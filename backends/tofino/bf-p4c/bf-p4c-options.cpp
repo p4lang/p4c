@@ -44,6 +44,7 @@
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
+#include "lib/exename.h"
 #include "lib/log.h"
 #include "version.h"
 
@@ -712,14 +713,21 @@ std::vector<const char *> *BFN_Options::process(int argc, char *const argv[]) {
     // Don't know, and I'm at the end of my patience with it ...
     if (!processed) outputDir = "."_cs;
 
+    auto executablePath = getExecutablePath(argv[0]);
+    if (executablePath.empty()) {
+        std::cerr << "Could not determine executable path" << std::endl;
+        return nullptr;
+    }
+    exe_name = cstring(executablePath.stem().c_str());
     // sde installs p4include directory to $SDE/install/share/p4c/p4include
     // and installs p4c to $SDE/install/bin/
     //
     // Therefore, we need to search ../share/p4c/p4include from the
     // directory that p4c resides in.
-    searchForIncludePath(p4includePath, {"../share/p4c/p4include"_cs}, exename(argv[0]));
+    searchForIncludePath(p4includePath, {"../share/p4c/p4include"_cs}, executablePath.c_str());
 
-    searchForIncludePath(p4_14includePath, {"../share/p4c/p4_14include"_cs}, exename(argv[0]));
+    searchForIncludePath(p4_14includePath, {"../share/p4c/p4_14include"_cs},
+                         executablePath.c_str());
 
     auto remainingOptions = CompilerOptions::process(argc, argv);
 

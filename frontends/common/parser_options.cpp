@@ -372,7 +372,7 @@ bool ParserOptions::searchForIncludePath(const char *&includePathOut,
 }
 
 std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) {
-    auto executablePath = getExecutablePath();
+    auto executablePath = getExecutablePath(argv[0]);
     if (executablePath.empty()) {
         std::cerr << "Could not determine executable path" << std::endl;
         return nullptr;
