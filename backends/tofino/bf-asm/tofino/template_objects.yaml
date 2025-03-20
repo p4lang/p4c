@@ -1,0 +1,109 @@
+# Copyright (C) 2024 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.  You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+#
+# SPDX-License-Identifier: Apache-2.0
+
+global:
+  - namespace=Tofino
+  - emit_binary
+  - emit_fieldname
+  - emit_json
+  - enable_disable
+  - input_binary
+  - reverse_write
+  - write_dma=mapram_config
+  - write_dma=imem_subword8
+  - write_dma=imem_subword16
+  - write_dma=imem_subword32
+  - write_dma=galois_field_matrix
+generate:
+  memories:
+    pipe_top_level:
+      memories.pipe_top_level.h: [ decl, name=memories.top ]
+      memories.pipe_top_level.cpp: [ defn, name=memories.top,
+          -Imemories.pipe_top_level.h, -Imemories.pipe_addrmap.h ]
+    pipe_addrmap:
+      memories.pipe_addrmap.h: [ decl, name=memories.pipe ]
+      memories.pipe_addrmap.cpp: [ defn, name=memories.pipe,
+          -Imemories.pipe_addrmap.h, -Imemories.prsr_mem_main_rspec.h ]
+    prsr_mem_main_rspec:
+      memories.prsr_mem_main_rspec.h: [ decl, name=memories.all.parser.%s ]
+      memories.prsr_mem_main_rspec.cpp: [ defn, name=memories.all.parser.%s,
+          -Imemories.prsr_mem_main_rspec.h ]
+  regs:
+    tofino:
+      regs.tofino.h: [ decl, name=regs.top ]
+      regs.tofino.cpp: [ defn, name=regs.top,
+          -Iregs.tofino.h, -Iregs.pipe_addrmap.h ]
+    pipe_addrmap:
+      regs.pipe_addrmap.h: [ decl, name=regs.pipe, expand_disabled_vector ]
+      regs.pipe_addrmap.cpp: [ defn, name=regs.pipe, expand_disabled_vector,
+          -Iregs.pipe_addrmap.h, -Iregs.ibp_rspec.h, -Iregs.ebp_rspec.h,
+          -Iregs.prsr_reg_merge_rspec.h, -Iregs.mau_addrmap.h,
+          -Iregs.dprsr_inp.h, -Iregs.dprsr_hdr.h ]
+    # pmarb_rspec
+    ibp_rspec: # Ingress parser registers
+      regs.ibp_rspec.h: [ decl, name=regs.all.parser.ingress ]
+      regs.ibp_rspec.cpp: [ defn, name=regs.all.parser.ingress,
+          -Iregs.ibp_rspec.h ]
+    ebp_rspec: # Egress parser registers
+      regs.ebp_rspec.h: [ decl, name=regs.all.parser.egress ]
+      regs.ebp_rspec.cpp: [ defn, name=regs.all.parser.egress,
+          -Iregs.ebp_rspec.h ]
+    prsr_reg_merge_rspec: # Shared parser registers
+      regs.prsr_reg_merge_rspec.h: [ decl, name=regs.all.parse_merge ]
+      regs.prsr_reg_merge_rspec.cpp: [ defn, name=regs.all.parse_merge,
+          -Iregs.prsr_reg_merge_rspec.h ]
+    mau_addrmap:
+      regs.mau_addrmap.h: [ decl, name=regs.match_action_stage.%02x ]
+      regs.mau_addrmap.cpp: [ defn, name=regs.match_action_stage.%02x,
+          -Iregs.mau_addrmap.h ]
+    # dprsr_reg_rspec
+    dprsr_inp:
+      regs.dprsr_inp.h: [ decl, name=regs.all.deparser.input_phase, global=fde_pov ]
+      regs.dprsr_inp.cpp: [ defn, name=regs.all.deparser.input_phase, global=fde_pov,
+          -Iregs.dprsr_inp.h ]
+    #dprsr_out_ingr: {}
+    #dprsr_out_egr: {}
+    dprsr_hdr:
+      regs.dprsr_hdr.h: [ decl, name=regs.all.deparser.header_phase, global=fde_phv ]
+      regs.dprsr_hdr.cpp: [ defn, name=regs.all.deparser.header_phase, global=fde_phv,
+          -Iregs.dprsr_hdr.h ]
+ignore:
+  memories:
+    - mau_addrmap
+    # pipe_top_level
+    - tm_pre_mem_rspec
+    - party_pgr_mem_rspec
+  regs:
+    # tofino
+    - dvsl_addrmap
+    - mac_addrmap
+    - serdes_addrmap
+    # pipe_addrmap
+    # pmarb_rspec
+    # ebp_rspec
+    - egrNx_regs
+    # parb_regs
+    - pbus_station_regs
+    - party_pgr_reg_rspec
+    - party_glue_reg_rspec
+    # dprsr_reg_rspec
+    - mir_buf_all
+    - dprsr_out_ingr
+    - dprsr_out_egr
+    # dprsr_hdr
+    # dprsr_hi_mem
+    - dprsr_h_pv_table_map

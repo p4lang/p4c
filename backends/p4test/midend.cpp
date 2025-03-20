@@ -28,6 +28,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "ir/dump.h"
 #include "midend/actionSynthesis.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
@@ -87,7 +88,8 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
     auto defUse = new P4::ComputeDefUse;
 
     addPasses(
-        {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+        {new P4::DumpPipe("MidEnd start"),
+         options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
          new P4::RemoveMiss(&typeMap),
          new P4::EliminateNewtype(&typeMap),
          new P4::EliminateInvalidHeaders(&typeMap),
@@ -140,11 +142,12 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          new P4::MoveDeclarations(),  // more may have been introduced
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
-             auto toplevel = evaluator->getToplevelBlock();
-             auto main = toplevel->getMain();
-             if (main == nullptr)
-                 // nothing further to do
-                 return nullptr;
+             const auto *toplevel = evaluator->getToplevelBlock();
+             const auto *main = toplevel->getMain();
+             if (main == nullptr) {
+                 // nothing further to do.
+                 return root;
+             }
              // Special handling when compiling for v1model.p4
              if (main->type->name == P4V1::V1Model::instance.sw.name) {
                  if (main->getConstructorParameters()->size() != 6) return root;
@@ -170,7 +173,8 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),
          new P4::SimplifyControlFlow(&typeMap, true),
-         new P4::MidEndLast()});
+         new P4::MidEndLast(),
+         new P4::DumpPipe("MidEnd end")});
     if (options.listMidendPasses) {
         listPasses(*outStream, cstring::newline);
         *outStream << std::endl;

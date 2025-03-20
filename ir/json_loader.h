@@ -92,11 +92,17 @@ class JSONLoader {
     const IR::Node *get_node() {
         if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
         int id;
-        load("Node_ID", id);
+        auto success = load("Node_ID", id);
+        if (!success) {
+            return nullptr;
+        }
         if (id >= 0) {
             if (node_refs.find(id) == node_refs.end()) {
                 cstring type;
-                load("Node_Type", type);
+                auto success = load("Node_Type", type);
+                if (!success) {
+                    return nullptr;
+                }
                 if (auto fn = get(IR::unpacker_table, type)) {
                     node_refs[id] = fn(*this);
                     // Creating JsonObject from source_info read from jsonFile
@@ -257,7 +263,11 @@ class JSONLoader {
             return;
         }
         T value;
-        load("value", value);
+        auto success = load("value", value);
+        if (!success) {
+            v = std::nullopt;
+            return;
+        }
         v = std::move(value);
     }
 
@@ -401,9 +411,8 @@ class JSONLoader {
         if (auto loader = JSONLoader(*this, field)) {
             loader.unpack_json(v);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     template <typename T>
