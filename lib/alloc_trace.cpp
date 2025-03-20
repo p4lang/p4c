@@ -74,9 +74,11 @@ std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
     }
     std::sort(sorted.begin(), sorted.end(), [](auto &a, auto &b) { return a.first > b.first; });
 #if HAVE_LIBBACKTRACE
-    if (!global_backtrace_state)
+    if (!global_backtrace_state) {
+        // TODO: Do not use cstring here?
         global_backtrace_state =
-            backtrace_create_state(getExecutablePath().c_str(), 1, bt_error, &out);
+            backtrace_create_state(cstring(getExecutablePath().c_str()).c_str(), 1, bt_error, &out);
+    }
 #endif
 
     out << "Allocated a total of " << n4(total_total) << "B memory";

@@ -58,7 +58,6 @@ std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPa
     std::array<char, PATH_MAX> buffer{};
     uint32_t size = static_cast<uint32_t>(buffer.size());
     if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
-        // TODO: What to do about the allocation here?
         return buffer.data();
     } else
 #elif defined(_WIN32)
