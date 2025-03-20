@@ -118,6 +118,7 @@ inline void warning(int lineno, const char *fmt, ...) {
 #endif /* BAREFOOT_INTERNAL */
 }
 
+// FIXME: Replace with library bug macros.
 inline const char *strip_prefix(const char *str, const char *pfx) {
     if (const char *p = strstr(str, pfx)) return p + strlen(pfx);
     return str;
@@ -144,14 +145,16 @@ inline void bug(const char *fname, int lineno, const char *fmt, ...) {
 extern std::unique_ptr<std::ostream> open_output(const char *, ...)
     __attribute__((format(printf, 1, 2)));
 
+// FIXME: Replace with library bug macros.
 #define SRCFILE strip_prefix(__FILE__, "bf-asm/")
 #define BUG(...)                               \
     do {                                       \
         bug(SRCFILE, __LINE__, ##__VA_ARGS__); \
     } while (0)
-#define BUG_CHECK(e, ...)           \
-    do {                            \
-        if (!(e)) BUG(__VA_ARGS__); \
+#define BUG_CHECK(e, ...)                          \
+    do {                                           \
+        if (!(e)) BUG("Check failed" __VA_ARGS__); \
+                                                   \
     } while (0)
 
 class VersionIter {

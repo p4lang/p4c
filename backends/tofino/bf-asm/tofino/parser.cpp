@@ -1004,9 +1004,9 @@ static void check_16b_extractor_configuration(const unsigned pad_idx, const unsi
     }
 
     // Check the slot configuration - sourcing from global field and no constant for {0,1}
-    BUG_CHECK(
-        *map[pad_idx].src >= PARSER_SRC_MAX_IDX - 3 && *map[pad_idx].src != EXTRACT_SLOT_UNUSED,
-        "Field is not sourcing from the global version field!");
+    BUG_CHECK(*map[pad_idx].src >= PARSER_SRC_MAX_IDX - 3 &&
+                  static_cast<uint64_t>(*map[pad_idx].src) != EXTRACT_SLOT_UNUSED,
+              "Field is not sourcing from the global version field!");
     if (pad_idx == phv_16b_0 || pad_idx == phv_16b_1) {
         BUG_CHECK(*map[pad_idx].src_type == 0,
                   "Invalid configuration of the source type for 16b 2n padding!");
