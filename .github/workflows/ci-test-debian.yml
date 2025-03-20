@@ -48,6 +48,7 @@ jobs:
       - name: Build (Ubuntu 22.04, GCC)
         run: |
           tools/ci-build.sh
+	  pip3 list --verbose
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests and need to avoid p4tc_stf tests.

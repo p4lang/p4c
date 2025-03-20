@@ -47,6 +47,7 @@ jobs:
         run: |
           ./bootstrap.sh -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD=ON --build-generator "Ninja"
           cmake --build build -- -j $(nproc)
+	  pip3 list --verbose
 
       - name: Run p4c tests (Fedora Linux)
         run: |
