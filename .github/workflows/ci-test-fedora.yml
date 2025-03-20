@@ -47,9 +47,10 @@ jobs:
         run: |
           ./bootstrap.sh -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD=ON --build-generator "Ninja"
           cmake --build build -- -j $(nproc)
+	  pip3 list --verbose
 
       - name: Run p4c tests (Fedora Linux)
         run: |
           # Avoid running p4tc stf tests for now
-          export PATH="$HOME/.local/bin:$PATH"; ctest --output-on-failure --schedule-random -E "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
+          export PATH="$HOME/.local/bin:$PATH"; export PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy"; ctest --output-on-failure --schedule-random -E "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build

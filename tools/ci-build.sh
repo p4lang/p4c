@@ -207,6 +207,7 @@ function install_ptf_ebpf_test_deps() (
     make "-j$(nproc)"
     sudo make install
     popd
+    sudo pip3 install scapy==2.5.0
 )
 
 if [[ "${ENABLE_EBPF}" == "ON" ]] ; then

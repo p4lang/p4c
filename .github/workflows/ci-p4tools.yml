@@ -37,8 +37,9 @@ jobs:
       - name: Build (Ubuntu 22.04)
         run: |
           tools/ci-build.sh
+	  pip3 list --verbose
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest -R "testgen|smith" --output-on-failure --schedule-random
+        run: sudo -E PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy" ctest -R "testgen|smith" --output-on-failure --schedule-random
         working-directory: ./build

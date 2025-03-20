@@ -51,6 +51,7 @@ jobs:
       - name: Build (Ubuntu 20.04)
         run: |
           tools/ci-build.sh
+	  pip3 list --verbose
 
       - name: Run PTF tests for eBPF backend (Ubuntu 20.04)
         run: sudo -E ./test.sh
