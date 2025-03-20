@@ -718,7 +718,7 @@ std::vector<const char *> *BFN_Options::process(int argc, char *const argv[]) {
         std::cerr << "Could not determine executable path" << std::endl;
         return nullptr;
     }
-    exe_name = cstring(executablePath.stem().c_str());
+    this->exe_name = cstring(executablePath.stem().c_str());
     // sde installs p4include directory to $SDE/install/share/p4c/p4include
     // and installs p4c to $SDE/install/bin/
     //

@@ -13,7 +13,7 @@ std::vector<const char *> *DpdkOptions::process(int argc, char *const argv[]) {
         std::cerr << "Could not determine executable path" << std::endl;
         return nullptr;
     }
-    exe_name = cstring(executablePath.stem().c_str());
+    this->exe_name = cstring(executablePath.stem().c_str());
 
     searchForIncludePath(p4includePath,
                          {"p4include/dpdk"_cs, "../p4include/dpdk"_cs, "../../p4include/dpdk"_cs},
