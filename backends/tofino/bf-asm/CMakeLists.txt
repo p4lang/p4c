@@ -245,7 +245,8 @@ set_source_files_properties(${BFAS_SOURCES} PROPERTIES COMPILE_FLAGS ${BFASM_CXX
 string(REPLACE "-Wno-overloaded-virtual" "" vector_c_flags ${BFASM_CXX_FLAGS})
 set_source_files_properties(vector.c PROPERTIES COMPILE_FLAGS ${vector_c_flags})
 add_executable (bfas ${BFAS_SOURCES})
-# Enable extensions for bfas. FIXME: Do we need this?
+# Enable extensions for bfas.
+# FIXME: This is needed to implement EXPAND_COMMA in target.h. Replace with __VA_OPT__ in C++20?
 target_compile_options(bfas PRIVATE -std=gnu++17)
 # Disable errors for warnings. FIXME: Get rid of this.
 target_compile_options(bfas PUBLIC "-Wno-error")

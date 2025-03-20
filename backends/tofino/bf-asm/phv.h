@@ -203,7 +203,7 @@ class Phv : public Section {
               lo(r.lo < 0 ? l : r.lo + l),
               hi(r.lo < 0 ? h : r.lo + h),
               lineno(r.lineno) {
-            BUG_CHECK(r.hi < 0 || hi <= r.hi);
+            BUG_CHECK(r.hi < 0 || hi <= r.hi, "Out of bounds slice: %s", r.toString().c_str());
         }
         Ref(const Register &r, gress_t gr, int lo = -1, int hi = -1);
         explicit operator bool() const { return lineno >= 0; }
@@ -260,7 +260,7 @@ class Phv : public Section {
     };
     // Return register using mau_id as @arg index
     static const Register *reg(int idx) {
-        BUG_CHECK(idx >= 0 && size_t(idx) < phv.regs.size());
+        BUG_CHECK(idx >= 0 && size_t(idx) < phv.regs.size(), "Register index out of range");
         return phv.regs[idx];
     }
 
