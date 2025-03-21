@@ -76,6 +76,8 @@ bool HalsteadMetricsPass::preorder(const IR::Type_Struct *structType) {
     return true;
 }
 
+// Collect operators and operands
+
 bool HalsteadMetricsPass::preorder(const IR::MethodCallExpression *methodCall) {
     if (!methodCall) return false;
     auto methodExpr = methodCall->method;
@@ -149,9 +151,9 @@ bool HalsteadMetricsPass::preorder(const IR::IfStatement *stmt) {
 bool HalsteadMetricsPass::preorder(const IR::SwitchStatement *stmt) {
     if (!stmt) return false;
     addUnaryOperator("switch");
-    for (const auto &caseItem : stmt->cases) {
+    for(size_t i = 0; i < stmt->cases.size(); i++)
         addUnaryOperator("case");
-    }
+
     return true;
 }
 

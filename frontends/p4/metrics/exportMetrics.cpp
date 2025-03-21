@@ -17,7 +17,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
         if (metric == "cyclomatic") {
             file << "\nCyclomatic Complexity:\n";
             for (const auto &[func, cc] : metrics.cyclomaticComplexity) {
-                file << "  Function: " << func << " -> CC: " << cc << "\n";
+                file <<"  "<<func << ": " << cc << "\n";
             }
         } 
         else if (metric == "halstead") {

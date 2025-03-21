@@ -53,8 +53,12 @@ class HalsteadMetricsPass : public Inspector {
       "max_length",    
       "length",        
     };
-    std::unordered_set<std::string> matchTypes = {
-      "exact", "lpm", "ternary", "range", "optional"
+    const std::unordered_set<std::string> matchTypes = {
+      "exact", 
+      "lpm", 
+      "ternary", 
+      "range", 
+      "optional"
     };
 
     //Helper methods.
