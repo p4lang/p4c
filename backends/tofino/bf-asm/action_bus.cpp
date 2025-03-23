@@ -124,7 +124,7 @@ ActionBus::ActionBus(Table *tbl, VECTOR(pair_t) & data) {
         value_t *name_ref = &kv.value;
         unsigned off = 0, sz = 0;
         if (kv.value.type == tCMD) {
-            BUG_CHECK(kv.value.vec.size > 0 && kv.value[0].type == tSTR);
+            BUG_CHECK(kv.value.vec.size > 0 && kv.value[0].type == tSTR, "invalid cmd size");
             if (kv.value == "hash_dist" || kv.value == "rng") {
                 if (!PCHECKTYPE(kv.value.vec.size > 1, kv.value[1], tINT)) continue;
                 name = kv.value[0].s;
@@ -285,10 +285,10 @@ unsigned ActionBus::Slot::lo(Table *tbl) const {
     for (auto &src : data) {
         int off = src.second;
         if (src.first.type == ActionBusSource::Field) off += src.first.field->immed_bit(0);
-        BUG_CHECK(rv < 0 || rv == off);
+        BUG_CHECK(rv < 0 || rv == off, "Slot::lo: %d vs %d", rv, off);
         rv = off;
     }
-    BUG_CHECK(rv >= 0);
+    BUG_CHECK(rv >= 0, "lo must be greater than zero, got: %d", rv);
     return rv;
 }
 
@@ -352,7 +352,7 @@ void ActionBus::pass1(Table *tbl) {
                                 src.table->set_address_used();
                                 break;
                             default:
-                                BUG();
+                                BUG("Unexpected type");
                         }
                         slot.data[src] = it->second;
                         ok = true;
@@ -405,7 +405,7 @@ void ActionBus::pass1(Table *tbl) {
                                 src.table->set_address_used();
                                 break;
                             default:
-                                BUG();
+                                BUG("Unexpected type");
                         }
                         slot.data[src] = it->second;
                     }
@@ -454,7 +454,7 @@ void ActionBus::pass1(Table *tbl) {
                 tbl->stage->action_bus_use_bit_mask.setrange(slot.byte * 8U, slot.size);
             }
             if (use[slotno]) {
-                BUG_CHECK(!slot.data.empty() && !use[slotno]->data.empty());
+                BUG_CHECK(!slot.data.empty() && !use[slotno]->data.empty(), "Slot is not empty");
                 auto nsrc = slot.data.begin()->first;
                 unsigned noff = slot.data.begin()->second;
                 unsigned nstart = 8 * (byte - slot.byte) + noff;
@@ -633,7 +633,8 @@ void ActionBus::do_alloc(Table *tbl, ActionBusSource src, unsigned use, int loby
         // Atcam tables are mutually exclusive and should be allowed to share
         // bytes on action bus
         if (slot_tbl && !Table::allow_bus_sharing(tbl, slot_tbl))
-            BUG_CHECK(slot_tbl == tbl || slot_tbl->action_bus->by_byte.at(use).data.count(src));
+            BUG_CHECK(slot_tbl == tbl || slot_tbl->action_bus->by_byte.at(use).data.count(src),
+                      "Slot sharing not allowed");
         tbl->stage->action_bus_use[slot] = tbl;
         Slot &sl = by_byte.emplace(use, Slot(src.name(tbl), use, bytes * 8U)).first->second;
         if (sl.size < bytes * 8U) sl.size = bytes * 8U;
@@ -850,7 +851,7 @@ void ActionBus::write_action_regs(REGS &regs, Table *tbl, int home_row, unsigned
         }
         LOG5("    " << el.first << ": " << el.second);
         unsigned byte = el.first;
-        BUG_CHECK(byte == el.second.byte);
+        BUG_CHECK(byte == el.second.byte, "Byte mismatch");
         unsigned slot = Stage::action_bus_slot_map[byte];
         unsigned bit = 0, size = 0;
         std::string srcname;
@@ -878,13 +879,14 @@ void ActionBus::write_action_regs(REGS &regs, Table *tbl, int home_row, unsigned
                 srcname = "table " + data.first.table->name_;
             } else {
                 // HashDist and RandomGen only work in write_immed_regs
-                BUG();
+                BUG("Unexpected ActionBusSource type");
             }
             LOG3("    byte " << byte << " (slot " << slot << "): " << srcname << " (" << data.second
                              << ".." << (data.second + data_size - 1) << ")" << " [" << data_bit
                              << ".." << (data_bit + data_size - 1) << "]");
             if (size) {
-                BUG_CHECK(bit == data_bit);  // checked in pass1; maintained by pass3
+                BUG_CHECK(bit == data_bit,
+                          "bit mismatch");  // checked in pass1; maintained by pass3
                 size = std::max(size, data_size);
             } else {
                 bit = data_bit;
@@ -920,7 +922,7 @@ void ActionBus::write_action_regs(REGS &regs, Table *tbl, int home_row, unsigned
                             mask = 7;
                             break;
                         default:
-                            BUG();
+                            BUG("Unexpected sbyte value %d", sbyte >> 2);
                     }
                     if ((sbyte ^ byte) & mask) {
                         error(lineno, "Can't put field %s into byte %d on action xbar",
@@ -977,7 +979,7 @@ void ActionBus::write_action_regs(REGS &regs, Table *tbl, int home_row, unsigned
                             mask = 7;
                             break;
                         default:
-                            BUG();
+                            BUG("Unexpected word value %d", word >> 1);
                     }
                     if (((word << 1) ^ byte) & mask) {
                         error(lineno, "Can't put field %s into byte %d on action xbar",
@@ -1035,7 +1037,7 @@ void ActionBus::write_action_regs(REGS &regs, Table *tbl, int home_row, unsigned
                 break;
             }
             default:
-                BUG();
+                BUG("Unexpected slot size %d", Stage::action_bus_slot_size[slot]);
         }
         if (bytemask)
             LOG1("WARNING: " << SrcInfo(lineno) << ": excess bits " << hex(bytemask)
@@ -1071,7 +1073,7 @@ void ActionBus::write_immed_regs(REGS &regs, Table *tbl) {
         switch (Stage::action_bus_slot_size[slot]) {
             case 8:
                 for (unsigned b = off / 8; b <= (off + size - 1) / 8; b++) {
-                    BUG_CHECK((b & 3) == (slot & 3));
+                    BUG_CHECK((b & 3) == (slot & 3), "byte mismatch");
                     adrdist.immediate_data_8b_enable[tid / 8] |= 1U << ((tid & 7) * 4 + b);
                     // we write these ctl regs twice if we use both bytes in a pair.  That will
                     // cause a WARNING in the log file if both uses are the same -- it should be
@@ -1083,7 +1085,7 @@ void ActionBus::write_immed_regs(REGS &regs, Table *tbl) {
             case 16:
                 slot -= ACTION_DATA_8B_SLOTS;
                 for (unsigned w = off / 16; w <= (off + size - 1) / 16; w++) {
-                    BUG_CHECK((w & 1) == (slot & 1));
+                    BUG_CHECK((w & 1) == (slot & 1), "word mismatch");
                     setup_muxctl(adrdist.immediate_data_16b_ixbar_ctl[tid * 2 + w], slot++ / 2);
                 }
                 break;
@@ -1092,7 +1094,7 @@ void ActionBus::write_immed_regs(REGS &regs, Table *tbl) {
                 setup_muxctl(adrdist.immediate_data_32b_ixbar_ctl[tid], slot);
                 break;
             default:
-                BUG();
+                BUG("Unexpected slot size %d", Stage::action_bus_slot_size[slot]);
         }
     }
     if (rngmask) {

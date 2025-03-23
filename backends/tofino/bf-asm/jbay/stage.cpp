@@ -110,7 +110,8 @@ void Stage::gen_mau_stage_extension(REGS &regs, json::map &extend) {
     mask0.eop_output_delay_fifo = 0x1;
     mask1.eop_output_delay_fifo = 0x1f;
     BUG_CHECK(regs.rams.match.adrdist.deferred_eop_bus_delay[0].eop_output_delay_fifo &
-              regs.rams.match.adrdist.deferred_eop_bus_delay[1].eop_output_delay_fifo & 1);
+                  regs.rams.match.adrdist.deferred_eop_bus_delay[1].eop_output_delay_fifo & 1,
+              "bad mask");
     registers.push_back(make_reg_vec(regs, regs.rams.match.adrdist.deferred_eop_bus_delay,
                                      "regs.rams.match.adrdist.deferred_eop_bus_delay", mask0, mask0,
                                      mask1));
@@ -125,8 +126,8 @@ void Stage::gen_mau_stage_extension(REGS &regs, json::map &extend) {
     registers.push_back(make_reg_vec(regs, regs.rams.match.merge.exact_match_delay_thread,
                                      "regs.rams.match.merge.exact_match_delay_thread", 0, 0x3,
                                      0x3));
-    BUG_CHECK((regs.rams.match.merge.mpr_thread_delay[0] & 1) == 0);
-    BUG_CHECK((regs.rams.match.merge.mpr_thread_delay[1] & 1) == 0);
+    BUG_CHECK((regs.rams.match.merge.mpr_thread_delay[0] & 1) == 0, "bad mask");
+    BUG_CHECK((regs.rams.match.merge.mpr_thread_delay[1] & 1) == 0, "bad mask");
     registers.push_back(make_reg_vec(regs, regs.rams.match.merge.mpr_thread_delay,
                                      "regs.rams.match.merge.mpr_thread_delay", 1, 1, 0x1f));
 }
@@ -165,7 +166,7 @@ void Stage::write_regs(Target::JBay::mau_regs &regs, bool) {
                 this[-1].pipelength(gress) - this[-1].pred_cycle(gress) + pred_cycle(gress) - 3;
             merge.predication_ctl[gress].start_table_fifo_enable = 1;
         } else {
-            BUG_CHECK(stage_dep[gress] == ACTION_DEP);
+            BUG_CHECK(stage_dep[gress] == ACTION_DEP, "bad stage dep");
             merge.predication_ctl[gress].start_table_fifo_delay0 = 0;
             merge.predication_ctl[gress].start_table_fifo_enable = 0;
         }

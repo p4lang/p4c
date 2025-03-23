@@ -245,8 +245,10 @@ bool SelectionTable::validate_length_call(const Table::Call &call) {
 unsigned SelectionTable::determine_length_shiftcount(const Table::Call &call, int group,
                                                      int word) const {
     if (auto f = call.args[0].field()) {
-        BUG_CHECK(f->by_group[group]->bit(0) / 128 == word && group == 0);
-        BUG_CHECK(f->by_group[group]->bit(0) % 128 <= 8);
+        BUG_CHECK(f->by_group[group]->bit(0) / 128 == word && group == 0,
+                  "invalid values for shiftcount: %d %d", f->by_group[0], word);
+        BUG_CHECK(f->by_group[group]->bit(0) % 128 <= 8, "invalid value for shiftcount: %d",
+                  f->by_group[group]->bit(0));
         return f->by_group[group]->bit(0) % 128U;
     }
     return 0;
@@ -323,7 +325,7 @@ void SelectionTable::write_regs_vt(REGS &regs) {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = 0;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::OVERFLOW;
                 push_on_overflow = true;
-                BUG_CHECK(options.target == TOFINO);
+                BUG_CHECK(options.target == TOFINO, "push_on_overflow only implemented for Tofino");
             } else {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = home->row % 8;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::METER;

@@ -47,7 +47,7 @@ bool ProxyHashMatchTable::verify_match_key() {
         }
     }
     auto match_format = format->field("match");
-    if (match_format && match.empty()) BUG_CHECK("Proxy hash table has no match");
+    if (match_format && match.empty()) BUG("Proxy hash table has no match");
     return error_count == 0;
 }
 
@@ -169,7 +169,7 @@ void ProxyHashMatchTable::gen_tbl_cfg(json::vector &out) const {
             way_tbl["way_number"] = way_number++;
             way_tbl["stage_table_type"] = "hash_way";
             auto fmt_width = get_format_width();
-            BUG_CHECK(fmt_width);
+            BUG_CHECK(fmt_width, "width of format is 0");
             way_tbl["size"] = way.rams.size() / fmt_width * format->groups() * 1024;
             add_pack_format(way_tbl, format.get(), false);
             way_tbl["memory_resource_allocation"] = gen_memory_resource_allocation_tbl_cfg(way);

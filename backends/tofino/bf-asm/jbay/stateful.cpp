@@ -17,6 +17,8 @@
 
 #include "backends/tofino/bf-asm/jbay/stateful.h"
 
+#include "lib/null.h"
+
 static const char *function_names[] = {"none", "log", "fifo", "stack", "clear"};
 
 static int decode_push_pop(const value_t &v) {
@@ -166,7 +168,7 @@ int StatefulTable::parse_counter_mode(Target::JBay target, const value_t &v) {
 
 void StatefulTable::set_counter_mode(Target::JBay target, int mode) {
     int fnmode = mode & FUNCTION_MASK;
-    BUG_CHECK(fnmode > 0 && (fnmode >> FUNCTION_SHIFT) <= FUNCTION_FAST_CLEAR);
+    BUG_CHECK(fnmode > 0 && (fnmode >> FUNCTION_SHIFT) <= FUNCTION_FAST_CLEAR, "invalid mode");
     if (stateful_counter_mode && (stateful_counter_mode & FUNCTION_MASK) != fnmode)
         error(lineno, "Incompatible uses (%s and %s) of stateful alu counters",
               function_names[stateful_counter_mode >> FUNCTION_SHIFT],
@@ -300,13 +302,13 @@ void StatefulTable::write_tofino2_common_regs(REGS &regs) {
         }
         if (underflow_action.set()) {
             auto act = actions->action(underflow_action.name);
-            BUG_CHECK(act);
+            CHECK_NULL(act);
             // 4-bit stateful addr MSB encoding for instruction, as given by table 6-67 (6.4.4.11)
             ctl3.slog_underflow_instruction = act->code * 2 + 1;
         }
         if (overflow_action.set()) {
             auto act = actions->action(overflow_action.name);
-            BUG_CHECK(act);
+            CHECK_NULL(act);
             ctl3.slog_overflow_instruction = act->code * 2 + 1;
         }
     } else {

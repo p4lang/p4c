@@ -21,6 +21,7 @@
 #include "asm-types.h"
 #include "backends/tofino/bf-asm/config.h"
 #include "bfas.h"
+#include "lib/exceptions.h"
 #include "map.h"
 
 struct MemUnit;

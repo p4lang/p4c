@@ -164,7 +164,7 @@ class ActionBus {
         unsigned lo(Table *tbl) const;  // low bit on the action data bus
         bool is_table_output() const {
             for (auto &d : data) {
-                BUG_CHECK(d.first.type != ActionBusSource::NameRef);
+                BUG_CHECK(d.first.type != ActionBusSource::NameRef, "Unexpected name ref");
                 if (d.first.type == ActionBusSource::TableOutput) return true;
             }
             return false;

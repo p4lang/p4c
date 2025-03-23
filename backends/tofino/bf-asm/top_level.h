@@ -37,7 +37,7 @@ class TopLevel {
     static TopLevelRegs<typename T::register_type> *regs();
 #define SET_MAU_STAGE(TARGET)                                                         \
     virtual void set_mau_stage(int, const char *, Target::TARGET::mau_regs *, bool) { \
-        BUG_CHECK(!"register mismatch");                                              \
+        BUG("register mismatch");                                                     \
     }
     FOR_ALL_REGISTER_SETS(SET_MAU_STAGE)
 };

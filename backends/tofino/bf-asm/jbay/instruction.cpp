@@ -31,7 +31,7 @@ void VLIWInstruction::write_regs_2(REGS &regs, Table *tbl, Table::Actions::Actio
     int iaddr = act->addr / ACTION_IMEM_COLORS;
     int color = act->addr % ACTION_IMEM_COLORS;
     unsigned bits = encode();
-    BUG_CHECK(slot >= 0);
+    BUG_CHECK(slot >= 0, "slots must be >= 0");
     unsigned off = slot % Phv::mau_groupsize();
     unsigned side = 0, group = 0;
     switch (slot / Phv::mau_groupsize()) {
@@ -92,14 +92,14 @@ void VLIWInstruction::write_regs_2(REGS &regs, Table *tbl, Table::Actions::Actio
             group = 2;
             break;
         default:
-            BUG();
+            BUG("bad slot size %d", slot / Phv::mau_groupsize());
     }
 
     switch (Phv::reg(slot)->type) {
         case Phv::Register::NORMAL:
             switch (Phv::reg(slot)->size) {
                 case 8:
-                    BUG_CHECK(group == 0 || group == 1);
+                    BUG_CHECK(group == 0 || group == 1, "bad group");
                     imem.imem_subword8[side][group][off][iaddr].imem_subword8_instr = bits;
                     imem.imem_subword8[side][group][off][iaddr].imem_subword8_color = color;
                     imem.imem_subword8[side][group][off][iaddr].imem_subword8_parity =
@@ -112,20 +112,20 @@ void VLIWInstruction::write_regs_2(REGS &regs, Table *tbl, Table::Actions::Actio
                         parity(bits) ^ color;
                     break;
                 case 32:
-                    BUG_CHECK(group == 0 || group == 1);
+                    BUG_CHECK(group == 0 || group == 1, "bad group");
                     imem.imem_subword32[side][group][off][iaddr].imem_subword32_instr = bits;
                     imem.imem_subword32[side][group][off][iaddr].imem_subword32_color = color;
                     imem.imem_subword32[side][group][off][iaddr].imem_subword32_parity =
                         parity(bits) ^ color;
                     break;
                 default:
-                    BUG();
+                    BUG("bad size %d", Phv::reg(slot)->size);
             }
             break;
         case Phv::Register::MOCHA:
             switch (Phv::reg(slot)->size) {
                 case 8:
-                    BUG_CHECK(group == 0 || group == 1);
+                    BUG_CHECK(group == 0 || group == 1, "bad group");
                     imem.imem_mocha_subword8[side][group][off - 12][iaddr]
                         .imem_mocha_subword_instr = bits;
                     imem.imem_mocha_subword8[side][group][off - 12][iaddr]
@@ -142,7 +142,7 @@ void VLIWInstruction::write_regs_2(REGS &regs, Table *tbl, Table::Actions::Actio
                         .imem_mocha_subword_parity = parity(bits) ^ color;
                     break;
                 case 32:
-                    BUG_CHECK(group == 0 || group == 1);
+                    BUG_CHECK(group == 0 || group == 1, "bad group");
                     imem.imem_mocha_subword32[side][group][off - 12][iaddr]
                         .imem_mocha_subword_instr = bits;
                     imem.imem_mocha_subword32[side][group][off - 12][iaddr]
@@ -151,13 +151,13 @@ void VLIWInstruction::write_regs_2(REGS &regs, Table *tbl, Table::Actions::Actio
                         .imem_mocha_subword_parity = parity(bits) ^ color;
                     break;
                 default:
-                    BUG();
+                    BUG("bad size %d", Phv::reg(slot)->size);
             }
             break;
         case Phv::Register::DARK:
             switch (Phv::reg(slot)->size) {
                 case 8:
-                    BUG_CHECK(group == 0 || group == 1);
+                    BUG_CHECK(group == 0 || group == 1, "bad group");
                     imem.imem_dark_subword8[side][group][off - 16][iaddr].imem_dark_subword_instr =
                         bits;
                     imem.imem_dark_subword8[side][group][off - 16][iaddr].imem_dark_subword_color =
@@ -174,7 +174,7 @@ void VLIWInstruction::write_regs_2(REGS &regs, Table *tbl, Table::Actions::Actio
                         .imem_dark_subword_parity = parity(bits) ^ color;
                     break;
                 case 32:
-                    BUG_CHECK(group == 0 || group == 1);
+                    BUG_CHECK(group == 0 || group == 1, "bad group");
                     imem.imem_dark_subword32[side][group][off - 16][iaddr].imem_dark_subword_instr =
                         bits;
                     imem.imem_dark_subword32[side][group][off - 16][iaddr].imem_dark_subword_color =
@@ -183,11 +183,11 @@ void VLIWInstruction::write_regs_2(REGS &regs, Table *tbl, Table::Actions::Actio
                         .imem_dark_subword_parity = parity(bits) ^ color;
                     break;
                 default:
-                    BUG();
+                    BUG("bad size %d", Phv::reg(slot)->size);
             }
             break;
         default:
-            BUG();
+            BUG("bad type %d", Phv::reg(slot)->type);
     }
 
     auto &power_ctl = regs.dp.actionmux_din_power_ctl;

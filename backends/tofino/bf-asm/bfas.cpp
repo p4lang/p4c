@@ -29,6 +29,7 @@
 #include "backends/tofino/bf-p4c/git_sha_version.h"  // for BF_P4C_GIT_SHA
 #include "backends/tofino/bf-p4c/version.h"
 #include "constants.h"
+#include "lib/exceptions.h"
 #include "lib/indent.h"
 #include "misc.h"
 #include "parser-tofino-jbay.h"
@@ -150,7 +151,7 @@ void output_all() {
     char build_date[1024];
     struct tm lt;
     localtime_r(&now, &lt);
-    BUG_CHECK(&lt);
+    BUG_CHECK(&lt, "localtime_r failed");
     strftime(build_date, 1024, "%c", &lt);
     ctxtJson["build_date"] = build_date;
     ctxtJson["schema_version"] = SCHEMA_VERSION;

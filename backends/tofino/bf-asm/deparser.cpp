@@ -172,7 +172,7 @@ struct Deparser::FDEntry {
         }
         unsigned size() override { return length; }
         unsigned encode() override {
-            BUG();
+            BUG("encoding clot not implemented");
             return -1;
         }
         void dbprint(std::ostream &out) const override {
@@ -211,7 +211,7 @@ struct Deparser::Intrinsic::Type {
 
  protected:
     Type(target_t t, gress_t gr, const char *n, int m) : target(t), gress(gr), name(n), max(m) {
-        BUG_CHECK(!all[t][gr].count(name));
+        BUG_CHECK(!all[t][gr].count(name), "Duplicate deparser intrinsic: %s", name.c_str());
         all[target][gress][name] = this;
     }
     ~Type() { all[target][gress].erase(name); }
@@ -220,7 +220,7 @@ struct Deparser::Intrinsic::Type {
 #define VIRTUAL_TARGET_METHODS(TARGET)                                            \
     virtual void setregs(Target::TARGET::deparser_regs &regs, Deparser &deparser, \
                          Intrinsic &vals) {                                       \
-        BUG_CHECK(!"target mismatch");                                            \
+        BUG("target mismatch");                                                   \
     }
     FOR_ALL_REGISTER_SETS(VIRTUAL_TARGET_METHODS)
 #undef VIRTUAL_TARGET_METHODS
@@ -392,8 +392,8 @@ void Deparser::input(VECTOR(value_t) args, value_t data) {
 template <class ENTRIES>
 static void write_checksum_entry(ENTRIES &entry, unsigned mask, int swap, int id,
                                  const char *name = "entry") {
-    BUG_CHECK(swap == 0 || swap == 1);
-    BUG_CHECK(mask == 0 || mask & 3);
+    BUG_CHECK(swap == 0 || swap == 1, "swap must be 0 or 1");
+    BUG_CHECK(mask == 0 || mask & 3, "mask must be 0 or 1 or 2 or 3");
     if (entry.modified()) error(1, "%s appears multiple times in checksum %d", name, id);
     entry.swap = swap;
     // CSR: The order of operation: data is swapped or not and then zeroed or not
@@ -762,13 +762,14 @@ template <class REGS>
 void Deparser::gen_learn_quanta(REGS &regs, json::vector &learn_quanta) {
     for (auto &digest : digests) {
         if (digest.type->name != "learning") continue;
-        BUG_CHECK(digest.context_json);
+        BUG_CHECK(digest.context_json, "No context_json in digest %s", digest.type->name.c_str());
         auto namevec = (*(digest.context_json))["name"];
         auto &names = *(namevec->as_vector());
         auto digentry = digest.context_json->begin();
         // Iterate on names. for each name, get the corresponding digest entry and fill in
         for (auto &tname : names) {
-            BUG_CHECK(digentry != digest.context_json->end());
+            BUG_CHECK(digentry != digest.context_json->end(), "Name %s not found in digest %s",
+                      (*tname).c_str(), digest.type->name.c_str());
             json::map quanta;
             quanta["name"] = (*tname).c_str();
             quanta["lq_cfg_type"] = digentry->first->as_number()->val;
@@ -779,7 +780,8 @@ void Deparser::gen_learn_quanta(REGS &regs, json::vector &learn_quanta) {
                 json::vector &fields = quanta["fields"];
                 for (auto &tup : digfields_vec) {
                     auto &one = *(tup->as_vector());
-                    BUG_CHECK(one.size() == 5);
+                    BUG_CHECK(one.size() == 5, "Wrong number of fields in digest %s",
+                              digfields->c_str());
                     json::map anon;
                     anon["field_name"] = (*(one[0])).clone();
                     anon["start_byte"] = (*(one[1])).clone();

@@ -47,7 +47,9 @@ struct DivMod : public AluOP {
 // setz op, so can OR with alu1hi to get that result
 DivMod::Decode opDIVMOD("divmod", JBAY, 0x00);
 
-void DivMod::write_regs(Target::Tofino::mau_regs &, Table *, Table::Actions::Action *) { BUG(); }
+void DivMod::write_regs(Target::Tofino::mau_regs &, Table *, Table::Actions::Action *) {
+    BUG("unsupported");
+}
 void DivMod::write_regs(Target::JBay::mau_regs &regs, Table *tbl, Table::Actions::Action *act) {
     AluOP::write_regs(regs, tbl, act);
     int logical_home_row = tbl->layout[0].row;
@@ -114,7 +116,7 @@ Instruction *MinMax::Decode::decode(Table *tbl, const Table::Actions::Action *ac
 }
 Instruction *MinMax::pass1(Table *tbl_, Table::Actions::Action *act) {
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int mask_size = (opc->opcode & 2) ? 8 : 16;
     constval = boost::none;
     mask->pass1(tbl);
@@ -157,7 +159,7 @@ void MinMax::pass2(Table *tbl, Table::Actions::Action *act) {
 }
 void MinMax::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu_instr_common = meter_group.stateful.salu_instr_common[act->code];
@@ -190,13 +192,15 @@ void MinMax::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Action
         salu.salu_pred = 0xffff;
     }
 }
-void MinMax::write_regs(Target::Tofino::mau_regs &, Table *, Table::Actions::Action *) { BUG(); }
+void MinMax::write_regs(Target::Tofino::mau_regs &, Table *, Table::Actions::Action *) {
+    BUG("unsupported");
+}
 
 template <>
 void AluOP::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     LOG2(this);
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu = meter_group.stateful.salu_instr_state_alu[act->code][slot - ALU2LO];
@@ -236,7 +240,7 @@ void AluOP::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions
             salu.salu_const_src = r->index;
             salu.salu_regfile_const = 1;
         } else {
-            BUG();
+            BUG("invalid srca");
         }
     }
     if (srcb) {
@@ -259,7 +263,7 @@ void AluOP::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions
             } else if (auto b = m->of.to<operand::Memory>()) {
                 salu_instr_common.salu_alu2_lo_math_src = b->field->bit(0) > 0 ? 3 : 2;
             } else {
-                BUG();
+                BUG("invalid mathfn operand");
             }
         } else if (auto k = srcb.to<operand::Const>()) {
             salu.salu_bsrc_input = 4;
@@ -275,7 +279,7 @@ void AluOP::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions
             salu.salu_const_src = r->index;
             salu.salu_regfile_const = 1;
         } else {
-            BUG();
+            BUG("invalid srcb");
         }
     }
 }
@@ -312,7 +316,7 @@ template <>
 void CmpOP::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     LOG2(this);
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu = meter_group.stateful.salu_instr_cmp_alu[act->code][slot];
@@ -406,7 +410,7 @@ template <>
 void TMatchOP::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     LOG2(this);
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu = meter_group.stateful.salu_instr_cmp_alu[act->code][slot];
@@ -473,7 +477,7 @@ template <>
 void OutOP::write_regs(Target::JBay::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     LOG2(this);
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu = meter_group.stateful.salu_instr_output_alu[act->code][slot - ALUOUT0];
