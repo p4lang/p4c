@@ -18,6 +18,7 @@
 #include "error_mode.h"
 
 #include "backends/tofino/bf-asm/stage.h"
+#include "lib/exceptions.h"
 
 DefaultErrorMode DefaultErrorMode::singleton;
 
@@ -140,7 +141,7 @@ void ErrorMode::write_regs(REGS &regs, const Stage *stage, gress_t gress) {
         merge.REG[gress].REG##_dis_pred = 1;                \
         break;                                              \
     default:                                                \
-        BUG();
+        BUG("unexpected error mode");
 
     switch (mode[PREV_ERROR]) { HANDLE_ERROR_CASES(prev_error_ctl, NO) }
     merge.prev_error_ctl[gress].prev_error_ctl_delay = tcam_err_delay;

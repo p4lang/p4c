@@ -23,7 +23,7 @@ template <>
 void AluOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     LOG2(this);
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu = meter_group.stateful.salu_instr_state_alu[act->code][slot - ALU2LO];
@@ -51,7 +51,7 @@ void AluOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl_, Table::Actio
             salu.salu_const_src = r->index;
             salu.salu_regfile_const = 1;
         } else {
-            BUG();
+            BUG("unknown operand");
         }
     }
     if (srcb) {
@@ -65,7 +65,7 @@ void AluOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl_, Table::Actio
             } else if (auto b = m->of.to<operand::Memory>()) {
                 salu_instr_common.salu_alu2_lo_math_src = b->field->bit(0) > 0 ? 3 : 2;
             } else {
-                BUG();
+                BUG("unknown operand");
             }
         } else if (auto k = srcb.to<operand::Const>()) {
             salu.salu_bsrc_phv = 0;
@@ -81,7 +81,7 @@ void AluOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl_, Table::Actio
             salu.salu_const_src = r->index;
             salu.salu_regfile_const = 1;
         } else {
-            BUG();
+            BUG("unknown operand");
         }
     }
 }
@@ -109,7 +109,7 @@ template <>
 void CmpOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     LOG2(this);
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu = meter_group.stateful.salu_instr_cmp_alu[act->code][slot];
@@ -149,7 +149,7 @@ void CmpOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl, Table::Action
 }
 
 void TMatchOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl, Table::Actions::Action *act) {
-    BUG();  // should never be called
+    BUG("Unreachable state.");
 }
 
 void OutOP::decode_output_mux(Target::Tofino, Table *tbl, value_t &op) {
@@ -178,7 +178,7 @@ template <>
 void OutOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl_, Table::Actions::Action *act) {
     LOG2(this);
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     int logical_home_row = tbl->layout[0].row;
     auto &meter_group = regs.rams.map_alu.meter_group[logical_home_row / 4U];
     auto &salu = meter_group.stateful.salu_instr_output_alu[act->code];

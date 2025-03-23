@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "lib/exceptions.h"
 #include "misc.h"
 
 #pragma GCC diagnostic push
@@ -146,7 +147,7 @@ bitvec get_bitvec(const value_t &v, unsigned max_bits, const char *error_message
 }
 
 uint64_t get_int64(const value_t &v, unsigned max_bits, const char *error_message) {
-    BUG_CHECK(max_bits <= 64);
+    BUG_CHECK(max_bits <= 64, "max_bits must be <= 64");
     bool too_large = false;
     uint64_t value = 0;
     if (CHECKTYPE2(v, tINT, tBIGINT)) {
@@ -158,7 +159,8 @@ uint64_t get_int64(const value_t &v, unsigned max_bits, const char *error_messag
                 value = ((uint64_t)v.bigi.data[1] << 32) + v.bigi.data[0];
                 too_large = v.bigi.size > 2;
             } else {
-                BUG_CHECK(sizeof(uintptr_t) == sizeof(uint64_t));
+                BUG_CHECK(sizeof(uintptr_t) == sizeof(uint64_t),
+                          "sizeof(uintptr_t) is not uint64_t");
                 value = v.bigi.data[0];
                 too_large = v.bigi.size > 1;
             }

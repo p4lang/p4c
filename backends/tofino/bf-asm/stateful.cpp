@@ -457,7 +457,7 @@ void StatefulTable::write_regs_vt(REGS &regs) {
         for (Layout &logical_row : layout) {
             unsigned row = logical_row.row / 2U;
             unsigned side = logical_row.row & 1; /* 0 == left  1 == right */
-            BUG_CHECK(side == 1);                /* no map rams or alus on left side anymore */
+            BUG_CHECK(side == 1, "no map rams or alus on left side anymore");
             auto vpn = logical_row.vpns.begin();
             auto mapram = logical_row.maprams.begin();
             auto &map_alu_row = map_alu.row[row];
@@ -519,7 +519,8 @@ void StatefulTable::write_regs_vt(REGS &regs) {
                     adr_ctl.adr_dist_oflo_adr_xbar_source_index = 0;
                     adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::OVERFLOW;
                     push_on_overflow = true;
-                    BUG_CHECK(options.target == TOFINO);
+                    BUG_CHECK(options.target == TOFINO,
+                              "push on overflow only supported on Tofino");
                 } else {
                     adr_ctl.adr_dist_oflo_adr_xbar_source_index = home->row % 8;
                     adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::METER;

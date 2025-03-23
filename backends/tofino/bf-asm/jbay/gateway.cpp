@@ -24,7 +24,7 @@ void Target::Tofino::GatewayTable::write_next_table_regs(Target::JBay::mau_regs 
     if (need_next_map_lut) merge.next_table_map_en_gateway |= 1U << logical_id;
     int idx = 3;
     for (auto &line : table) {
-        BUG_CHECK(idx >= 0);
+        BUG_CHECK(idx >= 0, "idx < 0");
         if (!line.run_table) {
             if (need_next_map_lut)
                 merge.gateway_next_table_lut[logical_id][idx] = line.next_map_lut;

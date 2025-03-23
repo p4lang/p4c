@@ -18,6 +18,7 @@
 #include "p4_table.h"
 
 #include "backends/tofino/bf-asm/tables.h"
+#include "lib/exceptions.h"
 
 static std::map<const P4Table *, alpm_t> alpms;
 
@@ -38,7 +39,7 @@ static unsigned apply_handle_offset(unsigned handle, unsigned offset) {
 static unsigned clear_handle_offset(unsigned handle) { return handle & 0xff00ffff; }
 
 P4Table *P4Table::get(P4Table::type t, VECTOR(pair_t) & data) {
-    BUG_CHECK(t < NUM_TABLE_TYPES);
+    BUG_CHECK(t < NUM_TABLE_TYPES, "bad table type %d", t);
     P4Table *rv;
     auto *h = ::get(data, "handle");
     auto *n = ::get(data, "name");
@@ -159,7 +160,7 @@ json::map *P4Table::base_tbl_cfg(json::vector &out, int size, const Table *table
     tbl["direction"] = direction_name(table->gress);
     if (handle) tbl["handle"] = handle;
     auto table_type = (handle >> 24) & 0x3f;
-    BUG_CHECK(table_type < NUM_TABLE_TYPES);
+    BUG_CHECK(table_type < NUM_TABLE_TYPES, "bad table type %d", table_type);
     tbl["name"] = p4_name();
     tbl["table_type"] = type_name[table_type];
     if (!explicit_size && tbl["size"])
@@ -199,7 +200,7 @@ void P4Table::base_alpm_tbl_cfg(json::map &out, int size, const Table *table,
             json::map &tbl = out;
             tbl["direction"] = direction_name(table->gress);
             auto table_type = (handle >> 24) & 0x3f;
-            BUG_CHECK(table_type < NUM_TABLE_TYPES);
+            BUG_CHECK(table_type < NUM_TABLE_TYPES, "bad table type %d", table_type);
             if (!(*alpm_table_handle & 0xffffff))
                 *alpm_table_handle = apply_handle_offset(
                     (P4Table::MatchEntry << 24) + (++max_handle[table_type]), unique_table_offset);
@@ -248,7 +249,7 @@ std::string P4Table::direction_name(gress_t gress) {
             return "ghost";
             break;
         default:
-            BUG();
+            BUG("Unknown gress type");
     }
     return "";
 }

@@ -31,7 +31,7 @@ void VLIWInstruction::write_regs(Target::Tofino::mau_regs &regs, Table *tbl,
     int iaddr = act->addr / ACTION_IMEM_COLORS;
     int color = act->addr % ACTION_IMEM_COLORS;
     unsigned bits = encode();
-    BUG_CHECK(slot >= 0);
+    BUG_CHECK(slot >= 0, "slot < 0");
     switch (Phv::reg(slot)->size) {
         case 8:
             imem.imem_subword8[slot - 64][iaddr].imem_subword8_instr = bits;
@@ -49,7 +49,7 @@ void VLIWInstruction::write_regs(Target::Tofino::mau_regs &regs, Table *tbl,
             imem.imem_subword32[slot][iaddr].imem_subword32_parity = parity(bits) ^ color;
             break;
         default:
-            BUG();
+            BUG("Invalid slot: %d", slot);
     }
     auto &power_ctl = regs.dp.actionmux_din_power_ctl;
     phvRead([&](const Phv::Slice &sl) { set_power_ctl_reg(power_ctl, sl.reg.mau_id()); });
