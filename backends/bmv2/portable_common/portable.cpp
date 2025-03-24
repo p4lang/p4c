@@ -475,12 +475,12 @@ void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionConte
             modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
             return;
         }
-        if (eb->getConstructorParameters()->size() < 2) {
-            modelError("%1%: expected 2 parameters", eb);
+        if (eb->getConstructorParameters()->size() < 1) {
+            modelError("%1%: expected 1 parameter", eb);
             return;
         }
         auto arg = tp->to<IR::Declaration_ID>();
-        auto param = eb->getConstructorParameters()->getParameter(1);
+        auto param = eb->getConstructorParameters()->getParameter(0);
         auto mem = arg->toString();
         LOG5("In convertParam with param " << param->toString() << " and mem " << mem);
         auto jsn = ctxt->conv->convertParam(param, mem);

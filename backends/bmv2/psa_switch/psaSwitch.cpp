@@ -335,7 +335,7 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto trim = inst->controlPlaneName().find(".");
-    auto block = inst->controlPlaneName().trim(trim);
+    auto block = inst->controlPlaneName().before(trim);
     auto psaStructure = static_cast<P4::PsaProgramStructure *>(ctxt->structure);
     auto ingressParser = psaStructure->parsers.at("ingress"_cs)->controlPlaneName();
     auto ingressDeparser = psaStructure->deparsers.at("ingress"_cs)->controlPlaneName();
