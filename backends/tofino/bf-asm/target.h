@@ -72,13 +72,9 @@ struct MemUnit;
 #define TARGETS_USING_REGS(CL, ...) TARGETS_USING_REGS_##CL(__VA_ARGS__)
 #define REGSETS_IN_CLASS(CL, ...) REGSETS_IN_CLASS_##CL(__VA_ARGS__)
 
-#define EXPAND(...) __VA_ARGS__
-#define EXPAND_COMMA(...) , ##__VA_ARGS__
-#define EXPAND_COMMA_CLOSE(...) ,##__VA_ARGS__ )
 #define INSTANTIATE_TARGET_TEMPLATE(TARGET, FUNC, ...) template FUNC(Target::TARGET::__VA_ARGS__);
 #define DECLARE_TARGET_CLASS(TARGET, ...) class TARGET __VA_ARGS__;
 #define FRIEND_TARGET_CLASS(TARGET, ...) friend class Target::TARGET __VA_ARGS__;
-#define TARGET_OVERLOAD(TARGET, FN, ARGS, ...) FN(Target::TARGET::EXPAND ARGS) __VA_ARGS__;
 
 #define PER_TARGET_CONSTANTS(M)                         \
     M(const char *, name)                               \
@@ -700,6 +696,11 @@ void emit_parser_registers(const Target::JBay::top_level_regs *regs, std::ostrea
  * will all have a Target::type argument prepended.  The final ARGS argument is the argument
  * list that that will be forwarded (basically ARGDECL without the types)
  */
+#define EXPAND(...) __VA_ARGS__
+#define EXPAND_COMMA(...) __VA_OPT__(, )##__VA_ARGS__                      // NOLINT
+#define EXPAND_COMMA_CLOSE(...) __VA_OPT__(, ) ##__VA_ARGS__ __VA_OPT__()) // NOLINT
+#define TARGET_OVERLOAD(TARGET, FN, ARGS, ...) FN(Target::TARGET::EXPAND ARGS) __VA_ARGS__;
+
 #define DECL_OVERLOAD_FUNC(TARGET, RTYPE, NAME, ARGDECL, ARGS) \
     RTYPE NAME(Target::TARGET EXPAND_COMMA_CLOSE ARGDECL;
 #define OVERLOAD_FUNC_FOREACH(GROUP, RTYPE, NAME, ARGDECL, ARGS, ...)                    \
