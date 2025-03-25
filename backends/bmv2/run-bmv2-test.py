@@ -84,6 +84,7 @@ PARSER.add_argument(
     help="replace reference outputs with newly generated ones",
 )
 PARSER.add_argument("-p", "--use_psa", dest="use_psa", action="store_true", help="Use psa switch")
+PARSER.add_argument("--use_pna", dest="use_pna", action="store_true", help="Use pna nic")
 PARSER.add_argument(
     "-bd",
     "--buildir",
@@ -250,6 +251,8 @@ def process_file(options: Options) -> int:
 
     if options.use_psa:
         binary = options.compiler_build_dir.joinpath("p4c-bm2-psa")
+    elif options.use_pna:
+        binary = options.compiler_build_dir.joinpath("p4c-bm2-pna")
     else:
         binary = options.compiler_build_dir.joinpath("p4c-bm2-ss")
 
@@ -359,6 +362,7 @@ def create_options(test_args: Any) -> Optional[Options]:
     for init_cmd in test_args.init_cmds:
         options.init_commands.append(init_cmd)
     options.use_psa = test_args.use_psa
+    options.use_pna = test_args.use_pna
     if test_args.pp:
         options.compiler_options.append(test_args.pp)
     if test_args.gdb:
