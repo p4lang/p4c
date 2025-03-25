@@ -76,6 +76,7 @@ class PnaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum *type) const override {
         if (type->name == "PNA_PacketPath_t") return true;
         if (type->name == "PNA_MeterColor_t") return true;
+        if (type->name == "PNA_Direction_t") return true;
         if (type->srcInfo.isValid()) {
             auto sourceFile = type->srcInfo.getSourceFile();
             if (sourceFile.endsWith(filename))
