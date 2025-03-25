@@ -667,7 +667,16 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         modelError("%1%: expected a member", hash->getNode());
         return;
     }
-    auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    // ExternConverter::convertHashAlgorithm() expects v1model names
+    // Convert from PSA/PNA names to v1model names
+    PortableCodeGenerator pcg;
+    auto v1modelHashName = pcg.convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    if (v1modelHashName.isNullOrEmpty()) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: unsupported hash algorithm for action selector", hash);
+        return;
+    }
+    auto algo = ExternConverter::convertHashAlgorithm(v1modelHashName);
     selector->emplace("algo"_cs, algo);
     auto input = ctxt->get_selector_input(c->to<IR::Declaration_Instance>());
     if (input == nullptr) {
