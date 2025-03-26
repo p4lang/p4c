@@ -47,7 +47,6 @@ endif()
 message("Done with setting up libbpf for P4C.")
 
 
-
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
 
@@ -190,6 +189,7 @@ include(CheckLinuxKernel)
 check_minimum_kernel_version("4.15.0" SUPPORTS_KERNEL)
 check_minimum_linux_libc_version("4.15.0" SUPPORTS_LIBC)
 if (NOT SUPPORTS_LIBC)
+  message(WARNING "Disabling eBPF kernel tests.")
   set (SUPPORTS_KERNEL FALSE)
 endif()
 

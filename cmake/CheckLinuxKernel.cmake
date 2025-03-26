@@ -1,18 +1,21 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Retrieves the kernel version from /usr/include/linux/version.h and stores it in KERNEL_VER.
-# This should also correspond with the linux-libc version.
+# This should also correspond with the linux-libc version that installs headers on debian distributions..
 # TODO: Consider other paths for linux/version.h?
 function(get_linux_libc_version_from_headers OUT_VERSION)
-    # macOS does not support these kinds of checks.
-    if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # Only Linux distributions support these kinds of checks.
+    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(${OUT_VERSION} "" PARENT_SCOPE)
         return()
     endif()
 
     set(LINUX_VERSION_HEADER "/usr/include/linux/version.h")
 
     if (NOT EXISTS ${LINUX_VERSION_HEADER})
-        message(ERROR "linux/version.h not found! Ensure linux-libc-dev is installed.")
+        message(WARNING "linux/version.h not found! Ensure linux-libc-dev is installed.")
+        set(${OUT_VERSION} "" PARENT_SCOPE)
+        return()
     endif()
 
     # Read the LINUX_VERSION_CODE line
@@ -21,7 +24,9 @@ function(get_linux_libc_version_from_headers OUT_VERSION)
     if (VERSION_LINE MATCHES "#define LINUX_VERSION_CODE ([0-9]+)")
         set(LINUX_VERSION_CODE ${CMAKE_MATCH_1})
     else()
-        message(ERROR "Failed to extract LINUX_VERSION_CODE from ${LINUX_VERSION_HEADER}")
+        message(WARNING "Failed to extract LINUX_VERSION_CODE from ${LINUX_VERSION_HEADER}")
+        set(${OUT_VERSION} "" PARENT_SCOPE)
+        return()
     endif()
 
     # Convert LINUX_VERSION_CODE to major.minor.patch.
@@ -38,8 +43,9 @@ endfunction()
 
 # Retrieves the kernel version from  uname -r and stores it in KERNEL_VER.
 function(get_kernel_version_from_uname OUT_VERSION)
-    # macOS does not support these kinds of checks.
-    if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    # Only Linux distributions support these kinds of checks.
+    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        set(${OUT_VERSION} "" PARENT_SCOPE)
         return()
     endif()
 
@@ -51,25 +57,28 @@ function(get_kernel_version_from_uname OUT_VERSION)
     )
 
     if (rc)
-        message(ERROR "Failed to detect kernel version using uname.")
+        message(WARNING "Failed to detect kernel version using uname.")
+        set(${OUT_VERSION} "" PARENT_SCOPE)
+        return()
     endif()
 
-    # Extract full version in MAJOR.MINOR.PATCH format
+    # Extract full version in MAJOR.MINOR.PATCH format.
     string(REGEX MATCH "^([0-9]+\\.[0-9]+\\.[0-9]+)" MATCHED_VERSION ${KERNEL_VER})
 
     if (MATCHED_VERSION)
         message(STATUS "Detected kernel version from uname: ${MATCHED_VERSION}")
         set(${OUT_VERSION} ${MATCHED_VERSION} PARENT_SCOPE)
     else()
-        message(ERROR "Failed to parse kernel version from uname output.")
+        message(WARNING "Failed to parse kernel version from uname output.")
+        set(${OUT_VERSION} "" PARENT_SCOPE)
     endif()
 endfunction()
 
 # Checks whether the linux libc version is at least MIN_VERSION.
 function(check_minimum_linux_libc_version MIN_VERSION RESULT_VAR)
-    # macOS does not support these kinds of checks.
-    if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        message(STATUS "Skipping kernel version check on macOS.")
+    # Only Linux distributions support these kinds of checks.
+    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        message(STATUS "Skipping kernel version check on unsupported OS.")
         set(${RESULT_VAR} FALSE PARENT_SCOPE)
         return()
     endif()
@@ -90,9 +99,9 @@ endfunction()
 
 # Checks whether the kernel version is at least MIN_VERSION.
 function(check_minimum_kernel_version MIN_VERSION RESULT_VAR)
-    # macOS does not support these kinds of checks.
-    if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        message(STATUS "Skipping kernel version check on macOS.")
+    # Only Linux distributions support these kinds of checks.
+    if (NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        message(STATUS "Skipping kernel version check on unsupported OS.")
         set(${RESULT_VAR} FALSE PARENT_SCOPE)
         return()
     endif()
