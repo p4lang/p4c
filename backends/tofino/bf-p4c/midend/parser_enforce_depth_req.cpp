@@ -507,9 +507,7 @@ class AddParserPad : public Modifier {
     // Tofino1-like architectures
     std::set<cstring> tofArch = {
         "tna"_cs,
-#if HAVE_JBAY
         "t2na"_cs,
-#endif /* HAVE_JBAY */
     };
 
     /**

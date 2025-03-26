@@ -22,6 +22,9 @@ limitations under the License.
 
 namespace P4 {
 
+/// @brief  Set of type declaration names that must be defined before the type can be inserted.
+using InsertionSet = absl::flat_hash_set<P4::cstring>;
+
 struct TypeSpecialization : public IHasDbPrint {
     /// Name to use for specialized type.
     cstring name;
@@ -31,14 +34,17 @@ struct TypeSpecialization : public IHasDbPrint {
     const IR::Type_Declaration *declaration;
     /// New synthesized type (created later)
     const IR::Type_StructLike *replacement;
-    /// Insertion point
-    const IR::Node *insertion;
+    /// Insertion point, the specialization will be inserted after all the top-level nodes in this
+    /// set.
+    InsertionSet insertion;
     /// Save here the canonical types of the type arguments of 'specialized'.
     /// The typeMap will be cleared, so we cannot look them up later.
     const IR::Vector<IR::Type> *argumentTypes;
+    /// was this specialization already inserted?
+    bool inserted = false;
 
     TypeSpecialization(cstring name, const IR::Type_Specialized *specialized,
-                       const IR::Type_Declaration *decl, const IR::Node *insertion,
+                       const IR::Type_Declaration *decl, const InsertionSet &insertion,
                        const IR::Vector<IR::Type> *argTypes)
         : name(name),
           specialized(specialized),
@@ -48,52 +54,78 @@ struct TypeSpecialization : public IHasDbPrint {
           argumentTypes(argTypes) {
         CHECK_NULL(specialized);
         CHECK_NULL(decl);
-        CHECK_NULL(insertion);
         CHECK_NULL(argTypes);
     }
     void dbprint(std::ostream &out) const override {
         out << "Specializing:" << dbp(specialized) << " from " << dbp(declaration) << " as "
-            << dbp(replacement) << " inserted at " << dbp(insertion);
+            << dbp(replacement) << " inserted at ";
+        format_container(out, insertion, '(', ')');
     }
 };
 
-struct TypeSpecializationMap : public IHasDbPrint {
+/// @brief A signature of a *concrete* specialization. None of the parameters can be type variables
+/// or generic types, therefore the specialization can always be identified globally the the names
+/// of types.
+struct SpecSignature {
+    /// @brief  Name of the type declaration of the base (unspecialized) type (i.e. the
+    /// struct/header)
+    cstring baseType;
+    /// @brief String representation of the type argument names.
+    safe_vector<cstring> arguments;
+
+    /// @brief Get a candidate name for the instantiation.
+    std::string name() const;
+
+    /// @brief Order for the sake of std::map only, the requirements are:
+    /// - it is a total order;
+    /// - all specializations of the same type are grouped together;
+    /// - no-argument specialization is always ordered immediatelly before any other specializations
+    ///   of the type (for the sake of lower_bound searches);
+    bool operator<(const SpecSignature &other) const {
+        // Using pointer comparison to speed up baseType comparation as we don't care about what
+        // that order is. Note that for pointers we have to use `std::less` to make the comparison
+        // defined for pointers into different objects.
+        return std::less<>()(std::forward_as_tuple(baseType.c_str(), arguments),
+                             std::forward_as_tuple(other.baseType.c_str(), other.arguments));
+    }
+
+    /// @brief Get a specialization signature if it is valid (i.e. the type is specialized only by
+    /// concrete non-generic types).
+    static std::optional<SpecSignature> get(const IR::Type_Specialized *spec);
+};
+
+std::string toString(const SpecSignature &);
+
+struct TypeSpecializationMap : IHasDbPrint {
     TypeMap *typeMap;
-    // The map can have multiple keys pointing to the same value
-    ordered_map<const IR::Type_Specialized *, TypeSpecialization *> map;
-    // Keep track of the values in the above map which are already
-    // inserted in the program.
-    std::set<TypeSpecialization *> inserted;
+    ordered_map<SpecSignature, TypeSpecialization> map;
 
     void add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
-             const IR::Node *insertion, NameGenerator *nameGen);
-    TypeSpecialization *get(const IR::Type_Specialized *t) const;
-    bool same(const TypeSpecialization *left, const IR::Type_Specialized *right) const;
+             NameGenerator *nameGen);
+    const TypeSpecialization *get(const IR::Type_Specialized *t) const;
+    TypeSpecialization *get(const IR::Type_Specialized *t);
     void dbprint(std::ostream &out) const override {
         for (auto it : map) {
-            out << dbp(it.first) << " => " << it.second << std::endl;
+            out << toString(it.first) << " => " << it.second << std::endl;
         }
     }
-    IR::Vector<IR::Node> *getSpecializations(const IR::Node *insertionPoint) {
-        IR::Vector<IR::Node> *result = nullptr;
-        for (auto s : map) {
-            if (inserted.find(s.second) != inserted.end()) continue;
-            if (s.second->insertion == insertionPoint) {
-                if (result == nullptr) result = new IR::Vector<IR::Node>();
-                LOG2("Will insert " << dbp(s.second->replacement) << " before "
-                                    << dbp(insertionPoint));
-                result->push_back(s.second->replacement);
-                inserted.emplace(s.second);
-            }
-        }
-        return result;
-    }
+
+    /// @brief Get a single specialization that is already available (i.e. it does not require any
+    /// additional definitions) and mark it as inserted. Returns nullptr if none such exists.
+    [[nodiscard]] const IR::Type_Declaration *nextAvailable();
+    /// @brief  Mark the @p tdec as already present and therefore remove it from required
+    /// definitions for specializations.
+    void markDefined(const IR::Type_Declaration *tdec);
+
+ private:
+    friend class CreateSpecializedTypes;
+    void fillInsertionSet(const IR::Type_StructLike *decl, InsertionSet &insertion);
 };
 
 /**
  * Find all generic type instantiations and their type arguments.
  */
-class FindTypeSpecializations : public Inspector {
+class FindTypeSpecializations : public Inspector, ResolutionContext {
     TypeSpecializationMap *specMap;
     MinimalNameGenerator nameGen;
 
@@ -111,7 +143,7 @@ class FindTypeSpecializations : public Inspector {
  * For each generic type that is specialized with concrete arguments create a
  * specialized type version and insert it in the program.
  */
-class CreateSpecializedTypes : public Transform {
+class CreateSpecializedTypes : public Modifier, public ResolutionContext {
     TypeSpecializationMap *specMap;
 
  public:
@@ -120,9 +152,8 @@ class CreateSpecializedTypes : public Transform {
         setName("CreateSpecializedTypes");
     }
 
-    const IR::Node *insert(const IR::Node *before);
-    const IR::Node *postorder(IR::Type_Declaration *type) override;
-    const IR::Node *postorder(IR::Declaration *decl) override { return insert(decl); }
+    void postorder(IR::Type_Specialized *type) override;
+    void postorder(IR::P4Program *prog) override;
 };
 
 /**

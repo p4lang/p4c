@@ -6,8 +6,8 @@ struct S {
     bit<32> b;
 }
 
-struct H3_0 {
+struct H3_S {
     tuple<S> t;
 }
 
-const H3_0 h4 = (H3_0){t = { (S){b = 32w0} }};
+const H3_S h4 = (H3_S){t = { (S){b = 32w0} }};

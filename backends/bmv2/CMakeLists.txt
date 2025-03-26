@@ -165,8 +165,11 @@ set (BMV2_V1MODEL_TEST_SUITES
   )
 
 set (PSA_INCLUDE_PATTERNS "include.*psa.p4")
-set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4")
-set (P4TESTS_FOR_PSA "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
+set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4" "include.*dpdk")
+set (P4TESTS_FOR_PSA
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/psa-*.p4"
+  )
 p4c_find_tests("${P4TESTS_FOR_PSA}" psa_tests INCLUDE "${PSA_INCLUDE_PATTERNS}" EXCLUDE "${PSA_EXCLUDE_PATTERNS}")
 
 set (BMV2_PSA_TEST_SUITES
@@ -203,6 +206,12 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1205-bmv2.p4
   # These psa tests are not ready to run on bmv2 yet
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
+  testdata/p4_16_samples/psa-example-parser-checksum.p4 # error: error.NoError: unsupported exact key expression
+  testdata/p4_16_samples/psa-meter4.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
+  testdata/p4_16_samples/psa-meter5.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
+  testdata/p4_16_samples/psa-random.p4 # vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)
+  testdata/p4_16_samples/psa-table-hit-miss.p4 # error: Program can not be implemented on this target since it
+                                               # contains a path from table MyIC.tbl back to itself
   # This reads stack.next
   testdata/p4_16_samples/issue692-bmv2.p4
   # These test use computations in the verify/update checksum controls - unsupported

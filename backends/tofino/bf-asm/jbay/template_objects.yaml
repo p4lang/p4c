@@ -1,0 +1,121 @@
+# Copyright (C) 2024 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.  You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+#
+# SPDX-License-Identifier: Apache-2.0
+
+global:
+  - namespace=JBay
+  - binary_offset
+  - emit_binary
+  - emit_fieldname
+  - emit_json
+  - enable_disable
+  - input_binary
+  - write_dma=mapram_config
+  - write_dma=imem_dark_subword8
+  - write_dma=imem_dark_subword16
+  - write_dma=imem_dark_subword32
+  - write_dma=imem_mocha_subword8
+  - write_dma=imem_mocha_subword16
+  - write_dma=imem_mocha_subword32
+  - write_dma=imem_subword8
+  - write_dma=imem_subword16
+  - write_dma=imem_subword32
+  - write_dma=galois_field_matrix
+generate:
+  memories:
+    jbay_mem:
+      memories.jbay_mem.h: [ decl, name=memories.top ]
+      memories.jbay_mem.cpp: [ defn, name=memories.top,
+          -Imemories.jbay_mem.h, -Imemories.pipe_addrmap.h ]
+    pipe_addrmap:  # pipes
+      memories.pipe_addrmap.h: [ decl, name=memories.pipe, widereg ]
+      memories.pipe_addrmap.cpp: [ defn, name=memories.pipe, widereg,
+          -Imemories.pipe_addrmap.h, -Imemories.prsr_mem_main_rspec.h ]
+    # parde_mem -- parde
+    prsr_mem_main_rspec:  # i_prsr_mem e_prsr_mem
+      memories.prsr_mem_main_rspec.h: [ decl, name=memories.parser.%s ]
+      memories.prsr_mem_main_rspec.cpp: [ defn, name=memories.parser.%s,
+          -Imemories.prsr_mem_main_rspec.h ]
+
+  regs:
+    jbay_reg:
+      regs.jbay_reg.h: [ decl, name=regs.top ]
+      regs.jbay_reg.cpp: [ defn, name=regs.top,
+          -Iregs.jbay_reg.h, -Iregs.pipe_addrmap.h ]
+    pipe_addrmap:  # pipea
+      regs.pipe_addrmap.h: [ decl, name=regs.pipe, widereg ]
+      regs.pipe_addrmap.cpp: [ defn, name=regs.pipe, widereg,
+          -Iregs.pipe_addrmap.h, -Iregs.ipb_prsr4_reg.h, -Iregs.epb_prsr4_reg.h,
+          -Iregs.pmerge_reg.h, -Iregs.mau_addrmap.h, -Iregs.dprsr_reg.h ]
+    mau_addrmap:  # mau
+      regs.mau_addrmap.h: [ decl, name=regs.match_action_stage.%02x ]
+      regs.mau_addrmap.cpp: [ defn, name=regs.match_action_stage.%02x,
+          -Iregs.mau_addrmap.h ]
+    # parde_glue_stn_reg
+    ipb_prsr4_reg:  # ipbprsr4reg
+      regs.ipb_prsr4_reg.h: [ decl, name=regs.parser.ingress ]
+      regs.ipb_prsr4_reg.cpp: [ defn, name=regs.parser.ingress,
+          -Iregs.ipb_prsr4_reg.h, -Iregs.prsr_reg_main_rspec.h ]
+    prsr_reg_main_rspec:  # prsr
+      regs.prsr_reg_main_rspec.h: [ decl, name=regs.parser.main.%s ]
+      regs.prsr_reg_main_rspec.cpp: [ defn, name=regs.parser.main.%s,
+          -Iregs.prsr_reg_main_rspec.h ]
+    pmerge_reg:  # pmergereg
+      regs.pmerge_reg.h: [ decl, name=regs.parse_merge ]
+      regs.pmerge_reg.cpp: [ defn, name=regs.parse_merge,
+          -Iregs.pmerge_reg.h ]
+    epb_prsr4_reg:  # epbprsr4reg
+      regs.epb_prsr4_reg.h: [ decl, name=regs.parser.egress ]
+      regs.epb_prsr4_reg.cpp: [ defn, name=regs.parser.egress,
+          -Iregs.epb_prsr4_reg.h, -Iregs.prsr_reg_main_rspec.h ]
+    # prsr_reg_main_rspec  # prsr
+    # mirr_ebuf_reg
+    dprsr_reg:
+      regs.dprsr_reg.h: [ decl, name=regs.deparser ]
+      regs.dprsr_reg.cpp: [ defn, name=regs.deparser,
+          -Iregs.dprsr_reg.h ]
+
+ignore:
+  memories:
+    # jbay_mem
+    - tm_top_mem_rspec  # tm
+    # pipes
+    - mau_addrmap  # mau -- just a dummy reg
+    # parde
+    - pgr_mem_rspec
+
+  regs:
+    # jbay_reg
+    - dvsl_addrmap
+    - eth100g_addrmap
+    - eth400g_addrmap
+    - gpio_regs
+    - serdes_addrmap
+    # pipes
+    # mau
+    # pardereg
+    # parde_glue_stn_reg
+    # parb_reg
+    - ebuf900_reg
+    - pbus_station_regs_rspec
+    - pgr_reg_rspec  # pgrreg
+    - s2p_reg
+    - p2s_reg
+    - parde_glue_reg_rspec  #pgluereg
+    # mirr_ebuf_reg  # mirefreg
+    # dprsr_reg
+    # dprsr_reg_rspec
+    - parde_dprsr_reg_rspec

@@ -2,12 +2,12 @@ struct h<t> {
     t f;
 }
 
-struct h_0 {
+struct h_bit1 {
     bit<1> f;
 }
 
-struct h_1 {
-    h_0 f;
+struct h_h_bit1 {
+    h_bit1 f;
 }
 
 control c(out bool x) {
