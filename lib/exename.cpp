@@ -19,22 +19,36 @@ limitations under the License.
 #include <array>
 #include <cstring>
 #include <filesystem>
+#include <system_error>
 
 namespace P4 {
 
-#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__)
-#include <unistd.h>
-
 #include <climits>
 #ifdef __APPLE__
+#include <unistd.h>
+
 #include <mach-o/dyld.h>
-#endif
 #elif defined(_WIN32)
 #include <windows.h>
+#else
+#include <unistd.h>
 #endif
 
 std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath) {
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__APPLE__)
+    std::array<char, PATH_MAX> buffer{};
+    uint32_t size = static_cast<uint32_t>(buffer.size());
+    if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
+        return buffer.data();
+    }
+#elif defined(_WIN32)
+    std::array<char, PATH_MAX> buffer{};
+    // TODO: Do we need to support this?
+    DWORD size = GetModuleFileNameA(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+    if (size > 0 && size < buffer.size()) {
+        return buffer.data();
+    }
+#else
     // Find the path of the executable.  We use a number of techniques that may fail or work on
     // different systems, and take the first working one we find.  Fallback to not overriding the
     // compiled-in installation path.
@@ -46,40 +60,20 @@ std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPa
     };
 
     for (const auto &path : paths) {
-        try {
-            // std::filesystem::canonical will throw on error if the path is invalid.
-            // It will also try to resolve symlinks.
-            return std::filesystem::canonical(path);
-        } catch (const std::filesystem::filesystem_error &) {
-            // Ignore and try the next path.
-        }
-    }
-#elif defined(__APPLE__)
-    std::array<char, PATH_MAX> buffer{};
-    uint32_t size = static_cast<uint32_t>(buffer.size());
-    if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
-        return buffer.data();
-    } else
-#elif defined(_WIN32)
-    std::array<char, PATH_MAX> buffer{};
-    // TODO: Do we need to support this?
-    DWORD size = GetModuleFileNameA(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
-    if (size > 0 && size < buffer.size()) {
-        return buffer.data();
-    } else
-#endif
-    if (auto *path = getenv("_")) {
-        return path;
-    }
-    // If the above fails, try to convert suggestedPath to a path.
-    try {
         // std::filesystem::canonical will throw on error if the path is invalid.
         // It will also try to resolve symlinks.
-        return std::filesystem::canonical(suggestedPath);
-    } catch (const std::filesystem::filesystem_error &) {
-        // In the case of an error, return an empty path.
-        return {};
+        std::error_code errorCode;
+        auto canonicalPath = std::filesystem::canonical(path, errorCode);
+        // Return the path if no error was thrown.
+        if (!errorCode) {
+            return canonicalPath;
+        }
     }
+#endif
+    // If the above fails, try to convert suggestedPath to a path.
+    std::error_code errorCode;
+    auto canonicalPath = std::filesystem::canonical(suggestedPath, errorCode);
+    return errorCode ? std::filesystem::path() : canonicalPath;
 }
 
 const char *exename(const char *argv0) {
