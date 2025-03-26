@@ -115,24 +115,32 @@ void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
     ctxt->json->add_header("scalars_t"_cs, name);
     ctxt->json->add_header_type("scalars_t"_cs);
     unsigned max_length = 0;
-    for (auto kv : structure->scalars) {
-        LOG5("Adding a scalar field " << kv.second << " to generated json");
+    auto add_field = [&](cstring name, const P4::IR::Declaration *decl) {
         auto field = new Util::JsonArray();
-        auto ftype = structure->typeMap->getType(kv.second, true);
+        auto ftype = structure->typeMap->getType(decl, true);
         if (auto type = ftype->to<IR::Type_Bits>()) {
-            field->append(kv.second->name);
+            field->append(name);
             max_length += type->size;
             field->append(type->size);
             field->append(type->isSigned);
         } else if (ftype->is<IR::Type_Boolean>()) {
-            field->append(kv.second->name);
+            field->append(name);
             max_length += 1;
             field->append(1);
             field->append(false);
         } else {
-            BUG_CHECK(kv.second, "%1 is not of Type_Bits or Type_Boolean");
+            BUG_CHECK(decl, "%1 is not of Type_Bits or Type_Boolean");
         }
         ctxt->json->add_header_field("scalars_t"_cs, field);
+    };
+    for (auto kv : structure->scalars) {
+        LOG5("Adding a scalar field " << kv.second << " to generated json");
+        add_field(kv.second->name.name, kv.second);
+    }
+    // also output the scalar metadata fields
+    for (auto kv : structure->scalarMetadataFields) {
+        LOG5("Adding a scalar metadata field " << kv.second << " to generated json");
+        add_field(kv.second, kv.first);
     }
     // must add padding
     unsigned padding = max_length % 8;
