@@ -222,6 +222,10 @@ cstring PortableCodeGenerator::convertHashAlgorithm(cstring algo) {
     if (algo == "IDENTITY") {
         return "identity"_cs;
     }
+    // Target default chosen to be crc16
+    if (algo == "TARGET_DEFAULT") {
+        return "crc16"_cs;
+    }
 
     return nullptr;
 }
