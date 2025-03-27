@@ -3,14 +3,14 @@ struct S<T, N> {
     bit<32> otherField;
 }
 
-struct S_0 {
+struct S_bit32_bit32 {
     bit<32> field;
     bit<32> otherField;
 }
 
 control _c<T>(out T t);
 package top<T>(_c<T> c);
-control c(out S_0 t) {
+control c(out S_bit32_bit32 t) {
     @hidden action issue2635l13() {
         t.field = 32w0;
         t.otherField = 32w0;
@@ -26,4 +26,4 @@ control c(out S_0 t) {
     }
 }
 
-top<S_0>(c()) main;
+top<S_bit32_bit32>(c()) main;

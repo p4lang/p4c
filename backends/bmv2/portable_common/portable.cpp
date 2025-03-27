@@ -222,6 +222,10 @@ cstring PortableCodeGenerator::convertHashAlgorithm(cstring algo) {
     if (algo == "IDENTITY") {
         return "identity"_cs;
     }
+    // Target default chosen to be crc16
+    if (algo == "TARGET_DEFAULT") {
+        return "crc16"_cs;
+    }
 
     return nullptr;
 }
@@ -475,12 +479,12 @@ void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionConte
             modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
             return;
         }
-        if (eb->getConstructorParameters()->size() < 2) {
-            modelError("%1%: expected 2 parameters", eb);
+        if (eb->getConstructorParameters()->size() < 1) {
+            modelError("%1%: expected 1 parameter", eb);
             return;
         }
         auto arg = tp->to<IR::Declaration_ID>();
-        auto param = eb->getConstructorParameters()->getParameter(1);
+        auto param = eb->getConstructorParameters()->getParameter(0);
         auto mem = arg->toString();
         LOG5("In convertParam with param " << param->toString() << " and mem " << mem);
         auto jsn = ctxt->conv->convertParam(param, mem);
@@ -667,7 +671,16 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         modelError("%1%: expected a member", hash->getNode());
         return;
     }
-    auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    // ExternConverter::convertHashAlgorithm() expects v1model names
+    // Convert from PSA/PNA names to v1model names
+    PortableCodeGenerator pcg;
+    auto v1modelHashName = pcg.convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    if (v1modelHashName.isNullOrEmpty()) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: unsupported hash algorithm for action selector", hash);
+        return;
+    }
+    auto algo = ExternConverter::convertHashAlgorithm(v1modelHashName);
     selector->emplace("algo"_cs, algo);
     auto input = ctxt->get_selector_input(c->to<IR::Declaration_Instance>());
     if (input == nullptr) {

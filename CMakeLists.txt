@@ -71,6 +71,9 @@ OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 
+# Enable DumpPipe pass output
+OPTION(ENABLE_DUMP_PIPE "Enable DumpPipe pass output" ON)
+
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
 set(MAX_LOGGING_LEVEL 10 CACHE STRING "Control the maximum logging level for -T logs")
@@ -187,6 +190,11 @@ endif ()
 
 if (BUILD_AUTO_VAR_INIT_PATTERN)
   add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
+endif ()
+
+# Enable DumpPipe pass output
+if (ENABLE_DUMP_PIPE)
+  add_definitions("-DENABLE_DUMP_PIPE=1")
 endif ()
 
 # Required tools and libraries.

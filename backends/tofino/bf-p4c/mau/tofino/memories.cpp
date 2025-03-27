@@ -3506,7 +3506,6 @@ bool Memories::allocate_all_swbox_users() {
             }
         }
 
-#ifdef HAVE_JBAY
         // JBay has no overflow bus between logical row 7 and 8
         if ((Device::isMemoryCoreSplit()) && i == MATCH_CENTRAL_ROW) {
             for (auto group : must_place_in_half) {
@@ -3526,9 +3525,7 @@ bool Memories::allocate_all_swbox_users() {
             curr_oflow = nullptr;
             must_place_in_half.clear();
         }
-#endif /* HAVE_JBAY */
     }
-
     if (!action_bus_users.empty() || !synth_bus_users.empty()) {
         for (auto abu : action_bus_users) abu->left_to_place();
 

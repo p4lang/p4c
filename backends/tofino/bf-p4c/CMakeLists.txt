@@ -150,7 +150,6 @@ set (BF_P4C_BACKEND_COMMON_SRCS
   common/check_field_corruption.cpp
   common/check_for_unimplemented_features.cpp
   common/check_uninitialized_read.cpp
-  common/dump_pipe.cpp
   common/pragma/collect_global_pragma.cpp
   common/elim_unused.cpp
   common/empty_tableseq.cpp
@@ -557,9 +556,6 @@ target_compile_definitions(bfp4c
   INTERFACE "-DPHV_SCHEMA_VERSION=\"${PHV_SCHEMA_VERSION}\""
   INTERFACE "-DCONFIG_PREFIX=\"${CMAKE_INSTALL_PREFIX}\""
   INTERFACE "-DCONFIG_PKGDATADIR=\"${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}\""
-)
-target_compile_definitions(bfp4c
-  INTERFACE "-DHAVE_JBAY=1"
 )
 if (ENABLE_BAREFOOT_INTERNAL)
   target_compile_definitions(bfp4c

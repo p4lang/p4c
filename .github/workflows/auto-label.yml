@@ -7,6 +7,10 @@ on:
     types: [opened, edited]  # Runs when a PR is created or modified
   workflow_dispatch:  # Allows manual triggering
 
+permissions:
+  issues: write  # Ensure the token has write access to issues
+  pull-requests: write  # Ensure the token has write access to PRs
+
 jobs:
   label:
     runs-on: ubuntu-latest
@@ -43,6 +47,7 @@ jobs:
               // Issue label mappings (original set)
               labelMappings = {
                 "[bug]": "bug",
+                "[infra]": "infrastructure",
                 "[feature]": "enhancement",
                 "[docs]": "documentation",
                 "[dpdk]": "dpdk",              
@@ -65,6 +70,7 @@ jobs:
               // PR label mappings (only the ones you want for PRs)
               labelMappings = {
                 "[core]":"core",
+                "[infra]": "infrastructure",
                 "[midend]":"core",
                 "[parser]":"core",
                 "[dpdk]": "dpdk",  

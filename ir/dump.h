@@ -69,6 +69,13 @@ inline std::ostream &operator<<(std::ostream &out, const Dump &d) {
     return out;
 }
 
+struct DumpPipe : public Inspector {
+    const char *heading;
+    DumpPipe() : heading(nullptr) {}
+    explicit DumpPipe(const char *h) : heading(h) {}
+    bool preorder(const IR::Node *pipe) override;
+};
+
 }  // namespace P4
 
 #endif /* IR_DUMP_H_ */
