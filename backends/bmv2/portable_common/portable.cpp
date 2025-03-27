@@ -111,7 +111,9 @@ void PortableCodeGenerator::createTypes(ConversionContext *ctxt,
 
 void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
                                           P4::PortableProgramStructure *structure) {
-    auto name = structure->scalars.begin()->first;
+    if (structure->scalars.empty() && structure->scalarMetadataFields.empty()) return;
+    // We may have items in scalarMetadataFields but not scalars
+    auto name = structure->scalars.empty() ? "scalars"_cs : structure->scalars.begin()->first;
     ctxt->json->add_header("scalars_t"_cs, name);
     ctxt->json->add_header_type("scalars_t"_cs);
     unsigned max_length = 0;
