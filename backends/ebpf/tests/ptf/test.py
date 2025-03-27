@@ -595,6 +595,9 @@ class VerifyPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
+# See issue https://github.com/p4lang/p4c/issues/5201 for why
+# PSATernaryTest is commented out.
+
 # class PSATernaryTest(P4EbpfTest):
 #     p4_file_path = "p4testdata/psa-ternary.p4"
 
