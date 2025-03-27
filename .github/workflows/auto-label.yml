@@ -10,13 +10,12 @@ on:
 permissions:
   issues: write  # Ensure the token has write access to issues
   pull-requests: write  # Ensure the token has write access to PRs
+  contents: read
 
 jobs:
   label:
 
-    permissions:
-      contents: read
-      pull-requests: write
+   
 
     runs-on: ubuntu-latest
     steps:
