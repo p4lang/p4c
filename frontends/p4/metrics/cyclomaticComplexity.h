@@ -6,6 +6,19 @@
 
 namespace P4 {
 
+class CyclomaticComplexityCalculator : public Inspector {
+    int cc;
+ public:
+    CyclomaticComplexityCalculator() : cc(1) { setName("CyclomaticComplexityCalculator"); }
+    int getComplexity() const { return cc; }
+
+    bool preorder([[maybe_unused]] const IR::IfStatement* stmt) override;
+    bool preorder(const IR::SwitchStatement* stmt) override;
+    bool preorder(const IR::SelectExpression* selectExpr) override;
+    bool preorder(const IR::MethodCallExpression* mce) override;
+    bool preorder(const IR::P4Table* table) override;
+};
+
 class CyclomaticComplexityPass : public Inspector {
     Metrics &metrics;
  public:

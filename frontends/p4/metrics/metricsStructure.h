@@ -81,7 +81,6 @@ struct Metrics {
     } matchActionTableMetrics;
 
     struct ParserMetrics {
-        P4::ordered_map<std::string, unsigned> StateNum;        // Parser name -> num states
         P4::ordered_map<std::string, unsigned> StateComplexity; // State name -> complexity
         unsigned totalStates = 0;
     } parserMetrics;

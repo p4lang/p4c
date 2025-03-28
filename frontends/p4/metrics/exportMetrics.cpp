@@ -114,7 +114,16 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
         } 
         else if (metric == "parser") {
             file << "\nParser Metrics:\n";
-            file << "  Total States: " << metrics.parserMetrics.totalStates << "\n";
+            file << "  States: " << metrics.parserMetrics.totalStates << "\n";
+            file << "  Complexities: "<<std::endl;
+
+            auto iterator = metrics.parserMetrics.StateComplexity.begin();
+            while (iterator != metrics.parserMetrics.StateComplexity.end()){
+                const auto& [stateName, complexity] = *iterator;
+                auto CCValue = metrics.parserMetrics.StateComplexity[stateName];
+                file<<"\t"<<stateName<<": "<<CCValue<<"\n";
+                iterator++;
+            }
         } 
         else if (metric == "inlined") {
             file << "\nInlined Actions: " << metrics.inlinedActionsNum << "\n";
