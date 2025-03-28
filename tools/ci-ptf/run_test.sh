@@ -25,7 +25,7 @@ fi
 # `virt-install --osinfo list` or `osinfo-query os` for more information and valid values
 OS_VARIANT=""
 case "$OS_TYPE" in
-  "ubuntu-20.04") OS_VARIANT="ubuntu20.04" ;;
+  "ubuntu-22.04") OS_VARIANT="ubuntu22.04" ;;
   *)
     echo "Unsupported OS_TYPE=$OS_TYPE; please add it to script $0"
     exit 1
