@@ -318,7 +318,7 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto trim = inst->controlPlaneName().find(".");
-    auto block = inst->controlPlaneName().trim(trim);
+    auto block = inst->controlPlaneName().before(trim);
     auto pnaStructure = static_cast<PnaProgramStructure *>(ctxt->structure);
     auto mainParser = pnaStructure->parsers.at("main_parser"_cs)->controlPlaneName();
     auto mainDeparser = pnaStructure->deparsers.at("main_deparser"_cs)->controlPlaneName();

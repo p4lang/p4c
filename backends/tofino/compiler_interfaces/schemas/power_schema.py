@@ -111,7 +111,6 @@ class StageCharacteristics(jsl.Document):
 
 
 class MatchTables(jsl.Document):
-
     class StageDetails(jsl.Document):
         title = "StageDetails"
         description = "Information about table power usage on a per-stage basis."

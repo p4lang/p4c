@@ -1,0 +1,48 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 38432435
+    name: "ingress.test_table"
+    alias: "test_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.$valid$"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 24383923
+  }
+  action_refs {
+    id: 21257015
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 24383923
+    name: "ingress.DummyAction"
+    alias: "DummyAction"
+  }
+}
+type_info {
+}

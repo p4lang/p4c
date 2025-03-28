@@ -111,28 +111,38 @@ void PortableCodeGenerator::createTypes(ConversionContext *ctxt,
 
 void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
                                           P4::PortableProgramStructure *structure) {
-    auto name = structure->scalars.begin()->first;
+    if (structure->scalars.empty() && structure->scalarMetadataFields.empty()) return;
+    // We may have items in scalarMetadataFields but not scalars
+    auto name = structure->scalars.empty() ? "scalars"_cs : structure->scalars.begin()->first;
     ctxt->json->add_header("scalars_t"_cs, name);
     ctxt->json->add_header_type("scalars_t"_cs);
     unsigned max_length = 0;
-    for (auto kv : structure->scalars) {
-        LOG5("Adding a scalar field " << kv.second << " to generated json");
+    auto add_field = [&](cstring name, const P4::IR::Declaration *decl) {
         auto field = new Util::JsonArray();
-        auto ftype = structure->typeMap->getType(kv.second, true);
+        auto ftype = structure->typeMap->getType(decl, true);
         if (auto type = ftype->to<IR::Type_Bits>()) {
-            field->append(kv.second->name);
+            field->append(name);
             max_length += type->size;
             field->append(type->size);
             field->append(type->isSigned);
         } else if (ftype->is<IR::Type_Boolean>()) {
-            field->append(kv.second->name);
+            field->append(name);
             max_length += 1;
             field->append(1);
             field->append(false);
         } else {
-            BUG_CHECK(kv.second, "%1 is not of Type_Bits or Type_Boolean");
+            BUG_CHECK(decl, "%1 is not of Type_Bits or Type_Boolean");
         }
         ctxt->json->add_header_field("scalars_t"_cs, field);
+    };
+    for (auto kv : structure->scalars) {
+        LOG5("Adding a scalar field " << kv.second << " to generated json");
+        add_field(kv.second->name.name, kv.second);
+    }
+    // also output the scalar metadata fields
+    for (auto kv : structure->scalarMetadataFields) {
+        LOG5("Adding a scalar metadata field " << kv.second << " to generated json");
+        add_field(kv.second, kv.first);
     }
     // must add padding
     unsigned padding = max_length % 8;
@@ -221,6 +231,10 @@ cstring PortableCodeGenerator::convertHashAlgorithm(cstring algo) {
     }
     if (algo == "IDENTITY") {
         return "identity"_cs;
+    }
+    // Target default chosen to be crc16
+    if (algo == "TARGET_DEFAULT") {
+        return "crc16"_cs;
     }
 
     return nullptr;
@@ -475,12 +489,12 @@ void ExternConverter_DirectCounter::convertExternInstance(UNUSED ConversionConte
             modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
             return;
         }
-        if (eb->getConstructorParameters()->size() < 2) {
-            modelError("%1%: expected 2 parameters", eb);
+        if (eb->getConstructorParameters()->size() < 1) {
+            modelError("%1%: expected 1 parameter", eb);
             return;
         }
         auto arg = tp->to<IR::Declaration_ID>();
-        auto param = eb->getConstructorParameters()->getParameter(1);
+        auto param = eb->getConstructorParameters()->getParameter(0);
         auto mem = arg->toString();
         LOG5("In convertParam with param " << param->toString() << " and mem " << mem);
         auto jsn = ctxt->conv->convertParam(param, mem);
@@ -667,7 +681,16 @@ void ExternConverter_ActionSelector::convertExternInstance(UNUSED ConversionCont
         modelError("%1%: expected a member", hash->getNode());
         return;
     }
-    auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    // ExternConverter::convertHashAlgorithm() expects v1model names
+    // Convert from PSA/PNA names to v1model names
+    PortableCodeGenerator pcg;
+    auto v1modelHashName = pcg.convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
+    if (v1modelHashName.isNullOrEmpty()) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: unsupported hash algorithm for action selector", hash);
+        return;
+    }
+    auto algo = ExternConverter::convertHashAlgorithm(v1modelHashName);
     selector->emplace("algo"_cs, algo);
     auto input = ctxt->get_selector_input(c->to<IR::Declaration_Instance>());
     if (input == nullptr) {

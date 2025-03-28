@@ -4,17 +4,17 @@ struct S<T> {
     T t;
 }
 
-struct S_0 {
+struct S_bit32 {
     bit<32> t;
 }
 
 extern E {
-    E(list<S_0> data);
+    E(list<S_bit32> data);
     void run();
 }
 
 control c() {
-    E((list<S_0>){(S_0){t = 32w10},(S_0){t = 32w5}}) e;
+    E((list<S_bit32>){(S_bit32){t = 32w10},(S_bit32){t = 32w5}}) e;
     apply {
         e.run();
     }

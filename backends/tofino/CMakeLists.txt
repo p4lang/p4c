@@ -23,9 +23,6 @@ if (CMAKE_BUILD_TYPE STREQUAL Release OR CMAKE_BUILD_TYPE STREQUAL RelWithDebInf
   add_definitions("-DRELEASE_BUILD=1")
 endif()
 
-# JBay is always enabled, the preprocessor guard is deprecated
-add_definitions("-DHAVE_JBAY=1")
-
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 if (ENABLE_STATIC_LIBS)
@@ -85,8 +82,7 @@ else()
     set (BFN_P4C_GIT_SHA $ENV{BFN_P4C_GIT_SHA})
   endif()
 endif()
-set (ENV{P4C_VERSION} "${BFN_P4C_VERSION} (SHA: ${BFN_P4C_GIT_SHA})")
-MESSAGE(STATUS "p4c-barefoot version: $ENV{P4C_VERSION}")
+MESSAGE(STATUS "p4c-barefoot version: ${BFN_P4C_VERSION}")
 
 # Generate the sha specific version file. It includes the GIT SHA.
 # Because this version changes frequently, we include it separately from the normal version files.
@@ -175,16 +171,6 @@ if (ENABLE_DOXYGEN)
   endif()
 endif()
 
-# Generate the LICENSE file. Do this before generating the build system so
-# that CPack detects that the file exists.
-execute_process(COMMAND "${BFN_P4C_SOURCE_DIR}/scripts/generate-license.sh")
-
-set (CPACK_RESOURCE_FILE_LICENSE "${BFN_P4C_SOURCE_DIR}/LICENSE")
-set (THIRD_PARTY_LICENSES "${BFN_P4C_SOURCE_DIR}/LICENSES.txt")
-install (FILES ${CPACK_RESOURCE_FILE_LICENSE}
-  ${THIRD_PARTY_LICENSES}
-  DESTINATION share/p4c)
-
 set (CPACK_GENERATOR "TBZ2")
 set (CPACK_PACKAGE_NAME "p4c")
 set (CPACK_PACKAGE_VERSION_MAJOR ${BFN_P4C_VERSION_MAJOR})
@@ -229,6 +215,7 @@ set (BF_P4C_IR_SRCS
   bf-p4c/parde/match_register.cpp
   bf-p4c/parde/clot/clot.cpp
   bf-p4c/phv/phv.cpp
+  # FIXME: This should be a library.
   bf-utils/dynamic_hash/dynamic_hash.cpp
   bf-utils/dynamic_hash/bfn_hash_algorithm.cpp
   )
@@ -239,4 +226,9 @@ foreach(src IN LISTS BF_P4C_IR_SRCS)
 endforeach()
 set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_BF_P4C_IR_SRCS} PARENT_SCOPE)
 
+
 add_subdirectory(bf-p4c)
+
+# Initialize bf-asm after bf-p4c.
+add_subdirectory(bf-asm)
+

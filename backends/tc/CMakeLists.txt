@@ -14,49 +14,6 @@
 # and limitations under the License.
 #*****************************************************************************/
 
-if(NOT APPLE)
-  # Fetch and declare the libbpf library. Print out download state while setting up libbpf.
-  set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-  set(FETCHCONTENT_QUIET OFF)
-  fetchcontent_declare(
-    p4cbpfrepo
-    URL https://github.com/libbpf/libbpf/archive/refs/tags/v1.5.0.tar.gz
-    URL_HASH SHA256=53492aff6dd47e4da04ef5e672d753b9743848bdb38e9d90eafbe190b7983c44
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/libbpf
-    USES_TERMINAL_DOWNLOAD TRUE
-    GIT_PROGRESS TRUE
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-  )
-  fetchcontent_makeavailable(p4cbpfrepo)
-  set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-  message("Building libbpf...")
-  execute_process(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/runtime/build-libbpf
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND_ECHO STDOUT
-  )
-  message("Done with setting up libbpf for P4C.")
-
-  fetchcontent_declare(
-    iproute2repo
-    URL https://github.com/p4tc-dev/iproute2-p4tc-pub/archive/refs/tags/release-v17-rc6.tar.gz
-    URL_HASH SHA256=624c32a571f9f30d1070d9b23e96121ac79f9273df9ff6db4ee6d034ab983c5d
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/iproute2-p4tc-pub
-    USES_TERMINAL_DOWNLOAD TRUE
-    GIT_PROGRESS TRUE
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-  )
-  fetchcontent_makeavailable(iproute2repo)
-  set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-  message("Building iproute2...")
-  execute_process(
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/runtime/build-iproute2 ${CMAKE_CURRENT_SOURCE_DIR}/runtime
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMAND_ECHO STDOUT
-  )
-  message("Done with setting up iproute2 for P4C.")
-endif()
-
 set(P4TC_BACKEND_SOURCES
     backend.cpp
     ebpfCodeGen.cpp
@@ -161,26 +118,5 @@ add_custom_target(tc_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/tc
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/tc/pna.p4 ${P4C_BINARY_DIR}/p4include/tc)
 
-set(P4TC_COMPILER_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-tc-test.py")
-
-set (P4_16_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4tc_samples/*.p4")
-
-# Setup fixture
-add_test(NAME p4tc_setup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/setup "https://api.github.com/repos/p4tc-dev/linux-p4tc-pub/releases/latest")
-set_tests_properties(p4tc_setup PROPERTIES FIXTURES_SETUP P4TCFixture)
-
-add_test(NAME p4tc_cleanup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/cleanup)
-set_tests_properties(p4tc_cleanup PROPERTIES FIXTURES_CLEANUP P4TCFixture)
-
-macro(p4tc_add_test_with_args tag driver isXfail alias p4test test_args cmake_args)
-  p4c_add_test_with_args(${tag} ${driver} ${isXfail} ${alias} ${p4test} ${test_args} "")
-  p4c_test_set_name(__testname ${tag} ${alias})
-  set_tests_properties(${__testname} PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK "shared_lock")
-  set_tests_properties(${__testname} PROPERTIES RESOURCE_LOCK "shared_lock")
-  set_tests_properties(${__testname} PROPERTIES TIMEOUT 1000)
-endmacro(p4tc_add_test_with_args)
-
-p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
-p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/arp_respond.p4" "testdata/p4tc_samples_stf/arp_respond.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/arp_respond.stf" "")
-p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/simple_l3.p4" "testdata/p4tc_samples_stf/simple_l3.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/simple_l3.stf" "")
+#### Tests ####
+include(${CMAKE_CURRENT_SOURCE_DIR}/TCTests.cmake)

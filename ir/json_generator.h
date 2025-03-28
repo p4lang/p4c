@@ -135,7 +135,10 @@ class JSONGenerator {
                 break;
             case OBJ_END:
                 break;
-            default:
+            case TOP:
+            case VEC_START:
+            case VEC_MID:
+            case OBJ_AFTERTAG:
                 BUG("invalid json output state in end_object");
                 break;
         }

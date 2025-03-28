@@ -165,12 +165,35 @@ set (BMV2_V1MODEL_TEST_SUITES
   )
 
 set (PSA_INCLUDE_PATTERNS "include.*psa.p4")
-set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4")
-set (P4TESTS_FOR_PSA "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
+set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4" "include.*dpdk")
+set (P4TESTS_FOR_PSA
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/psa-*.p4"
+  )
 p4c_find_tests("${P4TESTS_FOR_PSA}" psa_tests INCLUDE "${PSA_INCLUDE_PATTERNS}" EXCLUDE "${PSA_EXCLUDE_PATTERNS}")
 
 set (BMV2_PSA_TEST_SUITES
   ${psa_tests}
+)
+
+set (PNA_INCLUDE_PATTERNS "include.*pna.p4")
+set (PNA_EXCLUDE_PATTERNS "include.*v1model.p4" "include.*dpdk")
+set (P4TESTS_FOR_PNA
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-*.p4"
+  )
+p4c_find_tests("${P4TESTS_FOR_PNA}" pna_test_candidates INCLUDE "${PNA_INCLUDE_PATTERNS}" EXCLUDE "${PNA_EXCLUDE_PATTERNS}")
+# Exclude dpdk tests from PNA test candidates
+# FIXME: some of these work with BMv2 -- potentially enable later
+set (pna_tests "")
+foreach (t ${pna_test_candidates})
+  if (NOT t MATCHES ".*-dpdk-.*.p4")
+    list (APPEND pna_tests ${t})
+  endif()
+endforeach()
+
+set (BMV2_PNA_TEST_SUITES
+  ${pna_tests}
 )
 
 # Execute PTF tests for these files.
@@ -180,7 +203,8 @@ set (BMV2_PTF_TEST_SUITES
 
 # -p to use psa switch model
 # -a to pass flags to compiler
-set (testExtraFlags "${testExtraFlags} -p -a='--target bmv2 --arch psa'")
+set (testExtraFlagsPSA "${testExtraFlags} -p -a='--target bmv2 --arch psa'")
+set (testExtraFlagsPNA "${testExtraFlags} --use_pna -a='--target bmv2 --arch pna'")
 
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
@@ -203,6 +227,12 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1205-bmv2.p4
   # These psa tests are not ready to run on bmv2 yet
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
+  testdata/p4_16_samples/psa-example-parser-checksum.p4 # error: error.NoError: unsupported exact key expression
+  testdata/p4_16_samples/psa-meter4.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
+  testdata/p4_16_samples/psa-meter5.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
+  testdata/p4_16_samples/psa-random.p4 # vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)
+  testdata/p4_16_samples/psa-table-hit-miss.p4 # error: Program can not be implemented on this target since it
+                                               # contains a path from table MyIC.tbl back to itself
   # This reads stack.next
   testdata/p4_16_samples/issue692-bmv2.p4
   # These test use computations in the verify/update checksum controls - unsupported
@@ -216,6 +246,15 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/hashing-non-tuple-bmv2.p4
   # Similarly, this test hashes on a bit input.
   testdata/p4_16_samples/issue584-1-bmv2.p4
+  # These pna tests are not ready to run on bmv2 yet
+  testdata/p4_16_samples/pna-example-SelectByDirection.p4  # error: SelectByDirection(...): not supported
+  testdata/p4_16_samples/pna-example-SelectByDirection1.p4  # error: SelectByDirection(...): not supported
+  testdata/p4_16_samples/pna-example-SelectByDirection2.p4  # error: SelectByDirection(...): not supported
+  testdata/p4_16_samples/pna-example-header-union.p4  # Error -11
+  testdata/p4_16_samples/pna-example-header-union1.p4  # Error -11
+  testdata/p4_16_samples/pna-example-pass-2.p4  # Conditional execution in actions not supported
+  testdata/p4_16_samples/pna-example-tcp-connection-tracking.p4  # Conditional execution in actions not supported
+  testdata/p4_16_samples/pna-extract-local-header.p4  # error: IfStatement: not supported within a deparser on this target
 )
 
 set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
@@ -244,9 +283,15 @@ else()
 endif()
 
 if (HAVE_PSA_SWITCH)
-  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlags})
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlagsPSA})
 else()
   MESSAGE(WARNING "BMv2 PSA switch is not available, not adding PSA BMv2 tests")
+endif()
+
+if (HAVE_PNA_NIC)
+  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PNA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlagsPNA})
+else()
+  MESSAGE(WARNING "BMv2 PNA switch is not available, not adding PNA BMv2 tests")
 endif()
 
 set (GTEST_BMV2_SOURCES
