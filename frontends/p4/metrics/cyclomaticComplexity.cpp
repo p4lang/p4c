@@ -40,7 +40,7 @@ class CyclomaticComplexityCalculator : public P4::Inspector {
     }
 };
 
-}  // anonymous namespace
+}  // anonymous namespace 
 
 namespace P4 {
 

@@ -64,12 +64,30 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
             file << "\nHeader Manipulation Metrics:\n";
             file << "  Total Operations: " << metrics.headerManipulationMetrics.totalManipulations.numOperations << "\n";
             file << "  Total Size: " << metrics.headerManipulationMetrics.totalManipulations.totalSize << "\n";
-        } 
+
+            auto iterator = metrics.headerManipulationMetrics.perPacketManipulations.begin();
+            while (iterator != metrics.headerManipulationMetrics.perPacketManipulations.end()){
+                const auto& [packetName, operations] = *iterator;
+                file<<"\t"<<packetName<<":\n";
+                file<<"\t  Operations: "<<operations.numOperations<<"\n";
+                file<<"\t  Size: "<<operations.totalSize<<"\n";
+                iterator++;
+            }
+        }
         else if (metric == "header-modification") {
             file << "\nHeader Modification Metrics:\n";
             file << "  Total Operations: " << metrics.headerModificationMetrics.totalModifications.numOperations << "\n";
             file << "  Total Size: " << metrics.headerModificationMetrics.totalModifications.totalSize << "\n";
-        } 
+
+            auto iterator = metrics.headerModificationMetrics.perPacketModifications.begin();
+            while (iterator != metrics.headerModificationMetrics.perPacketModifications.end()){
+                const auto& [packetName, operations] = *iterator;
+                file<<"\t"<<packetName<<":\n";
+                file<<"\t  Operations: "<<operations.numOperations<<"\n";
+                file<<"\t  Size: "<<operations.totalSize<<"\n";
+                iterator++;
+            }
+        }
         else if (metric == "match-action") {
             file << "\nMatch-Action Table Metrics:\n";
             file << "  Number of Tables: " << metrics.matchActionTableMetrics.numTables << "\n";

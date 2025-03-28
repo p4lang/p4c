@@ -2,9 +2,6 @@
 
 namespace P4 {
 
-MetricsPassManager::MetricsPassManager(const CompilerOptions &options, Metrics &metrics)
-    : selectedMetrics(options.selectedMetrics), metrics(metrics) {}
-
 void MetricsPassManager::addInlined(PassManager &pm) const {
     if (selectedMetrics.find("inlined") != selectedMetrics.end()) {
         pm.addPasses({new InlinedActionsMetricPass(metrics)});
@@ -33,12 +30,6 @@ void MetricsPassManager::addRemaining(PassManager &pm) const {
     if (selectedMetrics.find("header-general") != selectedMetrics.end()) {
         pm.addPasses({new HeaderMetricsPass(metrics)});
     }
-    if (selectedMetrics.find("header-manipulation") != selectedMetrics.end()) {
-        pm.addPasses({new HeaderManipulationMetricsPass(metrics)});
-    }
-    if (selectedMetrics.find("header-modification") != selectedMetrics.end()) {
-        pm.addPasses({new HeaderModificationMetricsPass(metrics)});
-    }
     if (selectedMetrics.find("match-action") != selectedMetrics.end()) {
         pm.addPasses({new MatchActionTableMetricsPass(metrics)});
     }
@@ -47,6 +38,12 @@ void MetricsPassManager::addRemaining(PassManager &pm) const {
     }
     if (selectedMetrics.find("extern") != selectedMetrics.end()) {
         pm.addPasses({new ExternalObjectsMetricPass(metrics)});
+    }
+    if (selectedMetrics.find("header-manipulation") != selectedMetrics.end()) {
+        pm.addPasses({new HeaderManipulationMetricsPass(typeMap, metrics)});
+    }
+    if (selectedMetrics.find("header-modification") != selectedMetrics.end()) {
+        pm.addPasses({new HeaderModificationMetricsPass(typeMap, metrics)});
     }
 }
 

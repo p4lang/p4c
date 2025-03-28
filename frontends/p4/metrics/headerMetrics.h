@@ -7,7 +7,7 @@
 namespace P4 {
 
 class HeaderMetricsPass : public Inspector {
-private:
+ private:
    Metrics &metrics;
    unsigned totalFieldsNum = 0;
    unsigned totalFieldsSize = 0;

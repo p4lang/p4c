@@ -6,7 +6,11 @@
 
 namespace P4 {
 
-// Define the Metrics structure that contains all the metrics
+struct PacketModification {
+    unsigned numOperations = 0;
+    unsigned totalSize = 0;
+};
+    
 struct Metrics {
     // Function name -> CC value
     P4::ordered_map<std::string, unsigned> cyclomaticComplexity;
@@ -42,12 +46,6 @@ struct Metrics {
         double avgFieldsNum = 0.0;
         double avgFieldSize = 0.0;
     } headerMetrics;
-
-    // Structure to be used only by other structures
-    struct PacketModification {
-        unsigned numOperations = 0;
-        unsigned totalSize = 0;
-    };
 
     // Metrics related to header addition and removal operations
     struct HeaderManipulationMetrics {

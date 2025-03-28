@@ -155,7 +155,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
 
     TypeMap typeMap;
     Metrics metrics;
-    MetricsPassManager metricsPassManager(options, metrics);
+    MetricsPassManager metricsPassManager(options, &typeMap, metrics);
 
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();

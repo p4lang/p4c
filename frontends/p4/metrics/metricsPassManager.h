@@ -26,10 +26,12 @@ class Metrics;
 class MetricsPassManager {
  private:
     const std::unordered_set<std::string> &selectedMetrics;
+    TypeMap* typeMap;
     Metrics &metrics;
 
  public:
-    MetricsPassManager(const CompilerOptions &options, Metrics &metrics);
+    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap, Metrics &metrics)
+      : selectedMetrics(options.selectedMetrics), typeMap(typeMap),metrics(metrics) {}
 
     void addInlined(PassManager &pm) const;
     void addUnusedCode(PassManager &pm) const;
