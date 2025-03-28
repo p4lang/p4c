@@ -485,6 +485,10 @@ class ControlConverter : public Inspector {
                     } else if (k->is<IR::Constant>()) {
                         key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                         key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
+                    } else if (k->is<IR::BoolLiteral>()) {
+                        key->emplace("key",
+                                     stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
+                        key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
                     } else if (k->is<IR::DefaultExpression>()) {
                         key->emplace("key", stringRepr(0, k8));
                         key->emplace("mask", stringRepr(0, k8));
