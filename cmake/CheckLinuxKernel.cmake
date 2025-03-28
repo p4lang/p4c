@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Retrieves the kernel version from /usr/include/linux/version.h and stores it in KERNEL_VER.
-# This should also correspond with the linux-libc version that installs headers on debian distributions..
+# This should also correspond with the linux-libc package version that installs headers on debian distributions.
 # TODO: Consider other paths for linux/version.h?
 function(get_linux_libc_version_from_headers OUT_VERSION)
     # Only Linux distributions support these kinds of checks.
