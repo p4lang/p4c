@@ -230,7 +230,6 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/psa-example-parser-checksum.p4 # error: error.NoError: unsupported exact key expression
   testdata/p4_16_samples/psa-meter4.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
   testdata/p4_16_samples/psa-meter5.p4 # Compiler Bug: backends/bmv2/portable_common/portable.cpp:574: Null info
-  testdata/p4_16_samples/psa-random.p4 # vector::_M_range_check: __n (which is 0) >= this->size() (which is 0)
   testdata/p4_16_samples/psa-table-hit-miss.p4 # error: Program can not be implemented on this target since it
                                                # contains a path from table MyIC.tbl back to itself
   # This reads stack.next

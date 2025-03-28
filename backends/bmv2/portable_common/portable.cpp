@@ -335,20 +335,21 @@ Util::IJson *ExternConverter_Random::convertExternObject(UNUSED ConversionContex
                                                          UNUSED const IR::MethodCallExpression *mc,
                                                          UNUSED const IR::StatOrDecl *s,
                                                          UNUSED const bool &emitExterns) {
-    if (mc->arguments->size() != 3) {
-        modelError("Expected 3 arguments for %1%", mc);
+    if (mc->arguments->size() != 1) {
+        modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("modify_field_rng_uniform"_cs);
     auto params = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, em->method->sourceInfoJsonObj());
     auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
-    /* TODO */
-    // auto lo = ctxt->conv->convert(mc->arguments->at(1)->expression);
-    // auto hi = ctxt->conv->convert(mc->arguments->at(2)->expression);
+    // Get low/high values from the declaration instance
+    auto di = em->object->to<IR::Declaration_Instance>();
+    auto lo = ctxt->conv->convert(di->arguments->at(0)->expression);
+    auto hi = ctxt->conv->convert(di->arguments->at(1)->expression);
     params->append(dest);
-    // params->append(lo);
-    // params->append(hi);
+    params->append(lo);
+    params->append(hi);
     return primitive;
 }
 
