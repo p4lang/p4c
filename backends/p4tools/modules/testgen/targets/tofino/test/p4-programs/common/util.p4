@@ -1,10 +1,8 @@
 /* -*- P4_16 -*- */
 
 /*******************************************************************************
- * BAREFOOT NETWORKS CONFIDENTIAL & PROPRIETARY
- *
- * Copyright (c) Intel Corporation
- * SPDX-License-Identifier: CC-BY-ND-4.0
+ * Copyright (c) 2024 Intel Corporation
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 
