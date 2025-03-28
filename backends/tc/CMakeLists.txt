@@ -118,26 +118,5 @@ add_custom_target(tc_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/tc
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/tc/pna.p4 ${P4C_BINARY_DIR}/p4include/tc)
 
-set(P4TC_COMPILER_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-tc-test.py")
-
-set (P4_16_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4tc_samples/*.p4")
-
-# Setup fixture
-add_test(NAME p4tc_setup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/setup "https://api.github.com/repos/p4tc-dev/linux-p4tc-pub/releases/latest")
-set_tests_properties(p4tc_setup PROPERTIES FIXTURES_SETUP P4TCFixture)
-
-add_test(NAME p4tc_cleanup COMMAND bash ${P4C_SOURCE_DIR}/backends/tc/runtime/cleanup)
-set_tests_properties(p4tc_cleanup PROPERTIES FIXTURES_CLEANUP P4TCFixture)
-
-macro(p4tc_add_test_with_args tag driver isXfail alias p4test test_args cmake_args)
-  p4c_add_test_with_args(${tag} ${driver} ${isXfail} ${alias} ${p4test} ${test_args} "")
-  p4c_test_set_name(__testname ${tag} ${alias})
-  set_tests_properties(${__testname} PROPERTIES FIXTURES_REQUIRED P4TCFixture RESOURCE_LOCK "shared_lock")
-  set_tests_properties(${__testname} PROPERTIES RESOURCE_LOCK "shared_lock")
-  set_tests_properties(${__testname} PROPERTIES TIMEOUT 1000)
-endmacro(p4tc_add_test_with_args)
-
-p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
-p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/arp_respond.p4" "testdata/p4tc_samples_stf/arp_respond.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/arp_respond.stf" "")
-p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/simple_l3.p4" "testdata/p4tc_samples_stf/simple_l3.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/simple_l3.stf" "")
+#### Tests ####
+include(${CMAKE_CURRENT_SOURCE_DIR}/TCTests.cmake)
