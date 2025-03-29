@@ -14,9 +14,6 @@ permissions:
 
 jobs:
   label:
-
-   
-
     runs-on: ubuntu-latest
     steps:
       - name: Auto-label Issues and PRs
@@ -120,3 +117,4 @@ jobs:
                 });
               }
             }
+
