@@ -158,8 +158,8 @@ void TofinoCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) co
 
 std::optional<const Constraint *> TofinoCmdStepper::startParserImpl(
     const IR::P4Parser *parser, ExecutionState &nextState) const {
-    auto programINfo = getProgramInfo();
-    auto gress = programINfo.getGress(parser);
+    auto programInfo = getProgramInfo();
+    auto gress = programInfo.getGress(parser);
 
     const auto *nineBitType = IR::Type_Bits::get(9);
     const auto *oneBitType = IR::Type_Bits::get(1);
@@ -187,12 +187,12 @@ std::optional<const Constraint *> TofinoCmdStepper::startParserImpl(
         case INGRESS: {
             // bypass_egress is not active at the beginning.
             const auto &bypassExpr =
-                programINfo.getParserParamVar(parser, oneBitType, 4, "bypass_egress"_cs);
+                programInfo.getParserParamVar(parser, oneBitType, 4, "bypass_egress"_cs);
             nextState.set(bypassExpr, IR::Constant::get(oneBitType, 0));
 
             // Check whether the parser error was referenced in this particular pipe.
-            const auto *pipes = programINfo.getPipes();
-            const auto *decl = pipes->at(programINfo.getPipeIdx(parser)).pipes.at("IngressT"_cs);
+            const auto *pipes = programInfo.getPipes();
+            const auto *decl = pipes->at(programInfo.getPipeIdx(parser)).pipes.at("IngressT"_cs);
             const auto *p4control = decl->checkedTo<IR::P4Control>();
             CheckParserError checkParserError;
             p4control->apply(checkParserError);
@@ -200,12 +200,12 @@ std::optional<const Constraint *> TofinoCmdStepper::startParserImpl(
             // Tofino implicitly drops packets if they are not set during the ingress or egress
             // pipeline.
             nextState.set(
-                programINfo.getParserParamVar(parser, nineBitType, 4, "ucast_egress_port"_cs),
+                programInfo.getParserParamVar(parser, nineBitType, 4, "ucast_egress_port"_cs),
                 new IR::UninitializedTaintExpression(nineBitType));
             // Initialize parser_err with no error and set the parser error label.
             // This label is used by some core externs to control target's parser error.
             const auto &parserErrorLabelExpr =
-                programINfo.getParserParamVar(parser, parserErrorType, 5, "parser_err"_cs);
+                programInfo.getParserParamVar(parser, parserErrorType, 5, "parser_err"_cs);
             nextState.set(parserErrorLabelExpr, IR::Constant::get(parserErrorType, 0));
             nextState.setParserErrorLabel(parserErrorLabelExpr);
             nextState.setProperty("gress"_cs, static_cast<uint64_t>(gress_t::INGRESS));
@@ -216,12 +216,12 @@ std::optional<const Constraint *> TofinoCmdStepper::startParserImpl(
             // Retrieve the egress port associated with this parser.
             // Tofino implicitly drops packets if they are not set during the ingress or egress
             // pipeline.
-            nextState.set(programINfo.getParserParamVar(parser, nineBitType, 3, "egress_port"_cs),
+            nextState.set(programInfo.getParserParamVar(parser, nineBitType, 3, "egress_port"_cs),
                           new IR::UninitializedTaintExpression(nineBitType));
             // Initialize parser_err with no error and set the parser error label.
             // This label is used by some core externs to control target's parser error.
             const auto &parserErrorLabelExpr =
-                programINfo.getParserParamVar(parser, parserErrorType, 3, "parser_err"_cs);
+                programInfo.getParserParamVar(parser, parserErrorType, 4, "parser_err"_cs);
             nextState.set(parserErrorLabelExpr, IR::Constant::get(parserErrorType, 0));
             nextState.setParserErrorLabel(parserErrorLabelExpr);
             nextState.setProperty("gress"_cs, static_cast<uint64_t>(gress_t::EGRESS));
@@ -283,7 +283,7 @@ std::map<Continuation::Exception, Continuation> TofinoCmdStepper::getExceptionHa
         case EGRESS: {
             result.emplace(Continuation::Exception::PacketTooShort, Continuation::Body({}));
             const auto &parserErrorVariable =
-                programInfo.getParserParamVar(parser, parserErrorType, 3, "parser_err"_cs);
+                programInfo.getParserParamVar(parser, parserErrorType, 4, "parser_err"_cs);
             const auto *noMatchConst = IR::Constant::get(parserErrorVariable->type,
                                                          TofinoConstants::PARSER_ERROR_NO_MATCH);
             const auto *noMatchAssign = new IR::AssignmentStatement(

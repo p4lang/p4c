@@ -285,7 +285,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "The validity bit of .* is tainted"
-  tna_simple_switch.p4
 )
 
 p4tools_add_xfail_reason(
