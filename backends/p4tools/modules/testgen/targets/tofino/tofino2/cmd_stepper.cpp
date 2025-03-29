@@ -218,7 +218,7 @@ std::optional<const Constraint *> JBayCmdStepper::startParserImpl(const IR::P4Pa
             // Initialize parser_err with no error and set the parser error label.
             // This label is used by some core externs to control target's parser error.
             const auto &parserErrorVariable =
-                programInfo.getParserParamVar(parser, parserErrorType, 3, "parser_err"_cs);
+                programInfo.getParserParamVar(parser, parserErrorType, 4, "parser_err"_cs);
             nextState.set(parserErrorVariable, IR::Constant::get(parserErrorType, 0));
             nextState.setParserErrorLabel(parserErrorVariable);
             nextState.setProperty("gress"_cs, static_cast<uint64_t>(gress_t::EGRESS));
@@ -282,7 +282,7 @@ std::map<Continuation::Exception, Continuation> JBayCmdStepper::getExceptionHand
             // Models PARSER_ERROR_NO_TCAM parser error.
             // Set the parser error label to PARSER_ERROR_NO_MATCH in case of a no-match.
             const auto &parserErrorVariable =
-                programInfo.getParserParamVar(parser, parserErrorType, 5, "parser_err"_cs);
+                programInfo.getParserParamVar(parser, parserErrorType, 4, "parser_err"_cs);
             const auto *noMatchConst =
                 IR::Constant::get(parserErrorVariable->type, JBayConstants::PARSER_ERROR_NO_MATCH);
             const auto *noMatchAssign = new IR::AssignmentStatement(
