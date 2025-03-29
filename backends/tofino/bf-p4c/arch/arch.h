@@ -30,9 +30,9 @@
 
 #include "backends/tofino/bf-p4c/arch/program_structure.h"
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/lib/assoc.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
