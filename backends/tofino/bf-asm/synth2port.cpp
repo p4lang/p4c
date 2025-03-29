@@ -110,9 +110,9 @@ json::map *Synth2Port::add_stage_tbl_cfg(json::map &tbl, const char *type, int s
     tbl["how_referenced"] = hr;
     int entries = 1;
     if (format) {
-        BUG_CHECK(format->log2size <= 7);
+        BUG_CHECK(format->log2size <= 7, "log2size %d > 7", format->log2size);
         if (format->groups() > 1) {
-            BUG_CHECK(format->log2size == 7);
+            BUG_CHECK(format->log2size == 7, "log2size %d != 7", format->log2size);
             entries = format->groups();
         } else {
             entries = 128U >> format->log2size;
@@ -164,7 +164,7 @@ int Synth2Port::get_home_row_for_row(int row) const {
         else if (row / 8 == home_row / 8)
             return home_row;
     }
-    BUG();
+    BUG("Could not find home row for row %d", row);
     return -1;
 }
 

@@ -168,7 +168,8 @@ unsigned CounterTable::determine_shiftcount(Table::Call &call, int group, unsign
     if (call.args[0].name() && strcmp(call.args[0].name(), "$DIRECT") == 0) {
         return direct_shiftcount() + tcam_shift;
     } else if (call.args[0].field()) {
-        BUG_CHECK(unsigned(call.args[0].field()->by_group[group]->bit(0) / 128) == word);
+        BUG_CHECK(unsigned(call.args[0].field()->by_group[group]->bit(0) / 128) == word,
+                  "wrong word");
         return call.args[0].field()->by_group[group]->bit(0) % 128 + indirect_shiftcount();
     } else if (call.args[1].field()) {
         return call.args[1].field()->by_group[group]->bit(0) % 128 + STAT_ADDRESS_ZERO_PAD;
@@ -229,7 +230,7 @@ void CounterTable::write_regs_vt(REGS &regs) {
     for (Layout &logical_row : layout) {
         unsigned row = logical_row.row / 2U;
         unsigned side = logical_row.row & 1; /* 0 == left  1 == right */
-        BUG_CHECK(side == 1);                /* no map rams or alus on left side anymore */
+        BUG_CHECK(side == 1, "no map rams or alus on left side anymore");
         /* FIXME factor vpn/mapram stuff with selection.cpp */
         auto vpn = logical_row.vpns.begin();
         auto mapram = logical_row.maprams.begin();
@@ -244,7 +245,7 @@ void CounterTable::write_regs_vt(REGS &regs) {
 
             if (swbox->get_home_row() != row) swbox->setup_row(swbox->get_home_row());
         }
-        BUG_CHECK(home != nullptr);
+        BUG_CHECK(home != nullptr, "no home row");
         LOG2("# DataSwitchbox.setup(" << row << ") home=" << home->row / 2U);
         swbox->setup_row(row);
         for (auto &memunit : logical_row.memunits) {
@@ -301,7 +302,7 @@ void CounterTable::write_regs_vt(REGS &regs) {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = 0;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::OVERFLOW;
                 push_on_overflow = true;
-                BUG_CHECK(options.target == TOFINO);
+                BUG_CHECK(options.target == TOFINO, "target not tofino");
             } else {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = swbox->get_home_row_logical() % 8;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::STATISTICS;
@@ -312,7 +313,7 @@ void CounterTable::write_regs_vt(REGS &regs) {
     bool run_at_eop = this->run_at_eop();
     if (home_rows.size() > 1) write_alu_vpn_range(regs);
 
-    BUG_CHECK(stats_groups.size() == home_rows.size());
+    BUG_CHECK(stats_groups.size() == home_rows.size(), "stats_groups.size() != home_rows.size()");
     bool first_stats_group = true;
     for (int &idx : stats_groups) {
         auto &movereg_stats_ctl = adrdist.movereg_stats_ctl[idx];

@@ -23,6 +23,7 @@
 
 #include "backends/tofino/bf-asm/target.h"
 #include "bfas.h"
+#include "lib/exceptions.h"
 
 int remove_name_tail_range(std::string &name, int *size) {
     auto tail = name.rfind('.');
@@ -90,7 +91,7 @@ void gen_instfield_name(const std::string &fullname, std::string &instname,
 }
 
 uint64_t bitMask(unsigned size) {
-    BUG_CHECK(size <= 64 && "bitMask(size), maximum size is 64");
+    BUG_CHECK(size <= 64, "bitMask(size), maximum size is 64");
     if (size == 64) return ~UINT64_C(0);
     return (UINT64_C(1) << size) - 1;
 }
@@ -119,7 +120,7 @@ int parity_2b(uint32_t v) {
 }
 
 bool check_bigint_unsigned(value_t value, uint32_t byte_width) {
-    BUG_CHECK(value.type == tBIGINT);
+    BUG_CHECK(value.type == tBIGINT, "check_bigint_unsigned: not a bigint");
 
     /* -- zero is in the range */
     if (value.bigi.size == 0) return true;
@@ -152,7 +153,7 @@ bool check_bigint_unsigned(value_t value, uint32_t byte_width) {
 }
 
 bool input_int_match(const value_t value, match_t &match, int width) {
-    BUG_CHECK(width <= sizeof(match_t::word0) * 8);
+    BUG_CHECK(width <= sizeof(match_t::word0) * 8, "input_int_match: invalid width");
 
     using MatchType = decltype(match_t::word0);
     MatchType mask;

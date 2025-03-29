@@ -177,7 +177,7 @@ int Parser::State::Match::write_load_config(Target::JBay::parser_regs &regs, Par
 
 static void write_output_slot(int lineno, Target::JBay::parser_regs::_memory::_po_action_row *row,
                               unsigned &used, int src, int dest, int bytemask, bool offset) {
-    BUG_CHECK(bytemask > 0 && bytemask < 4);
+    BUG_CHECK(bytemask > 0 && bytemask < 4, "Invalid bytemask %d", bytemask);
     for (int i = 0; i < 20; ++i) {
         if (used & (1 << i)) continue;
         row->phv_dst[i] = dest;
@@ -237,8 +237,8 @@ static void write_output_const_slot(int lineno,
                                     unsigned &used, unsigned src, int dest, int bytemask,
                                     int flags) {
     // use bits 24..27 of 'used' to track the two constant slots
-    BUG_CHECK(bytemask > 0 && bytemask < 4);
-    BUG_CHECK((src & ~((0xffff00ff >> (8 * (bytemask - 1))) & 0xffff)) == 0);
+    BUG_CHECK(bytemask > 0 && bytemask < 4, "Invalid bytemask %d", bytemask);
+    BUG_CHECK((src & ~((0xffff00ff >> (8 * (bytemask - 1))) & 0xffff)) == 0, "Invalid src %d", src);
     // FIXME -- should be able to treat this as 4x8-bit rather than 2x16-bit slots, as long
     // as the ROTATE flag is consistent for each half.
     int cslot = -1;
@@ -276,7 +276,7 @@ void Parser::State::Match::Set::write_output_config(Target::JBay::parser_regs &r
             if (((what >> (8 * i)) & 0xff) == 0) mask &= ~(1 << i);
     }
     if (where->reg.size == 8) {
-        BUG_CHECK((mask & ~1) == 0);
+        BUG_CHECK((mask & ~1) == 0, "Invalid mask %d", mask);
         if (where->reg.index & 1) {
             mask <<= 1;
             what <<= 8;

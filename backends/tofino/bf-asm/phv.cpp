@@ -28,7 +28,7 @@ const Phv::Register Phv::Slice::invalid("<bad>", Phv::Register::NORMAL, 0, ~0, 0
 
 void Phv::init_phv(target_t target_type) {
     if (target) {
-        BUG_CHECK(target->type() == target_type);  // sanity check
+        BUG_CHECK(target->type() == target_type, "target type mismatch");  // sanity check
         return;
     }
     switch (target_type) {
@@ -38,7 +38,7 @@ void Phv::init_phv(target_t target_type) {
         break;
         FOR_ALL_TARGETS(INIT_FOR_TARGET)
         default:
-            BUG();
+            BUG("Unknown target type %d", target_type);
     }
 #undef INIT_FOR_TARGET
     target->init_regs(*this);
@@ -325,7 +325,7 @@ int Phv::get_position_offset(gress_t gress, std::string name) {
     for (auto f : phv_pov_field_sizes[gress]) {
         if (f.first == name) return position_offset;
         // POV should be single bit
-        BUG_CHECK(f.second == 1);
+        BUG_CHECK(f.second == 1, "POV should be single bit");
         position_offset += 1;
     }
     return 0;
@@ -414,7 +414,7 @@ void Phv::output(json::map &ctxt_json) {
                         phv_record[live_string] = live_stage;
                     };
                     auto container_json = field_context_json[slot.first->name];
-                    BUG_CHECK(container_json);
+                    BUG_CHECK(container_json, " No context_json");
                     bool field_added = false;
                     if (!container_json->as_vector()) {
                         // FIXME -- should be flexible about parsing context_json -- continue

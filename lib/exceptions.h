@@ -134,6 +134,7 @@ class CompilationError : public P4CExceptionBase {
         : P4CExceptionBase(format, std::forward<Args>(args)...) {}
 };
 
+/// FIXME: Use __VA_OPT__ for calls without an input string?
 #define BUG(...)                                                      \
     do {                                                              \
         throw P4::Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \

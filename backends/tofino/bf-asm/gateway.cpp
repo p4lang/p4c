@@ -23,6 +23,7 @@
 #include "backends/tofino/bf-asm/tables.h"
 #include "lib/algorithm.h"
 #include "lib/hex.h"
+#include "lib/null.h"
 
 // template specialization declarations
 #include "backends/tofino/bf-asm/jbay/gateway.h"
@@ -553,7 +554,7 @@ void GatewayTable::payload_write_regs(REGS &regs, int row, int type, int bus) {
         xbar_ctl.exact_inhibit_enable = 1;
     }
     if (have_payload >= 0 || match_address >= 0) {
-        BUG_CHECK(payload_unit == bus);
+        BUG_CHECK(payload_unit == bus, "payload_unit %d != bus %d", payload_unit, bus);
         if (type)
             merge.gateway_payload_tind_pbus[row] |= 1 << bus;
         else
@@ -579,7 +580,7 @@ void GatewayTable::payload_write_regs(REGS &regs, int row, int type, int bus) {
 
     int groups = format ? format->groups() : 1;
     if (groups > 1 || payload_map.size() > 1) {
-        BUG_CHECK(type == 0);  // only supported on exact result busses
+        BUG_CHECK(type == 0, "type not supported");  // only supported on exact result busses
         enable_gateway_payload_exact_shift_ovr(regs, row * 2 + bus);
     }
 
@@ -724,7 +725,7 @@ void GatewayTable::write_regs_vt(REGS &regs) {
         gw_reg.gateway_table_ctl.gateway_table_input_data0_select = 1;
         gw_reg.gateway_table_ctl.gateway_table_input_hash0_select = 1;
     } else {
-        BUG_CHECK(search_bus == 1);
+        BUG_CHECK(search_bus == 1, "search_bus must be 1");
         gw_reg.gateway_table_ctl.gateway_table_input_data1_select = 1;
         gw_reg.gateway_table_ctl.gateway_table_input_hash1_select = 1;
     }
@@ -744,7 +745,7 @@ void GatewayTable::write_regs_vt(REGS &regs) {
     int idx = 3;
     gw_reg.gateway_table_ctl.gateway_table_mode = range_match;
     for (auto &line : table) {
-        BUG_CHECK(idx >= 0);
+        BUG_CHECK(idx >= 0, "idx < 0");
         /* FIXME -- hardcoding version/valid to always */
         gw_reg.gateway_table_vv_entry[idx].gateway_table_entry_versionvalid0 = 0x3;
         gw_reg.gateway_table_vv_entry[idx].gateway_table_entry_versionvalid1 = 0x3;
@@ -803,7 +804,7 @@ void GatewayTable::write_regs_vt(REGS &regs) {
                 }
             }
         } else {
-            BUG_CHECK(tmatch);
+            CHECK_NULL(tmatch);
             auto &xbar_ctl = merge.gateway_to_pbus_xbar_ctl[tmatch->indirect_bus];
             xbar_ctl.tind_logical_select = logical_id;
             xbar_ctl.tind_inhibit_enable = 1;

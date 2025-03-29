@@ -161,12 +161,12 @@ unsigned Table::NextTables::next_in_stage(int stage) const {
 }
 
 bool Table::NextTables::need_next_map_lut() const {
-    BUG_CHECK(resolved);
+    BUG_CHECK(resolved, "NextTables must be resolved first");
     return next.size() > 1 || (next.size() == 1 && !next_table_);
 }
 
 void Table::NextTables::force_single_next_table() {
-    BUG_CHECK(resolved);  // must be resolved already
+    BUG_CHECK(resolved, "NextTables must be resolved first");
     if (next.size() > 1)
         error(lineno,
               "Can't support multiple next tables; next is directly in overhead "
@@ -221,7 +221,7 @@ unsigned Table::Call::Arg::size() const {
         case Name:
             return 0;
         default:
-            BUG();
+            BUG("unknown argument type");
     }
     return -1;
 }
@@ -647,7 +647,7 @@ void Table::setup_vpns(std::vector<Layout> &layout, VECTOR(value_t) * vpn, bool 
     bool on_repeat = false;
     for (auto &row : layout) {
         if (++word < width) {
-            BUG_CHECK(firstrow);
+            BUG_CHECK(firstrow, "firstrow not set in table %s", name());
             if (!column_match(row.memunits, firstrow->memunits))
                 error(row.lineno, "Columns across wide rows don't match in table %s", name());
             row.vpns = firstrow->vpns;
@@ -935,9 +935,9 @@ void Table::alloc_rams(bool logical, BFN::Alloc2Dbase<Table *> &use,
     }
 }
 
-void Table::alloc_global_busses() { BUG(); }
-void Table::alloc_global_srams() { BUG(); }
-void Table::alloc_global_tcams() { BUG(); }
+void Table::alloc_global_busses() { BUG("unsupported"); }
+void Table::alloc_global_srams() { BUG("unsupported"); }
+void Table::alloc_global_tcams() { BUG("unsupported"); }
 
 void Table::alloc_busses(BFN::Alloc2Dbase<Table *> &bus_use, Layout::bus_type_t bus_type) {
     for (auto &row : layout) {
@@ -1186,7 +1186,7 @@ void Table::pass1() {
         // later stages.  This matches the range of stages we need to set timing regs for.
         for (int st = stage->stageno; st < last_stage; ++st) {
             auto stg = Stage::stage(gress, st);
-            BUG_CHECK(stg);
+            BUG_CHECK(stg, "stage %d ran into an error", st);
             auto &prev = stg->long_branch_use[lb.first];
             if (prev && *prev != lb.second) {
                 error(lb.second.lineno, "Conflicting use of long_branch tag %d", lb.first);
@@ -1197,7 +1197,7 @@ void Table::pass1() {
             stg->long_branch_thread[gress] |= 1U << lb.first;
         }
         auto last_stg = Stage::stage(gress, last_stage);
-        BUG_CHECK(last_stg);
+        BUG_CHECK(last_stg, "stage %d ran into an error", last_stage);
         last_stg->long_branch_thread[gress] |= 1U << lb.first;
         last_stg->long_branch_terminate |= 1U << lb.first;
     }
@@ -1412,7 +1412,7 @@ void Table::Format::pass2(Table *tbl) {
                 word = slot;
                 break;
             default:
-                BUG();
+                BUG("unsupported bus slot size %1%", Stage::action_bus_slot_size[slot]);
         }
         if (err) error(lineno, "Immediate data misaligned for action bus byte %d", byte_slot);
     }
@@ -1937,16 +1937,16 @@ void Table::Actions::Action::check_conditional(Table::Format::Field &field) cons
         for (auto br : field.bits) {
             auto overlap = kv.second[MC_ADT].getslice(br.lo, br.size());
             if (overlap.empty()) {
-                BUG_CHECK(!found || (found && condition != kv.first));
+                BUG_CHECK(!found || (found && condition != kv.first), "invalid overlap");
             } else if (overlap.popcount() == br.size()) {
                 if (found) {
-                    BUG_CHECK(condition == kv.first);
+                    BUG_CHECK(condition == kv.first, "invalid overlap");
                 } else {
                     found = true;
                     condition = kv.first;
                 }
             } else {
-                BUG();
+                BUG("unexpected slice overlap");
             }
         }
     }
@@ -1964,15 +1964,15 @@ bool Table::Actions::Action::immediate_conditional(int lo, int sz, std::string &
     for (auto kv : mod_cond_values) {
         auto overlap = kv.second[MC_IMMED].getslice(lo, sz);
         if (overlap.empty()) {
-            BUG_CHECK(!found || (found && condition != kv.first));
+            BUG_CHECK(!found || (found && condition != kv.first), "invalid overlap");
         } else {
             if (found) {
-                BUG_CHECK(condition == kv.first);
+                BUG_CHECK(condition == kv.first, "invalid overlap");
             } else if (overlap.popcount() == sz) {
                 found = true;
                 condition = kv.first;
             } else {
-                BUG();
+                BUG("unexpected slice overlap");
             }
         }
     }
@@ -2010,7 +2010,7 @@ std::map<Table *, std::set<Table::Actions::Action *>> Table::find_pred_in_stage(
 
 void Table::Actions::pass2(Table *tbl) {
     /* We do NOT call this for SALU actions, so we can assume VLIW actions here */
-    BUG_CHECK(tbl->table_type() != STATEFUL);
+    BUG_CHECK(tbl->table_type() != STATEFUL, "VLIW actions not yet supported");
     int code = tbl->get_gateway() ? 1 : 0;  // if there's a gateway, reserve code 0 for a NOP
                                             // to run when the gateway inhibits the table
 
@@ -2148,7 +2148,7 @@ void Table::Actions::pass2(Table *tbl) {
 }
 
 void Table::Actions::stateful_pass2(Table *tbl) {
-    BUG_CHECK(tbl->table_type() == STATEFUL);
+    BUG_CHECK(tbl->table_type() == STATEFUL, "stateful_pass2 called on non-stateful table");
     auto *stbl = tbl->to<StatefulTable>();
     for (auto &act : *this) {
         if (act.code >= 4) {
@@ -2680,7 +2680,7 @@ int Table::find_on_ixbar(Phv::Slice sl, InputXbar::Group group, InputXbar::Group
     for (auto &ixb : input_xbar) {
         if (auto *i = ixb->find(sl, group, found)) {
             unsigned bit = (i->lo + sl.lo - i->what->lo);
-            BUG_CHECK(bit < 128);
+            BUG_CHECK(bit < 128, "bit %1% out of range", bit);
             return bit / 8;
         }
     }
@@ -2688,7 +2688,7 @@ int Table::find_on_ixbar(Phv::Slice sl, InputXbar::Group group, InputXbar::Group
         for (auto *in : stage->ixbar_use[group]) {
             if (auto *i = in->find(sl, group)) {
                 unsigned bit = (i->lo + sl.lo - i->what->lo);
-                BUG_CHECK(bit < 128);
+                BUG_CHECK(bit < 128, "bit %1% out of range", bit);
                 return bit / 8;
             }
         }
@@ -3123,7 +3123,7 @@ void Table::add_zero_padding_fields(Table::Format *format, Table::Actions::Actio
     if (format->log2size == 0) {
         if (auto at = this->to<ActionTable>()) {
             format->size = at->get_size();
-            BUG_CHECK(format->size);
+            BUG_CHECK(format->size, "Action table %s has no size", name());
             format->log2size = at->get_log2size();
             // For wide action formats, entries per word is 1, so plug in a
             // single pad field of 256 bits
@@ -3208,7 +3208,7 @@ json::map &Table::add_pack_format(json::map &stage_tbl, Table::Format *format, b
      * JSON is reversed.
      */
     if (print_fields) {
-        BUG_CHECK(format);
+        BUG_CHECK(format, "Can not print fields since format is null");
         int basebit = std::max(0, mem_word_width - (1 << format->log2size));
         json::vector &entry_list = pack_fmt["entries"];
         if (format->is_wide_format()) {

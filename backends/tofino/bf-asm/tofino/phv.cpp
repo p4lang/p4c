@@ -45,7 +45,7 @@ void Target::Tofino::Phv::init_regs(::Phv &phv) {
             }
         }
     }
-    BUG_CHECK(uid == phv.regs.size());
+    BUG_CHECK(uid == phv.regs.size(), "uid %u != %zu", uid, phv.regs.size());
 }
 
 static bitvec tagalong_group(int n) {

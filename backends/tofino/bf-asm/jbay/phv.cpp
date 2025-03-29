@@ -60,7 +60,7 @@ void Target::JBay::Phv::init_regs(::Phv &phv) {
             }
         }
     }
-    BUG_CHECK(uid == phv.regs.size());
-    BUG_CHECK(deparser_id == 224);
-    BUG_CHECK(byte == 512);
+    BUG_CHECK(uid == phv.regs.size(), "uid %u != %zu", uid, phv.regs.size());
+    BUG_CHECK(deparser_id == 224, "deparser_id %u != 224", deparser_id);
+    BUG_CHECK(byte == 512, "byte %u != 512", byte);
 }

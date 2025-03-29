@@ -45,7 +45,7 @@ void Stage::write_regs(Target::Tofino::mau_regs &regs, bool) {
                     merge.predication_ctl[gress].start_table_fifo_enable = 0;
                     break;
                 default:
-                    BUG();
+                    BUG("bad stage dependency");
             }
         }
         if (stageno != 0) {
@@ -134,7 +134,9 @@ void Stage::gen_configuration_cache(Target::Tofino::mau_regs &regs, json::vector
 
 template <>
 void Stage::gen_mau_stage_extension(Target::Tofino::mau_regs &regs, json::map &extend) {
-    BUG();  // stage extension not supported on tofino
+    BUG("stage extension not supported on Tofino");
 }
 
-void AlwaysRunTable::write_regs(Target::Tofino::mau_regs &) { BUG(); }
+void AlwaysRunTable::write_regs(Target::Tofino::mau_regs &) {
+    BUG("register writes not supported on Tofino");
+}

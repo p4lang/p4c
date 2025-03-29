@@ -24,6 +24,7 @@
 #include "input_xbar.h"
 #include "instruction.h"
 #include "lib/algorithm.h"
+#include "lib/null.h"
 #include "misc.h"
 
 Table::Format *MatchTable::get_format() const {
@@ -336,7 +337,7 @@ void MatchTable::write_common_regs(typename TARGET::mau_regs &regs, int type, Ta
     } else {
         /* ternary match with no indirection table */
         auto tern_table = this->to<TernaryMatchTable>();
-        BUG_CHECK(tern_table != nullptr);
+        CHECK_NULL(tern_table);
         if (tern_table->indirect_bus >= 0) result_buses.insert(tern_table->indirect_bus);
         result = this;
     }
@@ -555,7 +556,7 @@ void MatchTable::write_common_regs(typename TARGET::mau_regs &regs, int type, Ta
 
 int MatchTable::get_address_mau_actiondata_adr_default(unsigned log2size, bool per_flow_enable) {
     int huffman_ones = log2size > 2 ? log2size - 3 : 0;
-    BUG_CHECK(huffman_ones < 7);
+    BUG_CHECK(huffman_ones < 7, "Huffman ones out of range");
     int rv = (1 << huffman_ones) - 1;
     rv = ((rv << 10) & 0xf8000) | (rv & 0x1f);
     if (!per_flow_enable) rv |= 1 << 22;

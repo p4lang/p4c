@@ -20,8 +20,8 @@
 
 template <typename REGS>
 void CounterTable::setup_teop_regs_2(REGS &regs, int stats_group_index) {
-    BUG_CHECK(teop >= 0 && teop < 4);
-    BUG_CHECK(gress == EGRESS);
+    BUG_CHECK(teop >= 0 && teop < 4, "Invalid teop: %d", teop);
+    BUG_CHECK(gress == EGRESS, "Invalid gress: %d", gress);
 
     auto &adrdist = regs.rams.match.adrdist;
 
@@ -87,7 +87,7 @@ void CounterTable::write_alu_vpn_range_2(REGS &regs) {
                 }
             }
             if (block_end) {
-                BUG_CHECK(min != 1000000 && max != -1);
+                BUG_CHECK(min != 1000000 && max != -1, " Invalid VPN range");
 
                 bitvec block_range(min, max - min + 1);
                 if (vpn_range.intersects(block_range))
@@ -101,7 +101,7 @@ void CounterTable::write_alu_vpn_range_2(REGS &regs) {
                 break;
             }
         }
-        BUG_CHECK(block_start && block_end);
+        BUG_CHECK(block_start && block_end, "Invalid VPN range");
     }
 
     if (vpn_range != bitvec(minvpn, sparevpn - minvpn))
