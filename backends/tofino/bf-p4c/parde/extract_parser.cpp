@@ -470,11 +470,20 @@ const IR::BFN::Parser *GetBackendParser::createBackendParser() {
             backendState->stride = true;
             LOG3("mark " << state->name << " as strided");
         }
-        if (auto dontmerge = state->getAnnotation("dontmerge"_cs)) {
-            if (dontmerge->getExpr().size()) {
-                auto gress = dontmerge->getExpr(0)->to<IR::StringLiteral>();
-                if (gress->value == toString(parser->thread)) {
+        for (const auto *annotation : state->getAnnotations()) {
+            if (annotation->name == "dontmerge") {
+                // If the annotation has a thread or "gress" argument, check whether the gress
+                // matches this parser's thread and only then set dontMerge to true.
+                // Otherwise, don't merge.
+                if (annotation->getExpr().size() != 0U) {
+                    const auto *gress = annotation->getExpr(0)->to<IR::StringLiteral>();
+                    if (gress->value == toString(parser->thread)) {
+                        backendState->dontMerge = true;
+                        break;
+                    }
+                } else {
                     backendState->dontMerge = true;
+                    break;
                 }
             }
         }

@@ -123,7 +123,7 @@ class AnnotateVarbitExtractStates : public Transform {
             if (!method) continue;
 
             if (method->member == "extract" && call->arguments->size() == 2) {
-                state->addOrReplaceAnnotation("dontmerge"_cs, {});
+                state->addOrReplaceAnnotation(new IR::Annotation("dontmerge"_cs, {}));
                 break;
             }
         }
