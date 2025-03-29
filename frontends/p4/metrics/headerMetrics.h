@@ -17,7 +17,7 @@ class HeaderMetricsPass : public Inspector {
     /// Collect metrics for each header.
     bool preorder(const IR::Type_Header *header) override;
     /// Calculate averages at the end of traversal.
-    void postorder([[maybe_unused]] const IR::P4Program *program) override;
+    void postorder(const IR::P4Program* /*program*/) override;
 
 };
 

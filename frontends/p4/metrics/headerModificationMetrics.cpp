@@ -128,7 +128,7 @@ bool HeaderModificationMetricsPass::preorder(const IR::P4Parser* parser) {
     return true;
 }
 
-void HeaderModificationMetricsPass::postorder(const IR::P4Program* program) {
+void HeaderModificationMetricsPass::postorder(const IR::P4Program* /*program*/) {
     if (!metrics.headerModificationMetrics.perPacketModifications.empty()) {
         auto& perPacket = metrics.headerModificationMetrics.perPacketModifications;
         metrics.headerModificationMetrics.maxModifications = 

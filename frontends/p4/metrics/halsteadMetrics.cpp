@@ -29,30 +29,30 @@ void HalsteadMetricsPass::addBinaryOperator(const std::string &op) {
 
 // Scope handling.
 
-bool HalsteadMetricsPass::preorder([[maybe_unused]] const IR::P4Control *control) {
+bool HalsteadMetricsPass::preorder(const IR::P4Control* /*control*/) {
     scopedOperands.emplace_back();
     return true;
 }
 
-void HalsteadMetricsPass::postorder([[maybe_unused]] const IR::P4Control *control) {
+void HalsteadMetricsPass::postorder(const IR::P4Control* /*control*/) {
     scopedOperands.pop_back();
 }
 
-bool HalsteadMetricsPass::preorder([[maybe_unused]] const IR::P4Parser *parser) {
+bool HalsteadMetricsPass::preorder(const IR::P4Parser* /*parser*/) {
     scopedOperands.emplace_back();
     return true;
 }
 
-void HalsteadMetricsPass::postorder([[maybe_unused]] const IR::P4Parser *parser) {
+void HalsteadMetricsPass::postorder(const IR::P4Parser* /*parser*/) {
     scopedOperands.pop_back();
 }
 
-bool HalsteadMetricsPass::preorder([[maybe_unused]] const IR::ActionFunction *action) {
+bool HalsteadMetricsPass::preorder(const IR::ActionFunction* /*action*/) {
     scopedOperands.emplace_back();
     return true;
 }
 
-void HalsteadMetricsPass::postorder([[maybe_unused]] const IR::ActionFunction *action) {
+void HalsteadMetricsPass::postorder(const IR::ActionFunction* /*action*/) {
     scopedOperands.pop_back();
 }
 
@@ -157,12 +157,12 @@ bool HalsteadMetricsPass::preorder(const IR::SwitchStatement *stmt) {
     return true;
 }
 
-bool HalsteadMetricsPass::preorder([[maybe_unused]]  const IR::ReturnStatement *stmt) {
+bool HalsteadMetricsPass::preorder(const IR::ReturnStatement* /*stmt*/) {
     addUnaryOperator("return");
     return true;
 }
 
-bool HalsteadMetricsPass::preorder([[maybe_unused]]  const IR::ExitStatement *stmt) {
+bool HalsteadMetricsPass::preorder(const IR::ExitStatement* /*stmt*/) {
     addUnaryOperator("exit");
     return true;
 }
@@ -210,7 +210,7 @@ bool HalsteadMetricsPass::preorder(const IR::P4Table *table) {
 
 // Final metrics calculation.
 
-void HalsteadMetricsPass::postorder([[maybe_unused]] const IR::P4Program *program) {
+void HalsteadMetricsPass::postorder(const IR::P4Program* /*program*/) {
     metrics.halsteadMetrics.uniqueOperators = uniqueUnaryOperators.size() + uniqueBinaryOperators.size();
     metrics.halsteadMetrics.uniqueOperands = uniqueOperands.size() + uniqueFields.size();
 

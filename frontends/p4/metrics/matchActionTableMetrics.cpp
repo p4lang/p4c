@@ -44,7 +44,7 @@ bool MatchActionTableMetricsPass::preorder(const IR::P4Table *table) {
     return true;
 }
 
-void MatchActionTableMetricsPass::postorder([[maybe_unused]] const IR::P4Program *program){
+void MatchActionTableMetricsPass::postorder(const IR::P4Program* /*program*/){
     if(metrics.matchActionTableMetrics.numTables > 0){
         metrics.matchActionTableMetrics.avgKeysPerTable = static_cast<double>(metrics.matchActionTableMetrics.totalKeys) / metrics.matchActionTableMetrics.numTables;
         metrics.matchActionTableMetrics.avgActionsPerTable = static_cast<double>(metrics.matchActionTableMetrics.totalActions) / metrics.matchActionTableMetrics.numTables;

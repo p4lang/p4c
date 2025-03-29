@@ -20,6 +20,7 @@ struct Metrics {
     unsigned unusedCodeInstances;
 
     struct NestingDepth {
+        P4::ordered_map<std::string, unsigned> blockNestingDepth; // Block name -> max depth
         double avgNestingDepth = 0.0;
         unsigned maxNestingDepth = 0;
     } nestingDepth;

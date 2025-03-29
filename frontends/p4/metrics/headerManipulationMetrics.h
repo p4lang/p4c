@@ -24,7 +24,7 @@ class HeaderManipulationMetricsPass : public Inspector {
         }
 
     bool preorder(const IR::MethodCallStatement* mcs) override;
-    void postorder(const IR::P4Program* program) override;
+    void postorder(const IR::P4Program* /*program*/) override;
 };
 
 }  // namespace P4

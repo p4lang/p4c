@@ -16,7 +16,7 @@ class MatchActionTableMetricsPass : public Inspector {
     /// Collect metrics for each match-action table
     bool preorder(const IR::P4Table *table) override;
     /// Calculate averages at the end of traversal
-    void postorder([[maybe_unused]] const IR::P4Program *program) override;
+    void postorder(const IR::P4Program* /*program*/) override;
 
 };
 

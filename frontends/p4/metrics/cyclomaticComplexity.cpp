@@ -3,7 +3,7 @@
 
 namespace P4 {
 
-bool CyclomaticComplexityCalculator::preorder([[maybe_unused]] const IR::IfStatement* stmt) {
+bool CyclomaticComplexityCalculator::preorder(const IR::IfStatement* /*stmt*/) {
     ++cc;
     return true;
 }

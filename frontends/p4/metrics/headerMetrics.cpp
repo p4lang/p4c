@@ -22,7 +22,7 @@ bool HeaderMetricsPass::preorder(const IR::Type_Header *header){
     return true;
 }
 
-void HeaderMetricsPass::postorder([[maybe_unused]] const IR::P4Program *program){
+void HeaderMetricsPass::postorder(const IR::P4Program* /*program*/){
     if (metrics.headerMetrics.numHeaders > 0)
         metrics.headerMetrics.avgFieldsNum = static_cast<double>(totalFieldsNum) / metrics.headerMetrics.numHeaders;
     if (totalFieldsNum > 0)

@@ -5,7 +5,7 @@
 
 namespace P4 {
 
-bool ExportMetricsPass::preorder(const IR::P4Program *program) {
+bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
 
     std::ofstream file(filename);
     if (!file.is_open()) {
@@ -41,8 +41,17 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
         } 
         else if (metric == "nesting-depth") {
             file << "\nNesting Depth Metrics:\n";
-            file << "  Avg Depth: " << metrics.nestingDepth.avgNestingDepth << "\n";
-            file << "  Max Depth: " << metrics.nestingDepth.maxNestingDepth << "\n";
+            file << "  Average: " << metrics.nestingDepth.avgNestingDepth << "\n";
+            file << "  Global Max: " << metrics.nestingDepth.maxNestingDepth << "\n";
+            file << "  Individual blocks: "<<"\n";
+
+            auto iterator = metrics.nestingDepth.blockNestingDepth.begin();
+            while (iterator != metrics.nestingDepth.blockNestingDepth.end()){
+                const auto& [blockName, depth] = *iterator;
+                auto depthValue = metrics.nestingDepth.blockNestingDepth[blockName];
+                file<<"\t"<<blockName<<": "<<depthValue<<"\n";
+                iterator++;
+            }
         } 
         else if (metric == "header-general") {
             file << "\nHeader Metrics:\n";

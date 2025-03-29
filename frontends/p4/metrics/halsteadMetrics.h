@@ -73,14 +73,14 @@ class HalsteadMetricsPass : public Inspector {
 
     // Scope enter/exit methods.
 
-    bool preorder([[maybe_unused]] const IR::P4Control *control) override;
-    void postorder([[maybe_unused]] const IR::P4Control *control) override;
-    bool preorder([[maybe_unused]] const IR::P4Parser *parser) override;
-    void postorder([[maybe_unused]] const IR::P4Parser *parser) override;
-    bool preorder([[maybe_unused]] const IR::ActionFunction *action) override;
-    void postorder([[maybe_unused]] const IR::ActionFunction *action) override;
-    bool preorder([[maybe_unused]] const IR::Type_Header *headerType) override;
-    bool preorder([[maybe_unused]] const IR::Type_Struct *structType) override;
+    bool preorder(const IR::P4Control* /*control*/) override;
+    void postorder(const IR::P4Control* /*control*/) override;
+    bool preorder(const IR::P4Parser* /*parser*/) override;
+    void postorder(const IR::P4Parser* /*parser*/) override;
+    bool preorder(const IR::ActionFunction* /*action*/) override;
+    void postorder(const IR::ActionFunction* /*action*/) override;
+    bool preorder(const IR::Type_Header* /*headerType*/) override;
+    bool preorder(const IR::Type_Struct* /*structType*/) override;
 
    // Operand and operator data collection. 
 
@@ -92,8 +92,8 @@ class HalsteadMetricsPass : public Inspector {
     bool preorder(const IR::AssignmentStatement *stmt) override;
     bool preorder(const IR::IfStatement *stmt) override;
     bool preorder(const IR::SwitchStatement *stmt) override;
-    bool preorder([[maybe_unused]] const IR::ReturnStatement *stmt) override;
-    bool preorder([[maybe_unused]] const IR::ExitStatement *stmt) override;
+    bool preorder(const IR::ReturnStatement* /*stmt*/) override;
+    bool preorder(const IR::ExitStatement* /*stmt*/) override;
     bool preorder(const IR::Operation_Unary *op) override;
     bool preorder(const IR::Operation_Binary *op) override;
     bool preorder(const IR::SelectExpression* selectExpr) override;
@@ -101,7 +101,7 @@ class HalsteadMetricsPass : public Inspector {
     bool preorder(const IR::P4Table *table) override;
 
     /// Calculate metrics at the end of traversal
-    void postorder([[maybe_unused]] const IR::P4Program *program) override;
+    void postorder(const IR::P4Program* /*program*/) override;
 };
 
 }  // namespace P4

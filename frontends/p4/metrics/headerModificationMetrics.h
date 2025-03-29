@@ -40,7 +40,7 @@ public:
     }
     bool preorder(const IR::AssignmentStatement* assign) override;
     bool preorder(const IR::P4Parser* parser) override;
-    void postorder(const IR::P4Program* program) override;
+    void postorder(const IR::P4Program* /*program*/) override;
 };
 
 }  // namespace P4

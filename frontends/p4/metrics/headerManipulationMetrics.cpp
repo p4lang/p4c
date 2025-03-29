@@ -41,7 +41,7 @@ bool HeaderManipulationMetricsPass::preorder(const IR::MethodCallStatement* mcs)
     return false;
 }
 
-void HeaderManipulationMetricsPass::postorder(const IR::P4Program* program) {
+void HeaderManipulationMetricsPass::postorder(const IR::P4Program* /*program*/) {
     auto& perPacket = metrics.headerManipulationMetrics.perPacketManipulations;
     if (!perPacket.empty()) {
         metrics.headerManipulationMetrics.maxManipulations =
