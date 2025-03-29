@@ -123,12 +123,7 @@ class AnnotateVarbitExtractStates : public Transform {
             if (!method) continue;
 
             if (method->member == "extract" && call->arguments->size() == 2) {
-                // TODO: We do not know the thread of this state.
-                // Add both directions.
-                state->addOrReplaceAnnotation(
-                    new IR::Annotation{"dontmerge"_cs, new IR::StringLiteral("ingress")});
-                state->addOrReplaceAnnotation(
-                    new IR::Annotation{"dontmerge"_cs, new IR::StringLiteral("egress")});
+                state->addOrReplaceAnnotation(new IR::Annotation("dontmerge"_cs, {}));
                 break;
             }
         }
