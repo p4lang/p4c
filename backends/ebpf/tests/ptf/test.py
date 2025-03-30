@@ -594,7 +594,10 @@ class VerifyPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_no_other_packets(self)
 
-@unittest.skip("we are skipping this test for temporay fix,Disabled on Ubuntu 22.04 - Tracking in #5201")
+
+@unittest.skip(
+    "we are skipping this test for temporay fix,Disabled on Ubuntu 22.04 - Tracking in #5201"
+)
 class PSATernaryTest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-ternary.p4"
 
