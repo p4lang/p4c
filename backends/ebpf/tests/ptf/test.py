@@ -596,10 +596,17 @@ class VerifyPSATest(P4EbpfTest):
 
 
 @unittest.skip(
-    "we are skipping this test for temporay fix,Disabled on Ubuntu 22.04 - Tracking in #5201"
+    "Disabled on Ubuntu 22.04 - Tracking in #5201 - "
+    "https://github.com/p4lang/p4c/issues/5201"
 )
 class PSATernaryTest(P4EbpfTest):
+    """Ternary match tests (currently disabled on Ubuntu 22.04)
+    
+    Note: This test is temporarily disabled due to compatibility issues with Ubuntu 22.04.
+    See GitHub issue #5201 for details.
+    """
     p4_file_path = "p4testdata/psa-ternary.p4"
+
 
     def runTest(self):
         # flow rules for 'tbl_ternary_0'
@@ -608,8 +615,7 @@ class PSATernaryTest(P4EbpfTest):
         self.table_add(
             table="ingress_tbl_ternary_0",
             key=["1.2.3.4^0xffffff00"],
-            action=0,
-            priority=1,
+            action=0,            priority=1,
         )
         self.table_add(
             table="ingress_tbl_ternary_0",
