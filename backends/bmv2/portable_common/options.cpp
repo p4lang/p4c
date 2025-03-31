@@ -8,9 +8,15 @@ namespace P4::BMV2 {
 using namespace P4::literals;
 
 std::vector<const char *> *PortableOptions::process(int argc, char *const argv[]) {
+    auto executablePath = getExecutablePath(argv[0]);
+    if (executablePath.empty()) {
+        std::cerr << "Could not determine executable path" << std::endl;
+        return nullptr;
+    }
+    this->exe_name = cstring(executablePath.stem().c_str());
     searchForIncludePath(p4includePath,
                          {"p4include/bmv2"_cs, "../p4include/bmv2"_cs, "../../p4include/bmv2"_cs},
-                         exename(argv[0]));
+                         executablePath.c_str());
 
     auto remainingOptions = CompilerOptions::process(argc, argv);
 

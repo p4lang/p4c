@@ -8,11 +8,18 @@ namespace P4::DPDK {
 using namespace P4::literals;
 
 std::vector<const char *> *DpdkOptions::process(int argc, char *const argv[]) {
+    auto executablePath = getExecutablePath(argv[0]);
+    if (executablePath.empty()) {
+        std::cerr << "Could not determine executable path" << std::endl;
+        return nullptr;
+    }
+    this->exe_name = cstring(executablePath.stem().c_str());
+
     searchForIncludePath(p4includePath,
                          {"p4include/dpdk"_cs, "../p4include/dpdk"_cs, "../../p4include/dpdk"_cs},
-                         exename(argv[0]));
+                         executablePath.c_str());
 
-    auto remainingOptions = CompilerOptions::process(argc, argv);
+    auto *remainingOptions = CompilerOptions::process(argc, argv);
 
     return remainingOptions;
 }
