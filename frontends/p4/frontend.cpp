@@ -202,6 +202,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         }),
         new CheckCoreMethods(&typeMap),
         new StaticAssert(&typeMap),
+        });
+    metricsPassManager.addUnusedCode(passes, true);
+    passes.addPasses({
         new RemoveParserIfs(&typeMap),
         new StructInitializers(&typeMap),
         new TableKeyNames(&typeMap),
@@ -211,17 +214,13 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new Reassociation(),
             new UselessCasts(&typeMap),
         }),
-    });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()), });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
     });
-    metricsPassManager.addUnusedCode(passes);
+    metricsPassManager.addUnusedCode(passes, true);
     passes.addPasses({ new RemoveAllUnusedDeclarations(*policy, true) });
-    metricsPassManager.addUnusedCode(passes);
+    metricsPassManager.addUnusedCode(passes, false);
     passes.addPasses({
         // Give each local declaration a unique internal name.
         // Must run before SimplifyParsers, which may merge adjacent states that
@@ -233,37 +232,22 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveInitializers(),
         new SideEffectOrdering(&typeMap, policy->skipSideEffectOrdering()),
         policy->removeOpAssign() ? new RemoveOpAssign() : nullptr,
-    });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()) });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&typeMap),
         new UniqueParameters(&typeMap),
-    });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()) });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SpecializeAll(&typeMap, policy),
         new RemoveParserControlFlow(&typeMap),
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
-        new MoveConstructors(),
-    });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({
+        new MoveConstructors(),    
         new RemoveAllUnusedDeclarations(*policy),
         new RemoveRedundantParsers(&typeMap, *policy),
-    });
-    metricsPassManager.addUnusedCode(passes);
-    passes.addPasses({
         new ClearTypeMap(&typeMap),
         new EvaluatorPass(&typeMap),
     });
-    // Optional passes
     if (policy->optimize(options)) {
         passes.addPasses({
             new Inline(&typeMap, *policy, options.optimizeParserInlining),
@@ -275,7 +259,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         });
     }
     if (policy->optimize(options)) {
-        metricsPassManager.addInlined(passes);
         passes.addPasses({new InlineActions(&typeMap, *policy)});
         metricsPassManager.addInlined(passes);
         passes.addPasses({
@@ -291,24 +274,17 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             // Check for constants only after inlining
             new CheckConstants(&typeMap),
             new ConstantFolding(&typeMap, constantFoldingPolicy),
-        });
-        metricsPassManager.addUnusedCode(passes);
-        passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()), });
-        metricsPassManager.addUnusedCode(passes);                    
-        passes.addPasses({
+            new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
             // more ifs may have been added to parsers
             new RemoveParserControlFlow(&typeMap),
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&typeMap),
-        });
-        metricsPassManager.addUnusedCode(passes);
-        passes.addPasses({
             new RemoveAllUnusedDeclarations(*policy),
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
-        metricsPassManager.addUnusedCode(passes);
     }
+    metricsPassManager.addUnusedCode(passes, false);
     metricsPassManager.addRemaining(passes);
     metricsPassManager.addExportPass(passes);
 

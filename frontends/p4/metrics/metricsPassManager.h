@@ -1,5 +1,5 @@
-#ifndef METRICS_PASS_MANAGER_H_
-#define METRICS_PASS_MANAGER_H_
+#ifndef FRONTENDS_P4_METRICS_PASS_MANAGER_H_
+#define FRONTENDS_P4_METRICS_PASS_MANAGER_H_
 
 #include "../../common/options.h"
 #include "../ir/ir.h"
@@ -34,7 +34,7 @@ class MetricsPassManager {
       : selectedMetrics(options.selectedMetrics), typeMap(typeMap),metrics(metrics) {}
 
     void addInlined(PassManager &pm) const;
-    void addUnusedCode(PassManager &pm) const;
+    void addUnusedCode(PassManager &pm, bool isBefore) const;
     void addRemaining(PassManager &pm) const;
     void addExportPass(PassManager &pm) const;
 };

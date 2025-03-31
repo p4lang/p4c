@@ -1,5 +1,5 @@
-#ifndef METRICS_STRUCTURE_H_
-#define METRICS_STRUCTURE_H_
+#ifndef FRONTENDS_P4_METRICS_STRUCTURE_H_
+#define FRONTENDS_P4_METRICS_STRUCTURE_H_
 
 #include <string>
 #include "lib/ordered_map.h"
@@ -10,15 +10,48 @@ struct PacketModification {
     unsigned numOperations = 0;
     unsigned totalSize = 0;
 };
+
+struct UnusedCodeInstances {
+    unsigned controls = 0;
+    unsigned parsers = 0;
+    unsigned tables = 0;
+    unsigned instances = 0;
+    unsigned variables = 0;
+    unsigned states = 0;
+    unsigned enums = 0;
+    unsigned blocks = 0;
+    unsigned conditionals = 0;
+    unsigned switches = 0;
+    unsigned actions = 0;         
+    unsigned functions = 0;       
+    unsigned parameters = 0;      
+    unsigned returns = 0;         
+    unsigned unaryOps = 0;
+
+    // Overload "-" and prevent negative deltas
+    UnusedCodeInstances operator-(const UnusedCodeInstances& other) const {
+        UnusedCodeInstances result;
+        result.controls = (controls > other.controls) ? (controls - other.controls) : 0;
+        result.parsers = (parsers > other.parsers) ? (parsers - other.parsers) : 0;
+        result.tables = (tables > other.tables) ? (tables - other.tables) : 0;
+        result.instances = (instances > other.instances) ? (instances - other.instances) : 0;
+        result.variables = (variables > other.variables) ? (variables - other.variables) : 0;
+        result.states = (states > other.states) ? (states - other.states) : 0;
+        result.enums = (enums > other.enums) ? (enums - other.enums) : 0;
+        result.blocks = (blocks > other.blocks) ? (blocks - other.blocks) : 0;
+        result.conditionals = (conditionals > other.conditionals) ? (conditionals - other.conditionals) : 0;
+        result.switches = (switches > other.switches) ? (switches - other.switches) : 0;
+        result.actions = (actions > other.actions) ? (actions - other.actions) : 0;
+        result.functions = (functions > other.functions) ? (functions - other.functions) : 0;
+        result.parameters = (parameters > other.parameters) ? (parameters - other.parameters) : 0;
+        result.returns = (returns > other.returns) ? (returns - other.returns) : 0;
+        result.unaryOps = (unaryOps > other.unaryOps) ? (unaryOps - other.unaryOps) : 0;
+        return result;
+    }
+};
     
 struct Metrics {
-    // Function name -> CC value
-    P4::ordered_map<std::string, unsigned> cyclomaticComplexity;
-
-    unsigned duplicateCodeInstances;
-
-    unsigned unusedCodeInstances;
-
+    
     struct NestingDepth {
         P4::ordered_map<std::string, unsigned> blockNestingDepth; // Block name -> max depth
         double avgNestingDepth = 0.0;
@@ -86,9 +119,18 @@ struct Metrics {
         unsigned totalStates = 0;
     } parserMetrics;
 
-    unsigned inlinedActionsNum;
+    P4::ordered_map<std::string, unsigned> cyclomaticComplexity; // Function name -> CC value
 
-    unsigned externalObjectsNum;
+    unsigned duplicateCodeInstances = 0;
+
+    unsigned inlinedActionsNum = 0;
+
+    unsigned externalObjectsNum = 0;
+
+    UnusedCodeInstances unusedCodeInstances;
+    UnusedCodeInstances interPassCounts;
+    std::vector<std::string> beforeActions;
+    std::vector<std::string> afterActions;
 };
 
 } // namespace P4

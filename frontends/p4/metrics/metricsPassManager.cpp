@@ -3,14 +3,16 @@
 namespace P4 {
 
 void MetricsPassManager::addInlined(PassManager &pm) const {
-    if (selectedMetrics.find("inlined") != selectedMetrics.end()) {
+    if (selectedMetrics.find("inlined") != selectedMetrics.end() ||
+            selectedMetrics.find("unused-code") != selectedMetrics.end()) 
+        {
         pm.addPasses({new InlinedActionsMetricPass(metrics)});
     }
 }
 
-void MetricsPassManager::addUnusedCode(PassManager &pm) const {
+void MetricsPassManager::addUnusedCode(PassManager &pm, bool isBefore) const {
     if (selectedMetrics.find("unused-code") != selectedMetrics.end()) {
-        pm.addPasses({new UnusedCodeMetricPass(metrics)});
+        pm.addPasses({new UnusedCodeMetricPass(metrics, isBefore)});
     }
 }
 

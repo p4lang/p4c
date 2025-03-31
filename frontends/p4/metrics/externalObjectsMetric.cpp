@@ -2,7 +2,7 @@
 
 namespace P4 {
 
-bool ExternalObjectsMetricPass::preorder(const IR::P4Program *program) {
+bool ExternalObjectsMetricPass::preorder(const IR::P4Program* /*program*/) {
     metrics.externalObjectsNum = 4;
     return false;
 }

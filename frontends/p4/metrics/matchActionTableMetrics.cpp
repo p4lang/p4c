@@ -13,7 +13,7 @@ unsigned MatchActionTableMetricsPass::keySize(const IR::KeyElement *keyElement){
     else if (keyType->is<IR::Type_Boolean>())
         return 1;
     // Enum is dependent on the backend/target, default to 32
-    else if (auto enumType = keyType->to<IR::Type_Enum>())
+    else if (keyType->to<IR::Type_Enum>())
         return 32u;
     else if (auto intType = keyType->to<IR::Type_SerEnum>())
         return intType->type->width_bits();

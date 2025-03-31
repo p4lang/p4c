@@ -26,6 +26,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "  Unique Operands: " << metrics.halsteadMetrics.uniqueOperands << "\n";
             file << "  Total Operators: " << metrics.halsteadMetrics.totalOperators << "\n";
             file << "  Total Operands: " << metrics.halsteadMetrics.totalOperands << "\n";
+
             file << "  Vocabulary: " << metrics.halsteadMetrics.vocabulary << "\n";
             file << "  Length: " << metrics.halsteadMetrics.length << "\n";
             file << "  Difficulty: " << metrics.halsteadMetrics.difficulty << "\n";
@@ -33,9 +34,32 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "  Effort: " << metrics.halsteadMetrics.effort << "\n";
             file << "  Estimated Bugs: " << metrics.halsteadMetrics.deliveredBugs << "\n";
         } 
-        else if (metric == "unreachable-code") {
-            file << "\nUnreachable Code Instances: " << metrics.unusedCodeInstances << "\n";
-        } 
+        else if (metric == "unused-code") {
+            file << "\nUnused Code Instances:\n";
+            
+            file << "\nProgram Structure:\n";
+            file << "  Controls: " << metrics.unusedCodeInstances.controls << "\n";
+            file << "  Tables: " << metrics.unusedCodeInstances.tables << "\n";
+            file << "  Parsers: " << metrics.unusedCodeInstances.parsers << "\n";
+            file << "  Parser states: " << metrics.unusedCodeInstances.states << "\n";
+            file << "  Actions: " << metrics.unusedCodeInstances.actions << "\n";
+            file << "  Functions: " << metrics.unusedCodeInstances.functions << "\n";
+
+            file << "\nDeclarations:\n";
+            file << "  Instances: " << metrics.unusedCodeInstances.instances << "\n";
+            file << "  Variables: " << metrics.unusedCodeInstances.variables << "\n";
+            file << "  Enums: " << metrics.unusedCodeInstances.enums << "\n";
+
+            file << "\nControl Flow:\n";
+            file << "  Blocks: " << metrics.unusedCodeInstances.blocks << "\n";
+            file << "  Conditionals: " << metrics.unusedCodeInstances.conditionals << "\n";
+            file << "  Switches: " << metrics.unusedCodeInstances.switches << "\n";
+
+            file << "\nOther:\n";
+            file << "  Parameters: " << metrics.unusedCodeInstances.parameters << "\n";
+            file << "  Returns: " << metrics.unusedCodeInstances.returns << "\n";
+            file << "  Unary Ops: " << metrics.unusedCodeInstances.unaryOps << "\n";
+        }
         else if (metric == "duplicit-code") {
             file << "\nDuplicate Code Instances: " << metrics.duplicateCodeInstances << "\n";
         } 

@@ -12,7 +12,7 @@ class DuplicateCodeMetricPass : public Inspector {
  public:
     explicit DuplicateCodeMetricPass(Metrics &metricsRef)
         : metrics(metricsRef) { setName("DuplicateCodePass"); }
-    bool preorder(const IR::P4Program *program) override;
+    bool preorder(const IR::P4Program* /*program*/) override;
 };
 
 }  // namespace P4

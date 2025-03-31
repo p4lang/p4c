@@ -7,12 +7,17 @@
 namespace P4 {
 
 class InlinedActionsMetricPass : public Inspector {
- private:
+    private:
     Metrics &metrics;
- public:
+    size_t count = 0;
+
+    public:
     explicit InlinedActionsMetricPass(Metrics &metricsRef)
-        : metrics(metricsRef) { setName("InlinedActionsMetricPass"); }
-    bool preorder(const IR::P4Program *program) override;
+        : metrics(metricsRef) { 
+        setName("InlinedActionsMetricPass"); 
+    }
+    
+    bool preorder(const IR::BlockStatement* block) override;
 };
 
 }  // namespace P4

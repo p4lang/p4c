@@ -2,9 +2,11 @@
 
 namespace P4 {
 
-bool InlinedActionsMetricPass::preorder(const IR::P4Program *program) {
-    metrics.inlinedActionsNum = 4;
-    return false;
+bool InlinedActionsMetricPass::preorder(const IR::BlockStatement* block) {
+    if (block->getAnnotation(IR::Annotation::inlinedFromAnnotation)) {
+        metrics.inlinedActionsNum++;
+    }
+    return true;
 }
 
 }  // namespace P4

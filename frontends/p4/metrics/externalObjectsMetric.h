@@ -12,7 +12,7 @@ class ExternalObjectsMetricPass : public Inspector {
  public:
     explicit ExternalObjectsMetricPass(Metrics &metricsRef)
         : metrics(metricsRef) { setName("ExternalObjectsMetricPass"); }
-    bool preorder(const IR::P4Program *program) override;
+    bool preorder(const IR::P4Program* /*program*/) override;
 };
 
 }  // namespace P4
