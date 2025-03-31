@@ -708,7 +708,6 @@ class PSATernaryTest(P4EbpfTest):
         testutils.verify_packet(self, pkt, PORT1)
 
 
-
 class ActionDefaultTernaryPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-default-ternary.p4"
 
