@@ -10,7 +10,8 @@
 # other GPL modules, please change the license to Apache-2.0.
 
 import copy
-
+import platform
+from distutils.version import LooseVersion
 from common import *
 from ptf.mask import Mask
 from ptf.packet import MPLS
@@ -595,6 +596,10 @@ class VerifyPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
+@unittest.skipIf(
+    LooseVersion(platform.release()) >= LooseVersion("5.15"),
+    "Skipping on Ubuntu 22.04+ due to clang/kernel version issues",
+)
 class PSATernaryTest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-ternary.p4"
 
