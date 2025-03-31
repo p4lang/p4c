@@ -8,7 +8,7 @@
 # GPL-2.0-only because it imports the GPL-2.0-only module Scapy.  If
 # someone later modifies it so that it no longer uses Scapy, nor any
 # other GPL modules, please change the license to Apache-2.0.
-
+import distro
 import copy
 import unittest
 import platform
@@ -20,6 +20,8 @@ from scapy.layers.inet import IP, UDP
 from scapy.layers.inet6 import IPv6
 from scapy.layers.l2 import ARP, Ether
 from scapy.packet import Packet, bind_layers, split_layers
+import ptf
+ptf.config["log_dir"] = "/tmp"  
 
 
 class SimpleForwardingPSATest(P4EbpfTest):
@@ -595,13 +597,16 @@ class VerifyPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_no_other_packets(self)
 
+
 def skip_if_ubuntu_22(test_item):
-    """if it is ubuntu 22.04 it will skipped"""
+    """Skip the test if running on Ubuntu 22.04"""
     try:
-        if 'Ubuntu 22.04' in platform.platform():
+        print(f"Detected OS: {distro.name()} {distro.version()}")  
+        if distro.name() == "Ubuntu" and distro.version() == "22.04":
+            print("we are Skipping PSATernaryTest because it's running on Ubuntu 22.04")  
             return unittest.skip("Test known to fail on Ubuntu 22.04")(test_item)
-    except:
-        pass
+    except Exception as e:
+        print(f"Warning: failing to determine OS version - {e}")
     return test_item
 @skip_if_ubuntu_22
 class PSATernaryTest(P4EbpfTest):
