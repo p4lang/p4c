@@ -21,7 +21,8 @@ from scapy.layers.inet6 import IPv6
 from scapy.layers.l2 import ARP, Ether
 from scapy.packet import Packet, bind_layers, split_layers
 import ptf
-ptf.config["log_dir"] = "/tmp"  
+
+ptf.config["log_dir"] = "/tmp"
 
 
 class SimpleForwardingPSATest(P4EbpfTest):
@@ -601,13 +602,17 @@ class VerifyPSATest(P4EbpfTest):
 def skip_if_ubuntu_22(test_item):
     """Skip the test if running on Ubuntu 22.04"""
     try:
-        print(f"Detected OS: {distro.name()} {distro.version()}")  
+        distro_info = f"{distro.name()} {distro.version()}"
+        print(f"Detected OS: {distro_info}")
         if distro.name() == "Ubuntu" and distro.version() == "22.04":
-            print("we are Skipping PSATernaryTest because it's running on Ubuntu 22.04")  
-            return unittest.skip("Test known to fail on Ubuntu 22.04")(test_item)
+            print("Skipping PSATernaryTest on Ubuntu 22.04 due to known issues")
+            return unittest.skip("Test known to fail on Ubuntu 22.04 (#5201)")(test_item)
+        return test_item
     except Exception as e:
-        print(f"Warning: failing to determine OS version - {e}")
-    return test_item
+        print(f"Warning: Failed to determine OS version - {e}")
+        return test_item
+
+
 @skip_if_ubuntu_22
 class PSATernaryTest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-ternary.p4"

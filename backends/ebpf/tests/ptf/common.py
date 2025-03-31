@@ -12,15 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" This file implements a PTF test case abstraction for eBPF.
-    Before each test case, the following steps are performed:
-    1. Compile P4/PSA program to eBPF bytecode using 'make psa'.
-    2. Load compiled eBPF programs to eBPF subsystem (nikss-ctl load).
-    3. Attach eBPF programs to interfaces used by PTF framework.
+"""This file implements a PTF test case abstraction for eBPF.
+Before each test case, the following steps are performed:
+1. Compile P4/PSA program to eBPF bytecode using 'make psa'.
+2. Load compiled eBPF programs to eBPF subsystem (nikss-ctl load).
+3. Attach eBPF programs to interfaces used by PTF framework.
 
-    After each test case, eBPF programs are detached from interfaces and removed from eBPF subsystem.
+After each test case, eBPF programs are detached from interfaces and removed from eBPF subsystem.
 
-    This file also provides functions to manage P4-eBPF tables, clone sessions and multicast groups.
+This file also provides functions to manage P4-eBPF tables, clone sessions and multicast groups.
 """
 
 import json
