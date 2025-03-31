@@ -12,7 +12,6 @@
 import copy
 import unittest
 import platform
-import distro
 from common import *
 from ptf.mask import Mask
 from ptf.packet import MPLS
@@ -597,9 +596,9 @@ class VerifyPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 def skip_if_ubuntu_22(test_item):
-    """Skip test if running on Ubuntu 22.04"""
+    """if it is ubuntu 22.04 it will skipped"""
     try:
-        if distro.id() == 'ubuntu' and distro.version() == '22.04':
+        if 'Ubuntu 22.04' in platform.platform():
             return unittest.skip("Test known to fail on Ubuntu 22.04")(test_item)
     except:
         pass
