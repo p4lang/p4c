@@ -692,6 +692,8 @@ class PSATernaryTest(P4EbpfTest):
         pkt[IP].dst = "255.255.255.255"
         pkt[UDP].chksum = 0x044D
         testutils.verify_packet(self, pkt, PORT1)
+
+
 class ActionDefaultTernaryPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-default-ternary.p4"
 
