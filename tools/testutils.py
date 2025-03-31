@@ -13,8 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Defines helper functions for a general testing framework. Used by multiple
-    Python testing scripts in the backends folder."""
+"""Defines helper functions for a general testing framework. Used by multiple
+Python testing scripts in the backends folder."""
 
 import logging
 import os

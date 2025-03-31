@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Converts the commands in an stf file which populate tables into a C
-    program that manipulates ebpf tables. """
+"""Converts the commands in an stf file which populate tables into a C
+program that manipulates ebpf tables."""
 
 import sys
 from pathlib import Path

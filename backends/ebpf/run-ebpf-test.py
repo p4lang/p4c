@@ -13,13 +13,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Contains different eBPF models and specifies their individual behavior
-    Currently five phases are defined:
-   1. Invokes the specified compiler on a provided p4 file.
-   2. Parses an stf file and generates an pcap output.
-   3. Loads the generated template or compiles it to a runnable binary.
-   4. Feeds the generated pcap test packets into the P4 "filter"
-   5. Evaluates the output with the expected result from the .stf file
+"""Contains different eBPF models and specifies their individual behavior
+ Currently five phases are defined:
+1. Invokes the specified compiler on a provided p4 file.
+2. Parses an stf file and generates an pcap output.
+3. Loads the generated template or compiles it to a runnable binary.
+4. Feeds the generated pcap test packets into the P4 "filter"
+5. Evaluates the output with the expected result from the .stf file
 """
 
 import argparse
