@@ -8,7 +8,7 @@
 # GPL-2.0-only because it imports the GPL-2.0-only module Scapy.  If
 # someone later modifies it so that it no longer uses Scapy, nor any
 # other GPL modules, please change the license to Apache-2.0.
-
+import unittest
 import copy
 import platform
 from distutils.version import LooseVersion
