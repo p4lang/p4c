@@ -29,6 +29,7 @@ jobs:
               "[frontend]": "core",
               "[midend]": "core",
               "[parser]": "core",
+              "[generator]": "core",
               "[infra]": "infrastructure",
               "[infrastructure]": "infrastructure",
               "[docs]": "documentation",
