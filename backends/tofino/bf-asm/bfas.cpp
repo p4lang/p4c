@@ -205,9 +205,7 @@ void check_target_pipes(int pipe_id) {
     else
 #define OUTPUT_TARGET(TARGET) << " " << Target::TARGET::name
 
-// Do not build main() when BUILDING_FOR_GTEST.
-#ifndef BUILDING_FOR_GTEST
-int main(int ac, char **av) {
+int run(int ac, char **av) {
     int srcfiles = 0;
     const char *firstsrc = 0;
     struct stat st;
@@ -505,6 +503,45 @@ int main(int ac, char **av) {
     }
     if (log_error > 0) warning(0, "%d config errors in log file", log_error);
     return error_count > 0 || (options.werror && warn_count > 0) ? 1 : 0;
+}
+
+// Do not build main() when BUILDING_FOR_GTEST.
+#ifndef BUILDING_FOR_GTEST
+
+/// Update error message to use 'Assembler' instead of 'Compiler'.
+/// TODO: Consider implementing a new exception type instead?
+/// We are not calling much into top-level compiler utilities.
+std::string updateErrorMsg(std::string errorMsg) {
+    for (const std::string_view toReplace : {"Compiler", "compiler"}) {
+        if (const auto pos = errorMsg.find(toReplace); pos != std::string::npos) {
+            errorMsg.replace(pos, toReplace.size(), "Assembler");
+            break;
+        }
+    }
+
+    return errorMsg;
+}
+
+int main(int ac, char **av) {
+    try {
+        return run(ac, av);
+    } catch (const Util::CompilerBug &e) {
+        std::cerr << "Internal error: " << updateErrorMsg(e.what()) << "\n";
+        std::cerr << "Please submit a bug report with your code." << "\n";
+        return EXIT_FAILURE;
+    } catch (const Util::CompilerUnimplemented &e) {
+        std::cerr << updateErrorMsg(e.what()) << "\n";
+        return EXIT_FAILURE;
+    } catch (const Util::CompilationError &e) {
+        std::cerr << updateErrorMsg(e.what()) << "\n";
+    } catch (const std::exception &e) {
+        std::cerr << "Internal error: " << updateErrorMsg(e.what()) << "\n";
+        std::cerr << "Please submit a bug report with your code." << "\n";
+        return EXIT_FAILURE;
+    } catch (...) {
+        std::cerr << "Internal error. Please submit a bug report with your code." << "\n";
+        return EXIT_FAILURE;
+    }
 }
 #endif /* !BUILDING_FOR_GTEST */
 
