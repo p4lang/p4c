@@ -12,10 +12,6 @@ struct PacketModification {
 };
 
 struct UnusedCodeInstances {
-    unsigned controls = 0;
-    unsigned parsers = 0;
-    unsigned tables = 0;
-    unsigned instances = 0;
     unsigned variables = 0;
     unsigned states = 0;
     unsigned enums = 0;
@@ -26,15 +22,10 @@ struct UnusedCodeInstances {
     unsigned functions = 0;       
     unsigned parameters = 0;      
     unsigned returns = 0;         
-    unsigned unaryOps = 0;
 
     // Overload "-" and prevent negative deltas
     UnusedCodeInstances operator-(const UnusedCodeInstances& other) const {
         UnusedCodeInstances result;
-        result.controls = (controls > other.controls) ? (controls - other.controls) : 0;
-        result.parsers = (parsers > other.parsers) ? (parsers - other.parsers) : 0;
-        result.tables = (tables > other.tables) ? (tables - other.tables) : 0;
-        result.instances = (instances > other.instances) ? (instances - other.instances) : 0;
         result.variables = (variables > other.variables) ? (variables - other.variables) : 0;
         result.states = (states > other.states) ? (states - other.states) : 0;
         result.enums = (enums > other.enums) ? (enums - other.enums) : 0;
@@ -45,7 +36,6 @@ struct UnusedCodeInstances {
         result.functions = (functions > other.functions) ? (functions - other.functions) : 0;
         result.parameters = (parameters > other.parameters) ? (parameters - other.parameters) : 0;
         result.returns = (returns > other.returns) ? (returns - other.returns) : 0;
-        result.unaryOps = (unaryOps > other.unaryOps) ? (unaryOps - other.unaryOps) : 0;
         return result;
     }
 };
@@ -128,9 +118,13 @@ struct Metrics {
     unsigned externalObjectsNum = 0;
 
     UnusedCodeInstances unusedCodeInstances;
+    
+    // Variables for storing inter-pass data.
     UnusedCodeInstances interPassCounts;
     std::vector<std::string> beforeActions;
     std::vector<std::string> afterActions;
+    std::vector<std::string> beforeVariables;  
+    std::vector<std::string> afterVariables;    
 };
 
 } // namespace P4

@@ -35,18 +35,14 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "  Estimated Bugs: " << metrics.halsteadMetrics.deliveredBugs << "\n";
         } 
         else if (metric == "unused-code") {
-            file << "\nUnused Code Instances:\n";
+            file << "\nUnused Code Instances:";
             
             file << "\nProgram Structure:\n";
-            file << "  Controls: " << metrics.unusedCodeInstances.controls << "\n";
-            file << "  Tables: " << metrics.unusedCodeInstances.tables << "\n";
-            file << "  Parsers: " << metrics.unusedCodeInstances.parsers << "\n";
-            file << "  Parser states: " << metrics.unusedCodeInstances.states << "\n";
             file << "  Actions: " << metrics.unusedCodeInstances.actions << "\n";
             file << "  Functions: " << metrics.unusedCodeInstances.functions << "\n";
+            file << "  Parser states: " << metrics.unusedCodeInstances.states << "\n";
 
             file << "\nDeclarations:\n";
-            file << "  Instances: " << metrics.unusedCodeInstances.instances << "\n";
             file << "  Variables: " << metrics.unusedCodeInstances.variables << "\n";
             file << "  Enums: " << metrics.unusedCodeInstances.enums << "\n";
 
@@ -58,7 +54,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "\nOther:\n";
             file << "  Parameters: " << metrics.unusedCodeInstances.parameters << "\n";
             file << "  Returns: " << metrics.unusedCodeInstances.returns << "\n";
-            file << "  Unary Ops: " << metrics.unusedCodeInstances.unaryOps << "\n";
         }
         else if (metric == "duplicit-code") {
             file << "\nDuplicate Code Instances: " << metrics.duplicateCodeInstances << "\n";
@@ -82,6 +77,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "  Total Headers: " << metrics.headerMetrics.numHeaders << "\n";
             file << "  Avg Fields Per Header: " << metrics.headerMetrics.avgFieldsNum << "\n";
             file << "  Avg Field Size: " << metrics.headerMetrics.avgFieldSize << "\n";
+            file << "  Per-header metrics:" << "\n";
 
             auto iterator = metrics.headerMetrics.fieldsNum.begin();
             while (iterator != metrics.headerMetrics.fieldsNum.end()){

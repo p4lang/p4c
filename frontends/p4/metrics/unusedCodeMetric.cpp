@@ -29,11 +29,13 @@ void UnusedCodeMetricPass::postorder(const IR::ParserState* node) {
     }
 }
 
-void UnusedCodeMetricPass::postorder(const IR::Operation_Unary* node) {
-    if (node->is<IR::Add>() || node->is<IR::Sub>()) {
-        if (node->expr->is<IR::PathExpression>()) {
-            currentInstancesCount.unaryOps++;
-        }
+void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable* node) {
+    std::string varName = node->getName().name.string();
+    if (isBefore) {
+        metrics.beforeVariables.push_back(varName);
+    } 
+    else {
+        metrics.afterVariables.push_back(varName);
     }
 }
 
@@ -44,8 +46,7 @@ void UnusedCodeMetricPass::recordBefore() {
 void UnusedCodeMetricPass::recordAfter() {
     metrics.unusedCodeInstances = metrics.interPassCounts - currentInstancesCount;
 
-    // Calculate the number of unused actions
-    metrics.unusedCodeInstances.actions = 0;
+    // Calculate the number of unused actions.
     for (const auto& beforeAction : metrics.beforeActions) {
         bool found = std::any_of(metrics.afterActions.begin(), metrics.afterActions.end(),
             [&](const std::string& afterAction) {
@@ -54,15 +55,19 @@ void UnusedCodeMetricPass::recordAfter() {
         
         if (!found) metrics.unusedCodeInstances.actions++;
     }
-    // Disregard actions that were inlined
+    // Disregard actions that were inlined.
     metrics.unusedCodeInstances.actions -= metrics.inlinedActionsNum;
+
+    // Calculate the number of unused variables.
+    for (const auto& beforeVar : metrics.beforeVariables) {
+        if (std::find(metrics.afterVariables.begin(), metrics.afterVariables.end(),beforeVar) 
+            == metrics.afterVariables.end()) 
+        {
+            metrics.unusedCodeInstances.variables++;
+        }
+    }
 }
 
-void UnusedCodeMetricPass::postorder(const IR::P4Control* /*node*/) { currentInstancesCount.controls++; }
-void UnusedCodeMetricPass::postorder(const IR::P4Parser* /*node*/) { currentInstancesCount.parsers++; }
-void UnusedCodeMetricPass::postorder(const IR::P4Table* /*node*/) { currentInstancesCount.tables++; }
-void UnusedCodeMetricPass::postorder(const IR::Declaration_Instance* /*node*/) { currentInstancesCount.instances++; }
-void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable* /*node*/) { currentInstancesCount.variables++; }
 void UnusedCodeMetricPass::postorder(const IR::Type_Enum* /*node*/) { currentInstancesCount.enums++; }
 void UnusedCodeMetricPass::postorder(const IR::Type_SerEnum* /*node*/) { currentInstancesCount.enums++; }
 void UnusedCodeMetricPass::postorder(const IR::BlockStatement* /*node*/) { currentInstancesCount.blocks++; }

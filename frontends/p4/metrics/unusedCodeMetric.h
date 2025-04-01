@@ -24,23 +24,18 @@ class UnusedCodeMetricPass : public Inspector {
         {setName("UnusedCodeMetricPass");
     }
     
-    void postorder(const IR::P4Control* node) override;
-    void postorder(const IR::P4Parser* node) override;
-    void postorder(const IR::P4Table* node) override;
-    void postorder(const IR::Declaration_Instance* node) override;
-    void postorder(const IR::Declaration_Variable* node) override;
-    void postorder(const IR::ParserState* node) override;
-    void postorder(const IR::Type_Enum* node) override;
-    void postorder(const IR::Type_SerEnum* node) override;
-    void postorder(const IR::BlockStatement* node) override;
-    void postorder(const IR::IfStatement* node) override;
-    void postorder(const IR::SwitchStatement* node) override;
     void postorder(const IR::P4Action* node) override;
-    void postorder(const IR::Function* node) override;
-    void postorder(const IR::Parameter* node) override;
-    void postorder(const IR::ReturnStatement* node) override;
-    void postorder(const IR::Operation_Unary* node) override;
-    void postorder(const IR::P4Program* node) override;
+    void postorder(const IR::ParserState* node) override;
+    void postorder(const IR::Declaration_Variable* node) override;
+    void postorder(const IR::Type_Enum* /*node*/) override;
+    void postorder(const IR::Type_SerEnum* /*node*/) override;
+    void postorder(const IR::BlockStatement* /*node*/) override;
+    void postorder(const IR::IfStatement* /*node*/) override;
+    void postorder(const IR::SwitchStatement* /*node*/) override;
+    void postorder(const IR::Function* /*node*/) override;
+    void postorder(const IR::Parameter* /*node*/) override;
+    void postorder(const IR::ReturnStatement* /*node*/) override;
+    void postorder(const IR::P4Program* /*node*/) override;
 };
 
 }  // namespace P4
