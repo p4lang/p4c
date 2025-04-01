@@ -50,9 +50,7 @@ class SimpleTunnelingPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-tunneling.p4"
 
     def runTest(self):
-        pkt = Ether(dst="11:11:11:11:11:11") / testutils.simple_ip_only_packet(
-            ip_dst="192.168.1.1"
-        )
+        pkt = Ether(dst="11:11:11:11:11:11") / testutils.simple_ip_only_packet(ip_dst="192.168.1.1")
 
         exp_pkt = (
             Ether(dst="11:11:11:11:11:11")
@@ -76,13 +74,9 @@ class PSACloneI2E(P4EbpfTest):
         # add PORT2, instance=1 as clone session member, cos = 0
         self.clone_session_add_member(clone_session=8, egress_port=DP_PORTS[2])
         # add PORT2, instance=2 as clone session member, cos = 1
-        self.clone_session_add_member(
-            clone_session=8, egress_port=DP_PORTS[2], instance=2, cos=1
-        )
+        self.clone_session_add_member(clone_session=8, egress_port=DP_PORTS[2], instance=2, cos=1)
 
-        pkt = testutils.simple_eth_packet(
-            eth_dst="00:00:00:00:00:{:02x}".format(DP_PORTS[1])
-        )
+        pkt = testutils.simple_eth_packet(eth_dst="00:00:00:00:00:{:02x}".format(DP_PORTS[1]))
         testutils.send_packet(self, PORT0, pkt)
         cloned_pkt = copy.deepcopy(pkt)
         cloned_pkt[Ether].type = 0xFACE
@@ -91,9 +85,7 @@ class PSACloneI2E(P4EbpfTest):
         pkt[Ether].src = "00:00:00:00:ca:fe"
         testutils.verify_packet(self, pkt, PORT1)
 
-        pkt = testutils.simple_eth_packet(
-            eth_dst="00:00:00:00:00:{:02x}".format(DP_PORTS[5])
-        )
+        pkt = testutils.simple_eth_packet(eth_dst="00:00:00:00:00:{:02x}".format(DP_PORTS[5]))
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_no_packet(self, pkt, PORT1)
 
@@ -136,9 +128,7 @@ class EgressTrafficManagerClonePSATest(P4EbpfTest):
         # add PORT2, instance=1 as clone session member, cos = 0
         self.clone_session_add_member(clone_session=8, egress_port=DP_PORTS[2])
 
-        pkt = testutils.simple_ip_packet(
-            eth_dst="aa:bb:cc:dd:ee:ff", eth_src="55:44:33:22:11:00"
-        )
+        pkt = testutils.simple_ip_packet(eth_dst="aa:bb:cc:dd:ee:ff", eth_src="55:44:33:22:11:00")
         testutils.send_packet(self, PORT1, pkt)
         pkt[Ether].dst = "00:00:00:00:00:11"
         testutils.verify_packet(self, pkt, PORT2)
@@ -164,16 +154,12 @@ class EgressTrafficManagerRecirculatePSATest(P4EbpfTest):
     p4_file_path = "p4testdata/etm-recirc.p4"
 
     def runTest(self):
-        pkt = testutils.simple_ip_packet(
-            eth_dst="00:11:22:33:44:55", eth_src="55:44:33:22:11:00"
-        )
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55", eth_src="55:44:33:22:11:00")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].src = "00:44:33:22:11:00"
         testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
-        pkt = testutils.simple_ip_packet(
-            eth_dst="00:11:22:33:FE:F0", eth_src="55:44:33:22:11:00"
-        )
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:FE:F0", eth_src="55:44:33:22:11:00")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].dst = "00:00:00:00:00:00"
         pkt[Ether].src = "00:44:33:22:11:00"
@@ -214,9 +200,7 @@ class SimpleLpmP4PSATest(P4EbpfTest):
             action=1,
             data=[DP_PORTS[2]],
         )
-        self.table_add(
-            table="ingress_tbl_fwd_lpm", key=["10.10.10.10/8"], action="_NoAction"
-        )
+        self.table_add(table="ingress_tbl_fwd_lpm", key=["10.10.10.10/8"], action="_NoAction")
         pkt = testutils.simple_ip_packet(ip_src="1.1.1.1", ip_dst="10.10.11.11")
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)
@@ -340,9 +324,7 @@ class PacketInLengthPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/packet_in-length.p4"
 
     def runTest(self):
-        pkt = Ether(dst="11:11:11:11:11:11") / testutils.simple_ip_only_packet(
-            ip_dst="192.168.1.1"
-        )
+        pkt = Ether(dst="11:11:11:11:11:11") / testutils.simple_ip_only_packet(ip_dst="192.168.1.1")
 
         # check if packet_in.length() works
         testutils.send_packet(self, PORT0, pkt)
@@ -402,9 +384,7 @@ class WideFieldDigest(P4EbpfTest):
     p4_file_path = "p4testdata/wide-field-digest.p4"
 
     def runTest(self):
-        pkt = testutils.simple_ipv6ip_packet(
-            ipv6_src="::2", ipv6_dst="::1", ipv6_hlim=64
-        )
+        pkt = testutils.simple_ipv6ip_packet(ipv6_src="::2", ipv6_dst="::1", ipv6_hlim=64)
         exp_pkt = pkt.copy()
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
@@ -435,9 +415,7 @@ class CountersPSATest(P4EbpfTest):
         self.counter_verify(name="ingress_test1_cnt", key=[1], bytes=100)
         self.counter_verify(name="ingress_test2_cnt", key=[1], packets=1)
         self.counter_verify(name="ingress_test3_cnt", key=[1], bytes=100, packets=1)
-        self.counter_verify(
-            name="ingress_action_cnt", key=[DP_PORTS[1]], bytes=100, packets=1
-        )
+        self.counter_verify(name="ingress_action_cnt", key=[DP_PORTS[1]], bytes=100, packets=1)
 
         pkt = testutils.simple_ip_packet(
             eth_dst="00:11:22:33:44:55", eth_src="00:AA:00:00:01:FE", pktlen=199
@@ -447,12 +425,8 @@ class CountersPSATest(P4EbpfTest):
 
         self.counter_verify(name="ingress_test1_cnt", key=[0x1FE], bytes=199)
         self.counter_verify(name="ingress_test2_cnt", key=[0x1FE], packets=1)
-        self.counter_verify(
-            name="ingress_test3_cnt", key=[0x1FE], bytes=199, packets=1
-        )
-        self.counter_verify(
-            name="ingress_action_cnt", key=[DP_PORTS[1]], bytes=299, packets=2
-        )
+        self.counter_verify(name="ingress_test3_cnt", key=[0x1FE], bytes=199, packets=1)
+        self.counter_verify(name="ingress_action_cnt", key=[DP_PORTS[1]], bytes=299, packets=2)
 
 
 class DirectCountersPSATest(P4EbpfTest):
@@ -563,9 +537,7 @@ class RandomPSATest(P4EbpfTest):
 
     def verify_range(self, value, min_value, max_value):
         if value < min_value or value > max_value:
-            self.fail(
-                "Value {} out of range [{}, {}]".format(value, min_value, max_value)
-            )
+            self.fail("Value {} out of range [{}, {}]".format(value, min_value, max_value))
 
     def runTest(self):
         self.table_add(table="MyIC_tbl_fwd", key=[4], action=1, data=[5])
@@ -585,13 +557,9 @@ class RandomPSATest(P4EbpfTest):
                 max_value=0x80_00_00_05,
             )
             sequence[0].append(recv_pkt[self.RandomHeader].f1)
-            self.verify_range(
-                value=recv_pkt[self.RandomHeader].f2, min_value=0, max_value=127
-            )
+            self.verify_range(value=recv_pkt[self.RandomHeader].f2, min_value=0, max_value=127)
             sequence[1].append(recv_pkt[self.RandomHeader].f2)
-            self.verify_range(
-                value=recv_pkt[self.RandomHeader].f3, min_value=256, max_value=259
-            )
+            self.verify_range(value=recv_pkt[self.RandomHeader].f3, min_value=256, max_value=259)
             sequence[2].append(recv_pkt[self.RandomHeader].f3)
         logger.info("f1 sequence: {}".format(sequence[0]))
         logger.info("f2 sequence: {}".format(sequence[1]))
@@ -628,6 +596,7 @@ class VerifyPSATest(P4EbpfTest):
 )
 class PSATernaryTest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-ternary.p4"
+
     def runTest(self):
         # flow rules for 'tbl_ternary_0'
         # 1. ipv4.srcAddr=1.2.3.4/0xffffff00 => action 0 priority 1
@@ -721,6 +690,7 @@ class PSATernaryTest(P4EbpfTest):
 
 class ActionDefaultTernaryPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-default-ternary.p4"
+
     def runTest(self):
         # flow rules for 'tbl_ternary_0'
         # 1. ipv4.srcAddr=1.2.3.4/0xffffff00 => action 0 priority 1
