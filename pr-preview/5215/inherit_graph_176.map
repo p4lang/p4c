@@ -1,0 +1,35 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,5,109,31"/>
+<area shape="rect" id="Node000001" href="$class_base_parser.html" title="Base class of Tofino parser in assembler." alt="" coords="161,5,255,31"/>
+<area shape="poly" id="edge76_Node000000_Node000001" title=" " alt="" coords="123,15,161,15,161,21,123,21"/>
+<area shape="rect" id="Node000002" href="$group__parde.html#class_parser" title="Representation of the Tofino 1/2 parser in assembler." alt="" coords="320,5,383,31"/>
+<area shape="poly" id="edge77_Node000001_Node000002" title=" " alt="" coords="269,15,320,15,320,21,269,21"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="157,92,259,117"/>
+<area shape="poly" id="edge78_Node000003_Node000002" title=" " alt="" coords="239,82,305,41,327,28,329,33,308,46,242,87"/>
+<area shape="rect" id="Node000004" href="$class_section.html" title=" " alt="" coords="316,215,387,240"/>
+<area shape="poly" id="edge79_Node000003_Node000004" title=" " alt="" coords="236,125,337,212,333,216,233,129"/>
+<area shape="rect" id="Node000005" href="$class_asm_stage.html" title=" " alt="" coords="490,85,578,111"/>
+<area shape="poly" id="edge80_Node000004_Node000005" title=" " alt="" coords="366,202,398,160,419,139,443,121,465,110,489,102,491,108,467,115,445,126,422,143,402,164,370,205"/>
+<area shape="rect" id="Node000006" href="$class_b_f_a_s_m_1_1_flexible_headers.html" title=" " alt="" coords="444,135,624,160"/>
+<area shape="poly" id="edge81_Node000004_Node000006" title=" " alt="" coords="381,205,443,170,478,158,480,163,445,175,383,209"/>
+<area shape="rect" id="Node000007" href="$class_base_asm_parser.html" title="Base class of parser assembly section." alt="" coords="473,184,595,209"/>
+<area shape="poly" id="edge82_Node000004_Node000007" title=" " alt="" coords="400,217,472,204,473,210,401,222"/>
+<area shape="rect" id="Node000009" href="$class_default_error_mode.html" title=" " alt="" coords="465,36,603,61"/>
+<area shape="poly" id="edge84_Node000004_Node000009" title=" " alt="" coords="359,200,389,136,413,101,442,72,465,59,468,64,446,76,417,105,393,139,364,203"/>
+<area shape="rect" id="Node000011" href="$group__parde.html#class_deparser" title=" " alt="" coords="493,233,575,259"/>
+<area shape="poly" id="edge85_Node000004_Node000011" title=" " alt="" coords="401,230,493,239,493,245,400,235"/>
+<area shape="rect" id="Node000012" href="$class_dyn_hash.html" title=" " alt="" coords="493,283,575,308"/>
+<area shape="poly" id="edge86_Node000004_Node000012" title=" " alt="" coords="389,244,445,269,494,284,493,289,443,274,387,249"/>
+<area shape="rect" id="Node000013" href="$class_phv.html" title=" " alt="" coords="511,332,557,357"/>
+<area shape="poly" id="edge87_Node000004_Node000013" title=" " alt="" coords="372,249,404,285,445,318,479,332,511,339,510,345,477,337,443,323,400,289,368,253"/>
+<area shape="rect" id="Node000014" href="$class_primitives.html" title=" " alt="" coords="490,381,578,407"/>
+<area shape="poly" id="edge88_Node000004_Node000014" title=" " alt="" coords="365,252,395,311,418,342,446,368,467,379,490,386,489,391,465,384,442,372,414,345,390,314,360,254"/>
+<area shape="rect" id="Node000015" href="$class_version.html" title=" " alt="" coords="499,431,569,456"/>
+<area shape="poly" id="edge89_Node000004_Node000015" title=" " alt="" coords="360,253,371,290,387,335,412,379,446,417,471,431,499,438,498,443,469,436,442,421,408,382,382,337,365,292,355,254"/>
+<area shape="rect" id="Node000008" href="$class_asm_parser.html" title=" " alt="" coords="672,184,763,209"/>
+<area shape="poly" id="edge83_Node000007_Node000008" title=" " alt="" coords="609,194,672,194,672,199,609,199"/>
+<area shape="rect" id="Node000010" href="$class_error_mode.html" title=" " alt="" coords="307,55,396,80"/>
+<area shape="poly" id="edge90_Node000010_Node000009" title=" " alt="" coords="410,59,465,53,466,58,410,64"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="169,215,247,240"/>
+<area shape="poly" id="edge91_Node000016_Node000004" title=" " alt="" coords="261,225,316,225,316,230,261,230"/>
+</map>

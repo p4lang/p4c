@@ -1,0 +1,53 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,216,80,241"/>
+<area shape="rect" id="Node000001" href="$class_copy_block_pragmas_1_1_copy_to_tables.html" title=" " alt="" coords="128,53,331,93"/>
+<area shape="poly" id="edge2248_Node000000_Node000001" title=" " alt="" coords="53,202,81,152,102,125,126,103,147,90,149,95,130,107,106,129,86,155,57,205"/>
+<area shape="rect" id="Node000002" href="$group__parde.html#class_deparser_modifier" title=" " alt="" coords="162,117,297,143"/>
+<area shape="poly" id="edge2249_Node000000_Node000002" title=" " alt="" coords="74,206,127,176,198,140,201,145,129,180,77,211"/>
+<area shape="rect" id="Node000007" href="$class_normalize_params.html" title=" " alt="" coords="161,191,298,216"/>
+<area shape="poly" id="edge2254_Node000000_Node000007" title=" " alt="" coords="94,219,160,210,161,215,94,224"/>
+<area shape="rect" id="Node000008" href="$group__parde.html#class_parde_modifier" title=" " alt="" coords="174,240,285,265"/>
+<area shape="poly" id="edge2255_Node000000_Node000008" title=" " alt="" coords="94,233,174,243,174,248,94,238"/>
+<area shape="rect" id="Node000011" href="$group__parde.html#class_parser_modifier" title=" " alt="" coords="172,556,287,581"/>
+<area shape="poly" id="edge2258_Node000000_Node000011" title=" " alt="" coords="60,252,223,554,219,557,55,255"/>
+<area shape="rect" id="Node000025" href="$class_rename_param.html" title="Renames a parameter and all uses of that parameter." alt="" coords="171,605,288,631"/>
+<area shape="poly" id="edge2272_Node000000_Node000025" title=" " alt="" coords="49,255,59,332,75,433,99,529,114,566,130,591,149,604,171,612,170,617,146,609,126,595,109,569,94,531,70,434,53,333,44,255"/>
+<area shape="rect" id="Node000003" href="$group__parde.html#class_add_deparser_metadata" title="Add deparser parameters for standard metadata." alt="" coords="412,5,580,31"/>
+<area shape="poly" id="edge2250_Node000002_Node000003" title=" " alt="" coords="308,113,329,103,344,88,352,72,361,55,377,40,411,25,413,30,380,44,365,59,357,74,348,91,332,107,311,118"/>
+<area shape="rect" id="Node000004" href="$group___lower_deparser_i_r.html#class_coalesce_learning" title="Replaces consecutive extracts of the same container with a single extract." alt="" coords="427,55,565,80"/>
+<area shape="poly" id="edge2251_Node000002_Node000004" title=" " alt="" coords="295,111,330,102,378,89,429,77,430,83,379,94,331,107,296,116"/>
+<area shape="rect" id="Node000005" href="$group___lower_deparser_i_r.html#struct_parde_1_1_lowered_1_1_rewrite_emit_clot" title="Replace Emits covered in a CLOT with EmitClot." alt="" coords="379,104,613,129"/>
+<area shape="poly" id="edge2252_Node000002_Node000005" title=" " alt="" coords="311,123,378,120,379,125,311,129"/>
+<area shape="rect" id="Node000006" href="$group___deparser_copy_opt.html#class_rewrite_deparser" title=" " alt="" coords="431,153,561,179"/>
+<area shape="poly" id="edge2253_Node000002_Node000006" title=" " alt="" coords="311,138,431,155,430,160,310,143"/>
+<area shape="rect" id="Node000009" href="$group__parde.html#class_adjust_extract" title="Adjusts extractions that extract from fields that are serialized from phv container,..." alt="" coords="441,203,551,228"/>
+<area shape="poly" id="edge2256_Node000008_Node000009" title=" " alt="" coords="298,240,441,220,442,226,298,246"/>
+<area shape="rect" id="Node000010" href="$group__parde.html#class_stack_push_shims" title="Adds parser states to initialize the $stkvalid fields that are used to handle the push_front and pop_..." alt="" coords="431,252,561,277"/>
+<area shape="poly" id="edge2257_Node000008_Node000010" title=" " alt="" coords="298,253,431,259,431,264,298,258"/>
+<area shape="rect" id="Node000012" href="$group__parde.html#class_add_parser_metadata" title="Extend parsers to extract standard metadata." alt="" coords="421,301,571,327"/>
+<area shape="poly" id="edge2259_Node000011_Node000012" title=" " alt="" coords="237,542,256,497,285,440,325,383,350,358,377,336,398,325,420,318,422,323,400,330,380,340,354,362,330,387,290,443,261,499,242,544"/>
+<area shape="rect" id="Node000013" href="$struct_clip_terminal_transition.html" title=" " alt="" coords="413,351,579,376"/>
+<area shape="poly" id="edge2260_Node000011_Node000013" title=" " alt="" coords="241,542,263,506,293,463,332,421,377,385,411,371,413,376,380,390,335,425,297,467,267,509,246,545"/>
+<area shape="rect" id="Node000014" href="$group___parser_copy_prop.html#struct_copy_prop_parser_def" title=" " alt="" coords="423,400,569,425"/>
+<area shape="poly" id="edge2261_Node000011_Node000014" title=" " alt="" coords="248,543,302,488,338,459,378,434,421,419,423,424,380,439,341,463,306,492,252,547"/>
+<area shape="rect" id="Node000015" href="$group___allocate_parser_checksums.html#class_elim_dead_parser_checksums" title=" " alt="" coords="396,449,596,475"/>
+<area shape="poly" id="edge2262_Node000011_Node000015" title=" " alt="" coords="259,546,313,514,378,484,416,472,417,477,380,488,316,518,262,551"/>
+<area shape="rect" id="Node000016" href="$group___reset_invalidated_checksum_headers.html#class_insert_parsed_valid_bits" title=" " alt="" coords="417,499,575,524"/>
+<area shape="poly" id="edge2263_Node000011_Node000016" title=" " alt="" coords="300,551,436,521,437,527,301,556"/>
+<area shape="rect" id="Node000017" href="$struct_insert_parser_clot_checksums_1_1_insert_parser_primitives.html" title=" " alt="" coords="396,549,596,589"/>
+<area shape="poly" id="edge2264_Node000011_Node000017" title=" " alt="" coords="301,566,395,566,395,571,301,571"/>
+<area shape="rect" id="Node000018" href="$group___lower_parser.html#class_parde_1_1_lowered_1_1_compute_buffer_requirements" title="Computes the number of bytes which must be available for each parser match to avoid a stall." alt="" coords="383,613,609,653"/>
+<area shape="poly" id="edge2265_Node000011_Node000018" title=" " alt="" coords="297,582,331,590,413,610,412,615,330,595,296,587"/>
+<area shape="rect" id="Node000019" href="$group___lower_parser.html#class_parde_1_1_lowered_1_1_compute_init_zero_containers" title="Computes containers that have fields relying on parser zero initialization." alt="" coords="391,677,601,717"/>
+<area shape="poly" id="edge2266_Node000011_Node000019" title=" " alt="" coords="301,576,332,591,349,609,357,627,365,646,380,663,400,674,398,679,377,667,360,648,352,629,345,611,329,595,298,580"/>
+<area shape="rect" id="Node000020" href="$group___lower_parser.html#class_parde_1_1_lowered_1_1_compute_multi_write_containers" title="Collects all containers that are written more than once by the parser." alt="" coords="385,741,607,781"/>
+<area shape="poly" id="edge2267_Node000011_Node000020" title=" " alt="" coords="301,573,317,580,332,591,347,608,354,625,358,660,361,694,367,711,381,727,396,738,393,743,377,731,363,713,355,696,352,661,349,627,342,610,329,595,315,585,299,578"/>
+<area shape="rect" id="Node000021" href="$struct_remove_empty_stall_state.html" title=" " alt="" coords="405,805,587,831"/>
+<area shape="poly" id="edge2268_Node000011_Node000021" title=" " alt="" coords="301,572,318,580,333,591,351,616,359,642,360,668,357,693,354,718,355,743,363,767,380,791,407,807,404,812,377,795,358,770,350,744,349,718,352,693,354,667,354,643,346,618,329,595,315,584,299,577"/>
+<area shape="rect" id="Node000022" href="$struct_resolve_negative_extract_1_1_adjust_shift.html" title=" " alt="" coords="407,855,585,895"/>
+<area shape="poly" id="edge2269_Node000011_Node000022" title=" " alt="" coords="301,572,318,579,333,591,354,622,363,654,363,686,358,717,353,748,353,779,360,810,381,840,408,859,405,864,377,844,356,812,347,780,348,748,353,716,357,685,358,655,350,625,329,595,315,584,299,577"/>
+<area shape="rect" id="Node000023" href="$struct_resolve_negative_extract_1_1_adjust_shift_out_of_buffer.html" title=" " alt="" coords="407,919,585,959"/>
+<area shape="poly" id="edge2270_Node000011_Node000023" title=" " alt="" coords="301,572,318,579,333,591,348,611,359,631,368,671,366,710,358,750,350,789,348,828,356,867,366,886,381,905,408,925,405,929,377,909,361,889,351,869,342,828,345,788,353,749,361,710,363,671,354,633,344,614,329,595,315,584,299,577"/>
+<area shape="rect" id="Node000024" href="$struct_slice_extracts.html" title=" " alt="" coords="443,984,549,1009"/>
+<area shape="poly" id="edge2271_Node000011_Node000024" title=" " alt="" coords="301,572,318,579,333,591,351,615,363,639,370,663,372,688,368,735,357,783,346,830,341,877,344,900,351,923,363,946,381,969,394,980,409,988,443,995,442,1001,407,993,391,985,377,973,358,949,346,925,339,901,336,877,340,829,352,782,363,735,367,688,365,664,358,641,346,618,329,595,315,584,299,576"/>
+</map>

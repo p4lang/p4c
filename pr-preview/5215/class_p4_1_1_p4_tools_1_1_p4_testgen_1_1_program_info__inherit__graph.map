@@ -1,0 +1,23 @@
+<map id="P4::P4Tools::P4Testgen::ProgramInfo" name="P4::P4Tools::P4Testgen::ProgramInfo">
+<area shape="rect" id="Node000001" title="Stores target&#45;specific information about a P4 program." alt="" coords="323,133,492,173"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_program_info.html" title=" " alt="" coords="540,5,791,45"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="439,122,485,87,539,55,570,43,572,48,541,60,488,91,443,126"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_program_info.html" title=" " alt="" coords="574,69,757,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="501,127,584,107,585,112,502,133"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html" title=" " alt="" coords="560,133,771,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="506,151,560,151,560,156,506,156"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_abstract_tofino_program_info.html" title=" " alt="" coords="541,197,789,237"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="502,174,585,195,584,200,501,179"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info.html" title=" " alt="" coords="546,261,785,301"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="443,180,488,215,541,247,572,259,570,264,539,252,485,220,439,185"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="168,141,275,166"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="288,151,323,151,323,156,288,156"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,141,120,166"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="134,151,168,151,168,156,134,156"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_program_info.html" title=" " alt="" coords="839,133,1039,173"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="785,151,838,151,838,156,785,156"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_program_info.html" title=" " alt="" coords="846,229,1031,269"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="798,263,845,258,846,263,799,268"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_program_info.html" title=" " alt="" coords="841,293,1036,333"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="799,294,841,299,841,305,798,300"/>
+</map>

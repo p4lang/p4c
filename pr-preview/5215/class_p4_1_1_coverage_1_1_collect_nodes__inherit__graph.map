@@ -1,0 +1,7 @@
+<map id="P4::Coverage::CollectNodes" name="P4::Coverage::CollectNodes">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,208,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="53,79,160,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,118,109,152,104,152,104,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="63,5,151,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,44,109,79,104,79,104,44"/>
+</map>

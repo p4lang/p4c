@@ -1,0 +1,13 @@
+<map id="Target::JBay" name="Target::JBay">
+<area shape="rect" id="Node000001" title=" " alt="" coords="253,79,352,104"/>
+<area shape="rect" id="Node000003" href="$class_target_1_1_tofino2_a0.html" title=" " alt="" coords="5,152,139,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="253,111,110,154,109,149,252,106"/>
+<area shape="rect" id="Node000004" href="$class_target_1_1_tofino2_h.html" title=" " alt="" coords="163,152,290,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="282,115,241,154,237,150,279,111"/>
+<area shape="rect" id="Node000005" href="$class_target_1_1_tofino2_m.html" title=" " alt="" coords="315,152,443,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="327,111,368,150,364,154,323,115"/>
+<area shape="rect" id="Node000006" href="$class_target_1_1_tofino2_u.html" title=" " alt="" coords="467,152,594,177"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="353,106,495,149,493,154,352,111"/>
+<area shape="rect" id="Node000002" href="$class_target.html" title=" " alt="" coords="271,5,334,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="305,44,305,79,300,79,300,44"/>
+</map>
