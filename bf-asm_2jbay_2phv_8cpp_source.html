@@ -176,9 +176,9 @@ $(function(){initNavTree('bf-asm_2jbay_2phv_8cpp_source.html',''); initResizable
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>            }</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        }</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    }</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    BUG_CHECK(uid == phv.regs.size());</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    BUG_CHECK(deparser_id == 224);</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    BUG_CHECK(<span class="keywordtype">byte</span> == 512);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    BUG_CHECK(uid == phv.regs.size(), <span class="stringliteral">&quot;uid %u != %zu&quot;</span>, uid, phv.regs.size());</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    BUG_CHECK(deparser_id == 224, <span class="stringliteral">&quot;deparser_id %u != 224&quot;</span>, deparser_id);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    BUG_CHECK(<span class="keywordtype">byte</span> == 512, <span class="stringliteral">&quot;byte %u != 512&quot;</span>, <span class="keywordtype">byte</span>);</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>}</div>
 <div class="ttc" id="aclass_phv_html"><div class="ttname"><a href="class_phv.html">Phv</a></div><div class="ttdef"><b>Definition</b> bf-asm/phv.h:32</div></div>
 </div><!-- fragment --></div><!-- contents -->

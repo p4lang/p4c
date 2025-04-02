@@ -161,7 +161,7 @@ $(function(){initNavTree('bf-asm_2tofino_2phv_8cpp_source.html',''); initResizab
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            }</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        }</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>    }</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    BUG_CHECK(uid == phv.regs.size());</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    BUG_CHECK(uid == phv.regs.size(), <span class="stringliteral">&quot;uid %u != %zu&quot;</span>, uid, phv.regs.size());</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>}</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keyword">static</span> bitvec tagalong_group(<span class="keywordtype">int</span> n) {</div>

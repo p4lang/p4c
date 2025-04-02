@@ -712,6 +712,7 @@ var hierarchy =
       [ "IterKeysCopy< Map >", "struct_iter_keys_copy.html", null ]
     ] ],
     [ "IterValues< PairIter >", "struct_iter_values.html", null ],
+    [ "IterValues< PairIter >::iterator", "class_iter_values_1_1iterator.html", null ],
     [ "IterValues< Map::const_iterator >", "struct_iter_values.html", [
       [ "IterValuesCopy< Map >", "struct_iter_values_copy.html", null ]
     ] ],
@@ -4186,7 +4187,6 @@ var hierarchy =
     ] ],
     [ "std::iterator< PackedItem >", null, [
       [ "IterKeys< PairIter >::iterator", "class_iter_keys_1_1iterator.html", null ],
-      [ "IterValues< PairIter >::iterator", "class_iter_values_1_1iterator.html", null ],
       [ "P4::ordered_set< T, COMP, ALLOC >::sorted_iterator", "class_p4_1_1ordered__set_1_1sorted__iterator.html", null ],
       [ "slist< T >::iterator", "classslist_1_1iterator.html", null ]
     ] ],

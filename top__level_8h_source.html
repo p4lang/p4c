@@ -154,7 +154,7 @@ $(function(){initNavTree('top__level_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">static</span> <a class="code hl_class" href="class_top_level_regs.html">TopLevelRegs&lt;typename T::register_type&gt;</a> *regs();</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#define SET_MAU_STAGE(TARGET)                                                         \</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">    virtual void set_mau_stage(int, const char *, Target::TARGET::mau_regs *, bool) { \</span></div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">        BUG_CHECK(!&quot;register mismatch&quot;);                                              \</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">        BUG(&quot;register mismatch&quot;);                                                     \</span></div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">    }</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    FOR_ALL_REGISTER_SETS(SET_MAU_STAGE)</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>};</div>

@@ -162,7 +162,7 @@ $(function(){initNavTree('tofino_2stage_8cpp_source.html',''); initResizable(tru
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>                    merge.predication_ctl[gress].start_table_fifo_enable = 0;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>                    <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>                <span class="keywordflow">default</span>:</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>                    BUG();</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>                    BUG(<span class="stringliteral">&quot;bad stage dependency&quot;</span>);</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>            }</div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        }</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        <span class="keywordflow">if</span> (stageno != 0) {</div>
@@ -252,10 +252,12 @@ $(function(){initNavTree('tofino_2stage_8cpp_source.html',''); initResizable(tru
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span><span class="keyword">template</span> &lt;&gt;</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span><span class="keywordtype">void</span> Stage::gen_mau_stage_extension(Target::Tofino::mau_regs &amp;regs, <a class="code hl_class" href="classjson_1_1map.html">json::map</a> &amp;extend) {</div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    BUG();  <span class="comment">// stage extension not supported on tofino</span></div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    BUG(<span class="stringliteral">&quot;stage extension not supported on Tofino&quot;</span>);</div>
 <div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>}</div>
 <div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="keywordtype">void</span> AlwaysRunTable::write_regs(Target::Tofino::mau_regs &amp;) { BUG(); }</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="keywordtype">void</span> AlwaysRunTable::write_regs(Target::Tofino::mau_regs &amp;) {</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    BUG(<span class="stringliteral">&quot;register writes not supported on Tofino&quot;</span>);</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>}</div>
 <div class="ttc" id="aclass_p4_1_1bitvec_html"><div class="ttname"><a href="class_p4_1_1bitvec.html">P4::bitvec</a></div><div class="ttdef"><b>Definition</b> bitvec.h:120</div></div>
 <div class="ttc" id="aclassjson_1_1map_html"><div class="ttname"><a href="classjson_1_1map.html">json::map</a></div><div class="ttdef"><b>Definition</b> backends/tofino/bf-asm/json.h:300</div></div>
 <div class="ttc" id="aclassjson_1_1vector_html"><div class="ttname"><a href="classjson_1_1vector.html">json::vector</a></div><div class="ttdef"><b>Definition</b> backends/tofino/bf-asm/json.h:222</div></div>

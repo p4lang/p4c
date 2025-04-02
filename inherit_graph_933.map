@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$struct_rerun_table_placement_trigger.html" title=" " alt="" coords="5,5,212,31"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,5,180,31"/>
+<area shape="rect" id="Node000001" href="$class_top_level_regs.html" title=" " alt="" coords="228,31,420,56"/>
+<area shape="poly" id="edge2637_Node000000_Node000001" title=" " alt="" coords="194,26,228,30,227,35,194,32"/>
+<area shape="rect" id="Node000002" href="$class_top_level.html" title=" " alt="" coords="53,55,132,80"/>
+<area shape="poly" id="edge2638_Node000002_Node000001" title=" " alt="" coords="146,59,227,51,228,56,146,65"/>
 </map>

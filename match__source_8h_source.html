@@ -189,11 +189,13 @@ $(function(){initNavTree('match__source_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <span class="keywordflow">return</span> str.str();</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    }</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">void</span> dbprint(std::ostream &amp;out)<span class="keyword"> const </span>{ out &lt;&lt; name() &lt;&lt; <span class="stringliteral">&quot;(&quot;</span> &lt;&lt; lo &lt;&lt; <span class="stringliteral">&quot;..&quot;</span> &lt;&lt; hi &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>; }</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>};</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">void</span> dbprint(std::ostream &amp;out)<span class="keyword"> const override </span>{</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        out &lt;&lt; name() &lt;&lt; <span class="stringliteral">&quot;(&quot;</span> &lt;&lt; lo &lt;&lt; <span class="stringliteral">&quot;..&quot;</span> &lt;&lt; hi &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    }</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>};</div>
 </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_ASM_MATCH_SOURCE_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_ASM_MATCH_SOURCE_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_match_source_html"><div class="ttname"><a href="class_match_source.html">MatchSource</a></div><div class="ttdef"><b>Definition</b> match_source.h:32</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_has_db_print_html"><div class="ttname"><a href="class_p4_1_1_i_has_db_print.html">P4::IHasDbPrint</a></div><div class="ttdef"><b>Definition</b> stringify.h:33</div></div>
 <div class="ttc" id="anamespace_p4_html_a9fe6085b1cee8f21f098c9db89644b58"><div class="ttname"><a href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">P4::error</a></div><div class="ttdeci">void error(const char *format, Args &amp;&amp;...args)</div><div class="ttdoc">Report an error with the given message.</div><div class="ttdef"><b>Definition</b> lib/error.h:58</div></div>

@@ -207,11 +207,11 @@ $(function(){initNavTree('parser-tofino-jbay_8h_source.html',''); initResizable(
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            <span class="keyword">explicit</span> Ref(<a class="code hl_struct" href="structvalue__t.html">value_t</a> &amp;v) { *<span class="keyword">this</span> = v; }</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> ptr.size() &gt; 0; }</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>            State *operator-&gt;()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                BUG_CHECK(ptr.size() == 1);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>                BUG_CHECK(ptr.size() == 1, <span class="stringliteral">&quot;pointer size must be 1, got %d&quot;</span>, ptr.size());</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                <span class="keywordflow">return</span> ptr[0];</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            }</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            State *operator*()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                BUG_CHECK(ptr.size() == 1);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                BUG_CHECK(ptr.size() == 1, <span class="stringliteral">&quot;pointer size must be 1, got %d&quot;</span>, ptr.size());</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                <span class="keywordflow">return</span> ptr[0];</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>            }</div>
 <div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> Ref &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> name == a.name &amp;&amp; pattern == a.pattern; }</div>
@@ -739,7 +739,7 @@ $(function(){initNavTree('parser-tofino-jbay_8h_source.html',''); initResizable(
 <div class="line"><a id="l00601" name="l00601"></a><span class="lineno">  601</span> </div>
 <div class="line"><a id="l00602" name="l00602"></a><span class="lineno">  602</span>    <span class="keywordflow">if</span> (buf_req &lt; 0) {</div>
 <div class="line"><a id="l00603" name="l00603"></a><span class="lineno">  603</span>        buf_req = max_off + 1;</div>
-<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>        BUG_CHECK(buf_req &lt;= 32);</div>
+<div class="line"><a id="l00604" name="l00604"></a><span class="lineno">  604</span>        BUG_CHECK(buf_req &lt;= 32, <span class="stringliteral">&quot;Buffer requirement too large: %d&quot;</span>, buf_req);</div>
 <div class="line"><a id="l00605" name="l00605"></a><span class="lineno">  605</span>    }</div>
 <div class="line"><a id="l00606" name="l00606"></a><span class="lineno">  606</span>    ea_row.buf_req = buf_req;</div>
 <div class="line"><a id="l00607" name="l00607"></a><span class="lineno">  607</span>}</div>
@@ -866,10 +866,10 @@ $(function(){initNavTree('parser-tofino-jbay_8h_source.html',''); initResizable(
 <div class="ttc" id="agroup__parde_html_class_parser"><div class="ttname"><a href="group__parde.html#class_parser">Parser</a></div><div class="ttdoc">Representation of the Tofino 1/2 parser in assembler.</div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.h:48</div></div>
 <div class="ttc" id="anamespace_p4_html_a9fe6085b1cee8f21f098c9db89644b58"><div class="ttname"><a href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">P4::error</a></div><div class="ttdeci">void error(const char *format, Args &amp;&amp;...args)</div><div class="ttdoc">Report an error with the given message.</div><div class="ttdef"><b>Definition</b> lib/error.h:58</div></div>
 <div class="ttc" id="anamespacejson_html"><div class="ttname"><a href="namespacejson.html">json</a></div><div class="ttdef"><b>Definition</b> bson.cpp:69</div></div>
-<div class="ttc" id="astruct_match_html"><div class="ttname"><a href="struct_match.html">Match</a></div><div class="ttdef"><b>Definition</b> tables.h:1465</div></div>
+<div class="ttc" id="astruct_match_html"><div class="ttname"><a href="struct_match.html">Match</a></div><div class="ttdef"><b>Definition</b> tables.h:1466</div></div>
 <div class="ttc" id="astruct_p4_1_1match__t_html"><div class="ttname"><a href="struct_p4_1_1match__t.html">P4::match_t</a></div><div class="ttdef"><b>Definition</b> match.h:36</div></div>
 <div class="ttc" id="astruct_parser_1_1_state_1_1_match_html"><div class="ttname"><a href="struct_parser_1_1_state_1_1_match.html">Parser::State::Match</a></div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.h:139</div></div>
-<div class="ttc" id="astruct_parser_1_1_state_1_1_match_html_a5af66748de3bed60926e9eebf2857878"><div class="ttname"><a href="struct_parser_1_1_state_1_1_match.html#a5af66748de3bed60926e9eebf2857878">Parser::State::Match::get_all_preds</a></div><div class="ttdeci">std::set&lt; Match * &gt; get_all_preds()</div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.cpp:1850</div></div>
+<div class="ttc" id="astruct_parser_1_1_state_1_1_match_html_a5af66748de3bed60926e9eebf2857878"><div class="ttname"><a href="struct_parser_1_1_state_1_1_match.html#a5af66748de3bed60926e9eebf2857878">Parser::State::Match::get_all_preds</a></div><div class="ttdeci">std::set&lt; Match * &gt; get_all_preds()</div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.cpp:1851</div></div>
 <div class="ttc" id="astruct_parser_1_1_state_1_1_match_html_ad284f2336dd4165980d59012c3f9532e"><div class="ttname"><a href="struct_parser_1_1_state_1_1_match.html#ad284f2336dd4165980d59012c3f9532e">Parser::State::Match::has_narrow_to_wide_extract</a></div><div class="ttdeci">bool has_narrow_to_wide_extract</div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.h:164</div></div>
 <div class="ttc" id="astruct_parser_1_1_state_1_1_match_key_html"><div class="ttname"><a href="struct_parser_1_1_state_1_1_match_key.html">Parser::State::MatchKey</a></div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.h:107</div></div>
 <div class="ttc" id="astruct_parser_1_1_state_1_1_output_use_html"><div class="ttname"><a href="struct_parser_1_1_state_1_1_output_use.html">Parser::State::OutputUse</a></div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.h:130</div></div>

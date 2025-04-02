@@ -328,7 +328,7 @@ $(function(){initNavTree('bf-asm_2phv_8h_source.html',''); initResizable(true); 
 <div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>              lo(r.lo &lt; 0 ? l : r.lo + l),</div>
 <div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>              hi(r.lo &lt; 0 ? h : r.lo + h),</div>
 <div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>              lineno(r.lineno) {</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>            BUG_CHECK(r.hi &lt; 0 || hi &lt;= r.hi);</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>            BUG_CHECK(r.hi &lt; 0 || hi &lt;= r.hi, <span class="stringliteral">&quot;Out of bounds slice: %s&quot;</span>, r.toString().c_str());</div>
 <div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        }</div>
 <div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        Ref(<span class="keyword">const</span> <a class="code hl_struct" href="struct_phv_1_1_register.html">Register</a> &amp;r, gress_t gr, <span class="keywordtype">int</span> lo = -1, <span class="keywordtype">int</span> hi = -1);</div>
 <div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <span class="keyword">explicit</span> <span class="keyword">operator</span> bool()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> lineno &gt;= 0; }</div>
@@ -375,7 +375,7 @@ $(function(){initNavTree('bf-asm_2phv_8h_source.html',''); initResizable(true); 
 <div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        }</div>
 <div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="keywordtype">bool</span> merge(<span class="keyword">const</span> Ref &amp;r);</div>
 <div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        std::string toString() <span class="keyword">const override</span>;</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        <span class="keywordtype">void</span> dbprint(std::ostream &amp;out) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        <span class="keywordtype">void</span> dbprint(std::ostream &amp;out) <span class="keyword">const override</span>;</div>
 <div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> </div>
 <div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keywordtype">int</span> get_lineno()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> lineno; }</div>
 <div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="keywordtype">int</span> fieldlobit()<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> lobit(); }</div>
@@ -386,7 +386,7 @@ $(function(){initNavTree('bf-asm_2phv_8h_source.html',''); initResizable(true); 
 </div>
 <div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="comment">// Return register using mau_id as @arg index</span></div>
 <div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <span class="keyword">static</span> <span class="keyword">const</span> <a class="code hl_struct" href="struct_phv_1_1_register.html">Register</a> *reg(<span class="keywordtype">int</span> idx) {</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        BUG_CHECK(idx &gt;= 0 &amp;&amp; <span class="keywordtype">size_t</span>(idx) &lt; phv.regs.size());</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        BUG_CHECK(idx &gt;= 0 &amp;&amp; <span class="keywordtype">size_t</span>(idx) &lt; phv.regs.size(), <span class="stringliteral">&quot;Register index out of range&quot;</span>);</div>
 <div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        <span class="keywordflow">return</span> phv.regs[idx];</div>
 <div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    }</div>
 <div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>

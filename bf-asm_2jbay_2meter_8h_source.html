@@ -136,8 +136,8 @@ $(function(){initNavTree('bf-asm_2jbay_2meter_8h_source.html',''); initResizable
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> REGS&gt;</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="keywordtype">void</span> MeterTable::setup_teop_regs_2(REGS &amp;regs, <span class="keywordtype">int</span> meter_group_index) {</div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    BUG_CHECK(teop &gt;= 0 &amp;&amp; teop &lt; 4);</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    BUG_CHECK(gress == EGRESS);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    BUG_CHECK(teop &gt;= 0 &amp;&amp; teop &lt; 4, <span class="stringliteral">&quot;teop out of range&quot;</span>);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    BUG_CHECK(gress == EGRESS, <span class="stringliteral">&quot;gress must be EGRESS&quot;</span>);</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    <span class="keyword">auto</span> &amp;adrdist = regs.rams.match.adrdist;</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    <span class="keywordflow">if</span> (!teop_initialized) {</div>
@@ -219,7 +219,7 @@ $(function(){initNavTree('bf-asm_2jbay_2meter_8h_source.html',''); initResizable
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>                }</div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            }</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            <span class="keywordflow">if</span> (block_end) {</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                BUG_CHECK(min != 1000000 &amp;&amp; max != -1);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                BUG_CHECK(min != 1000000 &amp;&amp; max != -1, <span class="stringliteral">&quot;Invalid VPN range&quot;</span>);</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                bitvec block_range(min, max - min + 1);</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                <span class="keywordflow">if</span> (vpn_range.intersects(block_range))</div>
@@ -236,7 +236,7 @@ $(function(){initNavTree('bf-asm_2jbay_2meter_8h_source.html',''); initResizable
 <div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            }</div>
 <div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        }</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        BUG_CHECK(block_start &amp;&amp; block_end);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        BUG_CHECK(block_start &amp;&amp; block_end, <span class="stringliteral">&quot;Invalid VPN range&quot;</span>);</div>
 <div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    }</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keywordflow">if</span> (vpn_range != bitvec(minvpn, sparevpn - minvpn))</div>

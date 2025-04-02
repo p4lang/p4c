@@ -8,8 +8,8 @@ var class_input_xbar =
     [ "Input", "struct_input_xbar_1_1_input.html", null ],
     [ "TcamUseCache", "class_input_xbar.html#struct_input_xbar_1_1_tcam_use_cache", null ],
     [ "find_hash_inputs", "class_input_xbar.html#a7793a6a51687afcae668bc8f4d65cb35", null ],
-    [ "write_galois_matrix", "class_input_xbar.html#af2051e5346a35f374e765f8a347c58be", null ],
     [ "write_galois_matrix", "class_input_xbar.html#a1349754ca810327b6860731904af4d26", null ],
-    [ "write_galois_matrix", "class_input_xbar.html#a13944875fd9f0bfc41c09a4cd01795b7", null ],
+    [ "write_galois_matrix", "class_input_xbar.html#a1349754ca810327b6860731904af4d26", null ],
+    [ "write_galois_matrix", "class_input_xbar.html#a43eff75d7e2ac27ed8833f6a7db7bf94", null ],
     [ "write_galois_matrix", "class_input_xbar.html#a43eff75d7e2ac27ed8833f6a7db7bf94", null ]
 ];
