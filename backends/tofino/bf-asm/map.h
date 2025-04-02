@@ -141,12 +141,13 @@ IterKeys<PairIter> Keys(std::pair<PairIter, PairIter> range) {
 /* iterate over the values in a map */
 template <class PairIter>
 struct IterValues {
-    class iterator
-        : public std::iterator<typename std::iterator_traits<PairIter>::iterator_category,
-                               typename std::iterator_traits<PairIter>::value_type,
-                               typename std::iterator_traits<PairIter>::difference_type,
-                               typename std::iterator_traits<PairIter>::pointer,
-                               typename std::iterator_traits<PairIter>::reference> {
+    class iterator {
+     public:
+        using iterator_category = typename std::iterator_traits<PairIter>::iterator_category;
+        using value_type = typename std::iterator_traits<PairIter>::value_type;
+        using difference_type = typename std::iterator_traits<PairIter>::difference_type;
+        using pointer = typename std::iterator_traits<PairIter>::pointer;
+        using reference = typename std::iterator_traits<PairIter>::reference;
         PairIter it;
 
      public:

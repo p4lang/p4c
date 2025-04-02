@@ -21,6 +21,7 @@
 #include "asm-types.h"
 #include "backends/tofino/bf-asm/config.h"
 #include "bfas.h"
+#include "lib/exceptions.h"
 #include "map.h"
 
 struct MemUnit;
@@ -31,53 +32,50 @@ struct MemUnit;
  *  FOR_ALL_TARGET_CLASSES -- metamacro that expands for each distinct target class
  *              a subset of the register sets
  */
-#define FOR_ALL_TARGETS(M, ...) \
-    M(Tofino, ##__VA_ARGS__)    \
-    M(JBay, ##__VA_ARGS__)      \
-    M(Tofino2H, ##__VA_ARGS__)  \
-    M(Tofino2M, ##__VA_ARGS__)  \
-    M(Tofino2U, ##__VA_ARGS__)  \
-    M(Tofino2A0, ##__VA_ARGS__)
-#define FOR_ALL_REGISTER_SETS(M, ...) \
-    M(Tofino, ##__VA_ARGS__)          \
-    M(JBay, ##__VA_ARGS__)
-#define FOR_ALL_TARGET_CLASSES(M, ...) M(Tofino, ##__VA_ARGS__)
+// TODO: clang-format adds space in __VA_OPT__
+#define FOR_ALL_TARGETS(M, ...)           \
+    M(Tofino __VA_OPT__(,) __VA_ARGS__)   \
+    M(JBay __VA_OPT__(,) __VA_ARGS__)     \
+    M(Tofino2H __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2M __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2U __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2A0 __VA_OPT__(,) __VA_ARGS__)
+#define FOR_ALL_REGISTER_SETS(M, ...)   \
+    M(Tofino __VA_OPT__(,) __VA_ARGS__) \
+    M(JBay __VA_OPT__(,) __VA_ARGS__)
+#define FOR_ALL_TARGET_CLASSES(M, ...) M(Tofino __VA_OPT__(,) __VA_ARGS__)
 
 // alias FOR_ALL -> FOR_EACH so the the group name does need to be plural
 #define FOR_EACH_TARGET FOR_ALL_TARGETS
 #define FOR_EACH_REGISTER_SET FOR_ALL_REGISTER_SETS
 #define FOR_EACH_TARGET_CLASS FOR_ALL_TARGET_CLASSES
 
-#define TARGETS_IN_CLASS_Tofino(M, ...) \
-    M(Tofino, ##__VA_ARGS__)            \
-    M(JBay, ##__VA_ARGS__)              \
-    M(Tofino2H, ##__VA_ARGS__)          \
-    M(Tofino2M, ##__VA_ARGS__)          \
-    M(Tofino2U, ##__VA_ARGS__)          \
-    M(Tofino2A0, ##__VA_ARGS__)
+#define TARGETS_IN_CLASS_Tofino(M, ...)   \
+    M(Tofino __VA_OPT__(,) __VA_ARGS__)   \
+    M(JBay __VA_OPT__(,) __VA_ARGS__)     \
+    M(Tofino2H __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2M __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2U __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2A0 __VA_OPT__(,) __VA_ARGS__)
 #define REGSETS_IN_CLASS_Tofino(M, ...) \
-    M(Tofino, ##__VA_ARGS__)            \
-    M(JBay, ##__VA_ARGS__)
+    M(Tofino __VA_OPT__(,) __VA_ARGS__) \
+    M(JBay __VA_OPT__(,) __VA_ARGS__)
 
-#define TARGETS_USING_REGS_JBay(M, ...) \
-    M(JBay, ##__VA_ARGS__)              \
-    M(Tofino2H, ##__VA_ARGS__)          \
-    M(Tofino2M, ##__VA_ARGS__)          \
-    M(Tofino2U, ##__VA_ARGS__)          \
-    M(Tofino2A0, ##__VA_ARGS__)
-#define TARGETS_USING_REGS_Tofino(M, ...) M(Tofino, ##__VA_ARGS__)
+#define TARGETS_USING_REGS_JBay(M, ...)   \
+    M(JBay __VA_OPT__(,) __VA_ARGS__)     \
+    M(Tofino2H __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2M __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2U __VA_OPT__(,) __VA_ARGS__) \
+    M(Tofino2A0 __VA_OPT__(,) __VA_ARGS__)
+#define TARGETS_USING_REGS_Tofino(M, ...) M(Tofino __VA_OPT__(,) __VA_ARGS__)
 
 #define TARGETS_IN_CLASS(CL, ...) TARGETS_IN_CLASS_##CL(__VA_ARGS__)
 #define TARGETS_USING_REGS(CL, ...) TARGETS_USING_REGS_##CL(__VA_ARGS__)
 #define REGSETS_IN_CLASS(CL, ...) REGSETS_IN_CLASS_##CL(__VA_ARGS__)
 
-#define EXPAND(...) __VA_ARGS__
-#define EXPAND_COMMA(...) , ##__VA_ARGS__
-#define EXPAND_COMMA_CLOSE(...) ,##__VA_ARGS__ )
 #define INSTANTIATE_TARGET_TEMPLATE(TARGET, FUNC, ...) template FUNC(Target::TARGET::__VA_ARGS__);
 #define DECLARE_TARGET_CLASS(TARGET, ...) class TARGET __VA_ARGS__;
 #define FRIEND_TARGET_CLASS(TARGET, ...) friend class Target::TARGET __VA_ARGS__;
-#define TARGET_OVERLOAD(TARGET, FN, ARGS, ...) FN(Target::TARGET::EXPAND ARGS) __VA_ARGS__;
 
 #define PER_TARGET_CONSTANTS(M)                         \
     M(const char *, name)                               \
@@ -699,6 +697,11 @@ void emit_parser_registers(const Target::JBay::top_level_regs *regs, std::ostrea
  * will all have a Target::type argument prepended.  The final ARGS argument is the argument
  * list that that will be forwarded (basically ARGDECL without the types)
  */
+#define EXPAND(...) __VA_ARGS__
+#define EXPAND_COMMA(...) __VA_OPT__(,) __VA_ARGS__
+#define EXPAND_COMMA_CLOSE(...) __VA_OPT__(,) __VA_ARGS__ )
+#define TARGET_OVERLOAD(TARGET, FN, ARGS, ...) FN(Target::TARGET::EXPAND ARGS) __VA_ARGS__;
+
 #define DECL_OVERLOAD_FUNC(TARGET, RTYPE, NAME, ARGDECL, ARGS) \
     RTYPE NAME(Target::TARGET EXPAND_COMMA_CLOSE ARGDECL;
 #define OVERLOAD_FUNC_FOREACH(GROUP, RTYPE, NAME, ARGDECL, ARGS, ...)                    \

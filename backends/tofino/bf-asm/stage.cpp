@@ -60,8 +60,8 @@ AsmStage::AsmStage() : Section("stage") {
         Stage::action_bus_slot_map[byte++] = slot;
         Stage::action_bus_slot_size[slot++] = 32;
     }
-    BUG_CHECK(byte == ACTION_DATA_BUS_BYTES);
-    BUG_CHECK(slot == ACTION_DATA_BUS_SLOTS);
+    BUG_CHECK(byte == ACTION_DATA_BUS_BYTES, "action data bus size mismatch");
+    BUG_CHECK(slot == ACTION_DATA_BUS_SLOTS, "action data bus slots mismatch");
 }
 
 void AsmStage::start(int lineno, VECTOR(value_t) args) {
@@ -88,7 +88,7 @@ void AsmStage::input(VECTOR(value_t) args, value_t data) {
             ? GHOST
             : (error(args[1].lineno, "Invalid thread %s", value_desc(args[1])), INGRESS);
     auto &stage = stages(gress);
-    BUG_CHECK(stageno >= 0 && (unsigned)stageno < stage.size());
+    BUG_CHECK(stageno >= 0 && (unsigned)stageno < stage.size(), "invalid stage number");
     if (stages_seen[gress][stageno])
         error(args[0].lineno, "Duplicate stage %d %s", stageno, to_string(gress).c_str());
     stages_seen[gress][stageno] = 1;
@@ -446,7 +446,7 @@ int Stage::first_table(gress_t gress) {
             if (tbl->logical_id < min_logical_id) min_logical_id = tbl->logical_id;
         }
         if (min_logical_id != INT_MAX) {
-            BUG_CHECK((min_logical_id & ~0xf) == 0);
+            BUG_CHECK((min_logical_id & ~0xf) == 0, "min_logical_id %d", min_logical_id);
             return (st.stageno << 4) + min_logical_id;
         }
     }
@@ -738,7 +738,7 @@ void Stage::gen_mau_stage_characteristics(REGS &regs, json::vector &stg_characte
 
 template <class REGS>
 void Stage::gen_configuration_cache(REGS &regs, json::vector &cfg_cache) {
-    BUG();  // Must be specialized for target -- no generic implementation
+    BUG("Must be specialized for target -- no generic implementation");
 }
 
 template <class REGS>

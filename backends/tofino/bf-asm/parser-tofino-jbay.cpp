@@ -394,7 +394,7 @@ void Parser::process() {
                 LOG1("Creating new " << gress << " " << name << " state");
                 auto n = states.emplace(name, new State(lineno, name.c_str(), gress, match_t{0, 0},
                                                         VECTOR(pair_t){0, 0, 0}));
-                BUG_CHECK(n.second);
+                BUG_CHECK(n.second, "State %s already defined", name.c_str());
                 State *state = n.first->second;
                 state->def = new State::Match(lineno, gress, *start_state[i]);
                 for (int j = 3; j >= i; j--)
@@ -1177,7 +1177,8 @@ void Parser::State::MatchKey::setup(value_t &spec) {
     // is not necessary as we can have independent byte extractors
     if (Target::MATCH_BYTE_16BIT_PAIRS() && (data[0].byte & data[1].byte) != USE_SAVED) {
         if (data[0].bit >= 0 && data[1].bit >= 0 && data[0].byte + 1 != data[1].byte) {
-            BUG_CHECK((data[0].byte | data[1].byte) != USE_SAVED);
+            BUG_CHECK((data[0].byte | data[1].byte) != USE_SAVED,
+                      "invalid match byte pair: 0x%02x 0x%02x", data[0].byte, data[1].byte);
             int unused = -1;  // unused slot
             for (int i = 0; i < 4; i++) {
                 if (data[i].bit < 0) {
@@ -1197,7 +1198,7 @@ void Parser::State::MatchKey::setup(value_t &spec) {
                 }
             }
             if (unused >= 0) {
-                BUG_CHECK(unused > 1);
+                BUG_CHECK(unused > 1, "Less than 2 unused slots in match bytes");
                 std::swap(data[1], data[unused]);
             } else {
                 error(spec.lineno, "Must have a 16-bit pair in match bytes");
@@ -1621,7 +1622,7 @@ Parser::State::State(int l, const char *n, gress_t gr, match_t sno, const VECTOR
         }
     }
     if (default_data.size) {
-        BUG_CHECK(!def);
+        BUG_CHECK(!def, "def is already set");
         match_t m = {0, 0};
         def = new Match(default_data[0].key.lineno, gress, this, m, default_data);
     }

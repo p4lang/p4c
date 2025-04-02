@@ -146,7 +146,8 @@ void ExactMatchTable::determine_ghost_bits() {
                 hash_tables = bitvec(hash_group->tables);
             } else {
                 for (auto &ht : ixb->get_hash_tables()) {
-                    BUG_CHECK(ht.first.type == InputXbar::HashTable::EXACT);
+                    BUG_CHECK(ht.first.type == InputXbar::HashTable::EXACT,
+                              "Unexpected hash table type");
                     hash_tables[ht.first.index] = 1;
                 }
             }
@@ -280,7 +281,7 @@ void ExactMatchTable::generate_stash_overhead_rows() {
                 Ram stash_ram(stash_row, stash_col);
                 if (way_map.count(stash_ram) > 0) {
                     auto way_word = way_map[stash_ram].word;
-                    BUG_CHECK(format);
+                    BUG_CHECK(format, "no format");
                     if (way_word == format->overhead_word) {
                         stash_overhead_rows.push_back(stash_row);
                         break;
@@ -466,7 +467,7 @@ void ExactMatchTable::gen_tbl_cfg(json::vector &out) const {
             way_tbl["way_number"] = way_number++;
             way_tbl["stage_table_type"] = "hash_way";
             auto fmt_width = get_format_width();
-            BUG_CHECK(fmt_width);
+            BUG_CHECK(fmt_width, "format width is zero");
             unsigned ram_depth = way.rams.at(0).isLamb() ? LAMB_DEPTH : SRAM_DEPTH;
             way_tbl["size"] = way.rams.size() / fmt_width * format->groups() * ram_depth;
             add_pack_format(way_tbl, format.get(), false);

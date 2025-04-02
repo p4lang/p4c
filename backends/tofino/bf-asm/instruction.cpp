@@ -32,13 +32,12 @@ constexpr int RotationBits = 16;
 std::multimap<std::string, Instruction::Decode *>
     Instruction::Decode::opcode[Instruction::NUM_SETS];
 
-Instruction::Decode::Decode(const char *name, int set, bool ts) : type_suffix(ts) {
-    targets = ~0U;
+Instruction::Decode::Decode(const char *name, int set, bool ts) : type_suffix(ts), targets(~0U) {
     for (auto d : ValuesForKey(opcode[set], name)) {
-        BUG_CHECK(!(d->targets & 1));
+        BUG_CHECK(!(d->targets & 1), "invalid target id");
         targets &= ~d->targets;
     }
-    BUG_CHECK(targets > 1);
+    BUG_CHECK(targets > 1, "less than 2 targets");
     opcode[set].emplace(name, this);
 }
 Instruction::Decode::Decode(const char *name, target_t target, int set, bool ts) : type_suffix(ts) {
@@ -46,7 +45,7 @@ Instruction::Decode::Decode(const char *name, target_t target, int set, bool ts)
     for (auto d : ValuesForKey(opcode[set], name)) {
         if (d->targets & 1) {
             d->targets &= ~targets;
-            BUG_CHECK(d->targets > 1);
+            BUG_CHECK(d->targets > 1, "less than 2 targets");
         }
     }
     opcode[set].emplace(name, this);
@@ -54,11 +53,11 @@ Instruction::Decode::Decode(const char *name, target_t target, int set, bool ts)
 Instruction::Decode::Decode(const char *name, std::set<target_t> target, int set, bool ts)
     : type_suffix(ts), targets(0) {
     for (auto t : target) targets |= 1 << t;
-    BUG_CHECK(targets > 1);
+    BUG_CHECK(targets > 1, "less than 2 targets");
     for (auto d : ValuesForKey(opcode[set], name)) {
         if (d->targets & 1) {
             d->targets &= ~targets;
-            BUG_CHECK(d->targets > 1);
+            BUG_CHECK(d->targets > 1, "less than 2 targets");
         }
     }
     opcode[set].emplace(name, this);
@@ -227,7 +226,7 @@ struct Operand : public IHasDbPrint {
         Action *clone() override { return new Action(*this); }
         int bits(int group, int dest_size = -1) override {
             int size = group_size[group] / 8U;
-            BUG_CHECK(lo >= 0 && hi >= 0);
+            BUG_CHECK(lo >= 0 && hi >= 0, "lo=%d, hi=%d", lo, hi);
             unsigned lo = this->lo, hi = this->hi;
             if (dest_size > 0) {
                 // override size based on destination size for deposit-field
@@ -527,22 +526,22 @@ struct Operand : public IHasDbPrint {
         Base *lookup(Base *&ref) override;
         Named *clone() override { return new Named(*this); }
         bool check() override {
-            BUG();
+            BUG("unsupported");
             return true;
         }
         int phvGroup() override {
-            BUG();
+            BUG("unsupported");
             return -1;
         }
         int bits(int group, int dest_size = -1) override {
-            BUG();
+            BUG("unsupported");
             return 0;
         }
         unsigned bitoffset(int group) const override {
-            BUG();
+            BUG("unsupported");
             return 0;
         }
-        void pass1(Table *, int) override { BUG(); }
+        void pass1(Table *, int) override { BUG("unsupported"); }
         void dbprint(std::ostream &out) const override {
             out << name;
             if (lo >= 0) {
@@ -1388,7 +1387,7 @@ int DepositField::encode() {
             bits |= dest->lo << 17;
             break;
         default:
-            BUG();
+            BUG("unexpected phv size %d", Phv::reg(slot)->size);
     }
     bits <<= Target::INSTR_SRC2_BITS();
     return bits | src2.bits(slot / Phv::mau_groupsize());
@@ -1484,7 +1483,7 @@ int Set::encode() {
             rv |= 0x20;
             break;
         default:
-            BUG();
+            BUG("unknown register type");
     }
     return rv;
 }

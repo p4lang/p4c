@@ -25,7 +25,7 @@
 TopLevel *TopLevel::all = nullptr;
 
 TopLevel::TopLevel() {
-    BUG_CHECK(!all);
+    BUG_CHECK(!all, "only one TopLevel allowed");
     all = this;
 }
 

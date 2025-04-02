@@ -27,7 +27,7 @@ auto terminate = ::testing::KilledBySignal(SIGABRT);
 
 TEST(asm_types, get_int64_0) {
     uint32_t i = 0;
-    value_t v{tINT, 0, 0};
+    value_t v{tINT, 0, {0}};
     v.i = i;
     CaptureStderr();
     EXPECT_EQ(get_int64(v), i);
@@ -45,7 +45,7 @@ TEST(asm_types, get_int64_0) {
 
 TEST(asm_types, get_int64_32bit) {
     uint32_t i = 0xAAAAAAAA;
-    value_t v{tINT, 0, 0};
+    value_t v{tINT, 0, {0}};
     v.i = i;
     CaptureStderr();
     EXPECT_EQ(get_int64(v), i);
@@ -62,7 +62,7 @@ TEST(asm_types, get_int64_32bit) {
 
 TEST(asm_types, get_int64_64bit) {
     uint64_t i = 0xAAAAAAAAAAAAAAAA;
-    value_t v{tINT, 0, 0};
+    value_t v{tINT, 0, {0}};
     v.i = i;
     CaptureStderr();
     EXPECT_EQ(get_int64(v), i);
@@ -78,7 +78,7 @@ TEST(asm_types, get_int64_64bit) {
 }
 
 TEST(asm_types, get_bigi_empty) {
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     v.bigi = EMPTY_VECTOR_INIT;
     EXPECT_EQ(get_int64(v), 0);
     EXPECT_EQ(get_bitvec(v), bitvec());
@@ -86,7 +86,7 @@ TEST(asm_types, get_bigi_empty) {
 
 TEST(asm_types, get_int64_bigi_0) {
     uint32_t i = 0;
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     VECTOR_init1(v.bigi, i);
     CaptureStderr();
     EXPECT_EQ(get_int64(v), i);
@@ -104,7 +104,7 @@ TEST(asm_types, get_int64_bigi_0) {
 
 TEST(asm_types, get_int64_bigi_32bit) {
     uint32_t i = 0xAAAAAAAA;
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     VECTOR_init1(v.bigi, i);
     CaptureStderr();
     EXPECT_EQ(get_int64(v), i);
@@ -121,7 +121,7 @@ TEST(asm_types, get_int64_bigi_32bit) {
 
 TEST(asm_types, get_int64_bigi_64bit) {
     uint64_t i = 0xAAAAAAAAAAAAAAAA;
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     if (sizeof(uintptr_t) == sizeof(uint32_t))
         VECTOR_init2(v.bigi, 0xAAAAAAAA, 0xAAAAAAAA);
     else
@@ -140,7 +140,7 @@ TEST(asm_types, get_int64_bigi_64bit) {
 }
 
 TEST(asm_types, get_bitvec_0) {
-    value_t v{tINT, 0, 0};
+    value_t v{tINT, 0, {0}};
     v.i = 0;
     auto i = bitvec(0);
     CaptureStderr();
@@ -157,7 +157,7 @@ TEST(asm_types, get_bitvec_0) {
 }
 
 TEST(asm_types, get_bitvec_32bit) {
-    value_t v{tINT, 0, 0};
+    value_t v{tINT, 0, {0}};
     v.i = 0xAAAAAAAA;
     auto i = bitvec(0xAAAAAAAA);
     CaptureStderr();
@@ -174,7 +174,7 @@ TEST(asm_types, get_bitvec_32bit) {
 }
 
 TEST(asm_types, get_bitvec_64bit) {
-    value_t v{tINT, 0, 0};
+    value_t v{tINT, 0, {0}};
     v.i = 0xAAAAAAAAAAAAAAAA;
     auto i = bitvec(0xAAAAAAAAAAAAAAAA);
     CaptureStderr();
@@ -191,7 +191,7 @@ TEST(asm_types, get_bitvec_64bit) {
 }
 
 TEST(asm_types, get_bitvec_bigi_0) {
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     VECTOR_init1(v.bigi, 0);
     auto i = bitvec(0);
     CaptureStderr();
@@ -208,7 +208,7 @@ TEST(asm_types, get_bitvec_bigi_0) {
 }
 
 TEST(asm_types, get_bitvec_bigi_32bit) {
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     VECTOR_init1(v.bigi, 0xAAAAAAAA);
     auto i = bitvec(0xAAAAAAAA);
     CaptureStderr();
@@ -225,7 +225,7 @@ TEST(asm_types, get_bitvec_bigi_32bit) {
 }
 
 TEST(asm_types, get_bitvec_bigi_64bit) {
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     if (sizeof(uintptr_t) == sizeof(uint32_t))
         VECTOR_init2(v.bigi, 0xAAAAAAAA, 0xAAAAAAAA);
     else
@@ -245,7 +245,7 @@ TEST(asm_types, get_bitvec_bigi_64bit) {
 }
 
 TEST(asm_types, get_bitvec_bigi_128bit) {
-    value_t v{tBIGINT, 0, 0};
+    value_t v{tBIGINT, 0, {0}};
     if (sizeof(uintptr_t) == sizeof(uint32_t))
         VECTOR_init4(v.bigi, 0xAAAAAAAA, 0xAAAAAAAA, 0xAAAAAAAA, 0xAAAAAAAA);
     else

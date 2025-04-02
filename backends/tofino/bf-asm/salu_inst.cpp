@@ -134,7 +134,7 @@ struct operand : public IHasDbPrint {
             else if (v == "phv_hi")
                 pi = 1;
             else
-                BUG();
+                BUG("Unknown phv operand %s", v.s);
             if (v.type == tCMD && PCHECKTYPE(v.vec.size == 2, v[1], tRANGE)) {
                 if ((v[1].range.lo & 7) || ((v[1].range.hi + 1) & 7))
                     error(lineno, "only byte slices allowed on %s", v[0].s);
@@ -237,7 +237,9 @@ struct operand::MathFn : public Base {
         }
     }
     const char *kind() const override { return "math fn"; }
-    bool phvRead(std::function<void(const ::Phv::Slice &sl)> fn) { return of->phvRead(fn); }
+    bool phvRead(std::function<void(const ::Phv::Slice &sl)> fn) override {
+        return of->phvRead(fn);
+    }
     void pass1(StatefulTable *tbl) override { of->pass1(tbl); }
 };
 
@@ -276,7 +278,7 @@ operand::operand(Table *tbl, const Table::Actions::Action *act, const value_t &v
         }
     }
     if (v->type == tCMD) {
-        BUG_CHECK(v->vec.size > 0 && v->vec[0].type == tSTR);
+        BUG_CHECK(v->vec.size > 0 && v->vec[0].type == tSTR, "bad operand");
         if (auto f = tbl->format->field(v->vec[0].s)) {
             if (v->vec.size > 1 && CHECKTYPE(v->vec[1], tRANGE) && v->vec[1].range.lo != 0)
                 error(v->vec[1].lineno, "Can't slice memory field %s in stateful action",
@@ -539,7 +541,7 @@ bool AluOP::equiv(Instruction *a_) {
 
 Instruction *AluOP::pass1(Table *tbl_, Table::Actions::Action *act) {
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "expected stateful table");
     if (slot < 0 && act->slot_use[slot = (dest ? ALU1HI : ALU1LO)]) slot = dest ? ALU2HI : ALU2LO;
     auto k1 = srca.to<operand::Const>();
     auto k2 = srcb.to<operand::Const>();
@@ -775,7 +777,7 @@ bool CmpOP::equiv(Instruction *a_) {
 
 Instruction *CmpOP::pass1(Table *tbl_, Table::Actions::Action *act) {
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "Expected stateful table");
     if (srca) srca->pass1(tbl);
     if (srcb) srcb->pass1(tbl);
     if (srcc) srcc->pass1(tbl);
@@ -817,9 +819,7 @@ struct TMatchOP : public SaluInstruction {
     FOR_ALL_REGISTER_SETS(DECLARE_FORWARD_VIRTUAL_INSTRUCTION_WRITE_REGS)
 };
 
-static TMatchOP::Decode opTMatch("tmatch", {
-                                               JBAY,
-                                           });
+static TMatchOP::Decode opTMatch("tmatch", JBAY);
 
 Instruction *TMatchOP::Decode::decode(Table *tbl, const Table::Actions::Action *act,
                                       const VECTOR(value_t) & op) const {
@@ -885,7 +885,7 @@ bool TMatchOP::equiv(Instruction *a_) {
 
 Instruction *TMatchOP::pass1(Table *tbl_, Table::Actions::Action *act) {
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "Expected stateful table");
     if (srca) srca->pass1(tbl);
     if (srcb) srcb->pass1(tbl);
     if (tbl->tmatch_use[slot].op) {
@@ -1013,7 +1013,7 @@ Instruction *OutOP::Decode::decode(Table *tbl, const Table::Actions::Action *act
 
 Instruction *OutOP::pass1(Table *tbl_, Table::Actions::Action *act) {
     auto tbl = dynamic_cast<StatefulTable *>(tbl_);
-    BUG_CHECK(tbl);
+    BUG_CHECK(tbl, "Expected stateful table");
     if (src) src->pass1(tbl);
     if (output_mux == STATEFUL_PREDICATION_OUTPUT) {
         if (act->pred_comb_sel >= 0 && act->pred_comb_sel != predication_encode)
@@ -1023,7 +1023,7 @@ Instruction *OutOP::pass1(Table *tbl_, Table::Actions::Action *act) {
     if (lmatch) {
         if (tbl->output_lmatch) {
             auto *other = dynamic_cast<OutOP *>(tbl->output_lmatch);
-            BUG_CHECK(other);
+            BUG_CHECK(other, "Expected outOP");
             if (lmatch_pred != other->lmatch_pred) {
                 error(lineno, "Conflict lmatch output use in stateful %s", tbl->name());
                 error(other->lineno, "conflicting use here");

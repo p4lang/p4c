@@ -58,7 +58,7 @@ Table::Format::Field *ActionTable::lookup_field(const std::string &name,
         }
     }
     for (auto *match_table : match_tables) {
-        BUG_CHECK((Table *)match_table != (Table *)this);
+        BUG_CHECK((Table *)match_table != (Table *)this, "Can't find match table");
         if (auto *rv = match_table->lookup_field(name)) return rv;
     }
     return 0;
@@ -82,7 +82,7 @@ int ActionTable::find_on_actionbus(const ActionBusSource &src, int lo, int hi, i
     int rv;
     if (action_bus && (rv = action_bus->find(src, lo, hi, size, pos)) >= 0) return rv;
     for (auto *match_table : match_tables) {
-        BUG_CHECK((Table *)match_table != (Table *)this);
+        BUG_CHECK((Table *)match_table != (Table *)this, "Can't find match table");
         if ((rv = match_table->find_on_actionbus(src, lo, hi, size, pos)) >= 0) return rv;
     }
     return -1;
@@ -93,7 +93,7 @@ int ActionTable::find_on_actionbus(const char *name, TableOutputModifier mod, in
     int rv;
     if (action_bus && (rv = action_bus->find(name, mod, lo, hi, size, len)) >= 0) return rv;
     for (auto *match_table : match_tables) {
-        BUG_CHECK((Table *)match_table != (Table *)this);
+        BUG_CHECK((Table *)match_table != (Table *)this, "Can't find match table");
         if ((rv = match_table->find_on_actionbus(name, mod, lo, hi, size, len)) >= 0) return rv;
     }
     return -1;
@@ -113,13 +113,13 @@ void ActionTable::need_on_actionbus(const ActionBusSource &src, int lo, int hi, 
             }
         }
         for (auto *match_table : match_tables) {
-            BUG_CHECK((Table *)match_table != (Table *)this);
+            BUG_CHECK((Table *)match_table != (Table *)this, "Can't find match table");
             if (f->fmt == match_table->get_format()) {
                 match_table->need_on_actionbus(f, lo, hi, size);
                 return;
             }
         }
-        BUG_CHECK(!"Can't find table associated with field");
+        BUG("Can't find table associated with field");
         // TBD - Add allocation for ActionBusSource::HashDistPair. Compiler does
         // action bus allocation so this path is never used.
     } else if (src.type == ActionBusSource::HashDist) {
@@ -136,7 +136,7 @@ void ActionTable::need_on_actionbus(const ActionBusSource &src, int lo, int hi, 
                 return;
             }
         }
-        BUG_CHECK(!"Can't find table associated with hash_dist");
+        BUG("Can't find table associated with hash_dist");
     } else if (src.type == ActionBusSource::RandomGen) {
         auto rng = src.rng;
         int attached_count = 0;
@@ -182,7 +182,7 @@ unsigned ActionTable::determine_shiftcount(Table::Call &call, int group, unsigne
     if (call.args[0] == "$DIRECT") {
         return 64 + extra_shift + tcam_shift;
     } else if (call.args[0].field()) {
-        BUG_CHECK(call.args[0].field()->by_group[group]->bit(0) / 128U == word);
+        BUG_CHECK(call.args[0].field()->by_group[group]->bit(0) / 128U == word, "Wrong word");
         return call.args[0].field()->by_group[group]->bit(0) % 128U + extra_shift;
     } else if (call.args[1].field()) {
         return call.args[1].field()->bit(0) + ACTION_ADDRESS_ZERO_PAD;
@@ -197,7 +197,7 @@ unsigned ActionTable::determine_shiftcount(Table::Call &call, int group, unsigne
  */
 unsigned ActionTable::determine_default(Table::Call &call) const {
     int huffman_ones = std::max(static_cast<int>(get_log2size()) - 3, 0);
-    BUG_CHECK(huffman_ones <= ACTION_DATA_HUFFMAN_BITS);
+    BUG_CHECK(huffman_ones <= ACTION_DATA_HUFFMAN_BITS, "Too many huffman ones");
     unsigned huffman_mask = (1 << huffman_ones) - 1;
     // lower_huffman_mask == 0x1f, upper_huffman_mask = 0x60
     unsigned lower_huffman_mask = (1U << ACTION_DATA_LOWER_HUFFMAN_BITS) - 1;
@@ -519,7 +519,7 @@ void ActionTable::pass3() {
                     tbl_actions = tern->indirect->actions.get();
                 }
             }
-            BUG_CHECK(tbl_actions);
+            BUG_CHECK(tbl_actions, "No actions for match table %s", mt->name());
             for (auto &act : *tbl_actions) {
                 if (pack_actions.count(act.name) == 0) pack_actions[act.name] = &act;
             }
@@ -540,8 +540,8 @@ void ActionTable::pass3() {
 
 template <class REGS>
 static void flow_selector_addr(REGS &regs, int from, int to) {
-    BUG_CHECK(from > to);
-    BUG_CHECK((from & 3) == 3);
+    BUG_CHECK(from > to, "from %d > to %d", from, to);
+    BUG_CHECK((from & 3) == 3, "from %d not multiple of 4", from);
     if (from / 2 == to / 2) {
         /* R to L */
         regs.rams.map_alu.selector_adr_switchbox.row[from / 4]
@@ -615,7 +615,7 @@ void ActionTable::write_regs_vt(REGS &regs) {
             for (auto mtab : match_tables)
                 icxbar[mtab->logical_id].address_distr_to_logical_rows |= 1U << logical_row.row;
         } else {
-            BUG_CHECK(home);
+            BUG_CHECK(home, "Action table %s has no home row", name());
             // FIXME use DataSwitchboxSetup for this somehow?
             if (&switch_ctl == home_switch_ctl) {
                 /* overflow from L to R action */
@@ -650,8 +650,8 @@ void ActionTable::write_regs_vt(REGS &regs) {
                 oflo_adr_xbar.adr_dist_oflo_adr_xbar_source_index = home->row % 8;
                 oflo_adr_xbar.adr_dist_oflo_adr_xbar_source_sel = 0;
             } else {
-                BUG_CHECK(home->row >= 8);
-                BUG_CHECK(options.target == TOFINO);
+                BUG_CHECK(home->row >= 8, "Action table %s has no home row", name());
+                BUG_CHECK(options.target == TOFINO, "Action table %s is not TOFINO", name());
                 oflo_adr_xbar.adr_dist_oflo_adr_xbar_source_index = 0;
                 oflo_adr_xbar.adr_dist_oflo_adr_xbar_source_sel = 3;
                 push_on_overflow = true;

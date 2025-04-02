@@ -511,7 +511,7 @@ void TernaryMatchTable::write_regs_vt(REGS &regs) {
 std::unique_ptr<json::map> TernaryMatchTable::gen_memory_resource_allocation_tbl_cfg(
     const char *type, const std::vector<Layout> &layout, bool skip_spare_bank) const {
     if (layout.size() == 0) return nullptr;
-    BUG_CHECK(!skip_spare_bank);  // never spares in tcam
+    BUG_CHECK(!skip_spare_bank, "can't spare in tcam");  // never spares in tcam
     json::map mra{{"memory_type", json::string(type)}};
     json::vector &mem_units_and_vpns = mra["memory_units_and_vpns"];
     json::vector mem_units;
@@ -652,7 +652,7 @@ void TernaryMatchTable::gen_entry_cfg(json::vector &out, std::string name, unsig
 
                     // Determine which section of the byte based on which nibble is provided
                     if (dirtcam_mode == DIRTCAM_4B_LO) {
-                        BUG_CHECK(nibbles_of_range.getbit(0));
+                        BUG_CHECK(nibbles_of_range.getbit(0), "no nibbles_of_range.getbit");
                         // Add the difference from the first bit of this byte and the lowest bit
                         range_start_bit += bit + lsb_lo_bit_in_byte - lsb_lo;
                         range_width =
@@ -660,7 +660,7 @@ void TernaryMatchTable::gen_entry_cfg(json::vector &out, std::string name, unsig
                         range_width = std::min(static_cast<int>(range_width), lsb_hi - bit + 1);
                         nibble_offset = lsb_lo_bit_in_byte % 4;
                     } else {
-                        BUG_CHECK(nibbles_of_range.getbit(1));
+                        BUG_CHECK(nibbles_of_range.getbit(1), "no nibbles_of_range.getbit(1)");
                         // Because the bit starts at the upper nibble, the start bit is either the
                         // beginning of the nibble or more
                         range_start_bit += bit + std::max(4, lsb_lo_bit_in_byte) - lsb_lo;
@@ -735,11 +735,11 @@ void TernaryMatchTable::gen_match_fields(json::vector &match_field_list,
                         // a field in the (mid) byte group, which is shared with the adjacent word
                         // group each word gets only 4 bits of the byte group and is placed at msb
                         // Check mid-byte field does not cross byte boundary (40-47)
-                        BUG_CHECK(field_phv.hi < 48);
+                        BUG_CHECK(field_phv.hi < 48, "field_phv.hi >= 48");
                         // Check mid-byte field is associated with even group
                         // | == 5 == | == 1 == | == 5 == | == 5 == | == 1 == | == 5 == |
                         // | Grp 0   | Midbyte0| Grp 1   | Grp 2   | Midbyte1| Grp 3   |
-                        BUG_CHECK((field_group.index & 1) == 0);
+                        BUG_CHECK((field_group.index & 1) == 0, "field_group.index & 1 == 0");
                         // Find groups to place this byte nibble. Check group which has this
                         // group as the byte_group
                         for (auto &m : match) {

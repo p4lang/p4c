@@ -19,6 +19,7 @@
 #include "backends/tofino/bf-asm/tables.h"
 #include "data_switchbox.h"
 #include "input_xbar.h"
+#include "lib/null.h"
 #include "misc.h"
 
 // target specific template specializations
@@ -332,7 +333,7 @@ void MeterTable::write_color_regs(REGS &regs, MatchTable *match, int type, int b
         else
             merge.mau_stats_adr_per_entry_en_mux_ctl[type][bus] = 0;
     } else {
-        BUG();
+        BUG("meter color must be either idletime or stats");
     }
 }
 FOR_ALL_REGISTER_SETS(INSTANTIATE_TARGET_TEMPLATE, void MeterTable::write_color_regs, mau_regs &,
@@ -410,11 +411,12 @@ void MeterTable::write_regs_home_row(REGS &regs, unsigned row) {
                 }
             }
             if (block_end) {
-                BUG_CHECK(minvpn != INT_MAX && maxvpn != INT_MIN);
+                BUG_CHECK(minvpn != INT_MAX && maxvpn != INT_MIN, "minvpn = %d, maxvpn = %d",
+                          minvpn, maxvpn);
                 break;
             }
         }
-        BUG_CHECK(block_start && block_end);
+        BUG_CHECK(block_start && block_end, "invalid vpn range");
     }
 
     int meter_group_index = row / 2U;
@@ -550,7 +552,7 @@ void MeterTable::write_mapram_color_regs(REGS &regs, bool &push_on_overflow) {
         // Allocating color maprams above home row is invalid
         // as color writes can only be distributed to maprams
         // via buses going on the home row or below
-        BUG_CHECK(curr_home_row / 4U >= row.row / 2U);
+        BUG_CHECK(curr_home_row / 4U >= row.row / 2U, "Allocating color maprams above home row");
 
         int color_map_color = color_maprams.empty() ? 0 : (curr_home_row / 4U) & 1;
         if (row.row == curr_home_row / 2) { /* on the home row */
@@ -664,7 +666,8 @@ void MeterTable::write_mapram_color_regs(REGS &regs, bool &push_on_overflow) {
                 .ctl.b_oflo_color_write_o_mux_select.b_oflo_color_write_o_sel_r_color_write_i = 1;
             map_alu.mapram_color_write_switchbox[row.row / 2U].ctl.r_oflo_color_write_o_mux_select =
                 1;
-            BUG_CHECK(curr_home_row / 4U >= row.row / 2U);
+            BUG_CHECK(curr_home_row / 4U >= row.row / 2U,
+                      "Allocating color maprams above home row");
             /* b_oflo_color_write_o_sel_t_oflo_color_write_i must be set for all
              * switchboxes below the homerow and above current row
              * It should never be set for a switchbox above the home row
@@ -688,7 +691,7 @@ void MeterTable::write_mapram_color_regs(REGS &regs, bool &push_on_overflow) {
         auto &map_alu_row = map_alu.row[row.row];
         auto vpn = row.vpns.begin();
         if (color_mapram_addr == STATS_MAP_ADDR) {
-            BUG_CHECK((row.row % 2) == 0);
+            BUG_CHECK((row.row % 2) == 0, "Stats mapram must be on even row");
             for (MatchTable *m : match_tables)
                 adrdist.mau_ad_stats_virt_lt[row.row / 2] |= (1U << m->logical_id);
         }
@@ -704,7 +707,7 @@ void MeterTable::write_mapram_color_regs(REGS &regs, bool &push_on_overflow) {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = 0;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::OVERFLOW;
                 push_on_overflow = true;
-                BUG_CHECK(options.target == TOFINO);
+                BUG_CHECK(options.target == TOFINO, "Only Tofino supports push on overflow");
             } else {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = curr_home_row % 8;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::METER;
@@ -809,7 +812,7 @@ void MeterTable::write_regs_vt(REGS &regs) {
     for (Layout &logical_row : layout) {
         unsigned row = logical_row.row / 2U;
         unsigned side = logical_row.row & 1; /* 0 == left  1 == right */
-        BUG_CHECK(side == 1);                /* no map rams or alus on left side anymore */
+        BUG_CHECK(side == 1, "no map rams or alus on left side anymore");
         auto vpn = logical_row.vpns.begin();
         auto mapram = logical_row.maprams.begin();
         auto &map_alu_row = map_alu.row[row];
@@ -819,7 +822,7 @@ void MeterTable::write_regs_vt(REGS &regs) {
             swbox = new DataSwitchboxSetup<REGS>(regs, this, logical_row.row,
                                                  (++home_it == home_rows.end()) ? -1 : *home_it);
         }
-        BUG_CHECK(home != nullptr);
+        CHECK_NULL(home);
         LOG2("# DataSwitchbox.setup_row(" << row << ") home=" << home->row / 2U);
         swbox->setup_row(row);
         for (auto &memunit : logical_row.memunits) {
@@ -843,7 +846,7 @@ void MeterTable::write_regs_vt(REGS &regs) {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = 0;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::OVERFLOW;
                 push_on_overflow = true;
-                BUG_CHECK(options.target == TOFINO);
+                BUG_CHECK(options.target == TOFINO, "push on overflow only supported on Tofino");
             } else {
                 adr_ctl.adr_dist_oflo_adr_xbar_source_index = home->row % 8;
                 adr_ctl.adr_dist_oflo_adr_xbar_source_sel = AdrDist::METER;
@@ -938,7 +941,7 @@ void MeterTable::meter_color_logical_to_phys(Target::Tofino::mau_regs &regs, int
                 adrdist.packet_action_at_headertime[0][lo.row / 2] = 1;
             }
         } else {
-            BUG();
+            BUG("color_mapram_addr must be either IDLE_MAP_ADDR or STATS_MAP_ADDR");
         }
         setup_muxctl(adrdist.meter_color_logical_to_phys_ixbar_ctl[logical_id], alu);
     }
@@ -969,7 +972,7 @@ void MeterTable::meter_color_logical_to_phys(Target::JBay::mau_regs &regs, int l
                 adrdist.packet_action_at_headertime[0][lo.row / 2] = 1;
             }
         } else {
-            BUG();
+            BUG("color_mapram_addr must be either IDLE_MAP_ADDR or STATS_MAP_ADDR");
         }
     }
     adrdist.meter_color_logical_to_phys_icxbar_ctl[logical_id] |= 1 << alu;
