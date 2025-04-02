@@ -15,7 +15,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# # # #### Tofino assembler
+####### Tofino assembler
 project(BFASM)
 
 MESSAGE("-- Adding bf-asm")
@@ -193,15 +193,21 @@ set (BFAS_COMMON_SOURCES
 
 BISON_TARGET (asm-parse asm-parse.ypp ${BFASM_GEN_DIR}/asm-parse.cpp VERBOSE)
 
-add_custom_command(OUTPUT ${BFASM_GEN_DIR}/uptr_sizes.h
+add_custom_command(
+  OUTPUT ${BFASM_GEN_DIR}/uptr_sizes.h
   COMMAND ${CMAKE_COMMAND} -E make_directory ${BFASM_GEN_DIR}
-  COMMAND ${BFASM_BINARY_DIR}/mksizes > ${BFASM_GEN_DIR}/uptr_sizes.h)
-add_custom_target(bfasm_uptr DEPENDS mksizes ${BFASM_GEN_DIR}/uptr_sizes.h)
+  COMMAND ${BFASM_BINARY_DIR}/mksizes > ${BFASM_GEN_DIR}/uptr_sizes.h
+  DEPENDS ${BFASM_BINARY_DIR}/mksizes
+  COMMENT "Generating uptr_sizes.h"
+)
+add_custom_target(bfasm_uptr DEPENDS ${BFASM_GEN_DIR}/uptr_sizes.h)
 
-add_custom_command(OUTPUT ${BFASM_GEN_DIR}/lex-yaml.c
+add_custom_command(
+  OUTPUT ${BFASM_GEN_DIR}/lex-yaml.c
   COMMAND ${FLEX_EXECUTABLE} -t ${BFASM_SOURCE_DIR}/lex-yaml.l > ${BFASM_GEN_DIR}/lex-yaml.c
   DEPENDS ${BFASM_SOURCE_DIR}/lex-yaml.l
-  COMMENT "Generating lex-yaml.cpp")
+  COMMENT "Generating lex-yaml.c"
+)
 add_custom_target(bfasm_yaml DEPENDS ${BFASM_GEN_DIR}/lex-yaml.c)
 add_dependencies(bfasm_yaml bfasm_uptr)
 
@@ -299,7 +305,7 @@ if (ENABLE_GTESTS)
   target_link_libraries (gtestasm PRIVATE bfas_lib gtest ${BFASM_LIB_DEPS})
   target_compile_options (gtestasm PRIVATE -Wall -Wextra -ggdb -O3
                           -Wno-unused-parameter -Wno-sign-compare)
-    # Disable errors for warnings. FIXME: Get rid of this.
+  # Disable errors for warnings. FIXME: Get rid of this.
   target_compile_options(gtestasm PUBLIC "-Wno-error")
 
   # Add to CTests - but this is in the BFASM project viz build/bf-asm, not build/p4c
