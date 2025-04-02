@@ -75,6 +75,3 @@ void InputXbar::write_galois_matrix(Target::Tofino::mau_regs &regs, HashTable id
         }
     }
 }
-
-template void InputXbar::write_galois_matrix(Target::Tofino::mau_regs &regs, HashTable id,
-                                             const std::map<int, HashCol> &mat);

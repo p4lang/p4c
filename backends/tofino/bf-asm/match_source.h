@@ -78,7 +78,9 @@ class HashMatchSource : public MatchSource {
         return str.str();
     }
 
-    void dbprint(std::ostream &out) const { out << name() << "(" << lo << ".." << hi << ")"; }
+    void dbprint(std::ostream &out) const override {
+        out << name() << "(" << lo << ".." << hi << ")";
+    }
 };
 
 #endif /* BACKENDS_TOFINO_BF_ASM_MATCH_SOURCE_H_ */

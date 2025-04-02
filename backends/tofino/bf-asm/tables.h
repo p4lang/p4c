@@ -2033,7 +2033,7 @@ DECLARE_ABSTRACT_TABLE_TYPE(
         void add_alu_indexes(json::map &stage_tbl, std::string alu_indexes) const;
         OVERLOAD_FUNC_FOREACH(TARGET_CLASS, std::vector<int>, determine_spare_bank_memory_units,
                               () const, (), override)
-        OVERLOAD_FUNC_FOREACH(TARGET_CLASS, void, alloc_vpns, (), ())
+        OVERLOAD_FUNC_FOREACH(TARGET_CLASS, void, alloc_vpns, (), (), override)
         template <class REGS> void write_regs_vt(REGS &regs);
         FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)
         FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,

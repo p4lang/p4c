@@ -96,4 +96,3 @@ void GatewayTable::standalone_write_regs(Target::JBay::mau_regs &regs) {
                                   ~merge.logical_table_thread[0].logical_table_thread_ingress &
                                   ~merge.pred_ghost_thread;
 }
-template void GatewayTable::standalone_write_regs(Target::JBay::mau_regs &regs);

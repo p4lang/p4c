@@ -300,10 +300,9 @@ void Target::Tofino::GatewayTable::pass3() {
 }
 
 template <>
-void enable_gateway_payload_exact_shift_ovr(Target::Tofino::mau_regs &regs, int bus) {
+void enable_gateway_payload_exact_shift_ovr(Target::Tofino::mau_regs & /*regs*/, int /*bus*/) {
     BUG("enable_gateway_payload_exact_shift_ovr not supported");
 }
-template void enable_gateway_payload_exact_shift_ovr(Target::Tofino::mau_regs &regs, int bus);
 
 void Target::Tofino::GatewayTable::write_next_table_regs(Target::Tofino::mau_regs &regs) {
     auto &merge = regs.rams.match.merge;

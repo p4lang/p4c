@@ -237,7 +237,9 @@ struct operand::MathFn : public Base {
         }
     }
     const char *kind() const override { return "math fn"; }
-    bool phvRead(std::function<void(const ::Phv::Slice &sl)> fn) { return of->phvRead(fn); }
+    bool phvRead(std::function<void(const ::Phv::Slice &sl)> fn) override {
+        return of->phvRead(fn);
+    }
     void pass1(StatefulTable *tbl) override { of->pass1(tbl); }
 };
 
@@ -817,9 +819,7 @@ struct TMatchOP : public SaluInstruction {
     FOR_ALL_REGISTER_SETS(DECLARE_FORWARD_VIRTUAL_INSTRUCTION_WRITE_REGS)
 };
 
-static TMatchOP::Decode opTMatch("tmatch", {
-                                               JBAY,
-                                           });
+static TMatchOP::Decode opTMatch("tmatch", JBAY);
 
 Instruction *TMatchOP::Decode::decode(Table *tbl, const Table::Actions::Action *act,
                                       const VECTOR(value_t) & op) const {

@@ -76,10 +76,15 @@ Table::Table(int line, std::string &&n, gress_t gr, Stage *s, int lid)
     if (stage) stage->all_refs.insert(&stage);
 }
 Table::~Table() {
-    BUG_CHECK(by_uid && uid >= 0 && uid < by_uid->size(), "invalid uid %d in table", uid);
+    if (by_uid == nullptr || uid < 0 || uid >= by_uid->size()) {
+        error(lineno, "invalid uid %d in table", uid);
+    } else {
+        (*by_uid)[uid] = nullptr;
+    }
     all->erase(name_);
-    (*by_uid)[uid] = nullptr;
-    if (stage) stage->all_refs.erase(&stage);
+    if (stage != nullptr) {
+        stage->all_refs.erase(&stage);
+    }
     if (all->empty()) {
         delete all;
         delete by_uid;

@@ -250,7 +250,7 @@ class Phv : public Section {
         }
         bool merge(const Ref &r);
         std::string toString() const override;
-        void dbprint(std::ostream &out) const;
+        void dbprint(std::ostream &out) const override;
 
         int get_lineno() const override { return lineno; }
         int fieldlobit() const override { return lobit(); }
