@@ -242,5 +242,5 @@ class BackendConverter : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_COMMON_EXTRACT_MAUPIPE_H_ */

@@ -1093,3 +1093,4 @@ PortableSwitchTranslation::PortableSwitchTranslation(P4::ReferenceMap *refMap, P
 }
 
 }  // namespace BFN
+}

@@ -150,3 +150,4 @@ void AddHardwareConstrainedFields::postorder(IR::BFN::Pipe *pipe) {
 }
 
 }  // namespace BFN
+}

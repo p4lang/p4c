@@ -29,7 +29,6 @@
 #include "lib/ordered_set.h"
 
 namespace P4 {
-namespace P4 {
 namespace BFN {
 
 namespace PSA {
@@ -691,3 +690,4 @@ RewritePacketPath::RewritePacketPath(P4::ReferenceMap *refMap, P4::TypeMap *type
 }  // namespace PSA
 
 }  // namespace BFN
+}

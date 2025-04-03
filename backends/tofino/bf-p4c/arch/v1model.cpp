@@ -38,7 +38,6 @@
 #include "midend/validateProperties.h"
 
 namespace P4 {
-namespace P4 {
 namespace BFN {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -2528,3 +2527,4 @@ SimpleSwitchTranslation::SimpleSwitchTranslation(P4::ReferenceMap *refMap, P4::T
 }
 
 }  // namespace BFN
+}

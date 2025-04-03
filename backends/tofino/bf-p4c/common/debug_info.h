@@ -41,5 +41,5 @@ struct DebugInfo {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_COMMON_DEBUG_INFO_H_ */

@@ -40,7 +40,7 @@
 #include "frontends/parsers/parserDriver.h"
 #include "lib/big_int_util.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -163,3 +163,4 @@ std::ostream &operator<<(std::ostream &out, const BFN::MetadataField &m) {
 }
 
 }  // namespace BFN
+}

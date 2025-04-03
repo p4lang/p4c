@@ -27,7 +27,6 @@
 #include "backends/tofino/bf-p4c/arch/remove_set_metadata.h"
 
 namespace P4 {
-namespace P4 {
 namespace BFN {
 
 /// If after translation, both the $phase0 and $resubmit states are still empty,
@@ -98,3 +97,4 @@ AddMetadataParserStates::AddMetadataParserStates(P4::ReferenceMap *refMap, P4::T
 }
 
 }  // namespace BFN
+}

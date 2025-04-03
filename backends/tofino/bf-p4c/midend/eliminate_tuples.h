@@ -80,5 +80,5 @@ class EliminateTuples final : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_ELIMINATE_TUPLES_H_ */

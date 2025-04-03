@@ -32,7 +32,7 @@
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 namespace {
@@ -394,3 +394,4 @@ AddTnaBridgeMetadata::AddTnaBridgeMetadata(P4::ReferenceMap *refMap, P4::TypeMap
 }
 
 }  // namespace BFN
+}

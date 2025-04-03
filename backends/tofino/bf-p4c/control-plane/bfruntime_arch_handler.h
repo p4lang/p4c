@@ -1,4 +1,4 @@
-/**
+\/**
  * Copyright (C) 2024 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -2468,6 +2468,7 @@ struct PSAArchHandlerBuilder : public P4::ControlPlaneAPI::P4RuntimeArchHandlerB
         return new BFRuntimeArchHandlerPSA(refMap, typeMap, evaluatedProgram);
     }
 };
+}
 }
 }  // namespace BFN
 #endif /* BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

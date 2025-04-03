@@ -301,5 +301,5 @@ class ParserPriorityConverter : public StatementConverter {
 }  // namespace V1
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_FROMV1_0_V1_CONVERTERS_H_ */

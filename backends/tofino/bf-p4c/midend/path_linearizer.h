@@ -98,5 +98,5 @@ struct PathLinearizer : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_PATH_LINEARIZER_H_ */

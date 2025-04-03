@@ -334,5 +334,5 @@ class SimplifyEmitArgs : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_ */

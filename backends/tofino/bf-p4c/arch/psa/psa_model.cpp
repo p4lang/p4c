@@ -18,7 +18,7 @@
 
 #include "psa_model.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -29,3 +29,4 @@ PsaModel PsaModel::instance;
 }  // namespace PSA
 
 }  // namespace BFN
+}

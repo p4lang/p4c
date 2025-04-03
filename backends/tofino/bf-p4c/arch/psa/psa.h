@@ -56,5 +56,5 @@ class PortableSwitchTranslation : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PSA_PSA_H_ */

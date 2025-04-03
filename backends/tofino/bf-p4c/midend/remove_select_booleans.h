@@ -82,5 +82,5 @@ class RemoveSelectBooleans : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_ */

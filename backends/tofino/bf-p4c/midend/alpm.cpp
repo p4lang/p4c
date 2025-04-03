@@ -30,7 +30,7 @@
 #include "lib/error_catalog.h"
 #include "lib/log.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -807,3 +807,4 @@ void CollectAlpmInfo::postorder(const IR::P4Table *tbl) {
 }
 
 }  // namespace BFN
+}

@@ -31,5 +31,5 @@ struct AddPsaBridgeMetadata : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_PSA_REWRITE_BRIDGE_METADATA_H_ */

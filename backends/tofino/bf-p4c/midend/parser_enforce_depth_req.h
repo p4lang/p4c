@@ -86,5 +86,5 @@ class ParserEnforceDepthReq : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_PARSER_ENFORCE_DEPTH_REQ_H_ */

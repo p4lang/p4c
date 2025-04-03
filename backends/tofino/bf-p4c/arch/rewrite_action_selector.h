@@ -52,5 +52,5 @@ class RewriteActionSelector : public Transform {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_REWRITE_ACTION_SELECTOR_H_ */

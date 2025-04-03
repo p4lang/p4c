@@ -41,7 +41,7 @@
 #include "lib/cstring.h"
 #include "lib/indent.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -955,3 +955,4 @@ IR::Node *ConvertPhase0AssignToExtract::preorder(IR::AssignmentStatement *stmt) 
 cstring getDefaultPhase0TableKeyName() { return defaultPhase0TableKeyName; }
 
 }  // namespace BFN
+}

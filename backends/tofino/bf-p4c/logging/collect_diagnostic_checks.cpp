@@ -21,7 +21,7 @@
 #include <optional>
 #include <regex>
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -154,3 +154,4 @@ void collect_diagnostic_checks(BfErrorReporter &reporter, BFN_Options &options) 
 }
 
 }  // namespace BFN
+}

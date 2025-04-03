@@ -32,7 +32,7 @@
 #include "ir/id.h"
 #include "lib/cstring.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -526,3 +526,4 @@ const IR::Node *RestoreParams::postorder(IR::BFN::TnaDeparser *control) {
 }
 
 }  // namespace BFN
+}

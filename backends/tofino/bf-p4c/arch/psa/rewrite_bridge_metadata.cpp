@@ -33,7 +33,7 @@
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -325,3 +325,4 @@ AddPsaBridgeMetadata::AddPsaBridgeMetadata(P4::ReferenceMap *refMap, P4::TypeMap
 }
 
 }  // namespace BFN
+}

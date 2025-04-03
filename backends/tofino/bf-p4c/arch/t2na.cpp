@@ -30,7 +30,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "midend/validateProperties.h"
 
-namespace P4 {
+
 namespace P4 {
 namespace BFN {
 
@@ -63,3 +63,4 @@ T2naArchTranslation::T2naArchTranslation(P4::ReferenceMap *refMap, P4::TypeMap *
 }
 
 }  // namespace BFN
+}

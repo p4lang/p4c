@@ -41,5 +41,5 @@ class DetectMultiplePipelines : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_DETECT_MULTIPLE_PIPELINES_H_

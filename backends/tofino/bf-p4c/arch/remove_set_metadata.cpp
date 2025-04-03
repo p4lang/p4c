@@ -25,7 +25,6 @@
 #include "ir/ir.h"
 
 namespace P4 {
-namespace P4 {
 namespace BFN {
 
 RemoveSetMetadata::RemoveSetMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
@@ -94,3 +93,4 @@ const IR::BaseAssignmentStatement *RemoveSetMetadata::preorder(
 }
 
 }  // namespace BFN
+}
