@@ -402,8 +402,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <p>Does not remove the "accept" state, even if it is not reachable. A transition between states <code>s1</code> and <code>s2</code> is part of a "simple" chain if:</p><ul>
 <li>there are no other outgoing edges from <code>s1</code>,</li>
 <li>there are no other incoming edges to <code>s2</code>,</li>
-<li>and <code>s2</code> does not have annotations. </li>
+<li>and <code>s2</code> does not have annotations.</li>
 </ul>
+<p>Note that UniqueNames must run before this pass, so that we won't end up with same-named state-local variables in the same state. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.13.2-->
