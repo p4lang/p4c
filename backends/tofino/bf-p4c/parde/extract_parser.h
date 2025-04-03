@@ -32,6 +32,7 @@
 namespace P4 {
 namespace IR {
 
+namespace P4 {
 namespace BFN {
 class Deparser;
 class Parser;
@@ -44,6 +45,7 @@ class P4Parser;
 }  // namespace IR
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -82,7 +84,7 @@ class ProcessParde : public Logging::PassManager {
  public:
     ProcessParde(const IR::BFN::Pipe *rv, bool useTna);
 };
-
+}
 }  // namespace BFN
 
 #endif /* BF_P4C_PARDE_EXTRACT_PARSER_H_ */

@@ -43,6 +43,7 @@
 #include "ir/ir.h"
 #include "ir/namemap.h"
 
+namespace P4 {
 namespace BFN {
 
 /** \ingroup SimpleSwitchTranslation */
@@ -76,5 +77,5 @@ class SimpleSwitchTranslation : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_V1MODEL_H_ */

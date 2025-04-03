@@ -21,6 +21,7 @@
 #include "backends/tofino/bf-p4c/parde/clot/header_validity_analysis.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -417,3 +418,4 @@ MergePovBits::MergePovBits(const PhvInfo &phv) {
 }
 
 }  // namespace BFN
+}

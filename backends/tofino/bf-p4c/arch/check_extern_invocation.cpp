@@ -21,6 +21,7 @@
 #include "backends/tofino/bf-p4c/device.h"
 #include "lib/bitvec.h"
 
+namespace P4 {
 namespace BFN {
 
 void CheckExternInvocationCommon::checkExtern(const P4::ExternMethod *extMethod,
@@ -144,3 +145,4 @@ void CheckT2NAExternInvocation::initPipeConstraints() {
 }
 
 }  // namespace BFN
+}

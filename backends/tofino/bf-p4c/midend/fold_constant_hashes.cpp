@@ -25,6 +25,7 @@
 #include "frontends/p4/methodInstance.h"
 #include "backends/tofino/bf-p4c/arch/helpers.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -441,3 +442,4 @@ const IR::Node *FoldConstantHashes::RemoveHangingCandidates::preorder(
 }
 
 }  // namespace BFN
+}

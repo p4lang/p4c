@@ -24,6 +24,7 @@
 #include "backends/tofino/bf-p4c/device.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 namespace V1 {
 
@@ -284,3 +285,4 @@ ParserCounterSelectionConverter::ParserCounterSelectionConverter() {
 
 }  // namespace V1
 }  // namespace BFN
+}

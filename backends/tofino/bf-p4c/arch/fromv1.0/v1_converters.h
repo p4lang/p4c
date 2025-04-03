@@ -27,6 +27,7 @@
 #include "lib/safe_vector.h"
 #include "v1_program_structure.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace V1 {

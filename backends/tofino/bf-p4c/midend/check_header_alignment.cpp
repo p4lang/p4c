@@ -25,6 +25,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+namespace P4 {
 namespace BFN {
 
 bool CheckPadAssignment::preorder(const IR::BaseAssignmentStatement *statement) {
@@ -263,3 +264,4 @@ const IR::Node *TransformResubmitHeaders::preorder(IR::Type_Header *header) {
 }
 
 }  // namespace BFN
+}

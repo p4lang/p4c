@@ -88,6 +88,7 @@ class ElimUnusedHeaderStackInfo : public PassManager {
     ElimUnusedHeaderStackInfo() { addPasses({new Find(*this), new Elim(*this)}); }
 };
 
+namespace P4 {
 namespace BFN {
 
 /// Metadata about how header stacks are used in the program.
@@ -132,7 +133,7 @@ struct HeaderStackInfo {
     }
 };
 }  // namespace BFN
-
+}
 /** Remove setValid when used to initialize a newly-pushed element of a header
  * stack, and fail with P4C_UNIMPLEMENTED if no such initialization occurs in
  * the same action as the push.

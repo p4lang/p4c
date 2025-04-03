@@ -22,6 +22,7 @@
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace PSA {
@@ -524,5 +525,5 @@ class PsaModel : public ::Model::Model {
 }  // namespace PSA
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PSA_PSA_MODEL_H_ */

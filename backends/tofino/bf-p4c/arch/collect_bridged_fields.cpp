@@ -26,6 +26,8 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+
+namespace P4 {
 namespace BFN {
 
 int CollectBridgedFields::uid_counter = 0;
@@ -117,7 +119,7 @@ void forAllTouchedFields(const LinearPath &linearPath, P4::TypeMap *typeMap, Fun
 }
 
 }  // namespace
-
+}
 CollectBridgedFields::CollectBridgedFields(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
     : refMap(refMap), typeMap(typeMap) {
     uid = ++uid_counter;

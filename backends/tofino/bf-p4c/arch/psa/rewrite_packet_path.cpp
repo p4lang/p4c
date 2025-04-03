@@ -28,6 +28,8 @@
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 namespace PSA {

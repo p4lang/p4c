@@ -25,13 +25,11 @@
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "lib/safe_vector.h"
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
 
-/**
- * Log IXBar allocation
- */
 class CollectIXBarInfo : public MauInspector {
     const PhvInfo &phv;
     std::map<int, safe_vector<IXBar::Use::Byte>> _stage;
@@ -51,5 +49,5 @@ class CollectIXBarInfo : public MauInspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_MAU_IXBAR_INFO_H_ */

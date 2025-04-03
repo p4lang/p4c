@@ -25,6 +25,7 @@
 #include <set>
 #include <string>
 
+namespace P4 {
 namespace BFN {
 
 /** Helper class for pragma help
@@ -118,5 +119,5 @@ class Pragma {
 };
 
 }  // end namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_COMMON_PRAGMA_PRAGMA_H_

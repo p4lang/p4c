@@ -21,6 +21,7 @@
 
 #include "frontends/p4/frontend.h"
 
+namespace P4 {
 namespace BFN {
 
 struct FrontEndPolicy : P4::FrontEndPolicy {
@@ -40,5 +41,5 @@ struct FrontEndPolicy : P4::FrontEndPolicy {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_COMMON_FRONT_END_POLICY_H_ */

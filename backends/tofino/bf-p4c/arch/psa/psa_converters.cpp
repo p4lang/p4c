@@ -23,6 +23,8 @@
 #include "lib/ordered_map.h"
 #include "programStructure.h"
 
+
+namespace P4 {
 namespace BFN {
 
 namespace PSA {
@@ -724,3 +726,4 @@ const IR::Node *PathExpressionConverter::postorder(IR::Member *node) {
 }  // namespace PSA
 
 }  // namespace BFN
+}// p4

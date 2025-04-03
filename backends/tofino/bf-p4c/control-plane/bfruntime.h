@@ -54,6 +54,7 @@ namespace P4 {
 struct P4RuntimeAPI;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 namespace BFRT {
@@ -424,5 +425,5 @@ class BFRuntimeGenerator {
 
 }  // namespace BFRT
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_H_ */

@@ -18,6 +18,7 @@
 
 #include "backends/tofino/bf-p4c/common/size_of.h"
 
+namespace P4 {
 namespace BFN {
 
 const IR::Node *ConvertSizeOfToConstant::preorder(IR::MAU::TypedPrimitive *p) {
@@ -129,3 +130,4 @@ const IR::Node *BackendStrengthReduction::preorder(IR::MAU::Instruction *inst) {
 }
 
 }  // namespace BFN
+}

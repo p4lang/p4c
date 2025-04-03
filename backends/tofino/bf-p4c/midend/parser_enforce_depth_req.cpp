@@ -28,6 +28,8 @@
 #include "backends/tofino/bf-p4c/midend/parser_graph.h"
 #include "backends/tofino/bf-p4c/parde/parser_loops_info.h"
 
+
+namespace P4 {
 namespace BFN {
 
 const cstring ParserEnforceDepthReq::pad_hdr_name = "min_parse_depth_padding"_cs;
@@ -1266,3 +1268,5 @@ ParserEnforceDepthReq::ParserEnforceDepthReq(P4::ReferenceMap *rm, BFN::Evaluato
 }
 
 }  // namespace BFN
+}
+

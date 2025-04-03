@@ -1,4 +1,4 @@
-/**
+\/**
  * Copyright (C) 2024 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -26,6 +26,7 @@
 
 using Logging::Resources_Schema_Logger;
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -95,5 +96,5 @@ class ParserResourcesLogging : public ParserInspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_ */

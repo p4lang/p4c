@@ -24,6 +24,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**

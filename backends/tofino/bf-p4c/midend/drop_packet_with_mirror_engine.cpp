@@ -20,6 +20,7 @@
 
 #include "backends/tofino/bf-p4c/device.h"
 
+namespace P4 {
 namespace BFN {
 
 #if 0
@@ -137,3 +138,4 @@ const IR::Node *DropPacketWithMirrorEngine_::postorder(IR::BFN::TnaDeparser *dp)
 }
 
 }  // namespace BFN
+}

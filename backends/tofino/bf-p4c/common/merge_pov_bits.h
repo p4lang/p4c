@@ -26,6 +26,7 @@
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -68,5 +69,5 @@ class MergePovBits : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_COMMON_MERGE_POV_BITS_H_ */

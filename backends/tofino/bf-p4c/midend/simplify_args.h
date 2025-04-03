@@ -80,6 +80,7 @@
 #include "ir/ir.h"
 #include "midend/flattenHeaders.h"
 
+namespace P4 {
 namespace BFN {
 
 /**

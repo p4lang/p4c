@@ -60,5 +60,5 @@ class GatewayControlFlow : public virtual ControlFlowVisitor {
 };
 
 }  // end namespace BFN
-
+}
 #endif /* BF_P4C_IR_GATEWAY_CONTROL_FLOW_H_ */

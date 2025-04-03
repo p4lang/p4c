@@ -30,6 +30,8 @@
 #include "lib/error_catalog.h"
 #include "lib/log.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 const std::set<unsigned> SplitAlpm::valid_partition_values = {1024, 2048, 4096, 8192};

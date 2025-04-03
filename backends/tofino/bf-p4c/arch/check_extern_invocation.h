@@ -30,6 +30,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 class CheckExternInvocationCommon : public P4::CheckExternInvocationCommon {
@@ -69,7 +70,7 @@ class CheckT2NAExternInvocation : public CheckExternInvocationCommon {
         initPipeConstraints();
     }
 };
-
+}
 }  // namespace BFN
 
 #endif /* BF_P4C_ARCH_CHECK_EXTERN_INVOCATION_H_ */

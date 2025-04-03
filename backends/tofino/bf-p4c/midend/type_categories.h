@@ -26,6 +26,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 struct LinearPath;
@@ -115,5 +116,5 @@ bool isSubobjectOfParameter(const LinearPath &path, P4::ReferenceMap *refMap);
 const IR::Parameter *getContainingParameter(const LinearPath &path, P4::ReferenceMap *refMap);
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_TYPE_CATEGORIES_H_ */

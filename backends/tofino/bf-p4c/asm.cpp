@@ -31,6 +31,7 @@
 #include "backends/tofino/bf-p4c/common/run_id.h"
 #include "backends/tofino/bf-p4c/device.h"
 
+namespace P4 {
 namespace BFN {
 
 std::string AsmOutput::ghostPhvContainer() const {
@@ -129,3 +130,4 @@ bool AsmOutput::preorder(const IR::BFN::Pipe *pipe) {
 }
 
 }  // namespace BFN
+}

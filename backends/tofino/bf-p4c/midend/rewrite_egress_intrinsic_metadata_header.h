@@ -26,6 +26,7 @@ class TypeMap;
 class ReferenceMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -161,5 +162,5 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_ */

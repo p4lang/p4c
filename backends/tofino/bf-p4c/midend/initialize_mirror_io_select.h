@@ -26,6 +26,7 @@
 #include "ir/ir.h"
 #include "type_checker.h"
 
+namespace P4 {
 namespace BFN {
 
 // Initialize eg_intr_md_for_dprsr.mirror_io_select
@@ -81,5 +82,5 @@ class InitializeMirrorIOSelect : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif  // INITIALIZE_MIRROR_IO_SELECT_H_

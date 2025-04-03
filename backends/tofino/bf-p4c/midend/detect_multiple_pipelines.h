@@ -24,6 +24,7 @@
 
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 // This is the visitor class for detecting multiple pipelines

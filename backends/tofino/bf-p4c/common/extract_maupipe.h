@@ -38,6 +38,7 @@
 class BFN_Options;
 class CreateSaluInstruction;
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;

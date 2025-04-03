@@ -53,6 +53,7 @@ using P4::ControlPlaneAPI::P4RuntimeSymbolTableIface;
 
 namespace p4configv1 = ::p4::config::v1;
 
+namespace P4 {
 namespace BFN {
 
 /// We re-use as much code as possible between PSA and TNA. The two
@@ -167,6 +168,7 @@ struct CounterlikeTraits<::BFN::MeterExtern<BFN::Arch::PSA>> {
 
 namespace Helpers = P4::ControlPlaneAPI::Helpers;
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -2466,6 +2468,6 @@ struct PSAArchHandlerBuilder : public P4::ControlPlaneAPI::P4RuntimeArchHandlerB
         return new BFRuntimeArchHandlerPSA(refMap, typeMap, evaluatedProgram);
     }
 };
-
+}
 }  // namespace BFN
 #endif /* BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

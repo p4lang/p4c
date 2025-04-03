@@ -24,6 +24,7 @@
 #include "ir/ir.h"
 #include "midend/eliminateTuples.h"
 
+namespace P4 {
 namespace BFN {
 
 // Finds all of the HashListExpressions and saves their data

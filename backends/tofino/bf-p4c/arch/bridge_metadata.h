@@ -29,6 +29,7 @@
 #include "lib/ordered_set.h"
 #include "midend/eliminateSerEnums.h"
 
+namespace P4 {
 namespace BFN {
 
 static const cstring META = "meta"_cs;
@@ -44,5 +45,6 @@ struct AddTnaBridgeMetadata : public PassManager {
 };
 
 }  // namespace BFN
+}
 
 #endif /* BF_P4C_ARCH_BRIDGE_METADATA_H_ */

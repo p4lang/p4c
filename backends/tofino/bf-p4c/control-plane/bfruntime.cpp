@@ -20,6 +20,7 @@
 
 #include "backends/tofino/bf-p4c/common/utils.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace BFRT {
@@ -994,3 +995,4 @@ void BFRuntimeGenerator::serializeBFRuntimeSchema(std::ostream *destination) {
 }  // namespace BFRT
 
 }  // namespace BFN
+}

@@ -18,6 +18,7 @@
 
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 
+namespace P4 {
 namespace BFN {
 
 // Overrides the setTypeType method in base classes.
@@ -125,3 +126,4 @@ EvaluatorPass::EvaluatorPass(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
 }
 
 }  // namespace BFN
+}

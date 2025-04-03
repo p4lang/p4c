@@ -41,6 +41,8 @@
 #include "lib/cstring.h"
 #include "lib/indent.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 namespace {

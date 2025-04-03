@@ -35,6 +35,7 @@ class TypeMap;
 
 class BFN_Options;
 
+namespace P4 {
 namespace BFN {
 
 /**

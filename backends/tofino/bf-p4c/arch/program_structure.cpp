@@ -40,6 +40,8 @@
 #include "frontends/parsers/parserDriver.h"
 #include "lib/big_int_util.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 const cstring ProgramStructure::INGRESS_PARSER = "ingress_parser"_cs;

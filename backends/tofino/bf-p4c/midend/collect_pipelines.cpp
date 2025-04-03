@@ -23,6 +23,8 @@
 
 #include "backends/tofino/bf-p4c/device.h"
 
+
+namespace P4 {
 namespace BFN {
 
 template <typename T>
@@ -131,3 +133,4 @@ bool CollectPipelines::preorder(const IR::Declaration_Instance *di) {
 }
 
 }  // namespace BFN
+}

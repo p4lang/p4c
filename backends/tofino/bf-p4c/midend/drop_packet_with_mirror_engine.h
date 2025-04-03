@@ -40,6 +40,7 @@
 #include "ir/ir.h"
 #include "type_checker.h"
 
+namespace P4 {
 namespace BFN {
 
 /*
@@ -102,5 +103,5 @@ class DropPacketWithMirrorEngine : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_DROP_PACKET_WITH_MIRROR_ENGINE_H_ */

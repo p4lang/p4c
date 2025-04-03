@@ -22,6 +22,7 @@
 #include "frontends/p4/strengthReduction.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -87,5 +88,5 @@ class ResolveSizeOfOperator : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_COMMON_SIZE_OF_H_ */

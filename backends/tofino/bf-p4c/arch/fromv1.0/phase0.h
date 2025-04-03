@@ -33,6 +33,7 @@ class TnaProgramStructure;
 }
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -201,7 +202,7 @@ class ConvertPhase0 : public PassManager {
 };
 
 cstring getDefaultPhase0TableKeyName();
-
+}
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_FROMV1_0_PHASE0_H_ */

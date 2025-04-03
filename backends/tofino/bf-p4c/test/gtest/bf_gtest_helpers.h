@@ -41,14 +41,16 @@ namespace IR {
 class P4Program;
 }  // namespace IR
 namespace IR {
+namespace P4 {
 namespace BFN {
 class Pipe;
 }  // namespace BFN
 }  // namespace IR
 }  // namespace P4
+namespace P4 {
 namespace BFN {
 class Backend;
-}
+}}
 class MauAsmOutput;
 
 namespace P4::Test {

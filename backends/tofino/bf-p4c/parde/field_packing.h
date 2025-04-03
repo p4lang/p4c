@@ -24,8 +24,7 @@
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/ir/gress.h"
 #include "lib/cstring.h"
-
-namespace P4 {
+namespace P4{
 namespace IR {
 namespace BFN {
 class ParserState;
@@ -34,6 +33,7 @@ class Expression;
 }  // namespace IR
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;

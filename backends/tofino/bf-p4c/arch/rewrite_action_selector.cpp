@@ -24,6 +24,8 @@
 #include "frontends/p4/methodInstance.h"
 #include "ir/annotations.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 const IR::Node *RewriteActionSelector::postorder(IR::Declaration_Instance *di) {

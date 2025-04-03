@@ -36,6 +36,8 @@
 #include "rewrite_bridge_metadata.h"
 #include "rewrite_packet_path.h"
 
+
+namespace P4 {
 namespace BFN {
 
 namespace PSA {

@@ -27,6 +27,7 @@
 // For now, we only partially implement the PR by setting `ENABLE_P4C3251 0`.
 #define ENABLE_P4C3251 0
 
+namespace P4 {
 namespace BFN {
 
 class CopyHeaders : public PassRepeated {
@@ -35,5 +36,5 @@ class CopyHeaders : public PassRepeated {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_COPY_HEADER_H_ */

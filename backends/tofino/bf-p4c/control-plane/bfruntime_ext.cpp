@@ -18,6 +18,8 @@
 
 #include "bfruntime_ext.h"
 
+
+namespace P4 {
 namespace BFN {
 
 namespace BFRT {
@@ -1494,4 +1496,5 @@ void BFRuntimeSchemaGenerator::addDebugCounterTable(Util::JsonArray *tablesJson)
 
 }  // namespace BFRT
 
+}
 }  // namespace BFN

@@ -18,6 +18,8 @@
 
 #include "backends/tofino/bf-p4c/arch/helpers.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 /**

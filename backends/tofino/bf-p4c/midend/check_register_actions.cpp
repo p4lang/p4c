@@ -22,6 +22,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 bool CheckRegisterActions::preorder(const IR::Declaration_Instance *di) {
@@ -88,3 +89,4 @@ bool CheckRegisterActions::preorder(const IR::Declaration_Instance *di) {
 }
 
 }  // namespace BFN
+}

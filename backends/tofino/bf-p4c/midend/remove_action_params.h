@@ -28,6 +28,7 @@
 
 #include "frontends/p4/removeParameters.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -193,5 +194,5 @@ class RemoveActionParameters : public PassManager {
 };
 
 }  // end namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_ */

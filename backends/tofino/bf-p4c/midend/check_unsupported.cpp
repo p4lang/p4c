@@ -20,7 +20,7 @@
 
 #include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/lib/safe_width.h"
-
+namespace P4 {
 namespace BFN {
 
 bool CheckUnsupported::preorder(const IR::PathExpression *path_expression) {
@@ -163,3 +163,4 @@ void CheckUnsupported::postorder(const IR::P4Table *const table_ptr) {
 }
 
 }  // namespace BFN
+}

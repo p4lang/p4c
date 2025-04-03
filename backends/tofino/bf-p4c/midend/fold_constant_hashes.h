@@ -25,6 +25,7 @@
 #include "backends/tofino/bf-p4c/mau/hash_function.h"
 #include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -128,7 +129,7 @@ class FoldConstantHashes : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 /* clang-format on */
 
 #endif  // BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_

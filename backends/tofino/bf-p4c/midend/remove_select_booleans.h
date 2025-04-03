@@ -59,6 +59,7 @@
 #include "ir/ir.h"
 #include "midend/removeSelectBooleans.h"
 
+namespace P4 {
 namespace BFN {
 
 class RemoveSelectBooleans : public PassManager {

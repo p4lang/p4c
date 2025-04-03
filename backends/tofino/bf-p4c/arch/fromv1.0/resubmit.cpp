@@ -27,6 +27,8 @@
 #include "frontends/p4/methodInstance.h"
 #include "ir/annotations.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 namespace {
 

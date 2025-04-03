@@ -24,6 +24,7 @@
 #include "backends/tofino/bf-p4c/arch/psa/psa.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace PSA {

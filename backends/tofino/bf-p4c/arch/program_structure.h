@@ -26,6 +26,7 @@
 #include "ir/namemap.h"
 #include "lib/ordered_set.h"
 
+namespace P4 {
 namespace BFN {
 
 using MetadataMap = ordered_map<cstring, IR::MetadataInfo *>;
@@ -188,5 +189,5 @@ struct ProgramStructure {
 };
 
 }  // namespace BFN
-
+} // p4 which we added
 #endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PROGRAM_STRUCTURE_H_ */

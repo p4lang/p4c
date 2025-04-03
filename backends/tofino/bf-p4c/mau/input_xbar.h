@@ -46,12 +46,13 @@ struct TableResourceAlloc;
 class TableMatch;
 class MauAsmOutput;
 
+namespace P4 {
 namespace BFN {
 namespace Resources {
 struct StageResources;
 }
 }  // namespace BFN
-
+}
 /// Compiler generated random number function for use as hash seed on the input crossbar.
 struct IXBarRandom {
     static std::random_device seed_generator;

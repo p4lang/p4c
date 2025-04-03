@@ -7,6 +7,7 @@
 #include <tuple>
 #include <utility>
 
+namespace P4 {
 namespace BFN {
 
 template <class T>
@@ -226,5 +227,5 @@ class Alloc3D : public Alloc3Dbase<T> {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_ASM_ALLOC_H_ */

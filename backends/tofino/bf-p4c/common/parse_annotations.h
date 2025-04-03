@@ -23,6 +23,7 @@
 #include "frontends/p4/parseAnnotations.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 // wrapper for PARSE, PARSE_PAIR, and PARSE_TRIPLE
@@ -187,5 +188,5 @@ class ParseAnnotations : public P4::ParseAnnotations {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_ */

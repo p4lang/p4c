@@ -25,6 +25,7 @@
 #include "backends/tofino/bf-p4c/device.h"
 #include "resources_clot.h"
 
+namespace P4 {
 namespace BFN {
 
 bool ClotResourcesLogging::usingClots() const {
@@ -233,5 +234,5 @@ ClotResourcesLogging::ClotResourcesLogging(const ClotInfo &clotInfo) : clotInfo(
 }
 
 }  // namespace BFN
-
+}
 /* clang-format on */

@@ -22,6 +22,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -42,5 +43,5 @@ class CheckRegisterActions : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_REGISTER_ACTIONS_H_

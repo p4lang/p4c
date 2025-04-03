@@ -37,6 +37,8 @@
 #include "midend/local_copyprop.h"
 #include "midend/validateProperties.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 //////////////////////////////////////////////////////////////////////////////////////////////

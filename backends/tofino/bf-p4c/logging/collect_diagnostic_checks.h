@@ -21,6 +21,7 @@
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/logging/bf_error_reporter.h"
 
+namespace P4 {
 namespace BFN {
 /**
  * @brief Collects error/warning checks from the program.
@@ -62,5 +63,5 @@ namespace BFN {
 void collect_diagnostic_checks(BfErrorReporter &reporter, BFN_Options &options);
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_ */

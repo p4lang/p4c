@@ -51,6 +51,8 @@
 #include "lib/error.h"
 #include "lib/safe_vector.h"
 
+
+namespace P4 {
 namespace BFN {
 
 static bool getBool(const IR::Argument *arg) {
@@ -2090,3 +2092,4 @@ bool BackendConverter::preorder(const IR::P4Program *program) {
 }
 
 }  // namespace BFN
+}

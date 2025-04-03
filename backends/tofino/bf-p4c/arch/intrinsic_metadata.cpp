@@ -21,6 +21,8 @@
 #include "ir/annotations.h"
 #include "ir/ir.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 const IR::ParserState *convertStartStateToNormalState(const IR::ParserState *state,

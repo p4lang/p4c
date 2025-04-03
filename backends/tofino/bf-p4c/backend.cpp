@@ -1,4 +1,4 @@
-/**
+\/**
  * Copyright (C) 2024 Intel Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -132,6 +132,8 @@
 #include "ir/pass_manager.h"
 #include "lib/indent.h"
 
+
+namespace P4 {
 namespace BFN {
 
 /**
@@ -508,3 +510,4 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
 }
 
 }  // namespace BFN
+}

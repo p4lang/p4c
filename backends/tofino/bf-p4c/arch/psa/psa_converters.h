@@ -27,6 +27,7 @@
 #include "lib/safe_vector.h"
 #include "programStructure.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace PSA {

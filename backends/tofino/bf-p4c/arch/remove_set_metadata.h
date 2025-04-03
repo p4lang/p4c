@@ -26,6 +26,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -63,7 +64,7 @@ struct RemoveSetMetadata : public Transform {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
 };
-
+}
 }  // namespace BFN
 
 #endif /* BF_P4C_ARCH_REMOVE_SET_METADATA_H_ */

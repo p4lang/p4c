@@ -35,7 +35,6 @@
 
 namespace P4 {
 namespace IR {
-
 namespace BFN {
 class Pipe;
 }  // namespace BFN
@@ -45,6 +44,7 @@ class P4Control;
 }  // namespace IR
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -154,5 +154,5 @@ struct AssignmentStmtErrorCheck : public DeparserInspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_PARDE_EXTRACT_DEPARSER_H_ */

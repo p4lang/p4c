@@ -18,6 +18,8 @@
 
 #include "psa_model.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 namespace PSA {

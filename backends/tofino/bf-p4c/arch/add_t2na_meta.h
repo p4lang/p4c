@@ -21,6 +21,7 @@
 
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 // Check T2NA metadata and add missing

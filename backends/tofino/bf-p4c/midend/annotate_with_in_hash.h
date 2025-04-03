@@ -57,6 +57,7 @@
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -95,5 +96,5 @@ class AnnotateWithInHash : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_ANNOTATE_WITH_IN_HASH_H_

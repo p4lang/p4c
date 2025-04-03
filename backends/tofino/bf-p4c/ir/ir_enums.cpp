@@ -217,6 +217,7 @@ bool operator>>(cstring s, IR::MAU::AlwaysRun &ar) {
 }  // end namespace IR
 
 namespace IR {
+namespace P4 {
 namespace BFN {
 
 static const char *checksum_mode_to_str[] = {"VERIFY", "RESIDUAL", "CLOT"};
@@ -252,7 +253,8 @@ bool operator>>(cstring s, IR::BFN::ParserWriteMode &t) {
     }
     return false;
 }
-
+} //end of  p4
 }  // end namespace BFN
 }  // end namespace IR
 }  // end namespace P4
+}

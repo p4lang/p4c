@@ -18,6 +18,8 @@
 
 #include "collect_hardware_constrained_fields.h"
 
+
+namespace P4 {
 namespace BFN {
 
 IR::Member *create_member(cstring hdr, cstring member) {

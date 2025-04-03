@@ -22,6 +22,7 @@
 #include "backends/tofino/bf-p4c/arch/psa/programStructure.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 struct AddPsaBridgeMetadata : public PassManager {

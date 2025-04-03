@@ -22,6 +22,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -109,7 +110,7 @@ IR::BFN::ParserState *FieldPacking::createExtractionState(
 }
 
 }  // namespace BFN
-
+}
 std::ostream &operator<<(std::ostream &out, const BFN::FieldPacking *packing) {
     if (packing == nullptr) {
         out << "(null field packing)" << std::endl;

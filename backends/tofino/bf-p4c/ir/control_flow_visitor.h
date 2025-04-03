@@ -22,6 +22,7 @@
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 class ControlFlowVisitor : public ::ControlFlowVisitor, virtual public P4::ResolutionContext {
@@ -64,5 +65,5 @@ class ControlFlowVisitor : public ::ControlFlowVisitor, virtual public P4::Resol
 };
 
 }  // end namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_IR_CONTROL_FLOW_VISITOR_H_ */

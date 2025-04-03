@@ -21,6 +21,8 @@
 #include <optional>
 #include <regex>
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 static std::optional<std::string> get_file_contents(BFN_Options &options) {

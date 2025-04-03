@@ -21,6 +21,8 @@
  */
 #include "detect_multiple_pipelines.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 // Checks the "main"

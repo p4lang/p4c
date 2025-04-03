@@ -723,8 +723,8 @@ class ParserGraphImpl : public DirectedGraph {
     assoc::map<int, const State *> _id_to_state;
 };
 
-namespace P4 {
 namespace IR {
+namespace P4 {
 namespace BFN {
 
 using ParserGraph = ParserGraphImpl<IR::BFN::Parser, IR::BFN::ParserState, IR::BFN::Transition>;

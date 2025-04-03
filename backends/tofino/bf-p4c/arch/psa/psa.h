@@ -42,6 +42,7 @@
 #include "ir/namemap.h"
 #include "ir/pattern.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
