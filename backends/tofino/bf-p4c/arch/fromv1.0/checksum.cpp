@@ -18,6 +18,7 @@
 
 #include "backends/tofino/bf-p4c/arch/fromv1.0/checksum.h"
 
+namespace P4 {
 namespace BFN {
 namespace V1 {
 
@@ -32,3 +33,4 @@ TranslateParserChecksums::TranslateParserChecksums(ProgramStructure *structure,
 
 }  // namespace V1
 }  // namespace BFN
+}

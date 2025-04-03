@@ -28,6 +28,7 @@
 #include "backends/tofino/bf-utils/dynamic_hash/bfn_hash_algorithm.h"
 #include "bfruntime.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace BFRT {
@@ -302,5 +303,5 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
 }  // namespace BFRT
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_EXT_H_

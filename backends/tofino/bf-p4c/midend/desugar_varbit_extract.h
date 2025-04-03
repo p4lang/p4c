@@ -107,6 +107,7 @@
 #include "ir/annotations.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -154,5 +155,5 @@ class DesugarVarbitExtract : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_ */

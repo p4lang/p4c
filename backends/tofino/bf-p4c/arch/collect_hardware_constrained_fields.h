@@ -27,6 +27,7 @@
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
+namespace P4 {
 namespace BFN {
 
 // This class add hardware constrained fields to pipe->thread[gress].hw_constrained_fields. This is
@@ -46,5 +47,5 @@ class CollectHardwareConstrainedFields : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_COLLECT_HARDWARE_CONSTRAINED_FIELDS_H_ */

@@ -28,6 +28,8 @@
 
 #include "lib/set.h"
 
+
+namespace P4 {
 namespace BFN {
 
 // CONSTANTS --------------------------------------------------------------------------------------
@@ -729,3 +731,4 @@ IR::Node *PingPongGeneration::GeneratePingPongMechanism::postorder(IR::MethodCal
 }
 
 }  // namespace BFN
+}

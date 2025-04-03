@@ -27,6 +27,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 using FieldListId = std::tuple<gress_t, unsigned, cstring>;
@@ -57,5 +58,5 @@ class FixupMirrorMetadata : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_FROMV1_0_MIRROR_H_ */

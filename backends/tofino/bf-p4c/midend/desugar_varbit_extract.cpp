@@ -25,6 +25,8 @@
 #include "backends/tofino/bf-p4c/device.h"
 #include "frontends/common/constantFolding.h"
 
+
+namespace P4 {
 namespace BFN {
 
 /// Does the header type contain any varbit field?
@@ -1486,3 +1488,4 @@ DesugarVarbitExtract::DesugarVarbitExtract(P4::ReferenceMap *refMap, P4::TypeMap
 }
 
 }  // namespace BFN
+}

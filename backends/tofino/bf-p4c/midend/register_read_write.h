@@ -26,6 +26,7 @@
 #include "ir/ir.h"
 #include "table_mutex.h"
 
+namespace P4 {
 namespace BFN {
 
 class SearchAndReplaceExpr : public Transform {
@@ -212,5 +213,5 @@ class RegisterReadWrite : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_

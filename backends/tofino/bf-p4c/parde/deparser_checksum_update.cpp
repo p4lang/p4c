@@ -1033,6 +1033,7 @@ struct DeleteChecksumField : public Transform {
 };
 }  // namespace
 
+namespace P4 {
 namespace BFN {
 
 IR::BFN::Pipe *extractChecksumFromDeparser(const IR::BFN::TnaDeparser *deparser,
@@ -1088,3 +1089,4 @@ IR::BFN::Pipe *extractChecksumFromDeparser(const IR::BFN::TnaDeparser *deparser,
 }
 
 }  // namespace BFN
+}

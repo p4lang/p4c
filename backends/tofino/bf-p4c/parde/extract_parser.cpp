@@ -34,6 +34,7 @@
 #include "ir/ir.h"
 #include "lib/log.h"
 
+namespace P4 {
 namespace BFN {
 
 using BlockInfoMapping = std::multimap<const IR::Node *, BlockInfo>;
@@ -1868,3 +1869,4 @@ ProcessParde::ProcessParde(const IR::BFN::Pipe *rv, bool useV1model)
 }
 
 }  // namespace BFN
+}

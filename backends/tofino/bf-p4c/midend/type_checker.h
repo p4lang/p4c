@@ -23,6 +23,7 @@
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
+namespace P4 {
 namespace BFN {
 
 /**

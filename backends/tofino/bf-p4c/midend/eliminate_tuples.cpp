@@ -18,6 +18,7 @@
 
 #include "backends/tofino/bf-p4c/midend/eliminate_tuples.h"
 
+namespace P4 {
 namespace BFN {
 
 bool SaveHashListExpression::preorder(const IR::HashListExpression *hle) {
@@ -41,3 +42,4 @@ const IR::Node *InsertHashStructExpression::preorder(IR::StructExpression *se) {
 }
 
 }  // namespace BFN
+}

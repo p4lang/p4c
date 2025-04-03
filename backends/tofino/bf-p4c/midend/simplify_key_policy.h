@@ -21,6 +21,7 @@
 
 #include "midend/simplifyKey.h"
 
+namespace P4 {
 namespace BFN {
 
 class IsPhase0 : public P4::KeyIsSimple {
@@ -84,5 +85,5 @@ class KeyIsSimple {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_SIMPLIFY_KEY_POLICY_H_ */

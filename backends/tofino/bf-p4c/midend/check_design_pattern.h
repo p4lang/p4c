@@ -53,6 +53,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 /**
  * \ingroup CheckDesignPattern

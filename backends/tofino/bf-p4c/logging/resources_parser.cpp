@@ -19,7 +19,7 @@
 #include "backends/tofino/bf-p4c/logging/resources_parser.h"
 
 #include "backends/tofino/bf-p4c/device.h"
-
+namespace P4 {
 namespace BFN {
 
 bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParser *parser) {
@@ -225,5 +225,5 @@ const ParserResourcesLogging::ParserResources *ParserResourcesLogging::getLogger
 }
 
 }  // namespace BFN
-
+}
 /* clang-format on */

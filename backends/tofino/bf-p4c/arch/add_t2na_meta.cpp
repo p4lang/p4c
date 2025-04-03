@@ -18,6 +18,7 @@
 
 #include "backends/tofino/bf-p4c/arch/add_t2na_meta.h"
 
+namespace P4 {
 namespace BFN {
 
 // Check T2NA metadata structures and headers and add missing fields
@@ -75,3 +76,4 @@ void AddT2naMeta::postorder(IR::Type_StructLike *typeStructLike) {
 }
 
 }  // namespace BFN
+}

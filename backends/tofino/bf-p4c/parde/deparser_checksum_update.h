@@ -36,6 +36,7 @@ class P4Control;
 }  // namespace IR
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -59,5 +60,6 @@ using namespace P4;
  */
 IR::BFN::Pipe *extractChecksumFromDeparser(const IR::BFN::TnaDeparser *deparser,
                                            IR::BFN::Pipe *pipe);
+}
 }  // namespace BFN
 #endif /* BF_P4C_PARDE_DEPARSER_CHECKSUM_UPDATE_H_ */

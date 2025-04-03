@@ -36,6 +36,7 @@
 using Logging::Resources_Schema_Logger;
 class ClotInfo;  // Forward declaration
 
+namespace P4 {
 namespace BFN {
 
 namespace Resources {
@@ -251,5 +252,5 @@ class ResourcesLogging : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_H_ */

@@ -18,6 +18,8 @@
 
 #include "backends/tofino/bf-p4c/midend/initialize_mirror_io_select.h"
 
+namespace P4 {
+namespace P4 {
 namespace BFN {
 
 // Add mirror_io_select initialization to egress parser

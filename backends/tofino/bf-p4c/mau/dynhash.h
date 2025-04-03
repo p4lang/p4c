@@ -89,6 +89,7 @@ class GatherDynamicHashAlloc : public MauInspector {
         : verify_hash_gen(vhg), hash_gen_alloc(hga) {}
 };
 
+namespace P4 {
 namespace BFN {
 
 static const unsigned fieldListHandleBase = (0x21 << 24);
@@ -151,6 +152,6 @@ class DynamicHashJson : public PassManager {
     }
 };
 
-}  // namespace BFN
-
+}  
+}
 #endif /* BF_P4C_MAU_DYNHASH_H_ */

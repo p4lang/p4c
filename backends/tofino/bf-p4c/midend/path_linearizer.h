@@ -24,6 +24,7 @@
 
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -97,5 +98,5 @@ struct PathLinearizer : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_PATH_LINEARIZER_H_ */

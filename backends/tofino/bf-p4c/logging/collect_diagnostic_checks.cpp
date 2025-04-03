@@ -21,6 +21,8 @@
 #include <optional>
 #include <regex>
 
+
+namespace P4 {
 namespace BFN {
 
 static std::optional<std::string> get_file_contents(BFN_Options &options) {
@@ -152,3 +154,4 @@ void collect_diagnostic_checks(BfErrorReporter &reporter, BFN_Options &options) 
 }
 
 }  // namespace BFN
+}

@@ -32,6 +32,7 @@
 #include "ir/pass_manager.h"
 #include "lib/cstring.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -201,5 +202,5 @@ class AlpmImplementation : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_ALPM_H_ */

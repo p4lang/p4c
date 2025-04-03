@@ -20,6 +20,8 @@
 
 #include "frontends/p4/methodInstance.h"
 
+
+namespace P4 {
 namespace BFN {
 
 void ControlFlowVisitor::visit_def(const IR::PathExpression *pe) {
@@ -47,3 +49,4 @@ void ControlFlowVisitor::visit_def(const IR::MethodCallExpression *mc) {
 }
 
 }  // namespace BFN
+}

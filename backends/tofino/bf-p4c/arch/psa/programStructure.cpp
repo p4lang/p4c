@@ -23,6 +23,7 @@
 #include "midend/validateProperties.h"
 #include "psa_converters.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace PSA {
@@ -150,3 +151,4 @@ const IR::P4Program *ProgramStructure::create(const IR::P4Program *program) {
 }  // namespace PSA
 
 }  // namespace BFN
+}

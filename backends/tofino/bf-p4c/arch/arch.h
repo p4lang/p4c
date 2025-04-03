@@ -49,6 +49,7 @@
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 
+namespace P4 {
 namespace BFN {
 
 // An Inspector pass to extract @pkginfo annotation from the P4 program
@@ -484,5 +485,5 @@ class ApplyEvaluator : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_ARCH_H_ */

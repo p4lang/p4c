@@ -21,6 +21,7 @@
 
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 // Check T2NA metadata and add missing
@@ -33,5 +34,5 @@ class AddT2naMeta final : public Modifier {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_ADD_T2NA_META_H_ */

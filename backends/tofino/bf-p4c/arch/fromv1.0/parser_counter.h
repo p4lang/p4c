@@ -21,6 +21,7 @@
 
 #include "backends/tofino/bf-p4c/arch/fromv1.0/v1_converters.h"
 
+namespace P4 {
 namespace BFN {
 namespace V1 {
 
@@ -41,5 +42,5 @@ class ParserCounterSelectionConverter : public PassManager {
 
 }  // namespace V1
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_ */

@@ -23,6 +23,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+namespace P4 {
 namespace BFN {
 
 struct ParserPragmas : public Inspector {
@@ -69,5 +70,5 @@ struct ParserLoopsInfo {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_ */

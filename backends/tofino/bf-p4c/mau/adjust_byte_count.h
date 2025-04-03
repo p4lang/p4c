@@ -21,6 +21,7 @@
 
 #include "backends/tofino/bf-p4c/logging/pass_manager.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -58,5 +59,5 @@ class AdjustByteCountSetup : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_ */

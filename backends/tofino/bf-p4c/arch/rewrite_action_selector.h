@@ -24,6 +24,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -51,5 +52,5 @@ class RewriteActionSelector : public Transform {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_REWRITE_ACTION_SELECTOR_H_ */

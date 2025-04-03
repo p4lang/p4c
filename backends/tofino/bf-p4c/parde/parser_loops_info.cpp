@@ -33,6 +33,7 @@
 #include "ir/ir.h"
 #include "lib/log.h"
 
+namespace P4 {
 namespace BFN {
 
 bool ParserPragmas::checkNumArgs(cstring pragma, const IR::Vector<IR::Expression> &exprs,
@@ -226,3 +227,4 @@ bool ParserLoopsInfo::need_strided_allocation(cstring state) const {
 }
 
 }  // namespace BFN
+}

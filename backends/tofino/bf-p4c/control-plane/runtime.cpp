@@ -33,6 +33,7 @@
 #include "lib/nullstream.h"
 #include "midend/eliminateNewtype.h"
 
+namespace P4 {
 namespace BFN {
 
 bool CheckReservedNames::preorder(const IR::Type_ArchBlock *b) {
@@ -159,3 +160,4 @@ void generateRuntime(const IR::P4Program *program, const BFN_Options &options) {
 }
 
 }  // namespace BFN
+}

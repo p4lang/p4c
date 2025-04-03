@@ -18,6 +18,7 @@
 
 #include "path_linearizer.h"
 
+namespace P4 {
 namespace BFN {
 
 cstring LinearPath::to_cstring(cstring delimiter, bool skip_path_expression) {
@@ -109,3 +110,4 @@ void PathLinearizer::end_apply() {
 }
 
 }  // namespace BFN
+}

@@ -23,6 +23,7 @@
 #include "backends/tofino/bf-p4c/common/utils.h"
 #include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -679,3 +680,4 @@ void EliminateHeaders::elimConcat(IR::IndexedVector<IR::NamedExpression> &output
             new IR::NamedExpression(IR::ID("concat_" + cstring::to_cstring(i++)), expr->right));
 }
 }  // namespace BFN
+}

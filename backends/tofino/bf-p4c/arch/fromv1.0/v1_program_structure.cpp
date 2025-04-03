@@ -21,6 +21,8 @@
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "v1_converters.h"
 
+
+namespace P4 {
 namespace BFN {
 
 namespace V1 {
@@ -174,3 +176,4 @@ const IR::P4Program *ProgramStructure::create(const IR::P4Program *program) {
 }  // namespace V1
 
 }  // namespace BFN
+}

@@ -33,6 +33,7 @@
 #include "midend/copyStructures.h"
 #include "midend/validateProperties.h"
 
+namespace P4 {
 namespace BFN {
 
 TnaArchTranslation::TnaArchTranslation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
@@ -63,3 +64,4 @@ TnaArchTranslation::TnaArchTranslation(P4::ReferenceMap *refMap, P4::TypeMap *ty
 }
 
 }  // namespace BFN
+}

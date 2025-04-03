@@ -23,6 +23,7 @@
 #include "backends/tofino/bf-p4c/midend/register_read_write.h"
 #include "midend/actionSynthesis.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -202,5 +203,5 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_ */

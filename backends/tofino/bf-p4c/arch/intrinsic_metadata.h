@@ -26,6 +26,7 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 const IR::ParserState *convertStartStateToNormalState(const IR::ParserState *state,
@@ -319,5 +320,5 @@ class AddIntrinsicMetadata : public PassManager {
 };
 
 }  // namespace BFN
-
+} // for p4
 #endif /* BF_P4C_ARCH_INTRINSIC_METADATA_H_ */

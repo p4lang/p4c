@@ -32,6 +32,8 @@
 #include "ir/id.h"
 #include "lib/cstring.h"
 
+
+namespace P4 {
 namespace BFN {
 
 Pipeline::Pipeline(cstring name, const IR::BFN::P4Thread *ingress, const IR::BFN::P4Thread *egress,
@@ -524,3 +526,4 @@ const IR::Node *RestoreParams::postorder(IR::BFN::TnaDeparser *control) {
 }
 
 }  // namespace BFN
+}

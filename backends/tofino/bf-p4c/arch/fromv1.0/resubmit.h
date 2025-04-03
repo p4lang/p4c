@@ -31,6 +31,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 struct FieldPacking;
@@ -46,5 +47,5 @@ class FixupResubmitMetadata : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_FROMV1_0_RESUBMIT_H_ */

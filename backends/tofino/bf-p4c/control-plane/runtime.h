@@ -31,6 +31,7 @@ using namespace P4;
 
 class BFN_Options;
 
+namespace P4 {
 namespace BFN {
 
 /*
@@ -69,5 +70,5 @@ class SetDefaultSize : public Modifier {
 void generateRuntime(const IR::P4Program *program, const BFN_Options &options);
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_RUNTIME_H_ */

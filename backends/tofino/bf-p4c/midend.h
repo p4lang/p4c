@@ -26,6 +26,7 @@
 
 class CollectSourceInfoLogging;
 
+namespace P4 {
 namespace BFN {
 
 class MidEnd : public PassManager {
@@ -42,5 +43,5 @@ class MidEnd : public PassManager {
 bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression *);
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_H_ */

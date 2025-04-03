@@ -40,6 +40,7 @@
 
 namespace p4configv1 = ::p4::config::v1;
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -404,5 +405,5 @@ P4::P4RuntimeAPI convertToStdP4Runtime(const P4::P4RuntimeAPI &p4RuntimeIn) {
 }
 
 }  // namespace BFN
-
+}
 #endif /* EXTENSIONS_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_ */

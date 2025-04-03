@@ -21,6 +21,7 @@
 
 #include "control-plane/p4RuntimeSerializer.h"
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -33,5 +34,5 @@ using namespace P4;
 P4::P4RuntimeAPI convertToStdP4Runtime(const P4::P4RuntimeAPI &p4RuntimeInput);
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_ */

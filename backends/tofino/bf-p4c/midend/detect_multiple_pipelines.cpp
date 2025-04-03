@@ -21,6 +21,7 @@
  */
 #include "detect_multiple_pipelines.h"
 
+namespace P4 {
 namespace BFN {
 
 // Checks the "main"
@@ -42,3 +43,4 @@ bool DetectMultiplePipelines::preorder(const IR::Declaration_Instance *di) {
 }
 
 }  // namespace BFN
+}

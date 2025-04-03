@@ -21,6 +21,8 @@
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 
+
+namespace P4 {
 namespace BFN {
 
 TEST(TofinoPathLinearizer, PathExpression) {
@@ -124,3 +126,4 @@ TEST(TofinoPathLinearizer, RejectNonPathlikeExpressions) {
 }
 
 }  // namespace BFN
+}

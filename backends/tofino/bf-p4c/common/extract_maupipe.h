@@ -38,6 +38,7 @@
 class BFN_Options;
 class CreateSaluInstruction;
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -241,5 +242,5 @@ class BackendConverter : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_COMMON_EXTRACT_MAUPIPE_H_ */

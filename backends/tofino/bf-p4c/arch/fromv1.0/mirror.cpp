@@ -29,6 +29,7 @@
 #include "frontends/p4/methodInstance.h"
 #include "ir/annotations.h"
 
+namespace P4 {
 namespace BFN {
 namespace {
 
@@ -309,3 +310,4 @@ FixupMirrorMetadata::FixupMirrorMetadata(P4::ReferenceMap *refMap, P4::TypeMap *
 }
 
 }  // namespace BFN
+}

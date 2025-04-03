@@ -99,6 +99,7 @@ bool operator>>(cstring s, IR::MAU::AlwaysRun &ar);
 
 }  // end namespace MAU
 
+namespace P4 {
 namespace BFN {
 
 /// The mode of operation of parser checksum units.
@@ -114,7 +115,7 @@ std::ostream &operator<<(std::ostream &out, const IR::BFN::ParserWriteMode &t);
 bool operator>>(cstring s, IR::BFN::ParserWriteMode &t);
 
 }  // end namespace BFN
-
+}
 }  // end namespace IR
 
 }  // end namespace P4

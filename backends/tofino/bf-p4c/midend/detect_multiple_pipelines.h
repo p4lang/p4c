@@ -24,6 +24,7 @@
 
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 // This is the visitor class for detecting multiple pipelines
@@ -40,5 +41,5 @@ class DetectMultiplePipelines : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_DETECT_MULTIPLE_PIPELINES_H_

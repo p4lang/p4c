@@ -31,6 +31,7 @@
 #include "lib/ordered_set.h"
 #include "midend/eliminateSerEnums.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace PSA {
@@ -138,5 +139,5 @@ struct ProgramStructure : BFN::ProgramStructure {
 }  // namespace PSA
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PSA_PROGRAMSTRUCTURE_H_ */

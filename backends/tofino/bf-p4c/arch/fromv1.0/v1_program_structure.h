@@ -27,6 +27,7 @@
 #include "ir/namemap.h"
 #include "lib/ordered_set.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace V1 {
@@ -50,5 +51,6 @@ struct ProgramStructure : BFN::ProgramStructure {
 }  // namespace V1
 
 }  // namespace BFN
+}
 
 #endif /* BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_V1_PROGRAM_STRUCTURE_H_ */

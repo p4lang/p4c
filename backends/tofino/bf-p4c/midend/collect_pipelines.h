@@ -29,6 +29,7 @@
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -117,5 +118,5 @@ class CollectPipelines : public Inspector {
 };
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_COLLECT_PIPELINES_H_

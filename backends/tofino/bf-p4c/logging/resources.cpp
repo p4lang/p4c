@@ -58,6 +58,8 @@ namespace std {
     }
 }  // namespace std
 
+
+namespace P4 {
 namespace BFN {
 
 static std::string getMeterTypeName(const IR::MAU::Table *table) {
@@ -937,5 +939,5 @@ ResourcesLogging::MauStageResourceUsage *ResourcesLogging::logStage(int stageNo)
 }
 
 }  // namespace BFN
-
+}
 /* clang-format on */

@@ -21,6 +21,7 @@
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 TEST(BFNTypeCategories, Types) {
@@ -99,3 +100,4 @@ TEST(BFNTypeCategories, Types) {
 }
 
 }  // namespace BFN
+}

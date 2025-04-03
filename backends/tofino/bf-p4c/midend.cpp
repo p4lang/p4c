@@ -173,6 +173,7 @@
 #include "midend/tableHit.h"
 #include "midend/validateProperties.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -470,3 +471,4 @@ MidEnd::MidEnd(BFN_Options &options) {
 }
 
 }  // namespace BFN
+}

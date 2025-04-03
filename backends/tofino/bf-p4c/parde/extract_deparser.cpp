@@ -25,6 +25,7 @@
 #include "frontends/p4/methodInstance.h"
 #include "ir/pattern.h"
 
+namespace P4 {
 namespace BFN {
 
 bool ExtractDeparser::preorder(const IR::Annotation *annot) {
@@ -571,3 +572,4 @@ void ExtractDeparser::end_apply() {
 }
 
 }  // namespace BFN
+}

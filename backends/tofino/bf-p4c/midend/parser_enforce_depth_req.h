@@ -22,6 +22,7 @@
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -85,5 +86,5 @@ class ParserEnforceDepthReq : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_PARSER_ENFORCE_DEPTH_REQ_H_ */

@@ -21,6 +21,7 @@
 
 #include <lib/error_catalog.h>
 
+namespace P4 {
 namespace BFN {
 
 using namespace P4;
@@ -62,5 +63,5 @@ class ErrorType : public P4::ErrorType {
 };
 
 }  // end namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_LIB_ERROR_TYPE_H_ */

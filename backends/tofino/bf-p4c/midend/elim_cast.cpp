@@ -20,6 +20,8 @@
 
 #include "backends/tofino/bf-p4c/common/slice.h"
 
+
+namespace P4 {
 namespace BFN {
 
 const IR::Node *EliminateWidthCasts::preorder(IR::Cast *expression) {
@@ -563,3 +565,4 @@ const IR::Node *RewriteConcatToSlices::preorder(IR::Neq *neq) {
 }
 
 }  // namespace BFN
+}

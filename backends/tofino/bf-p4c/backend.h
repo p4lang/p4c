@@ -40,6 +40,7 @@
 class FieldDefUse;
 struct CollectPhvLoggingInfo;
 
+namespace P4 {
 namespace BFN {
 
 class Backend : public PassManager {
@@ -122,5 +123,5 @@ class Backend : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_BACKEND_H_ */

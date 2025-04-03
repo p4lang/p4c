@@ -27,6 +27,8 @@
 #include "lib/ordered_map.h"
 #include "v1_program_structure.h"
 
+
+namespace P4 {
 namespace BFN {
 
 namespace V1 {
@@ -749,3 +751,4 @@ const IR::Node *ParserPriorityConverter::postorder(IR::AssignmentStatement *node
 }  // namespace V1
 
 }  // namespace BFN
+}

@@ -27,6 +27,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -237,5 +238,5 @@ class PingPongGeneration : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_PING_PONG_GENERATION_H_

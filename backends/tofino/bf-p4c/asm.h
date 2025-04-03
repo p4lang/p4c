@@ -36,6 +36,7 @@
 
 class FieldDefUse;
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -83,5 +84,5 @@ class AsmOutput : public Inspector {
 };
 
 } /* namespace BFN */
-
+}
 #endif /* _BACKENDS_TOFINO_BF_P4C_ASM_H_ */

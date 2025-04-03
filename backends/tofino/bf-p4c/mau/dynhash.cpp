@@ -69,6 +69,8 @@ bool GatherDynamicHashAlloc::preorder(const IR::MAU::Table *tbl) {
     return true;
 }
 
+
+namespace P4 {
 namespace BFN {
 
 unsigned fieldListHandle = 0x0;
@@ -646,3 +648,4 @@ std::ostream &operator<<(std::ostream &out, const DynamicHashJson &dyn) {
 }
 
 }  // namespace BFN
+}

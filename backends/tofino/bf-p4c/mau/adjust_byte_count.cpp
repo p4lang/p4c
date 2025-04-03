@@ -18,6 +18,8 @@
 
 #include "backends/tofino/bf-p4c/mau/adjust_byte_count.h"
 
+
+namespace P4 {
 namespace BFN {
 
 AdjustByteCountSetup::AdjustByteCountSetup() { addPasses({new Scan(*this), new Update(*this)}); }
@@ -125,3 +127,4 @@ bool AdjustByteCountSetup::Scan::preorder(const IR::MAU::Primitive *prim) {
 }
 
 }  // namespace BFN
+}

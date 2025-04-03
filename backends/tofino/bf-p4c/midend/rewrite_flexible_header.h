@@ -32,6 +32,7 @@ class TypeMap;
 class ReferenceMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -70,5 +71,5 @@ class RewriteFlexibleStruct : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_REWRITE_FLEXIBLE_HEADER_H_ */

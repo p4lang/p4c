@@ -24,6 +24,8 @@
 #include "backends/tofino/bf-p4c/mau/stateful_alu.h"
 #include "frontends/p4/methodInstance.h"
 
+
+namespace P4 {
 namespace BFN {
 
 bool RegisterReadWrite::CheckRegisterActions::preorder(
@@ -617,3 +619,4 @@ bool RegisterReadWrite::MoveRegisterParameters::preorder(IR::P4Control *c) {
 }
 
 }  // namespace BFN
+}

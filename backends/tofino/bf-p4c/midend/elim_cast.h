@@ -51,6 +51,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 /**
@@ -251,5 +252,5 @@ class ElimCasts : public PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_MIDEND_ELIM_CAST_H_ */

@@ -22,6 +22,8 @@
 #include "backends/tofino/bf-p4c/logging/filelog.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
+
+namespace P4 {
 namespace BFN {
 
 Visitor::profile_t CollectIXBarInfo::init_apply(const IR::Node *node) {
@@ -95,3 +97,4 @@ void CollectIXBarInfo::end_apply(const IR::Node *root) {
 }
 
 }  // namespace BFN
+}

@@ -21,6 +21,8 @@
 #include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 #include "backends/tofino/bf-p4c/midend/type_categories.h"
 
+
+namespace P4 {
 namespace BFN {
 
 /**
@@ -267,3 +269,4 @@ const IR::Node *DoAnnotateWithInHash::preorder(IR::AssignmentStatement *assignme
 }
 
 }  // namespace BFN
+}

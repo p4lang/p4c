@@ -27,6 +27,7 @@
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 const IR::Declaration_Instance *getDeclInst(const P4::ReferenceMap *refMap,
@@ -51,5 +52,6 @@ std::optional<const IR::ExpressionValue *> getExpressionFromProperty(const IR::P
 std::vector<const IR::Expression *> convertConcatToList(const IR::Concat *expr);
 
 }  // namespace BFN
+}
 
 #endif /* BF_P4C_ARCH_HELPERS_H_ */

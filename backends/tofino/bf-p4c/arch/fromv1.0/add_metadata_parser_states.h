@@ -27,6 +27,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 struct ElimUnusedMetadataStates : Transform {
@@ -50,5 +51,5 @@ struct AddMetadataParserStates : PassManager {
 };
 
 }  // namespace BFN
-
+}
 #endif /* BF_P4C_ARCH_FROMV1_0_ADD_METADATA_PARSER_STATES_H_ */

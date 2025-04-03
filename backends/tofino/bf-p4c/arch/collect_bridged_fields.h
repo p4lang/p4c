@@ -33,6 +33,7 @@ class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
+namespace P4 {
 namespace BFN {
 
 using FieldRef = std::pair<cstring, cstring>;
@@ -94,6 +95,6 @@ struct CollectBridgedFields : public Inspector,
     static int uid_counter;
 };
 
-}  // namespace BFN
+}}  // namespace BFN
 
 #endif /* BF_P4C_ARCH_COLLECT_BRIDGED_FIELDS_H_ */

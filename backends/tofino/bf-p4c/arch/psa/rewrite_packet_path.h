@@ -24,6 +24,7 @@
 #include "backends/tofino/bf-p4c/arch/psa/psa.h"
 #include "ir/ir.h"
 
+namespace P4 {
 namespace BFN {
 
 namespace PSA {
@@ -36,5 +37,5 @@ struct RewritePacketPath : public PassManager {
 }  // namespace PSA
 
 }  // namespace BFN
-
+}
 #endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_ */

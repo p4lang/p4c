@@ -24,6 +24,7 @@
 #include "frontends/p4/typeMap.h"
 #include "path_linearizer.h"
 
+namespace P4 {
 namespace BFN {
 
 bool isIntrinsicMetadataType(const IR::Type *type) {
@@ -143,3 +144,4 @@ const IR::Parameter *getContainingParameter(const LinearPath &path, P4::Referenc
 }
 
 }  // namespace BFN
+}
