@@ -100,9 +100,7 @@ class EgressTrafficManagerDropPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/etm-drop.p4"
 
     def runTest(self):
-        pkt = testutils.simple_ip_packet(
-            eth_dst="00:11:22:33:44:55", eth_src="00:AA:00:00:00:01", pktlen=100
-        )
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55", eth_src="00:AA:00:00:00:01")
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
         pkt[Ether].src = "00:44:33:22:FF:FF"
@@ -690,10 +688,6 @@ class PSATernaryTest(P4EbpfTest):
         testutils.verify_packet(self, pkt, PORT1)
 
 
-@unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
-    "Skipping on Ubuntu 22.04+ due to clang/kernel version issues",
-)
 class ActionDefaultTernaryPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/action-default-ternary.p4"
 
@@ -701,3 +695,298 @@ class ActionDefaultTernaryPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet()
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
+
+
+class ConstEntryTernaryPSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/const-entry-ternary.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ip_packet()
+        pkt[IP].src = 0x33333333
+
+        # via ternary const entry
+        pkt[Ether].src = "55:55:55:55:55:11"  # mask is 0xFFFFFFFFFF00
+        pkt[IP].dst = 0x11229900  # mask is 0xFFFF00FF
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT2)
+        pkt[Ether].src = "77:77:77:77:11:11"  # mask is 0xFFFFFFFF0000
+        pkt[IP].dst = 0x11993355  # mask is 0xFF00FFFF
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
+
+
+class PassToKernelStackTest(P4EbpfTest):
+    p4_file_path = "p4testdata/pass-to-kernel.p4"
+
+    def setUp(self):
+        super(PassToKernelStackTest, self).setUp()
+        # static route
+        self.exec_ns_cmd("ip route add 20.0.0.15/32 dev eth1")
+        # add IP address to interface, so that it can reply with ICMP and ARP
+        self.exec_ns_cmd("ifconfig eth0 10.0.0.1 up")
+        # static ARP
+        self.exec_ns_cmd("arp -s 20.0.0.15 00:00:00:00:00:aa")
+        self.exec_ns_cmd("arp -s 10.0.0.2 00:00:00:00:00:cc")
+
+    def tearDown(self):
+        self.exec_ns_cmd("arp -d 20.0.0.15")
+        self.exec_ns_cmd("arp -d 10.0.0.2")
+        self.exec_ns_cmd("ip route del 20.0.0.15/32")
+
+        super(PassToKernelStackTest, self).tearDown()
+
+    def runTest(self):
+        # simple forward by Linux routing
+        pkt = testutils.simple_tcp_packet(
+            eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2", ip_dst="20.0.0.15"
+        )
+        testutils.send_packet(self, PORT0, pkt)
+        exp_pkt = pkt.copy()
+        exp_pkt[Ether].src = "00:00:00:00:00:02"  # MAC of eth1
+        exp_pkt[Ether].dst = "00:00:00:00:00:aa"
+        exp_pkt[IP].ttl = 63  # routed packet
+        testutils.verify_packet(self, exp_pkt, PORT1)
+        self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
+
+        # ARP handling
+        pkt = testutils.simple_arp_packet(
+            pktlen=21, eth_dst="00:00:00:00:00:01", ip_snd="10.0.0.2", ip_tgt="10.0.0.1"
+        )
+        testutils.send_packet(self, PORT0, pkt)
+        exp_pkt = pkt.copy()
+        exp_pkt[ARP].op = 2
+        exp_pkt[ARP].hwsrc = "00:00:00:00:00:01"
+        exp_pkt[ARP].hwdst = pkt[Ether].src
+        exp_pkt[ARP].psrc = pkt[ARP].pdst
+        exp_pkt[ARP].pdst = pkt[ARP].psrc
+        exp_pkt[Ether].src = "00:00:00:00:00:01"
+        exp_pkt[Ether].dst = pkt[Ether].src
+        testutils.verify_packet(self, exp_pkt, PORT0)
+        self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
+
+        pkt = testutils.simple_icmp_packet(
+            eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2", ip_dst="10.0.0.1"
+        )
+        testutils.send_packet(self, PORT0, pkt)
+        exp_pkt = testutils.simple_icmp_packet(
+            eth_src="00:00:00:00:00:01",  # MAC of eth1
+            eth_dst="00:00:00:00:00:cc",
+            ip_src="10.0.0.1",
+            ip_dst="10.0.0.2",
+            icmp_type=0,
+        )
+        mask = Mask(exp_pkt)
+        # Linux can generate random IP identification number,
+        # ignore ID and checksum in the validation
+        mask.set_do_not_care_scapy(IP, "id")
+        mask.set_do_not_care_scapy(IP, "chksum")
+        testutils.verify_packet(self, mask, PORT0)
+        self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
+
+
+class LPMTableCachePSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/table-cache-lpm.p4"
+    p4c_additional_args = "--table-caching"
+
+    def runTest(self):
+        # TODO: make this additional entry working
+        # self.table_add(table="ingress_tbl_lpm", key=["00:11:22:33:44:50/44"], action=1, data=["11:22:33:44:55:67"])
+        self.table_add(
+            table="ingress_tbl_lpm",
+            key=["00:11:22:33:44:55/48"],
+            action=1,
+            data=["11:22:33:44:55:66"],
+        )
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:50")
+        exp_pkt = testutils.simple_ip_packet(eth_dst="11:22:33:44:55:66")
+        exp_pkt[Ether].type = 0x8601
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+        # Validate that cache entry is used during packet processing. By altering cache we get two different states
+        # of a table entry with different executed actions. Based on this it is possible to detect which entry is in
+        # use, table entry or cached entry. If we only read cache here then we couldn't test that it is used correctly.
+        self.table_update(
+            table="ingress_tbl_lpm_cache",
+            key=["32w0x60", "32w0", "64w0x5044332211000000"],
+            action=0,
+            data=["160w0"],
+        )
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
+
+        # Update table entry to test if NIKSS library invalidates cache
+        self.table_update(
+            table="ingress_tbl_lpm",
+            key=["00:11:22:33:44:55"],
+            action=1,
+            data=["11:22:33:44:55:66"],
+        )
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+
+class TernaryTableCachePSATest(P4EbpfTest):
+    p4_file_path = "p4testdata/table-cache-ternary.p4"
+    p4c_additional_args = "--table-caching"
+
+    def runTest(self):
+        self.table_add(
+            table="ingress_tbl_ternary",
+            key=["00:11:22:33:44:55"],
+            action=1,
+            data=["11:22:33:44:55:66"],
+        )
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55")
+        exp_pkt = testutils.simple_ip_packet(eth_dst="11:22:33:44:55:66")
+        exp_pkt[Ether].type = 0x8601
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+        # Validate that cache entry is used during packet processing. By altering cache we get two different states
+        # of a table entry with different executed actions. Based on this it is possible to detect which entry is in
+        # use, table entry or cached entry. If we only read cache here then we couldn't test that it is used correctly.
+        self.table_update(
+            table="ingress_tbl_ternary_cache",
+            key=["00:11:22:33:44:55"],
+            action=1,
+            data=["32w0", "11:22:33:44:55:66", "16w0", "64w0"],
+        )
+        testutils.send_packet(self, PORT0, pkt)
+        exp_pkt[Ether].type = 0x0800
+        testutils.verify_packet(self, exp_pkt, PORT1)
+
+        # Delete table entry to test if NIKSS library invalidates cache
+        self.table_delete(table="ingress_tbl_ternary", key=["00:11:22:33:44:55"])
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
+
+
+class WideFieldTableSupport(P4EbpfTest):
+    """
+    Test support for fields wider than 64 bits in tables using IPv6 protocol.
+    """
+
+    p4_file_path = "p4testdata/wide-field-tables.p4"
+
+    def runTest(self):
+        tests = [
+            {
+                "case": "exact match",
+                "table": "ingress_tbl_exact",
+                "priority": None,
+                "match": ["0000:1111:2222:3333:4444:5555:6666:7777"],
+                "test_ipv6": "0000:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0000",
+            },
+            {
+                "case": "LPM match",
+                "table": "ingress_tbl_lpm",
+                "priority": None,
+                "match": ["0001:1111:2222:3333:4444:5555:6666:0000/112"],
+                "test_ipv6": "0001:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0001",
+            },
+            {
+                "case": "ternary match",
+                "table": "ingress_tbl_ternary",
+                "priority": 1,
+                "match": [
+                    "0002:1111:2222:3333:4444:5555:0000:7777^ffff:ffff:ffff:ffff:ffff:ffff:0000:ffff"
+                ],
+                "test_ipv6": "0002:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0002",
+            },
+            {
+                "case": "exact const entry",
+                "table": None,
+                "test_ipv6": "0003:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0003",
+            },
+            {
+                "case": "LPM const entry",
+                "table": None,
+                "test_ipv6": "0004:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0004",
+            },
+            {
+                "case": "ternary const entry",
+                "table": None,
+                "test_ipv6": "0005:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0005",
+            },
+            {
+                "case": "ternary const entry - exact match",
+                "table": None,
+                "test_ipv6": "0006:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0006",
+            },
+            {
+                "case": "ActionProfile",
+                "table": None,
+                "test_ipv6": "0007:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0007",
+            },
+            {
+                "case": "ActionSelector",
+                "table": None,
+                "test_ipv6": "0008:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0008",
+            },
+            {
+                "case": "default action",
+                "table": None,  # defined by P4 program
+                "no_table_matches": 1,  # default to 2 matches - one for default and one for any table above
+                "test_ipv6": "aaaa:1111:2222:3333:4444:5555:6666:7777",
+                "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:aaaa",
+            },
+        ]
+        for t in tests:
+            if t["table"]:
+                self.table_add(
+                    table=t["table"],
+                    key=t["match"],
+                    action=1,
+                    data=[t["exp_ipv6"]],
+                    priority=t["priority"],
+                )
+
+        # Add rules for ActionProfile
+        mid = self.action_profile_add_action(
+            ap="ingress_ap", action=1, data=["ffff:1111:2222:3333:4444:5555:6666:0007"]
+        )
+        self.table_add(
+            table="ingress_tbl_exact_ap",
+            key=["0007:1111:2222:3333:4444:5555:6666:7777"],
+            references=[mid],
+        )
+
+        # Add rules for ActionSelector
+        gid = self.action_selector_create_empty_group(selector="ingress_as")
+        self.table_add(
+            table="ingress_tbl_exact_as",
+            key=["0008:1111:2222:3333:4444:5555:6666:7777"],
+            references=["group {}".format(gid)],
+        )
+        for _ in range(0, 3):
+            mid = self.action_selector_add_action(
+                selector="ingress_as",
+                action=1,
+                data=["ffff:1111:2222:3333:4444:5555:6666:0008"],
+            )
+            self.action_selector_add_member_to_group(
+                selector="ingress_as", group_ref=gid, member_ref=mid
+            )
+
+        for t in tests:
+            logger.info("Testing {}...".format(t["case"]))
+            pkt = testutils.simple_ipv6ip_packet(
+                ipv6_src=t["test_ipv6"], ipv6_dst="::1", ipv6_hlim=64
+            )
+            exp_pkt = pkt.copy()
+            exp_pkt[IPv6].dst = t["exp_ipv6"]
+            exp_pkt[IPv6].hlim = exp_pkt[IPv6].hlim - t.get("no_table_matches", 2)
+            testutils.send_packet(self, PORT0, pkt)
+            testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
