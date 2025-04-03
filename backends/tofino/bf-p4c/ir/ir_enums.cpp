@@ -18,7 +18,7 @@
 
 #include "backends/tofino/bf-p4c/ir/ir_enums.h"
 
-namespace P4 {
+
 namespace IR {
 namespace MAU {
 
@@ -253,7 +253,7 @@ bool operator>>(cstring s, IR::BFN::ParserWriteMode &t) {
     }
     return false;
 }
-} //end of  p4
+ //end of  p4
 }  // end namespace BFN
 }  // end namespace IR
 }  // end namespace P4
