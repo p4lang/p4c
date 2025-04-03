@@ -567,7 +567,7 @@ static void check_jbay_ownership(bitvec phv_use[2]) {
                 mask = 1;
                 break;
             default:
-                BUG();
+                BUG("unexpected size %d", Phv::reg(i)->size);
         }
         group = i & ~mask;
         if (phv_use[EGRESS].getrange(group, mask + 1)) {
@@ -594,7 +594,7 @@ static void setup_jbay_ownership(bitvec phv_use, ubits_base &phv8, ubits_base &p
                 phv32_grps.insert(1U << (reg->deparser_id() / 2U));
                 break;
             default:
-                BUG();
+                BUG("unexpected size %d", reg->size);
         }
     }
 
@@ -725,7 +725,7 @@ void write_jbay_full_checksum_config(
                 write_jbay_checksum_entry(phv_entries[unit_entry.first].entry[remap[1]], mask >> 2,
                                           swap >> 1, povbit, unit_entry.first, val->reg.name);
             else
-                BUG_CHECK((mask >> 2 == 0) && (swap >> 1 == 0));
+                BUG_CHECK((mask >> 2 == 0) && (swap >> 1 == 0), "Invalid checksum");
         }
     }
     int tag_idx = 0;
@@ -1036,7 +1036,7 @@ void Deparser::write_config(Target::JBay::deparser_regs &regs) {
                 int num_words = (size + 31) / 32;
                 int quanta_index = 11;
                 for (int index = num_words - 1; index >= 0; index--) {
-                    BUG_CHECK(quanta_index >= 0);
+                    BUG_CHECK(quanta_index >= 0, "quanta_index < 0");
                     unsigned word = lrnmask.getrange(index * 32, 32);
                     regs.dprsrreg.inp.icr.lrnmask[id].mask[quanta_index--] = word;
                 }

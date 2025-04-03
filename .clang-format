@@ -27,4 +27,6 @@ IncludeCategories:
   - Regex: ".*"
     Priority: 5000
 IncludeIsMainRegex: '(_test)?$'
+WhitespaceSensitiveMacros:
+  - __VA_OPT__
 ...

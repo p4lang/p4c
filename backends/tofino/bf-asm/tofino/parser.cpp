@@ -136,7 +136,7 @@ static phv_use_slots *get_phv_use_slots(int size) {
     else if (size == 8)
         usable_slots = phv_8b_slots;
     else
-        BUG();
+        BUG("unsupported size: %d", size);
 
     return usable_slots;
 }
@@ -151,7 +151,7 @@ static phv_use_slots *get_phv_csum_use_slots(int size) {
     else if (size == 8)
         usable_slots = phv_8b_csum_slots;
     else
-        BUG();
+        BUG("unsupported size: %d", size);
 
     return usable_slots;
 }
@@ -524,7 +524,7 @@ static int encode_constant_for_slot(int slot, unsigned val) {
         case phv_8b_3:
             return val & 0xff;
         default:
-            BUG();
+            BUG("Invalid slot: %d", slot);
             return -1;
     }
 }
@@ -644,13 +644,13 @@ void Parser::mark_unused_output_map(Target::Tofino::parser_regs &regs, void *_ma
 template <>
 void Parser::State::Match::HdrLenIncStop::write_config(
     Tofino::memories_all_parser_::_po_action_row &) const {
-    BUG();  // no hdr_len_inc_stop on tofino; should not get here
+    BUG("no hdr_len_inc_stop on tofino; should not get here");
 }
 
 template <>
 void Parser::State::Match::Clot::write_config(Tofino::memories_all_parser_::_po_action_row &, int,
                                               bool) const {
-    BUG();  // no CLOTs on tofino; should not get here
+    BUG("no CLOTs on tofino; should not get here");
 }
 
 template <>
@@ -1004,9 +1004,9 @@ static void check_16b_extractor_configuration(const unsigned pad_idx, const unsi
     }
 
     // Check the slot configuration - sourcing from global field and no constant for {0,1}
-    BUG_CHECK(
-        *map[pad_idx].src >= PARSER_SRC_MAX_IDX - 3 && *map[pad_idx].src != EXTRACT_SLOT_UNUSED,
-        "Field is not sourcing from the global version field!");
+    BUG_CHECK(*map[pad_idx].src >= PARSER_SRC_MAX_IDX - 3 &&
+                  static_cast<uint64_t>(*map[pad_idx].src) != EXTRACT_SLOT_UNUSED,
+              "Field is not sourcing from the global version field!");
     if (pad_idx == phv_16b_0 || pad_idx == phv_16b_1) {
         BUG_CHECK(*map[pad_idx].src_type == 0,
                   "Invalid configuration of the source type for 16b 2n padding!");

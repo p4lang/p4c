@@ -18,6 +18,7 @@
 #ifndef BACKENDS_TOFINO_BF_ASM_POWER_CTL_H_
 #define BACKENDS_TOFINO_BF_ASM_POWER_CTL_H_
 
+#include "lib/exceptions.h"
 #include "misc.h"
 
 /* power_ctl is weirdly encoded!
@@ -57,7 +58,7 @@ void set_power_ctl_reg(checked_array<2, checked_array<16, ubits<I>>> &power_ctl,
             reg = (reg % (I * 4));
             break;
         default:
-            BUG();
+            BUG("Invalid power control reg: %d", reg);
     }
     power_ctl[side][reg / I] |= 1U << reg % I;
 }

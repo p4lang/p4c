@@ -144,7 +144,7 @@ class Table {
     void setup_maprams(value_t &);
     void setup_vpns(std::vector<Layout> &, VECTOR(value_t) *, bool allow_holes = false);
     virtual void vpn_params(int &width, int &depth, int &period, const char *&period_name) const {
-        BUG();
+        BUG("unsupported");
     }
     virtual int get_start_vpn() { return 0; }
     void alloc_rams(bool logical, BFN::Alloc2Dbase<Table *> &use,
@@ -197,7 +197,7 @@ class Table {
             return *this;
         }
         Ref &operator=(const value_t &a) & {
-            BUG_CHECK(a.type == tSTR);
+            BUG_CHECK(a.type == tSTR, "expected string");
             name = a.s;
             lineno = a.lineno;
             return *this;
@@ -254,11 +254,11 @@ class Table {
         void resolve_long_branch(const Table *tbl, const std::map<int, NextTables> &lbrch);
         bool set() const { return lineno >= 0; }
         int next_table_id() const {
-            BUG_CHECK(resolved);
+            BUG_CHECK(resolved, "next table not resolved");
             return next_table_ ? next_table_->table_id() : Target::END_OF_PIPE();
         }
         std::string next_table_name() const {
-            BUG_CHECK(resolved);
+            BUG_CHECK(resolved, "next table not resolved");
             if (next_table_) {
                 if (auto nxt_p4_name = next_table_->p4_name()) return nxt_p4_name;
             }
@@ -299,7 +299,7 @@ class Table {
                     last = chunk.hi + 1;
                 }
                 if (i == 0) return last;
-                BUG();
+                BUG("unsupported");
                 return 0;  // quiet -Wreturn-type warning
             }
             /* bit(i), adjusted for the immediate shift of the match group of the field
@@ -312,7 +312,7 @@ class Table {
             unsigned hi(unsigned bit) {
                 for (auto &chunk : bits)
                     if (bit >= chunk.lo && bit <= chunk.hi) return chunk.hi;
-                BUG();
+                BUG("unsupported");
                 return 0;  // quiet -Wreturn-type warning
             }
             enum flags_t { NONE = 0, USED_IMMED = 1, ZERO = 3 };
@@ -356,7 +356,7 @@ class Table {
         unsigned groups() const { return fmt.size(); }
         const ordered_map<std::string, Field> &group(int g) const { return fmt.at(g); }
         Field *field(const std::string &n, int group = 0) {
-            BUG_CHECK(group >= 0 && (size_t)group < fmt.size());
+            BUG_CHECK(group >= 0 && (size_t)group < fmt.size(), "invalid group %d", group);
             auto it = fmt[group].find(n);
             if (it != fmt[group].end()) return &it->second;
             return 0;
@@ -468,7 +468,7 @@ class Table {
             Arg(const char *n) : type(Name) { str = strdup(n); }  // NOLINT(runtime/explicit)
             Arg(decltype(Counter) ctr, int mode) : type(Counter) {
                 val = mode;
-                BUG_CHECK(ctr == Counter);
+                BUG_CHECK(ctr == Counter, "invalid counter type");
             }
             ~Arg() {
                 if (type == Name) free(str);
@@ -486,7 +486,7 @@ class Table {
                     case Name:
                         return !strcmp(str, a.str);
                     default:
-                        BUG();
+                        BUG("unknown argument type");
                 }
                 return false;
             }
@@ -756,7 +756,7 @@ class Table {
     virtual const GatewayTable *get_gateway() const { return 0; }
     virtual SelectionTable *get_selector() const { return 0; }
     virtual MeterTable *get_meter() const { return 0; }
-    virtual void set_stateful(StatefulTable *s) { BUG(); }
+    virtual void set_stateful(StatefulTable *s) { BUG("unsupported"); }
     virtual StatefulTable *get_stateful() const { return 0; }
     virtual void set_address_used() {
         // FIXME -- could use better error message(s) -- lineno is not accurate/useful
@@ -774,51 +774,51 @@ class Table {
     virtual const Call &get_action() const { return action; }
     virtual std::vector<Call> get_calls() const;
     virtual bool is_attached(const Table *) const {
-        BUG();
+        BUG("unsupported");
         return false;
     }
     virtual Format::Field *find_address_field(const AttachedTable *) const {
-        BUG();
+        BUG("unsupported");
         return 0;
     }
     virtual Format::Field *get_per_flow_enable_param(MatchTable *) const {
-        BUG();
+        BUG("unsupported");
         return 0;
     }
     virtual Format::Field *get_meter_address_param(MatchTable *) const {
-        BUG();
+        BUG("unsupported");
         return 0;
     }
     virtual Format::Field *get_meter_type_param(MatchTable *) const {
-        BUG();
+        BUG("unsupported");
         return 0;
     }
     virtual int direct_shiftcount() const {
-        BUG();
+        BUG("unsupported");
         return -1;
     }
     virtual int indirect_shiftcount() const {
-        BUG();
+        BUG("unsupported");
         return -1;
     }
     virtual int address_shift() const {
-        BUG();
+        BUG("unsupported");
         return -1;
     }
     virtual int home_row() const {
-        BUG();
+        BUG("unsupported");
         return -1;
     }
     /* mem unitno mapping -- unit numbers used in context json */
     virtual int json_memunit(const MemUnit &u) const;
     virtual int ram_word_width() const { return MEM_WORD_WIDTH; }
     virtual int unitram_type() {
-        BUG();
+        BUG("unsupported");
         return -1;
     }
     virtual bool uses_colormaprams() const { return false; }
     virtual int color_shiftcount(Table::Call &call, int group, int tcam_shift) const {
-        BUG();
+        BUG("unsupported");
         return -1;
     }
     virtual bool adr_mux_select_stats() { return false; }
@@ -839,8 +839,8 @@ class Table {
     const T *to() const {
         return dynamic_cast<const T *>(this);
     }
-    virtual void determine_word_and_result_bus() { BUG(); }
-    virtual int stm_vbus_column() const { BUG(); }
+    virtual void determine_word_and_result_bus() { BUG("unsupported"); }
+    virtual int stm_vbus_column() const { BUG("unsupported"); }
 
     std::string name_;
     int uid;
@@ -902,7 +902,7 @@ class Table {
             if (u == row.memunits.end()) continue;
             return row.vpns.at(u - row.memunits.begin());
         }
-        BUG();
+        BUG("unsupported");
         return 0;
     }
     void layout_vpn_bounds(int &min, int &max, bool spare = false) const {
@@ -966,7 +966,7 @@ class Table {
                                           const Table::Actions::Action *act) const;
     virtual bool validate_call(Table::Call &call, MatchTable *self, size_t required_args,
                                int hash_dist_type, Table::Call &first_call) {
-        BUG();
+        BUG("unsupported");
         return false;
     }
     bool validate_instruction(Table::Call &call) const;
@@ -1408,7 +1408,8 @@ DECLARE_TABLE_TYPE(
     };
     bitvec s0q1_nibbles, s1q0_nibbles; std::vector<Phv::Ref *> s0q1_prefs, s1q0_prefs;
     std::map<int, match_element> s0q1, s1q0; table_type_t table_type()
-        const override { return ATCAM; } void verify_format(Target::Tofino) override;
+        const override { return ATCAM; };
+    void verify_format(Target::Tofino) override;
     void verify_entry_priority(); void setup_column_priority(); void find_tcam_match();
     void gen_unit_cfg(json::vector &units, int size) const;
     std::unique_ptr<json::vector> gen_memory_resource_allocation_tbl_cfg() const;
@@ -1492,8 +1493,8 @@ DECLARE_TABLE_TYPE(TernaryMatchTable, MatchTable, "ternary_match",
     int indirect_bus = -1;   /* indirect bus to use if there's no indirect table */
     void alloc_vpns() override;
     range_match_t get_dirtcam_mode(int group, int byte) const {
-        BUG_CHECK(group >= 0);
-        BUG_CHECK(byte >= 0);
+        BUG_CHECK(group >= 0, "group must be >= 0");
+        BUG_CHECK(byte >= 0, "byte must be >= 0");
         range_match_t dirtcam_mode = NONE;
         for (auto &m : match) {
             if (m.word_group == group) {
@@ -1877,7 +1878,7 @@ DECLARE_TABLE_TYPE(GatewayTable, Table, "gateway",
     template<class REGS> void payload_write_regs(REGS &, int row, int type, int bus);
     template<class REGS> void standalone_write_regs(REGS &regs);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD,
-        virtual void write_next_table_regs, (mau_regs &), { BUG(); })
+        virtual void write_next_table_regs, (mau_regs &), { BUG("unsupported"); })
     bool gateway_needs_ixbar_group() {
         for (auto& m : match)
             if (m.offset < 32)
@@ -1949,8 +1950,8 @@ DECLARE_TABLE_TYPE(
                           (mau_regs & regs, MatchTable *match, int type, int bus,
                            const std::vector<Call::Arg> &args),
                           override) int address_shift()
-        const override { return 7; } std::vector<int>
-            determine_spare_bank_memory_units() const override;
+        const override { return 7; }
+    std::vector<int> determine_spare_bank_memory_units() const override;
     unsigned meter_group() const { return layout.at(0).row / 4U; } int home_row() const override {
         return layout.at(0).row | 3;
     } int unitram_type() override { return UnitRam::SELECTOR; } StatefulTable *get_stateful()
@@ -2027,21 +2028,22 @@ DECLARE_ABSTRACT_TABLE_TYPE(
     } bool global_binding = false;
     bool output_used = false; int home_lineno = -1; std::set<int, std::greater<int>> home_rows;
     json::map * add_stage_tbl_cfg(json::map & tbl, const char *type, int size) const override;
-    public
-    : int get_home_row_for_row(int row) const;
-    void add_alu_indexes(json::map &stage_tbl, std::string alu_indexes) const;
-    OVERLOAD_FUNC_FOREACH(TARGET_CLASS, std::vector<int>, determine_spare_bank_memory_units,
-                          () const, (), override)
-        OVERLOAD_FUNC_FOREACH(TARGET_CLASS, void, alloc_vpns, (), ()) template <class REGS>
-        void write_regs_vt(REGS &regs);
-    FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)
-    FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
-                          (mau_regs & regs, MatchTable *match, int type, int bus,
-                           const std::vector<Call::Arg> &args),
-                          override = 0)
-    void common_init_setup(const VECTOR(pair_t) &, bool, P4Table::type) override;
-    bool common_setup(pair_t &, const VECTOR(pair_t) &, P4Table::type) override;
-    void pass1() override; void pass2() override; void pass3() override;)
+     public:
+        int get_home_row_for_row(int row) const;
+        void add_alu_indexes(json::map &stage_tbl, std::string alu_indexes) const;
+        OVERLOAD_FUNC_FOREACH(TARGET_CLASS, std::vector<int>, determine_spare_bank_memory_units,
+                              () const, (), override)
+        OVERLOAD_FUNC_FOREACH(TARGET_CLASS, void, alloc_vpns, (), (), override)
+        template <class REGS> void write_regs_vt(REGS &regs);
+        FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)
+        FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
+                              (mau_regs & regs, MatchTable *match, int type, int bus,
+                               const std::vector<Call::Arg> &args),
+                              override = 0)
+        void common_init_setup(const VECTOR(pair_t) &, bool, P4Table::type) override;
+        bool common_setup(pair_t &, const VECTOR(pair_t) &, P4Table::type) override;
+        void pass1() override; void pass2() override; void pass3() override;
+)
 
 DECLARE_TABLE_TYPE(
     CounterTable, Synth2Port, "counter",

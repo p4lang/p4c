@@ -92,11 +92,11 @@ class Parser : public BaseParser, public Contextable {
             explicit Ref(value_t &v) { *this = v; }
             operator bool() const { return ptr.size() > 0; }
             State *operator->() const {
-                BUG_CHECK(ptr.size() == 1);
+                BUG_CHECK(ptr.size() == 1, "pointer size must be 1, got %d", ptr.size());
                 return ptr[0];
             }
             State *operator*() const {
-                BUG_CHECK(ptr.size() == 1);
+                BUG_CHECK(ptr.size() == 1, "pointer size must be 1, got %d", ptr.size());
                 return ptr[0];
             }
             bool operator==(const Ref &a) const { return name == a.name && pattern == a.pattern; }
@@ -601,7 +601,7 @@ void Parser::State::Match::write_common_row_config(REGS &regs, Parser *pa, State
 
     if (buf_req < 0) {
         buf_req = max_off + 1;
-        BUG_CHECK(buf_req <= 32);
+        BUG_CHECK(buf_req <= 32, "Buffer requirement too large: %d", buf_req);
     }
     ea_row.buf_req = buf_req;
 }

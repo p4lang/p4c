@@ -26,6 +26,7 @@
 #include <sys/types.h>
 
 #include "bfas.h"
+#include "lib/exceptions.h"
 
 template <size_t N>
 static void convertToAbsPath(const char *const relPath, char (&output)[N]) {

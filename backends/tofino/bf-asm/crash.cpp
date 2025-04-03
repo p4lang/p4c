@@ -36,6 +36,7 @@
 
 #include "bfas.h"
 #include "exename.h"
+#include "lib/exceptions.h"
 #include "lib/hex.h"
 #include "lib/log.h"
 

@@ -280,7 +280,7 @@ int Target::numMauStagesOverride = 0;
 
 int Target::encodeConst(int src) {
     SWITCH_FOREACH_TARGET(options.target, return TARGET::encodeConst(src););
-    BUG();
+    BUG("unsupported target");
     return 0;
 }
 

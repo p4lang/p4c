@@ -173,7 +173,7 @@ class Deparser : public Section {
          protected:
             Type(target_t t, gress_t gr, const char *n, int cnt)
                 : target(t), gress(gr), name(n), count(cnt) {
-                BUG_CHECK(!all[target][gress].count(name));
+                BUG_CHECK(!all[target][gress].count(name), "Duplicate name %s", name.c_str());
                 all[target][gress][name] = this;
             }
             ~Type() { all[target][gress].erase(name); }
@@ -182,7 +182,7 @@ class Deparser : public Section {
 #define VIRTUAL_TARGET_METHODS(TARGET)                                            \
     virtual void setregs(Target::TARGET::deparser_regs &regs, Deparser &deparser, \
                          Deparser::Digest &data) {                                \
-        BUG_CHECK(!"target mismatch");                                            \
+        BUG("target mismatch");                                                   \
     }
             FOR_ALL_REGISTER_SETS(VIRTUAL_TARGET_METHODS)
 #undef VIRTUAL_TARGET_METHODS

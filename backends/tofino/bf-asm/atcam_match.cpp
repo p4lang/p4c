@@ -155,7 +155,7 @@ void AlgTcamMatchTable::setup_column_priority() {
 void AlgTcamMatchTable::verify_entry_priority() {
     int result_bus_word = -1;
     for (int i = 0; i < static_cast<int>(group_info.size()); i++) {
-        BUG_CHECK(group_info[i].result_bus_word >= 0);
+        BUG_CHECK(group_info[i].result_bus_word >= 0, "result bus word must be >= 0");
         if (result_bus_word == -1) {
             result_bus_word = group_info[i].result_bus_word;
         } else if (result_bus_word != group_info[i].result_bus_word) {
@@ -258,7 +258,7 @@ void AlgTcamMatchTable::find_tcam_match() {
     for (auto match_field : match) {
         auto phv_p = dynamic_cast<Phv::Ref *>(match_field);
         if (phv_p == nullptr) {
-            BUG();
+            BUG("expected Phv::Ref");
             continue;
         }
         auto phv_ref = *phv_p;
@@ -381,7 +381,7 @@ std::unique_ptr<json::vector> AlgTcamMatchTable::gen_memory_resource_allocation_
             if (mem_units.empty())
                 vpn_ctr = layout_get_vpn(ram);
             else
-                BUG_CHECK(vpn_ctr == layout_get_vpn(ram));
+                BUG_CHECK(vpn_ctr == layout_get_vpn(ram), "vpn mismatch");
             mem_units.push_back(json_memunit(ram));
             if (mem_units.size() == fmt_width) {
                 json::map tmp;
@@ -398,7 +398,7 @@ std::unique_ptr<json::vector> AlgTcamMatchTable::gen_memory_resource_allocation_
                 mem_units_and_vpns.push_back(std::move(tmp));
             }
         }
-        BUG_CHECK(mem_units.empty());
+        BUG_CHECK(mem_units.empty(), "Memory units not empty");
         mras.push_back(std::move(mra));
     }
     return json::mkuniq<json::vector>(std::move(mras));

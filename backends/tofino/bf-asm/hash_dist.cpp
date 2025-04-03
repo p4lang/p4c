@@ -19,6 +19,7 @@
 
 #include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
+#include "lib/exceptions.h"
 #include "lib/range.h"
 
 static void set_output_bit(unsigned &xbar_use, value_t &v) {
@@ -135,9 +136,7 @@ void HashDistribution::pass1(Table *tbl, delay_type_t delay_type, bool non_linea
                 err = true;
                 break;
             default:
-                error(lineno,
-                      "a mod 3 check should only hit these particular cases, of 0, 1, and 2");
-                BUG();
+                BUG("a mod 3 check should only hit these particular cases, of 0, 1, and 2");
         }
         if (!err) {
             for (auto *use : tbl->stage->hash_dist_use[other])
@@ -204,7 +203,7 @@ void HashDistribution::write_regs(REGS &regs, Table *tbl) {
                                                                         2);
                 break;
             default:
-                BUG();
+                BUG("a mod 3 check should only hit these particular cases, 0 and 1");
         }
     }
     for (int oxbar : Range(0, 4))

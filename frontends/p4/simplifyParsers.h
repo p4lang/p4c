@@ -29,6 +29,9 @@ namespace P4 {
  *  - there are no other outgoing edges from ```s1```,
  *  - there are no other incoming edges to ```s2```,
  *  - and ```s2``` does not have annotations.
+ *
+ * Note that UniqueNames must run before this pass, so that we won't end up
+ * with same-named state-local variables in the same state.
  */
 class SimplifyParsers : public Transform {
  public:

@@ -18,9 +18,9 @@
 #ifndef BACKENDS_TOFINO_BF_ASM_ALIAS_ARRAY_H_
 #define BACKENDS_TOFINO_BF_ASM_ALIAS_ARRAY_H_
 
-#include <stdlib.h>
+#include <cstdlib>
 
-#include "bfas.h"  // for BUG_CHECK
+#include "lib/exceptions.h"
 
 template <size_t S, typename T>
 class alias_array;

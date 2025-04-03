@@ -56,10 +56,19 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
                 auto em = mi->to<P4::ExternMethod>();
                 if (em != nullptr) {
-                    if ((em->originalExternType->name.name == "Register" ||
-                         em->method->name.name == "read") ||
-                        (em->originalExternType->name.name == "Meter" &&
-                         em->method->name.name == "execute")) {
+                    if (em->originalExternType->name.name == "Random" &&
+                        em->method->name.name == "read") {
+                        isR = true;
+                        auto dest = new IR::Argument(l);
+                        auto args = new IR::Vector<IR::Argument>();
+                        args->push_back(dest);  // dest
+                        mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
+                        mce2->arguments = args;
+                        s = new IR::MethodCallStatement(mce);
+                    } else if ((em->originalExternType->name.name == "Register" ||
+                                em->method->name.name == "read") ||
+                               (em->originalExternType->name.name == "Meter" &&
+                                em->method->name.name == "execute")) {
                         isR = true;
                         // l = l->to<IR::PathExpression>();
                         // BUG_CHECK(l != nullptr, "register_read dest cast failed");

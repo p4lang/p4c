@@ -207,7 +207,7 @@ void Target::Tofino::GatewayTable::pass2() {
             if (tbl && !tbl->layout.empty()) {
                 for (auto &row : tbl->layout) {
                     auto match_rbus = row.bus.at(ternary ? Layout::TIND_BUS : Layout::RESULT_BUS);
-                    BUG_CHECK(match_rbus >= 0);  // alloc_busses on the match table must run first
+                    BUG_CHECK(match_rbus >= 0, "alloc_busses on the match table must be run first");
                     if (stage->gw_payload_use[row.row][match_rbus]) {
                         continue;
                     } else {
@@ -228,7 +228,7 @@ void Target::Tofino::GatewayTable::pass2() {
         }
     }
     if (payload_unit >= 0 && !layout[1].bus.count(Layout::RESULT_BUS)) {
-        BUG_CHECK(layout.size() > 1);
+        BUG_CHECK(layout.size() > 1, "layout size <= 1");
         int row = layout[1].row;
         Table *tbl = match_table;
         int ternary = tbl ? 0 : -1;
@@ -300,18 +300,16 @@ void Target::Tofino::GatewayTable::pass3() {
 }
 
 template <>
-void enable_gateway_payload_exact_shift_ovr(Target::Tofino::mau_regs &regs, int bus) {
-    // Not supported on tofino
-    BUG();
+void enable_gateway_payload_exact_shift_ovr(Target::Tofino::mau_regs & /*regs*/, int /*bus*/) {
+    BUG("enable_gateway_payload_exact_shift_ovr not supported");
 }
-template void enable_gateway_payload_exact_shift_ovr(Target::Tofino::mau_regs &regs, int bus);
 
 void Target::Tofino::GatewayTable::write_next_table_regs(Target::Tofino::mau_regs &regs) {
     auto &merge = regs.rams.match.merge;
     int idx = 3;
     if (need_next_map_lut) error(lineno, "Tofino does not support using next_map_lut in gateways");
     for (auto &line : table) {
-        BUG_CHECK(idx >= 0);
+        BUG_CHECK(idx >= 0, "Index is negative");
         if (!line.run_table)
             merge.gateway_next_table_lut[logical_id][idx] = line.next.next_table_id();
         --idx;

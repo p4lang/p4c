@@ -485,7 +485,7 @@ static int tcam_swizzle_16[2][2]{{0, -1}, {+1, 0}};
 
 int InputXbar::tcam_input_use(int out_byte, int phv_byte, int phv_size) {
     int rv = out_byte;
-    BUG_CHECK(phv_byte >= 0 && phv_byte < phv_size / 8);
+    BUG_CHECK(phv_byte >= 0 && phv_byte < phv_size / 8, "Invalid PHV byte");
     switch (phv_size) {
         case 8:
             break;
@@ -496,7 +496,7 @@ int InputXbar::tcam_input_use(int out_byte, int phv_byte, int phv_size) {
             rv += tcam_swizzle_16[out_byte & 1][phv_byte];
             break;
         default:
-            BUG();
+            BUG("Invalid PHV size");
     }
     return rv;
 }
@@ -517,7 +517,7 @@ void InputXbar::tcam_update_use(TcamUseCache &use) {
             int group_byte = input.lo / 8;
             for (int phv_byte = input.what->lo / 8; phv_byte <= input.what->hi / 8;
                  phv_byte++, group_byte++) {
-                BUG_CHECK(group_byte <= 5);
+                BUG_CHECK(group_byte <= 5, "Group byte size must be <= 5, got %d", group_byte);
                 int out_byte = group_byte == 5 ? half_byte : group_base + group_byte;
                 int in_byte = tcam_input_use(out_byte, phv_byte, input.what->reg.size);
                 use.tcam_use.emplace(in_byte, std::pair<const Input &, int>(input, phv_byte));
@@ -548,7 +548,7 @@ void InputXbar::check_input(InputXbar::Group group, Input &input, TcamUseCache &
     }
     for (int phv_byte = input.what->lo / 8; phv_byte <= input.what->hi / 8;
          phv_byte++, group_byte++) {
-        BUG_CHECK(group_byte <= 5);
+        BUG_CHECK(group_byte <= 5, "Group byte size must be <= 5, got %d", group_byte);
         int out_byte = group_byte == 5 ? half_byte : group_base + group_byte;
         int in_byte = tcam_input_use(out_byte, phv_byte, input.what->reg.size);
         if (in_byte < 0 || in_byte >= TCAM_XBAR_INPUT_BYTES) {
@@ -800,10 +800,10 @@ void InputXbar::write_regs(REGS &regs) {
                 xbar.mau_match_input_xbar_ternary_match_enable[gress] |= 1 << (group.first.index);
                 break;
             default:
-                BUG();
+                BUG("Unexpected group type");
         }
         for (auto &input : group.second) {
-            BUG_CHECK(input.lo >= 0);
+            BUG_CHECK(input.lo >= 0, "Input xbar group lo must be >= 0");
             unsigned word_group = 0, word_index = 0, swizzle_mask = 0;
             bool hi_enable = false;
             switch (input.what->reg.size) {
@@ -825,7 +825,7 @@ void InputXbar::write_regs(REGS &regs) {
                     swizzle_mask = 3;
                     break;
                 default:
-                    BUG();
+                    BUG("Unexpected reg size");
             }
             word_group &= 3;
             unsigned phv_byte = input.what->lo / 8U;
@@ -849,7 +849,8 @@ void InputXbar::write_regs(REGS &regs) {
                     }
                 }
                 if (input.what->reg.ixbar_id() < 64) {
-                    BUG_CHECK(input.what->reg.size == 32);
+                    BUG_CHECK(input.what->reg.size == 32, "Expected size 32, got %1%",
+                              input.what->reg.size);
                     xbar.match_input_xbar_32b_ctl[word_group][i].match_input_xbar_32b_ctl_address =
                         word_index;
                     if (hi_enable)
