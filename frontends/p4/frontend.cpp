@@ -211,9 +211,12 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
         new RemoveAllUnusedDeclarations(*policy, true),
+        // Give each local declaration a unique internal name.
+        // Must run before SimplifyParsers, which may merge adjacent states that
+        // contain same-named state-local variables.
+        new UniqueNames(),
         new SimplifyParsers(),
         new ResetHeaders(&typeMap),
-        new UniqueNames(),       // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
         new SideEffectOrdering(&typeMap, policy->skipSideEffectOrdering()),

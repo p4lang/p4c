@@ -1,0 +1,6 @@
+issue5211_simplify_parsers_dup_state_local_var_decl.p4(8): [--Wwarn=shadow] warning: 'p' shadows 'parser p'
+parser p(packet_in p, out S s) {
+                   ^
+issue5211_simplify_parsers_dup_state_local_var_decl.p4(8)
+parser p(packet_in p, out S s) {
+       ^
