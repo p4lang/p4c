@@ -29,7 +29,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace P4 {
+
 namespace IR {
 
 namespace P4 {
@@ -38,12 +38,12 @@ class Deparser;
 class Parser;
 class Pipe;
 }  // namespace BFN
-
+} //  P4
 class P4Control;
 class P4Parser;
 
 }  // namespace IR
-}  // namespace P4
+
 
 namespace P4 {
 namespace BFN {
@@ -84,7 +84,7 @@ class ProcessParde : public Logging::PassManager {
  public:
     ProcessParde(const IR::BFN::Pipe *rv, bool useTna);
 };
-}
+} //P4
 }  // namespace BFN
 
 #endif /* BF_P4C_PARDE_EXTRACT_PARSER_H_ */

@@ -33,7 +33,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace P4 {
+
 namespace IR {
 namespace BFN {
 class Pipe;
@@ -42,7 +42,6 @@ class Pipe;
 class P4Control;
 
 }  // namespace IR
-}  // namespace P4
 
 namespace P4 {
 namespace BFN {
@@ -154,5 +153,5 @@ struct AssignmentStmtErrorCheck : public DeparserInspector {
 };
 
 }  // namespace BFN
-}
+} 
 #endif /* BF_P4C_PARDE_EXTRACT_DEPARSER_H_ */
