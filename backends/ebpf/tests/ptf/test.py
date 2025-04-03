@@ -100,7 +100,7 @@ class EgressTrafficManagerDropPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/etm-drop.p4"
 
     def runTest(self):
-        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55", eth_src="00:AA:00:00:00:01")
+        pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55", eth_src="55:44:33:22:11:00")
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
         pkt[Ether].src = "00:44:33:22:FF:FF"
@@ -697,6 +697,8 @@ class ActionDefaultTernaryPSATest(P4EbpfTest):
         testutils.verify_packet(self, pkt, PORT1)
 
 
+
+# Test default action for ternary match
 class ConstEntryTernaryPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/const-entry-ternary.p4"
 
