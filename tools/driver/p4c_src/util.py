@@ -56,13 +56,12 @@ def getLocalCfg(config):
 
 # top-down find, good for deployment
 def find_bin(exe):
-    found_path = None
     for pp in os.environ["PATH"].split(":"):
         for root, dirs, files in os.walk(pp):
             for ff in files:
                 if ff == exe:
-                    found_path = os.path.join(pp, ff)
-    return found_path
+                    return os.path.join(pp, ff)
+    return None
 
 
 def find_file(directory, filename, binary=True):
