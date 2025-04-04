@@ -18,7 +18,7 @@ limitations under the License.
 #define BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_
 
 #include "backends/bmv2/portable_common/options.h"
-#include "backends/bmv2/psa_switch/midend.h"
+#include "midend.h"
 
 namespace P4::BMV2 {
 
