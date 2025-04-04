@@ -1067,7 +1067,7 @@ PortableSwitchTranslation::PortableSwitchTranslation(P4::ReferenceMap *refMap, P
                                          "psa_direct_meter"_cs, "psa_idle_timeout"_cs,
                                          "psa_empty_group_action"_cs}),
         new P4::ConvertEnums(typeMap, new PSA::PacketPathTo8Bits),
-        new P4::CopyStructures(typeMap),
+        new P4::CopyStructures(typeMap, P4::CopyStructuresConfig()),
         new BFN::TypeChecking(refMap, typeMap, true),
         evaluator,
         new VisitFunctor(
