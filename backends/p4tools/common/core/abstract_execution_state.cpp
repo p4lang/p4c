@@ -158,9 +158,6 @@ std::vector<IR::StateVariable> AbstractExecutionState::getFlatFields(
         for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
             const auto *newArr =
                 HSIndexToMember::produceStackIndex(stackElementsType, parent, arrayIndex);
-            BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
-                      "Trying to get the flat fields for a non Type_StructLike element : %1%",
-                      stackElementsType);
             auto subFields = getFlatFields(newArr, validVector);
             flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
         }
