@@ -693,12 +693,13 @@ class ActionDefaultTernaryPSATest(P4EbpfTest):
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
+
+        # Test default action for ternary match
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
 
 
-# Test default action for ternary match
 class ConstEntryTernaryPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/const-entry-ternary.p4"
 
