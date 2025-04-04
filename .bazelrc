@@ -3,9 +3,9 @@ common --enable_workspace
 # Enable once #5066 is resolved.
 common --noenable_bzlmod
 
-# Use C++17.
-build --cxxopt=-std=c++17
-build --host_cxxopt=-std=c++17
+# Use C++20.
+build --cxxopt=-std=c++20
+build --host_cxxopt=-std=c++20
 
 # Force the use of Clang for all builds.
 build --action_env=CC=clang
