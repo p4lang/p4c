@@ -19,7 +19,7 @@
 #define BACKENDS_TOFINO_BF_ASM_VECTOR_H_
 
 /* C code and macros for VECTOR objects similar to C++ std::vector */
-#include <stddef.h>
+#include <cstddef>
 
 #define CAT(A, B) A##B
 #define VECTOR(NAME) CAT(NAME, _VECTOR)
@@ -213,17 +213,11 @@
          : ((vec).data[(vec).size] = (val), 0))
 #define VECTOR_top(vec) ((vec).data[(vec).size - 1])
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-extern int erase_raw_vector(void *vec, size_t elsize, int idx, unsigned cnt);
-extern int expand_raw_vector(void *vec, size_t elsize);
-extern int init_raw_vector(void *vec, size_t elsize, int mincap);
-extern int insert_raw_vector(void *vec, size_t elsize, int idx, unsigned cnt);
-extern int reserve_raw_vector(void *vec, size_t elsize, int size, int shrink);
-extern int shrink_raw_vector(void *vec, size_t elsize);
-#ifdef __cplusplus
-}
-#endif
+int erase_raw_vector(void *vec, size_t elsize, int idx, unsigned cnt);
+int expand_raw_vector(void *vec, size_t elsize);
+int init_raw_vector(void *vec, size_t elsize, int mincap);
+int insert_raw_vector(void *vec, size_t elsize, int idx, unsigned cnt);
+int reserve_raw_vector(void *vec, size_t elsize, int size, int shrink);
+int shrink_raw_vector(void *vec, size_t elsize);
 
 #endif /* BACKENDS_TOFINO_BF_ASM_VECTOR_H_ */
