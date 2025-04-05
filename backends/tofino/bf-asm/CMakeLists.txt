@@ -193,17 +193,25 @@ set (BFAS_COMMON_SOURCES
 
 BISON_TARGET (asm-parse asm-parse.ypp ${BFASM_GEN_DIR}/asm-parse.cpp VERBOSE)
 
-add_custom_command(OUTPUT ${BFASM_GEN_DIR}/uptr_sizes.h
+add_custom_command(
+  OUTPUT ${BFASM_GEN_DIR}/uptr_sizes.h
   COMMAND ${CMAKE_COMMAND} -E make_directory ${BFASM_GEN_DIR}
-  COMMAND ${BFASM_BINARY_DIR}/mksizes > ${BFASM_GEN_DIR}/uptr_sizes.h)
-add_custom_target(bfasm_uptr DEPENDS mksizes ${BFASM_GEN_DIR}/uptr_sizes.h)
+  COMMAND ${BFASM_BINARY_DIR}/mksizes > ${BFASM_GEN_DIR}/uptr_sizes.h
+  DEPENDS ${BFASM_BINARY_DIR}/mksizes
+  COMMENT "Generating uptr_sizes.h"
+)
+add_custom_target(bfasm_uptr DEPENDS ${BFASM_GEN_DIR}/uptr_sizes.h)
 
-add_custom_command(OUTPUT ${BFASM_GEN_DIR}/lex-yaml.c
+add_custom_command(
+  OUTPUT ${BFASM_GEN_DIR}/lex-yaml.c
   COMMAND ${FLEX_EXECUTABLE} -t ${BFASM_SOURCE_DIR}/lex-yaml.l > ${BFASM_GEN_DIR}/lex-yaml.c
   DEPENDS ${BFASM_SOURCE_DIR}/lex-yaml.l
-  COMMENT "Generating lex-yaml.cpp")
+  COMMENT "Generating lex-yaml.c"
+)
 add_custom_target(bfasm_yaml DEPENDS ${BFASM_GEN_DIR}/lex-yaml.c)
 add_dependencies(bfasm_yaml bfasm_uptr)
+
+set_source_files_properties(${BFASM_GEN_DIR}/lex-yaml.c PROPERTIES GENERATED TRUE)
 
 set (BFAS_GEN_SOURCES
   ${BFASM_GEN_DIR}/asm-parse.cpp

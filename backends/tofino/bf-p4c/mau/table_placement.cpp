@@ -5683,9 +5683,7 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
     return rv;
 }
 
-IR::Node *TransformTables::postorder(IR::MAU::Table *tbl) {
-    return Device::mauSpec().postTransformTables(tbl);
-}
+IR::Node *TransformTables::postorder(IR::MAU::Table *tbl) { return tbl; }
 
 IR::Node *TransformTables::preorder(IR::MAU::BackendAttached *ba) {
     LOG5("TransformTables::preorder BackendAttached " << ba->attached->name);
