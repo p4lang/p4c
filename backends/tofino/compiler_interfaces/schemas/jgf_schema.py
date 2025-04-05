@@ -21,12 +21,12 @@ Version notes:
 """
 
 major_version = 1
-revision_version = 0  # (medium version)
-addition_version = 0  # (minor version)
+minor_version = 0
+patch_version = 0
 
 
 def get_schema_version():
-    return "%s.%s.%s" % (str(major_version), str(revision_version), str(addition_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))
 
 
 ########################################################
