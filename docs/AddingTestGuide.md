@@ -5,7 +5,7 @@ This document serves as a guide for adding and running tests in the P4C reposito
 ## Types of Tests
 
 ### Positive Tests
-Positive tests are standard tests where the compiler should not fail due to compile-time errors. The expected output should match the actual output for the test to pass.The compiler should generate a output file with no errors.
+Positive tests are standard tests where the compiler should not fail due to compile-time errors. The expected output should match the actual output for the test to pass. The compiler should generate a output file with no errors.
 
 #### Source File Location
 - `testdata/p4_16_samples/`
@@ -55,6 +55,14 @@ XFAIL tests are used when a test is currently failing due to a known compiler is
   - `make check-bmv2`
   - `make check-ebpf`
 
+## Running Tests
+
+You can run tests using `ctest`, the recommended approach moving forward:
+  - **Run all tests**:  `ctest --output-on-failure`
+  - **Run a subset of tests (filter by name):**  `ctest --output-on-failure -R <pattern>`
+  - **Rerun only previously failed tests:**  `ctest --output-on-failure --rerun-failed`
+  - **Run a specific test (by full or partial test name):**`ctest --output-on-failure -R '<test_name>'`
+  - **Tests for specific backends:**  `ctest --output-on-failure -R bmv2`
 ## Adding New Tests
 
 1. Add the new `.p4` test file to the appropriate directory (`testdata/p4_16_samples/` for standard tests).
