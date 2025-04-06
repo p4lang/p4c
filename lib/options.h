@@ -105,6 +105,7 @@ class Options {
     cstring getCompileCommand() { return compileCommand; }
     cstring getBuildDate() { return buildDate; }
     cstring getBinaryName() { return cstring(binaryName); }
+    void shortUsage();
     virtual void usage();
 };
 
