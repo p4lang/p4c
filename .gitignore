@@ -52,3 +52,6 @@ docs/doxygen/awesome_css/
 
 # thirdparty
 backends/tofino/third_party/
+rapidjson-1.1.0/
+rapidjson/
+third_party/
