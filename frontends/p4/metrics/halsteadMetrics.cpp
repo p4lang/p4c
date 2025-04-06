@@ -227,21 +227,21 @@ void HalsteadMetricsPass::postorder(const IR::P4Program* /*program*/) {
     metrics.halsteadMetrics.deliveredBugs = metrics.halsteadMetrics.volume / 3000.0;
 
     if(LOGGING(3)){
-        std::cout << "Unique Unary Operators:\n";
+        std::cout << "Unique Unary Operators ("<< uniqueUnaryOperators.size() <<"):\n";
         for (const auto& op : uniqueUnaryOperators) {
-            std::cout << op << "\n";
+            std::cout << " - " << op << "\n";
         }
-        std::cout << "\nUnique Binary Operators:\n";
+        std::cout << "\nUnique Binary Operators (" << uniqueBinaryOperators.size() << "):\n";
         for (const auto& op : uniqueBinaryOperators) {
-            std::cout << op << "\n";
+            std::cout << " - " << op << "\n";
         }
-        std::cout << "\nUnique Operands (Vars/Consts):\n";
+        std::cout << "\nUnique Operands ("<< uniqueOperands.size() <<"):\n";
         for (const auto& operand : uniqueOperands) {
-            std::cout << operand << "\n";
+            std::cout << " - " << operand << "\n";
         }
-        std::cout << "\nUnique Fields :\n";
+        std::cout << "\nUnique Fields (" << uniqueFields.size() << "):\n";
         for (const auto& operand : uniqueFields) {
-            std::cout << operand << "\n";
+            std::cout << " - " << operand << "\n";
         }
     }
 }

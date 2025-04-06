@@ -9,22 +9,17 @@ void MetricsPassManager::addInlined(PassManager &pm) const {
         pm.addPasses({new InlinedActionsMetricPass(metrics)});
     }
 }
-
 void MetricsPassManager::addUnusedCode(PassManager &pm, bool isBefore) const {
     if (selectedMetrics.find("unused-code") != selectedMetrics.end()) {
         pm.addPasses({new UnusedCodeMetricPass(metrics, isBefore)});
     }
 }
-
 void MetricsPassManager::addRemaining(PassManager &pm) const {
     if (selectedMetrics.find("cyclomatic") != selectedMetrics.end()) {
         pm.addPasses({new CyclomaticComplexityPass(metrics)});
     }
     if (selectedMetrics.find("halstead") != selectedMetrics.end()) {
         pm.addPasses({new HalsteadMetricsPass(metrics)});
-    }
-    if (selectedMetrics.find("duplicate-code") != selectedMetrics.end()) {
-        pm.addPasses({new DuplicateCodeMetricPass(metrics)});
     }
     if (selectedMetrics.find("nesting-depth") != selectedMetrics.end()) {
         pm.addPasses({new NestingDepthMetricPass(metrics)});

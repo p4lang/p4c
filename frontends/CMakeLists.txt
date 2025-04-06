@@ -86,7 +86,6 @@ set (P4_FRONTEND_SRCS
   p4/validateParsedProgram.cpp
   p4/metrics/metricsPassManager.cpp
   p4/metrics/cyclomaticComplexity.cpp
-  p4/metrics/duplicateCodeMetric.cpp
   p4/metrics/unusedCodeMetric.cpp
   p4/metrics/nestingDepthMetric.cpp
   p4/metrics/halsteadMetrics.cpp
@@ -177,7 +176,6 @@ set (P4_FRONTEND_HDRS
   p4/validateValueSets.h
   p4/metrics/metricsPassManager.h
   p4/metrics/cyclomaticComplexity.h
-  p4/metrics/duplicateCodeMetric.h
   p4/metrics/unusedCodeMetric.h
   p4/metrics/nestingDepthMetric.h
   p4/metrics/halsteadMetrics.h

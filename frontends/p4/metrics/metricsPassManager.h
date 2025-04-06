@@ -6,7 +6,6 @@
 #include "metricsStructure.h"
 #include "exportMetrics.h"
 #include "cyclomaticComplexity.h"
-#include "duplicateCodeMetric.h"
 #include "externalObjectsMetric.h"
 #include "halsteadMetrics.h"
 #include "headerManipulationMetrics.h"

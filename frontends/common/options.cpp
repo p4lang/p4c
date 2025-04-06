@@ -178,9 +178,9 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
     "--metrics", "metric1[,metric2]",
     [this](const char *arg) {
         static const std::unordered_set<std::string> validMetrics = {
-            "cyclomatic", "halstead", "unused-code", "duplicit-code",
-            "nesting-depth", "header-general", "header-manipulation",
-            "header-modification", "match-action", "parser", "inlined", "extern"
+            "cyclomatic", "halstead", "unused-code", "nesting-depth",
+            "header-general", "header-manipulation","header-modification",
+            "match-action", "parser", "inlined", "extern"
         };
         auto copy = strdup(arg);
         while (auto metric = strsep(&copy, ",")) {

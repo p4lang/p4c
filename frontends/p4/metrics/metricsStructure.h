@@ -41,7 +41,17 @@ struct UnusedCodeInstances {
 };
     
 struct Metrics {
-    
+    unsigned inlinedActionsNum = 0;
+
+    UnusedCodeInstances unusedCodeInstances;
+    struct HelperVars { // Variables for storing inter-pass data.
+        UnusedCodeInstances interPassCounts;
+        std::vector<std::string> beforeActions;
+        std::vector<std::string> afterActions;
+        std::vector<std::string> beforeVariables;  
+        std::vector<std::string> afterVariables;    
+    } helperVars;
+
     struct NestingDepth {
         P4::ordered_map<std::string, unsigned> blockNestingDepth; // Block name -> max depth
         double avgNestingDepth = 0.0;
@@ -111,20 +121,12 @@ struct Metrics {
 
     P4::ordered_map<std::string, unsigned> cyclomaticComplexity; // Function name -> CC value
 
-    unsigned duplicateCodeInstances = 0;
-
-    unsigned inlinedActionsNum = 0;
-
-    unsigned externalObjectsNum = 0;
-
-    UnusedCodeInstances unusedCodeInstances;
-    
-    // Variables for storing inter-pass data.
-    UnusedCodeInstances interPassCounts;
-    std::vector<std::string> beforeActions;
-    std::vector<std::string> afterActions;
-    std::vector<std::string> beforeVariables;  
-    std::vector<std::string> afterVariables;    
+    struct ExternMetrics {
+        unsigned externFunctions = 0;
+        unsigned externStructures = 0;
+        unsigned externFunctionUses = 0;
+        unsigned externStructUses = 0;
+    } externMetrics;
 };
 
 } // namespace P4

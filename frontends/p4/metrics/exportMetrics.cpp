@@ -35,34 +35,31 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "  Estimated Bugs: " << metrics.halsteadMetrics.deliveredBugs << "\n";
         } 
         else if (metric == "unused-code") {
-            file << "\nUnused Code Instances:";
+            file << "\nUnused Code Instances:\n";
             
-            file << "\nProgram Structure:\n";
-            file << "  Actions: " << metrics.unusedCodeInstances.actions << "\n";
-            file << "  Functions: " << metrics.unusedCodeInstances.functions << "\n";
-            file << "  Parser states: " << metrics.unusedCodeInstances.states << "\n";
+            file << "  Program Structure:\n";
+            file << "\tActions: " << metrics.unusedCodeInstances.actions << "\n";
+            file << "\tFunctions: " << metrics.unusedCodeInstances.functions << "\n";
+            file << "\tParser states: " << metrics.unusedCodeInstances.states << "\n";
 
-            file << "\nDeclarations:\n";
-            file << "  Variables: " << metrics.unusedCodeInstances.variables << "\n";
-            file << "  Enums: " << metrics.unusedCodeInstances.enums << "\n";
+            file << "  Declarations:\n";
+            file << "\tVariables: " << metrics.unusedCodeInstances.variables << "\n";
+            file << "\tEnums: " << metrics.unusedCodeInstances.enums << "\n";
 
-            file << "\nControl Flow:\n";
-            file << "  Blocks: " << metrics.unusedCodeInstances.blocks << "\n";
-            file << "  Conditionals: " << metrics.unusedCodeInstances.conditionals << "\n";
-            file << "  Switches: " << metrics.unusedCodeInstances.switches << "\n";
+            file << "  Control Flow:\n";
+            file << "\tBlocks: " << metrics.unusedCodeInstances.blocks << "\n";
+            file << "\tConditionals: " << metrics.unusedCodeInstances.conditionals << "\n";
+            file << "\tSwitches: " << metrics.unusedCodeInstances.switches << "\n";
 
-            file << "\nOther:\n";
-            file << "  Parameters: " << metrics.unusedCodeInstances.parameters << "\n";
-            file << "  Returns: " << metrics.unusedCodeInstances.returns << "\n";
+            file << "  Other:\n";
+            file << "\tParameters: " << metrics.unusedCodeInstances.parameters << "\n";
+            file << "\tReturns: " << metrics.unusedCodeInstances.returns << "\n";
         }
-        else if (metric == "duplicit-code") {
-            file << "\nDuplicate Code Instances: " << metrics.duplicateCodeInstances << "\n";
-        } 
         else if (metric == "nesting-depth") {
             file << "\nNesting Depth Metrics:\n";
             file << "  Average: " << metrics.nestingDepth.avgNestingDepth << "\n";
             file << "  Global Max: " << metrics.nestingDepth.maxNestingDepth << "\n";
-            file << "  Individual blocks: "<<"\n";
+            file << "  Individual blocks: \n";
 
             auto iterator = metrics.nestingDepth.blockNestingDepth.begin();
             while (iterator != metrics.nestingDepth.blockNestingDepth.end()){
@@ -77,15 +74,15 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "  Total Headers: " << metrics.headerMetrics.numHeaders << "\n";
             file << "  Avg Fields Per Header: " << metrics.headerMetrics.avgFieldsNum << "\n";
             file << "  Avg Field Size: " << metrics.headerMetrics.avgFieldSize << "\n";
-            file << "  Per-header metrics:" << "\n";
+            file << "  Per-header metrics:\n";
 
             auto iterator = metrics.headerMetrics.fieldsNum.begin();
             while (iterator != metrics.headerMetrics.fieldsNum.end()){
                 const auto& [headerName, numFields] = *iterator;
                 auto sizeFields = metrics.headerMetrics.fieldSizeSum[headerName];
                 file<<"\t"<<headerName<<":\n";
-                file<<"\t Fields: "<<numFields<<"\n";
-                file<<"\t Fields size sum: "<<sizeFields<<"\n";
+                file<<"\t  Fields: "<<numFields<<"\n";
+                file<<"\t  Fields size sum: "<<sizeFields<<"\n";
                 iterator++;
             }
         } 
@@ -93,6 +90,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "\nHeader Manipulation Metrics:\n";
             file << "  Total Operations: " << metrics.headerManipulationMetrics.totalManipulations.numOperations << "\n";
             file << "  Total Size: " << metrics.headerManipulationMetrics.totalManipulations.totalSize << "\n";
+            file << "  Per-packet metrics:\n";
 
             auto iterator = metrics.headerManipulationMetrics.perPacketManipulations.begin();
             while (iterator != metrics.headerManipulationMetrics.perPacketManipulations.end()){
@@ -107,6 +105,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "\nHeader Modification Metrics:\n";
             file << "  Total Operations: " << metrics.headerModificationMetrics.totalModifications.numOperations << "\n";
             file << "  Total Size: " << metrics.headerModificationMetrics.totalModifications.totalSize << "\n";
+            file << "  Per-packet metrics:\n";
 
             auto iterator = metrics.headerModificationMetrics.perPacketModifications.begin();
             while (iterator != metrics.headerModificationMetrics.perPacketModifications.end()){
@@ -128,13 +127,14 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             file << "  Total Actions: " << metrics.matchActionTableMetrics.totalActions << "\n";
             file << "  Avg Actions Per Table: " << metrics.matchActionTableMetrics.avgActionsPerTable << "\n";
             file << "  Max Actions Per Table: " << metrics.matchActionTableMetrics.maxActionsPerTable << "\n";
+            file << "  Per-table Metrics:\n";
 
             auto iterator = metrics.matchActionTableMetrics.keysNum.begin();
             while (iterator != metrics.matchActionTableMetrics.keysNum.end()){
                 const auto& [tableName, numKeys] = *iterator;
                 auto numActions = metrics.matchActionTableMetrics.actionsNum[tableName];
                 auto keySizeSum = metrics.matchActionTableMetrics.keySizeSum[tableName];
-                file<<"\t"<<tableName<<":\n";
+                file<<"  "<<tableName<<":\n";
                 file<<"\t Actions: "<<numActions<<"\n";
                 file<<"\t Keys: "<<numKeys<<"\n";
                 file<<"\t Key size sum: "<<keySizeSum<<"\n";
@@ -144,7 +144,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         else if (metric == "parser") {
             file << "\nParser Metrics:\n";
             file << "  States: " << metrics.parserMetrics.totalStates << "\n";
-            file << "  Complexities: "<<std::endl;
+            file << "  Per-parser complexities:\n";
 
             auto iterator = metrics.parserMetrics.StateComplexity.begin();
             while (iterator != metrics.parserMetrics.StateComplexity.end()){
@@ -154,12 +154,16 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
                 iterator++;
             }
         } 
-        else if (metric == "inlined") {
-            file << "\nInlined Actions: " << metrics.inlinedActionsNum << "\n";
-        } 
         else if (metric == "extern") {
-            file << "\nExternal Objects: " << metrics.externalObjectsNum << "\n";
+            file << "\nExtern Metrics:\n";
+            file << "  Extern Functions: " << metrics.externMetrics.externFunctions << "\n";
+            file << "  Function Calls: " << metrics.externMetrics.externFunctionUses << "\n";
+            file << "  Extern Structures: " << metrics.externMetrics.externStructures << "\n";
+            file << "  Number of Structure Uses: " << metrics.externMetrics.externStructUses << "\n";
         }
+        else if (metric == "inlined") {
+            file << "\nNumber of Inlined Actions: " << metrics.inlinedActionsNum << "\n";
+        } 
     }
 
     file.close();

@@ -16,9 +16,9 @@ void UnusedCodeMetricPass::postorder(const IR::P4Action* node) {
     std::string scopedActionName = parentName + "." + node->getName().name;
 
     if (isBefore) {
-        metrics.beforeActions.push_back(scopedActionName);
+        metrics.helperVars.beforeActions.push_back(scopedActionName);
     } else {
-        metrics.afterActions.push_back(scopedActionName);
+        metrics.helperVars.afterActions.push_back(scopedActionName);
     }
 }
 
@@ -32,23 +32,23 @@ void UnusedCodeMetricPass::postorder(const IR::ParserState* node) {
 void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable* node) {
     std::string varName = node->getName().name.string();
     if (isBefore) {
-        metrics.beforeVariables.push_back(varName);
+        metrics.helperVars.beforeVariables.push_back(varName);
     } 
     else {
-        metrics.afterVariables.push_back(varName);
+        metrics.helperVars.afterVariables.push_back(varName);
     }
 }
 
 void UnusedCodeMetricPass::recordBefore() {
-    metrics.interPassCounts = currentInstancesCount;
+    metrics.helperVars.interPassCounts = currentInstancesCount;
 }
 
 void UnusedCodeMetricPass::recordAfter() {
-    metrics.unusedCodeInstances = metrics.interPassCounts - currentInstancesCount;
+    metrics.unusedCodeInstances = metrics.helperVars.interPassCounts - currentInstancesCount;
 
     // Calculate the number of unused actions.
-    for (const auto& beforeAction : metrics.beforeActions) {
-        bool found = std::any_of(metrics.afterActions.begin(), metrics.afterActions.end(),
+    for (const auto& beforeAction : metrics.helperVars.beforeActions) {
+        bool found = std::any_of(metrics.helperVars.afterActions.begin(), metrics.helperVars.afterActions.end(),
             [&](const std::string& afterAction) {
                 return afterAction.find(beforeAction) != std::string::npos;
             });
@@ -59,9 +59,9 @@ void UnusedCodeMetricPass::recordAfter() {
     metrics.unusedCodeInstances.actions -= metrics.inlinedActionsNum;
 
     // Calculate the number of unused variables.
-    for (const auto& beforeVar : metrics.beforeVariables) {
-        if (std::find(metrics.afterVariables.begin(), metrics.afterVariables.end(),beforeVar) 
-            == metrics.afterVariables.end()) 
+    for (const auto& beforeVar : metrics.helperVars.beforeVariables) {
+        if (std::find(metrics.helperVars.afterVariables.begin(), metrics.helperVars.afterVariables.end(),beforeVar) 
+            == metrics.helperVars.afterVariables.end()) 
         {
             metrics.unusedCodeInstances.variables++;
         }
