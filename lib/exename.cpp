@@ -34,7 +34,7 @@ namespace P4 {
 #include <unistd.h>
 #endif
 
-std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath) {
+std::filesystem::path getExecutablePath() {
 #if defined(__APPLE__)
     std::array<char, PATH_MAX> buffer{};
     uint32_t size = static_cast<uint32_t>(buffer.size());
@@ -70,6 +70,14 @@ std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPa
         }
     }
 #endif
+    return std::filesystem::path();
+}
+
+std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath) {
+    auto path = getExecutablePath();
+    if (!path.empty()) {
+        return path;
+    }
     // If the above fails, try to convert suggestedPath to a path.
     std::error_code errorCode;
     auto canonicalPath = std::filesystem::canonical(suggestedPath, errorCode);

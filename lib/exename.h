@@ -23,7 +23,12 @@ namespace P4 {
 /// Return the full path to the binary being executed.
 /// @returns an empty path if unable to determine the path.
 /// TODO: With C++20 replace with std::expected?
-std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath = "");
+std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath);
+
+/// Return the full path to the binary being executed.
+/// @returns an empty path if unable to determine the path.
+/// TODO: With C++20 replace with std::expected?
+std::filesystem::path getExecutablePath();
 
 /// Attempt to determine the executable name and return a static path to it.
 /// Will use argv0 if provided and nothing better can be found
