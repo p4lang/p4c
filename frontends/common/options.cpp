@@ -177,7 +177,7 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
     registerOption(
     "--metrics", "metric1[,metric2]",
     [this](const char *arg) {
-        static const std::unordered_set<std::string> validMetrics = {
+        static const std::set<std::string> validMetrics = {
             "cyclomatic", "halstead", "unused-code", "nesting-depth",
             "header-general", "header-manipulation","header-modification",
             "match-action", "parser", "inlined", "extern"

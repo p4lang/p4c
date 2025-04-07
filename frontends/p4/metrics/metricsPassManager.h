@@ -24,7 +24,7 @@ class Metrics;
 
 class MetricsPassManager {
  private:
-    const std::unordered_set<std::string> &selectedMetrics;
+    const std::set<std::string> &selectedMetrics;
     TypeMap* typeMap;
     Metrics &metrics;
 

@@ -46,7 +46,7 @@ void MetricsPassManager::addRemaining(PassManager &pm) const {
 
 void MetricsPassManager::addExportPass(PassManager &pm) const {
     if (!selectedMetrics.empty()) {
-        pm.addPasses({new ExportMetricsPass("metrics_output.txt", selectedMetrics, metrics)});
+        pm.addPasses({new ExportMetricsPass("metrics_output", selectedMetrics, metrics)});
     }
 }
 
