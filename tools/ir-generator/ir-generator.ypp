@@ -79,8 +79,9 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     }                           emit;
 }
 
-%token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE ENUM INLINE INTERFACE NAMESPACE
-                NEW NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VARIANT VIRTUAL
+%token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE ENUM INLINE EXPLICIT
+                INTERFACE NAMESPACE NEW NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED
+                PUBLIC STATIC VARIANT VIRTUAL
 %token<str>     BLOCK COMMENTBLOCK IDENTIFIER INCLUDE INTEGER NO STRING ZERO
 %token<emit>    EMITBLOCK
 
@@ -255,9 +256,11 @@ method
           { if ($2 != $<irClass>0->name)
                 yyerror("constructor name %s doesn't match class name %s", $2.c_str(),
                         $<irClass>0->name.c_str());
-            if ($1 & ~IrField::Inline)
+            if ($1 & ~(IrField::Inline | IrField::Explicit))
                 yyerror("%s invalid on constructor", IrElement::modifier($1));
-            ($<irMethod>$ = new IrMethod(@2, $2))->inImpl = !($1 & IrField::Inline);
+            $<irMethod>$ = new IrMethod(@2, $2);
+            $<irMethod>$->inImpl = !($1 & IrField::Inline);
+            $<irMethod>$->isExplicit = ($1 & IrField::Explicit);
             $<irMethod>$->clss = $<irClass>0; }
       optArgList { BEGIN(PARSE_CTOR_INIT); } ')' body
           { ($$ = $<irMethod>4)->body = $8;
@@ -341,6 +344,7 @@ irField
 modifier
     : NULLOK    { $$ = IrElement::NullOK; }
     | INLINE    { $$ = IrElement::Inline; }
+    | EXPLICIT  { $$ = IrElement::Explicit; }
     | OPTIONAL  { $$ = IrElement::Optional; }
     | STATIC    { $$ = IrElement::Static; }
     | VIRTUAL   { $$ = IrElement::Virtual; }
