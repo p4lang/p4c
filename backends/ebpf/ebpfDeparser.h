@@ -27,11 +27,13 @@ class EBPFDeparser;
 class DeparserBodyTranslator : public ControlBodyTranslator {
  protected:
     const EBPFDeparser *deparser;
+    bool insideIfStatement = false;//this will check if inside the if statement
 
  public:
     explicit DeparserBodyTranslator(const EBPFDeparser *deparser);
 
     bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::IfStatement *s) override;
 };
 
 /// This translator emits buffer preparation (eg. which headers will be emitted)
@@ -42,9 +44,9 @@ class DeparserPrepareBufferTranslator : public ControlBodyTranslator {
  public:
     explicit DeparserPrepareBufferTranslator(const EBPFDeparser *deparser);
 
-    void processMethod(const P4::ExternMethod *method) override;
-    bool preorder(const IR::BlockStatement *s) override;
     bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::BlockStatement *s) override;
+    void processMethod(const P4::ExternMethod *method) override; 
 };
 
 /// This translator emits headers
