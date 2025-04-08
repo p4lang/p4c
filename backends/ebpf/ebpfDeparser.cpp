@@ -31,13 +31,21 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression *expression
                                           control->program->typeMap);
     auto ext = mi->to<P4::ExternMethod>();
     if (ext != nullptr) {
-        // We skip headers emit processing which is handled by DeparserHdrEmitTranslator
-        if (ext->method->name.name == p4lib.packetOut.emit.name) return false;
+          // We skip headers emit if not inside a if statement
+        if (ext->method->name.name == p4lib.packetOut.emit.name && !insideIfStatement){
+         return false;
+        }
     }
 
     return ControlBodyTranslator::preorder(expression);
 }
-
+// we are adding a new preorder method for ifstatement to deparserbodytranslator 
+bool DeparserBodyTranslator::preorder(const IR::IfStatement *s) {
+    insideIfStatement = true;
+    bool result = CodeGenInspector::preorder(s);
+    insideIfStatement = false;
+    return result;
+}
 DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),
