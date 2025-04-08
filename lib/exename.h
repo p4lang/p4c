@@ -21,7 +21,7 @@ limitations under the License.
 namespace P4 {
 
 /// Return the full path to the binary being executed.
-/// @returns an empty path if unable to determine the path.
+/// @returns @p suggestedPath if unable to determine the path.
 /// TODO: With C++20 replace with std::expected?
 std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath);
 
