@@ -74,8 +74,15 @@ std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
     }
     std::sort(sorted.begin(), sorted.end(), [](auto &a, auto &b) { return a.first > b.first; });
 #if HAVE_LIBBACKTRACE
-    if (!global_backtrace_state)
-        global_backtrace_state = backtrace_create_state(exename(), 1, bt_error, &out);
+    if (!global_backtrace_state) {
+        // TODO: Do not use strdup here?
+        auto executablePath = getExecutablePath();
+        if (executablePath.empty()) {
+            executablePath = "<unknown_path>";
+        }
+        const char *executableChar = strdup(executablePath.c_str());
+        global_backtrace_state = backtrace_create_state(executableChar, 1, bt_error, &out);
+    }
 #endif
 
     out << "Allocated a total of " << n4(total_total) << "B memory";
