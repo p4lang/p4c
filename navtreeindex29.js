@@ -1,7 +1,5 @@
 var NAVTREEINDEX29 =
 {
-"class_p_h_v_1_1v2_1_1_trivial_allocator_1_1_phv_status.html":[13,0,15,2,30,1],
-"class_p_h_v_1_1v2_1_1_tx_score.html":[13,0,15,2,31],
 "class_p_h_v_1_1v2_1_1_tx_score_maker.html":[13,0,15,2,32],
 "class_p_h_v___analysis_pass.html":[13,0,529],
 "class_p_h_v___field___operations.html":[13,0,530],
@@ -249,5 +247,7 @@ var NAVTREEINDEX29 =
 "class_scc_topo_sorter.html#ad1e7b6f7b6fbdb6b2a2c4af2584667cd":[13,0,612,0],
 "class_scc_topo_sorter.html#aebb870e3733326dd4fd479cfcc8e0a18":[13,0,612,2],
 "class_score_context.html":[13,0,613],
-"class_section.html":[13,0,614]
+"class_section.html":[13,0,614],
+"class_section.html#a8bc055f8b213893a5e002608d1781e86":[13,0,614,0],
+"class_section.html#ad5438ee238f2d8f8d7b65350d532dfce":[13,0,614,1]
 };

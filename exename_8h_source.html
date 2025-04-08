@@ -100,7 +100,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('lib_2exename_8h_source.html',''); initResizable(true); });
+$(function(){initNavTree('exename_8h_source.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -126,7 +126,7 @@ $(function(){initNavTree('lib_2exename_8h_source.html',''); initResizable(true);
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">lib/exename.h</div></div>
+  <div class="headertitle"><div class="title">exename.h</div></div>
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
@@ -147,15 +147,23 @@ $(function(){initNavTree('lib_2exename_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#ifndef LIB_EXENAME_H_</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#define LIB_EXENAME_H_</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="namespace_p4.html#a7b6eedd397c9b652003a9a2e9948d20c">exename</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *argv0 = <span class="keyword">nullptr</span>);</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_EXENAME_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;filesystem&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>std::filesystem::path <a class="code hl_function" href="namespace_p4.html#a825e366c561578d0e28d1ba429947d55">getExecutablePath</a>(<span class="keyword">const</span> std::filesystem::path &amp;suggestedPath);</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>std::filesystem::path <a class="code hl_function" href="namespace_p4.html#a825e366c561578d0e28d1ba429947d55">getExecutablePath</a>();</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>[[deprecated(<span class="stringliteral">&quot;Use getExecutablePath() instead&quot;</span>)]]</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="namespace_p4.html#a7b6eedd397c9b652003a9a2e9948d20c">exename</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *argv0 = <span class="keyword">nullptr</span>);</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_EXENAME_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
-<div class="ttc" id="anamespace_p4_html_a7b6eedd397c9b652003a9a2e9948d20c"><div class="ttname"><a href="namespace_p4.html#a7b6eedd397c9b652003a9a2e9948d20c">P4::exename</a></div><div class="ttdeci">const char * exename(const char *argv0)</div><div class="ttdef"><b>Definition</b> lib/exename.cpp:47</div></div>
+<div class="ttc" id="anamespace_p4_html_a7b6eedd397c9b652003a9a2e9948d20c"><div class="ttname"><a href="namespace_p4.html#a7b6eedd397c9b652003a9a2e9948d20c">P4::exename</a></div><div class="ttdeci">const char * exename(const char *argv0)</div><div class="ttdef"><b>Definition</b> exename.cpp:87</div></div>
+<div class="ttc" id="anamespace_p4_html_a825e366c561578d0e28d1ba429947d55"><div class="ttname"><a href="namespace_p4.html#a825e366c561578d0e28d1ba429947d55">P4::getExecutablePath</a></div><div class="ttdeci">std::filesystem::path getExecutablePath()</div><div class="ttdef"><b>Definition</b> exename.cpp:37</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.13.2-->

@@ -1755,6 +1755,10 @@ const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>get
 <tr class="memitem:a0ecde0f8c93733cae0b10931f380e2cc" id="r_a0ecde0f8c93733cae0b10931f380e2cc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a5a8d2595231408cba09d1e395f941017">DebugHook</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ecde0f8c93733cae0b10931f380e2cc">getDiagnosticCountInPassHook</a> (<a class="el" href="class_p4_1_1_base_compile_context.html">BaseCompileContext</a> &amp;ctxt=<a class="el" href="class_p4_1_1_base_compile_context.html#afc8d0a99e780ae72af4203ae8ef180b5">BaseCompileContext::get</a>())</td></tr>
 <tr class="memdesc:a0ecde0f8c93733cae0b10931f380e2cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">This creates a debug hook that prints information about the number of diagnostics of different levels (error, warning, info) printed by each of the pass after it ended. This is intended to help in debuggig and testing.  <br /></td></tr>
 <tr class="separator:a0ecde0f8c93733cae0b10931f380e2cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a825e366c561578d0e28d1ba429947d55" id="r_a825e366c561578d0e28d1ba429947d55"><td class="memItemLeft" align="right" valign="top">std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a825e366c561578d0e28d1ba429947d55">getExecutablePath</a> ()</td></tr>
+<tr class="separator:a825e366c561578d0e28d1ba429947d55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2443f3d7d5fee51dbbefa1353bfc3400" id="r_a2443f3d7d5fee51dbbefa1353bfc3400"><td class="memItemLeft" align="right" valign="top">std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2443f3d7d5fee51dbbefa1353bfc3400">getExecutablePath</a> (const std::filesystem::path &amp;suggestedPath)</td></tr>
+<tr class="separator:a2443f3d7d5fee51dbbefa1353bfc3400"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9eec3e84d06be2647c9018f07511cdfd" id="r_a9eec3e84d06be2647c9018f07511cdfd"><td class="memItemLeft" align="right" valign="top"><a id="a9eec3e84d06be2647c9018f07511cdfd" name="a9eec3e84d06be2647c9018f07511cdfd"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>getIndent</b> (int l)</td></tr>
 <tr class="separator:a9eec3e84d06be2647c9018f07511cdfd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2939,6 +2943,42 @@ template&lt;typename Map, typename Key&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>A debug hook suitable for using in pass managers. </dd></dl>
+
+</div>
+</div>
+<a id="a825e366c561578d0e28d1ba429947d55" name="a825e366c561578d0e28d1ba429947d55"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a825e366c561578d0e28d1ba429947d55">&#9670;&#160;</a></span>getExecutablePath() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::filesystem::path P4::getExecutablePath </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Return the full path to the binary being executed. </p><dl class="section return"><dt>Returns</dt><dd>an empty path if unable to determine the path. TODO: With C++20 replace with std::expected? </dd></dl>
+
+</div>
+</div>
+<a id="a2443f3d7d5fee51dbbefa1353bfc3400" name="a2443f3d7d5fee51dbbefa1353bfc3400"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2443f3d7d5fee51dbbefa1353bfc3400">&#9670;&#160;</a></span>getExecutablePath() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::filesystem::path P4::getExecutablePath </td>
+          <td>(</td>
+          <td class="paramtype">const std::filesystem::path &amp;</td>          <td class="paramname"><span class="paramname"><em>suggestedPath</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Return the full path to the binary being executed. </p><dl class="section return"><dt>Returns</dt><dd><code class="param">suggestedPath</code> if unable to determine the path. TODO: With C++20 replace with std::expected? </dd></dl>
 
 </div>
 </div>
