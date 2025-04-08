@@ -216,7 +216,7 @@ class Virtme:
         return result.returncode
 
     def run_script(self, script_name, args):
-        cmd = f'sudo {self.ns.mnt_dir}/{script_name} ' + " ".join(args)
+        cmd = f'sudo -E {self.ns.mnt_dir}/{script_name} ' + " ".join(args)
         return self.run(cmd)
 
     def run_tcpdump(self, filename, port):
@@ -233,7 +233,7 @@ class Virtme:
             "StrictHostKeyChecking=no",
             "-o",
             "UserKnownHostsFile=/dev/null",
-            f"sudo nohup bash -c '{tcpdump_cmd} > /dev/null 2>&1 &' && sleep 1 && pgrep -n -f '{tcpdump_cmd}'",
+            f"sudo -E nohup bash -c '{tcpdump_cmd} > /dev/null 2>&1 &' && sleep 1 && pgrep -n -f '{tcpdump_cmd}'",
         ]
 
         # Run the command using subprocess to capture the output
