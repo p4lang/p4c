@@ -64,7 +64,7 @@ std::filesystem::path getExecutablePath() {
         // It will also try to resolve symlinks.
         std::error_code errorCode;
         auto canonicalPath = std::filesystem::canonical(path, errorCode);
-        // Return the path if no error was thrown.
+        // Return the path if no error occurred.
         if (!errorCode) {
             return canonicalPath;
         }
