@@ -153,7 +153,6 @@ set (BFAS_COMMON_SOURCES
   dynhash.cpp
   error_mode.cpp
   exact_match.cpp
-  exename.cpp
   flexible_headers.cpp
   gateway.cpp
   hash_action.cpp

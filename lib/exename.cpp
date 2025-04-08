@@ -16,58 +16,84 @@ limitations under the License.
 
 #include "exename.h"
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#include "exceptions.h"
+#include <array>
+#include <cstring>
+#include <filesystem>
+#include <system_error>
 
 namespace P4 {
 
-template <size_t N>
-static void convertToAbsPath(const char *const relPath, char (&output)[N]) {
-    output[0] = '\0';  // Default to the empty string, indicating failure.
+#include <climits>
+#ifdef __APPLE__
+#include <unistd.h>
 
-    char cwd[PATH_MAX];
-    if (!getcwd(cwd, sizeof(cwd))) return;
-    const size_t cwdLen = strlen(cwd);
-    if (cwdLen == 0) return;
-    const char *separator = cwd[cwdLen - 1] == '/' ? "" : "/";
+#include <mach-o/dyld.h>
+#elif defined(_WIN32)
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
-    // Construct an absolute path. We're assuming that @relPath is relative to
-    // the current working directory.
-    int n = snprintf(output, N, "%s%s%s", cwd, separator, relPath);
-    BUG_CHECK(n >= 0, "Pathname too long");
+std::filesystem::path getExecutablePath() {
+#if defined(__APPLE__)
+    std::array<char, PATH_MAX> buffer{};
+    uint32_t size = static_cast<uint32_t>(buffer.size());
+    if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
+        return buffer.data();
+    }
+#elif defined(_WIN32)
+    std::array<char, PATH_MAX> buffer{};
+    // TODO: Do we need to support this?
+    DWORD size = GetModuleFileNameA(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+    if (size > 0 && size < buffer.size()) {
+        return buffer.data();
+    }
+#else
+    // Find the path of the executable.  We use a number of techniques that may fail or work on
+    // different systems, and take the first working one we find.  Fallback to not overriding the
+    // compiled-in installation path.
+    std::array<std::string, 4> paths = {
+        "/proc/self/exe",         // Linux
+        "/proc/curproc/file",     // FreeBSD
+        "/proc/curproc/exe",      // NetBSD
+        "/proc/self/path/a.out",  // Solaris
+    };
+
+    for (const auto &path : paths) {
+        // std::filesystem::canonical will fail if the path is invalid.
+        // It will also try to resolve symlinks.
+        std::error_code errorCode;
+        auto canonicalPath = std::filesystem::canonical(path, errorCode);
+        // Return the path if no error occurred.
+        if (!errorCode) {
+            return canonicalPath;
+        }
+    }
+#endif
+    return std::filesystem::path();
+}
+
+std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath) {
+    auto path = getExecutablePath();
+    if (!path.empty()) {
+        return path;
+    }
+    // If the above fails, try to convert suggestedPath to a path.
+    std::error_code errorCode;
+    auto canonicalPath = std::filesystem::canonical(suggestedPath, errorCode);
+    return errorCode ? std::filesystem::path() : canonicalPath;
 }
 
 const char *exename(const char *argv0) {
-    // Leave 1 extra char for the \0
-    static char buffer[PATH_MAX + 1];
-    if (buffer[0]) return buffer;  // done already
-    int len;
-    /* find the path of the executable.  We use a number of techniques that may fail
-     * or work on different systems, and take the first working one we find.  Fall
-     * back to not overriding the compiled-in installation path */
-    if ((len = readlink("/proc/self/exe", buffer, sizeof(buffer) - 1)) > 0 ||
-        (len = readlink("/proc/curproc/exe", buffer, sizeof(buffer) - 1)) > 0 ||
-        (len = readlink("/proc/curproc/file", buffer, sizeof(buffer) - 1)) > 0 ||
-        (len = readlink("/proc/self/path/a.out", buffer, sizeof(buffer) - 1)) > 0) {
-        buffer[len] = 0;
-    } else if (argv0 && argv0[0] == '/') {
-        snprintf(buffer, sizeof(buffer), "%s", argv0);
-    } else if (argv0 && strchr(argv0, '/')) {
-        convertToAbsPath(argv0, buffer);
-    } else if (getenv("_")) {
-        strncpy(buffer, getenv("_"), sizeof(buffer));
-        buffer[sizeof(buffer) - 1] = 0;
-    } else {
-        buffer[0] = 0;
+    std::filesystem::path argv0Path =
+        (argv0 != nullptr) ? std::filesystem::path(argv0) : std::filesystem::path();
+
+    auto path = getExecutablePath(argv0Path);
+    if (path.empty()) {
+        return nullptr;
     }
-    return buffer;
+    // TODO: There is a potential leak here.
+    return strdup(path.c_str());
 }
 
 }  // namespace P4
