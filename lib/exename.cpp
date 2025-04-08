@@ -60,7 +60,7 @@ std::filesystem::path getExecutablePath() {
     };
 
     for (const auto &path : paths) {
-        // std::filesystem::canonical will throw on error if the path is invalid.
+        // std::filesystem::canonical will fail if the path is invalid.
         // It will also try to resolve symlinks.
         std::error_code errorCode;
         auto canonicalPath = std::filesystem::canonical(path, errorCode);
