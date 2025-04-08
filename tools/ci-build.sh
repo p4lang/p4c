@@ -116,6 +116,7 @@ sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
 sudo apt-get install -y python3-venv curl
 curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
 uv sync
+uv tool update-shell
 
 if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
 then
@@ -232,8 +233,8 @@ function install_stf_p4tc_test_deps() (
     ${P4C_DIR}/backends/tc/runtime/build-iproute2 ${P4C_DIR}/backends/tc/runtime
     git clone --recurse-submodules https://github.com/arighi/virtme-ng.git ${P4C_DIR}/backends/tc/runtime/virtme-ng
     pushd ${P4C_DIR}/backends/tc/runtime/virtme-ng
-    git checkout v1.19
-    uv pip install .
+    git checkout v1.33
+    BUILD_VIRTME_NG_INIT=1 uv tool install .
     popd
 )
 

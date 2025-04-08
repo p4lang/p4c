@@ -11,6 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -x
+set -e  # exit on error
+
 help() {
    cat <<EOF
 Usage: $0 [-h] [-i <bzImage>] [-f config] [-s script] [-n vm_ip]
@@ -78,7 +81,9 @@ while getopts 'hi:f:s:n:m:u:' OPT; do
 done
 shift $((OPTIND -1))
 
-source ${MNTDIR}/virtme-ng/bin/activate
+# Add the .local/bin directory to the path. virtme-run might be there.
+export PATH="$HOME/.local/bin:$PATH"
+which virtme-run || { echo "virtme-run not found"; exit 1; }
 
 virtme-run \
    --arch "x86_64" \
@@ -92,5 +97,3 @@ virtme-run \
    --show-boot-console \
    --script-sh "/mnt/$SCRIPT $VM_IP" \
    --qemu-opts -nic tap,ifname=taptc,script=no,downscript=no
-
-deactivate
