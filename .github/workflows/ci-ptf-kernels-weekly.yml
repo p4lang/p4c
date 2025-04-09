@@ -119,4 +119,4 @@ jobs:
 
       - name: Install VM and run PTF tests for eBPF backend
         run: |
-          sudo -E ./tools/ci-ptf/run_test.sh sudo docker run --privileged -v /sys/fs/bpf:/sys/fs/bpf -w /p4c/backends/ebpf/tests p4c ./test.sh
+          sudo -E ./tools/ci-ptf/run_test.sh sudo docker run --privileged -v /sys/fs/bpf:/sys/fs/bpf -w /p4c/backends/ebpf/tests p4c uv run ./test.sh

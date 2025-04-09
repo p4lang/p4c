@@ -9,6 +9,11 @@ on:
   push:
     branches: [main]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-ubuntu18-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   # Build with GCC and test p4c on Ubuntu 18.04.
   test-ubuntu18:
@@ -39,4 +44,4 @@ jobs:
         # this is needed to create network namespaces for the ebpf tests.
       - name: Run tests (Ubuntu 18.04)
         run: |
-          sudo -E docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
+          sudo -E docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c uv run ctest --output-on-failure --schedule-random

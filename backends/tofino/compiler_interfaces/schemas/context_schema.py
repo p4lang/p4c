@@ -150,12 +150,12 @@ Version Notes:
 """
 
 major_version = 1
-medium_version = 12
-minor_version = 4
+minor_version = 12
+patch_version = 4
 
 
 def get_schema_version():
-    return "%s.%s.%s" % (str(major_version), str(medium_version), str(minor_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))
 
 
 ########################################################
