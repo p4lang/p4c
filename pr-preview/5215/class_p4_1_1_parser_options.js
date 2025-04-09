@@ -9,7 +9,6 @@ var class_p4_1_1_parser_options =
     [ "isv1", "class_p4_1_1_parser_options.html#a199177c4bd3d579a7842a1a13e1c8d80", null ],
     [ "preprocess", "class_p4_1_1_parser_options.html#a8ee3d96c97ed1739333585eda4114fd1", null ],
     [ "process", "class_p4_1_1_parser_options.html#a9c3805deef462cafb43682b0cf69d2c7", null ],
-    [ "searchForIncludePath", "class_p4_1_1_parser_options.html#abbf13a127503b3313a0a7781c157134e", null ],
     [ "setInputFile", "class_p4_1_1_parser_options.html#afeeffad3295444a4eb148d5fa276393b", null ],
     [ "compilerVersion", "class_p4_1_1_parser_options.html#a06aeb896b9ff41034ca072b84abefb3e", null ],
     [ "doNotCompile", "class_p4_1_1_parser_options.html#a5c1ea3b2c15f95195a45d75756727133", null ],

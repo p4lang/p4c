@@ -188,8 +188,6 @@ std::optional&lt; <a class="el" href="#a9f1c37ce9870351d6a7e19630bbd2ccd">Parser
 <tr class="separator:a8ee3d96c97ed1739333585eda4114fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9c3805deef462cafb43682b0cf69d2c7" id="r_a9c3805deef462cafb43682b0cf69d2c7"><td class="memItemLeft" align="right" valign="top">std::vector&lt; const char * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9c3805deef462cafb43682b0cf69d2c7">process</a> (int argc, char *const argv[]) override</td></tr>
 <tr class="separator:a9c3805deef462cafb43682b0cf69d2c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abbf13a127503b3313a0a7781c157134e" id="r_abbf13a127503b3313a0a7781c157134e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abbf13a127503b3313a0a7781c157134e">searchForIncludePath</a> (const char *&amp;includePathOut, std::vector&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt; relativePaths, const char *)</td></tr>
-<tr class="separator:abbf13a127503b3313a0a7781c157134e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afeeffad3295444a4eb148d5fa276393b" id="r_afeeffad3295444a4eb148d5fa276393b"><td class="memItemLeft" align="right" valign="top"><a id="afeeffad3295444a4eb148d5fa276393b" name="afeeffad3295444a4eb148d5fa276393b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setInputFile</b> ()</td></tr>
 <tr class="memdesc:afeeffad3295444a4eb148d5fa276393b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expect that the only remaining argument is the input file. <br /></td></tr>
@@ -214,6 +212,8 @@ Static Public Member Functions</h2></td></tr>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>closeFile</b> (FILE *<a class="el" href="#a0da54641de222300cc86b574205cca7f">file</a>)</td></tr>
 <tr class="memdesc:aca0acef9e806966b4ddc2ecec8b2ac62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to close the input stream associated with the result. <br /></td></tr>
 <tr class="separator:aca0acef9e806966b4ddc2ecec8b2ac62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe0ee7582c422b01543cfb35e576538d" id="r_afe0ee7582c422b01543cfb35e576538d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afe0ee7582c422b01543cfb35e576538d">searchForIncludePath</a> (const char *&amp;includePathOut, const std::vector&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt; &amp;userSpecifiedPaths, const char *<a class="el" href="namespace_p4.html#a7b6eedd397c9b652003a9a2e9948d20c">exename</a>)</td></tr>
+<tr class="separator:afe0ee7582c422b01543cfb35e576538d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -475,11 +475,14 @@ std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bot
 
 </div>
 </div>
-<a id="abbf13a127503b3313a0a7781c157134e" name="abbf13a127503b3313a0a7781c157134e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abbf13a127503b3313a0a7781c157134e">&#9670;&#160;</a></span>searchForIncludePath()</h2>
+<a id="afe0ee7582c422b01543cfb35e576538d" name="afe0ee7582c422b01543cfb35e576538d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe0ee7582c422b01543cfb35e576538d">&#9670;&#160;</a></span>searchForIncludePath()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">bool P4::ParserOptions::searchForIncludePath </td>
@@ -489,7 +492,7 @@ std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bot
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt;</td>          <td class="paramname"><span class="paramname"><em>relativePaths</em></span>, </td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>userSpecifiedPaths</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -497,6 +500,11 @@ std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bot
           <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>exename</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 <p>Search and set 'includePathOut' to be the first valid path from the list of possible relative paths. </p>
 

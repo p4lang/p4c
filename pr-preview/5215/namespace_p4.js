@@ -581,6 +581,8 @@ var namespace_p4 =
     [ "generateP4Runtime", "group__control__plane.html#gaa3c1e7c533612f655b186bcf0a5924a9", null ],
     [ "get", "namespace_p4.html#a2feee694cf557c6f3291b0ac270842bf", null ],
     [ "getDiagnosticCountInPassHook", "namespace_p4.html#a0ecde0f8c93733cae0b10931f380e2cc", null ],
+    [ "getExecutablePath", "namespace_p4.html#a825e366c561578d0e28d1ba429947d55", null ],
+    [ "getExecutablePath", "namespace_p4.html#a2443f3d7d5fee51dbbefa1353bfc3400", null ],
     [ "getref", "namespace_p4.html#a002cab4524c2e05cb9767bfc9c0ef17a", null ],
     [ "hasVarbitsOrUnions", "namespace_p4.html#ad633c714dcd226a6c41dbfe987e18190", null ],
     [ "info", "namespace_p4.html#a1ddab1e9dd0a8688a3b704a9d1d98161", null ],

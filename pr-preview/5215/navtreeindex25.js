@@ -1,7 +1,5 @@
 var NAVTREEINDEX25 =
 {
-"class_p4_1_1_util_1_1_as_enumerator.html#a851df24b6211bfbba5fa5efc492dce13":[13,0,12,25,1,1],
-"class_p4_1_1_util_1_1_comment.html":[13,0,12,25,3],
 "class_p4_1_1_util_1_1_comment.html#acd3180bcbd5233909c59e93a077ebd57":[13,0,12,25,3,0],
 "class_p4_1_1_util_1_1_compilation_error.html":[13,0,12,25,4],
 "class_p4_1_1_util_1_1_compiler_bug.html":[13,0,12,25,5],
@@ -249,5 +247,7 @@ var NAVTREEINDEX25 =
 "class_p4_1_1graphs_1_1_graphs.html#a5c95c73763f14a9c3eeb89f3915429ba":[12,0,14,5,6,3],
 "class_p4_1_1graphs_1_1_graphs.html#a5c95c73763f14a9c3eeb89f3915429ba":[13,0,12,9,6,3],
 "class_p4_1_1graphs_1_1_graphs.html#a95945ee794b77464a42fb25a87449916":[12,0,14,5,6,2],
-"class_p4_1_1graphs_1_1_graphs.html#a95945ee794b77464a42fb25a87449916":[13,0,12,9,6,2]
+"class_p4_1_1graphs_1_1_graphs.html#a95945ee794b77464a42fb25a87449916":[13,0,12,9,6,2],
+"class_p4_1_1graphs_1_1_graphs.html#struct_p4_1_1graphs_1_1_graphs_1_1_vertex":[12,0,14,5,6,1],
+"class_p4_1_1graphs_1_1_graphs.html#struct_p4_1_1graphs_1_1_graphs_1_1_vertex":[13,0,12,9,6,1]
 };

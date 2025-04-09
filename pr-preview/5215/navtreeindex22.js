@@ -1,7 +1,5 @@
 var NAVTREEINDEX22 =
 {
-"class_p4_1_1_remove_exits.html":[13,0,12,386],
-"class_p4_1_1_remove_generic_types.html":[12,0,14,372],
 "class_p4_1_1_remove_generic_types.html":[13,0,12,387],
 "class_p4_1_1_remove_hidden.html":[12,0,14,373],
 "class_p4_1_1_remove_hidden.html":[13,0,12,388],
@@ -249,5 +247,7 @@ var NAVTREEINDEX22 =
 "class_p4_1_1_symbolic_value_factory.html":[13,0,12,488],
 "class_p4_1_1_symbolic_varbit.html":[12,0,14,474],
 "class_p4_1_1_symbolic_varbit.html":[13,0,12,489],
-"class_p4_1_1_symbolic_void.html":[12,0,14,475]
+"class_p4_1_1_symbolic_void.html":[12,0,14,475],
+"class_p4_1_1_symbolic_void.html":[13,0,12,490],
+"class_p4_1_1_synthesize_actions.html":[12,0,14,477]
 };
