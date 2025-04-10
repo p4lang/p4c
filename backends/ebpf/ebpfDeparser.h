@@ -1,3 +1,8 @@
+#ifndef BACKENDS_EBPF_EBPFDEPARSER_H_
+#define BACKENDS_EBPF_EBPFDEPARSER_H_
+
+#include "ebpfControl.h"
+
 /*
 Copyright 2022-present Orange
 Copyright 2022-present Open Networking Foundation
@@ -14,10 +19,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef BACKENDS_EBPF_EBPFDEPARSER_H_
-#define BACKENDS_EBPF_EBPFDEPARSER_H_
-
-#include "ebpfControl.h"
 
 namespace P4::EBPF {
 
@@ -27,11 +28,14 @@ class EBPFDeparser;
 class DeparserBodyTranslator : public ControlBodyTranslator {
  protected:
     const EBPFDeparser *deparser;
+    bool insideIfStatement = false;
+    bool insideIfStatement = false;
 
  public:
     explicit DeparserBodyTranslator(const EBPFDeparser *deparser);
 
     bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::IfStatement *s) override;
 };
 
 /// This translator emits buffer preparation (eg. which headers will be emitted)
