@@ -1,7 +1,7 @@
 set(BMV2_SIMPLE_SWITCH_SEARCH_PATHS
   ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/build/targets/simple_switch
-  ${P4C_SOURCE_DIR}/../../behavioral-model/build/targets/simple_switch)
+  ${P4C_SOURCE_DIR}/../behavioral-model/targets/simple_switch
+  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/simple_switch)
 
 # check for simple_switch
 find_program (SIMPLE_SWITCH_CLI simple_switch_CLI
@@ -22,8 +22,8 @@ find_package_handle_standard_args ("BMV2"
 
 set(BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS
   ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/build/targets/simple_switch_grpc
-  ${P4C_SOURCE_DIR}/../../behavioral-model/build/targets/simple_switch_grpc)
+  ${P4C_SOURCE_DIR}/../behavioral-model/targets/simple_switch_grpc
+  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/simple_switch_grpc)
 
 # check for simple_switch_grpc
 find_program (SIMPLE_SWITCH_GRPC simple_switch_grpc PATHS ${BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS} )
@@ -39,8 +39,8 @@ find_package_handle_standard_args ("BMV2"
 
 set(BMV2_PSA_SWITCH_SEARCH_PATHS
   ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/build/targets/psa_switch
-  ${P4C_SOURCE_DIR}/../../behavioral-model/build/targets/psa_switch)
+  ${P4C_SOURCE_DIR}/../behavioral-model/targets/psa_switch
+  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/psa_switch)
 
 # check for psa_switch
 find_program (PSA_SWITCH_CLI psa_switch_CLI
@@ -61,8 +61,8 @@ find_package_handle_standard_args ("BMV2"
 
 set(BMV2_PNA_NIC_SEARCH_PATHS
   ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/build/targets/pna_nic
-  ${P4C_SOURCE_DIR}/../../behavioral-model/build/targets/pna_nic)
+  ${P4C_SOURCE_DIR}/../behavioral-model/targets/pna_nic
+  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/pna_nic)
   
 # check for pna_nic
 find_program (PNA_NIC_CLI pna_nic_CLI
@@ -78,5 +78,5 @@ endif (PNA_NIC_CLI)
 mark_as_advanced(PNA_NIC PNA_NIC_CLI)
 
 find_package_handle_standard_args ("BMV2"
-  "Program 'pna_nic_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMv2_PNA_NIC_SEARCH_PATHS}.\nWill not run PNA PNA BMv2 tests."
+  "Program 'pna_nic_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_PNA_NIC_SEARCH_PATHS}.\nWill not run PNA PNA BMv2 tests."
   PNA_NIC PNA_NIC_CLI)
