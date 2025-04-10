@@ -24,9 +24,10 @@ jobs:
           submodules: recursive
       - uses: actions/setup-python@v5
 
-      - name: Upgrade setuptools
-        run: python3 -m pip install --upgrade setuptools
-
+      - name: Upgrade pip + setuptools
+        run: |
+          python3 -m pip install --upgrade setuptools
+          pip install --upgrade setuptools 
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1
