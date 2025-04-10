@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-python@v5
 
       - name: Upgrade setuptools
-        run: pip install --upgrade setuptools
+        run: python3 -m pip install --upgrade setuptools
 
 
       - name: ccache
