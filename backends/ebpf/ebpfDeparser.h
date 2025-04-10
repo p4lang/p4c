@@ -29,6 +29,7 @@ class DeparserBodyTranslator : public ControlBodyTranslator {
  protected:
     const EBPFDeparser *deparser;
     bool insideIfStatement = false;
+    bool insideIfStatement = false;
 
  public:
     explicit DeparserBodyTranslator(const EBPFDeparser *deparser);

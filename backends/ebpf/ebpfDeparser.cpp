@@ -31,9 +31,9 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression *expression
                                           control->program->typeMap);
     auto ext = mi->to<P4::ExternMethod>();
     if (ext != nullptr) {
-          // We skip headers emit if not inside a if statement
-        if (ext->method->name.name == p4lib.packetOut.emit.name && !insideIfStatement){
-         return false;
+        // We skip headers emit if not inside a if statement
+        if (ext->method->name.name == p4lib.packetOut.emit.name && !insideIfStatement) {
+            return false;
         }
     }
 
