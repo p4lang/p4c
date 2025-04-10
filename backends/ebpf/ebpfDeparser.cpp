@@ -40,7 +40,6 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression *expression
     return ControlBodyTranslator::preorder(expression);
 }
 
-// we are adding a new preorder method for ifstatement to deparserbodytranslator 
 bool DeparserBodyTranslator::preorder(const IR::IfStatement *s) {
     insideIfStatement = true;
     bool result = CodeGenInspector::preorder(s);
