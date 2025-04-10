@@ -39,6 +39,7 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression *expression
 
     return ControlBodyTranslator::preorder(expression);
 }
+
 // we are adding a new preorder method for ifstatement to deparserbodytranslator 
 bool DeparserBodyTranslator::preorder(const IR::IfStatement *s) {
     insideIfStatement = true;
@@ -46,6 +47,7 @@ bool DeparserBodyTranslator::preorder(const IR::IfStatement *s) {
     insideIfStatement = false;
     return result;
 }
+
 DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),

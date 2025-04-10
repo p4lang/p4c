@@ -44,9 +44,9 @@ class DeparserPrepareBufferTranslator : public ControlBodyTranslator {
  public:
     explicit DeparserPrepareBufferTranslator(const EBPFDeparser *deparser);
 
-    bool preorder(const IR::MethodCallExpression *expression) override;
-    bool preorder(const IR::BlockStatement *s) override;
     void processMethod(const P4::ExternMethod *method) override; 
+    bool preorder(const IR::BlockStatement *s) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
 };
 
 /// This translator emits headers
