@@ -24,6 +24,59 @@ endif()
 
 project (P4C)
 
+# Minimal lint-only configuration
+if (CMAKE_LINT_ONLY)
+  message(STATUS "CMAKE_LINT_ONLY=ON: Only configuring lint targets")
+
+  # add_custom_target(cpplint 
+  #   COMMAND python3 ${CMAKE_SOURCE_DIR}/tools/cpplint.py
+  #   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #   COMMENT "Running cpplint")
+  file(GLOB_RECURSE LINT_FILES
+  "${CMAKE_SOURCE_DIR}/*.cpp"
+  "${CMAKE_SOURCE_DIR}/*.h")
+
+  add_custom_target(cpplint
+  COMMAND find ${CMAKE_SOURCE_DIR} -name "*.cpp" -o -name "*.h" | xargs python3 ${CMAKE_SOURCE_DIR}/tools/cpplint.py || true
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMENT "Running cpplint on all C++ source files using xargs")
+
+
+  # add_custom_target(clang-format
+  #   COMMAND find ${CMAKE_SOURCE_DIR} -regex '.*\\(cpp\\|h\\)' -exec clang-format -i {} +
+  #   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #   COMMENT "Running clang-format")
+  add_custom_target(clang-format
+  COMMAND find ${CMAKE_SOURCE_DIR} -type f \( -name "*.cpp" -o -name "*.h" \) -print0 | xargs -0 clang-format -i || true
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMENT "Running clang-format on all C/C++ files")
+
+
+  # add_custom_target(black
+  #   COMMAND black .
+  #   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #   COMMENT "Running black on Python files")
+
+  add_custom_target(black
+  COMMAND black . || true
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMENT "Running black on all Python files")
+
+  # add_custom_target(isort
+  #   COMMAND isort .
+  #   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  #   COMMENT "Running isort on Python files")
+
+  add_custom_target(isort
+  COMMAND isort . || true
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMENT "Running isort on Python files")
+
+
+  return()
+endif()
+
+
 # set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)

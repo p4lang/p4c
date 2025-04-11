@@ -24,15 +24,24 @@ jobs:
           submodules: recursive
       - uses: actions/setup-python@v5
 
+      - name: Upgrade pip + setuptools
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade "setuptools>=61"
+
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
           key: apply-linters-${{ runner.os }}
           max-size: 1000M
 
-      - name: Build (Ubuntu 22.04)
+      - name: Minimal Lint Setup
         run: |
-          tools/ci-build.sh
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ python3-pip clang-format
+          pip3 install -r requirements.txt
+          mkdir -p build && cd build 
+          cmake .. -DCMAKE_LINT_ONLY=ON
 
       - name: Run cpplint on C/C++ files.
         run: cmake --build build --target cpplint
