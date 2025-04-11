@@ -140,13 +140,13 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
     // Header manipulation metrics.
     if (selectedMetrics.count("header-manipulation")) {
         textFile << "\nHeader Manipulation Metrics:\n"
-                << "  Total Operations: " << metrics.headerManipulationMetrics.totalManipulations.numOperations << "\n"
-                << "  Total Size: " << metrics.headerManipulationMetrics.totalManipulations.totalSize << "\n"
+                << "  Total Operations: " << metrics.headerManipulationMetrics.total.numOperations << "\n"
+                << "  Total Size: " << metrics.headerManipulationMetrics.total.totalSize << "\n"
                 << "  Per-packet metrics:\n";
 
         auto* manipulationJson = new Util::JsonObject();
         auto* perPacketManip = new Util::JsonObject();
-        for (const auto& [packet, ops] : metrics.headerManipulationMetrics.perPacketManipulations) {
+        for (const auto& [packet, ops] : metrics.headerManipulationMetrics.perPacket) {
             textFile << "\t" << packet << ":\n"
                     << "\t  Operations: " << ops.numOperations << "\n"
                     << "\t  Size: " << ops.totalSize << "\n";
@@ -157,9 +157,9 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             perPacketManip->emplace(toCString(packet), packetOps);
         }
         manipulationJson->emplace("total_operations", 
-                                 new Util::JsonValue(metrics.headerManipulationMetrics.totalManipulations.numOperations))
+                                 new Util::JsonValue(metrics.headerManipulationMetrics.total.numOperations))
                         ->emplace("total_size", 
-                                 new Util::JsonValue(metrics.headerManipulationMetrics.totalManipulations.totalSize))
+                                 new Util::JsonValue(metrics.headerManipulationMetrics.total.totalSize))
                         ->emplace("per_packet", perPacketManip);
         root->emplace("header_manipulation", manipulationJson);
     }
@@ -167,13 +167,13 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
     // Header modification metrics.
     if (selectedMetrics.count("header-modification")) {
         textFile << "\nHeader Modification Metrics:\n"
-                << "  Total Operations: " << metrics.headerModificationMetrics.totalModifications.numOperations << "\n"
-                << "  Total Size: " << metrics.headerModificationMetrics.totalModifications.totalSize << "\n"
+                << "  Total Operations: " << metrics.headerModificationMetrics.total.numOperations << "\n"
+                << "  Total Size: " << metrics.headerModificationMetrics.total.totalSize << "\n"
                 << "  Per-packet metrics:\n";
 
         auto* modificationJson = new Util::JsonObject();
         auto* perPacketMod = new Util::JsonObject();
-        for (const auto& [packet, ops] : metrics.headerModificationMetrics.perPacketModifications) {
+        for (const auto& [packet, ops] : metrics.headerModificationMetrics.perPacket) {
             textFile << "\t" << packet << ":\n"
                     << "\t  Operations: " << ops.numOperations << "\n"
                     << "\t  Size: " << ops.totalSize << "\n";
@@ -184,9 +184,9 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
             perPacketMod->emplace(toCString(packet), packetMod);
         }
         modificationJson->emplace("total_operations", 
-                                new Util::JsonValue(metrics.headerModificationMetrics.totalModifications.numOperations))
+                                new Util::JsonValue(metrics.headerModificationMetrics.total.numOperations))
                        ->emplace("total_size", 
-                                new Util::JsonValue(metrics.headerModificationMetrics.totalModifications.totalSize))
+                                new Util::JsonValue(metrics.headerModificationMetrics.total.totalSize))
                        ->emplace("per_packet", perPacketMod);
         root->emplace("header_modification", modificationJson);
     }

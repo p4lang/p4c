@@ -36,17 +36,18 @@ void MetricsPassManager::addRemaining(PassManager &pm) const {
     if (selectedMetrics.find("extern") != selectedMetrics.end()) {
         pm.addPasses({new ExternalObjectsMetricPass(metrics)});
     }
-    if (selectedMetrics.find("header-manipulation") != selectedMetrics.end()) {
-        pm.addPasses({new HeaderManipulationMetricsPass(typeMap, metrics)});
-    }
-    if (selectedMetrics.find("header-modification") != selectedMetrics.end()) {
-        pm.addPasses({new HeaderModificationMetricsPass(typeMap, metrics)});
+    if (selectedMetrics.find("header-manipulation") != selectedMetrics.end() || 
+        selectedMetrics.find("header-modification") != selectedMetrics.end()) {
+        pm.addPasses({new HeaderPacketMetricsPass(typeMap, metrics)});
     }
 }
 
 void MetricsPassManager::addExportPass(PassManager &pm) const {
     if (!selectedMetrics.empty()) {
-        pm.addPasses({new ExportMetricsPass("metrics_output", selectedMetrics, metrics)});
+        size_t pos = options.file.string().rfind('.');
+        std::string filename = (pos != std::string::npos ? options.file.string().substr(0, pos): options.file.string());
+        filename += "_metrics";
+        pm.addPasses({new ExportMetricsPass(filename, selectedMetrics, metrics)});
     }
 }
 

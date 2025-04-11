@@ -90,8 +90,7 @@ set (P4_FRONTEND_SRCS
   p4/metrics/nestingDepthMetric.cpp
   p4/metrics/halsteadMetrics.cpp
   p4/metrics/headerMetrics.cpp
-  p4/metrics/headerManipulationMetrics.cpp
-  p4/metrics/headerModificationMetrics.cpp
+  p4/metrics/headerPacketMetrics.cpp
   p4/metrics/matchActionTableMetrics.cpp
   p4/metrics/parserMetrics.cpp
   p4/metrics/inlinedActionsMetric.cpp
@@ -180,8 +179,7 @@ set (P4_FRONTEND_HDRS
   p4/metrics/nestingDepthMetric.h
   p4/metrics/halsteadMetrics.h
   p4/metrics/headerMetrics.h
-  p4/metrics/headerManipulationMetrics.h
-  p4/metrics/headerModificationMetrics.h
+  p4/metrics/headerPacketMetrics.h
   p4/metrics/matchActionTableMetrics.h
   p4/metrics/parserMetrics.h
   p4/metrics/inlinedActionsMetric.h

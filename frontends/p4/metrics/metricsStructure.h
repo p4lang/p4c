@@ -11,6 +11,13 @@ struct PacketModification {
     unsigned totalSize = 0;
 };
 
+struct HeaderPacketMetrics {
+    P4::ordered_map<std::string, PacketModification> perPacket;  // Packet type -> operations
+    PacketModification total;
+    PacketModification max;
+    PacketModification min;
+};
+
 struct UnusedCodeInstances {
     unsigned variables = 0;
     unsigned states = 0;
@@ -81,21 +88,8 @@ struct Metrics {
         double avgFieldSize = 0.0;
     } headerMetrics;
 
-    // Metrics related to header addition and removal operations
-    struct HeaderManipulationMetrics {
-        P4::ordered_map<std::string, PacketModification> perPacketManipulations;  // Packet type -> manipulations
-        PacketModification totalManipulations;
-        PacketModification maxManipulations;
-        PacketModification minManipulations;
-    } headerManipulationMetrics;
-
-    // Metrics related to editing operations performed on header fields
-    struct HeaderModificationMetrics {
-        P4::ordered_map<std::string, PacketModification> perPacketModifications;  // Packet type -> modifications
-        PacketModification totalModifications;
-        PacketModification maxModifications;
-        PacketModification minModifications;
-    } headerModificationMetrics;
+    HeaderPacketMetrics headerManipulationMetrics; // Metrics related to header addition and removal operations
+    HeaderPacketMetrics headerModificationMetrics; // Metrics related to editing operations performed on header fields
 
     struct MatchActionTableMetrics {
         unsigned numTables = 0;

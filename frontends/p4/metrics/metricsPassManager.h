@@ -8,9 +8,8 @@
 #include "cyclomaticComplexity.h"
 #include "externalObjectsMetric.h"
 #include "halsteadMetrics.h"
-#include "headerManipulationMetrics.h"
 #include "headerMetrics.h"
-#include "headerModificationMetrics.h"
+#include "headerPacketMetrics.h"
 #include "inlinedActionsMetric.h"
 #include "matchActionTableMetrics.h"
 #include "nestingDepthMetric.h"
@@ -24,13 +23,14 @@ class Metrics;
 
 class MetricsPassManager {
  private:
+    const CompilerOptions &options;
     const std::set<std::string> &selectedMetrics;
     TypeMap* typeMap;
     Metrics &metrics;
 
  public:
     MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap, Metrics &metrics)
-      : selectedMetrics(options.selectedMetrics), typeMap(typeMap),metrics(metrics) {}
+      : options(options), selectedMetrics(options.selectedMetrics), typeMap(typeMap),metrics(metrics) {}
 
     void addInlined(PassManager &pm) const;
     void addUnusedCode(PassManager &pm, bool isBefore) const;
