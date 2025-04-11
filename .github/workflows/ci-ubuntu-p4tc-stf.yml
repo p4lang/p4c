@@ -9,6 +9,11 @@ on:
   push:
     branches: [main]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-ubuntu-p4tc-stf-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   # Run p4tc stf tests
   test-ubuntu-p4tc-stf:
