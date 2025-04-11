@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_SELECTOR_UPDATE_H_
-#define BF_P4C_MAU_SELECTOR_UPDATE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_SELECTOR_UPDATE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_SELECTOR_UPDATE_H_
 
 #include "ir/pass_manager.h"
 #include "lib/ordered_map.h"
@@ -59,4 +59,4 @@ class AddSelectorSalu : public PassManager {
     AddSelectorSalu() : PassManager({new FindSelectorSalu(*this), new AddSaluIfNeeded(*this)}) {}
 };
 
-#endif /* BF_P4C_MAU_SELECTOR_UPDATE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_SELECTOR_UPDATE_H_ */

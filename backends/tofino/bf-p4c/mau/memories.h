@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_MEMORIES_H_
-#define BF_P4C_MAU_MEMORIES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_MEMORIES_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_MEMORIES_H_
 
 #include <algorithm>
 
@@ -292,4 +292,4 @@ std::ostream &operator<<(std::ostream &out, const BFN::Alloc2D<cstring, R, C> &a
     return out;
 }
 
-#endif /* BF_P4C_MAU_MEMORIES_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_MEMORIES_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_PARSER_EXTRACT_BALANCE_SCORE_H_
-#define BF_P4C_PHV_PARSER_EXTRACT_BALANCE_SCORE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PARSER_EXTRACT_BALANCE_SCORE_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PARSER_EXTRACT_BALANCE_SCORE_H_
 
 /* Note: this is an incorrect header. It contains function implementations, hence it can
  *    be included just in one translation unit. Otherwise, linking conflicts will
@@ -267,4 +267,4 @@ int get_score(const StateExtractUsage &use) {
 
 }  // namespace ParserExtractScore
 
-#endif /* BF_P4C_PHV_PARSER_EXTRACT_BALANCE_SCORE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PARSER_EXTRACT_BALANCE_SCORE_H_ */

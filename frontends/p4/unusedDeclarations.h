@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4_UNUSEDDECLARATIONS_H_
-#define P4_UNUSEDDECLARATIONS_H_
+#ifndef FRONTENDS_P4_UNUSEDDECLARATIONS_H_
+#define FRONTENDS_P4_UNUSEDDECLARATIONS_H_
 
 #include "../common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
@@ -201,4 +201,4 @@ class RemoveAllUnusedDeclarations : public PassRepeated {
 
 }  // namespace P4
 
-#endif /* P4_UNUSEDDECLARATIONS_H_ */
+#endif /* FRONTENDS_P4_UNUSEDDECLARATIONS_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_COMMON_TABLE_PRINTER_H_
-#define BF_P4C_COMMON_TABLE_PRINTER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_TABLE_PRINTER_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_TABLE_PRINTER_H_
 
 #include <iomanip>
 
@@ -128,4 +128,4 @@ class TablePrinter {
     const unsigned cellPad = 2;
 };
 
-#endif /* BF_P4C_COMMON_TABLE_PRINTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_TABLE_PRINTER_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_LIB_SAFE_WIDTH_H_
-#define BF_P4C_LIB_SAFE_WIDTH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LIB_SAFE_WIDTH_H_
+#define BACKENDS_TOFINO_BF_P4C_LIB_SAFE_WIDTH_H_
 
 #include "ir/ir.h"
 
@@ -33,4 +33,4 @@ inline int safe_width_bits(const IR::Type *type) {
 /// Get the width of a type, or 0 if the type has no width
 inline int safe_width_bits(const IR::Expression *e) { return safe_width_bits(e->type); }
 
-#endif /* BF_P4C_LIB_SAFE_WIDTH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LIB_SAFE_WIDTH_H_ */

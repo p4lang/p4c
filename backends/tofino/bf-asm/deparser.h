@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef DEPARSER_H_
-#define DEPARSER_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_DEPARSER_H_
+#define BACKENDS_TOFINO_BF_ASM_DEPARSER_H_
 
 #include <vector>
 
@@ -283,4 +283,4 @@ class Deparser : public Section {
     void report_resources_deparser_json(json::vector &fde_entries_i, json::vector &fde_entries_e);
 };
 
-#endif /* DEPARSER_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_DEPARSER_H_ */

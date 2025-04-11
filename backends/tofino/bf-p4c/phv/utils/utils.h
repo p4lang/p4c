@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_UTILS_UTILS_H_
-#define BF_P4C_PHV_UTILS_UTILS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_
 
 #include <optional>
 
@@ -1277,4 +1277,4 @@ std::ostream &operator<<(std::ostream &out, const ordered_set<T> &set) {
 }
 }  // namespace P4
 
-#endif /* BF_P4C_PHV_UTILS_UTILS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_ */

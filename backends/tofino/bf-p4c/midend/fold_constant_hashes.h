@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_
-#define BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_
 
 /* clang-format off */
 #include "ir/ir.h"
@@ -131,4 +131,4 @@ class FoldConstantHashes : public PassManager {
 
 /* clang-format on */
 
-#endif  // BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_ */

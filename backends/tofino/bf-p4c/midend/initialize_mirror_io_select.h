@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef INITIALIZE_MIRROR_IO_SELECT_H_
-#define INITIALIZE_MIRROR_IO_SELECT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_INITIALIZE_MIRROR_IO_SELECT_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_INITIALIZE_MIRROR_IO_SELECT_H_
 
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
@@ -82,4 +82,4 @@ class InitializeMirrorIOSelect : public PassManager {
 
 }  // namespace BFN
 
-#endif  // INITIALIZE_MIRROR_IO_SELECT_H_
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_INITIALIZE_MIRROR_IO_SELECT_H_ */

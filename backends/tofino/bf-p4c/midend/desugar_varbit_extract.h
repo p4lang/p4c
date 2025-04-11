@@ -97,8 +97,8 @@
  *         extract<bit<16>>(); }
  *
  */
-#ifndef BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
-#define BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
 
 #include "backends/tofino/bf-p4c/common/utils.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
@@ -155,4 +155,4 @@ class DesugarVarbitExtract : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_ */

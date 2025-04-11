@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_NEXT_TABLE_H_
-#define BF_P4C_MAU_NEXT_TABLE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_NEXT_TABLE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_NEXT_TABLE_H_
 
 #include "ir/ir.h"
 
@@ -63,4 +63,4 @@ class DynamicNextTable : public DynamicVisitor, public NextTable, public IHasDbP
     DynamicNextTable *clone() const override { BUG("DynamicNextTable not cloneable"); }
 };
 
-#endif /* BF_P4C_MAU_NEXT_TABLE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_NEXT_TABLE_H_ */

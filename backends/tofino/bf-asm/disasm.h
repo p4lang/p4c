@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef DISASM_H_
-#define DISASM_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_DISASM_H_
+#define BACKENDS_TOFINO_BF_ASM_DISASM_H_
 
 #include "backends/tofino/bf-asm/target.h"
 
@@ -48,4 +48,4 @@ FOR_ALL_TARGETS(
         }
     })
 
-#endif /* DISASM_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_DISASM_H_ */

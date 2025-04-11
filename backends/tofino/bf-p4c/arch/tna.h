@@ -21,8 +21,8 @@
  * \ingroup ArchTranslation
  * \brief Set of passes that translate TNA architecture.
  */
-#ifndef BF_P4C_ARCH_TNA_H_
-#define BF_P4C_ARCH_TNA_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_TNA_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_TNA_H_
 
 #include "arch.h"
 #include "ir/ir.h"
@@ -76,4 +76,4 @@ struct TnaArchTranslation : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_TNA_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_TNA_H_ */

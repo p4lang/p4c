@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef CONSTANTS_H_
-#define CONSTANTS_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_CONSTANTS_H_
+#define BACKENDS_TOFINO_BF_ASM_CONSTANTS_H_
 
 enum {
     /* global constants related to MAU stage */
@@ -239,4 +239,4 @@ enum {
     IDLE = 2,
 };
 }  // namespace MoveReg
-#endif /* CONSTANTS_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_CONSTANTS_H_ */

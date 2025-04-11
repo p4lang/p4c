@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
-#define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#ifndef FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#define FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
@@ -187,4 +187,4 @@ class CheckShadowing : public PassManager {
 
 }  // namespace P4
 
-#endif /* COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */
+#endif /* FRONTENDS_COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */

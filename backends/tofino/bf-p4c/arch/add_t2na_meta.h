@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_ARCH_ADD_T2NA_META_H_
-#define BF_P4C_ARCH_ADD_T2NA_META_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_ADD_T2NA_META_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_ADD_T2NA_META_H_
 
 #include "ir/ir.h"
 
@@ -34,4 +34,4 @@ class AddT2naMeta final : public Modifier {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_ADD_T2NA_META_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_ADD_T2NA_META_H_ */

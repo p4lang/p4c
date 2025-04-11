@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_
-#define BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_
 
 #include "backends/tofino/bf-p4c/parde/decaf.h"
 #include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
@@ -73,4 +73,4 @@ class AddSpecialConstraints : public Inspector {
         : phv_i(phv), pragmas_i(pragmas), actions_i(actions), decaf_i(decaf) {}
 };
 
-#endif /*  BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_    */
+#endif /*  BACKENDS_TOFINO_BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_    */

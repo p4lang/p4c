@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_
-#define BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_
 
 #include "backends/tofino/bf-p4c/logging/constrained_fields.h"
 #include "backends/tofino/bf-p4c/phv/pragma/pa_container_size.h"
@@ -53,4 +53,4 @@ class ContainerSizeExtractor {
                                         const std::vector<int> &layout);
 };
 
-#endif  // BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_ */

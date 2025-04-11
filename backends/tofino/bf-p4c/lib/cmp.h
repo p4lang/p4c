@@ -19,8 +19,8 @@
 #include <cstring>
 #include <functional>
 
-#ifndef BF_P4C_LIB_CMP_H_
-#define BF_P4C_LIB_CMP_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LIB_CMP_H_
+#define BACKENDS_TOFINO_BF_P4C_LIB_CMP_H_
 
 /// Provides templates for lifting comparison operators from objects to pointers, and deriving
 /// related comparison operators on objects.
@@ -121,4 +121,4 @@ class PairLess {
         return false;
     }
 };
-#endif /* BF_P4C_LIB_CMP_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LIB_CMP_H_ */

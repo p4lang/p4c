@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_IXBAR_EXPR_H_
-#define BF_P4C_MAU_IXBAR_EXPR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_IXBAR_EXPR_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_IXBAR_EXPR_H_
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
@@ -332,4 +332,4 @@ class AdjustIXBarExpression : public MauModifier {
     bool preorder(IR::MAU::IXBarExpression *e) override;
 };
 
-#endif /* BF_P4C_MAU_IXBAR_EXPR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_IXBAR_EXPR_H_ */

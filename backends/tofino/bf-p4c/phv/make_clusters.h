@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_MAKE_CLUSTERS_H_
-#define BF_P4C_PHV_MAKE_CLUSTERS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_MAKE_CLUSTERS_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_MAKE_CLUSTERS_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
@@ -555,4 +555,4 @@ class Clustering : public PassManager {
     }
 };
 
-#endif /* BF_P4C_PHV_MAKE_CLUSTERS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_MAKE_CLUSTERS_H_ */

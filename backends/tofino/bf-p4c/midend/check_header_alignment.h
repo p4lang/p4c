@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_
-#define BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_
 
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -162,4 +162,4 @@ class PadFlexibleField : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_ */

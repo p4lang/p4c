@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_
-#define BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
@@ -58,4 +58,4 @@ class AdjustEgressPacketLength : public PassManager {
     AdjustEgressPacketLength(P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 };
 
-#endif /* BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_ */
