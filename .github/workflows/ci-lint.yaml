@@ -27,7 +27,7 @@ jobs:
       - name: Upgrade pip + setuptools
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade setuptools>=61
+          python3 -m pip install --upgrade "setuptools>=61"
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1
