@@ -35,7 +35,7 @@ control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std
     }
     table t {
         actions = {
-            a(hdr.h.isValid() || true);
+            a(true);
             @defaultonly NoAction();
         }
         default_action = NoAction();
