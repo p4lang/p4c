@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_DEFAULT_NEXT_H_
-#define BF_P4C_MAU_DEFAULT_NEXT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_DEFAULT_NEXT_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_DEFAULT_NEXT_H_
 
 #include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
 #include "backends/tofino/bf-p4c/ir/table_tree.h"
@@ -210,4 +210,4 @@ class DefaultNext : public MauInspector, public NextTable, BFN::ControlFlowVisit
     }
 };
 
-#endif /* BF_P4C_MAU_DEFAULT_NEXT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_DEFAULT_NEXT_H_ */

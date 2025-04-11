@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_
-#define BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_
 
 #include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
@@ -176,4 +176,4 @@ class CalcParserCriticalPath : public PassManager {
 
 std::ostream &operator<<(std::ostream &out, const ParserCriticalPathResult &rst);
 
-#endif /* BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_ */

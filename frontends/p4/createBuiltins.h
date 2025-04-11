@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4_CREATEBUILTINS_H_
-#define P4_CREATEBUILTINS_H_
+#ifndef FRONTENDS_P4_CREATEBUILTINS_H_
+#define FRONTENDS_P4_CREATEBUILTINS_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -53,4 +53,4 @@ class CreateBuiltins final : public Transform {
 };
 }  // namespace P4
 
-#endif /* P4_CREATEBUILTINS_H_ */
+#endif /* FRONTENDS_P4_CREATEBUILTINS_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_OPTIMIZE_PHV_H_
-#define BF_P4C_PHV_OPTIMIZE_PHV_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_OPTIMIZE_PHV_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_OPTIMIZE_PHV_H_
 
 #include <optional>
 
@@ -115,4 +115,4 @@ class BruteForceOptimizationStrategy {
     void printContDependency();
 };
 
-#endif /* BF_P4C_PHV_OPTIMIZE_PHV_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_OPTIMIZE_PHV_H_ */

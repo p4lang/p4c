@@ -257,7 +257,10 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
         if (++threads_dumped < int(thread_ids.size())) {
             lock.unlock();
             pthread_exit(0);
-        } else { lock.unlock(); })
+        } else {
+            // Unlock.
+            lock.unlock();
+        })
     if (sig != SIGABRT) BUG("Exiting with SIG%s", signames[sig]);
     _exit(sig + 0x80);
 }

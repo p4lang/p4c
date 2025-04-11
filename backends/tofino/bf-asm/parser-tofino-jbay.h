@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef PARSER_TOFINO_JBAY_H_
-#define PARSER_TOFINO_JBAY_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_PARSER_TOFINO_JBAY_H_
+#define BACKENDS_TOFINO_BF_ASM_PARSER_TOFINO_JBAY_H_
 
 #include <map>
 #include <set>
@@ -719,4 +719,4 @@ void setup_jbay_clear_on_write(bitvec phv_allow_clear_on_write, checked_array<12
                                checked_array<256, ubits<1>> &main_i,
                                checked_array<256, ubits<1>> &main_e);
 
-#endif /* PARSER_TOFINO_JBAY_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_PARSER_TOFINO_JBAY_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
-#define BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_UTILS_SLICE_ALLOC_H_
 
 #include <optional>
 
@@ -384,4 +384,4 @@ std::ostream &operator<<(std::ostream &out, const DarkInitPrimitive &);
 
 std::ostream &operator<<(std::ostream &, const safe_vector<PHV::AllocSlice> &);
 
-#endif /* BF_P4C_PHV_UTILS_SLICE_ALLOC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_UTILS_SLICE_ALLOC_H_ */

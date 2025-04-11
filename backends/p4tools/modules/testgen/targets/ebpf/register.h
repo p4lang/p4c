@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_EBPF_REGISTER_H_
-#define TESTGEN_TARGETS_EBPF_REGISTER_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_REGISTER_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_REGISTER_H_
 
 #include "backends/p4tools/common/p4ctool.h"
 
@@ -14,4 +14,4 @@ inline void ebpfRegisterTestgenTarget() { EBPF::EBPFTestgenTarget::make(); }
 
 }  // namespace P4::P4Tools::P4Testgen
 
-#endif /* TESTGEN_TARGETS_EBPF_REGISTER_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_REGISTER_H_ */

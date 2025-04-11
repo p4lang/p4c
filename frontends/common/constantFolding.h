@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef COMMON_CONSTANTFOLDING_H_
-#define COMMON_CONSTANTFOLDING_H_
+#ifndef FRONTENDS_COMMON_CONSTANTFOLDING_H_
+#define FRONTENDS_COMMON_CONSTANTFOLDING_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -207,4 +207,4 @@ class ConstantFolding : public PassManager {
 
 }  // namespace P4
 
-#endif /* COMMON_CONSTANTFOLDING_H_ */
+#endif /* FRONTENDS_COMMON_CONSTANTFOLDING_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_ACTION_DATA_BUS_H_
-#define BF_P4C_MAU_ACTION_DATA_BUS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_ACTION_DATA_BUS_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_ACTION_DATA_BUS_H_
 
 #include "backends/tofino/bf-p4c/mau/action_format.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
@@ -175,4 +175,4 @@ struct ActionDataBus {
     friend std::ostream &operator<<(std::ostream &out, const ActionDataBus &adb);
 };
 
-#endif /* BF_P4C_MAU_ACTION_DATA_BUS_H_*/
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_ACTION_DATA_BUS_H_*/

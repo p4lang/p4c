@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _FIELD_DEFUSE_H_
-#define _FIELD_DEFUSE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_FIELD_DEFUSE_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_FIELD_DEFUSE_H_
 
 #include <iostream>
 
@@ -294,4 +294,4 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
 
 /** @} */  // end of group parde
 
-#endif /* _FIELD_DEFUSE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_FIELD_DEFUSE_H_ */

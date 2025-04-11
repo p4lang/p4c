@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_V2_PHV_KIT_H_
-#define BF_P4C_PHV_V2_PHV_KIT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_PHV_KIT_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_V2_PHV_KIT_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/mau/table_mutex.h"
@@ -210,4 +210,4 @@ struct PhvKit {
 }  // namespace v2
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_V2_PHV_KIT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_V2_PHV_KIT_H_ */

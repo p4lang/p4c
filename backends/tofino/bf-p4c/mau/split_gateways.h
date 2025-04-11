@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_SPLIT_GATEWAYS_H_
-#define BF_P4C_MAU_SPLIT_GATEWAYS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_SPLIT_GATEWAYS_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_SPLIT_GATEWAYS_H_
 
 #include "field_use.h"
 #include "gateway.h"
@@ -53,4 +53,4 @@ class SplitComplexGateways : public Transform {
     explicit SplitComplexGateways(const PhvInfo &phv) : phv(phv) {}
 };
 
-#endif /* BF_P4C_MAU_SPLIT_GATEWAYS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_SPLIT_GATEWAYS_H_ */

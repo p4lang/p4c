@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef EVALUATOR_EVALUATOR_H_
-#define EVALUATOR_EVALUATOR_H_
+#ifndef FRONTENDS_P4_EVALUATOR_EVALUATOR_H_
+#define FRONTENDS_P4_EVALUATOR_EVALUATOR_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -124,4 +124,4 @@ class EvaluatorPass final : public PassManager, public IHasBlock {
 
 }  // namespace P4
 
-#endif /* EVALUATOR_EVALUATOR_H_ */
+#endif /* FRONTENDS_P4_EVALUATOR_EVALUATOR_H_ */

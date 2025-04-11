@@ -12,8 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
-#define DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
+#ifndef BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
+#define BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
 
 #include <iostream>
 #include <optional>
@@ -392,4 +392,4 @@ struct PNAArchHandlerBuilderForDPDK : public P4::ControlPlaneAPI::P4RuntimeArchH
 /** @} */ /* end group control_plane */
 }  // namespace P4
 
-#endif /* DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */
+#endif /* BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

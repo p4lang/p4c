@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_ASM_HASH_OUTPUT_H_
-#define BF_P4C_MAU_ASM_HASH_OUTPUT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_ASM_HASH_OUTPUT_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_ASM_HASH_OUTPUT_H_
 
 #include <iterator>
 #include <map>
@@ -102,4 +102,4 @@ void emit_ixbar_hash_table(int hash_table, safe_vector<Slice> &match_data,
                            safe_vector<Slice> &ghost, const TableMatch *fmt,
                            std::map<int, std::map<int, Slice>> &sort);
 
-#endif /* BF_P4C_MAU_ASM_HASH_OUTPUT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_ASM_HASH_OUTPUT_H_ */

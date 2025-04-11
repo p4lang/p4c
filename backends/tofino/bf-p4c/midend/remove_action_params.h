@@ -23,8 +23,8 @@
  *
  * This moves action parameters out of the actions.
  */
-#ifndef BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
-#define BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
 
 #include "frontends/p4/removeParameters.h"
 
@@ -194,4 +194,4 @@ class RemoveActionParameters : public PassManager {
 
 }  // end namespace BFN
 
-#endif /* BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_ */

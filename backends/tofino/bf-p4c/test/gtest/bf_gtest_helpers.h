@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_GTEST_HELPERS_H_
-#define BF_GTEST_HELPERS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_TEST_GTEST_BF_GTEST_HELPERS_H_
+#define BACKENDS_TOFINO_BF_P4C_TEST_GTEST_BF_GTEST_HELPERS_H_
 
 /** Helper functions and classes for making the creation of gtest easier and their running faster.
  *  See test-bf_getst_helper.cpp for example usage.
@@ -333,4 +333,4 @@ class TestCode {
 
 }  // namespace P4::Test
 
-#endif /* BF_GTEST_HELPERS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_TEST_GTEST_BF_GTEST_HELPERS_H_ */
