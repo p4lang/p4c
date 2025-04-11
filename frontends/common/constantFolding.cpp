@@ -800,7 +800,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
 
     // The concatenation result would be wrong if the negative value was used for the second
     // argument (because the big_int binary representation does not match what the P4 spec expects).
-    // Thereore, we convert the second argument to a unsigned literal with the same binary
+    // Therefore, we convert the second argument to a unsigned literal with the same binary
     // representation as the P4 mandates for the signed value and concatenate these.
     if (rt->isSigned) {
         rt = IR::Type_Bits::get(rt->size);
