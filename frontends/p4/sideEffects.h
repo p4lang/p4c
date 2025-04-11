@@ -59,9 +59,8 @@ class HasTableApply : public Inspector, public ResolutionContext {
  * method call expression is counted.  With type information, invocations
  * of ```isValid()``` are ignored.
  */
-class SideEffects : public Inspector {
+class SideEffects : public Inspector, public ResolutionContext {
  private:
-    DeclarationLookup *refMap;
     TypeMap *typeMap;
 
  public:
@@ -72,13 +71,13 @@ class SideEffects : public Inspector {
     unsigned sideEffectCount = 0;
 
     void postorder(const IR::MethodCallExpression *mce) override {
-        if (refMap == nullptr || typeMap == nullptr) {
+        auto mi = MethodInstance::resolve(mce, this, typeMap, !typeMap);
+        if (!mi) {
             // conservative
             sideEffectCount++;
             nodeWithSideEffect = mce;
             return;
         }
-        auto mi = MethodInstance::resolve(mce, refMap, typeMap);
         if (!mi->is<BuiltInMethod>()) {
             sideEffectCount++;
             nodeWithSideEffect = mce;
@@ -98,16 +97,14 @@ class SideEffects : public Inspector {
 
     /// The @refMap and @typeMap arguments can be null, in which case the check
     /// will be more conservative.
-    SideEffects(DeclarationLookup *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        setName("SideEffects");
-    }
+    explicit SideEffects(TypeMap *typeMap) : typeMap(typeMap) { setName("SideEffects"); }
 
     /// @return true if the expression may have side-effects.
     static bool check(const IR::Expression *expression, const Visitor *calledBy,
-                      DeclarationLookup *refMap = nullptr, TypeMap *typeMap = nullptr,
-                      const Visitor::Context *ctxt = nullptr) {
-        SideEffects se(refMap, typeMap);
+                      TypeMap *typeMap = nullptr, const Visitor::Context *ctxt = nullptr) {
+        SideEffects se(typeMap);
         se.setCalledBy(calledBy);
+        if (calledBy && !ctxt) ctxt = calledBy->getChildContext();
         expression->apply(se, ctxt);
         return se.nodeWithSideEffect != nullptr;
     }

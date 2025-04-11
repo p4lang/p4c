@@ -35,9 +35,9 @@ control strength() {
         bool z;
         z = z;
         z = z;
-        z = z && false;
         z = false;
-        z = z || true;
+        z = false;
+        z = true;
         z = true;
         z = z;
         z = z;

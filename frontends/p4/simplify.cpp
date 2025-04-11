@@ -75,7 +75,7 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::IfStatement *statement) {
         statement->ifTrue = e;
     }
 
-    if (SideEffects::check(statement->condition, this, this, typeMap, getChildContext()))
+    if (SideEffects::check(statement->condition, this, typeMap, getChildContext()))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
         (statement->ifFalse == nullptr || statement->ifFalse->is<IR::EmptyStatement>()))
@@ -104,7 +104,7 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::SwitchStatement *statement)
             LOG2("Removing switch statement " << statement << " keeping " << mce);
             return new IR::MethodCallStatement(statement->srcInfo, mce);
         }
-        if (SideEffects::check(statement->expression, this, this, typeMap, getChildContext()))
+        if (SideEffects::check(statement->expression, this, typeMap, getChildContext()))
             // This can happen if this pass is run before SideEffectOrdering.
             return statement;
         LOG2("Removing switch statement " << statement);

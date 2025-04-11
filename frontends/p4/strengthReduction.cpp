@@ -129,7 +129,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::LAnd *expr) {
     if (isFalse(expr->left)) return expr->left;
     if (isTrue(expr->left)) return expr->right;
     if (isTrue(expr->right)) return expr->left;
-    // Note that remaining case is not simplified, due to possible side effects in expr->left
+    if (isFalse(expr->right) && !hasSideEffects(expr->left)) return expr->right;
     return expr;
 }
 
@@ -137,7 +137,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::LOr *expr) {
     if (isFalse(expr->left)) return expr->right;
     if (isTrue(expr->left)) return expr->left;
     if (isFalse(expr->right)) return expr->left;
-    // Note that remaining case is not simplified, due to semantics of short-circuit evaluation
+    if (isTrue(expr->right) && !hasSideEffects(expr->left)) return expr->right;
     return expr;
 }
 

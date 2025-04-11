@@ -1476,9 +1476,9 @@ class RemoveUnused : public Transform {
         if (!hasUses.hasUses(getOriginal())) {
             Log::TempIndent indent;
             LOG3("Removing statement " << getOriginal() << " " << statement << indent);
-            SideEffects se(refMap, typeMap);
+            SideEffects se(typeMap);
             se.setCalledBy(this);
-            (void)statement->right->apply(se);
+            (void)statement->right->apply(se, getChildContext());
 
             if (se.nodeWithSideEffect != nullptr) {
                 // We expect that at this point there can't be more than 1
