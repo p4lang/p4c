@@ -1,0 +1,16 @@
+issue5231-const-int-concat.p4(15): [--Wwarn=overflow] warning: 7s0b1100111: signed value does not fit in 7 bits
+    const int<7> a = 7s0b_110_0111
+                     ^^^^^^^^^^^^^
+issue5231-const-int-concat.p4(16): [--Wwarn=overflow] warning: 9s0b111100011: signed value does not fit in 9 bits
+    const int<9> b = 9s0b_1_1110_0011
+                     ^^^^^^^^^^^^^^^^
+issue5231-const-int-concat.p4(18): [--Wwarn=overflow] warning: 7s0b1100111: signed value does not fit in 7 bits
+    const int<16> d = 7s0b_1100111
+                      ^^^^^^^^^^^^
+issue5231-const-int-concat.p4(18): [--Wwarn=overflow] warning: 9s0b111100011: signed value does not fit in 9 bits
+    const int<16> d = 7s0b_1100111 ++ 9s0b_111100011
+                                      ^^^^^^^^^^^^^^
+issue5231-const-int-concat.p4(19): [--Wwarn=overflow] warning: 16s0b1100111111100011: signed value does not fit in 16 bits
+    const int<16> e = 16s0b_110_0111_1_1110_0011
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=missing] warning: Program does not contain a `main' module
