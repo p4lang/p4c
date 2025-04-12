@@ -317,7 +317,6 @@ bool EBPFDeparser::build() {
     headers = *it;
     ++it;
     packet_out = *it;
-
     codeGen = new EBPF::ControlBodyTranslator(this);
     codeGen->substitute(headers, parserHeaders);
 
