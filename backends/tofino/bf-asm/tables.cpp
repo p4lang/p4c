@@ -2304,7 +2304,7 @@ void Table::Actions::Action::check_and_add_resource(json::vector &resources,
     // present in the resource array
     bool found = false;
     for (auto &r : resources) {
-        if (resource == r->to<json::map>()) {
+        if (resource.operator==(r->to<json::map>())) {
             found = true;
             break;
         }
