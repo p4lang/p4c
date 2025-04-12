@@ -6,18 +6,17 @@
 #include <string>
 #include <utility>
 
-#include <boost/format.hpp>
-
+#include "lib/boost_format_compat.h"
 #include "lib/log.h"
 
 namespace P4::P4Tools {
 
 /// Helper function for @printFeature
-inline std::string logHelper(boost::format &f) { return f.str(); }
+inline BoostFormatCompat &logHelper(BoostFormatCompat &f) { return f; }
 
 /// Helper function for @printFeature
 template <class T, class... Args>
-std::string logHelper(boost::format &f, T &&t, Args &&...args) {
+BoostFormatCompat &logHelper(BoostFormatCompat &f, T &&t, Args &&...args) {
     return logHelper(f % std::forward<T>(t), std::forward<Args>(args)...);
 }
 
@@ -32,8 +31,8 @@ void printFeature(const std::string &label, int level, const std::string &fmt,
         return;
     }
 
-    boost::format f(fmt);
-    LOG_FEATURE(label.c_str(), level, logHelper(f, std::forward<Arguments>(args)...));
+    BoostFormatCompat f(fmt.c_str());
+    LOG_FEATURE(label.c_str(), level, logHelper(f, std::forward<Arguments>(args)...).str());
 }
 
 /// Helper functions that prints strings associated with basic tool information.
