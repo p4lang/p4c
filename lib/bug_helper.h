@@ -18,7 +18,6 @@ limitations under the License.
 #define LIB_BUG_HELPER_H_
 
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <utility>
