@@ -22,7 +22,7 @@ namespace P4::EBPF {
 DeparserBodyTranslator::DeparserBodyTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),
-      deparser(deparser)
+      deparser(deparser),
       insideIfStatement(false) {
     setName("DeparserBodyTranslator");
 }
@@ -49,7 +49,6 @@ bool DeparserBodyTranslator::preorder(const IR::IfStatement *s) {
         visit(s->ifFalse);
     insideIfStatement = false;
     return false;
-    return result;
 }
 
 DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser *deparser)
