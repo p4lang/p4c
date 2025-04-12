@@ -13,14 +13,15 @@
 #include <set>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 
-#include <boost/format.hpp>
-
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
-#include "bug_helper.h"
 #include "error_catalog.h"
 #include "error_helper.h"
 #include "exceptions.h"
+#include "lib/format.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 
@@ -33,10 +34,9 @@ enum class DiagnosticAction {
 };
 
 // Keeps track of compilation errors.
-// Errors are specified using the error() and warning() methods,
-// that use boost::format format strings, i.e.,
-// %1%, %2%, etc (starting at 1, not at 0).
-// Some compatibility for printf-style arguments is also supported.
+// Errors are specified using the error() and warning() methods.
+// Supported formatting styles are boost-style (%1%, %2%, ...) and
+// printf/absl::StrFormat-style (%s, %d, ...).
 class ErrorReporter {
  protected:
     unsigned int infoCount;
@@ -79,26 +79,23 @@ class ErrorReporter {
           warningCount(0),
           errorCount(0),
           maxErrorCount(20),
+          outputstream(&std::cerr),
           defaultInfoDiagnosticAction(DiagnosticAction::Info),
           defaultWarningDiagnosticAction(DiagnosticAction::Warn) {
-        outputstream = &std::cerr;
         ErrorCatalog::getCatalog().initReporter(*this);
     }
     virtual ~ErrorReporter() = default;
 
-    // error message for a bug
+    // Error message for a bug.
     template <typename... Args>
     std::string bug_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
-        // FIXME: This will implicitly take location of the first argument having
-        // SourceInfo. Not sure if this always desireable or not.
-        return ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+        return createBugMessage(format, args...);
     }
 
+    // Formats a message with a trailing newline and any source locations and excerpts.
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
-        return ::P4::error_helper(fmt, std::forward<Args>(args)...).toString();
+        return ::P4::error_helper(format, std::forward<Args>(args)...).toString();
     }
 
     template <class T, typename = decltype(std::declval<T>()->getSourceInfo()), typename... Args>
@@ -150,9 +147,8 @@ class ErrorReporter {
             msgType = ErrorMessage::MessageType::Error;
         }
 
-        boost::format fmt(format);
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
-        msg = ::P4::error_helper(fmt, msg, std::forward<Args>(args)...);
+        msg = ::P4::error_helper(format, std::move(msg), std::forward<Args>(args)...);
         emit_message(msg);
 
         if (errorCount > maxErrorCount)
