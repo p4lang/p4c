@@ -1328,8 +1328,8 @@ bool CreateSaluInstruction::preorder(const IR::Operation::Relation *rel, cstring
     if (etype == IF) {
         Pattern::Match<IR::Expression> e1, e2;
         Pattern::Match<IR::Constant> k;
-        if (Device::statefulAluSpec().CmpMask && ((e1 & k) == e2).match(rel) && !k->fitsUint() &&
-            !k->fitsInt()) {
+        if (Device::statefulAluSpec().CmpMask && ((e1 & k).operator==(e2)).match(rel) &&
+            !k->fitsUint() && !k->fitsInt()) {
             // FIXME -- wide "neq" can be done with tmatch too?
             opcode = "tmatch"_cs;
             visit(rel->left, "left");
