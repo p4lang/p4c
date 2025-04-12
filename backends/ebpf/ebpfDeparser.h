@@ -28,8 +28,7 @@ class EBPFDeparser;
 class DeparserBodyTranslator : public ControlBodyTranslator {
  protected:
     const EBPFDeparser *deparser;
-    bool insideIfStatement = false;
-    bool insideIfStatement = false;
+    bool insideIfStatement;
 
  public:
     explicit DeparserBodyTranslator(const EBPFDeparser *deparser);
@@ -71,6 +70,7 @@ class EBPFDeparser : public EBPFControl {
     EBPFType *headerType;
     cstring outerHdrOffsetVar, outerHdrLengthVar;
     cstring returnCode;
+    DeparserBodyTranslator* deparserTranslator;
 
     EBPFDeparser(const EBPFProgram *program, const IR::ControlBlock *control,
                  const IR::Parameter *parserHeaders)
@@ -79,6 +79,11 @@ class EBPFDeparser : public EBPFControl {
         outerHdrOffsetVar = cstring("outHeaderOffset");
         outerHdrLengthVar = cstring("outHeaderLength");
         returnCode = cstring("returnCode");
+        DeparserBodyTranslator* deparserTranslator;
+         {
+        codeGen = deparserTranslator;
+    }
+
     }
 
     bool build() override;
