@@ -338,7 +338,7 @@ bool SRamMatchTable::verify_match_key() {
     return error_count == 0;
 }
 
-std::unique_ptr<json::map> SRamMatchTable::gen_memory_resource_allocation_tbl_cfg(
+std::unique_ptr<json::map> SRamMatchTable::gen_memory_resource_allocation_tbl_cfg_with_way(
     const Way &way) const {
     json::map mra;
     unsigned vpn_ctr = 0;

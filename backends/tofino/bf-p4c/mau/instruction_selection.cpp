@@ -3111,7 +3111,7 @@ const IR::Node *RemoveUnnecessaryActionArgSlice::preorder(IR::Slice *sl) {
 // Simplify "actionArg != 0 ? f0 : f1" to "actionArg ? f0 : f1"
 const IR::Node *SimplifyConditionalActionArg::postorder(IR::Mux *mux) {
     Pattern::Match<IR::MAU::ActionArg> aa;
-    if ((0 != aa).match(mux->e0)) mux->e0 = aa;
+    if ((aa != 0).match(mux->e0)) mux->e0 = aa;
     return mux;
 }
 

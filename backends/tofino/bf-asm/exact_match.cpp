@@ -471,7 +471,8 @@ void ExactMatchTable::gen_tbl_cfg(json::vector &out) const {
             unsigned ram_depth = way.rams.at(0).isLamb() ? LAMB_DEPTH : SRAM_DEPTH;
             way_tbl["size"] = way.rams.size() / fmt_width * format->groups() * ram_depth;
             add_pack_format(way_tbl, format.get(), false);
-            way_tbl["memory_resource_allocation"] = gen_memory_resource_allocation_tbl_cfg(way);
+            way_tbl["memory_resource_allocation"] =
+                gen_memory_resource_allocation_tbl_cfg_with_way(way);
             way_stage_tables.push_back(std::move(way_tbl));
         }
     }

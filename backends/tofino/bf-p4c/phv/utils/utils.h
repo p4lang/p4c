@@ -160,7 +160,7 @@ class Allocation {
         ConditionalConstraintData()
             : bitPosition(-1), rotationAllowed(false), container(std::nullopt) {}
 
-        bool operator==(ConditionalConstraintData &other) const {
+        bool operator==(const ConditionalConstraintData &other) const {
             return bitPosition == other.bitPosition && rotationAllowed == other.rotationAllowed &&
                    container == other.container;
         }

@@ -296,7 +296,7 @@ class vector : public obj, public vector_base {
     }
 };
 
-typedef ordered_map<obj *, std::unique_ptr<obj>, obj::ptrless> map_base;
+using map_base = ordered_map<obj *, std::unique_ptr<obj>, obj::ptrless>;
 class map : public obj, public map_base {
  public:
     map() {}

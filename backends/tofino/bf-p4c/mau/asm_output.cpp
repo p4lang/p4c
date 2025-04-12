@@ -2305,7 +2305,7 @@ void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent, const IR
         auto method = method_call->method->to<IR::PathExpression>();
         auto path = method->path;
         for (auto action : Values(tbl->actions)) {
-            if (action->name.name == path->name) {
+            if (path->name == action->name.name) {
                 context_json_entries << indent << "action_handle: 0x" << hex(action->handle)
                                      << std::endl;
                 break;

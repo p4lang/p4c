@@ -280,7 +280,7 @@ class InputXbar {
             : outer(o), outer_end(oend), inner_valid(false) {
             mk_inner_valid();
         }
-        bool operator==(const all_iter &a) {
+        bool operator==(const all_iter &a) const {
             if (outer != a.outer) return false;
             if (inner_valid != a.inner_valid) return false;
             return inner_valid ? inner == a.inner : true;
