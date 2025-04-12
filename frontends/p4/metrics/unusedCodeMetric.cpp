@@ -4,8 +4,9 @@ namespace P4 {
 
 
 void UnusedCodeMetricPass::postorder(const IR::P4Action* node) {
-    std::string parentName = "global";
-    
+    if (node->getName().name == "NoAction") return;
+
+    std::string parentName = "";
     if (auto* parentCtrl = findContext<IR::P4Control>()) {
         parentName = parentCtrl->getName().name.string();
     } 
@@ -65,6 +66,24 @@ void UnusedCodeMetricPass::recordAfter() {
         {
             metrics.unusedCodeInstances.variables++;
         }
+    }
+
+    if(LOGGING(3)){
+        std::cout<<"Original actions: \n";
+        for (const auto& before : metrics.helperVars.beforeActions)
+            std::cout<<" - "<< before << std::endl;
+        
+        std::cout<<"Transformed actions: \n";
+        for (const auto& after : metrics.helperVars.afterActions)
+            std::cout<<" - "<< after << std::endl;
+
+        std::cout<<"Original variables: \n";
+        for (const auto& before : metrics.helperVars.beforeVariables)
+            std::cout<<" - "<< before << std::endl;
+
+        std::cout<<"Transformed variables: \n";
+        for (const auto& after : metrics.helperVars.afterVariables)
+            std::cout<<" - "<< after << std::endl;
     }
 }
 

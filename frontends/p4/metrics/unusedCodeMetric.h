@@ -6,6 +6,7 @@
 #include <algorithm>
 #include "../ir/ir.h"
 #include "metricsStructure.h"
+#include "../lib/log.h"
 
 namespace P4 {
 
