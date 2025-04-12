@@ -75,15 +75,13 @@ class EBPFDeparser : public EBPFControl {
     EBPFDeparser(const EBPFProgram *program, const IR::ControlBlock *control,
                  const IR::Parameter *parserHeaders)
         : EBPFControl(program, control, parserHeaders) {
-        codeGen = new DeparserBodyTranslator(this);
+        deparserTranslator = new DeparserBodyTranslator(this);
+        codeGen = deparserTranslator;
+
         outerHdrOffsetVar = cstring("outHeaderOffset");
         outerHdrLengthVar = cstring("outHeaderLength");
         returnCode = cstring("returnCode");
-        DeparserBodyTranslator* deparserTranslator;
-         {
-        codeGen = deparserTranslator;
-    }
-
+        
     }
 
     bool build() override;
