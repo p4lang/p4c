@@ -410,7 +410,7 @@ class MapIterChecked {
         iter(MapIterChecked *s, pair_t *p_) : self(s), p(p_) { check(); }
         pair_t &operator*() const { return *p; }
         pair_t *operator->() const { return p; }
-        bool operator==(iter &a) const { return p == a.p; }
+        bool operator==(const iter &a) const { return p == a.p; }
         iter &operator++() {
             p++;
             check();
