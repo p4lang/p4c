@@ -22,6 +22,7 @@
 
 #include "action_bus.h"
 #include "backends/tofino/bf-asm/config.h"
+#include "backends/tofino/bf-asm/json.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "input_xbar.h"
 #include "instruction.h"
@@ -2304,7 +2305,7 @@ void Table::Actions::Action::check_and_add_resource(json::vector &resources,
     // present in the resource array
     bool found = false;
     for (auto &r : resources) {
-        if (resource == r->to<json::map>()) {
+        if (resource == r->to<json::obj>()) {
             found = true;
             break;
         }
@@ -2556,7 +2557,7 @@ void Table::Actions::add_action_format(const Table *table, json::map &tbl) const
             json::string name = a.first;
             int lo = remove_name_tail_range(name);
             json::string immed_name = a.second.name;
-            if (immed_name != "immediate") continue;  // output only immediate fields
+            if (immed_name != json::string("immediate")) continue;  // output only immediate fields
             if (!(act.has_param(name) || a.second.is_constant))
                 continue;  // and fields that are parameters or constants
             json::map action_format_per_action_imm_field;
