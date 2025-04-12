@@ -18,6 +18,8 @@
 
 #include <fstream>
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/logging/collect_diagnostic_checks.h"
 #include "bf_gtest_helpers.h"

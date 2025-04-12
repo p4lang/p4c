@@ -18,6 +18,8 @@
 
 #include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/phv/allocate_phv.h"
 #include "lib/log.h"
 

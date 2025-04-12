@@ -19,6 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_UTILS_REPORT_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_UTILS_REPORT_H_
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
 
 namespace PHV {
