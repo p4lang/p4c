@@ -1,7 +1,12 @@
+# To find the BMv2 executables in the BMv2 source tree instead of
+# an installed location, set BMV2_SOURCE_DIR to the BMv2 source directory.
 set(BMV2_SIMPLE_SWITCH_SEARCH_PATHS
-  ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/targets/simple_switch
-  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/simple_switch)
+  ${CMAKE_INSTALL_PREFIX}/bin)
+if(DEFINED BMV2_SOURCE_DIR)
+  set(BMV2_SIMPLE_SWITCH_SEARCH_PATHS
+    ${BMV2_SIMPLE_SWITCH_SEARCH_PATHS}
+    ${BMV2_SOURCE_DIR}/targets/simple_switch)
+endif()
 
 # check for simple_switch
 find_program (SIMPLE_SWITCH_CLI simple_switch_CLI
@@ -21,9 +26,12 @@ find_package_handle_standard_args ("BMV2"
   SIMPLE_SWITCH SIMPLE_SWITCH_CLI)
 
 set(BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS
-  ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/targets/simple_switch_grpc
-  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/simple_switch_grpc)
+  ${CMAKE_INSTALL_PREFIX}/bin)
+if(DEFINED BMV2_SOURCE_DIR)
+  set(BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS
+    ${BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS}
+    ${BMV2_SOURCE_DIR}/targets/simple_switch_grpc)
+endif()
 
 # check for simple_switch_grpc
 find_program (SIMPLE_SWITCH_GRPC simple_switch_grpc PATHS ${BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS} )
@@ -38,9 +46,12 @@ find_package_handle_standard_args ("BMV2"
 
 
 set(BMV2_PSA_SWITCH_SEARCH_PATHS
-  ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/targets/psa_switch
-  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/psa_switch)
+  ${CMAKE_INSTALL_PREFIX}/bin)
+if(DEFINED BMV2_SOURCE_DIR)
+  set(BMV2_PSA_SWITCH_SEARCH_PATHS
+    ${BMV2_PSA_SWITCH_SEARCH_PATHS}
+    ${BMV2_SOURCE_DIR}/targets/psa_switch)
+endif()
 
 # check for psa_switch
 find_program (PSA_SWITCH_CLI psa_switch_CLI
@@ -60,9 +71,12 @@ find_package_handle_standard_args ("BMV2"
   PSA_SWITCH PSA_SWITCH_CLI)
 
 set(BMV2_PNA_NIC_SEARCH_PATHS
-  ${CMAKE_INSTALL_PREFIX}/bin
-  ${P4C_SOURCE_DIR}/../behavioral-model/targets/pna_nic
-  ${P4C_SOURCE_DIR}/../../behavioral-model/targets/pna_nic)
+  ${CMAKE_INSTALL_PREFIX}/bin)
+if(DEFINED BMV2_SOURCE_DIR)
+  set(BMV2_PNA_NIC_SEARCH_PATHS
+    ${BMV2_PNA_NIC_SEARCH_PATHS}
+    ${BMV2_SOURCE_DIR}/targets/pna_nic)
+endif()
   
 # check for pna_nic
 find_program (PNA_NIC_CLI pna_nic_CLI
