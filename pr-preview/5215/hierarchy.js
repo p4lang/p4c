@@ -1178,6 +1178,7 @@ var hierarchy =
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
         [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
+        [ "P4::SideEffects", "class_p4_1_1_side_effects.html", null ],
         [ "P4::StatementSplitter", "struct_p4_1_1_statement_splitter.html", null ],
         [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
         [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
