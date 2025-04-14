@@ -1,0 +1,6 @@
+psa-register1.p4(51): [--Wwarn=unused] warning: reg: unused instance
+    Register<bit<16>, bit<10>>(1024) reg;
+                                     ^^^
+psa-register1.p4(52): [--Wwarn=unused] warning: 'idx' is unused
+    action execute_register(bit<10> idx) {
+                                    ^^^
