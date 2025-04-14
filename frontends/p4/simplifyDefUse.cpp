@@ -1501,7 +1501,7 @@ class RemoveUnused : public Transform {
     }
     const IR::Node *postorder(IR::MethodCallStatement *mcs) override {
         if (!hasUses.hasUses(getOriginal())) {
-            if (SideEffects::hasSideEffect(mcs->methodCall, refMap, typeMap)) {
+            if (SideEffects::mayHaveSideEffect(mcs->methodCall, refMap, typeMap)) {
                 return mcs;
             }
             // removing
