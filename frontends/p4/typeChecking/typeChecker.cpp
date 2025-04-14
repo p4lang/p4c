@@ -464,6 +464,9 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
             if (canon == nullptr) return nullptr;
             args->push_back(canon);
         }
+        if (errorCount()) {
+            return nullptr;  // don't attempt to specialize type if there were errors
+        }
         auto specialized = specialize(gt, args, getChildContext());
 
         auto result =
@@ -472,7 +475,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         learn(result, this, getChildContext());
         return result;
     } else {
-        BUG_CHECK(::P4::errorCount(), "Unexpected type %1%", dbp(type));
+        BUG_CHECK(errorCount(), "Unexpected type %1%", dbp(type));
     }
 
     // If we reach this point some type error must have occurred, because
