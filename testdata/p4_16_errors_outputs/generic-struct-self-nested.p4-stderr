@@ -7,3 +7,5 @@ generic-struct-self-nested.p4(56): [--Werror=type-error] error: H2: contains sel
 generic-struct-self-nested.p4(16)
 struct H2<G> {
        ^^
+Compilation cannot continue due to type errors
+

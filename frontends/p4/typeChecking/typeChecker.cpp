@@ -464,9 +464,6 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
             if (canon == nullptr) return nullptr;
             args->push_back(canon);
         }
-        if (errorCount()) {
-            return nullptr;  // don't attempt to specialize type if there were errors
-        }
         auto specialized = specialize(gt, args, getChildContext());
 
         auto result =
