@@ -44,10 +44,6 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    @name("IngressParserImpl.tmp") bit<16> tmp;
-    @name("IngressParserImpl.tmp_0") bit<16> tmp_0;
-    @name("IngressParserImpl.tmp_1") bool tmp_1;
-    @name("IngressParserImpl.tmp_2") bool tmp_2;
     @name("IngressParserImpl.ck") InternetChecksum() ck_0;
     state start {
         buffer.extract<ethernet_t>(hdr.ethernet);
@@ -60,11 +56,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
         buffer.extract<ipv4_t>(hdr.ipv4);
         ck_0.clear();
         ck_0.add<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
-        tmp = hdr.ipv4.hdrChecksum;
-        tmp_0 = ck_0.get();
-        tmp_1 = tmp == tmp_0;
-        tmp_2 = tmp_1;
-        verify(tmp_2, error.BadIPv4HeaderChecksum);
+        verify(hdr.ipv4.hdrChecksum == ck_0.get(), error.BadIPv4HeaderChecksum);
         ck_0.subtract<tuple<bit<32>, bit<32>>>({ hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         transition accept;
     }
