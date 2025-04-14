@@ -4,3 +4,5 @@ typedef h<tt> t;
 issue3291.p4(1)
 struct h<t>{
        ^
+Compilation cannot continue due to type errors
+
