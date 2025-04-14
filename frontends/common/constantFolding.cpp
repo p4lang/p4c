@@ -802,14 +802,16 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
     // argument (because the big_int binary representation does not match what the P4 spec expects).
     // Therefore, we convert the second argument to a unsigned literal with the same binary
     // representation as the P4 mandates for the signed value and concatenate these.
+    big_int rvalue = right->value;
     if (rt->isSigned) {
-        rt = IR::Type_Bits::get(rt->size);
-        right = new IR::Constant(rt, right->value, 10, true /* no warning */);
+        // Reuse conversion from Constant's ctor. Temporary Type & Constant -> allocate on stack.
+        IR::Type_Bits utype(rt->size, false);
+        rvalue = IR::Constant(&utype, rvalue, 10, true /* no warning */).value;
     }
 
-    auto resultType = IR::Type_Bits::get(lt->width_bits() + rt->width_bits(), lt->isSigned);
+    auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
     if (overflowWidth(e, resultType->width_bits())) return e;
-    big_int value = (left->value << rt->width_bits()) | right->value;
+    big_int value = (left->value << rt->size) | rvalue;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
 
