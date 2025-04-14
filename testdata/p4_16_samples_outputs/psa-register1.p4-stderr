@@ -1,0 +1,3 @@
+psa-register1.p4(53): [--Wwarn=unused] warning: 'data' is unused
+        bit<16> data = reg.read(idx);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
