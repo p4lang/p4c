@@ -30,7 +30,7 @@ class MetricsPassManager {
 
  public:
     MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap, Metrics &metrics)
-      : options(options), selectedMetrics(options.selectedMetrics), typeMap(typeMap),metrics(metrics) {}
+      : options(options), selectedMetrics(options.selectedMetrics), typeMap(typeMap), metrics(metrics) {}
 
     void addInlined(PassManager &pm) const;
     void addUnusedCode(PassManager &pm, bool isBefore) const;

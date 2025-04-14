@@ -25,7 +25,7 @@ void MetricsPassManager::addRemaining(PassManager &pm) const {
         pm.addPasses({new NestingDepthMetricPass(metrics)});
     }
     if (selectedMetrics.find("header-general") != selectedMetrics.end()) {
-        pm.addPasses({new HeaderMetricsPass(metrics)});
+        pm.addPasses({new HeaderMetricsPass(typeMap, metrics)});
     }
     if (selectedMetrics.find("match-action") != selectedMetrics.end()) {
         pm.addPasses({new MatchActionTableMetricsPass(metrics)});

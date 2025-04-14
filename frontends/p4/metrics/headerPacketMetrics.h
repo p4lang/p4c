@@ -44,8 +44,9 @@ class HeaderPacketMetricsPass : public Inspector {
     bool insideParserState;
     bool isValid;
 
-    void updateMetrics(const std::string& headerName, int size, bool isModification);
-    int getHeaderSize(const IR::Type_Header* header) const;
+    void updateMetrics(const std::string& headerName, size_t size, bool isModification);
+    size_t getHeaderFieldSize(const IR::Type* type) const;
+    size_t getHeaderSize(const IR::Type_Header* header) const;
 
  public:
     HeaderPacketMetricsPass(TypeMap* typeMap, Metrics& metrics)

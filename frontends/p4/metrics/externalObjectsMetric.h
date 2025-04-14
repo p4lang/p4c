@@ -20,7 +20,7 @@ class ExternalObjectsMetricPass : public Inspector {
 
     /// Extern structure declaration.
     void postorder(const IR::Type_Extern* node) override;
-    /// Exern variable declaration.
+    /// Extern structure instance.
     void postorder(const IR::Declaration_Instance* node) override;
     /// Extern structure use.
     void postorder(const IR::Member* node) override;

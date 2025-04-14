@@ -2,21 +2,36 @@
 
 namespace P4 {
 
-bool HeaderMetricsPass::preorder(const IR::Type_Header *header){
+bool HeaderMetricsPass::preorder(const IR::Type_Header *header) {
     std::string headerName = header->getName().string();
     metrics.headerMetrics.numHeaders++;
-
-    int numFields = 0;
-    int sizeSum = 0;
+    size_t numFields = 0;
+    size_t sizeSum = 0;
 
     for (auto field : header->fields) {
         numFields++;
-        sizeSum += field->type->width_bits();
+        const IR::Type* currentType = typeMap->getType(field->type, true);
+
+        // Unwrap the field type and get size.
+        while (currentType != nullptr) {
+            if (auto typeType = currentType->to<IR::Type_Type>()) {
+                currentType = typeType->type;
+            }
+            else if (auto bitsType = currentType->to<IR::Type_Bits>()) {
+                sizeSum += bitsType->width_bits();
+                break;
+            } else if (auto newtype = currentType->to<IR::Type_Newtype>()) {
+                currentType = typeMap->getType(newtype->type, true);
+            } else if (auto typedefType = currentType->to<IR::Type_Typedef>()) {
+                currentType = typeMap->getType(typedefType->type, true);
+            } else {
+                break;
+            }
+        }
     }
 
     metrics.headerMetrics.fieldsNum[headerName] = numFields;
     metrics.headerMetrics.fieldSizeSum[headerName] = sizeSum;
-
     totalFieldsNum += numFields;
     totalFieldsSize += sizeSum;
     return true;

@@ -49,19 +49,35 @@ bool ParserAnalyzer::preorder(const IR::P4Parser* parser) {
     return false;
 }
 
-
-int HeaderPacketMetricsPass::getHeaderSize(const IR::Type_Header* header) const {
-    int size = 0;
-    for (const auto* field : header->fields) {
-        auto fieldType = typeMap->getType(field, true);
-        if (fieldType && fieldType->is<IR::Type_Bits>()) {
-            size += fieldType->to<IR::Type_Bits>()->size;
+size_t HeaderPacketMetricsPass::getHeaderFieldSize(const IR::Type* type) const {
+    const IR::Type* currentType = type;
+    while (currentType != nullptr) {
+        if (auto typeType = currentType->to<IR::Type_Type>()) {
+            currentType = typeType->type;
         }
+        else if (auto bitsType = currentType->to<IR::Type_Bits>()) {
+            return bitsType->width_bits();
+        } else if (auto newtype = currentType->to<IR::Type_Newtype>()) {
+            currentType = typeMap->getType(newtype->type, true);
+        } else if (auto typedefType = currentType->to<IR::Type_Typedef>()) {
+            currentType = typeMap->getType(typedefType->type, true);
+        } else {
+            break;
+        }
+    }
+    return 0;
+}
+
+size_t HeaderPacketMetricsPass::getHeaderSize(const IR::Type_Header* header) const {
+    size_t size = 0;
+    for (auto field : header->fields) {
+        const IR::Type* currentType = typeMap->getType(field->type, true);
+        size += getHeaderFieldSize(currentType);
     }
     return size;
 }
 
-void HeaderPacketMetricsPass::updateMetrics(const std::string& headerName, int size, bool isModification) {
+void HeaderPacketMetricsPass::updateMetrics(const std::string& headerName, size_t size, bool isModification) {
     for (const auto &packetType : cumulativeTypes) {
         if (packetType.find(headerName) != std::string::npos) {
             auto& target = isModification
@@ -98,17 +114,33 @@ void HeaderPacketMetricsPass::postorder (const IR::ParserState* /*state*/){
 }
 
 bool HeaderPacketMetricsPass::preorder(const IR::AssignmentStatement* assign) {
-    auto member = assign->left->to<IR::Member>();
+    auto left = assign->left;
+    auto member = left->to<IR::Member>();
     if (!member) return false;
 
-    auto baseType = typeMap->getType(member->expr, true);
-    if (!baseType || !baseType->is<IR::Type_Header>()) return false;
+    const IR::Type* leftType = typeMap->getType(left, true);
+    if (!leftType) return false;
 
-    auto leftType = typeMap->getType(assign->left, true);
-    if (!leftType || !leftType->is<IR::Type_Bits>()) return false;
+    size_t size = 0;
+    std::string headerName;
 
-    int size = leftType->to<IR::Type_Bits>()->size;
-    std::string headerName = member->expr->to<IR::Member>()->member.name.string();
+    // Assignment to entire header.
+    if (auto headerType = leftType->to<IR::Type_Header>()) {
+        size = getHeaderSize(headerType);
+        headerName = member->member.name.string();
+    }
+    // Assignment to a header field.
+    else {
+        const IR::Type* baseType = typeMap->getType(member->expr, true);
+        if (!baseType || !baseType->is<IR::Type_Header>()) return false;
+
+        size = getHeaderFieldSize(leftType);
+        if (auto baseMember = member->expr->to<IR::Member>()) {
+            headerName = baseMember->member.name.string();
+        } else {
+            return false;
+        }
+    }
 
     updateMetrics(headerName, size, true);
     return false;
