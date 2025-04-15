@@ -81,7 +81,6 @@ class EBPFDeparser : public EBPFControl {
         outerHdrOffsetVar = cstring("outHeaderOffset");
         outerHdrLengthVar = cstring("outHeaderLength");
         returnCode = cstring("returnCode");
-        
     }
 
     bool build() override;
