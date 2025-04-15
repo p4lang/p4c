@@ -2,11 +2,10 @@
 
 namespace P4 {
 
-bool InlinedActionsMetricPass::preorder(const IR::BlockStatement* block) {
+void InlinedActionsMetricPass::postorder(const IR::BlockStatement* block) {
     if (block->getAnnotation(IR::Annotation::inlinedFromAnnotation)) {
         metrics.inlinedActionsNum++;
     }
-    return true;
 }
 
 }  // namespace P4

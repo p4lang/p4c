@@ -24,6 +24,11 @@ void ParserAnalyzer::dfsCumulativeTypes(
     const std::string& parentType,
     std::unordered_map<const IR::ParserState*, std::string>& types
 ) {
+    std::string stateName = state->name.name.string();
+    if (stateEncounters[stateName] > 50)
+        return;
+    stateEncounters[stateName]++;
+
     std::string extract = getPacketType(state);
     std::string cumulative = parentType.empty() ? extract : (extract.empty() ? parentType : parentType + "-" + extract);
     types[state] = cumulative;

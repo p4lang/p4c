@@ -17,7 +17,7 @@ class InlinedActionsMetricPass : public Inspector {
         setName("InlinedActionsMetricPass"); 
     }
     
-    bool preorder(const IR::BlockStatement* block) override;
+    void postorder(const IR::BlockStatement* block) override;
 };
 
 }  // namespace P4

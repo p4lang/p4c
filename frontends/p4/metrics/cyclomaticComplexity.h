@@ -12,10 +12,10 @@ class CyclomaticComplexityCalculator : public Inspector {
     CyclomaticComplexityCalculator() : cc(1) { setName("CyclomaticComplexityCalculator"); }
     int getComplexity() const { return cc; }
 
-    bool preorder(const IR::IfStatement* /*stmt*/) override;
-    bool preorder(const IR::SwitchStatement* stmt) override;
-    bool preorder(const IR::SelectExpression* selectExpr) override;
-    bool preorder(const IR::MethodCallExpression* mce) override;
+    void postorder(const IR::IfStatement* /*stmt*/) override;
+    void postorder(const IR::SwitchStatement* stmt) override;
+    void postorder(const IR::SelectExpression* selectExpr) override;
+    void postorder(const IR::MethodCallExpression* mce) override;
     bool preorder(const IR::P4Table* table) override;
 };
 

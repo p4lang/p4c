@@ -17,6 +17,7 @@ class ParserAnalyzer : public Inspector {
  private:
     ParserCallGraph& parserCallGraph;
     std::set<std::string>& cumulativeTypes;
+    std::unordered_map<std::string, size_t> stateEncounters;
     TypeMap* typeMap;
 
     std::string getPacketType(const IR::ParserState* state) const;

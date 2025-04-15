@@ -79,26 +79,26 @@ class HalsteadMetricsPass : public Inspector {
     void postorder(const IR::P4Parser* /*parser*/) override;
     bool preorder(const IR::ActionFunction* /*action*/) override;
     void postorder(const IR::ActionFunction* /*action*/) override;
-    bool preorder(const IR::Type_Header* /*headerType*/) override;
-    bool preorder(const IR::Type_Struct* /*structType*/) override;
 
    // Operand and operator data collection. 
 
+    void postorder(const IR::Type_Header* /*headerType*/) override;
+    void postorder(const IR::Type_Struct* /*structType*/) override;
     bool preorder(const IR::PathExpression *pathExpr) override;
     bool preorder(const IR::Member *member) override;
-    bool preorder(const IR::Constant *constant) override;
-    bool preorder(const IR::ConstructorCallExpression *ctorCall) override;
+    void postorder(const IR::Constant *constant) override;
+    void postorder(const IR::ConstructorCallExpression *ctorCall) override;
     bool preorder(const IR::MethodCallExpression *methodCall) override;
-    bool preorder(const IR::AssignmentStatement *stmt) override;
-    bool preorder(const IR::IfStatement *stmt) override;
-    bool preorder(const IR::SwitchStatement *stmt) override;
-    bool preorder(const IR::ReturnStatement* /*stmt*/) override;
-    bool preorder(const IR::ExitStatement* /*stmt*/) override;
+    void postorder(const IR::AssignmentStatement* /*stmt*/) override;
+    void postorder(const IR::IfStatement *stmt) override;
+    void postorder(const IR::SwitchStatement *stmt) override;
+    void postorder(const IR::ReturnStatement* /*stmt*/) override;
+    void postorder(const IR::ExitStatement* /*stmt*/) override;
     bool preorder(const IR::Operation_Unary *op) override;
-    bool preorder(const IR::Operation_Binary *op) override;
-    bool preorder(const IR::SelectExpression* selectExpr) override;
+    void postorder(const IR::Operation_Binary *op) override;
+    void postorder(const IR::SelectExpression* /*selectExpr*/) override;
     bool preorder(const IR::SelectCase* selectCase) override;
-    bool preorder(const IR::P4Table *table) override;
+    void postorder(const IR::P4Table *table) override;
 
     /// Calculate metrics at the end of traversal
     void postorder(const IR::P4Program* /*program*/) override;

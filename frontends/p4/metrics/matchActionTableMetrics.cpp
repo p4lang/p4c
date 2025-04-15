@@ -21,7 +21,7 @@ unsigned MatchActionTableMetricsPass::keySize(const IR::KeyElement *keyElement){
         return 0;
 }
 
-bool MatchActionTableMetricsPass::preorder(const IR::P4Table *table) {
+void MatchActionTableMetricsPass::postorder(const IR::P4Table *table) {
     std::string tableName = table->externalName().string();
 
     if (table->getKey() != nullptr) {
@@ -41,7 +41,6 @@ bool MatchActionTableMetricsPass::preorder(const IR::P4Table *table) {
     metrics.matchActionTableMetrics.totalActions += metrics.matchActionTableMetrics.actionsNum[tableName];
     metrics.matchActionTableMetrics.maxKeysPerTable = std::max(metrics.matchActionTableMetrics.maxKeysPerTable, metrics.matchActionTableMetrics.keysNum[tableName]);
     metrics.matchActionTableMetrics.maxActionsPerTable= std::max(metrics.matchActionTableMetrics.maxActionsPerTable, metrics.matchActionTableMetrics.actionsNum[tableName]);
-    return true;
 }
 
 void MatchActionTableMetricsPass::postorder(const IR::P4Program* /*program*/){

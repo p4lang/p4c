@@ -58,22 +58,18 @@ void HalsteadMetricsPass::postorder(const IR::ActionFunction* /*action*/) {
 
 // Collect structure fields to prevent duplicate counting of "unique" operands.
 
-bool HalsteadMetricsPass::preorder(const IR::Type_Header *headerType) {
-    if (!headerType) return false;
+void HalsteadMetricsPass::postorder(const IR::Type_Header *headerType) {
     for (auto field : headerType->fields) {
         std::string fieldName = field->name.toString().string();
         structFields.insert(fieldName);
     }
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::Type_Struct *structType) {
-    if (!structType) return false;
+void HalsteadMetricsPass::postorder(const IR::Type_Struct *structType) {
     for (auto field : structType->fields) {
         std::string fieldName = field->name.toString().string();
         structFields.insert(fieldName);
     }
-    return true;
 }
 
 // Collect operators and operands
@@ -119,52 +115,39 @@ bool HalsteadMetricsPass::preorder(const IR::PathExpression *pathExpr) {
     return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::Constant *constant) {
-    if (!constant) return false;
+void HalsteadMetricsPass::postorder(const IR::Constant *constant) {
     std::string valueStr = constant->toString().string();
     addOperand(valueStr);
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::ConstructorCallExpression *ctorCall) {
-    if (!ctorCall) return false;
+void HalsteadMetricsPass::postorder(const IR::ConstructorCallExpression *ctorCall) {
     std::string ctorName = ctorCall->constructedType->toString().string();
     addUnaryOperator("construct:" + ctorName);
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::AssignmentStatement *stmt) {
-    if (!stmt) return false;
+void HalsteadMetricsPass::postorder(const IR::AssignmentStatement* /*stmt*/) {
     addBinaryOperator("=");
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::IfStatement *stmt) {
-    if (!stmt) return false;
+void HalsteadMetricsPass::postorder(const IR::IfStatement *stmt) {
     addUnaryOperator("if");
     if (stmt->ifFalse != nullptr) {
         addUnaryOperator("else");
     }
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::SwitchStatement *stmt) {
-    if (!stmt) return false;
+void HalsteadMetricsPass::postorder(const IR::SwitchStatement *stmt) {
     addUnaryOperator("switch");
     for(size_t i = 0; i < stmt->cases.size(); i++)
         addUnaryOperator("case");
-
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::ReturnStatement* /*stmt*/) {
+void HalsteadMetricsPass::postorder(const IR::ReturnStatement* /*stmt*/) {
     addUnaryOperator("return");
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::ExitStatement* /*stmt*/) {
+void HalsteadMetricsPass::postorder(const IR::ExitStatement* /*stmt*/) {
     addUnaryOperator("exit");
-    return true;
 }
 
 bool HalsteadMetricsPass::preorder(const IR::Operation_Unary *op) {
@@ -174,18 +157,14 @@ bool HalsteadMetricsPass::preorder(const IR::Operation_Unary *op) {
     return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::Operation_Binary *op) {
-    if (!op) return false;
+void HalsteadMetricsPass::postorder(const IR::Operation_Binary *op) {
     std::string opName = op->getStringOp().string();
     addBinaryOperator(opName);
-    return true;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::SelectExpression *selectExpr) {
-    if (!selectExpr) return false;
+void HalsteadMetricsPass::postorder(const IR::SelectExpression* /*selectExpr*/) {
     addUnaryOperator("transition");
     addUnaryOperator("select");
-    return true; 
 }
 
 bool HalsteadMetricsPass::preorder(const IR::SelectCase *caseItem) {
@@ -198,14 +177,12 @@ bool HalsteadMetricsPass::preorder(const IR::SelectCase *caseItem) {
     return false;
 }
 
-bool HalsteadMetricsPass::preorder(const IR::P4Table *table) {
-    if (!table) return false;
+void HalsteadMetricsPass::postorder(const IR::P4Table *table) {
     for (const auto &property : table->properties->properties) {
         std::string propName = property->name.toString().string();
         addBinaryOperator("=");
         addOperand(propName);
     }
-    return true;
 }
 
 // Final metrics calculation.

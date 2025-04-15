@@ -2,7 +2,7 @@
 
 namespace P4 {
 
-bool HeaderMetricsPass::preorder(const IR::Type_Header *header) {
+void HeaderMetricsPass::postorder(const IR::Type_Header *header) {
     std::string headerName = header->getName().string();
     metrics.headerMetrics.numHeaders++;
     size_t numFields = 0;
@@ -34,7 +34,6 @@ bool HeaderMetricsPass::preorder(const IR::Type_Header *header) {
     metrics.headerMetrics.fieldSizeSum[headerName] = sizeSum;
     totalFieldsNum += numFields;
     totalFieldsSize += sizeSum;
-    return true;
 }
 
 void HeaderMetricsPass::postorder(const IR::P4Program* /*program*/){

@@ -17,7 +17,7 @@ class HeaderMetricsPass : public Inspector {
     explicit HeaderMetricsPass(TypeMap* typeMap, Metrics &metricsRef)
       : typeMap(typeMap), metrics(metricsRef) { setName("HeaderMetricsPass"); }
     /// Collect metrics for each header.
-    bool preorder(const IR::Type_Header *header) override;
+    void postorder(const IR::Type_Header *header) override;
     /// Calculate averages at the end of traversal.
     void postorder(const IR::P4Program* /*program*/) override;
 
