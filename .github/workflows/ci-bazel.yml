@@ -7,8 +7,7 @@ on:
     branches: [main]
   merge_group:
     branches: [main]
-
-# Cancel any preceding run on the pull request.
+# Cancel any preceding run on the pull request
 concurrency:
   group: bazel-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -29,16 +28,12 @@ jobs:
           echo "Found formatting changes in the following files:"
           echo "${CHANGED_FILES}"
           echo ""
-          echo "Please run `tools/format-bazel-files.sh` to apply the changes."
+          echo "Please run \`tools/format-bazel-files.sh\` to apply the changes."
           exit 1
 
-  build_direct: #Build p4c directly.
+  build_direct: # Build p4c directly.
     needs: format_bazel_files
     runs-on: ubuntu-latest
-
-    env:
-      CACHE_KEY: ${{ runner.os }}-bazel
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -47,13 +42,13 @@ jobs:
       - name: Mount bazel cache
         uses: actions/cache/restore@v4
         with:
-            # See  https://docs.bazel.build/versions/master/output_directories.html
-          path: "~/.cache/bazel"
+          # See https://docs.bazel.build/versions/master/output_directories.html
+          path: ~/.cache/bazel
           # Create cash entry for every run (by using unique key derived from commit hash).
           # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
+          key: ${{ runner.os }}-bazel-direct-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
           restore-keys: |
-            ${{ env.CACHE_KEY }}
+            ${{ runner.os }}-bazel-direct-
 
       - name: Save start time
         uses: josStorer/get-current-time@v2
@@ -90,16 +85,12 @@ jobs:
         uses: actions/cache/save@v4
         if: always() && (github.ref_name == 'main' || env.duration > 180)
         with:
-          path: "~/.cache/bazel"
-          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-${{ github.run_id }}
+          path: ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-direct-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-${{ github.run_id }}
 
-  build_indirect: # Build 3rd party Bazel project depending on p4c as a subproject.
+  build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
     needs: format_bazel_files
     runs-on: ubuntu-latest
-
-    env:
-      CACHE_KEY: ${{ runner.os }}-bazel
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -108,13 +99,13 @@ jobs:
       - name: Mount bazel cache
         uses: actions/cache/restore@v4
         with:
-            # See https://docs.bazel.build/versions/master/output_directories.html  
-          path: "~/.cache/bazel"
+          # See https://docs.bazel.build/versions/master/output_directories.html
+          path: ~/.cache/bazel
           # Create cash entry for every run (by using unique key derived from commit hash).
           # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
+          key: ${{ runner.os }}-bazel-indirect-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
           restore-keys: |
-            ${{ env.CACHE_KEY }}
+            ${{ runner.os }}-bazel-indirect-
 
       - name: Save start time
         uses: josStorer/get-current-time@v2
@@ -151,6 +142,5 @@ jobs:
         uses: actions/cache/save@v4
         if: always() && (github.ref_name == 'main' || env.duration > 180)
         with:
-          path: "~/.cache/bazel"
-          key: ${{ env.CACHE_KEY }}-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-${{ github.run_id }}
-          
+          path: ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-indirect-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-${{ github.run_id }}
