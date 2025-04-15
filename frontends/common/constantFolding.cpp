@@ -805,13 +805,13 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
     big_int rvalue = right->value;
     if (rt->isSigned) {
         // Reuse conversion from Constant's ctor. Temporary Type & Constant -> allocate on stack.
-        IR::Type_Bits utype(rt->size, false);
+        IR::Type_Bits utype(rt->width_bits(), false);
         rvalue = IR::Constant(&utype, rvalue, 10, true /* no warning */).value;
     }
 
-    auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
+    auto resultType = IR::Type_Bits::get(lt->width_bits() + rt->width_bits(), lt->isSigned);
     if (overflowWidth(e, resultType->width_bits())) return e;
-    big_int value = (left->value << rt->size) | rvalue;
+    big_int value = (left->value << rt->width_bits()) | rvalue;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
 
