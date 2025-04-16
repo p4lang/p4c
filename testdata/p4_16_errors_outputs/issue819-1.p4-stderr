@@ -10,3 +10,5 @@ issue819-1.p4(27): [--Werror=type-error] error: WrapControls: contains self 'Wra
 issue819-1.p4(7)
 extern WrapControls<T1,T2> {
        ^^^^^^^^^^^^
+Compilation cannot continue due to type errors
+

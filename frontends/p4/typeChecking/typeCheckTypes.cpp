@@ -173,6 +173,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Specialized *type) {
         if (!argtype) return type;
         if (auto self = ContainsType::find(argtype, baseType, typeMap)) {
             typeError("%1%: contains self '%2%' as type argument", type->baseType, self);
+            // If we continue we could get a IR loop which would crash the compiler, so stop here.
+            FATAL_ERROR("Compilation cannot continue due to type errors");
             return type;
         }
         if (auto tg = argtype->to<IR::IMayBeGenericType>()) {

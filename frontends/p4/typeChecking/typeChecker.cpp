@@ -472,7 +472,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         learn(result, this, getChildContext());
         return result;
     } else {
-        BUG_CHECK(::P4::errorCount(), "Unexpected type %1%", dbp(type));
+        BUG_CHECK(errorCount(), "Unexpected type %1%", dbp(type));
     }
 
     // If we reach this point some type error must have occurred, because
