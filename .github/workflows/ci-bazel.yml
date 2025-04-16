@@ -7,6 +7,7 @@ on:
     branches: [main]
   merge_group:
     branches: [main]
+    
 # Cancel any preceding run on the pull request
 concurrency:
   group: bazel-${{ github.event.pull_request.number || github.ref }}
