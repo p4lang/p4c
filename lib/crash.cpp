@@ -294,8 +294,7 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
             lock.unlock();
             pthread_exit(0);
         } else {
-            // Unlock.
-            lock.unlock();
+            lock.unlock();  // NOLINT clang-format is collapsing this code into a single line.
         })
     if (sig != SIGABRT) BUG("Exiting with SIG%s", signames[sig]);
     _exit(sig + 0x80);

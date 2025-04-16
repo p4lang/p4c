@@ -1,5 +1,5 @@
 This diff file tracks the modifications that have been applied to cpplint.py compared to the original found here:
-https://github.com/cpplint/cpplint/blob/7b88b68187e3516540fab3caa900988d2179ed24/cpplint.py
+https://github.com/cpplint/cpplint/blob/2d2e1c9bbfd25f0d47e1ee193e7160cda4930b70/cpplint.py
 Please update this file, whenever you make changes to cpplint.
 --- tools/tmp.txt	2025-04-11 14:16:02.679905300 +0200
 +++ tools/cpplint.py	2025-04-11 14:13:59.169380300 +0200

@@ -142,11 +142,11 @@ void ErrorMode::write_regs(REGS &regs, const Stage *stage, gress_t gress) {
         break;                                              \
     default:                                                \
         BUG("unexpected error mode");
-
+    // clang-format off
     switch (mode[PREV_ERROR]) {
-        // PREV_ERROR.
         HANDLE_ERROR_CASES(prev_error_ctl, NO)
     }
+    // clang-format on
     merge.prev_error_ctl[gress].prev_error_ctl_delay = tcam_err_delay;
     if (propagate) {
         switch (stage->stage_dep[gress]) {
@@ -170,24 +170,21 @@ void ErrorMode::write_regs(REGS &regs, const Stage *stage, gress_t gress) {
                 BUG("unexpected stage_dep: %d", stage->stage_dep[gress]);
         }
     }
-
+    // clang-format off
     switch (mode[TCAM_MATCH]) {
-        // TCAM_MATCH
         HANDLE_ERROR_CASES(tcam_match_error_ctl, YES)
     }
     switch (mode[TIND_ECC]) {
-        // TIND_ECC
         HANDLE_ERROR_CASES(tind_ecc_error_ctl, YES)
     }
     switch (mode[GFM_PARITY]) {
-        // GFM_PARITY
         HANDLE_ERROR_CASES(gfm_parity_error_ctl, YES)
     }
     merge.gfm_parity_error_ctl[gress].gfm_parity_error_ctl_delay = tcam_err_delay;
     switch (mode[EMM_ECC]) {
-        // EMM_ECC
         HANDLE_ERROR_CASES(emm_ecc_error_ctl, YES)
     }
+    // clang-format on
     merge.emm_ecc_error_ctl[gress].emm_ecc_error_ctl_delay = tcam_err_delay;
 
     if (map_to_immed) {
