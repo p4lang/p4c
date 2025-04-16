@@ -187,14 +187,17 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
  * If @warn is true, emit compiler warnings if an unused instance of an
  * IR::P4Table or IR::Declaration_Instance is removed.
  */
-class RemoveAllUnusedDeclarations : public PassRepeated {
+class RemoveAllUnusedDeclarations : public PassManager {
     UsedDeclSet used;
 
  public:
-    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy, bool warn = false)
-        : PassManager({new CollectUsedDeclarations(used),
-                       policy.getRemoveUnusedDeclarationsPass(used, warn)}) {
+    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy, bool warn = false) {
         setName("RemoveAllUnusedDeclarations");
+        if (warn)
+            addPasses({new CollectUsedDeclarations(used),
+                       policy.getRemoveUnusedDeclarationsPass(used, warn)});
+        addPasses({new PassRepeated({new CollectUsedDeclarations(used),
+                                     policy.getRemoveUnusedDeclarationsPass(used, false)})});
         setStopOnError(true);
     }
 };

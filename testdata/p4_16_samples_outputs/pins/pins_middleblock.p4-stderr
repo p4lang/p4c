@@ -70,24 +70,6 @@ pins_middleblock.p4(1512): [--Wwarn=unused] warning: Table acl_pre_ingress_metad
 pins_middleblock.p4(1574): [--Wwarn=unused] warning: Control lag_hashing_config is not used; removing
 control lag_hashing_config(in headers_t headers) {
         ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1025): [--Wwarn=unused] warning: acl_egress_dhcp_to_host_counter: unused instance
-    @id(0x13000108) direct_counter(CounterType.packets_and_bytes) acl_egress_dhcp_to_host_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1123): [--Wwarn=unused] warning: acl_ingress_qos_counter: unused instance
-    @id(0x13000107) direct_counter(CounterType.packets_and_bytes) acl_ingress_qos_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1121): [--Wwarn=unused] warning: acl_ingress_qos_meter: unused instance
-...) @mode(single_rate_two_color) direct_meter<MeterColor_t>(MeterType.bytes) acl_ingress_qos_meter;
-                                                                              ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1124): [--Wwarn=unused] warning: acl_ingress_counting_counter: unused instance
-    @id(0x13000109) direct_counter(CounterType.packets_and_bytes) acl_ingress_counting_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1416): [--Wwarn=unused] warning: acl_pre_ingress_vlan_counter: unused instance
-    @id(0x13000106) direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_vlan_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1417): [--Wwarn=unused] warning: acl_pre_ingress_metadata_counter: unused instance
-    @id(0x13000105) direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_metadata_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(632): [--Wwarn=uninitialized_use] warning: tunnel_id_value may not be completely initialized
             tunnel_id_value: exact @id(1) @name("tunnel_id");
             ^^^^^^^^^^^^^^^
