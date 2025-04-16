@@ -74,6 +74,22 @@ OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 # Enable DumpPipe pass output
 OPTION(ENABLE_DUMP_PIPE "Enable DumpPipe pass output" ON)
 
+option(CMAKE_LINT_ONLY "Only run linting/formatting targets without building p4c" OFF)
+
+if(CMAKE_LINT_ONLY)
+  include(cmake/Linters.cmake)
+
+  # Add the existing linting targets here using the functions
+  add_cpplint_target()
+  add_clang_format_target()  # (if defined inside Linters.cmake)
+  add_cpplint_target()
+  add_black_target()
+
+  # Stop here, no further targets
+  return()
+endif()
+
+
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
 set(MAX_LOGGING_LEVEL 10 CACHE STRING "Control the maximum logging level for -T logs")
