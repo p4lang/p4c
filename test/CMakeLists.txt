@@ -29,9 +29,11 @@ set (GTEST_UNITTEST_SOURCES
   gtest/dumpjson.cpp
   gtest/enumerator_test.cpp
   gtest/equiv_test.cpp
+  gtest/error_reporter_test.cpp
   gtest/exception_test.cpp
   gtest/expr_uses_test.cpp
   gtest/flat_map.cpp
+  gtest/format_test.cpp
   gtest/format_test.cpp
   gtest/helpers.cpp
   gtest/hash.cpp

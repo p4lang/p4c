@@ -22,16 +22,15 @@ limitations under the License.
 #include <unistd.h>
 
 #include <exception>
-
-#include <boost/format.hpp>
+#include <string>  //
+#include <utility>
 
 #include "absl/strings/str_cat.h"
-#include "lib/bug_helper.h"
+#include "lib/boost_format_helper.h"
 
 namespace P4::Util {
 
 // colors to pretty print messages
-// \e is non-standard escape sequence, use codepoint \33 instead
 constexpr char ANSI_RED[] = "\33[31m";
 constexpr char ANSI_BLUE[] = "\33[34m";
 constexpr char ANSI_CLR[] = "\33[0m";
@@ -65,8 +64,9 @@ inline const char *cerr_clear_colors() {
 }
 
 /// Base class for all exceptions.
-/// The constructor uses boost::format for the format string, i.e.,
-/// %1%, %2%, etc (starting at 1, not at 0)
+/// Supports boost::format-style (%N%), std::format-style ({}),
+/// and simple printf-style (%s, %d, etc.) placeholders.
+/// All arguments are formatted using operator<<.
 class P4CExceptionBase : public std::exception {
  protected:
     std::string message;
@@ -76,13 +76,22 @@ class P4CExceptionBase : public std::exception {
     template <typename... Args>
     explicit P4CExceptionBase(const char *format, Args &&...args) {
         traceCreation();
-        boost::format fmt(format);
-        // FIXME: This will implicitly take location of the first argument having
-        // SourceInfo. Not sure if this always desireable or not.
-        message = ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+
+        // 1. Capture arguments
+        auto argTuple = std::make_tuple(std::forward<Args>(args)...);
+        // 2. Extract SourceInfo details (mimicking bug_helper pre-processing)
+        std::string positionStr;
+        std::string tailStr;
+        extractBugSourceInfo(argTuple, positionStr, tailStr);  // Call the new helper
+        // 3. Format the core message using the enhanced createFormattedMessage
+        std::string formattedCore = P4::createFormattedMessage(format, std::forward<Args>(args)...);
+        // 4. Assemble the final message string (mimicking bug_helper final step)
+        // Add newline before tail only if tail is not empty.
+        message = absl::StrCat(positionStr, positionStr.empty() ? "" : ": ", formattedCore,
+                               tailStr.empty() ? "" : "\n", tailStr);
     }
 
-    const char *what() const noexcept override { return message.c_str(); }
+    [[nodiscard]] const char *what() const noexcept override { return message.c_str(); }
 };
 
 /// This class indicates a bug in the compiler
