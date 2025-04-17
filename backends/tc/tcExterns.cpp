@@ -535,7 +535,7 @@ void EBPFDigestPNA::emitPushElement(EBPF::CodeBuilder *builder, const IR::Expres
     builder->append("));");
     builder->newline();
     builder->emitIndent();
-    builder->append("bpf_p4tc_extern_digest_pack(skb, &ext_params, sizeof(ext_params))");
+    builder->append("bpf_p4tc_extern_digest_pack(skb, &ext_params, sizeof(ext_params));");
 }
 
 void EBPFDigestPNA::emitPushElement(EBPF::CodeBuilder *builder, cstring elem) const {
