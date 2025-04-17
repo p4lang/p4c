@@ -22,6 +22,21 @@ limitations under the License.
 
 namespace P4 {
 
+struct CopyStructuresConfig {
+    /// Specific targets may allow functions or methods to return structs.
+    /// Such methods will not be converted in this pass. Setting the
+    /// errorOnMethodCall flag will produce an error message if such a
+    ///  method is encountered.
+    bool errorOnMethodCall = true;
+
+    /// Do not only copy normal structures but also perform copy assignments for headers.
+    bool copyHeaders = false;
+    /// Also expand header union assignments.
+    /// TODO: This is only necessary because the copy structure pass does not correctly expand
+    /// header unions for some back ends.
+    bool expandUnions = true;
+};
+
 /**
  * Convert assignments between structures to assignments between fields
  *
@@ -53,19 +68,15 @@ namespace P4 {
  *
  */
 class DoCopyStructures : public Transform {
+    /// The type map.
     TypeMap *typeMap;
-    /// Specific targets may allow functions or methods to return structs.
-    /// Such methods will not be converted in this pass. Setting the
-    /// errorOnMethodCall flag will produce an error message if such a
-    ///  method is encountered.
-    bool errorOnMethodCall;
 
-    /// Do not only copy normal structures but also perform copy assignments for headers.
-    bool copyHeaders;
+    /// Configuration options.
+    CopyStructuresConfig _config;
 
  public:
-    explicit DoCopyStructures(TypeMap *typeMap, bool errorOnMethodCall, bool copyHeaders = false)
-        : typeMap(typeMap), errorOnMethodCall(errorOnMethodCall), copyHeaders(copyHeaders) {
+    explicit DoCopyStructures(TypeMap *typeMap, CopyStructuresConfig config)
+        : typeMap(typeMap), _config(config) {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
@@ -116,15 +127,15 @@ class RemoveAliases : public Transform {
 
 class CopyStructures : public PassRepeated {
  public:
-    explicit CopyStructures(TypeMap *typeMap, bool errorOnMethodCall = true,
-                            bool copyHeaders = false, TypeChecking *typeChecking = nullptr) {
+    explicit CopyStructures(TypeMap *typeMap, CopyStructuresConfig config,
+                            TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(typeMap);
         setName("CopyStructures");
         if (typeChecking == nullptr) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.emplace_back(typeChecking);
         passes.emplace_back(new RemoveAliases(typeMap));
         passes.emplace_back(typeChecking);
-        passes.emplace_back(new DoCopyStructures(typeMap, errorOnMethodCall, copyHeaders));
+        passes.emplace_back(new DoCopyStructures(typeMap, config));
     }
 };
 
