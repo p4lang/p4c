@@ -224,55 +224,73 @@ void PNAArchTC::emitInstances(EBPF::CodeBuilder *builder) const {
 
 void PNAArchTC::emitGlobalFunctions(EBPF::CodeBuilder *builder) const {
     const char *code =
-        "static inline u32 getPrimitive32(u8 *a, int size) {\n"
-        "   if(size <= 16 || size > 24) {\n"
-        "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
-        "   return  ((((u32)a[2]) <<16) | (((u32)a[1]) << 8) | (u32)a[0]);\n"
-        "}\n"
-        "static inline u64 getPrimitive64(u8 *a, int size) {\n"
-        "   if(size <= 32 || size > 56) {\n"
-        "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
-        "   if(size <= 40) {\n"
-        "       return  ((((u64)a[4]) << 32) | (((u64)a[3]) << 24) | (((u64)a[2]) << 16) | "
-        "(((u64)a[1]) << 8) | (u64)a[0]);\n"
-        "   } else {\n"
-        "       if(size <= 48) {\n"
-        "           return  ((((u64)a[5]) << 40) | (((u64)a[4]) << 32) | (((u64)a[3]) << 24) | "
-        "(((u64)a[2]) << 16) | (((u64)a[1]) << "
-        "8) | (u64)a[0]);\n"
-        "       } else {\n"
-        "           return  ((((u64)a[6]) << 48) | (((u64)a[5]) << 40) | (((u64)a[4]) << 32) | "
-        "(((u64)a[3]) << 24) | (((u64)a[2]) << "
-        "16) | (((u64)a[1]) << 8) | (u64)a[0]);\n"
-        "       }\n"
-        "   }\n"
-        "}\n"
-        "static inline void storePrimitive32(u8 *a, int size, u32 value) {\n"
-        "   if(size <= 16 || size > 24) {\n"
-        "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
-        "   a[0] = (u8)(value);\n"
-        "   a[1] = (u8)(value >> 8);\n"
-        "   a[2] = (u8)(value >> 16);\n"
-        "}\n"
-        "static inline void storePrimitive64(u8 *a, int size, u64 value) {\n"
-        "   if(size <= 32 || size > 56) {\n"
-        "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
-        "   a[0] = (u8)(value);\n"
-        "   a[1] = (u8)(value >> 8);\n"
-        "   a[2] = (u8)(value >> 16);\n"
-        "   a[3] = (u8)(value >> 24);\n"
-        "   a[4] = (u8)(value >> 32);\n"
-        "   if (size > 40) {\n"
-        "       a[5] = (u8)(value >> 40);\n"
-        "   }\n"
-        "   if (size > 48) {\n"
-        "       a[6] = (u8)(value >> 48);\n"
-        "   }\n"
-        "}\n";
+        static inline u32 getPrimitive32(u8 *a, int size) {
+    if (size <= 16 || size > 24) {
+        bpf_printk("Invalid size for 32-bit primitive: %d", size);
+        return 0;
+    }
+    return (((u32)a[2] << 16) | 
+           ((u32)a[1] << 8) | 
+           (u32)a[0];
+}
+
+static inline u64 getPrimitive64(u8 *a, int size) {
+    if (size <= 32 || size > 56) {
+        bpf_printk("Invalid size for 64-bit primitive: %d", size);
+        return 0;
+    }
+    if (size <= 40) {
+        return (((u64)a[4] << 32) | 
+               ((u64)a[3] << 24) | 
+               ((u64)a[2] << 16) | 
+               ((u64)a[1] << 8) | 
+               (u64)a[0]);
+    } else if (size <= 48) {
+        return (((u64)a[5] << 40) | 
+               ((u64)a[4] << 32) | 
+               ((u64)a[3] << 24) | 
+               ((u64)a[2] << 16) | 
+               ((u64)a[1] << 8) | 
+               (u64)a[0]);
+    } else {
+        return (((u64)a[6] << 48) | 
+               ((u64)a[5] << 40) | 
+               ((u64)a[4] << 32) | 
+               ((u64)a[3] << 24) | 
+               ((u64)a[2] << 16) | 
+               ((u64)a[1] << 8) | 
+               (u64)a[0]);
+    }
+}
+
+static inline void storePrimitive32(u8 *a, int size, u32 value) {
+    if (size <= 16 || size > 24) {
+        bpf_printk("Invalid size for 32-bit store: %d", size);
+        return;
+    }
+    a[0] = (u8)(value & 0xFF);
+    a[1] = (u8)((value >> 8) & 0xFF);
+    a[2] = (u8)((value >> 16) & 0xFF);
+}
+
+static inline void storePrimitive64(u8 *a, int size, u64 value) {
+    if (size <= 32 || size > 56) {
+        bpf_printk("Invalid size for 64-bit store: %d", size);
+        return;
+    }
+    a[0] = (u8)(value & 0xFF);
+    a[1] = (u8)((value >> 8) & 0xFF);
+    a[2] = (u8)((value >> 16) & 0xFF);
+    a[3] = (u8)((value >> 24) & 0xFF);
+    a[4] = (u8)((value >> 32) & 0xFF);
+    
+    if (size > 40) {
+        a[5] = (u8)((value >> 40) & 0xFF);
+    }
+    if (size > 48) {
+        a[6] = (u8)((value >> 48) & 0xFF);
+    }
+}
     builder->appendLine(code);
 }
 
