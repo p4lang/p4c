@@ -70,7 +70,7 @@ class EBPFDeparser : public EBPFControl {
     EBPFType *headerType;
     cstring outerHdrOffsetVar, outerHdrLengthVar;
     cstring returnCode;
-    DeparserBodyTranslator* deparserTranslator;
+    DeparserBodyTranslator *deparserTranslator;
 
     EBPFDeparser(const EBPFProgram *program, const IR::ControlBlock *control,
                  const IR::Parameter *parserHeaders)

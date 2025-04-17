@@ -45,8 +45,7 @@ bool DeparserBodyTranslator::preorder(const IR::IfStatement *s) {
     insideIfStatement = true;
     visit(s->condition);
     visit(s->ifTrue);
-    if (s->ifFalse != nullptr)
-        visit(s->ifFalse);
+    if (s->ifFalse != nullptr) visit(s->ifFalse);
     insideIfStatement = false;
     return false;
 }
