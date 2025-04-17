@@ -26,16 +26,17 @@ class MetricsPassManager {
     const CompilerOptions &options;
     const std::set<std::string> &selectedMetrics;
     TypeMap* typeMap;
-    Metrics &metrics;
+    Metrics metrics;
 
  public:
-    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap, Metrics &metrics)
-      : options(options), selectedMetrics(options.selectedMetrics), typeMap(typeMap), metrics(metrics) {}
-
-    void addInlined(PassManager &pm) const;
-    void addUnusedCode(PassManager &pm, bool isBefore) const;
-    void addRemaining(PassManager &pm) const;
-    void addExportPass(PassManager &pm) const;
+    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap)
+      : options(options), selectedMetrics(options.selectedMetrics), typeMap(typeMap), metrics() {}
+    
+    Metrics& getMetrics() { return metrics; }
+    void addInlined(PassManager &pm);
+    void addUnusedCode(PassManager &pm, bool isBefore);
+    void addRemaining(PassManager &pm);
+    void addExportPass(PassManager &pm);
 };
 
 }  // namespace P4

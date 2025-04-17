@@ -2,19 +2,19 @@
 
 namespace P4 {
 
-void MetricsPassManager::addInlined(PassManager &pm) const {
+void MetricsPassManager::addInlined(PassManager &pm){
     if (selectedMetrics.find("inlined") != selectedMetrics.end() ||
             selectedMetrics.find("unused-code") != selectedMetrics.end()) 
         {
         pm.addPasses({new InlinedActionsMetricPass(metrics)});
     }
 }
-void MetricsPassManager::addUnusedCode(PassManager &pm, bool isBefore) const {
+void MetricsPassManager::addUnusedCode(PassManager &pm, bool isBefore){
     if (selectedMetrics.find("unused-code") != selectedMetrics.end()) {
         pm.addPasses({new UnusedCodeMetricPass(metrics, isBefore)});
     }
 }
-void MetricsPassManager::addRemaining(PassManager &pm) const {
+void MetricsPassManager::addRemaining(PassManager &pm){
     if (selectedMetrics.find("cyclomatic") != selectedMetrics.end()) {
         pm.addPasses({new CyclomaticComplexityPass(metrics)});
     }
@@ -42,7 +42,7 @@ void MetricsPassManager::addRemaining(PassManager &pm) const {
     }
 }
 
-void MetricsPassManager::addExportPass(PassManager &pm) const {
+void MetricsPassManager::addExportPass(PassManager &pm){
     if (!selectedMetrics.empty()) {
         size_t pos = options.file.string().rfind('.');
         std::string filename = (pos != std::string::npos ? options.file.string().substr(0, pos): options.file.string());

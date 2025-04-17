@@ -77,7 +77,6 @@ limitations under the License.
 #include "validateParsedProgram.h"
 #include "validateStringAnnotations.h"
 #include "validateValueSets.h"
-#include "metrics/metricsStructure.h"
 #include "metrics/metricsPassManager.h"
 
 namespace P4 {
@@ -154,8 +153,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     TypeMap typeMap;
-    Metrics metrics;
-    MetricsPassManager metricsPassManager(options, &typeMap, metrics);
+    MetricsPassManager metricsPassManager(options, &typeMap);
 
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
