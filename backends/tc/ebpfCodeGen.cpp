@@ -228,7 +228,7 @@ void PNAArchTC::emitGlobalFunctions(EBPF::CodeBuilder *builder) const {
         "   if(size <= 16 || size > 24) {\n"
         "       bpf_printk(\"Invalid size.\");\n"
         "   };\n"
-        "   return  ((((u32)a[2]) <<16) | (((u32)a[1]) << 8) | a[0]);\n"
+        "   return  ((((u32)a[2]) <<16) | (((u32)a[1]) << 8) | (u32)a[0]);\n"
         "}\n"
         "static inline u64 getPrimitive64(u8 *a, int size) {\n"
         "   if(size <= 32 || size > 56) {\n"
@@ -236,16 +236,16 @@ void PNAArchTC::emitGlobalFunctions(EBPF::CodeBuilder *builder) const {
         "   };\n"
         "   if(size <= 40) {\n"
         "       return  ((((u64)a[4]) << 32) | (((u64)a[3]) << 24) | (((u64)a[2]) << 16) | "
-        "(((u64)a[1]) << 8) | a[0]);\n"
+        "(((u64)a[1]) << 8) | (u64)a[0]);\n"
         "   } else {\n"
         "       if(size <= 48) {\n"
         "           return  ((((u64)a[5]) << 40) | (((u64)a[4]) << 32) | (((u64)a[3]) << 24) | "
         "(((u64)a[2]) << 16) | (((u64)a[1]) << "
-        "8) | a[0]);\n"
+        "8) | (u64)a[0]);\n"
         "       } else {\n"
         "           return  ((((u64)a[6]) << 48) | (((u64)a[5]) << 40) | (((u64)a[4]) << 32) | "
         "(((u64)a[3]) << 24) | (((u64)a[2]) << "
-        "16) | (((u64)a[1]) << 8) | a[0]);\n"
+        "16) | (((u64)a[1]) << 8) | (u64)a[0]);\n"
         "       }\n"
         "   }\n"
         "}\n"
@@ -1967,7 +1967,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendLine("};");
             builder->emitIndent();
             builder->append(
-                "bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key))");
+                "bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key));");
         }
         return;
     } else if (function->expr->method->toString() == "add_entry") {
@@ -2080,7 +2080,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->emitIndent();
         builder->append(
             "bpf_p4tc_entry_create_on_miss(skb, &update_params, sizeof(update_params), &key, "
-            "sizeof(key))");
+            "sizeof(key));");
         return;
     }
 
@@ -2104,7 +2104,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->emitIndent();
             builder->appendFormat("bpf_p4tc_%s(skb,&sa->set,", fname.c_str());
             visit(function->expr->arguments->at(0));
-            builder->append(")");
+            builder->append(");");
         } else if (fname == "skb_set_meta") {
             if (function->expr->arguments->size() != 0) {
                 ::P4::error("skb_set_meta takes no arguments");
@@ -2226,7 +2226,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST")
                     builder->appendFormat("%v(", swap);
                 table->codeGen->visit(c->expression);
-                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") builder->append(")");
+                if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") builder->append(");");
             }
             builder->endOfStatement(true);
 
