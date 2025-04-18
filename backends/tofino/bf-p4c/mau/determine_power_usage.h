@@ -21,7 +21,6 @@
 
 #include <map>
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/logging/manifest.h"
 #include "backends/tofino/bf-p4c/logging/power_schema.h"
 #include "backends/tofino/bf-p4c/mau/build_power_graph.h"
@@ -30,6 +29,7 @@
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "lib/error.h"
 #include "lib/json.h"
 

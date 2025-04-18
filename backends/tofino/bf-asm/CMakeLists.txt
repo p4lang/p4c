@@ -210,6 +210,8 @@ add_custom_command(
 add_custom_target(bfasm_yaml DEPENDS ${BFASM_GEN_DIR}/lex-yaml.c)
 add_dependencies(bfasm_yaml bfasm_uptr)
 
+set_source_files_properties(${BFASM_GEN_DIR}/lex-yaml.c PROPERTIES GENERATED TRUE)
+
 set (BFAS_GEN_SOURCES
   ${BFASM_GEN_DIR}/asm-parse.cpp
   ${BFASM_GEN_DIR}/uptr_sizes.h
