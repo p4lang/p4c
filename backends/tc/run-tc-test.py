@@ -16,6 +16,7 @@
 # *******************************************************************************/
 
 import argparse
+import logging
 import os
 import re
 import sys
@@ -77,6 +78,14 @@ PARSER.add_argument(
     action='store_true',
     help=("Replace"),
 )
+PARSER.add_argument(
+    "-ll",
+    "--log_level",
+    dest="log_level",
+    default="DEBUG",
+    choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG", "NOTSET"],
+    help="The log level to choose.",
+)
 
 
 class Options(object):
@@ -91,7 +100,7 @@ class Options(object):
         self.clang = ""
         self.p4filename = ""
         self.testfile: Optional[Path] = None
-        self.testdir = ""
+        self.testdir: Optional[Path] = None
         self.runtimedir = str(FILE_DIR.joinpath("runtime"))
         self.compilerOptions = []
 
@@ -182,7 +191,18 @@ def main(argv: Any) -> None:
     options.replace = args.replace
     if args.testfile:
         options.testfile = testutils.check_if_file(Path(args.testfile))
-    options.testdir = tempfile.mkdtemp(dir=os.path.abspath("./"))
+    options.testdir = Path(tempfile.mkdtemp(dir=os.path.abspath("./")))
+
+    # Configure logging.
+    logging.basicConfig(
+        filename=options.testdir.joinpath("test.log"),
+        format="%(levelname)s: %(message)s",
+        level=getattr(logging, args.log_level),
+        filemode="w",
+    )
+    stderr_log = logging.StreamHandler()
+    stderr_log.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    logging.getLogger().addHandler(stderr_log)
 
     if args.cleanupTmp:
         options.cleanupTmp = False

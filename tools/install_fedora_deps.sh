@@ -51,6 +51,8 @@ sudo dnf install -y -q \
     procps-ng \
     python3 \
     python3-pip \
+    python3-virtualenv \
+    curl \
     python3-thrift \
     readline-devel \
     tcpdump \
@@ -60,8 +62,9 @@ sudo dnf install -y -q \
     glibc-devel.i686 \
     ninja-build
 
-pip3 install --upgrade pip
-pip3 install -r ${P4C_DIR}/requirements.txt
+# Set up uv.
+curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
+uv sync
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS

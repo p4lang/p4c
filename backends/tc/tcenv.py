@@ -159,6 +159,9 @@ class Virtme:
         return self._get_version(image_url)
 
     def wait_for_ssh(self):
+        # Wait for 30 seconds at most.
+        max_tries = 6
+        tries = 0
         while True:
             try:
                 with socket.create_connection((self.host_ip, 22), timeout=1):
@@ -169,6 +172,7 @@ class Virtme:
                 if self.verbose:
                     print("Connection still refused")
                 time.sleep(5)
+                tries += 1
 
     def boot(self):
         version = self.extract_version()
@@ -178,7 +182,7 @@ class Virtme:
         img_str = f"{self.extract_dir}/boot/vmlinuz-{version}"
 
         cmd = f"{self.spawn_script} -f {config_str} -i {img_str} -m {self.runtime_dir} -s {self.post_boot_script} -n {self.host_ip} -u {self.user}"
-        self.vm_proc = testutils.open_process(cmd)
+        self.vm_proc = testutils.open_process(cmd, env=os.environ.copy())
         if self.vm_proc is None:
             testutils.log.error("Failed to boot vm")
             return testutils.FAILURE
@@ -216,7 +220,7 @@ class Virtme:
         return result.returncode
 
     def run_script(self, script_name, args):
-        cmd = f'sudo {self.ns.mnt_dir}/{script_name} ' + " ".join(args)
+        cmd = f'sudo -E {self.ns.mnt_dir}/{script_name} ' + " ".join(args)
         return self.run(cmd)
 
     def run_tcpdump(self, filename, port):
@@ -233,7 +237,7 @@ class Virtme:
             "StrictHostKeyChecking=no",
             "-o",
             "UserKnownHostsFile=/dev/null",
-            f"sudo nohup bash -c '{tcpdump_cmd} > /dev/null 2>&1 &' && sleep 1 && pgrep -n -f '{tcpdump_cmd}'",
+            f"sudo -E nohup bash -c '{tcpdump_cmd} > /dev/null 2>&1 &' && sleep 1 && pgrep -n -f '{tcpdump_cmd}'",
         ]
 
         # Run the command using subprocess to capture the output
