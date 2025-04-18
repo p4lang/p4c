@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_INSTRUCTION_MEMORY_H_
-#define BF_P4C_MAU_INSTRUCTION_MEMORY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_INSTRUCTION_MEMORY_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_INSTRUCTION_MEMORY_H_
 
 /* clang-format off */
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
@@ -179,4 +179,4 @@ struct InstructionMemory {
 
 /* clang-format on */
 
-#endif /* BF_P4C_MAU_INSTRUCTION_MEMORY_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_INSTRUCTION_MEMORY_H_ */

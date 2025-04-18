@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_IR_GRESS_H_
-#define BF_P4C_IR_GRESS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_IR_GRESS_H_
+#define BACKENDS_TOFINO_BF_P4C_IR_GRESS_H_
 
 #include <iosfwd>
 #include <optional>
@@ -47,4 +47,4 @@ std::ostream &operator<<(std::ostream &out, gress_t gress);
 std::ostream &operator<<(std::ostream &out, std::optional<gress_t> gress);
 bool operator>>(cstring s, gress_t &gressOut);
 
-#endif /* BF_P4C_IR_GRESS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_IR_GRESS_H_ */

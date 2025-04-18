@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_LOGGING_H_
-#define _BACKENDS_TOFINO_BF_P4C_LOGGING_LOGGING_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_LOGGING_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_LOGGING_H_
 
 #include <string.h>
 #include <time.h>
@@ -72,4 +72,4 @@ class Logger : public rapidjson::Document {
 };
 }  // end namespace Logging
 
-#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_LOGGING_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_LOGGING_H_ */

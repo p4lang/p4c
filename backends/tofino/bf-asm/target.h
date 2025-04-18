@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef TARGET_H_
-#define TARGET_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_TARGET_H_
+#define BACKENDS_TOFINO_BF_ASM_TARGET_H_
 
 #include "asm-types.h"
 #include "backends/tofino/bf-asm/config.h"
@@ -710,4 +710,4 @@ void emit_parser_registers(const Target::JBay::top_level_regs *regs, std::ostrea
         SWITCH_FOREACH_##GROUP(options.target, return NAME(TARGET() EXPAND_COMMA ARGS);) \
     }
 
-#endif /* TARGET_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_TARGET_H_ */

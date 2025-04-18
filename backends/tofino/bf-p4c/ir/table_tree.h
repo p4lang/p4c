@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_IR_TABLE_TREE_H_
-#define BF_P4C_IR_TABLE_TREE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_IR_TABLE_TREE_H_
+#define BACKENDS_TOFINO_BF_P4C_IR_TABLE_TREE_H_
 
 #include "ir/ir.h"
 #include "lib/hex.h"
@@ -125,4 +125,4 @@ class TableTree {
     }
 };
 
-#endif /* BF_P4C_IR_TABLE_TREE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_IR_TABLE_TREE_H_ */

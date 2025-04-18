@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _BACKENDS_TOFINO_BF_P4C_ASM_H_
-#define _BACKENDS_TOFINO_BF_P4C_ASM_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ASM_H_
+#define BACKENDS_TOFINO_BF_P4C_ASM_H_
 
 #include <string>
 
@@ -84,4 +84,4 @@ class AsmOutput : public Inspector {
 
 } /* namespace BFN */
 
-#endif /* _BACKENDS_TOFINO_BF_P4C_ASM_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ASM_H_ */

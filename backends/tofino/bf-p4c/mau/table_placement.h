@@ -23,8 +23,8 @@
  * TODO High-level description of table placement
  */
 
-#ifndef BF_P4C_MAU_TABLE_PLACEMENT_H_
-#define BF_P4C_MAU_TABLE_PLACEMENT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TABLE_PLACEMENT_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TABLE_PLACEMENT_H_
 
 #include <map>
 
@@ -419,4 +419,4 @@ class MergeAlwaysRunActions : public PassManager {
     }
 };
 
-#endif /* BF_P4C_MAU_TABLE_PLACEMENT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TABLE_PLACEMENT_H_ */

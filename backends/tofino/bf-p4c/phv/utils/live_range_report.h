@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_UTILS_LIVE_RANGE_REPORT_H_
-#define BF_P4C_PHV_UTILS_LIVE_RANGE_REPORT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_UTILS_LIVE_RANGE_REPORT_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_UTILS_LIVE_RANGE_REPORT_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/mau/table_summary.h"
@@ -69,4 +69,4 @@ class LiveRangeReport : public Inspector {
     int get_max_stages() const { return maxStages; }
 };
 
-#endif /*  BF_P4C_PHV_UTILS_LIVE_RANGE_REPORT_H_  */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_UTILS_LIVE_RANGE_REPORT_H_ */

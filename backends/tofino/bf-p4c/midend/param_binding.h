@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _MIDEND_PARAM_BINDING_H_
-#define _MIDEND_PARAM_BINDING_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_PARAM_BINDING_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_PARAM_BINDING_H_
 
 #include <map>
 
@@ -67,4 +67,4 @@ class ParamBinding : public Inspector {
     void postorder(const IR::Declaration_Variable *var);
 };
 
-#endif /* _MIDEND_PARAM_BINDING_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_PARAM_BINDING_H_ */

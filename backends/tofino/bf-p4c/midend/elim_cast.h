@@ -42,8 +42,8 @@
  * This pass does not simplify key elements. These are processed in the P4::SimplifyKey
  * pass, which transforms them in order to be simplified in the BFN::ElimCasts pass.
  */
-#ifndef BF_P4C_MIDEND_ELIM_CAST_H_
-#define BF_P4C_MIDEND_ELIM_CAST_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_ELIM_CAST_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_ELIM_CAST_H_
 
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/p4/simplify.h"
@@ -252,4 +252,4 @@ class ElimCasts : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_MIDEND_ELIM_CAST_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_ELIM_CAST_H_ */

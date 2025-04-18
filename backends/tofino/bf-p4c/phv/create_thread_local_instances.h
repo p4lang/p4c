@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_CREATE_THREAD_LOCAL_INSTANCES_H_
-#define BF_P4C_PHV_CREATE_THREAD_LOCAL_INSTANCES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_CREATE_THREAD_LOCAL_INSTANCES_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_CREATE_THREAD_LOCAL_INSTANCES_H_
 
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -33,4 +33,4 @@ struct CreateThreadLocalInstances : public PassManager {
     CreateThreadLocalInstances();
 };
 
-#endif /* BF_P4C_PHV_CREATE_THREAD_LOCAL_INSTANCES_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_CREATE_THREAD_LOCAL_INSTANCES_H_ */

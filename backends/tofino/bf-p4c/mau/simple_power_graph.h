@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_SIMPLE_POWER_GRAPH_H_
-#define BF_P4C_MAU_SIMPLE_POWER_GRAPH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_SIMPLE_POWER_GRAPH_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_SIMPLE_POWER_GRAPH_H_
 
 #include <cstring>
 #include <map>
@@ -234,4 +234,4 @@ class SimplePowerGraph : public IHasDbPrint {
 
 }  // end namespace MauPower
 
-#endif /* BF_P4C_MAU_SIMPLE_POWER_GRAPH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_SIMPLE_POWER_GRAPH_H_ */

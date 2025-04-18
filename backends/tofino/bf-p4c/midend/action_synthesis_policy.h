@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_
-#define BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_
 
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
 #include "backends/tofino/bf-p4c/midend/register_read_write.h"
@@ -203,4 +203,4 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_ */

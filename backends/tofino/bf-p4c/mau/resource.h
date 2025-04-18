@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_RESOURCE_H_
-#define BF_P4C_MAU_RESOURCE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_H_
 
 /* clang-format off */
 
@@ -90,4 +90,4 @@ std::ostream &operator<<(std::ostream &, const TableResourceAlloc &);
 
 /* clang-format on */
 
-#endif /* BF_P4C_MAU_RESOURCE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_H_ */

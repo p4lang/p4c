@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_REDUCTION_OR_H_
-#define BF_P4C_MAU_REDUCTION_OR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_REDUCTION_OR_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_REDUCTION_OR_H_
 
 #include <map>
 
@@ -70,4 +70,4 @@ class GatherReductionOrReqs : public MauInspector {
     explicit GatherReductionOrReqs(ReductionOrInfo &red_or_info) : red_or_info(red_or_info) {}
 };
 
-#endif /* BF_P4C_MAU_REDUCTION_OR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_REDUCTION_OR_H_ */

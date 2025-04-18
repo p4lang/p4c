@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
-#define BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_
 
 #include <map>
 #include <ostream>
@@ -74,4 +74,4 @@ class FinalizeMauPredDepsPower : public PassManager {
 
 }  // end namespace MauPower
 
-#endif /* BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_FINALIZE_MAU_PRED_DEPS_POWER_H_ */

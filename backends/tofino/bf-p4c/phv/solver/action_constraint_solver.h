@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
-#define BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
 
 #include <optional>
 #include <vector>
@@ -357,4 +357,4 @@ class ActionDarkSolver : public ActionSolverBase {
 
 }  // namespace solver
 
-#endif /* BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_ */

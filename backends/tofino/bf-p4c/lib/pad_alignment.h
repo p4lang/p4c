@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef PAD_ALIGNMENT_H_
-#define PAD_ALIGNMENT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LIB_PAD_ALIGNMENT_H_
+#define BACKENDS_TOFINO_BF_P4C_LIB_PAD_ALIGNMENT_H_
 
 #include "lib/algorithm.h"
 
@@ -26,4 +26,4 @@ static inline int getAlignment(int bitSize) {
     return (nextByteBoundary - bitSize);
 }
 
-#endif /* PAD_ALIGNMENT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LIB_PAD_ALIGNMENT_H_ */

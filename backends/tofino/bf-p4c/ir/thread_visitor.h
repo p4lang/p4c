@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_IR_THREAD_VISITOR_H_
-#define BF_P4C_IR_THREAD_VISITOR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_IR_THREAD_VISITOR_H_
+#define BACKENDS_TOFINO_BF_P4C_IR_THREAD_VISITOR_H_
 
 #include "ir/ir.h"
 
@@ -32,4 +32,4 @@ class ThreadVisitor : public virtual Visitor {
 
 extern gress_t VisitingThread(const Visitor *v);
 
-#endif /* BF_P4C_IR_THREAD_VISITOR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_IR_THREAD_VISITOR_H_ */

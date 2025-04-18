@@ -1,5 +1,5 @@
-#ifndef _FRONTENDS_P4_GETV1MODELVERSION_H_
-#define _FRONTENDS_P4_GETV1MODELVERSION_H_
+#ifndef FRONTENDS_P4_GETV1MODELVERSION_H_
+#define FRONTENDS_P4_GETV1MODELVERSION_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -24,4 +24,4 @@ class GetV1ModelVersion : public Inspector {
 
 }  // namespace P4::P4V1
 
-#endif /* _FRONTENDS_P4_GETV1MODELVERSION_H_ */
+#endif /* FRONTENDS_P4_GETV1MODELVERSION_H_ */

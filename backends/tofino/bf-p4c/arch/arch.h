@@ -21,8 +21,8 @@
  * \ingroup midend
  * \brief Set of passes that normalize variations in the architectures.
  */
-#ifndef BF_P4C_ARCH_ARCH_H_
-#define BF_P4C_ARCH_ARCH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_H_
 
 #include <optional>
 
@@ -485,4 +485,4 @@ class ApplyEvaluator : public PassManager {
 
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_ARCH_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_H_ */

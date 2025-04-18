@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_
-#define BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_
 
 #include "backends/tofino/bf-p4c/phv/v2/kind_size_indexed_map.h"
 #include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
@@ -239,4 +239,4 @@ class GreedyTxScore : public TxScore {
 }  // namespace v2
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_ */

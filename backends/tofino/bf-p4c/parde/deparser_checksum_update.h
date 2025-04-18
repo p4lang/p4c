@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PARDE_DEPARSER_CHECKSUM_UPDATE_H_
-#define BF_P4C_PARDE_DEPARSER_CHECKSUM_UPDATE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_DEPARSER_CHECKSUM_UPDATE_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_DEPARSER_CHECKSUM_UPDATE_H_
 
 #include "ir/ir.h"
 
@@ -60,4 +60,4 @@ using namespace P4;
 IR::BFN::Pipe *extractChecksumFromDeparser(const IR::BFN::TnaDeparser *deparser,
                                            IR::BFN::Pipe *pipe);
 }  // namespace BFN
-#endif /* BF_P4C_PARDE_DEPARSER_CHECKSUM_UPDATE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_DEPARSER_CHECKSUM_UPDATE_H_ */

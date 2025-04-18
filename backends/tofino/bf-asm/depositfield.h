@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _DEPOSITFIELD_H_
-#define _DEPOSITFIELD_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_DEPOSITFIELD_H_
+#define BACKENDS_TOFINO_BF_ASM_DEPOSITFIELD_H_
 
 #include <stdint.h>
 
@@ -31,4 +31,4 @@ RotateConstant discoverRotation(int32_t val, int containerSize, int32_t tooLarge
 
 }  // namespace DepositField
 
-#endif /* _DEPOSITFIELD_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_DEPOSITFIELD_H_ */

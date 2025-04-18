@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef PARDE_MARSHAL_H_
-#define PARDE_MARSHAL_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_MARSHAL_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_MARSHAL_H_
 
 #include <iostream>
 
@@ -67,4 +67,4 @@ inline std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m) {
 
 }  // namespace P4
 
-#endif /* PARDE_MARSHAL_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_MARSHAL_H_ */

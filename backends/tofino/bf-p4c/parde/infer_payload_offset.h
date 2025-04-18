@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_
-#define BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/parde/parde_utils.h"
@@ -110,4 +110,4 @@ class InferPayloadOffset : public PassManager {
     InferPayloadOffset(const PhvInfo &phv, const FieldDefUse &defuse);
 };
 
-#endif /* BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_ */

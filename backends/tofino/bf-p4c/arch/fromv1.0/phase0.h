@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_ARCH_FROMV1_0_PHASE0_H_
-#define BF_P4C_ARCH_FROMV1_0_PHASE0_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_PHASE0_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_PHASE0_H_
 
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -204,4 +204,4 @@ cstring getDefaultPhase0TableKeyName();
 
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_FROMV1_0_PHASE0_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_PHASE0_H_ */

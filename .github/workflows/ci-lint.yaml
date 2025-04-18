@@ -15,9 +15,6 @@ jobs:
       IMAGE_TYPE: test
       CMAKE_ONLY: ON
       CTEST_PARALLEL_LEVEL: 4
-      ENABLE_GTESTS: ON
-      ENABLE_TOFINO: ON
-      ENABLE_TEST_TOOLS: ON
     steps:
       - uses: actions/checkout@v4
         with:

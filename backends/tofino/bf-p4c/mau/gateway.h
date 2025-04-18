@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_GATEWAY_H_
-#define BF_P4C_MAU_GATEWAY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_GATEWAY_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_GATEWAY_H_
 
 #include <set>
 
@@ -219,4 +219,4 @@ class GatewayOpt : public PassManager {
     explicit GatewayOpt(const PhvInfo &);
 };
 
-#endif /* BF_P4C_MAU_GATEWAY_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_GATEWAY_H_ */
