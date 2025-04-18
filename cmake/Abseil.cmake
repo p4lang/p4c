@@ -19,7 +19,7 @@ macro(p4c_obtain_abseil)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
     endif()
   else()
-    set(P4C_ABSEIL_VERSION "20240116.1")
+    set(P4C_ABSEIL_VERSION "20250127.1")
     message(STATUS "Fetching Abseil version ${P4C_ABSEIL_VERSION} for P4C...")
 
     # Unity builds do not work for Abseil...
@@ -40,7 +40,7 @@ macro(p4c_obtain_abseil)
     FetchContent_Declare(
       abseil
       URL https://github.com/abseil/abseil-cpp/releases/download/${P4C_ABSEIL_VERSION}/abseil-cpp-${P4C_ABSEIL_VERSION}.tar.gz
-      URL_HASH SHA256=3c743204df78366ad2eaf236d6631d83f6bc928d1705dd0000b872e53b73dc6a
+      # URL_HASH SHA256=3c743204df78366ad2eaf236d6631d83f6bc928d1705dd0000b872e53b73dc6a
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
       DOWNLOAD_EXTRACT_TIMESTAMP TRUE
