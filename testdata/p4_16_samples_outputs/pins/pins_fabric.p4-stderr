@@ -67,18 +67,6 @@ pins_fabric.p4(1497): [--Wwarn=unused] warning: Table acl_pre_ingress_vlan_table
 pins_fabric.p4(1526): [--Wwarn=unused] warning: Table acl_pre_ingress_metadata_table is not used; removing
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(1025): [--Wwarn=unused] warning: acl_egress_dhcp_to_host_counter: unused instance
-    @id(0x13000108) direct_counter(CounterType.packets_and_bytes) acl_egress_dhcp_to_host_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(1127): [--Wwarn=unused] warning: acl_ingress_security_counter: unused instance
-    @id(0x1300010A) direct_counter(CounterType.packets_and_bytes) acl_ingress_security_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(1429): [--Wwarn=unused] warning: acl_pre_ingress_vlan_counter: unused instance
-    @id(0x13000106) direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_vlan_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(1430): [--Wwarn=unused] warning: acl_pre_ingress_metadata_counter: unused instance
-    @id(0x13000105) direct_counter(CounterType.packets_and_bytes) acl_pre_ingress_metadata_counter;
-                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_fabric.p4(632): [--Wwarn=uninitialized_use] warning: tunnel_id_value may not be completely initialized
             tunnel_id_value: exact @id(1) @name("tunnel_id");
             ^^^^^^^^^^^^^^^
