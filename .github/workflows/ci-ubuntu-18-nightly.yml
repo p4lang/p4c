@@ -9,6 +9,11 @@ on:
   push:
     branches: [main]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-ubuntu18-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   # Build with GCC and test p4c on Ubuntu 18.04.
   test-ubuntu18:
