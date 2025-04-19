@@ -18,9 +18,9 @@ class HalsteadMetricsPass : public Inspector {
     std::unordered_set<std::string> uniqueUnaryOperators;
     std::unordered_set<std::string> uniqueBinaryOperators;
     std::unordered_multiset<std::string> uniqueOperands;
-    std::unordered_set<std::string> uniqueFields;
-    std::unordered_set<std::string> structFields;
-    std::vector<std::unordered_set<std::string>> scopedOperands;
+    std::unordered_set<std::string> structFields; // All structure field names.
+    std::unordered_set<std::string> uniqueFields; // Structure fields that were used in the program.
+    std::vector<std::unordered_set<std::string>> scopedOperands; // Operands divided by scopes. 
     const std::unordered_set<std::string> reservedKeywords = {
       "extract",       
       "emit",          
@@ -71,14 +71,14 @@ class HalsteadMetricsPass : public Inspector {
     explicit HalsteadMetricsPass(Metrics &metricsRef)
       : metrics(metricsRef) { setName("HalsteadMetricsPass"); }
 
-    // Scope enter/exit methods.
+    // Scope handling.
 
     bool preorder(const IR::P4Control* /*control*/) override;
     void postorder(const IR::P4Control* /*control*/) override;
     bool preorder(const IR::P4Parser* /*parser*/) override;
     void postorder(const IR::P4Parser* /*parser*/) override;
-    bool preorder(const IR::ActionFunction* /*action*/) override;
-    void postorder(const IR::ActionFunction* /*action*/) override;
+    bool preorder(const IR::Function* /*function*/) override;
+    void postorder(const IR::Function* /*function*/) override;
 
    // Operand and operator data collection. 
 
@@ -91,11 +91,13 @@ class HalsteadMetricsPass : public Inspector {
     bool preorder(const IR::MethodCallExpression *methodCall) override;
     void postorder(const IR::AssignmentStatement* /*stmt*/) override;
     void postorder(const IR::IfStatement *stmt) override;
-    void postorder(const IR::SwitchStatement *stmt) override;
+    void postorder(const IR::SwitchStatement* /*stmt*/) override;
+    void postorder(const IR::SwitchCase* /*case*/) override;
     void postorder(const IR::ReturnStatement* /*stmt*/) override;
     void postorder(const IR::ExitStatement* /*stmt*/) override;
     bool preorder(const IR::Operation_Unary *op) override;
     void postorder(const IR::Operation_Binary *op) override;
+    void postorder(const IR::ParserState* state) override;
     void postorder(const IR::SelectExpression* /*selectExpr*/) override;
     bool preorder(const IR::SelectCase* selectCase) override;
     void postorder(const IR::P4Table *table) override;

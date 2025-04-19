@@ -47,12 +47,12 @@ void HalsteadMetricsPass::postorder(const IR::P4Parser* /*parser*/) {
     scopedOperands.pop_back();
 }
 
-bool HalsteadMetricsPass::preorder(const IR::ActionFunction* /*action*/) {
+bool HalsteadMetricsPass::preorder(const IR::Function* /*function*/) {
     scopedOperands.emplace_back();
     return true;
 }
 
-void HalsteadMetricsPass::postorder(const IR::ActionFunction* /*action*/) {
+void HalsteadMetricsPass::postorder(const IR::Function* /*function*/) {
     scopedOperands.pop_back();
 }
 
@@ -115,39 +115,9 @@ bool HalsteadMetricsPass::preorder(const IR::PathExpression *pathExpr) {
     return true;
 }
 
-void HalsteadMetricsPass::postorder(const IR::Constant *constant) {
-    std::string valueStr = constant->toString().string();
-    addOperand(valueStr);
-}
-
 void HalsteadMetricsPass::postorder(const IR::ConstructorCallExpression *ctorCall) {
     std::string ctorName = ctorCall->constructedType->toString().string();
     addUnaryOperator("construct:" + ctorName);
-}
-
-void HalsteadMetricsPass::postorder(const IR::AssignmentStatement* /*stmt*/) {
-    addBinaryOperator("=");
-}
-
-void HalsteadMetricsPass::postorder(const IR::IfStatement *stmt) {
-    addUnaryOperator("if");
-    if (stmt->ifFalse != nullptr) {
-        addUnaryOperator("else");
-    }
-}
-
-void HalsteadMetricsPass::postorder(const IR::SwitchStatement *stmt) {
-    addUnaryOperator("switch");
-    for(size_t i = 0; i < stmt->cases.size(); i++)
-        addUnaryOperator("case");
-}
-
-void HalsteadMetricsPass::postorder(const IR::ReturnStatement* /*stmt*/) {
-    addUnaryOperator("return");
-}
-
-void HalsteadMetricsPass::postorder(const IR::ExitStatement* /*stmt*/) {
-    addUnaryOperator("exit");
 }
 
 bool HalsteadMetricsPass::preorder(const IR::Operation_Unary *op) {
@@ -157,9 +127,24 @@ bool HalsteadMetricsPass::preorder(const IR::Operation_Unary *op) {
     return true;
 }
 
-void HalsteadMetricsPass::postorder(const IR::Operation_Binary *op) {
-    std::string opName = op->getStringOp().string();
-    addBinaryOperator(opName);
+void HalsteadMetricsPass::postorder(const IR::ParserState* state) {
+    auto expr = state->selectExpression;
+    if (!expr) return;
+    
+    // Transition without select.
+    if (auto pe = expr->to<IR::PathExpression>()) {
+        addUnaryOperator("transition");
+        addOperand(pe->path->name.string());
+        std::cout<<"transition "<< pe->path->name.string()<<std::endl;
+    }
+    scopedOperands.pop_back();
+}
+
+void HalsteadMetricsPass::postorder(const IR::IfStatement *stmt) {
+    addUnaryOperator("if");
+    if (stmt->ifFalse != nullptr) {
+        addUnaryOperator("else");
+    }
 }
 
 void HalsteadMetricsPass::postorder(const IR::SelectExpression* /*selectExpr*/) {
@@ -184,6 +169,14 @@ void HalsteadMetricsPass::postorder(const IR::P4Table *table) {
         addOperand(propName);
     }
 }
+
+void HalsteadMetricsPass::postorder(const IR::AssignmentStatement* /*stmt*/) {addBinaryOperator("=");}
+void HalsteadMetricsPass::postorder(const IR::SwitchStatement* /*stmt*/) {addUnaryOperator("switch");}
+void HalsteadMetricsPass::postorder(const IR::SwitchCase* /*case*/){addUnaryOperator("case");}
+void HalsteadMetricsPass::postorder(const IR::ReturnStatement* /*stmt*/) {addUnaryOperator("return");}
+void HalsteadMetricsPass::postorder(const IR::ExitStatement* /*stmt*/) {addUnaryOperator("exit");}
+void HalsteadMetricsPass::postorder(const IR::Constant *constant) {addOperand(constant->toString().string());}
+void HalsteadMetricsPass::postorder(const IR::Operation_Binary *op) {addBinaryOperator(op->getStringOp().string());}
 
 // Final metrics calculation.
 

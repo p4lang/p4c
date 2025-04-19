@@ -12,7 +12,7 @@ struct PacketModification {
 };
 
 struct HeaderPacketMetrics {
-    P4::ordered_map<std::string, PacketModification> perPacket;  // Packet type -> operations
+    P4::ordered_map<std::string, PacketModification> perPacket;  // Packet type -> operations.
     PacketModification total;
     PacketModification max;
     PacketModification min;
@@ -30,7 +30,7 @@ struct UnusedCodeInstances {
     unsigned parameters = 0;      
     unsigned returns = 0;         
 
-    // Overload "-" and prevent negative deltas
+    // Overload "-" and prevent negative deltas.
     UnusedCodeInstances operator-(const UnusedCodeInstances& other) const {
         UnusedCodeInstances result;
         result.variables = (variables > other.variables) ? (variables - other.variables) : 0;
@@ -60,7 +60,7 @@ struct Metrics {
     } helperVars;
 
     struct NestingDepth {
-        P4::ordered_map<std::string, unsigned> blockNestingDepth; // Block name -> max depth
+        P4::ordered_map<std::string, unsigned> blockNestingDepth; // Block name -> max depth.
         double avgNestingDepth = 0.0;
         unsigned maxNestingDepth = 0;
     } nestingDepth;
@@ -71,7 +71,7 @@ struct Metrics {
         unsigned totalOperators = 0;
         unsigned totalOperands = 0;
 
-        // Derived metrics
+        // Derived metrics.
         double vocabulary = 0.0;
         double length = 0.0;
         double difficulty = 0.0;
@@ -82,20 +82,20 @@ struct Metrics {
 
     struct HeaderMetrics {
         unsigned numHeaders = 0;
-        P4::ordered_map<std::string, unsigned> fieldsNum;     // Header name -> num fields
-        P4::ordered_map<std::string, unsigned> fieldSizeSum;  // Header name -> total size
+        P4::ordered_map<std::string, unsigned> fieldsNum;     // Header name -> num fields.
+        P4::ordered_map<std::string, unsigned> fieldSizeSum;  // Header name -> total size.
         double avgFieldsNum = 0.0;
         double avgFieldSize = 0.0;
     } headerMetrics;
 
-    HeaderPacketMetrics headerManipulationMetrics; // Metrics related to header addition and removal operations
-    HeaderPacketMetrics headerModificationMetrics; // Metrics related to editing operations performed on header fields
+    HeaderPacketMetrics headerManipulationMetrics; // Metrics related to header addition and removal operations.
+    HeaderPacketMetrics headerModificationMetrics; // Metrics related to editing operations performed on header fields.
 
     struct MatchActionTableMetrics {
         unsigned numTables = 0;
-        P4::ordered_map<std::string, unsigned> keysNum;      // Table name -> num keys
-        P4::ordered_map<std::string, unsigned> actionsNum;   // Table name -> num actions
-        P4::ordered_map<std::string, unsigned> keySizeSum;   // Table name -> sum key sizes
+        P4::ordered_map<std::string, unsigned> keysNum;      // Table name -> num keys.
+        P4::ordered_map<std::string, unsigned> actionsNum;   // Table name -> num actions.
+        P4::ordered_map<std::string, unsigned> keySizeSum;   // Table name -> sum key sizes.
 
         unsigned totalKeys = 0;
         unsigned totalKeySizeSum = 0;
@@ -109,11 +109,11 @@ struct Metrics {
     } matchActionTableMetrics;
 
     struct ParserMetrics {
-        P4::ordered_map<std::string, unsigned> StateComplexity; // State name -> complexity
+        P4::ordered_map<std::string, unsigned> StateComplexity; // State name -> complexity.
         unsigned totalStates = 0;
     } parserMetrics;
 
-    P4::ordered_map<std::string, unsigned> cyclomaticComplexity; // Function name -> CC value
+    P4::ordered_map<std::string, unsigned> cyclomaticComplexity; // Function name -> CC value.
 
     struct ExternMetrics {
         unsigned externFunctions = 0;
