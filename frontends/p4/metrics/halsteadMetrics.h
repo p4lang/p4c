@@ -21,7 +21,7 @@ class HalsteadMetricsPass : public Inspector {
     std::unordered_set<std::string> uniqueFields;
     std::unordered_set<std::string> structFields;
     std::vector<std::unordered_set<std::string>> scopedOperands;
-    const std::unordered_set<std::string> specialMethods = {
+    const std::unordered_set<std::string> reservedKeywords = {
       "extract",       
       "emit",          
       "isValid",      
@@ -82,8 +82,8 @@ class HalsteadMetricsPass : public Inspector {
 
    // Operand and operator data collection. 
 
-    void postorder(const IR::Type_Header* /*headerType*/) override;
-    void postorder(const IR::Type_Struct* /*structType*/) override;
+    void postorder(const IR::Type_Header* headerType) override;
+    void postorder(const IR::Type_Struct* structType) override;
     bool preorder(const IR::PathExpression *pathExpr) override;
     bool preorder(const IR::Member *member) override;
     void postorder(const IR::Constant *constant) override;

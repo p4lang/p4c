@@ -99,7 +99,7 @@ bool HalsteadMetricsPass::preorder(const IR::Member *member) {
     if (!member) return false;
     std::string fieldName = member->member.name.string();
     // Only add the member if it is not a method call
-    if (specialMethods.find(fieldName) == specialMethods.end()){
+    if (reservedKeywords.find(fieldName) == reservedKeywords.end()){
         addOperand(fieldName);
     }
     addBinaryOperator(".");
