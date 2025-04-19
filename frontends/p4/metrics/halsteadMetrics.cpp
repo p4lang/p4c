@@ -172,7 +172,7 @@ bool HalsteadMetricsPass::preorder(const IR::SelectCase *caseItem) {
     addOperand(caseItem->keyset->toString().string());
     if (auto pathExpr = caseItem->state->to<IR::PathExpression>()) {
         std::string nextState = pathExpr->path->name.toString().string();
-        addUnaryOperator(nextState);
+        addOperand(nextState);
     }
     return false;
 }
