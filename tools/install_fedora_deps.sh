@@ -52,7 +52,9 @@ sudo dnf install -y -q \
     procps-ng \
     python3 \
     python3-pip \
+    python3-virtualenv \
     python3-thrift \
+    curl \
     readline-devel \
     tcpdump \
     thrift-devel \
@@ -61,8 +63,13 @@ sudo dnf install -y -q \
     glibc-devel.i686 \
     ninja-build
 
-pip3 install --upgrade pip
-pip3 install -r ${P4C_DIR}/requirements.txt
+# We need to source the bashrc file to update the PATH variable for Fedora.
+grep -qxF 'export PATH="$HOME/.local/bin:$PATH"' ~/.bashrc || echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+# Set up uv for Python dependency management.
+curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
+uv sync
+uv tool update-shell
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS
