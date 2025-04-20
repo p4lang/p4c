@@ -14,6 +14,7 @@ class UnusedCodeMetricPass : public Inspector {
  private:
     Metrics& metrics;
     UnusedCodeInstances currentInstancesCount;
+    std::vector<std::string> scope;
     bool isBefore;
 
     void recordBefore();
@@ -24,16 +25,32 @@ class UnusedCodeMetricPass : public Inspector {
         : metrics(metrics), isBefore(isBefore) 
         {setName("UnusedCodeMetricPass");
     }
+
+
+    // Scope handling.
+
+    void scope_enter(std::string name);
+    void scope_leave();
+    bool preorder(const IR::P4Control* control) override;
+    void postorder(const IR::P4Control* /*control*/) override;
+    bool preorder(const IR::P4Parser* parser) override;
+    void postorder(const IR::P4Parser* /*parser*/) override;
+    bool preorder(const IR::Function* function) override;
+    void postorder(const IR::Function* /*function*/) override;
+    bool preorder (const IR::IfStatement* stmt) override;
+    void postorder(const IR::IfStatement* /*stmt*/) override;
+    bool preorder(const IR::SwitchCase* caseNode) override;
+    void postorder(const IR::SwitchCase* /*case*/) override;
     
-    void postorder(const IR::P4Action* node) override;
-    void postorder(const IR::ParserState* node) override;
+    // Data collection.
+
+    bool preorder(const IR::P4Action* action) override;
+    void postorder(const IR::ParserState* /*state*/) override;
     void postorder(const IR::Declaration_Variable* node) override;
     void postorder(const IR::Type_Enum* /*node*/) override;
     void postorder(const IR::Type_SerEnum* /*node*/) override;
     void postorder(const IR::BlockStatement* /*node*/) override;
-    void postorder(const IR::IfStatement* /*node*/) override;
     void postorder(const IR::SwitchStatement* /*node*/) override;
-    void postorder(const IR::Function* /*node*/) override;
     void postorder(const IR::Parameter* /*node*/) override;
     void postorder(const IR::ReturnStatement* /*node*/) override;
     void postorder(const IR::P4Program* /*node*/) override;

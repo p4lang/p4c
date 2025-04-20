@@ -135,7 +135,6 @@ void HalsteadMetricsPass::postorder(const IR::ParserState* state) {
     if (auto pe = expr->to<IR::PathExpression>()) {
         addUnaryOperator("transition");
         addOperand(pe->path->name.string());
-        std::cout<<"transition "<< pe->path->name.string()<<std::endl;
     }
     scopedOperands.pop_back();
 }

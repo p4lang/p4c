@@ -2,43 +2,102 @@
 
 namespace P4 {
 
-
-void UnusedCodeMetricPass::postorder(const IR::P4Action* node) {
-    if (node->getName().name == "NoAction") return;
-
-    std::string parentName = "";
-    if (auto* parentCtrl = findContext<IR::P4Control>()) {
-        parentName = parentCtrl->getName().name.string();
-    } 
-    else if (auto* parentParser = findContext<IR::P4Parser>()) {
-        parentName = parentParser->getName().name.string();
-    }
-
-    std::string scopedActionName = parentName + "." + node->getName().name;
-
-    if (isBefore) {
-        metrics.helperVars.beforeActions.push_back(scopedActionName);
-    } else {
-        metrics.helperVars.afterActions.push_back(scopedActionName);
-    }
+void UnusedCodeMetricPass::scope_enter(std::string name){
+    scope.push_back(scope.empty() ? name : scope.back() + "." + name);
 }
 
-void UnusedCodeMetricPass::postorder(const IR::ParserState* node) {
-    if (node->name != IR::ParserState::accept && 
-        node->name != IR::ParserState::reject) {
+void UnusedCodeMetricPass::scope_leave(){
+    if (!scope.empty())
+        scope.pop_back();
+}
+
+bool UnusedCodeMetricPass::preorder(const IR::P4Control* control) {
+    scope_enter(control->getName().name.string());
+    return true;
+}
+
+void UnusedCodeMetricPass::postorder(const IR::P4Control* /*control*/) {
+    scope_leave();
+}
+
+bool UnusedCodeMetricPass::preorder(const IR::P4Parser* parser) {
+    scope_enter(parser->getName().name.string());
+    return true;
+}
+
+void UnusedCodeMetricPass::postorder(const IR::P4Parser* /*parser*/) {
+    scope_leave();
+}
+
+bool UnusedCodeMetricPass::preorder(const IR::Function* function) {
+    scope_enter(function->getName().name.string());
+    return true;
+}
+
+void UnusedCodeMetricPass::postorder(const IR::Function* /*function*/) {
+    scope_leave();
+}
+
+bool UnusedCodeMetricPass::preorder(const IR::IfStatement* stmt) {
+    scope_enter("if_" + std::to_string(stmt->id));
+    currentInstancesCount.conditionals++;
+    return true;
+}
+
+void UnusedCodeMetricPass::postorder(const IR::IfStatement* /*stmt*/) {
+    scope_leave();
+}
+
+bool UnusedCodeMetricPass::preorder(const IR::SwitchCase* caseNode) {
+    scope_enter("case_" + std::to_string(caseNode->id));
+    return true;
+}
+
+void UnusedCodeMetricPass::postorder(const IR::SwitchCase* /*caseNode*/) {
+    scope_leave();
+}
+
+
+bool UnusedCodeMetricPass::preorder(const IR::P4Action* action) {
+    if (action->getName().name == "NoAction") return false;
+    std::string scopedName = scope.empty() ? action->getName().name.string() : scope.back() + "." + action->getName().name.string();
+    
+
+    if (isBefore) {
+        metrics.helperVars.beforeActions.push_back(scopedName);
+    } else {
+        metrics.helperVars.afterActions.push_back(scopedName);
+    }
+    return true;
+}
+
+void UnusedCodeMetricPass::postorder(const IR::ParserState* state) {
+    if (state->name != IR::ParserState::accept && 
+        state->name != IR::ParserState::reject) {
         currentInstancesCount.states++;
     }
 }
 
 void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable* node) {
-    std::string varName = node->getName().name.string();
+
+    std::string name = node->getName().name.string();
+    std::string scopedName = scope.empty() ? name : scope.back() + "." + name;
+
     if (isBefore) {
-        metrics.helperVars.beforeVariables.push_back(varName);
+        metrics.helperVars.beforeVariables.push_back(scopedName);
     } 
     else {
-        metrics.helperVars.afterVariables.push_back(varName);
+        metrics.helperVars.afterVariables.push_back(scopedName);
     }
 }
+
+void UnusedCodeMetricPass::postorder(const IR::Type_Enum* /*node*/) { currentInstancesCount.enums++; }
+void UnusedCodeMetricPass::postorder(const IR::Type_SerEnum* /*node*/) { currentInstancesCount.enums++; }
+void UnusedCodeMetricPass::postorder(const IR::BlockStatement* /*node*/) { currentInstancesCount.blocks++; }
+void UnusedCodeMetricPass::postorder(const IR::SwitchStatement* /*node*/) { currentInstancesCount.switches++; }
+void UnusedCodeMetricPass::postorder(const IR::Parameter* /*node*/) { currentInstancesCount.parameters++; }
+void UnusedCodeMetricPass::postorder(const IR::ReturnStatement* /*node*/) { currentInstancesCount.returns++; }
+void UnusedCodeMetricPass::postorder(const IR::P4Program* /*node*/) { isBefore ? recordBefore() : recordAfter(); }
 
 void UnusedCodeMetricPass::recordBefore() {
     metrics.helperVars.interPassCounts = currentInstancesCount;
@@ -61,11 +120,11 @@ void UnusedCodeMetricPass::recordAfter() {
 
     // Calculate the number of unused variables.
     for (const auto& beforeVar : metrics.helperVars.beforeVariables) {
-        if (std::find(metrics.helperVars.afterVariables.begin(), metrics.helperVars.afterVariables.end(),beforeVar) 
-            == metrics.helperVars.afterVariables.end()) 
-        {
-            metrics.unusedCodeInstances.variables++;
-        }
+        bool found = std::any_of(metrics.helperVars.afterVariables.begin(), metrics.helperVars.afterVariables.end(),
+            [&](const std::string& afterVar) {
+                return afterVar.find(beforeVar) != std::string::npos;
+            });
+        if (!found) metrics.unusedCodeInstances.variables++;
     }
 
     if(LOGGING(3)){
@@ -86,15 +145,5 @@ void UnusedCodeMetricPass::recordAfter() {
             std::cout<<" - "<< after << std::endl;
     }
 }
-
-void UnusedCodeMetricPass::postorder(const IR::Type_Enum* /*node*/) { currentInstancesCount.enums++; }
-void UnusedCodeMetricPass::postorder(const IR::Type_SerEnum* /*node*/) { currentInstancesCount.enums++; }
-void UnusedCodeMetricPass::postorder(const IR::BlockStatement* /*node*/) { currentInstancesCount.blocks++; }
-void UnusedCodeMetricPass::postorder(const IR::IfStatement* /*node*/) { currentInstancesCount.conditionals++; }
-void UnusedCodeMetricPass::postorder(const IR::SwitchStatement* /*node*/) { currentInstancesCount.switches++; }
-void UnusedCodeMetricPass::postorder(const IR::Function* /*node*/) { currentInstancesCount.functions++; }
-void UnusedCodeMetricPass::postorder(const IR::Parameter* /*node*/) { currentInstancesCount.parameters++; }
-void UnusedCodeMetricPass::postorder(const IR::ReturnStatement* /*node*/) { currentInstancesCount.returns++; }
-void UnusedCodeMetricPass::postorder(const IR::P4Program* /*node*/) { isBefore ? recordBefore() : recordAfter(); }
 
 }  // namespace P4
