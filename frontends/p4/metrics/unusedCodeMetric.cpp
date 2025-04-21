@@ -46,15 +46,7 @@ bool UnusedCodeMetricPass::preorder(const IR::IfStatement* stmt) {
 
 void UnusedCodeMetricPass::postorder(const IR::IfStatement* stmt) {
     currentInstancesCount.conditionals++;
-    
-    if (stmt->ifTrue != nullptr && !stmt->ifTrue->is<IR::BlockStatement>())
-        currentInstancesCount.blocks++;
-        
-    if (stmt->ifFalse != nullptr){
-        currentInstancesCount.conditionals++;
-        if(!stmt->ifFalse->is<IR::BlockStatement>()) currentInstancesCount.blocks++;
-    }
-        
+    if (stmt->ifFalse != nullptr) currentInstancesCount.conditionals++;
     scope_leave();
 }
 
@@ -66,7 +58,6 @@ bool UnusedCodeMetricPass::preorder(const IR::SwitchCase* caseNode) {
 void UnusedCodeMetricPass::postorder(const IR::SwitchCase* /*caseNode*/) {
     scope_leave();
 }
-
 
 bool UnusedCodeMetricPass::preorder(const IR::P4Action* action) {
     if (action->getName().name == "NoAction") return false;
@@ -102,17 +93,11 @@ void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable* node) {
 
 void UnusedCodeMetricPass::postorder(const IR::Type_Enum* /*node*/) { currentInstancesCount.enums++; }
 void UnusedCodeMetricPass::postorder(const IR::Type_SerEnum* /*node*/) { currentInstancesCount.enums++; }
-void UnusedCodeMetricPass::postorder(const IR::BlockStatement* /*node*/) { currentInstancesCount.blocks++; }
 void UnusedCodeMetricPass::postorder(const IR::Parameter* /*node*/) { currentInstancesCount.parameters++; }
 void UnusedCodeMetricPass::postorder(const IR::ReturnStatement* /*node*/) { currentInstancesCount.returns++; }
 void UnusedCodeMetricPass::postorder(const IR::P4Program* /*node*/) { isBefore ? recordBefore() : recordAfter(); }
 
 void UnusedCodeMetricPass::recordBefore() {
-    // Disregard functions, actions and conditionals.
-    currentInstancesCount.blocks -= currentInstancesCount.functions;
-    currentInstancesCount.blocks -= currentInstancesCount.actions;
-    currentInstancesCount.blocks -= currentInstancesCount.conditionals;
-    // Save collected data.
     metrics.helperVars.interPassCounts = currentInstancesCount;
 }
 

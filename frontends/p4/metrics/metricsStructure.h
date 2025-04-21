@@ -22,7 +22,6 @@ struct UnusedCodeInstances {
     unsigned variables = 0;
     unsigned states = 0;
     unsigned enums = 0;
-    unsigned blocks = 0;
     unsigned conditionals = 0;
     unsigned actions = 0;         
     unsigned functions = 0;       
@@ -35,7 +34,6 @@ struct UnusedCodeInstances {
         result.variables = (variables > other.variables) ? (variables - other.variables) : 0;
         result.states = (states > other.states) ? (states - other.states) : 0;
         result.enums = (enums > other.enums) ? (enums - other.enums) : 0;
-        result.blocks = (blocks > other.blocks) ? (blocks - other.blocks) : 0;
         result.conditionals = (conditionals > other.conditionals) ? (conditionals - other.conditionals) : 0;
         result.actions = (actions > other.actions) ? (actions - other.actions) : 0;
         result.functions = (functions > other.functions) ? (functions - other.functions) : 0;

@@ -49,7 +49,6 @@ class UnusedCodeMetricPass : public Inspector {
     void postorder(const IR::Declaration_Variable* node) override;
     void postorder(const IR::Type_Enum* /*node*/) override;
     void postorder(const IR::Type_SerEnum* /*node*/) override;
-    void postorder(const IR::BlockStatement* /*node*/) override;
     void postorder(const IR::Parameter* /*node*/) override;
     void postorder(const IR::ReturnStatement* /*node*/) override;
     void postorder(const IR::P4Program* /*node*/) override;

@@ -69,10 +69,8 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
                 << "  Declarations:\n"
                 << "\tVariables: " << metrics.unusedCodeInstances.variables << "\n"
                 << "\tEnums: " << metrics.unusedCodeInstances.enums << "\n"
-                << "  Control Flow:\n"
-                << "\tBlocks: " << metrics.unusedCodeInstances.blocks << "\n"
-                << "\tConditionals: " << metrics.unusedCodeInstances.conditionals << "\n"
                 << "  Other:\n"
+                << "\tConditionals: " << metrics.unusedCodeInstances.conditionals << "\n"
                 << "\tParameters: " << metrics.unusedCodeInstances.parameters << "\n"
                 << "\tReturns: " << metrics.unusedCodeInstances.returns << "\n";
 
@@ -82,7 +80,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
                    ->emplace("states", new Util::JsonValue(metrics.unusedCodeInstances.states))
                    ->emplace("variables", new Util::JsonValue(metrics.unusedCodeInstances.variables))
                    ->emplace("enums", new Util::JsonValue(metrics.unusedCodeInstances.enums))
-                   ->emplace("blocks", new Util::JsonValue(metrics.unusedCodeInstances.blocks))
                    ->emplace("conditionals", new Util::JsonValue(metrics.unusedCodeInstances.conditionals))
                    ->emplace("parameters", new Util::JsonValue(metrics.unusedCodeInstances.parameters))
                    ->emplace("returns", new Util::JsonValue(metrics.unusedCodeInstances.returns));
