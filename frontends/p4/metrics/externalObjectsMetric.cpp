@@ -42,6 +42,7 @@ void ExternalObjectsMetricPass::postorder(const IR::Member* node) {
 }
 
 void ExternalObjectsMetricPass::postorder(const IR::Method* node) {
+    // Do not add methods that belong to an extern structure.
     if (!findContext<IR::Type_Extern>()) {
         metrics.externMetrics.externFunctions++;
         externFunctions.insert(node->name.name.string());

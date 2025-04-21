@@ -116,8 +116,8 @@ bool HalsteadMetricsPass::preorder(const IR::PathExpression *pathExpr) {
 }
 
 void HalsteadMetricsPass::postorder(const IR::ConstructorCallExpression *ctorCall) {
-    std::string ctorName = ctorCall->constructedType->toString().string();
-    addUnaryOperator("construct:" + ctorName);
+    if (ctorCall->constructedType)
+        addUnaryOperator("construct:" + ctorCall->constructedType->toString().string());
 }
 
 bool HalsteadMetricsPass::preorder(const IR::Operation_Unary *op) {
@@ -136,7 +136,6 @@ void HalsteadMetricsPass::postorder(const IR::ParserState* state) {
         addUnaryOperator("transition");
         addOperand(pe->path->name.string());
     }
-    scopedOperands.pop_back();
 }
 
 void HalsteadMetricsPass::postorder(const IR::IfStatement *stmt) {
