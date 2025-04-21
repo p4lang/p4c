@@ -23,8 +23,6 @@ limitations under the License.
 
 #include <stddef.h>  // size_t
 
-#include <bpf/bpf_endian.h>  // definitions for bpf_ntohs etc...
-
 #include "ebpf_common.h"
 
 #include "install/libbpf/include/bpf/bpf_endian.h"  // definitions for bpf_ntohs etc...
@@ -198,6 +196,6 @@ struct {                                 \
 #define BPF_OBJ_PIN(table, name) bpf_obj_pin(table, name)
 #define BPF_OBJ_GET(name) bpf_obj_get(name)
 
-#endif // END EBPF KERNEL DEFINITIONS
+#endif  // END EBPF KERNEL DEFINITIONS
 
 #endif  // BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_

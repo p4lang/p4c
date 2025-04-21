@@ -154,6 +154,7 @@ class Target(EBPFTarget):
             return result
         return testutils.SUCCESS
 
+    # FIXME: Reenable bpftool for loading in subsequent PRs.
     # def _attach_filters(self, bridge: Bridge, proc: subprocess.Popen) -> int:
     #     # Is this a XDP or TC (ebpf_filter) program?
     #     p_result = testutils.exec_process(f"objdump -hj xdp {self.template}.o").returncode
@@ -168,7 +169,10 @@ class Target(EBPFTarget):
     #     if result != testutils.SUCCESS:
     #         return result
     #     load_type = "xdp" if is_xdp else "tc"
-    #     cmd = f"{self.bpftool} prog load {self.template}.o {self.EBPF_PATH}/ebpf_filter pinmaps {self.ebpf_map_path} type {load_type}"
+    #     cmd = (
+    #         f"{self.bpftool} prog load {self.template}.o {self.EBPF_PATH}/ebpf_filter pinmaps "
+    #         f"{self.ebpf_map_path} type {load_type}"
+    #     )
     #     result = bridge.ns_proc_append(proc, cmd)
     #     if result != testutils.SUCCESS:
     #         return result
@@ -177,20 +181,20 @@ class Target(EBPFTarget):
     #     ports = bridge.br_ports if is_xdp else bridge.edge_ports
     #     if len(ports) > 0:
     #         for port_name in ports:
-    #             result = bridge.ns_proc_append(
-    #                 proc,
-    #                 f"{self.bpftool} net attach {attach_type} pinned {self.EBPF_PATH}/ebpf_filter dev {port_name}",
+    #             cmd = (
+    #                 f"{self.bpftool} net attach {attach_type} pinned "
+    #                 f"{self.EBPF_PATH}/ebpf_filter dev {port_name} "
     #             )
+    #             result = bridge.ns_proc_append(proc, cmd)
     #             if result != testutils.SUCCESS:
     #                 return result
-    #     else:
-    #         # No ports attached (no pcap files), load to bridge instead
-    #         result = bridge.ns_proc_append(
-    #             proc,
-    #             f"{self.bpftool} net attach {attach_type} pinned {self.EBPF_PATH}/ebpf_filter dev {bridge.br_name}",
-    #         )
-
-    #     return result
+    #         return result
+    #     # No ports attached (no pcap files), load to bridge instead
+    #     cmd = (
+    #         f"{self.bpftool} net attach {attach_type} pinned "
+    #         f"{self.EBPF_PATH}/ebpf_filter dev {bridge.br_name} "
+    #     )
+    #     return bridge.ns_proc_append(proc, cmd)
 
     def _run_tcpdump(self, bridge, filename, port):
         cmd = f"{bridge.get_ns_prefix()} tcpdump -w {filename} -i {port}"
