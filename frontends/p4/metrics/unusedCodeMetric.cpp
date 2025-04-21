@@ -31,6 +31,7 @@ void UnusedCodeMetricPass::postorder(const IR::P4Parser* /*parser*/) {
 
 bool UnusedCodeMetricPass::preorder(const IR::Function* function) {
     scope_enter(function->getName().name.string());
+    currentInstancesCount.functions++;
     return true;
 }
 
@@ -40,11 +41,20 @@ void UnusedCodeMetricPass::postorder(const IR::Function* /*function*/) {
 
 bool UnusedCodeMetricPass::preorder(const IR::IfStatement* stmt) {
     scope_enter("if_" + std::to_string(stmt->id));
-    currentInstancesCount.conditionals++;
     return true;
 }
 
-void UnusedCodeMetricPass::postorder(const IR::IfStatement* /*stmt*/) {
+void UnusedCodeMetricPass::postorder(const IR::IfStatement* stmt) {
+    currentInstancesCount.conditionals++;
+    
+    if (stmt->ifTrue != nullptr && !stmt->ifTrue->is<IR::BlockStatement>())
+        currentInstancesCount.blocks++;
+        
+    if (stmt->ifFalse != nullptr){
+        currentInstancesCount.conditionals++;
+        if(!stmt->ifFalse->is<IR::BlockStatement>()) currentInstancesCount.blocks++;
+    }
+        
     scope_leave();
 }
 
@@ -61,7 +71,6 @@ void UnusedCodeMetricPass::postorder(const IR::SwitchCase* /*caseNode*/) {
 bool UnusedCodeMetricPass::preorder(const IR::P4Action* action) {
     if (action->getName().name == "NoAction") return false;
     std::string scopedName = scope.empty() ? action->getName().name.string() : scope.back() + "." + action->getName().name.string();
-    
 
     if (isBefore) {
         metrics.helperVars.beforeActions.push_back(scopedName);
@@ -94,12 +103,16 @@ void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable* node) {
 void UnusedCodeMetricPass::postorder(const IR::Type_Enum* /*node*/) { currentInstancesCount.enums++; }
 void UnusedCodeMetricPass::postorder(const IR::Type_SerEnum* /*node*/) { currentInstancesCount.enums++; }
 void UnusedCodeMetricPass::postorder(const IR::BlockStatement* /*node*/) { currentInstancesCount.blocks++; }
-void UnusedCodeMetricPass::postorder(const IR::SwitchStatement* /*node*/) { currentInstancesCount.switches++; }
 void UnusedCodeMetricPass::postorder(const IR::Parameter* /*node*/) { currentInstancesCount.parameters++; }
 void UnusedCodeMetricPass::postorder(const IR::ReturnStatement* /*node*/) { currentInstancesCount.returns++; }
 void UnusedCodeMetricPass::postorder(const IR::P4Program* /*node*/) { isBefore ? recordBefore() : recordAfter(); }
 
 void UnusedCodeMetricPass::recordBefore() {
+    // Disregard functions, actions and conditionals.
+    currentInstancesCount.blocks -= currentInstancesCount.functions;
+    currentInstancesCount.blocks -= currentInstancesCount.actions;
+    currentInstancesCount.blocks -= currentInstancesCount.conditionals;
+    // Save collected data.
     metrics.helperVars.interPassCounts = currentInstancesCount;
 }
 
@@ -115,8 +128,9 @@ void UnusedCodeMetricPass::recordAfter() {
         
         if (!found) metrics.unusedCodeInstances.actions++;
     }
-    // Disregard actions that were inlined.
-    metrics.unusedCodeInstances.actions -= metrics.inlinedActionsNum;
+    // Disregard actions and functions that were inlined.
+    metrics.unusedCodeInstances.actions -= metrics.inlinedCode.actions;
+    metrics.unusedCodeInstances.functions -= metrics.inlinedCode.functions;
 
     // Calculate the number of unused variables.
     for (const auto& beforeVar : metrics.helperVars.beforeVariables) {

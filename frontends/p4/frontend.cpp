@@ -258,7 +258,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     }
     if (policy->optimize(options)) {
         passes.addPasses({new InlineActions(&typeMap, *policy)});
-        metricsPassManager.addInlined(passes);
+        metricsPassManager.addInlined(passes, true);
         passes.addPasses({
             new LocalizeAllActions(*policy),
             new UniqueNames(),
@@ -268,6 +268,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             // in the proper place.
             new RemoveActionParameters(&typeMap),
             new InlineFunctions(&typeMap, *policy),
+        });
+        metricsPassManager.addInlined(passes, false);
+        passes.addPasses({
             new SetHeaders(&typeMap),
             // Check for constants only after inlining
             new CheckConstants(&typeMap),

@@ -93,7 +93,7 @@ set (P4_FRONTEND_SRCS
   p4/metrics/headerPacketMetrics.cpp
   p4/metrics/matchActionTableMetrics.cpp
   p4/metrics/parserMetrics.cpp
-  p4/metrics/inlinedActionsMetric.cpp
+  p4/metrics/inlinedCodeMetric.cpp
   p4/metrics/externalObjectsMetric.cpp
   p4/metrics/exportMetrics.cpp
   )
@@ -182,7 +182,7 @@ set (P4_FRONTEND_HDRS
   p4/metrics/headerPacketMetrics.h
   p4/metrics/matchActionTableMetrics.h
   p4/metrics/parserMetrics.h
-  p4/metrics/inlinedActionsMetric.h
+  p4/metrics/inlinedCodeMetric.h
   p4/metrics/externalObjectsMetric.h
   p4/metrics/exportMetrics.h
   )

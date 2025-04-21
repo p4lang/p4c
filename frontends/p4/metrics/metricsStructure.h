@@ -24,7 +24,6 @@ struct UnusedCodeInstances {
     unsigned enums = 0;
     unsigned blocks = 0;
     unsigned conditionals = 0;
-    unsigned switches = 0;
     unsigned actions = 0;         
     unsigned functions = 0;       
     unsigned parameters = 0;      
@@ -38,7 +37,6 @@ struct UnusedCodeInstances {
         result.enums = (enums > other.enums) ? (enums - other.enums) : 0;
         result.blocks = (blocks > other.blocks) ? (blocks - other.blocks) : 0;
         result.conditionals = (conditionals > other.conditionals) ? (conditionals - other.conditionals) : 0;
-        result.switches = (switches > other.switches) ? (switches - other.switches) : 0;
         result.actions = (actions > other.actions) ? (actions - other.actions) : 0;
         result.functions = (functions > other.functions) ? (functions - other.functions) : 0;
         result.parameters = (parameters > other.parameters) ? (parameters - other.parameters) : 0;
@@ -48,7 +46,11 @@ struct UnusedCodeInstances {
 };
     
 struct Metrics {
-    unsigned inlinedActionsNum = 0;
+    struct InlinedCode {
+        unsigned actions = 0;
+        unsigned functions = 0;
+    } inlinedCode;
+    
 
     UnusedCodeInstances unusedCodeInstances;
     struct HelperVars { // Variables for storing inter-pass data.

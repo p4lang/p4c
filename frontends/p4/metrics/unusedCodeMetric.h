@@ -38,7 +38,7 @@ class UnusedCodeMetricPass : public Inspector {
     bool preorder(const IR::Function* function) override;
     void postorder(const IR::Function* /*function*/) override;
     bool preorder (const IR::IfStatement* stmt) override;
-    void postorder(const IR::IfStatement* /*stmt*/) override;
+    void postorder(const IR::IfStatement* stmt) override;
     bool preorder(const IR::SwitchCase* caseNode) override;
     void postorder(const IR::SwitchCase* /*case*/) override;
     
@@ -50,7 +50,6 @@ class UnusedCodeMetricPass : public Inspector {
     void postorder(const IR::Type_Enum* /*node*/) override;
     void postorder(const IR::Type_SerEnum* /*node*/) override;
     void postorder(const IR::BlockStatement* /*node*/) override;
-    void postorder(const IR::SwitchStatement* /*node*/) override;
     void postorder(const IR::Parameter* /*node*/) override;
     void postorder(const IR::ReturnStatement* /*node*/) override;
     void postorder(const IR::P4Program* /*node*/) override;

@@ -72,7 +72,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
                 << "  Control Flow:\n"
                 << "\tBlocks: " << metrics.unusedCodeInstances.blocks << "\n"
                 << "\tConditionals: " << metrics.unusedCodeInstances.conditionals << "\n"
-                << "\tSwitches: " << metrics.unusedCodeInstances.switches << "\n"
                 << "  Other:\n"
                 << "\tParameters: " << metrics.unusedCodeInstances.parameters << "\n"
                 << "\tReturns: " << metrics.unusedCodeInstances.returns << "\n";
@@ -85,7 +84,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
                    ->emplace("enums", new Util::JsonValue(metrics.unusedCodeInstances.enums))
                    ->emplace("blocks", new Util::JsonValue(metrics.unusedCodeInstances.blocks))
                    ->emplace("conditionals", new Util::JsonValue(metrics.unusedCodeInstances.conditionals))
-                   ->emplace("switches", new Util::JsonValue(metrics.unusedCodeInstances.switches))
                    ->emplace("parameters", new Util::JsonValue(metrics.unusedCodeInstances.parameters))
                    ->emplace("returns", new Util::JsonValue(metrics.unusedCodeInstances.returns));
         root->emplace("unused_code", unusedJson);
@@ -266,10 +264,16 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("extern", externJson);
     }
 
-    // Inlined actions.
+    // Inlined code.
     if (selectedMetrics.count("inlined")) {
-        textFile << "\nNumber of Inlined Actions: " << metrics.inlinedActionsNum << "\n";
-        root->emplace("inlined_actions", new Util::JsonValue(metrics.inlinedActionsNum));
+        textFile << "\nInlined Code:\n"
+                << "  Actions: " << metrics.inlinedCode.actions << "\n"
+                << "  Functions: " << metrics.inlinedCode.functions << "\n";
+
+        auto* inlinedJson = new Util::JsonObject();
+        inlinedJson->emplace("inlined_actions", new Util::JsonValue(metrics.inlinedCode.actions))
+                   ->emplace("inlined_functions", new Util::JsonValue(metrics.inlinedCode.functions));
+        root->emplace("inlined", inlinedJson);
     }
 
     jsonFile << root->toString();

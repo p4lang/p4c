@@ -23,6 +23,8 @@ class NestingDepthMetricPass : public Inspector {
     void postorder(const IR::P4Parser* parser) override;
     bool preorder(const IR::P4Control* /*control*/) override;
     void postorder(const IR::P4Control* control) override;
+    bool preorder(const IR::Function* /*function*/) override;
+    void postorder(const IR::Function* function) override;
     bool preorder(const IR::ParserState* /*state*/) override;
     void postorder(const IR::ParserState* /*state*/) override;
     bool preorder(const IR::SelectExpression* /*stmt*/) override;

@@ -27,6 +27,14 @@ void NestingDepthMetricPass::postorder(const IR::P4Control *control) {
     metrics.nestingDepth.blockNestingDepth[control->name.name.string()] = currentMax;
 }
 
+bool NestingDepthMetricPass::preorder(const IR::Function* /*function*/) {
+    currentDepth = currentMax = 0;
+    return true;
+}
+
+void NestingDepthMetricPass::postorder(const IR::Function* function) {
+    metrics.nestingDepth.blockNestingDepth[function->name.name.string()] = currentMax;
+}
 
 bool NestingDepthMetricPass::preorder(const IR::ParserState* /*state*/){
     return increment();
