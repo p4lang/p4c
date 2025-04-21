@@ -194,6 +194,6 @@ struct {                                 \
 #define BPF_OBJ_PIN(table, name) bpf_obj_pin(table, name)
 #define BPF_OBJ_GET(name) bpf_obj_get(name)
 
-#endif // END EBPF KERNEL DEFINITIONS
+#endif  // END EBPF KERNEL DEFINITIONS
 
 #endif  // BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
