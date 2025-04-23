@@ -19,27 +19,28 @@ std::string ParserAnalyzer::getPacketType(const IR::ParserState* state) const {
 }
 
 void ParserAnalyzer::dfsCumulativeTypes(
-    const IR::ParserState* state,
-    const ParserCallGraph& pcg,
-    const std::string& parentType,
-    std::unordered_map<const IR::ParserState*, std::string>& types
-) {
-    std::string stateName = state->name.name.string();
-    if (stateEncounters[stateName] > 50)
-        return;
-    stateEncounters[stateName]++;
+    const IR::ParserState*                          state,
+    const ParserCallGraph&                          pcg,
+    const std::string&                              parentType,
+    std::unordered_map<const IR::ParserState*, std::string>& types,
+    std::unordered_set<const IR::ParserState*>&     currentPath) {
 
-    std::string extract = getPacketType(state);
-    std::string cumulative = parentType.empty() ? extract : (extract.empty() ? parentType : parentType + "-" + extract);
+    // If this state was already visited on the current path, stop.
+    if (!currentPath.insert(state).second) return;
+        
+    auto extract = getPacketType(state);
+    auto cumulative = parentType.empty() ? extract : (extract.empty() ? parentType : parentType + "-" + extract);
     types[state] = cumulative;
     cumulativeTypes.insert(cumulative);
 
     if (auto* callees = const_cast<ParserCallGraph&>(pcg).getCallees(state)) {
-        for (const auto* next : *callees) {
-            dfsCumulativeTypes(next, pcg, cumulative, types);
-        }
+        for (auto* next : *callees)
+            dfsCumulativeTypes(next, pcg, cumulative, types, currentPath);
     }
+
+    currentPath.erase(state);
 }
+
 
 bool ParserAnalyzer::preorder(const IR::P4Parser* parser) {
     parserCallGraph = ParserCallGraph(parser->name.name);
@@ -48,27 +49,21 @@ bool ParserAnalyzer::preorder(const IR::P4Parser* parser) {
 
     if (auto* start = parser->getDeclByName(IR::ParserState::start)) {
         std::unordered_map<const IR::ParserState*, std::string> types;
-        dfsCumulativeTypes(start->to<IR::ParserState>(), parserCallGraph, "", types);
+        std::unordered_set<const IR::ParserState*> currentPath;
+        dfsCumulativeTypes(start->to<IR::ParserState>(), parserCallGraph, "", types, currentPath);
     }
 
     return false;
 }
 
 size_t HeaderPacketMetricsPass::getHeaderFieldSize(const IR::Type* type) const {
-    const IR::Type* currentType = type;
-    while (currentType != nullptr) {
-        if (auto typeType = currentType->to<IR::Type_Type>()) {
-            currentType = typeType->type;
-        }
-        else if (auto bitsType = currentType->to<IR::Type_Bits>()) {
-            return bitsType->width_bits();
-        } else if (auto newtype = currentType->to<IR::Type_Newtype>()) {
-            currentType = typeMap->getType(newtype->type, true);
-        } else if (auto typedefType = currentType->to<IR::Type_Typedef>()) {
-            currentType = typeMap->getType(typedefType->type, true);
-        } else {
-            break;
-        }
+    const IR::Type* cur = type;
+    while (cur) {
+        if (auto tb = cur->to<IR::Type_Bits>())     return tb->width_bits();
+        if (auto tt = cur->to<IR::Type_Type>())     cur = tt->type;
+        else if (auto nt = cur->to<IR::Type_Newtype>()) cur = typeMap->getType(nt->type, true);
+        else if (auto td = cur->to<IR::Type_Typedef>()) cur = typeMap->getType(td->type, true);
+        else break;
     }
     return 0;
 }

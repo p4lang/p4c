@@ -44,11 +44,7 @@ struct UnusedCodeInstances {
 };
     
 struct Metrics {
-    struct InlinedCode {
-        unsigned actions = 0;
-        unsigned functions = 0;
-    } inlinedCode;
-    
+    unsigned inlinedActions = 0;
 
     UnusedCodeInstances unusedCodeInstances;
     struct HelperVars { // Variables for storing inter-pass data.

@@ -10,7 +10,7 @@
 #include "halsteadMetrics.h"
 #include "headerMetrics.h"
 #include "headerPacketMetrics.h"
-#include "inlinedCodeMetric.h"
+#include "inlinedActionsMetric.h"
 #include "matchActionTableMetrics.h"
 #include "nestingDepthMetric.h"
 #include "parserMetrics.h"
@@ -33,7 +33,7 @@ class MetricsPassManager {
       : options(options), selectedMetrics(options.selectedMetrics), typeMap(typeMap), metrics() {}
     
     Metrics& getMetrics() { return metrics; }
-    void addInlined(PassManager &pm, bool actions);
+    void addInlined(PassManager &pm);
     void addUnusedCode(PassManager &pm, bool isBefore);
     void addRemaining(PassManager &pm);
     void addExportPass(PassManager &pm);

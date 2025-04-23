@@ -2,23 +2,25 @@
 
 namespace P4 {
 
-unsigned MatchActionTableMetricsPass::keySize(const IR::KeyElement *keyElement){
-    if (keyElement == nullptr)
-        return 0;
+unsigned MatchActionTableMetricsPass::keySize(const IR::KeyElement *keyElement) {
+    if (keyElement == nullptr) return 0;
 
-    auto keyType = keyElement->expression->type;
+    const IR::Type* currentType = keyElement->expression->type;
+    while (currentType != nullptr) {
+        if (auto bitType = currentType->to<IR::Type_Bits>()) return bitType->width_bits();
+        else if (currentType->is<IR::Type_Boolean>()) return 1;
+        else if (currentType->to<IR::Type_Error>()) return 32u; // Common default
+        else if (currentType->to<IR::Type_Enum>()) return 32u;  // Target-dependent, default to 32 bits
+        else if (auto serEnum = currentType->to<IR::Type_SerEnum>()) return serEnum->type->width_bits();
 
-    if (auto bitType = keyType->to<IR::Type_Bits>())
-        return bitType->width_bits();
-    else if (keyType->is<IR::Type_Boolean>())
-        return 1;
-    // Enum is dependent on the backend/target, default to 32
-    else if (keyType->to<IR::Type_Enum>())
-        return 32u;
-    else if (auto intType = keyType->to<IR::Type_SerEnum>())
-        return intType->type->width_bits();
-    else
-        return 0;
+        // Unwrap the type if it's a type definition wrapper
+        if (auto tt = currentType->to<IR::Type_Type>()) currentType = tt->type;    
+        else if (auto nt = currentType->to<IR::Type_Newtype>()) currentType = typeMap->getType(nt->type, true);    
+        else if (auto td = currentType->to<IR::Type_Typedef>()) currentType = typeMap->getType(td->type, true);
+        else break;
+    }
+
+    return 0; // Unsupported type
 }
 
 void MatchActionTableMetricsPass::postorder(const IR::P4Table *table) {

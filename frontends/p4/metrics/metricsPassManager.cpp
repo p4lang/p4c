@@ -2,12 +2,11 @@
 
 namespace P4 {
 
-void MetricsPassManager::addInlined(PassManager &pm, bool actions){
+void MetricsPassManager::addInlined(PassManager &pm){
     if (selectedMetrics.find("inlined") != selectedMetrics.end() ||
             selectedMetrics.find("unused-code") != selectedMetrics.end()) 
-        {
-            if(actions) pm.addPasses({new InlinedCodeMetricPass(metrics, true)});
-            else { pm.addPasses({new InlinedCodeMetricPass(metrics, false)}); }
+    {
+            pm.addPasses({new InlinedActionsMetricPass(metrics)});
     }
 }
 void MetricsPassManager::addUnusedCode(PassManager &pm, bool isBefore){
@@ -29,7 +28,7 @@ void MetricsPassManager::addRemaining(PassManager &pm){
         pm.addPasses({new HeaderMetricsPass(typeMap, metrics)});
     }
     if (selectedMetrics.find("match-action") != selectedMetrics.end()) {
-        pm.addPasses({new MatchActionTableMetricsPass(metrics)});
+        pm.addPasses({new MatchActionTableMetricsPass(typeMap, metrics)});
     }
     if (selectedMetrics.find("parser") != selectedMetrics.end()) {
         pm.addPasses({new ParserMetricsPass(metrics)});

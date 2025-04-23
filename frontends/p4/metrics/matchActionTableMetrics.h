@@ -3,6 +3,7 @@
 
 #include "../ir/ir.h"
 #include "metricsStructure.h"
+#include "../typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -10,9 +11,10 @@ class MatchActionTableMetricsPass : public Inspector {
  private:
     unsigned keySize(const IR::KeyElement *keyElement);
     Metrics &metrics;
+    TypeMap* typeMap;
  public:
-    explicit MatchActionTableMetricsPass(Metrics &metricsRef)
-        : metrics(metricsRef) { setName("MatchActionTableMetricsPass"); }
+    explicit MatchActionTableMetricsPass(TypeMap* map, Metrics &metricsRef)
+        : typeMap(map), metrics(metricsRef) { setName("MatchActionTableMetricsPass"); }
     /// Collect metrics for each match-action table
     void postorder(const IR::P4Table *table) override;
     /// Calculate averages at the end of traversal

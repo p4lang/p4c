@@ -261,16 +261,10 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("extern", externJson);
     }
 
-    // Inlined code.
+    // Inlined actions.
     if (selectedMetrics.count("inlined")) {
-        textFile << "\nInlined Code:\n"
-                << "  Actions: " << metrics.inlinedCode.actions << "\n"
-                << "  Functions: " << metrics.inlinedCode.functions << "\n";
-
-        auto* inlinedJson = new Util::JsonObject();
-        inlinedJson->emplace("inlined_actions", new Util::JsonValue(metrics.inlinedCode.actions))
-                   ->emplace("inlined_functions", new Util::JsonValue(metrics.inlinedCode.functions));
-        root->emplace("inlined", inlinedJson);
+        textFile << "\nNumber of Inlined Actions: " << metrics.inlinedActions << "\n";
+        root->emplace("inlined_actions", new Util::JsonValue(metrics.inlinedActions));
     }
 
     jsonFile << root->toString();

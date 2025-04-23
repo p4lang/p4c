@@ -22,10 +22,11 @@ class ParserAnalyzer : public Inspector {
 
     std::string getPacketType(const IR::ParserState* state) const;
     void dfsCumulativeTypes(
-        const IR::ParserState* state,
-        const ParserCallGraph& pcg,
-        const std::string& parentType,
-        std::unordered_map<const IR::ParserState*, std::string>& types);
+        const IR::ParserState*                          state,
+        const ParserCallGraph&                          pcg,
+        const std::string&                              parentType,
+        std::unordered_map<const IR::ParserState*, std::string>& types,
+        std::unordered_set<const IR::ParserState*>&     currentPath);
 
  public:
     ParserAnalyzer(ParserCallGraph& graph, std::set<std::string>& types, TypeMap* map)
