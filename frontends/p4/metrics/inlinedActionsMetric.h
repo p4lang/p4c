@@ -9,7 +9,7 @@ namespace P4 {
 class InlinedActionsMetricPass : public Inspector {
     private:
     Metrics &metrics;
-    size_t count = 0;
+    std::unordered_set<std::string> actions; 
 
     public:
     explicit InlinedActionsMetricPass(Metrics &metricsRef)

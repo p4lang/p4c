@@ -10,8 +10,9 @@ namespace P4 {
 class MatchActionTableMetricsPass : public Inspector {
  private:
     unsigned keySize(const IR::KeyElement *keyElement);
-    Metrics &metrics;
     TypeMap* typeMap;
+    Metrics &metrics;
+    
  public:
     explicit MatchActionTableMetricsPass(TypeMap* map, Metrics &metricsRef)
         : typeMap(map), metrics(metricsRef) { setName("MatchActionTableMetricsPass"); }
