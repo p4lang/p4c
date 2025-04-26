@@ -114,7 +114,8 @@ void UnusedCodeMetricPass::recordAfter() {
         if (!found) metrics.unusedCodeInstances.actions++;
     }
     // Disregard actions that were inlined.
-    metrics.unusedCodeInstances.actions -= metrics.inlinedActions;
+    metrics.unusedCodeInstances.actions = metrics.inlinedActions > metrics.unusedCodeInstances.actions 
+    ? metrics.unusedCodeInstances.actions : metrics.unusedCodeInstances.actions - metrics.inlinedActions;
 
     // Calculate the number of unused variables.
     for (const auto& beforeVar : metrics.helperVars.beforeVariables) {

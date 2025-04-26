@@ -93,6 +93,8 @@ class HalsteadMetricsPass : public Inspector {
     void postorder(const IR::IfStatement *stmt) override;
     void postorder(const IR::SwitchStatement* /*stmt*/) override;
     void postorder(const IR::SwitchCase* /*case*/) override;
+    void postorder(const IR::ForStatement* /*stmt*/) override;  
+    void postorder(const IR::ForInStatement* /*stmt*/) override;
     void postorder(const IR::ReturnStatement* /*stmt*/) override;
     void postorder(const IR::ExitStatement* /*stmt*/) override;
     bool preorder(const IR::Operation_Unary *op) override;

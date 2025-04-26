@@ -10,6 +10,14 @@ void CyclomaticComplexityCalculator::postorder(const IR::SwitchStatement* stmt) 
     cc += stmt->cases.size();
 }
 
+void CyclomaticComplexityCalculator::postorder(const IR::ForStatement* /*stmt*/) {
+    ++cc;
+}
+
+void CyclomaticComplexityCalculator::postorder(const IR::ForInStatement* /*stmt*/) {
+    ++cc;
+}
+
 void CyclomaticComplexityCalculator::postorder(const IR::SelectExpression* selectExpr) {
     cc += selectExpr->selectCases.size();
 }

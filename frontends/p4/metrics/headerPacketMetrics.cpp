@@ -45,7 +45,7 @@ void ParserAnalyzer::dfsCumulativeTypes(
 bool ParserAnalyzer::preorder(const IR::P4Parser* parser) {
     parserCallGraph = ParserCallGraph(parser->name.name);
     ComputeParserCG buildGraph(&parserCallGraph);
-    parser->apply(buildGraph);
+    parser->apply(buildGraph, getChildContext());
 
     if (auto* start = parser->getDeclByName(IR::ParserState::start)) {
         std::unordered_map<const IR::ParserState*, std::string> types;

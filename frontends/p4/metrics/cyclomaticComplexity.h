@@ -14,6 +14,8 @@ class CyclomaticComplexityCalculator : public Inspector {
 
     void postorder(const IR::IfStatement* /*stmt*/) override;
     void postorder(const IR::SwitchStatement* stmt) override;
+    void postorder(const IR::ForStatement* /*stmt*/) override;  
+    void postorder(const IR::ForInStatement* /*stmt*/) override;
     void postorder(const IR::SelectExpression* selectExpr) override;
     void postorder(const IR::MethodCallExpression* mce) override;
     bool preorder(const IR::P4Table* table) override;

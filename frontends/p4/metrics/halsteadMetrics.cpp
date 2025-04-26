@@ -145,6 +145,14 @@ void HalsteadMetricsPass::postorder(const IR::IfStatement *stmt) {
     }
 }
 
+void HalsteadMetricsPass::postorder(const IR::ForStatement* /*stmt*/) {
+    addUnaryOperator("for");
+}
+
+void HalsteadMetricsPass::postorder(const IR::ForInStatement* /*stmt*/) {
+    addUnaryOperator("for");
+}
+
 void HalsteadMetricsPass::postorder(const IR::SelectExpression* /*selectExpr*/) {
     addUnaryOperator("transition");
     addUnaryOperator("select");
