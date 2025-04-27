@@ -54,19 +54,19 @@ class JsonValue final : public IJson {
 #endif
 
  public:
-    enum Kind { String, Number, True, False, Null };
+    enum Kind { String, Integer, Float, True, False, Null };
     JsonValue() : tag(Kind::Null) {}
-    JsonValue(bool b) : tag(b ? Kind::True : Kind::False) {}     // NOLINT
-    JsonValue(big_int v) : tag(Kind::Number), value(v) {}        // NOLINT
-    JsonValue(int v) : tag(Kind::Number), value(v) {}            // NOLINT
-    JsonValue(long v) : tag(Kind::Number), value(v) {}           // NOLINT
-    JsonValue(long long v);                                      // NOLINT
-    JsonValue(unsigned v) : tag(Kind::Number), value(v) {}       // NOLINT
-    JsonValue(unsigned long v) : tag(Kind::Number), value(v) {}  // NOLINT
-    JsonValue(unsigned long long v);                             // NOLINT
-    JsonValue(double v) : tag(Kind::Number), value(v) {}         // NOLINT
-    JsonValue(float v) : tag(Kind::Number), value(v) {}          // NOLINT
-    JsonValue(cstring s) : tag(Kind::String), str(s) {}          // NOLINT
+    JsonValue(bool b) : tag(b ? Kind::True : Kind::False) {}        // NOLINT
+    JsonValue(big_int v) : tag(Kind::Integer), intValue(v) {}       // NOLINT
+    JsonValue(int v) : tag(Kind::Integer), intValue(v) {}           // NOLINT
+    JsonValue(long v) : tag(Kind::Integer), intValue(v) {}          // NOLINT
+    JsonValue(long long v);                                         // NOLINT
+    JsonValue(unsigned v) : tag(Kind::Integer), intValue(v) {}      // NOLINT
+    JsonValue(unsigned long v) : tag(Kind::Integer), intValue(v) {} // NOLINT
+    JsonValue(unsigned long long v);                                // NOLINT
+    JsonValue(double v) : tag(Kind::Float), floatValue(v) {}        // NOLINT
+    JsonValue(float v) : tag(Kind::Float), floatValue(v) {}         // NOLINT
+    JsonValue(cstring s) : tag(Kind::String), str(s) {}             // NOLINT
     // FIXME: replace these two ctors with std::string view, cannot do now as
     // std::string is implicitly convertible to cstring
     JsonValue(const char *s) : tag(Kind::String), str(s) {}         // NOLINT
@@ -74,10 +74,21 @@ class JsonValue final : public IJson {
     void serialize(std::ostream &out) const override;
 
     bool operator==(const big_int &v) const;
-    // is_integral is true for bool
+    // Integer types
     template <typename T, typename std::enable_if_t<std::is_integral_v<T>, int> = 0>
     bool operator==(const T &v) const {
-        return (tag == Kind::Number) && (v == value);
+        if (tag == Kind::Integer)
+            return intValue == v;
+        return false;
+    }
+
+    template <typename T, typename std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
+    bool operator==(const T &v) const {
+        if (tag == Kind::Integer)
+            return static_cast<double>(intValue) == static_cast<double>(v);
+        if (tag == Kind::Float)
+            return floatValue == static_cast<double>(v);
+        return false;
     }
     bool operator==(const double &v) const;
     bool operator==(const float &v) const;
@@ -88,26 +99,30 @@ class JsonValue final : public IJson {
     bool operator==(const std::string &s) const;
     bool operator==(const JsonValue &other) const;
 
-    bool isNumber() const { return tag == Kind::Number; }
+    bool isNumber() const { return tag == Kind::Integer || tag == Kind::Float; }
     bool isBool() const { return tag == Kind::True || tag == Kind::False; }
     bool isString() const { return tag == Kind::String; }
     bool isNull() const { return tag == Kind::Null; }
+    bool isInteger() const { return tag == Kind::Integer; }
+    bool isFloat() const { return tag == Kind::Float; }
 
     bool getBool() const;
     cstring getString() const;
-    big_int getValue() const;
+    big_int getIntValue() const;
+    double getFloatValue() const;
     int getInt() const;
 
     static JsonValue *null;
 
  private:
-    JsonValue(Kind kind) : tag(kind) {  // NOLINT
-        if (kind == Kind::String || kind == Kind::Number)
+    JsonValue(Kind kind) : tag(kind) {
+        if (kind == Kind::String || kind == Kind::Integer || kind == Kind::Float)
             throw std::logic_error("Incorrect constructor called");
     }
 
     const Kind tag;
-    const big_int value = 0;
+    const big_int intValue = 0;
+    const double floatValue = 0.0;
     const cstring str = cstring::empty;
 
     DECLARE_TYPEINFO(JsonValue, IJson);

@@ -35,17 +35,20 @@ void IJson::dump() const { std::cout << toString(); }
 
 JsonValue *JsonValue::null = new JsonValue();
 
-JsonValue::JsonValue(long long v) : tag(Kind::Number), value(v) {}
+JsonValue::JsonValue(long long v) : tag(Kind::Integer), intValue(v) {}
 
-JsonValue::JsonValue(unsigned long long v) : tag(Kind::Number), value(v) {}
+JsonValue::JsonValue(unsigned long long v) : tag(Kind::Integer), intValue(v) {}
 
 void JsonValue::serialize(std::ostream &out) const {
     switch (tag) {
         case Kind::String:
             out << "\"" << str << "\"";
             break;
-        case Kind::Number:
-            out << value;
+        case Kind::Integer:
+            out << intValue;
+            break;
+        case Kind::Float:
+            out << floatValue;
             break;
         case Kind::True:
             out << "true";
@@ -60,13 +63,15 @@ void JsonValue::serialize(std::ostream &out) const {
 }
 
 bool JsonValue::operator==(const big_int &v) const {
-    return tag == Kind::Number ? v == value : false;
+    return tag == Kind::Integer ? v == intValue : false;
 }
 bool JsonValue::operator==(const double &v) const {
-    return tag == Kind::Number ? big_int(v) == value : false;
+    return tag == Kind::Float ? floatValue == v :
+           tag == Kind::Integer ? static_cast<double>(intValue) == v :
+           false;
 }
 bool JsonValue::operator==(const float &v) const {
-    return tag == Kind::Number ? big_int(v) == value : false;
+    return *this == static_cast<double>(v);
 }
 bool JsonValue::operator==(const cstring &s) const {
     return tag == Kind::String ? s == str : false;
@@ -89,8 +94,10 @@ bool JsonValue::operator==(const JsonValue &other) const {
     switch (tag) {
         case Kind::String:
             return str == other.str;
-        case Kind::Number:
-            return value == other.value;
+        case Kind::Integer:
+            return intValue == other.intValue;
+        case Kind::Float:
+            return floatValue == other.floatValue;
         case Kind::True:
         case Kind::False:
         case Kind::Null:
@@ -134,15 +141,21 @@ cstring JsonValue::getString() const {
     return str;
 }
 
-big_int JsonValue::getValue() const {
-    if (!isNumber()) throw std::logic_error("Incorrect json value kind");
-    return value;
+big_int JsonValue::getIntValue() const {
+    if (!isInteger()) throw std::logic_error("Not an integer");
+    return intValue;
+}
+
+double JsonValue::getFloatValue() const {
+    if (!isFloat()) throw std::logic_error("Not a float");
+    return floatValue;
 }
 
 int JsonValue::getInt() const {
-    big_int val = getValue();
-    if (val < INT_MIN || val > INT_MAX) throw std::logic_error("Value too large for an int");
-    return int(val);
+    auto val = getIntValue();
+    if (val < INT_MIN || val > INT_MAX)
+        throw std::logic_error("Value too large for int");
+    return static_cast<int>(val);
 }
 
 JsonArray *JsonArray::append(IJson *value) {
