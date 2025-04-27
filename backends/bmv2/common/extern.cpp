@@ -169,7 +169,7 @@ void ExternConverter::addToFieldList(ConversionContext *ctxt, const IR::Expressi
                     auto val = jo->getAs<Util::JsonValue>("value");
                     j = jo = new Util::JsonObject();
                     jo->emplace("type", "hexstr");
-                    jo->emplace("value", stringRepr(val->getValue()));
+                    jo->emplace("value", stringRepr(val->getIntValue()));
                 }
             }
         }
