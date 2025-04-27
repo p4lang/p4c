@@ -38,9 +38,9 @@ void HeaderMetricsPass::postorder(const IR::Type_Header *header) {
 
 void HeaderMetricsPass::postorder(const IR::P4Program* /*program*/){
     if (metrics.headerMetrics.numHeaders > 0)
-        metrics.headerMetrics.avgFieldsNum = static_cast<double>(totalFieldsNum) / metrics.headerMetrics.numHeaders;
+        metrics.headerMetrics.avgFieldsNum = static_cast<double>(totalFieldsNum) / static_cast<double>(metrics.headerMetrics.numHeaders);
     if (totalFieldsNum > 0)
-        metrics.headerMetrics.avgFieldSize = static_cast<double>(totalFieldsSize) / totalFieldsNum;
+        metrics.headerMetrics.avgFieldSize = static_cast<double>(totalFieldsSize) / static_cast<double>(totalFieldsNum);
 }
 
 }  // namespace P4
