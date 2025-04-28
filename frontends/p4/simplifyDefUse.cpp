@@ -744,7 +744,11 @@ class FindUninitialized : public Inspector {
         }
 
         if (auto st = dst_type->to<IR::Type_Stack>()) {
-            if (src->is<IR::MethodCallExpression>()) {
+            if (!st->elementType->is<IR::Type_Header>() &&
+                !st->elementType->is<IR::Type_HeaderUnion>()) {
+                // Generalized arrays means we can have array of any type, and we only
+                // care about arrays of headers or header_unions here
+            } else if (src->is<IR::MethodCallExpression>()) {
                 for (const auto *storage : headerDefs->getStorageLocation(dst)) {
                     headerDefs->setValueToStorage(storage, TernaryBool::Yes);
                 }
@@ -771,8 +775,8 @@ class FindUninitialized : public Inspector {
                         for (auto dst_element : *dst_array_storage) {
                             auto dst_header_union = dst_element->to<StructLocation>();
                             auto src_header_union = (*it)->to<StructLocation>();
-                            if (dst_header_union->isHeaderUnion() &&
-                                src_header_union->isHeaderUnion()) {
+                            if (dst_header_union && dst_header_union->isHeaderUnion() &&
+                                src_header_union && src_header_union->isHeaderUnion()) {
                                 auto field_it = src_header_union->fields().begin();
                                 for (auto field : dst_header_union->fields()) {
                                     headerDefs->update(field, headerDefs->find(*field_it));
