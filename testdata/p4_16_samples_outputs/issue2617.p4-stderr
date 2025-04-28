@@ -16,9 +16,9 @@ issue2617.p4(17): [--Wwarn=parser-transition] warning: SelectCase: unreachable c
 issue2617.p4(67): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
             2:
             ^
-issue2617.p4(37): [--Wwarn=parser-transition] warning: accept state in parser p1 is unreachable
+issue2617.p4(37): [--Wwarn=unreachable] warning: accept state in parser p1 is unreachable
 parser p1(out bit<32> v) {
        ^^
-issue2617.p4(37): [--Wwarn=parser-transition] warning: accept state in parser p1 is unreachable
+issue2617.p4(37): [--Wwarn=unreachable] warning: accept state in parser p1 is unreachable
 parser p1(out bit<32> v) {
        ^^
