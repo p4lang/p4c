@@ -418,7 +418,7 @@ def main():
         dest="inputMetrics",
         help=(
             "Select which code metrics will be collected (comma-separated list). "
-            "Valid options: all, cyclomatic, halstead, unused-code, nesting-depth,"
+            "Valid options: all, loc, cyclomatic, halstead, unused-code, nesting-depth,"
             "header-general, header-manipulation, header-modification, match-action,"
             "parser, inlined, extern. "
             "Example: --metrics cyclomatic,halstead"

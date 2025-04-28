@@ -2,38 +2,58 @@
 
 namespace P4 {
 
+MetricsPassManager::MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap)
+    : options(options), 
+    selectedMetrics(options.selectedMetrics), 
+    typeMap(typeMap), 
+    metrics() {
+    
+    size_t pos = options.file.string().rfind('.');
+    fileName = (pos != std::string::npos 
+        ? options.file.string().substr(0, pos)
+        : options.file.string());
+
+    isolatedFileName = fileName.rfind('/') == std::string::npos
+        ? fileName 
+        : fileName.substr(fileName.rfind('/'));
+}
+
 void MetricsPassManager::addInlined(PassManager &pm){
     if (selectedMetrics.find("inlined") != selectedMetrics.end() ||
-            selectedMetrics.find("unused-code") != selectedMetrics.end()) 
+        selectedMetrics.find("unused-code") != selectedMetrics.end()) 
     {
-            pm.addPasses({new InlinedActionsMetricPass(metrics)});
+        // This pass is necessary for determining the correct unused code values for actions.
+        pm.addPasses({new InlinedActionsMetricPass(metrics)});
     }
 }
 void MetricsPassManager::addUnusedCode(PassManager &pm, bool isBefore){
-    if (selectedMetrics.find("unused-code") != selectedMetrics.end()) {
+    if (selectedMetrics.count("unused-code")) {
         pm.addPasses({new UnusedCodeMetricPass(metrics, isBefore)});
     }
 }
 void MetricsPassManager::addRemaining(PassManager &pm){
-    if (selectedMetrics.find("cyclomatic") != selectedMetrics.end()) {
+    if (selectedMetrics.count("loc")) {
+        pm.addPasses({new LinesOfCodeMetricPass(metrics, isolatedFileName)});
+    }
+    if (selectedMetrics.count("cyclomatic")) {
         pm.addPasses({new CyclomaticComplexityPass(metrics)});
     }
-    if (selectedMetrics.find("halstead") != selectedMetrics.end()) {
+    if (selectedMetrics.count("halstead")) {
         pm.addPasses({new HalsteadMetricsPass(metrics)});
     }
-    if (selectedMetrics.find("nesting-depth") != selectedMetrics.end()) {
+    if (selectedMetrics.count("nesting-depth")) {
         pm.addPasses({new NestingDepthMetricPass(metrics)});
     }
-    if (selectedMetrics.find("header-general") != selectedMetrics.end()) {
+    if (selectedMetrics.count("header-general")) {
         pm.addPasses({new HeaderMetricsPass(typeMap, metrics)});
     }
-    if (selectedMetrics.find("match-action") != selectedMetrics.end()) {
+    if (selectedMetrics.count("match-action")) {
         pm.addPasses({new MatchActionTableMetricsPass(typeMap, metrics)});
     }
-    if (selectedMetrics.find("parser") != selectedMetrics.end()) {
+    if (selectedMetrics.count("parser")) {
         pm.addPasses({new ParserMetricsPass(metrics)});
     }
-    if (selectedMetrics.find("extern") != selectedMetrics.end()) {
+    if (selectedMetrics.count("extern")) {
         pm.addPasses({new ExternalObjectsMetricPass(metrics)});
     }
     if (selectedMetrics.find("header-manipulation") != selectedMetrics.end() || 
@@ -44,10 +64,7 @@ void MetricsPassManager::addRemaining(PassManager &pm){
 
 void MetricsPassManager::addExportPass(PassManager &pm){
     if (!selectedMetrics.empty()) {
-        size_t pos = options.file.string().rfind('.');
-        std::string filename = (pos != std::string::npos ? options.file.string().substr(0, pos): options.file.string());
-        filename += "_metrics";
-        pm.addPasses({new ExportMetricsPass(filename, selectedMetrics, metrics)});
+        pm.addPasses({new ExportMetricsPass(fileName + "_metrics", selectedMetrics, metrics)});
     }
 }
 

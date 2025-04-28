@@ -37,7 +37,7 @@ protected:
         opts.langVersion = CompilerOptions::FrontendVersion::P4_16;
         opts.file = inputFile;
         opts.selectedMetrics = {
-            "cyclomatic", "halstead", "unused-code", "nesting-depth",
+            "loc", "cyclomatic", "halstead", "unused-code", "nesting-depth",
             "header-general", "header-manipulation","header-modification",
             "match-action", "parser", "inlined", "extern"
         };
@@ -49,7 +49,7 @@ protected:
         const IR::P4Program* result = frontend.run(opts, program, &std::cerr);
         ASSERT_NE(result, nullptr) << "Frontend pipeline failed for " << inputFile;
     
-        metricsOutputPath = "../testdata/p4_16_samples/" + fs::path(inputFile).stem().string();
+        metricsOutputPath = "../testdata/p4_16_samples/metrics/" + fs::path(inputFile).stem().string();
         txtMetricsOutputPath = jsonMetricsOutputPath = metricsOutputPath;
         txtMetricsOutputPath += "_metrics.txt";
         jsonMetricsOutputPath += "_metrics.json";
@@ -83,10 +83,10 @@ protected:
 
 #define DEFINE_METRIC_TEST(N)                                           \
 TEST_F(MetricPassesTest, MetricsTest##N) {                              \
-    inputFile = "../testdata/p4_16_samples/metrics_test_" #N ".p4";     \
+    inputFile = "../testdata/p4_16_samples/metrics/metrics_test_" #N ".p4";     \
     SetUpFrontend();                                                    \
     compareWithExpectedOutput(                                          \
-        "../testdata/p4_16_samples_outputs/metrics_test_" #N "_metrics.expected"); \
+        "../testdata/p4_16_samples_outputs/metrics/metrics_test_" #N "_metrics.expected"); \
 }
 
 DEFINE_METRIC_TEST(1)

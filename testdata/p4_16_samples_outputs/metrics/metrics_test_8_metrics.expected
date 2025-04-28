@@ -1,0 +1,130 @@
+
+Lines of Code: 211
+
+Cyclomatic Complexity:
+  MyParser: 5
+  MyVerifyChecksum: 1
+  MyIngress: 7
+  MyEgress: 4
+  MyComputeChecksum: 1
+  MyDeparser: 1
+
+Halstead Metrics:
+  Unique Operators: 26
+  Unique Operands: 56
+  Total Operators: 116
+  Total Operands: 124
+  Vocabulary: 82
+  Length: 240
+  Difficulty: 28.7857
+  Volume: 1525.81
+  Effort: 43921.6
+  Estimated Bugs: 0.508604
+
+Unused Code Instances:
+  Program Structure:
+	Actions: 0
+	Functions: 0
+	Parser states: 1
+  Declarations:
+	Variables: 0
+	Enums: 0
+  Other:
+	Conditionals: 0
+	Parameters: 0
+	Returns: 0
+
+Nesting Depth Metrics:
+  Average: 1.16667
+  Global Max: 2
+  Individual blocks: 
+	MyParser: 2
+	MyVerifyChecksum: 1
+	MyIngress: 1
+	MyEgress: 1
+	MyComputeChecksum: 1
+	MyDeparser: 1
+
+Header Metrics:
+  Total Headers: 3
+  Avg Fields Per Header: 8.66667
+  Avg Field Size: 16.6154
+  Per-header metrics:
+	ethernet_t:
+	  Fields: 3
+	  Fields size sum: 112
+	ipv4_t:
+	  Fields: 12
+	  Fields size sum: 160
+	tcp_t:
+	  Fields: 11
+	  Fields size sum: 160
+
+Header Manipulation Metrics:
+  Total Operations: 3
+  Total Size: 432
+  Per-packet metrics:
+	ethernet:
+	  Operations: 1
+	  Size: 112
+	ethernet-ipv4:
+	  Operations: 2
+	  Size: 272
+	ethernet-ipv4-tcp:
+	  Operations: 3
+	  Size: 432
+
+Header Modification Metrics:
+  Total Operations: 4
+  Total Size: 136
+  Per-packet metrics:
+	ethernet:
+	  Operations: 2
+	  Size: 96
+	ethernet-ipv4:
+	  Operations: 4
+	  Size: 136
+	ethernet-ipv4-tcp:
+	  Operations: 4
+	  Size: 136
+
+Match-Action Table Metrics:
+  Number of Tables: 3
+  Total Keys: 3
+  Total Key Size: 55
+  Avg Key Size: 18.3333
+  Avg Keys Per Table: 1
+  Max Keys Per Table: 1
+  Total Actions: 9
+  Avg Actions Per Table: 3
+  Max Actions Per Table: 3
+  Per-table Metrics:
+  ecmp_group:
+	 Actions: 3
+	 Keys: 1
+	 Key size sum: 32
+  ecmp_nhop:
+	 Actions: 3
+	 Keys: 1
+	 Key size sum: 14
+  send_frame:
+	 Actions: 3
+	 Keys: 1
+	 Key size sum: 9
+
+Parser Metrics:
+  States: 5
+  Per-parser complexities:
+	start: 3
+	parse_ipv4: 3
+	parse_tcp: 1
+	accept: 1
+	reject: 1
+
+Extern Metrics:
+  Extern Functions: 24
+  Function Calls: 10
+  Extern Structures: 10
+  Structure Uses: 6
+
+Number of Inlined Actions: 0

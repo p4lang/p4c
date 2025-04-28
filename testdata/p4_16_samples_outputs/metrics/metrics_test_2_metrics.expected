@@ -1,0 +1,171 @@
+
+Lines of Code: 289
+
+Cyclomatic Complexity:
+  MyParser: 17
+  MyVerifyChecksum: 1
+  MyComputeChecksum: 1
+  MyIngress: 14
+  MyEgress: 3
+  MyDeparser: 1
+
+Halstead Metrics:
+  Unique Operators: 41
+  Unique Operands: 119
+  Total Operators: 312
+  Total Operands: 339
+  Vocabulary: 160
+  Length: 651
+  Difficulty: 58.3992
+  Volume: 4766.58
+  Effort: 278364
+  Estimated Bugs: 1.58886
+
+Unused Code Instances:
+  Program Structure:
+	Actions: 0
+	Functions: 0
+	Parser states: 0
+  Declarations:
+	Variables: 0
+	Enums: 0
+  Other:
+	Conditionals: 0
+	Parameters: 5
+	Returns: 0
+
+Nesting Depth Metrics:
+  Average: 1.5
+  Global Max: 3
+  Individual blocks: 
+	MyParser: 2
+	MyVerifyChecksum: 1
+	MyComputeChecksum: 1
+	MyIngress: 3
+	MyEgress: 1
+	MyDeparser: 1
+
+Header Metrics:
+  Total Headers: 8
+  Avg Fields Per Header: 6.625
+  Avg Field Size: 21.1321
+  Per-header metrics:
+	Ethernet_t:
+	  Fields: 3
+	  Fields size sum: 112
+	IPv4_t:
+	  Fields: 12
+	  Fields size sum: 160
+	IPv6_t:
+	  Fields: 8
+	  Fields size sum: 320
+	ARP_t:
+	  Fields: 9
+	  Fields size sum: 224
+	TCP_t:
+	  Fields: 10
+	  Fields size sum: 160
+	UDP_t:
+	  Fields: 4
+	  Fields size sum: 64
+	ICMP_t:
+	  Fields: 5
+	  Fields size sum: 64
+	h_stack:
+	  Fields: 2
+	  Fields size sum: 16
+
+Header Manipulation Metrics:
+  Total Operations: 11
+  Total Size: 1904
+  Per-packet metrics:
+	ethernet:
+	  Operations: 1
+	  Size: 112
+	ethernet-arp:
+	  Operations: 2
+	  Size: 336
+	ethernet-ipv4:
+	  Operations: 5
+	  Size: 752
+	ethernet-ipv4-icmp:
+	  Operations: 6
+	  Size: 816
+	ethernet-ipv4-tcp:
+	  Operations: 6
+	  Size: 912
+	ethernet-ipv4-udp:
+	  Operations: 6
+	  Size: 816
+	ethernet-ipv6:
+	  Operations: 3
+	  Size: 752
+
+Header Modification Metrics:
+  Total Operations: 10
+  Total Size: 134
+  Per-packet metrics:
+	ethernet:
+	  Operations: 1
+	  Size: 48
+	ethernet-arp:
+	  Operations: 2
+	  Size: 64
+	ethernet-ipv4:
+	  Operations: 5
+	  Size: 80
+	ethernet-ipv4-icmp:
+	  Operations: 6
+	  Size: 88
+	ethernet-ipv4-tcp:
+	  Operations: 6
+	  Size: 86
+	ethernet-ipv4-udp:
+	  Operations: 6
+	  Size: 96
+	ethernet-ipv6:
+	  Operations: 2
+	  Size: 56
+
+Match-Action Table Metrics:
+  Number of Tables: 1
+  Total Keys: 2
+  Total Key Size: 40
+  Avg Key Size: 20
+  Avg Keys Per Table: 2
+  Max Keys Per Table: 2
+  Total Actions: 2
+  Avg Actions Per Table: 2
+  Max Actions Per Table: 2
+  Per-table Metrics:
+  ipv4_lpm:
+	 Actions: 2
+	 Keys: 2
+	 Key size sum: 40
+
+Parser Metrics:
+  States: 15
+  Per-parser complexities:
+	start: 3
+	start_true: 1
+	start_join: 5
+	parse_ipv4: 4
+	parse_ipv4_true: 1
+	parse_ipv4_join: 3
+	parse_ipv4_true_0: 1
+	parse_ipv4_join_0: 5
+	parse_ipv6: 2
+	parse_arp: 1
+	parse_tcp: 1
+	parse_udp: 1
+	parse_icmp: 1
+	accept: 1
+	reject: 1
+
+Extern Metrics:
+  Extern Functions: 24
+  Function Calls: 21
+  Extern Structures: 10
+  Structure Uses: 12
+
+Number of Inlined Actions: 3

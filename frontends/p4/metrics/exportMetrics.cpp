@@ -3,14 +3,12 @@
 namespace P4 {
 
 bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
-    // Open text file
     std::ofstream textFile(filename + ".txt");
     if (!textFile.is_open()) {
         std::cerr << "Error: Unable to open file " << filename + ".txt" << "\n";
         return false;
     }
 
-    // Open JSON file
     std::string jsonFilename = filename + ".json";
     std::ofstream jsonFile(jsonFilename);
     if (!jsonFile.is_open()) {
@@ -20,7 +18,11 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
 
     Util::JsonObject* root = new Util::JsonObject();
 
-    // Cyclomatic complexity.
+    if (selectedMetrics.count("loc")) {
+        textFile << "\nLines of Code: " << metrics.linesOfCode << "\n";
+        root->emplace("lines_of_code", new Util::JsonValue(metrics.linesOfCode));
+    }
+
     if (selectedMetrics.count("cyclomatic")) {
         textFile << "\nCyclomatic Complexity:\n";
         auto* ccJson = new Util::JsonObject();
@@ -31,7 +33,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("cyclomatic_complexity", ccJson);
     }
 
-    // Halstead metrics.
     if (selectedMetrics.count("halstead")) {
         textFile << "\nHalstead Metrics:\n"
                 << "  Unique Operators: " << metrics.halsteadMetrics.uniqueOperators << "\n"
@@ -59,7 +60,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("halstead", halsteadJson);
     }
 
-    // Unused code metrics.
     if (selectedMetrics.count("unused-code")) {
         textFile << "\nUnused Code Instances:\n"
                 << "  Program Structure:\n"
@@ -86,7 +86,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("unused_code", unusedJson);
     }
 
-    // Nesting depth metrics.
     if (selectedMetrics.count("nesting-depth")) {
         textFile << "\nNesting Depth Metrics:\n"
                 << "  Average: " << metrics.nestingDepth.avgNestingDepth << "\n"
@@ -105,7 +104,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("nesting_depth", nestingJson);
     }
 
-    // Header general metrics.
     if (selectedMetrics.count("header-general")) {
         textFile << "\nHeader Metrics:\n"
                 << "  Total Headers: " << metrics.headerMetrics.numHeaders << "\n"
@@ -132,7 +130,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("header_metrics", headerJson);
     }
 
-    // Header manipulation metrics.
     if (selectedMetrics.count("header-manipulation")) {
         textFile << "\nHeader Manipulation Metrics:\n"
                 << "  Total Operations: " << metrics.headerManipulationMetrics.total.numOperations << "\n"
@@ -159,7 +156,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("header_manipulation", manipulationJson);
     }
 
-    // Header modification metrics.
     if (selectedMetrics.count("header-modification")) {
         textFile << "\nHeader Modification Metrics:\n"
                 << "  Total Operations: " << metrics.headerModificationMetrics.total.numOperations << "\n"
@@ -186,8 +182,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("header_modification", modificationJson);
     }
 
-
-    // Match-action table metrics.
     if (selectedMetrics.count("match-action")) {
         textFile << "\nMatch-Action Table Metrics:\n"
                 << "  Number of Tables: " << metrics.matchActionTableMetrics.numTables << "\n"
@@ -228,7 +222,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("match_action_tables", tableJson);
     }
 
-    // Parser metrics.
     if (selectedMetrics.count("parser")) {
         textFile << "\nParser Metrics:\n"
                 << "  States: " << metrics.parserMetrics.totalStates << "\n"
@@ -245,7 +238,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("parser", parserJson);
     }
 
-    // Extern metrics.
     if (selectedMetrics.count("extern")) {
         textFile << "\nExtern Metrics:\n"
                 << "  Extern Functions: " << metrics.externMetrics.externFunctions << "\n"
@@ -261,7 +253,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program* /*program*/) {
         root->emplace("extern", externJson);
     }
 
-    // Inlined actions.
     if (selectedMetrics.count("inlined")) {
         textFile << "\nNumber of Inlined Actions: " << metrics.inlinedActions << "\n";
         root->emplace("inlined_actions", new Util::JsonValue(metrics.inlinedActions));

@@ -6,6 +6,7 @@
 #include "metricsStructure.h"
 #include "exportMetrics.h"
 #include "cyclomaticComplexity.h"
+#include "linesOfCodeMetric.h"
 #include "externalObjectsMetric.h"
 #include "halsteadMetrics.h"
 #include "headerMetrics.h"
@@ -27,10 +28,11 @@ class MetricsPassManager {
     const std::set<std::string> &selectedMetrics;
     TypeMap* typeMap;
     Metrics metrics;
+    std::string fileName;
+    std::string isolatedFileName;
 
  public:
-    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap)
-      : options(options), selectedMetrics(options.selectedMetrics), typeMap(typeMap), metrics() {}
+    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap);
     
     Metrics& getMetrics() { return metrics; }
     void addInlined(PassManager &pm);

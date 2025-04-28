@@ -178,7 +178,7 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
     "--metrics", "metric1[,metric2]",
     [this](const char *arg) {
         static const std::set<std::string> validMetrics = {
-            "cyclomatic", "halstead", "unused-code", "nesting-depth",
+            "loc", "cyclomatic", "halstead", "unused-code", "nesting-depth",
             "header-general", "header-manipulation","header-modification",
             "match-action", "parser", "inlined", "extern"
         };
@@ -200,7 +200,7 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
         return true;
     },
     "Select which code metrics will be collected.\n"
-    "Valid options: all, cyclomatic, halstead, unused-code, duplicit-code,\n"
+    "Valid options: all, loc, cyclomatic, halstead, unused-code, duplicit-code,\n"
     "nesting-depth, header-general, header-manipulation, header-modification,\n"
     "match-action, parser, inlined, extern.");
 }

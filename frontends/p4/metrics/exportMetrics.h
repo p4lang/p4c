@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include "../ir/ir.h"
 #include "../lib/json.h"
 #include "metricsStructure.h"

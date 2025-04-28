@@ -44,6 +44,7 @@ struct UnusedCodeInstances {
 };
     
 struct Metrics {
+    unsigned linesOfCode = 0;
     unsigned inlinedActions = 0;
 
     UnusedCodeInstances unusedCodeInstances;
@@ -108,7 +109,7 @@ struct Metrics {
         P4::ordered_map<std::string, unsigned> StateComplexity; // State name -> complexity.
         unsigned totalStates = 0;
     } parserMetrics;
-
+    
     P4::ordered_map<std::string, unsigned> cyclomaticComplexity; // Function name -> CC value.
 
     struct ExternMetrics {
