@@ -52,7 +52,7 @@ class ErrorType {
     static const int ERR_UNSUPPORTED_ON_TARGET;  // target can not handle construct
     static const int ERR_DUPLICATE;              // duplicate objects
     static const int ERR_IO;                     // IO error
-    static const int ERR_UNREACHABLE;            // unreachable parser state
+    static const int ERR_UNREACHABLE;            // unreachable code
     static const int ERR_MODEL;                  // something is wrong with the target model
     static const int ERR_RESERVED;               // Reserved for target use
     // Backends should extend this class with additional errors in the range 500-999.
@@ -78,7 +78,7 @@ class ErrorType {
     static const int WARN_IGNORE_PROPERTY;          // invalid property for object, ignored
     static const int WARN_TYPE_INFERENCE;           // type inference can not infer, substitutes
     static const int WARN_PARSER_TRANSITION;        // parser transition non-fatal issues
-    static const int WARN_UNREACHABLE;              // parser state unreachable
+    static const int WARN_UNREACHABLE;              // unreachable code
     static const int WARN_SHADOWING;                // instance shadowing
     static const int WARN_IGNORE;                   // simply ignore
     static const int WARN_INVALID_HEADER;           // access to fields of an invalid header
