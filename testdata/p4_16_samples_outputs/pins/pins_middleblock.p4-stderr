@@ -7,6 +7,15 @@ pins_middleblock.p4(603)
 pins_middleblock.p4(846): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
             1w1: ternary @id(1) @name("dummy_match");
             ^^^
+pins_middleblock.p4(10): [--Wwarn=unused] warning: 'INTERNAL_VLAN_ID' is unused
+const vlan_id_t INTERNAL_VLAN_ID = 0xfff;
+                ^^^^^^^^^^^^^^^^
+pins_middleblock.p4(11): [--Wwarn=unused] warning: 'NO_VLAN_ID' is unused
+const vlan_id_t NO_VLAN_ID = 0x0;
+                ^^^^^^^^^^
+pins_middleblock.p4(143): [--Wwarn=unused] warning: 'kDefaultVrf' is unused
+const vrf_id_t kDefaultVrf = 0;
+               ^^^^^^^^^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'port' is unused
 ...ction mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t sr...
                                                 ^^^^
@@ -31,6 +40,42 @@ pins_middleblock.p4(717): [--Wwarn=unused] warning: 'tos' is unused
 pins_middleblock.p4(719): [--Wwarn=unused] warning: 'monitor_failover_port' is unused
 ..._id_t monitor_port, @id(2) port_id_t monitor_failover_port, @id(3) @format(MAC_ADDRESS) ethern...
                                         ^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(899): [--Wwarn=unused] warning: 'IPV6_MULTICAST_MASK' is unused
+const ipv6_addr_t IPV6_MULTICAST_MASK = 0xff000000000000000000000000000000;
+                  ^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(900): [--Wwarn=unused] warning: 'IPV6_MULTICAST_VALUE' is unused
+const ipv6_addr_t IPV6_MULTICAST_VALUE = 0xff000000000000000000000000000000;
+                  ^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(901): [--Wwarn=unused] warning: 'IPV6_LOOPBACK_MASK' is unused
+const ipv6_addr_t IPV6_LOOPBACK_MASK = 0xffffffffffffffffffffffffffffffff;
+                  ^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(902): [--Wwarn=unused] warning: 'IPV6_LOOPBACK_VALUE' is unused
+const ipv6_addr_t IPV6_LOOPBACK_VALUE = 0x1;
+                  ^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(903): [--Wwarn=unused] warning: 'IPV4_MULTICAST_MASK' is unused
+const ipv4_addr_t IPV4_MULTICAST_MASK = 0xf0000000;
+                  ^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(904): [--Wwarn=unused] warning: 'IPV4_MULTICAST_VALUE' is unused
+const ipv4_addr_t IPV4_MULTICAST_VALUE = 0xe0000000;
+                  ^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(905): [--Wwarn=unused] warning: 'IPV4_BROADCAST_VALUE' is unused
+const ipv4_addr_t IPV4_BROADCAST_VALUE = 0xffffffff;
+                  ^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(906): [--Wwarn=unused] warning: 'IPV4_LOOPBACK_MASK' is unused
+const ipv4_addr_t IPV4_LOOPBACK_MASK = 0xff000000;
+                  ^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(907): [--Wwarn=unused] warning: 'IPV4_LOOPBACK_VALUE' is unused
+const ipv4_addr_t IPV4_LOOPBACK_VALUE = 0x7f000000;
+                  ^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(908): [--Wwarn=unused] warning: 'MAC_MULTICAST_MASK' is unused
+const ethernet_addr_t MAC_MULTICAST_MASK = 0x10000000000;
+                      ^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(909): [--Wwarn=unused] warning: 'MAC_MULTICAST_VALUE' is unused
+const ethernet_addr_t MAC_MULTICAST_VALUE = 0x10000000000;
+                      ^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(1026): [--Wwarn=unused] warning: 'acl_egress_forward' is unused
+    @id(0x0100010D) @sai_action(SAI_PACKET_ACTION_FORWARD) action acl_egress_forward() {
+                                                                  ^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1080): [--Wwarn=unused] warning: Table acl_egress_dhcp_to_host_table is not used; removing
   ") table acl_egress_dhcp_to_host_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

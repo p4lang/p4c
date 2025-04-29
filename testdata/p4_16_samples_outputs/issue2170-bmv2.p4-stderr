@@ -1,0 +1,3 @@
+issue2170-bmv2.p4(70): [--Wwarn=unused] warning: 'tmp_condition' is unused
+        bit<8> tmp_condition = 8w0;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^

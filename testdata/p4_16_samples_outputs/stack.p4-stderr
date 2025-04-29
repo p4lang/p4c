@@ -1,3 +1,9 @@
+stack.p4(31): [--Wwarn=unused] warning: 'e' is unused
+        bit<32> e = stack.lastIndex;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+stack.p4(44): [--Wwarn=unused] warning: 'sz' is unused
+        bit<32> sz = stack.size;
+        ^^^^^^^^^^^^^^^^^^^^^^^
 stack.p4(30): [--Wwarn=uninitialized] warning: stack.next: reading uninitialized value
         b = stack.next;
             ^^^^^^^^^^

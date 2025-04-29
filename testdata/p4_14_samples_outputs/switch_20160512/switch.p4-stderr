@@ -10,9 +10,33 @@ action set_config_parameters(enable_dod) {
 fabric.p4(210): [--Wwarn=type-inference] warning: Could not infer type for fabric_mgid, using bit<8>
 action set_fabric_multicast(fabric_mgid) {
                             ^^^^^^^^^^^
+switch.p4(96): [--Wwarn=unused] warning: '.nop' is unused
+action nop() {
+^
 intrinsic.p4(40): [--Wwarn=unused] warning: 'enable_dod' is unused
 action deflect_on_drop(enable_dod) {
                        ^^^^^^^^^^
+sflow.p4(66): [--Wwarn=unused] warning: '.sflow_ing_pkt_to_cpu' is unused
+action sflow_ing_pkt_to_cpu(sflow_i2e_mirror_id, reason_code) {
+^
+multicast.p4(329): [--Wwarn=unused] warning: '.multicast_route_s_g_hit' is unused
+action multicast_route_s_g_hit(mc_index, mcast_rpf_group) {
+^
+multicast.p4(305): [--Wwarn=unused] warning: '.multicast_route_star_g_miss' is unused
+action multicast_route_star_g_miss() {
+^
+multicast.p4(309): [--Wwarn=unused] warning: '.multicast_route_sm_star_g_hit' is unused
+action multicast_route_sm_star_g_hit(mc_index, mcast_rpf_group) {
+^
+multicast.p4(317): [--Wwarn=unused] warning: '.multicast_route_bidir_star_g_hit' is unused
+action multicast_route_bidir_star_g_hit(mc_index, mcast_rpf_group) {
+^
+meter.p4(36): [--Wwarn=unused] warning: '.meter_permit' is unused
+action meter_permit() {
+^
+meter.p4(32): [--Wwarn=unused] warning: '.meter_deny' is unused
+action meter_deny() {
+^
 fabric.p4(210): [--Wwarn=unused] warning: 'fabric_mgid' is unused
 action set_fabric_multicast(fabric_mgid) {
                             ^^^^^^^^^^^

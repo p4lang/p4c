@@ -1,0 +1,3 @@
+action_profile-bmv2.p4(29): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^

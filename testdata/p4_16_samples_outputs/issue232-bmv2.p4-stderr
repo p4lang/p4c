@@ -1,0 +1,6 @@
+issue232-bmv2.p4(20): [--Wwarn=unused] warning: 'EthernetAddress' is unused
+typedef bit<48> EthernetAddress;
+                ^^^^^^^^^^^^^^^
+issue232-bmv2.p4(21): [--Wwarn=unused] warning: 'IPv4Address' is unused
+typedef bit<32> IPv4Address;
+                ^^^^^^^^^^^

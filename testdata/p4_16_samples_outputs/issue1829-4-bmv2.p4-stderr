@@ -1,3 +1,9 @@
+issue1829-4-bmv2.p4(54): [--Wwarn=unused] warning: 'da_meter_result1' is unused
+    bit<2> da_meter_result1;
+    ^^^^^^^^^^^^^^^^^^^^^^^
+issue1829-4-bmv2.p4(55): [--Wwarn=unused] warning: 'da_meter_result2' is unused
+    bit<2> da_meter_result2;
+    ^^^^^^^^^^^^^^^^^^^^^^^
 issue1829-4-bmv2.p4(59): [--Wwarn=unused] warning: da_meter: unused instance
     direct_meter<bit<2> >(MeterType.packets) da_meter;
                                              ^^^^^^^^

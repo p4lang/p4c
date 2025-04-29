@@ -1,0 +1,3 @@
+gauntlet_typedef_cast-bmv2.p4(15): [--Wwarn=unused] warning: 'prefix' is unused
+const dummy_def prefix = 2348810240;
+                ^^^^^^

@@ -1,1 +1,19 @@
+octal.p4(1): [--Wwarn=unused] warning: 'n1' is unused
+const bit<16> n1 = 16w0377; // 377
+              ^^
+octal.p4(2): [--Wwarn=unused] warning: 'n2' is unused
+const bit<16> n2 = 16w0o0377; // 255
+              ^^
+octal.p4(3): [--Wwarn=unused] warning: 't1' is unused
+const bool t1 = (n1 == 377);
+           ^^
+octal.p4(4): [--Wwarn=unused] warning: 't2' is unused
+const bool t2 = (n1 == 255);
+           ^^
+octal.p4(5): [--Wwarn=unused] warning: 't3' is unused
+const bool t3 = (n2 == 377);
+           ^^
+octal.p4(6): [--Wwarn=unused] warning: 't4' is unused
+const bool t4 = (n2 == 255);
+           ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -1,3 +1,36 @@
+pna-example-tcp-connection-tracking-err.p4(66): [--Wwarn=unused] warning: 'TCP_URG_MASK' is unused
+const bit<8> TCP_URG_MASK = 0x20;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(67): [--Wwarn=unused] warning: 'TCP_ACK_MASK' is unused
+const bit<8> TCP_ACK_MASK = 0x10;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(68): [--Wwarn=unused] warning: 'TCP_PSH_MASK' is unused
+const bit<8> TCP_PSH_MASK = 0x08;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(69): [--Wwarn=unused] warning: 'TCP_RST_MASK' is unused
+const bit<8> TCP_RST_MASK = 0x04;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(70): [--Wwarn=unused] warning: 'TCP_SYN_MASK' is unused
+const bit<8> TCP_SYN_MASK = 0x02;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(71): [--Wwarn=unused] warning: 'TCP_FIN_MASK' is unused
+const bit<8> TCP_FIN_MASK = 0x01;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(75): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NOW' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW = (ExpireTimeProfileId_t) 0;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(76): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NEW' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW = (ExpireTimeProfileId_t) 1;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(77): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_ESTABLISHED' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t) 2;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(78): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NEVER' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER = (ExpireTimeProfileId_t) 3;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-tcp-connection-tracking-err.p4(141): [--Wwarn=unused] warning: 'drop' is unused
+    action drop () {
+           ^^^^
 pna-example-tcp-connection-tracking-err.p4(206): [--Wwarn=uninitialized_use] warning: update_aging_info may be uninitialized
         if (update_aging_info) {
             ^^^^^^^^^^^^^^^^^

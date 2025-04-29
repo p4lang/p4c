@@ -94,6 +94,9 @@ action set_next_hop(type_, ip, router_interface_id) {
 sai_p4.p4(429): [--Wwarn=unused] warning: 'ip' is unused
 action set_next_hop(type_, ip, router_interface_id) {
                            ^^
+sai_p4.p4(280): [--Wwarn=unused] warning: '.set_in_port' is unused
+action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_prior...
+^
 sai_p4.p4(263): [--Wwarn=unused] warning: 'max_virtual_routers' is unused
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_suppo...
                                          ^^^^^^^^^^^^^^^^^^^

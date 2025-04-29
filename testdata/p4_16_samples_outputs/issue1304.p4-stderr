@@ -1,3 +1,6 @@
+issue1304.p4(7): [--Wwarn=unused] warning: 'CONST_VAL' is unused
+const bit<8> CONST_VAL = 8w10;
+             ^^^^^^^^^
 issue1304.p4(32): [--Wwarn=unused] warning: Control MyVerifyChecksum is not used; removing
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
         ^^^^^^^^^^^^^^^^

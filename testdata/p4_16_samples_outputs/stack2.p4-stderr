@@ -1,0 +1,3 @@
+stack2.p4(5): [--Wwarn=unused] warning: 'stack' is unused
+        h[4] stack;
+        ^^^^^^^^^^

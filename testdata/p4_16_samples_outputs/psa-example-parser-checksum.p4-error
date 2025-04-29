@@ -1,0 +1,3 @@
+psa-example-parser-checksum.p4(86): [--Wwarn=unused] warning: 'NUM_ERRORS' is unused
+const bit<9> NUM_ERRORS = 256;
+             ^^^^^^^^^^

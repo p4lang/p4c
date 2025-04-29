@@ -1,1 +1,4 @@
+issue3806.p4(10): [--Wwarn=unused] warning: 'f' is unused
+void f (inout Headers h) {
+     ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

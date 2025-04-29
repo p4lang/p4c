@@ -1,4 +1,28 @@
 constant-fold-infint.p4(6): [--Wwarn=mismatch] warning: -7w1: negative value with unsigned type
 const int e = (int)d; // -1
               ^^^^^^
+constant-fold-infint.p4(1): [--Wwarn=unused] warning: 'a' is unused
+const bit<4> a = 0b0101;
+             ^
+constant-fold-infint.p4(2): [--Wwarn=unused] warning: 'b' is unused
+const int b = (int)a; // 5
+          ^
+constant-fold-infint.p4(3): [--Wwarn=unused] warning: 'c' is unused
+const bit<7> c = (bit<7>)b; // 5
+             ^
+constant-fold-infint.p4(5): [--Wwarn=unused] warning: 'd' is unused
+const int<4> d = -1;
+             ^
+constant-fold-infint.p4(6): [--Wwarn=unused] warning: 'e' is unused
+const int e = (int)d; // -1
+          ^
+constant-fold-infint.p4(7): [--Wwarn=unused] warning: 'f' is unused
+const bit<7> f = (bit<7>)e; // 0b1111111 = 127
+             ^
+constant-fold-infint.p4(8): [--Wwarn=unused] warning: 'g' is unused
+const int<7> g = (int<7>)e; // 0b1111111 = -1
+             ^
+constant-fold-infint.p4(9): [--Wwarn=unused] warning: 'h' is unused
+const int h = (int)g; // -1
+          ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -1,0 +1,24 @@
+pins_wbb.p4(10): [--Wwarn=unused] warning: 'INTERNAL_VLAN_ID' is unused
+const vlan_id_t INTERNAL_VLAN_ID = 0xfff;
+                ^^^^^^^^^^^^^^^^
+pins_wbb.p4(11): [--Wwarn=unused] warning: 'NO_VLAN_ID' is unused
+const vlan_id_t NO_VLAN_ID = 0x0;
+                ^^^^^^^^^^
+pins_wbb.p4(138): [--Wwarn=unused] warning: 'tunnel_id_t' is unused
+type bit<10> tunnel_id_t;
+             ^^^^^^^^^^^
+pins_wbb.p4(143): [--Wwarn=unused] warning: 'kDefaultVrf' is unused
+const vrf_id_t kDefaultVrf = 0;
+               ^^^^^^^^^^^
+pins_wbb.p4(145): [--Wwarn=unused] warning: 'router_interface_id_t' is unused
+type bit<10> router_interface_id_t;
+             ^^^^^^^^^^^^^^^^^^^^^
+pins_wbb.p4(151): [--Wwarn=unused] warning: 'qos_queue_t' is unused
+type bit<8> qos_queue_t;
+            ^^^^^^^^^^^
+pins_wbb.p4(154): [--Wwarn=unused] warning: 'multicast_group_id_t' is unused
+typedef bit<16> multicast_group_id_t;
+                ^^^^^^^^^^^^^^^^^^^^
+pins_wbb.p4(155): [--Wwarn=unused] warning: 'replica_instance_t' is unused
+typedef bit<16> replica_instance_t;
+                ^^^^^^^^^^^^^^^^^^

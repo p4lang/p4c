@@ -1,1 +1,7 @@
+ex1.p4(17): [--Wwarn=unused] warning: 'x' is unused
+const bit<8> x = 10;
+             ^
+ex1.p4(19): [--Wwarn=unused] warning: 'a' is unused
+action a(in S w, out bit<8> z)
+       ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

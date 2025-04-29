@@ -1,0 +1,6 @@
+psa-example-counters-bmv2.p4(56): [--Wwarn=unused] warning: 'PacketCounter_t' is unused
+typedef bit<32> PacketCounter_t;
+                ^^^^^^^^^^^^^^^
+psa-example-counters-bmv2.p4(59): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 512;
+              ^^^^^^^^^

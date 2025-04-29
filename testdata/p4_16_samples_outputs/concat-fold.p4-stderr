@@ -1,1 +1,4 @@
+concat-fold.p4(17): [--Wwarn=unused] warning: 'a' is unused
+const bit<24> a = 16w0 ++ 8w1;
+              ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

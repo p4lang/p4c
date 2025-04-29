@@ -1,3 +1,6 @@
+module.p4(17): [--Wwarn=unused] warning: 'package s' is unused
+package s();
+        ^
 module.p4(38): [--Wwarn=unused] warning: main1: unused instance
 switch0(f()) main1;
              ^^^^^

@@ -168,7 +168,7 @@ TEST_F(Diagnostics, CompilerOptions) {
     auto parseWithCompilerOptions =
         [](const CommandLineOptions &args) -> std::optional<FrontendTestCase> {
         auto &options = GTestContext::get().options();
-        options.process(args.size(), const_cast<char *const *>(args.data()));
+        options.process_options(args.size(), const_cast<char *const *>(args.data()));
         return createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
     };
 
