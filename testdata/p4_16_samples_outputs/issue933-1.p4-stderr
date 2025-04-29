@@ -1,0 +1,3 @@
+issue933-1.p4(12): [--Wwarn=unused] warning: 'h' is unused
+        headers h;
+        ^^^^^^^^^

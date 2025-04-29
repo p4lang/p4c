@@ -1,1 +1,4 @@
+issue3091-1.p4(3): [--Wwarn=unused] warning: 'exact_once' is unused
+const tuple<match_kind> exact_once = {exact};
+                        ^^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

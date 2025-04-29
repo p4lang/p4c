@@ -1,3 +1,6 @@
+issue2735.p4(5): [--Wwarn=unused] warning: 'N_MAC_ENTRIES' is unused
+const bit<32> N_MAC_ENTRIES = 4096;
+              ^^^^^^^^^^^^^
 issue2735.p4(8): [--Wwarn=unused] warning: Control SnvsIngress is not used; removing
 control SnvsIngress(out Mac_entry b0) {
         ^^^^^^^^^^^

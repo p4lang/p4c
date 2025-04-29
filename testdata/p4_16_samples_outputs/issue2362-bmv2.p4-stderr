@@ -1,0 +1,3 @@
+issue2362-bmv2.p4(17): [--Wwarn=unused] warning: 'simple_action' is unused
+bit<16> simple_action() {
+        ^^^^^^^^^^^^^

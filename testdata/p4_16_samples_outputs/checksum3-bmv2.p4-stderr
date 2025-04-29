@@ -1,0 +1,6 @@
+checksum3-bmv2.p4(27): [--Wwarn=unused] warning: 'EthernetAddress' is unused
+typedef bit<48> EthernetAddress;
+                ^^^^^^^^^^^^^^^
+checksum3-bmv2.p4(85): [--Wwarn=unused] warning: 'myTuple1' is unused
+    > myTuple1;
+      ^^^^^^^^

@@ -13,4 +13,10 @@ issue5231-const-int-concat.p4(18): [--Wwarn=overflow] warning: 9s0b111100011: si
 issue5231-const-int-concat.p4(19): [--Wwarn=overflow] warning: 16s0b1100111111100011: signed value does not fit in 16 bits
     const int<16> e = 16s0b_110_0111_1_1110_0011
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue5231-const-int-concat.p4(3): [--Wwarn=unused] warning: 'positive' is unused
+void positive() {
+     ^^^^^^^^
+issue5231-const-int-concat.p4(14): [--Wwarn=unused] warning: 'negative' is unused
+void negative() {
+     ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

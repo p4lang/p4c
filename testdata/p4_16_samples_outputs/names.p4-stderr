@@ -1,3 +1,6 @@
+names.p4(18): [--Wwarn=unused] warning: 'c' is unused
+const S c = { 1w1 };
+        ^
 names.p4(20): [--Wwarn=unused] warning: Control p is not used; removing
 control p()
         ^

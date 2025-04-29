@@ -1,0 +1,6 @@
+issue1107.p4(11): [--Wwarn=unused] warning: 'MyIP' is unused
+const IPAddr MyIP = 0xffffffff;
+             ^^^^
+issue1107.p4(17): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^

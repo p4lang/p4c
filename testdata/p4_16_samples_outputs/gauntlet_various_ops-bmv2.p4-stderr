@@ -19,3 +19,12 @@ gauntlet_various_ops-bmv2.p4(133): [--Wwarn=mismatch] warning: -4w1: negative va
 gauntlet_various_ops-bmv2.p4(138): [--Wwarn=mismatch] warning: 1w4: value does not fit in 1 bits
         h.div.a = (bit<8>)(4 / 1w1);
                            ^
+gauntlet_various_ops-bmv2.p4(105): [--Wwarn=unused] warning: 'uflow_tmp' is unused
+        const bit<8> uflow_tmp = 1;
+                     ^^^^^^^^^
+gauntlet_various_ops-bmv2.p4(142): [--Wwarn=unused] warning: 'tmp2' is unused
+        bit<48> tmp2 = (1 | 2) |+| 48w0;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+gauntlet_various_ops-bmv2.p4(143): [--Wwarn=unused] warning: 'int_def' is unused
+        const int int_def = 1;
+                  ^^^^^^^

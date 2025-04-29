@@ -1,0 +1,3 @@
+use-priority-as-name.p4(61): [--Wwarn=unused] warning: 'ETHERTYPE_IPV4' is unused
+    const bit<16> ETHERTYPE_IPV4 = 16w0x0800;
+                  ^^^^^^^^^^^^^^

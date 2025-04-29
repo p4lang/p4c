@@ -1,3 +1,6 @@
+issue3379.p4(14): [--Wwarn=unused] warning: 'package mypackaget' is unused
+package mypackaget(mypt<t> t1, mypt<t> t2);
+        ^^^^^^^^^^
 issue3379.p4(15): [--Wwarn=unused] warning: t4: unused instance
 mypackaget(MyParser1()) t4;
                         ^^

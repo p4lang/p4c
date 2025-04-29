@@ -1,0 +1,3 @@
+issue3219.p4(6): [--Wwarn=unused] warning: 'func2' is unused
+bit<4> func2() {
+       ^^^^^

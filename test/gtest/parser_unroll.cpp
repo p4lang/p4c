@@ -80,8 +80,6 @@ std::pair<const IR::P4Parser *, const IR::P4Parser *> loadExample(
     CompilerOptions::FrontendVersion langVersion = CompilerOptions::FrontendVersion::P4_16) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
     auto &options = P4TestContext::get().options();
-    const char *argv = "./gtestp4c";
-    options.process(1, (char *const *)&argv);
     options.langVersion = langVersion;
     const IR::P4Program *program = load_model(file, options);
     if (!program) return std::make_pair(nullptr, nullptr);

@@ -1,3 +1,144 @@
+define.p4(92): [--Wwarn=unused] warning: 'l4_port_t' is unused
+typedef bit<16> l4_port_t;
+                ^^^^^^^^^
+define.p4(102): [--Wwarn=unused] warning: 'S1U_SGW_PREFIX' is unused
+const ipv4_addr_t S1U_SGW_PREFIX = 2348810240;
+                  ^^^^^^^^^^^^^^
+define.p4(105): [--Wwarn=unused] warning: 'ETHERTYPE_QINQ' is unused
+const bit<16> ETHERTYPE_QINQ = 0x88A8;
+              ^^^^^^^^^^^^^^
+define.p4(106): [--Wwarn=unused] warning: 'ETHERTYPE_QINQ_NON_STD' is unused
+const bit<16> ETHERTYPE_QINQ_NON_STD = 0x9100;
+              ^^^^^^^^^^^^^^^^^^^^^^
+define.p4(107): [--Wwarn=unused] warning: 'ETHERTYPE_VLAN' is unused
+const bit<16> ETHERTYPE_VLAN = 0x8100;
+              ^^^^^^^^^^^^^^
+define.p4(108): [--Wwarn=unused] warning: 'ETHERTYPE_MPLS' is unused
+const bit<16> ETHERTYPE_MPLS = 0x8847;
+              ^^^^^^^^^^^^^^
+define.p4(109): [--Wwarn=unused] warning: 'ETHERTYPE_MPLS_MULTICAST' is unused
+const bit<16> ETHERTYPE_MPLS_MULTICAST =0x8848;
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+define.p4(110): [--Wwarn=unused] warning: 'ETHERTYPE_IPV4' is unused
+const bit<16> ETHERTYPE_IPV4 = 0x0800;
+              ^^^^^^^^^^^^^^
+define.p4(111): [--Wwarn=unused] warning: 'ETHERTYPE_IPV6' is unused
+const bit<16> ETHERTYPE_IPV6 = 0x86dd;
+              ^^^^^^^^^^^^^^
+define.p4(112): [--Wwarn=unused] warning: 'ETHERTYPE_ARP' is unused
+const bit<16> ETHERTYPE_ARP = 0x0806;
+              ^^^^^^^^^^^^^
+define.p4(114): [--Wwarn=unused] warning: 'PROTO_ICMP' is unused
+const bit<8> PROTO_ICMP = 1;
+             ^^^^^^^^^^
+define.p4(115): [--Wwarn=unused] warning: 'PROTO_TCP' is unused
+const bit<8> PROTO_TCP = 6;
+             ^^^^^^^^^
+define.p4(116): [--Wwarn=unused] warning: 'PROTO_UDP' is unused
+const bit<8> PROTO_UDP = 17;
+             ^^^^^^^^^
+define.p4(117): [--Wwarn=unused] warning: 'PROTO_ICMPV6' is unused
+const bit<8> PROTO_ICMPV6 = 58;
+             ^^^^^^^^^^^^
+define.p4(119): [--Wwarn=unused] warning: 'IPV4_MIN_IHL' is unused
+const bit<4> IPV4_MIN_IHL = 5;
+             ^^^^^^^^^^^^
+define.p4(121): [--Wwarn=unused] warning: 'FWD_BRIDGING' is unused
+const fwd_type_t FWD_BRIDGING = 0;
+                 ^^^^^^^^^^^^
+define.p4(122): [--Wwarn=unused] warning: 'FWD_MPLS' is unused
+const fwd_type_t FWD_MPLS = 1;
+                 ^^^^^^^^
+define.p4(123): [--Wwarn=unused] warning: 'FWD_IPV4_UNICAST' is unused
+const fwd_type_t FWD_IPV4_UNICAST = 2;
+                 ^^^^^^^^^^^^^^^^
+define.p4(124): [--Wwarn=unused] warning: 'FWD_IPV4_MULTICAST' is unused
+const fwd_type_t FWD_IPV4_MULTICAST = 3;
+                 ^^^^^^^^^^^^^^^^^^
+define.p4(125): [--Wwarn=unused] warning: 'FWD_IPV6_UNICAST' is unused
+const fwd_type_t FWD_IPV6_UNICAST = 4;
+                 ^^^^^^^^^^^^^^^^
+define.p4(126): [--Wwarn=unused] warning: 'FWD_IPV6_MULTICAST' is unused
+const fwd_type_t FWD_IPV6_MULTICAST = 5;
+                 ^^^^^^^^^^^^^^^^^^
+define.p4(127): [--Wwarn=unused] warning: 'FWD_UNKNOWN' is unused
+const fwd_type_t FWD_UNKNOWN = 7;
+                 ^^^^^^^^^^^
+define.p4(129): [--Wwarn=unused] warning: 'DEFAULT_VLAN_ID' is unused
+const vlan_id_t DEFAULT_VLAN_ID = 12w4094;
+                ^^^^^^^^^^^^^^^
+define.p4(131): [--Wwarn=unused] warning: 'DEFAULT_MPLS_TTL' is unused
+const bit<8> DEFAULT_MPLS_TTL = 64;
+             ^^^^^^^^^^^^^^^^
+define.p4(132): [--Wwarn=unused] warning: 'DEFAULT_IPV4_TTL' is unused
+const bit<8> DEFAULT_IPV4_TTL = 64;
+             ^^^^^^^^^^^^^^^^
+define.p4(134): [--Wwarn=unused] warning: 'DEFAULT_SDF_RULE_ID' is unused
+const sdf_rule_id_t DEFAULT_SDF_RULE_ID = 0;
+                    ^^^^^^^^^^^^^^^^^^^
+define.p4(135): [--Wwarn=unused] warning: 'DEFAULT_PCC_RULE_ID' is unused
+const pcc_rule_id_t DEFAULT_PCC_RULE_ID = 0;
+                    ^^^^^^^^^^^^^^^^^^^
+define.p4(136): [--Wwarn=unused] warning: 'SPGW_DIR_UNKNOWN' is unused
+const direction_t SPGW_DIR_UNKNOWN = 2w0;
+                  ^^^^^^^^^^^^^^^^
+define.p4(137): [--Wwarn=unused] warning: 'SPGW_DIR_UPLINK' is unused
+const direction_t SPGW_DIR_UPLINK = 2w1;
+                  ^^^^^^^^^^^^^^^
+define.p4(138): [--Wwarn=unused] warning: 'SPGW_DIR_DOWNLINK' is unused
+const direction_t SPGW_DIR_DOWNLINK = 2w2;
+                  ^^^^^^^^^^^^^^^^^
+define.p4(139): [--Wwarn=unused] warning: 'PCC_GATE_OPEN' is unused
+const pcc_gate_status_t PCC_GATE_OPEN = 1w0;
+                        ^^^^^^^^^^^^^
+define.p4(140): [--Wwarn=unused] warning: 'PCC_GATE_CLOSED' is unused
+const pcc_gate_status_t PCC_GATE_CLOSED = 1w1;
+                        ^^^^^^^^^^^^^^^
+define.p4(143): [--Wwarn=unused] warning: 'INT_DSCP' is unused
+const bit<6> INT_DSCP = 0x1;
+             ^^^^^^^^
+define.p4(147): [--Wwarn=unused] warning: 'INT_HEADER_LEN_WORDS' is unused
+const bit<8> INT_HEADER_LEN_WORDS = 4;
+             ^^^^^^^^^^^^^^^^^^^^
+define.p4(148): [--Wwarn=unused] warning: 'INT_HEADER_LEN_BYTES' is unused
+const bit<16> INT_HEADER_LEN_BYTES = 16;
+              ^^^^^^^^^^^^^^^^^^^^
+define.p4(150): [--Wwarn=unused] warning: 'CPU_MIRROR_SESSION_ID' is unused
+const bit<8> CPU_MIRROR_SESSION_ID = 250;
+             ^^^^^^^^^^^^^^^^^^^^^
+define.p4(151): [--Wwarn=unused] warning: 'REPORT_MIRROR_SESSION_ID' is unused
+const bit<32> REPORT_MIRROR_SESSION_ID = 500;
+              ^^^^^^^^^^^^^^^^^^^^^^^^
+define.p4(153): [--Wwarn=unused] warning: 'NPROTO_ETHERNET' is unused
+const bit<4> NPROTO_ETHERNET = 0;
+             ^^^^^^^^^^^^^^^
+define.p4(154): [--Wwarn=unused] warning: 'NPROTO_TELEMETRY_DROP_HEADER' is unused
+const bit<4> NPROTO_TELEMETRY_DROP_HEADER = 1;
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+define.p4(155): [--Wwarn=unused] warning: 'NPROTO_TELEMETRY_SWITCH_LOCAL_HEADER' is unused
+const bit<4> NPROTO_TELEMETRY_SWITCH_LOCAL_HEADER = 2;
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+define.p4(157): [--Wwarn=unused] warning: 'HW_ID' is unused
+const bit<6> HW_ID = 1;
+             ^^^^^
+define.p4(158): [--Wwarn=unused] warning: 'REPORT_FIXED_HEADER_LEN' is unused
+const bit<8> REPORT_FIXED_HEADER_LEN = 12;
+             ^^^^^^^^^^^^^^^^^^^^^^^
+define.p4(159): [--Wwarn=unused] warning: 'DROP_REPORT_HEADER_LEN' is unused
+const bit<8> DROP_REPORT_HEADER_LEN = 12;
+             ^^^^^^^^^^^^^^^^^^^^^^
+define.p4(160): [--Wwarn=unused] warning: 'LOCAL_REPORT_HEADER_LEN' is unused
+const bit<8> LOCAL_REPORT_HEADER_LEN = 16;
+             ^^^^^^^^^^^^^^^^^^^^^^^
+define.p4(161): [--Wwarn=unused] warning: 'ETH_HEADER_LEN' is unused
+const bit<8> ETH_HEADER_LEN = 14;
+             ^^^^^^^^^^^^^^
+define.p4(162): [--Wwarn=unused] warning: 'IPV4_MIN_HEAD_LEN' is unused
+const bit<8> IPV4_MIN_HEAD_LEN = 20;
+             ^^^^^^^^^^^^^^^^^
+define.p4(163): [--Wwarn=unused] warning: 'UDP_HEADER_LEN' is unused
+const bit<8> UDP_HEADER_LEN = 8;
+             ^^^^^^^^^^^^^^
 fabric.p4(84): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.gtpu_ipv4
         spgw_ingress.apply(hdr.gtpu_ipv4, hdr.gtpu_udp, hdr.gtpu,
                            ^^^^^^^^^^^^^

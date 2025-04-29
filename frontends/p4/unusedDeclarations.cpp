@@ -62,6 +62,7 @@ void UsedDeclSet::dbprint(std::ostream &out) const {
 
 bool RemoveUnusedDeclarations::giveWarning(const IR::Node *node) {
     if (warned == nullptr) return false;
+    if (isSystemFile(node->srcInfo.getSourceFile())) return false;
     auto p = warned->emplace(node);
     LOG3("Warn about " << dbp(node) << " " << p.second);
     return p.second;
@@ -145,6 +146,7 @@ const IR::Node *RemoveUnusedDeclarations::process(const IR::IDeclaration *decl) 
         // Internal identifiers, e.g., __v1model_version
         return decl->getNode();
     if (used.isUsed(getOriginal<IR::IDeclaration>())) return decl->getNode();
+    if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
     LOG3("Removing " << getOriginal());
     prune();  // no need to go deeper
     return nullptr;

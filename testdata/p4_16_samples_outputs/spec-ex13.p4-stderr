@@ -1,1 +1,7 @@
+spec-ex13.p4(17): [--Wwarn=unused] warning: 'FourBits' is unused
+typedef bit<4> FourBits;
+               ^^^^^^^^
+spec-ex13.p4(19): [--Wwarn=unused] warning: 'FStruct' is unused
+typedef FourStruct FStruct;
+                   ^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

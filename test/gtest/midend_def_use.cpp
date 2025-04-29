@@ -43,8 +43,6 @@ P4::ComputeDefUse *computeDefUse(std::string source, CompilerOptions::FrontendVe
     BUG_CHECK(::P4::errorCount() == 0, "Unexpected errors");
 
     auto &options = P4TestContext::get().options();
-    const char *argv = "./gtestp4c";
-    options.process(1, (char *const *)&argv);
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
 
     P4::FrontEnd frontend;

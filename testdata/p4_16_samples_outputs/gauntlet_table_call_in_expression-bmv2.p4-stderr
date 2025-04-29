@@ -4,3 +4,6 @@ gauntlet_table_call_in_expression-bmv2.p4(32): [--Wwarn=shadow] warning: 'simple
 gauntlet_table_call_in_expression-bmv2.p4(14)
 bit<16> simple_action() {
         ^^^^^^^^^^^^^
+gauntlet_table_call_in_expression-bmv2.p4(14): [--Wwarn=unused] warning: 'simple_action' is unused
+bit<16> simple_action() {
+        ^^^^^^^^^^^^^

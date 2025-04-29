@@ -1,0 +1,15 @@
+list-compare.p4(8): [--Wwarn=unused] warning: 'x' is unused
+const pair x = { 10, 20 };
+           ^
+list-compare.p4(9): [--Wwarn=unused] warning: 'y' is unused
+const pair y = { 30, 40 };
+           ^
+list-compare.p4(10): [--Wwarn=unused] warning: 'z' is unused
+const bool z = x == y;
+           ^
+list-compare.p4(11): [--Wwarn=unused] warning: 'w' is unused
+const bool w = x == x;
+           ^
+list-compare.p4(12): [--Wwarn=unused] warning: 's' is unused
+const S s = { 10, 20 };
+        ^
