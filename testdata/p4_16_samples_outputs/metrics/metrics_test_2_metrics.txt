@@ -1,5 +1,5 @@
 
-Lines of Code: 289
+Lines of Code: 220
 
 Cyclomatic Complexity:
   MyParser: 17

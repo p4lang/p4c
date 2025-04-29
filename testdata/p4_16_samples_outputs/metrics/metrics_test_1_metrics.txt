@@ -1,20 +1,20 @@
 
-Lines of Code: 27
+Lines of Code: 4
 
 Cyclomatic Complexity:
-  c: 1
+  MyIngress: 1
 
 Halstead Metrics:
-  Unique Operators: 5
-  Unique Operands: 8
-  Total Operators: 10
-  Total Operands: 15
-  Vocabulary: 13
-  Length: 25
-  Difficulty: 4.6875
-  Volume: 92.511
-  Effort: 433.645
-  Estimated Bugs: 0.030837
+  Unique Operators: 1
+  Unique Operands: 0
+  Total Operators: 1
+  Total Operands: 0
+  Vocabulary: 1
+  Length: 1
+  Difficulty: 0
+  Volume: 0
+  Effort: 0
+  Estimated Bugs: 0
 
 Unused Code Instances:
   Program Structure:
@@ -33,7 +33,7 @@ Nesting Depth Metrics:
   Average: 1
   Global Max: 1
   Individual blocks: 
-	c: 1
+	MyIngress: 1
 
 Header Metrics:
   Total Headers: 0
@@ -68,9 +68,9 @@ Parser Metrics:
   Per-parser complexities:
 
 Extern Metrics:
-  Extern Functions: 1
-  Function Calls: 2
-  Extern Structures: 0
+  Extern Functions: 3
+  Function Calls: 0
+  Extern Structures: 2
   Structure Uses: 0
 
 Number of Inlined Actions: 0

@@ -1,5 +1,5 @@
 
-Lines of Code: 279
+Lines of Code: 222
 
 Cyclomatic Complexity:
   ParserImpl: 3

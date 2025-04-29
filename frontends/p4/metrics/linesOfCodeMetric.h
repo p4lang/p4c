@@ -13,10 +13,9 @@ class LinesOfCodeMetricPass : public Inspector {
  private:
     Metrics &metrics;
     std::string sourceFile;
-    unsigned startLine = ~0U;
-    unsigned endLine = 0;
-    std::string first;
-    std::string last;
+    //unsigned startLine = ~0U;
+    //unsigned endLine = 0;
+    std::unordered_set<unsigned> lines;
 
  public:
     explicit LinesOfCodeMetricPass(Metrics &metricsRef, std::string sourceFile)

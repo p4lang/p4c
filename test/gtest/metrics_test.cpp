@@ -86,7 +86,7 @@ TEST_F(MetricPassesTest, MetricsTest##N) {                              \
     inputFile = "../testdata/p4_16_samples/metrics/metrics_test_" #N ".p4";     \
     SetUpFrontend();                                                    \
     compareWithExpectedOutput(                                          \
-        "../testdata/p4_16_samples_outputs/metrics/metrics_test_" #N "_metrics.expected"); \
+        "../testdata/p4_16_samples_outputs/metrics/metrics_test_" #N "_metrics.txt"); \
 }
 
 DEFINE_METRIC_TEST(1)
