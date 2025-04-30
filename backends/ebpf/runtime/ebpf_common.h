@@ -19,7 +19,6 @@ limitations under the License.
  * It should be included with new target header files.
  */
 
-#include <stdio.h>          // printf
 #include <stdbool.h>        // true and false
 #include <linux/types.h>    // u8, u16, u32, u64
 
@@ -31,12 +30,3 @@ typedef signed int s32;
 typedef unsigned int u32;
 typedef signed long long s64;
 typedef unsigned long long u64;
-
-
-/// Helper function.
-/// Print a byte buffer according to the specified length.
-static inline void print_n_bytes(void *receiveBuffer, int num) {
-    for (int i = 0; i < num; i++)
-        printf("%02x", ((unsigned char *)receiveBuffer)[i]);
-    printf("\n");
-}

@@ -26,6 +26,7 @@ limitations under the License.
 #include "ebpf_common.h"
 
 #include <endian.h>
+#include <stdio.h>          // printf
 
 /// define some byte order conversions, these mimic bpf_endian.h
 #define htonll(x) htobe64(x)
@@ -104,5 +105,12 @@ struct bpf_table tables[] = {
 extern struct bpf_table tables[];
 extern int ebpf_filter(struct sk_buff *skb);
 
+/// Helper function.
+/// Print a byte buffer according to the specified length.
+static inline void print_n_bytes(void *receiveBuffer, int num) {
+    for (int i = 0; i < num; i++)
+        printf("%02x", ((unsigned char *)receiveBuffer)[i]);
+    printf("\n");
+}
 
 #endif  // BACKENDS_EBPF_RUNTIME_EBPF_USER_H_
