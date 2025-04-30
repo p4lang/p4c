@@ -15,6 +15,7 @@ if [ "$IN_DOCKER" == "TRUE" ]; then
 fi
 
 sudo dnf install -y -q \
+    awk \
     automake \
     bison \
     boost-devel \

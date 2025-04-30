@@ -23,8 +23,9 @@ limitations under the License.
 
 #include "ebpf_common.h"
 
-#include <bpf/bpf_endian.h> // definitions for bpf_ntohs etc...
+#include <stddef.h> // size_t
 
+#include <bpf/bpf_endian.h> // definitions for bpf_ntohs etc...
 #undef htonl
 #undef htons
 #define htons(d) bpf_htons(d)
