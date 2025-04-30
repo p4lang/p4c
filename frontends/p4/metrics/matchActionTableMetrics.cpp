@@ -28,30 +28,28 @@ void MatchActionTableMetricsPass::postorder(const IR::P4Table *table) {
 
     if (table->getKey() != nullptr) {
         for (auto keyElement : table->getKey()->keyElements) {
-            metrics.matchActionTableMetrics.keysNum[tableName] += 1;
-            metrics.matchActionTableMetrics.keySizeSum[tableName] += keySize(keyElement);
+            metrics.keysNum[tableName] += 1;
+            metrics.keySizeSum[tableName] += keySize(keyElement);
         }
     }
 
-    if (table->getActionList() != nullptr) {
-        metrics.matchActionTableMetrics.actionsNum[tableName] = table->getActionList()->size();
-    }
+    if (table->getActionList() != nullptr) metrics.actionsNum[tableName] = table->getActionList()->size();
 
-    metrics.matchActionTableMetrics.numTables += 1;
-    metrics.matchActionTableMetrics.totalKeys += metrics.matchActionTableMetrics.keysNum[tableName];
-    metrics.matchActionTableMetrics.totalKeySizeSum += metrics.matchActionTableMetrics.keySizeSum[tableName];
-    metrics.matchActionTableMetrics.totalActions += metrics.matchActionTableMetrics.actionsNum[tableName];
-    metrics.matchActionTableMetrics.maxKeysPerTable = std::max(metrics.matchActionTableMetrics.maxKeysPerTable, metrics.matchActionTableMetrics.keysNum[tableName]);
-    metrics.matchActionTableMetrics.maxActionsPerTable= std::max(metrics.matchActionTableMetrics.maxActionsPerTable, metrics.matchActionTableMetrics.actionsNum[tableName]);
+    metrics.numTables += 1;
+    metrics.totalKeys += metrics.keysNum[tableName];
+    metrics.totalKeySizeSum += metrics.keySizeSum[tableName];
+    metrics.totalActions += metrics.actionsNum[tableName];
+    metrics.maxKeysPerTable = std::max(metrics.maxKeysPerTable, metrics.keysNum[tableName]);
+    metrics.maxActionsPerTable= std::max(metrics.maxActionsPerTable, metrics.actionsNum[tableName]);
 }
 
 void MatchActionTableMetricsPass::postorder(const IR::P4Program* /*program*/){
-    if(metrics.matchActionTableMetrics.numTables > 0){
-        metrics.matchActionTableMetrics.avgKeysPerTable = static_cast<double>(metrics.matchActionTableMetrics.totalKeys) / static_cast<double>(metrics.matchActionTableMetrics.numTables);
-        metrics.matchActionTableMetrics.avgActionsPerTable = static_cast<double>(metrics.matchActionTableMetrics.totalActions) / static_cast<double>(metrics.matchActionTableMetrics.numTables);
+    if(metrics.numTables > 0){
+        metrics.avgKeysPerTable = static_cast<double>(metrics.totalKeys) / static_cast<double>(metrics.numTables);
+        metrics.avgActionsPerTable = static_cast<double>(metrics.totalActions) / static_cast<double>(metrics.numTables);
     }
-    if (metrics.matchActionTableMetrics.totalKeys > 0)
-        metrics.matchActionTableMetrics.avgKeySize = static_cast<double>(metrics.matchActionTableMetrics.totalKeySizeSum) / static_cast<double>(metrics.matchActionTableMetrics.totalKeys);
+    if (metrics.totalKeys > 0)
+        metrics.avgKeySize = static_cast<double>(metrics.totalKeySizeSum) / static_cast<double>(metrics.totalKeys);
 }
 
 }  // namespace P4

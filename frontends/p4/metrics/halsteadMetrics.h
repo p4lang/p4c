@@ -1,3 +1,23 @@
+/*
+Collects basic Halstead metrics (unique and total operators and operands)
+of the compiled program, and calculates derived Halstead metrics 
+(vocabulary, length, difficulty, volume, effort, delivered bugs) at
+the end of traversal. The collection process is based on rules, 
+which were adapted from the rules for collecting Halstead metrics in C:
+
+- Identifier and control block declarations are not considered.
+- Constructor calls are considered operators.
+- All variables, constants, and literals are considered operands.
+- Local variables and constants with identical names in different blocks are considered distinct operands.
+- Structure fields are considered as global operands, and are only counted when used.
+- Control flow statements (if, select, transition, etc.) are considered operators.
+- Function calls, method calls and action invocations are considered operators.
+- Built-in functions (extract, clear, get, etc.) are considered operators.
+- Square brackets and dots are considered operators.
+- Unary and binary versions of operators such as + and - are counted separately.
+- State names in transition statements are considered operands (since they are similar to GOTO statements in C)
+*/
+
 #ifndef FRONTENDS_P4_HALSTEAD_METRICS_H_
 #define FRONTENDS_P4_HALSTEAD_METRICS_H_
 
@@ -14,13 +34,13 @@ namespace P4 {
 
 class HalsteadMetricsPass : public Inspector {
  private:
-    Metrics &metrics;
+    HalsteadMetrics &metrics;
     std::unordered_set<std::string> uniqueUnaryOperators;
     std::unordered_set<std::string> uniqueBinaryOperators;
     std::unordered_multiset<std::string> uniqueOperands;
-    std::unordered_set<std::string> structFields; // All structure field names.
+    std::unordered_set<std::string> structFields; // Field names of the defined structures.
     std::unordered_set<std::string> uniqueFields; // Structure fields that were used in the program.
-    std::vector<std::unordered_set<std::string>> scopedOperands; // Operands divided by scopes. 
+    std::vector<std::unordered_set<std::string>> scopedOperands; // Operands separated by scopes. 
     const std::unordered_set<std::string> reservedKeywords = {
       "extract",       
       "emit",          
@@ -69,7 +89,7 @@ class HalsteadMetricsPass : public Inspector {
 
  public:
     explicit HalsteadMetricsPass(Metrics &metricsRef)
-      : metrics(metricsRef) { setName("HalsteadMetricsPass"); }
+      : metrics(metricsRef.halsteadMetrics) { setName("HalsteadMetricsPass"); }
 
     // Scope handling.
 
@@ -104,7 +124,7 @@ class HalsteadMetricsPass : public Inspector {
     bool preorder(const IR::SelectCase* selectCase) override;
     void postorder(const IR::P4Table *table) override;
 
-    /// Calculate metrics at the end of traversal
+    /// Calculate metrics at the end of traversal.
     void postorder(const IR::P4Program* /*program*/) override;
 };
 

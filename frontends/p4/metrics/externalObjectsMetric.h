@@ -1,3 +1,11 @@
+/*
+Counts the number of external structure and function declarations
+and uses. When encountering an extern structure declaration, its
+method names are collected into "externFunctions". Encountering
+an extern method is counted as an extern structure use and as an extern
+function call too.
+*/
+
 #ifndef FRONTENDS_P4_EXTERNAL_OBJECTS_H_
 #define FRONTENDS_P4_EXTERNAL_OBJECTS_H_
 
@@ -9,14 +17,14 @@ namespace P4 {
 
 class ExternalObjectsMetricPass : public Inspector {
  private:
-    Metrics &metrics;
+    ExternMetrics &metrics;
     std::set<std::string> externFunctions;  // Standalone extern functions.
     std::set<std::string> externTypeNames;  // Type names of extern structures.
     std::map<std::string, std::set<std::string>> externMethods;  // Tracks methods per extern.
 
  public:
     explicit ExternalObjectsMetricPass(Metrics &metricsRef)
-        : metrics(metricsRef) { setName("ExternalObjectsMetricPass"); }
+        : metrics(metricsRef.externMetrics) { setName("ExternalObjectsMetricPass"); }
 
     /// Extern structure declaration.
     void postorder(const IR::Type_Extern* node) override;

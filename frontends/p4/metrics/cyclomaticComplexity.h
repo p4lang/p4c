@@ -1,3 +1,10 @@
+/*
+Determines the cyclomatic complexity values of parsers and
+controls. It applies the ccCalculator to each parser and control
+instance found during traversal. The ccCalculator determines the 
+CC value by counting decision point nodes (like if statements).
+*/
+
 #ifndef FRONTENDS_P4_CYCLOMATIC_COMPLEXITY_H_
 #define FRONTENDS_P4_CYCLOMATIC_COMPLEXITY_H_
 

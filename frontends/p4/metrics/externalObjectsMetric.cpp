@@ -1,11 +1,10 @@
 #include "externalObjectsMetric.h"
-#include <iostream>
 
 namespace P4 {
 
 void ExternalObjectsMetricPass::postorder(const IR::Type_Extern* node) {
     externTypeNames.insert(node->name.name.string());
-    metrics.externMetrics.externStructures++;
+    metrics.externStructures++;
     
     for (const auto& method : node->methods) {
         externMethods[node->name.name.string()].insert(method->name.name.string());
@@ -19,7 +18,7 @@ void ExternalObjectsMetricPass::postorder(const IR::Declaration_Instance* node) 
     if (auto tn = type->to<IR::Type_Name>()) {
         typeName = tn->path->name.name.string();
         if (externTypeNames.count(typeName)) {
-            metrics.externMetrics.externStructUses++;
+            metrics.externStructUses++;
         }
     }
 }
@@ -32,11 +31,11 @@ void ExternalObjectsMetricPass::postorder(const IR::Member* node) {
         std::string externName = externType->name.name.string();
         std::string memberName = node->member.name.string();
 
-        metrics.externMetrics.externStructUses++;
+        metrics.externStructUses++;
         // Check if member is a method call and count it.
         if (externMethods.count(externName) && 
             externMethods[externName].count(memberName)) {
-            metrics.externMetrics.externFunctionUses++;
+            metrics.externFunctionUses++;
         }
     }
 }
@@ -44,7 +43,7 @@ void ExternalObjectsMetricPass::postorder(const IR::Member* node) {
 void ExternalObjectsMetricPass::postorder(const IR::Method* node) {
     // Do not add methods that belong to an extern structure.
     if (!findContext<IR::Type_Extern>()) {
-        metrics.externMetrics.externFunctions++;
+        metrics.externFunctions++;
         externFunctions.insert(node->name.name.string());
     }
 }
@@ -55,7 +54,7 @@ void ExternalObjectsMetricPass::postorder(const IR::MethodCallExpression* node) 
     if (auto path = method->to<IR::PathExpression>()) {
         std::string calledName = path->path->name.name.string();
         if (externFunctions.count(calledName)) {
-            metrics.externMetrics.externFunctionUses++;
+            metrics.externFunctionUses++;
         }
     }
 }

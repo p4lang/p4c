@@ -5,26 +5,20 @@ namespace P4 {
 // Helper functions.
 
 void HalsteadMetricsPass::addOperand(const std::string &operand) {
-    if (scopedOperands.empty()) {
-        scopedOperands.emplace_back();  // Start global scope if none
-    }
-    if (structFields.find(operand) != structFields.end()){
-        uniqueFields.insert(operand);
-    }
-    else if (scopedOperands.back().insert(operand).second) {
-        uniqueOperands.insert(operand);
-    }
-    metrics.halsteadMetrics.totalOperands++;
+    if (scopedOperands.empty()) scopedOperands.emplace_back(); 
+    if (structFields.find(operand) != structFields.end()) uniqueFields.insert(operand);
+    else if (scopedOperands.back().insert(operand).second) uniqueOperands.insert(operand);
+    metrics.totalOperands++;
 }
 
 void HalsteadMetricsPass::addUnaryOperator(const std::string &op) {
     uniqueUnaryOperators.insert(op);
-    metrics.halsteadMetrics.totalOperators++;
+    metrics.totalOperators++;
 }
 
 void HalsteadMetricsPass::addBinaryOperator(const std::string &op) {
     uniqueBinaryOperators.insert(op);
-    metrics.halsteadMetrics.totalOperators++;
+    metrics.totalOperators++;
 }
 
 // Scope handling.
@@ -72,7 +66,7 @@ void HalsteadMetricsPass::postorder(const IR::Type_Struct *structType) {
     }
 }
 
-// Collect operators and operands
+// Collect operators and operands.
 
 bool HalsteadMetricsPass::preorder(const IR::MethodCallExpression *methodCall) {
     if (!methodCall) return false;
@@ -99,9 +93,7 @@ bool HalsteadMetricsPass::preorder(const IR::Member *member) {
     if (!member) return false;
     std::string fieldName = member->member.name.string();
     // Only add the member if it is not a method call
-    if (reservedKeywords.find(fieldName) == reservedKeywords.end()){
-        addOperand(fieldName);
-    }
+    if (reservedKeywords.find(fieldName) == reservedKeywords.end()){ addOperand(fieldName); }
     addBinaryOperator(".");
     return true;
 }
@@ -109,9 +101,7 @@ bool HalsteadMetricsPass::preorder(const IR::Member *member) {
 bool HalsteadMetricsPass::preorder(const IR::PathExpression *pathExpr) {
     if (!pathExpr) return false;
     std::string name = pathExpr->path->name.name.string();
-    if (matchTypes.find(name) == matchTypes.end()) {
-        addOperand(name);
-    }
+    if (matchTypes.find(name) == matchTypes.end()) { addOperand(name); }
     return true;
 }
 
@@ -145,14 +135,6 @@ void HalsteadMetricsPass::postorder(const IR::IfStatement *stmt) {
     }
 }
 
-void HalsteadMetricsPass::postorder(const IR::ForStatement* /*stmt*/) {
-    addUnaryOperator("for");
-}
-
-void HalsteadMetricsPass::postorder(const IR::ForInStatement* /*stmt*/) {
-    addUnaryOperator("for");
-}
-
 void HalsteadMetricsPass::postorder(const IR::SelectExpression* /*selectExpr*/) {
     addUnaryOperator("transition");
     addUnaryOperator("select");
@@ -183,24 +165,26 @@ void HalsteadMetricsPass::postorder(const IR::ReturnStatement* /*stmt*/) {addUna
 void HalsteadMetricsPass::postorder(const IR::ExitStatement* /*stmt*/) {addUnaryOperator("exit");}
 void HalsteadMetricsPass::postorder(const IR::Constant *constant) {addOperand(constant->toString().string());}
 void HalsteadMetricsPass::postorder(const IR::Operation_Binary *op) {addBinaryOperator(op->getStringOp().string());}
+void HalsteadMetricsPass::postorder(const IR::ForStatement* /*stmt*/) { addUnaryOperator("for"); }
+void HalsteadMetricsPass::postorder(const IR::ForInStatement* /*stmt*/) { addUnaryOperator("for"); }
 
 // Final metrics calculation.
 
 void HalsteadMetricsPass::postorder(const IR::P4Program* /*program*/) {
-    metrics.halsteadMetrics.uniqueOperators = uniqueUnaryOperators.size() + uniqueBinaryOperators.size();
-    metrics.halsteadMetrics.uniqueOperands = uniqueOperands.size() + uniqueFields.size();
+    metrics.uniqueOperators = uniqueUnaryOperators.size() + uniqueBinaryOperators.size();
+    metrics.uniqueOperands = uniqueOperands.size() + uniqueFields.size();
 
-    metrics.halsteadMetrics.vocabulary = metrics.halsteadMetrics.uniqueOperators + metrics.halsteadMetrics.uniqueOperands;
-    metrics.halsteadMetrics.length = metrics.halsteadMetrics.totalOperators + metrics.halsteadMetrics.totalOperands;
+    metrics.vocabulary = metrics.uniqueOperators + metrics.uniqueOperands;
+    metrics.length = metrics.totalOperators + metrics.totalOperands;
 
-    metrics.halsteadMetrics.difficulty = metrics.halsteadMetrics.uniqueOperands == 0 ? 0 :
-        (metrics.halsteadMetrics.uniqueOperators / 2.0) * (static_cast<double>(metrics.halsteadMetrics.totalOperands) / metrics.halsteadMetrics.uniqueOperands);
+    metrics.difficulty = metrics.uniqueOperands == 0 ? 0 :
+        (metrics.uniqueOperators / 2.0) * (static_cast<double>(metrics.totalOperands) / metrics.uniqueOperands);
 
-    metrics.halsteadMetrics.volume = metrics.halsteadMetrics.vocabulary == 0 ? 0 :
-        metrics.halsteadMetrics.length * std::log2(metrics.halsteadMetrics.vocabulary);
+    metrics.volume = metrics.vocabulary == 0 ? 0 :
+        metrics.length * std::log2(metrics.vocabulary);
 
-    metrics.halsteadMetrics.effort = metrics.halsteadMetrics.difficulty * metrics.halsteadMetrics.volume;
-    metrics.halsteadMetrics.deliveredBugs = metrics.halsteadMetrics.volume / 3000.0;
+    metrics.effort = metrics.difficulty * metrics.volume;
+    metrics.deliveredBugs = metrics.volume / 3000.0;
 
     if(LOGGING(3)){
         std::cout << "Unique Unary Operators ("<< uniqueUnaryOperators.size() <<"):\n";

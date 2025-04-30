@@ -1,3 +1,8 @@
+/*
+Collects parser metrics by applying the CC calculator to each state,
+and collecting the number of states of each encountered parser
+*/
+
 #ifndef FRONTENDS_P4_PARSER_METRICS_H_
 #define FRONTENDS_P4_PARSER_METRICS_H_
 
@@ -9,11 +14,11 @@ namespace P4 {
 
 class ParserMetricsPass : public Inspector {
  private:
-    Metrics &metrics;
+    ParserMetrics &metrics;
 
  public:
     explicit ParserMetricsPass(Metrics &metricsRef)
-        : metrics(metricsRef) { setName("ParserMetricsPass"); }
+        : metrics(metricsRef.parserMetrics) { setName("ParserMetricsPass"); }
 
     bool preorder(const IR::P4Parser *parser) override;
 };

@@ -283,8 +283,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         });
     }
     metricsPassManager.addUnusedCode(passes, false);
-    metricsPassManager.addRemaining(passes);
-    metricsPassManager.addExportPass(passes);
+    metricsPassManager.addMetricPasses(passes);
 
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this

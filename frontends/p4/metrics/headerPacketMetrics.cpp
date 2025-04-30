@@ -19,11 +19,11 @@ std::string ParserAnalyzer::getPacketType(const IR::ParserState* state) const {
 }
 
 void ParserAnalyzer::dfsCumulativeTypes(
-    const IR::ParserState*                          state,
-    const ParserCallGraph&                          pcg,
-    const std::string&                              parentType,
+    const IR::ParserState*                              state,
+    const ParserCallGraph&                              pcg,
+    const std::string&                                  parentType,
     std::unordered_map<const IR::ParserState*, std::string>& types,
-    std::unordered_set<const IR::ParserState*>&     currentPath) {
+    std::unordered_set<const IR::ParserState*>&      currentPath) {
 
     // If this state was already visited on the current path, stop.
     if (!currentPath.insert(state).second) return;
@@ -185,7 +185,6 @@ bool HeaderPacketMetricsPass::preorder(const IR::MethodCallStatement* mcs) {
             }
         }
     }
-
     return false;
 }
 

@@ -1,3 +1,22 @@
+/*
+Collects header manipulation metrics (extract, setValid and 
+setInvalid calls), and header modification metrics (assignment 
+statements where the left side is a header type). Before the main
+pass traverses the IR, the ParserAnalyzer pass is ran to determine
+cumulative packet types which can be created by the parser 
+(for example, "ethernet", "ethernet-ipv4", "ethernet-ipv4-tcp").
+It does so by creating a parserCallGraph and then traversing it.
+Only limitation is that it cannot determine packet types created
+with loops completely (it stops when the same state is encountered
+in the current path). 
+
+After the ParserAnalyzer finishes, the main pass collects the metrics
+on a global and per-packet type basis. An operation on a header type is 
+added to the metrics of all packet types containing that type (so for 
+hdr.ipv4.ttl = 64, the operation size will be added to both "ethernet-ipv4" 
+and "ethernet-ipv4-tcp").
+*/
+
 #ifndef FRONTENDS_P4_HEADER_PACKET_METRICS_H_
 #define FRONTENDS_P4_HEADER_PACKET_METRICS_H_
 
@@ -55,7 +74,7 @@ class HeaderPacketMetricsPass : public Inspector {
         : typeMap(typeMap), metrics(metrics), parserCallGraph("parserCallGraph") {
         setName("HeaderPacketMetricsPass");
     }
-    /// Ensure the parser analyzer collects cumulative packet types first.
+
     bool preorder(const IR::P4Program* program) override;
     void postorder(const IR::P4Program* /*program*/) override;
     bool preorder(const IR::AssignmentStatement* assign) override;

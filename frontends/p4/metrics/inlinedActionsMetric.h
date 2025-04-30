@@ -1,3 +1,9 @@
+/*
+Counts the number of actions inlined during the frontend stage by
+counting unique action names inside of blocks with annotantions of type
+"Annotation::inlinedFromAnnotation".
+*/
+
 #ifndef FRONTENDS_P4_INLINED_ACTIONS_H_
 #define FRONTENDS_P4_INLINED_ACTIONS_H_
 

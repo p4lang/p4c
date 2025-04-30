@@ -1,3 +1,10 @@
+/*
+Adds code metric collection passes to the frontend pipeline,
+based on the "selectedMetrics" option. If any metrics were
+selected by the user, the pass which exports them is added 
+as well.
+*/
+
 #ifndef FRONTENDS_P4_METRICS_PASS_MANAGER_H_
 #define FRONTENDS_P4_METRICS_PASS_MANAGER_H_
 
@@ -37,8 +44,7 @@ class MetricsPassManager {
     Metrics& getMetrics() { return metrics; }
     void addInlined(PassManager &pm);
     void addUnusedCode(PassManager &pm, bool isBefore);
-    void addRemaining(PassManager &pm);
-    void addExportPass(PassManager &pm);
+    void addMetricPasses(PassManager &pm);
 };
 
 }  // namespace P4

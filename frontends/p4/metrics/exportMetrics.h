@@ -1,3 +1,9 @@
+/*
+Exports the collected code metric values into a formatted
+text file, and a json file. The new filenames are based on the
+compiled program name (programName_metrics.txt/json).
+*/
+
 #ifndef FRONTENDS_P4_EXPORTMETRICS_H_
 #define FRONTENDS_P4_EXPORTMETRICS_H_
 

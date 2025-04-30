@@ -4,7 +4,7 @@ namespace P4 {
 
 void HeaderMetricsPass::postorder(const IR::Type_Header *header) {
     std::string headerName = header->getName().string();
-    metrics.headerMetrics.numHeaders++;
+    metrics.numHeaders++;
     size_t numFields = 0;
     size_t sizeSum = 0;
 
@@ -30,17 +30,17 @@ void HeaderMetricsPass::postorder(const IR::Type_Header *header) {
         }
     }
 
-    metrics.headerMetrics.fieldsNum[headerName] = numFields;
-    metrics.headerMetrics.fieldSizeSum[headerName] = sizeSum;
+    metrics.fieldsNum[headerName] = numFields;
+    metrics.fieldSizeSum[headerName] = sizeSum;
     totalFieldsNum += numFields;
     totalFieldsSize += sizeSum;
 }
 
 void HeaderMetricsPass::postorder(const IR::P4Program* /*program*/){
-    if (metrics.headerMetrics.numHeaders > 0)
-        metrics.headerMetrics.avgFieldsNum = static_cast<double>(totalFieldsNum) / static_cast<double>(metrics.headerMetrics.numHeaders);
+    if (metrics.numHeaders > 0)
+        metrics.avgFieldsNum = static_cast<double>(totalFieldsNum) / static_cast<double>(metrics.numHeaders);
     if (totalFieldsNum > 0)
-        metrics.headerMetrics.avgFieldSize = static_cast<double>(totalFieldsSize) / static_cast<double>(totalFieldsNum);
+        metrics.avgFieldSize = static_cast<double>(totalFieldsSize) / static_cast<double>(totalFieldsNum);
 }
 
 }  // namespace P4

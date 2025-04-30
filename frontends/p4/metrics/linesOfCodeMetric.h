@@ -1,4 +1,9 @@
-// linesOfCodeMetric.h
+/*
+Counts the number of "real" lines of code in the compiled program
+by inserting the numbers of lines which contain code into a set,
+and retrieving it's size at the end.
+*/
+
 #ifndef FRONTENDS_P4_LINES_OF_CODE_METRIC_H_
 #define FRONTENDS_P4_LINES_OF_CODE_METRIC_H_
 
@@ -13,8 +18,6 @@ class LinesOfCodeMetricPass : public Inspector {
  private:
     Metrics &metrics;
     std::string sourceFile;
-    //unsigned startLine = ~0U;
-    //unsigned endLine = 0;
     std::unordered_set<unsigned> lines;
 
  public:

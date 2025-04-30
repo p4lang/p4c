@@ -15,10 +15,10 @@ bool ParserMetricsPass::preorder(const IR::P4Parser *parser) {
         state->apply(calculator);
         int complexity = calculator.getComplexity();
 
-        metrics.parserMetrics.StateComplexity[stateName] = complexity;
+        metrics.StateComplexity[stateName] = complexity;
     }
 
-    metrics.parserMetrics.totalStates += stateCount;
+    metrics.totalStates += stateCount;
     return false;
 }
 

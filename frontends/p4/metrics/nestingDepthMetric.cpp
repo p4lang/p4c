@@ -4,78 +4,52 @@ namespace P4 {
 
 bool NestingDepthMetricPass::increment(){
     currentDepth++;
-    if (currentDepth > currentMax)
-        currentMax = currentDepth;
+    if (currentDepth > currentMax) currentMax = currentDepth;
     return true;
 }
 
-bool NestingDepthMetricPass::preorder(const IR::P4Parser* /*parser*/) {
+void NestingDepthMetricPass::decrement(){
+    if (currentDepth > 0) currentDepth-- ;
+}
+
+bool NestingDepthMetricPass::enter(){
     currentDepth = currentMax = 0;
     return true;
 }
 
-void NestingDepthMetricPass::postorder(const IR::P4Parser *parser) {
-    metrics.nestingDepth.blockNestingDepth[parser->name.name.string()] = currentMax;
+void NestingDepthMetricPass::logDepth(const std::string name){
+    metrics.blockNestingDepth[name] = currentMax;
 }
 
-bool NestingDepthMetricPass::preorder(const IR::P4Control* /*control*/) {
-    currentDepth = currentMax = 0;
-    return true;
-}
-
-void NestingDepthMetricPass::postorder(const IR::P4Control *control) {
-    metrics.nestingDepth.blockNestingDepth[control->name.name.string()] = currentMax;
-}
-
-bool NestingDepthMetricPass::preorder(const IR::Function* /*function*/) {
-    currentDepth = currentMax = 0;
-    return true;
-}
-
-void NestingDepthMetricPass::postorder(const IR::Function* function) {
-    metrics.nestingDepth.blockNestingDepth[function->name.name.string()] = currentMax;
-}
-
-bool NestingDepthMetricPass::preorder(const IR::ParserState* /*state*/){
-    return increment();
-}
-void NestingDepthMetricPass::postorder(const IR::ParserState* /*state*/){
-    currentDepth--;
-}
-
-bool NestingDepthMetricPass::preorder(const IR::SelectExpression* /*stmt*/) {
-    return increment();
-}
-
-void NestingDepthMetricPass::postorder(const IR::SelectExpression* /*stmt*/) {
-    currentDepth--;
-}
-
-bool NestingDepthMetricPass::preorder(const IR::BlockStatement* /*stmt*/) {
-    return increment();
-}
-
-void NestingDepthMetricPass::postorder(const IR::BlockStatement* /*stmt*/) {
-    currentDepth--;
-}
-
+bool NestingDepthMetricPass::preorder(const IR::P4Parser* /*parser*/) { return enter(); }
+bool NestingDepthMetricPass::preorder(const IR::P4Control* /*control*/) { return enter(); }
+bool NestingDepthMetricPass::preorder(const IR::Function* /*function*/) { return enter(); }
+void NestingDepthMetricPass::postorder(const IR::P4Parser *parser) { logDepth(parser->name.name.string()); }
+void NestingDepthMetricPass::postorder(const IR::P4Control *control) {logDepth(control->name.name.string());}
+void NestingDepthMetricPass::postorder(const IR::Function* function) {logDepth(function->name.name.string());}
+bool NestingDepthMetricPass::preorder(const IR::ParserState* /*state*/){ return increment(); }
+bool NestingDepthMetricPass::preorder(const IR::SelectExpression* /*stmt*/) { return increment(); }
+bool NestingDepthMetricPass::preorder(const IR::BlockStatement* /*stmt*/) { return increment(); }
+void NestingDepthMetricPass::postorder(const IR::ParserState* /*state*/){ decrement(); }
+void NestingDepthMetricPass::postorder(const IR::SelectExpression* /*stmt*/) { decrement(); }
+void NestingDepthMetricPass::postorder(const IR::BlockStatement* /*stmt*/) { decrement(); }
 
 void NestingDepthMetricPass::postorder(const IR::P4Program* /*program*/) {
     unsigned total = 0;
     unsigned count = 0;
-    metrics.nestingDepth.maxNestingDepth = 0;
+    metrics.maxNestingDepth = 0;
 
-    for (const auto &entry : metrics.nestingDepth.blockNestingDepth) {
+    for (const auto &entry : metrics.blockNestingDepth) {
         total += entry.second;
         count++;
-        if (entry.second > metrics.nestingDepth.maxNestingDepth)
-            metrics.nestingDepth.maxNestingDepth = entry.second;
+        if (entry.second > metrics.maxNestingDepth)
+            metrics.maxNestingDepth = entry.second;
     }
 
     if (count > 0) {
-        metrics.nestingDepth.avgNestingDepth = static_cast<double>(total) / count;
+        metrics.avgNestingDepth = static_cast<double>(total) / count;
     } else {
-        metrics.nestingDepth.avgNestingDepth = 0.0;
+        metrics.avgNestingDepth = 0.0;
     }
 }
 

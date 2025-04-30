@@ -2,25 +2,11 @@
 
 namespace P4 {
 
-void CyclomaticComplexityCalculator::postorder(const IR::IfStatement* /*stmt*/) {
-    ++cc;
-}
-
-void CyclomaticComplexityCalculator::postorder(const IR::SwitchStatement* stmt) {
-    cc += stmt->cases.size();
-}
-
-void CyclomaticComplexityCalculator::postorder(const IR::ForStatement* /*stmt*/) {
-    ++cc;
-}
-
-void CyclomaticComplexityCalculator::postorder(const IR::ForInStatement* /*stmt*/) {
-    ++cc;
-}
-
-void CyclomaticComplexityCalculator::postorder(const IR::SelectExpression* selectExpr) {
-    cc += selectExpr->selectCases.size();
-}
+void CyclomaticComplexityCalculator::postorder(const IR::IfStatement* /*stmt*/) { ++cc; }
+void CyclomaticComplexityCalculator::postorder(const IR::SwitchStatement* stmt) { cc += stmt->cases.size(); }
+void CyclomaticComplexityCalculator::postorder(const IR::ForStatement* /*stmt*/) { ++cc; }
+void CyclomaticComplexityCalculator::postorder(const IR::ForInStatement* /*stmt*/) { ++cc; }
+void CyclomaticComplexityCalculator::postorder(const IR::SelectExpression* selectExpr) { cc += selectExpr->selectCases.size(); }
 
 void CyclomaticComplexityCalculator::postorder(const IR::MethodCallExpression* mce) {
     if (auto pathExpr = mce->method->to<IR::PathExpression>()) {

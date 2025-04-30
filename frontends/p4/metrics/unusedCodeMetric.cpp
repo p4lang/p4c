@@ -2,47 +2,28 @@
 
 namespace P4 {
 
-void UnusedCodeMetricPass::scope_enter(std::string name){
+bool UnusedCodeMetricPass::scope_enter(std::string name){
     scope.push_back(scope.empty() ? name : scope.back() + "." + name);
+    return true;
 }
 
 void UnusedCodeMetricPass::scope_leave(){
-    if (!scope.empty())
-        scope.pop_back();
-}
-
-bool UnusedCodeMetricPass::preorder(const IR::P4Control* control) {
-    scope_enter(control->getName().name.string());
-    return true;
-}
-
-void UnusedCodeMetricPass::postorder(const IR::P4Control* /*control*/) {
-    scope_leave();
-}
-
-bool UnusedCodeMetricPass::preorder(const IR::P4Parser* parser) {
-    scope_enter(parser->getName().name.string());
-    return true;
-}
-
-void UnusedCodeMetricPass::postorder(const IR::P4Parser* /*parser*/) {
-    scope_leave();
+    if (!scope.empty()) scope.pop_back();
 }
 
 bool UnusedCodeMetricPass::preorder(const IR::Function* function) {
-    scope_enter(function->getName().name.string());
     currentInstancesCount.functions++;
-    return true;
+    return scope_enter(function->getName().name.string());
 }
 
-void UnusedCodeMetricPass::postorder(const IR::Function* /*function*/) {
-    scope_leave();
-}
-
-bool UnusedCodeMetricPass::preorder(const IR::IfStatement* stmt) {
-    scope_enter("if_" + std::to_string(stmt->id));
-    return true;
-}
+bool UnusedCodeMetricPass::preorder(const IR::P4Control* control) { return scope_enter(control->getName().name.string()); }
+bool UnusedCodeMetricPass::preorder(const IR::P4Parser* parser) { return scope_enter(parser->getName().name.string()); }
+bool UnusedCodeMetricPass::preorder(const IR::IfStatement* stmt) { return scope_enter("if_" + std::to_string(stmt->id)); }
+bool UnusedCodeMetricPass::preorder(const IR::SwitchCase* caseNode) { return scope_enter("case_" + std::to_string(caseNode->id)); }
+void UnusedCodeMetricPass::postorder(const IR::P4Control* /*control*/) { scope_leave(); }
+void UnusedCodeMetricPass::postorder(const IR::P4Parser* /*parser*/) { scope_leave(); }
+void UnusedCodeMetricPass::postorder(const IR::Function* /*function*/) { scope_leave(); }
+void UnusedCodeMetricPass::postorder(const IR::SwitchCase* /*case*/) { scope_leave(); }
 
 void UnusedCodeMetricPass::postorder(const IR::IfStatement* stmt) {
     currentInstancesCount.conditionals++;
@@ -50,24 +31,13 @@ void UnusedCodeMetricPass::postorder(const IR::IfStatement* stmt) {
     scope_leave();
 }
 
-bool UnusedCodeMetricPass::preorder(const IR::SwitchCase* caseNode) {
-    scope_enter("case_" + std::to_string(caseNode->id));
-    return true;
-}
-
-void UnusedCodeMetricPass::postorder(const IR::SwitchCase* /*caseNode*/) {
-    scope_leave();
-}
-
 bool UnusedCodeMetricPass::preorder(const IR::P4Action* action) {
     if (action->getName().name == "NoAction") return false;
     std::string scopedName = scope.empty() ? action->getName().name.string() : scope.back() + "." + action->getName().name.string();
 
-    if (isBefore) {
-        metrics.helperVars.beforeActions.push_back(scopedName);
-    } else {
-        metrics.helperVars.afterActions.push_back(scopedName);
-    }
+    if (isBefore) metrics.helperVars.beforeActions.push_back(scopedName);
+    else metrics.helperVars.afterActions.push_back(scopedName);
+        
     return true;
 }
 
@@ -83,12 +53,8 @@ void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable* node) {
     std::string name = node->getName().name.string();
     std::string scopedName = scope.empty() ? name : scope.back() + "." + name;
 
-    if (isBefore) {
-        metrics.helperVars.beforeVariables.push_back(scopedName);
-    } 
-    else {
-        metrics.helperVars.afterVariables.push_back(scopedName);
-    }
+    if (isBefore) metrics.helperVars.beforeVariables.push_back(scopedName);
+    else metrics.helperVars.afterVariables.push_back(scopedName);
 }
 
 void UnusedCodeMetricPass::postorder(const IR::Type_Enum* /*node*/) { currentInstancesCount.enums++; }
