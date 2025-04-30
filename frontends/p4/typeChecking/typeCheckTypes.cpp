@@ -379,17 +379,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Typedef *tdecl) {
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Stack *type) {
-    auto canon = setTypeType(type);
-    if (canon == nullptr) return type;
-
-    auto etype = canon->to<IR::Type_Stack>()->elementType;
-    if (etype == nullptr) return type;
-
-#if 0
-    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>() &&
-        !etype->is<IR::Type_SpecializedCanonical>())
-        typeError("Header stack %1% used with non-header type %2%", type, etype->toString());
-#endif
+    setTypeType(type);
     return type;
 }
 

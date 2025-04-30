@@ -80,7 +80,7 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
     size_t sz = typeStack->getSize();
     if ((expansion += (sz - 1)) > maxExpansion) {
         if (expansion - sz < maxExpansion)
-            error(ErrorType::ERR_OVERLIMIT, "%1%too much expansion from non-const array indexes",
+            error(ErrorType::ERR_OVERLIMIT, "%1%Too much expansion from non-const array indexes",
                   statement->srcInfo);
         return statement;
     }
