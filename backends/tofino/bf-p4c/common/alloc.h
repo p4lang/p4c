@@ -22,6 +22,7 @@
 #include <stdlib.h>
 
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 namespace BFN {
