@@ -54,6 +54,7 @@ class ErrorType {
     static const int ERR_IO;                     // IO error
     static const int ERR_UNREACHABLE;            // unreachable code
     static const int ERR_MODEL;                  // something is wrong with the target model
+    static const int ERR_TABLE_KEYS;             // something is wrong with a table key
     static const int ERR_RESERVED;               // Reserved for target use
     // Backends should extend this class with additional errors in the range 500-999.
     static const int ERR_MIN_BACKEND = 500;  // first allowed backend error code
@@ -88,6 +89,7 @@ class ErrorType {
     static const int WARN_EXPRESSION;               // expression related warnings
     static const int WARN_DUPLICATE;                // duplicate objects
     static const int WARN_BRANCH_HINT;              // branch frequency/likely hints
+    static const int WARN_TABLE_KEYS;               // something is wrong with a table key
     // Backends should extend this class with additional warnings in the range 1500-2141.
     static const int WARN_MIN_BACKEND = 1500;  // first allowed backend warning code
     static const int WARN_MAX = 2141;          // last allowed warning code
