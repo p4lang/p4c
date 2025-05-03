@@ -47,6 +47,9 @@ target_link_libraries(
     # For Abseil includes.
   PRIVATE frontend
 )
+if (ENABLE_PCH)
+  target_precompile_headers(p4tools-common REUSE_FROM ir)
+endif()
 
 target_include_directories(
   p4tools-common
