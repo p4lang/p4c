@@ -50,9 +50,6 @@ if (ENABLE_TESTING)
   enable_testing()
 endif()
 
-set(BOOST_MIN_VERSION "1.58.0")
-find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
-
 # Get the version from bf-p4c/version.h
 file (STRINGS "${BFN_P4C_SOURCE_DIR}/bf-p4c/version.h"
   __version
