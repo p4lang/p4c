@@ -30,13 +30,13 @@
 #include "backends/tofino/bf-p4c/phv/collect_table_keys.h"
 #include "backends/tofino/bf-p4c/phv/fieldslice_live_range.h"
 #include "backends/tofino/bf-p4c/phv/make_clusters.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "backends/tofino/bf-p4c/phv/slicing/types.h"
 #include "backends/tofino/bf-p4c/phv/v2/action_packing_validator.h"
 #include "backends/tofino/bf-p4c/phv/v2/parser_packing_validator.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 namespace PHV {
 namespace v2 {
