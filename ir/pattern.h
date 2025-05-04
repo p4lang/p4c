@@ -91,25 +91,9 @@ class Pattern {
         Match() : m(nullptr) {}
         const T *operator->() const { return m; }
         operator const T *() const { return m; }  // NOLINT(runtime/explicit)
-        Pattern operator*(const Pattern &a) { return Pattern(*this) * a; }
-        Pattern operator/(const Pattern &a) { return Pattern(*this) / a; }
-        Pattern operator%(const Pattern &a) { return Pattern(*this) % a; }
-        Pattern operator+(const Pattern &a) { return Pattern(*this) + a; }
-        Pattern operator-(const Pattern &a) { return Pattern(*this) - a; }
-        Pattern operator<<(const Pattern &a) { return Pattern(*this) << a; }
-        Pattern operator>>(const Pattern &a) { return Pattern(*this) >> a; }
-        Pattern operator==(const Pattern &a) { return Pattern(*this) == a; }
-        Pattern operator!=(const Pattern &a) { return Pattern(*this) != a; }
-        Pattern operator<(const Pattern &a) { return Pattern(*this) < a; }
-        Pattern operator<=(const Pattern &a) { return Pattern(*this) <= a; }
-        Pattern operator>(const Pattern &a) { return Pattern(*this) > a; }
-        Pattern operator>=(const Pattern &a) { return Pattern(*this) >= a; }
+
         Pattern Relation(const Pattern &a) { return Pattern(*this).Relation(a); }
-        Pattern operator&(const Pattern &a) { return Pattern(*this) & a; }
-        Pattern operator|(const Pattern &a) { return Pattern(*this) | a; }
-        Pattern operator^(const Pattern &a) { return Pattern(*this) ^ a; }
-        Pattern operator&&(const Pattern &a) { return Pattern(*this) && a; }
-        Pattern operator||(const Pattern &a) { return Pattern(*this) || a; }
+
         // avoid ambiguous overloads with operator const T * above
         Pattern operator+(int a) { return Pattern(*this) + Pattern(a); }
         Pattern operator-(int a) { return Pattern(*this) - Pattern(a); }
@@ -205,6 +189,66 @@ inline Pattern operator|(int v, const Pattern &a) { return Pattern(v) | a; }
 inline Pattern operator^(int v, const Pattern &a) { return Pattern(v) ^ a; }
 inline Pattern operator&&(int v, const Pattern &a) { return Pattern(v) && a; }
 inline Pattern operator||(int v, const Pattern &a) { return Pattern(v) || a; }
+
+// NOTE: Because of C++20 overloading rules (particularly the fact that "flipped" operators don't
+// work with non-bool return type), we must have both versions for Pattern-Match comparsion as well
+// as the Match-Match version to be non-ambiguous.
+template<typename A, typename B> Pattern operator*(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) * Pattern(b); }
+template<typename A, typename B> Pattern operator/(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) / Pattern(b); }
+template<typename A, typename B> Pattern operator%(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) % Pattern(b); }
+template<typename A, typename B> Pattern operator+(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) + Pattern(b); }
+template<typename A, typename B> Pattern operator-(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) - Pattern(b); }
+template<typename A, typename B> Pattern operator<<(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) << Pattern(b); }
+template<typename A, typename B> Pattern operator>>(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) >> Pattern(b); }
+template<typename A, typename B> Pattern operator==(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) == Pattern(b); }
+template<typename A, typename B> Pattern operator!=(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) != Pattern(b); }
+template<typename A, typename B> Pattern operator<(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) < Pattern(b); }
+template<typename A, typename B> Pattern operator<=(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) <= Pattern(b); }
+template<typename A, typename B> Pattern operator>(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) > Pattern(b); }
+template<typename A, typename B> Pattern operator>=(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) >= Pattern(b); }
+template<typename A, typename B> Pattern operator&(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) & Pattern(b); }
+template<typename A, typename B> Pattern operator|(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) | Pattern(b); }
+template<typename A, typename B> Pattern operator^(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) ^ Pattern(b); }
+template<typename A, typename B> Pattern operator&&(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) && Pattern(b); }
+template<typename A, typename B> Pattern operator||(Pattern::Match<A> &a, Pattern::Match<B> &b) { return Pattern(a) || Pattern(b); }
+
+template<typename T> Pattern operator*(const Pattern &a, Pattern::Match<T> &b) { return a * Pattern(b); }
+template<typename T> Pattern operator/(const Pattern &a, Pattern::Match<T> &b) { return a / Pattern(b); }
+template<typename T> Pattern operator%(const Pattern &a, Pattern::Match<T> &b) { return a % Pattern(b); }
+template<typename T> Pattern operator+(const Pattern &a, Pattern::Match<T> &b) { return a + Pattern(b); }
+template<typename T> Pattern operator-(const Pattern &a, Pattern::Match<T> &b) { return a - Pattern(b); }
+template<typename T> Pattern operator<<(const Pattern &a, Pattern::Match<T> &b) { return a << Pattern(b); }
+template<typename T> Pattern operator>>(const Pattern &a, Pattern::Match<T> &b) { return a >> Pattern(b); }
+template<typename T> Pattern operator==(const Pattern &a, Pattern::Match<T> &b) { return a == Pattern(b); }
+template<typename T> Pattern operator!=(const Pattern &a, Pattern::Match<T> &b) { return a != Pattern(b); }
+template<typename T> Pattern operator<(const Pattern &a, Pattern::Match<T> &b) { return a < Pattern(b); }
+template<typename T> Pattern operator<=(const Pattern &a, Pattern::Match<T> &b) { return a <= Pattern(b); }
+template<typename T> Pattern operator>(const Pattern &a, Pattern::Match<T> &b) { return a > Pattern(b); }
+template<typename T> Pattern operator>=(const Pattern &a, Pattern::Match<T> &b) { return a >= Pattern(b); }
+template<typename T> Pattern operator&(const Pattern &a, Pattern::Match<T> &b) { return a & Pattern(b); }
+template<typename T> Pattern operator|(const Pattern &a, Pattern::Match<T> &b) { return a | Pattern(b); }
+template<typename T> Pattern operator^(const Pattern &a, Pattern::Match<T> &b) { return a ^ Pattern(b); }
+template<typename T> Pattern operator&&(const Pattern &a, Pattern::Match<T> &b) { return a && Pattern(b); }
+template<typename T> Pattern operator||(const Pattern &a, Pattern::Match<T> &b) { return a || Pattern(b); }
+
+template<typename T> Pattern operator*(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) * b; }
+template<typename T> Pattern operator/(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) / b; }
+template<typename T> Pattern operator%(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) % b; }
+template<typename T> Pattern operator+(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) + b; }
+template<typename T> Pattern operator-(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) - b; }
+template<typename T> Pattern operator<<(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) << b; }
+template<typename T> Pattern operator>>(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) >> b; }
+template<typename T> Pattern operator==(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) == b; }
+template<typename T> Pattern operator!=(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) != b; }
+template<typename T> Pattern operator<(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) < b; }
+template<typename T> Pattern operator<=(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) <= b; }
+template<typename T> Pattern operator>(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) > b; }
+template<typename T> Pattern operator>=(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) >= b; }
+template<typename T> Pattern operator&(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) & b; }
+template<typename T> Pattern operator|(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) | b; }
+template<typename T> Pattern operator^(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) ^ b; }
+template<typename T> Pattern operator&&(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) && b; }
+template<typename T> Pattern operator||(const Pattern::Match<T> &a, Pattern &b) { return Patter(a) || b; }
 
 }  // namespace P4
 
