@@ -1,4 +1,4 @@
-C++ (following the C++ 11 standard) is the implementation language for
+C++ (following the C++ 20 standard) is the implementation language for
 the compiler.  This file contains notes on how we use C++ and conventions
 we use for things that C++ does not handle well.
 
