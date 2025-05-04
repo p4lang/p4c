@@ -219,6 +219,11 @@ class SourceInfo final {
 
     friend std::ostream &operator<<(std::ostream &os, const SourceInfo &info);
 
+    template <typename Sink>
+    friend void AbslStringify(Sink &sink, const SourceInfo &p) {
+        absl::Format(&sink, "%s:%d:%d", p.filename, p.line, p.column);
+    }
+
  private:
     const InputSources *sources = nullptr;
     SourcePosition start = SourcePosition();

@@ -365,7 +365,8 @@ void AlgTcamMatchTable::write_regs_vt(REGS &regs) {
     }
 }
 
-std::unique_ptr<json::vector> AlgTcamMatchTable::gen_memory_resource_allocation_tbl_cfg() const {
+std::unique_ptr<json::vector> AlgTcamMatchTable::gen_memory_resource_allocation_tbl_cfg_no_input()
+    const {
     if (col_priority_way.size() == 0)
         error(lineno, "No column priority determined for table %s", name());
     unsigned fmt_width = format ? (format->size + 127) / 128 : 0;
@@ -427,7 +428,7 @@ void AlgTcamMatchTable::gen_unit_cfg(json::vector &units, int size) const {
     // Assuming atcam next hit table cannot be multiple tables
     stage_tbl["default_next_table"] =
         !hit_next.empty() ? hit_next[0].next_table_id() : Target::END_OF_PIPE();
-    stage_tbl["memory_resource_allocation"] = gen_memory_resource_allocation_tbl_cfg();
+    stage_tbl["memory_resource_allocation"] = gen_memory_resource_allocation_tbl_cfg_no_input();
     // Hash functions not necessary currently for ATCAM matches, as the result comes from
     // the partition_field_name
     stage_tbl["hash_functions"] = json::vector();

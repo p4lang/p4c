@@ -25,6 +25,7 @@ limitations under the License.
 
 #include "absl/numeric/bits.h"
 #include "bitvec.h"
+#include "cstring.h"
 #include "exceptions.h"
 #include "hash.h"
 

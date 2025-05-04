@@ -22,6 +22,8 @@
 #include <ostream>
 #include <string>
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/mau/memories.h"
 #include "lib/hex.h"
