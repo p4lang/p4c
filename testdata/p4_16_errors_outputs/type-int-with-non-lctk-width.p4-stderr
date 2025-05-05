@@ -7,4 +7,3 @@ type-int-with-non-lctk-width.p4(4): [--Wwarn=unused] warning: 'tt' is unused
 type-int-with-non-lctk-width.p4(4): [--Werror=expected] error: l: expected a constant
   const int<(l)> tt = 1;
              ^
-Can not shift by a negative value.
