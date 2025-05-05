@@ -50,6 +50,19 @@ TEST(Util, Json) {
     auto smallestLongLong = static_cast<long long>(1LL << 63);
     value = new JsonValue(smallestLongLong);
     EXPECT_EQ(getNumStringRepr(smallestLongLong), value->toString());
+    value = new JsonValue(0.0f);
+    EXPECT_EQ("0", value->toString());
+    value = new JsonValue(3.14f);
+    EXPECT_EQ("3.14", value->toString());
+    value = new JsonValue(2.718);
+    EXPECT_EQ("2.718", value->toString());
+    value = new JsonValue(-0.00123);
+    EXPECT_EQ("-0.00123", value->toString());
+    value = new JsonValue(1.23456e-10);
+    EXPECT_EQ("1.23456e-10", value->toString());
+    value = new JsonValue(static_cast<float>(1.0 / 3.0));
+    std::string floatStr = value->toString().string();
+    EXPECT_TRUE(floatStr.find("0.333") == 0);
 
     auto arr = new JsonArray();
     arr->append(5);
