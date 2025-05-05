@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_COMMON_CHECK_FIELD_CORRUPTION_H_
-#define BF_P4C_COMMON_CHECK_FIELD_CORRUPTION_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_CHECK_FIELD_CORRUPTION_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_CHECK_FIELD_CORRUPTION_H_
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
@@ -61,4 +61,4 @@ class CheckFieldCorruption : public Inspector, TofinoWriteContext {
     bool preorder(const IR::BFN::ParserZeroInit *) override;
 };
 
-#endif /* BF_P4C_COMMON_CHECK_FIELD_CORRUPTION_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_CHECK_FIELD_CORRUPTION_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _MIDEND_SIMPLIFY_REFERENCES_H_
-#define _MIDEND_SIMPLIFY_REFERENCES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_REFERENCES_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_REFERENCES_H_
 
 #include <vector>
 
@@ -62,4 +62,4 @@ struct SimplifyReferences : public PassManager {
     SimplifyReferences(ParamBinding *bindings, P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 };
 
-#endif /* _MIDEND_SIMPLIFY_REFERENCES_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_REFERENCES_H_ */

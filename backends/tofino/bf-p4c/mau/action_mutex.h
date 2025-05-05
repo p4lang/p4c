@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_ACTION_MUTEX_H_
-#define BF_P4C_MAU_ACTION_MUTEX_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_ACTION_MUTEX_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_ACTION_MUTEX_H_
 
 #include <map>
 
@@ -62,4 +62,4 @@ class ActionMutuallyExclusive : public MauInspector {
     std::map<cstring, const IR::MAU::Action *> name_actions;
 };
 
-#endif /* BF_P4C_MAU_ACTION_MUTEX_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_ACTION_MUTEX_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_VALIDATE_ACTIONS_H_
-#define BF_P4C_MAU_VALIDATE_ACTIONS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_VALIDATE_ACTIONS_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_VALIDATE_ACTIONS_H_
 
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
@@ -47,4 +47,4 @@ class ValidateActions final : public MauInspector {
         : phv(p), red_info(ri), stop_compiler(sc), phv_alloc(pa), ad_alloc(ad) {}
 };
 
-#endif /* BF_P4C_MAU_VALIDATE_ACTIONS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_VALIDATE_ACTIONS_H_ */

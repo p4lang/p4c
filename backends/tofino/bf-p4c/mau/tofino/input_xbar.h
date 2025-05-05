@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
-#define BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
 
 /* clang-format off */
 #include "backends/tofino/bf-p4c/mau/input_xbar.h"
@@ -745,4 +745,4 @@ struct IXBar : public ::IXBar {
 
 /* clang-format on */
 
-#endif /* BF_P4C_MAU_TOFINO_INPUT_XBAR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TOFINO_INPUT_XBAR_H_ */

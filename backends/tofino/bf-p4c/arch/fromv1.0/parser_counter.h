@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_
-#define BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_
 
 #include "backends/tofino/bf-p4c/arch/fromv1.0/v1_converters.h"
 
@@ -42,4 +42,4 @@ class ParserCounterSelectionConverter : public PassManager {
 }  // namespace V1
 }  // namespace BFN
 
-#endif /* BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_ */

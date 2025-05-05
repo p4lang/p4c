@@ -17,8 +17,8 @@
  *  SPDX-License-Identifier: Apache-2.0
  ******************************************************************************/
 
-#ifndef TESTGEN_TARGETS_TOFINO_SHARED_PROGRAM_INFO_H_
-#define TESTGEN_TARGETS_TOFINO_SHARED_PROGRAM_INFO_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_TOFINO_SHARED_PROGRAM_INFO_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_TOFINO_SHARED_PROGRAM_INFO_H_
 
 #include <vector>
 
@@ -96,4 +96,4 @@ class TofinoSharedProgramInfo : public ProgramInfo {
 
 }  // namespace P4::P4Tools::P4Testgen::Tofino
 
-#endif /* TESTGEN_TARGETS_TOFINO_SHARED_PROGRAM_INFO_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_TOFINO_SHARED_PROGRAM_INFO_H_ */

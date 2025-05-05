@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PARDE_PARSER_QUERY_H_
-#define BF_P4C_PARDE_PARSER_QUERY_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_QUERY_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_QUERY_H_
 
 #include <ir/ir.h>
 
@@ -76,4 +76,4 @@ struct ParserQuery {
         : parser_info(pi), field_to_states(fs) {}
 };
 
-#endif /*BF_P4C_PARDE_PARSER_QUERY_H_*/
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_QUERY_H_ */

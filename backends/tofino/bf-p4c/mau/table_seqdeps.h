@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_TABLE_SEQDEPS_H_
-#define BF_P4C_MAU_TABLE_SEQDEPS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_TABLE_SEQDEPS_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_TABLE_SEQDEPS_H_
 
 #include "field_use.h"
 #include "mau_visitor.h"
@@ -33,4 +33,4 @@ class TableFindSeqDependencies : public MauModifier {
     explicit TableFindSeqDependencies(const PhvInfo &p) : uses(p) {}
 };
 
-#endif /* BF_P4C_MAU_TABLE_SEQDEPS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_TABLE_SEQDEPS_H_ */

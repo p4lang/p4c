@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_ADD_ALWAYS_RUN_H_
-#define BF_P4C_MAU_ADD_ALWAYS_RUN_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_ADD_ALWAYS_RUN_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_ADD_ALWAYS_RUN_H_
 
 #include <optional>
 
@@ -130,4 +130,4 @@ class AddAlwaysRun : public PassManager {
     explicit AddAlwaysRun(const ordered_map<gress_t, ConstraintMap> &tablesToAdd);
 };
 
-#endif /* BF_P4C_MAU_ADD_ALWAYS_RUN_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_ADD_ALWAYS_RUN_H_ */

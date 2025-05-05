@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
-#define COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
+#ifndef FRONTENDS_COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
+#define FRONTENDS_COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
@@ -124,4 +124,4 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
 
 }  // namespace P4
 
-#endif /* COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_ */
+#endif /* FRONTENDS_COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_ */

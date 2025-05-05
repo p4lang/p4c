@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
-#define BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_DETERMINE_POWER_USAGE_H_
 
 #include <map>
 
@@ -140,4 +140,4 @@ class DeterminePowerUsage : public MauInspector {
 
 }  // end namespace MauPower
 
-#endif /* BF_P4C_MAU_DETERMINE_POWER_USAGE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_DETERMINE_POWER_USAGE_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_
-#define _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_
 
 #include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/logging/resources_schema.h"
@@ -96,4 +96,4 @@ class ParserResourcesLogging : public ParserInspector {
 
 }  // namespace BFN
 
-#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_ */
