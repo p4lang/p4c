@@ -153,7 +153,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     TypeMap typeMap;
-    MetricsPassManager metricsPassManager(options, &typeMap);
+
+    MetricsPassManager metricsPassManager(options, &typeMap, P4::BaseCompileContext::get().metrics);
 
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();

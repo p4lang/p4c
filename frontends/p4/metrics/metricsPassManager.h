@@ -31,15 +31,14 @@ class Metrics;
 
 class MetricsPassManager {
  private:
-    const CompilerOptions &options;
     const std::set<std::string> &selectedMetrics;
     TypeMap* typeMap;
-    Metrics metrics;
+    Metrics &metrics;
     std::string fileName;
     std::string isolatedFileName;
 
  public:
-    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap);
+    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap, Metrics& metricsRef);
     
     Metrics& getMetrics() { return metrics; }
     void addInlined(PassManager &pm);

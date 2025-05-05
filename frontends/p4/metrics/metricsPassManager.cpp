@@ -2,11 +2,10 @@
 
 namespace P4 {
 
-MetricsPassManager::MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap)
-    : options(options), 
-    selectedMetrics(options.selectedMetrics), 
+MetricsPassManager::MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap, Metrics& metricsRef)
+    :selectedMetrics(options.selectedMetrics), 
     typeMap(typeMap), 
-    metrics() {
+    metrics(metricsRef) {
     
     size_t pos = options.file.string().rfind('.');
     fileName = (pos != std::string::npos 
