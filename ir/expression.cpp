@@ -94,6 +94,7 @@ void IR::Constant::handleOverflow(bool noWarning) {
             P4::warning(ErrorType::WARN_OVERFLOW,
                         "%1%: zero-width integer cannot have non-zero value", this);
         }
+        value = 0;
     } else if (tb->isSigned) {
         big_int max = (one << (width - 1)) - 1;
         big_int min = -(one << (width - 1));
