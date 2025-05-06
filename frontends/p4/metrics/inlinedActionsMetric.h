@@ -15,7 +15,7 @@ namespace P4 {
 class InlinedActionsMetricPass : public Inspector {
  private:
     Metrics &metrics;
-    std::unordered_set<std::string> actions;
+    std::unordered_set<cstring> actions;
 
  public:
     explicit InlinedActionsMetricPass(Metrics &metricsRef) : metrics(metricsRef) {

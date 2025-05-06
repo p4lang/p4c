@@ -18,13 +18,15 @@ comparing collected data from the previous run with the new data.
 #include "../lib/log.h"
 #include "metricsStructure.h"
 
+using namespace P4::literals;
+
 namespace P4 {
 
 class UnusedCodeMetricPass : public Inspector {
  private:
     Metrics &metrics;
     UnusedCodeInstances currentInstancesCount;
-    std::vector<std::string> scope;
+    std::vector<cstring> scope;
     bool isBefore;
 
     void recordBefore();
@@ -38,7 +40,7 @@ class UnusedCodeMetricPass : public Inspector {
 
     // Scope handling.
 
-    bool scope_enter(std::string name);
+    bool scope_enter(cstring name);
     void scope_leave();
     bool preorder(const IR::P4Control *control) override;
     bool preorder(const IR::P4Parser *parser) override;

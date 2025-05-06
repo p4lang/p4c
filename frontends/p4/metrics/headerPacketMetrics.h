@@ -28,6 +28,8 @@ and "ethernet-ipv4-tcp").
 #include "../typeChecking/typeChecker.h"
 #include "metricsStructure.h"
 
+using namespace P4::literals;
+
 namespace P4 {
 
 class HeaderPacketMetricsPass;
@@ -35,18 +37,18 @@ class HeaderPacketMetricsPass;
 class ParserAnalyzer : public Inspector {
  private:
     ParserCallGraph &parserCallGraph;
-    std::set<std::string> &cumulativeTypes;
-    std::unordered_map<std::string, size_t> stateEncounters;
+    std::set<cstring> &cumulativeTypes;
+    std::unordered_map<cstring, size_t> stateEncounters;
     TypeMap *typeMap;
 
-    std::string getPacketType(const IR::ParserState *state) const;
+    cstring getPacketType(const IR::ParserState *state) const;
     void dfsCumulativeTypes(const IR::ParserState *state, const ParserCallGraph &pcg,
-                            const std::string &parentType,
-                            std::unordered_map<const IR::ParserState *, std::string> &types,
+                            const cstring &parentType,
+                            std::unordered_map<const IR::ParserState *, cstring> &types,
                             std::unordered_set<const IR::ParserState *> &currentPath);
 
  public:
-    ParserAnalyzer(ParserCallGraph &graph, std::set<std::string> &types, TypeMap *map)
+    ParserAnalyzer(ParserCallGraph &graph, std::set<cstring> &types, TypeMap *map)
         : parserCallGraph(graph), cumulativeTypes(types), typeMap(map) {
         setName("ParserAnalyzer");
     }
@@ -59,11 +61,11 @@ class HeaderPacketMetricsPass : public Inspector {
     TypeMap *typeMap;
     Metrics &metrics;
     ParserCallGraph parserCallGraph;
-    std::set<std::string> cumulativeTypes;
+    std::set<cstring> cumulativeTypes;
     bool insideParserState;
     bool isValid;
 
-    void updateMetrics(const std::string &headerName, size_t size, bool isModification);
+    void updateMetrics(const cstring &headerName, size_t size, bool isModification);
     size_t getHeaderFieldSize(const IR::Type *type) const;
     size_t getHeaderSize(const IR::Type_Header *header) const;
 

@@ -33,7 +33,7 @@ unsigned MatchActionTableMetricsPass::keySize(const IR::KeyElement *keyElement) 
 }
 
 void MatchActionTableMetricsPass::postorder(const IR::P4Table *table) {
-    std::string tableName = table->externalName().string();
+    cstring tableName = table->externalName();
 
     if (table->getKey() != nullptr) {
         for (auto keyElement : table->getKey()->keyElements) {

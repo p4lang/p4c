@@ -17,21 +17,19 @@ bool NestingDepthMetricPass::enter() {
     return true;
 }
 
-void NestingDepthMetricPass::logDepth(const std::string name) {
+void NestingDepthMetricPass::logDepth(const cstring name) {
     metrics.blockNestingDepth[name] = currentMax;
 }
 
 bool NestingDepthMetricPass::preorder(const IR::P4Parser * /*parser*/) { return enter(); }
 bool NestingDepthMetricPass::preorder(const IR::P4Control * /*control*/) { return enter(); }
 bool NestingDepthMetricPass::preorder(const IR::Function * /*function*/) { return enter(); }
-void NestingDepthMetricPass::postorder(const IR::P4Parser *parser) {
-    logDepth(parser->name.name.string());
-}
+void NestingDepthMetricPass::postorder(const IR::P4Parser *parser) { logDepth(parser->name.name); }
 void NestingDepthMetricPass::postorder(const IR::P4Control *control) {
-    logDepth(control->name.name.string());
+    logDepth(control->name.name);
 }
 void NestingDepthMetricPass::postorder(const IR::Function *function) {
-    logDepth(function->name.name.string());
+    logDepth(function->name.name);
 }
 bool NestingDepthMetricPass::preorder(const IR::ParserState * /*state*/) { return increment(); }
 bool NestingDepthMetricPass::preorder(const IR::SelectExpression * /*stmt*/) { return increment(); }

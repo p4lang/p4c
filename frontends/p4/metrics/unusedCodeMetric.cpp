@@ -2,8 +2,8 @@
 
 namespace P4 {
 
-bool UnusedCodeMetricPass::scope_enter(std::string name) {
-    scope.push_back(scope.empty() ? name : scope.back() + "." + name);
+bool UnusedCodeMetricPass::scope_enter(cstring name) {
+    scope.push_back(scope.empty() ? name : scope.back() + "."_cs + name);
     return true;
 }
 
@@ -13,20 +13,20 @@ void UnusedCodeMetricPass::scope_leave() {
 
 bool UnusedCodeMetricPass::preorder(const IR::Function *function) {
     currentInstancesCount.functions++;
-    return scope_enter(function->getName().name.string());
+    return scope_enter(function->getName().name);
 }
 
 bool UnusedCodeMetricPass::preorder(const IR::P4Control *control) {
-    return scope_enter(control->getName().name.string());
+    return scope_enter(control->getName().name);
 }
 bool UnusedCodeMetricPass::preorder(const IR::P4Parser *parser) {
-    return scope_enter(parser->getName().name.string());
+    return scope_enter(parser->getName().name);
 }
 bool UnusedCodeMetricPass::preorder(const IR::IfStatement *stmt) {
-    return scope_enter("if_" + std::to_string(stmt->id));
+    return scope_enter("if_"_cs + std::to_string(stmt->id));
 }
 bool UnusedCodeMetricPass::preorder(const IR::SwitchCase *caseNode) {
-    return scope_enter("case_" + std::to_string(caseNode->id));
+    return scope_enter("case_"_cs + std::to_string(caseNode->id));
 }
 void UnusedCodeMetricPass::postorder(const IR::P4Control * /*control*/) { scope_leave(); }
 void UnusedCodeMetricPass::postorder(const IR::P4Parser * /*parser*/) { scope_leave(); }
@@ -40,9 +40,9 @@ void UnusedCodeMetricPass::postorder(const IR::IfStatement *stmt) {
 }
 
 bool UnusedCodeMetricPass::preorder(const IR::P4Action *action) {
-    if (action->getName().name == "NoAction") return false;
-    std::string scopedName = scope.empty() ? action->getName().name.string()
-                                           : scope.back() + "." + action->getName().name.string();
+    if (action->getName().name == "NoAction"_cs) return false;
+    cstring scopedName =
+        scope.empty() ? action->getName().name : scope.back() + "."_cs + action->getName().name;
 
     if (isBefore)
         metrics.helperVars.beforeActions.push_back(scopedName);
@@ -59,8 +59,8 @@ void UnusedCodeMetricPass::postorder(const IR::ParserState *state) {
 }
 
 void UnusedCodeMetricPass::postorder(const IR::Declaration_Variable *node) {
-    std::string name = node->getName().name.string();
-    std::string scopedName = scope.empty() ? name : scope.back() + "." + name;
+    cstring name = node->getName().name;
+    cstring scopedName = scope.empty() ? name : scope.back() + "."_cs + name;
 
     if (isBefore)
         metrics.helperVars.beforeVariables.push_back(scopedName);
@@ -93,11 +93,11 @@ void UnusedCodeMetricPass::recordAfter() {
 
     // Calculate the number of unused actions.
     for (const auto &beforeAction : metrics.helperVars.beforeActions) {
-        bool found =
-            std::any_of(metrics.helperVars.afterActions.begin(),
-                        metrics.helperVars.afterActions.end(), [&](const std::string &afterAction) {
-                            return afterAction.find(beforeAction) != std::string::npos;
-                        });
+        bool found = std::any_of(
+            metrics.helperVars.afterActions.begin(), metrics.helperVars.afterActions.end(),
+            [&](const cstring &afterAction) {
+                return afterAction.string().find(beforeAction.string()) != std::string::npos;
+            });
 
         if (!found) metrics.unusedCodeInstances.actions++;
     }
@@ -111,8 +111,8 @@ void UnusedCodeMetricPass::recordAfter() {
     for (const auto &beforeVar : metrics.helperVars.beforeVariables) {
         bool found =
             std::any_of(metrics.helperVars.afterVariables.begin(),
-                        metrics.helperVars.afterVariables.end(), [&](const std::string &afterVar) {
-                            return afterVar.find(beforeVar) != std::string::npos;
+                        metrics.helperVars.afterVariables.end(), [&](const cstring &afterVar) {
+                            return afterVar.string().find(beforeVar.string()) != std::string::npos;
                         });
         if (!found) metrics.unusedCodeInstances.variables++;
     }

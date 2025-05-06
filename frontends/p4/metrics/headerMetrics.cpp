@@ -3,7 +3,7 @@
 namespace P4 {
 
 void HeaderMetricsPass::postorder(const IR::Type_Header *header) {
-    std::string headerName = header->getName().string();
+    cstring headerName = header->getName();
     metrics.numHeaders++;
     size_t numFields = 0;
     size_t sizeSum = 0;

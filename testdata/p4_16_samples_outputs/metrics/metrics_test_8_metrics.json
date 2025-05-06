@@ -1,0 +1,145 @@
+{
+  "lines_of_code" : 150,
+  "cyclomatic_complexity" : {
+    "MyParser" : 5,
+    "MyVerifyChecksum" : 1,
+    "MyIngress" : 7,
+    "MyEgress" : 4,
+    "MyComputeChecksum" : 1,
+    "MyDeparser" : 1
+  },
+  "halstead" : {
+    "unique_operators" : 26,
+    "unique_operands" : 56,
+    "total_operators" : 116,
+    "total_operands" : 124,
+    "vocabulary" : 82,
+    "length" : 240,
+    "difficulty" : 28.7857,
+    "volume" : 1525.81,
+    "effort" : 43921.6,
+    "estimated_bugs" : 0.508604
+  },
+  "unused_code" : {
+    "actions" : 0,
+    "functions" : 0,
+    "states" : 1,
+    "variables" : 0,
+    "enums" : 0,
+    "conditionals" : 0,
+    "parameters" : 0,
+    "returns" : 0
+  },
+  "nesting_depth" : {
+    "average" : 1.16667,
+    "global_max" : 2,
+    "individual_blocks" : {
+      "MyParser" : 2,
+      "MyVerifyChecksum" : 1,
+      "MyIngress" : 1,
+      "MyEgress" : 1,
+      "MyComputeChecksum" : 1,
+      "MyDeparser" : 1
+    }
+  },
+  "header_metrics" : {
+    "total_headers" : 3,
+    "avg_fields_per_header" : 8.66667,
+    "avg_field_size" : 16.6154,
+    "per_header_metrics" : {
+      "ethernet_t" : {
+        "fields" : 3,
+        "field_size_sum" : 112
+      },
+      "ipv4_t" : {
+        "fields" : 12,
+        "field_size_sum" : 160
+      },
+      "tcp_t" : {
+        "fields" : 11,
+        "field_size_sum" : 160
+      }
+    }
+  },
+  "header_manipulation" : {
+    "total_operations" : 3,
+    "total_size" : 432,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 1,
+        "size" : 112
+      },
+      "ethernet-ipv4" : {
+        "operations" : 2,
+        "size" : 272
+      },
+      "ethernet-ipv4-tcp" : {
+        "operations" : 3,
+        "size" : 432
+      }
+    }
+  },
+  "header_modification" : {
+    "total_operations" : 4,
+    "total_size" : 136,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 2,
+        "size" : 96
+      },
+      "ethernet-ipv4" : {
+        "operations" : 4,
+        "size" : 136
+      },
+      "ethernet-ipv4-tcp" : {
+        "operations" : 4,
+        "size" : 136
+      }
+    }
+  },
+  "match_action_tables" : {
+    "num_tables" : 3,
+    "total_keys" : 3,
+    "total_key_size" : 55,
+    "avg_key_size" : 18.3333,
+    "avg_keys_per_table" : 1,
+    "max_keys_per_table" : 1,
+    "total_actions" : 9,
+    "avg_actions_per_table" : 3,
+    "max_actions_per_table" : 3,
+    "per_table_metrics" : {
+      "ecmp_group" : {
+        "actions" : 3,
+        "keys" : 1,
+        "key_size_sum" : 32
+      },
+      "ecmp_nhop" : {
+        "actions" : 3,
+        "keys" : 1,
+        "key_size_sum" : 14
+      },
+      "send_frame" : {
+        "actions" : 3,
+        "keys" : 1,
+        "key_size_sum" : 9
+      }
+    }
+  },
+  "parser" : {
+    "total_states" : 5,
+    "state_complexities" : {
+      "start" : 3,
+      "parse_ipv4" : 3,
+      "parse_tcp" : 1,
+      "accept" : 1,
+      "reject" : 1
+    }
+  },
+  "extern" : {
+    "functions" : 24,
+    "function_calls" : 10,
+    "structures" : 10,
+    "structure_uses" : 6
+  },
+  "inlined_actions" : 0
+}

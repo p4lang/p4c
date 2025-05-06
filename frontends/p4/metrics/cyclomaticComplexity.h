@@ -11,6 +11,8 @@ CC value by counting decision point nodes (like if statements).
 #include "../ir/ir.h"
 #include "metricsStructure.h"
 
+using namespace P4::literals;
+
 namespace P4 {
 
 class CyclomaticComplexityCalculator : public Inspector {

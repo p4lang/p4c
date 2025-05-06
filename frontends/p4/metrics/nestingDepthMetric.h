@@ -26,7 +26,7 @@ class NestingDepthMetricPass : public Inspector {
     }
     bool increment();
     void decrement();
-    void logDepth(const std::string name);
+    void logDepth(const cstring name);
     bool enter();
 
     bool preorder(const IR::P4Parser * /*parser*/) override;

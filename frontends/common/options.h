@@ -84,7 +84,7 @@ class CompilerOptions : public ParserOptions {
     // List of code metrics input by user.
     cstring inputMetrics = nullptr;
     // Code metrics to be collected.
-    std::set<std::string> selectedMetrics;
+    std::set<cstring> selectedMetrics;
 
     // General optimization options -- can be interpreted by backends in various ways
     int optimizationLevel = 1;

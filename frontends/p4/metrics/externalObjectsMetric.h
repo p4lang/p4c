@@ -19,9 +19,9 @@ namespace P4 {
 class ExternalObjectsMetricPass : public Inspector {
  private:
     ExternMetrics &metrics;
-    std::set<std::string> externFunctions;                       // Standalone extern functions.
-    std::set<std::string> externTypeNames;                       // Type names of extern structures.
-    std::map<std::string, std::set<std::string>> externMethods;  // Tracks methods per extern.
+    std::set<cstring> externFunctions;                   // Standalone extern functions.
+    std::set<cstring> externTypeNames;                   // Type names of extern structures.
+    std::map<cstring, std::set<cstring>> externMethods;  // Tracks methods per extern.
 
  public:
     explicit ExternalObjectsMetricPass(Metrics &metricsRef) : metrics(metricsRef.externMetrics) {

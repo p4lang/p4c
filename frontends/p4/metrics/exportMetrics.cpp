@@ -5,35 +5,34 @@ namespace P4 {
 bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
     std::ofstream textFile(filename + ".txt");
     if (!textFile.is_open()) {
-        std::cerr << "Error: Unable to open file " << filename + ".txt" << "\n";
+        error(ErrorType::ERR_IO, "Error: Unable to open file %s.txt", filename.c_str());
         return false;
     }
 
-    std::string jsonFilename = filename + ".json";
-    std::ofstream jsonFile(jsonFilename);
+    std::ofstream jsonFile(filename + ".json");
     if (!jsonFile.is_open()) {
-        std::cerr << "Error: Unable to open JSON file " << jsonFilename << "\n";
+        error(ErrorType::ERR_IO, "Error: Unable to open file %s.json", filename.c_str());
         return false;
     }
 
     Util::JsonObject *root = new Util::JsonObject();
 
-    if (selectedMetrics.count("loc")) {
+    if (selectedMetrics.count("loc"_cs)) {
         textFile << "\nLines of Code: " << metrics.linesOfCode << "\n";
         root->emplace("lines_of_code", new Util::JsonValue(metrics.linesOfCode));
     }
 
-    if (selectedMetrics.count("cyclomatic")) {
+    if (selectedMetrics.count("cyclomatic"_cs)) {
         textFile << "\nCyclomatic Complexity:\n";
         auto *ccJson = new Util::JsonObject();
         for (const auto &[func, cc] : metrics.cyclomaticComplexity) {
             textFile << "  " << func << ": " << cc << "\n";
-            ccJson->emplace(toCString(func), new Util::JsonValue(cc));
+            ccJson->emplace(func, new Util::JsonValue(cc));
         }
         root->emplace("cyclomatic_complexity", ccJson);
     }
 
-    if (selectedMetrics.count("halstead")) {
+    if (selectedMetrics.count("halstead"_cs)) {
         textFile << "\nHalstead Metrics:\n"
                  << "  Unique Operators: " << metrics.halsteadMetrics.uniqueOperators << "\n"
                  << "  Unique Operands: " << metrics.halsteadMetrics.uniqueOperands << "\n"
@@ -64,7 +63,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("halstead", halsteadJson);
     }
 
-    if (selectedMetrics.count("unused-code")) {
+    if (selectedMetrics.count("unused-code"_cs)) {
         textFile << "\nUnused Code Instances:\n"
                  << "  Program Structure:\n"
                  << "\tActions: " << metrics.unusedCodeInstances.actions << "\n"
@@ -90,7 +89,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("unused_code", unusedJson);
     }
 
-    if (selectedMetrics.count("nesting-depth")) {
+    if (selectedMetrics.count("nesting-depth"_cs)) {
         textFile << "\nNesting Depth Metrics:\n"
                  << "  Average: " << metrics.nestingDepth.avgNestingDepth << "\n"
                  << "  Global Max: " << metrics.nestingDepth.maxNestingDepth << "\n"
@@ -100,7 +99,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         auto *blockDepths = new Util::JsonObject();
         for (const auto &[blockName, depth] : metrics.nestingDepth.blockNestingDepth) {
             textFile << "\t" << blockName << ": " << depth << "\n";
-            blockDepths->emplace(toCString(blockName), new Util::JsonValue(depth));
+            blockDepths->emplace(blockName, new Util::JsonValue(depth));
         }
         nestingJson->emplace("average", new Util::JsonValue(metrics.nestingDepth.avgNestingDepth))
             ->emplace("global_max", new Util::JsonValue(metrics.nestingDepth.maxNestingDepth))
@@ -108,7 +107,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("nesting_depth", nestingJson);
     }
 
-    if (selectedMetrics.count("header-general")) {
+    if (selectedMetrics.count("header-general"_cs)) {
         textFile << "\nHeader Metrics:\n"
                  << "  Total Headers: " << metrics.headerMetrics.numHeaders << "\n"
                  << "  Avg Fields Per Header: " << metrics.headerMetrics.avgFieldsNum << "\n"
@@ -127,7 +126,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
             headerData->emplace("fields", new Util::JsonValue(fields))
                 ->emplace("field_size_sum",
                           new Util::JsonValue(metrics.headerMetrics.fieldSizeSum.at(header)));
-            perHeader->emplace(toCString(header), headerData);
+            perHeader->emplace(header, headerData);
         }
         headerJson->emplace("total_headers", new Util::JsonValue(metrics.headerMetrics.numHeaders))
             ->emplace("avg_fields_per_header",
@@ -137,7 +136,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("header_metrics", headerJson);
     }
 
-    if (selectedMetrics.count("header-manipulation")) {
+    if (selectedMetrics.count("header-manipulation"_cs)) {
         textFile << "\nHeader Manipulation Metrics:\n"
                  << "  Total Operations: " << metrics.headerManipulationMetrics.total.numOperations
                  << "\n"
@@ -154,7 +153,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
             auto *packetOps = new Util::JsonObject();
             packetOps->emplace("operations", new Util::JsonValue(ops.numOperations))
                 ->emplace("size", new Util::JsonValue(ops.totalSize));
-            perPacketManip->emplace(toCString(packet), packetOps);
+            perPacketManip->emplace(packet, packetOps);
         }
         manipulationJson
             ->emplace("total_operations",
@@ -165,7 +164,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("header_manipulation", manipulationJson);
     }
 
-    if (selectedMetrics.count("header-modification")) {
+    if (selectedMetrics.count("header-modification"_cs)) {
         textFile << "\nHeader Modification Metrics:\n"
                  << "  Total Operations: " << metrics.headerModificationMetrics.total.numOperations
                  << "\n"
@@ -182,7 +181,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
             auto *packetMod = new Util::JsonObject();
             packetMod->emplace("operations", new Util::JsonValue(ops.numOperations))
                 ->emplace("size", new Util::JsonValue(ops.totalSize));
-            perPacketMod->emplace(toCString(packet), packetMod);
+            perPacketMod->emplace(packet, packetMod);
         }
         modificationJson
             ->emplace("total_operations",
@@ -193,7 +192,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("header_modification", modificationJson);
     }
 
-    if (selectedMetrics.count("match-action")) {
+    if (selectedMetrics.count("match-action"_cs)) {
         textFile << "\nMatch-Action Table Metrics:\n"
                  << "  Number of Tables: " << metrics.matchActionTableMetrics.numTables << "\n"
                  << "  Total Keys: " << metrics.matchActionTableMetrics.totalKeys << "\n"
@@ -228,7 +227,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
                 ->emplace(
                     "key_size_sum",
                     new Util::JsonValue(metrics.matchActionTableMetrics.keySizeSum.at(table)));
-            perTable->emplace(toCString(table), tableData);
+            perTable->emplace(table, tableData);
         }
         tableJson
             ->emplace("num_tables", new Util::JsonValue(metrics.matchActionTableMetrics.numTables))
@@ -251,7 +250,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("match_action_tables", tableJson);
     }
 
-    if (selectedMetrics.count("parser")) {
+    if (selectedMetrics.count("parser"_cs)) {
         textFile << "\nParser Metrics:\n"
                  << "  States: " << metrics.parserMetrics.totalStates << "\n"
                  << "  Per-parser complexities:\n";
@@ -260,14 +259,14 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         auto *stateComplexities = new Util::JsonObject();
         for (const auto &[state, complexity] : metrics.parserMetrics.StateComplexity) {
             textFile << "\t" << state << ": " << complexity << "\n";
-            stateComplexities->emplace(toCString(state), new Util::JsonValue(complexity));
+            stateComplexities->emplace(state, new Util::JsonValue(complexity));
         }
         parserJson->emplace("total_states", new Util::JsonValue(metrics.parserMetrics.totalStates))
             ->emplace("state_complexities", stateComplexities);
         root->emplace("parser", parserJson);
     }
 
-    if (selectedMetrics.count("extern")) {
+    if (selectedMetrics.count("extern"_cs)) {
         textFile << "\nExtern Metrics:\n"
                  << "  Extern Functions: " << metrics.externMetrics.externFunctions << "\n"
                  << "  Function Calls: " << metrics.externMetrics.externFunctionUses << "\n"
@@ -284,7 +283,7 @@ bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
         root->emplace("extern", externJson);
     }
 
-    if (selectedMetrics.count("inlined")) {
+    if (selectedMetrics.count("inlined"_cs)) {
         textFile << "\nNumber of Inlined Actions: " << metrics.inlinedActions << "\n";
         root->emplace("inlined_actions", new Util::JsonValue(metrics.inlinedActions));
     }

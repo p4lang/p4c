@@ -32,33 +32,35 @@ statements in C)
 #include "../lib/log.h"
 #include "metricsStructure.h"
 
+using namespace P4::literals;
+
 namespace P4 {
 
 class HalsteadMetricsPass : public Inspector {
  private:
     HalsteadMetrics &metrics;
-    std::unordered_set<std::string> uniqueUnaryOperators;
-    std::unordered_set<std::string> uniqueBinaryOperators;
-    std::unordered_multiset<std::string> uniqueOperands;
-    std::unordered_set<std::string> structFields;  // Field names of the defined structures.
-    std::unordered_set<std::string>
-        uniqueFields;  // Structure fields that were used in the program.
-    std::vector<std::unordered_set<std::string>> scopedOperands;  // Operands separated by scopes.
-    const std::unordered_set<std::string> reservedKeywords = {
-        "extract",    "emit",        "isValid",      "setValid", "setInvalid", "push_front",
-        "pop_front",  "next",        "last",         "apply",    "hit",        "miss",
-        "action_run", "accept",      "mark_to_drop", "read",     "write",      "count",
-        "execute",    "clear",       "update",       "get",      "verify",     "clone",
-        "resubmit",   "recirculate", "transition",   "size",     "max_length", "length",
-    };
-    const std::unordered_set<std::string> matchTypes = {"exact", "lpm", "ternary", "range",
-                                                        "optional"};
+    std::unordered_set<cstring> uniqueUnaryOperators;
+    std::unordered_set<cstring> uniqueBinaryOperators;
+    std::unordered_multiset<cstring> uniqueOperands;
+    std::unordered_set<cstring> structFields;  // Field names of the defined structures.
+    std::unordered_set<cstring> uniqueFields;  // Structure fields that were used in the program.
+    std::vector<std::unordered_set<cstring>> scopedOperands;  // Operands separated by scopes.
+    const std::unordered_set<P4::cstring> reservedKeywords = {
+        "extract"_cs,     "emit"_cs,       "isValid"_cs,    "setValid"_cs,   "setInvalid"_cs,
+        "push_front"_cs,  "pop_front"_cs,  "next"_cs,       "last"_cs,       "apply"_cs,
+        "hit"_cs,         "miss"_cs,       "action_run"_cs, "accept"_cs,     "mark_to_drop"_cs,
+        "read"_cs,        "write"_cs,      "count"_cs,      "execute"_cs,    "clear"_cs,
+        "update"_cs,      "get"_cs,        "verify"_cs,     "clone"_cs,      "resubmit"_cs,
+        "recirculate"_cs, "transition"_cs, "size"_cs,       "max_length"_cs, "length"_cs};
+
+    const std::unordered_set<P4::cstring> matchTypes = {"exact"_cs, "lpm"_cs, "ternary"_cs,
+                                                        "range"_cs, "optional"_cs};
 
     // Helper methods.
 
-    void addOperand(const std::string &operand);
-    void addUnaryOperator(const std::string &op);
-    void addBinaryOperator(const std::string &op);
+    void addOperand(const cstring &operand);
+    void addUnaryOperator(const cstring &op);
+    void addBinaryOperator(const cstring &op);
 
  public:
     explicit HalsteadMetricsPass(Metrics &metricsRef) : metrics(metricsRef.halsteadMetrics) {
@@ -105,4 +107,3 @@ class HalsteadMetricsPass : public Inspector {
 }  // namespace P4
 
 #endif /* FRONTENDS_P4_METRICS_HALSTEADMETRICS_H_ */
-

@@ -17,17 +17,18 @@ compiled program name (programName_metrics.txt/json).
 #include "../lib/json.h"
 #include "metricsStructure.h"
 
+using namespace P4::literals;
+
 namespace P4 {
 
 class ExportMetricsPass : public Inspector {
  private:
     std::string filename;
-    std::set<std::string> selectedMetrics;
+    std::set<cstring> selectedMetrics;
     Metrics &metrics;
-    cstring toCString(const std::string &s) { return cstring(s.c_str()); }
 
  public:
-    explicit ExportMetricsPass(const std::string &filename, std::set<std::string> selectedMetrics,
+    explicit ExportMetricsPass(const std::string &filename, std::set<cstring> selectedMetrics,
                                Metrics &metricsRef)
         : filename(filename), selectedMetrics(selectedMetrics), metrics(metricsRef) {
         setName("ExportMetricsPass");

@@ -4,7 +4,7 @@ namespace P4 {
 
 // Helper functions.
 
-void HalsteadMetricsPass::addOperand(const std::string &operand) {
+void HalsteadMetricsPass::addOperand(const cstring &operand) {
     if (scopedOperands.empty()) scopedOperands.emplace_back();
     if (structFields.find(operand) != structFields.end())
         uniqueFields.insert(operand);
@@ -13,12 +13,12 @@ void HalsteadMetricsPass::addOperand(const std::string &operand) {
     metrics.totalOperands++;
 }
 
-void HalsteadMetricsPass::addUnaryOperator(const std::string &op) {
+void HalsteadMetricsPass::addUnaryOperator(const cstring &op) {
     uniqueUnaryOperators.insert(op);
     metrics.totalOperators++;
 }
 
-void HalsteadMetricsPass::addBinaryOperator(const std::string &op) {
+void HalsteadMetricsPass::addBinaryOperator(const cstring &op) {
     uniqueBinaryOperators.insert(op);
     metrics.totalOperators++;
 }
@@ -54,14 +54,14 @@ void HalsteadMetricsPass::postorder(const IR::Function * /*function*/) {
 
 void HalsteadMetricsPass::postorder(const IR::Type_Header *headerType) {
     for (auto field : headerType->fields) {
-        std::string fieldName = field->name.toString().string();
+        cstring fieldName = field->name.toString();
         structFields.insert(fieldName);
     }
 }
 
 void HalsteadMetricsPass::postorder(const IR::Type_Struct *structType) {
     for (auto field : structType->fields) {
-        std::string fieldName = field->name.toString().string();
+        cstring fieldName = field->name.toString();
         structFields.insert(fieldName);
     }
 }
@@ -71,14 +71,13 @@ void HalsteadMetricsPass::postorder(const IR::Type_Struct *structType) {
 bool HalsteadMetricsPass::preorder(const IR::MethodCallExpression *methodCall) {
     if (!methodCall) return false;
     auto methodExpr = methodCall->method;
-    std::string method = methodExpr->toString().string();
 
     if (auto memberExpr = methodExpr->to<IR::Member>()) {
-        auto memberName = memberExpr->member.name.string();
+        auto memberName = memberExpr->member.name;
         visit(memberExpr);
         addUnaryOperator(memberName);
     } else if (auto pathExpr = methodExpr->to<IR::PathExpression>()) {
-        auto pathName = pathExpr->path->name.name.string();
+        auto pathName = pathExpr->path->name.name;
         addUnaryOperator(pathName);
     } else if (auto nestedMethodCall = methodExpr->to<IR::MethodCallExpression>()) {
         visit(nestedMethodCall);
@@ -89,18 +88,18 @@ bool HalsteadMetricsPass::preorder(const IR::MethodCallExpression *methodCall) {
 
 bool HalsteadMetricsPass::preorder(const IR::Member *member) {
     if (!member) return false;
-    std::string fieldName = member->member.name.string();
+    cstring fieldName = member->member.name;
     // Only add the member if it is not a method call
     if (reservedKeywords.find(fieldName) == reservedKeywords.end()) {
         addOperand(fieldName);
     }
-    addBinaryOperator(".");
+    addBinaryOperator("."_cs);
     return true;
 }
 
 bool HalsteadMetricsPass::preorder(const IR::PathExpression *pathExpr) {
     if (!pathExpr) return false;
-    std::string name = pathExpr->path->name.name.string();
+    cstring name = pathExpr->path->name.name;
     if (matchTypes.find(name) == matchTypes.end()) {
         addOperand(name);
     }
@@ -109,12 +108,12 @@ bool HalsteadMetricsPass::preorder(const IR::PathExpression *pathExpr) {
 
 void HalsteadMetricsPass::postorder(const IR::ConstructorCallExpression *ctorCall) {
     if (ctorCall->constructedType)
-        addUnaryOperator("construct:" + ctorCall->constructedType->toString().string());
+        addUnaryOperator("construct:"_cs + ctorCall->constructedType->toString());
 }
 
 bool HalsteadMetricsPass::preorder(const IR::Operation_Unary *op) {
     if (!op) return false;
-    std::string opName = op->getStringOp().string();
+    cstring opName = op->getStringOp();
     addUnaryOperator(opName);
     return true;
 }
@@ -125,28 +124,28 @@ void HalsteadMetricsPass::postorder(const IR::ParserState *state) {
 
     // Transition without select.
     if (auto pe = expr->to<IR::PathExpression>()) {
-        addUnaryOperator("transition");
-        addOperand(pe->path->name.string());
+        addUnaryOperator("transition"_cs);
+        addOperand(pe->path->name);
     }
 }
 
 void HalsteadMetricsPass::postorder(const IR::IfStatement *stmt) {
-    addUnaryOperator("if");
+    addUnaryOperator("if"_cs);
     if (stmt->ifFalse != nullptr) {
-        addUnaryOperator("else");
+        addUnaryOperator("else"_cs);
     }
 }
 
 void HalsteadMetricsPass::postorder(const IR::SelectExpression * /*selectExpr*/) {
-    addUnaryOperator("transition");
-    addUnaryOperator("select");
+    addUnaryOperator("transition"_cs);
+    addUnaryOperator("select"_cs);
 }
 
 bool HalsteadMetricsPass::preorder(const IR::SelectCase *caseItem) {
     if (!caseItem) return false;
-    addOperand(caseItem->keyset->toString().string());
+    addOperand(caseItem->keyset->toString());
     if (auto pathExpr = caseItem->state->to<IR::PathExpression>()) {
-        std::string nextState = pathExpr->path->name.toString().string();
+        cstring nextState = pathExpr->path->name.toString();
         addOperand(nextState);
     }
     return false;
@@ -154,34 +153,38 @@ bool HalsteadMetricsPass::preorder(const IR::SelectCase *caseItem) {
 
 void HalsteadMetricsPass::postorder(const IR::P4Table *table) {
     for (const auto &property : table->properties->properties) {
-        std::string propName = property->name.toString().string();
-        addBinaryOperator("=");
+        cstring propName = property->name.toString();
+        addBinaryOperator("="_cs);
         addOperand(propName);
     }
 }
 
 void HalsteadMetricsPass::postorder(const IR::AssignmentStatement * /*stmt*/) {
-    addBinaryOperator("=");
+    addBinaryOperator("="_cs);
 }
 void HalsteadMetricsPass::postorder(const IR::SwitchStatement * /*stmt*/) {
-    addUnaryOperator("switch");
+    addUnaryOperator("switch"_cs);
 }
-void HalsteadMetricsPass::postorder(const IR::SwitchCase * /*case*/) { addUnaryOperator("case"); }
+void HalsteadMetricsPass::postorder(const IR::SwitchCase * /*case*/) {
+    addUnaryOperator("case"_cs);
+}
 void HalsteadMetricsPass::postorder(const IR::ReturnStatement * /*stmt*/) {
-    addUnaryOperator("return");
+    addUnaryOperator("return"_cs);
 }
 void HalsteadMetricsPass::postorder(const IR::ExitStatement * /*stmt*/) {
-    addUnaryOperator("exit");
+    addUnaryOperator("exit"_cs);
 }
 void HalsteadMetricsPass::postorder(const IR::Constant *constant) {
-    addOperand(constant->toString().string());
+    addOperand(constant->toString());
 }
 void HalsteadMetricsPass::postorder(const IR::Operation_Binary *op) {
-    addBinaryOperator(op->getStringOp().string());
+    addBinaryOperator(op->getStringOp());
 }
-void HalsteadMetricsPass::postorder(const IR::ForStatement * /*stmt*/) { addUnaryOperator("for"); }
+void HalsteadMetricsPass::postorder(const IR::ForStatement * /*stmt*/) {
+    addUnaryOperator("for"_cs);
+}
 void HalsteadMetricsPass::postorder(const IR::ForInStatement * /*stmt*/) {
-    addUnaryOperator("for");
+    addUnaryOperator("for"_cs);
 }
 
 // Final metrics calculation.
@@ -197,7 +200,7 @@ void HalsteadMetricsPass::postorder(const IR::P4Program * /*program*/) {
         metrics.uniqueOperands == 0
             ? 0
             : (metrics.uniqueOperators / 2.0) *
-                  (static_cast<double>(metrics.totalOperands) / metrics.uniqueOperands);
+            (static_cast<double>(metrics.totalOperands) / metrics.uniqueOperands);
 
     metrics.volume = metrics.vocabulary == 0 ? 0 : metrics.length * std::log2(metrics.vocabulary);
 

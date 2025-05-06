@@ -11,7 +11,7 @@ bool ParserMetricsPass::preorder(const IR::P4Parser *parser) {
 
     for (const auto &state : parser->states) {
         stateCount++;
-        std::string stateName = state->name.name.string();
+        cstring stateName = state->name.name;
 
         CyclomaticComplexityCalculator calculator;
         state->apply(calculator);

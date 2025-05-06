@@ -1,0 +1,130 @@
+{
+  "lines_of_code" : 101,
+  "cyclomatic_complexity" : {
+    "MyParser" : 5,
+    "MyVerifyChecksum" : 1,
+    "MyComputeChecksum" : 1,
+    "MyIngress" : 4,
+    "MyEgress" : 1,
+    "MyDeparser" : 1
+  },
+  "halstead" : {
+    "unique_operators" : 24,
+    "unique_operands" : 45,
+    "total_operators" : 105,
+    "total_operands" : 109,
+    "vocabulary" : 69,
+    "length" : 214,
+    "difficulty" : 29.0667,
+    "volume" : 1307.22,
+    "effort" : 37996.7,
+    "estimated_bugs" : 0.435741
+  },
+  "unused_code" : {
+    "actions" : 2,
+    "functions" : 3,
+    "states" : 1,
+    "variables" : 9,
+    "enums" : 1,
+    "conditionals" : 4,
+    "parameters" : 4,
+    "returns" : 3
+  },
+  "nesting_depth" : {
+    "average" : 1.33333,
+    "global_max" : 2,
+    "individual_blocks" : {
+      "MyParser" : 2,
+      "MyVerifyChecksum" : 1,
+      "MyComputeChecksum" : 1,
+      "MyIngress" : 2,
+      "MyEgress" : 1,
+      "MyDeparser" : 1
+    }
+  },
+  "header_metrics" : {
+    "total_headers" : 3,
+    "avg_fields_per_header" : 7.66667,
+    "avg_field_size" : 25.7391,
+    "per_header_metrics" : {
+      "Ethernet_t" : {
+        "fields" : 3,
+        "field_size_sum" : 112
+      },
+      "IPv4_t" : {
+        "fields" : 12,
+        "field_size_sum" : 160
+      },
+      "IPv6_t" : {
+        "fields" : 8,
+        "field_size_sum" : 320
+      }
+    }
+  },
+  "header_manipulation" : {
+    "total_operations" : 4,
+    "total_size" : 912,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 1,
+        "size" : 112
+      },
+      "ethernet-ipv4" : {
+        "operations" : 2,
+        "size" : 272
+      },
+      "ethernet-ipv6" : {
+        "operations" : 3,
+        "size" : 752
+      }
+    }
+  },
+  "header_modification" : {
+    "total_operations" : 7,
+    "total_size" : 92,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 1,
+        "size" : 48
+      },
+      "ethernet-ipv4" : {
+        "operations" : 6,
+        "size" : 84
+      },
+      "ethernet-ipv6" : {
+        "operations" : 2,
+        "size" : 56
+      }
+    }
+  },
+  "match_action_tables" : {
+    "num_tables" : 0,
+    "total_keys" : 0,
+    "total_key_size" : 0,
+    "avg_key_size" : 0,
+    "avg_keys_per_table" : 0,
+    "max_keys_per_table" : 0,
+    "total_actions" : 0,
+    "avg_actions_per_table" : 0,
+    "max_actions_per_table" : 0,
+    "per_table_metrics" : {
+    }
+  },
+  "parser" : {
+    "total_states" : 5,
+    "state_complexities" : {
+      "start" : 4,
+      "parse_ipv4" : 2,
+      "parse_ipv6" : 1,
+      "accept" : 1,
+      "reject" : 1
+    }
+  },
+  "extern" : {
+    "functions" : 24,
+    "function_calls" : 8,
+    "structures" : 10,
+    "structure_uses" : 6
+  },
+  "inlined_actions" : 1
+}

@@ -17,7 +17,7 @@ struct PacketModification {
 };
 
 struct HeaderPacketMetrics {
-    P4::ordered_map<std::string, PacketModification> perPacket;  // Packet type -> operations.
+    P4::ordered_map<cstring, PacketModification> perPacket;  // Packet type -> operations.
     PacketModification total;
     PacketModification max;
     PacketModification min;
@@ -58,18 +58,18 @@ struct ExternMetrics {
 
 struct UnusedCodeHelperVars {  // Variables for storing inter-pass data.
     UnusedCodeInstances interPassCounts;
-    std::vector<std::string> beforeActions;
-    std::vector<std::string> afterActions;
-    std::vector<std::string> beforeVariables;
-    std::vector<std::string> afterVariables;
+    std::vector<cstring> beforeActions;
+    std::vector<cstring> afterActions;
+    std::vector<cstring> beforeVariables;
+    std::vector<cstring> afterVariables;
 };
 
 struct MatchActionTableMetrics {
     unsigned numTables = 0;
     // Table name -> value
-    P4::ordered_map<std::string, unsigned> keysNum;
-    P4::ordered_map<std::string, unsigned> actionsNum;
-    P4::ordered_map<std::string, unsigned> keySizeSum;
+    P4::ordered_map<cstring, unsigned> keysNum;
+    P4::ordered_map<cstring, unsigned> actionsNum;
+    P4::ordered_map<cstring, unsigned> keySizeSum;
 
     unsigned totalKeys = 0;
     unsigned totalKeySizeSum = 0;
@@ -83,13 +83,13 @@ struct MatchActionTableMetrics {
 };
 
 struct NestingDepthMetrics {
-    P4::ordered_map<std::string, unsigned> blockNestingDepth;  // Block name -> max depth.
+    P4::ordered_map<cstring, unsigned> blockNestingDepth;  // Block name -> max depth.
     double avgNestingDepth = 0.0;
     unsigned maxNestingDepth = 0;
 };
 
 struct ParserMetrics {
-    P4::ordered_map<std::string, unsigned> StateComplexity;  // State name -> complexity.
+    P4::ordered_map<cstring, unsigned> StateComplexity;  // State name -> complexity.
     unsigned totalStates = 0;
 };
 
@@ -111,8 +111,8 @@ struct HeaderMetrics {
     double avgFieldsNum = 0.0;
     double avgFieldSize = 0.0;
     // Header name -> value
-    P4::ordered_map<std::string, unsigned> fieldsNum;
-    P4::ordered_map<std::string, unsigned> fieldSizeSum;
+    P4::ordered_map<cstring, unsigned> fieldsNum;
+    P4::ordered_map<cstring, unsigned> fieldSizeSum;
 };
 
 struct Metrics {
@@ -127,10 +127,10 @@ struct Metrics {
     HeaderPacketMetrics headerModificationMetrics;  // Assignment operations.
     MatchActionTableMetrics matchActionTableMetrics;
     ParserMetrics parserMetrics;
-    P4::ordered_map<std::string, unsigned> cyclomaticComplexity;  // Function name -> CC value.
+    P4::ordered_map<cstring, unsigned> cyclomaticComplexity;  // Function name -> CC value.
     ExternMetrics externMetrics;
 };
 
 }  // namespace P4
 
-#endif  /* FRONTENDS_P4_METRICS_METRICSSTRUCTURE_H_ */
+#endif /* FRONTENDS_P4_METRICS_METRICSSTRUCTURE_H_ */

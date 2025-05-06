@@ -19,6 +19,8 @@ testdata/p4_16_samples_outputs.
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 
+using namespace P4::literals;
+
 namespace P4::Test {
 namespace fs = std::filesystem;
 
@@ -38,13 +40,13 @@ protected:
         opts.file = inputFile;
         if(allMetrics){
             opts.selectedMetrics = {
-                "loc", "cyclomatic", "halstead", "unused-code", "nesting-depth",
-                "header-general", "header-manipulation","header-modification",
-                "match-action", "parser", "inlined", "extern"
+                "loc"_cs, "cyclomatic"_cs, "halstead"_cs, "unused-code"_cs, "nesting-depth"_cs,
+                "header-general"_cs, "header-manipulation"_cs,"header-modification"_cs,
+                "match-action"_cs, "parser"_cs, "inlined"_cs, "extern"_cs
             };
         }
 
-        else opts.selectedMetrics = {"loc", "cyclomatic", "header-manipulation"};
+        else opts.selectedMetrics = {"loc"_cs, "cyclomatic"_cs, "header-manipulation"_cs};
 
         const IR::P4Program* program = parseP4File(opts);
         ASSERT_NE(program, nullptr) << "Parsing failed for " << inputFile;
@@ -71,10 +73,10 @@ protected:
     }
 
     void compareWithExpectedOutput(const std::string& expectedRelPath) {
-        std::string actual = readFileContent(txtMetricsOutputPath);
+        std::string actual = readFileContent(jsonMetricsOutputPath);
         std::string expected = readFileContent(expectedRelPath);
 
-        ASSERT_NE(actual, "") << "Cannot open file: " << txtMetricsOutputPath<<std::endl;
+        ASSERT_NE(actual, "") << "Cannot open file: " << jsonMetricsOutputPath<<std::endl;
         ASSERT_NE(expected, "") << "Cannot open file: " << expectedRelPath<<std::endl;
         EXPECT_EQ(actual, expected);
     }
@@ -90,7 +92,7 @@ TEST_F(MetricPassesTest, MetricsTest##N) {                                      
     inputFile = "../testdata/p4_16_samples/metrics/metrics_test_" #N ".p4";          \
     SetUpFrontend(true);                                                             \
     compareWithExpectedOutput(                                                       \
-        "../testdata/p4_16_samples_outputs/metrics/metrics_test_" #N "_metrics.txt");\
+        "../testdata/p4_16_samples_outputs/metrics/metrics_test_" #N "_metrics.json");\
 }
 
 DEFINE_METRIC_TEST(1)
@@ -106,7 +108,7 @@ TEST_F(MetricPassesTest, MetricsTest9) {
     inputFile = "../testdata/p4_16_samples/metrics/metrics_test_8.p4";
     SetUpFrontend(false);
     compareWithExpectedOutput(
-        "../testdata/p4_16_samples_outputs/metrics/metrics_test_9_metrics.txt");
+        "../testdata/p4_16_samples_outputs/metrics/metrics_test_9_metrics.json");
 }
 
 TEST_F(MetricPassesTest, MetricsTest10) {
@@ -117,7 +119,7 @@ TEST_F(MetricPassesTest, MetricsTest10) {
     Metrics& metrics = P4CContext::get().options().metrics;
 
     EXPECT_EQ(metrics.linesOfCode, 150u);
-    EXPECT_EQ(metrics.cyclomaticComplexity.at("MyIngress"), 7u);
+    EXPECT_EQ(metrics.cyclomaticComplexity.at(cstring::literal("MyIngress")), 7u);
     EXPECT_EQ(metrics.halsteadMetrics.uniqueOperators, 26u);
     EXPECT_NEAR(metrics.halsteadMetrics.effort, 43921.6, 0.1);
     EXPECT_EQ(metrics.unusedCodeInstances.states, 1u);

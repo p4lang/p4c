@@ -24,6 +24,8 @@ as well.
 #include "parserMetrics.h"
 #include "unusedCodeMetric.h"
 
+using namespace P4::literals;
+
 namespace P4 {
 
 class PassManager;
@@ -31,7 +33,7 @@ class Metrics;
 
 class MetricsPassManager {
  private:
-    const std::set<std::string> &selectedMetrics;
+    const std::set<cstring> &selectedMetrics;
     TypeMap *typeMap;
     Metrics &metrics;
     std::string fileName;
@@ -48,4 +50,4 @@ class MetricsPassManager {
 
 }  // namespace P4
 
-#endif  /* FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_ */
+#endif /* FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_ */

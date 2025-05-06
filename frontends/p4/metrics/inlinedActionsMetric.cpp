@@ -12,7 +12,7 @@ void InlinedActionsMetricPass::postorder(const IR::BlockStatement *block) {
             const auto *stringLiteral = exprs.at(0)->to<IR::StringLiteral>();
             if (stringLiteral != nullptr) {
                 // Only count unique actions.
-                if (actions.insert(stringLiteral->value.string()).second) metrics.inlinedActions++;
+                if (actions.insert(stringLiteral->value).second) metrics.inlinedActions++;
             }
         }
     }

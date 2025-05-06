@@ -3,20 +3,20 @@
 namespace P4 {
 
 void ExternalObjectsMetricPass::postorder(const IR::Type_Extern *node) {
-    externTypeNames.insert(node->name.name.string());
+    externTypeNames.insert(node->name.name);
     metrics.externStructures++;
 
     for (const auto &method : node->methods) {
-        externMethods[node->name.name.string()].insert(method->name.name.string());
+        externMethods[node->name.name].insert(method->name.name);
     }
 }
 
 void ExternalObjectsMetricPass::postorder(const IR::Declaration_Instance *node) {
     const IR::Type *type = node->type;
-    std::string typeName;
+    cstring typeName;
 
     if (auto tn = type->to<IR::Type_Name>()) {
-        typeName = tn->path->name.name.string();
+        typeName = tn->path->name.name;
         if (externTypeNames.count(typeName)) {
             metrics.externStructUses++;
         }
@@ -28,8 +28,8 @@ void ExternalObjectsMetricPass::postorder(const IR::Member *node) {
 
     if (baseType && baseType->is<IR::Type_Extern>()) {
         auto externType = baseType->to<IR::Type_Extern>();
-        std::string externName = externType->name.name.string();
-        std::string memberName = node->member.name.string();
+        cstring externName = externType->name.name;
+        cstring memberName = node->member.name;
 
         metrics.externStructUses++;
         // Check if member is a method call and count it.
@@ -43,7 +43,7 @@ void ExternalObjectsMetricPass::postorder(const IR::Method *node) {
     // Do not add methods that belong to an extern structure.
     if (!findContext<IR::Type_Extern>()) {
         metrics.externFunctions++;
-        externFunctions.insert(node->name.name.string());
+        externFunctions.insert(node->name.name);
     }
 }
 
@@ -51,7 +51,7 @@ void ExternalObjectsMetricPass::postorder(const IR::MethodCallExpression *node) 
     auto method = node->method;
 
     if (auto path = method->to<IR::PathExpression>()) {
-        std::string calledName = path->path->name.name.string();
+        cstring calledName = path->path->name.name;
         if (externFunctions.count(calledName)) {
             metrics.externFunctionUses++;
         }

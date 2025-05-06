@@ -2,32 +2,34 @@
 
 namespace P4 {
 
-std::string ParserAnalyzer::getPacketType(const IR::ParserState *state) const {
+cstring ParserAnalyzer::getPacketType(const IR::ParserState *state) const {
     for (const auto *stmt : state->components) {
         if (const auto *methodCall = stmt->to<IR::MethodCallStatement>()) {
             const auto *method = methodCall->methodCall;
             if (const auto *member = method->method->to<IR::Member>()) {
-                if (member->member.name == "extract" && !method->arguments->empty()) {
+                if (member->member.name == "extract"_cs && !method->arguments->empty()) {
                     if (const auto *arg = method->arguments->at(0)->expression->to<IR::Member>()) {
-                        return arg->member.name.string();
+                        return arg->member.name;
                     }
                 }
             }
         }
     }
-    return "";
+    return ""_cs;
 }
 
-void ParserAnalyzer::dfsCumulativeTypes(
-    const IR::ParserState *state, const ParserCallGraph &pcg, const std::string &parentType,
-    std::unordered_map<const IR::ParserState *, std::string> &types,
-    std::unordered_set<const IR::ParserState *> &currentPath) {
+void ParserAnalyzer::dfsCumulativeTypes(const IR::ParserState *state, const ParserCallGraph &pcg,
+                                        const cstring &parentType,
+                                        std::unordered_map<const IR::ParserState *, cstring> &types,
+                                        std::unordered_set<const IR::ParserState *> &currentPath) {
     // If this state was already visited on the current path, stop.
     if (!currentPath.insert(state).second) return;
 
-    auto extract = getPacketType(state);
-    auto cumulative =
-        parentType.empty() ? extract : (extract.empty() ? parentType : parentType + "-" + extract);
+    cstring extract = getPacketType(state);
+    cstring cumulative = parentType.isNullOrEmpty()
+        ? extract
+        : (extract.isNullOrEmpty() ? parentType : parentType + "-"_cs + extract);
+
     types[state] = cumulative;
     cumulativeTypes.insert(cumulative);
 
@@ -44,9 +46,10 @@ bool ParserAnalyzer::preorder(const IR::P4Parser *parser) {
     parser->apply(buildGraph, getChildContext());
 
     if (auto *start = parser->getDeclByName(IR::ParserState::start)) {
-        std::unordered_map<const IR::ParserState *, std::string> types;
+        std::unordered_map<const IR::ParserState *, cstring> types;
         std::unordered_set<const IR::ParserState *> currentPath;
-        dfsCumulativeTypes(start->to<IR::ParserState>(), parserCallGraph, "", types, currentPath);
+        dfsCumulativeTypes(start->to<IR::ParserState>(), parserCallGraph, ""_cs, types,
+                           currentPath);
     }
 
     return false;
@@ -77,10 +80,10 @@ size_t HeaderPacketMetricsPass::getHeaderSize(const IR::Type_Header *header) con
     return size;
 }
 
-void HeaderPacketMetricsPass::updateMetrics(const std::string &headerName, size_t size,
+void HeaderPacketMetricsPass::updateMetrics(const cstring &headerName, size_t size,
                                             bool isModification) {
     for (const auto &packetType : cumulativeTypes) {
-        if (packetType.find(headerName) != std::string::npos) {
+        if (packetType.string().find(headerName.string()) != std::string::npos) {
             auto &target = isModification ? metrics.headerModificationMetrics.perPacket[packetType]
                                           : metrics.headerManipulationMetrics.perPacket[packetType];
 
@@ -121,19 +124,19 @@ bool HeaderPacketMetricsPass::preorder(const IR::AssignmentStatement *assign) {
     if (!leftType) return false;
 
     size_t size = 0;
-    std::string headerName;
+    cstring headerName;
 
     // Assignment to entire header.
     if (auto headerType = leftType->to<IR::Type_Header>()) {
         size = getHeaderSize(headerType);
-        headerName = member->member.name.string();
+        headerName = member->member.name;
     } else {  // Assignment to a header field.
         const IR::Type *baseType = typeMap->getType(member->expr, true);
         if (!baseType || !baseType->is<IR::Type_Header>()) return false;
 
         size = getHeaderFieldSize(leftType);
         if (auto baseMember = member->expr->to<IR::Member>()) {
-            headerName = baseMember->member.name.string();
+            headerName = baseMember->member.name;
         } else {
             return false;
         }
@@ -150,16 +153,16 @@ bool HeaderPacketMetricsPass::preorder(const IR::MethodCallStatement *mcs) {
 
     if (const auto *member = methodCall->method->to<IR::Member>()) {
         auto methodName = member->member.name;
-        if (methodName == "setValid" || methodName == "setInvalid") {
+        if (methodName == "setValid"_cs || methodName == "setInvalid"_cs) {
             baseExpr = member->expr;
-        } else if (methodName == "extract" && !methodCall->arguments->empty()) {
+        } else if (methodName == "extract"_cs && !methodCall->arguments->empty()) {
             baseExpr = methodCall->arguments->at(0)->expression;
         }
 
         if (insideParserState) {
             if (isValid) {
-                if (methodName != "setInvalid") return false;
-            } else if (methodName == "extract" || methodName == "setValid") {
+                if (methodName != "setInvalid"_cs) return false;
+            } else if (methodName == "extract"_cs || methodName == "setValid"_cs) {
                 isValid = true;
             }
         }
@@ -169,12 +172,12 @@ bool HeaderPacketMetricsPass::preorder(const IR::MethodCallStatement *mcs) {
             if (baseType && baseType->is<IR::Type_Header>()) {
                 auto headerType = baseType->to<IR::Type_Header>();
                 int size = getHeaderSize(headerType);
-                std::string headerName;
+                cstring headerName;
 
                 if (auto *baseMember = baseExpr->to<IR::Member>()) {
-                    headerName = baseMember->member.name.string();
+                    headerName = baseMember->member.name;
                 } else {
-                    headerName = headerType->toString().string();
+                    headerName = headerType->toString();
                 }
 
                 updateMetrics(headerName, size, false);
