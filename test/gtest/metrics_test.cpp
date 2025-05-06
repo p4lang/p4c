@@ -113,12 +113,8 @@ TEST_F(MetricPassesTest, MetricsTest10) {
     inputFile = "../testdata/p4_16_samples/metrics/metrics_test_8.p4";
     SetUpFrontend(true);
 
-    // Check if the metric values got written to compiler context
-    P4CContext& contextRef = P4CContext::get();
-    auto* ctx = dynamic_cast<P4CContextWithOptions<CompilerOptions>*>(&contextRef);
-    ASSERT_NE(ctx, nullptr);
-
-    const Metrics& metrics = ctx->metrics;
+    // Check if the metric values got written to compiler context.
+    Metrics& metrics = P4CContext::get().options().metrics;
 
     EXPECT_EQ(metrics.linesOfCode, 150u);
     EXPECT_EQ(metrics.cyclomaticComplexity.at("MyIngress"), 7u);

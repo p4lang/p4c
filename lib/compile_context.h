@@ -22,7 +22,6 @@ limitations under the License.
 
 #include "lib/cstring.h"
 #include "lib/error_reporter.h"
-#include "../frontends/p4/metrics/metricsStructure.h"
 
 namespace P4 {
 
@@ -105,9 +104,6 @@ class BaseCompileContext : public ICompileContext {
 
     /// @return the default diagnostic action for calls to `::P4::error()`.
     virtual DiagnosticAction getDefaultErrorDiagnosticAction();
-
-    /// Holds the code metrics data, making it accessible throghout compilation.
-    Metrics metrics;
 
  private:
     /// Error and warning tracking facilities for this compilation context.

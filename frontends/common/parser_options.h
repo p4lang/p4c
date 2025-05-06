@@ -28,6 +28,7 @@ limitations under the License.
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
+#include "../p4/metrics/metricsStructure.h"
 
 namespace P4 {
 
@@ -113,6 +114,8 @@ class ParserOptions : public Util::Options {
     /// If true do not generate #include statements.
     /// Used for debugging.
     bool noIncludes = false;
+    /// Holds code metric values, makes them accessible during the entire compilation.
+    Metrics metrics;
 };
 
 /// A compilation context which exposes compiler options and a compiler

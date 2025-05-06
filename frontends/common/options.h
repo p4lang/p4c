@@ -81,9 +81,9 @@ class CompilerOptions : public ParserOptions {
     cstring arch = nullptr;
     // If true, unroll all parser loops inside the midend.
     bool loopsUnrolling = false;
-    // List of code metrics input by user
+    // List of code metrics input by user.
     cstring inputMetrics = nullptr;
-    // Code metrics to be collected
+    // Code metrics to be collected.
     std::set<std::string> selectedMetrics;
 
     // General optimization options -- can be interpreted by backends in various ways
