@@ -1,25 +1,25 @@
 /*
 Adds code metric collection passes to the frontend pipeline,
 based on the "selectedMetrics" option. If any metrics were
-selected by the user, the pass which exports them is added 
+selected by the user, the pass which exports them is added
 as well.
 */
 
-#ifndef FRONTENDS_P4_METRICS_PASS_MANAGER_H_
-#define FRONTENDS_P4_METRICS_PASS_MANAGER_H_
+#ifndef FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_
+#define FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_
 
 #include "../../common/options.h"
 #include "../ir/ir.h"
-#include "metricsStructure.h"
-#include "exportMetrics.h"
 #include "cyclomaticComplexity.h"
-#include "linesOfCodeMetric.h"
+#include "exportMetrics.h"
 #include "externalObjectsMetric.h"
 #include "halsteadMetrics.h"
 #include "headerMetrics.h"
 #include "headerPacketMetrics.h"
 #include "inlinedActionsMetric.h"
+#include "linesOfCodeMetric.h"
 #include "matchActionTableMetrics.h"
+#include "metricsStructure.h"
 #include "nestingDepthMetric.h"
 #include "parserMetrics.h"
 #include "unusedCodeMetric.h"
@@ -32,15 +32,15 @@ class Metrics;
 class MetricsPassManager {
  private:
     const std::set<std::string> &selectedMetrics;
-    TypeMap* typeMap;
+    TypeMap *typeMap;
     Metrics &metrics;
     std::string fileName;
     std::string isolatedFileName;
 
  public:
-    MetricsPassManager(const CompilerOptions &options, TypeMap* typeMap, Metrics& metricsRef);
-    
-    Metrics& getMetrics() { return metrics; }
+    MetricsPassManager(const CompilerOptions &options, TypeMap *typeMap, Metrics &metricsRef);
+
+    Metrics &getMetrics() { return metrics; }
     void addInlined(PassManager &pm);
     void addUnusedCode(PassManager &pm, bool isBefore);
     void addMetricPasses(PassManager &pm);
@@ -48,4 +48,4 @@ class MetricsPassManager {
 
 }  // namespace P4
 
-#endif  // METRICS_PASS_MANAGER_H_
+#endif  /* FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_ */

@@ -10,14 +10,13 @@ void HeaderMetricsPass::postorder(const IR::Type_Header *header) {
 
     for (auto field : header->fields) {
         numFields++;
-        const IR::Type* currentType = typeMap->getType(field->type, true);
+        const IR::Type *currentType = typeMap->getType(field->type, true);
 
         // Unwrap the field type and get size.
         while (currentType != nullptr) {
             if (auto typeType = currentType->to<IR::Type_Type>()) {
                 currentType = typeType->type;
-            }
-            else if (auto bitsType = currentType->to<IR::Type_Bits>()) {
+            } else if (auto bitsType = currentType->to<IR::Type_Bits>()) {
                 sizeSum += bitsType->width_bits();
                 break;
             } else if (auto newtype = currentType->to<IR::Type_Newtype>()) {
@@ -36,11 +35,13 @@ void HeaderMetricsPass::postorder(const IR::Type_Header *header) {
     totalFieldsSize += sizeSum;
 }
 
-void HeaderMetricsPass::postorder(const IR::P4Program* /*program*/){
+void HeaderMetricsPass::postorder(const IR::P4Program * /*program*/) {
     if (metrics.numHeaders > 0)
-        metrics.avgFieldsNum = static_cast<double>(totalFieldsNum) / static_cast<double>(metrics.numHeaders);
+        metrics.avgFieldsNum =
+            static_cast<double>(totalFieldsNum) / static_cast<double>(metrics.numHeaders);
     if (totalFieldsNum > 0)
-        metrics.avgFieldSize = static_cast<double>(totalFieldsSize) / static_cast<double>(totalFieldsNum);
+        metrics.avgFieldSize =
+            static_cast<double>(totalFieldsSize) / static_cast<double>(totalFieldsNum);
 }
 
 }  // namespace P4

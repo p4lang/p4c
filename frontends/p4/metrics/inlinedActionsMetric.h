@@ -4,8 +4,8 @@ counting unique action names inside of blocks with annotantions of type
 "Annotation::inlinedFromAnnotation".
 */
 
-#ifndef FRONTENDS_P4_INLINED_ACTIONS_H_
-#define FRONTENDS_P4_INLINED_ACTIONS_H_
+#ifndef FRONTENDS_P4_METRICS_INLINEDACTIONSMETRIC_H_
+#define FRONTENDS_P4_METRICS_INLINEDACTIONSMETRIC_H_
 
 #include "../ir/ir.h"
 #include "metricsStructure.h"
@@ -13,19 +13,18 @@ counting unique action names inside of blocks with annotantions of type
 namespace P4 {
 
 class InlinedActionsMetricPass : public Inspector {
-    private:
+ private:
     Metrics &metrics;
-    std::unordered_set<std::string> actions; 
+    std::unordered_set<std::string> actions;
 
-    public:
-    explicit InlinedActionsMetricPass(Metrics &metricsRef)
-        : metrics(metricsRef) { 
-        setName("InlinedActionsMetricPass"); 
+ public:
+    explicit InlinedActionsMetricPass(Metrics &metricsRef) : metrics(metricsRef) {
+        setName("InlinedActionsMetricPass");
     }
-    
-    void postorder(const IR::BlockStatement* block) override;
+
+    void postorder(const IR::BlockStatement *block) override;
 };
 
 }  // namespace P4
 
-#endif /* FRONTENDS_P4_INLINED_ACTIONS_H_ */
+#endif /* FRONTENDS_P4_METRICS_INLINEDACTIONSMETRIC_H_ */

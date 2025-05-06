@@ -1,6 +1,8 @@
 #include "parserMetrics.h"
-#include "cyclomaticComplexity.h"
+
 #include <iostream>
+
+#include "cyclomaticComplexity.h"
 
 namespace P4 {
 

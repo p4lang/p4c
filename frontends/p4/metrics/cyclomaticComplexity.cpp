@@ -2,20 +2,23 @@
 
 namespace P4 {
 
-void CyclomaticComplexityCalculator::postorder(const IR::IfStatement* /*stmt*/) { ++cc; }
-void CyclomaticComplexityCalculator::postorder(const IR::SwitchStatement* stmt) { cc += stmt->cases.size(); }
-void CyclomaticComplexityCalculator::postorder(const IR::ForStatement* /*stmt*/) { ++cc; }
-void CyclomaticComplexityCalculator::postorder(const IR::ForInStatement* /*stmt*/) { ++cc; }
-void CyclomaticComplexityCalculator::postorder(const IR::SelectExpression* selectExpr) { cc += selectExpr->selectCases.size(); }
+void CyclomaticComplexityCalculator::postorder(const IR::IfStatement * /*stmt*/) { ++cc; }
+void CyclomaticComplexityCalculator::postorder(const IR::SwitchStatement *stmt) {
+    cc += stmt->cases.size();
+}
+void CyclomaticComplexityCalculator::postorder(const IR::ForStatement * /*stmt*/) { ++cc; }
+void CyclomaticComplexityCalculator::postorder(const IR::ForInStatement * /*stmt*/) { ++cc; }
+void CyclomaticComplexityCalculator::postorder(const IR::SelectExpression *selectExpr) {
+    cc += selectExpr->selectCases.size();
+}
 
-void CyclomaticComplexityCalculator::postorder(const IR::MethodCallExpression* mce) {
+void CyclomaticComplexityCalculator::postorder(const IR::MethodCallExpression *mce) {
     if (auto pathExpr = mce->method->to<IR::PathExpression>()) {
-        if (pathExpr->path->name.name.string() == "verify")
-            ++cc;
+        if (pathExpr->path->name.name.string() == "verify") ++cc;
     }
 }
 
-bool CyclomaticComplexityCalculator::preorder(const IR::P4Table* table) {
+bool CyclomaticComplexityCalculator::preorder(const IR::P4Table *table) {
     if (!table) return false;
     auto actionList = table->getActionList();
     cc += actionList->actionList.size();

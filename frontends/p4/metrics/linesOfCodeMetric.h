@@ -4,13 +4,14 @@ by inserting the numbers of lines which contain code into a set,
 and retrieving it's size at the end.
 */
 
-#ifndef FRONTENDS_P4_LINES_OF_CODE_METRIC_H_
-#define FRONTENDS_P4_LINES_OF_CODE_METRIC_H_
+#ifndef FRONTENDS_P4_METRICS_LINESOFCODEMETRIC_H_
+#define FRONTENDS_P4_METRICS_LINESOFCODEMETRIC_H_
+
+#include <string>
+#include <unordered_set>
 
 #include "../ir/ir.h"
 #include "metricsStructure.h"
-#include <unordered_set>
-#include <string>
 
 namespace P4 {
 
@@ -26,10 +27,10 @@ class LinesOfCodeMetricPass : public Inspector {
         setName("LinesOfCodeMetricPass");
     }
 
-    void postorder(const IR::Node* node) override;
-    void postorder(const IR::P4Program* /*program*/) override;
+    void postorder(const IR::Node *node) override;
+    void postorder(const IR::P4Program * /*program*/) override;
 };
 
 }  // namespace P4
 
-#endif /* FRONTENDS_P4_LINES_OF_CODE_METRIC_H_ */
+#endif /* FRONTENDS_P4_METRICS_LINESOFCODEMETRIC_H_ */

@@ -2,10 +2,11 @@
 Structure definitions used by the code metric collection passes.
 */
 
-#ifndef FRONTENDS_P4_METRICS_STRUCTURE_H_
-#define FRONTENDS_P4_METRICS_STRUCTURE_H_
+#ifndef FRONTENDS_P4_METRICS_METRICSSTRUCTURE_H_
+#define FRONTENDS_P4_METRICS_METRICSSTRUCTURE_H_
 
 #include <string>
+
 #include "lib/ordered_map.h"
 
 namespace P4 {
@@ -27,18 +28,19 @@ struct UnusedCodeInstances {
     unsigned states = 0;
     unsigned enums = 0;
     unsigned conditionals = 0;
-    unsigned actions = 0;         
-    unsigned functions = 0;       
-    unsigned parameters = 0;      
-    unsigned returns = 0;         
+    unsigned actions = 0;
+    unsigned functions = 0;
+    unsigned parameters = 0;
+    unsigned returns = 0;
 
     // Overloads "-" to prevent negative deltas.
-    UnusedCodeInstances operator-(const UnusedCodeInstances& other) const {
+    UnusedCodeInstances operator-(const UnusedCodeInstances &other) const {
         UnusedCodeInstances result;
         result.variables = (variables > other.variables) ? (variables - other.variables) : 0;
         result.states = (states > other.states) ? (states - other.states) : 0;
         result.enums = (enums > other.enums) ? (enums - other.enums) : 0;
-        result.conditionals = (conditionals > other.conditionals) ? (conditionals - other.conditionals) : 0;
+        result.conditionals =
+            (conditionals > other.conditionals) ? (conditionals - other.conditionals) : 0;
         result.actions = (actions > other.actions) ? (actions - other.actions) : 0;
         result.functions = (functions > other.functions) ? (functions - other.functions) : 0;
         result.parameters = (parameters > other.parameters) ? (parameters - other.parameters) : 0;
@@ -54,12 +56,12 @@ struct ExternMetrics {
     unsigned externStructUses = 0;
 };
 
-struct UnusedCodeHelperVars { // Variables for storing inter-pass data.
+struct UnusedCodeHelperVars {  // Variables for storing inter-pass data.
     UnusedCodeInstances interPassCounts;
     std::vector<std::string> beforeActions;
     std::vector<std::string> afterActions;
-    std::vector<std::string> beforeVariables;  
-    std::vector<std::string> afterVariables;    
+    std::vector<std::string> beforeVariables;
+    std::vector<std::string> afterVariables;
 };
 
 struct MatchActionTableMetrics {
@@ -81,13 +83,13 @@ struct MatchActionTableMetrics {
 };
 
 struct NestingDepthMetrics {
-    P4::ordered_map<std::string, unsigned> blockNestingDepth; // Block name -> max depth.
+    P4::ordered_map<std::string, unsigned> blockNestingDepth;  // Block name -> max depth.
     double avgNestingDepth = 0.0;
     unsigned maxNestingDepth = 0;
 };
 
 struct ParserMetrics {
-    P4::ordered_map<std::string, unsigned> StateComplexity; // State name -> complexity.
+    P4::ordered_map<std::string, unsigned> StateComplexity;  // State name -> complexity.
     unsigned totalStates = 0;
 };
 
@@ -109,7 +111,7 @@ struct HeaderMetrics {
     double avgFieldsNum = 0.0;
     double avgFieldSize = 0.0;
     // Header name -> value
-    P4::ordered_map<std::string, unsigned> fieldsNum;     
+    P4::ordered_map<std::string, unsigned> fieldsNum;
     P4::ordered_map<std::string, unsigned> fieldSizeSum;
 };
 
@@ -121,13 +123,14 @@ struct Metrics {
     NestingDepthMetrics nestingDepth;
     HalsteadMetrics halsteadMetrics;
     HeaderMetrics headerMetrics;
-    HeaderPacketMetrics headerManipulationMetrics; // Header addition and removal operations.
-    HeaderPacketMetrics headerModificationMetrics; // Assignment operations.
+    HeaderPacketMetrics headerManipulationMetrics;  // Header addition and removal operations.
+    HeaderPacketMetrics headerModificationMetrics;  // Assignment operations.
     MatchActionTableMetrics matchActionTableMetrics;
     ParserMetrics parserMetrics;
-    P4::ordered_map<std::string, unsigned> cyclomaticComplexity; // Function name -> CC value.
+    P4::ordered_map<std::string, unsigned> cyclomaticComplexity;  // Function name -> CC value.
     ExternMetrics externMetrics;
 };
 
-} // namespace P4
-#endif // METRICS_STRUCTURE_H_
+}  // namespace P4
+
+#endif  /* FRONTENDS_P4_METRICS_METRICSSTRUCTURE_H_ */
