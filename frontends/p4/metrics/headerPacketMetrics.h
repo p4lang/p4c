@@ -20,8 +20,8 @@ and "ethernet-ipv4-tcp").
 #ifndef FRONTENDS_P4_METRICS_HEADERPACKETMETRICS_H_
 #define FRONTENDS_P4_METRICS_HEADERPACKETMETRICS_H_
 
-#include "frontends/p4/callGraph.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/callGraph.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/metrics/metricsStructure.h"
 #include "frontends/p4/parserCallGraph.h"

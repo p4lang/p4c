@@ -38,6 +38,9 @@ class MetricPassesTest : public P4CTest {
         auto &opts = ctx->options();
         opts.langVersion = CompilerOptions::FrontendVersion::P4_16;
         opts.file = inputFile;
+        fs::path relPath = "../../p4include";
+        fs::path absPath = fs::absolute(relPath);
+        setenv("P4C_16_INCLUDE_PATH", absPath.c_str(), 1);
         if (allMetrics) {
             opts.selectedMetrics = {"loc"_cs,
                                     "cyclomatic"_cs,
