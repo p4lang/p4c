@@ -1,0 +1,3 @@
+array4.p4(27): [--Werror=overlimit] error: Too much expansion from non-const array indexes
+        hdr.data.arr[hdr.data.x].nested_arr[hdr.data.y] = t2;
+                                                        ^
