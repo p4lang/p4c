@@ -14,9 +14,9 @@ comparing collected data from the previous run with the new data.
 #include <string>
 #include <vector>
 
-#include "../ir/ir.h"
-#include "../lib/log.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "ir/ir.h"
+#include "lib/log.h"
 
 using namespace P4::literals;
 

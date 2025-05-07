@@ -7,7 +7,7 @@ Structure definitions used by the code metric collection passes.
 
 #include <string>
 
-#include "../lib/cstring.h"
+#include "lib/cstring.h"
 #include "lib/ordered_map.h"
 
 namespace P4 {

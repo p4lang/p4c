@@ -20,13 +20,13 @@ and "ethernet-ipv4-tcp").
 #ifndef FRONTENDS_P4_METRICS_HEADERPACKETMETRICS_H_
 #define FRONTENDS_P4_METRICS_HEADERPACKETMETRICS_H_
 
-#include "../../common/resolveReferences/referenceMap.h"
-#include "../callGraph.h"
-#include "../ir/ir.h"
-#include "../methodInstance.h"
-#include "../parserCallGraph.h"
-#include "../typeChecking/typeChecker.h"
-#include "metricsStructure.h"
+#include "frontends/p4/callGraph.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "frontends/p4/parserCallGraph.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 using namespace P4::literals;
 
@@ -39,7 +39,6 @@ class ParserAnalyzer : public Inspector {
     ParserCallGraph &parserCallGraph;
     std::set<cstring> &cumulativeTypes;
     std::unordered_map<cstring, size_t> stateEncounters;
-    TypeMap *typeMap;
 
     cstring getPacketType(const IR::ParserState *state) const;
     void dfsCumulativeTypes(const IR::ParserState *state, const ParserCallGraph &pcg,
@@ -48,8 +47,8 @@ class ParserAnalyzer : public Inspector {
                             std::unordered_set<const IR::ParserState *> &currentPath);
 
  public:
-    ParserAnalyzer(ParserCallGraph &graph, std::set<cstring> &types, TypeMap *map)
-        : parserCallGraph(graph), cumulativeTypes(types), typeMap(map) {
+    ParserAnalyzer(ParserCallGraph &graph, std::set<cstring> &types)
+        : parserCallGraph(graph), cumulativeTypes(types) {
         setName("ParserAnalyzer");
     }
 

@@ -1,4 +1,4 @@
-#include "inlinedActionsMetric.h"
+#include "frontends/p4/metrics/inlinedActionsMetric.h"
 
 namespace P4 {
 

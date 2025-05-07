@@ -6,9 +6,9 @@ and collecting the number of states of each encountered parser
 #ifndef FRONTENDS_P4_METRICS_PARSERMETRICS_H_
 #define FRONTENDS_P4_METRICS_PARSERMETRICS_H_
 
-#include "../ir/ir.h"
-#include "cyclomaticComplexity.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/cyclomaticComplexity.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "ir/ir.h"
 
 namespace P4 {
 

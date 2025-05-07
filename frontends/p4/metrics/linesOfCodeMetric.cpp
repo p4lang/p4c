@@ -1,4 +1,4 @@
-#include "linesOfCodeMetric.h"
+#include "frontends/p4/metrics/linesOfCodeMetric.h"
 
 namespace P4 {
 

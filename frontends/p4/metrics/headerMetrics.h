@@ -7,9 +7,9 @@ its type, until the field's bit width can be extracted.
 #ifndef FRONTENDS_P4_METRICS_HEADERMETRICS_H_
 #define FRONTENDS_P4_METRICS_HEADERMETRICS_H_
 
-#include "../ir/ir.h"
-#include "../typeMap.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 

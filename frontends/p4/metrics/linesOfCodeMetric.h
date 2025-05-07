@@ -10,8 +10,8 @@ and retrieving it's size at the end.
 #include <string>
 #include <unordered_set>
 
-#include "../ir/ir.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "ir/ir.h"
 
 namespace P4 {
 

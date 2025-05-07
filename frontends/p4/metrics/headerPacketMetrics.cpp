@@ -1,4 +1,4 @@
-#include "headerPacketMetrics.h"
+#include "frontends/p4/metrics/headerPacketMetrics.h"
 
 namespace P4 {
 
@@ -101,7 +101,7 @@ void HeaderPacketMetricsPass::updateMetrics(const cstring &headerName, size_t si
 }
 
 bool HeaderPacketMetricsPass::preorder(const IR::P4Program *program) {
-    ParserAnalyzer analyzer(parserCallGraph, cumulativeTypes, typeMap);
+    ParserAnalyzer analyzer(parserCallGraph, cumulativeTypes);
     program->apply(analyzer);
     return true;
 }

@@ -7,9 +7,9 @@ each key field and extracting its bit width.
 #ifndef FRONTENDS_P4_METRICS_MATCHACTIONTABLEMETRICS_H_
 #define FRONTENDS_P4_METRICS_MATCHACTIONTABLEMETRICS_H_
 
-#include "../ir/ir.h"
-#include "../typeChecking/typeChecker.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 

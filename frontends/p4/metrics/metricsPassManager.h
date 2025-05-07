@@ -8,28 +8,27 @@ as well.
 #ifndef FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_
 #define FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_
 
-#include "../../common/options.h"
-#include "../ir/ir.h"
-#include "cyclomaticComplexity.h"
-#include "exportMetrics.h"
-#include "externalObjectsMetric.h"
-#include "halsteadMetrics.h"
-#include "headerMetrics.h"
-#include "headerPacketMetrics.h"
-#include "inlinedActionsMetric.h"
-#include "linesOfCodeMetric.h"
-#include "matchActionTableMetrics.h"
-#include "metricsStructure.h"
-#include "nestingDepthMetric.h"
-#include "parserMetrics.h"
-#include "unusedCodeMetric.h"
+#include "frontends/common/options.h"
+#include "frontends/p4/metrics/cyclomaticComplexity.h"
+#include "frontends/p4/metrics/exportMetrics.h"
+#include "frontends/p4/metrics/externalObjectsMetric.h"
+#include "frontends/p4/metrics/halsteadMetrics.h"
+#include "frontends/p4/metrics/headerMetrics.h"
+#include "frontends/p4/metrics/headerPacketMetrics.h"
+#include "frontends/p4/metrics/inlinedActionsMetric.h"
+#include "frontends/p4/metrics/linesOfCodeMetric.h"
+#include "frontends/p4/metrics/matchActionTableMetrics.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "frontends/p4/metrics/nestingDepthMetric.h"
+#include "frontends/p4/metrics/parserMetrics.h"
+#include "frontends/p4/metrics/unusedCodeMetric.h"
+#include "ir/ir.h"
 
 using namespace P4::literals;
 
 namespace P4 {
 
 class PassManager;
-class Metrics;
 
 class MetricsPassManager {
  private:

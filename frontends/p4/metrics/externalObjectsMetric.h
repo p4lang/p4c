@@ -11,8 +11,8 @@ function call too.
 
 #include <set>
 
-#include "../ir/ir.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "ir/ir.h"
 
 namespace P4 {
 

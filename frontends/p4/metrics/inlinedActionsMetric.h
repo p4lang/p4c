@@ -7,8 +7,8 @@ counting unique action names inside of blocks with annotantions of type
 #ifndef FRONTENDS_P4_METRICS_INLINEDACTIONSMETRIC_H_
 #define FRONTENDS_P4_METRICS_INLINEDACTIONSMETRIC_H_
 
-#include "../ir/ir.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "ir/ir.h"
 
 namespace P4 {
 

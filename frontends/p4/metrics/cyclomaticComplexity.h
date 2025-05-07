@@ -8,8 +8,8 @@ CC value by counting decision point nodes (like if statements).
 #ifndef FRONTENDS_P4_METRICS_CYCLOMATICCOMPLEXITY_H_
 #define FRONTENDS_P4_METRICS_CYCLOMATICCOMPLEXITY_H_
 
-#include "../ir/ir.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "ir/ir.h"
 
 using namespace P4::literals;
 

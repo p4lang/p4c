@@ -28,9 +28,9 @@ statements in C)
 #include <unordered_set>
 #include <vector>
 
-#include "../ir/ir.h"
-#include "../lib/log.h"
-#include "metricsStructure.h"
+#include "frontends/p4/metrics/metricsStructure.h"
+#include "ir/ir.h"
+#include "lib/log.h"
 
 using namespace P4::literals;
 
