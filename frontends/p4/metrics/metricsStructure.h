@@ -6,6 +6,7 @@ Structure definitions used by the code metric collection passes.
 #define FRONTENDS_P4_METRICS_METRICSSTRUCTURE_H_
 
 #include <string>
+
 #include "../lib/cstring.h"
 #include "lib/ordered_map.h"
 
