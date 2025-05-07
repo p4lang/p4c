@@ -44,6 +44,7 @@ limitations under the License.
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
+#include "metrics/metricsPassManager.h"
 #include "moveConstructors.h"
 #include "moveDeclarations.h"
 #include "parseAnnotations.h"
@@ -77,7 +78,6 @@ limitations under the License.
 #include "validateParsedProgram.h"
 #include "validateStringAnnotations.h"
 #include "validateValueSets.h"
-#include "metrics/metricsPassManager.h"
 
 namespace P4 {
 
@@ -201,7 +201,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         }),
         new CheckCoreMethods(&typeMap),
         new StaticAssert(&typeMap),
-        });
+    });
     metricsPassManager.addUnusedCode(passes, true);
     passes.addPasses({
         new RemoveParserIfs(&typeMap),
@@ -241,7 +241,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveParserControlFlow(&typeMap),
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
-        new MoveConstructors(),    
+        new MoveConstructors(),
         new RemoveAllUnusedDeclarations(*policy),
         new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
@@ -303,7 +303,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         passes.removePasses(options.passesToExcludeFrontend);
     }
 
-    
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
     passes.addDebugHooks(hooks, true);

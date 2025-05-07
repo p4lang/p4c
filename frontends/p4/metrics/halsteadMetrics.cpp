@@ -200,7 +200,7 @@ void HalsteadMetricsPass::postorder(const IR::P4Program * /*program*/) {
         metrics.uniqueOperands == 0
             ? 0
             : (metrics.uniqueOperators / 2.0) *
-            (static_cast<double>(metrics.totalOperands) / metrics.uniqueOperands);
+                  (static_cast<double>(metrics.totalOperands) / metrics.uniqueOperands);
 
     metrics.volume = metrics.vocabulary == 0 ? 0 : metrics.length * std::log2(metrics.vocabulary);
 

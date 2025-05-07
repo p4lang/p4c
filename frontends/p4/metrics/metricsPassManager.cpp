@@ -10,8 +10,8 @@ MetricsPassManager::MetricsPassManager(const CompilerOptions &options, TypeMap *
         (pos != std::string::npos ? options.file.string().substr(0, pos) : options.file.string());
 
     isolatedFileName = fileName.rfind('/') == std::string::npos
-        ? fileName
-        : fileName.substr(fileName.rfind('/') + 1);
+                           ? fileName
+                           : fileName.substr(fileName.rfind('/') + 1);
     isolatedFileName += ".p4";
 }
 

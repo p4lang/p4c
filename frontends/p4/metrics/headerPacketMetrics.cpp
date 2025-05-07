@@ -26,9 +26,10 @@ void ParserAnalyzer::dfsCumulativeTypes(const IR::ParserState *state, const Pars
     if (!currentPath.insert(state).second) return;
 
     cstring extract = getPacketType(state);
-    cstring cumulative = parentType.isNullOrEmpty()
-        ? extract
-        : (extract.isNullOrEmpty() ? parentType : parentType + "-"_cs + extract);
+    cstring cumulative =
+        parentType.isNullOrEmpty()
+            ? extract
+            : (extract.isNullOrEmpty() ? parentType : parentType + "-"_cs + extract);
 
     types[state] = cumulative;
     cumulativeTypes.insert(cumulative);

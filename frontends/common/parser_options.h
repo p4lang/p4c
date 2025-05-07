@@ -23,12 +23,12 @@ limitations under the License.
 #include <filesystem>
 #include <set>
 
+#include "../p4/metrics/metricsStructure.h"
 #include "ir/configuration.h"
 #include "ir/pass_manager.h"
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
-#include "../p4/metrics/metricsStructure.h"
 
 namespace P4 {
 

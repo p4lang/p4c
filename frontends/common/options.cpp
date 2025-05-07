@@ -177,11 +177,18 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
     registerOption(
         "--metrics", "metric1[,metric2]",
         [this](const char *arg) {
-            static const std::set<cstring> validMetrics = {
-                "loc"_cs, "cyclomatic"_cs, "halstead"_cs, "unused-code"_cs, "nesting-depth"_cs,
-                "header-general"_cs, "header-manipulation"_cs,"header-modification"_cs,
-                "match-action"_cs, "parser"_cs, "inlined"_cs, "extern"_cs
-            };
+            static const std::set<cstring> validMetrics = {"loc"_cs,
+                                                           "cyclomatic"_cs,
+                                                           "halstead"_cs,
+                                                           "unused-code"_cs,
+                                                           "nesting-depth"_cs,
+                                                           "header-general"_cs,
+                                                           "header-manipulation"_cs,
+                                                           "header-modification"_cs,
+                                                           "match-action"_cs,
+                                                           "parser"_cs,
+                                                           "inlined"_cs,
+                                                           "extern"_cs};
             auto copy = strdup(arg);
             while (cstring metric = cstring(strsep(&copy, ","))) {
                 if (metric == "all") {

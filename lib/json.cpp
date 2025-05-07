@@ -66,13 +66,11 @@ bool JsonValue::operator==(const big_int &v) const {
     return tag == Kind::Integer ? v == intValue : false;
 }
 bool JsonValue::operator==(const double &v) const {
-    return tag == Kind::Float ? floatValue == v :
-           tag == Kind::Integer ? static_cast<double>(intValue) == v :
-           false;
+    return tag == Kind::Float     ? floatValue == v
+           : tag == Kind::Integer ? static_cast<double>(intValue) == v
+                                  : false;
 }
-bool JsonValue::operator==(const float &v) const {
-    return *this == static_cast<double>(v);
-}
+bool JsonValue::operator==(const float &v) const { return *this == static_cast<double>(v); }
 bool JsonValue::operator==(const cstring &s) const {
     return tag == Kind::String ? s == str : false;
 }
@@ -153,8 +151,7 @@ double JsonValue::getFloatValue() const {
 
 int JsonValue::getInt() const {
     auto val = getIntValue();
-    if (val < INT_MIN || val > INT_MAX)
-        throw std::logic_error("Value too large for int");
+    if (val < INT_MIN || val > INT_MAX) throw std::logic_error("Value too large for int");
     return static_cast<int>(val);
 }
 

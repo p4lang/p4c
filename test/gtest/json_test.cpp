@@ -62,7 +62,7 @@ TEST(Util, Json) {
     EXPECT_EQ("1.23456e-10", value->toString());
     value = new JsonValue(static_cast<float>(1.0 / 3.0));
     std::string floatStr = value->toString().string();
-    EXPECT_TRUE(floatStr.find("0.333") == 0);
+    EXPECT_EQ(floatStr.find("0.333"), 0);
 
     auto arr = new JsonArray();
     arr->append(5);
