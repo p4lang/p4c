@@ -58,7 +58,6 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
-          echo "P4C_16_INCLUDE_PATH=$(cd p4include && pwd)" >> $GITHUB_ENV
           ctest --output-on-failure --schedule-random -E "ubpf|testgen|smith"
         working-directory: ./build
 
@@ -106,6 +105,5 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
-          echo "P4C_16_INCLUDE_PATH=$(cd p4include && pwd)" >> $GITHUB_ENV
           ctest --output-on-failure --schedule-random -E "ubpf|testgen|smith"
         working-directory: ./build

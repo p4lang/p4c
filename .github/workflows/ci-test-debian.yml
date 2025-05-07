@@ -51,7 +51,7 @@ jobs:
 
       - name: Run tests (Ubuntu 22.04)
         run: |
-          export P4C_16_INCLUDE_PATH=$(realpath ../p4include); sudo -E ctest --output-on-failure --schedule-random
+          sudo -E ctest --output-on-failure --schedule-random
         working-directory: ./build
         if: matrix.unity == 'ON' && matrix.gtest == 'ON'
 
@@ -91,5 +91,5 @@ jobs:
 
       - name: Run tests (Ubuntu 22.04)
         run: |
-          export P4C_16_INCLUDE_PATH=$(realpath ../p4include); ctest --output-on-failure --schedule-random -R tofino
+          ctest --output-on-failure --schedule-random -R tofino
         working-directory: ./build
