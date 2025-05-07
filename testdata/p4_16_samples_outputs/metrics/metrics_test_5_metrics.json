@@ -1,5 +1,5 @@
 {
-  "lines_of_code" : 101,
+  "lines_of_code" : 116,
   "cyclomatic_complexity" : {
     "MyParser" : 5,
     "MyVerifyChecksum" : 1,

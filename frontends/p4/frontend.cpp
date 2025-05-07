@@ -216,11 +216,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
-    });
-    metricsPassManager.addUnusedCode(passes, true);
-    passes.addPasses({ new RemoveAllUnusedDeclarations(*policy, true) });
-    metricsPassManager.addUnusedCode(passes, false);
-    passes.addPasses({
+        new RemoveAllUnusedDeclarations(*policy, true),
         // Give each local declaration a unique internal name.
         // Must run before SimplifyParsers, which may merge adjacent states that
         // contain same-named state-local variables.
