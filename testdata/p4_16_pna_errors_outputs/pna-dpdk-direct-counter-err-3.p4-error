@@ -1,3 +1,15 @@
+pna-dpdk-direct-counter-err-3.p4(5): [--Wwarn=unused] warning: 'ETHERNET_HEADER_LEN' is unused
+const bit<8> ETHERNET_HEADER_LEN = 14;
+             ^^^^^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err-3.p4(42): [--Wwarn=unused] warning: 'PacketCounter_t' is unused
+typedef bit<32> PacketCounter_t;
+                ^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err-3.p4(44): [--Wwarn=unused] warning: 'FlowIdx_t' is unused
+typedef bit<16> FlowIdx_t;
+                ^^^^^^^^^
+pna-dpdk-direct-counter-err-3.p4(45): [--Wwarn=unused] warning: 'IPV4_HOST_TABLE_MAX_ENTRIES' is unused
+const bit<32> IPV4_HOST_TABLE_MAX_ENTRIES = 1024;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pna.p4(401): [--Werror=unexpected] error: count method of per_prefix_pkt_bytes_count extern can only be invoked from within action of ownertable
   void count(in bit<32> pkt_len);
        ^^^^^

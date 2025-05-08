@@ -1,1 +1,4 @@
+issue3324.p4(2): [--Wwarn=unused] warning: 'g' is unused
+void g<t>(in t b)
+     ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

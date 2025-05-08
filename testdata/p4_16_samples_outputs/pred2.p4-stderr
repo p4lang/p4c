@@ -1,3 +1,6 @@
+pred2.p4(23): [--Wwarn=unused] warning: 'a' is unused
+    bit<32> a;
+    ^^^^^^^^^
 pred2.p4(28): [--Wwarn=uninitialized_use] warning: tmp_1 may be uninitialized
         tmp_1 = (!true && !true ? false : tmp_1);
                                           ^^^^^

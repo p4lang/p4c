@@ -1,0 +1,3 @@
+named_meter_bmv2.p4(62): [--Wwarn=unused] warning: 'm_action' is unused
+    @name("m_action") action m_action(bit<9> meter_idx) {
+                             ^^^^^^^^

@@ -1,0 +1,36 @@
+v1model-special-ops-bmv2.p4(28): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_NORMAL' is unused
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_NORMAL = 0;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(29): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_INGRESS_CLONE' is unused
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_INGRESS_CLONE = 1;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(30): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_EGRESS_CLONE' is unused
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_EGRESS_CLONE = 2;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(31): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_COALESCED' is unused
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_COALESCED = 3;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(32): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_RECIRC' is unused
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_RECIRC = 4;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(33): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION' is unused
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION = 5;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(34): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT' is unused
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT = 6;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(42): [--Wwarn=unused] warning: 'I2E_CLONE_SESSION_ID' is unused
+const bit<32> I2E_CLONE_SESSION_ID = 5;
+              ^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(43): [--Wwarn=unused] warning: 'E2E_CLONE_SESSION_ID' is unused
+const bit<32> E2E_CLONE_SESSION_ID = 11;
+              ^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(96): [--Wwarn=unused] warning: 'ETHERTYPE_IPV4' is unused
+    const bit<16> ETHERTYPE_IPV4 = 16w0x0800;
+                  ^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(192): [--Wwarn=unused] warning: 'RESUBMITTED_PKT_L2PTR' is unused
+    const bit<32> RESUBMITTED_PKT_L2PTR = 0xe50b;
+                  ^^^^^^^^^^^^^^^^^^^^^
+v1model-special-ops-bmv2.p4(193): [--Wwarn=unused] warning: 'RECIRCULATED_PKT_L2PTR' is unused
+    const bit<32> RECIRCULATED_PKT_L2PTR = 0xec1c;
+                  ^^^^^^^^^^^^^^^^^^^^^^

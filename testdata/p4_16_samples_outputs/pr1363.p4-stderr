@@ -4,6 +4,9 @@ pr1363.p4(12): [--Wwarn=shadow] warning: 'implementation' shadows 'implementatio
 pr1363.p4(3)
 typedef bit implementation;
             ^^^^^^^^^^^^^^
+pr1363.p4(3): [--Wwarn=unused] warning: 'implementation' is unused
+typedef bit implementation;
+            ^^^^^^^^^^^^^^
 pr1363.p4(9): [--Wwarn=unused] warning: Control c is not used; removing
 control c() {
         ^

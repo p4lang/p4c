@@ -1,3 +1,6 @@
+annotations.p4(17): [--Wwarn=unused] warning: 'b' is unused
+@annotest const bit b = 1;
+                    ^
 annotations.p4(30): [--Wwarn=unused] warning: Control c is not used; removing
 control c() {
         ^

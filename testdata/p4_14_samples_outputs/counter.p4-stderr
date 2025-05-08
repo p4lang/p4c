@@ -1,0 +1,6 @@
+counter.p4(70): [--Wwarn=unused] warning: '.m_action' is unused
+action m_action(idx) {
+^
+counter.p4(56): [--Wwarn=unused] warning: '._nop' is unused
+action _nop() {
+^

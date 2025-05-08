@@ -4,3 +4,6 @@ issue2544_shadowing2.p4(28): [--Wwarn=shadow] warning: 'foo' shadows 'foo'
 issue2544_shadowing2.p4(26)
     bit<8> foo = 4;
     ^^^^^^^^^^^^^^
+issue2544_shadowing2.p4(24): [--Wwarn=unused] warning: 'shadowing' is unused
+void shadowing() {
+     ^^^^^^^^^

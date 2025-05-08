@@ -1,0 +1,3 @@
+internet_checksum1-bmv2.p4(155): [--Wwarn=unused] warning: 'a' is unused
+    bit<16> a;
+    ^^^^^^^^^

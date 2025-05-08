@@ -1,0 +1,45 @@
+up4.p4(5): [--Wwarn=unused] warning: 'IP_VERSION_4' is unused
+const bit<4> IP_VERSION_4 = 4;
+             ^^^^^^^^^^^^
+up4.p4(6): [--Wwarn=unused] warning: 'DEFAULT_IPV4_TTL' is unused
+const bit<8> DEFAULT_IPV4_TTL = 64;
+             ^^^^^^^^^^^^^^^^
+up4.p4(12): [--Wwarn=unused] warning: 'UDP_PORT_GTPU' is unused
+const bit<16> UDP_PORT_GTPU = 2152;
+              ^^^^^^^^^^^^^
+up4.p4(13): [--Wwarn=unused] warning: 'GTP_V1' is unused
+const bit<3> GTP_V1 = 0x1;
+             ^^^^^^
+up4.p4(14): [--Wwarn=unused] warning: 'GTP_PROTOCOL_TYPE_GTP' is unused
+const bit<1> GTP_PROTOCOL_TYPE_GTP = 0x1;
+             ^^^^^^^^^^^^^^^^^^^^^
+up4.p4(15): [--Wwarn=unused] warning: 'GTP_MESSAGE_TYPE_UPDU' is unused
+const bit<8> GTP_MESSAGE_TYPE_UPDU = 0xff;
+             ^^^^^^^^^^^^^^^^^^^^^
+up4.p4(16): [--Wwarn=unused] warning: 'GTPU_NEXT_EXT_NONE' is unused
+const bit<8> GTPU_NEXT_EXT_NONE = 0x0;
+             ^^^^^^^^^^^^^^^^^^
+up4.p4(17): [--Wwarn=unused] warning: 'GTPU_NEXT_EXT_PSC' is unused
+const bit<8> GTPU_NEXT_EXT_PSC = 0x85;
+             ^^^^^^^^^^^^^^^^^
+up4.p4(18): [--Wwarn=unused] warning: 'GTPU_EXT_PSC_TYPE_DL' is unused
+const bit<4> GTPU_EXT_PSC_TYPE_DL = 4w0;
+             ^^^^^^^^^^^^^^^^^^^^
+up4.p4(19): [--Wwarn=unused] warning: 'GTPU_EXT_PSC_TYPE_UL' is unused
+const bit<4> GTPU_EXT_PSC_TYPE_UL = 4w1;
+             ^^^^^^^^^^^^^^^^^^^^
+up4.p4(20): [--Wwarn=unused] warning: 'GTPU_EXT_PSC_LEN' is unused
+const bit<8> GTPU_EXT_PSC_LEN = 8w1;
+             ^^^^^^^^^^^^^^^^
+up4.p4(30): [--Wwarn=unused] warning: 'DEFAULT_QFI' is unused
+const qfi_t DEFAULT_QFI = 0;
+            ^^^^^^^^^^^
+up4.p4(31): [--Wwarn=unused] warning: 'APP_ID_UNKNOWN' is unused
+const bit<8> APP_ID_UNKNOWN = 0;
+             ^^^^^^^^^^^^^^
+up4.p4(32): [--Wwarn=unused] warning: 'DEFAULT_SESSION_METER_IDX' is unused
+const session_meter_idx_t DEFAULT_SESSION_METER_IDX = 0;
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+up4.p4(33): [--Wwarn=unused] warning: 'DEFAULT_APP_METER_IDX' is unused
+const app_meter_idx_t DEFAULT_APP_METER_IDX = 0;
+                      ^^^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,3 @@
+ipv6-actions_ubpf.p4(123): [--Wwarn=unused] warning: 'set_traffic_class' is unused
+    action set_traffic_class(bit<8> trafficClass) {
+           ^^^^^^^^^^^^^^^^^

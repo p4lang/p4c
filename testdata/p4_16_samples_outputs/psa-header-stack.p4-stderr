@@ -1,0 +1,3 @@
+psa-header-stack.p4(81): [--Wwarn=unused] warning: 'forward' is unused
+    action forward() {
+           ^^^^^^^

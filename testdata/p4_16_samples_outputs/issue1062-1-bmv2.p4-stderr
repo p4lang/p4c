@@ -1,0 +1,3 @@
+issue1062-1-bmv2.p4(49): [--Wwarn=unused] warning: 'error_idx' is unused
+    bit<8> error_idx;
+    ^^^^^^^^^^^^^^^^

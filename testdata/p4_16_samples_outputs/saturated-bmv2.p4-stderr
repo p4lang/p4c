@@ -1,0 +1,6 @@
+saturated-bmv2.p4(76): [--Wwarn=unused] warning: 'ru' is unused
+    USat_t ru;
+    ^^^^^^^^^
+saturated-bmv2.p4(77): [--Wwarn=unused] warning: 'r' is unused
+    Sat_t r;
+    ^^^^^^^

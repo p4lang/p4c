@@ -1,3 +1,15 @@
+pna-dpdk-direct-meter-err-1.p4(32): [--Wwarn=unused] warning: 'ByteCounter_t' is unused
+typedef bit<48> ByteCounter_t;
+                ^^^^^^^^^^^^^
+pna-dpdk-direct-meter-err-1.p4(33): [--Wwarn=unused] warning: 'PacketCounter_t' is unused
+typedef bit<32> PacketCounter_t;
+                ^^^^^^^^^^^^^^^
+pna-dpdk-direct-meter-err-1.p4(34): [--Wwarn=unused] warning: 'PacketByteCounter_t' is unused
+typedef bit<80> PacketByteCounter_t;
+                ^^^^^^^^^^^^^^^^^^^
+pna-dpdk-direct-meter-err-1.p4(36): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 512;
+              ^^^^^^^^^
 [--Werror=unexpected] error: dpdk_execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action
 [--Werror=unexpected] error: dpdk_execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action
 pna-dpdk-direct-meter-err-1.p4(116): [--Werror=target-error] error: Direct counters and direct meters are unsupported for wildcard match table ipv4_da_lpm

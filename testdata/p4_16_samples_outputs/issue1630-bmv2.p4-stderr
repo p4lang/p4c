@@ -1,0 +1,3 @@
+issue1630-bmv2.p4(6): [--Wwarn=unused] warning: 'TYPE_IPV4' is unused
+const bit<16> TYPE_IPV4 = 0x800;
+              ^^^^^^^^^

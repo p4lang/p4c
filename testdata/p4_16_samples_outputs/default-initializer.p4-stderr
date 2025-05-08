@@ -1,0 +1,78 @@
+default-initializer.p4(3): [--Wwarn=unused] warning: 'cst' is unused
+const int cst = ...;
+          ^^^
+default-initializer.p4(68): [--Wwarn=unused] warning: 'b' is unused
+        bool b = ...;
+        ^^^^^^^^^^^^
+default-initializer.p4(69): [--Wwarn=unused] warning: 'e' is unused
+        error e = ...;
+        ^^^^^^^^^^^^^
+default-initializer.p4(70): [--Wwarn=unused] warning: 'e1' is unused
+        E e1 = ...;
+        ^^^^^^^^^^
+default-initializer.p4(71): [--Wwarn=unused] warning: 'z' is unused
+        Z z = ...;
+        ^^^^^^^^^
+default-initializer.p4(72): [--Wwarn=unused] warning: 's0' is unused
+        S s0 = ...;
+        ^^^^^^^^^^
+default-initializer.p4(73): [--Wwarn=unused] warning: 's1' is unused
+        S s1 = { ... };
+        ^^^^^^^^^^^^^^
+default-initializer.p4(74): [--Wwarn=unused] warning: 's2' is unused
+        S s2 = { 2, ... };
+        ^^^^^^^^^^^^^^^^^
+default-initializer.p4(75): [--Wwarn=unused] warning: 's3' is unused
+        S s3 = { b = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(76): [--Wwarn=unused] warning: 's4' is unused
+        S s4 = { f = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(77): [--Wwarn=unused] warning: 's5' is unused
+        S s5 = { b = 2, f = 3, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(78): [--Wwarn=unused] warning: 's6' is unused
+        S s6 = (S){ ... };
+        ^^^^^^^^^^^^^^^^^
+default-initializer.p4(79): [--Wwarn=unused] warning: 's7' is unused
+        S s7 = (S){ 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(80): [--Wwarn=unused] warning: 's8' is unused
+        S s8 = (S){ b = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(81): [--Wwarn=unused] warning: 's9' is unused
+        S s9 = (S){ f = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(82): [--Wwarn=unused] warning: 's10' is unused
+        S s10 = (S){ b = 2, f = 3, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(84): [--Wwarn=unused] warning: 'h1' is unused
+        H h1 = { ... };
+        ^^^^^^^^^^^^^^
+default-initializer.p4(85): [--Wwarn=unused] warning: 'h2' is unused
+        H h2 = { 2, ... };
+        ^^^^^^^^^^^^^^^^^
+default-initializer.p4(86): [--Wwarn=unused] warning: 'h3' is unused
+        H h3 = { b = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(87): [--Wwarn=unused] warning: 'h4' is unused
+        H h4 = { f = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(88): [--Wwarn=unused] warning: 'h5' is unused
+        H h5 = { b = 2, f = 3, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(89): [--Wwarn=unused] warning: 'h6' is unused
+        H h6 = (H){ ... };
+        ^^^^^^^^^^^^^^^^^
+default-initializer.p4(90): [--Wwarn=unused] warning: 'h7' is unused
+        H h7 = (H){ 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(91): [--Wwarn=unused] warning: 'h8' is unused
+        H h8 = (H){ b = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(92): [--Wwarn=unused] warning: 'h9' is unused
+        H h9 = (H){ f = 2, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer.p4(93): [--Wwarn=unused] warning: 'h10' is unused
+        H h10 = (H){ b = 2, f = 3, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
