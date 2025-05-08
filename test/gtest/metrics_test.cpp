@@ -17,7 +17,8 @@ testdata/p4_16_samples_outputs.
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
-#include "helpers.h"
+#include "test/gtest/env.h"
+#include "test/gtest/helpers.h"
 
 using namespace P4::literals;
 
@@ -38,9 +39,9 @@ class MetricPassesTest : public P4CTest {
         auto &opts = ctx->options();
         opts.langVersion = CompilerOptions::FrontendVersion::P4_16;
         opts.file = inputFile;
-        fs::path relPath = "../../p4include";
-        fs::path absPath = fs::absolute(relPath);
-        setenv("P4C_16_INCLUDE_PATH", absPath.c_str(), 1);
+        const char *originalEnv = getenv("P4C_16_INCLUDE_PATH");
+        std::string includeDir = std::string(buildPath) + "p4include";
+        setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
         if (allMetrics) {
             opts.selectedMetrics = {"loc"_cs,
                                     "cyclomatic"_cs,
@@ -69,6 +70,11 @@ class MetricPassesTest : public P4CTest {
         txtMetricsOutputPath = jsonMetricsOutputPath = metricsOutputPath;
         txtMetricsOutputPath += "_metrics.txt";
         jsonMetricsOutputPath += "_metrics.json";
+
+        if (!originalEnv)
+            unsetenv("P4C_16_INCLUDE_PATH");
+        else
+            setenv("P4C_16_INCLUDE_PATH", originalEnv, 1);
     }
 
     std::string readFileContent(const fs::path &path) {
