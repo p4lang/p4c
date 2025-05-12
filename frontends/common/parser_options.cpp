@@ -477,8 +477,7 @@ std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() con
         fileName = makeFileName(dumpFolder, fileName, "");
         std::ofstream filestream{fileName};
         if (filestream) {
-            if (Log::verbose())
-                std::cerr << "Writing preprocessed P4 to " << fileName << std::endl;
+            if (Log::verbose()) std::cerr << "Writing preprocessed P4 to " << fileName << std::endl;
             filestream << stream.str();
         }
         filestream.close();
