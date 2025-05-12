@@ -462,40 +462,33 @@ std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() con
     }
 
     if (savePreprocessed) {
-        if (file == "-") {
-            ::P4::error(ErrorType::ERR_INVALID,
-                        "--save-temps option is not supported when the "
-                        "input P4 comes from stdin.");
-            return std::nullopt;
-        }
-
-        // Run the cpp command a second time to produce a second input stream to write to
-        // filename.p4pp.
-        FILE *inSave = popen(cmd.c_str(), "r");
-        if (inSave == nullptr) {
-            ::P4::error(ErrorType::ERR_IO, "Error invoking preprocessor");
-            perror("");
-            return std::nullopt;
-        }
         std::stringstream stream;
         char *line = nullptr;
         size_t len = 0;
         ssize_t read = 0;
 
-        while ((read = getline(&line, &len, inSave)) != -1) {
+        while ((read = getline(&line, &len, in)) != -1) {
             stream << line;
         }
-        closeFile(inSave);
+        closeFile(in);
 
         std::filesystem::path fileName(file.stem());
         fileName += ".p4pp";
         fileName = makeFileName(dumpFolder, fileName, "");
         std::ofstream filestream{fileName};
         if (filestream) {
-            if (Log::verbose()) std::cerr << "Writing preprocessed P4 to " << fileName << std::endl;
+            if (Log::verbose())
+                std::cerr << "Writing preprocessed P4 to " << fileName << std::endl;
             filestream << stream.str();
         }
         filestream.close();
+
+        in = fopen(fileName.c_str(), "r");
+        if (in == nullptr) {
+            ::P4::error(ErrorType::ERR_IO, "Error invoking preprocessor");
+            perror("");
+            return std::nullopt;
+        }
     }
     return ParserOptions::PreprocessorResult(in, &closeFile);
 }
