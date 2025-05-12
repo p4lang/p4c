@@ -429,15 +429,13 @@ static std::filesystem::path makeFileName(const std::filesystem::path &folder,
 std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() const {
     FILE *in = nullptr;
 
-    std::string cmd;
-
     if (file == "-") {
         in = stdin;
     } else {
 #ifdef __clang__
-        cmd = "cc -E -x c -Wno-comment";
+        std::string cmd = "cc -E -x c -Wno-comment";
 #else
-        cmd = "cpp";
+        std::string cmd = "cpp";
 #endif
 
         cmd += " -C -undef -nostdinc -x assembler-with-cpp " + preprocessor_options.string() +
