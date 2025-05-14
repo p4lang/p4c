@@ -312,7 +312,6 @@ var hierarchy =
     [ "boost::equality_comparable", null, [
       [ "P4::Test::Match::Result", "struct_p4_1_1_test_1_1_match_1_1_result.html", null ]
     ] ],
-    [ "bpf_elf_map", "structbpf__elf__map.html", null ],
     [ "bpf_map", "structbpf__map.html", null ],
     [ "bpf_table", "structbpf__table.html", null ],
     [ "BreakSliceListCtx", "struct_break_slice_list_ctx.html", null ],

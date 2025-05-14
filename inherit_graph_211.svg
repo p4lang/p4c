@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_dependency_graph.html#struct_dependency_graph_1_1_stage_info" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="namespace_deposit_field.html#struct_deposit_field_1_1_rotate_constant" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="159,-19 0,-19 0,0 159,0 159,-19"/>
-<text text-anchor="middle" x="79.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">DependencyGraph::StageInfo</text>
+<text text-anchor="middle" x="79.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">DepositField::RotateConstant</text>
 </a>
 </g>
 </g>

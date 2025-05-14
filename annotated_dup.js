@@ -2364,7 +2364,6 @@ var annotated_dup =
     [ "BFN_Options", "class_b_f_n___options.html", "class_b_f_n___options" ],
     [ "BFNContext", "class_b_f_n_context.html", "class_b_f_n_context" ],
     [ "BFNOptionPragmaParser", "class_b_f_n_option_pragma_parser.html", null ],
-    [ "bpf_elf_map", "structbpf__elf__map.html", null ],
     [ "bpf_map", "structbpf__map.html", null ],
     [ "bpf_table", "structbpf__table.html", null ],
     [ "BreakSliceListCtx", "struct_break_slice_list_ctx.html", null ],
