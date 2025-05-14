@@ -8,7 +8,7 @@ ptf @ git+https://github.com/p4lang/ptf@d016cdfe99f2d609cc9c7fd7f8c414b56d5b3c5c
 # This is the same commit hash as defined in the top-level CMakelists.txt
 p4runtime @ git+https://github.com/p4lang/p4runtime@ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5#subdirectory=py
 scapy==2.5.0
-clang-format==18.1.0
+clang-format==18.1.8
 isort==5.13.2; python_version > '3.6'
 black==24.3.0; python_version > '3.6'
 protobuf==3.20.2; python_version > '3.6'
