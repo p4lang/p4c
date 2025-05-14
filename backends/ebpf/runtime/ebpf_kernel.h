@@ -21,11 +21,12 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
 #define BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
 
+#include <stddef.h>  // size_t
+
 #include "ebpf_common.h"
 
-#include <stddef.h> // size_t
+#include "install/libbpf/include/bpf/bpf_endian.h"  // definitions for bpf_ntohs etc...
 
-#include <bpf/bpf_endian.h> // definitions for bpf_ntohs etc...
 #undef htonl
 #undef htons
 #define htons(d) bpf_htons(d)
@@ -48,7 +49,7 @@ limitations under the License.
 
 #ifdef CONTROL_PLANE // BEGIN EBPF USER SPACE DEFINITIONS
 
-#include <bpf/bpf.h> // bpf_obj_get/pin, bpf_map_update_elem
+#include "install/libbpf/include/bpf/bpf.h"  // bpf_obj_get/pin, bpf_map_update_elem
 
 #define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
     bpf_map_update_elem(index, key, value, flags)
@@ -57,14 +58,37 @@ limitations under the License.
 
 #else // BEGIN EBPF KERNEL DEFINITIONS
 
-#include <linux/pkt_cls.h>  // TC_ACT_OK, TC_ACT_SHOT
-#include "linux/bpf.h"  // types, and general bpf definitions
+// These files are provided by the system, not libbpf.
+#include "contrib/bpftool/include/uapi/linux/bpf.h"      // BPF_ANY,
+#include "contrib/bpftool/include/uapi/linux/pkt_cls.h"  // TC_ACT_OK, TC_ACT_SHOT
 // This file contains the definitions of all the kernel bpf essentials
-#include <bpf/bpf_helpers.h>
+#include "install/libbpf/include/bpf/bpf_helpers.h"
 
+// TODO: Use this include instead of the define directive once Ubuntu 18.04 is deprecated.
+// #include "install/libbpf/include/bpf/btf.h"
+#define MAPS_ELF_SEC ".maps"
+
+
+/// Simple descriptor which replaces the kernel sk_buff structure.
+#define SK_BUFF struct __sk_buff
+
+/// From iproute2, annotate table with BTF which allows to read types at runtime.
+/// TODO: Do we need this with Ubuntu 24.04?
+#define BPF_ANNOTATE_KV_PAIR(name, type_key, type_val)  \
+    struct ____btf_map_##name {                         \
+        type_key key;                                   \
+        type_val value;                                 \
+    };                                                  \
+    struct ____btf_map_##name                           \
+        __attribute__ ((section(".maps." #name), used)) \
+        ____btf_map_##name = {};
+
+#define REGISTER_START()
+/// TODO: Do we need this with Ubuntu 24.04?
+#if !defined(BTF) && (defined(__clang__) && (__clang_major__ < 12))
 /// A helper structure used by an eBPF C program
 /// to describe map attributes for the elf_bpf loader
-/// FIXME: We only need this because we are loading with iproute2
+/// FIXME: We only need this because we are loading with iproute2. Remove with Ubuntu 24.04
 struct bpf_elf_map {
     __u32 type;
     __u32 size_key;
@@ -76,22 +100,6 @@ struct bpf_elf_map {
     __u32 inner_id;
     __u32 inner_idx;
 };
-
-/// Simple descriptor which replaces the kernel sk_buff structure.
-#define SK_BUFF struct __sk_buff
-
-/// From iproute2, annotate table with BTF which allows to read types at runtime.
-#define BPF_ANNOTATE_KV_PAIR(name, type_key, type_val)  \
-    struct ____btf_map_##name {                         \
-        type_key key;                                   \
-        type_val value;                                 \
-    };                                                  \
-    struct ____btf_map_##name                           \
-        __attribute__ ((section(".maps." #name), used)) \
-        ____btf_map_##name = {};
-
-#define REGISTER_START()
-#ifndef BTF
 /// Note: pinning exports the table name globally, do not remove.
 #define REGISTER_TABLE(NAME, TYPE, KEY_TYPE, VALUE_TYPE, MAX_ENTRIES) \
 struct bpf_elf_map SEC("maps") NAME = {          \
@@ -140,7 +148,7 @@ struct {                                 \
     VALUE_TYPE *value;                   \
     __uint(max_entries, MAX_ENTRIES);    \
     __uint(pinning, LIBBPF_PIN_BY_NAME); \
-} NAME SEC(".maps");
+} NAME SEC(MAPS_ELF_SEC);
 #define REGISTER_TABLE_FLAGS(NAME, TYPE, KEY_TYPE, VALUE_TYPE, MAX_ENTRIES, FLAGS) \
 struct {                                 \
     __uint(type, TYPE);                  \
@@ -149,14 +157,14 @@ struct {                                 \
     __uint(max_entries, MAX_ENTRIES);    \
     __uint(pinning, LIBBPF_PIN_BY_NAME); \
     __uint(map_flags, FLAGS);            \
-} NAME SEC(".maps");
+} NAME SEC(MAPS_ELF_SEC);
 #define REGISTER_TABLE_INNER(NAME, TYPE, KEY_TYPE, VALUE_TYPE, MAX_ENTRIES, ID, INNER_IDX) \
 struct NAME {                            \
     __uint(type, TYPE);                  \
     KEY_TYPE *key;                       \
     VALUE_TYPE *value;                   \
     __uint(max_entries, MAX_ENTRIES);    \
-} NAME SEC(".maps");
+} NAME SEC(MAPS_ELF_SEC);
 #define REGISTER_TABLE_OUTER(NAME, TYPE, KEY_TYPE, VALUE_TYPE, MAX_ENTRIES, INNER_ID, INNER_NAME) \
 struct {                                 \
     __uint(type, TYPE);                  \
@@ -165,7 +173,7 @@ struct {                                 \
     __uint(max_entries, MAX_ENTRIES);    \
     __uint(pinning, LIBBPF_PIN_BY_NAME); \
     __array(values, struct INNER_NAME);  \
-} NAME SEC(".maps");
+} NAME SEC(MAPS_ELF_SEC);
 #define REGISTER_TABLE_NO_KEY_TYPE(NAME, TYPE, KEY_SIZE, VALUE_TYPE, MAX_ENTRIES) \
 struct {                                 \
     __uint(type, TYPE);                  \
@@ -173,7 +181,7 @@ struct {                                 \
     VALUE_TYPE *value;                   \
     __uint(max_entries, MAX_ENTRIES);    \
     __uint(pinning, LIBBPF_PIN_BY_NAME); \
-} NAME SEC(".maps");
+} NAME SEC(MAPS_ELF_SEC);
 #endif
 #define REGISTER_END()
 
@@ -188,6 +196,6 @@ struct {                                 \
 #define BPF_OBJ_PIN(table, name) bpf_obj_pin(table, name)
 #define BPF_OBJ_GET(name) bpf_obj_get(name)
 
-#endif // END EBPF KERNEL DEFINITIONS
+#endif  // END EBPF KERNEL DEFINITIONS
 
 #endif  // BACKENDS_EBPF_RUNTIME_EBPF_KERNEL_H_
