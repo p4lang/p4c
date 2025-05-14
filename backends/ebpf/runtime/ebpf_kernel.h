@@ -23,6 +23,8 @@ limitations under the License.
 
 #include <stddef.h>  // size_t
 
+#include <sys/types.h>  // ssize_t
+
 #include "ebpf_common.h"
 
 #include "install/libbpf/include/bpf/bpf_endian.h"  // definitions for bpf_ntohs etc...
