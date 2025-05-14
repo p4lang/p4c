@@ -123,9 +123,9 @@ class Options:
         self.replace = False  # Replace previous outputs.
         self.target = "test"  # The name of the target compiler.
         # Actual location of the test framework.
-        self.testdir = str(FILE_DIR)
+        self.testdir = FILE_DIR
         # The location of the eBPF runtime, some targets may overwrite this.
-        self.runtimedir = str(FILE_DIR.joinpath("runtime"))
+        self.runtimedir = FILE_DIR.joinpath("runtime")
         self.extern = ""  # Path to C file with extern definition.
 
 
