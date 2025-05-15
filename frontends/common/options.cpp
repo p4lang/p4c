@@ -174,6 +174,39 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
             return *level == 0;
         },
         "Optimization level");
+    registerOption(
+        "--metrics", "metric1[,metric2]",
+        [this](const char *arg) {
+            static const std::set<cstring> validMetrics = {"loc"_cs,
+                                                           "cyclomatic"_cs,
+                                                           "halstead"_cs,
+                                                           "unused-code"_cs,
+                                                           "nesting-depth"_cs,
+                                                           "header-general"_cs,
+                                                           "header-manipulation"_cs,
+                                                           "header-modification"_cs,
+                                                           "match-action"_cs,
+                                                           "parser"_cs,
+                                                           "inlined"_cs,
+                                                           "extern"_cs};
+            auto copy = strdup(arg);
+            while (cstring metric = cstring(strsep(&copy, ","))) {
+                if (metric == "all") {
+                    CompilerOptions::selectedMetrics = validMetrics;
+                    return true;
+                } else if (validMetrics.find(metric) == validMetrics.end()) {
+                    ::P4::error(ErrorType::ERR_INVALID, "Invalid metric: %s", metric);
+                    return false;
+                } else {
+                    CompilerOptions::selectedMetrics.insert(metric);
+                }
+            }
+            return true;
+        },
+        "Select which code metrics will be collected.\n"
+        "Valid options: all, loc, cyclomatic, halstead, unused-code, duplicit-code,\n"
+        "nesting-depth, header-general, header-manipulation, header-modification,\n"
+        "match-action, parser, inlined, extern.");
 }
 
 bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }

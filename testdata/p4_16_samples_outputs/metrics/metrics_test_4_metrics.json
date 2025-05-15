@@ -1,0 +1,131 @@
+{
+  "lines_of_code" : 222,
+  "cyclomatic_complexity" : {
+    "ParserImpl" : 3,
+    "ingress" : 5,
+    "egress" : 1,
+    "DeparserImpl" : 1,
+    "verifyChecksum" : 1,
+    "computeChecksum" : 1
+  },
+  "halstead" : {
+    "unique_operators" : 28,
+    "unique_operands" : 93,
+    "total_operators" : 297,
+    "total_operands" : 347,
+    "vocabulary" : 121,
+    "length" : 644,
+    "difficulty" : 52.2366,
+    "volume" : 4455.75,
+    "effort" : 232753,
+    "estimated_bugs" : 1.48525
+  },
+  "unused_code" : {
+    "actions" : 0,
+    "functions" : 0,
+    "states" : 2,
+    "variables" : 0,
+    "enums" : 0,
+    "conditionals" : 0,
+    "parameters" : 0,
+    "returns" : 0
+  },
+  "nesting_depth" : {
+    "average" : 1.33333,
+    "global_max" : 2,
+    "individual_blocks" : {
+      "ParserImpl" : 2,
+      "ingress" : 2,
+      "egress" : 1,
+      "DeparserImpl" : 1,
+      "verifyChecksum" : 1,
+      "computeChecksum" : 1
+    }
+  },
+  "header_metrics" : {
+    "total_headers" : 5,
+    "avg_fields_per_header" : 5.6,
+    "avg_field_size" : 13.1429,
+    "per_header_metrics" : {
+      "ethernet_t" : {
+        "fields" : 3,
+        "field_size_sum" : 112
+      },
+      "custom_t" : {
+        "fields" : 16,
+        "field_size_sum" : 136
+      },
+      "ipv4_new_t" : {
+        "fields" : 5,
+        "field_size_sum" : 96
+      },
+      "stack_elem_t" : {
+        "fields" : 2,
+        "field_size_sum" : 16
+      },
+      "bar_t" : {
+        "fields" : 2,
+        "field_size_sum" : 8
+      }
+    }
+  },
+  "header_manipulation" : {
+    "total_operations" : 11,
+    "total_size" : 872,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 2,
+        "size" : 224
+      },
+      "ethernet-custom" : {
+        "operations" : 6,
+        "size" : 640
+      }
+    }
+  },
+  "header_modification" : {
+    "total_operations" : 23,
+    "total_size" : 424,
+    "per_packet" : {
+      "ethernet-custom" : {
+        "operations" : 17,
+        "size" : 264
+      }
+    }
+  },
+  "match_action_tables" : {
+    "num_tables" : 1,
+    "total_keys" : 10,
+    "total_key_size" : 225,
+    "avg_key_size" : 22.5,
+    "avg_keys_per_table" : 10,
+    "max_keys_per_table" : 10,
+    "total_actions" : 3,
+    "avg_actions_per_table" : 3,
+    "max_actions_per_table" : 3,
+    "per_table_metrics" : {
+      "custom_table" : {
+        "actions" : 3,
+        "keys" : 10,
+        "key_size_sum" : 225
+      }
+    }
+  },
+  "parser" : {
+    "total_states" : 5,
+    "state_complexities" : {
+      "start" : 3,
+      "parse_custom" : 1,
+      "parse_done" : 1,
+      "accept" : 1,
+      "reject" : 1
+    }
+  },
+  "extern" : {
+    "functions" : 24,
+    "function_calls" : 15,
+    "structures" : 10,
+    "structure_uses" : 13
+  },
+  "inlined_actions" : 0
+}
