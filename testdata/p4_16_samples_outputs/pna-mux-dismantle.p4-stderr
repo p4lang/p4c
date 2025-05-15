@@ -1,0 +1,12 @@
+pna-mux-dismantle.p4(62): [--Wwarn=unused] warning: 'ByteCounter_t' is unused
+typedef bit<48> ByteCounter_t;
+                ^^^^^^^^^^^^^
+pna-mux-dismantle.p4(63): [--Wwarn=unused] warning: 'PacketCounter_t' is unused
+typedef bit<32> PacketCounter_t;
+                ^^^^^^^^^^^^^^^
+pna-mux-dismantle.p4(64): [--Wwarn=unused] warning: 'PacketByteCounter_t' is unused
+typedef bit<80> PacketByteCounter_t;
+                ^^^^^^^^^^^^^^^^^^^
+pna-mux-dismantle.p4(66): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 4;
+              ^^^^^^^^^

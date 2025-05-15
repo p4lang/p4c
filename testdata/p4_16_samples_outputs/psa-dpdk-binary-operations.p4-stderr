@@ -1,0 +1,6 @@
+psa-dpdk-binary-operations.p4(61): [--Wwarn=unused] warning: 'Op1' is unused
+    bit<8> Op1 = 0x2;
+    ^^^^^^^^^^^^^^^^
+psa-dpdk-binary-operations.p4(62): [--Wwarn=unused] warning: 'Op2' is unused
+    bit<16> Op2 = 0x23;
+    ^^^^^^^^^^^^^^^^^^

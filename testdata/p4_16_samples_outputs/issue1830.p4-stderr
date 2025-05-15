@@ -1,1 +1,10 @@
+issue1830.p4(1): [--Wwarn=unused] warning: 'foo' is unused
+void foo<T>(in T x) {}
+     ^^^
+issue1830.p4(3): [--Wwarn=unused] warning: 'bar' is unused
+void bar() {
+     ^^^
+issue1830.p4(7): [--Wwarn=unused] warning: 'main' is unused
+void main() {
+     ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

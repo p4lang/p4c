@@ -1,0 +1,3 @@
+pna-dpdk-direct-meter-learner.p4(47): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 4;
+              ^^^^^^^^^

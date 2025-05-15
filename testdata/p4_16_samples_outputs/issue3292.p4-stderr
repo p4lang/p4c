@@ -1,1 +1,4 @@
+issue3292.p4(5): [--Wwarn=unused] warning: 'func' is unused
+void func<t>(t a)
+     ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

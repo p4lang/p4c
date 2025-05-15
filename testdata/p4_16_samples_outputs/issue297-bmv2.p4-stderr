@@ -1,0 +1,3 @@
+issue297-bmv2.p4(29): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^

@@ -1,1 +1,16 @@
+issue3635.p4(7): [--Wwarn=unused] warning: 'f' is unused
+void f()
+     ^
+issue3635.p4(13): [--Wwarn=unused] warning: 'good' is unused
+const bit<8> good = ((bit<4>)e.a) ++ ((bit<4>)e.b);
+             ^^^^
+issue3635.p4(14): [--Wwarn=unused] warning: 'bad' is unused
+const bit<4> bad = e.a + e.b;
+             ^^^
+issue3635.p4(15): [--Wwarn=unused] warning: 'bad1' is unused
+const bit<8> bad1 = e.a ++ e.b;
+             ^^^^
+issue3635.p4(16): [--Wwarn=unused] warning: 'bad2' is unused
+const bit<4> bad2 = e.a & e.b;
+             ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

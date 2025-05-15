@@ -1,0 +1,6 @@
+xor_test.p4(5): [--Wwarn=unused] warning: 'TYPE_IPV4' is unused
+const bit<16> TYPE_IPV4 = 0x800;
+              ^^^^^^^^^
+xor_test.p4(98): [--Wwarn=unused] warning: 'drop' is unused
+    action drop() {
+           ^^^^

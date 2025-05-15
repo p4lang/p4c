@@ -1,0 +1,3 @@
+unused.p4(44): [--Wwarn=unused] warning: 'parser proto' is unused
+parser proto(packet_in p, out Header h);
+       ^^^^^

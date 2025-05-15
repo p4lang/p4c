@@ -1,9 +1,33 @@
+issue982.p4(46): [--Wwarn=unused] warning: 'PORT_CPU' is unused
+const PortId_t PORT_CPU = 255;
+               ^^^^^^^^
+issue982.p4(120): [--Wwarn=unused] warning: 'send_to_port' is unused
+action send_to_port(inout psa_ingress_output_metadata_t meta, in PortId_t egress_port) {
+       ^^^^^^^^^^^^
+issue982.p4(125): [--Wwarn=unused] warning: 'multicast' is unused
+action multicast(inout psa_ingress_output_metadata_t meta, in MulticastGroup_t multicast_group) {
+       ^^^^^^^^^
+issue982.p4(129): [--Wwarn=unused] warning: 'ingress_drop' is unused
+action ingress_drop(inout psa_ingress_output_metadata_t meta) {
+       ^^^^^^^^^^^^
+issue982.p4(132): [--Wwarn=unused] warning: 'ingress_truncate' is unused
+action ingress_truncate(inout psa_ingress_output_metadata_t meta, in PacketLength_t payload_bytes...
+       ^^^^^^^^^^^^^^^^
+issue982.p4(136): [--Wwarn=unused] warning: 'egress_drop' is unused
+action egress_drop(inout psa_egress_output_metadata_t meta) {
+       ^^^^^^^^^^^
+issue982.p4(139): [--Wwarn=unused] warning: 'egress_truncate' is unused
+action egress_truncate(inout psa_ingress_output_metadata_t meta, in PacketLength_t payload_bytes) {
+       ^^^^^^^^^^^^^^^
 issue982.p4(198): [--Wwarn=unused] warning: 'W' is unused
 extern Counter<W, S> {
                ^
 issue982.p4(203): [--Wwarn=unused] warning: 'W' is unused
 extern DirectCounter<W> {
                      ^
+issue982.p4(264): [--Wwarn=unused] warning: 'control Deparser' is unused
+control Deparser<H, M>(packet_out buffer, inout H hdr, in M user_meta);
+        ^^^^^^^^
 issue982.p4(343): [--Wwarn=uninitialized_out_param] warning: out parameter 'ostd' may be uninitialized when 'EgressParserImpl' terminates
 ...a user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
                                                                                              ^^^^

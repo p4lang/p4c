@@ -1,1 +1,7 @@
+spec-ex14.p4(17): [--Wwarn=unused] warning: 'COUNTER' is unused
+const bit<32> COUNTER = 32w0x0;
+              ^^^^^^^
+spec-ex14.p4(22): [--Wwarn=unused] warning: 'version' is unused
+const Version version = { 32w0, 32w0 };
+              ^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

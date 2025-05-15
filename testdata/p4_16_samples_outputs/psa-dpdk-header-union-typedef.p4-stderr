@@ -1,3 +1,9 @@
+psa-dpdk-header-union-typedef.p4(87): [--Wwarn=unused] warning: 'Op1' is unused
+    bit<8> Op1 = 0x2;
+    ^^^^^^^^^^^^^^^^
+psa-dpdk-header-union-typedef.p4(88): [--Wwarn=unused] warning: 'Op2' is unused
+    bit<16> Op2 = 0x23;
+    ^^^^^^^^^^^^^^^^^^
 psa-dpdk-header-union-typedef.p4(118): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
     out clone_t a,
                 ^

@@ -1,0 +1,3 @@
+newtype.p4(30): [--Wwarn=unused] warning: 'n5' is unused
+        NN32 n5 = (NN32)(N32)5;
+        ^^^^^^^^^^^^^^^^^^^^^^

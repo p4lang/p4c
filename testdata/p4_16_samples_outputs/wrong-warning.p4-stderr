@@ -1,3 +1,15 @@
+wrong-warning.p4(69): [--Wwarn=unused] warning: 'h1' is unused
+    h1_t h1;
+    ^^^^^^^
+wrong-warning.p4(70): [--Wwarn=unused] warning: 'h1b' is unused
+    h1_t h1b;
+    ^^^^^^^^
+wrong-warning.p4(71): [--Wwarn=unused] warning: 'h2' is unused
+    h2_t h2;
+    ^^^^^^^
+wrong-warning.p4(77): [--Wwarn=unused] warning: 'a2' is unused
+    h2_t[2] a2;
+    ^^^^^^^^^^
 wrong-warning.p4(104): [--Wwarn=uninitialized_use] warning: a1b may not be completely initialized
         a1 = a1b;
              ^^^

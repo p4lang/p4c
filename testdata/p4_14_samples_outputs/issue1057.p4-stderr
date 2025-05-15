@@ -1,0 +1,3 @@
+issue1057.p4(36): [--Wwarn=unused] warning: '.ethernet' is unused
+action ethernet() {
+^
