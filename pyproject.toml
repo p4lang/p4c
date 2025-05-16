@@ -1,11 +1,47 @@
 [project]
 name = "p4c"
+version = "1.2.5.1"
+description = ""
+authors = [{ name = "The P4 Language Consortium", email = "info@p4.org" }]
 requires-python = ">=3.8"
+readme = "README.md"
+license = "Apache"
+dependencies = [
+    "pyroute2==0.7.3",
+    "ply==3.11",
+    "scapy==2.5.0",
+    "googleapis-common-protos==1.53.0",
+    "grpcio==1.67.0 ; python_version > '3.6'",
+    "grpcio==1.48.2 ; python_version <= '3.6'",
+    "thrift==0.21.0",
+    "protobuf==3.20.2 ; python_version > '3.6'",
+    "protobuf==3.19.2 ; python_version <= '3.6'",
+    "clang-format==18.1.0",
+    "black==24.3.0 ; python_version > '3.6'",
+    "black==22.8.0 ; python_version <= '3.6'",
+    "isort==5.13.2 ; python_version > '3.6'",
+    "isort==5.10.1 ; python_version <= '3.6'",
+    "p4runtime",
+    "ptf",
+]
 
 [flake8]
 max-line-length = 100
 max-complexity = 10
 extend-ignore = "E203"
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+# FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Python.
+# This is the same commit hash as defined in the top-level CMakelists.txt
+p4runtime = { git = "https://github.com/p4lang/p4runtime.git", rev = "ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5", subdirectory = "py" }
+ptf = { git = "https://github.com/p4lang/ptf.git", rev = "d016cdfe99f2d609cc9c7fd7f8c414b56d5b3c5c"}
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.isort]
 profile = 'black'
@@ -44,6 +80,7 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
 [tool.pylint.main]
 init-hook="from pylint.config import find_default_config_files; import os, sys, pathlib; sys.path.append(next(find_default_config_files()).parent);sys.path.append(f'{pathlib.Path().home()}.local/lib/python{sys.version_info[0]}.{sys.version_info[1]}/site-packages/');"
+
 [tool.pylint.messages_control]
 max-line-length = 100
 disable = [
