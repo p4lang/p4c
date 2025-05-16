@@ -9,6 +9,7 @@
 #include "ir/ir.h"
 #include "ir/solver.h"
 #include "lib/cstring.h"
+#include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
@@ -121,6 +122,14 @@ MidEnd Bmv2V1ModelTestgenTarget::mkMidEnd(const CompilerOptions &options) const 
 
 const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::produceProgramInfoImpl(
     const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const {
+    const auto *mainType = mainDecl->type->to<IR::Type_Specialized>();
+    if (mainType == nullptr || mainType->baseType->path->name != "V1Switch") {
+        error(ErrorType::ERR_INVALID,
+              "%1%: This P4Testgen back end only supports a 'V1Switch' main package. The current "
+              "type is %2%",
+              mainDecl, mainDecl->type);
+        return nullptr;
+    }
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
@@ -128,8 +137,11 @@ const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::produceProgramInfoImpl(
         argumentsToTypeDeclarations(&compilerResult.getProgram(), mainDecl->arguments);
 
     // We should have six arguments.
-    BUG_CHECK(blocks.size() == 6, "%1%: The BMV2 architecture requires 6 pipes. Received %2%.",
+    if (blocks.size() != 6) {
+        error(ErrorType::ERR_INVALID, "%1%: The BMV2 architecture requires 6 pipes. Received %2%.",
               mainDecl, blocks.size());
+        return nullptr;
+    }
 
     ordered_map<cstring, const IR::Type_Declaration *> programmableBlocks;
     std::map<int, int> declIdToGress;

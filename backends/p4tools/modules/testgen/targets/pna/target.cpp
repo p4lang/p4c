@@ -37,15 +37,26 @@ void PnaDpdkTestgenTarget::make() {
 
 const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::produceProgramInfoImpl(
     const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const {
+    const auto *mainType = mainDecl->type->to<IR::Type_Specialized>();
+    if (mainType == nullptr || mainType->baseType->path->name != "PNA_NIC") {
+        error(ErrorType::ERR_INVALID,
+              "%1%: This P4Testgen back end only supports a 'PNA_NIC' main package. The current "
+              "type is %2%",
+              mainDecl, mainDecl->type);
+        return nullptr;
+    }
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
     const auto blocks =
         argumentsToTypeDeclarations(&compilerResult.getProgram(), mainDecl->arguments);
 
-    // We should have six arguments.
-    BUG_CHECK(blocks.size() == 4, "%1%: The PNA architecture requires 4 pipes. Received %2%.",
+    // We should have four arguments.
+    if (blocks.size() != 4) {
+        error(ErrorType::ERR_INVALID, "%1%: The PNA architecture requires 4 pipes. Received %2%.",
               mainDecl, blocks.size());
+        return nullptr;
+    }
 
     ordered_map<cstring, const IR::Type_Declaration *> programmableBlocks;
     // Add to parserDeclIdToGress, mauDeclIdToGress, and deparserDeclIdToGress.
