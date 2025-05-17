@@ -23,11 +23,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.tmp_hdr") ethernet_t tmp_hdr_0;
     apply {
-        tmp_hdr_0.setValid();
-        tmp_hdr_0 = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
-        h.eth_hdr.eth_type = tmp_hdr_0.eth_type |-| tmp_hdr_0.eth_type;
+        h.eth_hdr.eth_type = 16w0;
     }
 }
 
