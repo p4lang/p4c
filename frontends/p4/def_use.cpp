@@ -315,7 +315,7 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
         auto loc = d.first;
         auto defs = d.second;
         auto current = ::P4::get(definitions, loc);
-        if (current != nullptr) {
+        if (current != nullptr && current != defs) {
             auto merged = current->merge(defs);
             result->definitions.emplace(loc, merged);
         } else {
