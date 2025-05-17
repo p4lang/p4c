@@ -338,7 +338,7 @@ action push_vxlan_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u0_ethernet.src_addr = underlay_smac;
     hdr.u0_ethernet.ether_type = 16w0x800;
     hdr.u0_ipv4.setValid();
-    hdr.u0_ipv4.total_len = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + 16w50;
+    hdr.u0_ipv4.total_len = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() * 16w40 + 16w50;
     hdr.u0_ipv4.version = 4w4;
     hdr.u0_ipv4.ihl = 4w5;
     hdr.u0_ipv4.diffserv = 8w0;
@@ -353,7 +353,7 @@ action push_vxlan_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u0_udp.setValid();
     hdr.u0_udp.src_port = 16w0;
     hdr.u0_udp.dst_port = 16w4789;
-    hdr.u0_udp.length = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + 16w30;
+    hdr.u0_udp.length = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() * 16w40 + 16w30;
     hdr.u0_udp.checksum = 16w0;
     hdr.u0_vxlan.setValid();
     hdr.u0_vxlan.reserved = 24w0;
@@ -368,7 +368,7 @@ action push_vxlan_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u1_ethernet.src_addr = underlay_smac;
     hdr.u1_ethernet.ether_type = 16w0x800;
     hdr.u1_ipv4.setValid();
-    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + 16w50;
+    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() * 16w40 + 16w50;
     hdr.u1_ipv4.version = 4w4;
     hdr.u1_ipv4.ihl = 4w5;
     hdr.u1_ipv4.diffserv = 8w0;
@@ -383,7 +383,7 @@ action push_vxlan_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u1_udp.setValid();
     hdr.u1_udp.src_port = 16w0;
     hdr.u1_udp.dst_port = 16w4789;
-    hdr.u1_udp.length = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + 16w30;
+    hdr.u1_udp.length = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() * 16w40 + 16w30;
     hdr.u1_udp.checksum = 16w0;
     hdr.u1_vxlan.setValid();
     hdr.u1_vxlan.reserved = 24w0;
@@ -398,8 +398,8 @@ action push_nvgre_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u0_ethernet.src_addr = underlay_smac;
     hdr.u0_ethernet.ether_type = 16w0x800;
     hdr.u0_ipv4.setValid();
-    hdr.u0_ipv4.total_len = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + 16w42;
-    hdr.u0_ipv4.total_len = 16w42 + hdr.u0_ipv4.total_len;
+    hdr.u0_ipv4.total_len = hdr.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr.customer_ipv4.isValid() + hdr.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr.customer_ipv6.isValid() * 16w40 + 16w42;
+    hdr.u0_ipv4.total_len = hdr.u0_ipv4.total_len + 16w42;
     hdr.u0_ipv4.version = 4w4;
     hdr.u0_ipv4.ihl = 4w5;
     hdr.u0_ipv4.diffserv = 8w0;
@@ -426,8 +426,8 @@ action push_nvgre_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u1_ethernet.src_addr = underlay_smac;
     hdr.u1_ethernet.ether_type = 16w0x800;
     hdr.u1_ipv4.setValid();
-    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + 16w42;
-    hdr.u1_ipv4.total_len = 16w42 + hdr.u1_ipv4.total_len;
+    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() * 16w40 + 16w42;
+    hdr.u1_ipv4.total_len = hdr.u1_ipv4.total_len + 16w42;
     hdr.u1_ipv4.version = 4w4;
     hdr.u1_ipv4.ihl = 4w5;
     hdr.u1_ipv4.diffserv = 8w0;
