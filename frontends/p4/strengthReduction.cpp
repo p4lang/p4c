@@ -198,6 +198,8 @@ const IR::Node *DoStrengthReduction::postorder(IR::Sub *expr) {
 const IR::Node *DoStrengthReduction::postorder(IR::Add *expr) {
     if (isZero(expr->right)) return expr->left;
     if (isZero(expr->left)) return expr->right;
+    if (expr->left->is<IR::Constant>())
+        std::swap(expr->left, expr->right);
     return expr;
 }
 
