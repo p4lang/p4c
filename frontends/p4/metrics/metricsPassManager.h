@@ -8,6 +8,8 @@ as well.
 #ifndef FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_
 #define FRONTENDS_P4_METRICS_METRICSPASSMANAGER_H_
 
+#include <filesystem>
+
 #include "frontends/common/options.h"
 #include "frontends/p4/metrics/cyclomaticComplexity.h"
 #include "frontends/p4/metrics/exportMetrics.h"
@@ -35,11 +37,14 @@ class MetricsPassManager {
     const std::set<cstring> &selectedMetrics;
     TypeMap *typeMap;
     Metrics &metrics;
-    std::string fileName;
-    std::string isolatedFileName;
+    std::filesystem::path fileName;
 
  public:
-    MetricsPassManager(const CompilerOptions &options, TypeMap *typeMap, Metrics &metricsRef);
+    MetricsPassManager(const CompilerOptions &options, TypeMap *typeMap, Metrics &metricsRef)
+        : selectedMetrics(options.selectedMetrics),
+          typeMap(typeMap),
+          metrics(metricsRef),
+          fileName(options.file) {}
 
     Metrics &getMetrics() { return metrics; }
     void addInlined(PassManager &pm);

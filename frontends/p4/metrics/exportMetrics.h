@@ -8,6 +8,7 @@ compiled program name (programName_metrics.txt/json).
 #define FRONTENDS_P4_METRICS_EXPORTMETRICS_H_
 
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -23,13 +24,13 @@ namespace P4 {
 
 class ExportMetricsPass : public Inspector {
  private:
-    std::string filename;
+    std::filesystem::path filename;
     std::set<cstring> selectedMetrics;
     Metrics &metrics;
 
  public:
-    explicit ExportMetricsPass(const std::string &filename, std::set<cstring> selectedMetrics,
-                               Metrics &metricsRef)
+    explicit ExportMetricsPass(const std::filesystem::path &filename,
+                               std::set<cstring> selectedMetrics, Metrics &metricsRef)
         : filename(filename), selectedMetrics(selectedMetrics), metrics(metricsRef) {
         setName("ExportMetricsPass");
     }

@@ -2,19 +2,6 @@
 
 namespace P4 {
 
-MetricsPassManager::MetricsPassManager(const CompilerOptions &options, TypeMap *typeMap,
-                                       Metrics &metricsRef)
-    : selectedMetrics(options.selectedMetrics), typeMap(typeMap), metrics(metricsRef) {
-    size_t pos = options.file.string().rfind('.');
-    fileName =
-        (pos != std::string::npos ? options.file.string().substr(0, pos) : options.file.string());
-
-    isolatedFileName = fileName.rfind('/') == std::string::npos
-                           ? fileName
-                           : fileName.substr(fileName.rfind('/') + 1);
-    isolatedFileName += ".p4";
-}
-
 void MetricsPassManager::addInlined(PassManager &pm) {
     if (selectedMetrics.find("inlined"_cs) != selectedMetrics.end() ||
         selectedMetrics.find("unused-code"_cs) != selectedMetrics.end()) {
@@ -31,7 +18,7 @@ void MetricsPassManager::addUnusedCode(PassManager &pm, bool isBefore) {
 
 void MetricsPassManager::addMetricPasses(PassManager &pm) {
     if (selectedMetrics.count("loc"_cs))
-        pm.addPasses({new LinesOfCodeMetricPass(metrics, isolatedFileName)});
+        pm.addPasses({new LinesOfCodeMetricPass(metrics, fileName)});
     if (selectedMetrics.count("cyclomatic"_cs))
         pm.addPasses({new CyclomaticComplexityPass(metrics)});
     if (selectedMetrics.count("halstead"_cs)) pm.addPasses({new HalsteadMetricsPass(metrics)});
@@ -50,7 +37,7 @@ void MetricsPassManager::addMetricPasses(PassManager &pm) {
     }
 
     if (!selectedMetrics.empty()) {
-        pm.addPasses({new ExportMetricsPass(fileName + "_metrics", selectedMetrics, metrics)});
+        pm.addPasses({new ExportMetricsPass(fileName, selectedMetrics, metrics)});
     }
 }
 }  // namespace P4

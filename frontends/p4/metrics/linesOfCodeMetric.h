@@ -7,6 +7,7 @@ and retrieving it's size at the end.
 #ifndef FRONTENDS_P4_METRICS_LINESOFCODEMETRIC_H_
 #define FRONTENDS_P4_METRICS_LINESOFCODEMETRIC_H_
 
+#include <filesystem>
 #include <string>
 #include <unordered_set>
 
@@ -22,8 +23,8 @@ class LinesOfCodeMetricPass : public Inspector {
     std::unordered_set<unsigned> lines;
 
  public:
-    explicit LinesOfCodeMetricPass(Metrics &metricsRef, std::string sourceFile)
-        : metrics(metricsRef), sourceFile(sourceFile) {
+    explicit LinesOfCodeMetricPass(Metrics &metricsRef, std::filesystem::path sourceFile)
+        : metrics(metricsRef), sourceFile(sourceFile.stem().string()) {
         setName("LinesOfCodeMetricPass");
     }
 

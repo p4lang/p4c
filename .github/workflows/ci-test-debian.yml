@@ -50,8 +50,7 @@ jobs:
           tools/ci-build.sh
 
       - name: Run tests (Ubuntu 22.04)
-        run: |
-          sudo -E ctest --output-on-failure --schedule-random
+        run: sudo -E ctest --output-on-failure --schedule-random
         working-directory: ./build
         if: matrix.unity == 'ON' && matrix.gtest == 'ON'
 
@@ -90,6 +89,5 @@ jobs:
           tools/ci-build.sh
 
       - name: Run tests (Ubuntu 22.04)
-        run: |
-          ctest --output-on-failure --schedule-random -R tofino
+        run: ctest --output-on-failure --schedule-random -R tofino
         working-directory: ./build

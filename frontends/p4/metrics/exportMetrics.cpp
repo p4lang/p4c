@@ -3,15 +3,20 @@
 namespace P4 {
 
 bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
-    std::ofstream textFile(filename + ".txt");
+    std::string isolatedFileName = filename.string();
+    size_t pos = isolatedFilename.rfind('.');
+    if (pos != std::string::npos) isolatedFileName = filename.string().substr(0, pos);
+    isolatedFileName += "_metrics";
+
+    std::ofstream textFile(isolatedFileName + ".txt");
     if (!textFile.is_open()) {
-        error(ErrorType::ERR_IO, "Error: Unable to open file %s.txt", filename.c_str());
+        error(ErrorType::ERR_IO, "Error: Unable to open file %s.txt", isolatedFileName.c_str());
         return false;
     }
 
-    std::ofstream jsonFile(filename + ".json");
+    std::ofstream jsonFile(isolatedFileName + ".json");
     if (!jsonFile.is_open()) {
-        error(ErrorType::ERR_IO, "Error: Unable to open file %s.json", filename.c_str());
+        error(ErrorType::ERR_IO, "Error: Unable to open file %s.json", isolatedFileName.c_str());
         return false;
     }
 
