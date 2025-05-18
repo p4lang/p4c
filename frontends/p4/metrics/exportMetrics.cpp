@@ -4,7 +4,7 @@ namespace P4 {
 
 bool ExportMetricsPass::preorder(const IR::P4Program * /*program*/) {
     std::string isolatedFileName = filename.string();
-    size_t pos = isolatedFilename.rfind('.');
+    size_t pos = isolatedFileName.rfind('.');
     if (pos != std::string::npos) isolatedFileName = filename.string().substr(0, pos);
     isolatedFileName += "_metrics";
 
