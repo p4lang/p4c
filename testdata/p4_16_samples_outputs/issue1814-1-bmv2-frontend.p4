@@ -17,7 +17,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("IngressImpl.registerData") bit<1> registerData_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("IngressImpl.testRegister") register<bit<1>>(32w1) testRegister_0;
     @name("IngressImpl.drop") action drop() {

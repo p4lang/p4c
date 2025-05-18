@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.ret") bit<8> ret_0;
     @name("ingress.x") bit<16> x;
     @name("ingress.hasReturned") bool hasReturned_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.top_a1") action top_a1(@name("y") bit<16> y) {
         x = y;

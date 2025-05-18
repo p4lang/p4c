@@ -38,7 +38,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.x_2") bit<16> x_4;
     @name("ingressImpl.retval") bit<16> retval_1;
     @name("ingressImpl.inlinedRetval_0") bit<16> inlinedRetval_2;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingressImpl.my_drop") action my_drop() {
         mark_to_drop(stdmeta);

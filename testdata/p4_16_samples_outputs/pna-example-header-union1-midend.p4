@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     O1 hdr_1_u_byte;
     O2 hdr_1_u_short;
     @name("ingress.retval") bool retval;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {

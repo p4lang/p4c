@@ -88,7 +88,7 @@ struct ct_tcp_table_hit_params_t {
 control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("MainControlImpl.outbound.conntrack.new_expire_time_profile_id") bit<8> outbound_conntrack_new_expire_time_profile_id;
     @name("MainControlImpl.inbound.conntrack.new_expire_time_profile_id") bit<8> inbound_conntrack_new_expire_time_profile_id;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.drop") action drop() {
         drop_packet();

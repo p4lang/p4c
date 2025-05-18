@@ -38,7 +38,7 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
     @name("MainControlImpl.retval") bit<3> retval_0;
     @name("MainControlImpl.tmp") bit<3> tmp_1;
     @name("MainControlImpl.inlinedRetval") bit<3> inlinedRetval_2;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.revie") action revie(@name("orde") bit<128> orde, @name("priv") bit<128> priv) {
         retval = 8w0;

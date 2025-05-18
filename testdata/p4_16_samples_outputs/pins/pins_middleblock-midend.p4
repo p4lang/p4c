@@ -451,37 +451,37 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     bool key_3;
     bool key_6;
     bool key_8;
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_8() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_9() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_10() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_10() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_11() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_11() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_12() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_12() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_13() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_13() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_14() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_14() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_15() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_15() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_16() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_16() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_17() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_17() {
     }
     @id(0x01000005) @name(".set_nexthop_id") action set_nexthop_id_1(@id(1) @refers_to(nexthop_table , nexthop_id) @name("nexthop_id") bit<10> nexthop_id) {
         local_metadata._nexthop_id_valid39 = true;
@@ -1544,9 +1544,9 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
 control egress(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @name("egress.acl_egress.ip_protocol") bit<8> acl_egress_ip_protocol;
     bool key_10;
-    @noWarn("unused") @name(".NoAction") action NoAction_18() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_18() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_19() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_19() {
     }
     @id(0x01000109) @sai_action(SAI_PACKET_ACTION_DROP) @name(".acl_drop") action acl_drop_4() {
         local_metadata._acl_drop42 = true;

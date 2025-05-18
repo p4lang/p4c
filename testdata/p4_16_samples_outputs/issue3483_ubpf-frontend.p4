@@ -48,7 +48,7 @@ parser prs(packet_in p, out Headers_t headers, inout Meta meta, inout standard_m
 }
 
 control pipe(inout Headers_t headers, inout Meta meta, inout standard_metadata unused) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.Reject") action Reject(@name("add") IPv4Address add) {
         headers.ipv4.srcAddr = add;

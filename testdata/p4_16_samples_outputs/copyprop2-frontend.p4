@@ -17,7 +17,7 @@ parser P(packet_in pkt, out H hdr) {
 
 control C(inout H hdr) {
     @name("C.h_is_valid") bool h_is_valid_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("C.t") table t_0 {
         key = {

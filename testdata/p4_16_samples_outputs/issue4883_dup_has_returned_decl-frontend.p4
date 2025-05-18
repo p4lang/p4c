@@ -8,7 +8,7 @@ extern bool foo(in bool x, in bool y);
 control C2() {
     @name("C2.s") S s_0;
     @name("C2.C.tmp") bool C_tmp;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("._xyz") action __xyz_0() {
         C_tmp = foo(s_0.f == 16w0, false);

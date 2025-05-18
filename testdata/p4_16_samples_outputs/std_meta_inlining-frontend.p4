@@ -26,7 +26,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
         standard_metadata_0.egress_spec = 9w64;
         standard_metadata = standard_metadata_0;
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.t0") table t0_0 {
         key = {
