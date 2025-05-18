@@ -189,7 +189,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "with type Type_Specialized is not a Type_Declaration"
+  "P4Testgen back end only supports a 'V1Switch' main"
   # Pipeline as a parameter of a switch, not a valid v1model program
   issue1304.p4
 )

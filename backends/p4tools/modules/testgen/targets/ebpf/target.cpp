@@ -39,16 +39,26 @@ void EBPFTestgenTarget::make() {
 
 const EBPFProgramInfo *EBPFTestgenTarget::produceProgramInfoImpl(
     const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const {
+    const auto *mainType = mainDecl->type->to<IR::Type_Specialized>();
+    if (mainType == nullptr || mainType->baseType->path->name != "ebpfFilter") {
+        error(ErrorType::ERR_INVALID,
+              "%1%: This P4Testgen back end only supports a 'ebpfFilter' main package. The current "
+              "type is %2%",
+              mainDecl, mainDecl->type);
+        return nullptr;
+    }
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
     const auto blocks =
         argumentsToTypeDeclarations(&compilerResult.getProgram(), mainDecl->arguments);
 
-    // We should have six arguments.
-    BUG_CHECK(blocks.size() == 2, "%1%: The EBPF architecture requires 2 blocks. Received %2%.",
+    // We should have two arguments.
+    if (blocks.size() != 2) {
+        error(ErrorType::ERR_INVALID, "%1%: The EBPF architecture requires 2 pipes. Received %2%.",
               mainDecl, blocks.size());
-
+        return nullptr;
+    }
     ordered_map<cstring, const IR::Type_Declaration *> programmableBlocks;
     for (size_t idx = 0; idx < blocks.size(); ++idx) {
         const auto *declType = blocks.at(idx);
