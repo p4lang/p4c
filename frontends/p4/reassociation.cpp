@@ -28,24 +28,25 @@ void Reassociation::reassociate(IR::Operation_Binary *root) {
         LOG3("Canonicalized constant to rhs: " << root);
     }
 
-    // Match the following tree
-    //       op
-    //      /  \
-    //     /    \
-    //    op    c2
-    //   / \
-    //  /   \
-    // e    c1
-    //
-    // (note that we're doing postorder visit and we already canonicalized
-    // constants to rhs)
-    // Rewrite to:
-    //       op
-    //      /  \
-    //     /    \
-    //    e     op
-    //         /  \
-    //        c1  c2
+    /* Match the following tree
+     *       op
+     *      /  \
+     *     /    \
+     *    op    c2
+     *   / \
+     *  /   \
+     * e    c1
+     *
+     * (note that we're doing postorder visit and we already canonicalized
+     * constants to rhs)
+     * Rewrite to:
+     *       op
+     *      /  \
+     *     /    \
+     *    e     op
+     *         /  \
+     *        c1  c2
+     */
     const IR::Operation_Binary *lhs;
     const IR::Constant *c1, *c2;
     const IR::Expression *e;
