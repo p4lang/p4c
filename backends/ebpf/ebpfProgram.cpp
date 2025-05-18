@@ -102,7 +102,7 @@ void EBPFProgram::emitC(CodeBuilder *builder, const std::filesystem::path &heade
     if (model.arch == ModelArchitecture::XdpSwitch)
         builder->target->emitCodeSection(builder, "xdp"_cs);
     else
-        builder->target->emitCodeSection(builder, "prog"_cs);
+        builder->target->emitCodeSection(builder, "tc"_cs);
     builder->emitIndent();
     builder->target->emitMain(builder, functionName, model.CPacketName.toString());
     builder->blockStart();

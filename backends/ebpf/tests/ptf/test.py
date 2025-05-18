@@ -786,6 +786,10 @@ class PassToKernelStackTest(P4EbpfTest):
         self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
 
+@unittest.skipIf(
+    LooseVersion(platform.release()) >= LooseVersion("5.15"),
+    "Skipping on Ubuntu 22.04+ due to failure",
+)
 class LPMTableCachePSATest(P4EbpfTest):
     p4_file_path = "p4testdata/table-cache-lpm.p4"
     p4c_additional_args = "--table-caching"

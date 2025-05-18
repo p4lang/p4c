@@ -96,7 +96,7 @@ class Bridge:
     def ns_proc_close(self, proc: subprocess.Popen, **extra_args: Any) -> int:
         """Close and actually run the process in the namespace. Returns the
         exit code."""
-        testutils.log.info("Executing command: %s", proc)
+        testutils.log.info("Executing command: %s", proc.args)
         result = testutils.run_process(proc, timeout=testutils.TIMEOUT, **extra_args)
         if result.returncode != testutils.SUCCESS:
             testutils.log.error(
@@ -109,7 +109,7 @@ class Bridge:
         avoid ICMPv6 spam."""
         # We do not care about failures here
         self.ns_exec(f"ip link set dev {br_name} up")
-        self.ns_exec(f"ip link set dev {br_name} mtu 9000")
+        self.ns_exec(f"ip link set dev {br_name} mtu 1500")
         # Prevent the broadcasting of ipv6 link discovery messages
         self.ns_exec("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
         self.ns_exec("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
@@ -130,7 +130,7 @@ class Bridge:
         result = self.ns_exec(cmd)
         if result != testutils.SUCCESS:
             return result
-        cmd = f"ip link set dev {port_name} mtu 9000"
+        cmd = f"ip link set dev {port_name} mtu 1500"
         return self.ns_exec(cmd)
 
     def attach_interfaces(self, num_ifaces: int) -> int:
