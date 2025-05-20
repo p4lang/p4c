@@ -296,10 +296,27 @@ void ProgramPoints::add(const ProgramPoints *from) {
     points.insert(from->points.begin(), from->points.end());
 }
 
+// Take the union of the current object with another.  A new ProgramPoints
+// will be allocated if necessary, but in the case where one of the two
+// ProgramPoints is a subset of the other, the latter will itself be returned.
 const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
-    auto *result = new ProgramPoints(points);
-    result->points.insert(with->points.begin(), with->points.end());
-    return result;
+    if (with == this) {
+        // Notice the case where the two are identical and exit early to avoid
+        // the iteration.
+        return this;
+    } else {
+        // Iterate over the (weakly) smaller of the two.
+        ProgramPoints *result = nullptr;
+        const ProgramPoints *larger = this, *smaller = with;
+        if (size() < with->size()) std::swap(larger, smaller);
+        for (auto pp : smaller->points) {
+            if (!larger->points.count(pp)) {
+                if (!result) result = new ProgramPoints(larger->points);
+                result->points.insert(pp);
+            }
+        }
+        return result ? result : larger;
+    }
 }
 
 bool ProgramPoints::operator==(const ProgramPoints &other) const {
