@@ -41,7 +41,7 @@ brew update
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake libtool
-    openssl coreutils bison grep ninja
+    openssl coreutils bison grep ninja virtualenv uv
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
@@ -60,8 +60,8 @@ fi
 if ! grep -q "$HOMEBREW_PREFIX/opt/grep/libexec/gnubin" ~/.bash_profile; then
   echo 'export PATH="$HOMEBREW_PREFIX/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
 fi
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
-# Install required pip packages
-# TODO: Should we use --break-system-packages or should we set up a venv?
-pip3 install --user --break-system-packages -r requirements.txt
+# Set up uv for Python dependency management.
+uv sync
