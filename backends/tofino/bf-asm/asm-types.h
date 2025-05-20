@@ -183,11 +183,6 @@ inline bool operator==(int a, const struct value_t &b) { return b.type == tINT &
 
 inline const char *value_desc(const value_t &v) { return value_desc(&v); }
 
-template <class A, class B>
-inline bool operator!=(A a, B b) {
-    return !(a == b);
-}
-
 inline value_t &VECTOR(value_t)::operator[](int i) const {
     assert(i >= 0 && i < size);
     return data[i];
