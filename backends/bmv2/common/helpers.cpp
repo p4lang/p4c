@@ -118,7 +118,7 @@ void ConversionContext::addToFieldList(const IR::Expression *expr, Util::JsonArr
                     auto val = jo->getAs<Util::JsonValue>("value");
                     j = jo = new Util::JsonObject();
                     jo->emplace("type", "hexstr");
-                    jo->emplace("value", stringRepr(val->getValue()));
+                    jo->emplace("value", stringRepr(val->getIntValue()));
                 }
             }
         }
