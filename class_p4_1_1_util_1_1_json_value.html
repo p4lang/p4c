@@ -144,11 +144,12 @@ Inheritance diagram for P4::Util::JsonValue:</div>
 Public Types</h2></td></tr>
 <tr class="memitem:ae20dead0535f688c10fad75594d3dfdc" id="r_ae20dead0535f688c10fad75594d3dfdc"><td class="memItemLeft" align="right" valign="top"><a id="ae20dead0535f688c10fad75594d3dfdc" name="ae20dead0535f688c10fad75594d3dfdc"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>Kind</b> { <br />
 &#160;&#160;<b>String</b>
-, <b>Number</b>
+, <b>Integer</b>
+, <b>Float</b>
 , <b>True</b>
-, <b>False</b>
 , <br />
-&#160;&#160;<b>Null</b>
+&#160;&#160;<b>False</b>
+, <b>Null</b>
 <br />
  }</td></tr>
 <tr class="separator:ae20dead0535f688c10fad75594d3dfdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -197,18 +198,27 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a51367e99aff78cfe823b08e7082b1c57" id="r_a51367e99aff78cfe823b08e7082b1c57"><td class="memItemLeft" align="right" valign="top"><a id="a51367e99aff78cfe823b08e7082b1c57" name="a51367e99aff78cfe823b08e7082b1c57"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>getBool</b> () const</td></tr>
 <tr class="separator:a51367e99aff78cfe823b08e7082b1c57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef6a217dbdebf5a266f7b0e23ab0fb96" id="r_aef6a217dbdebf5a266f7b0e23ab0fb96"><td class="memItemLeft" align="right" valign="top"><a id="aef6a217dbdebf5a266f7b0e23ab0fb96" name="aef6a217dbdebf5a266f7b0e23ab0fb96"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>getFloatValue</b> () const</td></tr>
+<tr class="separator:aef6a217dbdebf5a266f7b0e23ab0fb96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19f9d0f2c72edf58b31ce2b0d24971ba" id="r_a19f9d0f2c72edf58b31ce2b0d24971ba"><td class="memItemLeft" align="right" valign="top"><a id="a19f9d0f2c72edf58b31ce2b0d24971ba" name="a19f9d0f2c72edf58b31ce2b0d24971ba"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>getInt</b> () const</td></tr>
 <tr class="separator:a19f9d0f2c72edf58b31ce2b0d24971ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abbafbfcc9fdf428780aebf3b4b7805ed" id="r_abbafbfcc9fdf428780aebf3b4b7805ed"><td class="memItemLeft" align="right" valign="top"><a id="abbafbfcc9fdf428780aebf3b4b7805ed" name="abbafbfcc9fdf428780aebf3b4b7805ed"></a>
+big_int&#160;</td><td class="memItemRight" valign="bottom"><b>getIntValue</b> () const</td></tr>
+<tr class="separator:abbafbfcc9fdf428780aebf3b4b7805ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a526335e947315b1ff5cd21e3991d90c5" id="r_a526335e947315b1ff5cd21e3991d90c5"><td class="memItemLeft" align="right" valign="top"><a id="a526335e947315b1ff5cd21e3991d90c5" name="a526335e947315b1ff5cd21e3991d90c5"></a>
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getString</b> () const</td></tr>
 <tr class="separator:a526335e947315b1ff5cd21e3991d90c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0caa172ca43ad829afdb97efdfb8a3ab" id="r_a0caa172ca43ad829afdb97efdfb8a3ab"><td class="memItemLeft" align="right" valign="top"><a id="a0caa172ca43ad829afdb97efdfb8a3ab" name="a0caa172ca43ad829afdb97efdfb8a3ab"></a>
-big_int&#160;</td><td class="memItemRight" valign="bottom"><b>getValue</b> () const</td></tr>
-<tr class="separator:a0caa172ca43ad829afdb97efdfb8a3ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c441ea2111717bde09141e3f03393dc" id="r_a0c441ea2111717bde09141e3f03393dc"><td class="memItemLeft" align="right" valign="top"><a id="a0c441ea2111717bde09141e3f03393dc" name="a0c441ea2111717bde09141e3f03393dc"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isBool</b> () const</td></tr>
 <tr class="separator:a0c441ea2111717bde09141e3f03393dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad322602bf04d2427bf0d104a2949fdd9" id="r_ad322602bf04d2427bf0d104a2949fdd9"><td class="memItemLeft" align="right" valign="top"><a id="ad322602bf04d2427bf0d104a2949fdd9" name="ad322602bf04d2427bf0d104a2949fdd9"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isFloat</b> () const</td></tr>
+<tr class="separator:ad322602bf04d2427bf0d104a2949fdd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8eaf9d40471135c52933692c47353c8a" id="r_a8eaf9d40471135c52933692c47353c8a"><td class="memItemLeft" align="right" valign="top"><a id="a8eaf9d40471135c52933692c47353c8a" name="a8eaf9d40471135c52933692c47353c8a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isInteger</b> () const</td></tr>
+<tr class="separator:a8eaf9d40471135c52933692c47353c8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38a0cd494bf65e52612bacddd9e89122" id="r_a38a0cd494bf65e52612bacddd9e89122"><td class="memItemLeft" align="right" valign="top"><a id="a38a0cd494bf65e52612bacddd9e89122" name="a38a0cd494bf65e52612bacddd9e89122"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isNull</b> () const</td></tr>
 <tr class="separator:a38a0cd494bf65e52612bacddd9e89122"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -241,6 +251,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (const
 <tr class="separator:a0e681bcab6758024b5de568b74fe2831"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30ef22670f6b512a8f9c0b74ea3d94e7" id="r_a30ef22670f6b512a8f9c0b74ea3d94e7"><td class="memTemplParams" colspan="2"><a id="a30ef22670f6b512a8f9c0b74ea3d94e7" name="a30ef22670f6b512a8f9c0b74ea3d94e7"></a>
 template&lt;typename T, typename std::enable_if_t&lt; std::is_integral_v&lt; T &gt;, int &gt; = 0&gt; </td></tr>
+<tr class="memitem:a30ef22670f6b512a8f9c0b74ea3d94e7"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>operator==</b> (const T &amp;v) const</td></tr>
+<tr class="separator:a30ef22670f6b512a8f9c0b74ea3d94e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30ef22670f6b512a8f9c0b74ea3d94e7" id="r_a30ef22670f6b512a8f9c0b74ea3d94e7"><td class="memTemplParams" colspan="2"><a id="a30ef22670f6b512a8f9c0b74ea3d94e7" name="a30ef22670f6b512a8f9c0b74ea3d94e7"></a>
+template&lt;typename T, typename std::enable_if_t&lt; std::is_floating_point_v&lt; T &gt;, int &gt; = 0&gt; </td></tr>
 <tr class="memitem:a30ef22670f6b512a8f9c0b74ea3d94e7"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>operator==</b> (const T &amp;v) const</td></tr>
 <tr class="separator:a30ef22670f6b512a8f9c0b74ea3d94e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a376bc636e57b3c6a19e7f55be96a04d2" id="r_a376bc636e57b3c6a19e7f55be96a04d2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a376bc636e57b3c6a19e7f55be96a04d2">serialize</a> (std::ostream &amp;out) const override</td></tr>
