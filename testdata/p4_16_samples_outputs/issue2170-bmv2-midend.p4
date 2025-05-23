@@ -38,7 +38,7 @@ parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standa
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     @name("ingress.hasReturned") bool hasReturned;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_something") action do_something() {
         stdmeta.egress_spec = 9w0;

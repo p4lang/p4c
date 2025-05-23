@@ -53,7 +53,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("MainControlImpl.key_0") bit<32> key_0;
     @name("MainControlImpl.key_1") bit<32> key_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.clb_pinned_flows") table clb_pinned_flows_0 {
         key = {

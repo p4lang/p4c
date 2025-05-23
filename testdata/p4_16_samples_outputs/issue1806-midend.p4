@@ -20,7 +20,7 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.do_act") action do_act() {
     }
