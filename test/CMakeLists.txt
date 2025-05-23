@@ -59,6 +59,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/rtti_test.cpp
   gtest/nethash.cpp
   gtest/visitor.cpp
+  gtest/metrics_test.cpp
 )
 
 # Combine the executable and the non-backend-specific unit tests into a single

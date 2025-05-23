@@ -413,6 +413,19 @@ def main():
         action="store_true",
         default=False,
     )
+    parser.add_argument(
+        "--metrics",
+        dest="inputMetrics",
+        help=(
+            "Select which code metrics will be collected (comma-separated list). "
+            "Valid options: all, loc, cyclomatic, halstead, unused-code, nesting-depth,"
+            "header-general, header-manipulation, header-modification, match-action,"
+            "parser, inlined, extern. "
+            "Example: --metrics cyclomatic,halstead"
+        ),
+        action="store",
+        default=None,
+    )
 
     ### DRYified “env_indicates_developer_build”
     env_indicates_developer_build = os.environ["P4C_BUILD_TYPE"] == "DEVELOPER"

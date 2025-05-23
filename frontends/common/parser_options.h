@@ -23,6 +23,7 @@ limitations under the License.
 #include <filesystem>
 #include <set>
 
+#include "../p4/metrics/metricsStructure.h"
 #include "ir/configuration.h"
 #include "ir/pass_manager.h"
 #include "lib/compile_context.h"
@@ -113,6 +114,8 @@ class ParserOptions : public Util::Options {
     /// If true do not generate #include statements.
     /// Used for debugging.
     bool noIncludes = false;
+    /// Holds code metric values, makes them accessible during the entire compilation.
+    Metrics metrics;
 };
 
 /// A compilation context which exposes compiler options and a compiler
