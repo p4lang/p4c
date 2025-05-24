@@ -327,15 +327,13 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch *a,
     all_dests.merge(b_inbuf_dests);
     if (!a_inbuf_dests.empty() || !b_inbuf_dests.empty()) return false;
 
-    auto extactors_required = extractors_used(a);
+    auto extractors_required = extractors_used(a);
     auto b_extractors = extractors_used(b);
-    extactors_required = std::accumulate(b_extractors.begin(), b_extractors.end(),
-                                         extactors_required, [](auto &map, const auto &pair) {
-                                             map[pair.first] += pair.second;
-                                             return map;
-                                         });
+    for (auto &[size, cnt] : b_extractors) {
+        extractors_required[size] += cnt;
+    }
     for (const auto &[size, max] : Device::pardeSpec().extractorSpec())
-        if (extactors_required[size] > max) return false;
+        if (extractors_required[size] > max) return false;
 
     // Do not hoist a into b if result would contain more than 2 CLOTs or if b contains a spilled
     // CLOT extract from a
