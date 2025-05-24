@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   p4c-lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       IMAGE_TYPE: test
       CMAKE_ONLY: ON
@@ -32,7 +32,7 @@ jobs:
           key: apply-linters-${{ runner.os }}
           max-size: 1000M
 
-      - name: Build (Ubuntu 22.04)
+      - name: Build (Ubuntu 24.04)
         run: |
           tools/ci-build.sh
 
