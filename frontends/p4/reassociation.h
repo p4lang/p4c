@@ -24,29 +24,30 @@ namespace P4 {
 
 using namespace literals;
 
-/** Implements a pass that reorders associative operations when beneficial.
- * For example, (a + c0) + c1 is rewritten as a + (c0 + c1) when cs are constants.
+/** Implements a pass that reorders associative operations when beneficial.  For
+ * example, (a + c0) + c1 is rewritten as a + (c0 + c1) when cs are constants.
+ * The pass performs only local reassociation transformation, it does not (yet)
+ * implement "push to leaves" optimization.
  */
-class Reassociation final : public Transform {
+class Reassociation final : public Modifier {
  public:
     Reassociation() {
         visitDagOnce = true;
         setName("Reassociation");
     }
-    using Transform::postorder;
+    using Modifier::postorder;
 
-    const IR::Node *reassociate(IR::Operation_Binary *root);
+    void reassociate(IR::Operation_Binary *root);
 
-    const IR::Node *postorder(IR::Add *expr) override { return reassociate(expr); }
-    const IR::Node *postorder(IR::Mul *expr) override { return reassociate(expr); }
-    const IR::Node *postorder(IR::BOr *expr) override { return reassociate(expr); }
-    const IR::Node *postorder(IR::BAnd *expr) override { return reassociate(expr); }
-    const IR::Node *postorder(IR::BXor *expr) override { return reassociate(expr); }
-    const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
+    void postorder(IR::Add *expr) override { reassociate(expr); }
+    void postorder(IR::Mul *expr) override { reassociate(expr); }
+    void postorder(IR::BOr *expr) override { reassociate(expr); }
+    void postorder(IR::BAnd *expr) override { reassociate(expr); }
+    void postorder(IR::BXor *expr) override { reassociate(expr); }
+    bool preorder(IR::BlockStatement *bs) override {
         // FIXME: Do we need to check for expression, so we'd be able to fine tune, e.g.
         // @disable_optimization("reassociation")
-        if (bs->hasAnnotation(IR::Annotation::disableOptimizationAnnotation)) prune();
-        return bs;
+        return !bs->hasAnnotation(IR::Annotation::disableOptimizationAnnotation);
     }
 };
 
