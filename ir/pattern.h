@@ -120,7 +120,7 @@ class Pattern {
     template <class T>
     Pattern(const T *&m) : pattern(new MatchExt<T>(m)) {}  // NOLINT(runtime/explicit)
     template <class T>
-    Pattern(Match<T> &m) : pattern(&m) {}                   // NOLINT(runtime/explicit)
+    Pattern(Match<T> &m) : pattern(&m) {}
     explicit Pattern(big_int v) : pattern(new Const(v)) {}  // NOLINT(runtime/explicit)
     explicit Pattern(int v) : pattern(new Const(v)) {}      // NOLINT(runtime/explicit)
     Pattern operator-() const { return Pattern(new Unary<IR::Neg>(pattern)); }
