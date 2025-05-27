@@ -471,7 +471,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\002\020"
+          value: "\000\020"
           mask: "\002\360"
         }
       }
@@ -480,12 +480,11 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\004"
+            value: "\000\000\000\005"
           }
         }
       }
-      priority: 41
-      is_const: true
+      priority: 40
     }
   }
 }
@@ -503,7 +502,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\000\020"
+          value: "\002\020"
           mask: "\002\360"
         }
       }
@@ -512,11 +511,12 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\005"
+            value: "\000\000\000\004"
           }
         }
       }
-      priority: 40
+      priority: 41
+      is_const: true
     }
   }
 }
@@ -652,7 +652,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\002\020"
+          value: "\000\020"
           mask: "\002\360"
         }
       }
@@ -661,12 +661,11 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\004"
+            value: "\000\000\000\005"
           }
         }
       }
-      priority: 41
-      is_const: true
+      priority: 40
     }
   }
 }
@@ -684,7 +683,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\000\020"
+          value: "\002\020"
           mask: "\002\360"
         }
       }
@@ -693,11 +692,12 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\005"
+            value: "\000\000\000\004"
           }
         }
       }
-      priority: 40
+      priority: 41
+      is_const: true
     }
   }
 }
@@ -833,7 +833,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\002\020"
+          value: "\000\020"
           mask: "\002\360"
         }
       }
@@ -842,12 +842,11 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\004"
+            value: "\000\000\000\005"
           }
         }
       }
-      priority: 14
-      is_const: true
+      priority: 13
     }
   }
 }
@@ -865,7 +864,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\000\020"
+          value: "\002\020"
           mask: "\002\360"
         }
       }
@@ -874,11 +873,12 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\005"
+            value: "\000\000\000\004"
           }
         }
       }
-      priority: 13
+      priority: 14
+      is_const: true
     }
   }
 }
@@ -1014,7 +1014,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\002\020"
+          value: "\000\020"
           mask: "\002\360"
         }
       }
@@ -1023,12 +1023,11 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\004"
+            value: "\000\000\000\005"
           }
         }
       }
-      priority: 14
-      is_const: true
+      priority: 13
     }
   }
 }
@@ -1046,7 +1045,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\000\020"
+          value: "\002\020"
           mask: "\002\360"
         }
       }
@@ -1055,11 +1054,12 @@ updates {
           action_id: 26776898
           params {
             param_id: 1
-            value: "\000\000\000\005"
+            value: "\000\000\000\004"
           }
         }
       }
-      priority: 13
+      priority: 14
+      is_const: true
     }
   }
 }
@@ -1488,6 +1488,37 @@ updates {
       match {
         field_id: 1
         exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 901
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
           value: "\000\000\000\000\000\002"
         }
       }
@@ -1508,6 +1539,30 @@ updates {
         }
       }
       priority: 900
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 801
     }
   }
 }
@@ -1570,61 +1625,6 @@ updates {
         }
       }
       priority: 700
-    }
-  }
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 47497379
-      match {
-        field_id: 1
-        exact {
-          value: "\000\000\000\000\000\004"
-        }
-      }
-      match {
-        field_id: 2
-        ternary {
-          value: "\000\020"
-          mask: "\002\360"
-        }
-      }
-      action {
-        action {
-          action_id: 26776898
-          params {
-            param_id: 1
-            value: "\000\000\000\005"
-          }
-        }
-      }
-      priority: 901
-    }
-  }
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 47497379
-      match {
-        field_id: 1
-        exact {
-          value: "\000\000\000\000\000\006"
-        }
-      }
-      action {
-        action {
-          action_id: 26776898
-          params {
-            param_id: 1
-            value: "\000\000\000\006"
-          }
-        }
-      }
-      priority: 801
     }
   }
 }
