@@ -10,6 +10,7 @@
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
 #include "lib/error.h"
+#include "midend/midEndLast.h"
 
 namespace P4::P4Tools {
 
@@ -93,6 +94,9 @@ MidEnd CompilerTarget::mkMidEnd(const CompilerOptions &options) const {
 const IR::P4Program *CompilerTarget::runMidEnd(const CompilerOptions &options,
                                                const IR::P4Program *program) const {
     auto midEnd = mkMidEnd(options);
+    midEnd.addPasses({
+        new P4::MidEndLast(),
+    });
     midEnd.addDebugHook(options.getDebugHook(), true);
     return program->apply(midEnd);
 }
