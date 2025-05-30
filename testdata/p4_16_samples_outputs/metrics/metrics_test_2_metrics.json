@@ -1,0 +1,197 @@
+{
+  "lines_of_code" : 220,
+  "cyclomatic_complexity" : {
+    "MyParser" : 17,
+    "MyVerifyChecksum" : 1,
+    "MyComputeChecksum" : 1,
+    "MyIngress" : 14,
+    "MyEgress" : 3,
+    "MyDeparser" : 1
+  },
+  "halstead" : {
+    "unique_operators" : 41,
+    "unique_operands" : 119,
+    "total_operators" : 312,
+    "total_operands" : 339,
+    "vocabulary" : 160,
+    "length" : 651,
+    "difficulty" : 58.3992,
+    "volume" : 4766.58,
+    "effort" : 278364,
+    "estimated_bugs" : 1.58886
+  },
+  "unused_code" : {
+    "actions" : 0,
+    "functions" : 0,
+    "states" : 0,
+    "variables" : 0,
+    "enums" : 0,
+    "conditionals" : 0,
+    "parameters" : 5,
+    "returns" : 0
+  },
+  "nesting_depth" : {
+    "average" : 1.5,
+    "global_max" : 3,
+    "individual_blocks" : {
+      "MyParser" : 2,
+      "MyVerifyChecksum" : 1,
+      "MyComputeChecksum" : 1,
+      "MyIngress" : 3,
+      "MyEgress" : 1,
+      "MyDeparser" : 1
+    }
+  },
+  "header_metrics" : {
+    "total_headers" : 8,
+    "avg_fields_per_header" : 6.625,
+    "avg_field_size" : 21.1321,
+    "per_header_metrics" : {
+      "Ethernet_t" : {
+        "fields" : 3,
+        "field_size_sum" : 112
+      },
+      "IPv4_t" : {
+        "fields" : 12,
+        "field_size_sum" : 160
+      },
+      "IPv6_t" : {
+        "fields" : 8,
+        "field_size_sum" : 320
+      },
+      "ARP_t" : {
+        "fields" : 9,
+        "field_size_sum" : 224
+      },
+      "TCP_t" : {
+        "fields" : 10,
+        "field_size_sum" : 160
+      },
+      "UDP_t" : {
+        "fields" : 4,
+        "field_size_sum" : 64
+      },
+      "ICMP_t" : {
+        "fields" : 5,
+        "field_size_sum" : 64
+      },
+      "h_stack" : {
+        "fields" : 2,
+        "field_size_sum" : 16
+      }
+    }
+  },
+  "header_manipulation" : {
+    "total_operations" : 11,
+    "total_size" : 1904,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 1,
+        "size" : 112
+      },
+      "ethernet-arp" : {
+        "operations" : 2,
+        "size" : 336
+      },
+      "ethernet-ipv4" : {
+        "operations" : 5,
+        "size" : 752
+      },
+      "ethernet-ipv4-icmp" : {
+        "operations" : 6,
+        "size" : 816
+      },
+      "ethernet-ipv4-tcp" : {
+        "operations" : 6,
+        "size" : 912
+      },
+      "ethernet-ipv4-udp" : {
+        "operations" : 6,
+        "size" : 816
+      },
+      "ethernet-ipv6" : {
+        "operations" : 3,
+        "size" : 752
+      }
+    }
+  },
+  "header_modification" : {
+    "total_operations" : 10,
+    "total_size" : 134,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 1,
+        "size" : 48
+      },
+      "ethernet-arp" : {
+        "operations" : 2,
+        "size" : 64
+      },
+      "ethernet-ipv4" : {
+        "operations" : 5,
+        "size" : 80
+      },
+      "ethernet-ipv4-icmp" : {
+        "operations" : 6,
+        "size" : 88
+      },
+      "ethernet-ipv4-tcp" : {
+        "operations" : 6,
+        "size" : 86
+      },
+      "ethernet-ipv4-udp" : {
+        "operations" : 6,
+        "size" : 96
+      },
+      "ethernet-ipv6" : {
+        "operations" : 2,
+        "size" : 56
+      }
+    }
+  },
+  "match_action_tables" : {
+    "num_tables" : 1,
+    "total_keys" : 2,
+    "total_key_size" : 40,
+    "avg_key_size" : 20,
+    "avg_keys_per_table" : 2,
+    "max_keys_per_table" : 2,
+    "total_actions" : 2,
+    "avg_actions_per_table" : 2,
+    "max_actions_per_table" : 2,
+    "per_table_metrics" : {
+      "ipv4_lpm" : {
+        "actions" : 2,
+        "keys" : 2,
+        "key_size_sum" : 40
+      }
+    }
+  },
+  "parser" : {
+    "total_states" : 15,
+    "state_complexities" : {
+      "start" : 3,
+      "start_true" : 1,
+      "start_join" : 5,
+      "parse_ipv4" : 4,
+      "parse_ipv4_true" : 1,
+      "parse_ipv4_join" : 3,
+      "parse_ipv4_true_0" : 1,
+      "parse_ipv4_join_0" : 5,
+      "parse_ipv6" : 2,
+      "parse_arp" : 1,
+      "parse_tcp" : 1,
+      "parse_udp" : 1,
+      "parse_icmp" : 1,
+      "accept" : 1,
+      "reject" : 1
+    }
+  },
+  "extern" : {
+    "functions" : 24,
+    "function_calls" : 21,
+    "structures" : 10,
+    "structure_uses" : 12
+  },
+  "inlined_actions" : 3
+}

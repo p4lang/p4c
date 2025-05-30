@@ -1,0 +1,29 @@
+{
+  "lines_of_code" : 150,
+  "cyclomatic_complexity" : {
+    "MyParser" : 5,
+    "MyVerifyChecksum" : 1,
+    "MyIngress" : 7,
+    "MyEgress" : 4,
+    "MyComputeChecksum" : 1,
+    "MyDeparser" : 1
+  },
+  "header_manipulation" : {
+    "total_operations" : 3,
+    "total_size" : 432,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 1,
+        "size" : 112
+      },
+      "ethernet-ipv4" : {
+        "operations" : 2,
+        "size" : 272
+      },
+      "ethernet-ipv4-tcp" : {
+        "operations" : 3,
+        "size" : 432
+      }
+    }
+  }
+}

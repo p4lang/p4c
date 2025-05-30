@@ -1,0 +1,74 @@
+
+Cyclomatic Complexity:
+  MyIngress: 1
+
+Halstead Metrics:
+  Unique Operators: 1
+  Unique Operands: 0
+  Total Operators: 1
+  Total Operands: 0
+  Vocabulary: 1
+  Length: 1
+  Difficulty: 0
+  Volume: 0
+  Effort: 0
+  Estimated Bugs: 0
+
+Unused Code Instances:
+  Program Structure:
+	Actions: 0
+	Functions: 0
+	Parser states: 0
+  Declarations:
+	Variables: 0
+	Enums: 0
+  Other:
+	Conditionals: 0
+	Parameters: 0
+	Returns: 0
+
+Nesting Depth Metrics:
+  Average: 1
+  Global Max: 1
+  Individual blocks: 
+	MyIngress: 1
+
+Header Metrics:
+  Total Headers: 0
+  Avg Fields Per Header: 0
+  Avg Field Size: 0
+  Per-header metrics:
+
+Header Manipulation Metrics:
+  Total Operations: 0
+  Total Size: 0
+  Per-packet metrics:
+
+Header Modification Metrics:
+  Total Operations: 0
+  Total Size: 0
+  Per-packet metrics:
+
+Match-Action Table Metrics:
+  Number of Tables: 0
+  Total Keys: 0
+  Total Key Size: 0
+  Avg Key Size: 0
+  Avg Keys Per Table: 0
+  Max Keys Per Table: 0
+  Total Actions: 0
+  Avg Actions Per Table: 0
+  Max Actions Per Table: 0
+  Per-table Metrics:
+
+Parser Metrics:
+  States: 0
+  Per-parser complexities:
+
+Extern Metrics:
+  Extern Functions: 3
+  Function Calls: 0
+  Extern Structures: 2
+  Structure Uses: 0
+
+Number of Inlined Actions: 0
