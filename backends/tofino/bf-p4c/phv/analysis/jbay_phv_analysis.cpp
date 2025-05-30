@@ -18,6 +18,8 @@
 
 #include "jbay_phv_analysis.h"
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"

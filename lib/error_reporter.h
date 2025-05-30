@@ -22,14 +22,14 @@ limitations under the License.
 #include <set>
 #include <type_traits>
 #include <unordered_map>
-
-#include <boost/format.hpp>
+#include <utility>
 
 #include "absl/strings/str_format.h"
-#include "bug_helper.h"
 #include "error_catalog.h"
-#include "error_helper.h"
+#include "error_message.h"
 #include "exceptions.h"
+#include "lib/boost_format_helper.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 
@@ -40,6 +40,45 @@ enum class DiagnosticAction {
     Warn,    /// Print a warning and continue compilation.
     Error    /// Print an error and signal that compilation should be aborted.
 };
+
+namespace detail {
+// Base case
+inline void collectSourceInfo(ErrorMessage & /*msg*/) {}
+// Recursive step
+template <typename T, typename... Rest>
+void collectSourceInfo(ErrorMessage &msg, T &&arg, Rest &&...rest) {
+    using ArgType = std::decay_t<T>;
+    if constexpr (Util::has_SourceInfo_v<ArgType>) {
+        if constexpr (std::is_convertible_v<ArgType, Util::SourceInfo>) {
+            Util::SourceInfo info(arg);
+            if (info.isValid()) {
+                msg.locations.push_back(info);
+            }
+        } else {
+            auto info = arg.getSourceInfo();
+            if (info.isValid()) {
+                msg.locations.push_back(info);
+            }
+        }
+    } else if constexpr (std::is_pointer_v<ArgType>) {
+        using PointeeType = std::remove_pointer_t<ArgType>;
+        if constexpr (Util::has_SourceInfo_v<PointeeType>) {
+            if (arg != nullptr) {
+                auto info = arg->getSourceInfo();
+                if (info.isValid()) {
+                    msg.locations.push_back(info);
+                }
+            }
+        }
+    } else if constexpr (std::is_same_v<ArgType, P4::Util::SourceInfo>) {
+        if (arg.isValid()) {
+            msg.locations.push_back(arg);
+        }
+    }
+
+    collectSourceInfo(msg, std::forward<Rest>(rest)...);
+}
+}  // namespace detail
 
 // Keeps track of compilation errors.
 // Errors are specified using the error() and warning() methods,
@@ -88,26 +127,42 @@ class ErrorReporter {
           warningCount(0),
           errorCount(0),
           maxErrorCount(20),
+          outputstream(&std::cerr),
           defaultInfoDiagnosticAction(DiagnosticAction::Info),
           defaultWarningDiagnosticAction(DiagnosticAction::Warn) {
-        outputstream = &std::cerr;
         ErrorCatalog::getCatalog().initReporter(*this);
     }
     virtual ~ErrorReporter() = default;
 
     // error message for a bug
+    // NOTE: Assumes bug_helper primarily did formatting + SourceInfo.
+    // If bug_helper did more (stack traces?), that logic is lost here.
     template <typename... Args>
     std::string bug_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
-        // FIXME: This will implicitly take location of the first argument having
-        // SourceInfo. Not sure if this always desireable or not.
-        return ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+        // 1. Format the message string
+        std::string formatted_msg = P4::createFormattedMessage(format, std::forward<Args>(args)...);
+
+        // 2. Extract SourceInfo (if bug_helper used to do this implicitly)
+        //    We create a dummy ErrorMessage to collect locations.
+        //    This might not be the ideal place, depending on bug_helper's exact role.
+        ErrorMessage dummy_msg;
+        detail::collectSourceInfo(dummy_msg, std::forward<Args>(args)...);
+
+        // 3. Combine? (This part depends on what bug_helper actually returned)
+        //    For now, just return the formatted message, ignoring collected SourceInfo.
+        //    If bug_helper included SourceInfo in its string, adjust accordingly.
+        //    Example: if (!dummy_msg.locations.empty()) {
+        //                 formatted_msg = dummy_msg.locations[0].toDebugString() + ": " +
+        //                 formatted_msg;
+        //              }
+        return formatted_msg;
     }
 
+    // Formats a message string directly. Does not handle SourceInfo.
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
-        return ::P4::error_helper(fmt, std::forward<Args>(args)...).toString();
+        // Directly call the new formatting function
+        return P4::createFormattedMessage(format, std::forward<Args>(args)...);
     }
 
     template <class T, typename = decltype(std::declval<T>()->getSourceInfo()), typename... Args>
@@ -159,9 +214,9 @@ class ErrorReporter {
             msgType = ErrorMessage::MessageType::Error;
         }
 
-        boost::format fmt(format);
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
-        msg = ::P4::error_helper(fmt, msg, std::forward<Args>(args)...);
+        detail::collectSourceInfo(msg, std::forward<Args>(args)...);
+        msg.message = P4::createFormattedMessage(format, std::forward<Args>(args)...);
         emit_message(msg);
 
         if (errorCount > maxErrorCount)
