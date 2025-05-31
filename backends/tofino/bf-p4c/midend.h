@@ -39,7 +39,8 @@ class MidEnd : public PassManager {
     explicit MidEnd(BFN_Options &options);
 };
 
-bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression *);
+bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression *,
+                              const DeclarationLookup *);
 
 }  // namespace BFN
 

@@ -282,7 +282,8 @@ inline const T *findContext(const Visitor::Context *c) {
 /**
  * \ingroup midend
  */
-bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression *) {
+bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression *,
+                              const DeclarationLookup *) {
     auto c = findContext<IR::Declaration_Instance>(ctxt);
     if (!c) return true;
 
