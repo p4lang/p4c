@@ -30,6 +30,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/dump.h"
 #include "midend/actionSynthesis.h"
+#include "midend/checkTableEntries.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
@@ -96,6 +97,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          new P4::EliminateSerEnums(&typeMap),
          new P4::SimplifyKey(
              &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
+         new P4::CheckTableEntries(true),
          new P4::RemoveExits(&typeMap),
          new P4::ConstantFolding(&typeMap),
          new P4::SimplifySelectCases(&typeMap, false),  // non-constant keysets

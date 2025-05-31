@@ -43,7 +43,8 @@ const int ErrorType::ERR_DUPLICATE = 13;
 const int ErrorType::ERR_IO = 14;
 const int ErrorType::ERR_UNREACHABLE = 15;
 const int ErrorType::ERR_MODEL = 16;
-const int ErrorType::ERR_RESERVED = 17;
+const int ErrorType::ERR_TABLE_KEYS = 17;
+const int ErrorType::ERR_RESERVED = 18;
 
 // ------ Warnings -----------
 const int ErrorType::LEGACY_WARNING = ERR_MAX + 1;
@@ -73,6 +74,7 @@ const int ErrorType::WARN_MULTI_HDR_EXTRACT = 1023;
 const int ErrorType::WARN_EXPRESSION = 1024;
 const int ErrorType::WARN_DUPLICATE = 1025;
 const int ErrorType::WARN_BRANCH_HINT = 1026;
+const int ErrorType::WARN_TABLE_KEYS = 1027;
 
 // ------ Info messages -----------
 const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
@@ -98,6 +100,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::ERR_UNREACHABLE, "unreachable"_cs},
     {ErrorType::ERR_IO, "I/O error"_cs},
     {ErrorType::ERR_MODEL, "Target model error"_cs},
+    {ErrorType::ERR_TABLE_KEYS, "keys"_cs},
     {ErrorType::ERR_RESERVED, "reserved"_cs},
 
     // Warnings
@@ -128,6 +131,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_EXPRESSION, "expr"_cs},
     {ErrorType::WARN_DUPLICATE, "duplicate"_cs},
     {ErrorType::WARN_BRANCH_HINT, "branch"_cs},
+    {ErrorType::WARN_TABLE_KEYS, "keys"_cs},
 
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},

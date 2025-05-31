@@ -94,8 +94,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
                         const priority=11: (48w0x1, 16w0x1111 &&& 16w0xf) : a_params(32w1);
                         priority=21: (48w0x2, 16w0x1181) : a_params(32w2);
                         priority=31: (48w0x3, 16w0x1000 &&& 16w0xf000) : a_params(32w3);
-                        const priority=41: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=40: (48w0x4, 16w0x10 &&& 16w0x2f0) : a_params(32w5);
+                        const priority=41: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=50: (48w0x6, default) : a_params(32w6);
         }
     }
@@ -115,8 +115,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
                         const priority=11: (48w0x1, 16w0x1111 &&& 16w0xf) : a_params(32w1);
                         priority=21: (48w0x2, 16w0x1181) : a_params(32w2);
                         priority=31: (48w0x3, 16w0x1000 &&& 16w0xf000) : a_params(32w3);
-                        const priority=41: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=40: (48w0x4, 16w0x10 &&& 16w0x2f0) : a_params(32w5);
+                        const priority=41: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=50: (48w0x6, default) : a_params(32w6);
         }
     }
@@ -135,8 +135,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
                         const priority=11: (48w0x1, 16w0x1111 &&& 16w0xf) : a_params(32w1);
                         priority=12: (48w0x2, 16w0x1181) : a_params(32w2);
                         priority=13: (48w0x3, 16w0x1000 &&& 16w0xf000) : a_params(32w3);
-                        const priority=14: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=13: (48w0x4, 16w0x10 &&& 16w0x2f0) : a_params(32w5);
+                        const priority=14: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=14: (48w0x6, default) : a_params(32w6);
         }
     }
@@ -155,8 +155,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
                         const priority=11: (48w0x1, 16w0x1111 &&& 16w0xf) : a_params(32w1);
                         priority=12: (48w0x2, 16w0x1181) : a_params(32w2);
                         priority=13: (48w0x3, 16w0x1000 &&& 16w0xf000) : a_params(32w3);
-                        const priority=14: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=13: (48w0x4, 16w0x10 &&& 16w0x2f0) : a_params(32w5);
+                        const priority=14: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
                         priority=14: (48w0x6, default) : a_params(32w6);
         }
     }
@@ -213,11 +213,11 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         priority_delta = 100;
         entries = {
                         priority=1000: (48w0x1, 16w0x1111 &&& 16w0xf) : a_params(32w1);
+                        priority=901: (48w0x4, 16w0x10 &&& 16w0x2f0) : a_params(32w5);
                         priority=900: (48w0x2, 16w0x1181) : a_params(32w2);
+                        priority=801: (48w0x6, default) : a_params(32w6);
                         priority=800: (48w0x3, 16w0x1000 &&& 16w0xf000) : a_params(32w3);
                         priority=700: (48w0x4, 16w0x210 &&& 16w0x2f0) : a_params(32w4);
-                        priority=901: (48w0x4, 16w0x10 &&& 16w0x2f0) : a_params(32w5);
-                        priority=801: (48w0x6, default) : a_params(32w6);
         }
     }
     apply {
