@@ -140,9 +140,8 @@ void MidEnd::addDefaultPasses() {
         // Local copy propagation and dead-code elimination.
         new P4::LocalCopyPropagation(
             &typeMap, nullptr,
-            [this](const Visitor::Context *context, const IR::Expression *expr) {
-                return localCopyPropPolicy(context, expr);
-            }),
+            [this](const Visitor::Context *context, const IR::Expression *expr,
+                   const DeclarationLookup *) { return localCopyPropPolicy(context, expr); }),
         new P4::ConstantFolding(&typeMap),
         new P4::MoveDeclarations(),
         new P4::SimplifyControlFlow(&typeMap, true),

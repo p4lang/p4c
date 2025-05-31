@@ -84,7 +84,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     TableInfo *inferForTable = nullptr;
     FuncInfo *inferForFunc = nullptr;
     bool need_key_rewrite = false;
-    std::function<bool(const Context *, const IR::Expression *)> policy;
+    std::function<bool(const Context *, const IR::Expression *, const DeclarationLookup *)> policy;
     bool elimUnusedTables = false;
     int uid = -1;
     static int uid_ctr;
@@ -150,9 +150,11 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    DoLocalCopyPropagation(TypeMap *typeMap,
-                           std::function<bool(const Context *, const IR::Expression *)> policy,
-                           bool eut)
+    DoLocalCopyPropagation(
+        TypeMap *typeMap,
+        std::function<bool(const Context *, const IR::Expression *, const DeclarationLookup *)>
+            policy,
+        bool eut)
         : typeMap(typeMap),
           tables(std::make_shared<std::map<cstring, TableInfo>>()),
           actions(std::make_shared<std::map<cstring, FuncInfo>>()),
@@ -166,15 +168,18 @@ class LocalCopyPropagation : public PassManager {
  public:
     LocalCopyPropagation(
         TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
-        std::function<bool(const Context *, const IR::Expression *)> policy =
-            [](const Context *, const IR::Expression *) -> bool { return true; },
+        std::function<bool(const Context *, const IR::Expression *, const DeclarationLookup *)>
+            policy = [](const Context *, const IR::Expression *,
+                        const DeclarationLookup *) -> bool { return true; },
         bool elimUnusedTables = false) {
         if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap, true);
         passes.push_back(typeChecking);
         passes.push_back(new DoLocalCopyPropagation(typeMap, policy, elimUnusedTables));
     }
-    LocalCopyPropagation(TypeMap *typeMap,
-                         std::function<bool(const Context *, const IR::Expression *)> policy)
+    LocalCopyPropagation(
+        TypeMap *typeMap,
+        std::function<bool(const Context *, const IR::Expression *, const DeclarationLookup *)>
+            policy)
         : LocalCopyPropagation(typeMap, nullptr, policy) {}
 };
 
