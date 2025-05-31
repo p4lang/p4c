@@ -2438,8 +2438,9 @@ bool skipMethodCallStatement(const Visitor::Context *ctxt, const IR::Expression 
 }
 
 /** \ingroup SimpleSwitchTranslation */
-bool skipCond(const Visitor::Context *ctxt, const IR::Expression *expr) {
-    return skipMethodCallStatement(ctxt, expr) && BFN::skipRegisterActionOutput(ctxt, expr);
+bool skipCond(const Visitor::Context *ctxt, const IR::Expression *expr,
+              const DeclarationLookup *refMap) {
+    return skipMethodCallStatement(ctxt, expr) && BFN::skipRegisterActionOutput(ctxt, expr, refMap);
 }
 
 }  // namespace V1
