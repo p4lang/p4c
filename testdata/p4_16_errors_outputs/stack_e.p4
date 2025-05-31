@@ -11,6 +11,7 @@ control p() {
         h b = stack[1231092310293];
         h c = stack[-2];
         h d = stack[6];
+        s e = stack1.next;
     }
 }
 
