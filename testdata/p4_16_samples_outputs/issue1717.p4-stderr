@@ -1,3 +1,18 @@
+issue1717.p4(38): [--Wwarn=unused] warning: 'e' is unused
+    Empty e;
+    ^^^^^^^
+issue1717.p4(39): [--Wwarn=unused] warning: 'n' is unused
+    Nested n;
+    ^^^^^^^^
+issue1717.p4(40): [--Wwarn=unused] warning: 's' is unused
+    S s;
+    ^^^
+issue1717.p4(42): [--Wwarn=unused] warning: 'se' is unused
+    const bit<32> se = e.minSizeInBits() + n.minSizeInBits();
+                  ^^
+issue1717.p4(43): [--Wwarn=unused] warning: 'sz' is unused
+    const bit<32> sz = h1.minSizeInBits() + h2.minSizeInBits() + h2.minSizeInBytes();
+                  ^^
 issue1717.p4(52): [--Wwarn=uninitialized_use] warning: h1.isValid may be uninitialized
         size = v(h1, h2);
                  ^^

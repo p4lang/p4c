@@ -1,1 +1,4 @@
+issue2342.p4(1): [--Wwarn=unused] warning: 'tmp' is unused
+const bool tmp = 1 != 8w2[7:0];
+           ^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -44,7 +44,8 @@ void ApplyOptionsPragmas::end_apply() {
     // XXX(seth): It'd be nice if the user's command line options took
     // precedence; currently, pragmas override the command line.
     auto &compilerOptionsInstance = P4CContext::get().options();
-    compilerOptionsInstance.process(options.size(), const_cast<char *const *>(options.data()));
+    compilerOptionsInstance.process_options(options.size(),
+                                            const_cast<char *const *>(options.data()));
 }
 
 std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tryToParse(

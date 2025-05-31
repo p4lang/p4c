@@ -1,0 +1,3 @@
+counter2.p4(37): [--Wwarn=unused] warning: '.act' is unused
+action act(port) {
+^

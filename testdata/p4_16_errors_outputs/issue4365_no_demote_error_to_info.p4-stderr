@@ -1,5 +1,5 @@
 [--Werror=invalid] error: Error type-error cannot be demoted.
-(from pragmas): Compile a P4 program
+./p4test: Compile a P4 program
 --help                                  Print this help message
 --version                               Print compiler version
 -I path                                 Specify include path (passed to preprocessor)

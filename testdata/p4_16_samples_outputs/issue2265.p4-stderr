@@ -1,3 +1,6 @@
+issue2265.p4(1): [--Wwarn=unused] warning: 'f' is unused
+T f<T>(T data) {
+  ^
 issue2265.p4(7): [--Wwarn=unused] warning: Control c is not used; removing
 control c<T>(inout T data) {
         ^

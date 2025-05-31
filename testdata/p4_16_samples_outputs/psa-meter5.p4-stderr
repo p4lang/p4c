@@ -1,0 +1,3 @@
+psa-meter5.p4(52): [--Wwarn=unused] warning: 'execute_meter' is unused
+    action execute_meter () {
+           ^^^^^^^^^^^^^

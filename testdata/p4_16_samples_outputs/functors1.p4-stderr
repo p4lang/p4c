@@ -1,0 +1,3 @@
+functors1.p4(22): [--Wwarn=unused] warning: 'z' is unused
+        bit<1> z = (1w0 & 1w1);
+        ^^^^^^^^^^^^^^^^^^^^^^

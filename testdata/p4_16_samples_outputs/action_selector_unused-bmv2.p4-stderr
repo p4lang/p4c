@@ -1,3 +1,9 @@
+action_selector_unused-bmv2.p4(14): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^
+action_selector_unused-bmv2.p4(18): [--Wwarn=unused] warning: 'drop' is unused
+    action drop() { mark_to_drop(smeta); }
+           ^^^^
 action_selector_unused-bmv2.p4(20): [--Wwarn=unused] warning: as: unused instance
     action_selector (HashAlgorithm.identity, 32w1024, 32w10) as;
                                                              ^^

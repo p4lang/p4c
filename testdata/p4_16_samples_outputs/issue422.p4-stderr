@@ -1,0 +1,12 @@
+issue422.p4(46): [--Wwarn=unused] warning: 'c0' is unused
+    const bit<16> c0 = 0xdead;
+                  ^^
+issue422.p4(47): [--Wwarn=unused] warning: 'v0' is unused
+    bit<16> v0;
+    ^^^^^^^^^^
+issue422.p4(54): [--Wwarn=unused] warning: 'c1' is unused
+        const bit<16> c1 = 0xdead;
+                      ^^
+issue422.p4(55): [--Wwarn=unused] warning: 'v1' is unused
+        bit<16> v1;
+        ^^^^^^^^^^

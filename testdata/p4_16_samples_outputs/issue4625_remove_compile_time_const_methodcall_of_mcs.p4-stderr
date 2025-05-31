@@ -1,0 +1,3 @@
+issue4625_remove_compile_time_const_methodcall_of_mcs.p4(7): [--Wwarn=unused] warning: 'h' is unused
+        h_t h;
+        ^^^^^

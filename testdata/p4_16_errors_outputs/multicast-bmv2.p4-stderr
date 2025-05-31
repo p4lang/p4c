@@ -1,3 +1,6 @@
+multicast-bmv2.p4(95): [--Wwarn=unused] warning: '.set_nhop_redirect' is unused
+    @name(".set_nhop_redirect") action set_nhop_redirect(bit<32> nhop_ipv4, bit<9> port) {
+                                       ^^^^^^^^^^^^^^^^^
 multicast-bmv2.p4(87): [--Werror=duplicate] error: ._drop: conflicting control plane name: ._drop
     @name("._drop") action _drop() {
                            ^^^^^

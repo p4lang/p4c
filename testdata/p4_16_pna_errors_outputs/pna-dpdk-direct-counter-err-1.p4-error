@@ -1,3 +1,12 @@
+pna-dpdk-direct-counter-err-1.p4(32): [--Wwarn=unused] warning: 'ByteCounter_t' is unused
+typedef bit<48> ByteCounter_t;
+                ^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err-1.p4(33): [--Wwarn=unused] warning: 'PacketCounter_t' is unused
+typedef bit<32> PacketCounter_t;
+                ^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err-1.p4(36): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 512;
+              ^^^^^^^^^
 pna-dpdk-direct-counter-err-1.p4(92): [--Werror=expected] error: Expected default action default_route_drop to have 'count' method call for DirectCounter extern instance MainControlImpl.per_prefix_pkt_byte_count1
     action default_route_drop() {
            ^^^^^^^^^^^^^^^^^^

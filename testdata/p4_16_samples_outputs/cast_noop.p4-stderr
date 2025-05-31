@@ -1,1 +1,16 @@
+cast_noop.p4(1): [--Wwarn=unused] warning: 'x' is unused
+const bool x = (bool)1;
+           ^
+cast_noop.p4(2): [--Wwarn=unused] warning: 'y' is unused
+const bool y = (bool)1w1;
+           ^
+cast_noop.p4(3): [--Wwarn=unused] warning: 'v' is unused
+const bool v = (bool)1w0;
+           ^
+cast_noop.p4(4): [--Wwarn=unused] warning: 'z' is unused
+const bool z = (bool)true;
+           ^
+cast_noop.p4(5): [--Wwarn=unused] warning: 'w' is unused
+const bool w = (bool)(bool)false;
+           ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

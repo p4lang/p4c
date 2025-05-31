@@ -1,1 +1,49 @@
+issue3699.p4(1): [--Wwarn=unused] warning: 'one' is unused
+const bit<4> one = 1;
+             ^^^
+issue3699.p4(2): [--Wwarn=unused] warning: 'max' is unused
+const bit<4> max = 0xf;
+             ^^^
+issue3699.p4(3): [--Wwarn=unused] warning: 'value' is unused
+const bit<4> value = max |+| one;
+             ^^^^^
+issue3699.p4(4): [--Wwarn=unused] warning: 'value1' is unused
+const bit<4> value1 = max |+| 2;
+             ^^^^^^
+issue3699.p4(10): [--Wwarn=unused] warning: 'f' is unused
+void f(in h[value == max ? 1 : -1] a){}
+     ^
+issue3699.p4(11): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(max |+| max) == max ? 1 : -1] a){}
+     ^^
+issue3699.p4(12): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(max |+| 0) == max ? 1 : -1] a){}
+     ^^
+issue3699.p4(13): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[value1 == max ? 1 : -1] a){}
+     ^^
+issue3699.p4(16): [--Wwarn=unused] warning: 'ones' is unused
+const int<5> ones = 1;
+             ^^^^
+issue3699.p4(17): [--Wwarn=unused] warning: 'maxs' is unused
+const int<5> maxs = 0xf;
+             ^^^^
+issue3699.p4(18): [--Wwarn=unused] warning: 'values' is unused
+const int<5> values = maxs |+| ones;
+             ^^^^^^
+issue3699.p4(19): [--Wwarn=unused] warning: 'values1' is unused
+const int<5> values1 = maxs |+| 2;
+             ^^^^^^^
+issue3699.p4(20): [--Wwarn=unused] warning: 'f' is unused
+void f(in h[values == maxs ? 1 : -1] a){}
+     ^
+issue3699.p4(21): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(maxs |+| maxs) == maxs ? 1 : -1] a){}
+     ^^
+issue3699.p4(22): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(maxs |+| 0) == maxs ? 1 : -1] a){}
+     ^^
+issue3699.p4(23): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[values1 == maxs ? 1 : -1] a){}
+     ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -1,2 +1,5 @@
+issue1803_same_table_name.p4(13): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^
 [--Werror=duplicate] error: Name 't0' is used for multiple table objects in the P4Info message
 [--Werror=duplicate] error: Found 1 duplicate name(s) in the P4Info
