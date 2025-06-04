@@ -20,6 +20,7 @@ set (MIDEND_SRCS
   convertErrors.cpp
   copyStructures.cpp
   coverage.cpp
+  checkTableEntries.cpp
   def_use.cpp
   eliminateActionRun.cpp
   eliminateInvalidHeaders.cpp
@@ -68,6 +69,7 @@ set (MIDEND_HDRS
   booleanKeys.h
   checkSize.h
   checkExternInvocationCommon.h
+  checkTableEntries.h
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
