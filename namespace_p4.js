@@ -54,6 +54,7 @@ var namespace_p4 =
     [ "CheckHeaderTypes", "class_p4_1_1_check_header_types.html", null ],
     [ "CheckNamedArgs", "class_p4_1_1_check_named_args.html", null ],
     [ "CheckShadowing", "class_p4_1_1_check_shadowing.html", null ],
+    [ "CheckTableEntries", "class_p4_1_1_check_table_entries.html", null ],
     [ "CheckTableSize", "class_p4_1_1_check_table_size.html", null ],
     [ "ChooseEnumRepresentation", "class_p4_1_1_choose_enum_representation.html", null ],
     [ "ChooseErrorRepresentation", "class_p4_1_1_choose_error_representation.html", "class_p4_1_1_choose_error_representation" ],

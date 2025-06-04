@@ -2929,6 +2929,7 @@ var hierarchy =
         [ "P4::BuildResourceMap", "class_p4_1_1_build_resource_map.html", null ],
         [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", null ],
         [ "P4::CheckNamedArgs", "class_p4_1_1_check_named_args.html", null ],
+        [ "P4::CheckTableEntries", "class_p4_1_1_check_table_entries.html", null ],
         [ "P4::ClearTypeMap", "class_p4_1_1_clear_type_map.html", null ],
         [ "P4::CollectUsedDeclarations", "class_p4_1_1_collect_used_declarations.html", null ],
         [ "P4::CompileTimeOperations", "class_p4_1_1_compile_time_operations.html", [

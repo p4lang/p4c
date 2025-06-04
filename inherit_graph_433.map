@@ -1,21 +1,21 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$class_p4_1_1_choose_enum_representation.html" title=" " alt="" coords="5,203,236,228"/>
 <area shape="rect" id="Node000001" href="$group__midend.html#class_b_f_n_1_1_enum_on32_bits" title="Class that implements a policy suitable for the ConvertEnums pass." alt="" coords="313,5,467,31"/>
-<area shape="poly" id="edge2299_Node000000_Node000001" title=" " alt="" coords="135,189,160,155,194,115,235,74,283,40,312,27,314,32,285,44,239,78,198,118,164,159,140,193"/>
+<area shape="poly" id="edge2300_Node000000_Node000001" title=" " alt="" coords="135,189,160,155,194,115,235,74,283,40,312,27,314,32,285,44,239,78,198,118,164,159,140,193"/>
 <area shape="rect" id="Node000002" href="$group___portable_switch_translation.html#class_b_f_n_1_1_p_s_a_1_1_packet_path_to8_bits" title=" " alt="" coords="286,55,494,80"/>
-<area shape="poly" id="edge2300_Node000000_Node000002" title=" " alt="" coords="142,191,203,139,241,112,283,89,314,78,316,83,285,94,244,117,206,144,146,195"/>
+<area shape="poly" id="edge2301_Node000000_Node000002" title=" " alt="" coords="142,191,203,139,241,112,283,89,314,78,316,83,285,94,244,117,206,144,146,195"/>
 <area shape="rect" id="Node000003" href="$class_p4_1_1_b_m_v2_1_1_enum_on32_bits.html" title=" " alt="" coords="296,104,484,129"/>
-<area shape="poly" id="edge2301_Node000000_Node000003" title=" " alt="" coords="156,194,215,166,283,138,323,127,324,132,285,143,217,171,159,199"/>
+<area shape="poly" id="edge2302_Node000000_Node000003" title=" " alt="" coords="156,194,215,166,283,138,323,127,324,132,285,143,217,171,159,199"/>
 <area shape="rect" id="Node000004" href="$class_p4_1_1_b_m_v2_1_1_pna_enum_on32_bits.html" title=" " alt="" coords="284,153,496,179"/>
-<area shape="poly" id="edge2302_Node000000_Node000004" title=" " alt="" coords="204,198,319,176,320,181,205,203"/>
+<area shape="poly" id="edge2303_Node000000_Node000004" title=" " alt="" coords="204,198,319,176,320,181,205,203"/>
 <area shape="rect" id="Node000005" href="$class_p4_1_1_b_m_v2_1_1_psa_enum_on32_bits.html" title=" " alt="" coords="285,203,495,228"/>
-<area shape="poly" id="edge2303_Node000000_Node000005" title=" " alt="" coords="250,213,284,213,284,218,250,218"/>
+<area shape="poly" id="edge2304_Node000000_Node000005" title=" " alt="" coords="250,213,284,213,284,218,250,218"/>
 <area shape="rect" id="Node000006" href="$class_p4_1_1_d_p_d_k_1_1_enum_on32_bits.html" title=" " alt="" coords="297,252,483,277"/>
-<area shape="poly" id="edge2304_Node000000_Node000006" title=" " alt="" coords="205,228,320,249,319,255,204,233"/>
+<area shape="poly" id="edge2305_Node000000_Node000006" title=" " alt="" coords="205,228,320,249,319,255,204,233"/>
 <area shape="rect" id="Node000007" href="$class_p4_1_1_e_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="299,301,481,327"/>
-<area shape="poly" id="edge2305_Node000000_Node000007" title=" " alt="" coords="160,232,218,259,285,286,329,299,327,304,283,291,216,264,157,237"/>
+<area shape="poly" id="edge2306_Node000000_Node000007" title=" " alt="" coords="160,232,218,259,285,286,329,299,327,304,283,291,216,264,157,237"/>
 <area shape="rect" id="Node000008" href="$class_p4_1_1_enum_on32_bits.html" title=" " alt="" coords="319,351,461,376"/>
-<area shape="poly" id="edge2306_Node000000_Node000008" title=" " alt="" coords="146,235,206,286,245,313,285,336,320,348,318,353,283,340,242,317,203,290,143,240"/>
+<area shape="poly" id="edge2307_Node000000_Node000008" title=" " alt="" coords="146,235,206,286,245,313,285,336,320,348,318,353,283,340,242,317,203,290,143,240"/>
 <area shape="rect" id="Node000009" href="$class_p4_1_1_u_b_p_f_1_1_enum_on32_bits.html" title=" " alt="" coords="298,400,482,425"/>
-<area shape="poly" id="edge2307_Node000000_Node000009" title=" " alt="" coords="140,238,164,271,198,311,239,351,285,385,314,397,312,402,283,390,235,356,194,315,160,275,136,241"/>
+<area shape="poly" id="edge2308_Node000000_Node000009" title=" " alt="" coords="140,238,164,271,198,311,239,351,285,385,314,397,312,402,283,390,235,356,194,315,160,275,136,241"/>
 </map>
