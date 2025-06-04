@@ -1,4 +1,7 @@
 spec-ex09.p4(24): [--Wwarn=unused] warning: Control p is not used; removing
 control p()
         ^
+spec-ex09.p4(59): [--Wwarn=unused] warning: 'Tcp_option_stack' is unused
+typedef Tcp_option_h[10] Tcp_option_stack;
+                         ^^^^^^^^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -1,3 +1,6 @@
+gauntlet_mux_eval-bmv2.p4(28): [--Wwarn=unused] warning: 'dummy' is unused
+    bit<16> dummy = !false ? tmp.eth_type : 16w1;
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 gauntlet_mux_eval-bmv2.p4(31): [--Wwarn=uninitialized_use] warning: tmp.src_addr may be uninitialized
         h.eth_hdr.src_addr = tmp.src_addr;
                              ^^^^^^^^^^^^

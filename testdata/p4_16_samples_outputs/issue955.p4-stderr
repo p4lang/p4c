@@ -1,0 +1,6 @@
+issue955.p4(30): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^
+issue955.p4(33): [--Wwarn=unused] warning: 'b' is unused
+    apply { bool b = hdr.h.isValid(); }
+            ^^^^^^^^^^^^^^^^^^^^^^^^

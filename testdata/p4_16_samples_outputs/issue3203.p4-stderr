@@ -1,1 +1,4 @@
+issue3203.p4(5): [--Wwarn=unused] warning: 'func' is unused
+bit func(h<bit> a) {
+    ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

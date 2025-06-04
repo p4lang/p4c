@@ -1,0 +1,3 @@
+functors3.p4(36): [--Wwarn=unused] warning: 'bv' is unused
+const bit bv = 1w0;
+          ^^

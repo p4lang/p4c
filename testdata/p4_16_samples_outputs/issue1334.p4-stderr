@@ -1,3 +1,6 @@
 issue1334.p4(14): [--Wwarn=unused] warning: Control d is not used; removing
 control d(out bit<32> x)(bit<32> a) {
         ^
+issue1334.p4(50): [--Wwarn=unused] warning: 'package top' is unused
+package top(proto p1, proto p2);
+        ^^^

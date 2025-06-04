@@ -1,0 +1,6 @@
+struct_init-1.p4(4): [--Wwarn=unused] warning: 'PSA_CPU_PORT' is unused
+const PortId_t PSA_CPU_PORT = { _v = 9w192 };
+               ^^^^^^^^^^^^
+struct_init-1.p4(12): [--Wwarn=unused] warning: 'p' is unused
+        PortId_t p = { _v = 0 };
+        ^^^^^^^^^^^^^^^^^^^^^^^

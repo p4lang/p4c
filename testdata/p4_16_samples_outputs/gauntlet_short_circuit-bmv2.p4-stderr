@@ -1,3 +1,6 @@
+gauntlet_short_circuit-bmv2.p4(34): [--Wwarn=unused] warning: 'bool_with_side_effect' is unused
+bool bool_with_side_effect(inout bit<8> val) {
+     ^^^^^^^^^^^^^^^^^^^^^
 gauntlet_short_circuit-bmv2.p4(23): [--Wwarn=uninitialized_use] warning: val may be uninitialized
     return val;
            ^^^

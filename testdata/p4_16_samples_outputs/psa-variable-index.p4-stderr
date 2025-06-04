@@ -1,0 +1,3 @@
+psa-variable-index.p4(92): [--Wwarn=unused] warning: 'forward' is unused
+    action forward() {
+           ^^^^^^^

@@ -1,1 +1,4 @@
+generic-struct-tuple.p4(5): [--Wwarn=unused] warning: 'x' is unused
+const S<bit<32>> x = { t = { 0, 0 } };
+                 ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

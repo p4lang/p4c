@@ -1,0 +1,3 @@
+pna-example-varIndex-1.p4(96): [--Wwarn=unused] warning: 'execute_1' is unused
+    action execute_1() {
+           ^^^^^^^^^

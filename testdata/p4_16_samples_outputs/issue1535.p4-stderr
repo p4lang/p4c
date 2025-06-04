@@ -1,0 +1,3 @@
+issue1535.p4(61): [--Wwarn=unused] warning: 'my_drop' is unused
+action my_drop(inout standard_metadata_t smeta) {
+       ^^^^^^^

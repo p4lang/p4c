@@ -58,6 +58,10 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
     char build_date[50];
     strftime(build_date, 50, "%c", localtime(&now));
     buildDate = cstring(build_date);
+    return process_options(argc, argv);
+}
+
+std::vector<const char *> *Util::Options::process_options(int argc, char *const argv[]) {
     for (int i = 1; i < argc; i++) {
         cstring opt = cstring(argv[i]);
         const char *arg = nullptr;

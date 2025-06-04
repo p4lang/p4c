@@ -1,3 +1,6 @@
+action_profile_max_group_size_annotation.p4(29): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^
 action_profile_max_group_size_annotation.p4(44): [--Wwarn=ignore] warning: Ignoring annotation @max_group_size on action profile 'ap', which does not have a selector
         implementation = action_profile(32w128);
         ^^^^^^^^^^^^^^

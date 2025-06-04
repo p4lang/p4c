@@ -1,0 +1,3 @@
+issue2900.p4(35): [--Wwarn=unused] warning: 'RxPkt' is unused
+bool RxPkt(in pna_main_input_metadata_t istd) {
+     ^^^^^

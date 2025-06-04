@@ -1,0 +1,6 @@
+issue3091.p4(216): [--Wwarn=unused] warning: 'mk1_t' is unused
+typedef tuple <match_kind> mk1_t;
+                           ^^^^^
+issue3091.p4(218): [--Wwarn=unused] warning: 'exact_once' is unused
+const tuple<match_kind> exact_once = {exact};
+                        ^^^^^^^^^^

@@ -1,4 +1,28 @@
 issue2444.p4(11): [--Wwarn=overflow] warning: 2s3: signed value does not fit in 2 bits
 const int z3 = 2s3
                ^^^
+issue2444.p4(1): [--Wwarn=unused] warning: 'a' is unused
+const int a = 1;
+          ^
+issue2444.p4(2): [--Wwarn=unused] warning: 'b' is unused
+const bool b = (bool)a;
+           ^
+issue2444.p4(4): [--Wwarn=unused] warning: 'z' is unused
+const int z = (int)2w1;
+          ^
+issue2444.p4(5): [--Wwarn=unused] warning: 'w' is unused
+const bool w = (bool)z;
+           ^
+issue2444.p4(7): [--Wwarn=unused] warning: 'z1' is unused
+const int z1 = 2w1;
+          ^^
+issue2444.p4(8): [--Wwarn=unused] warning: 'w1' is unused
+const bool w1 = (bool)z1;
+           ^^
+issue2444.p4(10): [--Wwarn=unused] warning: 'z2' is unused
+const int z2 = 2w3;
+          ^^
+issue2444.p4(11): [--Wwarn=unused] warning: 'z3' is unused
+const int z3 = 2s3;
+          ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

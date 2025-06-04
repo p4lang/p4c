@@ -1,0 +1,3 @@
+list.p4(10): [--Wwarn=unused] warning: 'list' is unused
+    bit<32> list; // check that 'list' identifier is allowed
+    ^^^^^^^^^^^^

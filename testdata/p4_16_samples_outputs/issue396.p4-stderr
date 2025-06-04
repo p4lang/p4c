@@ -1,0 +1,3 @@
+issue396.p4(37): [--Wwarn=unused] warning: 'h1' is unused
+        H h1;
+        ^^^^

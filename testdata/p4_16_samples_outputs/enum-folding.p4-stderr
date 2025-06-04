@@ -1,1 +1,4 @@
+enum-folding.p4(21): [--Wwarn=unused] warning: 'a' is unused
+const bool a = X.a == X.b;
+           ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

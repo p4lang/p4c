@@ -1,0 +1,3 @@
+psa-example-dpdk-meter.p4(56): [--Wwarn=unused] warning: 'color_in' is unused
+    PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

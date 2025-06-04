@@ -1,0 +1,9 @@
+issue3488-bmv2.p4(7): [--Wwarn=unused] warning: 'IPv6Address' is unused
+typedef bit<128> IPv6Address;
+                 ^^^^^^^^^^^
+issue3488-bmv2.p4(8): [--Wwarn=unused] warning: 'IPv4ORv6Address' is unused
+typedef bit<128> IPv4ORv6Address;
+                 ^^^^^^^^^^^^^^^
+issue3488-bmv2.p4(16): [--Wwarn=unused] warning: 'ETHER_HDR_SIZE' is unused
+const bit<16> ETHER_HDR_SIZE=112/8;
+              ^^^^^^^^^^^^^^

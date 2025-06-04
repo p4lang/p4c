@@ -1,0 +1,3 @@
+gauntlet_int_slice-bmv2.p4(34): [--Wwarn=unused] warning: 'simple_action' is unused
+    action simple_action() {
+           ^^^^^^^^^^^^^

@@ -1,3 +1,6 @@
+nested_if_statement.p4(4): [--Wwarn=unused] warning: 'TYPE_IPV4' is unused
+const bit<16> TYPE_IPV4 = 0x800;
+              ^^^^^^^^^
 nested_if_statement.p4(75): [--Wwarn=unused] warning: 'offset' is unused
     action if_testing(out bit<16> value, in bit<8> offset) {
                                                    ^^^^^^

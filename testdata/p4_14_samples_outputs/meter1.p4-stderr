@@ -1,0 +1,3 @@
+meter1.p4(65): [--Wwarn=unused] warning: '.m_action' is unused
+action m_action(meter_idx) {
+^

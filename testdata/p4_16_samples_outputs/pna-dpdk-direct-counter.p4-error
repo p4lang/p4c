@@ -1,0 +1,9 @@
+pna-dpdk-direct-counter.p4(5): [--Wwarn=unused] warning: 'ETHERNET_HEADER_LEN' is unused
+const bit<8> ETHERNET_HEADER_LEN = 14;
+             ^^^^^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter.p4(45): [--Wwarn=unused] warning: 'FlowIdx_t' is unused
+typedef bit<16> FlowIdx_t;
+                ^^^^^^^^^
+pna-dpdk-direct-counter.p4(46): [--Wwarn=unused] warning: 'IPV4_HOST_TABLE_MAX_ENTRIES' is unused
+const bit<32> IPV4_HOST_TABLE_MAX_ENTRIES = 1024;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^

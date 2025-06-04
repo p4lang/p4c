@@ -1,1 +1,4 @@
+specialization.p4(28): [--Wwarn=unused] warning: 'a' is unused
+action a() {
+       ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

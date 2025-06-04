@@ -1,0 +1,6 @@
+functors.p4(22): [--Wwarn=unused] warning: 'z' is unused
+        bit z = b & c;
+        ^^^^^^^^^^^^^
+functors.p4(27): [--Wwarn=unused] warning: 'bv' is unused
+const bit bv = 1w0;
+          ^^

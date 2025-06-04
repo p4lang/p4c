@@ -1,3 +1,6 @@
+psa-meter5.p4(52): [--Wwarn=unused] warning: 'execute_meter' is unused
+    action execute_meter () {
+           ^^^^^^^^^^^^^
 psa-meter5.p4(51): [--Wwarn=unsupported] warning: MyIC.meter0: Packet metering is not supported. Falling back to byte metering.
     DirectMeter(PSA_MeterType_t.PACKETS) meter0;
                                          ^^^^^^

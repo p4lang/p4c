@@ -1,3 +1,6 @@
+psa-example-register2-bmv2.p4(60): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 512;
+              ^^^^^^^^^
 psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in 80w0xffffffff000000000000
     s[(80 -1):48] = s[(80 -1):48] + 1;
     ^^^^^^^^^^^^^

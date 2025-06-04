@@ -1,0 +1,3 @@
+action_call_table_ebpf.p4(44): [--Wwarn=unused] warning: 'x' is unused
+        bool x = true;
+        ^^^^^^^^^^^^^

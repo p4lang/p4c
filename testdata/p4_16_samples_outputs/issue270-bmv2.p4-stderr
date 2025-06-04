@@ -1,0 +1,3 @@
+issue270-bmv2.p4(67): [--Wwarn=unused] warning: 'drop' is unused
+action drop() {}
+       ^^^^

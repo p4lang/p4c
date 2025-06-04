@@ -1,0 +1,30 @@
+crc32-bmv2.p4(60): [--Wwarn=unused] warning: 'P4CALC_ETYPE' is unused
+const bit<16> P4CALC_ETYPE = 0x1234;
+              ^^^^^^^^^^^^
+crc32-bmv2.p4(61): [--Wwarn=unused] warning: 'P4CALC_P' is unused
+const bit<8> P4CALC_P = 0x50; // 'P'
+             ^^^^^^^^
+crc32-bmv2.p4(62): [--Wwarn=unused] warning: 'P4CALC_4' is unused
+const bit<8> P4CALC_4 = 0x34; // '4'
+             ^^^^^^^^
+crc32-bmv2.p4(63): [--Wwarn=unused] warning: 'P4CALC_VER' is unused
+const bit<8> P4CALC_VER = 0x01; // v0.1
+             ^^^^^^^^^^
+crc32-bmv2.p4(64): [--Wwarn=unused] warning: 'P4CALC_PLUS' is unused
+const bit<8> P4CALC_PLUS = 0x2b; // '+'
+             ^^^^^^^^^^^
+crc32-bmv2.p4(65): [--Wwarn=unused] warning: 'P4CALC_MINUS' is unused
+const bit<8> P4CALC_MINUS = 0x2d; // '-'
+             ^^^^^^^^^^^^
+crc32-bmv2.p4(66): [--Wwarn=unused] warning: 'P4CALC_AND' is unused
+const bit<8> P4CALC_AND = 0x26; // '&'
+             ^^^^^^^^^^
+crc32-bmv2.p4(67): [--Wwarn=unused] warning: 'P4CALC_OR' is unused
+const bit<8> P4CALC_OR = 0x7c; // '|'
+             ^^^^^^^^^
+crc32-bmv2.p4(68): [--Wwarn=unused] warning: 'P4CALC_CARET' is unused
+const bit<8> P4CALC_CARET = 0x5e; // '^'
+             ^^^^^^^^^^^^
+crc32-bmv2.p4(69): [--Wwarn=unused] warning: 'P4CALC_CRC' is unused
+const bit<8> P4CALC_CRC = 0x3e; // '>'
+             ^^^^^^^^^^

@@ -1,0 +1,6 @@
+action_call_ubpf.p4(37): [--Wwarn=unused] warning: 'tmp' is unused
+            bit<1> tmp = 0; // does not matter
+            ^^^^^^^^^^^^^^
+action_call_ubpf.p4(39): [--Wwarn=unused] warning: 'tmp' is unused
+            bit<1> tmp = 0; // does not matter
+            ^^^^^^^^^^^^^^
