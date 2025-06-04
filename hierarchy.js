@@ -2576,7 +2576,6 @@ var hierarchy =
             [ "JbayNextTable", "class_jbay_next_table.html", null ],
             [ "P4::CopyStructures", "class_p4_1_1_copy_structures.html", null ],
             [ "P4::DPDK::DpdkAsmOptimization", "class_p4_1_1_d_p_d_k_1_1_dpdk_asm_optimization.html", null ],
-            [ "P4::RemoveAllUnusedDeclarations", "class_p4_1_1_remove_all_unused_declarations.html", null ],
             [ "P4::RemoveParserControlFlow", "class_p4_1_1_remove_parser_control_flow.html", null ],
             [ "P4::SideEffectOrdering", "class_p4_1_1_side_effect_ordering.html", null ],
             [ "P4::SimplifyControlFlow", "class_p4_1_1_simplify_control_flow.html", null ],
@@ -2585,6 +2584,7 @@ var hierarchy =
             [ "PropagateExtractConst", "group___parser_copy_prop.html#class_propagate_extract_const", null ]
           ] ],
           [ "P4::RemoveActionParameters", "class_p4_1_1_remove_action_parameters.html", null ],
+          [ "P4::RemoveAllUnusedDeclarations", "class_p4_1_1_remove_all_unused_declarations.html", null ],
           [ "P4::RemoveAllUnusedHUDDeclarations", "class_p4_1_1_remove_all_unused_h_u_d_declarations.html", null ],
           [ "P4::RemoveAssertAssume", "class_p4_1_1_remove_assert_assume.html", null ],
           [ "P4::RemoveDontcareArgs", "class_p4_1_1_remove_dontcare_args.html", null ],

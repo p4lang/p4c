@@ -1,5 +1,6 @@
 var NAVTREEINDEX37 =
 {
+"struct_p4_1_1_half_open_range.html#a702c6846668514d240f0dc0a090ea033":[13,0,12,230,19],
 "struct_p4_1_1_half_open_range.html#a749c0faddbb21a0dae9200d9c28b2adb":[12,0,14,215,8],
 "struct_p4_1_1_half_open_range.html#a749c0faddbb21a0dae9200d9c28b2adb":[13,0,12,230,8],
 "struct_p4_1_1_half_open_range.html#a7536d29555335b4d5641f1e838bf22ae":[12,0,14,215,16],
@@ -248,6 +249,5 @@ var NAVTREEINDEX37 =
 "struct_p4_1_1_specialization_info.html#a793ca534528571407010973e0945b1a2":[13,0,12,445,1],
 "struct_p4_1_1_specialization_info.html#aa4591f2fcc504bdc0ffcab94ab1982c8":[12,0,14,430,6],
 "struct_p4_1_1_specialization_info.html#aa4591f2fcc504bdc0ffcab94ab1982c8":[13,0,12,445,6],
-"struct_p4_1_1_specialization_info.html#ac17d7bafb19e02ae50e3e58557e34d2a":[12,0,14,430,0],
-"struct_p4_1_1_specialization_info.html#ac17d7bafb19e02ae50e3e58557e34d2a":[13,0,12,445,0]
+"struct_p4_1_1_specialization_info.html#ac17d7bafb19e02ae50e3e58557e34d2a":[12,0,14,430,0]
 };

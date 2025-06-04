@@ -280,28 +280,31 @@ $(function(){initNavTree('unused_declarations_8h_source.html',''); initResizable
 </div>
 <div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span></div>
 <div class="foldopen" id="foldopen00190" data-start="{" data-end="};">
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="class_p4_1_1_remove_all_unused_declarations.html">  190</a></span><span class="keyword">class </span>RemoveAllUnusedDeclarations : <span class="keyword">public</span> PassRepeated {</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="class_p4_1_1_remove_all_unused_declarations.html">  190</a></span><span class="keyword">class </span>RemoveAllUnusedDeclarations : <span class="keyword">public</span> PassManager {</div>
 <div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <a class="code hl_class" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> used;</div>
 <div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keyword">explicit</span> RemoveAllUnusedDeclarations(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_remove_unused_policy.html">RemoveUnusedPolicy</a> &amp;policy, <span class="keywordtype">bool</span> warn = <span class="keyword">false</span>)</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        : <a class="code hl_class" href="class_p4_1_1_pass_manager.html">PassManager</a>({<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_collect_used_declarations.html">CollectUsedDeclarations</a>(used),</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>                       policy.<a class="code hl_function" href="class_p4_1_1_remove_unused_policy.html#a8dcd6a9caada23dfceacd0f45e04182f">getRemoveUnusedDeclarationsPass</a>(used, warn)}) {</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        setName(<span class="stringliteral">&quot;RemoveAllUnusedDeclarations&quot;</span>);</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        setStopOnError(<span class="keyword">true</span>);</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    }</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>};</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keyword">explicit</span> RemoveAllUnusedDeclarations(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_remove_unused_policy.html">RemoveUnusedPolicy</a> &amp;policy, <span class="keywordtype">bool</span> warn = <span class="keyword">false</span>) {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        setName(<span class="stringliteral">&quot;RemoveAllUnusedDeclarations&quot;</span>);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        <span class="keywordflow">if</span> (warn)</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>            addPasses({<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_collect_used_declarations.html">CollectUsedDeclarations</a>(used),</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>                       policy.<a class="code hl_function" href="class_p4_1_1_remove_unused_policy.html#a8dcd6a9caada23dfceacd0f45e04182f">getRemoveUnusedDeclarationsPass</a>(used, warn)});</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        addPasses({<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_pass_repeated.html">PassRepeated</a>({<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_collect_used_declarations.html">CollectUsedDeclarations</a>(used),</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>                                     policy.<a class="code hl_function" href="class_p4_1_1_remove_unused_policy.html#a8dcd6a9caada23dfceacd0f45e04182f">getRemoveUnusedDeclarationsPass</a>(used, <span class="keyword">false</span>)})});</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        setStopOnError(<span class="keyword">true</span>);</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    }</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>};</div>
 </div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_UNUSEDDECLARATIONS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span> </div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> </div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_UNUSEDDECLARATIONS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_collect_used_declarations_html"><div class="ttname"><a href="class_p4_1_1_collect_used_declarations.html">P4::CollectUsedDeclarations</a></div><div class="ttdoc">Collects all used declarations into @used set.</div><div class="ttdef"><b>Definition</b> unusedDeclarations.h:58</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_has_db_print_html"><div class="ttname"><a href="class_p4_1_1_i_has_db_print.html">P4::IHasDbPrint</a></div><div class="ttdef"><b>Definition</b> stringify.h:33</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_i_declaration_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_i_declaration.html">P4::IR::IDeclaration</a></div><div class="ttdoc">The Declaration interface, representing objects with names.</div><div class="ttdef"><b>Definition</b> declaration.h:26</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
 <div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:413</div></div>
-<div class="ttc" id="aclass_p4_1_1_pass_manager_html"><div class="ttname"><a href="class_p4_1_1_pass_manager.html">P4::PassManager</a></div><div class="ttdef"><b>Definition</b> ir/pass_manager.h:40</div></div>
+<div class="ttc" id="aclass_p4_1_1_pass_repeated_html"><div class="ttname"><a href="class_p4_1_1_pass_repeated.html">P4::PassRepeated</a></div><div class="ttdef"><b>Definition</b> ir/pass_manager.h:145</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_unused_declarations_html"><div class="ttname"><a href="class_p4_1_1_remove_unused_declarations.html">P4::RemoveUnusedDeclarations</a></div><div class="ttdoc">Removes unused declarations.</div><div class="ttdef"><b>Definition</b> unusedDeclarations.h:100</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_unused_declarations_html_a9f3cdb33606e9c641b1817f0512c521d"><div class="ttname"><a href="class_p4_1_1_remove_unused_declarations.html#a9f3cdb33606e9c641b1817f0512c521d">P4::RemoveUnusedDeclarations::warned</a></div><div class="ttdeci">std::set&lt; const IR::Node * &gt; * warned</div><div class="ttdef"><b>Definition</b> unusedDeclarations.h:112</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_unused_declarations_html_aaf098956487c2e1631b573f5a68d2ba3"><div class="ttname"><a href="class_p4_1_1_remove_unused_declarations.html#aaf098956487c2e1631b573f5a68d2ba3">P4::RemoveUnusedDeclarations::giveWarning</a></div><div class="ttdeci">bool giveWarning(const IR::Node *node)</div><div class="ttdef"><b>Definition</b> unusedDeclarations.cpp:63</div></div>

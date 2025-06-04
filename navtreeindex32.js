@@ -1,5 +1,6 @@
 var NAVTREEINDEX32 =
 {
+"namespace_p4.html#ab6405cbcaf5ac60cc9104a38b3e9073faed36a1ef76a59ee3f15180e0441188ad":[12,0,14,539,0],
 "namespace_p4.html#ab7d558748b12559a00d99a30879cb18c":[12,0,14,543],
 "namespace_p4.html#abd6cc9eb9c84cc5ce9473f4c489906e8":[12,0,14,578],
 "namespace_p4.html#ac1ec8dcf99ed9763922e8a476f80dd26":[12,0,14,536],
@@ -248,6 +249,5 @@ var NAVTREEINDEX32 =
 "namespace_stateful_alu.html":[12,0,20],
 "namespace_test.html":[12,0,22],
 "namespace_tofino.html":[12,0,23],
-"namespace_tofino.html#a32e6d9be8d8986392ce7ccc43796daa5":[12,0,23,6],
-"namespaceassoc.html":[12,0,1]
+"namespace_tofino.html#a32e6d9be8d8986392ce7ccc43796daa5":[12,0,23,6]
 };
