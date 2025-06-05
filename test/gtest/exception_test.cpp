@@ -30,7 +30,7 @@ TEST(UtilException, Messages) {
     } catch (std::exception &ex) {
         cstring err(ex.what());
         cstring redir_msg("Compiler Bug:\ntest\n");
-        cstring no_redir_msg = cstring(ANSI_RED) + "Compiler Bug" + ANSI_CLR + ":\ntest\n";
+        cstring no_redir_msg = cstring(ANSI_RED) + "Compiler Bug" + ANSI_CLR + ":\ntest";
         // The error message might or might not be colorized based on if the test are redirected
         // or not, to make sure both options are valid an array is used.
         bool is_content_correct = (err == redir_msg) || (err == no_redir_msg);
@@ -41,7 +41,7 @@ TEST(UtilException, Messages) {
         throw CompilationError("Testing error %1%", 1);
     } catch (std::exception &ex) {
         cstring err(ex.what());
-        EXPECT_EQ(err, "Testing error 1\n");
+        EXPECT_EQ(err, "Testing error 1");
     }
 }
 
