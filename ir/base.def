@@ -242,7 +242,7 @@ class Annotation {
     inline Annotation(Util::SourceInfo si, ID n,
                       std::initializer_list<const Expression *> a, bool structured = false)
         : Node(si), name(n), body(a), structured(structured) {}
-    inline Annotation(Util::SourceInfo si, ID n,
+    inline explicit Annotation(Util::SourceInfo si, ID n,
                       const Expression *a, bool structured = false)
         : Node(si), name(n), body(), structured(structured) {
         body.emplace<ExpressionAnnotation>(a);
@@ -252,7 +252,7 @@ class Annotation {
     inline Annotation(Util::SourceInfo si, ID n, const IndexedVector<NamedExpression> &kv,
                       bool structured = false)
         : Node(si), name(n), body(kv), structured(structured) {}
-    inline Annotation(ID n, const Expression *a, bool structured = false)
+    inline explicit Annotation(ID n, const Expression *a, bool structured = false)
         : name(n), body(), structured(structured) {
         body.emplace<ExpressionAnnotation>(a);
     }
@@ -445,6 +445,12 @@ interface IAnnotated {
     inline void addOrReplaceAnnotation(Annotation ann) {
         Annotations::addOrReplace(getAnnotations(), ann);
     }
+#emit
+    // FIXME: We shouldn't need this delete.
+    // Ideally, we only accept references to expressions.
+    void addOrReplaceAnnotation(cstring name, std::nullptr_t expr, bool structured = false) = delete;
+    void addAnnotation(cstring name, std::nullptr_t expr, bool structured = false) = delete;
+#end
 }
 
 interface IInstance {
