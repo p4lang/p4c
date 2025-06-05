@@ -111,8 +111,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
     auto convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits());
     auto convertErrors = new P4::ConvertErrors(&typeMap, new ErrorWidth(16));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::function<bool(const Context *, const IR::Expression *, const DeclarationLookup *)> policy =
-        [=](const Context *ctx, const IR::Expression *, const DeclarationLookup *refMap) -> bool {
+    P4::LocalCopyPropPolicyCallbackFn policy = [=](const Context *ctx, const IR::Expression *,
+                                                   const DeclarationLookup *refMap) -> bool {
         if (auto mce = findContext<IR::MethodCallExpression>(ctx)) {
             auto mi = P4::MethodInstance::resolve(mce, refMap, &typeMap);
             if (auto em = mi->to<P4::ExternMethod>()) {

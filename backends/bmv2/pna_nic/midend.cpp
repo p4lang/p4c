@@ -95,8 +95,8 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
     : PortableMidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&typeMap, new PnaEnumOn32Bits("pna.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::function<bool(const Context *, const IR::Expression *, const DeclarationLookup *)> policy =
-        [=](const Context *, const IR::Expression *e, const DeclarationLookup *refMap) -> bool {
+    P4::LocalCopyPropPolicyCallbackFn policy = [=](const Context *, const IR::Expression *e,
+                                                   const DeclarationLookup *refMap) -> bool {
         auto mce = e->to<IR::MethodCallExpression>();
         if (mce == nullptr) return true;
         auto mi = P4::MethodInstance::resolve(mce, refMap, &typeMap);
