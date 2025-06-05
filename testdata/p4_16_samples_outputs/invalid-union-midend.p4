@@ -13,86 +13,54 @@ header_union HU {
 }
 
 parser p(inout HU hu) {
-    @name("ih_e") E ih_e_0;
-    @name("ih_h") H ih_h_0;
+    HU ih;
     state start {
-        transition select(ih_e_0.isValid()) {
-            true: start_true;
-            false: start_false;
-        }
-    }
-    state start_true {
-        hu.e.setValid();
-        hu.e = ih_e_0;
-        hu.h.setInvalid();
-        transition start_join;
-    }
-    state start_false {
-        hu.e.setInvalid();
-        transition start_join;
-    }
-    state start_join {
-        transition select(ih_h_0.isValid()) {
-            true: start_true_0;
-            false: start_false_0;
-        }
-    }
-    state start_true_0 {
-        hu.h.setValid();
-        hu.h = ih_h_0;
-        hu.e.setInvalid();
-        transition start_join_0;
-    }
-    state start_false_0 {
-        hu.h.setInvalid();
-        transition start_join_0;
-    }
-    state start_join_0 {
+        hu = ih;
         transition accept;
     }
 }
 
 control c(inout HU hu) {
-    @name("c.h") H h_1;
-    @name("c.a") action a_0() {
+    @name("c.h") H h_0;
+    @name("c.a") action a() {
     }
-    @hidden @name("invalidunion27") action invalidunion27_0() {
-        h_1.setValid();
-        h_1.f = 32w0;
-        if (h_1.isValid()) {
+    @hidden action invalidunion27() {
+        h_0.setValid();
+        h_0.f = 32w0;
+        if (h_0.isValid()) {
             hu.h.setValid();
-            hu.h = h_1;
+            hu.h = h_0;
             hu.e.setInvalid();
         } else {
             hu.h.setInvalid();
         }
     }
-    @hidden @name("tbl_a") table tbl_a_0 {
+    @hidden table tbl_a {
         actions = {
-            a_0();
+            a();
         }
-        const default_action = a_0();
+        const default_action = a();
     }
-    @hidden @name("tbl_invalidunion27") table tbl_invalidunion27_0 {
+    @hidden table tbl_invalidunion27 {
         actions = {
-            invalidunion27_0();
+            invalidunion27();
         }
-        const default_action = invalidunion27_0();
+        const default_action = invalidunion27();
     }
-    @name("tmp") bit<32> tmp_0;
+    bit<32> tmp;
     apply {
-        tbl_a_0.apply();
-        tmp_0 = 32w0;
+        tbl_a.apply();
+        tmp = 32w0;
         if (hu.e.isValid()) {
-            tmp_0 = tmp_0 + 32w1;
+            tmp = tmp + 32w1;
         }
         if (hu.h.isValid()) {
-            tmp_0 = tmp_0 + 32w1;
+            tmp = tmp + 32w1;
         }
-        if (tmp_0 == 32w1) {
+        if (tmp == 32w1) {
             ;
         } else {
-            tbl_invalidunion27_0.apply();
+            tbl_invalidunion27.apply();
         }
     }
 }

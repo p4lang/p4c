@@ -12,6 +12,10 @@ header H {
     bit<8> x;
 }
 
+header_union U {
+    H h;
+}
+
 struct headers_t {
     ethernet_t ethernet;
     H          h1;
@@ -36,9 +40,11 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.tmp") H tmp;
     H tmp_1_h;
+    @name("ingressImpl.tmp_1") U tmp_1;
     @name("ingressImpl.tmp_3") H[1] tmp_3;
     @name("ingressImpl.h") H h_0;
     H u_0_h;
+    @name("ingressImpl.u") U u_0;
     @name("ingressImpl.s") H[1] s_0;
     @hidden action issue30011l84() {
         log_msg("hdr.ethernet is valid");
@@ -64,12 +70,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @hidden action issue30011l45() {
         u_0_h.setInvalid();
-        if (u_0_h.isValid()) {
-            tmp_1_h.setValid();
-            tmp_1_h = u_0_h;
-        } else {
-            tmp_1_h.setInvalid();
-        }
+        tmp_1 = u_0;
     }
     @hidden action issue30011l109() {
         log_msg("h() returned a header stack with valid element 0");
