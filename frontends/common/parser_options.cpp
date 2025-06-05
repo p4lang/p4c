@@ -24,8 +24,10 @@ limitations under the License.
 #include <sys/wait.h>
 
 #include <filesystem>
+#include <fstream>
 #include <memory>
 #include <regex>
+#include <sstream>
 #include <unordered_set>
 
 #include "absl/strings/escaping.h"
@@ -121,6 +123,13 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             return true;
         },
         "Output `make` dependency rule only (passed to preprocessor)");
+    registerOption(
+        "--save-temps", nullptr,
+        [this](const char *) {
+            savePreprocessed = true;
+            return true;
+        },
+        "Saves preprocessed P4 to filename.p4pp and do not exit compilation.");
     registerOption(
         "-MD", nullptr,
         [this](const char *) {
@@ -405,6 +414,18 @@ const char *ParserOptions::getIncludePath() const {
     return path.c_str();
 }
 
+// From (folder, file.ext, suffix)  returns
+// folder/file-suffix.ext
+static std::filesystem::path makeFileName(const std::filesystem::path &folder,
+                                          const std::filesystem::path &name,
+                                          std::string_view baseSuffix) {
+    std::filesystem::path newName(name.stem());
+    newName += baseSuffix;
+    newName += name.extension();
+
+    return folder / newName;
+}
+
 std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() const {
     FILE *in = nullptr;
 
@@ -439,19 +460,36 @@ std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() con
         }
         return std::nullopt;
     }
+
+    if (savePreprocessed) {
+        std::stringstream stream;
+        char *line = nullptr;
+        size_t len = 0;
+        ssize_t read = 0;
+
+        while ((read = getline(&line, &len, in)) != -1) {
+            stream << line;
+        }
+        closeFile(in);
+
+        std::filesystem::path fileName(file.stem());
+        fileName += ".p4pp";
+        fileName = makeFileName(dumpFolder, fileName, "");
+        std::ofstream filestream{fileName};
+        if (filestream) {
+            if (Log::verbose()) std::cerr << "Writing preprocessed P4 to " << fileName << std::endl;
+            filestream << stream.str();
+        }
+        filestream.close();
+
+        in = fopen(fileName.c_str(), "r");
+        if (in == nullptr) {
+            ::P4::error(ErrorType::ERR_IO, "Error invoking preprocessor");
+            perror("");
+            return std::nullopt;
+        }
+    }
     return ParserOptions::PreprocessorResult(in, &closeFile);
-}
-
-// From (folder, file.ext, suffix)  returns
-// folder/file-suffix.ext
-static std::filesystem::path makeFileName(const std::filesystem::path &folder,
-                                          const std::filesystem::path &name,
-                                          std::string_view baseSuffix) {
-    std::filesystem::path newName(name.stem());
-    newName += baseSuffix;
-    newName += name.extension();
-
-    return folder / newName;
 }
 
 bool ParserOptions::isv1() const { return langVersion == ParserOptions::FrontendVersion::P4_14; }
