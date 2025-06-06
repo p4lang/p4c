@@ -117,6 +117,23 @@ class Pattern {
         Pattern operator!=(int a) { return Pattern(*this) != Pattern(a); }
     };
 
+    template<class T = IR::AssignmentStatement>
+    class Assign : public Base {
+        static_assert(std::is_base_of_v<IR::BaseAssignmentStatement, T>);
+        Base *left, *right;
+
+     public:
+        bool match(const IR::Node *n) override {
+            if (auto as = n->to<T>()) {
+                if (left->match(as->left) && right->match(as->right)) return true;
+            }
+            return false;
+        }
+        Assign(Base *l, Base *r) : left(l), right(r) {}  // NOLINT(runtime/explicit)
+        Assign(Base *l, int val) : left(l), right(new Const(val)) {}  // NOLINT(runtime/explicit)
+        Assign(Base *l, big_int val) : left(l), right(new Const(val)) {}  // NOLINT(runtime/explicit)
+    };
+
     template <class T>
     Pattern(const T *&m) : pattern(new MatchExt<T>(m)) {}  // NOLINT(runtime/explicit)
     template <class T>
