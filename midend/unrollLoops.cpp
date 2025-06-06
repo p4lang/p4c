@@ -183,6 +183,10 @@ long UnrollLoops::evalLoop(const IR::Expression *exp, long val,
 long UnrollLoops::evalLoop(const IR::BaseAssignmentStatement *assign, long val,
                            const ComputeDefUse::locset_t &idefs, bool &fail) {
     if (assign->is<IR::AssignmentStatement>()) return evalLoop(assign->right, val, idefs, fail);
+    if (val != evalLoop(assign->left, val, idefs, fail) || fail) {
+        fail = true;
+        return 1;
+    }
     if (assign->is<IR::MulAssign>()) return val * evalLoop(assign->right, val, idefs, fail);
     if (assign->is<IR::DivAssign>()) return val / evalLoop(assign->right, val, idefs, fail);
     if (assign->is<IR::ModAssign>()) return val % evalLoop(assign->right, val, idefs, fail);
