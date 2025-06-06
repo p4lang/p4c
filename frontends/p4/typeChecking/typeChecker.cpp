@@ -584,7 +584,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
         if (initType->is<IR::Type_UnknownStruct>() ||
             (si != nullptr && initType->is<IR::Type_Struct>())) {
             // Even if the structure is a struct expression with the right type,
-            // we still need to recurse over its fields; they many not have
+            // we still need to recurse over its fields; they may not have
             // the right type.
             CHECK_NULL(si);
             bool hasDots = si->containsDots();
@@ -607,7 +607,8 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             if (hasDots) vec.push_back(si->getField("..."_cs));
             if (!changes) vec = si->components;
             if (initType->is<IR::Type_UnknownStruct>() || changes) {
-                sourceExpression = new IR::StructExpression(type, type, vec);
+                sourceExpression =
+                    new IR::StructExpression(sourceExpression->srcInfo, type, type, vec);
                 setType(sourceExpression, destType);
             }
         } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
@@ -630,7 +631,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
                 auto src = assignment(sourceExpression, fieldI->type, compI);
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
-            sourceExpression = new IR::StructExpression(type, type, vec);
+            sourceExpression = new IR::StructExpression(sourceExpression->srcInfo, type, type, vec);
             setType(sourceExpression, destType);
             assignment(errorPosition, destType, sourceExpression);
         }
