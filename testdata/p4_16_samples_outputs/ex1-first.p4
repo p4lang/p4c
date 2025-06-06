@@ -4,5 +4,5 @@ struct S {
 }
 
 action a(in S w, out bit<8> z) {
-    z = 8w10 + w.s;
+    z = w.s + 8w10;
 }
