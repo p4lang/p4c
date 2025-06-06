@@ -29,8 +29,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<16> dummy_var;
-        dummy_var = 16w0 & function_with_side_effect(h.eth_hdr.eth_type);
-        dummy_var = 16w0 * function_with_side_effect(h.eth_hdr.eth_type);
+        dummy_var = function_with_side_effect(h.eth_hdr.eth_type) & 16w0;
+        dummy_var = function_with_side_effect(h.eth_hdr.eth_type) * 16w0;
         dummy_var = 16w0 >> function_with_side_effect(h.eth_hdr.eth_type);
     }
 }
