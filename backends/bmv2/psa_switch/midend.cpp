@@ -94,12 +94,12 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
     : PortableMidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::function<bool(const Context *, const IR::Expression *)> policy =
-        [=](const Context *, const IR::Expression *e) -> bool {
+    P4::LocalCopyPropPolicyCallbackFn policy = [=](const Context *, const IR::Expression *e,
+                                                   const DeclarationLookup *refMap) -> bool {
         auto mce = e->to<IR::MethodCallExpression>();
         if (mce == nullptr) return true;
         // FIXME: Add utility method to resolve declaration given a context
-        auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
+        auto mi = P4::MethodInstance::resolve(mce, refMap, &typeMap);
         auto em = mi->to<P4::ExternMethod>();
         if (em == nullptr) return true;
         if (em->originalExternType->name.name == "Register" || em->method->name.name == "read")

@@ -342,7 +342,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
     }
     if (auto var = ::P4::getref(available, name)) {
         if (var->val) {
-            if (policy(getChildContext(), var->val)) {
+            if (policy(getChildContext(), var->val, this)) {
                 LOG3("  propagating value for " << name << ": " << var->val);
                 CopySrcInfo copy(srcInfo);
                 return var->val->apply(copy);
@@ -811,7 +811,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(vname);
                     var->live = true;
-                } else if (policy(getChildContext(), var->val)) {
+                } else if (policy(getChildContext(), var->val, this)) {
                     LOG3("  will propagate value into table key " << vname << ": " << var->val);
                     tbl->key_remap.emplace(vname, var->val);
                     need_key_rewrite = true;
@@ -837,7 +837,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(vname);
                     var->live = true;
-                } else if (policy(getChildContext(), var->val)) {
+                } else if (policy(getChildContext(), var->val, this)) {
                     LOG3("  will propagate value into table key " << vname << ": " << var->val);
                     tbl->key_remap.emplace(vname, var->val);
                     need_key_rewrite = true;
