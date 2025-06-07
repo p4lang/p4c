@@ -44,6 +44,7 @@ limitations under the License.
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
+#include "metrics/metricsPassManager.h"
 #include "moveConstructors.h"
 #include "moveDeclarations.h"
 #include "parseAnnotations.h"
@@ -153,6 +154,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
 
     TypeMap typeMap;
 
+    MetricsPassManager metricsPassManager(options, &typeMap, P4CContext::get().options().metrics);
+
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
 
@@ -198,6 +201,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         }),
         new CheckCoreMethods(&typeMap),
         new StaticAssert(&typeMap),
+    });
+    metricsPassManager.addUnusedCode(passes, true);
+    passes.addPasses({
         new RemoveParserIfs(&typeMap),
         new StructInitializers(&typeMap),
         new TableKeyNames(&typeMap),
@@ -248,8 +254,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         });
     }
     if (policy->optimize(options)) {
+        passes.addPasses({new InlineActions(&typeMap, *policy)});
+        metricsPassManager.addInlined(passes);
         passes.addPasses({
-            new InlineActions(&typeMap, *policy),
             new LocalizeAllActions(*policy),
             new UniqueNames(),
             new UniqueParameters(&typeMap),
@@ -272,6 +279,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
     }
+    metricsPassManager.addUnusedCode(passes, false);
+    metricsPassManager.addMetricPasses(passes);
+
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this
         // check during inlining since it significantly slows compilation.

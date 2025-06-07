@@ -1,0 +1,96 @@
+{
+  "lines_of_code" : 33,
+  "cyclomatic_complexity" : {
+    "TopParser" : 7
+  },
+  "halstead" : {
+    "unique_operators" : 7,
+    "unique_operands" : 21,
+    "total_operators" : 20,
+    "total_operands" : 36,
+    "vocabulary" : 28,
+    "length" : 56,
+    "difficulty" : 6,
+    "volume" : 269.212,
+    "effort" : 1615.27,
+    "estimated_bugs" : 0.0897373
+  },
+  "unused_code" : {
+    "actions" : 0,
+    "functions" : 0,
+    "states" : 0,
+    "variables" : 0,
+    "enums" : 0,
+    "conditionals" : 0,
+    "parameters" : 0,
+    "returns" : 0
+  },
+  "nesting_depth" : {
+    "average" : 2,
+    "global_max" : 2,
+    "individual_blocks" : {
+      "TopParser" : 2
+    }
+  },
+  "header_metrics" : {
+    "total_headers" : 1,
+    "avg_fields_per_header" : 3,
+    "avg_field_size" : 37.3333,
+    "per_header_metrics" : {
+      "Ethernet_h" : {
+        "fields" : 3,
+        "field_size_sum" : 112
+      }
+    }
+  },
+  "header_manipulation" : {
+    "total_operations" : 1,
+    "total_size" : 112,
+    "per_packet" : {
+      "ethernet" : {
+        "operations" : 1,
+        "size" : 112
+      }
+    }
+  },
+  "header_modification" : {
+    "total_operations" : 0,
+    "total_size" : 0,
+    "per_packet" : {
+    }
+  },
+  "match_action_tables" : {
+    "num_tables" : 0,
+    "total_keys" : 0,
+    "total_key_size" : 0,
+    "avg_key_size" : 0,
+    "avg_keys_per_table" : 0,
+    "max_keys_per_table" : 0,
+    "total_actions" : 0,
+    "avg_actions_per_table" : 0,
+    "max_actions_per_table" : 0,
+    "per_table_metrics" : {
+    }
+  },
+  "parser" : {
+    "total_states" : 9,
+    "state_complexities" : {
+      "start" : 5,
+      "dispatch_value_sets" : 3,
+      "parse_ipv4" : 1,
+      "parse_arp" : 1,
+      "parse_ipv6" : 1,
+      "parse_trill" : 1,
+      "parse_vlan_tag" : 1,
+      "accept" : 1,
+      "reject" : 1
+    }
+  },
+  "extern" : {
+    "functions" : 3,
+    "function_calls" : 2,
+    "structures" : 3,
+    "structure_uses" : 3
+  },
+  "inlined_actions" : 0
+}

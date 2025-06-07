@@ -20,6 +20,7 @@ limitations under the License.
 #define FRONTENDS_COMMON_OPTIONS_H_
 
 #include <filesystem>
+#include <unordered_set>
 
 #include "parser_options.h"
 // for p4::P4RuntimeFormat definition
@@ -80,6 +81,10 @@ class CompilerOptions : public ParserOptions {
     cstring arch = nullptr;
     // If true, unroll all parser loops inside the midend.
     bool loopsUnrolling = false;
+    // List of code metrics input by user.
+    cstring inputMetrics = nullptr;
+    // Code metrics to be collected.
+    std::set<cstring> selectedMetrics;
 
     // General optimization options -- can be interpreted by backends in various ways
     int optimizationLevel = 1;

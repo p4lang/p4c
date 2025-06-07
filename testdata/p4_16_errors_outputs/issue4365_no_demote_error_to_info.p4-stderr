@@ -63,6 +63,10 @@
 --arch arch                             Compile for the specified architecture.
 --loopsUnroll                           Unrolling all parser's loops
 -O                                      Optimization level
+--metrics metric1[,metric2]             Select which code metrics will be collected.
+                                        Valid options: all, loc, cyclomatic, halstead, unused-code, duplicit-code,
+                                        nesting-depth, header-general, header-manipulation, header-modification,
+                                        match-action, parser, inlined, extern.
 --listMidendPasses                      [p4test] Lists exact name of all midend passes.
 --parse-only                            only parse the P4 input, without any further processing
 --validate                              Validate the P4 input, running just the front-end
