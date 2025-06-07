@@ -1,0 +1,3 @@
+forloop9.p4(22): [--Wwarn=unsupported] warning: Can't unroll loop: ForStatement
+        for (; i < 20;) {
+        ^^^^^^^^^^^^^^^

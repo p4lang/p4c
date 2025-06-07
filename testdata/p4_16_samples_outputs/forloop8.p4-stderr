@@ -1,0 +1,3 @@
+forloop8.p4(33): [--Wwarn=unsupported] warning: Can't unroll loop: ForStatement
+        for (
+        ^
