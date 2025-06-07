@@ -534,6 +534,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
         defuse.uses[l->node].insert(loc);
         defuse.defs[loc->node].insert(l);
     }
+    LOG8("  " << defuse.defs[loc->node]);
     return e;
 }
 
@@ -717,7 +718,7 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::loc_t &loc) {
 }
 
 std::ostream &operator<<(std::ostream &out, const hvec_set<const ComputeDefUse::loc_t *> &s) {
-    out << ": {";
+    out << "{";
     const char *sep = " ";
     for (auto *l : s) {
         out << sep << *l;
@@ -739,7 +740,7 @@ std::ostream &operator<<(
         out << '(' << p.first->srcInfo.toSourcePositionData(&line, &col);
         out << ':' << line << ':' << (col + 1) << ')';
     }
-    out << p.second;
+    out << ": " << p.second;
     return out;
 }
 
