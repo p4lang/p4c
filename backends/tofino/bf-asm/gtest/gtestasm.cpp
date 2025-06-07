@@ -59,7 +59,7 @@ class GTestOptions : public Util::Options {
             },
             "[Compiler debugging] Adjust logging level per file (see below)");
     }
-    std::vector<const char *> *process(int argc, char *const argv[]) {
+    std::vector<const char *> *process(int argc, char *const argv[]) override {
         auto remainingOptions = Util::Options::process(argc, argv);
         return remainingOptions;
     }
