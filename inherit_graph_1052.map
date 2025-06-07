@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$struct_tofino_1_1_memories_1_1_s_r_a_m__group_1_1color__mapram__group.html" title=" " alt="" coords="5,5,217,45"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,13,159,38"/>
+<area shape="rect" id="Node000001" href="$class_target_1_1_tofino_1_1_ternary_indirect_table.html" title=" " alt="" coords="207,5,420,45"/>
+<area shape="poly" id="edge2765_Node000000_Node000001" title=" " alt="" coords="172,23,206,23,206,28,172,28"/>
 </map>

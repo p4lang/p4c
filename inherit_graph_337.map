@@ -1,13 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$class_lift_equal.html" title=" " alt="" coords="5,5,176,31"/>
 <area shape="rect" id="Node000001" href="$class_lift_compare.html" title=" " alt="" coords="224,29,417,55"/>
-<area shape="poly" id="edge2228_Node000000_Node000001" title=" " alt="" coords="190,26,224,29,224,35,189,31"/>
+<area shape="poly" id="edge2242_Node000000_Node000001" title=" " alt="" coords="190,26,224,29,224,35,189,31"/>
 <area shape="rect" id="Node000002" href="$class_p_h_v_1_1_field_slice.html" title=" " alt="" coords="465,29,584,55"/>
-<area shape="poly" id="edge2229_Node000001_Node000002" title=" " alt="" coords="431,39,465,39,465,45,431,45"/>
+<area shape="poly" id="edge2243_Node000001_Node000002" title=" " alt="" coords="431,39,465,39,465,45,431,45"/>
 <area shape="rect" id="Node000005" href="$class_lift_less.html" title=" " alt="" coords="9,55,172,80"/>
-<area shape="poly" id="edge2230_Node000005_Node000001" title=" " alt="" coords="185,54,224,50,224,55,186,60"/>
+<area shape="poly" id="edge2244_Node000005_Node000001" title=" " alt="" coords="185,54,224,50,224,55,186,60"/>
 <area shape="rect" id="Node000003" href="$class_p_h_v_1_1_abstract_field.html" title=" " alt="" coords="250,79,391,104"/>
-<area shape="poly" id="edge2232_Node000003_Node000002" title=" " alt="" coords="386,73,471,52,472,57,388,78"/>
+<area shape="poly" id="edge2246_Node000003_Node000002" title=" " alt="" coords="386,73,471,52,472,57,388,78"/>
 <area shape="rect" id="Node000004" href="$class_p_h_v_1_1_constant.html" title=" " alt="" coords="467,79,582,104"/>
-<area shape="poly" id="edge2231_Node000003_Node000004" title=" " alt="" coords="405,89,467,89,467,94,405,94"/>
+<area shape="poly" id="edge2245_Node000003_Node000004" title=" " alt="" coords="405,89,467,89,467,94,405,94"/>
 </map>
