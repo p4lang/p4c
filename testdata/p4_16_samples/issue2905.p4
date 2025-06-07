@@ -1,9 +1,15 @@
 #include <core.p4>
 
-control c() {
+struct h_t {
+    bit<1> b;
+}
+
+control c(inout h_t h) {
     action a() {}
     table t {
-        key = {}
+        key = {
+            h.b : exact;
+        }
         actions = {
             a;
         }
