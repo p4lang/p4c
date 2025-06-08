@@ -1,5 +1,7 @@
 var NAVTREEINDEX34 =
 {
+"struct_action_data_bus_1_1_full_share.html":[13,0,30,0],
+"struct_action_data_bus_1_1_loc.html":[13,0,30,1],
 "struct_action_data_bus_1_1_use.html":[13,0,30,2],
 "struct_action_data_bus_1_1_use_1_1_reserved_space.html":[13,0,30,2,0],
 "struct_action_data_bus_1_1_use_1_1_reserved_space.html#a88b4c1800d1661fa2fbca414166829ab":[13,0,30,2,0,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX34 =
 "struct_b_f_n_1_1_resources_1_1_hash_dist_resource.html":[13,0,4,2,2],
 "struct_b_f_n_1_1_resources_1_1_memories_resource.html":[13,0,4,2,4],
 "struct_b_f_n_1_1_resources_1_1_xbar_byte_resource.html":[13,0,4,2,6],
-"struct_b_f_n_1_1_rewrite_parser_checksums.html":[12,0,4,187],
-"struct_b_f_n_1_1_rewrite_parser_checksums.html":[13,0,4,191],
-"struct_b_f_n_1_1_rewrite_parser_statements.html":[12,0,4,188]
+"struct_b_f_n_1_1_rewrite_parser_checksums.html":[12,0,4,187]
 };

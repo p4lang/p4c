@@ -1,5 +1,7 @@
 var NAVTREEINDEX40 =
 {
+"struct_tofino_1_1_i_x_bar.html":[12,0,23,2],
+"struct_tofino_1_1_i_x_bar.html":[13,0,20,2],
 "struct_tofino_1_1_i_x_bar.html#a4f7a6557bbc9917c4e6c8764a0836e59":[12,0,23,2,5],
 "struct_tofino_1_1_i_x_bar.html#a4f7a6557bbc9917c4e6c8764a0836e59":[13,0,20,2,5],
 "struct_tofino_1_1_i_x_bar_1_1_hash_dist_alloc_post_expand.html":[12,0,23,2,1],

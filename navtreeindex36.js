@@ -1,5 +1,7 @@
 var NAVTREEINDEX36 =
 {
+"struct_p4_1_1_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_st1322a69414f620e76e7f30e0ec680188.html":[13,0,12,2,0,2],
+"struct_p4_1_1_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_sta0136555201f55da098a85711b433ac9.html":[13,0,12,2,0,1],
 "struct_p4_1_1_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_stda9c30113a2eccbb56f74bdd94f918dc.html":[13,0,12,2,0,4],
 "struct_p4_1_1_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_counter_extern_3_01_ste958726fa88b1d2455cc5cc072b4688e.html":[13,0,12,2,0,3],
 "struct_p4_1_1_b_m_v2_1_1_helpers_1_1_counterlike_traits_3_01_standard_1_1_meter_extern_3_01_stan01b1106c7bcb19b48625129200a629a0.html":[13,0,12,2,0,8],
@@ -247,7 +249,5 @@ var NAVTREEINDEX36 =
 "struct_p4_1_1_egress___model.html":[13,0,12,171],
 "struct_p4_1_1_error_message.html":[12,0,14,172],
 "struct_p4_1_1_error_message.html":[13,0,12,187],
-"struct_p4_1_1_error_message.html#a041e939c6adafb81b9d3f766c96e6f6d":[12,0,14,172,0],
-"struct_p4_1_1_error_message.html#a041e939c6adafb81b9d3f766c96e6f6d":[13,0,12,187,0],
-"struct_p4_1_1_error_message.html#a5bb09631c62b8c0a5441d2e397d9a1d9":[12,0,14,172,1]
+"struct_p4_1_1_error_message.html#a041e939c6adafb81b9d3f766c96e6f6d":[12,0,14,172,0]
 };

@@ -44,22 +44,22 @@
 <area shape="poly" id="edge46_Node000001_Node000839" title=" " alt="" coords="54,822,60,873,74,937,85,971,100,1003,119,1033,143,1059,160,1070,179,1078,177,1083,157,1075,140,1063,115,1037,95,1006,80,973,68,939,54,874,49,823"/>
 <area shape="rect" id="Node000846" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="169,1122,336,1147"/>
 <area shape="poly" id="edge51_Node000001_Node000846" title=" " alt="" coords="53,822,55,882,67,959,78,1000,94,1040,116,1077,143,1109,170,1125,168,1129,140,1113,111,1080,89,1042,73,1002,62,961,50,882,47,823"/>
-<area shape="rect" id="Node000885" href="$class_p4_1_1_type_inference_base.html" title=" " alt="" coords="433,1270,602,1295"/>
-<area shape="poly" id="edge58_Node000001_Node000885" title=" " alt="" coords="55,822,64,909,81,1026,93,1084,107,1136,124,1179,143,1207,157,1215,182,1223,256,1240,433,1269,432,1274,255,1245,180,1228,154,1220,140,1211,119,1182,102,1138,88,1085,76,1026,59,910,50,822"/>
-<area shape="rect" id="Node000890" href="$class_p4_1_1_transform.html" title=" " alt="" coords="197,1171,308,1197"/>
-<area shape="poly" id="edge56_Node000001_Node000890" title=" " alt="" coords="56,822,67,900,85,1001,111,1097,126,1134,143,1158,168,1174,198,1181,196,1186,166,1179,139,1162,122,1136,106,1099,80,1002,62,901,51,823"/>
-<area shape="rect" id="Node001209" href="$class_p4_1_1_visit_functor.html" title=" " alt="" coords="191,1273,314,1298"/>
-<area shape="poly" id="edge59_Node000001_Node001209" title=" " alt="" coords="55,822,63,917,80,1046,92,1111,106,1170,123,1219,143,1252,166,1268,192,1277,190,1282,163,1273,139,1255,118,1221,101,1172,86,1112,74,1047,58,918,50,823"/>
-<area shape="rect" id="Node001210" href="$class_p_h_v_1_1_live_range_split_or_fail.html" title=" " alt="" coords="157,1322,348,1347"/>
-<area shape="poly" id="edge60_Node000001_Node001210" title=" " alt="" coords="54,823,60,929,75,1075,87,1150,102,1217,120,1272,143,1309,159,1321,155,1325,139,1312,116,1274,96,1219,81,1151,70,1076,55,929,49,823"/>
-<area shape="rect" id="Node001211" href="$class_p_h_v_1_1v2_1_1_phv_allocation.html" title=" " alt="" coords="168,1371,337,1397"/>
-<area shape="poly" id="edge61_Node000001_Node001211" title=" " alt="" coords="54,823,58,938,72,1099,83,1181,99,1256,119,1317,130,1341,143,1358,169,1375,166,1379,140,1362,126,1343,114,1319,93,1258,78,1182,66,1100,53,938,48,823"/>
-<area shape="rect" id="Node001212" href="$group___allocate_parser_checksums.html#struct_parser_checksum_allocator" title=" " alt="" coords="159,1421,347,1446"/>
-<area shape="poly" id="edge62_Node000001_Node001212" title=" " alt="" coords="53,822,56,946,69,1123,80,1213,96,1295,117,1362,129,1388,143,1407,160,1420,157,1424,139,1411,125,1391,112,1364,90,1296,75,1214,63,1123,51,946,48,822"/>
-<area shape="rect" id="Node001213" href="$struct_phv_info_1_1_dump_phv_fields.html" title="Pretty&#45;print all fields." alt="" coords="163,1470,343,1495"/>
-<area shape="poly" id="edge63_Node000001_Node001213" title=" " alt="" coords="53,822,55,955,65,1146,77,1244,93,1334,115,1408,128,1436,143,1457,164,1472,161,1476,139,1461,124,1438,110,1410,87,1335,71,1245,60,1147,49,955,48,822"/>
-<area shape="rect" id="Node001214" href="$class_phv_logging_1_1_collect_def_use_info.html" title=" " alt="" coords="141,1519,364,1545"/>
-<area shape="poly" id="edge64_Node000001_Node001214" title=" " alt="" coords="53,823,53,964,62,1170,73,1276,90,1373,113,1453,127,1483,143,1506,157,1517,154,1521,139,1510,122,1486,108,1455,85,1375,68,1277,57,1171,48,965,47,823"/>
+<area shape="rect" id="Node000886" href="$class_p4_1_1_type_inference_base.html" title=" " alt="" coords="433,1270,602,1295"/>
+<area shape="poly" id="edge58_Node000001_Node000886" title=" " alt="" coords="55,822,64,909,81,1026,93,1084,107,1136,124,1179,143,1207,157,1215,182,1223,256,1240,433,1269,432,1274,255,1245,180,1228,154,1220,140,1211,119,1182,102,1138,88,1085,76,1026,59,910,50,822"/>
+<area shape="rect" id="Node000891" href="$class_p4_1_1_transform.html" title=" " alt="" coords="197,1171,308,1197"/>
+<area shape="poly" id="edge56_Node000001_Node000891" title=" " alt="" coords="56,822,67,900,85,1001,111,1097,126,1134,143,1158,168,1174,198,1181,196,1186,166,1179,139,1162,122,1136,106,1099,80,1002,62,901,51,823"/>
+<area shape="rect" id="Node001210" href="$class_p4_1_1_visit_functor.html" title=" " alt="" coords="191,1273,314,1298"/>
+<area shape="poly" id="edge59_Node000001_Node001210" title=" " alt="" coords="55,822,63,917,80,1046,92,1111,106,1170,123,1219,143,1252,166,1268,192,1277,190,1282,163,1273,139,1255,118,1221,101,1172,86,1112,74,1047,58,918,50,823"/>
+<area shape="rect" id="Node001211" href="$class_p_h_v_1_1_live_range_split_or_fail.html" title=" " alt="" coords="157,1322,348,1347"/>
+<area shape="poly" id="edge60_Node000001_Node001211" title=" " alt="" coords="54,823,60,929,75,1075,87,1150,102,1217,120,1272,143,1309,159,1321,155,1325,139,1312,116,1274,96,1219,81,1151,70,1076,55,929,49,823"/>
+<area shape="rect" id="Node001212" href="$class_p_h_v_1_1v2_1_1_phv_allocation.html" title=" " alt="" coords="168,1371,337,1397"/>
+<area shape="poly" id="edge61_Node000001_Node001212" title=" " alt="" coords="54,823,58,938,72,1099,83,1181,99,1256,119,1317,130,1341,143,1358,169,1375,166,1379,140,1362,126,1343,114,1319,93,1258,78,1182,66,1100,53,938,48,823"/>
+<area shape="rect" id="Node001213" href="$group___allocate_parser_checksums.html#struct_parser_checksum_allocator" title=" " alt="" coords="159,1421,347,1446"/>
+<area shape="poly" id="edge62_Node000001_Node001213" title=" " alt="" coords="53,822,56,946,69,1123,80,1213,96,1295,117,1362,129,1388,143,1407,160,1420,157,1424,139,1411,125,1391,112,1364,90,1296,75,1214,63,1123,51,946,48,822"/>
+<area shape="rect" id="Node001214" href="$struct_phv_info_1_1_dump_phv_fields.html" title="Pretty&#45;print all fields." alt="" coords="163,1470,343,1495"/>
+<area shape="poly" id="edge63_Node000001_Node001214" title=" " alt="" coords="53,822,55,955,65,1146,77,1244,93,1334,115,1408,128,1436,143,1457,164,1472,161,1476,139,1461,124,1438,110,1410,87,1335,71,1245,60,1147,49,955,48,822"/>
+<area shape="rect" id="Node001215" href="$class_phv_logging_1_1_collect_def_use_info.html" title=" " alt="" coords="141,1519,364,1545"/>
+<area shape="poly" id="edge64_Node000001_Node001215" title=" " alt="" coords="53,823,53,964,62,1170,73,1276,90,1373,113,1453,127,1483,143,1506,157,1517,154,1521,139,1510,122,1486,108,1455,85,1375,68,1277,57,1171,48,965,47,823"/>
 <area shape="rect" id="Node000014" href="$class_default_next.html" title=" " alt="" coords="467,431,568,457"/>
 <area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="310,667,338,659,362,643,378,623,385,601,387,579,385,557,384,534,385,511,393,488,410,466,436,450,466,442,467,447,438,455,414,470,398,491,391,512,389,534,391,556,392,579,391,602,383,625,366,647,340,664,311,672"/>
 <area shape="rect" id="Node000015" href="$class_dynamic_next_table.html" title=" " alt="" coords="445,283,590,309"/>
@@ -110,6 +110,6 @@
 <area shape="poly" id="edge52_Node000846_Node000289" title=" " alt="" coords="350,1132,428,1132,428,1137,350,1137"/>
 <area shape="poly" id="edge53_Node000846_Node000300" title=" " alt="" coords="335,1147,449,1169,448,1174,334,1152"/>
 <area shape="poly" id="edge54_Node000846_Node000301" title=" " alt="" coords="348,1150,365,1158,381,1170,390,1183,399,1196,413,1207,439,1218,437,1223,411,1212,395,1199,386,1186,377,1174,363,1162,346,1154"/>
-<area shape="poly" id="edge55_Node000846_Node000885" title=" " alt="" coords="350,1148,366,1158,378,1170,385,1183,391,1209,396,1234,403,1245,414,1257,434,1268,431,1273,410,1261,398,1249,391,1236,385,1210,380,1185,373,1173,362,1162,347,1153"/>
-<area shape="poly" id="edge57_Node000890_Node000301" title=" " alt="" coords="322,1194,449,1218,448,1223,321,1199"/>
+<area shape="poly" id="edge55_Node000846_Node000886" title=" " alt="" coords="350,1148,366,1158,378,1170,385,1183,391,1209,396,1234,403,1245,414,1257,434,1268,431,1273,410,1261,398,1249,391,1236,385,1210,380,1185,373,1173,362,1162,347,1153"/>
+<area shape="poly" id="edge57_Node000891_Node000301" title=" " alt="" coords="322,1194,449,1218,448,1223,321,1199"/>
 </map>

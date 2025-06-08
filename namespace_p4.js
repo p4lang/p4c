@@ -446,6 +446,7 @@ var namespace_p4 =
     [ "SimplifyComplexConditionPolicy", "group___simplify_nested_if.html#class_p4_1_1_simplify_complex_condition_policy", null ],
     [ "SimplifyControlFlow", "class_p4_1_1_simplify_control_flow.html", null ],
     [ "SimplifyDefUse", "class_p4_1_1_simplify_def_use.html", null ],
+    [ "SimplifyExternMethodCalls", "class_p4_1_1_simplify_extern_method_calls.html", null ],
     [ "SimplifyIfStatement", "group___simplify_if_statement.html#class_p4_1_1_simplify_if_statement", null ],
     [ "SimplifyKey", "class_p4_1_1_simplify_key.html", null ],
     [ "SimplifyNestedIf", "group___simplify_nested_if.html#class_p4_1_1_simplify_nested_if", null ],

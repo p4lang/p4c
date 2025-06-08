@@ -1,5 +1,7 @@
 var NAVTREEINDEX26 =
 {
+"class_p4_1_1bitvec_1_1nonconst__bitref.html":[13,0,12,54,2],
+"class_p4_1_1cstring.html":[12,0,14,84],
 "class_p4_1_1cstring.html":[13,0,12,99],
 "class_p4_1_1cstring.html#a064df5c45da0a89e1a36520baf1f4bc1":[12,0,14,84,4],
 "class_p4_1_1cstring.html#a064df5c45da0a89e1a36520baf1f4bc1":[13,0,12,99,4],
@@ -89,12 +91,12 @@ var NAVTREEINDEX26 =
 "class_p4_1_1ordered__set_1_1sorted__iterator.html":[13,0,12,345,0],
 "class_p4_1_1safe__vector.html":[12,0,14,426],
 "class_p4_1_1safe__vector.html":[13,0,12,441],
-"class_p4_1_1string__map.html":[12,0,14,473],
-"class_p4_1_1string__map.html":[13,0,12,488],
-"class_p4_1_1string__map.html#a41a19381543fbc10b4677b8864db5048":[12,0,14,473,1],
-"class_p4_1_1string__map.html#a41a19381543fbc10b4677b8864db5048":[13,0,12,488,1],
-"class_p4_1_1string__map.html#a8163684afa7b195fde4016e76d2bd967":[12,0,14,473,0],
-"class_p4_1_1string__map.html#a8163684afa7b195fde4016e76d2bd967":[13,0,12,488,0],
+"class_p4_1_1string__map.html":[12,0,14,474],
+"class_p4_1_1string__map.html":[13,0,12,489],
+"class_p4_1_1string__map.html#a41a19381543fbc10b4677b8864db5048":[12,0,14,474,1],
+"class_p4_1_1string__map.html#a41a19381543fbc10b4677b8864db5048":[13,0,12,489,1],
+"class_p4_1_1string__map.html#a8163684afa7b195fde4016e76d2bd967":[12,0,14,474,0],
+"class_p4_1_1string__map.html#a8163684afa7b195fde4016e76d2bd967":[13,0,12,489,0],
 "class_p4_runtime_symbol_table_iface.html":[13,0,485],
 "class_p4_runtime_symbol_table_iface.html#a3d8872300f2ded037d19e51cd23457b2":[13,0,485,2],
 "class_p4_runtime_symbol_table_iface.html#ab46f248f8fe56a4c164334c84721b1bf":[13,0,485,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX26 =
 "class_p_h_v_1_1_allocation.html#af0e7021614988fd7456cd5c9c9833970":[12,0,16,6,28],
 "class_p_h_v_1_1_allocation.html#af0e7021614988fd7456cd5c9c9833970":[13,0,15,9,28],
 "class_p_h_v_1_1_allocation.html#af5145402ae68af25b937ca6e3895517c":[12,0,16,6,15],
-"class_p_h_v_1_1_allocation.html#af5145402ae68af25b937ca6e3895517c":[13,0,15,9,15],
-"class_p_h_v_1_1_allocation.html#afcfb24182fa901919cd22604627da920":[12,0,16,6,43],
-"class_p_h_v_1_1_allocation.html#afcfb24182fa901919cd22604627da920":[13,0,15,9,43]
+"class_p_h_v_1_1_allocation.html#af5145402ae68af25b937ca6e3895517c":[13,0,15,9,15]
 };
