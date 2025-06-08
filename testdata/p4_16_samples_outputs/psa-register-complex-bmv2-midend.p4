@@ -25,7 +25,6 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("cIngress.tmp") bit<48> tmp;
     @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
@@ -35,7 +34,6 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @hidden action psaregistercomplexbmv2l60() {
         regfile_0.write(32w1, 48w3);
         regfile_0.write(32w2, 48w4);
-        tmp = regfile_0.read(32w1);
         hdr.ethernet.dstAddr = regfile_0.read(32w1) + regfile_0.read(32w2) + 48w281474976710651;
     }
     @hidden table tbl_psaregistercomplexbmv2l60 {
@@ -52,7 +50,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         tbl_psaregistercomplexbmv2l60.apply();
-        if (tmp + regfile_0.read(32w2) + 48w281474976710651 == 48w2) {
+        if (regfile_0.read(32w1) + regfile_0.read(32w2) + 48w281474976710651 == 48w2) {
             tbl_send_to_port.apply();
         }
     }

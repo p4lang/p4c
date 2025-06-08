@@ -56,6 +56,7 @@ limitations under the License.
 #include "midend/removeSelectBooleans.h"
 #include "midend/removeUnusedParameters.h"
 #include "midend/replaceSelectRange.h"
+#include "midend/simplifyExternMethod.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
@@ -111,6 +112,9 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
     if (BMV2::PnaNicContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+            new P4::TypeChecking(&refMap, &typeMap),
+            new P4::SimplifyExternMethodCalls(&typeMap),
+            new P4::TypeChecking(&refMap, &typeMap),
             new CheckUnsupported(),
             new P4::RemoveMiss(&typeMap),
             new P4::EliminateNewtype(&typeMap),
