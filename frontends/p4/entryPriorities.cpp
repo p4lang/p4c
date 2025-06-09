@@ -70,6 +70,9 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     // check to see if priorities are required or allowed
     bool requiresPriorities = false;
     auto key = table->getKey();
+    if (!key || key->keyElements.empty()) {
+        return entries;
+    }
     for (auto element : key->keyElements) {
         if (requiresPriority(element)) {
             requiresPriorities = true;
