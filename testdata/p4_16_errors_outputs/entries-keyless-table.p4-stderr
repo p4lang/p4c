@@ -1,3 +1,0 @@
-entries-keyless-table.p4(18): [--Werror=unsupported] error: t: Entries cannot be specified for a table with no key
-    table t {
-          ^

@@ -7,6 +7,7 @@ control c() {
         }
         default_action = a;
         entries = {
+                        default : a;
         }
     }
     apply {

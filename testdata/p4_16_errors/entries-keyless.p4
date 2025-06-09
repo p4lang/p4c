@@ -18,7 +18,7 @@ control c() {
     table t {
         actions = { a; }
         default_action = a;
-        entries = {}
+        entries = { _ : a; }
     }
     apply {
         t.apply();
