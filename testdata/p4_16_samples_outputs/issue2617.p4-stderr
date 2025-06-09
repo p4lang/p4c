@@ -1,15 +1,3 @@
-issue2617.p4(64): [--Wwarn=mismatch] warning: 32w1: constant expression in switch
-        switch (32w1) {
-                ^^^^
-issue2617.p4(70): [--Wwarn=mismatch] warning: E.C: constant expression in switch
-        switch (E.C) {
-                ^^^
-issue2617.p4(75): [--Wwarn=mismatch] warning: E.C: constant expression in switch
-        switch (E.C) {
-                ^^^
-issue2617.p4(80): [--Wwarn=mismatch] warning: X.B: constant expression in switch
-        switch (X.B) {
-                ^^^
 issue2617.p4(17): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
             2: two;
             ^^^^^^

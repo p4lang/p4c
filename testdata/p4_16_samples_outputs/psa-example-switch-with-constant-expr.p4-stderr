@@ -1,3 +1,0 @@
-psa-example-switch-with-constant-expr.p4(65): [--Wwarn=mismatch] warning: 16w2: constant expression in switch
-        switch (16w2) {
-                ^^^^

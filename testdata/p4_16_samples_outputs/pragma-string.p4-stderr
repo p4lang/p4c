@@ -1,1 +1,17 @@
+pragma-string.p4(20): [--Wwarn=unused] warning: 'original' is unused
+const bit b = 1;
+          ^
+pragma-string.p4(23): [--Wwarn=unused] warning: 'string \" with \" quotes' is unused
+const bit c = 1;
+          ^
+pragma-string.p4(27): [--Wwarn=unused] warning: 'string with
+newline' is unused
+const bit d = 1;
+          ^
+pragma-string.p4(31): [--Wwarn=unused] warning: 'string with quoted newline' is unused
+const bit e = 1;
+          ^
+pragma-string.p4(34): [--Wwarn=unused] warning: '8-bit string ⟶' is unused
+const bit f = 1;
+          ^
 [--Wwarn=missing] warning: Program does not contain a `main' module
