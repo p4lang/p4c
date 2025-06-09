@@ -59,7 +59,7 @@ bool P4::CheckTableEntries::ternary_covers(const IR::Expression *k1, const IR::E
 
 bool P4::CheckTableEntries::preorder(const IR::P4Table *tbl) {
     auto *entries = tbl->getEntries();
-    if (!entries) return false;
+    if (!entries || entries->entries.empty()) return false;
     auto *key = tbl->getKey();
     BUG_CHECK(key, "%1% table has entries and no key", tbl);
     std::vector<bool> ternary_keys;

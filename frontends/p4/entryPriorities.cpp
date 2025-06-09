@@ -39,13 +39,6 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
     CHECK_NULL(ep);
 
-    auto key = table->getKey();
-    if (!key || key->keyElements.empty()) {
-        ::P4::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1%: Entries cannot be specified for a table with no key", table);
-        return entries;
-    }
-
     const IR::Entry *withPriority = nullptr;
     for (auto entry : entries->entries) {
         if (entry->priority) {
@@ -76,6 +69,10 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
 
     // check to see if priorities are required or allowed
     bool requiresPriorities = false;
+    auto key = table->getKey();
+    if (!key || key->keyElements.empty()) {
+        return entries;
+    }
     for (auto element : key->keyElements) {
         if (requiresPriority(element)) {
             requiresPriorities = true;
