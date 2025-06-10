@@ -61,7 +61,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
 
         auto *sclone = stat->clone();
         bool changed = false;
-        for (auto &c : sclone->cases) {
+        for (unsigned i = 0; i < sclone->cases.size(); i++) {
+            auto &c = sclone->cases[i];
             if (!isCompileTimeConstant(c->label))
                 typeError("%1%: must be a compile-time constant", c->label);
             auto lt = getType(c->label);
@@ -82,6 +83,12 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
                 c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
                 setCompileTimeConstant(c->label);
                 changed = true;
+            }
+            for (unsigned j = i + 1; j < sclone->cases.size(); j++) {
+                auto *other = sclone->cases.at(j);
+                if (other->label->equiv(*c->label)) {
+                    typeError("%1%: duplicate case label %2%", other->label, c->label);
+                }
             }
         }
         if (changed) stat = sclone;
