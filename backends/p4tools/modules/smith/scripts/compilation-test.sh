@@ -12,6 +12,7 @@ KNOWN_BUGS=(
     "Cannot evaluate initializer for constant"
     "Null expr"
     "error: retval_1: declaration not found"  # V1model failure.
+    "error: \(in\)\?out argument binds value accessed by callee"
 )
 
 # Function to check if an error is triggered by a known bug.

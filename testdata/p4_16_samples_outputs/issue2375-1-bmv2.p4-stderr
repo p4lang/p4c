@@ -1,3 +1,0 @@
-issue2375-1-bmv2.p4(34): [--Wwarn=unused] warning: 'val' is unused
-    action do_action(inout bool val) {
-                                ^^^
