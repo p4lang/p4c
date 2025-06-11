@@ -31,7 +31,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
         hdr.ethernet.src_addr = m.addr;
     }
-    action macswp(inout bit<48> tmp1, bit<32> tmp2) {
+    action macswp(in bit<48> tmp1, bit<32> tmp2) {
         if (tmp1 == 0x1 && tmp2 == 0x2) {
             m.addr = hdr.ethernet.dst_addr;
             hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
