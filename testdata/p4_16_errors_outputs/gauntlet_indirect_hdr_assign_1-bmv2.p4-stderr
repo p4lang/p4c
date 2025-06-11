@@ -1,0 +1,12 @@
+gauntlet_indirect_hdr_assign_1-bmv2.p4(27): [--Wwarn=unused] warning: 'val' is unused
+    action do_action(inout Headers val) {
+                                   ^^^
+gauntlet_indirect_hdr_assign_1-bmv2.p4(32): [--Werror=invalid] error: inout argument binds value accessed by callee do_action
+        do_action(h);
+                  ^
+gauntlet_indirect_hdr_assign_1-bmv2.p4(27)
+    action do_action(inout Headers val) {
+           ^^^^^^^^^
+gauntlet_indirect_hdr_assign_1-bmv2.p4(28)
+        h.eth_hdr.eth_type = 2;
+        ^^^^^^^^^^^^^^^^^^

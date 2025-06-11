@@ -22,7 +22,7 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    action do_thing(inout bit<8> val_0) {
+    action do_thing(in bit<8> val_0) {
         h.h.a = h.h.b >= 4 ? h.h.b : h.h.b + 1;
     }
     apply {
