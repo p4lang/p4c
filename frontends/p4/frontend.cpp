@@ -26,6 +26,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 // Passes
 #include "actionsInlining.h"
+#include "checkArgAlias.h"
 #include "checkConstants.h"
 #include "checkCoreMethods.h"
 #include "checkNamedArgs.h"
@@ -201,6 +202,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         }),
         new CheckCoreMethods(&typeMap),
         new StaticAssert(&typeMap),
+        new CheckArgAlias(&typeMap),
     });
     metricsPassManager.addUnusedCode(passes, true);
     passes.addPasses({
