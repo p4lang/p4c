@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 issue2289.p4(44): [--Wwarn=unused] warning: 'byaA' is unused
     action simple_action(out bit<16> byaA) {
                                      ^^^^
@@ -10,3 +11,18 @@ issue2289.p4(44)
 issue2289.p4(44): [--Wwarn=uninitialized-use] warning: byaA may be uninitialized
     action simple_action(out bit<16> byaA) {
                                      ^^^^
+||||||| parent of 41d93ef0b3 (Check for out/inout bindings aliased with uses)
+issue2289.p4(44): [--Wwarn=unused] warning: 'byaA' is unused
+    action simple_action(out bit<16> byaA) {
+                                     ^^^^
+issue2289.p4(44): [--Wwarn=uninitialized_out_param] warning: out parameter 'byaA' may be uninitialized when 'simple_action' terminates
+    action simple_action(out bit<16> byaA) {
+                                     ^^^^
+issue2289.p4(44)
+    action simple_action(out bit<16> byaA) {
+           ^^^^^^^^^^^^^
+issue2289.p4(44): [--Wwarn=uninitialized_use] warning: byaA may be uninitialized
+    action simple_action(out bit<16> byaA) {
+                                     ^^^^
+=======
+>>>>>>> 41d93ef0b3 (Check for out/inout bindings aliased with uses)

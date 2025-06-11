@@ -31,11 +31,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<1> tmp;
     @name("ingress.slice_action") action slice_action() {
-        h.h.a = 8w2;
         tmp = 1w1;
+    }
+    @hidden action issue2498bmv2l41() {
+        h.h.a = 8w2;
     }
     @hidden action act() {
         h.h.a[0:0] = tmp;
+    }
+    @hidden table tbl_issue2498bmv2l41 {
+        actions = {
+            issue2498bmv2l41();
+        }
+        const default_action = issue2498bmv2l41();
     }
     @hidden table tbl_slice_action {
         actions = {
@@ -50,6 +58,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = act();
     }
     apply {
+        tbl_issue2498bmv2l41.apply();
         tbl_slice_action.apply();
         tbl_act.apply();
     }
