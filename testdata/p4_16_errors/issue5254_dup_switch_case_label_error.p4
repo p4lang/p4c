@@ -65,7 +65,11 @@ control c() {
   }
 
   apply {
-    t.apply();
+    switch (t.apply().action_run) {
+      a: {}
+      a: {}
+      default: {}
+    }
   }
 }
 Pkg(c()) main;

@@ -35,19 +35,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        absl::flat_hash_map<cstring, const IR::Node *, Util::Hash> foundLabels;
-        const IR::Node *foundDefault = nullptr;
         for (auto c : stat->cases) {
             if (c->label->is<IR::DefaultExpression>()) {
-                if (foundDefault)
-                    typeError("%1%: multiple 'default' labels %2%", c->label, foundDefault);
-                foundDefault = c->label;
                 continue;
             } else if (auto pe = c->label->to<IR::PathExpression>()) {
                 cstring label = pe->path->name.name;
-                auto [it, inserted] = foundLabels.emplace(label, c->label);
-                if (!inserted)
-                    typeError("%1%: 'switch' label duplicates %2%", c->label, it->second);
                 if (!ae->contains(label))
                     typeError("%1% is not a legal label (action name)", c->label);
             } else {
@@ -61,8 +53,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
 
         auto *sclone = stat->clone();
         bool changed = false;
-        for (unsigned i = 0; i < sclone->cases.size(); i++) {
-            auto &c = sclone->cases[i];
+        for (auto &c : sclone->cases) {
             if (!isCompileTimeConstant(c->label))
                 typeError("%1%: must be a compile-time constant", c->label);
             auto lt = getType(c->label);
@@ -83,12 +74,6 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
                 c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
                 setCompileTimeConstant(c->label);
                 changed = true;
-            }
-            for (unsigned j = i + 1; j < sclone->cases.size(); j++) {
-                auto *other = sclone->cases.at(j);
-                if (other->label->equiv(*c->label)) {
-                    typeError("%1%: duplicate case label %2%", other->label, c->label);
-                }
             }
         }
         if (changed) stat = sclone;
