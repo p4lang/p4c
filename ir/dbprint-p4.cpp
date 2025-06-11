@@ -138,7 +138,9 @@ void IR::ActionFunction::dbprint(std::ostream &out) const {
 }
 
 void IR::P4Action::dbprint(std::ostream &out) const {
-    out << annotations << "action " << name << "(";
+    out << annotations << "action " << name;
+    if (dbgetflags(out) & Brief) return;
+    out << "(";
     const char *sep = "";
     for (auto arg : parameters->parameters) {
         out << sep << arg->direction << ' ' << arg->type << ' ' << arg->name;
@@ -214,6 +216,7 @@ void IR::V1Control::dbprint(std::ostream &out) const {
 }
 void IR::P4Control::dbprint(std::ostream &out) const {
     out << "control " << name;
+    if (dbgetflags(out) & Brief) return;
     if (type->typeParameters && !type->typeParameters->empty()) out << type->typeParameters;
     if (type->applyParams) out << '(' << type->applyParams << ')';
     if (constructorParams) out << '(' << constructorParams << ')';
