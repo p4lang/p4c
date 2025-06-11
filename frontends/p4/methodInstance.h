@@ -84,6 +84,7 @@ class MethodInstance : public InstanceBase {
         with instantiated type parameters. */
     const IR::Type_MethodBase *actualMethodType;
     virtual bool isApply() const { return false; }
+    virtual const IR::IDeclaration *callee() const { return object; }
 
     /** @param useExpressionType If true, the typeMap can be nullptr,
      *   and then mce->type is used.  For some technical reasons
@@ -141,6 +142,7 @@ class ApplyMethod final : public MethodInstance {
     const IR::IApply *applyObject;
     bool isApply() const override { return true; }
     bool isTableApply() const { return object->is<IR::P4Table>(); }
+    const IR::IDeclaration *callee() const override { return applyObject->to<IR::IDeclaration>(); }
 
     DECLARE_TYPEINFO(ApplyMethod, MethodInstance);
 };
@@ -222,6 +224,7 @@ class ActionCall final : public MethodInstance {
     /// Generate a version of the action where the parameters in the
     /// substitution have been replaced with the arguments.
     const IR::P4Action *specialize(const DeclarationLookup *refMap) const;
+    const IR::IDeclaration *callee() const override { return action; }
 
     DECLARE_TYPEINFO(ActionCall, MethodInstance);
 };
@@ -244,6 +247,7 @@ class FunctionCall final : public MethodInstance {
 
  public:
     const IR::Function *function;
+    const IR::IDeclaration *callee() const override { return function; }
 
     DECLARE_TYPEINFO(FunctionCall, MethodInstance);
 };
