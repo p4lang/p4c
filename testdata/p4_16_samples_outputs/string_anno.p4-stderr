@@ -1,1 +1,17 @@
+string_anno.p4(19): [--Wwarn=unused] warning: 'original' is unused
+@name("original") const bit b = 1;
+                            ^
+string_anno.p4(20): [--Wwarn=unused] warning: 'string \" with \" quotes' is unused
+@name("string \" with \" quotes") const bit c = 1;
+                                            ^
+string_anno.p4(22): [--Wwarn=unused] warning: 'string with
+newline' is unused
+newline") const bit d = 1;
+                    ^
+string_anno.p4(23): [--Wwarn=unused] warning: 'string with quoted newline' is unused
+@name("string with quoted newline") const bit e = 1;
+                                              ^
+string_anno.p4(25): [--Wwarn=unused] warning: '8-bit string ⟶' is unused
+@name("8-bit string ⟶") const bit f = 1;
+                                    ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -58,8 +58,6 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
         // switch (expression)
         Comparison comp;
         comp.left = stat->expression;
-        if (isCompileTimeConstant(stat->expression))
-            warn(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch", stat->expression);
 
         auto *sclone = stat->clone();
         bool changed = false;
