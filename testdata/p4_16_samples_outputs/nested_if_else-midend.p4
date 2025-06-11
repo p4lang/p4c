@@ -71,7 +71,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         } else {
             x_0 = hdr.ipv4.identification + 16w6;
         }
-        hdr.ipv4.totalLen = hdr.ipv4.totalLen + x_0 + hdr.ipv4.hdrChecksum;
+        hdr.ipv4.totalLen = hdr.ipv4.srcAddr[15:0] + x_0 + hdr.ipv4.hdrChecksum;
     }
     @name("MyIngress.drop") action drop() {
     }
