@@ -7,6 +7,7 @@
 -U arg                                  Undefine macro (passed to preprocessor)
 -E                                      Preprocess only, do not compile (prints program on stdout)
 -M                                      Output `make` dependency rule only (passed to preprocessor)
+--save-temps                            Saves preprocessed P4 to filename.p4pp and do not exit compilation.
 -MD                                     Output `make` dependency rule to file as side effect (passed to preprocessor)
 -MF file                                With -M, specify output file for dependencies (passed to preprocessor)
 -MG                                     with -M, suppress errors for missing headers (passed to preprocessor)
