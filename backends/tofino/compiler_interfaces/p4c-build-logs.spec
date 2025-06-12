@@ -6,7 +6,7 @@ import os.path, sys
 block_cipher = None
 
 a = Analysis(['p4c-build-logs'],
-             # pathex=['tools'],
+             pathex=['tools'],
              binaries=None, # cython_mods,
              datas=[ ('schemas/*.py', 'schemas')],
              # hiddenimports=[],

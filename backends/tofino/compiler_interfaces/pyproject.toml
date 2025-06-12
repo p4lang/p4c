@@ -1,0 +1,11 @@
+[project]
+name = "compiler-interfaces"
+version = "0.1.0"
+description = "Compiler interfaces for Tofino"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "jsl>=0.2.4",
+    "jsonschema==2.6.0",
+    "pyinstaller>=6.12.0",
+]
