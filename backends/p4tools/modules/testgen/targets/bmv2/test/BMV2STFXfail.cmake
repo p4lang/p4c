@@ -61,6 +61,11 @@ p4tools_add_xfail_reason(
   extract_for_header_union.p4
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
+  "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
+)
+
 ####################################################################################################
 # 2. P4Testgen Issues
 # These are failures in P4Testgen that need to be fixed.
