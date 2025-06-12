@@ -92,7 +92,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         /// composed in reverse order, from bottom to top.  The top of the stack
         /// has no 'derivedFrom' field, and it contains the actual source
         /// position where the analysis started.
-        boost::format fmt(format);
+        BoostFormatCompat fmt(format);
         return reportErrorImpl(subst,
                                "  ---- Actual error:\n" +
                                    ::P4::error_helper(fmt, std::forward<Args>(args)...).toString());
