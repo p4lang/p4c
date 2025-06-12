@@ -329,11 +329,15 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch *a,
 
     auto extactors_required = extractors_used(a);
     auto b_extractors = extractors_used(b);
-    extactors_required = std::accumulate(b_extractors.begin(), b_extractors.end(),
-                                         extactors_required, [](auto &map, const auto &pair) {
-                                             map[pair.first] += pair.second;
-                                             return map;
-                                         });
+    // then default-constructs value (0 for uint), then += works.
+    extactors_required =
+        std::accumulate(b_extractors.begin(), b_extractors.end(), std::move(extactors_required),
+                        [](std::map<unsigned int, unsigned int> current_map,
+                           const std::pair<const unsigned int, unsigned int> &pair) {
+                            current_map[pair.first] += pair.second;
+                            return current_map;
+                        });
+
     for (const auto &[size, max] : Device::pardeSpec().extractorSpec())
         if (extactors_required[size] > max) return false;
 

@@ -30,9 +30,6 @@
 unsigned Deparser::unique_field_list_handle;
 Deparser Deparser::singleton_object;
 
-Deparser::Deparser() : Section("deparser") {}
-Deparser::~Deparser() {}
-
 struct Deparser::FDEntry {
     struct Base {
         virtual ~Base() {}
@@ -201,6 +198,9 @@ struct Deparser::FDEntry {
     }
     void check(bitvec &phv_use) { what->check(phv_use); }
 };
+
+Deparser::Deparser() : Section("deparser") {}
+Deparser::~Deparser() = default;
 
 struct Deparser::Intrinsic::Type {
     target_t target;
