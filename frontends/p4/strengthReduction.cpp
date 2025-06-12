@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "strengthReduction.h"
 
+#include "ir/pattern.h"
+
 namespace P4 {
 
 /// @section Helper methods
@@ -78,9 +80,8 @@ const IR::Node *DoStrengthReduction::postorder(IR::UPlus *expr) { return expr->e
 const IR::Node *DoStrengthReduction::postorder(IR::BAnd *expr) {
     if (isAllOnes(expr->left)) return expr->right;
     if (isAllOnes(expr->right)) return expr->left;
-    auto l = expr->left->to<IR::Cmpl>();
-    auto r = expr->right->to<IR::Cmpl>();
-    if (l && r)
+    const IR::Cmpl *l, *r;
+    if (match(expr, m_BinOp(m_Cmpl(l), m_Cmpl(r))))
         return new IR::Cmpl(expr->srcInfo, expr->type,
                             new IR::BOr(expr->srcInfo, expr->type, l->expr, r->expr));
 
@@ -94,11 +95,11 @@ const IR::Node *DoStrengthReduction::postorder(IR::BAnd *expr) {
 const IR::Node *DoStrengthReduction::postorder(IR::BOr *expr) {
     if (isZero(expr->left)) return expr->right;
     if (isZero(expr->right)) return expr->left;
-    auto l = expr->left->to<IR::Cmpl>();
-    auto r = expr->right->to<IR::Cmpl>();
-    if (l && r)
+    const IR::Cmpl *l, *r;
+    if (match(expr, m_BinOp(m_Cmpl(l), m_Cmpl(r))))
         return new IR::Cmpl(expr->srcInfo, expr->type,
                             new IR::BAnd(expr->srcInfo, expr->type, l->expr, r->expr));
+
     if (hasSideEffects(expr)) return expr;
     if (expr->left->equiv(*expr->right)) return expr->left;
     return expr;
@@ -182,10 +183,11 @@ const IR::Node *DoStrengthReduction::postorder(IR::Sub *expr) {
     if (isZero(expr->right)) return expr->left;
     if (isZero(expr->left)) return new IR::Neg(expr->srcInfo, expr->type, expr->right);
     // Replace `a - constant` with `a + (-constant)`
-    if (enableSubConstToAddTransform && expr->right->is<IR::Constant>()) {
-        auto cst = expr->right->to<IR::Constant>();
-        auto neg = new IR::Constant(cst->srcInfo, cst->type, -cst->value, cst->base, true);
-        auto result = new IR::Add(expr->srcInfo, expr->type, expr->left, neg);
+    const IR::Constant *cst;
+    if (enableSubConstToAddTransform && match(expr->right, m_Constant(cst))) {
+        auto result =
+            new IR::Add(expr->srcInfo, expr->type, expr->left,
+                        new IR::Constant(cst->srcInfo, cst->type, -cst->value, cst->base, true));
         return result;
     }
     if (hasSideEffects(expr)) return expr;
@@ -203,12 +205,38 @@ const IR::Node *DoStrengthReduction::postorder(IR::Add *expr) {
 
 const IR::Node *DoStrengthReduction::postorder(IR::Shl *expr) {
     if (isZero(expr->right)) return expr->left;
-    if (const auto *sh2 = expr->left->to<IR::Shl>()) {
-        if (sh2->right->type->is<IR::Type_InfInt>() && expr->right->type->is<IR::Type_InfInt>()) {
-            // (a << b) << c is a << (b + c)
+
+    {
+        // (a << b) << c is a << (b + c)
+        const IR::Expression *a, *b, *c;
+        if (match(expr, m_BinOp(m_Shl(m_Expr(a), m_AllOf(m_Expr(b), m_TypeInfInt())),
+                                m_AllOf(m_Expr(c), m_TypeInfInt())))) {
             auto *result =
-                new IR::Shl(expr->srcInfo, sh2->left->type, sh2->left,
-                            new IR::Add(expr->srcInfo, sh2->right->type, sh2->right, expr->right));
+                new IR::Shl(expr->srcInfo, a->type, a, new IR::Add(expr->srcInfo, b->type, b, c));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
+    }
+
+    {
+        // (a >> b) << b could be transformed into a & (-1 << b)
+        const IR::Expression *a, *b;
+        const IR::Type_Bits *type;
+        if (match(expr, m_AllOf(m_BinOp(m_Shr(m_Expr(a), m_Expr(b)), m_DeferredEq(b)),
+                                m_TypeBits(type)))) {
+            big_int mask;
+            if (const auto *constRhs = b->to<IR::Constant>()) {
+                // Explicitly calculate mask to silence `value does not fit` warning
+                int maskBits = type->width_bits() - constRhs->asInt();
+                mask = Util::mask(maskBits > 0 ? maskBits : 0);
+            } else {
+                mask = Util::mask(type->width_bits());
+            }
+
+            auto *result =
+                new IR::BAnd(expr->srcInfo, a->type, a,
+                             new IR::Shl(expr->srcInfo, a->type,
+                                         new IR::Constant(expr->srcInfo, a->type, mask), b));
             LOG3("Replace " << expr << " with " << result);
             return result;
         }
@@ -220,16 +248,35 @@ const IR::Node *DoStrengthReduction::postorder(IR::Shl *expr) {
 
 const IR::Node *DoStrengthReduction::postorder(IR::Shr *expr) {
     if (isZero(expr->right)) return expr->left;
-    if (auto sh2 = expr->left->to<IR::Shr>()) {
-        if (sh2->right->type->is<IR::Type_InfInt>() && expr->right->type->is<IR::Type_InfInt>()) {
-            // (a >> b) >> c is a >> (b + c)
+
+    {  // (a << b) << c is a << (b + c)
+        const IR::Expression *a, *b, *c;
+        if (match(expr, m_BinOp(m_Shr(m_Expr(a), m_AllOf(m_Expr(b), m_TypeInfInt())),
+                                m_AllOf(m_Expr(c), m_TypeInfInt())))) {
             auto *result =
-                new IR::Shr(expr->srcInfo, sh2->left->type, sh2->left,
-                            new IR::Add(expr->srcInfo, sh2->right->type, sh2->right, expr->right));
+                new IR::Shr(expr->srcInfo, a->type, a, new IR::Add(expr->srcInfo, b->type, b, c));
             LOG3("Replace " << expr << " with " << result);
             return result;
         }
     }
+
+    {
+        // (a << b) >> b could be transformed into a & (-1 >> b) if the shift is logical
+        const IR::Expression *a, *b;
+        const IR::Type_Bits *type;
+        if (match(expr, m_AllOf(m_BinOp(m_Shl(m_Expr(a), m_Expr(b)), m_DeferredEq(b)),
+                                m_TypeBits(type))) &&
+            !type->isSigned) {
+            auto *result = new IR::BAnd(
+                expr->srcInfo, a->type, a,
+                new IR::Shr(
+                    expr->srcInfo, a->type,
+                    new IR::Constant(expr->srcInfo, a->type, Util::mask(type->width_bits())), b));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
+    }
+
     if (!hasSideEffects(expr->right) && isZero(expr->left)) return expr->left;
     return expr;
 }
@@ -291,11 +338,8 @@ const IR::Node *DoStrengthReduction::postorder(IR::Mod *expr) {
 
 const IR::Node *DoStrengthReduction::postorder(IR::Range *range) {
     // Range a..a is the same as a
-    if (auto c0 = range->left->to<IR::Constant>()) {
-        if (auto c1 = range->right->to<IR::Constant>()) {
-            if (c0->value == c1->value) return c0;
-        }
-    }
+    const IR::Constant *c0, *c1;
+    if (match(range, m_BinOp(m_Constant(c0), m_Constant(c1))) && c0->value == c1->value) return c0;
     return range;
 }
 

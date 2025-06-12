@@ -16,21 +16,50 @@ limitations under the License.
 
 #include "reassociation.h"
 
+#include "ir/pattern.h"
+
 namespace P4 {
 
-const IR::Node *Reassociation::reassociate(IR::Operation_Binary *root) {
-    const auto *right = root->right->to<IR::Constant>();
-    if (!right) return root;
-    auto leftBin = root->left->to<IR::Operation_Binary>();
-    if (!leftBin) return root;
-    if (leftBin->getStringOp() != root->getStringOp()) return root;
-    if (!leftBin->right->is<IR::Constant>()) return root;
-    auto *c = root->clone();
-    c->left = leftBin->right;
-    c->right = root->right;
-    root->left = leftBin->left;
-    root->right = c;
-    return root;
+void Reassociation::reassociate(IR::Operation_Binary *root) {
+    LOG3("Trying to reassociate " << root);
+    // Canonicalize constant to rhs
+    if (root->left->is<IR::Constant>()) {
+        std::swap(root->left, root->right);
+        LOG3("Canonicalized constant to rhs: " << root);
+    }
+
+    /* Match the following tree
+     *       op
+     *      /  \
+     *     /    \
+     *    op    c2
+     *   / \
+     *  /   \
+     * e    c1
+     *
+     * (note that we're doing postorder visit and we already canonicalized
+     * constants to rhs)
+     * Rewrite to:
+     *       op
+     *      /  \
+     *     /    \
+     *    e     op
+     *         /  \
+     *        c1  c2
+     */
+    const IR::Operation_Binary *lhs;
+    const IR::Constant *c1, *c2;
+    const IR::Expression *e;
+    if (match(root,
+              m_BinOp(m_AllOf(m_BinOp(lhs), m_BinOp(m_Expr(e), m_Constant(c1))), m_Constant(c2))) &&
+        lhs->getStringOp() == root->getStringOp()) {
+        auto *newRight = root->clone();
+        newRight->left = c1;
+        newRight->right = c2;
+        root->left = e;
+        root->right = newRight;
+        LOG3("Reassociated constants together: " << root);
+    }
 }
 
 }  // namespace P4
