@@ -11,7 +11,7 @@ struct Headers {
 control c(inout Headers hdr) {
     bit<16> tmp_val = 16w3;
     action do_action() {
-        hdr.eth_hdr.eth_type = 16w3 + (tmp_val > 16w2 ? 16w3 : 16w1);
+        hdr.eth_hdr.eth_type = (tmp_val > 16w2 ? 16w3 : 16w1) + 16w3;
     }
     apply {
         do_action();
