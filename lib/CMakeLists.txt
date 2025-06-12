@@ -101,3 +101,6 @@ target_link_libraries(p4ctoolkit
   PUBLIC absl::strings
   PUBLIC ${LIBGC_LIBRARIES}
 )
+
+add_executable(p4c_tool checker.cpp)
+target_link_libraries(p4c_tool PRIVATE p4ctoolkit ${P4C_LIB_DEPS} absl::strings absl::base  absl::log absl::log_initialize absl::flags)

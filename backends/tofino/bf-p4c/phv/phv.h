@@ -24,6 +24,7 @@
 
 #include <boost/functional/hash.hpp>
 
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_set.h"
 
