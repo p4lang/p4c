@@ -124,7 +124,9 @@ set (P4C_EBPF_DIST_HEADERS
 
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS} backends-common)
-add_dependencies(p4c-ebpf ir-generated frontend)
+if (ENABLE_PCH)
+  target_precompile_headers(p4c-ebpf REUSE_FROM ir)
+endif()
 
 install (TARGETS p4c-ebpf
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
