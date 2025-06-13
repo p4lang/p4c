@@ -54,7 +54,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyIngress.x") bit<16> x_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
         x_0 = hdr.ipv4.identification;
