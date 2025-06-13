@@ -84,7 +84,7 @@ popd
 
 # Install BMv2 from source
 pushd "${tmp_dir}"
-git clone --depth=1 https://github.com/p4lang/behavioral-model
+git clone --depth=1 https://github.com/Hoooao/behavioral-model
 cd behavioral-model
 ./autogen.sh
 ./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger CC="ccache gcc" CXX="ccache g++"
