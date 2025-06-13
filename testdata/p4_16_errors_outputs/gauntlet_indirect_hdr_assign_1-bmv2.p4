@@ -8,14 +8,6 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-header simple_struct {
-    bit<32> a;
-}
-
-struct nested_struct {
-    simple_struct s;
-}
-
 struct Headers {
     ethernet_t eth_hdr;
 }
@@ -23,14 +15,6 @@ struct Headers {
 struct Meta {
 }
 
-bit<16> function_1() {
-    nested_struct tmp_struct = { { 1 } };
-    tmp_struct.s.a = 1;
-    return (bit<16>)1;
-}
-bit<16> function_2(in bit<16> val) {
-    return function_1();
-}
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         transition parse_hdrs;
@@ -42,12 +26,11 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    action simple_action(out bit<16> byaA) {
-        byaA = function_2(function_1());
+    action do_action(inout Headers val) {
+        h.eth_hdr.eth_type = 2;
     }
     apply {
-        function_1();
-        simple_action(h.eth_hdr.eth_type);
+        do_action(h);
     }
 }
 
@@ -66,9 +49,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control deparser(packet_out b, in Headers h) {
+control deparser(packet_out pkt, in Headers h) {
     apply {
-        b.emit(h);
+        pkt.emit(h);
     }
 }
 
