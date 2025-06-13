@@ -1,0 +1,36 @@
+issue5254_dup_switch_case_label_error.p4(34): [--Werror=invalid] error: 8s1: duplicate case label 8s1
+      (int<8>)1: {}
+              ^
+issue5254_dup_switch_case_label_error.p4(33)
+      (int<8>)1: {}
+              ^
+issue5254_dup_switch_case_label_error.p4(40): [--Werror=invalid] error: 8w1: duplicate case label 8w1
+      (bit<8>)1: {}
+              ^
+issue5254_dup_switch_case_label_error.p4(39)
+      (bit<8>)1: {}
+              ^
+issue5254_dup_switch_case_label_error.p4(46): [--Werror=invalid] error: error.Error1: duplicate case label error.Error1
+      error.Error1: {}
+      ^^^^^^^^^^^^
+issue5254_dup_switch_case_label_error.p4(45)
+      error.Error1: {}
+      ^^^^^^^^^^^^
+issue5254_dup_switch_case_label_error.p4(52): [--Werror=invalid] error: e.e1: duplicate case label e.e1
+      e.e1: {}
+      ^^^^
+issue5254_dup_switch_case_label_error.p4(51)
+      e.e1: {}
+      ^^^^
+issue5254_dup_switch_case_label_error.p4(58): [--Werror=invalid] error: s.s1: duplicate case label s.s1
+      s.s1: {}
+      ^^^^
+issue5254_dup_switch_case_label_error.p4(57)
+      s.s1: {}
+      ^^^^
+issue5254_dup_switch_case_label_error.p4(70): [--Werror=invalid] error: a: duplicate case label a
+      a: {}
+      ^
+issue5254_dup_switch_case_label_error.p4(69)
+      a: {}
+      ^

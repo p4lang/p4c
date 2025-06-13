@@ -1,9 +1,3 @@
 issue3611.p4(12): [--Werror=type-error] error: 1: 'switch' label must be an action name or 'default'
       1: {} // { dg-error "" }
       ^
-issue3611.p4(14): [--Werror=type-error] error: a: 'switch' label duplicates a
-      a: {}
-      ^
-issue3611.p4(13)
-      a: {}
-      ^

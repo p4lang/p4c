@@ -35,19 +35,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        absl::flat_hash_map<cstring, const IR::Node *, Util::Hash> foundLabels;
-        const IR::Node *foundDefault = nullptr;
         for (auto c : stat->cases) {
             if (c->label->is<IR::DefaultExpression>()) {
-                if (foundDefault)
-                    typeError("%1%: multiple 'default' labels %2%", c->label, foundDefault);
-                foundDefault = c->label;
                 continue;
             } else if (auto pe = c->label->to<IR::PathExpression>()) {
                 cstring label = pe->path->name.name;
-                auto [it, inserted] = foundLabels.emplace(label, c->label);
-                if (!inserted)
-                    typeError("%1%: 'switch' label duplicates %2%", c->label, it->second);
                 if (!ae->contains(label))
                     typeError("%1% is not a legal label (action name)", c->label);
             } else {

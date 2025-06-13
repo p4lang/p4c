@@ -19,8 +19,6 @@ control c() {
             }
             a: {
             }
-            a: {
-            }
             default: {
             }
         }

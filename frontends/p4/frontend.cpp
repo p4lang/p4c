@@ -146,6 +146,36 @@ class SetStrictStruct : public NoVisit {
     }
 };
 
+/**
+ * This pass validates switch statement semantics.
+ * Must be run after ConstantFolding.
+ */
+class ValidateSwitchStatements : public Inspector {
+ public:
+    explicit ValidateSwitchStatements() {}
+    bool preorder(const IR::SwitchStatement *stat) override {
+        const IR::Node *foundDefault = nullptr;
+        for (unsigned i = 0; i < stat->cases.size(); i++) {
+            const auto *c = stat->cases.at(i);
+            if (c->label->is<IR::DefaultExpression>()) {
+                if (foundDefault)
+                    P4::error(P4::ErrorType::ERR_INVALID, "%1%: multiple 'default' labels %2%",
+                              c->label, foundDefault);
+                foundDefault = c->label;
+                continue;
+            }
+            for (unsigned j = i + 1; j < stat->cases.size(); j++) {
+                auto *other = stat->cases.at(j);
+                if (other->label->equiv(*c->label)) {
+                    P4::error(P4::ErrorType::ERR_INVALID, "%1%: duplicate case label %2%",
+                              other->label, c->label);
+                }
+            }
+        }
+        return true;
+    }
+};
+
 }  // namespace
 
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
@@ -174,6 +204,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
+        new ValidateSwitchStatements(),
         // Validate @name/@deprecated/@noWarn. Should run after constant folding.
         new ValidateStringAnnotations(),
         // Desugars direct parser and control applications
