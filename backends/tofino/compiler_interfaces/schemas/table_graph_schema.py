@@ -18,12 +18,12 @@ from schemas.jgf_schema import Graph, GraphEdge, GraphNode, JsonGraphFormatSchem
 """
 
 major_version = 1  # (major)
-revision_version = 0  # (medium)
-addition_version = 1  # (minor)
+minor_version = 0  # (medium)
+patch_version = 1  # (minor)
 
 
 def get_schema_version():
-    return "%s.%s.%s" % (str(major_version), str(revision_version), str(addition_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))
 
 
 ########################################################
