@@ -143,7 +143,7 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
         if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
             auto subList = flattenStructExpression(subStructExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
-        } else if (const auto *subListExpr = listElem->to<BaseListExpression>()) {
+        } else if (const auto *subListExpr = listElem->expression->to<BaseListExpression>()) {
             auto subList = flattenListExpression(subListExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         } else {
