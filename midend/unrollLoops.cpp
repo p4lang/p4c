@@ -183,6 +183,10 @@ long UnrollLoops::evalLoop(const IR::Expression *exp, long val,
 long UnrollLoops::evalLoop(const IR::BaseAssignmentStatement *assign, long val,
                            const ComputeDefUse::locset_t &idefs, bool &fail) {
     if (assign->is<IR::AssignmentStatement>()) return evalLoop(assign->right, val, idefs, fail);
+    if (val != evalLoop(assign->left, val, idefs, fail) || fail) {
+        fail = true;
+        return 1;
+    }
     if (assign->is<IR::MulAssign>()) return val * evalLoop(assign->right, val, idefs, fail);
     if (assign->is<IR::DivAssign>()) return val / evalLoop(assign->right, val, idefs, fail);
     if (assign->is<IR::ModAssign>()) return val % evalLoop(assign->right, val, idefs, fail);
@@ -201,18 +205,16 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
         auto d = resolveUnique(v->path->name, P4::ResolutionType::Any);
         bounds.index = d ? d->to<IR::Declaration_Variable>() : nullptr;
         if (!bounds.index) return false;
-        const IR::BaseAssignmentStatement *init = nullptr, *incr = nullptr;
-        const IR::Constant *initval = nullptr;
+        const IR::BaseAssignmentStatement *incr = nullptr;
+        Pattern::Match<IR::Constant> initval;
         auto &index_defs = defUse->getDefs(v);
         if (index_defs.size() != 2) {
             // must be exactly 2 defs -- one to a constant before the loop and one
             // to a non-constant in the loop
             return false;
-        } else if ((init = index_defs.front()->parent->node->to<IR::AssignmentStatement>()) &&
-                   (initval = init->right->to<IR::Constant>())) {
+        } else if (Pattern::Assign(v, initval).match(index_defs.front()->parent->node)) {
             incr = index_defs.back()->parent->node->to<IR::BaseAssignmentStatement>();
-        } else if ((init = index_defs.back()->parent->node->to<IR::AssignmentStatement>()) &&
-                   (initval = init->right->to<IR::Constant>())) {
+        } else if (Pattern::Assign(v, initval).match(index_defs.back()->parent->node)) {
             incr = index_defs.front()->parent->node->to<IR::BaseAssignmentStatement>();
         } else {
             return false;
