@@ -116,6 +116,9 @@ void error(const int kind, const char *format, Args &&...args) {
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
 
+/// Report an error if condition e is false.
+#define ERROR_CHECK(e, ...) do { if (!(e)) ::P4::error(__VA_ARGS__); } while (0)
+
 #if LEGACY
 /// Report a warning with the given message.
 template <typename... Args>
@@ -149,6 +152,9 @@ void warning(const int kind, const char *format, Args &&...args) {
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
+
+/// Report a warning if condition e is false.
+#define WARN_CHECK(e, ...) do { if (!(e)) ::P4::warning(__VA_ARGS__); } while (0)
 
 /// Report info messages of type kind. Requires that the node argument have source info.
 template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
