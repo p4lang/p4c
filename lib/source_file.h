@@ -192,6 +192,7 @@ class SourceInfo final {
     cstring toPositionString() const;
     cstring toSourcePositionData(unsigned *outLineNumber, unsigned *outColumnNumber) const;
     SourceFileLine toPosition() const;
+    SourceFileLine toPositionEnd() const;
 
     bool isValid() const { return this->start.isValid(); }
     explicit operator bool() const { return isValid(); }

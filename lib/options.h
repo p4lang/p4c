@@ -51,6 +51,9 @@ class Options {
     // return true if processing is successful
     using OptionProcessor = std::function<bool(const char *)>;
 
+ private:
+    void shortUsage();
+
  protected:
     struct Option {
         cstring option;
