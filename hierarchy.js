@@ -1873,6 +1873,7 @@ var hierarchy =
     [ "P4::ParserStructureImpl::ParserSymbolicInterpreter", "class_p4_1_1_parser_structure_impl_1_1_parser_symbolic_interpreter.html", null ],
     [ "P4::PassManager::VisitorRef", "class_p4_1_1_pass_manager_1_1_visitor_ref.html", null ],
     [ "P4::Pattern", "class_p4_1_1_pattern.html", null ],
+    [ "P4::Pattern::Assign< T >", "class_p4_1_1_pattern_1_1_assign.html", null ],
     [ "P4::Pattern::Match< T >", "class_p4_1_1_pattern_1_1_match.html", null ],
     [ "P4::PauseTrace", "namespace_p4.html#class_p4_1_1_pause_trace", null ],
     [ "P4::PerInstanceSubstitutions", "struct_p4_1_1_per_instance_substitutions.html", null ],

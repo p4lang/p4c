@@ -560,7 +560,7 @@ var searchData=
   ['assertion_20violations_557',['Finding Assertion Violations',['../p4testgen.html#finding-assertion-violations',1,'']]],
   ['assertionmodeenabled_558',['assertionModeEnabled',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a58807d6b163b3caa06defdf63ff85714',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
   ['assertsparser_559',['AssertsParser',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_asserts_parser.html',1,'P4::P4Tools::P4Testgen::Bmv2']]],
-  ['assign_560',['Assign',['../group___deparser_copy_opt.html#struct_assign',1,'Assign'],['../struct_p4_1_1_i_r_1_1_traversal_1_1_assign.html',1,'P4::IR::Traversal::Assign&lt; T &gt;'],['../namespacesolver.html#structsolver_1_1_assign',1,'solver::Assign']]],
+  ['assign_560',['Assign',['../group___deparser_copy_opt.html#struct_assign',1,'Assign'],['../struct_p4_1_1_i_r_1_1_traversal_1_1_assign.html',1,'P4::IR::Traversal::Assign&lt; T &gt;'],['../class_p4_1_1_pattern_1_1_assign.html',1,'P4::Pattern::Assign&lt; T &gt;'],['../namespacesolver.html#structsolver_1_1_assign',1,'solver::Assign']]],
   ['assignactionargtypes_561',['AssignActionArgTypes',['../class_p4_1_1_type_check_1_1_assign_action_arg_types.html',1,'P4::TypeCheck']]],
   ['assignactionhandle_562',['AssignActionHandle',['../class_assign_action_handle.html',1,'']]],
   ['assignchain_563',['AssignChain',['../group___deparser_copy_opt.html#class_assign_chain',1,'']]],

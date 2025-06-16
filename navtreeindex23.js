@@ -1,5 +1,7 @@
 var NAVTREEINDEX23 =
 {
+"class_p4_1_1_struct_initializers.html":[13,0,12,491],
+"class_p4_1_1_struct_location.html":[12,0,14,477],
 "class_p4_1_1_struct_location.html":[13,0,12,492],
 "class_p4_1_1_substitute_parameters.html":[12,0,14,479],
 "class_p4_1_1_substitute_parameters.html":[13,0,12,494],
@@ -247,7 +249,5 @@ var NAVTREEINDEX23 =
 "class_p4_1_1_test_1_1_next_table_prop_test.html":[13,0,12,23,40],
 "class_p4_1_1_test_1_1_no_co_pack.html":[12,0,14,11,40],
 "class_p4_1_1_test_1_1_no_co_pack.html":[13,0,12,23,41],
-"class_p4_1_1_test_1_1_pa_atomic_pragma_test.html":[12,0,14,11,41],
-"class_p4_1_1_test_1_1_pa_atomic_pragma_test.html":[13,0,12,23,42],
-"class_p4_1_1_test_1_1_pa_byte_pack_pragma_test.html":[12,0,14,11,42]
+"class_p4_1_1_test_1_1_pa_atomic_pragma_test.html":[12,0,14,11,41]
 };

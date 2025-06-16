@@ -275,7 +275,7 @@ var searchData=
   ['asmparser_272',['AsmParser',['../class_asm_parser.html',1,'']]],
   ['asmstage_273',['AsmStage',['../class_asm_stage.html',1,'']]],
   ['assertsparser_274',['AssertsParser',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_asserts_parser.html',1,'P4::P4Tools::P4Testgen::Bmv2']]],
-  ['assign_275',['Assign',['../group___deparser_copy_opt.html#struct_assign',1,'Assign'],['../struct_p4_1_1_i_r_1_1_traversal_1_1_assign.html',1,'P4::IR::Traversal::Assign&lt; T &gt;'],['../namespacesolver.html#structsolver_1_1_assign',1,'solver::Assign']]],
+  ['assign_275',['Assign',['../group___deparser_copy_opt.html#struct_assign',1,'Assign'],['../struct_p4_1_1_i_r_1_1_traversal_1_1_assign.html',1,'P4::IR::Traversal::Assign&lt; T &gt;'],['../class_p4_1_1_pattern_1_1_assign.html',1,'P4::Pattern::Assign&lt; T &gt;'],['../namespacesolver.html#structsolver_1_1_assign',1,'solver::Assign']]],
   ['assignactionargtypes_276',['AssignActionArgTypes',['../class_p4_1_1_type_check_1_1_assign_action_arg_types.html',1,'P4::TypeCheck']]],
   ['assignactionhandle_277',['AssignActionHandle',['../class_assign_action_handle.html',1,'']]],
   ['assignchain_278',['AssignChain',['../group___deparser_copy_opt.html#class_assign_chain',1,'']]],

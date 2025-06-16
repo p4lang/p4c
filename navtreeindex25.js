@@ -1,5 +1,7 @@
 var NAVTREEINDEX25 =
 {
+"class_p4_1_1_u_b_p_f_1_1_u_b_p_f_bool_type.html":[13,0,12,24,7],
+"class_p4_1_1_u_b_p_f_1_1_u_b_p_f_control.html":[13,0,12,24,9],
 "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_control_body_translator.html":[13,0,12,24,10],
 "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_deparser.html":[13,0,12,24,11],
 "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_deparser_translation_visitor.html":[13,0,12,24,12],
@@ -247,7 +249,5 @@ var NAVTREEINDEX25 =
 "class_p4_1_1bitvec.html#a00c059dfb2a1007d826d8fbe1a359e83":[13,0,12,54,3],
 "class_p4_1_1bitvec_1_1const__bitref.html":[12,0,14,39,0],
 "class_p4_1_1bitvec_1_1const__bitref.html":[13,0,12,54,0],
-"class_p4_1_1bitvec_1_1copy__bitref.html":[12,0,14,39,1],
-"class_p4_1_1bitvec_1_1copy__bitref.html":[13,0,12,54,1],
-"class_p4_1_1bitvec_1_1nonconst__bitref.html":[12,0,14,39,2]
+"class_p4_1_1bitvec_1_1copy__bitref.html":[12,0,14,39,1]
 };
