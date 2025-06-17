@@ -81,14 +81,6 @@ p4tools_add_xfail_reason(
   loop-3-clause-tricky2.p4
 )
 
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-protobuf-ir"
-  "Cast failed"
-  # testgen has issues with arrays
-  array1.p4
-  array2.p4
-)
-
 ####################################################################################################
 # 3. WONTFIX
 ####################################################################################################
