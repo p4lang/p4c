@@ -69,13 +69,13 @@ void CheckUnsupported::postorder(const IR::P4Table *const table_ptr) {
         size_t total_TCAM_key_bits = 0u;
 
         for (const auto *const key_element_ptr : key_ptr->keyElements) {
-            if ("lpm" == key_element_ptr->matchType->path->name) {
+            if (key_element_ptr->matchType->path->name == "lpm") {
                 ++lpm_key_count;
             }
-            if ("range" == key_element_ptr->matchType->path->name) {
+            if (key_element_ptr->matchType->path->name == "range") {
                 ++range_key_count;
             }
-            if ("ternary" == key_element_ptr->matchType->path->name) {
+            if (key_element_ptr->matchType->path->name == "ternary") {
                 ++ternary_key_count;
                 const size_t size = table_ptr->getSizeProperty()->asUint64(),
                              this_TCAM_key_bits =
