@@ -19,12 +19,11 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 #define BACKENDS_TOFINO_BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 
-#include "backends/tofino/bf-p4c/device.h"
-
-namespace P4 {
-class TypeMap;
-class ReferenceMap;
-}  // namespace P4
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
 
 namespace BFN {
 
@@ -32,7 +31,7 @@ namespace BFN {
  * \ingroup midend
  * \brief Pass that updates egress intrinsic metadata.
  */
-class RewriteEgressIntrinsicMetadataHeader : public PassManager {
+class RewriteEgressIntrinsicMetadataHeader : public P4::PassManager {
     struct CollectUsedFields : public Inspector {
         std::set<cstring> used_fields;
         const IR::Type_Header *eg_intr_md = nullptr;
@@ -57,7 +56,7 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
         }
     };
 
-    struct RewriteHeader : public Transform {
+    struct RewriteHeader : public P4::Transform {
         const CollectUsedFields &used_fields;
         P4::TypeMap *typeMap;
 
@@ -155,7 +154,7 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
             collectUsedFields,
             new RewriteHeader(*collectUsedFields, typeMap),
             new P4::ClearTypeMap(typeMap),
-            new BFN::TypeChecking(refMap, typeMap, true),
+            new TypeChecking(refMap, typeMap, true),
         });
     }
 };
