@@ -18,7 +18,7 @@
 
 #include "backends/tofino/bf-p4c/phv/v2/greedy_tx_score.h"
 
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "gtest/gtest.h"
 
 namespace P4::Test {
