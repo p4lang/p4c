@@ -45,7 +45,7 @@ class InsertHashStructExpression : public Transform {
  public:
     InsertHashStructExpression(
         std::map<const IR::Expression *, const IR::HashListExpression *> *update_hashes)
-        : update_hashes(update_hashes){};
+        : update_hashes(update_hashes) {};
 
     const IR::Node *preorder(IR::StructExpression *se) override;
 };

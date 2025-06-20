@@ -457,7 +457,7 @@ class AsmParser : public BaseAsmParser {
     void init_port_use(bitvec &port_use, const value_t &arg);
 
  public:
-    AsmParser() : BaseAsmParser("parser"){};
+    AsmParser() : BaseAsmParser("parser") {};
     ~AsmParser() {}
 
     // For gtest

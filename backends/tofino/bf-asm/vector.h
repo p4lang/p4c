@@ -85,8 +85,7 @@
          : ((vec).size = 3, (vec).data[0] = (v1), (vec).data[1] = (v2), (vec).data[2] = (v3), \
             (vec).data[3] = (v4), (vec).data[4] = (v5), 0))
 
-#define EMPTY_VECTOR_INIT \
-    { 0, 0, 0 }
+#define EMPTY_VECTOR_INIT {0, 0, 0}
 
 /* VECTOR_fini(vec)
  *   destroys a vector, freeing memory

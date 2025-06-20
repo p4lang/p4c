@@ -555,7 +555,7 @@ int main(int ac, char **av) {
             Logging::Manifest &manifest;
 
          public:
-            explicit manifest_generator_guard(Logging::Manifest &manifest) : manifest(manifest){};
+            explicit manifest_generator_guard(Logging::Manifest &manifest) : manifest(manifest) {};
             ~manifest_generator_guard() {
                 try {
                     manifest.setSuccess(::errorCount() == 0);

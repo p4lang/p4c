@@ -97,7 +97,7 @@ class GreedyAllocator : public AllocatorBase {
 
  public:
     GreedyAllocator(const PhvKit &kit, PhvInfo &phv, int pipe_id)
-        : AllocatorBase(kit), phv_i(phv), pipe_id_i(pipe_id){};
+        : AllocatorBase(kit), phv_i(phv), pipe_id_i(pipe_id) {};
 
     /// @returns false if allocation failed.
     /// allocate all @p clusters to phv_i. This function will directly print out errors
