@@ -75,6 +75,10 @@ const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *tabl
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*result"_cs);
 }
 
+const IR::StateVariable &TableStepper::getGlobalTableHitVar() {
+    return ToolsVariables::getStateVariable(IR::Type::Boolean::get(), "*global_table_hit"_cs);
+}
+
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit"_cs);
 }
@@ -189,6 +193,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
+        nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(true));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
 
@@ -286,6 +291,7 @@ void TableStepper::setTableDefaultEntries(
             auto collector = CoverableNodesScanner(stepper->state);
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
+        nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(false));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
         std::stringstream tableStream;
@@ -354,6 +360,7 @@ void TableStepper::evalTableControlEntries(
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
+        nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(true));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
 
@@ -410,6 +417,9 @@ void TableStepper::evalTaintedTable() {
     nextState.set(tableActionVar,
                   stepper->programInfo.createTargetUninitialized(tableActionVar->type, true));
     // We do not know whether this table was hit or not.
+    auto globalHitVar = getGlobalTableHitVar();
+    nextState.set(globalHitVar,
+                  stepper->programInfo.createTargetUninitialized(globalHitVar->type, true));
     auto hitVar = getTableHitVar(table);
     nextState.set(hitVar, stepper->programInfo.createTargetUninitialized(hitVar->type, true));
 
@@ -509,6 +519,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
         auto collector = CoverableNodesScanner(stepper->state);
         collector.updateNodeCoverage(actionType, coveredNodes);
     }
+    nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(false));
     nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
     nextState.set(getTableActionVar(table), getTableActionString(tableAction));
 
