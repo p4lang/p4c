@@ -295,7 +295,7 @@ class AllocatorBase {
     explicit AllocatorBase(const PhvKit &kit) : kit_i(kit) {
         kit_i.parser_packing_validator->set_trivial_pass(kit.settings.trivial_alloc);
     };
-    virtual ~AllocatorBase(){};
+    virtual ~AllocatorBase() {};
 
     /////////////////////////////////////////////////////////////////
     /// ALLOCATION functions common to trivial and greedy allocation
