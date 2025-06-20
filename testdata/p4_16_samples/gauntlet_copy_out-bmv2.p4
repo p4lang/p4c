@@ -23,7 +23,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> c = 8w12;
     action do_thing(inout bit<8> inout_c) {
         h.h.a = inout_c;
-        c = 8w24;
+        // c = 8w24;
     }
     apply {
         do_thing(c);
