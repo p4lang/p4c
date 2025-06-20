@@ -9,7 +9,7 @@ control c() {
     }
     @name(".b") action b_0() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.t") table t_0 {
         actions = {

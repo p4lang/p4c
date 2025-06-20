@@ -396,21 +396,21 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     ethernet_t hdr_29_u0_ethernet;
     ipv4_t hdr_29_u0_ipv4;
     ipv6_t hdr_29_u0_ipv6;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_8() {
     }
     @name(".tunnel_decap") action tunnel_decap_1() {
         hdr_0_u0_ethernet = hdr.u0_ethernet;

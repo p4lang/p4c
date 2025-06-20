@@ -81,11 +81,11 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("ingress.unknown_source") action unknown_source() {
         meta._send_mac_learn_msg0 = true;

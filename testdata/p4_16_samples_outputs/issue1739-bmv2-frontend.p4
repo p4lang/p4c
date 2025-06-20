@@ -63,7 +63,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         mark_to_drop(smeta_2);
         standard_metadata = smeta_2;
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.set_output") action set_output(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;

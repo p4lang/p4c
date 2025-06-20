@@ -32,13 +32,13 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
     @name("MyIC.ap") ActionProfile(32w1024) ap_0;
     @name("MyIC.as") ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as_0;

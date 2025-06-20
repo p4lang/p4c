@@ -26,9 +26,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     ethernet_t tmp_0_eth_hdr;
     bit<128> key_0;
     bit<48> key_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.set_valid_action") action set_valid_action() {
         tmp_0_eth_hdr.setValid();
