@@ -160,7 +160,7 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::Operation::Relation *e) {
     Pattern::Match<IR::Expression> e1, e2;
     Pattern::Match<IR::Constant> k1, k2;
     int width = safe_width_bits(e->left->type);
-    if (((e1 & k1) == k2).match(e) || ((e1 & k1) != k2).match(e)) {
+    if ((k2 == (e1 & k1)).match(e) || (k2 != (e1 & k1)).match(e)) {
         BUG_CHECK(!e1->is<IR::Constant>(), "constant folding failed");
         // always true or always false
         if ((abs(k1->value) & abs(k2->value)) != abs(k2->value)) {
