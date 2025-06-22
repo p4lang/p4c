@@ -586,7 +586,7 @@ The P4C CMakeLists.txt will use that name to figure the full path of the files t
 
 clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command:
 ```
-uv pip install "clang-format==18.1.0" "black==24.3.0" "isort==5.13.2"
+uv pip install "clang-format==18.1.8" "black==24.3.0" "isort==5.13.2"
 ```
 clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`. black and isort can be checked using the `make black` or `make isort` command respectively. Complaints can be fixed by running `make black-fix-errors` or `make isort-fix-errors`.
 
