@@ -75,8 +75,8 @@ const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *tabl
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*result"_cs);
 }
 
-const IR::StateVariable &TableStepper::getGlobalTableHitVar() {
-    return ToolsVariables::getStateVariable(IR::Type::Boolean::get(), "*global_table_hit"_cs);
+const IR::StateVariable &TableStepper::getActiveTableVar() {
+    return ToolsVariables::getStateVariable(IR::Type::String::get(), "*active_table_var"_cs);
 }
 
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
@@ -193,9 +193,9 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
-        nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(true));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
         // Some path selection strategies depend on looking ahead and collecting potential
         // nodes. If that is the case, apply the CoverableNodesScanner visitor.
@@ -291,9 +291,9 @@ void TableStepper::setTableDefaultEntries(
             auto collector = CoverableNodesScanner(stepper->state);
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
-        nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(false));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << "| Overriding default action: " << actionName;
@@ -360,9 +360,9 @@ void TableStepper::evalTableControlEntries(
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
-        nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(true));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
@@ -417,11 +417,12 @@ void TableStepper::evalTaintedTable() {
     nextState.set(tableActionVar,
                   stepper->programInfo.createTargetUninitialized(tableActionVar->type, true));
     // We do not know whether this table was hit or not.
-    auto globalHitVar = getGlobalTableHitVar();
-    nextState.set(globalHitVar,
-                  stepper->programInfo.createTargetUninitialized(globalHitVar->type, true));
     auto hitVar = getTableHitVar(table);
     nextState.set(hitVar, stepper->programInfo.createTargetUninitialized(hitVar->type, true));
+    // Set current active table
+    auto activeTableVar = getActiveTableVar();
+    nextState.set(activeTableVar,
+                  stepper->programInfo.createTargetUninitialized(activeTableVar->type, true));
 
     // Reset the property to its previous stepper->state.
     replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, currentTaint));
@@ -519,9 +520,9 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
         auto collector = CoverableNodesScanner(stepper->state);
         collector.updateNodeCoverage(actionType, coveredNodes);
     }
-    nextState.set(getGlobalTableHitVar(), IR::BoolLiteral::get(false));
     nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
     nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+    nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
     nextState.replaceTopBody(&replacements);
     stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredNodes);
