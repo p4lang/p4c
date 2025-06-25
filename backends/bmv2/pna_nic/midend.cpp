@@ -49,6 +49,7 @@ limitations under the License.
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
 #include "midend/orderArguments.h"
+#include "midend/persistToReg.h"
 #include "midend/predication.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeLeftSlices.h"
@@ -112,6 +113,7 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
     if (BMV2::PnaNicContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+            new P4::PersistToReg("Register"_cs),
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::SimplifyExternMethodCalls(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),

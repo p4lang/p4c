@@ -1,0 +1,109 @@
+# Initialize all 6 elements of register array to have the same value
+# 0xcafe
+
+packet 4 cafe 0000 01 00 010000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 01 00 010000000000 ffff   ******** 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 01 01 020000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 01 01 020000000000 ffff   ******** 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 01 02 030000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 01 02 030000000000 ffff   ******** 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 01 03 040000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 01 03 040000000000 ffff   ******** 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 01 04 050000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 01 04 050000000000 ffff   ******** 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 01 05 060000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 01 05 060000000000 ffff   ******** 0000cafe deadbeef deadbeef $
+
+
+# Read all 6 of them back to confirm that they contain the value
+# written.
+
+packet 4 cafe 0000 02 00 110000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 00 110000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 01 120000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 01 120000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 02 130000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 02 130000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 03 140000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 03 140000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 04 150000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 04 150000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 05 160000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 05 160000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+# Try incrementing the register array at index 6, 8, 16, 32, and 64,
+# all of which are outside the bounds of the legal index range of [0,
+# 5].  Then read all values again and ensure that none of them have
+# changed.
+
+packet 4 cafe 0000 03 06 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 03 06 000000000000 ffff   ******** ******** deadbeef deadbeef
+
+packet 4 cafe 0000 03 08 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 03 08 000000000000 ffff   ******** ******** deadbeef deadbeef
+
+packet 4 cafe 0000 03 10 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 03 10 000000000000 ffff   ******** ******** deadbeef deadbeef
+
+packet 4 cafe 0000 03 20 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 03 20 000000000000 ffff   ******** ******** deadbeef deadbeef
+
+packet 4 cafe 0000 03 40 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 03 40 000000000000 ffff   ******** ******** deadbeef deadbeef
+
+
+packet 4 cafe 0000 02 00 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 00 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 01 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 01 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 02 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 02 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 03 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 03 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 04 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 04 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 05 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 05 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+# Now try incrementing the value at index 5, and store a value of
+# 0xf00d at index 0.  Then read all values back and ensure they have
+# the expected contents.
+
+packet 4 cafe 0000 03 05 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 03 05 000000000000 ffff   0000cafe 0000caff deadbeef deadbeef
+
+packet 4 f00d 0000 01 00 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 f00d 0000 01 00 000000000000 ffff   0000cafe 0000f00d deadbeef deadbeef
+
+packet 4 cafe 0000 02 00 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 00 000000000000 ffff   0000f00d 0000f00d deadbeef deadbeef $
+
+packet 4 cafe 0000 02 01 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 01 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 02 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 02 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 03 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 03 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 04 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 04 000000000000 ffff   0000cafe 0000cafe deadbeef deadbeef $
+
+packet 4 cafe 0000 02 05 000000000000 ffff   deadbeef deadbeef deadbeef deadbeef
+expect 1 cafe 0000 02 05 000000000000 ffff   0000caff 0000caff deadbeef deadbeef $
