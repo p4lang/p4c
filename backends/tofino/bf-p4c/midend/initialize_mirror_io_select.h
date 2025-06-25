@@ -33,7 +33,7 @@ class DoInitializeMirrorIOSelect : public Transform {
     cstring egIntrMdForDprsrName;
 
  public:
-    DoInitializeMirrorIOSelect(){};
+    DoInitializeMirrorIOSelect() {};
 
     // disable this pass if the @disable_egress_mirror_io_select_initialization pragma is used
     const IR::Node *preorder(IR::P4Program *p) override {

@@ -126,7 +126,7 @@ enum class ErrorCode {
 struct Error {
     ErrorCode code;
     cstring msg;
-    Error(ErrorCode code, cstring msg) : code(code), msg(msg){};
+    Error(ErrorCode code, cstring msg) : code(code), msg(msg) {};
 };
 
 /// ContainerSpec container specification.
@@ -340,7 +340,7 @@ class ActionMoveSolver : public ActionSolverBase {
 /// are not set in this action need to be not live.
 class ActionMochaSolver : public ActionSolverBase {
  public:
-    ActionMochaSolver(){};
+    ActionMochaSolver() {};
     Result solve() override;
 };
 
@@ -351,7 +351,7 @@ class ActionMochaSolver : public ActionSolverBase {
 /// are not set in this action need not to be not live.
 class ActionDarkSolver : public ActionSolverBase {
  public:
-    ActionDarkSolver(){};
+    ActionDarkSolver() {};
     Result solve() override;
 };
 
