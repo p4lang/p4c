@@ -56,6 +56,7 @@ limitations under the License.
 #include "midend/noMatch.h"
 #include "midend/orderArguments.h"
 #include "midend/parserUnroll.h"
+#include "midend/persistToReg.h"
 #include "midend/predication.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeExits.h"
@@ -169,6 +170,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
     if (!DPDK::DpdkContext::get().options().loadIRFromJson) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+            new P4::PersistToReg("Register"_cs),
             new P4::RemoveMiss(&typeMap),
             new P4::EliminateNewtype(&typeMap),
             new P4::EliminateSerEnums(&typeMap),

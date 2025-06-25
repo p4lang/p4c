@@ -320,15 +320,38 @@ class HeaderDefinitions : public IHasDbPrint {
     void setNotReport(const HeaderDefinitions *other) { notReport = other->notReport; }
 };
 
+class DefUseCommon {
+ protected:
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+
+    bool isPersistent(const IR::Expression *e) {
+        if (auto *ai = e->to<IR::ArrayIndex>()) return isPersistent(ai->left);
+        if (auto *sl = e->to<IR::AbstractSlice>()) return isPersistent(sl->e0);
+        if (auto *m = e->to<IR::Member>()) {
+            auto *type = typeMap->getType(m->expr, true)->to<IR::Type_StructLike>();
+            auto *ft = type->getField(m->member.name);
+            if (ft->hasAnnotation(IR::Annotation::persistentAnnotation)) return true;
+            return isPersistent(m->expr);
+        }
+        if (auto *pe = e->to<IR::PathExpression>()) {
+            if (auto *annot = refMap->getDeclaration(pe->path, true)->to<IR::IAnnotated>())
+                return annot->hasAnnotation(IR::Annotation::persistentAnnotation);
+            return false;
+        }
+        BUG("isPersistent can't understand %s: %s", e->node_type_name(), e);
+    }
+
+    DefUseCommon(ReferenceMap *r, TypeMap *t) : refMap(r), typeMap(t) {}
+};
+
 // Run for each parser and control separately
 // Somewhat of a misnamed pass -- the main point of this pass is to find all the uses
 // of each definition, and fill in the `hasUses` output with all the definitions that have
 // uses so RemoveUnused can remove unused things.  It incidentally finds uses that have
 // no definitions and issues uninitialized warnings about them.
-class FindUninitialized : public Inspector {
+class FindUninitialized : public Inspector, DefUseCommon {
     ProgramPoint context;  // context as of the last call or state transition
-    ReferenceMap *refMap;
-    TypeMap *typeMap;
     AllDefinitions *definitions;
     bool lhs = false;           // checking the lhs of an assignment
     ProgramPoint currentPoint;  // context of the current expression/statement
@@ -383,9 +406,8 @@ class FindUninitialized : public Inspector {
     }
 
     FindUninitialized(FindUninitialized *parent, ProgramPoint context)
-        : context(context),
-          refMap(parent->refMap),
-          typeMap(parent->typeMap),
+        : DefUseCommon(parent->refMap, parent->typeMap),
+          context(context),
           definitions(parent->definitions),
           currentPoint(context),
           hasUses(parent->hasUses),
@@ -397,8 +419,7 @@ class FindUninitialized : public Inspector {
  public:
     FindUninitialized(AllDefinitions *definitions, ReferenceMap *refMap, TypeMap *typeMap,
                       HasUses &hasUses)
-        : refMap(refMap),
-          typeMap(typeMap),
+        : DefUseCommon(refMap, typeMap),
           definitions(definitions),
           currentPoint(),
           hasUses(hasUses),
@@ -1023,6 +1044,7 @@ class FindUninitialized : public Inspector {
         auto points = currentDefinitions->getPoints(*read);
 
         if (reportUninitialized && !lhs && points->containsBeforeStart() &&
+            !isPersistent(expression) &&
             hasUninitializedHeaderUnion(expression, currentDefinitions, read)) {
             // Do not report uninitialized values on the LHS.
             // This could happen if we are writing to an array element
@@ -1464,20 +1486,18 @@ class FindUninitialized : public Inspector {
     void postorder(const IR::Operation_Binary *expression) override { otherExpression(expression); }
 };
 
-class RemoveUnused : public Transform {
+class RemoveUnused : public Transform, DefUseCommon {
     const HasUses &hasUses;
-    ReferenceMap *refMap;
-    TypeMap *typeMap;
 
  public:
     explicit RemoveUnused(const HasUses &hasUses, ReferenceMap *refMap, TypeMap *typeMap)
-        : hasUses(hasUses), refMap(refMap), typeMap(typeMap) {
+        : DefUseCommon(refMap, typeMap), hasUses(hasUses) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("RemoveUnused");
     }
     const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
-        if (!hasUses.hasUses(getOriginal())) {
+        if (!hasUses.hasUses(getOriginal()) && !isPersistent(statement->left)) {
             Log::TempIndent indent;
             LOG3("Removing statement " << getOriginal() << " " << statement << indent);
             SideEffects se(typeMap);
