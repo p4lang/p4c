@@ -40,9 +40,8 @@ class TableStepper {
         const IR::Type *type, const IR::P4Table *table, cstring name,
         std::optional<int> idx1_opt = std::nullopt, std::optional<int> idx2_opt = std::nullopt);
 
-    /// @returns the boolean-typed state variable that tracks whether an action was executed
-    /// as the result of a table hit or miss.
-    static const IR::StateVariable &getGlobalTableHitVar();
+    /// @returns the string-typed state variable that tracks the current active table.
+    static const IR::StateVariable &getActiveTableVar();
 
     /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
     /// The value of this variable is false if the table misses or is not reached.
