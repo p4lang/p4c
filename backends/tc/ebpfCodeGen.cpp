@@ -1901,13 +1901,15 @@ bool ConvertToEBPFDeparserPNA::preorder(const IR::Declaration_Instance *di) {
             deparser->addExternDeclaration = true;
             cstring instance = EBPF::EBPFObject::externalName(di);
             auto digest = new EBPFDigestPNA(program, di, typeName, tcIR);
-            for (auto type : ebpfTypes) {
-                if (type->is<EBPF::EBPFStructType>()) {
-                    auto structType = type->to<EBPF::EBPFStructType>();
 
-                    auto structValueType =
-                        dynamic_cast<P4::EBPF::EBPFStructType *>(digest->valueType);
-                    if (structValueType->name == structType->name) structType->packed = true;
+            if (digest->valueType->is<EBPF::EBPFStructType>()) {
+                for (auto type : ebpfTypes) {
+                    if (type->is<EBPF::EBPFStructType>()) {
+                        auto structType = type->to<EBPF::EBPFStructType>();
+                        auto digestType = digest->valueType->to<EBPF::EBPFStructType>();
+
+                        if (digestType->name == structType->name) structType->packed = true;
+                    }
                 }
             }
             deparser->digests.emplace(instance, digest);

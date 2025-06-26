@@ -39,7 +39,7 @@ struct my_ingress_headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
     struct ipv4_t ipv4; /* ipv4_t */
 };
-struct ipv4_learn_digest_t {
+struct __attribute__((__packed__)) ipv4_learn_digest_t {
     u32 srcAddr; /* bit<32> */
     u32 ingress_port; /* PortId_t */
 };
