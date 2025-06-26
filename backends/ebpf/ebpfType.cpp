@@ -196,6 +196,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike *strct) : EBPFType(strc
         }
         fields.push_back(new EBPFField(type, f));
     }
+    packed = false;
 }
 
 void EBPFStructType::declare(CodeBuilder *builder, cstring id, bool asPointer) {
@@ -232,6 +233,8 @@ void EBPFStructType::emitInitializer(CodeBuilder *builder) {
 void EBPFStructType::emit(CodeBuilder *builder) {
     builder->emitIndent();
     builder->append(kind);
+    builder->spc();
+    if (packed) builder->append("__attribute__((__packed__))");
     builder->spc();
     builder->append(name);
     builder->spc();
