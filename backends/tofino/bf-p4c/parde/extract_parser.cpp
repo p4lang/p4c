@@ -90,7 +90,7 @@ struct GetHeaderStackIndex : public Inspector {
                 BUG_CHECK(hdr, "%1%: not a header reference in extract", statement);
 
                 if (!hdr->is<IR::HeaderStackItemRef>()) {
-                    if (header == hdr->to<IR::ConcreteHeaderRef>()->ref->name) {
+                    if (hdr->to<IR::ConcreteHeaderRef>()->ref->name == header) {
                         rv = 0;
                     }
                 }
@@ -553,7 +553,7 @@ const IR::BFN::Parser *GetBackendParser::createBackendParser() {
         while (bitr != binfo->end()) {
             auto b = *bitr;
             auto bparser = b.first->to<IR::P4Parser>();
-            if (bparser && (bparser->name.originalName == parser->name) &&
+            if (bparser && (parser->name == bparser->name.originalName) &&
                 (b.second.gress == parser->thread)) {
                 if (!b.second.parser_instance_name.isNullOrEmpty())
                     multiParserName = b.second.parser_instance_name;

@@ -172,7 +172,8 @@ void ProxyHashMatchTable::gen_tbl_cfg(json::vector &out) const {
             BUG_CHECK(fmt_width, "width of format is 0");
             way_tbl["size"] = way.rams.size() / fmt_width * format->groups() * 1024;
             add_pack_format(way_tbl, format.get(), false);
-            way_tbl["memory_resource_allocation"] = gen_memory_resource_allocation_tbl_cfg(way);
+            way_tbl["memory_resource_allocation"] =
+                gen_memory_resource_allocation_tbl_cfg_with_way(way);
             way_stage_tables.push_back(std::move(way_tbl));
         }
     }

@@ -201,6 +201,22 @@ class Pattern {
     Pattern operator||(const Pattern &r) const {
         return Pattern(new Binary<IR::LOr>(pattern, r.pattern));
     }
+    /// We use these templates to deal with amgigous overloads introduced by C++20.
+    /// https://en.cppreference.com/w/cpp/language/default_comparisons
+    // TODO: Ideally, we would fix these ambiguous overloads by making the Pattern class explicit in
+    // its initialization but that is a breaking change.
+    template <class T>
+    Pattern operator==(Match<T> &m) const {
+        return *this == Pattern(m);
+    }
+    template <class T>
+    Pattern operator!=(Match<T> &m) const {
+        return *this != Pattern(m);
+    }
+    template <class T>
+    Pattern operator==(const Match<T> &m) const {
+        return *this == Pattern(m);
+    }
 
     bool match(const IR::Node *n) { return pattern->match(n); }
 };

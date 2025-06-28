@@ -214,11 +214,11 @@ class Table {
         operator bool() const { return all && all->count(name) > 0; }
         operator Table *() const { return ::get(all, name); }
         Table *operator->() const { return ::get(all, name); }
-        bool set() const { return lineno >= 0; }
-        bool operator==(const Table *t) const { return name == t->name_; }
-        bool operator==(const char *t) const { return name == t; }
-        bool operator==(const std::string &t) const { return name == t; }
+        [[nodiscard]] bool set() const { return lineno >= 0; }
+        bool operator==(const Table &t) const { return name == t.name_; }
+        bool operator!=(const Table &t) const { return name != t.name_; }
         bool operator==(const Ref &a) const { return name == a.name; }
+        bool operator!=(const Ref &a) const { return name != a.name; }
         bool operator<(const Ref &a) const { return name < a.name; }
         bool check() const {
             if (set() && !*this) error(lineno, "No table named %s", name.c_str());
@@ -1320,7 +1320,7 @@ DECLARE_ABSTRACT_TABLE_TYPE(SRamMatchTable, MatchTable,         // exact, atcam,
     void add_field_to_pack_format(json::vector &field_list, unsigned basebit, std::string name,
                                   const Table::Format::Field &field,
                                   const Table::Actions::Action *act) const override;
-    std::unique_ptr<json::map> gen_memory_resource_allocation_tbl_cfg(const Way &) const;
+    std::unique_ptr<json::map> gen_memory_resource_allocation_tbl_cfg_with_way(const Way &) const;
     Actions *get_actions() const override {
         return actions ? actions.get() : (action ? action->actions.get() : nullptr);
     }
@@ -1412,7 +1412,7 @@ DECLARE_TABLE_TYPE(
     void verify_format(Target::Tofino) override;
     void verify_entry_priority(); void setup_column_priority(); void find_tcam_match();
     void gen_unit_cfg(json::vector &units, int size) const;
-    std::unique_ptr<json::vector> gen_memory_resource_allocation_tbl_cfg() const;
+    std::unique_ptr<json::vector> gen_memory_resource_allocation_tbl_cfg_no_input() const;
     void setup_nibble_mask(Table::Format::Field *match, int group,
                            std::map<int, match_element> &elems, bitvec &mask);
     std::string get_match_mode(const Phv::Ref &pref, int offset) const override;
