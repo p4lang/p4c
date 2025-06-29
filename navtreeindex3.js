@@ -207,7 +207,7 @@ var NAVTREEINDEX3 =
 "class_format_hash_1_1_slice_width.html":[13,0,311,1],
 "class_format_hash_1_1_zero_hash.html":[13,0,311,2],
 "class_g_test_options.html":[13,0,336],
-"class_g_test_options.html#a6f0c06cbd7ba5c833ea1c28ab6f3287c":[13,0,336,0],
+"class_g_test_options.html#a2967a87593fde497ba9b34f6f17823be":[13,0,336,0],
 "class_g_test_table_placement.html":[13,0,337],
 "class_gateway_layout.html":[13,0,314],
 "class_gateway_opt.html":[13,0,315],

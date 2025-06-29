@@ -414,7 +414,7 @@ $(function(){initNavTree('bf-asm_2input__xbar_8h_source.html',''); initResizable
 <div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            : outer(o), outer_end(oend), inner_valid(<span class="keyword">false</span>) {</div>
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>            mk_inner_valid();</div>
 <div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        }</div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>        <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> all_iter &amp;a) {</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>        <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> all_iter &amp;a)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>            <span class="keywordflow">if</span> (outer != a.outer) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>            <span class="keywordflow">if</span> (inner_valid != a.inner_valid) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>            <span class="keywordflow">return</span> inner_valid ? inner == a.inner : <span class="keyword">true</span>;</div>

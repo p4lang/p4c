@@ -1,5 +1,7 @@
 var NAVTREEINDEX26 =
 {
+"class_p4_1_1bitvec_1_1const__bitref.html":[13,0,12,54,0],
+"class_p4_1_1bitvec_1_1copy__bitref.html":[12,0,14,39,1],
 "class_p4_1_1bitvec_1_1copy__bitref.html":[13,0,12,54,1],
 "class_p4_1_1bitvec_1_1nonconst__bitref.html":[12,0,14,39,2],
 "class_p4_1_1bitvec_1_1nonconst__bitref.html":[13,0,12,54,2],
@@ -247,7 +249,5 @@ var NAVTREEINDEX26 =
 "class_p_h_v_1_1_allocation.html#ae9155cdaf2ae07b68ee972f05ce2c0b3":[12,0,16,6,7],
 "class_p_h_v_1_1_allocation.html#ae9155cdaf2ae07b68ee972f05ce2c0b3":[13,0,15,9,7],
 "class_p_h_v_1_1_allocation.html#aee7ae951612454702bf3ac04eed5f882":[12,0,16,6,17],
-"class_p_h_v_1_1_allocation.html#aee7ae951612454702bf3ac04eed5f882":[13,0,15,9,17],
-"class_p_h_v_1_1_allocation.html#af0e7021614988fd7456cd5c9c9833970":[12,0,16,6,28],
-"class_p_h_v_1_1_allocation.html#af0e7021614988fd7456cd5c9c9833970":[13,0,15,9,28]
+"class_p_h_v_1_1_allocation.html#aee7ae951612454702bf3ac04eed5f882":[13,0,15,9,17]
 };

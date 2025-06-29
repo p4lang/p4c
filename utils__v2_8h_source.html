@@ -253,90 +253,88 @@ $(function(){initNavTree('utils__v2_8h_source.html',''); initResizable(true); })
 <div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="keywordtype">int</span> t_i = 0;</div>
 <div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span></div>
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_search_config.html">SearchConfig</a> *search_config_i = <span class="keyword">new</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_search_config.html">SearchConfig</a>();</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span></div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    std::ostream *tracer = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> <span class="keyword">private</span>:</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *tab_table[] = {</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        <span class="stringliteral">&quot;&quot;</span>, <span class="stringliteral">&quot; &quot;</span>, <span class="stringliteral">&quot;  &quot;</span>, <span class="stringliteral">&quot;   &quot;</span>, <span class="stringliteral">&quot;    &quot;</span>, <span class="stringliteral">&quot;     &quot;</span>, <span class="stringliteral">&quot;      &quot;</span>, <span class="stringliteral">&quot;       &quot;</span>, <span class="stringliteral">&quot;        &quot;</span>,</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    };</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">int</span> max_log_level = <span class="keyword">sizeof</span>(tab_table) / <span class="keyword">sizeof</span>(tab_table[0]) - 1;</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span> </div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *tab_table[] = {</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="stringliteral">&quot;&quot;</span>, <span class="stringliteral">&quot; &quot;</span>, <span class="stringliteral">&quot;  &quot;</span>, <span class="stringliteral">&quot;   &quot;</span>, <span class="stringliteral">&quot;    &quot;</span>, <span class="stringliteral">&quot;     &quot;</span>, <span class="stringliteral">&quot;      &quot;</span>, <span class="stringliteral">&quot;       &quot;</span>, <span class="stringliteral">&quot;        &quot;</span>,</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    };</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    <span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keywordtype">int</span> max_log_level = <span class="keyword">sizeof</span>(tab_table) / <span class="keyword">sizeof</span>(tab_table[0]) - 1;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    ScoreContext() {}</div>
 <div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    ScoreContext() {}</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span> </div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_super_cluster.html">SuperCluster</a> *sc()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        BUG_CHECK(sc_i, <span class="stringliteral">&quot;sc not added in ctx.&quot;</span>);</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="keywordflow">return</span> sc_i;</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    }</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    ScoreContext with_sc(<span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_super_cluster.html">SuperCluster</a> *sc)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        cloned.sc_i = sc;</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        <span class="keywordflow">return</span> cloned;</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    }</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span> </div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_container_group.html">ContainerGroup</a> *cont_group()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        BUG_CHECK(cont_group_i, <span class="stringliteral">&quot;container group not added in ctx.&quot;</span>);</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        <span class="keywordflow">return</span> cont_group_i;</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    }</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    ScoreContext with_cont_group(<span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_container_group.html">ContainerGroup</a> *cont_group)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        cloned.cont_group_i = cont_group;</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keywordflow">return</span> cloned;</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    }</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keyword">const</span> std::vector&lt;const SuperCluster::SliceList *&gt; *alloc_order()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        BUG_CHECK(alloc_order_i, <span class="stringliteral">&quot;sl alloc order not added in ctx.&quot;</span>);</div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keywordflow">return</span> alloc_order_i;</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    }</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    ScoreContext with_alloc_order(<span class="keyword">const</span> std::vector&lt;const SuperCluster::SliceList *&gt; *order)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        cloned.alloc_order_i = order;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordflow">return</span> cloned;</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    }</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_sc_alloc_alignment.html">ScAllocAlignment</a> *alloc_alignment()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        BUG_CHECK(alloc_alignment_i, <span class="stringliteral">&quot;alloc alignment not added in ctx.&quot;</span>);</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        <span class="keywordflow">return</span> alloc_alignment_i;</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    }</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>    ScoreContext with_alloc_alignment(<span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_sc_alloc_alignment.html">ScAllocAlignment</a> *alignment)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        cloned.alloc_alignment_i = alignment;</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        <span class="keywordflow">return</span> cloned;</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    }</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1v2_1_1_tx_score_maker.html">TxScoreMaker</a> *score()<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        BUG_CHECK(score_i, <span class="stringliteral">&quot;score not added in ctx.&quot;</span>);</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="keywordflow">return</span> score_i;</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    }</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    ScoreContext with_score(<span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1v2_1_1_tx_score_maker.html">TxScoreMaker</a> *score)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        cloned.score_i = score;</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        <span class="keywordflow">return</span> cloned;</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    }</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    <span class="keywordtype">int</span> t()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> t_i; }</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    std::string t_tabs()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> tab_table[t_i]; }</div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>    ScoreContext with_t(<span class="keywordtype">int</span> t)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        <span class="keywordflow">if</span> (t &gt; max_log_level) t = max_log_level;</div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        cloned.t_i = t;</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        <span class="keywordflow">return</span> cloned;</div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    }</div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_search_config.html">SearchConfig</a> *search_config()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> search_config_i; }</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    ScoreContext with_search_config(<span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_search_config.html">SearchConfig</a> *c)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>        cloned.search_config_i = c;</div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        <span class="keywordflow">return</span> cloned;</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    }</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>};</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_super_cluster.html">SuperCluster</a> *sc()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        BUG_CHECK(sc_i, <span class="stringliteral">&quot;sc not added in ctx.&quot;</span>);</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        <span class="keywordflow">return</span> sc_i;</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    }</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    ScoreContext with_sc(<span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_super_cluster.html">SuperCluster</a> *sc)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>        cloned.sc_i = sc;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <span class="keywordflow">return</span> cloned;</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    }</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_container_group.html">ContainerGroup</a> *cont_group()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        BUG_CHECK(cont_group_i, <span class="stringliteral">&quot;container group not added in ctx.&quot;</span>);</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="keywordflow">return</span> cont_group_i;</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    }</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    ScoreContext with_cont_group(<span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1_container_group.html">ContainerGroup</a> *cont_group)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        cloned.cont_group_i = cont_group;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        <span class="keywordflow">return</span> cloned;</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    }</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span> </div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="keyword">const</span> std::vector&lt;const SuperCluster::SliceList *&gt; *alloc_order()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        BUG_CHECK(alloc_order_i, <span class="stringliteral">&quot;sl alloc order not added in ctx.&quot;</span>);</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        <span class="keywordflow">return</span> alloc_order_i;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    }</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    ScoreContext with_alloc_order(<span class="keyword">const</span> std::vector&lt;const SuperCluster::SliceList *&gt; *order)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        cloned.alloc_order_i = order;</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keywordflow">return</span> cloned;</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    }</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span> </div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    <span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_sc_alloc_alignment.html">ScAllocAlignment</a> *alloc_alignment()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        BUG_CHECK(alloc_alignment_i, <span class="stringliteral">&quot;alloc alignment not added in ctx.&quot;</span>);</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="keywordflow">return</span> alloc_alignment_i;</div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    }</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    ScoreContext with_alloc_alignment(<span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_sc_alloc_alignment.html">ScAllocAlignment</a> *alignment)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        cloned.alloc_alignment_i = alignment;</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="keywordflow">return</span> cloned;</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    }</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span> </div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1v2_1_1_tx_score_maker.html">TxScoreMaker</a> *score()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        BUG_CHECK(score_i, <span class="stringliteral">&quot;score not added in ctx.&quot;</span>);</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="keywordflow">return</span> score_i;</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    }</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    ScoreContext with_score(<span class="keyword">const</span> <a class="code hl_class" href="class_p_h_v_1_1v2_1_1_tx_score_maker.html">TxScoreMaker</a> *score)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        cloned.score_i = score;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="keywordflow">return</span> cloned;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    }</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>    <span class="keywordtype">int</span> t()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> t_i; }</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    std::string t_tabs()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> tab_table[t_i]; }</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    ScoreContext with_t(<span class="keywordtype">int</span> t)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        <span class="keywordflow">if</span> (t &gt; max_log_level) t = max_log_level;</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>        cloned.t_i = t;</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        <span class="keywordflow">return</span> cloned;</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    }</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    <span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_search_config.html">SearchConfig</a> *search_config()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> search_config_i; }</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    ScoreContext with_search_config(<span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_search_config.html">SearchConfig</a> *c)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        <span class="keyword">auto</span> cloned = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        cloned.search_config_i = c;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        <span class="keywordflow">return</span> cloned;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    }</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>};</div>
 </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span> </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>}  <span class="comment">// namespace v2</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>}  <span class="comment">// namespace PHV</span></div>
 <div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>}  <span class="comment">// namespace v2</span></div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>}  <span class="comment">// namespace PHV</span></div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__set_html"><div class="ttname"><a href="class_p4_1_1ordered__set.html">P4::ordered_set</a></div><div class="ttdef"><b>Definition</b> ordered_set.h:32</div></div>

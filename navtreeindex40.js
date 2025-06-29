@@ -1,5 +1,7 @@
 var NAVTREEINDEX40 =
 {
+"struct_tofino_1_1_action_data_bus_1_1_use.html":[12,0,23,0,0],
+"struct_tofino_1_1_action_data_bus_1_1_use.html":[13,0,20,0,0],
 "struct_tofino_1_1_action_data_bus_1_1_use_1_1_random_number_generator.html":[12,0,23,0,0,0],
 "struct_tofino_1_1_action_data_bus_1_1_use_1_1_random_number_generator.html":[13,0,20,0,0,0],
 "struct_tofino_1_1_i_x_bar.html":[12,0,23,2],
