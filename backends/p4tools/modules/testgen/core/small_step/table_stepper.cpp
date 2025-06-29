@@ -75,6 +75,10 @@ const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *tabl
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*result"_cs);
 }
 
+const IR::StateVariable &TableStepper::getActiveTableVar() {
+    return ToolsVariables::getStateVariable(IR::Type::String::get(), "*active_table_var"_cs);
+}
+
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit"_cs);
 }
@@ -564,6 +568,8 @@ bool TableStepper::eval() {
 TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
     : stepper(stepper), table(table) {
     properties.tableName = table->controlPlaneName();
+    auto &nextState = stepper->state.clone();
+    nextState.set(getActiveTableVar(), IR::StringLiteral::get(properties.tableName));
     for (size_t index = 0; index < table->getActionList()->size(); index++) {
         const auto *action = table->getActionList()->actionList.at(index);
         properties.actionIdMap.emplace(action->controlPlaneName(), index);
