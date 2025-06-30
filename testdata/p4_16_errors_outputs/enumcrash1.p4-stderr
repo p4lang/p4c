@@ -1,0 +1,3 @@
+enumcrash1.p4(6): [--Werror=type-error] error: Foo.D: Invalid enum tag
+    testfn(arg = Foo.D);
+                 ^^^^^
