@@ -97,7 +97,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Table *type) {
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Type *type) {
-    BUG("Should never be found in IR: %1%", type);
+    BUG_CHECK(errorCount() > 0, "Should never be found in IR: %1%", type);
+    return type;
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::P4Control *cont) {
