@@ -340,8 +340,8 @@ const IR::Node *DoConstantFolding::postorder(IR::UPlus *e) {
 }
 
 const IR::Constant *DoConstantFolding::cast(const IR::Constant *node, unsigned base,
-                                            const IR::Type_Bits *type) const {
-    return new IR::Constant(node->srcInfo, type, node->value, base);
+                                            const IR::Type_Bits *type, bool noWarning) const {
+    return new IR::Constant(node->srcInfo, type, node->value, base, noWarning);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Add *e) {
@@ -920,7 +920,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();
         if (auto arg = expr->to<IR::Constant>()) {
-            return cast(arg, arg->base, type);
+            // Do not emit overflow or mismatch warnings for explicit casts.
+            return cast(arg, arg->base, type, /* noWarning */ true);
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
             if (type->isSigned || type->size != 1)
                 error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% directly to %2% (use bit<1>)",
