@@ -108,15 +108,11 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         auto *vec = new IR::Vector<IR::Expression>();
         const auto *elementType = ts->elementType;
         for (size_t i = 0; i < ts->getSize(); i++) {
-            const IR::Expression *invalid = nullptr;
-            if (elementType->is<IR::Type_Header>()) {
-                invalid = new IR::InvalidHeader(elementType->getP4Type());
-            } else {
-                BUG_CHECK(elementType->is<IR::Type_HeaderUnion>(),
-                          "%1%: expected a header or header union stack", elementType);
-                invalid = new IR::InvalidHeaderUnion(srcInfo, elementType->getP4Type());
+            const IR::Expression *value = getDefaultValue(elementType, srcInfo);
+            if (value == nullptr) {
+                return nullptr;
             }
-            vec->push_back(invalid);
+            vec->push_back(value);
         }
         const auto *resultType = ts->getP4Type();
         return new IR::HeaderStackExpression(srcInfo, resultType, *vec, resultType);
