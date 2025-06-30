@@ -921,7 +921,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         auto type = etype->to<IR::Type_Bits>();
         if (auto arg = expr->to<IR::Constant>()) {
             // Do not emit overflow or mismatch warnings for explicit casts.
-            return cast(arg, arg->base, type, /* noWarning */ true);
+            return cast(arg, arg->base, type, /* noWarning */ !e->implicit);
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
             if (type->isSigned || type->size != 1)
                 error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% directly to %2% (use bit<1>)",
