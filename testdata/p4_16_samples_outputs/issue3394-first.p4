@@ -19,7 +19,7 @@ control C1(int a, inout bit<8> b) {
         if (b == (bit<8>)a) {
             b = (bit<8>)a + 8w1;
         } else {
-            b = (bit<8>)(1 + a);
+            b = (bit<8>)(a + 1);
         }
     }
 }
