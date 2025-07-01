@@ -80,7 +80,7 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool
                     BUG("Unexpected type %1%", ft);
                 }
             }
-        } else if (ft->is<IR::Type_Stack>()) {
+        } else if (ft->is<IR::Type_Array>()) {
             // Done elsewhere
             LOG3("stack generation done elsewhere");
             continue;
@@ -140,7 +140,7 @@ void HeaderConverter::addHeaderStacks(const IR::Type_Struct *headersStruct) {
     LOG2("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
         auto ft = ctxt->typeMap->getType(f, true);
-        auto stack = ft->to<IR::Type_Stack>();
+        auto stack = ft->to<IR::Type_Array>();
         if (stack == nullptr) continue;
         auto stack_name = f->controlPlaneName();
         auto stack_size = stack->getSize();
@@ -178,7 +178,7 @@ void HeaderConverter::addHeaderStacks(const IR::Type_Struct *headersStruct) {
 bool HeaderConverter::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;
     for (auto f : st->fields) {
-        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
+        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Array>()) {
             result = true;
         }
     }
@@ -246,7 +246,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             field->append(32);
             field->append(false);
             max_length += 32;
-        } else if (ftype->to<IR::Type_Stack>()) {
+        } else if (ftype->to<IR::Type_Array>()) {
             BUG("%1%: nested stack", st);
         } else {
             BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
@@ -336,7 +336,7 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node *node) {
                 ctxt->json->add_metadata(metadata_type, v->name);
             }
             addHeaderType(st);
-        } else if (auto stack = type->to<IR::Type_Stack>()) {
+        } else if (auto stack = type->to<IR::Type_Array>()) {
             auto type = ctxt->typeMap->getTypeType(stack->elementType, true);
             if (type->is<IR::Type_Header>()) {
                 auto ht = type->to<IR::Type_Header>();

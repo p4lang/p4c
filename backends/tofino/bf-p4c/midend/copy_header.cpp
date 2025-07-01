@@ -108,7 +108,7 @@ const IR::Node *DoCopyHeaders::postorder(IR::AssignmentStatement *statement) {
             retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
         return new IR::BlockStatement(statement->srcInfo, *retval);
-    } else if (auto stk = ltype->to<IR::Type_Stack>()) {
+    } else if (auto stk = ltype->to<IR::Type_Array>()) {
         auto size = stk->size->to<IR::Constant>();
         BUG_CHECK(size && size->value > 0, "stack %s size is not positive constant", ltype);
         auto retval = new IR::IndexedVector<IR::StatOrDecl>();

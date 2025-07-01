@@ -100,7 +100,7 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
             result->createField(validFieldName, valid);
         }
         return result;
-    } else if (auto st = type->to<IR::Type_Stack>()) {
+    } else if (auto st = type->to<IR::Type_Array>()) {
         auto *result = construct<ArrayLocation>(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {
             auto *sl = create(st->elementType, absl::StrCat(name, "[", i, "]"));
@@ -207,7 +207,7 @@ const LocationSet *LocationSet::getField(cstring field) const {
             }
         } else if (const auto *array = l->to<ArrayLocation>()) {
             for (const auto *f : *array) {
-                if (field == IR::Type_Stack::next || field == IR::Type_Stack::last) {
+                if (field == IR::Type_Array::next || field == IR::Type_Array::last) {
                     result->add(f);
                 } else {
                     f->to<StructLocation>()->addField(field, result);
@@ -591,12 +591,12 @@ bool ComputeWriteSet::preorder(const IR::Member *expression) {
     auto storage = getWrites(expression->expr);
 
     auto basetype = typeMap->getType(expression->expr, true);
-    if (basetype->is<IR::Type_Stack>()) {
-        if (expression->member.name == IR::Type_Stack::next ||
-            expression->member.name == IR::Type_Stack::last) {
+    if (basetype->is<IR::Type_Array>()) {
+        if (expression->member.name == IR::Type_Array::next ||
+            expression->member.name == IR::Type_Array::last) {
             expressionWrites(expression, storage);
             return false;
-        } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+        } else if (expression->member.name == IR::Type_Array::lastIndex) {
             expressionWrites(expression, LocationSet::empty);
             return false;
         }
@@ -703,7 +703,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
             auto v = base->getField(StorageFactory::validFieldName);
             expressionWrites(expression, v);
             return false;
-        } else if (name == IR::Type_Stack::push_front || name == IR::Type_Stack::pop_front) {
+        } else if (name == IR::Type_Array::push_front || name == IR::Type_Array::pop_front) {
             expressionWrites(expression, base);
             return false;
         } else {

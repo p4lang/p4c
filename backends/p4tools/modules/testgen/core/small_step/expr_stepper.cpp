@@ -226,7 +226,7 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 BUG("Unknown method call on header instance: %1%", call);
             }
 
-            if (method->expr->type->is<IR::Type_Stack>()) {
+            if (method->expr->type->is<IR::Type_Array>()) {
                 if (method->member == "push_front") {
                     return stepStackPushPopFront(method->expr, call->arguments);
                 }

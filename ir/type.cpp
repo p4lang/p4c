@@ -31,12 +31,12 @@ limitations under the License.
 
 namespace P4::IR {
 
-const cstring IR::Type_Stack::next = "next"_cs;
-const cstring IR::Type_Stack::last = "last"_cs;
-const cstring IR::Type_Stack::arraySize = "size"_cs;
-const cstring IR::Type_Stack::lastIndex = "lastIndex"_cs;
-const cstring IR::Type_Stack::push_front = "push_front"_cs;
-const cstring IR::Type_Stack::pop_front = "pop_front"_cs;
+const cstring IR::Type_Array::next = "next"_cs;
+const cstring IR::Type_Array::last = "last"_cs;
+const cstring IR::Type_Array::arraySize = "size"_cs;
+const cstring IR::Type_Array::lastIndex = "lastIndex"_cs;
+const cstring IR::Type_Array::push_front = "push_front"_cs;
+const cstring IR::Type_Array::pop_front = "pop_front"_cs;
 const cstring IR::Type_Header::isValid = "isValid"_cs;
 const cstring IR::Type_Header::setValid = "setValid"_cs;
 const cstring IR::Type_Header::setInvalid = "setInvalid"_cs;
@@ -53,7 +53,7 @@ long Type_Declaration::nextId = 0;
 long Type_InfInt::nextId = 0;
 long Type_Any::nextId = 0;
 
-const Type *Type_Stack::at(size_t) const { return elementType; }
+const Type *Type_Array::at(size_t) const { return elementType; }
 
 const Type_Bits *Type_Bits::get(int width, bool isSigned) {
     // map (width, signed) to type

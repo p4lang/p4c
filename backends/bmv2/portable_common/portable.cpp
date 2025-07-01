@@ -60,7 +60,7 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
             field->append(error_width);
             field->append(false);
             max_length += error_width;
-        } else if (ftype->to<IR::Type_Stack>()) {
+        } else if (ftype->to<IR::Type_Array>()) {
             BUG("%1%: nested stack", st);
         } else {
             BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);

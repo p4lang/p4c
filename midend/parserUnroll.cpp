@@ -168,7 +168,7 @@ class ParserStateRewriter : public Transform {
         ParserStateRewriter rewriter(parserStructure, state, valueMap, refMap, typeMap, afterExec,
                                      visitedStates);
         auto basetype = getTypeArray(expression->left);
-        if (!basetype->is<IR::Type_Stack>()) return expression;
+        if (!basetype->is<IR::Type_Array>()) return expression;
         IR::ArrayIndex *newExpression = expression->clone();
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
         auto *value = ev.evaluate(expression->right, false);
@@ -187,7 +187,7 @@ class ParserStateRewriter : public Transform {
                           expression);
             return expression;
         }
-        const auto *arrayType = basetype->to<IR::Type_Stack>();
+        const auto *arrayType = basetype->to<IR::Type_Array>();
         if (res->asUnsigned() >= arrayType->getSize()) {
             wasOutOfBound = true;
             return expression;
@@ -200,7 +200,7 @@ class ParserStateRewriter : public Transform {
     IR::Node *postorder(IR::Member *expression) {
         if (!afterExec) return expression;
         auto basetype = getTypeArray(getOriginal<IR::Member>()->expr);
-        if (basetype->is<IR::Type_Stack>()) {
+        if (basetype->is<IR::Type_Array>()) {
             auto l = afterExec->get(expression->expr);
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
             auto array = l->to<SymbolicArray>();
@@ -208,11 +208,11 @@ class ParserStateRewriter : public Transform {
             unsigned offset = 0;
             if (state->statesIndexes.count(expression->expr)) {
                 idx = state->statesIndexes.at(expression->expr);
-                if (expression->member.name != IR::Type_Stack::last) {
+                if (expression->member.name != IR::Type_Array::last) {
                     offset = 1;
                 }
             }
-            if (expression->member.name == IR::Type_Stack::lastIndex) {
+            if (expression->member.name == IR::Type_Array::lastIndex) {
                 return new IR::Constant(IR::Type_Bits::get(32), idx);
             } else {
                 if (idx + offset >= array->size) {
@@ -244,8 +244,8 @@ class ParserStateRewriter : public Transform {
     const IR::Type *getTypeArray(const IR::Node *element) {
         if (element->is<IR::ArrayIndex>()) {
             const IR::Expression *left = element->to<IR::ArrayIndex>()->left;
-            if (left->type->is<IR::Type_Stack>())
-                return left->type->to<IR::Type_Stack>()->elementType;
+            if (left->type->is<IR::Type_Array>())
+                return left->type->to<IR::Type_Array>()->elementType;
         }
         return typeMap->getType(element, true);
     }
@@ -897,7 +897,7 @@ bool ParserStructure::reachableHSUsage(IR::ID id, const ParserStateInfo *state) 
 
 void ParserStructure::addStateHSUsage(const IR::ParserState *state,
                                       const IR::Expression *expression) {
-    if (state == nullptr || expression == nullptr || !expression->type->is<IR::Type_Stack>())
+    if (state == nullptr || expression == nullptr || !expression->type->is<IR::Type_Array>())
         return;
     auto i = statesWithHeaderStacks.find(state->name.name);
     if (i == statesWithHeaderStacks.end()) {

@@ -30,7 +30,7 @@ void SubstituteStructures::explode(const IR::Expression *expression, const IR::T
             explode(e, t, output);
         }
     } else {
-        BUG_CHECK(!type->is<IR::Type_StructLike>() && !type->is<IR::Type_Stack>(),
+        BUG_CHECK(!type->is<IR::Type_StructLike>() && !type->is<IR::Type_Array>(),
                   "%1%: unexpected type", type);
         output->push_back(expression);
     }

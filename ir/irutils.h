@@ -62,7 +62,7 @@ const IR::Constant *getMaxValueConstant(const Type *t, const Util::SourceInfo &s
 /// Type_StructLike     StructExpression (fields filled with getDefaultValue)
 /// Type_Fragment       recurses into getDefaultValue
 /// Type_BaseList       ListExpression (fields filled with getDefaultValue)
-/// Type_Stack          HeaderStackExpression (fields filled with getDefaultValue)
+/// Type_Array          HeaderStackExpression (fields filled with getDefaultValue)
 /// Definition: https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values
 const IR::Expression *getDefaultValue(const Type *type, const Util::SourceInfo &srcInfo = {},
                                       bool valueRequired = false);

@@ -444,7 +444,7 @@ void FlattenHeader::explode(const IR::Expression *expression, IR::Vector<IR::Exp
         }
     } else {
         BUG_CHECK(
-            !expression->type->is<IR::Type_StructLike>() && !expression->type->is<IR::Type_Stack>(),
+            !expression->type->is<IR::Type_StructLike>() && !expression->type->is<IR::Type_Array>(),
             "%1%: unexpected type", expression->type);
         output->push_back(expression);
     }

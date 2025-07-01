@@ -45,7 +45,7 @@ EBPF::EBPFType *UBPFTypeFactory::create(const IR::Type *type) {
         result = new UBPFEnumType(te);
     } else if (auto te = type->to<IR::Type_Error>()) {
         result = new UBPFErrorType(te);
-    } else if (auto ts = type->to<IR::Type_Stack>()) {
+    } else if (auto ts = type->to<IR::Type_Array>()) {
         auto et = create(ts->elementType);
         if (et == nullptr) return nullptr;
         result = new EBPF::EBPFStackType(ts, et);

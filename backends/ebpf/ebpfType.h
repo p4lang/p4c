@@ -88,7 +88,7 @@ class EBPFStackType : public EBPFType, public IHasWidth {
     unsigned size;
 
  public:
-    EBPFStackType(const IR::Type_Stack *type, EBPFType *elementType)
+    EBPFStackType(const IR::Type_Array *type, EBPFType *elementType)
         : EBPFType(type), elementType(elementType), size(type->getSize()) {
         CHECK_NULL(type);
         CHECK_NULL(elementType);

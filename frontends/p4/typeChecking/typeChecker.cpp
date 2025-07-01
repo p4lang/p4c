@@ -259,19 +259,19 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
     } else if (auto set = type->to<IR::Type_Set>()) {
         auto et = canonicalize(set->elementType);
         if (et == nullptr) return nullptr;
-        if (et->is<IR::Type_Stack>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
+        if (et->is<IR::Type_Array>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
             ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: Sets of %2% are not supported", type, et);
         if (et == set->elementType) return type;
         const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
         return canon;
-    } else if (auto stack = type->to<IR::Type_Stack>()) {
+    } else if (auto stack = type->to<IR::Type_Array>()) {
         auto et = canonicalize(stack->elementType);
         if (et == nullptr) return nullptr;
         const IR::Type *canon;
         if (et == stack->elementType)
             canon = type;
         else
-            canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
+            canon = new IR::Type_Array(stack->srcInfo, et, stack->size);
         canon = typeMap->getCanonical(canon);
         return canon;
     } else if (auto vec = type->to<IR::Type_P4List>()) {
@@ -666,7 +666,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             }
         }
         // else this is some other expression that evaluates to a tuple
-    } else if (auto tstack = concreteType->to<IR::Type_Stack>()) {
+    } else if (auto tstack = concreteType->to<IR::Type_Array>()) {
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
             bool hasDots = li->containsDots();
             if (tstack->getSize() != li->components.size() && !hasDots) {

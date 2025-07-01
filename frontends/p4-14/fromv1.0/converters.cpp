@@ -199,8 +199,8 @@ const IR::Node *ExpressionConverter::postorder(IR::HeaderStackItemRef *ref) {
     if (ref->index_->is<IR::PathExpression>()) {
         auto nr = ref->index_->to<IR::PathExpression>();
         if (nr->path->name == "last" || nr->path->name == "next") {
-            cstring name = nr->path->name == "last" ? IR::Type_Stack::last : IR::Type_Stack::next;
-            if (replaceNextWithLast && name == IR::Type_Stack::next) name = IR::Type_Stack::last;
+            cstring name = nr->path->name == "last" ? IR::Type_Array::last : IR::Type_Array::next;
+            if (replaceNextWithLast && name == IR::Type_Array::next) name = IR::Type_Array::last;
             auto result = new IR::Member(ref->srcInfo, ref->base_, name);
             result->type = ref->base_->type;
             return result;

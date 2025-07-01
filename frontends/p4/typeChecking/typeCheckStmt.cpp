@@ -189,7 +189,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
                                            forin->body);
         else
             delete rclone;
-    } else if (auto *stack = ctype->to<IR::Type_Stack>()) {
+    } else if (auto *stack = ctype->to<IR::Type_Array>()) {
         if (!canCastBetween(stack->elementType, ltype))
             typeError("%1% does not match header stack type %2%", forin->ref, ctype);
     } else if (auto *list = ctype->to<IR::Type_P4List>()) {

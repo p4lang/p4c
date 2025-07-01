@@ -101,7 +101,7 @@ struct BridgeIngressToEgress : public Transform {
                       bridgedField.first, bridgedField.second);
             auto &info = fieldInfo.at(bridgedField);
 
-            if (info.type->is<IR::Type_Stack>())
+            if (info.type->is<IR::Type_Array>())
                 P4C_UNIMPLEMENTED(
                     "Currently the compiler does not support bridging field %1% "
                     "of type stack.",

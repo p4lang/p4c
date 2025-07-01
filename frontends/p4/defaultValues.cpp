@@ -89,7 +89,7 @@ const IR::Node *DoDefaultValues::postorder(IR::HeaderStackExpression *expression
             vec.push_back(expression->components.at(i));  // skip '...'
 
         auto expressionType = typeMap->getType(getOriginal(), true);
-        auto stackType = expressionType->to<IR::Type_Stack>();
+        auto stackType = expressionType->to<IR::Type_Array>();
         BUG_CHECK(stackType, "%1%: expected a stack type", expressionType);
         auto dotsType = typeMap->getType(dots, true);
         auto result = defaultValue(expression, dotsType);

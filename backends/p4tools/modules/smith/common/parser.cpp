@@ -73,7 +73,7 @@ IR::ParserState *ParserGenerator::genHdrStates() {
     auto *pktCall = new IR::Member(new IR::PathExpression("pkt"), "extract");
     for (auto sfName : hdrFieldsNames) {
         const auto *sfType = hdrFieldsTypes[sfName];
-        if (const auto *sfTpS = sfType->to<IR::Type_Stack>()) {
+        if (const auto *sfTpS = sfType->to<IR::Type_Array>()) {
             auto *mem = new IR::Member(new IR::PathExpression("hdr"), sfName);
             size_t size = sfTpS->getSize();
             const auto *eleTpName = sfTpS->elementType;

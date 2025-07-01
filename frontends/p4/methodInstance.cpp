@@ -61,9 +61,9 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
                 mem->member == IR::Type_Header::setInvalid ||
                 mem->member == IR::Type_Header::isValid)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
-        } else if (basetype->is<IR::Type_Stack>()) {
-            if (mem->member == IR::Type_Stack::push_front ||
-                mem->member == IR::Type_Stack::pop_front)
+        } else if (basetype->is<IR::Type_Array>()) {
+            if (mem->member == IR::Type_Array::push_front ||
+                mem->member == IR::Type_Array::pop_front)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
         } else {
             const IR::IDeclaration *decl = nullptr;

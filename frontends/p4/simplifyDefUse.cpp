@@ -144,9 +144,9 @@ class HeaderDefinitions : public IHasDbPrint {
             for (auto bs : base_storage) {
                 if (auto struct_storage = bs->to<StructLocation>()) {
                     struct_storage->addField(expr->member, &result);
-                } else if (bs->is<ArrayLocation>() && (expr->member == IR::Type_Stack::next ||
-                                                       expr->member == IR::Type_Stack::last ||
-                                                       expr->member == IR::Type_Stack::lastIndex)) {
+                } else if (bs->is<ArrayLocation>() && (expr->member == IR::Type_Array::next ||
+                                                       expr->member == IR::Type_Array::last ||
+                                                       expr->member == IR::Type_Array::lastIndex)) {
                     auto array_storage = bs->to<ArrayLocation>();
                     for (auto element : *array_storage) result.add(element);
                 }
@@ -198,9 +198,9 @@ class HeaderDefinitions : public IHasDbPrint {
         auto member = expr->to<IR::Member>();
         auto base = member ? member->expr : nullptr;
 
-        if (member && base && typeMap->getType(base, true)->is<IR::Type_Stack>() &&
-            (member->member == IR::Type_Stack::next || member->member == IR::Type_Stack::last ||
-             member->member == IR::Type_Stack::lastIndex)) {
+        if (member && base && typeMap->getType(base, true)->is<IR::Type_Array>() &&
+            (member->member == IR::Type_Array::next || member->member == IR::Type_Array::last ||
+             member->member == IR::Type_Array::lastIndex)) {
             return true;
         }
 
@@ -743,7 +743,7 @@ class FindUninitialized : public Inspector {
             return;
         }
 
-        if (auto st = dst_type->to<IR::Type_Stack>()) {
+        if (auto st = dst_type->to<IR::Type_Array>()) {
             if (!st->elementType->is<IR::Type_Header>() &&
                 !st->elementType->is<IR::Type_HeaderUnion>()) {
                 // Generalized arrays means we can have array of any type, and we only
@@ -760,7 +760,7 @@ class FindUninitialized : public Inspector {
                     typeMap->setType(dst_elem, st->elementType);
                     processHeadersInAssignment(dst_elem, source, st->elementType, src_type);
                 }
-            } else if (src_type->is<IR::Type_Stack>()) {
+            } else if (src_type->is<IR::Type_Array>()) {
                 auto dst_locations = headerDefs->getStorageLocation(dst);
                 auto src_locations = headerDefs->getStorageLocation(src);
 
@@ -1064,7 +1064,7 @@ class FindUninitialized : public Inspector {
             } else {
                 return false;
             }
-        } else if (type->is<IR::Type_Stack>()) {
+        } else if (type->is<IR::Type_Array>()) {
             if (isHeaderUnionStackUninitialized(type, currentDefinitions, read)) {
                 return true;
             } else {
@@ -1093,7 +1093,7 @@ class FindUninitialized : public Inspector {
     bool isHeaderUnionStackUninitialized(const IR::Type *type,
                                          const P4::Definitions *currentDefinitions,
                                          const LocationSet *read) {
-        auto sType = type->to<IR::Type_Stack>();
+        auto sType = type->to<IR::Type_Array>();
         for (unsigned int i = 0; i < sType->getSize(); i++) {
             if (sType->at(i)->is<IR::Type_HeaderUnion>()) {
                 auto stackLoc = read->getIndex(i);
@@ -1203,7 +1203,7 @@ class FindUninitialized : public Inspector {
         if (auto bim = mi->to<BuiltInMethod>()) {
             auto base = getReads(bim->appliedTo, true);
             cstring name = bim->name.name;
-            if (name == IR::Type_Stack::push_front || name == IR::Type_Stack::pop_front) {
+            if (name == IR::Type_Array::push_front || name == IR::Type_Array::pop_front) {
                 // Reads all array fields
                 reads(expression, base);
                 registerUses(expression, false);
@@ -1353,9 +1353,9 @@ class FindUninitialized : public Inspector {
         auto storage = getReads(expression->expr, true);
 
         auto basetype = typeMap->getType(expression->expr, true);
-        if (basetype->is<IR::Type_Stack>()) {
-            if (expression->member.name == IR::Type_Stack::next ||
-                expression->member.name == IR::Type_Stack::last) {
+        if (basetype->is<IR::Type_Array>()) {
+            if (expression->member.name == IR::Type_Array::next ||
+                expression->member.name == IR::Type_Array::last) {
                 // Accessing these fields implies reading the whole stack
                 auto save = lhs;
                 lhs = false;
@@ -1364,11 +1364,11 @@ class FindUninitialized : public Inspector {
                 lhs = save;
                 reads(expression, storage);
                 registerUses(expression, false);
-                if (!lhs && expression->member.name == IR::Type_Stack::next)
+                if (!lhs && expression->member.name == IR::Type_Array::next)
                     warn(ErrorType::WARN_UNINITIALIZED, "%1%: reading uninitialized value",
                          expression);
                 return false;
-            } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+            } else if (expression->member.name == IR::Type_Array::lastIndex) {
                 auto index = storage->getArrayLastIndex();
                 reads(expression, index);
                 registerUses(expression, false);

@@ -474,7 +474,7 @@ class ArrayIndex : Operation_Binary {
     stringOp = "[]";
     precedence = DBPrint::Prec_Postfix;
     inline ArrayIndex {
-        if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
+        if (auto st = left ? left->type->to<IR::Type_Array>() : nullptr)
             type = st->elementType; }
     toString{ return absl::StrCat(left, "[", right, "]"); }
 }

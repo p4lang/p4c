@@ -617,7 +617,7 @@ class Type_Name : Type {
     }
 }
 
-class Type_Stack : Type_Indexed, Type {
+class Type_Array : Type_Indexed, Type {
     Type        elementType;
     Expression  size;
     toString{
@@ -637,7 +637,7 @@ class Type_Stack : Type_Indexed, Type {
     static const cstring push_front;
     static const cstring pop_front;
     const Type* getP4Type() const override
-    { return new IR::Type_Stack(srcInfo, elementType->getP4Type(), size); }
+    { return new IR::Type_Array(srcInfo, elementType->getP4Type(), size); }
     int width_bits() const override { return getSize() * elementType->width_bits(); }
 }
 
