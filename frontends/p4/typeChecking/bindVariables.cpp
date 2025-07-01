@@ -79,6 +79,7 @@ const IR::Node *DoBindTypeVariables::postorder(IR::Expression *expression) {
 const IR::Node *DoBindTypeVariables::postorder(IR::Declaration_Instance *decl) {
     if (decl->type->is<IR::Type_Specialized>()) return decl;
     auto type = typeMap->getType(getOriginal(), true);
+    while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
     if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) type = tsc->substituted;
     BUG_CHECK(type->is<IR::IMayBeGenericType>(), "%1%: unexpected type %2% for declaration", decl,
               type);
