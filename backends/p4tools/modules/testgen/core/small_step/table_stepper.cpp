@@ -75,6 +75,10 @@ const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *tabl
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*result"_cs);
 }
 
+const IR::StateVariable &TableStepper::getActiveTableVar() {
+    return ToolsVariables::getStateVariable(IR::Type::String::get(), "*active_table_var"_cs);
+}
+
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit"_cs);
 }
@@ -191,6 +195,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
         // Some path selection strategies depend on looking ahead and collecting potential
         // nodes. If that is the case, apply the CoverableNodesScanner visitor.
@@ -288,6 +293,7 @@ void TableStepper::setTableDefaultEntries(
         }
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << "| Overriding default action: " << actionName;
@@ -356,6 +362,7 @@ void TableStepper::evalTableControlEntries(
 
         nextState.set(getTableHitVar(table), IR::BoolLiteral::get(true));
         nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+        nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
@@ -412,6 +419,10 @@ void TableStepper::evalTaintedTable() {
     // We do not know whether this table was hit or not.
     auto hitVar = getTableHitVar(table);
     nextState.set(hitVar, stepper->programInfo.createTargetUninitialized(hitVar->type, true));
+    // Set current active table
+    auto activeTableVar = getActiveTableVar();
+    nextState.set(activeTableVar,
+                  stepper->programInfo.createTargetUninitialized(activeTableVar->type, true));
 
     // Reset the property to its previous stepper->state.
     replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, currentTaint));
@@ -511,6 +522,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     }
     nextState.set(getTableHitVar(table), IR::BoolLiteral::get(false));
     nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+    nextState.set(getActiveTableVar(), IR::StringLiteral::get(table->name));
 
     nextState.replaceTopBody(&replacements);
     stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredNodes);
