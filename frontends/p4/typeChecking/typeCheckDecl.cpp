@@ -221,6 +221,11 @@ bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *ins
     return rv;
 }
 
+static const IR::Type *relayerArrayType(const IR::Type *base, const IR::Type_Array *arr) {
+    if (auto *nest = arr->elementType->to<IR::Type_Array>()) base = relayerArrayType(base, nest);
+    return new IR::Type_Array(base, arr->size);
+}
+
 template <class Node>
 TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstanceImpl(Node *decl) {
     // We need to control the order of the type-checking: we want to do first
@@ -237,6 +242,8 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
     }
     auto orig = getOriginal<IR::Declaration_Instance>();
 
+    auto *arrayType = type->template to<IR::Type_Array>();
+    while (auto *at = type->template to<IR::Type_Array>()) type = at->elementType;
     auto simpleType = type;
     if (auto *sc = type->template to<IR::Type_SpecializedCanonical>()) simpleType = sc->substituted;
 
@@ -251,6 +258,7 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
         // Otherwise, we use the type received from checkExternConstructor, which
         // has substituted the type variables with fresh ones.
         if (type->template is<IR::Type_Extern>()) type = newType;
+        if (arrayType) type = relayerArrayType(type, arrayType);
         setType(orig, type);
         setType(decl, type);
 
@@ -269,6 +277,10 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
             setType(decl, type);
         }
     } else if (simpleType->template is<IR::IContainer>()) {
+        if (arrayType) {
+            typeError("%1%: can't create arrays of %2%", decl, simpleType);
+            return {decl, true};
+        }
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
             return {decl, true};
