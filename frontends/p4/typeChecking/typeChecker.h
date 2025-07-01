@@ -252,7 +252,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Type_Extern *type);
     const IR::Node *postorder(const IR::StructField *field);
     const IR::Node *postorder(const IR::Type_Header *type);
-    const IR::Node *postorder(const IR::Type_Stack *type);
+    const IR::Node *postorder(const IR::Type_Array *type);
     const IR::Node *postorder(const IR::Type_Struct *type);
     const IR::Node *postorder(const IR::Type_HeaderUnion *type);
     const IR::Node *postorder(const IR::Type_Typedef *type);
@@ -400,7 +400,7 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Type_Extern *type) override;
     void postorder(const IR::StructField *field) override;
     void postorder(const IR::Type_Header *type) override;
-    void postorder(const IR::Type_Stack *type) override;
+    void postorder(const IR::Type_Array *type) override;
     void postorder(const IR::Type_Struct *type) override;
     void postorder(const IR::Type_HeaderUnion *type) override;
     void postorder(const IR::Type_Typedef *type) override;
@@ -539,7 +539,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Type_Extern *type) override;
     const IR::Node *postorder(IR::StructField *field) override;
     const IR::Node *postorder(IR::Type_Header *type) override;
-    const IR::Node *postorder(IR::Type_Stack *type) override;
+    const IR::Node *postorder(IR::Type_Array *type) override;
     const IR::Node *postorder(IR::Type_Struct *type) override;
     const IR::Node *postorder(IR::Type_HeaderUnion *type) override;
     const IR::Node *postorder(IR::Type_Typedef *type) override;

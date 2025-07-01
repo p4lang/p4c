@@ -332,7 +332,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
             else
                 e = get_primary(m, ctxt->parent);
             if (!di.live[fi]) return e;
-        } else if (m->expr->type->to<IR::Type_Stack>()) {
+        } else if (m->expr->type->to<IR::Type_Array>()) {
             if (m->member.name == "lastIndex") {
                 // this depends on how much has been written to the header stack, but not
                 // on any data that has been written.  So what should the defs be?  For now,
@@ -403,7 +403,7 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
             di.live[fi] = 0;
             if (!di.live) di.defs.clear();
             return e;
-        } else if (auto *ts = m->expr->type->to<IR::Type_Stack>()) {
+        } else if (auto *ts = m->expr->type->to<IR::Type_Array>()) {
             if (m->member.name == "next" || m->member.name == "last") {
                 di.defs.insert(getLoc(m));
                 di.live.setrange(0, ts->getSize());

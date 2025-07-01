@@ -76,7 +76,7 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
     IR::IfStatement *result = nullptr;
     IR::IfStatement *curResult = nullptr;
     IR::IfStatement *newIf = nullptr;
-    const auto *typeStack = aiFinder.arrayIndex->left->type->checkedTo<IR::Type_Stack>();
+    const auto *typeStack = aiFinder.arrayIndex->left->type->checkedTo<IR::Type_Array>();
     size_t sz = typeStack->getSize();
     if ((expansion += (sz - 1)) > maxExpansion) {
         if (expansion - sz < maxExpansion)

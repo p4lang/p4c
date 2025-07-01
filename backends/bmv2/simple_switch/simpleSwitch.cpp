@@ -1143,7 +1143,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         LOG2("Headers type is " << st);
         for (auto f : st->fields) {
             auto t = typeMap->getType(f, true);
-            if (!t->is<IR::Type_Header>() && !t->is<IR::Type_Stack>() &&
+            if (!t->is<IR::Type_Header>() && !t->is<IR::Type_Array>() &&
                 !t->is<IR::Type_HeaderUnion>()) {
                 ::P4::error(ErrorType::ERR_EXPECTED,
                             "%1%: the type should be a struct of headers, stacks, or unions",

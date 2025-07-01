@@ -26,7 +26,7 @@ cstring ActionConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_Varbits>()) return "assign_VL"_cs;
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header"_cs;
-    if (auto ts = type->to<IR::Type_Stack>()) {
+    if (auto ts = type->to<IR::Type_Array>()) {
         auto et = ts->elementType;
         if (et->is<IR::Type_HeaderUnion>())
             return "assign_union_stack"_cs;
@@ -185,12 +185,12 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                     prim = "add_header"_cs;
                 } else if (builtin->name == IR::Type_Header::setInvalid) {
                     prim = "remove_header"_cs;
-                } else if (builtin->name == IR::Type_Stack::push_front) {
+                } else if (builtin->name == IR::Type_Array::push_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                     auto arg = ctxt->conv->convert(mc->arguments->at(0)->expression);
                     prim = "push"_cs;
                     parameters->append(arg);
-                } else if (builtin->name == IR::Type_Stack::pop_front) {
+                } else if (builtin->name == IR::Type_Array::pop_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                     auto arg = ctxt->conv->convert(mc->arguments->at(0)->expression);
                     prim = "pop"_cs;

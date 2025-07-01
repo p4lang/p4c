@@ -105,9 +105,9 @@ void InspectPnaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
                 pinfo->metadata_types.emplace(type->getName(), type->to<IR::Type_Struct>());
                 addHeaderInstance(type, f->controlPlaneName());
             }
-        } else if (ft->is<IR::Type_Stack>()) {
-            LOG5("Field is Type_Stack " << ft->toString());
-            auto stack = ft->to<IR::Type_Stack>();
+        } else if (ft->is<IR::Type_Array>()) {
+            LOG5("Field is Type_Array " << ft->toString());
+            auto stack = ft->to<IR::Type_Array>();
             // auto stack_name = f->controlPlaneName();
             auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);

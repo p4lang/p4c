@@ -485,7 +485,7 @@ class SymbolicHeaderUnion : public SymbolicStruct {
 class SymbolicArray final : public SymbolicValue {
     std::vector<SymbolicStruct *> values;
     friend class AnyElement;
-    explicit SymbolicArray(const IR::Type_Stack *type)
+    explicit SymbolicArray(const IR::Type_Array *type)
         : SymbolicValue(type),
           size(type->getSize()),
           elemType(type->elementType->to<IR::Type_Header>()) {}
@@ -493,7 +493,7 @@ class SymbolicArray final : public SymbolicValue {
  public:
     const size_t size;
     const IR::Type_Header *elemType;
-    SymbolicArray(const IR::Type_Stack *stack, bool uninitialized,
+    SymbolicArray(const IR::Type_Array *stack, bool uninitialized,
                   const SymbolicValueFactory *factory);
     SymbolicValue *get(const IR::Node *node, size_t index) const {
         if (index >= values.size())

@@ -19,7 +19,7 @@ class ErrorOnInfInt : public Inspector {
 class HasInfInt : public Inspector {
  public:
     bool found = false;
-    bool preorder(const IR::Type_Stack *type) override {
+    bool preorder(const IR::Type_Array *type) override {
         visit(type->elementType);
         // We skip the array size, that's a constant
         return false;

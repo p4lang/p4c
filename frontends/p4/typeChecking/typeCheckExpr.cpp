@@ -596,7 +596,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
     if (done()) return expression;
     bool constant = true;
     auto stackType = getTypeType(expression->headerStackType);
-    if (auto st = stackType->to<IR::Type_Stack>()) {
+    if (auto st = stackType->to<IR::Type_Array>()) {
         auto elementType = st->elementType;
         IR::Vector<IR::Expression> vec;
         bool changed = false;
@@ -685,7 +685,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ArrayIndex *expression) {
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr) return expression;
-    auto hst = ltype->to<IR::Type_Stack>();
+    auto hst = ltype->to<IR::Type_Array>();
 
     int index = -1;
     if (auto cst = expression->right->to<IR::Constant>()) {
@@ -1228,7 +1228,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
             return expression;
         }
     }
-    if (concreteType->is<IR::Type_Stack>()) {
+    if (concreteType->is<IR::Type_Array>()) {
         if (expression->expr->is<IR::ListExpression>()) {
             auto result = assignment(expression, concreteType, expression->expr);
             return result;
@@ -1704,14 +1704,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
         return expression;
     }
 
-    if (auto *stack = type->to<IR::Type_Stack>()) {
+    if (auto *stack = type->to<IR::Type_Array>()) {
         auto parser = findContext<IR::P4Parser>();
         auto eltype = stack->elementType;
         if (auto sc = eltype->to<IR::Type_SpecializedCanonical>()) eltype = sc->baseType;
         if (!eltype->is<IR::Type_Header>() && !eltype->is<IR::Type_HeaderUnion>()) {
             typeError("%1%: '%2%' can only be used on header stacks", expression, member);
             return expression;
-        } else if (member == IR::Type_Stack::next || member == IR::Type_Stack::last) {
+        } else if (member == IR::Type_Array::next || member == IR::Type_Array::last) {
             if (parser == nullptr) {
                 typeError("%1%: 'last', and 'next' for stacks can only be used in a parser",
                           expression);
@@ -1719,16 +1719,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
             }
             setType(getOriginal(), stack->elementType);
             setType(expression, stack->elementType);
-            if (isLeftValue(expression->expr) && member == IR::Type_Stack::next) {
+            if (isLeftValue(expression->expr) && member == IR::Type_Array::next) {
                 setLeftValue(expression);
                 setLeftValue(getOriginal<IR::Expression>());
             }
             return expression;
-        } else if (member == IR::Type_Stack::arraySize) {
+        } else if (member == IR::Type_Array::arraySize) {
             setType(getOriginal(), IR::Type_Bits::get(32));
             setType(expression, IR::Type_Bits::get(32));
             return expression;
-        } else if (member == IR::Type_Stack::lastIndex) {
+        } else if (member == IR::Type_Array::lastIndex) {
             if (parser == nullptr) {
                 typeError("%1%: 'lastIndex' for stacks can only be used in a parser", expression);
                 return expression;
@@ -1736,10 +1736,10 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
             setType(getOriginal(), IR::Type_Bits::get(32, false));
             setType(expression, IR::Type_Bits::get(32, false));
             return expression;
-        } else if (member == IR::Type_Stack::push_front || member == IR::Type_Stack::pop_front) {
+        } else if (member == IR::Type_Array::push_front || member == IR::Type_Array::pop_front) {
             if (parser != nullptr)
                 typeError("%1%: '%2%' and '%3%' for stacks cannot be used in a parser", expression,
-                          IR::Type_Stack::push_front, IR::Type_Stack::pop_front);
+                          IR::Type_Array::push_front, IR::Type_Array::pop_front);
             if (!isLeftValue(expression->expr))
                 typeError("%1%: must be applied to a left-value", expression);
             IR::IndexedVector<IR::Parameter> params;
@@ -2175,8 +2175,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
         }
 
         auto bi = mi->to<BuiltInMethod>();
-        if (isInContext<IR::SelectCase>() && (!bi || (bi->name == IR::Type_Stack::pop_front ||
-                                                      bi->name == IR::Type_Stack::push_front))) {
+        if (isInContext<IR::SelectCase>() && (!bi || (bi->name == IR::Type_Array::pop_front ||
+                                                      bi->name == IR::Type_Array::push_front))) {
             typeError("%1%: no function calls allowed in this context", expression);
             return expression;
         }
@@ -2304,7 +2304,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::DefaultExpression *expres
 }
 
 bool TypeInferenceBase::containsHeader(const IR::Type *type) {
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Array>() ||
         type->is<IR::Type_HeaderUnion>())
         return true;
     if (auto *st = type->to<IR::Type_Struct>()) {

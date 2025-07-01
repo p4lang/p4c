@@ -561,7 +561,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     if (inferForFunc) inferForFunc->writes.insert(obj);
                 }
                 return mc;
-            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+            } else if (mem->expr->type->is<IR::Type_Array>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 dropValuesUsing(obj);
@@ -648,7 +648,7 @@ void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpressi
                 LOG3("loop prepass header method call " << mc->method << " writes to " << obj);
                 self.dropValuesUsing(obj);
                 return;
-            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+            } else if (mem->expr->type->is<IR::Type_Array>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 self.dropValuesUsing(obj);

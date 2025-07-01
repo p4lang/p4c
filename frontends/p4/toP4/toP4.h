@@ -147,7 +147,7 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::Type_Parser *t) override;
     bool preorder(const IR::Type_Control *t) override;
     bool preorder(const IR::Type_Name *t) override;
-    bool preorder(const IR::Type_Stack *t) override;
+    bool preorder(const IR::Type_Array *t) override;
     bool preorder(const IR::Type_Specialized *t) override;
     bool preorder(const IR::Type_Enum *t) override;
     bool preorder(const IR::Type_SerEnum *t) override;

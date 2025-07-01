@@ -220,7 +220,7 @@ class RemoveGenericTypes : public Transform {
         if (!type->typeParameters->empty()) return nullptr;
         return type;
     }
-    const IR::Node *postorder(IR::Type_Stack *type) override {
+    const IR::Node *postorder(IR::Type_Array *type) override {
         if (type->elementType->is<IR::Type_Specialized>()) return nullptr;
         return type;
     }

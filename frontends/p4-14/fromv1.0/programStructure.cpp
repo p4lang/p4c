@@ -345,7 +345,7 @@ void ProgramStructure::createStructures() {
         auto ht = type->to<IR::Type_Header>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
-        auto stack = new IR::Type_Stack(id.srcInfo, tn, new IR::Constant(size));
+        auto stack = new IR::Type_Array(id.srcInfo, tn, new IR::Constant(size));
         auto annos = addGlobalNameAnnotation(id, it.first->annotations);
         auto field = new IR::StructField(id.srcInfo, id, annos, stack);
         headers->fields.push_back(field);
@@ -1530,7 +1530,7 @@ CONVERT_PRIMITIVE(push, ) {  // NOLINT(whitespace/parens), remove with C++20 upg
     auto hdr = conv.convert(primitive->operands.at(0));
     auto count = push_pop_size(conv, primitive);
     IR::IndexedVector<IR::StatOrDecl> block;
-    auto methodName = IR::Type_Stack::push_front;
+    auto methodName = IR::Type_Array::push_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
     block.push_back(
         new IR::MethodCallStatement(primitive->srcInfo, method, {new IR::Argument(count)}));
@@ -1547,7 +1547,7 @@ CONVERT_PRIMITIVE(pop, ) {  // NOLINT(whitespace/parens), remove with C++20 upgr
               "Expected 1 or 2 operands for %1%", primitive);
     auto hdr = conv.convert(primitive->operands.at(0));
     auto count = push_pop_size(conv, primitive);
-    auto methodName = IR::Type_Stack::pop_front;
+    auto methodName = IR::Type_Array::pop_front;
     auto method = new IR::Member(hdr, IR::ID(methodName));
     return new IR::MethodCallStatement(primitive->srcInfo, method, {new IR::Argument(count)});
 }

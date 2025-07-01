@@ -118,10 +118,10 @@ const IR::Expression *RemoveComplexComparisons::explode(Util::SourceInfo srcInfo
             result = new IR::LAnd(srcInfo, result, rec);
         }
         return result;
-    } else if (auto at = leftType->to<IR::Type_Stack>()) {
+    } else if (auto at = leftType->to<IR::Type_Array>()) {
         auto size = at->getSize();
         const IR::Expression *result = new IR::BoolLiteral(true);
-        BUG_CHECK(rightType->is<IR::Type_Stack>(), "%1%: comparing stack with %1%", left,
+        BUG_CHECK(rightType->is<IR::Type_Array>(), "%1%: comparing stack with %1%", left,
                   rightType);
         for (unsigned i = 0; i < size; i++) {
             auto index = new IR::Constant(i);
@@ -153,7 +153,7 @@ const IR::Node *RemoveComplexComparisons::postorder(IR::Operation_Binary *expres
     if (!expression->is<IR::Neq>() && !expression->is<IR::Equ>()) return expression;
     auto ltype = typeMap->getType(expression->left, true);
     auto rtype = typeMap->getType(expression->right, true);
-    if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Stack>() &&
+    if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Array>() &&
         !ltype->is<IR::Type_BaseList>())
         return expression;
     auto result = explode(expression->srcInfo, ltype, expression->left, rtype, expression->right);

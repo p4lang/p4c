@@ -229,7 +229,7 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
             add_comment(out, (*it)->name.toString());
             if (auto t = (*it)->type->to<IR::Type_Name>()) {
                 out << "header " << (*it)->name << " instanceof " << t->path->name;
-            } else if (auto t = (*it)->type->to<IR::Type_Stack>()) {
+            } else if (auto t = (*it)->type->to<IR::Type_Array>()) {
                 if (!t->elementType->is<IR::Type_Name>())
                     BUG("%1% Unsupported type", t->elementType);
                 cstring type_name = t->elementType->to<IR::Type_Name>()->path->name;

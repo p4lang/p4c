@@ -258,7 +258,7 @@ bool AbstractStepper::stepSetHeaderValidity(const IR::StateVariable &headerRef, 
 const IR::MethodCallStatement *generateStacksetValid(const IR::Expression *stackRef, int index,
                                                      bool isValid) {
     const auto *arrayIndex = HSIndexToMember::produceStackIndex(
-        stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, index);
+        stackRef->type->checkedTo<IR::Type_Array>()->elementType, stackRef, index);
     auto name = (isValid) ? IR::Type_Header::setValid : IR::Type_Header::setInvalid;
     return new IR::MethodCallStatement(new IR::MethodCallExpression(
         IR::Type_Void::get(),
@@ -270,7 +270,7 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
                                      std::vector<Continuation::Command> &replacements,
                                      const IR::Expression *stackRef, int leftIndex,
                                      int rightIndex) {
-    const auto *elemType = stackRef->type->checkedTo<IR::Type_Stack>()->elementType;
+    const auto *elemType = stackRef->type->checkedTo<IR::Type_Array>()->elementType;
     const auto *leftArIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, leftIndex);
     const auto *rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
@@ -293,7 +293,7 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
 
 bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
                                             const IR::Vector<IR::Argument> *args, bool isPush) {
-    const auto *stackType = stackRef->type->checkedTo<IR::Type_Stack>();
+    const auto *stackType = stackRef->type->checkedTo<IR::Type_Array>();
     auto sz = static_cast<int>(stackType->getSize());
     BUG_CHECK(args->size() == 1, "Invalid size of arguments for %1%", stackRef);
     auto count = args->at(0)->expression->checkedTo<IR::Constant>()->asInt();

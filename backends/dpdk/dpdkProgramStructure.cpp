@@ -121,7 +121,7 @@ bool ParseDpdkArchitecture::preorder(const IR::PackageBlock *block) {
 bool InspectDpdkProgram::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;
     for (auto f : st->fields) {
-        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
+        if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Array>()) {
             result = true;
         }
     }
@@ -203,9 +203,9 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, b
                 structure->metadata_types.emplace(type->getName(), type->to<IR::Type_Struct>());
                 addHeaderInstance(type, f->controlPlaneName());
             }
-        } else if (ft->is<IR::Type_Stack>()) {
-            LOG5("Field is Type_Stack " << ft->toString());
-            auto stack = ft->to<IR::Type_Stack>();
+        } else if (ft->is<IR::Type_Array>()) {
+            LOG5("Field is Type_Array " << ft->toString());
+            auto stack = ft->to<IR::Type_Array>();
             auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
