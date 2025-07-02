@@ -706,6 +706,10 @@ class FindUninitialized : public Inspector {
                     typeMap->setType(src_member, ftype);
                     processHeadersInAssignment(dst_member, src_member, ftype, ftype);
                 }
+            } else if (typeMap->externImplicitReadType(src_type)) {
+                for (const auto *s : headerDefs->getStorageLocation(dst)) {
+                    headerDefs->setValueToStorage(s, TernaryBool::Yes);
+                }
             } else {
                 BUG("%1%: unexpected expression on RHS", src);
             }
@@ -1469,6 +1473,30 @@ class RemoveUnused : public Transform {
     ReferenceMap *refMap;
     TypeMap *typeMap;
 
+    // FIXME -- this is very messy -- should be a better way to detect this
+    // Perhaps via P4::SideEffects
+    bool isExternType(const IR::Expression *e) {
+        auto *type = typeMap ? typeMap->getType(e, false) : nullptr;
+        if (!type) type = e->type;
+        if (auto *tsc = type->to<IR::Type_SpecializedCanonical>()) type = tsc->substituted;
+        if (auto *ts = type->to<IR::Type_Specialized>()) type = ts->baseType;
+        return type->is<IR::Type_Extern>();
+    }
+
+    bool implicitExernAssign(const IR::Expression *exp) {
+        while (!isExternType(exp)) {
+            if (auto *sl = exp->to<IR::AbstractSlice>())
+                exp = sl->e0;
+            else if (auto *m = exp->to<IR::Member>())
+                exp = m->expr;
+            else if (auto *ai = exp->to<IR::ArrayIndex>())
+                exp = ai->left;
+            else
+                return false;
+        }
+        return true;
+    }
+
  public:
     explicit RemoveUnused(const HasUses &hasUses, ReferenceMap *refMap, TypeMap *typeMap)
         : hasUses(hasUses), refMap(refMap), typeMap(typeMap) {
@@ -1477,7 +1505,7 @@ class RemoveUnused : public Transform {
         setName("RemoveUnused");
     }
     const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
-        if (!hasUses.hasUses(getOriginal())) {
+        if (!hasUses.hasUses(getOriginal()) && !implicitExernAssign(statement->left)) {
             Log::TempIndent indent;
             LOG3("Removing statement " << getOriginal() << " " << statement << indent);
             SideEffects se(typeMap);
