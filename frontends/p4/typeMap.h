@@ -108,6 +108,13 @@ class TypeMap final : public ProgramMap {
 
     /// True is type occupies no storage.
     bool typeIsEmpty(const IR::Type *type) const;
+
+    // helper functions for implicitly assignable/readable externs, needed by typeChecking
+    // and typeUnification
+    // FIXME -- we currently only allow one implicit assign and one implicit read per
+    // extern, as unification can't deal with resolving more than one (overload resolution)
+    const IR::Type *externImplicitAssignType(const IR::Type *, bool skipIndex = false) const;
+    const IR::Type *externImplicitReadType(const IR::Type *, bool skipIndex = false) const;
 };
 }  // namespace P4
 

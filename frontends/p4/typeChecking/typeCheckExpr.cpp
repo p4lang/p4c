@@ -1324,8 +1324,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PathExpression *expressio
     } else if (decl->is<IR::Declaration_Variable>()) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
-    } else if (decl->is<IR::Parameter>()) {
-        auto paramDecl = decl->to<IR::Parameter>();
+    } else if (auto paramDecl = decl->to<IR::Parameter>()) {
         if (paramDecl->direction == IR::Direction::InOut ||
             paramDecl->direction == IR::Direction::Out) {
             setLeftValue(expression);
@@ -1333,10 +1332,21 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PathExpression *expressio
         } else if (paramDecl->direction == IR::Direction::None) {
             setCompileTimeConstant(expression);
             setCompileTimeConstant(getOriginal<IR::Expression>());
+            if (typeMap->externImplicitAssignType(paramDecl->type, true)) {
+                setLeftValue(expression);
+                setLeftValue(getOriginal<IR::Expression>());
+            }
         }
-    } else if (decl->is<IR::Declaration_Constant>() || decl->is<IR::Declaration_Instance>()) {
+    } else if (decl->is<IR::Declaration_Constant>()) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
+    } else if (auto di = decl->to<IR::Declaration_Instance>()) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+        if (typeMap->externImplicitAssignType(di->type, true)) {
+            setLeftValue(expression);
+            setLeftValue(getOriginal<IR::Expression>());
+        }
     } else if (decl->is<IR::Method>() || decl->is<IR::Function>()) {
         type = getType(decl->getNode());
         // Each method invocation uses fresh type variables
@@ -1620,28 +1630,36 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
     if (auto ts = type->to<IR::Type_SpecializedCanonical>()) type = ts->substituted;
 
     if (auto *ext = type->to<IR::Type_Extern>()) {
-        auto call = findContext<IR::MethodCallExpression>();
-        if (call == nullptr) {
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+        if (auto call = getParent<IR::MethodCallExpression>()) {
+            auto method = ext->lookupMethod(expression->member, call->arguments);
+            if (method == nullptr) {
+                typeError("%1%: extern %2% does not have method matching this call", expression,
+                          ext->name);
+                return expression;
+            }
+
+            const IR::Type *methodType = getType(method);
+            if (methodType == nullptr) return expression;
+            // Each method invocation uses fresh type variables
+            methodType = cloneWithFreshTypeVariables(methodType->to<IR::IMayBeGenericType>());
+
+            setType(getOriginal(), methodType);
+            setType(expression, methodType);
+            return expression;
+        } else if (auto cvt = typeMap->externImplicitReadType(ext)) {
+            if (cvt->is<IR::Type_StructLike>()) {
+                type = cvt;
+                // assume we'll convert to that and fall through
+            } else {
+                typeError("%1%: Methods can only be called", expression);
+                return expression;
+            }
+        } else {
             typeError("%1%: Methods can only be called", expression);
             return expression;
         }
-        auto method = ext->lookupMethod(expression->member, call->arguments);
-        if (method == nullptr) {
-            typeError("%1%: extern %2% does not have method matching this call", expression,
-                      ext->name);
-            return expression;
-        }
-
-        const IR::Type *methodType = getType(method);
-        if (methodType == nullptr) return expression;
-        // Each method invocation uses fresh type variables
-        methodType = cloneWithFreshTypeVariables(methodType->to<IR::IMayBeGenericType>());
-
-        setType(getOriginal(), methodType);
-        setType(expression, methodType);
-        setCompileTimeConstant(expression);
-        setCompileTimeConstant(getOriginal<IR::Expression>());
-        return expression;
     }
 
     bool inMethod = getParent<IR::MethodCallExpression>() != nullptr;

@@ -37,6 +37,7 @@ set (MIDEND_SRCS
   flattenLogMsg.cpp
   flattenUnions.cpp
   hsIndexSimplify.cpp
+  implicitReadWrite.cpp
   interpreter.cpp
   global_copyprop.cpp
   local_copyprop.cpp
@@ -93,6 +94,7 @@ set (MIDEND_HDRS
   flattenInterfaceStructs.h
   flattenUnions.h
   has_side_effects.h
+  implicitReadWrite.h
   interpreter.h
   global_copyprop.h
   local_copyprop.h
