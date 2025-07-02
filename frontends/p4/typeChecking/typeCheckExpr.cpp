@@ -915,6 +915,12 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
         // getTypeType should have already taken care of the error message
         return expression;
     }
+    // FIXME: #5100, strip the new-type introduced by `type` keyword for now. According to the spec,
+    // such code should be rejected, but before #5099 it was accepted, so keep it accepted for now,
+    // until we discuss what is the right approach here.
+    if (const auto *rt = rtype->to<IR::Type_Newtype>()) {
+        rtype = getTypeType(rt->type);
+    }
     auto lt = ltype->to<IR::Type_Bits>();
     if (auto cst = expression->right->to<IR::Constant>()) {
         if (!cst->fitsInt()) {
@@ -945,9 +951,14 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
         }
     }
 
-    if (rtype->is<IR::Type_Bits>() && rtype->to<IR::Type_Bits>()->isSigned) {
+    if (const auto *rbits = rtype->to<IR::Type_Bits>(); rbits && rbits->isSigned) {
         typeError("%1%: Shift amount must be an unsigned number", expression->right);
         return expression;
+    } else if (!rbits && !rtype->is<IR::Type_InfInt>()) {
+        typeError(
+            "%1%: The right operand of shifts must be either an expression of type bit<S> or int, "
+            "but is %2%",
+            expression->right, rtype);
     }
 
     if (!lt && !ltype->is<IR::Type_InfInt>()) {
