@@ -126,7 +126,7 @@ control MainControlImpl(inout parsed_headers_t hdrs, inout user_meta_t umeta, in
         hdrs.ipv4[0].ihl = 4w5;
         hdrs.ipv4[0].dscp = 6w5;
         hdrs.ipv4[0].ecn = 2w0;
-        hdrs.ipv4[0].length = 16w20 + umeta.L2_packet_len_bytes;
+        hdrs.ipv4[0].length = umeta.L2_packet_len_bytes + 16w20;
         hdrs.ipv4[0].identification = 16w0;
         hdrs.ipv4[0].rsvd = 1w0;
         hdrs.ipv4[0].df = 1w0;
