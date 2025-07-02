@@ -231,6 +231,9 @@ const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
 }
 
 // May return nullptr if a type error occurs.
+// FIXME -- this seems to be broken in that it sometimes creates duplicate struct
+// types (new IR::Struct objects tht are identical to the existing type).  This will
+// break any code that assumens types can be compared by pointer (which much code does)
 const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
     if (type == nullptr) return nullptr;
 
@@ -550,6 +553,8 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
     const IR::Type *initType = getType(sourceExpression);
     if (initType == nullptr) return sourceExpression;
+    if (auto implicit = typeMap->externImplicitAssignType(destType)) destType = implicit;
+    if (auto implicit = typeMap->externImplicitReadType(initType)) initType = implicit;
 
     auto tvs = unifyCast(errorPosition, destType, initType,
                          "Source expression '%1%' produces a result of type '%2%' which cannot be "
