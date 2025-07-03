@@ -91,11 +91,9 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
     if (!used.isUsed(orig)) {
         if (warnOnly) {
             if (giveWarning(orig))
-                warn(ErrorType::WARN_UNUSED, "control '%2%' is unused", cont,
-                    cont->externalName());
+                warn(ErrorType::WARN_UNUSED, "control '%2%' is unused", cont, cont->externalName());
         } else {
-            info(ErrorType::INFO_REMOVED, "removing control '%2%'", cont,
-                 cont->externalName());
+            info(ErrorType::INFO_REMOVED, "removing control '%2%'", cont, cont->externalName());
             prune();
             return nullptr;
         }
@@ -107,15 +105,14 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
 }
 
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
-    auto orig = getOriginal<IR::P4Parser>();\
+    auto orig = getOriginal<IR::P4Parser>();
     if (!used.isUsed(orig)) {
         if (warnOnly) {
             if (giveWarning(orig))
                 warn(ErrorType::WARN_UNUSED, "parser '%2%' is unused", parser,
-                    parser->externalName());
+                     parser->externalName());
         } else {
-            info(ErrorType::INFO_REMOVED, "removing parser '%2%'", parser,
-                 parser->externalName());
+            info(ErrorType::INFO_REMOVED, "removing parser '%2%'", parser, parser->externalName());
             prune();
             return nullptr;
         }
@@ -132,8 +129,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Table *table) {
             if (giveWarning(getOriginal()))
                 warn(ErrorType::WARN_UNUSED, "table '%1%' is unused", table);
         } else {
-            info(ErrorType::INFO_REMOVED, "removing table '%2%'", table,
-                 table->externalName());
+            info(ErrorType::INFO_REMOVED, "removing table '%2%'", table, table->externalName());
             prune();
             return nullptr;
         }

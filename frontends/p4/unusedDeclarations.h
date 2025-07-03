@@ -126,8 +126,8 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
 
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
-    RemoveUnusedDeclarations(const UsedDeclSet &used, bool warnOnly) :
-            used(used), warnOnly(warnOnly) {
+    RemoveUnusedDeclarations(const UsedDeclSet &used, bool warnOnly)
+        : used(used), warnOnly(warnOnly) {
         setName("RemoveUnusedDeclarations");
     }
 

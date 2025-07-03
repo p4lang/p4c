@@ -98,7 +98,7 @@ class ErrorType {
     // info messages as initially defined with a format string
     static const int INFO_INFERRED;  // information inferred by compiler
     static const int INFO_PROGRESS;  // compilation progress
-    static const int INFO_REMOVED ;  // instance removed
+    static const int INFO_REMOVED;   // instance removed
 
     // Backends should extend this class with additional info messages in the range 3000-3999.
     static const int INFO_MIN_BACKEND = 3000;  // first allowed backend info code
