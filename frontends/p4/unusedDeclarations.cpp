@@ -20,12 +20,12 @@ limitations under the License.
 
 namespace P4 {
 
-RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(
-    const UsedDeclSet &used, bool warn) const {
-    return new RemoveUnusedDeclarations(used, warn);
+UnusedDeclarations *RemoveUnusedPolicy::getUnusedDeclarationsPass(const UsedDeclSet &used,
+                                                                  bool warn) const {
+    return new UnusedDeclarations(used, warn);
 }
 
-Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node *node) {
+Visitor::profile_t UnusedDeclarations::init_apply(const IR::Node *node) {
     LOG4("Used set " << used);
     return Transform::init_apply(node);
 }
@@ -60,7 +60,7 @@ void UsedDeclSet::dbprint(std::ostream &out) const {
     for (const auto *decl : usedDecls) out << dbp(decl) << '\n';
 }
 
-bool RemoveUnusedDeclarations::giveWarning(const IR::Node *node) {
+bool UnusedDeclarations::giveWarning(const IR::Node *node) {
     BUG_CHECK(warnOnly, "Emitting warning while not expected");
     if (isSystemFile(node->srcInfo.getSourceFile())) return false;
     auto p = warned.emplace(node);
@@ -68,7 +68,7 @@ bool RemoveUnusedDeclarations::giveWarning(const IR::Node *node) {
     return p.second;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_Enum *type) {
+const IR::Node *UnusedDeclarations::preorder(IR::Type_Enum *type) {
     prune();  // never remove individual enum members
     if (!warnOnly && !used.isUsed(getOriginal<IR::Type_Enum>())) {
         LOG3("Removing " << type);
@@ -77,7 +77,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_Enum *type) {
     return type;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_SerEnum *type) {
+const IR::Node *UnusedDeclarations::preorder(IR::Type_SerEnum *type) {
     prune();  // never remove individual enum members
     if (!warnOnly && !used.isUsed(getOriginal<IR::Type_SerEnum>())) {
         LOG3("Removing " << type);
@@ -86,7 +86,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_SerEnum *type) {
     return type;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
+const IR::Node *UnusedDeclarations::preorder(IR::P4Control *cont) {
     auto orig = getOriginal<IR::P4Control>();
     if (!used.isUsed(orig)) {
         if (warnOnly) {
@@ -104,7 +104,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
     return cont;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
+const IR::Node *UnusedDeclarations::preorder(IR::P4Parser *parser) {
     auto orig = getOriginal<IR::P4Parser>();
     if (!used.isUsed(orig)) {
         if (warnOnly) {
@@ -123,7 +123,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
     return parser;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Table *table) {
+const IR::Node *UnusedDeclarations::preorder(IR::P4Table *table) {
     if (!used.isUsed(getOriginal<IR::IDeclaration>())) {
         if (warnOnly) {
             if (giveWarning(getOriginal()))
@@ -138,7 +138,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Table *table) {
     return table;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::Declaration_Variable *decl) {
+const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Variable *decl) {
     prune();
     if (warnOnly) {
         // Ignore the return value to prevent removal of the declaration
@@ -150,7 +150,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Declaration_Variable *dec
     return decl;
 }
 
-const IR::Node *RemoveUnusedDeclarations::process(const IR::IDeclaration *decl) {
+const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl) {
     LOG3("Visiting " << decl);
     if (decl->getName().name == IR::ParserState::verify && getParent<IR::P4Program>())
         return decl->getNode();
@@ -165,7 +165,7 @@ const IR::Node *RemoveUnusedDeclarations::process(const IR::IDeclaration *decl) 
     return nullptr;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::Parameter *param) {
+const IR::Node *UnusedDeclarations::preorder(IR::Parameter *param) {
     // Skip all things that just declare "prototypes"
     if (isInContext<IR::Type_Parser>() && !isInContext<IR::P4Parser>()) return param;
     if (isInContext<IR::Type_Control>() && !isInContext<IR::P4Control>()) return param;
@@ -175,7 +175,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Parameter *param) {
     return warnIfUnused(param);
 }
 
-const IR::Node *RemoveUnusedDeclarations::warnIfUnused(const IR::Node *node) {
+const IR::Node *UnusedDeclarations::warnIfUnused(const IR::Node *node) {
     if (!used.isUsed(getOriginal<IR::IDeclaration>())) {
         if (warnOnly && giveWarning(getOriginal())) {
             warn(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
@@ -184,7 +184,7 @@ const IR::Node *RemoveUnusedDeclarations::warnIfUnused(const IR::Node *node) {
     return node;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::Declaration_Instance *decl) {
+const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Instance *decl) {
     // Don't delete instances; they may have consequences on the control-plane API
     if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>()) return decl;
     if (!used.isUsed(getOriginal<IR::Declaration_Instance>())) {
@@ -206,7 +206,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Declaration_Instance *dec
     return decl;
 }
 
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::ParserState *state) {
+const IR::Node *UnusedDeclarations::preorder(IR::ParserState *state) {
     if (state->name == IR::ParserState::accept || state->name == IR::ParserState::reject ||
         state->name == IR::ParserState::start)
         return state;
@@ -220,6 +220,6 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::ParserState *state) {
 // extern functions declared in files should be kept,
 // even if it is not referenced in the user program. Compiler
 // backend may synthesize code to use the extern functions.
-const IR::Node *RemoveUnusedDeclarations::preorder(IR::Method *method) { return method; }
+const IR::Node *UnusedDeclarations::preorder(IR::Method *method) { return method; }
 
 }  // namespace P4

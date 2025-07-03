@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace P4 {
 
-class RemoveUnusedDeclarations;
+class UnusedDeclarations;
 
 class UsedDeclSet : public IHasDbPrint {
     /// Set containing all declarations in the program.
@@ -50,8 +50,8 @@ class RemoveUnusedPolicy {
     virtual ~RemoveUnusedPolicy() = default;
     /// The policy for removing unused declarations is baked into the pass -- targets can specify
     /// their own subclass of the pass with a changed policy and return that here
-    virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const UsedDeclSet &used,
-                                                                      bool warn = false) const;
+    virtual UnusedDeclarations *getUnusedDeclarationsPass(const UsedDeclSet &used,
+                                                          bool warn = false) const;
 };
 
 /// @brief Collects all used declarations into @used set
@@ -95,7 +95,7 @@ class CollectUsedDeclarations : public Inspector, ResolutionContext {
  *
  * @pre Requires an up-to-date ReferenceMap.
  */
-class RemoveUnusedDeclarations : public Transform, ResolutionContext {
+class UnusedDeclarations : public Transform, ResolutionContext {
  protected:
     const UsedDeclSet &used;
 
@@ -126,9 +126,8 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
 
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
-    RemoveUnusedDeclarations(const UsedDeclSet &used, bool warnOnly)
-        : used(used), warnOnly(warnOnly) {
-        setName("RemoveUnusedDeclarations");
+    UnusedDeclarations(const UsedDeclSet &used, bool warnOnly) : used(used), warnOnly(warnOnly) {
+        setName("UnusedDeclarations");
     }
 
  public:
@@ -184,7 +183,7 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
     const IR::Node *preorder(IR::Type_Declaration *decl) override { return process(decl); }
 };
 
-/** @brief Iterates RemoveUnusedDeclarations until convergence.
+/** @brief Iterates UnusedDeclarations until convergence.
  */
 class RemoveAllUnusedDeclarations : public PassManager {
     UsedDeclSet used;
@@ -192,8 +191,8 @@ class RemoveAllUnusedDeclarations : public PassManager {
  public:
     explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy) {
         setName("RemoveAllUnusedDeclarations");
-        addPasses({new PassRepeated({new CollectUsedDeclarations(used),
-                                     policy.getRemoveUnusedDeclarationsPass(used, false)})});
+        addPasses({new PassRepeated(
+            {new CollectUsedDeclarations(used), policy.getUnusedDeclarationsPass(used, false)})});
         setStopOnError(true);
     }
 };
@@ -206,8 +205,8 @@ class WarnAboutUnusedDeclarations : public PassManager {
  public:
     explicit WarnAboutUnusedDeclarations(const RemoveUnusedPolicy &policy) {
         setName("WarnAboutUnusedDeclarations");
-        addPasses({new CollectUsedDeclarations(used),
-                   policy.getRemoveUnusedDeclarationsPass(used, true)});
+        addPasses(
+            {new CollectUsedDeclarations(used), policy.getUnusedDeclarationsPass(used, true)});
     }
 };
 
