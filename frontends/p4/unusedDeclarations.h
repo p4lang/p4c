@@ -90,9 +90,7 @@ class CollectUsedDeclarations : public Inspector, ResolutionContext {
  * Additionally, IR::Declaration_Instance nodes for extern instances are not
  * removed but still trigger warnings.
  *
- * If @warned is non-null, unused IR::P4Table and IR::Declaration_Instance
- * nodes are stored in @warned if they are unused and removed by this pass.  A
- * compilation warning is emitted when a new node is added to @warned,
+ * A compilation warning is emitted when a new node is added to @warned,
  * preventing duplicate warnings per node.
  *
  * @pre Requires an up-to-date ReferenceMap.
@@ -101,7 +99,12 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
  protected:
     const UsedDeclSet &used;
 
-    /** If not null, logs the following unused elements in @warned:
+    /** If true, emits warnings about unused instances. Details below.
+     *  If false, removes unused instances.
+     */
+    bool warnOnly;
+
+    /** Logs the following unused elements in @warned:
      *  - unused IR::P4Table nodes
      *  - unused IR::Declaration_Instance nodes
      *
@@ -109,10 +112,9 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
      *  warnings.  The @warned set keeps track of warnings emitted in
      *  previous iterations to avoid emitting duplicate warnings.
      */
-    std::set<const IR::Node *> *warned;
+    std::set<const IR::Node *> warned;
 
     /** Stores @node in @warned if:
-     *   - @warned is non-null,
      *   - @node is an unused declaration,
      *   - @node is not already present in @warned.
      *
@@ -124,8 +126,8 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
 
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
-    RemoveUnusedDeclarations(const UsedDeclSet &used, bool warn)
-        : used(used), warned(warn ? new std::set<const IR::Node *> : nullptr) {
+    RemoveUnusedDeclarations(const UsedDeclSet &used, bool warnOnly) :
+            used(used), warnOnly(warnOnly) {
         setName("RemoveUnusedDeclarations");
     }
 
@@ -183,22 +185,29 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
 };
 
 /** @brief Iterates RemoveUnusedDeclarations until convergence.
- *
- * If @warn is true, emit compiler warnings if an unused instance of an
- * IR::P4Table or IR::Declaration_Instance is removed.
  */
 class RemoveAllUnusedDeclarations : public PassManager {
     UsedDeclSet used;
 
  public:
-    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy, bool warn = false) {
+    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy) {
         setName("RemoveAllUnusedDeclarations");
-        if (warn)
-            addPasses({new CollectUsedDeclarations(used),
-                       policy.getRemoveUnusedDeclarationsPass(used, warn)});
         addPasses({new PassRepeated({new CollectUsedDeclarations(used),
                                      policy.getRemoveUnusedDeclarationsPass(used, false)})});
         setStopOnError(true);
+    }
+};
+
+/** @brief Emits warnings about unused instances without modifying IR.
+ */
+class WarnAboutUnusedDeclarations : public PassManager {
+    UsedDeclSet used;
+
+ public:
+    explicit WarnAboutUnusedDeclarations(const RemoveUnusedPolicy &policy) {
+        setName("WarnAboutUnusedDeclarations");
+        addPasses({new CollectUsedDeclarations(used),
+                   policy.getRemoveUnusedDeclarationsPass(used, true)});
     }
 };
 
