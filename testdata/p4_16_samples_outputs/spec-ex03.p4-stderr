@@ -1,4 +1,10 @@
-spec-ex03.p4(19): [--Wwarn=unused] warning: Control dp is not used; removing
+spec-ex03.p4(19): [--Wwarn=unused] warning: control 'dp' is unused
+control dp()
+        ^^
+spec-ex03.p4(22): [--Wwarn=unused] warning: 't' is unused
+        bi/**/t; // declaration of variable t type bi
+        ^^^^^^^
+spec-ex03.p4(19): [--Winfo=removed] info: removing control 'dp'
 control dp()
         ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

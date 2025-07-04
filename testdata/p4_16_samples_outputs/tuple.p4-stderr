@@ -1,3 +1,0 @@
-tuple.p4(17): [--Wwarn=unused] warning: 'pair' is unused
-typedef tuple<bit<32>, bool> pair;
-                             ^^^^

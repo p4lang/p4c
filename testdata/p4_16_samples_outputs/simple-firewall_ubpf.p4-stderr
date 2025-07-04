@@ -1,12 +1,3 @@
-simple-firewall_ubpf.p4(20): [--Wwarn=unused] warning: 'SYNSENT' is unused
-const bit<32> SYNSENT = 1;
-              ^^^^^^^
-simple-firewall_ubpf.p4(21): [--Wwarn=unused] warning: 'SYNACKED' is unused
-const bit<32> SYNACKED = 2;
-              ^^^^^^^^
-simple-firewall_ubpf.p4(22): [--Wwarn=unused] warning: 'ESTABLISHED' is unused
-const bit<32> ESTABLISHED = 3;
-              ^^^^^^^^^^^
 simple-firewall_ubpf.p4(25): [--Wwarn=unused] warning: 'egressSpec_t' is unused
 typedef bit<9> egressSpec_t;
                ^^^^^^^^^^^^
