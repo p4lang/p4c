@@ -101,11 +101,11 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     @name("ingress.egress_port") PortId_t egress_port_1;
     @name("ingress.meta") psa_ingress_output_metadata_t meta_2;
     @name("ingress.egress_port") PortId_t egress_port_2;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("ingress.unknown_source") action unknown_source() {
         meta.send_mac_learn_msg = true;

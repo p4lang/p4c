@@ -33,7 +33,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 
 type bit<12> CounterIndex_t;
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.counter") Counter<bit<10>, CounterIndex_t>(32w1024, PSA_CounterType_t.PACKETS) counter_0;
     @name("MyIC.execute") action execute_1() {

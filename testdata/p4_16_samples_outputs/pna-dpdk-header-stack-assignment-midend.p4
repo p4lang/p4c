@@ -111,7 +111,7 @@ parser MainParserImpl(packet_in pkt, out parsed_headers_t hdrs, inout user_meta_
 }
 
 control MainControlImpl(inout parsed_headers_t hdrs, inout user_meta_t umeta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.encap_one_tunnel_layer_ipv4") action encap_one_tunnel_layer_ipv4(@name("mac_da") bit<48> mac_da, @name("mac_sa") bit<48> mac_sa, @name("ipv4_sa") bit<32> ipv4_sa, @name("ipv4_da") bit<32> ipv4_da) {
         hdrs.ipv4[3] = hdrs.ipv4[2];

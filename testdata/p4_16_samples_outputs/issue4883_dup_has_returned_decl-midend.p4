@@ -7,7 +7,7 @@ struct S {
 extern bool foo(in bool x, in bool y);
 control C2() {
     @name("C2.s") S s_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("._xyz") action __xyz_0() {
         foo(s_0.f == 16w0, false);
