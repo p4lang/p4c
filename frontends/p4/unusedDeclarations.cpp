@@ -61,7 +61,7 @@ void UsedDeclSet::dbprint(std::ostream &out) const {
 }
 
 bool UnusedDeclarations::giveWarning(const IR::Node *node) {
-    BUG_CHECK(warnOnly, "Emitting warning while not expected");
+    if (!warnOnly) return false;
     if (isSystemFile(node->srcInfo.getSourceFile())) return false;
     auto p = warned.emplace(node);
     LOG3("Warn about " << dbp(node) << " " << p.second);
@@ -89,10 +89,9 @@ const IR::Node *UnusedDeclarations::preorder(IR::Type_SerEnum *type) {
 const IR::Node *UnusedDeclarations::preorder(IR::P4Control *cont) {
     auto orig = getOriginal<IR::P4Control>();
     if (!used.isUsed(orig)) {
-        if (warnOnly) {
-            if (giveWarning(orig))
-                warn(ErrorType::WARN_UNUSED, "control '%2%' is unused", cont, cont->externalName());
-        } else {
+        if (giveWarning(orig))
+            warn(ErrorType::WARN_UNUSED, "control '%2%' is unused", cont, cont->externalName());
+        if (!warnOnly) {
             info(ErrorType::INFO_REMOVED, "removing control '%2%'", cont, cont->externalName());
             prune();
             return nullptr;
@@ -107,11 +106,9 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Control *cont) {
 const IR::Node *UnusedDeclarations::preorder(IR::P4Parser *parser) {
     auto orig = getOriginal<IR::P4Parser>();
     if (!used.isUsed(orig)) {
-        if (warnOnly) {
-            if (giveWarning(orig))
-                warn(ErrorType::WARN_UNUSED, "parser '%2%' is unused", parser,
-                     parser->externalName());
-        } else {
+        if (giveWarning(orig))
+            warn(ErrorType::WARN_UNUSED, "parser '%2%' is unused", parser, parser->externalName());
+        if (!warnOnly) {
             info(ErrorType::INFO_REMOVED, "removing parser '%2%'", parser, parser->externalName());
             prune();
             return nullptr;
@@ -125,10 +122,9 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Parser *parser) {
 
 const IR::Node *UnusedDeclarations::preorder(IR::P4Table *table) {
     if (!used.isUsed(getOriginal<IR::IDeclaration>())) {
-        if (warnOnly) {
-            if (giveWarning(getOriginal()))
-                warn(ErrorType::WARN_UNUSED, "table '%1%' is unused", table);
-        } else {
+        if (giveWarning(getOriginal()))
+            warn(ErrorType::WARN_UNUSED, "table '%1%' is unused", table);
+        if (!warnOnly) {
             info(ErrorType::INFO_REMOVED, "removing table '%2%'", table, table->externalName());
             prune();
             return nullptr;
@@ -140,13 +136,9 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Table *table) {
 
 const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Variable *decl) {
     prune();
-    if (warnOnly) {
-        // Ignore the return value to prevent removal of the declaration
-        (void)process(decl);
-    } else {
-        if (decl->initializer == nullptr) return process(decl);
-        if (!SideEffects::check(decl->initializer, this, nullptr, nullptr)) return process(decl);
-    }
+    if (warnOnly) return process(decl);
+    if (decl->initializer == nullptr) return process(decl);
+    if (!SideEffects::check(decl->initializer, this, nullptr, nullptr)) return process(decl);
     return decl;
 }
 
@@ -158,9 +150,8 @@ const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl) {
         // Internal identifiers, e.g., __v1model_version
         return decl->getNode();
     if (used.isUsed(getOriginal<IR::IDeclaration>())) return decl->getNode();
-    if (warnOnly && giveWarning(getOriginal())) {
-        warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
-    }
+    if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
+    if (warnOnly) return decl->getNode();
     prune();  // no need to go deeper
     return nullptr;
 }
@@ -177,7 +168,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::Parameter *param) {
 
 const IR::Node *UnusedDeclarations::warnIfUnused(const IR::Node *node) {
     if (!used.isUsed(getOriginal<IR::IDeclaration>())) {
-        if (warnOnly && giveWarning(getOriginal())) {
+        if (giveWarning(getOriginal())) {
             warn(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
         }
     }
@@ -188,11 +179,8 @@ const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Instance *decl) {
     // Don't delete instances; they may have consequences on the control-plane API
     if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>()) return decl;
     if (!used.isUsed(getOriginal<IR::Declaration_Instance>())) {
-        if (warnOnly) {
-            if (giveWarning(getOriginal())) {
-                warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
-            }
-        } else {
+        if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
+        if (!warnOnly) {
             // We won't delete extern instances; these may be useful even if not references.
             auto type = decl->type;
             if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
