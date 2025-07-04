@@ -1,3 +1,0 @@
-type-spec-nested.p4(1): [--Wwarn=unused] warning: 'test' is unused
-void test<T>(in T val) {}
-     ^^^^

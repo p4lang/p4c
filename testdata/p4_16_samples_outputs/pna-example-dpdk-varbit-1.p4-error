@@ -1,0 +1,3 @@
+pna-example-dpdk-varbit-1.p4(82): [--Wwarn=unused] warning: 'tmp_hdr' is unused
+        option_t tmp_hdr = pkt.lookahead<option_t>();
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

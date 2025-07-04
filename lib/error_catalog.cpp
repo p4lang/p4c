@@ -79,6 +79,7 @@ const int ErrorType::WARN_TABLE_KEYS = 1027;
 // ------ Info messages -----------
 const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
 const int ErrorType::INFO_PROGRESS = 2143;
+const int ErrorType::INFO_REMOVED = 2144;
 
 // map from errorCode to ErrorSig
 std::map<int, cstring> ErrorCatalog::errorCatalog = {
@@ -135,7 +136,8 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
 
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},
-    {ErrorType::INFO_PROGRESS, "progress"_cs}};
+    {ErrorType::INFO_PROGRESS, "progress"_cs},
+    {ErrorType::INFO_REMOVED, "removed"_cs}};
 
 void ErrorCatalog::initReporter(ErrorReporter &reporter) {
     // by default, ignore warnings about branch hints -- user can turn them

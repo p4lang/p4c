@@ -201,6 +201,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Synthesize some built-in constructs
         new CreateBuiltins(),
         new CheckShadowing(),
+        new WarnAboutUnusedDeclarations(*policy),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
@@ -247,7 +248,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
-        new RemoveAllUnusedDeclarations(*policy, true),
+        new RemoveAllUnusedDeclarations(*policy),
         // Give each local declaration a unique internal name.
         // Must run before SimplifyParsers, which may merge adjacent states that
         // contain same-named state-local variables.

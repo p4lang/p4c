@@ -1,4 +1,10 @@
-spec-ex06.p4(19): [--Wwarn=unused] warning: Control p is not used; removing
+spec-ex06.p4(19): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+spec-ex06.p4(21): [--Wwarn=unused] warning: 'A1' is unused
+    action A1()
+           ^^
+spec-ex06.p4(19): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

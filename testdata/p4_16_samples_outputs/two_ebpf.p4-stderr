@@ -1,0 +1,3 @@
+two_ebpf.p4(42): [--Winfo=removed] info: removing control 'Check'
+control Check(in IPv4Address address, inout bool pass) {
+        ^^^^^

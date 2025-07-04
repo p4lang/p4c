@@ -1,18 +1,6 @@
-pna-dpdk-add_on_miss0.p4(9): [--Wwarn=unused] warning: 'IPV4_HOST_SIZE' is unused
-const int IPV4_HOST_SIZE = 65536;
-          ^^^^^^^^^^^^^^
 pna-dpdk-add_on_miss0.p4(20): [--Wwarn=unused] warning: 'IPv6Address' is unused
 typedef bit<128> IPv6Address;
                  ^^^^^^^^^^^
-pna-dpdk-add_on_miss0.p4(23): [--Wwarn=unused] warning: 'ETYPE_IPV4' is unused
-const etype_t ETYPE_IPV4 = 0x0800; /* IPv4 */
-              ^^^^^^^^^^
-pna-dpdk-add_on_miss0.p4(26): [--Wwarn=unused] warning: 'IPPROTO_TCP' is unused
-const ipproto_t IPPROTO_TCP = 6; /* Transmission Control Protocol */
-                ^^^^^^^^^^^
-pna-dpdk-add_on_miss0.p4(27): [--Wwarn=unused] warning: 'IPPROTO_UDP' is unused
-const ipproto_t IPPROTO_UDP = 17; /* User Datagram Protocol */
-                ^^^^^^^^^^^
 pna-dpdk-add_on_miss0.p4(70): [--Wwarn=unused] warning: 'TCP_URG_MASK' is unused
 const bit<8> TCP_URG_MASK = 0x20;
              ^^^^^^^^^^^^
@@ -33,9 +21,6 @@ const bit<8> TCP_FIN_MASK = 0x01;
              ^^^^^^^^^^^^
 pna-dpdk-add_on_miss0.p4(89): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NOW' is unused
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW = (ExpireTimeProfileId_t) 0;
-                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pna-dpdk-add_on_miss0.p4(90): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NEW' is unused
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW = (ExpireTimeProfileId_t) 1;
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pna-dpdk-add_on_miss0.p4(91): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_ESTABLISHED' is unused
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t) 2;

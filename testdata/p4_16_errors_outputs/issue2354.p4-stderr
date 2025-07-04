@@ -1,3 +1,6 @@
+issue2354.p4(29): [--Wwarn=unused] warning: 'test' is unused
+        bool test = 8w1 == val;
+        ^^^^^^^^^^^^^^^^^^^^^^
 issue2354.p4(28): [--Werror=type-error] error: val: parameters with type int must be directionless
     action do_action1(in int val) {
                              ^^^

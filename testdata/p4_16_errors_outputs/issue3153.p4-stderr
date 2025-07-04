@@ -1,3 +1,6 @@
+issue3153.p4(1): [--Wwarn=unused] warning: 'b' is unused
+const bool b = +false;
+           ^
 issue3153.p4(1): [--Werror=expected] error: false: expected an integer value
 const bool b = +false;
                 ^^^^^

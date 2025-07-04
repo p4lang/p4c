@@ -1,7 +1,13 @@
-spec-ex29.p4(47): [--Wwarn=unused] warning: Parser top is not used; removing
+spec-ex29.p4(47): [--Wwarn=unused] warning: parser 'top' is unused
 parser top(packet_in b, out Parsed_packet p) {
        ^^^
-spec-ex29.p4(70): [--Wwarn=unused] warning: Control Automatic is not used; removing
+spec-ex29.p4(70): [--Wwarn=unused] warning: control 'Automatic' is unused
+control Automatic(packet_out b, in Parsed_packet p) {
+        ^^^^^^^^^
+spec-ex29.p4(47): [--Winfo=removed] info: removing parser 'top'
+parser top(packet_in b, out Parsed_packet p) {
+       ^^^
+spec-ex29.p4(70): [--Winfo=removed] info: removing control 'Automatic'
 control Automatic(packet_out b, in Parsed_packet p) {
         ^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

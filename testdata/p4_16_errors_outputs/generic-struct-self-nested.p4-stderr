@@ -1,3 +1,18 @@
+generic-struct-self-nested.p4(30): [--Wwarn=unused] warning: 'bz' is unused
+const Header<bit<16>> bz = {
+                      ^^
+generic-struct-self-nested.p4(68): [--Wwarn=unused] warning: 'g' is unused
+const GH<bit<32>> g = { data = 0 };
+                  ^
+generic-struct-self-nested.p4(69): [--Wwarn=unused] warning: 'g1' is unused
+const GH<S> g1 = { data = { b = 0 } };
+            ^^
+generic-struct-self-nested.p4(73): [--Wwarn=unused] warning: 'h4' is unused
+const H3<S> h4 = {
+            ^^
+generic-struct-self-nested.p4(88): [--Wwarn=unused] warning: 'h5' is unused
+        H3<S> h5;
+        ^^^^^^^^
 generic-struct-self-nested.p4(47): [--Wwarn=mismatch] warning: 1w9223372036854775810: value does not fit in 1 bits
     invalid = 9223372036854775810
               ^^^^^^^^^^^^^^^^^^^

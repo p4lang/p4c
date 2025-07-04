@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace P4 {
 
-class RemoveUnusedDeclarations;
+class UnusedDeclarations;
 
 class UsedDeclSet : public IHasDbPrint {
     /// Set containing all declarations in the program.
@@ -50,8 +50,8 @@ class RemoveUnusedPolicy {
     virtual ~RemoveUnusedPolicy() = default;
     /// The policy for removing unused declarations is baked into the pass -- targets can specify
     /// their own subclass of the pass with a changed policy and return that here
-    virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const UsedDeclSet &used,
-                                                                      bool warn = false) const;
+    virtual UnusedDeclarations *getUnusedDeclarationsPass(const UsedDeclSet &used,
+                                                          bool warn = false) const;
 };
 
 /// @brief Collects all used declarations into @used set
@@ -90,18 +90,21 @@ class CollectUsedDeclarations : public Inspector, ResolutionContext {
  * Additionally, IR::Declaration_Instance nodes for extern instances are not
  * removed but still trigger warnings.
  *
- * If @warned is non-null, unused IR::P4Table and IR::Declaration_Instance
- * nodes are stored in @warned if they are unused and removed by this pass.  A
- * compilation warning is emitted when a new node is added to @warned,
+ * A compilation warning is emitted when a new node is added to @warned,
  * preventing duplicate warnings per node.
  *
  * @pre Requires an up-to-date ReferenceMap.
  */
-class RemoveUnusedDeclarations : public Transform, ResolutionContext {
+class UnusedDeclarations : public Transform, ResolutionContext {
  protected:
     const UsedDeclSet &used;
 
-    /** If not null, logs the following unused elements in @warned:
+    /** If true, emits warnings about unused instances. Details below.
+     *  If false, removes unused instances.
+     */
+    bool warnOnly;
+
+    /** Logs the following unused elements in @warned:
      *  - unused IR::P4Table nodes
      *  - unused IR::Declaration_Instance nodes
      *
@@ -109,10 +112,9 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
      *  warnings.  The @warned set keeps track of warnings emitted in
      *  previous iterations to avoid emitting duplicate warnings.
      */
-    std::set<const IR::Node *> *warned;
+    std::set<const IR::Node *> warned;
 
     /** Stores @node in @warned if:
-     *   - @warned is non-null,
      *   - @node is an unused declaration,
      *   - @node is not already present in @warned.
      *
@@ -124,9 +126,8 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
 
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
-    RemoveUnusedDeclarations(const UsedDeclSet &used, bool warn)
-        : used(used), warned(warn ? new std::set<const IR::Node *> : nullptr) {
-        setName("RemoveUnusedDeclarations");
+    UnusedDeclarations(const UsedDeclSet &used, bool warnOnly) : used(used), warnOnly(warnOnly) {
+        setName("UnusedDeclarations");
     }
 
  public:
@@ -182,23 +183,30 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
     const IR::Node *preorder(IR::Type_Declaration *decl) override { return process(decl); }
 };
 
-/** @brief Iterates RemoveUnusedDeclarations until convergence.
- *
- * If @warn is true, emit compiler warnings if an unused instance of an
- * IR::P4Table or IR::Declaration_Instance is removed.
+/** @brief Iterates UnusedDeclarations until convergence.
  */
 class RemoveAllUnusedDeclarations : public PassManager {
     UsedDeclSet used;
 
  public:
-    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy, bool warn = false) {
+    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy) {
         setName("RemoveAllUnusedDeclarations");
-        if (warn)
-            addPasses({new CollectUsedDeclarations(used),
-                       policy.getRemoveUnusedDeclarationsPass(used, warn)});
-        addPasses({new PassRepeated({new CollectUsedDeclarations(used),
-                                     policy.getRemoveUnusedDeclarationsPass(used, false)})});
+        addPasses({new PassRepeated(
+            {new CollectUsedDeclarations(used), policy.getUnusedDeclarationsPass(used, false)})});
         setStopOnError(true);
+    }
+};
+
+/** @brief Emits warnings about unused instances without modifying IR.
+ */
+class WarnAboutUnusedDeclarations : public PassManager {
+    UsedDeclSet used;
+
+ public:
+    explicit WarnAboutUnusedDeclarations(const RemoveUnusedPolicy &policy) {
+        setName("WarnAboutUnusedDeclarations");
+        addPasses(
+            {new CollectUsedDeclarations(used), policy.getUnusedDeclarationsPass(used, true)});
     }
 };
 

@@ -1,4 +1,10 @@
-spec-ex08.p4(25): [--Wwarn=unused] warning: Control p is not used; removing
+spec-ex08.p4(25): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+spec-ex08.p4(28): [--Wwarn=unused] warning: 'ethernetHeader' is unused
+        Ethernet_h ethernetHeader;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+spec-ex08.p4(25): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module
