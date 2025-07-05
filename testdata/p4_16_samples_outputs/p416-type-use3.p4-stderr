@@ -1,3 +1,0 @@
-p416-type-use3.p4(91): [--Wwarn=unused] warning: 'ETHERTYPE_CUSTOM' is unused
-    const bit<16> ETHERTYPE_CUSTOM = 16w0xDEAD;
-                  ^^^^^^^^^^^^^^^^

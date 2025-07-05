@@ -1,3 +1,6 @@
+issue3045-1.p4(12): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
 issue3045-1.p4(16): [--Werror=type-error] error: 'f(r, exact)'
         f(r, exact);
         ^^^^^^^^^^^

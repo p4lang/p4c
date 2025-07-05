@@ -1,3 +1,6 @@
+issue2230.p4(53): [--Wwarn=unused] warning: control 'ingressImpl' is unused
+control ingressImpl(inout headers_t hdr,
+        ^^^^^^^^^^^
 issue2230.p4(70): [--Werror=type-error] error: 'hdr.h2 = hdr.h1'
         hdr.h2 = hdr.h1;
                ^

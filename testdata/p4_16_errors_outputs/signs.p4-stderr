@@ -1,3 +1,6 @@
+signs.p4(16): [--Wwarn=unused] warning: 'a' is unused
+action a() {
+       ^
 signs.p4(18): [--Werror=type-error] error: 'b'
     int<8> b = 8w0;
     ^^^^^^^^^^^^^^

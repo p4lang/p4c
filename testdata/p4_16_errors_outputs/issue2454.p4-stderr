@@ -1,3 +1,6 @@
+issue2454.p4(5): [--Wwarn=unused] warning: control 'D' is unused
+control D() {
+        ^
 issue2454.p4(8): [--Werror=type-error] error: c: argument cannot have type control C
         f(c);
           ^

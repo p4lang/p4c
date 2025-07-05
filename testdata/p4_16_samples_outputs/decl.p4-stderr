@@ -10,7 +10,10 @@ decl.p4(37): [--Wwarn=shadow] warning: 'y' shadows 'y'
 decl.p4(33)
                 bit y;
                 ^^^^^
-decl.p4(17): [--Wwarn=unused] warning: Control p is not used; removing
+decl.p4(17): [--Wwarn=unused] warning: control 'p' is unused
+control p(in bit y_0)
+        ^
+decl.p4(17): [--Winfo=removed] info: removing control 'p'
 control p(in bit y_0)
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

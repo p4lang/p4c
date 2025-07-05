@@ -1,3 +1,6 @@
+twovarbit.p4(8): [--Wwarn=unused] warning: parser 'P' is unused
+parser P(packet_in p) {
+       ^
 twovarbit.p4(4): [--Werror=type-error] error: x and u: multiple varbit fields in a header
     varbit<120> x;
                 ^

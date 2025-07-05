@@ -1,4 +1,7 @@
-issue3343.p4(1): [--Wwarn=unused] warning: Parser MyParser1 is not used; removing
+issue3343.p4(1): [--Wwarn=unused] warning: parser 'MyParser1' is unused
+parser MyParser1(in bit<6> ttt) {
+       ^^^^^^^^^
+issue3343.p4(1): [--Winfo=removed] info: removing parser 'MyParser1'
 parser MyParser1(in bit<6> ttt) {
        ^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

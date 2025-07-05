@@ -1,4 +1,7 @@
-issue361-bmv2.p4(46): [--Wwarn=unused] warning: Control C is not used; removing
+issue361-bmv2.p4(46): [--Wwarn=unused] warning: control 'C' is unused
+control C() {
+        ^
+issue361-bmv2.p4(46): [--Winfo=removed] info: removing control 'C'
 control C() {
         ^
 [--Wwarn=parser-transition] warning: SelectCase: unreachable case

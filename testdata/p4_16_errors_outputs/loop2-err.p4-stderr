@@ -1,3 +1,6 @@
+loop2-err.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
 loop2-err.p4(5): [--Werror=type-error] error: 'ForInStatement'
         for (bit<8> a in 16w0..16w15) {
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,3 +1,6 @@
+spec-issue1297-string-cat-err-3-anno.p4(3): [--Wwarn=unused] warning: 'fn' is unused
+void fn() {
+     ^^
 spec-issue1297-string-cat-err-3-anno.p4(2): [--Werror=type-error] error: "a" | "b": @deprecated annotation's value must be a string
 @deprecated("a" | "b")
               ^^^^^^^

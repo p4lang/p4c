@@ -1,3 +1,6 @@
+issue3345.p4(1): [--Wwarn=unused] warning: parser 'MyParser2' is unused
+parser MyParser2(in bool t) {
+       ^^^^^^^^^
 issue3345.p4(3): [--Werror=type-error] error: 'SelectExpression'
     transition select(t) {
                ^

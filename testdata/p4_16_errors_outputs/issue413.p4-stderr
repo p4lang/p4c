@@ -1,3 +1,6 @@
+issue413.p4(38): [--Wwarn=unused] warning: 'b1b' is unused
+        bit<8> b1b;
+        ^^^^^^^^^^
 issue413.p4(34): [--Wwarn=mismatch] warning: 16w0xcafebabe: value does not fit in 16 bits
     const bit<32> c1d = 32w0xcafebabe;
                         ^^^^^^^^^^^^^

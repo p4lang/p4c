@@ -13,18 +13,9 @@ const bit<32> one = 32w1;
 const.p4(21): [--Wwarn=unused] warning: 'max' is unused
 const bit<32> max = 32w0xFFFF_FFFF;
               ^^^
-const.p4(22): [--Wwarn=unused] warning: 'z' is unused
-const bit<32> z = 1;
-              ^
 const.p4(29): [--Wwarn=unused] warning: 'v' is unused
 const S v = { 32w3, (bit<32>)z };
         ^
-const.p4(31): [--Wwarn=unused] warning: 'two' is unused
-const bit<32> two = 32w2;
-              ^^^
-const.p4(32): [--Wwarn=unused] warning: 'twotwo' is unused
-const int<32> twotwo = (int<32>)two;
-              ^^^^^^
 const.p4(33): [--Wwarn=unused] warning: 'twothree' is unused
 const bit<32> twothree = (bit<32>)twotwo;
               ^^^^^^^^
