@@ -6,7 +6,7 @@ var class_p4_1_1_do_constant_folding =
       [ "DontKnow", "class_p4_1_1_do_constant_folding.html#a2342289cbde2a320fa9887e509f4a30aa0376265f1d915c2504844d6ed96becd3", null ]
     ] ],
     [ "binary", "class_p4_1_1_do_constant_folding.html#a5c8ac09d49d814a82da9ef7e1d706c91", null ],
-    [ "cast", "class_p4_1_1_do_constant_folding.html#ab0e867f5a180e573f4591ab391747efe", null ],
+    [ "cast", "class_p4_1_1_do_constant_folding.html#aa71ba657327abc6049c8090dcd2c7d01", null ],
     [ "compare", "class_p4_1_1_do_constant_folding.html#af128dd44c8dc8177f7a16c5762fbaf56", null ],
     [ "getConstant", "class_p4_1_1_do_constant_folding.html#aca5b04b93f3560d362da4b1a62acdfa9", null ],
     [ "setContains", "class_p4_1_1_do_constant_folding.html#a92320f78791dd5ec5ad5f47be63a62db", null ],
