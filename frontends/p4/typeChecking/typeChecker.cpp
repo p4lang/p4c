@@ -569,7 +569,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
 
     if (initType->is<IR::Type_InfInt>() && !destType->is<IR::Type_InfInt>()) {
         auto toType = destType->getP4Type();
-        sourceExpression = new IR::Cast(toType, sourceExpression);
+        sourceExpression = new IR::Cast(toType, sourceExpression, /* implicit */ true);
         setType(toType, new IR::Type_Type(destType));
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);

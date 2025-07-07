@@ -87,8 +87,8 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     const IR::Expression *getConstant(const IR::Expression *expr) const;
 
     /// Statically cast constant @p node to @p type represented in the specified @p base.
-    const IR::Constant *cast(const IR::Constant *node, unsigned base,
-                             const IR::Type_Bits *type) const;
+    const IR::Constant *cast(const IR::Constant *node, unsigned base, const IR::Type_Bits *type,
+                             bool noWarning = false) const;
 
     /// Statically evaluate binary operation @p e implemented by @p func.
     const IR::Node *binary(const IR::Operation_Binary *op,
