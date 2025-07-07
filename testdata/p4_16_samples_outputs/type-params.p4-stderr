@@ -4,4 +4,7 @@ package m1<D>(p<D> m);
 type-params.p4(20): [--Wwarn=unused] warning: 'package m2' is unused
 package m2<D>(p<_> m);
         ^^
+type-params.p4(20): [--Wwarn=unused] warning: 'D' is unused
+package m2<D>(p<_> m);
+           ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

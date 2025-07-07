@@ -1,3 +1,15 @@
+bitExtract_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+bitExtract_e.p4(25): [--Wwarn=unused] warning: 'x' is unused
+        bit<4> x = s[3:0]; // wrong type for s
+        ^^^^^^^^^^^^^^^^^
+bitExtract_e.p4(26): [--Wwarn=unused] warning: 'y' is unused
+        bit<8> y = dt[7:0]; // too many bits
+        ^^^^^^^^^^^^^^^^^^
+bitExtract_e.p4(27): [--Wwarn=unused] warning: 'z' is unused
+        bit<4> z = dt[7:4]; // too many bits
+        ^^^^^^^^^^^^^^^^^^
 bitExtract_e.p4(25): [--Werror=type-error] error: s[3:0]: bit extraction only defined for bit<> types
         bit<4> x = s[3:0]; // wrong type for s
                    ^^^^^^

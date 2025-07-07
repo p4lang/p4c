@@ -1,3 +1,0 @@
-use-priority-as-name.p4(79): [--Winfo=removed] info: removing control 'set_priority'
-control set_priority(
-        ^^^^^^^^^^^^

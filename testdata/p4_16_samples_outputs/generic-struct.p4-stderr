@@ -1,21 +1,6 @@
-generic-struct.p4(14): [--Wwarn=unused] warning: 'u' is unused
-const U u = { f = { data = { b = 10 }, valid = 1 } };
-        ^
-generic-struct.p4(25): [--Wwarn=unused] warning: 'h2' is unused
-const Header<S> h2 = (Header<S>){
-                ^^
 generic-struct.p4(30): [--Wwarn=unused] warning: 'bz' is unused
 const Header<bit<16>> bz = {
                       ^^
-generic-struct.p4(35): [--Wwarn=unused] warning: 'h' is unused
-const Header<S> h = {
-                ^
-generic-struct.p4(40): [--Wwarn=unused] warning: 'h1' is unused
-const H2<S> h1 = (H2<S>){
-            ^^
-generic-struct.p4(45): [--Wwarn=unused] warning: 'h3' is unused
-const H2<S> h3 = {
-            ^^
 generic-struct.p4(68): [--Wwarn=unused] warning: 'g' is unused
 const GH<bit<32>> g = { data = 0 };
                   ^
@@ -28,6 +13,3 @@ const H3<S> h4 = {
 generic-struct.p4(88): [--Wwarn=unused] warning: 'h5' is unused
         H3<S> h5;
         ^^^^^^^^
-generic-struct.p4(89): [--Wwarn=unused] warning: 'n' is unused
-        H4<H2<S>> n;
-        ^^^^^^^^^^^

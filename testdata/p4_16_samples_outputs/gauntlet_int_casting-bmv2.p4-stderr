@@ -1,3 +1,0 @@
-gauntlet_int_casting-bmv2.p4(31): [--Wwarn=unused] warning: 'int_val' is unused
-    const int int_val = 123;
-              ^^^^^^^

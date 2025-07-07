@@ -1,3 +1,6 @@
+gauntlet_invalid_hdr_short_circuit-bmv2.p4(42): [--Wwarn=unused] warning: 'dummy' is unused
+        bool dummy = false || return_bool(h.h);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 [--Wwarn=uninitialized_use] warning: dummy_0.a may be uninitialized
 [--Wwarn=uninitialized_use] warning: dummy_0.b may be uninitialized
 [--Wwarn=uninitialized_use] warning: dummy_0.c may be uninitialized

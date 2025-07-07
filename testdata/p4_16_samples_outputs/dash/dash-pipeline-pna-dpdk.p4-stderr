@@ -1,30 +1,6 @@
-dash-pipeline-pna-dpdk.p4(19): [--Wwarn=unused] warning: 'ETHER_HDR_SIZE' is unused
-const bit<16> ETHER_HDR_SIZE = 112 / 8;
-              ^^^^^^^^^^^^^^
-dash-pipeline-pna-dpdk.p4(35): [--Wwarn=unused] warning: 'IPV4_HDR_SIZE' is unused
-const bit<16> IPV4_HDR_SIZE = 160 / 8;
-              ^^^^^^^^^^^^^
-dash-pipeline-pna-dpdk.p4(47): [--Wwarn=unused] warning: 'UDP_HDR_SIZE' is unused
-const bit<16> UDP_HDR_SIZE = 64 / 8;
-              ^^^^^^^^^^^^
-dash-pipeline-pna-dpdk.p4(55): [--Wwarn=unused] warning: 'VXLAN_HDR_SIZE' is unused
-const bit<16> VXLAN_HDR_SIZE = 64 / 8;
-              ^^^^^^^^^^^^^^
-dash-pipeline-pna-dpdk.p4(65): [--Wwarn=unused] warning: 'NVGRE_HDR_SIZE' is unused
-const bit<16> NVGRE_HDR_SIZE = 64 / 8;
-              ^^^^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(80): [--Wwarn=unused] warning: 'TCP_HDR_SIZE' is unused
 const bit<16> TCP_HDR_SIZE = 160 / 8;
               ^^^^^^^^^^^^
-dash-pipeline-pna-dpdk.p4(92): [--Wwarn=unused] warning: 'IPV6_HDR_SIZE' is unused
-const bit<16> IPV6_HDR_SIZE = 320 / 8;
-              ^^^^^^^^^^^^^
-dash-pipeline-pna-dpdk.p4(407): [--Wwarn=unused] warning: 'push_nvgre_tunnel_u0' is unused
-action push_nvgre_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac, in EthernetAddr...
-       ^^^^^^^^^^^^^^^^^^^^
-dash-pipeline-pna-dpdk.p4(442): [--Wwarn=unused] warning: 'push_nvgre_tunnel_u1' is unused
-action push_nvgre_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac, in EthernetAddr...
-       ^^^^^^^^^^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(587): [--Wwarn=unused] warning: 'hdr' is unused
 action push_action_static_encap(in headers_t hdr, inout metadata_t meta, in dash_encapsulation_t ...
                                              ^^^
@@ -34,6 +10,9 @@ action push_action_nat46(in headers_t hdr, inout metadata_t meta, in IPv6Address
 dash-pipeline-pna-dpdk.p4(647): [--Wwarn=unused] warning: 'push_action_nat64' is unused
 action push_action_nat64(in headers_t hdr, inout metadata_t meta, in IPv4Address src, in IPv4Addr...
        ^^^^^^^^^^^^^^^^^
+dash-pipeline-pna-dpdk.p4(647): [--Wwarn=unused] warning: 'hdr' is unused
+action push_action_nat64(in headers_t hdr, inout metadata_t meta, in IPv4Address src, in IPv4Addr...
+                                      ^^^
 dash-pipeline-pna-dpdk.p4(689): [--Wwarn=unused] warning: 'hdr' is unused
 action route_vnet(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_object_id_t"] bit...
                                   ^^^

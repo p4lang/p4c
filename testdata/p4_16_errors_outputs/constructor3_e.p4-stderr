@@ -1,3 +1,9 @@
+constructor3_e.p4(21): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+constructor3_e.p4(22): [--Wwarn=unused] warning: 'e' is unused
+    E(true) e;
+            ^
 constructor3_e.p4(22): [--Werror=type-error] error: 'e'
     E(true) e;
             ^

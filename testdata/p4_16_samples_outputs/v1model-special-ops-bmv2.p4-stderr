@@ -4,6 +4,3 @@ const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_NORMAL = 0;
 v1model-special-ops-bmv2.p4(31): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_COALESCED' is unused
 const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_COALESCED = 3;
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-v1model-special-ops-bmv2.p4(168): [--Winfo=removed] info: removing control 'fill_ipv4_address'
-control fill_ipv4_address(out bit<32> ipv4_address,
-        ^^^^^^^^^^^^^^^^^

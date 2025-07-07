@@ -1,3 +1,0 @@
-issue1739-bmv2.p4(68): [--Wwarn=unused] warning: 'ETHERTYPE_IPV4' is unused
-    const bit<16> ETHERTYPE_IPV4 = 16w0x0800;
-                  ^^^^^^^^^^^^^^

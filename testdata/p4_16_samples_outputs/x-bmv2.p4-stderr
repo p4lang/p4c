@@ -1,3 +1,0 @@
-x-bmv2.p4(34): [--Winfo=removed] info: removing control 'ctrl'
-control ctrl(inout M meta) {
-        ^^^^
