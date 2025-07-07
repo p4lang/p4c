@@ -7,4 +7,7 @@ const bit<7> f = (bit<7>)e; // 0b1111111 = 127
 constant-fold-infint.p4(9): [--Wwarn=unused] warning: 'h' is unused
 const int h = (int)g; // -1
           ^
+constant-fold-infint.p4(6): [--Wwarn=mismatch] warning: -7w1: negative value with unsigned type
+const int e = (int)d; // -1
+              ^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module
