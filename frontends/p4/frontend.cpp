@@ -248,7 +248,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
-        new RemoveAllUnusedDeclarations(*policy),
+        new RemoveAllUnusedDeclarations(*policy, true),
         // Give each local declaration a unique internal name.
         // Must run before SimplifyParsers, which may merge adjacent states that
         // contain same-named state-local variables.
@@ -270,7 +270,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
-        new RemoveAllUnusedDeclarations(*policy),
+        new RemoveAllUnusedDeclarations(*policy, true),
         new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
         new EvaluatorPass(&typeMap),
@@ -307,7 +307,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&typeMap),
-            new RemoveAllUnusedDeclarations(*policy),
+            new RemoveAllUnusedDeclarations(*policy, true),
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
     }

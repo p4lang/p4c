@@ -51,7 +51,8 @@ class RemoveUnusedPolicy {
     /// The policy for removing unused declarations is baked into the pass -- targets can specify
     /// their own subclass of the pass with a changed policy and return that here
     virtual UnusedDeclarations *getUnusedDeclarationsPass(const UsedDeclSet &used,
-                                                          bool warn = false) const;
+                                                          bool removeUnused, bool warnUnused,
+                                                          bool warnRemoved) const;
 };
 
 /// @brief Collects all used declarations into @used set
@@ -99,10 +100,14 @@ class UnusedDeclarations : public Transform, ResolutionContext {
  protected:
     const UsedDeclSet &used;
 
-    /** If true, emits warnings about unused instances. Details below.
-     *  If false, removes unused instances.
-     */
-    bool warnOnly;
+    /// If true, removes unused instances.
+    bool removeUnused;
+
+    /// If true, emits warnings about unused instances.
+    bool warnUnused;
+
+    /// If true, emits warnings about removed instances.
+    bool warnRemoved;
 
     /** Logs the following unused elements in @warned:
      *  - unused IR::P4Table nodes
@@ -126,7 +131,9 @@ class UnusedDeclarations : public Transform, ResolutionContext {
 
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
-    UnusedDeclarations(const UsedDeclSet &used, bool warnOnly) : used(used), warnOnly(warnOnly) {
+    UnusedDeclarations(const UsedDeclSet &used, bool removeUnused, bool warnUnused,
+                       bool warnRemoved)
+        : used(used), removeUnused(removeUnused), warnUnused(warnUnused), warnRemoved(warnRemoved) {
         setName("UnusedDeclarations");
     }
 
@@ -189,10 +196,12 @@ class RemoveAllUnusedDeclarations : public PassManager {
     UsedDeclSet used;
 
  public:
-    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy) {
+    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy,
+                                         bool warnRemoved = false) {
         setName("RemoveAllUnusedDeclarations");
-        addPasses({new PassRepeated(
-            {new CollectUsedDeclarations(used), policy.getUnusedDeclarationsPass(used, false)})});
+        addPasses(
+            {new PassRepeated({new CollectUsedDeclarations(used),
+                               policy.getUnusedDeclarationsPass(used, true, false, warnRemoved)})});
         setStopOnError(true);
     }
 };
@@ -205,8 +214,8 @@ class WarnAboutUnusedDeclarations : public PassManager {
  public:
     explicit WarnAboutUnusedDeclarations(const RemoveUnusedPolicy &policy) {
         setName("WarnAboutUnusedDeclarations");
-        addPasses(
-            {new CollectUsedDeclarations(used), policy.getUnusedDeclarationsPass(used, true)});
+        addPasses({new CollectUsedDeclarations(used),
+                   policy.getUnusedDeclarationsPass(used, false, true, false)});
     }
 };
 

@@ -21,8 +21,10 @@ limitations under the License.
 namespace P4 {
 
 UnusedDeclarations *RemoveUnusedPolicy::getUnusedDeclarationsPass(const UsedDeclSet &used,
-                                                                  bool warn) const {
-    return new UnusedDeclarations(used, warn);
+                                                                  bool removeUnused,
+                                                                  bool warnUnused,
+                                                                  bool warnRemoved) const {
+    return new UnusedDeclarations(used, removeUnused, warnUnused, warnRemoved);
 }
 
 Visitor::profile_t UnusedDeclarations::init_apply(const IR::Node *node) {
@@ -61,7 +63,7 @@ void UsedDeclSet::dbprint(std::ostream &out) const {
 }
 
 bool UnusedDeclarations::giveWarning(const IR::Node *node) {
-    if (!warnOnly) return false;
+    if (!warnUnused) return false;
     if (isSystemFile(node->srcInfo.getSourceFile())) return false;
     auto p = warned.emplace(node);
     LOG3("Warn about " << dbp(node) << " " << p.second);
@@ -70,7 +72,7 @@ bool UnusedDeclarations::giveWarning(const IR::Node *node) {
 
 const IR::Node *UnusedDeclarations::preorder(IR::Type_Enum *type) {
     prune();  // never remove individual enum members
-    if (!warnOnly && !used.isUsed(getOriginal<IR::Type_Enum>())) {
+    if (removeUnused && !used.isUsed(getOriginal<IR::Type_Enum>())) {
         LOG3("Removing " << type);
         return nullptr;
     }
@@ -79,7 +81,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::Type_Enum *type) {
 
 const IR::Node *UnusedDeclarations::preorder(IR::Type_SerEnum *type) {
     prune();  // never remove individual enum members
-    if (!warnOnly && !used.isUsed(getOriginal<IR::Type_SerEnum>())) {
+    if (removeUnused && !used.isUsed(getOriginal<IR::Type_SerEnum>())) {
         LOG3("Removing " << type);
         return nullptr;
     }
@@ -91,8 +93,10 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Control *cont) {
     if (!used.isUsed(orig)) {
         if (giveWarning(orig))
             warn(ErrorType::WARN_UNUSED, "control '%2%' is unused", cont, cont->externalName());
-        if (!warnOnly) {
-            info(ErrorType::INFO_REMOVED, "removing control '%2%'", cont, cont->externalName());
+        if (removeUnused) {
+            if (warnRemoved) {
+                info(ErrorType::INFO_REMOVED, "removing control '%2%'", cont, cont->externalName());
+            }
             prune();
             return nullptr;
         }
@@ -108,8 +112,11 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Parser *parser) {
     if (!used.isUsed(orig)) {
         if (giveWarning(orig))
             warn(ErrorType::WARN_UNUSED, "parser '%2%' is unused", parser, parser->externalName());
-        if (!warnOnly) {
-            info(ErrorType::INFO_REMOVED, "removing parser '%2%'", parser, parser->externalName());
+        if (removeUnused) {
+            if (warnRemoved) {
+                info(ErrorType::INFO_REMOVED, "removing parser '%2%'", parser,
+                     parser->externalName());
+            }
             prune();
             return nullptr;
         }
@@ -124,8 +131,10 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Table *table) {
     if (!used.isUsed(getOriginal<IR::IDeclaration>())) {
         if (giveWarning(getOriginal()))
             warn(ErrorType::WARN_UNUSED, "table '%1%' is unused", table);
-        if (!warnOnly) {
-            info(ErrorType::INFO_REMOVED, "removing table '%2%'", table, table->externalName());
+        if (removeUnused) {
+            if (warnRemoved) {
+                info(ErrorType::INFO_REMOVED, "removing table '%2%'", table, table->externalName());
+            }
             prune();
             return nullptr;
         }
@@ -136,7 +145,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Table *table) {
 
 const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Variable *decl) {
     prune();
-    if (warnOnly) return process(decl);
+    if (!removeUnused) return process(decl);
     if (decl->initializer == nullptr) return process(decl);
     if (!SideEffects::check(decl->initializer, this, nullptr, nullptr)) return process(decl);
     return decl;
@@ -151,7 +160,7 @@ const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl) {
         return decl->getNode();
     if (used.isUsed(getOriginal<IR::IDeclaration>())) return decl->getNode();
     if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
-    if (warnOnly) return decl->getNode();
+    if (!removeUnused) return decl->getNode();
     prune();  // no need to go deeper
     return nullptr;
 }
@@ -180,7 +189,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Instance *decl) {
     if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>()) return decl;
     if (!used.isUsed(getOriginal<IR::Declaration_Instance>())) {
         if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
-        if (!warnOnly) {
+        if (removeUnused) {
             // We won't delete extern instances; these may be useful even if not references.
             auto type = decl->type;
             if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
@@ -199,7 +208,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::ParserState *state) {
         state->name == IR::ParserState::start)
         return state;
 
-    if (warnOnly || used.isUsed(getOriginal<IR::ParserState>())) return state;
+    if (!removeUnused || used.isUsed(getOriginal<IR::ParserState>())) return state;
     LOG3("Removing " << state);
     prune();
     return nullptr;
