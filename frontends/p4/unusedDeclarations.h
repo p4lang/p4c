@@ -52,7 +52,7 @@ class RemoveUnusedPolicy {
     /// their own subclass of the pass with a changed policy and return that here
     virtual UnusedDeclarations *getUnusedDeclarationsPass(const UsedDeclSet &used,
                                                           bool removeUnused, bool warnUnused,
-                                                          bool warnRemoved) const;
+                                                          bool infoRemoved) const;
 };
 
 /// @brief Collects all used declarations into @used set
@@ -106,8 +106,8 @@ class UnusedDeclarations : public Transform, ResolutionContext {
     /// If true, emits warnings about unused instances.
     bool warnUnused;
 
-    /// If true, emits warnings about removed instances.
-    bool warnRemoved;
+    /// If true, emits info messages about removed instances.
+    bool infoRemoved;
 
     /** Logs the following unused elements in @warned:
      *  - unused IR::P4Table nodes
@@ -132,8 +132,8 @@ class UnusedDeclarations : public Transform, ResolutionContext {
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
     UnusedDeclarations(const UsedDeclSet &used, bool removeUnused, bool warnUnused,
-                       bool warnRemoved)
-        : used(used), removeUnused(removeUnused), warnUnused(warnUnused), warnRemoved(warnRemoved) {
+                       bool infoRemoved)
+        : used(used), removeUnused(removeUnused), warnUnused(warnUnused), infoRemoved(infoRemoved) {
         setName("UnusedDeclarations");
     }
 
@@ -197,11 +197,11 @@ class RemoveAllUnusedDeclarations : public PassManager {
 
  public:
     explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy,
-                                         bool warnRemoved = false) {
+                                         bool infoRemoved = false) {
         setName("RemoveAllUnusedDeclarations");
         addPasses(
             {new PassRepeated({new CollectUsedDeclarations(used),
-                               policy.getUnusedDeclarationsPass(used, true, false, warnRemoved)})});
+                               policy.getUnusedDeclarationsPass(used, true, false, infoRemoved)})});
         setStopOnError(true);
     }
 };

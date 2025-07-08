@@ -23,8 +23,8 @@ namespace P4 {
 UnusedDeclarations *RemoveUnusedPolicy::getUnusedDeclarationsPass(const UsedDeclSet &used,
                                                                   bool removeUnused,
                                                                   bool warnUnused,
-                                                                  bool warnRemoved) const {
-    return new UnusedDeclarations(used, removeUnused, warnUnused, warnRemoved);
+                                                                  bool infoRemoved) const {
+    return new UnusedDeclarations(used, removeUnused, warnUnused, infoRemoved);
 }
 
 Visitor::profile_t UnusedDeclarations::init_apply(const IR::Node *node) {
@@ -94,7 +94,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Control *cont) {
         if (giveWarning(orig))
             warn(ErrorType::WARN_UNUSED, "control '%2%' is unused", cont, cont->externalName());
         if (removeUnused) {
-            if (warnRemoved) {
+            if (infoRemoved) {
                 info(ErrorType::INFO_REMOVED, "removing control '%2%'", cont, cont->externalName());
             }
             prune();
@@ -113,7 +113,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Parser *parser) {
         if (giveWarning(orig))
             warn(ErrorType::WARN_UNUSED, "parser '%2%' is unused", parser, parser->externalName());
         if (removeUnused) {
-            if (warnRemoved) {
+            if (infoRemoved) {
                 info(ErrorType::INFO_REMOVED, "removing parser '%2%'", parser,
                      parser->externalName());
             }
@@ -132,7 +132,7 @@ const IR::Node *UnusedDeclarations::preorder(IR::P4Table *table) {
         if (giveWarning(getOriginal()))
             warn(ErrorType::WARN_UNUSED, "table '%1%' is unused", table);
         if (removeUnused) {
-            if (warnRemoved) {
+            if (infoRemoved) {
                 info(ErrorType::INFO_REMOVED, "removing table '%2%'", table, table->externalName());
             }
             prune();
