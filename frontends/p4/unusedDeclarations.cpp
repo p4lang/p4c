@@ -155,7 +155,16 @@ const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl) {
     LOG3("Visiting " << decl);
     if (decl->getName().name == IR::ParserState::verify && getParent<IR::P4Program>())
         return decl->getNode();
-    if (decl->externalName(decl->getName().name).startsWith("__"))
+    // @name annotations can be unparsed until the first ConstantFolding. In case
+    // of UnusedDeclarations in the scope of WarnAboutUnusedDeclarations, we cannot
+    // use externalName as it expects the @name annotation to be a single string.
+    bool skipNameCheck = false;
+    if (const auto *annotated = decl->to<IR::IAnnotated>()) {
+        if (const auto *anno = annotated->getAnnotation(IR::Annotation::nameAnnotation)) {
+            skipNameCheck = anno->getSingleString(false) == cstring::empty;
+        }
+    }
+    if (!skipNameCheck && decl->externalName(decl->getName().name).startsWith("__"))
         // Internal identifiers, e.g., __v1model_version
         return decl->getNode();
     if (used.isUsed(getOriginal<IR::IDeclaration>())) return decl->getNode();
