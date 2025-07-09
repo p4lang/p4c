@@ -70,7 +70,7 @@ int main(int argc, char *const argv[]) {
 
     P4::serializeP4RuntimeIfRequired(program, options);
 
-    const IR::ToplevelBlock *toplevel = nullptr;
+    IR::ToplevelBlock *toplevel = nullptr;
     TC::MidEnd midEnd;
     midEnd.addDebugHook(hook);
     try {

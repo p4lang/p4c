@@ -58,7 +58,8 @@ EBPFType *EBPFTypeFactory::create(const IR::Type *type) {
         // Implement error type as scalar of width 8 bits
         result = new EBPFScalarType(IR::Type_Bits::get(8, false));
     } else {
-        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% not supported", type);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Type %1% not supported",
+                    type);
     }
 
     return result;
@@ -139,10 +140,8 @@ void EBPFScalarType::declare(CodeBuilder *builder, cstring id, bool asPointer) {
         builder->spc();
         builder->append(id);
     } else {
-        if (asPointer)
-            builder->appendFormat("u8* %s", id.c_str());
-        else
-            builder->appendFormat("u8 %s[%d]", id.c_str(), bytesRequired());
+        builder->appendFormat("struct internal_bit_%u %s%s", width, asPointer ? "*" : "",
+                              id.c_str());
     }
 }
 
@@ -155,9 +154,9 @@ void EBPFScalarType::declareInit(CodeBuilder *builder, cstring id, bool asPointe
         builder->append(id);
     } else {
         if (asPointer)
-            builder->appendFormat("u8* %s = NULL", id.c_str());
+            builder->appendFormat("struct internal_bit_%u *%s = 0", width, id.c_str());
         else
-            builder->appendFormat("u8 %s[%d] = {0}", id.c_str(), bytesRequired());
+            builder->appendFormat("struct internal_bit_%u %s = {{ 0 }}", width, id.c_str());
     }
 }
 

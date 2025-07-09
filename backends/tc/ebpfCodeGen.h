@@ -403,6 +403,29 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     bool IsTableAddOnMiss(const IR::P4Table *table);
     const IR::P4Action *GetAddOnMissHitAction(cstring actionName);
     void ValidateAddOnMissMissAction(const IR::P4Action *act);
+    bool arith_common(const IR::Operation_Binary *, const char *, const char *);
+    bool sarith_common(const IR::Operation_Binary *, const char *);
+    bool preorder(const IR::Concat *) override;
+    bool preorder(const IR::Add *) override;
+    bool preorder(const IR::Sub *) override;
+    bool preorder(const IR::Mul *) override;
+    bool preorder(const IR::Cast *) override;
+    bool preorder(const IR::Neg *) override;
+    bool preorder(const IR::Cmpl *) override;
+    bool preorder(const IR::Shl *) override;
+    bool preorder(const IR::Shr *) override;
+    bool preorder(const IR::Equ *) override;
+    bool preorder(const IR::Neq *) override;
+    bool preorder(const IR::Lss *) override;
+    bool preorder(const IR::Leq *) override;
+    bool preorder(const IR::Grt *) override;
+    bool preorder(const IR::Geq *) override;
+    bool preorder(const IR::BAnd *) override;
+    bool preorder(const IR::BOr *) override;
+    bool preorder(const IR::BXor *) override;
+    bool preorder(const IR::AddSat *) override;
+    bool preorder(const IR::SubSat *) override;
+    bool big_x_small_mul(const IR::Expression *, const IR::Constant *);
 };
 
 // Similar to class ActionTranslationVisitorPSA in backends/ebpf/psa/ebpfPsaControl.h

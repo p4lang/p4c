@@ -26,8 +26,12 @@ namespace P4::EBPF {
 /// This pass rewrites expressions which are not supported natively on EBPF.
 class LowerExpressions : public Transform {
     P4::TypeMap *typeMap;
-    /// Cannot shift with a value larger than 5 bits.
-    const int maxShiftWidth = 5;
+    /*
+     * Shifts now have no particular limit on the bitwidth of the shift
+     *	amount, but I haven't figured out how to get rid of the limit
+     *	entirely.  So I just raised it a lot.p
+     */
+    const int maxShiftWidth = 1024;
     const IR::Expression *shift(const IR::Operation_Binary *expression) const;
 
  public:

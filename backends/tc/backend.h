@@ -43,6 +43,276 @@ extern cstring PnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META];
 
 class PNAEbpfGenerator;
 
+typedef struct decllist DECLLIST;
+struct decllist {
+    DECLLIST *link;
+    IR::Declaration *decl;
+};
+
+typedef struct stmtlist STMTLIST;
+struct stmtlist {
+    STMTLIST *link;
+    IR::Statement *stmt;
+};
+
+typedef struct container CONTAINER;
+struct container {
+    CONTAINER *link;
+    DECLLIST *temps;
+    STMTLIST *stmts;
+    IR::Statement *s;
+};
+
+enum WrType {
+    WR_VALUE = 1,
+    WR_CONCAT,
+    WR_ADD,
+    WR_SUB,
+    WR_MUL,
+    WR_BXSMUL,
+    WR_CAST,
+    WR_NEG,
+    WR_NOT,
+    WR_SHL_X,
+    WR_SHL_C,
+    WR_SHRA_X,
+    WR_SHRA_C,
+    WR_SHRL_X,
+    WR_SHRL_C,
+    WR_CMP,
+    WR_BITAND,
+    WR_BITOR,
+    WR_BITXOR,
+    WR_ADDSAT,
+    WR_SUBSAT,
+    WR_ASSIGN,
+};
+
+class WidthRec {
+ public:
+    WrType type;
+    union {
+        // if WR_VALUE
+        int value;
+        // if WR_CONCAT
+        struct {
+            int lhsw;
+            int rhsw;
+            // result width is implicit: is lhsw + rhsw
+        } concat;
+        // if WR_ADD, WR_SUB, WR_MUL, WR_NEG, WR_NOT, WR_BITAND,
+        //  WR_BITOR, WR_BITXOR
+        struct {
+            int w;
+        } arith;
+        // if WR_BXSMUL
+        struct {
+            int bw;
+            unsigned int sv;
+        } bxsmul;
+        // if WR_CAST
+        struct {
+            int fw;
+            int tw;
+        } cast;
+        // if WR_SHL_X, WR_SHRA_X, WR_SHRL_X
+        struct {
+            int lw;
+            int rw;
+        } shift_x;
+        // if WR_SHL_C, WR_SHRA_C, WR_SRL_C
+        struct {
+            int lw;
+            unsigned int sv;
+        } shift_c;
+        // if WR_CMP
+        struct {
+            int w;
+            unsigned char cmp;
+#define CMP_EQ 0x01
+#define CMP_NE 0x02
+#define CMP_LT 0x03
+#define CMP_GE 0x04
+#define CMP_GT 0x05
+#define CMP_LE 0x06
+#define CMP_BASE 0x07
+#define CMP_SIGNED 0x08
+        } cmp;
+        // if WR_ADDSAT, WR_SUBSAT
+        struct {
+            int w;
+            bool issigned;
+        } sarith;
+        // if WR_ASSIGN
+        struct {
+            int w;
+        } assign;
+    };
+
+ public:
+    friend bool operator<(const WidthRec &l, const WidthRec &r) {
+        if (l.type != r.type) return (l.type < r.type);
+        switch (l.type) {
+            case WR_VALUE:
+                return (l.value < r.value);
+                break;
+            case WR_CONCAT:
+                return ((l.concat.lhsw < r.concat.lhsw) ||
+                        ((l.concat.lhsw == r.concat.lhsw) && (l.concat.rhsw < r.concat.rhsw)));
+                break;
+            case WR_ADD:
+            case WR_SUB:
+            case WR_MUL:
+            case WR_NEG:
+            case WR_NOT:
+            case WR_BITAND:
+            case WR_BITOR:
+            case WR_BITXOR:
+                return (l.arith.w < r.arith.w);
+                break;
+            case WR_BXSMUL:
+                return ((l.bxsmul.bw < r.bxsmul.bw) ||
+                        ((l.bxsmul.bw == r.bxsmul.bw) && (l.bxsmul.sv < r.bxsmul.sv)));
+                break;
+            case WR_CAST:
+                return ((l.cast.fw < r.cast.fw) ||
+                        ((l.cast.fw == r.cast.fw) && (l.cast.tw < r.cast.tw)));
+                break;
+            case WR_SHL_X:
+            case WR_SHRA_X:
+            case WR_SHRL_X:
+                return ((l.shift_x.lw < r.shift_x.lw) ||
+                        ((l.shift_x.lw == r.shift_x.lw) && ((l.shift_x.rw < r.shift_x.rw))));
+                break;
+            case WR_SHL_C:
+            case WR_SHRA_C:
+            case WR_SHRL_C:
+                return ((l.shift_c.lw < r.shift_c.lw) ||
+                        ((l.shift_c.lw == r.shift_c.lw) && ((l.shift_c.sv < r.shift_c.sv))));
+                break;
+            case WR_CMP:
+                return ((l.cmp.w < r.cmp.w) || ((l.cmp.w == r.cmp.w) && (l.cmp.cmp < r.cmp.cmp)));
+                break;
+            case WR_ADDSAT:
+            case WR_SUBSAT:
+                return ((l.sarith.w < r.sarith.w) ||
+                        ((l.sarith.w == r.sarith.w) && (!l.sarith.issigned && r.sarith.issigned)));
+                break;
+            case WR_ASSIGN:
+                return (l.assign.w < r.assign.w);
+                break;
+        }
+        return (0);
+    }
+    friend bool operator==(const WidthRec &l, const WidthRec &r) {
+        if (l.type != r.type) return (0);
+        switch (l.type) {
+            case WR_VALUE:
+                return (l.value == r.value);
+                break;
+            case WR_CONCAT:
+                return ((l.concat.lhsw == r.concat.lhsw) && (l.concat.rhsw) == (r.concat.rhsw));
+                break;
+            case WR_ADD:
+            case WR_SUB:
+            case WR_MUL:
+            case WR_NEG:
+            case WR_NOT:
+            case WR_BITAND:
+            case WR_BITOR:
+            case WR_BITXOR:
+                return (l.arith.w == r.arith.w);
+                break;
+            case WR_BXSMUL:
+                return ((l.bxsmul.bw == r.bxsmul.bw) && (l.bxsmul.sv == r.bxsmul.sv));
+                break;
+            case WR_CAST:
+                return ((l.cast.fw == r.cast.fw) && (l.cast.tw == r.cast.tw));
+                break;
+            case WR_SHL_X:
+            case WR_SHRA_X:
+            case WR_SHRL_X:
+                return ((l.shift_x.lw == r.shift_x.lw) && (l.shift_x.rw == r.shift_x.rw));
+                break;
+            case WR_SHL_C:
+            case WR_SHRA_C:
+            case WR_SHRL_C:
+                return ((l.shift_c.lw == r.shift_c.lw) && (l.shift_c.sv == r.shift_c.sv));
+                break;
+            case WR_CMP:
+                return ((l.cmp.w == r.cmp.w) && (l.cmp.cmp == r.cmp.cmp));
+                break;
+            case WR_ADDSAT:
+            case WR_SUBSAT:
+                return ((l.sarith.w == r.sarith.w) && (l.sarith.issigned == r.sarith.issigned));
+                break;
+            case WR_ASSIGN:
+                return (l.assign.w == r.assign.w);
+                break;
+        }
+        return (1);
+    }
+    friend bool operator>(const WidthRec &l, const WidthRec &r) { return (r < l); }
+    friend bool operator>=(const WidthRec &l, const WidthRec &r) { return (!(l < r)); }
+    friend bool operator<=(const WidthRec &l, const WidthRec &r) { return (!(r < l)); }
+    friend bool operator!=(const WidthRec &l, const WidthRec &r) { return (!(l == r)); }
+};
+
+class ScanWidths : public Inspector {
+ private:
+    int nwr;
+    WidthRec *wrv;
+    P4::TypeMap *typemap;
+    void insert_wr(WidthRec &);
+    void add_width(int);
+    void add_concat(int, int);
+    void add_arith(WrType, int);
+    void add_sarith(WrType, int, bool);
+    void add_bxsmul(int, unsigned int);
+    void add_cast(unsigned int, unsigned int);
+    bool big_x_small_mul(const IR::Expression *, const IR::Constant *);
+    void add_shift_c(WrType, unsigned int, unsigned int);
+    void add_shift_x(WrType, unsigned int, unsigned int);
+    void add_cmp(unsigned int, unsigned char);
+    void add_assign(unsigned int);
+
+ public:
+    explicit ScanWidths(P4::TypeMap *tm) : nwr(0), wrv(0), typemap(tm) {}
+    ~ScanWidths(void) { std::free(wrv); }
+    void expr_common(const IR::Expression *);
+    virtual bool preorder(const IR::Expression *) override;
+    virtual bool preorder(const IR::Concat *) override;
+    virtual bool preorder(const IR::Add *) override;
+    virtual bool preorder(const IR::Sub *) override;
+    virtual bool preorder(const IR::Mul *) override;
+    virtual bool preorder(const IR::Cast *) override;
+    virtual bool preorder(const IR::Neg *) override;
+    virtual bool preorder(const IR::Cmpl *) override;
+    virtual bool preorder(const IR::Shl *) override;
+    virtual bool preorder(const IR::Shr *) override;
+    virtual bool preorder(const IR::Equ *) override;
+    virtual bool preorder(const IR::Neq *) override;
+    virtual bool preorder(const IR::Lss *) override;
+    virtual bool preorder(const IR::Leq *) override;
+    virtual bool preorder(const IR::Grt *) override;
+    virtual bool preorder(const IR::Geq *) override;
+    virtual bool preorder(const IR::BAnd *) override;
+    virtual bool preorder(const IR::BOr *) override;
+    virtual bool preorder(const IR::BXor *) override;
+    virtual bool preorder(const IR::AddSat *) override;
+    virtual bool preorder(const IR::SubSat *) override;
+    virtual bool preorder(const IR::AssignmentStatement *) override;
+    bool arith_common_2(const IR::Operation_Binary *, WrType, bool = true);
+    bool arith_common_1(const IR::Operation_Unary *, WrType, bool = true);
+    bool sarith_common_2(const IR::Operation_Binary *, WrType, bool = true);
+    profile_t init_apply(const IR::Node *) override;
+    void end_apply(const IR::Node *) override;
+    void revisit_visited();
+    void dump() const;
+    void gen_h(EBPF::CodeBuilder *) const;
+    void gen_c(EBPF::CodeBuilder *) const;
+};
+
 /**
  * Backend code generation from midend IR
  */
@@ -150,7 +420,7 @@ class Extern {
 
 class Backend : public PassManager {
  public:
-    const IR::ToplevelBlock *toplevel;
+    IR::ToplevelBlock *toplevel;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     TCOptions &options;
@@ -162,15 +432,16 @@ class Backend : public PassManager {
     EbpfOptions ebpfOption;
     EBPF::Target *target;
     const PNAEbpfGenerator *ebpf_program;
+    const ScanWidths *widths;
 
  public:
-    explicit Backend(const IR::ToplevelBlock *toplevel, P4::ReferenceMap *refMap,
-                     P4::TypeMap *typeMap, TCOptions &options)
-        : toplevel(toplevel), refMap(refMap), typeMap(typeMap), options(options) {
+    explicit Backend(IR::ToplevelBlock *toplevel, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                     TCOptions &options)
+        : toplevel(toplevel), refMap(refMap), typeMap(typeMap), options(options), widths(0) {
         setName("BackEnd");
     }
     bool process();
-    bool ebpfCodeGen(P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
+    bool ebpfCodeGen(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::P4Program *);
     void serialize() const;
     bool serializeIntrospectionJson(std::ostream &out) const;
     bool emitCFile();
