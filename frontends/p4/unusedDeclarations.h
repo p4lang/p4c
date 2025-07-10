@@ -126,7 +126,7 @@ class UnusedDeclarations : public Transform, ResolutionContext {
      * @return true if @node is added to @warned.
      */
     bool giveWarning(const IR::Node *node);
-    const IR::Node *process(const IR::IDeclaration *decl);
+    const IR::Node *process(const IR::IDeclaration *decl, bool skipWarn = false);
     const IR::Node *warnIfUnused(const IR::Node *node);
 
     // Prevent direct instantiations of this class.
@@ -186,6 +186,7 @@ class UnusedDeclarations : public Transform, ResolutionContext {
     }
 
     const IR::Node *preorder(IR::Declaration_Variable *decl) override;
+    const IR::Node *preorder(IR::Declaration_Constant *decl) override;
     const IR::Node *preorder(IR::Declaration *decl) override { return process(decl); }
     const IR::Node *preorder(IR::Type_Declaration *decl) override { return process(decl); }
 };

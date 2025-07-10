@@ -17,6 +17,7 @@ limitations under the License.
 #include "unusedDeclarations.h"
 
 #include "sideEffects.h"
+#include "staticAssert.h"
 
 namespace P4 {
 
@@ -151,7 +152,22 @@ const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Variable *decl) {
     return decl;
 }
 
-const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl) {
+const IR::Node *UnusedDeclarations::preorder(IR::Declaration_Constant *decl) {
+    bool induced_no_warn = false;
+    if (decl->initializer != nullptr) {
+        forAllMatching<IR::MethodCallExpression>(
+            decl->initializer, [&](const IR::MethodCallExpression *mce) {
+                // MethodInstance::resolve cannot be used since types are not known
+                // during the application of WarnAboutUnusedDeclarations.
+                if (const auto *pe = mce->method->to<IR::PathExpression>()) {
+                    if (pe->path->name.name == staticAssertMethodName) induced_no_warn = true;
+                }
+            });
+    }
+    return process(decl, induced_no_warn);
+}
+
+const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl, bool skipWarn) {
     LOG3("Visiting " << decl);
     if (decl->getName().name == IR::ParserState::verify && getParent<IR::P4Program>())
         return decl->getNode();
@@ -168,7 +184,8 @@ const IR::Node *UnusedDeclarations::process(const IR::IDeclaration *decl) {
         // Internal identifiers, e.g., __v1model_version
         return decl->getNode();
     if (used.isUsed(getOriginal<IR::IDeclaration>())) return decl->getNode();
-    if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
+    if (giveWarning(getOriginal()) && !skipWarn)
+        warn(ErrorType::WARN_UNUSED, "'%1%' is unused", decl);
     if (!removeUnused) return decl->getNode();
     prune();  // no need to go deeper
     return nullptr;
