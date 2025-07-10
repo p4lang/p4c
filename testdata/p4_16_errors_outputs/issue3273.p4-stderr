@@ -1,3 +1,7 @@
 issue3273.p4(3): [--Werror=type-error] error: int: illegal return type for method
     abstract int f();
              ^^^
+[--Werror=type-error] error: int: illegal return type for method
+issue3273.p4(1): [--Werror=type-error] error: Error while analyzing e
+extern e {
+       ^

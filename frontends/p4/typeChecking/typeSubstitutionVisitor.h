@@ -45,15 +45,17 @@ class TypeOccursVisitor : public Inspector {
 class TypeVariableSubstitutionVisitor : public Transform {
  protected:
     const TypeVariableSubstitution *bindings;
-    bool replace;  // If true variables that map to variables are just replaced
-                   // in the TypeParameterList of the replaced object; else they
-                   // are removed.
+    bool replace;      // If true variables that map to variables are just replaced
+                       // in the TypeParameterList of the replaced object; else they
+                       // are removed.
+    bool cloneInfInt;  // If true, ensure that Type_InfInt nodes are replaced with
+                       // new ones as fresh type variables
     const IR::Node *replacement(const IR::ITypeVar *original, const IR::Node *node);
 
  public:
     explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution *bindings,
-                                             bool replace = false)
-        : bindings(bindings), replace(replace) {
+                                             bool replace = false, bool cloneInfInt = false)
+        : bindings(bindings), replace(replace), cloneInfInt(cloneInfInt) {
         setName("TypeVariableSubstitution");
     }
 
@@ -65,7 +67,8 @@ class TypeVariableSubstitutionVisitor : public Transform {
         return replacement(getOriginal<IR::Type_Var>(), tv);
     }
     const IR::Node *preorder(IR::Type_InfInt *ti) override {
-        return replacement(getOriginal<IR::Type_InfInt>(), ti);
+        const auto *n = cloneInfInt ? IR::Type_InfInt::get() : ti;
+        return replacement(getOriginal<IR::Type_InfInt>(), n);
     }
 };
 
