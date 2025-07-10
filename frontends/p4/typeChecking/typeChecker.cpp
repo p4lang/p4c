@@ -81,7 +81,7 @@ const IR::Type *TypeInferenceBase::cloneWithFreshTypeVariables(const IR::IMayBeG
         BUG_CHECK(b, "%1%: failed replacing %2% with %3%", type, v, tv);
     }
 
-    TypeVariableSubstitutionVisitor sv(&tvs, true);
+    TypeVariableSubstitutionVisitor sv(&tvs, true, true);
     sv.setCalledBy(this);
     auto cl = type->to<IR::Type>()->apply(sv, getChildContext());
     CHECK_NULL(cl);
