@@ -1,0 +1,3 @@
+issue949.p4(65): [--Wwarn=unused] warning: 'didHit' is unused
+  bool didHit = someTable.apply().hit;
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

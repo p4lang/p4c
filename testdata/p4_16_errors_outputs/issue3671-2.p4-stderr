@@ -1,3 +1,9 @@
+issue3671-2.p4(8): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+issue3671-2.p4(13): [--Wwarn=unused] warning: table 't' is unused
+    table t {
+          ^
 issue3671-2.p4(17): [--Werror=type-error] error: { f1 = ext1(), f0 = ext2() }: argument does not match declaration in actions list: { f0 = ext1(), f1 = ext2() }
         default_action = a1({f1 = ext1(),f0 = ext2()});
                             ^^^^^^^^^^^^^^^^^^^^^^^^^

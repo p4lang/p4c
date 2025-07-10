@@ -1,9 +1,3 @@
-issue3178.p4(3): [--Wwarn=unused] warning: 'b10' is unused
-const bit<10> b10 = (bit<10>)(bit<1>)TableType.TT_ACL;
-              ^^^
-issue3178.p4(4): [--Wwarn=unused] warning: 'mask' is unused
-const bit<10> mask = 1 << 9;
-              ^^^^
 issue3178.p4(6): [--Wwarn=unused] warning: 'test1' is unused
 const bit<10> test1 = b10 << 3;
               ^^^^^

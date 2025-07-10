@@ -1,3 +1,9 @@
+issue1557-bmv2.p4(13): [--Wwarn=unused] warning: 'empty' is unused
+action empty() { }
+       ^^^^^
+issue1557-bmv2.p4(17): [--Wwarn=unused] warning: 'drop' is unused
+    action drop() { smeta.drop = 1; }
+           ^^^^
 issue1557-bmv2.p4(17): [--Werror=type-error] error: Field drop is not a member of structure struct standard_metadata
     action drop() { smeta.drop = 1; }
                           ^^^^

@@ -1,41 +1,11 @@
-issue1765-1-bmv2.p4(10): [--Wwarn=unused] warning: 'TYPE_IPV4' is unused
-const bit<16> TYPE_IPV4 = 0x800;
-              ^^^^^^^^^
-issue1765-1-bmv2.p4(11): [--Wwarn=unused] warning: 'TYPE_IPV6' is unused
-const bit<16> TYPE_IPV6 = 0x86dd;
-              ^^^^^^^^^
-issue1765-1-bmv2.p4(12): [--Wwarn=unused] warning: 'TYPE_CPU' is unused
-const bit<16> TYPE_CPU = 0x4242;
-              ^^^^^^^^
 issue1765-1-bmv2.p4(13): [--Wwarn=unused] warning: 'TYPE_DEBUG' is unused
 const bit<16> TYPE_DEBUG = 0x2323;
               ^^^^^^^^^^
-issue1765-1-bmv2.p4(14): [--Wwarn=unused] warning: 'PROTO_ICMP' is unused
-const bit<8> PROTO_ICMP = 1;
-             ^^^^^^^^^^
-issue1765-1-bmv2.p4(15): [--Wwarn=unused] warning: 'PROTO_TCP' is unused
-const bit<8> PROTO_TCP = 6;
-             ^^^^^^^^^
-issue1765-1-bmv2.p4(16): [--Wwarn=unused] warning: 'PROTO_UDP' is unused
-const bit<8> PROTO_UDP = 17;
-             ^^^^^^^^^
-issue1765-1-bmv2.p4(17): [--Wwarn=unused] warning: 'PROTO_ICMP6' is unused
-const bit<8> PROTO_ICMP6 = 58;
-             ^^^^^^^^^^^
 issue1765-1-bmv2.p4(18): [--Wwarn=unused] warning: 'TCP_SEQ_LEN' is unused
 const bit<8> TCP_SEQ_LEN = 4;
              ^^^^^^^^^^^
-issue1765-1-bmv2.p4(19): [--Wwarn=unused] warning: 'ICMP6_ECHO_REQUEST' is unused
-const bit<8> ICMP6_ECHO_REQUEST = 128;
-             ^^^^^^^^^^^^^^^^^^
-issue1765-1-bmv2.p4(20): [--Wwarn=unused] warning: 'ICMP6_ECHO_REPLY' is unused
-const bit<8> ICMP6_ECHO_REPLY = 129;
-             ^^^^^^^^^^^^^^^^
 issue1765-1-bmv2.p4(21): [--Wwarn=unused] warning: 'ICMP6_NS' is unused
 const bit<8> ICMP6_NS = 135;
-             ^^^^^^^^
-issue1765-1-bmv2.p4(22): [--Wwarn=unused] warning: 'ICMP6_NA' is unused
-const bit<8> ICMP6_NA = 136;
              ^^^^^^^^
 issue1765-1-bmv2.p4(23): [--Wwarn=unused] warning: 'TASK_ICMP6_NS' is unused
 const task_t TASK_ICMP6_NS = 1;
@@ -43,27 +13,36 @@ const task_t TASK_ICMP6_NS = 1;
 issue1765-1-bmv2.p4(24): [--Wwarn=unused] warning: 'TASK_ICMP6_GENERAL' is unused
 const task_t TASK_ICMP6_GENERAL = 2;
              ^^^^^^^^^^^^^^^^^^
-issue1765-1-bmv2.p4(25): [--Wwarn=unused] warning: 'TASK_DEBUG' is unused
-const task_t TASK_DEBUG = 3;
-             ^^^^^^^^^^
 issue1765-1-bmv2.p4(26): [--Wwarn=unused] warning: 'TASK_ICMP6_REPLY' is unused
 const task_t TASK_ICMP6_REPLY = 4;
              ^^^^^^^^^^^^^^^^
 issue1765-1-bmv2.p4(202): [--Wwarn=unused] warning: 'drop' is unused
     action drop() {
            ^^^^
-issue1765-1-bmv2.p4(237): [--Wwarn=unused] warning: Table ndp_answer is not used; removing
+issue1765-1-bmv2.p4(237): [--Wwarn=unused] warning: table 'ndp_answer' is unused
     table ndp_answer {
           ^^^^^^^^^^
-issue1765-1-bmv2.p4(250): [--Wwarn=unused] warning: Table port2mcast is not used; removing
+issue1765-1-bmv2.p4(250): [--Wwarn=unused] warning: table 'port2mcast' is unused
     table port2mcast {
           ^^^^^^^^^^
-issue1765-1-bmv2.p4(262): [--Wwarn=unused] warning: Table addr2mcast is not used; removing
+issue1765-1-bmv2.p4(262): [--Wwarn=unused] warning: table 'addr2mcast' is unused
     table addr2mcast {
           ^^^^^^^^^^
-issue1765-1-bmv2.p4(274): [--Wwarn=unused] warning: Table ndp is not used; removing
+issue1765-1-bmv2.p4(274): [--Wwarn=unused] warning: table 'ndp' is unused
     table ndp {
           ^^^
 issue1765-1-bmv2.p4(287): [--Wwarn=unused] warning: 'icmp6_answer' is unused
     action icmp6_answer() {
            ^^^^^^^^^^^^
+issue1765-1-bmv2.p4(237): [--Winfo=removed] info: removing table 'ndp_answer'
+    table ndp_answer {
+          ^^^^^^^^^^
+issue1765-1-bmv2.p4(250): [--Winfo=removed] info: removing table 'port2mcast'
+    table port2mcast {
+          ^^^^^^^^^^
+issue1765-1-bmv2.p4(262): [--Winfo=removed] info: removing table 'addr2mcast'
+    table addr2mcast {
+          ^^^^^^^^^^
+issue1765-1-bmv2.p4(274): [--Winfo=removed] info: removing table 'ndp'
+    table ndp {
+          ^^^

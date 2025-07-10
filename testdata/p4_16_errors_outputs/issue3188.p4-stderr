@@ -1,3 +1,6 @@
+issue3188.p4(5): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
 issue3188.p4(3): [--Werror=expected] error: static_assert(false, "V1 model version is not >= 20200000"): V1 model version is not >= 20200000
 const bool test = static_assert(20180101 >= 20200000, "V1 model version is not >= 20200000");
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

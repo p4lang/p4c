@@ -1,4 +1,7 @@
-issue1586.p4(3): [--Wwarn=unused] warning: Control cIngress is not used; removing
+issue1586.p4(3): [--Wwarn=unused] warning: control 'cIngress' is unused
+control cIngress()
+        ^^^^^^^^
+issue1586.p4(3): [--Winfo=removed] info: removing control 'cIngress'
 control cIngress()
         ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

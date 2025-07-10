@@ -1,3 +1,6 @@
+mux_e.p4(16): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
 [--Werror=type-error] error: Selector of ?: must be bool, not bit<1>
 mux_e.p4(25): [--Werror=type-error] error: '?:'
         d = d ? a : d; // wrong types a <-> d

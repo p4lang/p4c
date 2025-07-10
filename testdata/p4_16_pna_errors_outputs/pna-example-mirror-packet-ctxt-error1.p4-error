@@ -1,12 +1,3 @@
-pna-example-mirror-packet-ctxt-error1.p4(4): [--Wwarn=unused] warning: 'MIRROR_SLOT_ID' is unused
-const MirrorSlotId_t MIRROR_SLOT_ID = (MirrorSlotId_t) 3;
-                     ^^^^^^^^^^^^^^
-pna-example-mirror-packet-ctxt-error1.p4(6): [--Wwarn=unused] warning: 'MIRROR_SESSION1' is unused
-const MirrorSessionId_t MIRROR_SESSION1 = (MirrorSessionId_t) 58;
-                        ^^^^^^^^^^^^^^^
-pna-example-mirror-packet-ctxt-error1.p4(7): [--Wwarn=unused] warning: 'MIRROR_SESSION2' is unused
-const MirrorSessionId_t MIRROR_SESSION2 = (MirrorSessionId_t) 62;
-                        ^^^^^^^^^^^^^^^
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table flowTable. Copying all match fields to metadata
 pna-example-mirror-packet-ctxt-error1.p4(114): [--Werror=unsupported] error:  mirror_packet cannot be used in the MainDeparserImpl main deparser
  mirror_packet(MIRROR_SLOT_ID, MIRROR_SESSION2);

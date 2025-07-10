@@ -1,9 +1,6 @@
 pna-dpdk-direct-meter-err-2.p4(5): [--Wwarn=unused] warning: 'ETHERNET_HEADER_LEN' is unused
 const bit<8> ETHERNET_HEADER_LEN = 14;
              ^^^^^^^^^^^^^^^^^^^
-pna-dpdk-direct-meter-err-2.p4(40): [--Wwarn=unused] warning: 'IPV4_HOST_TABLE_MAX_ENTRIES' is unused
-const bit<32> IPV4_HOST_TABLE_MAX_ENTRIES = 1024;
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pna-dpdk-direct-meter-err-2.p4(81): [--Wwarn=unsupported] warning: MainControlImpl.meter0: Packet metering is not supported. Falling back to byte metering.
     DirectMeter(PNA_MeterType_t.PACKETS) meter0;
                                          ^^^^^^

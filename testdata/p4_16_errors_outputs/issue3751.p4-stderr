@@ -1,3 +1,6 @@
+issue3751.p4(3): [--Wwarn=unused] warning: 'vs' is unused
+  value_set<bit>(t) vs;
+                    ^^
 issue3751.p4(3): [--Werror=expected] error: t: value_set size must be constant
   value_set<bit>(t) vs;
                  ^

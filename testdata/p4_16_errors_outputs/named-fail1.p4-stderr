@@ -1,3 +1,9 @@
+named-fail1.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+named-fail1.p4(5): [--Wwarn=unused] warning: 'xv' is unused
+        bit<16> xv = 0;
+        ^^^^^^^^^^^^^^
 named-fail1.p4(8): [--Werror=type-error] error: 'f(z = b, y = b)'
         f(z = b, y = b); // No such parameter
         ^^^^^^^^^^^^^^^

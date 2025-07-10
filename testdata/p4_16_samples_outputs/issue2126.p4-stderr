@@ -1,4 +1,13 @@
-issue2126.p4(1): [--Wwarn=unused] warning: Parser p is not used; removing
+issue2126.p4(1): [--Wwarn=unused] warning: parser 'p' is unused
+parser p() {
+       ^
+issue2126.p4(4): [--Wwarn=unused] warning: 'retval' is unused
+            bit<16> retval = 0;
+            ^^^^^^^^^^^^^^^^^^
+issue2126.p4(7): [--Wwarn=unused] warning: 'retval' is unused
+            bit<16> retval = 1;
+            ^^^^^^^^^^^^^^^^^^
+issue2126.p4(1): [--Winfo=removed] info: removing parser 'p'
 parser p() {
        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

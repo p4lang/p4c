@@ -1,3 +1,12 @@
+issue3246.p4(1): [--Wwarn=unused] warning: 'func' is unused
+bit<32> func()
+        ^^^^
+issue3246.p4(6): [--Wwarn=unused] warning: 'func' is unused
+bit<32> func()
+        ^^^^
+issue3246.p4(11): [--Wwarn=unused] warning: 'func1' is unused
+bit<32> func1()
+        ^^^^^
 issue3246.p4(3): [--Werror=type-error] error: '1w1.minSizeInBits()'
   return (1w1).minSizeInBits<int, int, int, int, int>();
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

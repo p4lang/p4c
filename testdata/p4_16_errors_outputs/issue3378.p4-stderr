@@ -1,3 +1,6 @@
+issue3378.p4(3): [--Wwarn=unused] warning: 'm' is unused
+g({f(), f()}) m;
+              ^
 issue3378.p4(2): [--Werror=type-error] error: f: not supported as a tuple field
 package g(tuple<f,f> b);
                 ^

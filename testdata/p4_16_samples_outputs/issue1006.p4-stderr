@@ -1,6 +1,6 @@
-issue1006.p4(14): [--Wwarn=unused] warning: reg0: unused instance
+issue1006.p4(14): [--Wwarn=unused] warning: 'reg0' is unused
     R<tuple<bit<8>>>({ 1 }) reg0;
                             ^^^^
-issue1006.p4(15): [--Wwarn=unused] warning: reg1: unused instance
+issue1006.p4(15): [--Wwarn=unused] warning: 'reg1' is unused
     R<foo>({ 1 }) reg1;
                   ^^^^

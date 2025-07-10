@@ -1,3 +1,9 @@
+default_action.p4(16): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+default_action.p4(19): [--Wwarn=unused] warning: table 't' is unused
+    table t {
+          ^
 default_action.p4(21): [--Werror=type-error] error: b() not present in action list
         default_action = b; // not in the list of actions
                          ^

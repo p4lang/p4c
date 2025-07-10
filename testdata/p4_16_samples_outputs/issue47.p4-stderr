@@ -1,6 +1,3 @@
-issue47.p4(1): [--Wwarn=unused] warning: 'b' is unused
-const bit<(5 + 3)> b = 10;
-                   ^
 issue47.p4(2): [--Wwarn=unused] warning: 'c' is unused
 const bit<(b)> c = 2;
                ^

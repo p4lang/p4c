@@ -1,18 +1,9 @@
-ml-headers.p4(22): [--Wwarn=unused] warning: 'TYPE_IPV6' is unused
-const bit<16> TYPE_IPV6 = 0x86dd;
-              ^^^^^^^^^
 ml-headers.p4(23): [--Wwarn=unused] warning: 'TYPE_CPU' is unused
 const bit<9> TYPE_CPU = 9w192;
              ^^^^^^^^
 ml-headers.p4(24): [--Wwarn=unused] warning: 'PROTO_TCP' is unused
 const bit<8> PROTO_TCP = 6;
              ^^^^^^^^^
-ml-headers.p4(25): [--Wwarn=unused] warning: 'PROTO_UDP' is unused
-const bit<8> PROTO_UDP = 17;
-             ^^^^^^^^^
-ml-headers.p4(26): [--Wwarn=unused] warning: 'PROTO_ICMP6' is unused
-const bit<8> PROTO_ICMP6 = 58;
-             ^^^^^^^^^^^
 ml-headers.p4(27): [--Wwarn=unused] warning: 'TCP_SEQ_LEN' is unused
 const bit<8> TCP_SEQ_LEN = 4;
              ^^^^^^^^^^^
@@ -22,6 +13,3 @@ const bit<8> ICMP6_ECHO_REQUEST = 128;
 ml-headers.p4(29): [--Wwarn=unused] warning: 'ICMP6_ECHO_REPLY' is unused
 const bit<8> ICMP6_ECHO_REPLY = 129;
              ^^^^^^^^^^^^^^^^
-ipv6-switch-ml-bmv2.p4(26): [--Wwarn=unused] warning: 'BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION' is unused
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION = 5;
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

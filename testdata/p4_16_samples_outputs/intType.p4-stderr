@@ -1,9 +1,3 @@
-intType.p4(1): [--Wwarn=unused] warning: 'a' is unused
-const int a = 5;
-          ^
-intType.p4(2): [--Wwarn=unused] warning: 'b' is unused
-const int b = 2 * a;
-          ^
 intType.p4(3): [--Wwarn=unused] warning: 'c' is unused
 const int c = b - a + 3;
           ^

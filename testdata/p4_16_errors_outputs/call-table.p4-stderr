@@ -1,3 +1,9 @@
+call-table.p4(17): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+call-table.p4(23): [--Wwarn=unused] warning: 'b' is unused
+    action b() {
+           ^
 call-table.p4(24): [--Werror=type-error] error: t.apply(): apply cannot be called from actions
         t.apply(); // cannot invoke table from action
         ^^^^^^^^^

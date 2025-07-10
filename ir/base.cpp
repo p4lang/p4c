@@ -34,15 +34,15 @@ cstring Annotation::getName() const {
     return getSingleString();
 }
 
-cstring Annotation::getSingleString() const {
+cstring Annotation::getSingleString(bool error) const {
     const auto &expr = getExpr();
     if (expr.size() != 1) {
-        ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
+        if (error) ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
         return cstring::empty;
     }
     auto str = expr[0]->to<IR::StringLiteral>();
     if (str == nullptr) {
-        ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
+        if (error) ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
         return cstring::empty;
     }
     return str->value;

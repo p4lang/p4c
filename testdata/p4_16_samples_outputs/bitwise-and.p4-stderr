@@ -1,4 +1,7 @@
-bitwise-and.p4(21): [--Wwarn=unused] warning: Control C is not used; removing
+bitwise-and.p4(21): [--Wwarn=unused] warning: control 'C' is unused
+control C(bit<1> meta) {
+        ^
+bitwise-and.p4(21): [--Winfo=removed] info: removing control 'C'
 control C(bit<1> meta) {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

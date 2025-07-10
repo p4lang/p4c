@@ -1,3 +1,9 @@
-spec-ex09.p4(24): [--Wwarn=unused] warning: Control p is not used; removing
+spec-ex09.p4(24): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+spec-ex09.p4(27): [--Wwarn=unused] warning: 'mpls_vec' is unused
+        Mpls_h[10] mpls_vec;
+        ^^^^^^^^^^^^^^^^^^^
+spec-ex09.p4(24): [--Winfo=removed] info: removing control 'p'
 control p()
         ^

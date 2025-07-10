@@ -1,3 +1,12 @@
+wrong-cast.p4(1): [--Wwarn=unused] warning: 'b' is unused
+const bool b = (bool)3;
+           ^
+wrong-cast.p4(2): [--Wwarn=unused] warning: 'c' is unused
+const bool c = (bool)2s0;
+           ^
+wrong-cast.p4(3): [--Wwarn=unused] warning: 'd' is unused
+const bool d = (bool)10w0;
+           ^
 wrong-cast.p4(1): [--Werror=invalid] error: (bool)3: Only 0 and 1 can be cast to booleans
 const bool b = (bool)3;
                ^^^^^^^

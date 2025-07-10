@@ -1,4 +1,7 @@
-alias.p4(38): [--Wwarn=unused] warning: Control c is not used; removing
+alias.p4(38): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+alias.p4(38): [--Winfo=removed] info: removing control 'c'
 control c() {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

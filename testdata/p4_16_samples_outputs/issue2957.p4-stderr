@@ -1,3 +1,6 @@
+issue2957.p4(23): [--Wwarn=unused] warning: 'tmp' is unused
+    H tmp = { extern_call(hdr.h[max(3w1, 3w2)]) };
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 issue2957.p4(23): [--Wwarn=uninitialized_use] warning: hdr.h[tmp_3].a may be uninitialized
     H tmp = { extern_call(hdr.h[max(3w1, 3w2)]) };
                           ^^^^^^^^^^^^^^^^^^^^

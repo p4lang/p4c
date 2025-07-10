@@ -1,7 +1,19 @@
-call.p4(17): [--Wwarn=unused] warning: Control qp is not used; removing
+call.p4(17): [--Wwarn=unused] warning: control 'qp' is unused
 control qp()
         ^^
-call.p4(42): [--Wwarn=unused] warning: Control p is not used; removing
+call.p4(42): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+call.p4(45): [--Wwarn=unused] warning: 'y' is unused
+    Ix() y;
+         ^
+call.p4(47): [--Wwarn=unused] warning: 'arg2' is unused
+    action b(in bit<32> arg2)
+                        ^^^^
+call.p4(17): [--Winfo=removed] info: removing control 'qp'
+control qp()
+        ^^
+call.p4(42): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

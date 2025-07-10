@@ -1,3 +1,6 @@
+issue1006-1.p4(14): [--Wwarn=unused] warning: 'reg2' is unused
+    R<bit<8>>(16w1) reg2;
+                    ^^^^
 issue1006-1.p4(14): [--Werror=type-error] error: 'reg2'
     R<bit<8>>(16w1) reg2;
                     ^^^^

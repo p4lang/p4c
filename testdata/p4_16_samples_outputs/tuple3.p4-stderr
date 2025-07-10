@@ -1,6 +1,3 @@
-tuple3.p4(1): [--Wwarn=unused] warning: 't' is unused
-const tuple<bit<32>, bit<32>> t = { 0, 1 };
-                              ^
 tuple3.p4(2): [--Wwarn=unused] warning: 'f' is unused
 const bit<32> f = t[0];
               ^

@@ -1,3 +1,6 @@
+issue2036-2.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
 issue2036-2.p4(10): [--Werror=type-error] error: 'f(b)'
         f(b);
         ^^^^

@@ -1,3 +1,9 @@
+issue345.p4(17): [--Wwarn=unused] warning: control 'C' is unused
+control C<H>() {
+        ^
+issue345.p4(19): [--Wwarn=unused] warning: 'h' is unused
+        H h = 0;
+        ^^^^^^^
 issue345.p4(19): [--Werror=type-error] error: 'h'
         H h = 0;
         ^^^^^^^

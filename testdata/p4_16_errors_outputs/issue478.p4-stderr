@@ -1,3 +1,6 @@
+issue478.p4(27): [--Wwarn=unused] warning: parser 'MyParser' is unused
+parser MyParser(packet_in b, out my_packet p) {
+       ^^^^^^^^
 issue478.p4(29): [--Werror=type-error] error: p.h: argument cannot contain varbit fields
         b.extract(p.h);
                   ^^^

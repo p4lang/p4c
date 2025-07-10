@@ -1,3 +1,6 @@
+issue3293.p4(1): [--Wwarn=unused] warning: 't' is unused
+struct t1<t>{}
+          ^
 issue3293.p4(3): [--Werror=type-error] error: t1: no type parameters supplied for return generic type
 extern t1 f();
        ^^

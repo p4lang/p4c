@@ -1,9 +1,3 @@
-octal.p4(1): [--Wwarn=unused] warning: 'n1' is unused
-const bit<16> n1 = 16w0377; // 377
-              ^^
-octal.p4(2): [--Wwarn=unused] warning: 'n2' is unused
-const bit<16> n2 = 16w0o0377; // 255
-              ^^
 octal.p4(3): [--Wwarn=unused] warning: 't1' is unused
 const bool t1 = (n1 == 377);
            ^^

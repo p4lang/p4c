@@ -1,4 +1,7 @@
-issue3623-1.p4(5): [--Wwarn=unused] warning: Control c is not used; removing
+issue3623-1.p4(5): [--Wwarn=unused] warning: control 'c' is unused
+control c(in e v)
+        ^
+issue3623-1.p4(5): [--Winfo=removed] info: removing control 'c'
 control c(in e v)
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

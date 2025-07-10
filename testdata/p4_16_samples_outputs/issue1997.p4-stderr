@@ -1,13 +1,10 @@
-issue1997.p4(3): [--Wwarn=unused] warning: 'A' is unused
-const int A = 5; // typecheck error
-          ^
-issue1997.p4(4): [--Wwarn=unused] warning: 'B' is unused
-const bit<16> B = 5; // works
-              ^
-issue1997.p4(23): [--Wwarn=unused] warning: Control c is not used; removing
+issue1997.p4(23): [--Wwarn=unused] warning: control 'c' is unused
 control c(in hdr h, inout standard_metadata_t standard_meta) {
         ^
 issue1997.p4(59): [--Wwarn=unused] warning: 'package top' is unused
 package top(proto p);
         ^^^
+issue1997.p4(23): [--Winfo=removed] info: removing control 'c'
+control c(in hdr h, inout standard_metadata_t standard_meta) {
+        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -1,3 +1,15 @@
+generic1_e.p4(21): [--Wwarn=unused] warning: control 'p1' is unused
+control p1(If x) // missing type parameter
+        ^^
+generic1_e.p4(26): [--Wwarn=unused] warning: control 'p2' is unused
+control p2(If<int<32>, int<32>> x) // too many type parameters
+        ^^
+generic1_e.p4(33): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+generic1_e.p4(36): [--Wwarn=unused] warning: 'x' is unused
+        h<bit> x; // no type parameter
+        ^^^^^^^^
 generic1_e.p4(21): [--Werror=type-error] error: Type parameters needed for x
 control p1(If x) // missing type parameter
               ^

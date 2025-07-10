@@ -1,3 +1,6 @@
+issue3808.p4(4): [--Wwarn=unused] warning: control 'eq0' is unused
+control eq0()
+        ^^^
 issue3808.p4(11): [--Werror=type-error] error: t: argument cannot have type Type_Table
     f<_>(t);
          ^

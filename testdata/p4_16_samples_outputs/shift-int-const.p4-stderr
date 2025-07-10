@@ -1,6 +1,0 @@
-shift-int-const.p4(7): [--Wwarn=unused] warning: 'a' is unused
-    const int a = 5;
-              ^
-shift-int-const.p4(8): [--Wwarn=unused] warning: 'b' is unused
-    const bit<4> b = 2;
-                 ^

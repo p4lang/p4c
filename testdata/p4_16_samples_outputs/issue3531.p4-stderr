@@ -1,3 +1,0 @@
-issue3531.p4(10): [--Wwarn=unused] warning: 'test' is unused
-const bool test = static_assert(20180101 >= 20160101, "V1 model version is not >= 20160101");
-           ^^^^

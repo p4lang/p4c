@@ -1,3 +1,6 @@
+typecheck1_e.p4(16): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
 typecheck1_e.p4(27): [--Werror=type-error] error: Cannot apply operation '~' to expression 'd' with type 'bool'
         d = ~d;
              ^

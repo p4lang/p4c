@@ -1,3 +1,9 @@
+stack3.p4(34): [--Wwarn=unused] warning: 's2' is unused
+        h[s1.size + 1] s2;
+        ^^^^^^^^^^^^^^^^^
+stack3.p4(35): [--Wwarn=unused] warning: 's3' is unused
+        h[x] s3;
+        ^^^^^^^
 stack3.p4(34): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
         h[s1.size + 1] s2;
         ^^^^^^^^^^^^^^

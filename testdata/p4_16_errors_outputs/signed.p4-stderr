@@ -1,3 +1,6 @@
+signed.p4(1): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
 signed.p4(5): [--Werror=type-error] error: 'signed_int1[7:0] = signed_int2'
         signed_int1[7:0] = signed_int2;
                          ^

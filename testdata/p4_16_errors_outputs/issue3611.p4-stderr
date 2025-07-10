@@ -1,3 +1,9 @@
+issue3611.p4(4): [--Wwarn=unused] warning: 'd' is unused
+action d() {}
+       ^
+issue3611.p4(5): [--Wwarn=unused] warning: control 'c' is unused
+control c()
+        ^
 issue3611.p4(12): [--Werror=type-error] error: 1: 'switch' label must be an action name or 'default'
       1: {} // { dg-error "" }
       ^

@@ -1,9 +1,3 @@
 constStruct.p4(6): [--Wwarn=mismatch] warning: 8w1024: value does not fit in 8 bits
     x = 1024
         ^^^^
-constStruct.p4(5): [--Wwarn=unused] warning: 's' is unused
-const S s = {
-        ^
-constStruct.p4(8): [--Wwarn=unused] warning: 'z' is unused
-const bit<16> z = (bit<16>)s.x;
-              ^

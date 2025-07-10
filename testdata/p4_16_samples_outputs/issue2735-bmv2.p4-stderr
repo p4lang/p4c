@@ -1,3 +1,0 @@
-issue2735-bmv2.p4(34): [--Wwarn=unused] warning: 'N_MAC_ENTRIES' is unused
-const bit<32> N_MAC_ENTRIES = 4096;
-              ^^^^^^^^^^^^^

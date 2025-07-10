@@ -1,9 +1,0 @@
-nested-struct.p4(10): [--Wwarn=unused] warning: 'h' is unused
-const Header h = {
-             ^
-nested-struct.p4(20): [--Wwarn=unused] warning: 'h1' is unused
-const H2 h1 = {
-         ^^
-nested-struct.p4(25): [--Wwarn=unused] warning: 'h2' is unused
-const H2 h2 = { { { 0 }, 1 }, 1 };
-         ^^

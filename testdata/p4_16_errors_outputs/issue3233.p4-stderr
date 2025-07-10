@@ -1,3 +1,9 @@
+issue3233.p4(7): [--Wwarn=unused] warning: 'func' is unused
+s func(bit t, bit t1)
+  ^^^^
+issue3233.p4(12): [--Wwarn=unused] warning: 'func1' is unused
+s func1(s t1)
+  ^^^^^
 issue3233.p4(9): [--Werror=type-error] error: s: cast not supported
   return (s)(s)(s){t, t1};
              ^

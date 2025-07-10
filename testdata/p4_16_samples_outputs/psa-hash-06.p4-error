@@ -1,6 +1,0 @@
-psa-hash-06.p4(55): [--Wwarn=unused] warning: 'base' is unused
- const bit<16> base = 2;
-               ^^^^
-psa-hash-06.p4(56): [--Wwarn=unused] warning: 'max_val' is unused
- const bit<16> max_val = 32;
-               ^^^^^^^

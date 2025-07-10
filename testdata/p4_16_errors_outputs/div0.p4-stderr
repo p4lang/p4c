@@ -1,3 +1,6 @@
+div0.p4(16): [--Wwarn=unused] warning: 'act' is unused
+action act() {
+       ^^^
 div0.p4(18): [--Werror=expr] error: a / 0: Division by zero
     a = a / 0;
         ^^^^^

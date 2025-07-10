@@ -1,3 +1,6 @@
+conditional_e.p4(16): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
 conditional_e.p4(21): [--Werror=type-error] error: Condition of IfStatement does not evaluate to a bool but bit<1>
         if (b) ; else ; // non-bool condition
         ^^

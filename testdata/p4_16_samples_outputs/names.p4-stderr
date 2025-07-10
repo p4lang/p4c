@@ -1,7 +1,7 @@
-names.p4(18): [--Wwarn=unused] warning: 'c' is unused
-const S c = { 1w1 };
+names.p4(20): [--Wwarn=unused] warning: control 'p' is unused
+control p()
         ^
-names.p4(20): [--Wwarn=unused] warning: Control p is not used; removing
+names.p4(20): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

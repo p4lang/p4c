@@ -1,3 +1,6 @@
+issue600.p4(22): [--Wwarn=unused] warning: parser 'p' is unused
+parser p(packet_in pkt) {
+       ^
 issue600.p4(25): [--Werror=type-error] error: H: type argument must be a fixed-width type
         h = pkt.lookahead<H>();
                           ^

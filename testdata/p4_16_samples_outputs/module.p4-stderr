@@ -1,25 +1,31 @@
 module.p4(17): [--Wwarn=unused] warning: 'package s' is unused
 package s();
         ^
-module.p4(38): [--Wwarn=unused] warning: main1: unused instance
+module.p4(38): [--Wwarn=unused] warning: 'main1' is unused
 switch0(f()) main1;
              ^^^^^
-module.p4(39): [--Wwarn=unused] warning: main3: unused instance
+module.p4(39): [--Wwarn=unused] warning: 'main3' is unused
 switch1<bool>(f()) main3;
                    ^^^^^
-module.p4(40): [--Wwarn=unused] warning: main4: unused instance
+module.p4(40): [--Wwarn=unused] warning: 'main4' is unused
 switch2(f()) main4;
              ^^^^^
-module.p4(41): [--Wwarn=unused] warning: main5: unused instance
+module.p4(41): [--Wwarn=unused] warning: 'main5' is unused
 switch3(f2()) main5;
               ^^^^^
-module.p4(42): [--Wwarn=unused] warning: main6: unused instance
+module.p4(42): [--Wwarn=unused] warning: 'main6' is unused
 switch4<bool>(f2()) main6;
                     ^^^^^
-module.p4(43): [--Wwarn=unused] warning: main2: unused instance
+module.p4(43): [--Wwarn=unused] warning: 'main2' is unused
 switch1(f()) main2;
              ^^^^^
-module.p4(44): [--Wwarn=unused] warning: main7: unused instance
+module.p4(44): [--Wwarn=unused] warning: 'main7' is unused
 switch4(f2()) main7;
               ^^^^^
+module.p4(23): [--Winfo=removed] info: removing parser 'f'
+parser f(out bool x)
+       ^
+module.p4(26): [--Winfo=removed] info: removing parser 'f2'
+parser f2(out bool x, out bool y)
+       ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

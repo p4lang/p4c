@@ -1,7 +1,10 @@
 issue3379-1.p4(13): [--Wwarn=unused] warning: 'package mypackaget' is unused
 package mypackaget<t>(mypt<t> t1, mypt<t> t2);
         ^^^^^^^^^^
-issue3379-1.p4(14): [--Wwarn=unused] warning: t4: unused instance
+issue3379-1.p4(14): [--Wwarn=unused] warning: 't4' is unused
 mypackaget<bit>(MyParser1()) t4;
                              ^^
+issue3379-1.p4(3): [--Winfo=removed] info: removing parser 'MyParser1'
+parser MyParser1(in bit tt) {
+       ^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

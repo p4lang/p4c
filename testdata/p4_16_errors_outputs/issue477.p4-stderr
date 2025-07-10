@@ -1,3 +1,6 @@
+issue477.p4(26): [--Wwarn=unused] warning: parser 'MyParser' is unused
+parser MyParser(packet_in b, out my_packet p) {
+       ^^^^^^^^
 issue477.p4(28): [--Werror=type-error] error: p.h: argument must be a header
         b.extract(p.h);
                   ^^^

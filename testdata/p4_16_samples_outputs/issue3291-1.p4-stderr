@@ -1,3 +1,0 @@
-issue3291-1.p4(4): [--Wwarn=unused] warning: 'g' is unused
-bool g<t>(in t a) {
-     ^

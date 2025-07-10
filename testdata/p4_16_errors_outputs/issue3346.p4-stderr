@@ -1,3 +1,6 @@
+issue3346.p4(1): [--Wwarn=unused] warning: parser 'MyParser1' is unused
+parser MyParser1(in bit<6> v) {
+       ^^^^^^^^^
 issue3346.p4(2): [--Werror=type-error] error: int: Illegal type for value_set element type
   value_set<int>(4) myvs;
             ^^^
