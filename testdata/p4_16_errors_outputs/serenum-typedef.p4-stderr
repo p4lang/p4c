@@ -25,6 +25,26 @@ serenum-typedef.p4(31): [--Werror=type-error] error: unrepresentable_p: Serializ
 serenum-typedef.p4(28)
 enum bit<4> UnrepresentableBit {
      ^^^^^^
+serenum-typedef.p4(50): [--Werror=type-error] error: 'SelectExpression'
+        transition select(e.type) {
+                   ^
+  ---- Actual error:
+serenum-typedef.p4(8): Cannot cast implicitly type 'EthTypes' to type 'Base_t'
+  enum EthT EthTypes {
+            ^^^^^^^^
+serenum-typedef.p4(3)
+  type bit<16> Base_t;
+               ^^^^^^
+  ---- Originating from:
+serenum-typedef.p4(51): 'match' case label 'EthTypes.IPv4' has type 'EthTypes' which does not match the expected type 'Base_t'
+              EthTypes.IPv4: accept;
+              ^^^^^^^^^^^^^
+serenum-typedef.p4(8)
+  enum EthT EthTypes {
+            ^^^^^^^^
+serenum-typedef.p4(3)
+  type bit<16> Base_t;
+               ^^^^^^
 serenum-typedef.p4(65): [--Werror=type-error] error: '(EthTypes)16w0'
             h.eth.type = (EthTypes)(bit<16>)0;
                          ^^^^^^^^^^^^^^^^^^^^

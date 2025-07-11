@@ -2269,6 +2269,12 @@ const IR::SelectCase *TypeInferenceBase::matchCase(const IR::SelectExpression *s
         }
         useSelType = selectType->components.at(0);
     }
+    if (auto senum = useSelType->to<IR::Type_SerEnum>()) {
+        // With select of a serial enum type, the cases may be either the serenum type,
+        // or the underlying type, so match against the underlying type, because implicit
+        // casts to the senum type are not allowed.
+        useSelType = getTypeType(senum->type);
+    }
     auto tvs = unifyCast(
         select, useSelType, caseType,
         "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",

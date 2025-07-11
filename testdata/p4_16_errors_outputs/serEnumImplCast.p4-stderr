@@ -1,9 +1,17 @@
 serEnumImplCast.p4(10): [--Wwarn=unused] warning: control 'c' is unused
 control c(inout meta_t m) {
         ^
-serEnumImplCast.p4(16): [--Werror=type-error] error: '2w0': values of type 'bit<2>' cannot be implicitly cast to type 'foo_t'
+serEnumImplCast.p4(16): [--Werror=type-error] error: '2w0'
         default_action = set_x(2w0); // not allowed to implicitly cast to serenum
                                ^^^
+  ---- Actual error:
+serEnumImplCast.p4(3): Cannot cast implicitly type 'bit<2>' to type 'foo_t'
+  enum bit<2> foo_t { A = 0, B = 1, C = 2, D = 3 }
+              ^^^^^
+  ---- Originating from:
+serEnumImplCast.p4(16): Source expression '2w0' produces a result of type 'bit<2>' which cannot be assigned to a left-value with type 'foo_t'
+          default_action = set_x(2w0); // not allowed to implicitly cast to serenum
+                                 ^^^
 serEnumImplCast.p4(3)
-enum bit<2> foo_t { A = 0, B = 1, C = 2, D = 3 }
-            ^^^^^
+  enum bit<2> foo_t { A = 0, B = 1, C = 2, D = 3 }
+              ^^^^^

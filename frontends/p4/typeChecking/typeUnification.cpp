@@ -445,12 +445,6 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
         bool success = (*src) == (*dest);
         if (!success) return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
-    } else if (auto se = dest->to<IR::Type_SerEnum>()) {
-        if (constraint->is<P4::CanBeImplicitlyCastConstraint>()) {
-            constraints->add(constraint->create(se->type, src));
-            return true;
-        }
-        return constraint->reportError(constraints->getCurrentSubstitution());
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         if (dest->to<IR::Type_Declaration>()->name != src->to<IR::Type_Declaration>()->name)
             return constraint->reportError(constraints->getCurrentSubstitution());
