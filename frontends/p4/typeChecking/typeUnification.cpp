@@ -24,6 +24,12 @@ namespace P4 {
 
 using namespace literals;
 
+const IR::Type *unspecialize(const IR::Type *type) {
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) type = tsc->substituted;
+    if (auto ts = type->to<IR::Type_Specialized>()) type = ts->baseType;
+    return type;
+}
+
 /// Unifies a call with a prototype.
 bool TypeUnification::unifyCall(const BinaryConstraint *constraint) {
     // These are canonical types.
@@ -91,7 +97,8 @@ bool TypeUnification::unifyCall(const BinaryConstraint *constraint) {
             return constraint->reportError(
                 constraints->getCurrentSubstitution(),
                 "%1%: Read-only value used for out/inout parameter '%2%'", arg->srcInfo, param);
-        else if (param->direction == IR::Direction::None && !arg->compileTimeConstant)
+        else if (param->direction == IR::Direction::None && !arg->compileTimeConstant &&
+                 !unspecialize(arg->type)->is<IR::Type_Extern>())
             return constraint->reportError(constraints->getCurrentSubstitution(),
                                            "%1%: argument used for directionless parameter '%2%' "
                                            "must be a compile-time constant",
@@ -416,8 +423,13 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                 constraints->add(new EqualityConstraint(dotsField->type, partial, constraint));
             }
             return true;
+        } else if (auto implicit = typeMap->externImplicitReadType(src)) {
+            // FIXME -- we're supposed to be able to compare types for equality by
+            // just comparing pointers, but it seems like typechecking internally
+            // creates duplicate struct types.  This seems like a bug waiting to
+            // happen, since if any such type leaks, later passes may fail mysteriously
+            if (implicit->equiv(*dest)) return true;
         }
-
         return constraint->reportError(constraints->getCurrentSubstitution());
     } else if (dest->is<IR::Type_Base>()) {
         if (dest->is<IR::Type_Bits>() && src->is<IR::Type_InfInt>()) {
@@ -429,6 +441,10 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             constraints->addUnifiableTypeVariable(src->to<IR::Type_Any>());
             constraints->add(constraint->create(dest, src));
             return true;
+        }
+        if (auto implicit = typeMap->externImplicitReadType(src)) {
+            if (*implicit == *dest) return true;
+            if (implicit->is<IR::Type_SerEnum>()) src = implicit;
         }
         if (auto senum = src->to<IR::Type_SerEnum>()) {
             if (constraint->is<P4::CanBeImplicitlyCastConstraint>()) {
