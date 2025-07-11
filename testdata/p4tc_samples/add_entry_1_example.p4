@@ -46,7 +46,7 @@ struct headers_t {
     ipv4_t     ipv4;
 }
 
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW    = (ExpireTimeProfileId_t) 2;
+#define EXPIRE_TIME_PROFILE_NOW ((ExpireTimeProfileId_t) 2)
 
 parser MainParserImpl(
     packet_in pkt,
@@ -84,9 +84,6 @@ control MainControlImpl(
     }
 
     action dflt_route_drop() {
-        drop_packet();
-    }
-    action drop() {
         drop_packet();
     }
 

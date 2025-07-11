@@ -4,6 +4,7 @@
 #include <tc/pna.p4>
 
 #define PORT_TABLE_SIZE 262144
+#define ETHERTYPE_IPV4 0x0800
 
 /*
  * Standard ethernet header
@@ -57,7 +58,6 @@ parser Ingress_Parser(
         in    pna_main_parser_input_metadata_t istd)
 {
     InternetChecksum() ck;
-    const bit<16> ETHERTYPE_IPV4 = 0x0800;
 
     state start {
         transition parse_ethernet;

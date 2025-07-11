@@ -4,6 +4,7 @@
 #include <tc/pna.p4>
 
 #define PORT_TABLE_SIZE 262144
+#define ETHERTYPE_IPV4 0x0800
 
 /*
  * Standard ethernet header
@@ -60,8 +61,6 @@ parser Ingress_Parser(
         inout my_ingress_metadata_t meta,
         in    pna_main_parser_input_metadata_t istd)
 {
-    const bit<16> ETHERTYPE_IPV4 = 0x0800;
-
     state start {
         transition parse_ethernet;
     }
@@ -88,10 +87,8 @@ control ingress(
 )
 {
     Hash<bit<16>>(PNA_HashAlgorithm_t.CRC16) h;
-    const bit<16> base = 15;
-    const bit<16> max = 32;
     apply {
-        hdr.crc.crc = h.get_hash(base, {hdr.crc.f1, hdr.crc.f2, hdr.crc.f3, hdr.crc.f4}, max);
+        hdr.crc.crc = h.get_hash(16w15, {hdr.crc.f1, hdr.crc.f2, hdr.crc.f3, hdr.crc.f4}, 16w32);
     }
 }
 

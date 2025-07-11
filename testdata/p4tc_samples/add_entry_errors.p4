@@ -49,7 +49,7 @@ struct headers_t {
 struct default_route_drop_params_t {
 }
 
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW    = (ExpireTimeProfileId_t) 2;
+#define EXPIRE_TIME_PROFILE_NOW ((ExpireTimeProfileId_t) 2)
 
 parser MainParserImpl(
     packet_in pkt,
@@ -82,9 +82,6 @@ control MainControlImpl(
 
     }
     action default_route_drop() {
-        drop_packet();
-    }
-    action drop() {
         drop_packet();
     }
 
