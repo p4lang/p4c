@@ -10,8 +10,8 @@ struct my_ingress_metadata_t {
 /*
  * CONST VALUES FOR TYPES
  */
-const bit<8> IP_PROTO_TCP = 0x06;
-const bit<16> ETHERTYPE_IPV4 = 0x0800;
+#define IP_PROTO_TCP 0x06
+#define ETHERTYPE_IPV4 0x0800
 
 /*
  * Standard ethernet header

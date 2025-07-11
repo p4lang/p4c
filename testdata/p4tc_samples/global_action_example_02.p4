@@ -42,6 +42,8 @@ struct my_ingress_metadata_t {
 struct empty_metadata_t {
 }
 
+#define ETHERTYPE_IPV4 0x800
+
 /***********************  P A R S E R  **************************/
 
 parser Ingress_Parser(
@@ -50,8 +52,6 @@ parser Ingress_Parser(
         inout my_ingress_metadata_t meta,
         in    pna_main_parser_input_metadata_t istd)
 {
-    const bit<16> ETHERTYPE_IPV4 = 0x0800;
-
     state start {
         transition parse_ethernet;
     }

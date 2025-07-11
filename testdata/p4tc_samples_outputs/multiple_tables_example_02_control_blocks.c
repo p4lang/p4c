@@ -256,7 +256,7 @@ if (/* hdr->ipv4.isValid() */
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
                                 {
-if (hdr->ipv4.protocol != 6) {
+if (hdr->ipv4.protocol!=6) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -309,7 +309,7 @@ if (hdr->ipv4.protocol != 6) {
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol==6 || (hdr->ipv4.version>1 && hdr->ipv4.ihl<=2)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -361,7 +361,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol==6 || (hdr->ipv4.version>1 && hdr->ipv4.ihl<=2)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -413,7 +413,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol==6 || (hdr->ipv4.version>1 && hdr->ipv4.ihl<=2)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -549,7 +549,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
                                 {
-if (hdr->ipv4.protocol != 6) {
+if (hdr->ipv4.protocol!=6) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -576,7 +576,7 @@ if (hdr->ipv4.protocol != 6) {
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol==6 || (hdr->ipv4.version>1 && hdr->ipv4.ihl<=2)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 

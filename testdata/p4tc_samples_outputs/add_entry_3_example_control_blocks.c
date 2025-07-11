@@ -119,8 +119,8 @@ if (/* hdr->ipv4.isValid() */
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH: 
                                 {
-                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (bpf_cpu_to_be64(getPrimitive64((u8 *)value->u.MainControlImpl_send_nh.smac, 48))));
-                                                                        storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (ntohll(getPrimitive64((u8 *)value->u.MainControlImpl_send_nh.dmac, 48) << 16)));
+storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)value->u.MainControlImpl_send_nh.smac, 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)value->u.MainControlImpl_send_nh.dmac, 48));
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 

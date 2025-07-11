@@ -127,12 +127,15 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::IfStatement *s) override;
 
     void widthCheck(const IR::Node *node) const;
+    bool scalar_type(const IR::Node *node) const;
     void emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order);
-    void emitTCBinaryOperation(const IR::Operation_Binary *b, bool isScalar);
+    void emitTCBinaryOperation(const IR::Operation_Binary *);
     void emitTCAssignmentEndianessConversion(const IR::Type *ltype, const IR::Expression *lexpr,
                                              const IR::Expression *rexpr, cstring lpath);
     void getBitAlignment(const IR::Expression *expression);
     bool storeBitAlignment(const IR::Type *ltype, const IR::Expression *lexpr, cstring lpath);
+    void visit_hostorder(const IR::Expression *);
+    void emit_tc_large(const IR::Operation_Binary *, unsigned int);  // catchall
 };
 
 class EBPFInitializerUtils {

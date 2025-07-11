@@ -227,32 +227,30 @@ void PNAArchTC::emitGlobalFunctions(EBPF::CodeBuilder *builder) const {
         "static inline u32 getPrimitive32(u8 *a, int size) {\n"
         "   if(size <= 16 || size > 24) {\n"
         "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
+        "   }\n"
         "   return  ((((u32)a[2]) <<16) | (((u32)a[1]) << 8) | a[0]);\n"
         "}\n"
         "static inline u64 getPrimitive64(u8 *a, int size) {\n"
         "   if(size <= 32 || size > 56) {\n"
         "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
+        "   }\n"
         "   if(size <= 40) {\n"
         "       return  ((((u64)a[4]) << 32) | (((u64)a[3]) << 24) | (((u64)a[2]) << 16) | "
         "(((u64)a[1]) << 8) | a[0]);\n"
         "   } else {\n"
         "       if(size <= 48) {\n"
         "           return  ((((u64)a[5]) << 40) | (((u64)a[4]) << 32) | (((u64)a[3]) << 24) | "
-        "(((u64)a[2]) << 16) | (((u64)a[1]) << "
-        "8) | a[0]);\n"
+        "(((u64)a[2]) << 16) | (((u64)a[1]) << 8) | a[0]);\n"
         "       } else {\n"
         "           return  ((((u64)a[6]) << 48) | (((u64)a[5]) << 40) | (((u64)a[4]) << 32) | "
-        "(((u64)a[3]) << 24) | (((u64)a[2]) << "
-        "16) | (((u64)a[1]) << 8) | a[0]);\n"
+        "(((u64)a[3]) << 24) | (((u64)a[2]) << 16) | (((u64)a[1]) << 8) | a[0]);\n"
         "       }\n"
         "   }\n"
         "}\n"
         "static inline void storePrimitive32(u8 *a, int size, u32 value) {\n"
         "   if(size <= 16 || size > 24) {\n"
         "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
+        "   }\n"
         "   a[0] = (u8)(value);\n"
         "   a[1] = (u8)(value >> 8);\n"
         "   a[2] = (u8)(value >> 16);\n"
@@ -260,7 +258,7 @@ void PNAArchTC::emitGlobalFunctions(EBPF::CodeBuilder *builder) const {
         "static inline void storePrimitive64(u8 *a, int size, u64 value) {\n"
         "   if(size <= 32 || size > 56) {\n"
         "       bpf_printk(\"Invalid size.\");\n"
-        "   };\n"
+        "   }\n"
         "   a[0] = (u8)(value);\n"
         "   a[1] = (u8)(value >> 8);\n"
         "   a[2] = (u8)(value >> 16);\n"
@@ -2409,8 +2407,37 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
             return (false);
         }
     }
+    auto ltype = typeMap->getType(a->left);
+    if (ltype) {
+        auto et = EBPF::EBPFTypeFactory::instance->create(ltype);
+        if (et->is<EBPF::EBPFScalarType>()) {
+            auto bits = et->to<EBPF::EBPFScalarType>()->implementationWidthInBits();
+            if (!EBPF::TCisPrimitiveByteAligned(bits)) {
+                if (bits <= 32) {
+                    builder->appendFormat("storePrimitive32((u8 *)&");
+                } else if (bits <= 64) {
+                    builder->appendFormat("storePrimitive64((u8 *)&");
+                } else {
+                    builder->appendFormat("assign_%u(&", bits);
+                }
+                visit(a->left);
+                builder->append("[0], ");
+                if (bits <= 64) {
+                    cstring getPrimitive = bits < 32 ? "getPrimitive32"_cs : "getPrimitive64"_cs;
 
-    return EBPF::CodeGenInspector::preorder(a);
+                    builder->appendFormat("%v, %v((u8 *)", bits, getPrimitive);
+                    visit(a->right);
+                    builder->appendFormat(", %v)", bits);
+                } else {
+                    visit(a->right);
+                }
+
+                builder->append(");");
+                return (false);
+            }
+        }
+    }
+    return (EBPF::CodeGenInspector::preorder(a));
 }
 // =====================ActionTranslationVisitorPNA=============================
 ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(
@@ -2625,7 +2652,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
             builder->endOfStatement(true);
             msgStr = absl::StrFormat("Deparser: emitting field %v=0x%%llx (%u bits)", field,
                                      widthToEmit);
-            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
+            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmpAD");
             builder->blockEnd(true);
         }
     } else {
@@ -2743,6 +2770,406 @@ EBPF::EBPFHashAlgorithmPSA *EBPFHashAlgorithmTypeFactoryPNA::create(
     }
 
     return nullptr;
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Concat *e) {
+    auto lt = e->left->type->to<IR::Type_Bits>();
+    if (lt) {
+        auto rt = e->right->type->to<IR::Type_Bits>();
+        if (rt) {
+            auto lbits = lt->width_bits();
+            auto rbits = rt->width_bits();
+            if (lbits + rbits > 64) {
+                builder->appendFormat("concat_%d_%d(", lbits, rbits);
+                getBitAlignment(e->left);
+                //	  visit(e->left);
+                builder->append(",");
+                getBitAlignment(e->right);
+                //	  visit(e->right);
+                builder->append(")");
+            } else {
+                builder->append("(((");
+                getBitAlignment(e->left);
+                //	  visit(e->left);
+                builder->appendFormat(")<<%d)|(", rbits);
+                getBitAlignment(e->right);
+                //	  visit(e->right);
+                builder->append("))");
+            }
+            return (false);
+        }
+    }
+    builder->appendFormat("<<Mystery cast %s %s>>", e->left->type->toString(),
+                          e->right->type->toString());
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::arith_common(const IR::Operation_Binary *e, const char *smallop,
+                                            const char *bigop) {
+    auto lt = e->left->type->to<IR::Type_Bits>();
+    if (lt) {
+        auto rt = e->right->type->to<IR::Type_Bits>();
+        if (rt) {
+            auto lbits = lt->width_bits();
+            auto rbits = rt->width_bits();
+            if (lbits != rbits) {
+                builder->appendFormat("<<Adding widths %d and %d>>", (int)lbits, (int)rbits);
+            } else if (lbits <= 64) {
+                getBitAlignment(e->left);
+                //	  visit(e->left);
+                builder->appendFormat(" %s ", smallop);
+                getBitAlignment(e->right);
+                //	  visit(e->right);
+            } else {
+                builder->appendFormat("%s_%u(", bigop, lbits);
+                visit_hostorder(e->left);
+                builder->append(", ");
+                visit_hostorder(e->right);
+                builder->append(")");
+            }
+            return (false);
+        }
+    }
+    builder->appendFormat("<<Mystery %s %s %s>>", bigop, e->left->type->toString(),
+                          e->right->type->toString());
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::sarith_common(const IR::Operation_Binary *e, const char *op) {
+    auto lt = e->left->type->to<IR::Type_Bits>();
+    if (lt) {
+        auto rt = e->right->type->to<IR::Type_Bits>();
+        auto lbits = lt->width_bits();
+        if (rt) {
+            assert((lt->width_bits() == rt->width_bits()) && (lt->isSigned == rt->isSigned));
+            builder->appendFormat("%s_%u(", op, lbits);
+            visit_hostorder(e->left);
+            builder->append(", ");
+            visit_hostorder(e->right);
+            builder->append(")");
+            return (false);
+        }
+    }
+    builder->appendFormat("<<Mystery %s %s %s>>", op, e->left->type->toString(),
+                          e->right->type->toString());
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::big_x_small_mul(const IR::Expression *big,
+                                               const IR::Constant *small) {
+    assert(big->type->is<IR::Type_Bits>());
+    auto bw = big->type->to<IR::Type_Bits>()->width_bits();
+    assert(bw > 64);
+    builder->appendFormat("bxsmul_%d_%u(", bw, static_cast<unsigned int>(small->value));
+    getBitAlignment(big);
+    // visit(big);
+    builder->appendFormat(")");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Add *e) { return (arith_common(e, "+", "add")); }
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Sub *e) { return (arith_common(e, "-", "sub")); }
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Mul *e) {
+    const IR::Constant *cx;
+
+    cx = e->left->to<IR::Constant>();
+    if (cx && (cx->value >= 0) && (cx->value < (1U << 22))) {
+        auto rt = e->right->type->to<IR::Type_Bits>();
+        if (rt && (rt->width_bits() > 64)) {
+            return (big_x_small_mul(e->right, cx));
+        }
+    }
+    cx = e->right->to<IR::Constant>();
+    if (cx && (cx->value >= 0) && (cx->value < (1U << 22))) {
+        auto rt = e->left->type->to<IR::Type_Bits>();
+        if (rt && (rt->width_bits() > 64)) {
+            return (big_x_small_mul(e->left, cx));
+        }
+    }
+    return (arith_common(e, "*", "mul"));
+}
+
+/*
+ * Grr.  In places where we want to call on our base class's method, it
+ *  does not work to just convert to the base class
+ *  (ControlBodyTranslator in our case); for example,
+
+    return(static_cast<EBPF::ControlBodyTranslator *>(this)->preorder(e));
+
+ *  draws an "error: no matching function for call" failure.  Why it
+ *  doesn't use CodeGenInspector's methods baffles me.
+ *
+ * Places where this is relevant are commented
+ *     // See inheritance comment above
+ */
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Cast *e) {
+    assert(e->type->is<IR::Type_Bits>());
+    assert(e->expr->type->is<IR::Type_Bits>());
+    auto fw = e->expr->type->to<IR::Type_Bits>()->width_bits();
+    auto tw = e->type->to<IR::Type_Bits>()->width_bits();
+    if (fw == tw) {
+        visit(e->expr);
+        return (false);
+    }
+    if ((fw <= 64) && (tw <= 64)) {  // This (see inheritance comment above) does not work.
+        // This - somehow - produces infinite recursion.
+        // return(static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+        // So, instead, this.  I hope it works well enough.
+        builder->append("(u64)(");
+        getBitAlignment(e->expr);
+        //    visit(e->expr);
+        builder->append(")");
+        if (tw < fw) builder->appendFormat("&%lluu", (1ULL << tw) - 1ULL);
+    } else {
+        auto tcTarget = dynamic_cast<const P4::EBPF::P4TCTarget *>(builder->target);
+        const IR::Expression *exp;
+        if (auto cast = e->expr->to<IR::Cast>())
+            exp = cast->expr;
+        else
+            exp = e->expr;
+
+        auto bo = tcTarget->getByteOrder(typeMap, findContext<IR::P4Action>(), exp);
+
+        builder->appendFormat("cast_%d_to_%d(", fw, tw);
+        /* The cast function to a value of size >= 64-bits expects the argument
+         * to be in host endian, so we need to convert network endian values
+         */
+        if (bo == "NETWORK")
+            emitAndConvertByteOrder(e->expr, "HOST"_cs);
+        else
+            getBitAlignment(e->expr);
+
+        builder->append(")");
+    }
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Neg *e) {
+    assert(e->type->is<IR::Type_Bits>());
+    auto w = e->type->to<IR::Type_Bits>()->width_bits();
+    if (w <= 64) {  // See inheritance comment above
+        return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+    }
+    builder->appendFormat("neg_%d(", w);
+    getBitAlignment(e->expr);
+    // visit(e->expr);
+    builder->append(")");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Cmpl *e) {
+    assert(e->type->is<IR::Type_Bits>());
+    auto w = e->type->to<IR::Type_Bits>()->width_bits();
+    if (w <= 64) {  // See inheritance comment above
+        return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+    }
+    builder->appendFormat("not_%d(", w);
+    getBitAlignment(e->expr);
+    // visit(e->expr);
+    builder->append(")");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Shl *e) {
+    assert(e->type->is<IR::Type_Bits>());
+    auto lw = e->type->to<IR::Type_Bits>()->width_bits();
+    auto ec = e->right->to<IR::Constant>();
+    if (ec) {
+        if (lw <= 64) {  // See inheritance comment above
+            return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+        } else if (ec->value < lw) {
+            builder->appendFormat("shl_%u_c_%u(", lw, static_cast<unsigned int>(ec->value));
+            getBitAlignment(e->left);
+            //       visit(e->left);
+            builder->append(")");
+        } else {
+            builder->appendFormat("(struct internal_bit_%u){0}", lw);
+        }
+    } else if (e->right->type->is<IR::Type_Bits>()) {
+        auto rw = e->right->type->to<IR::Type_Bits>()->width_bits();
+        if ((lw <= 64) && (rw <= 64)) {  // See inheritance comment above
+            return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+        } else {
+            builder->appendFormat("shl_%d_x_%d(", lw, rw);
+            getBitAlignment(e->left);
+            //       visit(e->left);
+            builder->append(",");
+            getBitAlignment(e->right);
+            //       visit(e->right);
+            builder->append(")");
+        }
+    } else {  // See inheritance comment above
+        return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+    }
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Shr *e) {
+    assert(e->type->is<IR::Type_Bits>());
+    auto lw = e->type->to<IR::Type_Bits>()->width_bits();
+    auto signc = e->type->to<IR::Type_Bits>()->isSigned ? 'a' : 'l';
+    auto ec = e->right->to<IR::Constant>();
+    if (ec) {
+        if (lw <= 64) {  // See inheritance comment above
+            return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+        } else if (ec->value < lw) {
+            builder->appendFormat("shr%c_%u_c_%u(", signc, lw,
+                                  static_cast<unsigned int>(ec->value));
+            getBitAlignment(e->left);
+            //       visit(e->left);
+            builder->append(")");
+        } else {
+            builder->appendFormat("(struct internal_bit_%u){0}", lw);
+        }
+    } else if (e->right->type->is<IR::Type_Bits>()) {
+        auto rw = e->right->type->to<IR::Type_Bits>()->width_bits();
+        if ((lw <= 64) && (rw <= 64)) {  // See inheritance comment above
+            return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+        } else {
+            builder->appendFormat("shr%c_%d_x_%d(", signc, lw, rw);
+            getBitAlignment(e->left);
+            //       visit(e->left);
+            builder->append(",");
+            getBitAlignment(e->right);
+            //       visit(e->right);
+            builder->append(")");
+        }
+    } else {  // See inheritance comment above
+        return (static_cast<EBPF::CodeGenInspector *>(this)->preorder(e));
+    }
+    return (false);
+}
+
+static void gen_cmp(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
+                    const IR::Operation_Binary *e, const char *small, const char *large) {
+    auto lt = e->left->type->to<IR::Type_Bits>();
+    assert(lt);
+    assert(e->right->type->to<IR::Type_Bits>());
+    auto w = lt->width_bits();
+    assert(w == e->right->type->to<IR::Type_Bits>()->width_bits());
+    assert(lt->isSigned == e->right->type->to<IR::Type_Bits>()->isSigned);
+    if (w <= 64) {
+        switch (small[0]) {
+            case '=':
+            case '!':
+                cbt->visit(e->left);
+                bld->appendFormat("%s", small);
+                cbt->visit(e->right);
+                break;
+            case '<':
+            case '>':
+                if (lt->isSigned) {
+                    int cw;
+                    bool exact;
+                    if (w < 8) {
+                        cw = 8;
+                        exact = false;
+                    } else if (w == 8) {
+                        cw = 8;
+                        exact = true;
+                    } else if (w < 16) {
+                        cw = 16;
+                        exact = false;
+                    } else if (w == 16) {
+                        cw = 16;
+                        exact = true;
+                    } else if (w < 32) {
+                        cw = 32;
+                        exact = false;
+                    } else if (w == 32) {
+                        cw = 32;
+                        exact = true;
+                    } else if (w < 64) {
+                        cw = 64;
+                        exact = false;
+                    } else if (w == 64) {
+                        cw = 64;
+                        exact = true;
+                    } else
+                        assert(!"Impossible width in gen_cmp");
+                    bld->appendFormat("((i%d)(", cw);
+                    cbt->visit(e->left);
+                    if (exact)
+                        bld->append("))");
+                    else
+                        bld->appendFormat(")<<%u)", cw - w);
+                    bld->appendFormat("%s", small);
+                    bld->appendFormat("((i%d)(", cw);
+                    cbt->visit(e->right);
+                    if (exact)
+                        bld->append("))");
+                    else
+                        bld->appendFormat(")<<%u)", cw - w);
+                } else {
+                    cbt->visit(e->left);
+                    bld->appendFormat("%s", small);
+                    cbt->visit(e->right);
+                }
+                break;
+            default:
+                assert(!"Invalid call to gen_cmp");
+                break;
+        }
+    } else {
+        bld->appendFormat("cmp_%s_%u_%s(", lt->isSigned ? "s" : "u", w, large);
+        cbt->visit(e->left);
+        bld->append(',');
+        cbt->visit(e->right);
+        bld->append(')');
+    }
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Equ *e) {
+    gen_cmp(this, builder, e, "==", "eq");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Neq *e) {
+    gen_cmp(this, builder, e, "!=", "ne");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Lss *e) {
+    gen_cmp(this, builder, e, "<", "lt");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Leq *e) {
+    gen_cmp(this, builder, e, "<=", "le");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Grt *e) {
+    gen_cmp(this, builder, e, ">", "gt");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::Geq *e) {
+    gen_cmp(this, builder, e, ">=", "ge");
+    return (false);
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::BAnd *e) {
+    return (arith_common(e, "&", "bitand"));
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::BOr *e) {
+    return (arith_common(e, "|", "bitor"));
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::BXor *e) {
+    return (arith_common(e, "^", "bitxor"));
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::AddSat *e) {
+    return (sarith_common(e, "addsat"));
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::SubSat *e) {
+    return (sarith_common(e, "subsat"));
 }
 
 }  // namespace P4::TC

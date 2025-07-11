@@ -58,15 +58,15 @@ header ethernet_t {
  * This is a custom protocol header for the calculator. We'll use
  * ethertype 0x1234 for is (see parser)
  */
-const bit<16> P4CALC_ETYPE = 0x1234;
-const bit<8>  P4CALC_P     = 0x50;   // 'P'
-const bit<8>  P4CALC_4     = 0x34;   // '4'
-const bit<8>  P4CALC_VER   = 0x01;   // v0.1
-const bit<8>  P4CALC_PLUS  = 0x2b;   // '+'
-const bit<8>  P4CALC_MINUS = 0x2d;   // '-'
-const bit<8>  P4CALC_AND   = 0x26;   // '&'
-const bit<8>  P4CALC_OR    = 0x7c;   // '|'
-const bit<8>  P4CALC_CARET = 0x5e;   // '^'
+#define P4CALC_ETYPE 0x1234
+#define P4CALC_P 0x50   // 'P'
+#define P4CALC_4 0x34   // '4'
+#define P4CALC_VER 0x01   // v0.1
+#define P4CALC_PLUS 0x2b   // '+'
+#define P4CALC_MINUS 0x2d   // '-'
+#define P4CALC_AND 0x26   // '&'
+#define P4CALC_OR 0x7c   // '|'
+#define P4CALC_CARET 0x5e   // '^'
 
 header p4calc_t {
     bit<8>  p;

@@ -38,15 +38,15 @@ header tcp_t {
 }
 
 // Masks of the bit positions of some bit flags within the TCP flags field.
-const bit<8> TCP_URG_MASK = 0x20;
-const bit<8> TCP_ACK_MASK = 0x10;
-const bit<8> TCP_PSH_MASK = 0x08;
-const bit<8> TCP_RST_MASK = 0x04;
-const bit<8> TCP_SYN_MASK = 0x02;
-const bit<8> TCP_FIN_MASK = 0x01;
+#define TCP_URG_MASK 0x20
+#define TCP_ACK_MASK 0x10
+#define TCP_PSH_MASK 0x08
+#define TCP_RST_MASK 0x04
+#define TCP_SYN_MASK 0x02
+#define TCP_FIN_MASK 0x01
 
-const PortId_t hport = (PortId_t) 0;
-const PortId_t nport = (PortId_t) 1;
+#define hport ((PortId_t) 0)
+#define nport ((PortId_t) 1)
 
 //////////////////////////////////////////////////////////////////////
 // Struct types for holding user-defined collections of headers and
@@ -106,7 +106,6 @@ control MainControlImpl(
     bool do_add_on_miss;
     bool update_aging_info;
     bool update_expire_time;
-    ExpireTimeProfileId_t new_expire_time_profile_id;
 
     action next_hop(PortId_t vport) {
         send_to_port(vport);
