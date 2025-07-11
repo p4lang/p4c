@@ -75,8 +75,8 @@ apply {
 	mov m.local_metadata_meta2 m.Ingress_tmp
 	mov m.tmpxor 0xFFFFFFFF
 	xor m.tmpxor m.local_metadata_meta6
-	mov m.local_metadata_meta4 0x808
-	add m.local_metadata_meta4 m.tmpxor
+	mov m.local_metadata_meta4 m.tmpxor
+	add m.local_metadata_meta4 0x808
 	mov m.Ingress_tmp_0 0x0
 	sub m.Ingress_tmp_0 m.local_metadata_meta3
 	mov m.local_metadata_meta3 m.Ingress_tmp_0
@@ -85,15 +85,15 @@ apply {
 	add m.local_metadata_meta3 0x1
 	mov m.local_metadata_meta5 m.local_metadata_meta7
 	add m.local_metadata_meta5 0xF0
-	mov m.local_metadata_meta7 0xF0
-	add m.local_metadata_meta7 m.local_metadata_meta2
+	mov m.local_metadata_meta7 m.local_metadata_meta2
+	add m.local_metadata_meta7 0xF0
 	mov h.dstAddr m.local_metadata_meta
 	mov h.srcAddr m.local_metadata_meta1
 	mov h.etherType m.local_metadata_meta2
 	mov m.Ingress_tmp_3 m.local_metadata_meta2
 	shl m.Ingress_tmp_3 0x10
-	mov m.Ingress_tmp_4 0xF0
-	add m.Ingress_tmp_4 m.local_metadata_meta2
+	mov m.Ingress_tmp_4 m.local_metadata_meta2
+	add m.Ingress_tmp_4 0xF0
 	mov m.Ingress_tmp_6 m.Ingress_tmp_4
 	and m.Ingress_tmp_6 0xFFFF
 	mov m.local_metadata_meta m.Ingress_tmp_3

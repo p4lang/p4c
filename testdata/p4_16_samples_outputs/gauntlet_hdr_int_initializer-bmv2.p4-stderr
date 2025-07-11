@@ -1,0 +1,3 @@
+gauntlet_hdr_int_initializer-bmv2.p4(29): [--Wwarn=unused] warning: 'tmp_hdr' is unused
+        ethernet_t tmp_hdr = { 1, 1, 1 };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
