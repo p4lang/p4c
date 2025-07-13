@@ -18,6 +18,7 @@
 #include "eliminateActionRun.h"
 
 #include "frontends/p4/methodInstance.h"
+#include "ir/irutils.h"
 
 namespace P4 {
 
@@ -65,8 +66,7 @@ const IR::Expression *ElimActionRun::RewriteActionRun::postorder(IR::Member *mem
     auto *parent = findContext<IR::Statement>();
     BUG_CHECK(parent && parent->is<IR::SwitchStatement>(), "action_run not in switch");
     auto &pps = self.prepend_statement[parent];
-    if (!pps) pps = new IR::Vector<IR::StatOrDecl>;
-    pps->push_back(new IR::MethodCallStatement(mce));
+    pps.push_back(new IR::MethodCallStatement(mce));
     self.add_to_control.push_back(info.action_run);
     return new IR::PathExpression(new IR::Type_Name(info.action_tags->name), info.action_run->name);
 }
@@ -101,11 +101,12 @@ const IR::SwitchCase *ElimActionRun::RewriteActionRun::postorder(IR::SwitchCase 
 }
 
 const IR::Node *ElimActionRun::RewriteActionRun::postorder(IR::Statement *stmt) {
-    auto *pps = get(self.prepend_statement, stmt);
-    if (!pps) return stmt;
-    pps->push_back(stmt);
-    self.prepend_statement.erase(stmt);
-    return pps;
+    auto pps = self.prepend_statement.find(stmt);
+    if (pps == self.prepend_statement.end()) return stmt;
+    pps->second.push_back(stmt);
+    auto *rv = inlineBlock(*this, std::move(pps->second));
+    self.prepend_statement.erase(pps);
+    return rv;
 }
 
 const IR::P4Control *ElimActionRun::RewriteActionRun::postorder(IR::P4Control *ctrl) {
