@@ -1,7 +1,10 @@
 annotations.p4(17): [--Wwarn=unused] warning: 'b' is unused
 @annotest const bit b = 1;
                     ^
-annotations.p4(30): [--Wwarn=unused] warning: Control c is not used; removing
+annotations.p4(30): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+annotations.p4(30): [--Winfo=removed] info: removing control 'c'
 control c() {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

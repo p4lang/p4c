@@ -1,3 +1,6 @@
+enumcrash1.p4(5): [--Wwarn=unused] warning: 'test' is unused
+action test() {
+       ^^^^
 enumcrash1.p4(6): [--Werror=type-error] error: Foo.D: Invalid enum tag
     testfn(arg = Foo.D);
                  ^^^^^

@@ -4,6 +4,9 @@ issue414-bmv2.p4(52): [--Wwarn=unused] warning: 'c1d' is unused
 issue414-bmv2.p4(53): [--Wwarn=unused] warning: 'b1a' is unused
     bit<8> b1a;
     ^^^^^^^^^^
-issue414-bmv2.p4(64): [--Wwarn=unused] warning: cbar_inst2: unused instance
+issue414-bmv2.p4(64): [--Wwarn=unused] warning: 'cbar_inst2' is unused
     cBar() cbar_inst2;
            ^^^^^^^^^^
+issue414-bmv2.p4(42): [--Winfo=removed] info: removing control 'cBar'
+control cBar(inout mystruct1 meta) {
+        ^^^^

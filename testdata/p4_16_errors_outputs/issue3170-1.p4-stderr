@@ -1,3 +1,6 @@
+issue3170-1.p4(11): [--Wwarn=unused] warning: 'tty' is unused
+typedef t<y> tty;
+             ^^^
 issue3170-1.p4(8): [--Werror=type-error] error: Field 'y' of 'header t' cannot have type 'struct y'
     tt y;
        ^

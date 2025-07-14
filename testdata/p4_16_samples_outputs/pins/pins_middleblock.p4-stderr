@@ -1,21 +1,3 @@
-pins_middleblock.p4(615): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
-            @proto_id(1) set_nexthop;
-                         ^^^^^^^^^^^
-pins_middleblock.p4(603)
-...ted("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table...
-                                             ^^^^^^^^^^^
-pins_middleblock.p4(846): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
-            1w1: ternary @id(1) @name("dummy_match");
-            ^^^
-pins_middleblock.p4(10): [--Wwarn=unused] warning: 'INTERNAL_VLAN_ID' is unused
-const vlan_id_t INTERNAL_VLAN_ID = 0xfff;
-                ^^^^^^^^^^^^^^^^
-pins_middleblock.p4(11): [--Wwarn=unused] warning: 'NO_VLAN_ID' is unused
-const vlan_id_t NO_VLAN_ID = 0x0;
-                ^^^^^^^^^^
-pins_middleblock.p4(143): [--Wwarn=unused] warning: 'kDefaultVrf' is unused
-const vrf_id_t kDefaultVrf = 0;
-               ^^^^^^^^^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'port' is unused
 ...ction mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t sr...
                                                 ^^^^
@@ -40,43 +22,10 @@ pins_middleblock.p4(717): [--Wwarn=unused] warning: 'tos' is unused
 pins_middleblock.p4(719): [--Wwarn=unused] warning: 'monitor_failover_port' is unused
 ..._id_t monitor_port, @id(2) port_id_t monitor_failover_port, @id(3) @format(MAC_ADDRESS) ethern...
                                         ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(899): [--Wwarn=unused] warning: 'IPV6_MULTICAST_MASK' is unused
-const ipv6_addr_t IPV6_MULTICAST_MASK = 0xff000000000000000000000000000000;
-                  ^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(900): [--Wwarn=unused] warning: 'IPV6_MULTICAST_VALUE' is unused
-const ipv6_addr_t IPV6_MULTICAST_VALUE = 0xff000000000000000000000000000000;
-                  ^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(901): [--Wwarn=unused] warning: 'IPV6_LOOPBACK_MASK' is unused
-const ipv6_addr_t IPV6_LOOPBACK_MASK = 0xffffffffffffffffffffffffffffffff;
-                  ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(902): [--Wwarn=unused] warning: 'IPV6_LOOPBACK_VALUE' is unused
-const ipv6_addr_t IPV6_LOOPBACK_VALUE = 0x1;
-                  ^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(903): [--Wwarn=unused] warning: 'IPV4_MULTICAST_MASK' is unused
-const ipv4_addr_t IPV4_MULTICAST_MASK = 0xf0000000;
-                  ^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(904): [--Wwarn=unused] warning: 'IPV4_MULTICAST_VALUE' is unused
-const ipv4_addr_t IPV4_MULTICAST_VALUE = 0xe0000000;
-                  ^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(905): [--Wwarn=unused] warning: 'IPV4_BROADCAST_VALUE' is unused
-const ipv4_addr_t IPV4_BROADCAST_VALUE = 0xffffffff;
-                  ^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(906): [--Wwarn=unused] warning: 'IPV4_LOOPBACK_MASK' is unused
-const ipv4_addr_t IPV4_LOOPBACK_MASK = 0xff000000;
-                  ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(907): [--Wwarn=unused] warning: 'IPV4_LOOPBACK_VALUE' is unused
-const ipv4_addr_t IPV4_LOOPBACK_VALUE = 0x7f000000;
-                  ^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(908): [--Wwarn=unused] warning: 'MAC_MULTICAST_MASK' is unused
-const ethernet_addr_t MAC_MULTICAST_MASK = 0x10000000000;
-                      ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(909): [--Wwarn=unused] warning: 'MAC_MULTICAST_VALUE' is unused
-const ethernet_addr_t MAC_MULTICAST_VALUE = 0x10000000000;
-                      ^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1026): [--Wwarn=unused] warning: 'acl_egress_forward' is unused
     @id(0x0100010D) @sai_action(SAI_PACKET_ACTION_FORWARD) action acl_egress_forward() {
                                                                   ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1080): [--Wwarn=unused] warning: Table acl_egress_dhcp_to_host_table is not used; removing
+pins_middleblock.p4(1080): [--Wwarn=unused] warning: table 'acl_egress_dhcp_to_host_table' is unused
   ") table acl_egress_dhcp_to_host_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1126): [--Wwarn=unused] warning: 'qos_queue' is unused
@@ -100,19 +49,46 @@ pins_middleblock.p4(1152): [--Wwarn=unused] warning: 'cpu_queue' is unused
 pins_middleblock.p4(1155): [--Wwarn=unused] warning: 'cpu_queue' is unused
 ...ACTION_FORWARD) action set_cpu_queue(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
                                                                                         ^^^^^^^^^
-pins_middleblock.p4(1249): [--Wwarn=unused] warning: Table acl_ingress_qos_table is not used; removing
+pins_middleblock.p4(1249): [--Wwarn=unused] warning: table 'acl_ingress_qos_table' is unused
   ") table acl_ingress_qos_table {
            ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1284): [--Wwarn=unused] warning: Table acl_ingress_counting_table is not used; removing
+pins_middleblock.p4(1284): [--Wwarn=unused] warning: table 'acl_ingress_counting_table' is unused
   ") table acl_ingress_counting_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1483): [--Wwarn=unused] warning: Table acl_pre_ingress_vlan_table is not used; removing
+pins_middleblock.p4(1483): [--Wwarn=unused] warning: table 'acl_pre_ingress_vlan_table' is unused
   ") table acl_pre_ingress_vlan_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1512): [--Wwarn=unused] warning: Table acl_pre_ingress_metadata_table is not used; removing
+pins_middleblock.p4(1512): [--Wwarn=unused] warning: table 'acl_pre_ingress_metadata_table' is unused
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1574): [--Wwarn=unused] warning: Control lag_hashing_config is not used; removing
+pins_middleblock.p4(1574): [--Wwarn=unused] warning: control 'lag_hashing_config' is unused
+control lag_hashing_config(in headers_t headers) {
+        ^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(615): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
+            @proto_id(1) set_nexthop;
+                         ^^^^^^^^^^^
+pins_middleblock.p4(603)
+...ted("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table...
+                                             ^^^^^^^^^^^
+pins_middleblock.p4(846): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            1w1: ternary @id(1) @name("dummy_match");
+            ^^^
+pins_middleblock.p4(1080): [--Winfo=removed] info: removing table 'acl_egress_dhcp_to_host_table'
+  ") table acl_egress_dhcp_to_host_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(1249): [--Winfo=removed] info: removing table 'acl_ingress_qos_table'
+  ") table acl_ingress_qos_table {
+           ^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(1284): [--Winfo=removed] info: removing table 'acl_ingress_counting_table'
+  ") table acl_ingress_counting_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(1483): [--Winfo=removed] info: removing table 'acl_pre_ingress_vlan_table'
+  ") table acl_pre_ingress_vlan_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(1512): [--Winfo=removed] info: removing table 'acl_pre_ingress_metadata_table'
+  ") table acl_pre_ingress_metadata_table {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(1574): [--Winfo=removed] info: removing control 'lag_hashing_config'
 control lag_hashing_config(in headers_t headers) {
         ^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(632): [--Wwarn=uninitialized_use] warning: tunnel_id_value may not be completely initialized

@@ -1,3 +1,6 @@
+fold_match.p4(17): [--Wwarn=unused] warning: parser 'p' is unused
+parser p()
+       ^
 fold_match.p4(25): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
             default : reject;
             ^^^^^^^^^^^^^^^^
@@ -46,7 +49,7 @@ fold_match.p4(105): [--Wwarn=parser-transition] warning: SelectCase: unreachable
 fold_match.p4(111): [--Wwarn=parser-transition] warning: SelectExpression: no case matches
         transition select(32w0)
                    ^
-fold_match.p4(17): [--Wwarn=unused] warning: Parser p is not used; removing
+fold_match.p4(17): [--Winfo=removed] info: removing parser 'p'
 parser p()
        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

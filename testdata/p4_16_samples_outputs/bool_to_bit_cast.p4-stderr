@@ -1,3 +1,6 @@
-bool_to_bit_cast.p4(45): [--Wwarn=unused] warning: Control C is not used; removing
+bool_to_bit_cast.p4(45): [--Wwarn=unused] warning: control 'C' is unused
+control C() {
+        ^
+bool_to_bit_cast.p4(45): [--Winfo=removed] info: removing control 'C'
 control C() {
         ^

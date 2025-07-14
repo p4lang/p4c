@@ -1,3 +1,18 @@
+minWidth.p4(7): [--Wwarn=unused] warning: 'xw' is unused
+const int xw = x.minWidthInBits();
+          ^^
+minWidth.p4(8): [--Wwarn=unused] warning: 'ew' is unused
+const int ew = error.minWidthInBits();
+          ^^
+minWidth.p4(9): [--Wwarn=unused] warning: 'sw' is unused
+const int sw = S.minWidthInBits();
+          ^^
+minWidth.p4(16): [--Wwarn=unused] warning: 'eew' is unused
+const int eew = e.minWidthInBits();
+          ^^^
+minWidth.p4(22): [--Wwarn=unused] warning: 'ce' is unused
+const int ce = ctr.minWidthInBits();
+          ^^
 minWidth.p4(7): [--Werror=type-error] error: Cannot extract field minWidthInBits from 2 which has type int
 const int xw = x.minWidthInBits();
                  ^^^^^^^^^^^^^^

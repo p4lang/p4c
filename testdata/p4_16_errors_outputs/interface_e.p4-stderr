@@ -1,3 +1,12 @@
+interface_e.p4(16): [--Wwarn=unused] warning: 'T' is unused
+extern X<T> { }
+         ^
+interface_e.p4(18): [--Wwarn=unused] warning: parser 'p' is unused
+parser p()
+       ^
+interface_e.p4(21): [--Wwarn=unused] warning: 'x' is unused
+    X() x;
+        ^
 interface_e.p4(21): [--Werror=type-error] error: x: type X has no matching constructor
     X() x;
         ^

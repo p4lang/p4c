@@ -1,3 +1,0 @@
-issue1879-bmv2.p4(6): [--Wwarn=unused] warning: 'TYPE_ADDR_IPV4' is unused
-const bit<6> TYPE_ADDR_IPV4 = 0x1;
-             ^^^^^^^^^^^^^^

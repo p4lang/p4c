@@ -1,4 +1,10 @@
-pragma-action.p4(17): [--Wwarn=unused] warning: Control test is not used; removing
+pragma-action.p4(17): [--Wwarn=unused] warning: control 'test' is unused
+control test()
+        ^^^^
+pragma-action.p4(22): [--Wwarn=unused] warning: table 'unit' is unused
+    table unit {
+          ^^^^
+pragma-action.p4(17): [--Winfo=removed] info: removing control 'test'
 control test()
         ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

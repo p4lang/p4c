@@ -1,3 +1,0 @@
-issue2287-bmv2.p4(48): [--Wwarn=unused] warning: 'bool_with_side_effect' is unused
-bool bool_with_side_effect(inout bit<8> val) {
-     ^^^^^^^^^^^^^^^^^^^^^

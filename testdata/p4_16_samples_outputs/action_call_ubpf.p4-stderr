@@ -4,3 +4,9 @@ action_call_ubpf.p4(37): [--Wwarn=unused] warning: 'tmp' is unused
 action_call_ubpf.p4(39): [--Wwarn=unused] warning: 'tmp' is unused
             bit<1> tmp = 0; // does not matter
             ^^^^^^^^^^^^^^
+action_call_ubpf.p4(46): [--Wwarn=unused] warning: 'tmp' is unused
+        bit<48> tmp = ubpf_time_get_ns(); // this should not be invoked.
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+action_call_ubpf.p4(52): [--Wwarn=unused] warning: 'tmp' is unused
+        bit<48> tmp = ubpf_time_get_ns(); // this should not be invoked.
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,6 +1,3 @@
-bitExtract.p4(17): [--Wwarn=unused] warning: 'b' is unused
-const bit<32> b = 32w0xAAAAA;
-              ^
 bitExtract.p4(18): [--Wwarn=unused] warning: 'c' is unused
 const bit<2> c = b[3:2];
              ^

@@ -1,9 +1,6 @@
 issue3283.p4(1): [--Wwarn=unused] warning: 'a' is unused
 const int a = {1w1, 1w1} [0];
           ^
-issue3283.p4(2): [--Wwarn=unused] warning: 'c' is unused
-const tuple<bit, bit> c = {1w1, 1w1};
-                      ^
 issue3283.p4(3): [--Wwarn=unused] warning: 'a1' is unused
 const int a1 = c[0];
           ^^

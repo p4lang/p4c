@@ -1,3 +1,0 @@
-v1model-p4runtime-most-types1.p4(339): [--Wwarn=unused] warning: 'ETHERTYPE_CUSTOM' is unused
-    const bit<16> ETHERTYPE_CUSTOM = 0xdead;
-                  ^^^^^^^^^^^^^^^^

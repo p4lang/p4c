@@ -1,3 +1,12 @@
+issue3787.p4(1): [--Wwarn=unused] warning: 'T' is unused
+extern X<T> {}
+         ^
+issue3787.p4(3): [--Wwarn=unused] warning: 'control c1' is unused
+control c1(in Y x);
+        ^^
+issue3787.p4(4): [--Wwarn=unused] warning: 'control c2' is unused
+control c2(in X<bit> x);
+        ^^
 issue3787.p4(3): [--Werror=type-error] error: x: a parameter with type Y cannot have a direction
 control c1(in Y x);
                 ^

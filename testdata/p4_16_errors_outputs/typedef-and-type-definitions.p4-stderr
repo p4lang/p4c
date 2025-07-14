@@ -1,3 +1,90 @@
+typedef-and-type-definitions.p4(75): [--Wwarn=unused] warning: 'intD_t' is unused
+typedef int intD_t;
+            ^^^^^^
+typedef-and-type-definitions.p4(112): [--Wwarn=unused] warning: 'intT_t' is unused
+type int intT_t;
+         ^^^^^^
+typedef-and-type-definitions.p4(114): [--Wwarn=unused] warning: 'iT_t' is unused
+type int<8> iT_t;
+            ^^^^
+typedef-and-type-definitions.p4(115): [--Wwarn=unused] warning: 'vT_t' is unused
+type varbit<8> vT_t; // error
+               ^^^^
+typedef-and-type-definitions.p4(116): [--Wwarn=unused] warning: 'errorT_t' is unused
+type error errorT_t; // error
+           ^^^^^^^^
+typedef-and-type-definitions.p4(117): [--Wwarn=unused] warning: 'boolT_t' is unused
+type bool boolT_t;
+          ^^^^^^^
+typedef-and-type-definitions.p4(118): [--Wwarn=unused] warning: 'enum1T_t' is unused
+type enum1_t enum1T_t; // error
+             ^^^^^^^^
+typedef-and-type-definitions.p4(119): [--Wwarn=unused] warning: 'serializable_enum1T_t' is unused
+type serializable_enum1_t serializable_enum1T_t; // error
+                          ^^^^^^^^^^^^^^^^^^^^^
+typedef-and-type-definitions.p4(120): [--Wwarn=unused] warning: 'H1T_t' is unused
+type h1_t H1T_t; // error
+          ^^^^^
+typedef-and-type-definitions.p4(123): [--Wwarn=unused] warning: 'hu1T_t' is unused
+type hu1_t hu1T_t; // error
+           ^^^^^^
+typedef-and-type-definitions.p4(124): [--Wwarn=unused] warning: 's1T_t' is unused
+type s1_t s1T_t; // error
+          ^^^^^
+typedef-and-type-definitions.p4(131): [--Wwarn=unused] warning: 'bDD_t' is unused
+typedef bD_t bDD_t;
+             ^^^^^
+typedef-and-type-definitions.p4(132): [--Wwarn=unused] warning: 'bTD_t' is unused
+typedef bT_t bTD_t;
+             ^^^^^
+typedef-and-type-definitions.p4(137): [--Wwarn=unused] warning: 'bDT_t' is unused
+type bD_t bDT_t;
+          ^^^^^
+typedef-and-type-definitions.p4(138): [--Wwarn=unused] warning: 'bTT_t' is unused
+type bT_t bTT_t;
+          ^^^^^
+typedef-and-type-definitions.p4(145): [--Wwarn=unused] warning: 'iDT_t' is unused
+type iD_t iDT_t;
+          ^^^^^
+typedef-and-type-definitions.p4(146): [--Wwarn=unused] warning: 'vDT_t' is unused
+type vD_t vDT_t; // error
+          ^^^^^
+typedef-and-type-definitions.p4(147): [--Wwarn=unused] warning: 'errorDT_t' is unused
+type errorD_t errorDT_t; // error
+              ^^^^^^^^^
+typedef-and-type-definitions.p4(148): [--Wwarn=unused] warning: 'boolDT_t' is unused
+type boolD_t boolDT_t;
+             ^^^^^^^^
+typedef-and-type-definitions.p4(149): [--Wwarn=unused] warning: 'enum1DT_t' is unused
+type enum1D_t enum1DT_t; // error
+              ^^^^^^^^^
+typedef-and-type-definitions.p4(150): [--Wwarn=unused] warning: 'serializable_enum1DT_t' is unused
+type serializable_enum1D_t serializable_enum1DT_t; // error
+                           ^^^^^^^^^^^^^^^^^^^^^^
+typedef-and-type-definitions.p4(151): [--Wwarn=unused] warning: 'H1DT_t' is unused
+type H1D_t H1DT_t; // error
+           ^^^^^^
+typedef-and-type-definitions.p4(152): [--Wwarn=unused] warning: 'H2aDT_t' is unused
+type H2aD_t H2aDT_t; // error
+            ^^^^^^^
+typedef-and-type-definitions.p4(153): [--Wwarn=unused] warning: 'h1StackDT_t' is unused
+type h1StackD_t h1StackDT_t; // error
+                ^^^^^^^^^^^
+typedef-and-type-definitions.p4(154): [--Wwarn=unused] warning: 'hu1DT_t' is unused
+type hu1D_t hu1DT_t; // error
+            ^^^^^^^
+typedef-and-type-definitions.p4(155): [--Wwarn=unused] warning: 's1DT_t' is unused
+type s1D_t s1DT_t; // error
+           ^^^^^^
+typedef-and-type-definitions.p4(156): [--Wwarn=unused] warning: 'PointADT_t' is unused
+type PointAD_t PointADT_t; // error
+               ^^^^^^^^^^
+typedef-and-type-definitions.p4(157): [--Wwarn=unused] warning: 'Tuple1DT_t' is unused
+type Tuple1D_t Tuple1DT_t; // error
+               ^^^^^^^^^^
+typedef-and-type-definitions.p4(158): [--Wwarn=unused] warning: 'Tuple2DT_t' is unused
+type Tuple2D_t Tuple2DT_t; // error
+               ^^^^^^^^^^
 typedef-and-type-definitions.p4(112): [--Werror=type-error] error: intT_t: `type' can only be applied to base types
 type int intT_t;
          ^^^^^^

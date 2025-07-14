@@ -1,4 +1,7 @@
-useless-cast.p4(1): [--Wwarn=unused] warning: Control c is not used; removing
+useless-cast.p4(1): [--Wwarn=unused] warning: control 'c' is unused
+control c(out bit<32> y) {
+        ^
+useless-cast.p4(1): [--Winfo=removed] info: removing control 'c'
 control c(out bit<32> y) {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

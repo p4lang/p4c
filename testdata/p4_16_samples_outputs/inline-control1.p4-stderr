@@ -1,3 +1,0 @@
-inline-control1.p4(30): [--Wwarn=unused] warning: 'arg' is unused
-    const bit<32> arg = 32w16;
-                  ^^^

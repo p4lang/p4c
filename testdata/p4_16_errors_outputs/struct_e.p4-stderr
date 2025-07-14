@@ -1,3 +1,6 @@
+struct_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
 struct_e.p4(24): [--Werror=type-error] error: Field data is not a member of structure struct s
         v.data = 1w0; // no such field
           ^^^^

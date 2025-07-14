@@ -1,6 +1,3 @@
-pna-dpdk-table-key-consolidation-learner-1.p4(125): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
-            8w0x48 : exact;
-            ^^^^^^
 pna-dpdk-table-key-consolidation-learner-1.p4(48): [--Wwarn=unused] warning: 'ByteCounter_t' is unused
 typedef bit<48> ByteCounter_t;
                 ^^^^^^^^^^^^^
@@ -13,6 +10,9 @@ typedef bit<80> PacketByteCounter_t;
 pna-dpdk-table-key-consolidation-learner-1.p4(52): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
 const bit<32> NUM_PORTS = 4;
               ^^^^^^^^^
+pna-dpdk-table-key-consolidation-learner-1.p4(125): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            8w0x48 : exact;
+            ^^^^^^
 pna-dpdk-table-key-consolidation-learner-1.p4(125): [--Wwarn=mismatch] warning: 8w0x48: Constant key field
             8w0x48 : exact;
             ^^^^^^

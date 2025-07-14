@@ -1,3 +1,6 @@
+incorrect-label.p4(68): [--Wwarn=unused] warning: table 't2' is unused
+    table t2 {
+          ^^
 incorrect-label.p4(75): [--Werror=type-error] error: b is not a legal label (action name)
             b: { stdmeta.egress_port = 2; } // wrong label for table t1
             ^
