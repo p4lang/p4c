@@ -1,0 +1,47 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/calc_128 numtables 1
+
+$TC p4template create action/calc_128/MainControlImpl/operation_add actid 1
+$TC p4template update action/calc_128/MainControlImpl/operation_add state active
+
+$TC p4template create action/calc_128/MainControlImpl/operation_sub actid 2
+$TC p4template update action/calc_128/MainControlImpl/operation_sub state active
+
+$TC p4template create action/calc_128/MainControlImpl/operation_mul actid 3
+$TC p4template update action/calc_128/MainControlImpl/operation_mul state active
+
+$TC p4template create action/calc_128/MainControlImpl/operation_and actid 4
+$TC p4template update action/calc_128/MainControlImpl/operation_and state active
+
+$TC p4template create action/calc_128/MainControlImpl/operation_or actid 5
+$TC p4template update action/calc_128/MainControlImpl/operation_or state active
+
+$TC p4template create action/calc_128/MainControlImpl/operation_xor actid 6
+$TC p4template update action/calc_128/MainControlImpl/operation_xor state active
+
+$TC p4template create action/calc_128/MainControlImpl/operation_drop actid 7
+$TC p4template update action/calc_128/MainControlImpl/operation_drop state active
+
+$TC p4template create table/calc_128/MainControlImpl/calculate \
+	tblid 1 \
+	type exact \
+	keysz 8 permissions 0x3da4 tentries 1024 nummasks 1 \
+	table_acts act name calc_128/MainControlImpl/operation_add \
+	act name calc_128/MainControlImpl/operation_sub \
+	act name calc_128/MainControlImpl/operation_mul \
+	act name calc_128/MainControlImpl/operation_and \
+	act name calc_128/MainControlImpl/operation_or \
+	act name calc_128/MainControlImpl/operation_xor \
+	act name calc_128/MainControlImpl/operation_drop
+$TC p4template update table/calc_128/MainControlImpl/calculate default_miss_action permissions 0x1024 action calc_128/MainControlImpl/operation_drop
+$TC p4template create table/calc_128/MainControlImpl/calculate entry op 0x2b permissions 0x1024 action calc_128/MainControlImpl/operation_add
+$TC p4template create table/calc_128/MainControlImpl/calculate entry op 0x2d permissions 0x1024 action calc_128/MainControlImpl/operation_sub
+$TC p4template create table/calc_128/MainControlImpl/calculate entry op 0x2a permissions 0x1024 action calc_128/MainControlImpl/operation_mul
+$TC p4template create table/calc_128/MainControlImpl/calculate entry op 0x26 permissions 0x1024 action calc_128/MainControlImpl/operation_and
+$TC p4template create table/calc_128/MainControlImpl/calculate entry op 0x7c permissions 0x1024 action calc_128/MainControlImpl/operation_or
+$TC p4template create table/calc_128/MainControlImpl/calculate entry op 0x5e permissions 0x1024 action calc_128/MainControlImpl/operation_xor
+$TC p4template update pipeline/calc_128 state ready
