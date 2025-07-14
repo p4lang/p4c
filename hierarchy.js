@@ -1173,7 +1173,6 @@ var hierarchy =
           [ "P4::BMV2::RemoveComplexExpressions", "class_p4_1_1_b_m_v2_1_1_remove_complex_expressions.html", null ]
         ] ],
         [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],
-        [ "P4::RemoveUnusedDeclarations", "class_p4_1_1_remove_unused_declarations.html", null ],
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
         [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
@@ -1189,6 +1188,7 @@ var hierarchy =
           ] ]
         ] ],
         [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ],
+        [ "P4::UnusedDeclarations", "class_p4_1_1_unused_declarations.html", null ],
         [ "P4::hasSideEffects", "class_p4_1_1has_side_effects.html", null ],
         [ "TableMutex", "class_table_mutex.html", null ]
       ] ]
@@ -2635,6 +2635,7 @@ var hierarchy =
           [ "P4::UniqueNames", "class_p4_1_1_unique_names.html", null ],
           [ "P4::UniqueParameters", "class_p4_1_1_unique_parameters.html", null ],
           [ "P4::UselessCasts", "class_p4_1_1_useless_casts.html", null ],
+          [ "P4::WarnAboutUnusedDeclarations", "class_p4_1_1_warn_about_unused_declarations.html", null ],
           [ "P4::graphs::MidEnd", "class_p4_1_1graphs_1_1_mid_end.html", null ],
           [ "PHV::AllocateTempsAndFinalizeLiverange", "class_p_h_v_1_1_allocate_temps_and_finalize_liverange.html", null ],
           [ "PHV::FieldSliceLiveRangeDB", "class_p_h_v_1_1_field_slice_live_range_d_b.html", null ],
@@ -3619,7 +3620,6 @@ var hierarchy =
         [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],
         [ "P4::RemoveOpAssign", "class_p4_1_1_remove_op_assign.html", null ],
         [ "P4::RemoveUnusedActionParameters", "class_p4_1_1_remove_unused_action_parameters.html", null ],
-        [ "P4::RemoveUnusedDeclarations", "class_p4_1_1_remove_unused_declarations.html", null ],
         [ "P4::RemoveUnusedHUDeclarations", "class_p4_1_1_remove_unused_h_u_declarations.html", null ],
         [ "P4::RemoveUselessCasts", "class_p4_1_1_remove_useless_casts.html", null ],
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
@@ -3647,6 +3647,7 @@ var hierarchy =
         ] ],
         [ "P4::UnnestSelectList", "class_p4_1_1_unnest_select_list.html", null ],
         [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ],
+        [ "P4::UnusedDeclarations", "class_p4_1_1_unused_declarations.html", null ],
         [ "PHV::v2::TableReplayFriendlyPhvConstraints", "class_p_h_v_1_1v2_1_1_table_replay_friendly_phv_constraints.html", null ],
         [ "Parde::Lowered::ReplaceParserIR", "group___lower_parser_i_r.html#struct_parde_1_1_lowered_1_1_replace_parser_i_r", null ],
         [ "Parde::Lowered::SplitGreedyParserStates", "group___lower_parser_i_r.html#struct_parde_1_1_lowered_1_1_split_greedy_parser_states", null ],

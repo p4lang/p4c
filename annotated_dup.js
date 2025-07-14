@@ -1969,7 +1969,6 @@ var annotated_dup =
       [ "RemoveReturns", "class_p4_1_1_remove_returns.html", null ],
       [ "RemoveSelectBooleans", "class_p4_1_1_remove_select_booleans.html", null ],
       [ "RemoveUnusedActionParameters", "class_p4_1_1_remove_unused_action_parameters.html", null ],
-      [ "RemoveUnusedDeclarations", "class_p4_1_1_remove_unused_declarations.html", "class_p4_1_1_remove_unused_declarations" ],
       [ "RemoveUnusedHUDeclarations", "class_p4_1_1_remove_unused_h_u_declarations.html", null ],
       [ "RemoveUnusedPolicy", "class_p4_1_1_remove_unused_policy.html", "class_p4_1_1_remove_unused_policy" ],
       [ "RemoveUselessCasts", "class_p4_1_1_remove_useless_casts.html", null ],
@@ -2100,6 +2099,7 @@ var annotated_dup =
       [ "UnusedCodeHelperVars", "namespace_p4.html#struct_p4_1_1_unused_code_helper_vars", null ],
       [ "UnusedCodeInstances", "struct_p4_1_1_unused_code_instances.html", null ],
       [ "UnusedCodeMetricPass", "class_p4_1_1_unused_code_metric_pass.html", null ],
+      [ "UnusedDeclarations", "class_p4_1_1_unused_declarations.html", "class_p4_1_1_unused_declarations" ],
       [ "UsedDeclSet", "class_p4_1_1_used_decl_set.html", "class_p4_1_1_used_decl_set" ],
       [ "UselessCasts", "class_p4_1_1_useless_casts.html", null ],
       [ "ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
@@ -2112,6 +2112,7 @@ var annotated_dup =
       [ "VisitFunctor", "class_p4_1_1_visit_functor.html", null ],
       [ "Visitor", "class_p4_1_1_visitor.html", "class_p4_1_1_visitor" ],
       [ "Visitor_Context", "struct_p4_1_1_visitor___context.html", null ],
+      [ "WarnAboutUnusedDeclarations", "class_p4_1_1_warn_about_unused_declarations.html", null ],
       [ "WithFieldsLocation", "class_p4_1_1_with_fields_location.html", null ]
     ] ],
     [ "Parde", null, [

@@ -1,5 +1,13 @@
 var NAVTREEINDEX40 =
 {
+"struct_tofino_1_1_action_data_bus.html":[12,0,23,0],
+"struct_tofino_1_1_action_data_bus.html":[13,0,20,0],
+"struct_tofino_1_1_action_data_bus.html#a1769acc1beaacd9d630274df9c52455a":[12,0,23,0,1],
+"struct_tofino_1_1_action_data_bus.html#a1769acc1beaacd9d630274df9c52455a":[13,0,20,0,1],
+"struct_tofino_1_1_action_data_bus.html#a1938a12a39a0824d348dc63c5ec94f11":[12,0,23,0,2],
+"struct_tofino_1_1_action_data_bus.html#a1938a12a39a0824d348dc63c5ec94f11":[13,0,20,0,2],
+"struct_tofino_1_1_action_data_bus.html#acd6fa93206197edc94a21e7162276160":[12,0,23,0,3],
+"struct_tofino_1_1_action_data_bus.html#acd6fa93206197edc94a21e7162276160":[13,0,20,0,3],
 "struct_tofino_1_1_action_data_bus_1_1_use.html":[12,0,23,0,0],
 "struct_tofino_1_1_action_data_bus_1_1_use.html":[13,0,20,0,0],
 "struct_tofino_1_1_action_data_bus_1_1_use_1_1_random_number_generator.html":[12,0,23,0,0,0],
