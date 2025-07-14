@@ -76,16 +76,13 @@ control MainControlImpl(
     in    pna_main_input_metadata_t istd,
     inout pna_main_output_metadata_t ostd)
 {
+    action default_route_drop() {
+        drop_packet();
+    }
     action next_hop() {
          add_entry(action_name = "default_route_drop",  // name of action
                  action_params = {}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
 
-    }
-    action default_route_drop() {
-        drop_packet();
-    }
-    action drop() {
-        drop_packet();
     }
 
     table ipv4_tbl_1 {

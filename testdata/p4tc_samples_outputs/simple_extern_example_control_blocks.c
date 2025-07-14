@@ -122,7 +122,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                      return TC_ACT_SHOT;
 ext_val = *ext_val_ptr;
                                 __builtin_memcpy(&val_0, ext_val.out_params, sizeof(u32 ));
-                                                                val_0 = (val_0 + 10);
+                                                                val_0 = val_0 + 10;
                                 /* reg1_0.write(value->u.ingress_ext_reg.port_id, val_0) */
                                 __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
                                 ext_params.pipe_id = p4tc_filter_fields.pipeid;
@@ -140,8 +140,8 @@ ext_val = *ext_val_ptr;
                             break;
                         case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
                             {
-                                storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.smac, 48)));
-                                                                storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.dmac, 48)));
+storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.smac), 48));
+                                storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.dmac), 48));
                                 /* send_to_port(value->u.ingress_send_nh.port_id) */
                                 compiler_meta__->drop = false;
                                 send_to_port(value->u.ingress_send_nh.port_id);

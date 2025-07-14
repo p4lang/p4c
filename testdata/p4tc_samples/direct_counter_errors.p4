@@ -70,8 +70,6 @@ parser Ingress_Parser(
 
 /***************** M A T C H - A C T I O N  *********************/
 
-typedef bit<64> PacketByteCounter_t;
-
 control ingress(
     inout my_ingress_headers_t  hdr,
     inout my_ingress_metadata_t meta,
