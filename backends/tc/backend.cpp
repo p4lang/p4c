@@ -772,7 +772,7 @@ static void gen_subsat(EBPF::CodeBuilder *bld, const WidthRec *wr) {
                 "0x%llxULL : 0x%llxULL;\n",
                 bits - 1, bits - 1, max, max & ~(max >> 1));
         } else {
-            bld->appendFormat(" ret = (rhs > lhs) ? 0 : lhs - rhs;\n");
+            bld->append(" ret = (rhs > lhs) ? 0 : lhs - rhs;\n");
         }
     } else {
         unsigned int signbit;
