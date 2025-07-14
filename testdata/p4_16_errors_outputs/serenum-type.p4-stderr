@@ -1,6 +1,26 @@
 serenum-type.p4(8): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed; note that type-declared types are not allowed even if they are fixed-size
 enum EthT EthTypes {
      ^^^^
+serenum-type.p4(34): [--Werror=type-error] error: 'SelectExpression'
+        transition select(e.type) {
+                   ^
+  ---- Actual error:
+serenum-type.p4(8): Cannot cast implicitly type 'EthTypes' to type 'EthT'
+  enum EthT EthTypes {
+            ^^^^^^^^
+serenum-type.p4(6)
+  type Base2_t EthT;
+               ^^^^
+  ---- Originating from:
+serenum-type.p4(35): 'match' case label 'EthTypes.IPv4' has type 'EthTypes' which does not match the expected type 'EthT'
+              EthTypes.IPv4: accept;
+              ^^^^^^^^^^^^^
+serenum-type.p4(8)
+  enum EthT EthTypes {
+            ^^^^^^^^
+serenum-type.p4(6)
+  type Base2_t EthT;
+               ^^^^
 serenum-type.p4(49): [--Werror=type-error] error: '(EthTypes)16w0'
             h.eth.type = (EthTypes)(bit<16>)0;
                          ^^^^^^^^^^^^^^^^^^^^
