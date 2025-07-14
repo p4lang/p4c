@@ -88,11 +88,11 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                         case INGRESS_ARP_TABLE_ACT_INGRESS_ARP_REPLY: 
                             {
                                 hdr->arp.oper = 2;
-                                                                storePrimitive64((u8 *)&hdr->arp_ipv4.tha, 48, (getPrimitive64((u8 *)hdr->arp_ipv4.sha, 48)));
-                                                                storePrimitive64((u8 *)&hdr->arp_ipv4.sha, 48, (getPrimitive64((u8 *)value->u.ingress_arp_reply.rmac, 48)));
+                                storePrimitive64((u8 *)&hdr->arp_ipv4.tha[0], 48, getPrimitive64((u8 *)(hdr->arp_ipv4.sha), 48));
+                                storePrimitive64((u8 *)&hdr->arp_ipv4.sha[0], 48, getPrimitive64((u8 *)(value->u.ingress_arp_reply.rmac), 48));
                                                                 hdr->arp_ipv4.spa = hdr->arp_ipv4.tpa;
-                                                                storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)hdr->ethernet.srcAddr, 48)));
-                                                                storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (getPrimitive64((u8 *)value->u.ingress_arp_reply.rmac, 48)));
+                                storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(hdr->ethernet.srcAddr), 48));
+                                storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_arp_reply.rmac), 48));
                                 /* send_to_port(skb->ifindex) */
                                 compiler_meta__->drop = false;
                                 send_to_port(skb->ifindex);

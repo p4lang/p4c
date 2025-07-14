@@ -100,8 +100,8 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
                                 {
-                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.smac, 48)));
-                                                                        storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.dmac, 48)));
+storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.smac), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.dmac), 48));
                                     /* send_to_port(value->u.ingress_send_nh.port_id) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.ingress_send_nh.port_id);
