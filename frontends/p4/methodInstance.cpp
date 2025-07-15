@@ -68,24 +68,27 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
         } else {
             const IR::IDeclaration *decl = nullptr;
             const IR::Type *type = nullptr;
-            if (auto th = mem->expr->to<IR::This>()) {
+            const IR::Expression *receiver = mem->expr;
+            while (auto ai = receiver->to<IR::ArrayIndex>()) receiver = ai->left;
+            if (auto th = receiver->to<IR::This>()) {
                 type = basetype;
                 decl = refMap->getDeclaration(th, true);
-            } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
+            } else if (auto pe = receiver->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
                 type = typeMap ? typeMap->getType(decl->getNode(), true) : pe->type;
-            } else if (auto mc = mem->expr->to<IR::MethodCallExpression>()) {
+            } else if (auto mc = receiver->to<IR::MethodCallExpression>()) {
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
                 type = mi->actualMethodType->returnType;
-            } else if (auto cce = mem->expr->to<IR::ConstructorCallExpression>()) {
+            } else if (auto cce = receiver->to<IR::ConstructorCallExpression>()) {
                 auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
                 decl = cc->to<ExternConstructorCall>()->type;
                 type = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
             } else {
-                BUG("unexpected expression %1% resolving method instance", mem->expr);
+                BUG("unexpected expression %1% resolving method instance", receiver);
             }
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
+            while (auto st = type->to<IR::Type_Array>()) type = st->elementType;
             if (type->is<IR::Type_SpecializedCanonical>())
                 type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
             if (type->is<IR::IApply>() && mem->member == IR::IApply::applyMethodName) {
@@ -172,9 +175,10 @@ ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *c
 Instantiation *Instantiation::resolve(const IR::Declaration_Instance *instance, DeclarationLookup *,
                                       TypeMap *typeMap) {
     auto type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
-    auto simpleType = type;
     const IR::Vector<IR::Type> *typeArguments;
 
+    while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
+    auto simpleType = type;
     if (auto st = type->to<IR::Type_SpecializedCanonical>()) {
         simpleType = st->baseType;
         typeArguments = st->arguments;
