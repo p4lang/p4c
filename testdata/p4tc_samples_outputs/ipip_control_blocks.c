@@ -106,7 +106,7 @@ if (/* hdr->outer.isValid() */
                                 break;
                             case MAIN_FWD_TABLE_ACT_MAIN_SET_NH: 
                                 {
-                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.Main_set_nh.dmac, 48)));
+storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(value->u.Main_set_nh.dmac), 48));
                                     /* send_to_port(value->u.Main_set_nh.port) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.Main_set_nh.port);

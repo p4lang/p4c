@@ -101,7 +101,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                                 *color_meter = 1;
                                 color_0 = bpf_p4tc_extern_meter_pkts_color(skb, &ext_params, sizeof(ext_params), &key, sizeof(key));
 
-                                if (color_0 == 0) {
+                                if (color_0==0) {
 /* drop_packet() */
                                     drop_packet();                                }
 
