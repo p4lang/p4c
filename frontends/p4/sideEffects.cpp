@@ -355,7 +355,7 @@ class GetWrittenExpressions : public Inspector, public ResolutionContext {
     // precisely the side effects without an inter-procedural
     // analysis.
     static const IR::Expression *everything;
-    std::set<const IR::Expression *> written;
+    ordered_set<const IR::Expression *> written;
 
     explicit GetWrittenExpressions(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
@@ -407,7 +407,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     // structs if possible.
     std::set<const IR::Parameter *> useTemporary;
     // Set of expressions modified while evaluating this method call.
-    std::set<const IR::Expression *> modifies;
+    ordered_set<const IR::Expression *> modifies;
     // FIXME: We need to be able to cache results here and not to recompute over
     // and over again
     GetWrittenExpressions gwe(typeMap);
