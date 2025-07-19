@@ -29,6 +29,7 @@ class ConvertToBackendIR;
 class EBPFPnaParser;
 class EBPFRegisterPNA;
 class EBPFHashPNA;
+class EBPFRandomPNA;
 
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 
@@ -300,6 +301,7 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
     bool addExternDeclaration = false;
     std::map<cstring, EBPFRegisterPNA *> pna_registers;
     std::map<cstring, EBPFHashPNA *> pna_hashes;
+    std::map<cstring, EBPFRandomPNA *> pna_randoms;
 
     mutable bool touched_skb_metadata;
 
@@ -314,6 +316,10 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
     }
     EBPFHashPNA *getHash(cstring name) const {
         auto result = ::P4::get(pna_hashes, name);
+        return result;
+    }
+    EBPFRandomPNA *getRandom(cstring name) const {
+        auto result = ::P4::get(pna_randoms, name);
         return result;
     }
     void emitExternDefinition(EBPF::CodeBuilder *builder) {
