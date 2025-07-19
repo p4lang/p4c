@@ -318,6 +318,14 @@ class EBPFTablePNADirectMeterPropertyVisitor : public EBPF::EBPFTablePsaProperty
     }
 };
 
+class EBPFRandomPNA : public EBPF::EBPFRandomPSA {
+ public:
+    explicit EBPFRandomPNA(const IR::Declaration_Instance *di) : EBPF::EBPFRandomPSA(di) {}
+
+    void emitExecute(EBPF::CodeBuilder *builder, ControlBodyTranslatorPNA *translator,
+                     const IR::Type *ltype, const IR::Expression *lexpr,
+                     const IR::Expression *rexpr) const;
+};
 }  // namespace P4::TC
 
 #endif /* BACKENDS_TC_TCEXTERNS_H_ */
