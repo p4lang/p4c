@@ -227,7 +227,8 @@ std::vector<const Expression *> flattenListOrStructExpression(const Expression *
 
 template <typename Stmts>
 const IR::Node *inlineBlockImpl(const Transform &t, Stmts &&stmts) {
-    if (stmts.size() == 1) {
+    if (stmts.size() == 1 && !t.getParent<IR::SwitchCase>()) {
+        // the child of a SwitchCase *must* be a BlockStatement
         // it could also be a declaration, and it that case, we need to wrap it in a block anyway
         if (auto *stmt = (*stmts.begin())->template to<IR::Statement>()) {
             return stmt;
