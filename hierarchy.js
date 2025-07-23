@@ -1449,13 +1449,13 @@ var hierarchy =
             [ "P4::IR::Vector< IR::DpdkDeclaration >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::DpdkDeclaration >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
-            [ "P4::IR::Vector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_vector.html", [
-              [ "P4::IR::IndexedVector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
-            ] ],
             [ "P4::IR::Vector< IR::ParserState >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::ParserState >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
             [ "P4::IR::Vector< IR::SelectCase >", "class_p4_1_1_i_r_1_1_vector.html", null ],
+            [ "P4::IR::Vector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_vector.html", [
+              [ "P4::IR::IndexedVector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
+            ] ],
             [ "P4::IR::Vector< N >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< T >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< T >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
@@ -4154,11 +4154,11 @@ var hierarchy =
       [ "P4::safe_vector< const IR::DpdkAction * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Parameter * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkDeclaration * >", "class_p4_1_1safe__vector.html", null ],
-      [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const T * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::ParserState * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const Constraint * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::SelectCase * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< DebugHook >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< P4::Visitor * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const N * >", "class_p4_1_1safe__vector.html", null ],

@@ -539,7 +539,7 @@ var sectionId = 'dynsection-0';
 <g id="a_Node000038"><a xlink:href="class_p4_1_1_i_r_1_1_vector.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#bfbfbf" points="832,-200.5 730,-200.5 730,-170.5 832,-170.5 832,-200.5"/>
 <text text-anchor="start" x="738" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IR::Vector&lt; IR</text>
-<text text-anchor="middle" x="781" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">::StatOrDecl &gt;</text>
+<text text-anchor="middle" x="781" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">::ParserState &gt;</text>
 </a>
 </g>
 </g>
@@ -558,7 +558,7 @@ var sectionId = 'dynsection-0';
 <g id="a_Node000040"><a xlink:href="class_p4_1_1_i_r_1_1_vector.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#bfbfbf" points="832,-152.5 730,-152.5 730,-122.5 832,-122.5 832,-152.5"/>
 <text text-anchor="start" x="738" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IR::Vector&lt; IR</text>
-<text text-anchor="middle" x="781" y="-129.5" font-family="Helvetica,sans-Serif" font-size="10.00">::ParserState &gt;</text>
+<text text-anchor="middle" x="781" y="-129.5" font-family="Helvetica,sans-Serif" font-size="10.00">::SelectCase &gt;</text>
 </a>
 </g>
 </g>
@@ -571,20 +571,20 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node42 -->
-<g id="Node000042" class="node">
-<title>Node42</title>
-<g id="a_Node000042"><a xlink:href="class_p4_1_1_i_r_1_1_vector.html" target="_top" xlink:title=" ">
+<!-- Node41 -->
+<g id="Node000041" class="node">
+<title>Node41</title>
+<g id="a_Node000041"><a xlink:href="class_p4_1_1_i_r_1_1_vector.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#bfbfbf" points="832,-104.5 730,-104.5 730,-74.5 832,-74.5 832,-104.5"/>
 <text text-anchor="start" x="738" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IR::Vector&lt; IR</text>
-<text text-anchor="middle" x="781" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">::SelectCase &gt;</text>
+<text text-anchor="middle" x="781" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">::StatOrDecl &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node9&#45;&gt;Node42 -->
-<g id="edge41_Node000009_Node000042" class="edge">
-<title>Node9&#45;&gt;Node42</title>
-<g id="a_edge41_Node000009_Node000042"><a xlink:title=" ">
+<!-- Node9&#45;&gt;Node41 -->
+<g id="edge40_Node000009_Node000041" class="edge">
+<title>Node9&#45;&gt;Node41</title>
+<g id="a_edge40_Node000009_Node000041"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M598.65,-477.59C600.18,-415.22 613.32,-221.38 715,-113.5 719.21,-109.04 724.32,-105.4 729.81,-102.43"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="595.14,-477.9 598.47,-487.95 602.14,-478.01 595.14,-477.9"/>
 </a>
@@ -841,7 +841,7 @@ var sectionId = 'dynsection-0';
 <g id="a_Node000039"><a xlink:href="class_p4_1_1_i_r_1_1_indexed_vector.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="1019,-200.5 900,-200.5 900,-170.5 1019,-170.5 1019,-200.5"/>
 <text text-anchor="start" x="908" y="-188.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IR::IndexedVector</text>
-<text text-anchor="middle" x="959.5" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; IR::StatOrDecl &gt;</text>
+<text text-anchor="middle" x="959.5" y="-177.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; IR::ParserState &gt;</text>
 </a>
 </g>
 </g>
@@ -854,22 +854,22 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node41 -->
-<g id="Node000041" class="node">
-<title>Node41</title>
-<g id="a_Node000041"><a xlink:href="class_p4_1_1_i_r_1_1_indexed_vector.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1019,-152.5 900,-152.5 900,-122.5 1019,-122.5 1019,-152.5"/>
-<text text-anchor="start" x="908" y="-140.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IR::IndexedVector</text>
-<text text-anchor="middle" x="959.5" y="-129.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; IR::ParserState &gt;</text>
+<!-- Node42 -->
+<g id="Node000042" class="node">
+<title>Node42</title>
+<g id="a_Node000042"><a xlink:href="class_p4_1_1_i_r_1_1_indexed_vector.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="1019,-104.5 900,-104.5 900,-74.5 1019,-74.5 1019,-104.5"/>
+<text text-anchor="start" x="908" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IR::IndexedVector</text>
+<text text-anchor="middle" x="959.5" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; IR::StatOrDecl &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node40&#45;&gt;Node41 -->
-<g id="edge40_Node000040_Node000041" class="edge">
-<title>Node40&#45;&gt;Node41</title>
-<g id="a_edge40_Node000040_Node000041"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M842.23,-137.5C860.85,-137.5 881.33,-137.5 899.84,-137.5"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="842.11,-134 832.11,-137.5 842.11,-141 842.11,-134"/>
+<!-- Node41&#45;&gt;Node42 -->
+<g id="edge41_Node000041_Node000042" class="edge">
+<title>Node41&#45;&gt;Node42</title>
+<g id="a_edge41_Node000041_Node000042"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M842.23,-89.5C860.85,-89.5 881.33,-89.5 899.84,-89.5"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="842.11,-86 832.11,-89.5 842.11,-93 842.11,-86"/>
 </a>
 </g>
 </g>
