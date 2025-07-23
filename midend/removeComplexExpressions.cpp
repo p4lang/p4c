@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/irutils.h"
 
 namespace P4 {
 
@@ -159,10 +160,10 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *ex
 
 const IR::Node *RemoveComplexExpressions::simpleStatement(IR::Statement *statement) {
     if (assignments.empty()) return statement;
-    auto block = new IR::BlockStatement(assignments);
-    block->push_back(statement);
+    assignments.push_back(statement);
+    auto *rv = inlineBlock(*this, std::move(assignments));
     assignments.clear();
-    return block;
+    return rv;
 }
 
 const IR::Node *RemoveComplexExpressions::postorder(IR::Statement *statement) {
