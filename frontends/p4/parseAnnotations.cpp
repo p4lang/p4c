@@ -30,6 +30,7 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
         PARSE_EMPTY(IR::Annotation::pureAnnotation),
         PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
         PARSE_EMPTY(IR::Annotation::unlikelyAnnotation),
+        PARSE_EMPTY(IR::Annotation::persistentAnnotation),
         PARSE_EMPTY("disable_optimization"_cs),
         PARSE_EMPTY("unroll"_cs),
         PARSE_EMPTY("nounroll"_cs),

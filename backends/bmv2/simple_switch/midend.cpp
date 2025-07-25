@@ -53,6 +53,7 @@ limitations under the License.
 #include "midend/nestedStructs.h"
 #include "midend/orderArguments.h"
 #include "midend/parserUnroll.h"
+#include "midend/persistToReg.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeMiss.h"
@@ -78,6 +79,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
         addPasses(
             {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
              new P4::CheckTableSize(),
+             new P4::PersistToReg("register"_cs),
              new P4::TypeChecking(&refMap, &typeMap),
              new P4::SimplifyExternMethodCalls(&typeMap),
              new P4::TypeChecking(&refMap, &typeMap),
