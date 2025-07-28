@@ -49,7 +49,8 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract<srcRoute_t>(hdr.srcRoutes[32s0]);
-        index_0 = index_0 + 32s1;
+        index_0 = (int<32>)((int)index_0 + 1);
+        hdr.srcRoutes[32s0].port = (bit<15>)((int)hdr.srcRoutes[32s0].port + 1);
         transition select(hdr.srcRoutes[32s0].bos) {
             1w1: parse_ipv4;
             default: parse_srcRouting1;
@@ -57,7 +58,8 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     state parse_srcRouting1 {
         packet.extract<srcRoute_t>(hdr.srcRoutes[32s1]);
-        index_0 = index_0 + 32s1;
+        index_0 = (int<32>)((int)index_0 + 1);
+        hdr.srcRoutes[32s1].port = (bit<15>)((int)hdr.srcRoutes[32s1].port + 1);
         transition select(hdr.srcRoutes[32s1].bos) {
             1w1: parse_ipv4;
             default: parse_srcRouting2;
@@ -65,7 +67,8 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     state parse_srcRouting2 {
         packet.extract<srcRoute_t>(hdr.srcRoutes[32s2]);
-        index_0 = index_0 + 32s1;
+        index_0 = (int<32>)((int)index_0 + 1);
+        hdr.srcRoutes[32s2].port = (bit<15>)((int)hdr.srcRoutes[32s2].port + 1);
         transition select(hdr.srcRoutes[32s2].bos) {
             1w1: parse_ipv4;
             default: parse_srcRouting3;
