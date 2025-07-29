@@ -91,7 +91,7 @@ control verifyChecksum(
     apply { }
 }
 
-extern Checksum<W> {
+extern Checksum {
   /// Constructor
   Checksum(HashAlgorithm hash);
 
@@ -104,7 +104,7 @@ control ingressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    Checksum<bit<32>>(HashAlgorithm.crc32) checksum_crc32;
+    Checksumi(HashAlgorithm.crc32) checksum_crc32;
     apply {
         if (hdr.ethernet.isValid()) {
             hdr.hstructs.setValid();
