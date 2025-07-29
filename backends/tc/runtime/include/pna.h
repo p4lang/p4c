@@ -18,7 +18,6 @@ and limitations under the License.
 #define P4C_PNA_H
 
 #include <stdbool.h>
-#include "crc32.h"
 
 // pna.p4 information
 
@@ -291,13 +290,16 @@ struct p4tc_ext_csum_params {
 /* Basic checksums are not implemented in DPDK */
 extern u16
 bpf_p4tc_ext_csum_crc16_add(struct p4tc_ext_csum_params *params,
-			    const void *data, const u32 data__sz) __ksym;
+			    const u32 params__sz, const void *data,
+			    const u32 data__sz) __ksym;
 
 extern u16
-bpf_p4tc_ext_csum_crc16_get(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_crc16_get(struct p4tc_ext_csum_params *params,
+			    const u32 params__sz) __ksym;
 
 extern void
-bpf_p4tc_ext_csum_crc16_clear(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_crc16_clear(struct p4tc_ext_csum_params *params,
+			      const u32 params__sz) __ksym;
 
 /* Equivalent to PNA CRC32 checksum */
 /* Basic checksums are not implemented in DPDK */
