@@ -33,6 +33,12 @@ struct s2_t {
     bit<8> f2;
 }
 
+struct tuple_0 {
+    bit<48> f0;
+    bit<48> f1;
+    bit<16> f2;
+}
+
 header hstructs_t {
     s0_t s0;
     s1_t s1;
@@ -62,7 +68,13 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
     }
 }
 
+extern Checksum {
+    Checksum(HashAlgorithm hash);
+    void update<T>(in T data);
+}
+
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
+    Checksum(HashAlgorithm.crc32) checksum_crc32;
     apply {
         if (hdr.ethernet.isValid()) {
             hdr.hstructs.setValid();
@@ -80,6 +92,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             hdr.hstructs.s1 = {f2 = 5};
             hdr.h2 = {f2 = 5};
             hdr.hstructs.s2 = {f2 = 5};
+            checksum_crc32.update((tuple_0){f0 = hdr.ethernet.srcAddr,f1 = hdr.ethernet.dstAddr,f2147483647 = hdr.ethernet.etherType});
         }
     }
 }
