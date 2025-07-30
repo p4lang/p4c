@@ -597,8 +597,13 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             bool changes = false;
             for (const IR::StructField *fieldI : ts->fields) {
                 auto compI = si->components.getDeclaration<IR::NamedExpression>(fieldI->name);
-                if (hasDots && compI == nullptr) {
-                    continue;
+                if (compI == nullptr) {
+                    if (hasDots) {
+                        continue;
+                    } else {
+                        typeError("No initializer for field %1%", fieldI->name);
+                        return sourceExpression;
+                    }
                 }
                 auto src = assignment(sourceExpression, fieldI->type, compI->expression);
                 if (src != compI->expression) changes = true;
