@@ -104,7 +104,7 @@ control ingressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    Checksumi(HashAlgorithm.crc32) checksum_crc32;
+    Checksum(HashAlgorithm.crc32) checksum_crc32;
     apply {
         if (hdr.ethernet.isValid()) {
             hdr.hstructs.setValid();
