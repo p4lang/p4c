@@ -712,6 +712,9 @@ void ExpressionEvaluator::setNonConstant(const IR::Expression *expression) {
     } else if (type->is<IR::Type_Bits>()) {
         set(expression,
             new SymbolicInteger(ScalarValue::ValueState::NotConstant, type->to<IR::Type_Bits>()));
+    } else if (type->is<IR::Type_InfInt>()) {
+        set(expression,
+            new SymbolicInteger(ScalarValue::ValueState::NotConstant, IR::Type_Bits::get(0)));
     } else {
         BUG("Non Type_Bits type %1% for expression %2%", type, expression);
     }
@@ -853,7 +856,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary *expression) {
     cf.setCalledBy(this);
     auto result = clone->apply(cf);
 
-    if (type->is<IR::Type_Bits>()) {
+    if (type->is<IR::Type_Bits>() || type->is<IR::Type_InfInt>()) {
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
     } else if (type->is<IR::Type_Boolean>()) {
