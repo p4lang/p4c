@@ -1,5 +1,9 @@
 var NAVTREEINDEX40 =
 {
+"struct_table_resource_alloc.html#af76b5efe8ecb4e247e4cc27cf3147100":[13,0,663,0],
+"struct_table_summary_1_1_placed_table.html":[13,0,665,0],
+"struct_target_1_1_j_bay_1_1parser__regs.html":[13,0,667,0,0],
+"struct_target_1_1_tofino_1_1parser__regs.html":[13,0,667,2,6],
 "struct_tofino_1_1_action_data_bus.html":[12,0,23,0],
 "struct_tofino_1_1_action_data_bus.html":[13,0,20,0],
 "struct_tofino_1_1_action_data_bus.html#a1769acc1beaacd9d630274df9c52455a":[12,0,23,0,1],

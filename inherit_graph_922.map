@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structpna__main__output__metadata__t.html" title=" " alt="" coords="5,5,223,31"/>
+<area shape="rect" id="Node000000" href="$class_p_h_v_1_1v2_1_1_tx_score.html" title="TxScore is the interface of an allocation score." alt="" coords="5,55,137,80"/>
+<area shape="rect" id="Node000001" href="$class_p_h_v_1_1v2_1_1_greedy_tx_score.html" title="GreedyTxScore is the default allocation heuristics." alt="" coords="189,5,368,31"/>
+<area shape="poly" id="edge2648_Node000000_Node000001" title=" " alt="" coords="138,49,224,28,225,33,139,54"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_min_pack_tx_score.html" title="MinPackTxScore prefers minimal packing." alt="" coords="185,55,372,80"/>
+<area shape="poly" id="edge2649_Node000000_Node000002" title=" " alt="" coords="151,65,185,65,185,70,151,70"/>
+<area shape="rect" id="Node000003" href="$class_p_h_v_1_1v2_1_1_nil_tx_score.html" title=" " alt="" coords="203,104,354,129"/>
+<area shape="poly" id="edge2650_Node000000_Node000003" title=" " alt="" coords="139,81,225,101,224,107,138,86"/>
 </map>

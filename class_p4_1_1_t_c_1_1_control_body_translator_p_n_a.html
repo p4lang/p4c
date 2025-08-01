@@ -150,6 +150,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0a6293d30e21919ad883c557f2da40de" id="r_a0a6293d30e21919ad883c557f2da40de"><td class="memItemLeft" align="right" valign="top"><a id="a0a6293d30e21919ad883c557f2da40de" name="a0a6293d30e21919ad883c557f2da40de"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ControlBodyTranslatorPNA</b> (const <a class="el" href="class_p4_1_1_t_c_1_1_e_b_p_f_control_p_n_a.html">EBPFControlPNA</a> *control, const <a class="el" href="class_p4_1_1_t_c_1_1_convert_to_backend_i_r.html">ConvertToBackendIR</a> *tcIR, const <a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a.html">EBPF::EBPFTablePSA</a> *table)</td></tr>
 <tr class="separator:a0a6293d30e21919ad883c557f2da40de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a939b7e235a473b43209f05a02a18c295" id="r_a939b7e235a473b43209f05a02a18c295"><td class="memItemLeft" align="right" valign="top"><a id="a939b7e235a473b43209f05a02a18c295" name="a939b7e235a473b43209f05a02a18c295"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>arithCommon</b> (const IR::Operation_Binary *, const char *, const char *)</td></tr>
+<tr class="separator:a939b7e235a473b43209f05a02a18c295"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2d22817fe4db859596e2351c52a9698" id="r_ac2d22817fe4db859596e2351c52a9698"><td class="memItemLeft" align="right" valign="top"><a id="ac2d22817fe4db859596e2351c52a9698" name="ac2d22817fe4db859596e2351c52a9698"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>bigXSmallMul</b> (const IR::Expression *, const IR::Constant *)</td></tr>
+<tr class="separator:ac2d22817fe4db859596e2351c52a9698"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a154bb3b0c358c215af9d93c899460f07" id="r_a154bb3b0c358c215af9d93c899460f07"><td class="memItemLeft" align="right" valign="top"><a id="a154bb3b0c358c215af9d93c899460f07" name="a154bb3b0c358c215af9d93c899460f07"></a>
 const IR::P4Action *&#160;</td><td class="memItemRight" valign="bottom"><b>GetAddOnMissHitAction</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> actionName)</td></tr>
 <tr class="separator:a154bb3b0c358c215af9d93c899460f07"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -159,21 +165,90 @@ virtual <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td 
 <tr class="memitem:a972d084548d846a757fdc0ce92d517ea" id="r_a972d084548d846a757fdc0ce92d517ea"><td class="memItemLeft" align="right" valign="top"><a id="a972d084548d846a757fdc0ce92d517ea" name="a972d084548d846a757fdc0ce92d517ea"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsTableAddOnMiss</b> (const IR::P4Table *table)</td></tr>
 <tr class="separator:a972d084548d846a757fdc0ce92d517ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a300d42d78fb00110be4ca9494f956df7" id="r_a300d42d78fb00110be4ca9494f956df7"><td class="memItemLeft" align="right" valign="top"><a id="a300d42d78fb00110be4ca9494f956df7" name="a300d42d78fb00110be4ca9494f956df7"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Add *) override</td></tr>
+<tr class="separator:a300d42d78fb00110be4ca9494f956df7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2164c9d678c6a7554970db1606b61798" id="r_a2164c9d678c6a7554970db1606b61798"><td class="memItemLeft" align="right" valign="top"><a id="a2164c9d678c6a7554970db1606b61798" name="a2164c9d678c6a7554970db1606b61798"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::AddSat *) override</td></tr>
+<tr class="separator:a2164c9d678c6a7554970db1606b61798"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89678a97a122e921513b2d995bc3787b" id="r_a89678a97a122e921513b2d995bc3787b"><td class="memItemLeft" align="right" valign="top"><a id="a89678a97a122e921513b2d995bc3787b" name="a89678a97a122e921513b2d995bc3787b"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::AssignmentStatement *a) override</td></tr>
 <tr class="separator:a89678a97a122e921513b2d995bc3787b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad29caa9a5045abb2efce1fa7d765efc6" id="r_ad29caa9a5045abb2efce1fa7d765efc6"><td class="memItemLeft" align="right" valign="top"><a id="ad29caa9a5045abb2efce1fa7d765efc6" name="ad29caa9a5045abb2efce1fa7d765efc6"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::BAnd *) override</td></tr>
+<tr class="separator:ad29caa9a5045abb2efce1fa7d765efc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab09919c919fe6906dd65643fba0a7e89" id="r_ab09919c919fe6906dd65643fba0a7e89"><td class="memItemLeft" align="right" valign="top"><a id="ab09919c919fe6906dd65643fba0a7e89" name="ab09919c919fe6906dd65643fba0a7e89"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::BOr *) override</td></tr>
+<tr class="separator:ab09919c919fe6906dd65643fba0a7e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5e89ce3aee77ac802b14dd21537f994d" id="r_a5e89ce3aee77ac802b14dd21537f994d"><td class="memItemLeft" align="right" valign="top"><a id="a5e89ce3aee77ac802b14dd21537f994d" name="a5e89ce3aee77ac802b14dd21537f994d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::BXor *) override</td></tr>
+<tr class="separator:a5e89ce3aee77ac802b14dd21537f994d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab67e6ebb8ed893067a10deafa93adbac" id="r_ab67e6ebb8ed893067a10deafa93adbac"><td class="memItemLeft" align="right" valign="top"><a id="ab67e6ebb8ed893067a10deafa93adbac" name="ab67e6ebb8ed893067a10deafa93adbac"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Cast *) override</td></tr>
+<tr class="separator:ab67e6ebb8ed893067a10deafa93adbac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b1c63d5bed82a2d696e3ea96158b6d4" id="r_a7b1c63d5bed82a2d696e3ea96158b6d4"><td class="memItemLeft" align="right" valign="top"><a id="a7b1c63d5bed82a2d696e3ea96158b6d4" name="a7b1c63d5bed82a2d696e3ea96158b6d4"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Cmpl *) override</td></tr>
+<tr class="separator:a7b1c63d5bed82a2d696e3ea96158b6d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abddaf21dc46e16951fec6bed8f001f22" id="r_abddaf21dc46e16951fec6bed8f001f22"><td class="memItemLeft" align="right" valign="top"><a id="abddaf21dc46e16951fec6bed8f001f22" name="abddaf21dc46e16951fec6bed8f001f22"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Concat *) override</td></tr>
+<tr class="separator:abddaf21dc46e16951fec6bed8f001f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52f01955c21f38cc0ed62f6ecda1f450" id="r_a52f01955c21f38cc0ed62f6ecda1f450"><td class="memItemLeft" align="right" valign="top"><a id="a52f01955c21f38cc0ed62f6ecda1f450" name="a52f01955c21f38cc0ed62f6ecda1f450"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Constant *) override</td></tr>
+<tr class="separator:a52f01955c21f38cc0ed62f6ecda1f450"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af635c6e9a63faaf343f0e5bfcfa90b24" id="r_af635c6e9a63faaf343f0e5bfcfa90b24"><td class="memItemLeft" align="right" valign="top"><a id="af635c6e9a63faaf343f0e5bfcfa90b24" name="af635c6e9a63faaf343f0e5bfcfa90b24"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Equ *) override</td></tr>
+<tr class="separator:af635c6e9a63faaf343f0e5bfcfa90b24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae76265dd958b4c556a7c244db1079af3" id="r_ae76265dd958b4c556a7c244db1079af3"><td class="memItemLeft" align="right" valign="top"><a id="ae76265dd958b4c556a7c244db1079af3" name="ae76265dd958b4c556a7c244db1079af3"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Geq *) override</td></tr>
+<tr class="separator:ae76265dd958b4c556a7c244db1079af3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d493bd2ca88667e39985b927b4260e7" id="r_a3d493bd2ca88667e39985b927b4260e7"><td class="memItemLeft" align="right" valign="top"><a id="a3d493bd2ca88667e39985b927b4260e7" name="a3d493bd2ca88667e39985b927b4260e7"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Grt *) override</td></tr>
+<tr class="separator:a3d493bd2ca88667e39985b927b4260e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f36af4162212cdaf4c1f7fc63c1701d" id="r_a0f36af4162212cdaf4c1f7fc63c1701d"><td class="memItemLeft" align="right" valign="top"><a id="a0f36af4162212cdaf4c1f7fc63c1701d" name="a0f36af4162212cdaf4c1f7fc63c1701d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Leq *) override</td></tr>
+<tr class="separator:a0f36af4162212cdaf4c1f7fc63c1701d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac53452f720290b12fb249371ed23494e" id="r_ac53452f720290b12fb249371ed23494e"><td class="memItemLeft" align="right" valign="top"><a id="ac53452f720290b12fb249371ed23494e" name="ac53452f720290b12fb249371ed23494e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Lss *) override</td></tr>
+<tr class="separator:ac53452f720290b12fb249371ed23494e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4b97ab584e94901ead66c4d7f95745e6" id="r_a4b97ab584e94901ead66c4d7f95745e6"><td class="memItemLeft" align="right" valign="top"><a id="a4b97ab584e94901ead66c4d7f95745e6" name="a4b97ab584e94901ead66c4d7f95745e6"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Member *) override</td></tr>
 <tr class="separator:a4b97ab584e94901ead66c4d7f95745e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abebeb37d9b1141c9c3379e7c3e250b31" id="r_abebeb37d9b1141c9c3379e7c3e250b31"><td class="memItemLeft" align="right" valign="top"><a id="abebeb37d9b1141c9c3379e7c3e250b31" name="abebeb37d9b1141c9c3379e7c3e250b31"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Mul *) override</td></tr>
+<tr class="separator:abebeb37d9b1141c9c3379e7c3e250b31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f23bd9261f1e0981dee42d2b7cc5e5d" id="r_a3f23bd9261f1e0981dee42d2b7cc5e5d"><td class="memItemLeft" align="right" valign="top"><a id="a3f23bd9261f1e0981dee42d2b7cc5e5d" name="a3f23bd9261f1e0981dee42d2b7cc5e5d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Neg *) override</td></tr>
+<tr class="separator:a3f23bd9261f1e0981dee42d2b7cc5e5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a319d2902d79f5bd2df93aadc33445f54" id="r_a319d2902d79f5bd2df93aadc33445f54"><td class="memItemLeft" align="right" valign="top"><a id="a319d2902d79f5bd2df93aadc33445f54" name="a319d2902d79f5bd2df93aadc33445f54"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Neq *) override</td></tr>
+<tr class="separator:a319d2902d79f5bd2df93aadc33445f54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c4d68f79618c8b1cebf1532e5a1ed07" id="r_a2c4d68f79618c8b1cebf1532e5a1ed07"><td class="memItemLeft" align="right" valign="top"><a id="a2c4d68f79618c8b1cebf1532e5a1ed07" name="a2c4d68f79618c8b1cebf1532e5a1ed07"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Shl *) override</td></tr>
+<tr class="separator:a2c4d68f79618c8b1cebf1532e5a1ed07"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f6528ee01452defac85eb2397e2be81" id="r_a8f6528ee01452defac85eb2397e2be81"><td class="memItemLeft" align="right" valign="top"><a id="a8f6528ee01452defac85eb2397e2be81" name="a8f6528ee01452defac85eb2397e2be81"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Shr *) override</td></tr>
+<tr class="separator:a8f6528ee01452defac85eb2397e2be81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac65917ed26946b2ee34a9b4d86586f3f" id="r_ac65917ed26946b2ee34a9b4d86586f3f"><td class="memItemLeft" align="right" valign="top"><a id="ac65917ed26946b2ee34a9b4d86586f3f" name="ac65917ed26946b2ee34a9b4d86586f3f"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Sub *) override</td></tr>
+<tr class="separator:ac65917ed26946b2ee34a9b4d86586f3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cc8567eb5edf1c1ede29a992c4af9c8" id="r_a2cc8567eb5edf1c1ede29a992c4af9c8"><td class="memItemLeft" align="right" valign="top"><a id="a2cc8567eb5edf1c1ede29a992c4af9c8" name="a2cc8567eb5edf1c1ede29a992c4af9c8"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::SubSat *) override</td></tr>
+<tr class="separator:a2cc8567eb5edf1c1ede29a992c4af9c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8fde0799e8aea4358f8cb34c43238448" id="r_a8fde0799e8aea4358f8cb34c43238448"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8fde0799e8aea4358f8cb34c43238448">processApply</a> (const <a class="el" href="class_p4_1_1_apply_method.html">P4::ApplyMethod</a> *method) override</td></tr>
 <tr class="separator:a8fde0799e8aea4358f8cb34c43238448"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f4b76f8650b8cbe46509edb08c830ec" id="r_a2f4b76f8650b8cbe46509edb08c830ec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2f4b76f8650b8cbe46509edb08c830ec">processFunction</a> (const <a class="el" href="class_p4_1_1_extern_function.html">P4::ExternFunction</a> *function) override</td></tr>
 <tr class="separator:a2f4b76f8650b8cbe46509edb08c830ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac913fadb311a8c072ae873d963a8bbe" id="r_aac913fadb311a8c072ae873d963a8bbe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aac913fadb311a8c072ae873d963a8bbe">processMethod</a> (const <a class="el" href="class_p4_1_1_extern_method.html">P4::ExternMethod</a> *method) override</td></tr>
 <tr class="separator:aac913fadb311a8c072ae873d963a8bbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24c5e7da49d58f55fed907a3d27f5102" id="r_a24c5e7da49d58f55fed907a3d27f5102"><td class="memItemLeft" align="right" valign="top"><a id="a24c5e7da49d58f55fed907a3d27f5102" name="a24c5e7da49d58f55fed907a3d27f5102"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>sarithCommon</b> (const IR::Operation_Binary *, const char *)</td></tr>
+<tr class="separator:a24c5e7da49d58f55fed907a3d27f5102"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c998ff7f5625b79d50055e3bfbb8eed" id="r_a2c998ff7f5625b79d50055e3bfbb8eed"><td class="memItemLeft" align="right" valign="top"><a id="a2c998ff7f5625b79d50055e3bfbb8eed" name="a2c998ff7f5625b79d50055e3bfbb8eed"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>ValidateAddOnMissMissAction</b> (const IR::P4Action *act)</td></tr>
 <tr class="separator:a2c998ff7f5625b79d50055e3bfbb8eed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55abf067469f2fa07f4f3c1e0472d4a7" id="r_a55abf067469f2fa07f4f3c1e0472d4a7"><td class="memItemLeft" align="right" valign="top"><a id="a55abf067469f2fa07f4f3c1e0472d4a7" name="a55abf067469f2fa07f4f3c1e0472d4a7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visitHostOrder</b> (const IR::Expression *)</td></tr>
+<tr class="separator:a55abf067469f2fa07f4f3c1e0472d4a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_p4_1_1_e_b_p_f_1_1_control_body_translator"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_e_b_p_f_1_1_control_body_translator')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_e_b_p_f_1_1_control_body_translator.html">P4::EBPF::ControlBodyTranslator</a></td></tr>
 <tr class="memitem:a728bb59b20cf422a32a2679aa6081167 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_control_body_translator" id="r_a728bb59b20cf422a32a2679aa6081167"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>ControlBodyTranslator</b> (const <a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control.html">EBPFControl</a> *control)</td></tr>
@@ -232,9 +307,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>emitAssignStatement</
 <tr class="memitem:a1004764a4ee80642ec6a001415c5dc89 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_a1004764a4ee80642ec6a001415c5dc89"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCAssignmentEndianessConversion</b> (const IR::Type *ltype, const IR::Expression *lexpr, const IR::Expression *rexpr, <a class="el" href="class_p4_1_1cstring.html">cstring</a> lpath)</td></tr>
 <tr class="separator:a1004764a4ee80642ec6a001415c5dc89 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0ad50a785d8f1679a5e9bbdbc15a272e inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_a0ad50a785d8f1679a5e9bbdbc15a272e"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCBinaryOperation</b> (const IR::Operation_Binary *b, bool isScalar)</td></tr>
-<tr class="separator:a0ad50a785d8f1679a5e9bbdbc15a272e inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4ca1dec1928f0a1ddafff169c5e0ef2 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_ae4ca1dec1928f0a1ddafff169c5e0ef2"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCBinaryOperation</b> (const IR::Operation_Binary *)</td></tr>
+<tr class="separator:ae4ca1dec1928f0a1ddafff169c5e0ef2 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae03e05fb3710a73f61f16cf6947b6303 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_ae03e05fb3710a73f61f16cf6947b6303"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>emitTCLarge</b> (const IR::Operation_Binary *, unsigned int)</td></tr>
+<tr class="separator:ae03e05fb3710a73f61f16cf6947b6303 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4100d47c82d006468af142654aa473be inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_a4100d47c82d006468af142654aa473be"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>getBitAlignment</b> (const IR::Expression *expression)</td></tr>
 <tr class="separator:a4100d47c82d006468af142654aa473be inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -338,6 +416,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const I
 <tr class="memitem:a96f3c4cbea33498251bbeee93843d725 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_a96f3c4cbea33498251bbeee93843d725"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (const IR::Type_Typedef *type) override</td></tr>
 <tr class="separator:a96f3c4cbea33498251bbeee93843d725 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2a26983f16f3390f6aa0d52c4568db6 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_aa2a26983f16f3390f6aa0d52c4568db6"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>scalarType</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) const</td></tr>
+<tr class="separator:aa2a26983f16f3390f6aa0d52c4568db6 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58d6504885d617336f1604d474bce6f0 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector" id="r_a58d6504885d617336f1604d474bce6f0"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setBuilder</b> (<a class="el" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder)</td></tr>
 <tr class="separator:a58d6504885d617336f1604d474bce6f0 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_code_gen_inspector"><td class="memSeparator" colspan="2">&#160;</td></tr>

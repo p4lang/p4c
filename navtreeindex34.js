@@ -1,5 +1,9 @@
 var NAVTREEINDEX34 =
 {
+"struct_action_data_1_1_single_action_positions.html#acd99621c5325016ba703d27e1dddcc5d":[12,0,0,20,4],
+"struct_action_data_1_1_single_action_positions.html#acd99621c5325016ba703d27e1dddcc5d":[13,0,0,20,4],
+"struct_action_data_1_1_single_action_positions.html#ad56b3f345169159086f09050dc064f26":[12,0,0,20,3],
+"struct_action_data_1_1_single_action_positions.html#ad56b3f345169159086f09050dc064f26":[13,0,0,20,3],
 "struct_action_data_1_1_unique_location_key.html":[12,0,0,21],
 "struct_action_data_1_1_unique_location_key.html":[13,0,0,21],
 "struct_action_data_bus.html":[13,0,30],
@@ -245,9 +249,5 @@ var NAVTREEINDEX34 =
 "struct_b_f_n_1_1_register.html":[13,0,4,169],
 "struct_b_f_n_1_1_register_param.html":[12,0,4,166],
 "struct_b_f_n_1_1_register_param.html":[13,0,4,170],
-"struct_b_f_n_1_1_remove_set_metadata.html":[12,0,4,171],
-"struct_b_f_n_1_1_remove_set_metadata.html":[13,0,4,175],
-"struct_b_f_n_1_1_reset_header_stack_index.html":[12,0,4,174],
-"struct_b_f_n_1_1_reset_header_stack_index.html":[13,0,4,178],
-"struct_b_f_n_1_1_resolve_header_stack_index.html":[12,0,4,175]
+"struct_b_f_n_1_1_remove_set_metadata.html":[12,0,4,171]
 };

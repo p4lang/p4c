@@ -141,12 +141,12 @@ Inheritance diagram for P4::TC::Backend:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aeed0532151ac987512fcd96b32bf6a1f" id="r_aeed0532151ac987512fcd96b32bf6a1f"><td class="memItemLeft" align="right" valign="top"><a id="aeed0532151ac987512fcd96b32bf6a1f" name="aeed0532151ac987512fcd96b32bf6a1f"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Backend</b> (const IR::ToplevelBlock *toplevel, <a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, <a class="el" href="class_p4_1_1_t_c_1_1_t_c_options.html">TCOptions</a> &amp;options)</td></tr>
-<tr class="separator:aeed0532151ac987512fcd96b32bf6a1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10ba603c68b0a7c444f7afe0591379b0" id="r_a10ba603c68b0a7c444f7afe0591379b0"><td class="memItemLeft" align="right" valign="top"><a id="a10ba603c68b0a7c444f7afe0591379b0" name="a10ba603c68b0a7c444f7afe0591379b0"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>ebpfCodeGen</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap)</td></tr>
-<tr class="separator:a10ba603c68b0a7c444f7afe0591379b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98bae61167c52722a5c5e692992c5709" id="r_a98bae61167c52722a5c5e692992c5709"><td class="memItemLeft" align="right" valign="top"><a id="a98bae61167c52722a5c5e692992c5709" name="a98bae61167c52722a5c5e692992c5709"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Backend</b> (IR::ToplevelBlock *toplevel, <a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, <a class="el" href="class_p4_1_1_t_c_1_1_t_c_options.html">TCOptions</a> &amp;options)</td></tr>
+<tr class="separator:a98bae61167c52722a5c5e692992c5709"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8d2f27e8349bc3ed5c56abd6e9e988d" id="r_ad8d2f27e8349bc3ed5c56abd6e9e988d"><td class="memItemLeft" align="right" valign="top"><a id="ad8d2f27e8349bc3ed5c56abd6e9e988d" name="ad8d2f27e8349bc3ed5c56abd6e9e988d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>ebpfCodeGen</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, const IR::P4Program *)</td></tr>
+<tr class="separator:ad8d2f27e8349bc3ed5c56abd6e9e988d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a933b6d9505dd180fa004f9528f05d876" id="r_a933b6d9505dd180fa004f9528f05d876"><td class="memItemLeft" align="right" valign="top"><a id="a933b6d9505dd180fa004f9528f05d876" name="a933b6d9505dd180fa004f9528f05d876"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>emitCFile</b> ()</td></tr>
 <tr class="separator:a933b6d9505dd180fa004f9528f05d876"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -392,12 +392,15 @@ IR::TCPipeline *&#160;</td><td class="memItemRight" valign="bottom"><b>pipeline<
 <tr class="memitem:a82852bb4e31875f74e391322f37e54ac" id="r_a82852bb4e31875f74e391322f37e54ac"><td class="memItemLeft" align="right" valign="top"><a id="a82852bb4e31875f74e391322f37e54ac" name="a82852bb4e31875f74e391322f37e54ac"></a>
 const IR::ToplevelBlock *&#160;</td><td class="memItemRight" valign="bottom"><b>top</b> = nullptr</td></tr>
 <tr class="separator:a82852bb4e31875f74e391322f37e54ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9d2310aaf56bb3f1916011c62fefd12" id="r_ac9d2310aaf56bb3f1916011c62fefd12"><td class="memItemLeft" align="right" valign="top"><a id="ac9d2310aaf56bb3f1916011c62fefd12" name="ac9d2310aaf56bb3f1916011c62fefd12"></a>
-const IR::ToplevelBlock *&#160;</td><td class="memItemRight" valign="bottom"><b>toplevel</b></td></tr>
-<tr class="separator:ac9d2310aaf56bb3f1916011c62fefd12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47117ee32ff9032fa7d9c7d7858f9a17" id="r_a47117ee32ff9032fa7d9c7d7858f9a17"><td class="memItemLeft" align="right" valign="top"><a id="a47117ee32ff9032fa7d9c7d7858f9a17" name="a47117ee32ff9032fa7d9c7d7858f9a17"></a>
+IR::ToplevelBlock *&#160;</td><td class="memItemRight" valign="bottom"><b>toplevel</b></td></tr>
+<tr class="separator:a47117ee32ff9032fa7d9c7d7858f9a17"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9432f1ae20690d2534722708c0b22bc6" id="r_a9432f1ae20690d2534722708c0b22bc6"><td class="memItemLeft" align="right" valign="top"><a id="a9432f1ae20690d2534722708c0b22bc6" name="a9432f1ae20690d2534722708c0b22bc6"></a>
 <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>typeMap</b></td></tr>
 <tr class="separator:a9432f1ae20690d2534722708c0b22bc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a569401ee8cb194e57c6c2f0e8aa9191a" id="r_a569401ee8cb194e57c6c2f0e8aa9191a"><td class="memItemLeft" align="right" valign="top"><a id="a569401ee8cb194e57c6c2f0e8aa9191a" name="a569401ee8cb194e57c6c2f0e8aa9191a"></a>
+const <a class="el" href="class_p4_1_1_t_c_1_1_scan_widths.html">ScanWidths</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>widths</b></td></tr>
+<tr class="separator:a569401ee8cb194e57c6c2f0e8aa9191a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
 <tr class="memitem:a77790b8548086cf62140b5b5579ac455 inherit pub_attribs_class_p4_1_1_visitor" id="r_a77790b8548086cf62140b5b5579ac455"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>called_by</b> = nullptr</td></tr>
