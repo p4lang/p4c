@@ -258,7 +258,7 @@ if (/* hdr->ipv4.isValid() */
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
+if (hdr->ipv4.protocol==6 && hdr->tcp.srcPort>0) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -310,7 +310,7 @@ if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
+if (hdr->ipv4.protocol!=4 || hdr->tcp.srcPort<=3) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -362,7 +362,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
+if (hdr->ipv4.protocol!=4 || hdr->tcp.srcPort<=3) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -414,7 +414,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
+if (hdr->ipv4.protocol!=4 || hdr->tcp.srcPort<=3) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -549,7 +549,7 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
+if (hdr->ipv4.protocol==6 && hdr->tcp.srcPort>0) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -576,7 +576,7 @@ if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
+if (hdr->ipv4.protocol!=4 || hdr->tcp.srcPort<=3) {
 /* drop_packet() */
                                         drop_packet();                                    }
 

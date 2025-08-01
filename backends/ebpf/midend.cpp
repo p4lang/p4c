@@ -107,7 +107,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::SimplifyControlFlow(&typeMap, true),
              new P4::TableHit(&typeMap),
              new P4::RemoveLeftSlices(&typeMap),
-             new EBPF::Lower(&refMap, &typeMap),
+             new EBPF::Lower(&refMap, &typeMap, 5),
              new P4::ParsersUnroll(true, &refMap, &typeMap),
              evaluator,
              new P4::MidEndLast()});

@@ -72,13 +72,13 @@ REGISTER_END()
 static inline u32 getPrimitive32(u8 *a, int size) {
    if(size <= 16 || size > 24) {
        bpf_printk("Invalid size.");
-   };
+   }
    return  ((((u32)a[2]) <<16) | (((u32)a[1]) << 8) | a[0]);
 }
 static inline u64 getPrimitive64(u8 *a, int size) {
    if(size <= 32 || size > 56) {
        bpf_printk("Invalid size.");
-   };
+   }
    if(size <= 40) {
        return  ((((u64)a[4]) << 32) | (((u64)a[3]) << 24) | (((u64)a[2]) << 16) | (((u64)a[1]) << 8) | a[0]);
    } else {
@@ -92,7 +92,7 @@ static inline u64 getPrimitive64(u8 *a, int size) {
 static inline void storePrimitive32(u8 *a, int size, u32 value) {
    if(size <= 16 || size > 24) {
        bpf_printk("Invalid size.");
-   };
+   }
    a[0] = (u8)(value);
    a[1] = (u8)(value >> 8);
    a[2] = (u8)(value >> 16);
@@ -100,7 +100,7 @@ static inline void storePrimitive32(u8 *a, int size, u32 value) {
 static inline void storePrimitive64(u8 *a, int size, u64 value) {
    if(size <= 32 || size > 56) {
        bpf_printk("Invalid size.");
-   };
+   }
    a[0] = (u8)(value);
    a[1] = (u8)(value >> 8);
    a[2] = (u8)(value >> 16);
@@ -113,4 +113,7 @@ static inline void storePrimitive64(u8 *a, int size, u64 value) {
        a[6] = (u8)(value >> 48);
    }
 }
+
+#define BITS(v) (v).bits
+#define SETGUARDS(x) do ; while (0)
 

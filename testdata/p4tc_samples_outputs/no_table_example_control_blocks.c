@@ -36,8 +36,8 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 {
         u8 hit;
         {
-if ((u32)skb->ifindex == 4) {
-                hdr->udp.src_port = (hdr->udp.src_port + 1);            }
+if (skb->ifindex==4) {
+                hdr->udp.src_port = hdr->udp.src_port + 1;            }
 
         }
     }
