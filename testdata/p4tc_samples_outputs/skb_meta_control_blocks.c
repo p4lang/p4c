@@ -65,7 +65,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
         u64 tmp_5 = 0;
         {
 if (/* hdr->ipv4.isValid() */
-            hdr->ipv4.ebpf_valid && hdr->ipv4.protocol == 0x6) {
+            hdr->ipv4.ebpf_valid && hdr->ipv4.protocol==0x6) {
 /* nh_table_0.apply() */
                 {
                     /* construct key */
@@ -97,16 +97,16 @@ if (/* hdr->ipv4.isValid() */
 /* skb_get_meta() */
                                     bpf_p4tc_skb_meta_get(skb,&sa->get,sizeof(sa->get));
                                     tmp = bpf_p4tc_skb_get_tc_classid(skb, &sa->get);
-                                    /* skb_set_tc_classid((tmp + 1)) */
-                                    bpf_p4tc_skb_set_tc_classid(skb,&sa->set,(tmp + 1));
+                                    /* skb_set_tc_classid(tmp + 1) */
+                                    bpf_p4tc_skb_set_tc_classid(skb,&sa->set,tmp + 1);
                                     tmp_2 = bpf_p4tc_skb_get_tc_index(skb, &sa->get);
-                                    /* skb_set_tc_index((tmp_2 + 1)) */
-                                    bpf_p4tc_skb_set_tc_index(skb,&sa->set,(tmp_2 + 1));
+                                    /* skb_set_tc_index(tmp_2 + 1) */
+                                    bpf_p4tc_skb_set_tc_index(skb,&sa->set,tmp_2 + 1);
                                     /* skb_set_meta() */
                                     bpf_p4tc_skb_meta_set(skb,&sa->set,sizeof(sa->set));
                                     tmp_5 = bpf_p4tc_skb_get_tstamp(skb, &sa->get);
-                                                                        storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (((getPrimitive64((u8 *)value->u.ingress_send_nh.srcMac, 48) ^ bpf_cpu_to_be64(getPrimitive64((u8 *)value->u.ingress_send_nh.srcMac, 48))) & ((1ULL << 48) - 1))));
-                                                                        storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (ntohll(getPrimitive64((u8 *)value->u.ingress_send_nh.dstMac, 48) << 16)));
+                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)((u64)(tmp_5 & 281474976710655u) ^ ntohll(getPrimitive64((u8 *)value->u.ingress_send_nh.srcMac, 48) << 16)), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.dstMac), 48));
                                     /* send_to_port(value->u.ingress_send_nh.port) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.ingress_send_nh.port);
