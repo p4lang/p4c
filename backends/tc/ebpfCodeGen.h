@@ -257,13 +257,15 @@ class ConvertToEbpfPipelineTC : public Inspector {
     P4::ReferenceMap *refmap;
     EBPF::EBPFPipeline *pipeline;
     const ConvertToBackendIR *tcIR;
+    std::vector<EBPF::EBPFType *> ebpfTypes;
 
  public:
     ConvertToEbpfPipelineTC(cstring name, EBPF::pipeline_type type, const EbpfOptions &options,
                             const IR::ParserBlock *parserBlock,
                             const IR::ControlBlock *controlBlock,
                             const IR::ControlBlock *deparserBlock, P4::ReferenceMap *refmap,
-                            P4::TypeMap *typemap, const ConvertToBackendIR *tcIR)
+                            P4::TypeMap *typemap, const ConvertToBackendIR *tcIR,
+                            std::vector<EBPF::EBPFType *> ebpfTypes)
         : name(name),
           type(type),
           options(options),
@@ -273,7 +275,8 @@ class ConvertToEbpfPipelineTC : public Inspector {
           typemap(typemap),
           refmap(refmap),
           pipeline(nullptr),
-          tcIR(tcIR) {}
+          tcIR(tcIR),
+          ebpfTypes(ebpfTypes) {}
 
     bool preorder(const IR::PackageBlock *block) override;
     EBPF::EBPFPipeline *getEbpfPipeline() { return pipeline; }
@@ -370,15 +373,18 @@ class ConvertToEBPFDeparserPNA : public Inspector {
     const IR::Parameter *parserHeaders;
     const IR::Parameter *istd;
     const ConvertToBackendIR *tcIR;
+    std::vector<EBPF::EBPFType *> ebpfTypes;
     TC::IngressDeparserPNA *deparser;
 
  public:
     ConvertToEBPFDeparserPNA(EBPF::EBPFProgram *program, const IR::Parameter *parserHeaders,
-                             const IR::Parameter *istd, const ConvertToBackendIR *tcIR)
+                             const IR::Parameter *istd, const ConvertToBackendIR *tcIR,
+                             std::vector<EBPF::EBPFType *> ebpfTypes)
         : program(program),
           parserHeaders(parserHeaders),
           istd(istd),
           tcIR(tcIR),
+          ebpfTypes(ebpfTypes),
           deparser(nullptr) {}
 
     bool preorder(const IR::ControlBlock *) override;
