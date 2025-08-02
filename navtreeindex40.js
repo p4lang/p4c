@@ -1,5 +1,13 @@
 var NAVTREEINDEX40 =
 {
+"struct_table_placement_1_1_placed.html#a559dfa6adcea6d582ceb5dbe7e2cf7fa":[13,0,661,1,2],
+"struct_table_placement_1_1_placed.html#a5ef193f4d97227786f3bb1adf1cd4a06":[13,0,661,1,1],
+"struct_table_placement_1_1_placed.html#a6b0058bef470954645a934931f2e38b4":[13,0,661,1,0],
+"struct_table_placement_1_1_placed.html#ae8eeea9fa7c9e0202cee308fb2f21b79":[13,0,661,1,3],
+"struct_table_resource_alloc.html":[13,0,663],
+"struct_table_resource_alloc.html#a9aef86d23dc6acb234860257268f44a3":[13,0,663,1],
+"struct_table_resource_alloc.html#af5141fb65000551f8509f51c9377ca60":[13,0,663,3],
+"struct_table_resource_alloc.html#af728e1dbade3adde1ff0e26de328d470":[13,0,663,2],
 "struct_table_resource_alloc.html#af76b5efe8ecb4e247e4cc27cf3147100":[13,0,663,0],
 "struct_table_summary_1_1_placed_table.html":[13,0,665,0],
 "struct_target_1_1_j_bay_1_1parser__regs.html":[13,0,667,0,0],
