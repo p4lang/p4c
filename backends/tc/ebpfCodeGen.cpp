@@ -1659,7 +1659,7 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
     auto pipeline_converter = new ConvertToEbpfPipelineTC(
         "tc-ingress"_cs, EBPF::TC_INGRESS, options, pipelineParser->checkedTo<IR::ParserBlock>(),
         pipelineControl->checkedTo<IR::ControlBlock>(),
-        pipelineDeparser->checkedTo<IR::ControlBlock>(), refmap, typemap, tcIR);
+        pipelineDeparser->checkedTo<IR::ControlBlock>(), refmap, typemap, tcIR, ebpfTypes);
     pipeline->apply(*pipeline_converter);
     tlb->getProgram()->apply(*pipeline_converter);
     auto tcIngress = pipeline_converter->getEbpfPipeline();
@@ -1690,8 +1690,9 @@ bool ConvertToEbpfPipelineTC::preorder(const IR::PackageBlock *block) {
     pipeline->control = control_converter->getEBPFControl();
     CHECK_NULL(pipeline->control);
 
-    auto deparser_converter = new ConvertToEBPFDeparserPNA(
-        pipeline, pipeline->parser->headers, pipeline->control->outputStandardMetadata, tcIR);
+    auto deparser_converter =
+        new ConvertToEBPFDeparserPNA(pipeline, pipeline->parser->headers,
+                                     pipeline->control->outputStandardMetadata, tcIR, ebpfTypes);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
@@ -1900,6 +1901,17 @@ bool ConvertToEBPFDeparserPNA::preorder(const IR::Declaration_Instance *di) {
             deparser->addExternDeclaration = true;
             cstring instance = EBPF::EBPFObject::externalName(di);
             auto digest = new EBPFDigestPNA(program, di, typeName, tcIR);
+
+            if (digest->valueType->is<EBPF::EBPFStructType>()) {
+                for (auto type : ebpfTypes) {
+                    if (type->is<EBPF::EBPFStructType>()) {
+                        auto structType = type->to<EBPF::EBPFStructType>();
+                        auto digestType = digest->valueType->to<EBPF::EBPFStructType>();
+
+                        if (digestType->name == structType->name) structType->packed = true;
+                    }
+                }
+            }
             deparser->digests.emplace(instance, digest);
         }
     }

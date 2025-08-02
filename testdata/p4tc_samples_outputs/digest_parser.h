@@ -40,7 +40,7 @@ struct my_ingress_metadata_t {
     u32 ingress_port; /* PortId_t */
     u8 send_digest; /* bool */
 };
-struct mac_learn_digest_t {
+struct __attribute__((__packed__)) mac_learn_digest_t {
     u8 srcAddr[6]; /* bit<48> */
     u32 ingress_port; /* PortId_t */
 };
