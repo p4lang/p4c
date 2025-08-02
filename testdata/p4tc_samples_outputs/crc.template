@@ -1,0 +1,7 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/crc numtables 0
+$TC p4template update pipeline/crc state ready

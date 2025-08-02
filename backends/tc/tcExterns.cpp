@@ -180,7 +180,7 @@ void EBPFCounterPNA::emitCount(EBPF::CodeBuilder *builder, const P4::ExternMetho
 }
 
 void EBPFChecksumPNA::init(const EBPF::EBPFProgram *program, cstring name, int type) {
-    engine = EBPFHashAlgorithmTypeFactoryPNA::instance()->create(type, program, name);
+    engine = EBPFChecksumAlgorithmTypeFactoryPNA::instance()->create(type, program, name);
 
     if (engine == nullptr) {
         if (declaration->arguments->empty())
@@ -453,6 +453,15 @@ void EBPFDigestPNA::emitInitializer(EBPF::CodeBuilder *builder) const {
     builder->newline();
 }
 
+void EBPFHashPNA::init(const EBPF::EBPFProgram *program, cstring name, int type) {
+    engine = EBPFHashAlgorithmTypeFactoryPNA::instance()->create(type, program, name);
+
+    if (engine == nullptr) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "Hash algorithm not yet implemented: %1%",
+                    declaration->arguments->at(0));
+    }
+}
+
 void EBPFHashPNA::emitVariables(EBPF::CodeBuilder *builder) {
     if (engine) {
         engine->emitVariables(builder, declaration);
@@ -480,7 +489,7 @@ void EBPFHashPNA::calculateHash(EBPF::CodeBuilder *builder, const IR::MethodCall
     builder->newline();
 }
 
-void CRCChecksumAlgorithmPNA::emitGet(EBPF::CodeBuilder *builder) {
+void HashAlgorithmPNA::emitGet(EBPF::CodeBuilder *builder) {
     if (crcWidth == 16) {
         builder->appendFormat("%s", registerVar.c_str());
     } else {
@@ -488,14 +497,13 @@ void CRCChecksumAlgorithmPNA::emitGet(EBPF::CodeBuilder *builder) {
     }
 }
 
-void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder, int dataPos,
-                                          const IR::MethodCallExpression *expr) {
+void HashAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder, int dataPos,
+                                   const IR::MethodCallExpression *expr) {
     emitAddData(builder, unpackArguments(expr, dataPos), expr);
 }
 
-void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder,
-                                          const ArgumentsList &arguments,
-                                          const IR::MethodCallExpression *expr) {
+void HashAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder, const ArgumentsList &arguments,
+                                   const IR::MethodCallExpression *expr) {
     cstring kfunc;
     if (crcWidth == 16) {
         kfunc = expr->arguments->size() == 3 ? "bpf_p4tc_ext_hash_base_crc16"_cs
@@ -520,6 +528,73 @@ void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder,
         } else {
             builder->appendFormat("), %v);", registerVar);
         }
+    }
+}
+
+void CRCChecksumAlgorithmPNA::emitVariables(EBPF::CodeBuilder *builder,
+                                            const IR::Declaration_Instance *decl) {
+    (void)decl;
+    csumVar = program->refMap->newName(baseName + "_state");
+    builder->emitIndent();
+    builder->appendFormat("struct p4tc_ext_csum_params %s = {};", csumVar.c_str());
+    builder->newline();
+}
+
+void CRCChecksumAlgorithmPNA::emitGet(EBPF::CodeBuilder *builder) {
+    builder->appendFormat("bpf_p4tc_ext_csum_crc%u_get(&%s, sizeof(%s));", crcWidth,
+                          csumVar.c_str(), csumVar.c_str());
+}
+
+void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder, int dataPos,
+                                          const IR::MethodCallExpression *expr) {
+    emitAddData(builder, unpackArguments(expr, dataPos), expr);
+}
+
+void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder,
+                                          const ArgumentsList &arguments,
+                                          const IR::MethodCallExpression *expr) {
+    (void)expr;
+    cstring kfunc;
+    if (crcWidth == 16)
+        kfunc = "bpf_p4tc_ext_csum_crc16_add"_cs;
+    else
+        kfunc = "bpf_p4tc_ext_csum_crc32_add"_cs;
+
+    for (auto field : arguments) {
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("%v(&%s, sizeof(%s), &", kfunc, csumVar.c_str(), csumVar.c_str());
+        visitor->visit(field);
+        builder->append(", sizeof(");
+        visitor->visit(field);
+        builder->append("));");
+    }
+}
+
+void CRCChecksumAlgorithmPNA::emitClear(EBPF::CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->appendFormat("bpf_p4tc_ext_csum_crc%u_clear(&%s, sizeof(%s));", crcWidth,
+                          csumVar.c_str(), csumVar.c_str());
+    builder->newline();
+}
+
+void EBPFCRCChecksumPNA::processMethod(EBPF::CodeBuilder *builder, cstring method,
+                                       const IR::MethodCallExpression *expr, Visitor *visitor) {
+    engine->setVisitor(visitor);
+    if (method == "clear") {
+        engine->emitClear(builder);
+    } else if (method == "update") {
+        engine->emitAddData(builder, 0, expr);
+    } else if (method == "get") {
+        engine->emitGet(builder);
+    } else {
+        ::P4::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
+    }
+}
+
+void EBPFCRCChecksumPNA::emitVariables(EBPF::CodeBuilder *builder) {
+    if (engine) {
+        engine->emitVariables(builder, declaration);
     }
 }
 
