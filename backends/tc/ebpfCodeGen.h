@@ -484,6 +484,16 @@ class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactor
     EBPF::EBPFHashAlgorithmPSA *create(int type, const EBPF::EBPFProgram *program, cstring name);
 };
 
+class EBPFChecksumAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactoryPSA {
+ public:
+    static EBPFChecksumAlgorithmTypeFactoryPNA *instance() {
+        static EBPFChecksumAlgorithmTypeFactoryPNA factory;
+        return &factory;
+    }
+
+    EBPF::EBPFHashAlgorithmPSA *create(int type, const EBPF::EBPFProgram *program, cstring name);
+};
+
 }  // namespace P4::TC
 
 #endif /* BACKENDS_TC_EBPFCODEGEN_H_ */

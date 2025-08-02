@@ -680,6 +680,10 @@ void EBPFPnaParser::emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declar
             checksums.emplace(name, instance);
             instance->emitVariables(builder);
             return;
+        } else if (EBPFObject::getTypeName(di) == "Checksum") {
+            auto instance = new EBPFCRCChecksumPNA(program, di, name);
+            checksums.emplace(name, instance);
+            instance->emitVariables(builder);
         }
     }
 
@@ -1542,6 +1546,11 @@ void IngressDeparserPNA::emitDeclaration(EBPF::CodeBuilder *builder, const IR::D
 
         if (EBPF::EBPFObject::getTypeName(di) == "InternetChecksum") {
             auto instance = new EBPFInternetChecksumPNA(program, di, name);
+            checksums.emplace(name, instance);
+            instance->emitVariables(builder);
+            return;
+        } else if (EBPF::EBPFObject::getSpecializedTypeName(di) == "Checksum") {
+            auto instance = new EBPFCRCChecksumPNA(program, di, name);
             checksums.emplace(name, instance);
             instance->emitVariables(builder);
             return;
@@ -2860,6 +2869,17 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
 }
 
 EBPF::EBPFHashAlgorithmPSA *EBPFHashAlgorithmTypeFactoryPNA::create(
+    int type, const EBPF::EBPFProgram *program, cstring name) {
+    if (type == EBPF::EBPFHashAlgorithmPSA::HashAlgorithm::CRC16) {
+        return new HashAlgorithmPNA(program, name, 16);
+    } else if (type == EBPF::EBPFHashAlgorithmPSA::HashAlgorithm::CRC32) {
+        return new HashAlgorithmPNA(program, name, 32);
+    }
+
+    return nullptr;
+}
+
+EBPF::EBPFHashAlgorithmPSA *EBPFChecksumAlgorithmTypeFactoryPNA::create(
     int type, const EBPF::EBPFProgram *program, cstring name) {
     if (type == EBPF::EBPFHashAlgorithmPSA::HashAlgorithm::CRC16) {
         return new CRCChecksumAlgorithmPNA(program, name, 16);
