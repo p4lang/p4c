@@ -169,6 +169,7 @@ class EBPFStructType : public EBPFType, public IHasWidth {
     std::vector<EBPFField *> fields;
     unsigned width;
     unsigned implWidth;
+    bool packed;
 
     explicit EBPFStructType(const IR::Type_StructLike *strct);
     void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
