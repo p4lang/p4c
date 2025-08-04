@@ -1358,6 +1358,7 @@ var annotated_dup =
         [ "EBPFInternetChecksumPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_internet_checksum_p_n_a.html", null ],
         [ "EBPFMeterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_meter_p_n_a.html", null ],
         [ "EBPFPnaParser", "class_p4_1_1_t_c_1_1_e_b_p_f_pna_parser.html", null ],
+        [ "EBPFRandomPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_random_p_n_a.html", null ],
         [ "EBPFRegisterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_register_p_n_a.html", null ],
         [ "EBPFTablePNA", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a.html", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a" ],
         [ "EBPFTablePNADirectCounterPropertyVisitor", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a_direct_counter_property_visitor.html", null ],

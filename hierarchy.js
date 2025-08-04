@@ -1987,7 +1987,9 @@ var hierarchy =
             [ "P4::EBPF::XDPHelpProgram", "class_p4_1_1_e_b_p_f_1_1_x_d_p_help_program.html", null ],
             [ "P4::UBPF::UBPFProgram", "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_program.html", null ]
           ] ],
-          [ "P4::EBPF::EBPFRandomPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_random_p_s_a.html", null ],
+          [ "P4::EBPF::EBPFRandomPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_random_p_s_a.html", [
+            [ "P4::TC::EBPFRandomPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_random_p_n_a.html", null ]
+          ] ],
           [ "P4::EBPF::EBPFTableBase", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_base.html", [
             [ "P4::EBPF::EBPFCounterTable", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_counter_table.html", [
               [ "P4::EBPF::EBPFCounterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_counter_p_s_a.html", [

@@ -1,5 +1,7 @@
 var NAVTREEINDEX32 =
 {
+"namespace_logging.html#ac6c91aa7c9b907996c823b0eb97cde2fa2cd599303b5ffb747aa35a95cd01b5ca":[12,0,11,9,0],
+"namespace_logging.html#ac6c91aa7c9b907996c823b0eb97cde2fa98216c6a1a06b313966a7b8e253fad41":[12,0,11,9,1],
 "namespace_logging.html#ac6c91aa7c9b907996c823b0eb97cde2fab7603a1062347999563308de81efa0bb":[12,0,11,9,2],
 "namespace_mau_power.html":[12,0,12],
 "namespace_meter_a_l_u.html":[12,0,13],
@@ -247,7 +249,5 @@ var NAVTREEINDEX32 =
 "namespace_p4_1_1_test.html#a2a84ef116208d11528a5e0af17202a03":[12,0,14,11,126],
 "namespace_p4_1_1_test.html#a304240c030387b803a4f53067aa263fa":[12,0,14,11,127],
 "namespace_p4_1_1_test.html#a3ccf0cc1cbdb60d9b71896ddba85c3dc":[12,0,14,11,109],
-"namespace_p4_1_1_test.html#a47e437628a9ac2e1344a79b51024478a":[12,0,14,11,87],
-"namespace_p4_1_1_test.html#a5311219ac4e6413900aefe30b1cf7fe8":[12,0,14,11,80],
-"namespace_p4_1_1_test.html#a54a41aff77fe08e20e62ec948414cfc5":[12,0,14,11,102]
+"namespace_p4_1_1_test.html#a47e437628a9ac2e1344a79b51024478a":[12,0,14,11,87]
 };
