@@ -1877,6 +1877,9 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
         control->addExternDeclaration = true;
         auto met = new EBPFMeterPNA(program, name, di, control->codeGen);
         control->meters.emplace(name, met);
+    } else if (typeName == "Random") {
+        auto rand = new EBPFRandomPNA(di);
+        control->pna_randoms.emplace(name, rand);
     } else {
         ::P4::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                     instance);
@@ -2443,6 +2446,10 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
     } else if (declType->name.name == "tc_skb_metadata") {
         gen_skb_call_ctrl(pnaControl, builder, method, this);
         return;
+    } else if (declType->name.name == "Random") {
+        auto rand = pnaControl->getRandom(name);
+        rand->processMethod(builder, method);
+        return;
     } else {
         ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: [C] [%2%] Unexpected method call",
                     method->expr, declType->name.name);
@@ -2506,6 +2513,12 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
             auto meter = table->getMeter(name);
             auto pna_meter = dynamic_cast<EBPFMeterPNA *>(meter);
             pna_meter->emitDirectMeterExecute(builder, ext, this, a->left);
+            return false;
+        } else if (ext->originalExternType->name.name == "Random") {
+            cstring name = EBPF::EBPFObject::externalName(ext->object);
+            auto rand = pnaControl->getRandom(name);
+            auto ltype = typeMap->getType(a->left);
+            rand->emitExecute(builder, this, ltype, a->left, a->right);
             return false;
         } else {
             return (false);

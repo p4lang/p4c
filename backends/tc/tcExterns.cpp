@@ -765,4 +765,15 @@ void EBPFMeterPNA::emitDirectMeterExecute(EBPF::CodeBuilder *builder,
     }
 }
 
+void EBPFRandomPNA::emitExecute(EBPF::CodeBuilder *builder, ControlBodyTranslatorPNA *translator,
+                                const IR::Type *ltype, const IR::Expression *lexpr,
+                                const IR::Expression *rexpr) const {
+    if (lexpr != nullptr) {
+        builder->emitIndent();
+        translator->emitTCAssignmentEndianessConversion(ltype, lexpr, rexpr, nullptr);
+        builder->endOfStatement();
+    } else {
+        translator->getBitAlignment(rexpr);
+    }
+}
 }  // namespace P4::TC
