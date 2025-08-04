@@ -1,0 +1,24 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/random numtables 1
+
+$TC p4template create action/random/Main/send_nh actid 1 \
+	param port_id type dev \
+	param dmac type macaddr \
+	param smac type macaddr
+$TC p4template update action/random/Main/send_nh state active
+
+$TC p4template create action/random/Main/drop actid 2
+$TC p4template update action/random/Main/drop state active
+
+$TC p4template create table/random/Main/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 permissions 0x3da4 tentries 100 nummasks 1 \
+	table_acts act name random/Main/send_nh \
+	act name random/Main/drop
+$TC p4template update table/random/Main/nh_table default_miss_action permissions 0x1024 action random/Main/drop
+$TC p4template update pipeline/random state ready

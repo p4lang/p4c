@@ -454,16 +454,6 @@ static inline u64 bpf_p4tc_extern_timestamp() {
 	return bpf_ktime_get_ns();
 }
 
-#define U32_MAX            ((u32)~0U)
-
-/* Random PNA extern */
-static inline u32 bpf_p4tc_extern_random(u32 min, u32 max) {
-	if (max == U32_MAX)
-		return (min + bpf_get_prandom_u32());
-
-	return (min + bpf_get_prandom_u32()) % (max + 1);
-}
-
 #define BIT(x) (1 << x)
 
 #define P4TC_SKB_META_SET_TSTAMP BIT(0)
