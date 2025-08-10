@@ -29,41 +29,6 @@
 #include "ixbar_expr.h"
 #include "lib/hex.h"
 
-const Device::StatefulAluSpec &TofinoDevice::getStatefulAluSpec() const {
-    static const Device::StatefulAluSpec spec = {/* .CmpMask = */ false,
-                                                 /* .CmpUnits = */ {"lo"_cs, "hi"_cs},
-                                                 /* .MaxSize = */ 32,
-                                                 /* .MaxDualSize = */ 64,
-                                                 /* .MaxPhvInputWidth = */ 32,
-                                                 /* .MaxInstructions = */ 4,
-                                                 /* .MaxInstructionConstWidth = */ 4,
-                                                 /* .MinInstructionConstValue = */ -8,
-                                                 /* .MaxInstructionConstValue = */ 7,
-                                                 /* .OutputWords = */ 1,
-                                                 /* .DivModUnit = */ false,
-                                                 /* .FastClear = */ false,
-                                                 /* .MaxRegfileRows = */ 4};
-    return spec;
-}
-
-const Device::StatefulAluSpec &JBayDevice::getStatefulAluSpec() const {
-    static const Device::StatefulAluSpec spec = {
-        /* .CmpMask = */ true,
-        /* .CmpUnits = */ {"cmp0"_cs, "cmp1"_cs, "cmp2"_cs, "cmp3"_cs},
-        /* .MaxSize = */ 128,
-        /* .MaxDualSize = */ 128,
-        /* .MaxPhvInputWidth = */ 64,
-        /* .MaxInstructions = */ 4,
-        /* .MaxInstructionConstWidth = */ 4,
-        /* .MinInstructionConstValue = */ -8,
-        /* .MaxInstructionConstValue = */ 7,
-        /* .OutputWords = */ 4,
-        /* .DivModUnit = */ true,
-        /* .FastClear = */ true,
-        /* .MaxRegfileRows = */ 4};
-    return spec;
-}
-
 /**
  * @brief This class detects a following pattern:
  *

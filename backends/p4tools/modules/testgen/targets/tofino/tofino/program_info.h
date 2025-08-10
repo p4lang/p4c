@@ -24,7 +24,7 @@
 #include <map>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"

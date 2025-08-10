@@ -16,20 +16,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_TOFINO_BF_P4C_DEVICE_H_
-#define BACKENDS_TOFINO_BF_P4C_DEVICE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_SPECS_DEVICE_H_
+#define BACKENDS_TOFINO_BF_P4C_SPECS_DEVICE_H_
 
-#include "backends/tofino/bf-p4c/arch/arch_spec.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
-#include "backends/tofino/bf-p4c/mau/mau_spec.h"
-#include "backends/tofino/bf-p4c/mau/power_spec.h"
-#include "backends/tofino/bf-p4c/parde/parde_spec.h"
-#include "backends/tofino/bf-p4c/phv/phv_spec.h"
+#include "backends/tofino/bf-p4c/specs/arch_spec.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/mau_spec.h"
+#include "backends/tofino/bf-p4c/specs/parde_spec.h"
+#include "backends/tofino/bf-p4c/specs/phv_spec.h"
+#include "backends/tofino/bf-p4c/specs/power_spec.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/range.h"
 
 class Device {
+ protected:
+    struct Options {
+        float phv_scale_factor = 1.0;
+        bool no_tagalong = false;
+        bool tof2lab44_workaround = false;
+    } options_;
+
  public:
     enum Device_t {
         TOFINO,
@@ -42,7 +49,7 @@ class Device {
      * This should be called as early as possible at startup, since the Device
      * singleton is available everywhere in the compiler.
      */
-    static void init(cstring name);
+    static void init(cstring name, Options options);
 
     static const Device &get() {
         BUG_CHECK(instance_ != nullptr, "Target device not initialized!");
@@ -54,9 +61,37 @@ class Device {
 
     static const PhvSpec &phvSpec() { return Device::get().getPhvSpec(); }
     static const PardeSpec &pardeSpec() { return Device::get().getPardeSpec(); }
-    struct GatewaySpec;
+    struct GatewaySpec {
+        int PhvBytes;
+        int HashBits;
+        int PredicateBits;
+        int MaxRows;
+        bool SupportXor;
+        bool SupportRange;
+        int ExactShifts;
+        bool ByteSwizzle;  // is the a byte swizzle between ixbar and gateway
+        int PerByteMatch;  // lower bytes are shared per row, with 1 bit match per row
+        unsigned XorByteSlots;
+    };
+
     static const GatewaySpec &gatewaySpec() { return Device::get().getGatewaySpec(); }
-    struct StatefulAluSpec;
+    struct StatefulAluSpec {
+        bool CmpMask;  // are cmp oprerands maskable?
+        std::vector<cstring> CmpUnits;
+        int MaxSize;
+        int MaxDualSize;
+        int MaxPhvInputWidth;
+        int MaxInstructions;
+        int MaxInstructionConstWidth;
+        int MinInstructionConstValue;
+        int MaxInstructionConstValue;
+        int OutputWords;
+        bool DivModUnit;
+        bool FastClear;
+        int MaxRegfileRows;
+
+        cstring cmpUnit(unsigned idx) const;
+    };
     static const StatefulAluSpec &statefulAluSpec() { return Device::get().getStatefulAluSpec(); }
     static const ArchSpec &archSpec() { return Device::get().getArchSpec(); }
     static const MauPowerSpec &mauPowerSpec() { return Device::get().getMauPowerSpec(); }
@@ -65,7 +100,8 @@ class Device {
     static const IMemSpec &imemSpec() { return Device::get().getMauSpec().getIMemSpec(); }
     static int numPipes() { return Device::get().getNumPipes(); }
     static int numStages() {
-        return numStagesRuntimeOverride_ ? numStagesRuntimeOverride_ : Device::get().getNumStages();
+        return (numStagesRuntimeOverride_ != 0) ? numStagesRuntimeOverride_
+                                                : Device::get().getNumStages();
     }
     static void overrideNumStages(int num);
     static int numLongBranchTags() { return Device::get().getLongBranchTags(); }
@@ -115,7 +151,7 @@ class Device {
     }
 
  protected:
-    explicit Device(cstring name) : name_(name) {}
+    explicit Device(Options options, cstring name) : options_(options), name_(name) {}
 
     virtual Device_t device_type() const = 0;
     virtual cstring get_name() const = 0;
@@ -177,7 +213,10 @@ class TofinoDevice : public Device {
     const TofinoArchSpec arch_;
 
  public:
-    TofinoDevice() : Device("Tofino"_cs), parde_() {}
+    explicit TofinoDevice(Options options)
+        : Device(options, "Tofino"_cs),
+          phv_(options.phv_scale_factor, options.no_tagalong),
+          parde_() {}
     Device::Device_t device_type() const override { return Device::TOFINO; }
     cstring get_name() const override { return "Tofino"_cs; }
     int getNumPipes() const override { return 4; }
@@ -251,7 +290,10 @@ class JBayDevice : public Device {
 #endif
 
  public:
-    JBayDevice() : Device("Tofino2"_cs), parde_() {}
+    explicit JBayDevice(Options options)
+        : Device(options, "Tofino2"_cs),
+          phv_(options.phv_scale_factor),
+          parde_(options.tof2lab44_workaround) {}
     Device::Device_t device_type() const override { return Device::JBAY; }
     cstring get_name() const override { return "Tofino2"_cs; }
     int getNumPipes() const override { return 4; }
@@ -308,6 +350,8 @@ class JBayHDevice : public JBayDevice {
  public:
     int getNumStages() const override { return 6; }
     cstring get_name() const override { return "Tofino2H"_cs; }
+
+    explicit JBayHDevice(Options options) : JBayDevice(options) {}
 };
 #endif /* BAREFOOT_INTERNAL */
 
@@ -315,19 +359,26 @@ class JBayMDevice : public JBayDevice {
  public:
     int getNumStages() const override { return 12; }
     cstring get_name() const override { return "Tofino2M"_cs; }
+
+    explicit JBayMDevice(Options options) : JBayDevice(options) {}
 };
 
 class JBayUDevice : public JBayDevice {
  public:
     int getNumStages() const override { return 20; }
     cstring get_name() const override { return "Tofino2U"_cs; }
+
+    explicit JBayUDevice(Options options) : JBayDevice(options) {}
 };
 
 class JBayA0Device : public JBayDevice {
  public:
-    const JBayA0PardeSpec parde_{};
+    const JBayA0PardeSpec parde_;
     const PardeSpec &getPardeSpec() const override { return parde_; }
     cstring get_name() const override { return "Tofino2A0"_cs; }
+
+    explicit JBayA0Device(Options options)
+        : JBayDevice(options), parde_(options.tof2lab44_workaround) {}
 };
 
-#endif /* BACKENDS_TOFINO_BF_P4C_DEVICE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_SPECS_DEVICE_H_ */
