@@ -73,9 +73,12 @@ def isError(p4filename):
     return "_errors" in p4filename
 
 
+ignoreStderrDirective = 'P4TEST_IGNORE_STDERR'
+
+
 def ignoreStderr(options):
     for line in open(options.p4filename):
-        if "P4TEST_IGNORE_STDERR" in line:
+        if ignoreStderrDirective in line:
             return True
     return False
 
@@ -210,9 +213,16 @@ def check_generated_files(options, tmpdir, expecteddir):
                 ' or rerun all tests using "P4TEST_REPLACE=True make check".' % expected
             )
             return FAILURE
-        result = compare_files(options, produced, expected, file[-7:] == "-stderr")
-        if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
-            return result
+        is_stderr = file[-7:] == "-stderr"
+        result = compare_files(options, produced, expected, is_stderr)
+        if result != SUCCESS:
+            if is_stderr and ignoreStderr(options):
+                print(
+                    '(Ignoring stderr differences for file %s due to %s in sample file)'
+                    % (file, ignoreStderrDirective)
+                )
+            else:
+                return result
     return SUCCESS
 
 
