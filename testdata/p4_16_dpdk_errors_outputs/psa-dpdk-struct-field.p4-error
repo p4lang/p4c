@@ -1,4 +1,4 @@
-psa-dpdk-struct-field.p4(51): [--Wwarn=uninitialized_use] warning: flg may be uninitialized
+psa-dpdk-struct-field.p4(51): [--Wwarn=uninitialized-use] warning: flg may be uninitialized
   if (flg == 0x2) {
       ^^^
 psa-dpdk-struct-field.p4(51): [--Werror=target-error] error: Unsupported bitwidth 80 in flg

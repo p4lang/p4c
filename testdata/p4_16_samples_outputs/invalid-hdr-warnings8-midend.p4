@@ -308,7 +308,7 @@ control c(inout bit<32> x) {
         }
         const default_action = xor();
     }
-    apply @noWarn("uninitialized_use") {
+    apply @noWarn("uninitialized-use") {
         tbl_invalidhdrwarnings8l13.apply();
         tbl_inout_action2.apply();
         tbl_xor.apply();

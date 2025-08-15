@@ -91,13 +91,13 @@ TEST_F(ErrorReporterTest, WarningsConformToExpectedFormat) {
 )";
 
     const std::string EXPECTED_WARN_1 =
-        R"(TestCode(46): [--Wwarn=uninitialized_use] warning: tmp may be uninitialized
+        R"(TestCode(46): [--Wwarn=uninitialized-use] warning: tmp may be uninitialized
         tmp = tmp * (make_zero ? 16w0 : 16w1);
               ^^^
 )";
 
     const std::string EXPECTED_WARN_2 =
-        R"(TestCode(44): [--Wwarn=uninitialized_out_param] warning: out parameter 'val_undefined' may be uninitialized when 'do_global_action' terminates
+        R"(TestCode(44): [--Wwarn=uninitialized-out-param] warning: out parameter 'val_undefined' may be uninitialized when 'do_global_action' terminates
     action do_global_action(in bool make_zero, out bool val_undefined) {
                                                         ^^^^^^^^^^^^^
 TestCode(44)
@@ -106,8 +106,8 @@ TestCode(44)
 )";
 
     const std::string EXPECTED_WARN_3 =
-        R"([--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
-TestCode(44): [--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
+        R"([--Wwarn=uninitialized-use] warning: val_undefined may be uninitialized
+TestCode(44): [--Wwarn=uninitialized-use] warning: val_undefined may be uninitialized
     action do_global_action(in bool make_zero, out bool val_undefined) {
                                                         ^^^^^^^^^^^^^
 )";

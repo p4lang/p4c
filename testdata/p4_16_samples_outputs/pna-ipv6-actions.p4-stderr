@@ -1,6 +1,6 @@
 pna-ipv6-actions.p4(171): [--Wwarn=unused] warning: 'set_traffic_class' is unused
     action set_traffic_class(bit<8> trafficClass) {
            ^^^^^^^^^^^^^^^^^
-pna-ipv6-actions.p4(178): [--Wwarn=uninitialized_use] warning: tmp1 may be uninitialized
+pna-ipv6-actions.p4(178): [--Wwarn=uninitialized-use] warning: tmp1 may be uninitialized
         headers.ipv6.srcAddr = (bit<128>)tmp1;
                                          ^^^^

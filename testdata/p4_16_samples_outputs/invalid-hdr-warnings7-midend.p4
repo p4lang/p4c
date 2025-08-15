@@ -379,7 +379,7 @@ control c(inout bit<32> x) {
         }
         const default_action = xor();
     }
-    apply @noWarn("uninitialized_use") {
+    apply @noWarn("uninitialized-use") {
         tbl_invalidhdrwarnings7l13.apply();
         tbl_initialize.apply();
         tbl_invalidhdrwarnings7l68.apply();
