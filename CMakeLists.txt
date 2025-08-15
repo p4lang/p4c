@@ -220,6 +220,10 @@ p4c_obtain_protobuf()
 if(ENABLE_P4C_GRAPHS AND NOT P4C_USE_PREINSTALLED_BOOST)
   list(APPEND ADDITIONAL_P4C_BOOST_LIBRARIES graph)
 endif()
+if (ENABLE_TOFINO)
+  # BF-ASM requires boost numeric.
+  list(APPEND ADDITIONAL_P4C_BOOST_LIBRARIES numeric)
+endif()
 include(Boost)
 p4c_obtain_boost()
 
