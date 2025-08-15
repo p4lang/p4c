@@ -26,7 +26,7 @@ control c(in Headers h) {
         default_action = a();
         largest_priority_wins = false;
         priority_delta = 10;
-        @noWarn("duplicate_priorities") entries = {
+        @noWarn("duplicate-priorities") entries = {
                         const priority=10: (32w0x1, 32w0x1111 &&& 32w0xf) : a_params(32w1);
                         priority=20: (32w0x2, 32w0x1181) : a_params(32w2);
                         priority=30: (32w0x3, 32w0x1000 &&& 32w0xf000) : a_params(32w3);
