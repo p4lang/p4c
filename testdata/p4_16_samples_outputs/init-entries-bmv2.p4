@@ -69,7 +69,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         default_action = a;
         largest_priority_wins = false;
         priority_delta = 10;
-        @noWarn("duplicate_priorities") entries = {
+        @noWarn("duplicate-priorities") entries = {
                         const priority=10: (0x1, 0x1111 &&& 0xf) : a_params(1);
                         (0x2, 0x1181) : a_params(2);
                         (0x3, 0x1000 &&& 0xf000) : a_params(3);
@@ -111,7 +111,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         default_action = a;
         largest_priority_wins = false;
         priority_delta = 10;
-        @noWarn("entries_out_of_priority_order") entries = {
+        @noWarn("entries-out-of-priority-order") entries = {
                         const priority=11: (0x1, 0x1111 &&& 0xf) : a_params(1);
                         (0x2, 0x1181) : a_params(2);
                         (0x3, 0x1000 &&& 0xf000) : a_params(3);
@@ -151,7 +151,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         }
         default_action = a;
         largest_priority_wins = false;
-        @noWarn("duplicate_priorities") @noWarn("entries_out_of_priority_order") entries = {
+        @noWarn("duplicate-priorities") @noWarn("entries-out-of-priority-order") entries = {
                         const priority=11: (0x1, 0x1111 &&& 0xf) : a_params(1);
                         (0x2, 0x1181) : a_params(2);
                         (0x3, 0x1000 &&& 0xf000) : a_params(3);
@@ -191,7 +191,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         }
         default_action = a;
         largest_priority_wins = false;
-        @noWarn("duplicate_priorities") entries = {
+        @noWarn("duplicate-priorities") entries = {
                         const priority=2001: (0x1, 0x1111 &&& 0xf) : a_params(1);
                         priority=2001: (0x2, 0x1181) : a_params(2);
                         priority=2001: (0x3, 0x1000 &&& 0xf000) : a_params(3);

@@ -69,7 +69,7 @@ control c(inout bit<32> x) {
                  ^ us1[0].h2.a ^ us1[1].h1.a ^ us1[1].h2.a;
     }
 
-    apply @noWarn("uninitialized_use") {
+    apply @noWarn("uninitialized-use") {
         u.h1.setValid();
         hs[0].setValid();
         us[0].h1.setValid();

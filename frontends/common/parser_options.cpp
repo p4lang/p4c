@@ -529,7 +529,7 @@ const P4CConfiguration &P4CContext::getConfig() {
 
 bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     static const std::unordered_set<cstring> recognizedDiagnostics = {
-        "uninitialized_out_param"_cs, "uninitialized_use"_cs, "unknown_diagnostic"_cs};
+        "uninitialized-out-param"_cs, "uninitialized-use"_cs, "unknown_diagnostic"_cs};
 
     return recognizedDiagnostics.count(diagnostic);
 }

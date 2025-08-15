@@ -1,9 +1,9 @@
-issue3001-1.p4(41): [--Wwarn=uninitialized_use] warning: h.x may be uninitialized
+issue3001-1.p4(41): [--Wwarn=uninitialized-use] warning: h.x may be uninitialized
     return h;
            ^
-issue3001-1.p4(46): [--Wwarn=uninitialized_use] warning: u.h may be uninitialized
+issue3001-1.p4(46): [--Wwarn=uninitialized-use] warning: u.h may be uninitialized
     return u;
            ^
-issue3001-1.p4(51): [--Wwarn=uninitialized_use] warning: s may not be completely initialized
+issue3001-1.p4(51): [--Wwarn=uninitialized-use] warning: s may not be completely initialized
     return s;
            ^

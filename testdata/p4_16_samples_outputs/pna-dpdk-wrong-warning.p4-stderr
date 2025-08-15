@@ -10,6 +10,6 @@ pna-dpdk-wrong-warning.p4(49): [--Wwarn=unused] warning: 'h2' is unused
 pna-dpdk-wrong-warning.p4(55): [--Wwarn=unused] warning: 'a2' is unused
     h2_t[2] a2;
     ^^^^^^^^^^
-pna-dpdk-wrong-warning.p4(82): [--Wwarn=uninitialized_use] warning: a1b may not be completely initialized
+pna-dpdk-wrong-warning.p4(82): [--Wwarn=uninitialized-use] warning: a1b may not be completely initialized
         a1 = a1b;
              ^^^
