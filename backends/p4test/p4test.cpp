@@ -86,6 +86,9 @@ P4TestOptions::P4TestOptions() {
             return true;
         },
         "use passes that use general switch instead of action_run");
+    registerOption(
+        "--keepTuples", nullptr, [this](const char *) { return keepTuples = true; },
+        "keep tuple type, but flatten assignments of them");
 }
 
 class P4TestPragmas : public P4::P4COptionPragmaParser {
