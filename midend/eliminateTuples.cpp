@@ -9,6 +9,12 @@ using namespace literals;
 const IR::Type *ReplacementMap::convertType(const IR::Type *type) {
     auto it = replacement.find(type);
     if (it != replacement.end()) return it->second;
+    if (auto canon = typeMap->getTypeType(type, false)) {
+        if (auto it = replacement.find(canon); it != replacement.end()) {
+            replacement.emplace(type, it->second);
+            return it->second;
+        }
+    }
     if (auto st = type->to<IR::Type_Struct>()) {
         bool changes = false;
         IR::IndexedVector<IR::StructField> fields;
@@ -41,6 +47,7 @@ const IR::Type *ReplacementMap::convertType(const IR::Type *type) {
         auto result = new IR::Type_Struct(name, fields);
         LOG3("Converted " << dbp(type) << " to " << dbp(result));
         replacement.emplace(type, result);
+        if (auto canon = typeMap->getTypeType(type, false)) replacement.emplace(canon, result);
         return result;
     }
     return type;
@@ -72,8 +79,7 @@ const IR::Node *DoReplaceTuples::postorder(IR::Type_BaseList *bl) {
         auto targ = repl.typeMap->getTypeType(arg, true);
         if (targ->is<IR::Type_Var>()) return bl;
     }
-    auto canon = repl.typeMap->getTypeType(type, true)->to<IR::Type_BaseList>();
-    auto st = repl.getReplacement(canon)->getP4Type();
+    auto st = repl.getReplacement(type)->getP4Type();
     return st;
 }
 
