@@ -137,8 +137,8 @@ action encap_one_tunnel_layer_ipv4 args instanceof encap_one_tunnel_layer_ipv4_a
 	and m.MainControlT_tmp_2 0xFC
 	mov h.ipv4_0.dscp_ecn m.MainControlT_tmp_2
 	or h.ipv4_0.dscp_ecn 0x0
-	mov h.ipv4_0.length 0x14
-	add h.ipv4_0.length m.local_metadata_L2_packet_len_bytes
+	mov h.ipv4_0.length m.local_metadata_L2_packet_len_bytes
+	add h.ipv4_0.length 0x14
 	mov h.ipv4_0.identification 0x0
 	mov m.MainControlT_tmp_3 h.ipv4_0.rsvd_df_mf_frag_off
 	and m.MainControlT_tmp_3 0x7FFF

@@ -61,8 +61,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<8> dummy_var;
         bool dummy_bool;
-        dummy_var = 8w0 & function_with_side_effect(h.h.a);
-        dummy_var = 8w0 * function_with_side_effect(h.h.b);
+        dummy_var = function_with_side_effect(h.h.a) & 8w0;
+        dummy_var = function_with_side_effect(h.h.b) * 8w0;
         dummy_var = 8w0 / function_with_side_effect(h.h.c);
         dummy_var = 8w0 >> function_with_side_effect(h.h.d);
         dummy_var = 8w0 << function_with_side_effect(h.h.e);
@@ -70,8 +70,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         dummy_var = function_with_side_effect(h.h.g);
         dummy_var = 8w0 |-| function_with_side_effect(h.h.h);
         dummy_var = 8w255 |+| function_with_side_effect(h.h.i);
-        dummy_var = 8w255 + function_with_side_effect(h.h.j);
-        dummy_var = 8w255 | function_with_side_effect(h.h.k);
+        dummy_var = function_with_side_effect(h.h.j) + 8w255;
+        dummy_var = function_with_side_effect(h.h.k) | 8w255;
         dummy_var = -function_with_side_effect(h.h.l);
         dummy_var = (16w1 ++ function_with_side_effect(h.h.m))[15:8];
         dummy_bool = true;
