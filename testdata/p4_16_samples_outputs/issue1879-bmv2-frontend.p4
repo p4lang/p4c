@@ -92,7 +92,7 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         paddingLen_0 = 9w64 - (meta.addrLen & 9w63) & 9w63;
         packet.extract<prot_host_addr_padding_t>(hdr.prot_host_addr_padding, (bit<32>)paddingLen_0);
         meta.addrLen = meta.addrLen + paddingLen_0;
-        meta.currPos = (bit<8>)(9w3 + (meta.addrLen >> 6));
+        meta.currPos = (bit<8>)((meta.addrLen >> 6) + 9w3);
         inf_0.setInvalid();
         meta_0 = meta;
         currI_0 = hdr.prot_common.curri;

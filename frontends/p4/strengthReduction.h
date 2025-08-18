@@ -95,7 +95,9 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::LOr *expr) override;
     const IR::Node *postorder(IR::LNot *expr) override;
     const IR::Node *postorder(IR::Sub *expr) override;
+    const IR::Node *postorder(IR::SubSat *expr) override;
     const IR::Node *postorder(IR::Add *expr) override;
+    const IR::Node *postorder(IR::AddSat *expr) override;
     const IR::Node *postorder(IR::UPlus *expr) override;
     const IR::Node *postorder(IR::Shl *expr) override;
     const IR::Node *postorder(IR::Shr *expr) override;
