@@ -1,6 +1,6 @@
-issue4365_wdisable_precedence_over_werror_control.p4(13): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+issue4365_wdisable_precedence_over_werror_control.p4(13): [--Wwarn=invalid-header] warning: accessing a field of an invalid header h
         __e(h.f1);
             ^
-issue4365_wdisable_precedence_over_werror_control.p4(13): [--Wwarn=uninitialized_use] warning: h.f1 may be uninitialized
+issue4365_wdisable_precedence_over_werror_control.p4(13): [--Wwarn=uninitialized-use] warning: h.f1 may be uninitialized
         __e(h.f1);
             ^^^^

@@ -91,11 +91,11 @@ control ingressImpl(
         actions = { a; a_params; }
         default_action = a;
         // t1b is same as t1, but because it has
-        // @noWarn("duplicate_priorities") annotation, no warning
+        // @noWarn("duplicate-priorities") annotation, no warning
         // should be created for it about duplicate priorities.
         largest_priority_wins = false;
         priority_delta = 10;
- 	@noWarn("duplicate_priorities")
+ 	@noWarn("duplicate-priorities")
         entries = {
             const priority=10: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
                                (0x02, 0x1181           ) : a_params(2); // priority=20
@@ -136,10 +136,10 @@ control ingressImpl(
         largest_priority_wins = false;
         priority_delta = 10;
         // t2b is same as t2, but because it has
-        // @noWarn("entries_out_of_priority_order") annotation, no
+        // @noWarn("entries-out-of-priority-order") annotation, no
         // warning should be created for it about entries out of
         // priority order.
-        @noWarn("entries_out_of_priority_order")
+        @noWarn("entries-out-of-priority-order")
         entries = {
             const priority=11: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
                                (0x02, 0x1181           ) : a_params(2); // priority=21
@@ -181,8 +181,8 @@ control ingressImpl(
         // t3b is same as t3, but because it has both noWarn
         // annotations, there should be no warnings issues for it
         // about entry priorities.
- 	@noWarn("duplicate_priorities")
-        @noWarn("entries_out_of_priority_order")
+ 	@noWarn("duplicate-priorities")
+        @noWarn("entries-out-of-priority-order")
         entries = {
             const priority=11: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
                                (0x02, 0x1181           ) : a_params(2); // priority=12
@@ -221,9 +221,9 @@ control ingressImpl(
         default_action = a;
         largest_priority_wins = false;
         // t4b is same as t4, but because it has
-        // @noWarn("duplicate_priorities") annotation, no warning
+        // @noWarn("duplicate-priorities") annotation, no warning
         // should be created for it about duplicate priorities.
- 	@noWarn("duplicate_priorities")
+ 	@noWarn("duplicate-priorities")
         entries = {
             const priority=2001: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
                   priority=2001: (0x02, 0x1181           ) : a_params(2);

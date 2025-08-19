@@ -85,16 +85,16 @@ pins_fabric.p4(1497): [--Winfo=removed] info: removing table 'acl_pre_ingress_vl
 pins_fabric.p4(1526): [--Winfo=removed] info: removing table 'acl_pre_ingress_metadata_table'
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(632): [--Wwarn=uninitialized_use] warning: tunnel_id_value may not be completely initialized
+pins_fabric.p4(632): [--Wwarn=uninitialized-use] warning: tunnel_id_value may not be completely initialized
             tunnel_id_value: exact @id(1) @name("tunnel_id");
             ^^^^^^^^^^^^^^^
-pins_fabric.p4(580): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+pins_fabric.p4(580): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id");
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(558): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+pins_fabric.p4(558): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(route...
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_fabric.p4(559): [--Wwarn=uninitialized_use] warning: neighbor_id_value may be uninitialized
+pins_fabric.p4(559): [--Wwarn=uninitialized-use] warning: neighbor_id_value may be uninitialized
             neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
             ^^^^^^^^^^^^^^^^^
 pins_fabric.p4(846): [--Wwarn=mismatch] warning: 1w1: Constant key field

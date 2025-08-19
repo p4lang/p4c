@@ -25,14 +25,14 @@ header Header {
 extern void func(in Header h);
 extern bit<32> g(inout bit<32> v, in bit<32> w);
 
-@noWarn("uninitialized_use")
+@noWarn("uninitialized-use")
 parser p1(packet_in p, out Header h) {
     Header[2] stack;
     bool b;
     bool c;
     bool d;
 
-    @noWarn("invalid_header")
+    @noWarn("invalid-header")
     @noWarn("ordering")
     state start {
         h.data1 = 0;
@@ -41,7 +41,7 @@ parser p1(packet_in p, out Header h) {
         transition next;
     }
 
-    @noWarn("invalid_header")
+    @noWarn("invalid-header")
     state next {
         h.data2 = h.data3 + 1;  // uninitialized
         stack[0] = stack[1];  // uninitialized
@@ -83,7 +83,7 @@ control c(out bit<32> v) {  // uninitialized
         default_action = a1();
     }
 
-    apply @noWarn("uninitialized_use")
+    apply @noWarn("uninitialized-use")
     {
         b = b + 1;  // uninitialized
         d = d + 1;

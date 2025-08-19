@@ -4,13 +4,13 @@ psa-dpdk-header-union-typedef.p4(87): [--Wwarn=unused] warning: 'Op1' is unused
 psa-dpdk-header-union-typedef.p4(88): [--Wwarn=unused] warning: 'Op2' is unused
     bit<16> Op2 = 0x23;
     ^^^^^^^^^^^^^^^^^^
-psa-dpdk-header-union-typedef.p4(118): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
+psa-dpdk-header-union-typedef.p4(118): [--Wwarn=uninitialized-out-param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
     out clone_t a,
                 ^
 psa-dpdk-header-union-typedef.p4(116)
 control MyID(
         ^^^^
-psa-dpdk-header-union-typedef.p4(131): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyED' terminates
+psa-dpdk-header-union-typedef.p4(131): [--Wwarn=uninitialized-out-param] warning: out parameter 'a' may be uninitialized when 'MyED' terminates
     out clone_t a,
                 ^
 psa-dpdk-header-union-typedef.p4(129)
