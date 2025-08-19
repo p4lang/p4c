@@ -14,7 +14,7 @@ dependencies = [
     "grpcio==1.67.0 ; python_version > '3.6'",
     "grpcio==1.48.2 ; python_version <= '3.6'",
     "thrift==0.21.0",
-    "protobuf==3.20.2 ; python_version > '3.6'",
+    "protobuf==4.25.8 ; python_version > '3.6'",
     "protobuf==3.19.2 ; python_version <= '3.6'",
     "clang-format==18.1.8",
     "black==24.3.0 ; python_version > '3.6'",
