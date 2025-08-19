@@ -17,9 +17,10 @@ parser p1(out bit<32> v) {
 control c(out bit<32> v) {
     apply {
         v = 32w1;
-        v = v + 32w2;
-        v = v + 32w3;
-        v = v + 32w20;
+        v = v + 32w10;
+        v = v + 32w100;
+        v = v + 32w1000;
+        v = v + 32w10000;
     }
 }
 
