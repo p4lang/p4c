@@ -461,8 +461,7 @@ const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
     if (typesKnown) {
         auto le = EnumInstance::resolve(eleft, typeMap);
         auto re = EnumInstance::resolve(eright, typeMap);
-        if (le != nullptr && re != nullptr) {
-            BUG_CHECK(le->type == re->type, "%1%: different enum types in comparison", e);
+        if (le != nullptr && re != nullptr && le->type == re->type) {
             bool bresult = (le->name == re->name) == eqTest;
             return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), bresult);
         }
