@@ -293,6 +293,7 @@ class Annotation {
     static const cstring inlinedFromAnnotation; /// annotation to mark block of inlined function
     static const cstring likelyAnnotation;  /// annotation for likely taken blocks/branchs
     static const cstring unlikelyAnnotation;  /// annotation for likely not taken blocks/branchs
+    static const cstring corelibAnnotation;  // annotation marking P4-16 corelib methods / externs
     toString{ return absl::StrCat("@", name); }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");

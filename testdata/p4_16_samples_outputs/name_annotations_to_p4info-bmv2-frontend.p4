@@ -16,7 +16,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 @name("IngressI.altIngressName") control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("IngressI.blue") action foo(@name("orange") bit<9> port) {
         smeta.egress_spec = port;

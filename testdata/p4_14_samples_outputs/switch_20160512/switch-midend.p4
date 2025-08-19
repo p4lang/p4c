@@ -1329,75 +1329,75 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".fabric_lag_action_profile") @mode("fair") action_selector(HashAlgorithm.identity, 32w1024, 32w8) fabric_lag_action_profile;
 @name(".lag_action_profile") @mode("fair") action_selector(HashAlgorithm.identity, 32w1024, 32w8) lag_action_profile;
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_8() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_9() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_10() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_10() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_11() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_11() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_12() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_12() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_13() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_13() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_14() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_14() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_15() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_15() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_16() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_16() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_17() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_17() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_18() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_18() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_19() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_19() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_20() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_20() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_21() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_21() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_22() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_22() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_23() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_23() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_24() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_24() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_25() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_25() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_26() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_26() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_27() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_27() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_28() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_28() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_29() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_29() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_30() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_30() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_31() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_31() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_32() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_32() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_33() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_33() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_34() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_34() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_35() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_35() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_36() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_36() {
     }
     @name(".egress_port_type_normal") action egress_port_type_normal(@name("ifindex") bit<16> ifindex_11) {
         meta._egress_metadata_port_type16 = 2w0;
@@ -3308,161 +3308,161 @@ struct tuple_4 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_37() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_37() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_38() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_38() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_39() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_39() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_40() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_40() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_41() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_41() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_42() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_42() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_43() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_43() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_44() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_44() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_45() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_45() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_46() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_46() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_47() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_47() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_48() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_48() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_49() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_49() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_50() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_50() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_51() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_51() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_52() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_52() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_53() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_53() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_54() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_54() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_55() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_55() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_56() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_56() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_57() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_57() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_58() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_58() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_59() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_59() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_60() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_60() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_61() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_61() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_62() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_62() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_63() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_63() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_64() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_64() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_65() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_65() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_66() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_66() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_67() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_67() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_68() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_68() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_69() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_69() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_70() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_70() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_71() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_71() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_72() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_72() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_73() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_73() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_74() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_74() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_75() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_75() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_76() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_76() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_77() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_77() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_78() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_78() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_79() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_79() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_80() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_80() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_81() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_81() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_82() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_82() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_83() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_83() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_84() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_84() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_85() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_85() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_86() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_86() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_87() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_87() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_88() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_88() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_89() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_89() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_90() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_90() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_91() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_91() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_92() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_92() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_93() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_93() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_94() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_94() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_95() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_95() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_96() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_96() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_97() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_97() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_98() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_98() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_99() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_99() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_100() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_100() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_101() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_101() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_102() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_102() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_103() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_103() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_104() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_104() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_105() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_105() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_106() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_106() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_107() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_107() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_108() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_108() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_109() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_109() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_110() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_110() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_111() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_111() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_112() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_112() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_113() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_113() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_114() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_114() {
     }
     @name(".rmac_hit") action rmac_hit_1() {
         meta._l3_metadata_rmac_hit91 = 1w1;
