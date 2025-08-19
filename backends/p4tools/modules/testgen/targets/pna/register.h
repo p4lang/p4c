@@ -10,7 +10,10 @@
 namespace P4::P4Tools::P4Testgen {
 
 /// Register the PNA testgen target with the testgen framework.
-inline void pnaRegisterTestgenTarget() { Pna::PnaDpdkTestgenTarget::make(); }
+inline void pnaRegisterTestgenTarget() {
+    Pna::PnaDpdkTestgenTarget::make();
+    Pna::PnaP4TCTestgenTarget::make();
+}
 
 }  // namespace P4::P4Tools::P4Testgen
 
