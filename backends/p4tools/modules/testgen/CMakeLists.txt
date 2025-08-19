@@ -120,6 +120,9 @@ target_link_libraries(testgen
 if (TESTGEN_INCLUDES)
   target_include_directories(testgen ${TESTGEN_INCLUDES})
 endif()
+if (ENABLE_PCH)
+  target_precompile_headers(testgen REUSE_FROM ir)
+endif()
 
 # The executable.
 add_p4tools_executable(p4testgen main.cpp)
