@@ -20,7 +20,7 @@
 #define BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_V1_PROGRAM_STRUCTURE_H_
 
 #include "backends/tofino/bf-p4c/arch/program_structure.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
