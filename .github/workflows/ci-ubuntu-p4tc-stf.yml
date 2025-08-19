@@ -28,7 +28,7 @@ jobs:
       BUILD_GENERATOR: Ninja
       INSTALL_STF_P4TC_DEPENDENCIES: ON
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
