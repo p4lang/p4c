@@ -211,6 +211,8 @@ cc_library(
         "midend/**/*.cpp",
         "control-plane/**/*.cpp",
     ]) + [
+        # TODO: These should be compiled in their respective folder.
+        "//backends/p4tools:ir_extension_sources",
         "backends/dpdk/dbprint-dpdk.cpp",
         "backends/dpdk/printUtils.cpp",
         "backends/dpdk/spec.cpp",
@@ -219,6 +221,13 @@ cc_library(
         "frontends/parsers/v1/v1lexer.cc",
         "frontends/parsers/v1/v1parser.cc",
         "ir/ir-generated.cpp",
+    ],
+    copts = [
+        # Where p4c should look for p4include at runtime.
+        ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
+        # This will work only if the binary is executed by Bazel. For a general
+        # solution, we would need to make p4c aware of Bazel, specifically:
+        # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
     ],
     textual_hdrs = glob([
         "ir/**/*.h",

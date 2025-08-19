@@ -38,6 +38,10 @@ set(
   lib/variables.cpp
 )
 
+# Custom IR constructs for P4Tools.
+set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/ir.def PARENT_SCOPE)
+set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${CMAKE_CURRENT_SOURCE_DIR}/ir.cpp PARENT_SCOPE)
+
 add_library(p4tools-common OBJECT ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
