@@ -145,7 +145,6 @@ std::vector<const IR::Type_Declaration *> argumentsToTypeDeclarations(
 
         if (const auto *ctorCall = expr->to<IR::ConstructorCallExpression>()) {
             const auto *constructedTypeName = ctorCall->constructedType->checkedTo<IR::Type_Name>();
-
             // Find the corresponding type declaration in the top-level namespace.
             declType =
                 findProgramDecl(ns, constructedTypeName->path)->checkedTo<IR::Type_Declaration>();

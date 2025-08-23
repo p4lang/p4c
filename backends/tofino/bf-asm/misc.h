@@ -18,15 +18,11 @@
 #ifndef BACKENDS_TOFINO_BF_ASM_MISC_H_
 #define BACKENDS_TOFINO_BF_ASM_MISC_H_
 
-#include <iomanip>
-#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
 #include <type_traits>
 #include <vector>
-
-#include <boost/numeric/conversion/converter.hpp>
 
 #include "asm-types.h"
 #include "backends/tofino/bf-asm/json.h"
@@ -152,8 +148,8 @@ bool check_range_strict(value_t value, IntType lo, IntType hi) {
 
     /* -- Handle different ranges (signed, unsigned, different size) of the value_t::i
      *    and IntType. */
-    typedef boost::numeric::converter<IntType, decltype(value_t::i)> Converter;
-    if (Converter::out_of_range(value.i)) {
+
+    if (!std::in_range<IntType>(value.i)) {
         format_error_message(value, lo, hi);
         return false;
     }

@@ -1,8 +1,17 @@
+dash-pipeline-v1model-bmv2.p4(81): [--Wwarn=unused] warning: 'TCP_HDR_SIZE' is unused
+const bit<16> TCP_HDR_SIZE = 160 / 8;
+              ^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(566): [--Wwarn=unused] warning: 'hdr' is unused
 action push_action_static_encap(in headers_t hdr, inout metadata_t meta, in dash_encapsulation_t ...
                                              ^^^
 dash-pipeline-v1model-bmv2.p4(598): [--Wwarn=unused] warning: 'hdr' is unused
 action push_action_nat46(in headers_t hdr, inout metadata_t meta, in IPv6Address sip, in IPv6Addr...
+                                      ^^^
+dash-pipeline-v1model-bmv2.p4(626): [--Wwarn=unused] warning: 'push_action_nat64' is unused
+action push_action_nat64(in headers_t hdr, inout metadata_t meta, in IPv4Address src, in IPv4Addr...
+       ^^^^^^^^^^^^^^^^^
+dash-pipeline-v1model-bmv2.p4(626): [--Wwarn=unused] warning: 'hdr' is unused
+action push_action_nat64(in headers_t hdr, inout metadata_t meta, in IPv4Address src, in IPv4Addr...
                                       ^^^
 dash-pipeline-v1model-bmv2.p4(668): [--Wwarn=unused] warning: 'hdr' is unused
 action route_vnet(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_object_id_t"] bit...
@@ -31,6 +40,12 @@ dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'underlay_dip_is_v
 dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'underlay_sip_is_v6' is unused
 ... IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVa...
                                          ^^^^^^^^^^^^^^^^^^
+dash-pipeline-v1model-bmv2.p4(781): [--Wwarn=unused] warning: 'service_tunnel_encode' is unused
+action service_tunnel_encode(inout headers_t hdr, in IPv6Address st_dst, in IPv6Address st_dst_ma...
+       ^^^^^^^^^^^^^^^^^^^^^
+dash-pipeline-v1model-bmv2.p4(794): [--Wwarn=unused] warning: 'service_tunnel_decode' is unused
+action service_tunnel_decode(inout headers_t hdr, in IPv4Address src, in IPv4Address dst) {
+       ^^^^^^^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(687): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
 ..._key, underlay_sip = (underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip), u...
                                              ^^^^^^^^^^^

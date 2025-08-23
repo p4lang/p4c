@@ -1,4 +1,28 @@
 spec-ex04.p4(24): [--Wwarn=overflow] warning: 8s0b10101010: signed value does not fit in 8 bits
 const int<8> b8 = 8s0b1010_1010
                   ^^^^^^^^^^^^^
+spec-ex04.p4(17): [--Wwarn=unused] warning: 'b0' is unused
+const bit<32> b0 = 32w0xFF; // a 32-bit bit-string with value 00FF
+              ^^
+spec-ex04.p4(18): [--Wwarn=unused] warning: 'b2' is unused
+const int<32> b2 = 32s0xFF; // a 32-bit signed number with value 255
+              ^^
+spec-ex04.p4(19): [--Wwarn=unused] warning: 'b3' is unused
+const int<32> b3 = -32s0xFF; // a 32-bit signed number with value -255
+              ^^
+spec-ex04.p4(20): [--Wwarn=unused] warning: 'b4' is unused
+const bit<8> b4 = 8w0b10101010; // an 8-bit bit-string with value AA
+             ^^
+spec-ex04.p4(21): [--Wwarn=unused] warning: 'b5' is unused
+const bit<8> b5 = 8w0b_1010_1010; // same value as above
+             ^^
+spec-ex04.p4(22): [--Wwarn=unused] warning: 'b6' is unused
+const bit<8> b6 = 8w170; // same value as above
+             ^^
+spec-ex04.p4(23): [--Wwarn=unused] warning: 'b7' is unused
+const bit<8> b7 = 8w0b1010_1010; // an 8-bit unsigned number with value 170
+             ^^
+spec-ex04.p4(24): [--Wwarn=unused] warning: 'b8' is unused
+const int<8> b8 = 8s0b1010_1010; // an 8-bit signed number with value -86
+             ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

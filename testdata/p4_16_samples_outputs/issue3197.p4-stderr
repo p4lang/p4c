@@ -1,1 +1,4 @@
+issue3197.p4(6): [--Wwarn=unused] warning: 'f' is unused
+bit<2> f(in bit<2> t)
+       ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

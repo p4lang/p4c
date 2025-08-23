@@ -1,1 +1,4 @@
+tuple3.p4(2): [--Wwarn=unused] warning: 'f' is unused
+const bit<32> f = t[0];
+              ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -344,7 +344,7 @@ action push_vxlan_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac
     if (hdr.customer_ipv6.isValid()) {
         customer_ip_len = customer_ip_len + 16w40 + hdr.customer_ipv6.payload_length;
     }
-    hdr.u0_ipv4.total_len = 16w50 + customer_ip_len;
+    hdr.u0_ipv4.total_len = customer_ip_len + 16w50;
     hdr.u0_ipv4.version = 4w4;
     hdr.u0_ipv4.ihl = 4w5;
     hdr.u0_ipv4.diffserv = 8w0;
@@ -359,7 +359,7 @@ action push_vxlan_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u0_udp.setValid();
     hdr.u0_udp.src_port = 16w0;
     hdr.u0_udp.dst_port = 16w4789;
-    hdr.u0_udp.length = 16w30 + customer_ip_len;
+    hdr.u0_udp.length = customer_ip_len + 16w30;
     hdr.u0_udp.checksum = 16w0;
     hdr.u0_vxlan.setValid();
     hdr.u0_vxlan.reserved = 24w0;
@@ -381,7 +381,7 @@ action push_vxlan_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac
     if (hdr.u0_ipv6.isValid()) {
         u0_ip_len = u0_ip_len + 16w40 + hdr.u0_ipv6.payload_length;
     }
-    hdr.u1_ipv4.total_len = 16w50 + u0_ip_len;
+    hdr.u1_ipv4.total_len = u0_ip_len + 16w50;
     hdr.u1_ipv4.version = 4w4;
     hdr.u1_ipv4.ihl = 4w5;
     hdr.u1_ipv4.diffserv = 8w0;
@@ -396,7 +396,7 @@ action push_vxlan_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac
     hdr.u1_udp.setValid();
     hdr.u1_udp.src_port = 16w0;
     hdr.u1_udp.dst_port = 16w4789;
-    hdr.u1_udp.length = 16w30 + u0_ip_len;
+    hdr.u1_udp.length = u0_ip_len + 16w30;
     hdr.u1_udp.checksum = 16w0;
     hdr.u1_vxlan.setValid();
     hdr.u1_vxlan.reserved = 24w0;
@@ -418,8 +418,8 @@ action push_nvgre_tunnel_u0(inout headers_t hdr, in EthernetAddress overlay_dmac
     if (hdr.customer_ipv6.isValid()) {
         customer_ip_len = customer_ip_len + 16w40 + hdr.customer_ipv6.payload_length;
     }
-    hdr.u0_ipv4.total_len = 16w50 + customer_ip_len;
-    hdr.u0_ipv4.total_len = 16w42 + hdr.u0_ipv4.total_len;
+    hdr.u0_ipv4.total_len = customer_ip_len + 16w50;
+    hdr.u0_ipv4.total_len = hdr.u0_ipv4.total_len + 16w42;
     hdr.u0_ipv4.version = 4w4;
     hdr.u0_ipv4.ihl = 4w5;
     hdr.u0_ipv4.diffserv = 8w0;
@@ -453,8 +453,8 @@ action push_nvgre_tunnel_u1(inout headers_t hdr, in EthernetAddress overlay_dmac
     if (hdr.u0_ipv6.isValid()) {
         u0_ip_len = u0_ip_len + 16w40 + hdr.u0_ipv6.payload_length;
     }
-    hdr.u1_ipv4.total_len = 16w50 + u0_ip_len;
-    hdr.u1_ipv4.total_len = 16w42 + hdr.u1_ipv4.total_len;
+    hdr.u1_ipv4.total_len = u0_ip_len + 16w50;
+    hdr.u1_ipv4.total_len = hdr.u1_ipv4.total_len + 16w42;
     hdr.u1_ipv4.version = 4w4;
     hdr.u1_ipv4.ihl = 4w5;
     hdr.u1_ipv4.diffserv = 8w0;

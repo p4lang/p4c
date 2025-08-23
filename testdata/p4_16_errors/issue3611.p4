@@ -11,7 +11,6 @@ control c()
    switch(t.apply().action_run) {
       1: {} // { dg-error "" }
       a: {}
-      a: {}
       default: {}
     }
   }

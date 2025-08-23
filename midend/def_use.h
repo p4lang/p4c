@@ -50,7 +50,7 @@ class ComputeDefUse : public Inspector,
     ComputeDefUse *clone() const override {
         auto *rv = new ComputeDefUse(*this);
         rv->uid = ++uid_ctr;
-        LOG8("ComputeDefUse::clone " << rv->uid);
+        LOG8("ComputeDefUse::clone " << rv->uid << " <- " << uid);
         return rv;
     }
     void flow_merge(Visitor &) override;
@@ -201,6 +201,8 @@ class ComputeDefUse : public Inspector,
         return out << cdu.defuse;
     }
 };
+
+std::ostream &operator<<(std::ostream &, const hvec_set<const ComputeDefUse::loc_t *> &);
 
 }  // namespace P4
 

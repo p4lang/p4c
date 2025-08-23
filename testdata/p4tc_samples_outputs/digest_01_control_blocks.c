@@ -92,8 +92,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                         switch (value->action) {
                             case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
                                 {
-                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.srcMac, 48)));
-                                                                        storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.dstMac, 48)));
+storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.srcMac), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.dstMac), 48));
                                                                         meta->ingress_port = skb->ifindex;
                                                                         meta->send_digest = true;
                                     /* send_to_port(value->u.ingress_send_nh.port) */

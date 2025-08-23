@@ -1,3 +1,6 @@
+div.p4(16): [--Wwarn=unused] warning: 'act' is unused
+action act() {
+       ^^^
 div.p4(18): [--Werror=invalid] error: -8 / -2: Division is not defined for negative numbers
     a = - 8 / -2;
         ^^^^^^^^

@@ -1,3 +1,18 @@
+pna-example-tcp-connection-tracking.p4(66): [--Wwarn=unused] warning: 'TCP_URG_MASK' is unused
+const bit<8> TCP_URG_MASK = 0x20;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking.p4(67): [--Wwarn=unused] warning: 'TCP_ACK_MASK' is unused
+const bit<8> TCP_ACK_MASK = 0x10;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking.p4(68): [--Wwarn=unused] warning: 'TCP_PSH_MASK' is unused
+const bit<8> TCP_PSH_MASK = 0x08;
+             ^^^^^^^^^^^^
+pna-example-tcp-connection-tracking.p4(78): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NEVER' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER = (ExpireTimeProfileId_t) 3;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-tcp-connection-tracking.p4(141): [--Wwarn=unused] warning: 'drop' is unused
+    action drop () {
+           ^^^^
 pna-example-tcp-connection-tracking.p4(206): [--Wwarn=uninitialized_use] warning: update_aging_info may be uninitialized
         if (update_aging_info) {
             ^^^^^^^^^^^^^^^^^

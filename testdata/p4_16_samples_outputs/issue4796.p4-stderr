@@ -10,9 +10,21 @@ issue4796.p4(33): [--Wwarn=unused] warning: 'orde' is unused
 issue4796.p4(33): [--Wwarn=unused] warning: 'priv' is unused
     action revie(out priceX year, bit<128> orde, bit<128> priv) {
                                                           ^^^^
-issue4796.p4(22): [--Wwarn=parser-transition] warning: accept state in parser MainParserImpl is unreachable
+issue4796.p4(35): [--Wwarn=unused] warning: 'compa' is unused
+    action compa() {
+           ^^^^^
+issue4796.p4(37): [--Wwarn=unused] warning: 'resea' is unused
+    action resea(out bit<32> janu, bit<4> revi) {
+           ^^^^^
+issue4796.p4(37): [--Wwarn=unused] warning: 'janu' is unused
+    action resea(out bit<32> janu, bit<4> revi) {
+                             ^^^^
+issue4796.p4(37): [--Wwarn=unused] warning: 'revi' is unused
+    action resea(out bit<32> janu, bit<4> revi) {
+                                          ^^^^
+issue4796.p4(22): [--Wwarn=unreachable] warning: accept state in parser MainParserImpl is unreachable
 parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_mai...
        ^^^^^^^^^^^^^^
-issue4796.p4(22): [--Wwarn=parser-transition] warning: accept state in parser MainParserImpl is unreachable
+issue4796.p4(22): [--Wwarn=unreachable] warning: accept state in parser MainParserImpl is unreachable
 parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_mai...
        ^^^^^^^^^^^^^^

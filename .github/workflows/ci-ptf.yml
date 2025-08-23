@@ -38,7 +38,7 @@ jobs:
       INSTALL_PTF_EBPF_DEPENDENCIES: ON
       BUILD_GENERATOR: Ninja
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -53,5 +53,5 @@ jobs:
           tools/ci-build.sh
 
       - name: Run PTF tests for eBPF backend (Ubuntu 22.04)
-        run: sudo -E ./test.sh
+        run: sudo -E env PATH="$PATH" uv run ./test.sh
         working-directory: ./backends/ebpf/tests

@@ -247,7 +247,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
     const IR::Node *postorder(IR::HeaderStackItemRef *ref) override {
         if (auto ht = ref->base()->type->to<IR::Type_StructLike>())
             setType(ref, ht);
-        else if (auto hst = ref->base()->type->to<IR::Type_Stack>())
+        else if (auto hst = ref->base()->type->to<IR::Type_Array>())
             setType(ref, hst->elementType);
         else
             error(ErrorType::ERR_TYPE_ERROR, "%s: %s is not a header", ref->base()->srcInfo,

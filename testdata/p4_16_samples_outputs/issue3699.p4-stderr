@@ -1,1 +1,25 @@
+issue3699.p4(10): [--Wwarn=unused] warning: 'f' is unused
+void f(in h[value == max ? 1 : -1] a){}
+     ^
+issue3699.p4(11): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(max |+| max) == max ? 1 : -1] a){}
+     ^^
+issue3699.p4(12): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(max |+| 0) == max ? 1 : -1] a){}
+     ^^
+issue3699.p4(13): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[value1 == max ? 1 : -1] a){}
+     ^^
+issue3699.p4(20): [--Wwarn=unused] warning: 'f' is unused
+void f(in h[values == maxs ? 1 : -1] a){}
+     ^
+issue3699.p4(21): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(maxs |+| maxs) == maxs ? 1 : -1] a){}
+     ^^
+issue3699.p4(22): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[(maxs |+| 0) == maxs ? 1 : -1] a){}
+     ^^
+issue3699.p4(23): [--Wwarn=unused] warning: 'f1' is unused
+void f1(in h[values1 == maxs ? 1 : -1] a){}
+     ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

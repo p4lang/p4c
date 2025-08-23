@@ -1,0 +1,3 @@
+minsize.p4(31): [--Wwarn=unused] warning: 'w' is unused
+const int w = T.maxSizeInBits();
+          ^

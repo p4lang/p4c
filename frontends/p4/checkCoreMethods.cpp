@@ -22,7 +22,7 @@ limitations under the License.
 namespace P4 {
 
 void DoCheckCoreMethods::checkEmitType(const IR::Expression *emit, const IR::Type *type) const {
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Array>() ||
         type->is<IR::Type_HeaderUnion>())
         return;
 

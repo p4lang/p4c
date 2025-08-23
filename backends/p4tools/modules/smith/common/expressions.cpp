@@ -1057,7 +1057,7 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
                         expr = genStructListExpr(fieldTn);
                         components.push_back(expr);
                     }
-                } else if (const auto *fieldTs = sf->type->to<IR::Type_Stack>()) {
+                } else if (const auto *fieldTs = sf->type->to<IR::Type_Array>()) {
                     auto stackSize = fieldTs->getSize();
                     const auto *stackType = fieldTs->elementType;
                     if (const auto *sTypeName = stackType->to<IR::Type_Name>()) {

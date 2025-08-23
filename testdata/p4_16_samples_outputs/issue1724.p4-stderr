@@ -1,1 +1,4 @@
+issue1724.p4(2): [--Wwarn=unused] warning: 'test' is unused
+action test(inout bit<16> a, inout bit<2> b) {
+       ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

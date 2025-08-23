@@ -1,2 +1,11 @@
+pna-dpdk-direct-counter-err-4.p4(32): [--Wwarn=unused] warning: 'ByteCounter_t' is unused
+typedef bit<48> ByteCounter_t;
+                ^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err-4.p4(33): [--Wwarn=unused] warning: 'PacketCounter_t' is unused
+typedef bit<32> PacketCounter_t;
+                ^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err-4.p4(36): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 512;
+              ^^^^^^^^^
 [--Werror=unexpected] error: count method for different DirectCounter instances (per_prefix_pkt_byte_count_0 and per_prefix_pkt_byte_count1_0) called within same action
 [--Werror=unexpected] error: count method for different DirectCounter instances (per_prefix_pkt_byte_count_0 and per_prefix_pkt_byte_count1_0) called within same action

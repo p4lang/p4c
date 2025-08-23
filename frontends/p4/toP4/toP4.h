@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4_TOP4_TOP4_H_
-#define P4_TOP4_TOP4_H_
+#ifndef FRONTENDS_P4_TOP4_TOP4_H_
+#define FRONTENDS_P4_TOP4_TOP4_H_
 
 #include <filesystem>
 #include <iostream>
@@ -147,7 +147,7 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::Type_Parser *t) override;
     bool preorder(const IR::Type_Control *t) override;
     bool preorder(const IR::Type_Name *t) override;
-    bool preorder(const IR::Type_Stack *t) override;
+    bool preorder(const IR::Type_Array *t) override;
     bool preorder(const IR::Type_Specialized *t) override;
     bool preorder(const IR::Type_Enum *t) override;
     bool preorder(const IR::Type_SerEnum *t) override;
@@ -270,4 +270,4 @@ void dumpP4(const IR::INode *node);
 
 }  // namespace P4
 
-#endif /* P4_TOP4_TOP4_H_ */
+#endif /* FRONTENDS_P4_TOP4_TOP4_H_ */

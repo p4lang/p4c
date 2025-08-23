@@ -1,3 +1,6 @@
+issue3359.p4(24): [--Wwarn=unused] warning: parser 'MyParser2' is unused
+parser MyParser2(in bit tt) {
+       ^^^^^^^^^
 issue3359.p4(14): [--Werror=type-error] error: t: cannot declare variables of type 'parser mypt' (consider using an instantiation)
     mypt t = MyParser();
     ^^^^^^^^^^^^^^^^^^^

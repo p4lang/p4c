@@ -1,0 +1,3 @@
+newtype1.p4(6): [--Wwarn=unused] warning: 'PSA_CPU_PORT' is unused
+const Narrow PSA_CPU_PORT = (Narrow) 9w192; // target-specific
+             ^^^^^^^^^^^^

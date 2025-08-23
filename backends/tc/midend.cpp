@@ -18,8 +18,8 @@ and limitations under the License.
 
 namespace P4::TC {
 
-const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
-                                     std::ostream *outStream) {
+IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
+                               std::ostream *outStream) {
     if (program == nullptr && options.listMidendPasses == 0) return nullptr;
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
@@ -59,7 +59,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
         new P4::SimplifyControlFlow(&typeMap, true),
         new P4::TableHit(&typeMap),
         new P4::RemoveLeftSlices(&typeMap),
-        new EBPF::Lower(&refMap, &typeMap),
+        new EBPF::Lower(&refMap, &typeMap, std::nullopt),
         new P4::ParsersUnroll(true, &refMap, &typeMap),
         evaluator,
         new P4::MidEndLast(),

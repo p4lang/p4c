@@ -66,7 +66,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     const auto *ltype = typeMap->getType(statement->left, true);
 
     // If the left type is not a struct like or a header stack, return.
-    if (!(ltype->is<IR::Type_StructLike>() || ltype->is<IR::Type_Stack>())) {
+    if (!(ltype->is<IR::Type_StructLike>() || ltype->is<IR::Type_Array>())) {
         return statement;
     }
     /*
@@ -131,11 +131,11 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         // Finish up.
         return new IR::IfStatement(srcInfo, isSrcValidCall,
                                    new IR::BlockStatement(srcInfo, thenStmts), elseStmt);
-    } else if (ltype->is<IR::Type_Stack>() &&
+    } else if (ltype->is<IR::Type_Array>() &&
                ((!isInContext<IR::P4Parser>()) ||
                 (statement->right->is<IR::HeaderStackExpression>()))) {
         // no copies in parsers -- copying stacks looses the .next field
-        const auto *stack = ltype->checkedTo<IR::Type_Stack>();
+        const auto *stack = ltype->checkedTo<IR::Type_Array>();
         const auto *stackSize = stack->size->to<IR::Constant>();
         BUG_CHECK(stackSize && stackSize->value > 0, "Size of stack %s is not a positive constant",
                   ltype);
@@ -154,7 +154,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
     } else {
-        if (ltype->is<IR::Type_Header>() || ltype->is<IR::Type_Stack>()) {
+        if (ltype->is<IR::Type_Header>() || ltype->is<IR::Type_Array>()) {
             // Leave headers as they are -- copy_header will also copy the valid bit
             return statement;
         }

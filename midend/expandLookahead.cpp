@@ -51,7 +51,7 @@ void DoExpandLookahead::expand(
         *offset -= size;
         auto assignment = new IR::AssignmentStatement(bitvector->srcInfo, destination, expression);
         output->push_back(assignment);
-    } else if (auto ts = type->to<IR::Type_Stack>()) {
+    } else if (auto ts = type->to<IR::Type_Array>()) {
         unsigned elements = ts->getSize();
         auto etype = ts->elementType;
         for (unsigned i = 0; i < elements; i++) {

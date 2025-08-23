@@ -3,7 +3,7 @@ ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # Argument for the CLANG compiler
 LLC ?= llc
 CLANG ?= clang
-override INCLUDES+= -I$(ROOT_DIR) -I$(ROOT_DIR)usr/include/ -I$(ROOT_DIR)contrib/libbpf/include/uapi/
+override INCLUDES+= -I$(ROOT_DIR)
 override LIBS+=
 # Optimization flags to save space
 override CFLAGS+= -O2 -g -c -D__KERNEL__ -D__ASM_SYSREG_H \

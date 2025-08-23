@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_V2_UTILS_V2_H_
-#define BF_P4C_PHV_V2_UTILS_V2_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_
 
 #include <iterator>
 #include <optional>
@@ -197,9 +197,6 @@ class ScoreContext {
     /// search time related parameters.
     const SearchConfig *search_config_i = new SearchConfig();
 
-    /// tracer will try to log steps of every allocation.
-    std::ostream *tracer = nullptr;
-
  private:
     static constexpr const char *tab_table[] = {
         "", " ", "  ", "   ", "    ", "     ", "      ", "       ", "        ",
@@ -279,4 +276,4 @@ class ScoreContext {
 }  // namespace v2
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_V2_UTILS_V2_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_V2_UTILS_V2_H_ */

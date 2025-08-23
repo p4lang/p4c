@@ -1,3 +1,15 @@
+pna-dpdk-direct-counter-err.p4(5): [--Wwarn=unused] warning: 'ETHERNET_HEADER_LEN' is unused
+const bit<8> ETHERNET_HEADER_LEN = 14;
+             ^^^^^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err.p4(42): [--Wwarn=unused] warning: 'ByteCounter_t' is unused
+typedef bit<48> ByteCounter_t;
+                ^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err.p4(44): [--Wwarn=unused] warning: 'PacketByteCounter_t' is unused
+typedef bit<80> PacketByteCounter_t;
+                ^^^^^^^^^^^^^^^^^^^
+pna-dpdk-direct-counter-err.p4(45): [--Wwarn=unused] warning: 'FlowIdx_t' is unused
+typedef bit<16> FlowIdx_t;
+                ^^^^^^^^^
 pna-dpdk-direct-counter-err.p4(95): [--Werror=unexpected] error: implementation property cannot co-exist with direct counter and direct meter property for table ipv4_host
     table ipv4_host {
           ^^^^^^^^^

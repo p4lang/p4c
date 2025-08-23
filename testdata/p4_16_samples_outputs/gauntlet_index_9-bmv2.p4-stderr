@@ -1,0 +1,3 @@
+gauntlet_index_9-bmv2.p4(4): [--Wwarn=unused] warning: 'max' is unused
+bit<3> max(in bit<3> val, in bit<3> bound) {
+       ^^^

@@ -62,7 +62,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
         u8 hit;
         {
 if (/* hdr->ipv4.isValid() */
-            hdr->ipv4.ebpf_valid && hdr->ipv4.protocol == 0x6) {
+            hdr->ipv4.ebpf_valid && hdr->ipv4.protocol==0x6) {
 /* nh_table_0.apply() */
                 {
                     /* construct key */
@@ -91,8 +91,8 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
                                 {
-                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.srcMac, 48)));
-                                                                        storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.dstMac, 48)));
+storePrimitive64((u8 *)&hdr->ethernet.srcAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.srcMac), 48));
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr[0], 48, getPrimitive64((u8 *)(value->u.ingress_send_nh.dstMac), 48));
                                     /* send_to_port(value->u.ingress_send_nh.port) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.ingress_send_nh.port);

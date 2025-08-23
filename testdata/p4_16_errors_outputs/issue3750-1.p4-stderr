@@ -1,3 +1,12 @@
+issue3750-1.p4(5): [--Wwarn=unused] warning: 'T' is unused
+extern E<T> {
+         ^
+issue3750-1.p4(9): [--Wwarn=unused] warning: 'f' is unused
+void f(tuple<ct> t)
+     ^
+issue3750-1.p4(14): [--Wwarn=unused] warning: 'g' is unused
+void g(tuple<E<bit<32>>> t)
+     ^
 issue3750-1.p4(9): [--Werror=type-error] error: ct: not supported as a tuple field
 void f(tuple<ct> t)
              ^^

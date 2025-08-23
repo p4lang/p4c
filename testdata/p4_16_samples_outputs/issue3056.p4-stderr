@@ -1,4 +1,31 @@
-issue3056.p4(6): [--Wwarn=unused] warning: Control compute is not used; removing
+issue3056.p4(6): [--Wwarn=unused] warning: control 'compute' is unused
+control compute() {
+        ^^^^^^^
+issue3056.p4(9): [--Wwarn=unused] warning: 'x1' is unused
+        bit<8> x1 = 8w0 << e;
+        ^^^^^^^^^^^^^^^^^^^^
+issue3056.p4(10): [--Wwarn=unused] warning: 'x2' is unused
+        bit<8> x2 = -e;
+        ^^^^^^^^^^^^^^
+issue3056.p4(11): [--Wwarn=unused] warning: 'x3' is unused
+        bit<4> x3 = e[3:0];
+        ^^^^^^^^^^^^^^^^^^
+issue3056.p4(12): [--Wwarn=unused] warning: 'x4' is unused
+        bool x4 = 8w0 == e;
+        ^^^^^^^^^^^^^^^^^^
+issue3056.p4(13): [--Wwarn=unused] warning: 'x5' is unused
+        bit<8> x5 = 8w0 | e;
+        ^^^^^^^^^^^^^^^^^^^
+issue3056.p4(14): [--Wwarn=unused] warning: 'x6' is unused
+        bit<8> x6 = e << 3; // p4c error: "<< left operand of shift must be a numeric type, not E"
+        ^^^^^^^^^^^^^^^^^^
+issue3056.p4(15): [--Wwarn=unused] warning: 'x7' is unused
+        bit<16> x7 = e ++ 8w0; // p4c error: "Concatenation not defined on E and bit<8>"
+        ^^^^^^^^^^^^^^^^^^^^^
+issue3056.p4(16): [--Wwarn=unused] warning: 'x8' is unused
+        bit<4> x8 = 8w0[4:E.e1]; // p4c error: "bit indexes must be compile-time constants"
+        ^^^^^^^^^^^^^^^^^^^^^^^
+issue3056.p4(6): [--Winfo=removed] info: removing control 'compute'
 control compute() {
         ^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

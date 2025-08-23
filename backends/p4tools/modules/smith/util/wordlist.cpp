@@ -690,7 +690,8 @@ const std::array<const char *, WORDLIST_LENGTH> Wordlist::WORDS = {
     "tractor",  "allah",    "unwrap",   "fares",    "resist",   "hoped",    "safer",    "wagner",
     "touched",  "cologne",  "wishing",  "ranger",   "smallest", "newman",   "marsh",    "ricky",
     "scared",   "theta",    "monsters", "asylum",   "lightbox", "robbie",   "stake",    "cocktail",
-    "outlets",  "arbor",    "poison"};
+    "outlets",  "arbor",    "poison",
+};
 
 const char *P4Tools::P4Smith::Wordlist::getFromWordlist() {
     if (counter < WORDLIST_LENGTH) {

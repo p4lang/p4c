@@ -342,7 +342,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
     }
     if (auto var = ::P4::getref(available, name)) {
         if (var->val) {
-            if (policy(getChildContext(), var->val)) {
+            if (policy(getChildContext(), var->val, this)) {
                 LOG3("  propagating value for " << name << ": " << var->val);
                 CopySrcInfo copy(srcInfo);
                 return var->val->apply(copy);
@@ -561,7 +561,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     if (inferForFunc) inferForFunc->writes.insert(obj);
                 }
                 return mc;
-            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+            } else if (mem->expr->type->is<IR::Type_Array>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 dropValuesUsing(obj);
@@ -648,7 +648,7 @@ void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpressi
                 LOG3("loop prepass header method call " << mc->method << " writes to " << obj);
                 self.dropValuesUsing(obj);
                 return;
-            } else if (mem->expr->type->is<IR::Type_Stack>()) {
+            } else if (mem->expr->type->is<IR::Type_Array>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 self.dropValuesUsing(obj);
@@ -811,7 +811,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(vname);
                     var->live = true;
-                } else if (policy(getChildContext(), var->val)) {
+                } else if (policy(getChildContext(), var->val, this)) {
                     LOG3("  will propagate value into table key " << vname << ": " << var->val);
                     tbl->key_remap.emplace(vname, var->val);
                     need_key_rewrite = true;
@@ -837,7 +837,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(vname);
                     var->live = true;
-                } else if (policy(getChildContext(), var->val)) {
+                } else if (policy(getChildContext(), var->val, this)) {
                     LOG3("  will propagate value into table key " << vname << ": " << var->val);
                     tbl->key_remap.emplace(vname, var->val);
                     need_key_rewrite = true;

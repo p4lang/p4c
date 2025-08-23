@@ -71,17 +71,23 @@ class HSIndexContretizer : public Transform {
     std::shared_ptr<MinimalNameGenerator> nameGen;
     IR::IndexedVector<IR::Declaration> *locals;
     GeneratedVariablesMap *generatedVariables;
+    size_t expansion = 0, maxExpansion;
+    int id;
+    static int idCtr;
 
  public:
-    explicit HSIndexContretizer(TypeMap *typeMap,
+    explicit HSIndexContretizer(TypeMap *typeMap, size_t maxExpansion,
                                 std::shared_ptr<MinimalNameGenerator> nameGen = nullptr,
                                 IR::IndexedVector<IR::Declaration> *locals = nullptr,
                                 GeneratedVariablesMap *generatedVariables = nullptr)
         : typeMap(typeMap),
           nameGen(nameGen),
           locals(locals),
-          generatedVariables(generatedVariables) {
+          generatedVariables(generatedVariables),
+          maxExpansion(maxExpansion) {
+        id = ++idCtr;
         if (generatedVariables == nullptr) generatedVariables = new GeneratedVariablesMap();
+        LOG5("HSIndexContretizer(" << id << ") maxExpansion = " << maxExpansion);
     }
     Visitor::profile_t init_apply(const IR::Node *node) override {
         auto rv = Transform::init_apply(node);
@@ -109,10 +115,10 @@ class HSIndexContretizer : public Transform {
 
 class HSIndexSimplifier : public PassManager {
  public:
-    explicit HSIndexSimplifier(TypeMap *typeMap) {
+    explicit HSIndexSimplifier(TypeMap *typeMap, size_t maxExpansion = 1000) {
         // remove block statements
         passes.push_back(new TypeChecking(nullptr, typeMap, true));
-        passes.push_back(new HSIndexContretizer(typeMap));
+        passes.push_back(new HSIndexContretizer(typeMap, maxExpansion));
         setName("HSIndexSimplifier");
     }
 };

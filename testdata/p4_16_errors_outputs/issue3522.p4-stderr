@@ -1,3 +1,9 @@
+issue3522.p4(9): [--Wwarn=unused] warning: 'a' is unused
+action a(in s v) {
+       ^
+issue3522.p4(10): [--Wwarn=unused] warning: 't' is unused
+    bit<32> t = v.field.lastIndex;
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 issue3522.p4(10): [--Werror=type-error] error: v.field.lastIndex: 'lastIndex' for stacks can only be used in a parser
     bit<32> t = v.field.lastIndex;
                 ^^^^^^^^^^^^^^^^^

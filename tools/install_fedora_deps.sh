@@ -15,6 +15,7 @@ if [ "$IN_DOCKER" == "TRUE" ]; then
 fi
 
 sudo dnf install -y -q \
+    awk \
     automake \
     bison \
     boost-devel \
@@ -51,7 +52,10 @@ sudo dnf install -y -q \
     procps-ng \
     python3 \
     python3-pip \
+    python3-virtualenv \
     python3-thrift \
+    uv \
+    curl \
     readline-devel \
     tcpdump \
     thrift-devel \
@@ -60,8 +64,8 @@ sudo dnf install -y -q \
     glibc-devel.i686 \
     ninja-build
 
-pip3 install --upgrade pip
-pip3 install -r ${P4C_DIR}/requirements.txt
+# Set up uv for Python dependency management.
+uv sync
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS

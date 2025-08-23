@@ -21,8 +21,8 @@ SymbolicValue *SymbolicValueFactory::create(const IR::Type *type, bool uninitial
     if (type->is<IR::Type_HeaderUnion>())
         return new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>(), uninitialized, this);
     if (type->is<IR::Type_Varbits>()) return new SymbolicVarbit(type->to<IR::Type_Varbits>());
-    if (type->is<IR::Type_Stack>()) {
-        auto st = type->to<IR::Type_Stack>();
+    if (type->is<IR::Type_Array>()) {
+        auto st = type->to<IR::Type_Array>();
         return new SymbolicArray(st, uninitialized, this);
     }
     if (type->is<IR::Type_Tuple>()) {
@@ -56,7 +56,7 @@ bool SymbolicValueFactory::isFixedWidth(const IR::Type *type) const {
     type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Varbits>()) return false;
     if (type->is<IR::Type_Extern>()) return false;
-    if (type->is<IR::Type_Stack>()) return isFixedWidth(type->to<IR::Type_Stack>()->elementType);
+    if (type->is<IR::Type_Array>()) return isFixedWidth(type->to<IR::Type_Array>()->elementType);
     if (type->is<IR::Type_StructLike>()) {
         auto st = type->to<IR::Type_StructLike>();
         for (auto f : st->fields)
@@ -89,8 +89,8 @@ unsigned SymbolicValueFactory::getWidth(const IR::Type *type) const {
         for (auto f : st->fields) width += getWidth(f->type);
         return width;
     }
-    if (type->is<IR::Type_Stack>()) {
-        auto st = type->to<IR::Type_Stack>();
+    if (type->is<IR::Type_Array>()) {
+        auto st = type->to<IR::Type_Array>();
         auto bw = getWidth(st->elementType);
         return bw * st->getSize();
     }
@@ -447,7 +447,7 @@ void SymbolicHeader::dbprint(std::ostream &out) const {
     out << " }";
 }
 
-SymbolicArray::SymbolicArray(const IR::Type_Stack *type, bool uninitialized,
+SymbolicArray::SymbolicArray(const IR::Type_Array *type, bool uninitialized,
                              const SymbolicValueFactory *factory)
     : SymbolicValue(type),
       size(type->getSize()),
@@ -542,7 +542,7 @@ void SymbolicArray::setAllUnknown() {
 }
 
 SymbolicValue *SymbolicArray::clone() const {
-    auto result = new SymbolicArray(type->to<IR::Type_Stack>());
+    auto result = new SymbolicArray(type->to<IR::Type_Array>());
     for (unsigned i = 0; i < values.size(); i++)
         result->values.push_back(get(nullptr, i)->clone()->to<SymbolicStruct>());
     return result;
@@ -712,6 +712,9 @@ void ExpressionEvaluator::setNonConstant(const IR::Expression *expression) {
     } else if (type->is<IR::Type_Bits>()) {
         set(expression,
             new SymbolicInteger(ScalarValue::ValueState::NotConstant, type->to<IR::Type_Bits>()));
+    } else if (type->is<IR::Type_InfInt>()) {
+        set(expression,
+            new SymbolicInteger(ScalarValue::ValueState::NotConstant, IR::Type_Bits::get(0)));
     } else {
         BUG("Non Type_Bits type %1% for expression %2%", type, expression);
     }
@@ -853,7 +856,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary *expression) {
     cf.setCalledBy(this);
     auto result = clone->apply(cf);
 
-    if (type->is<IR::Type_Bits>()) {
+    if (type->is<IR::Type_Bits>() || type->is<IR::Type_InfInt>()) {
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
         set(expression, new SymbolicInteger(result->to<IR::Constant>()));
     } else if (type->is<IR::Type_Boolean>()) {
@@ -972,23 +975,23 @@ void ExpressionEvaluator::postorder(const IR::Member *expression) {
         return;
     }
     auto basetype = typeMap->getType(expression->expr, true);
-    if (basetype->is<IR::Type_Stack>()) {
+    if (basetype->is<IR::Type_Array>()) {
         BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
         auto array = l->to<SymbolicArray>();
         SymbolicValue *v;
-        if (expression->member.name == IR::Type_Stack::next) {
+        if (expression->member.name == IR::Type_Array::next) {
             v = array->next(expression);
             if (v->is<SymbolicError>()) {
                 set(expression, v);
                 return;
             }
-        } else if (expression->member.name == IR::Type_Stack::last) {
+        } else if (expression->member.name == IR::Type_Array::last) {
             v = array->last(expression);
             if (v->is<SymbolicError>()) {
                 set(expression, v);
                 return;
             }
-        } else if (expression->member.name == IR::Type_Stack::lastIndex) {
+        } else if (expression->member.name == IR::Type_Array::lastIndex) {
             v = array->lastIndex(expression);
             if (v->is<SymbolicError>()) {
                 set(expression, v);
@@ -1096,7 +1099,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
             hv->setValid(name == IR::Type_Header::setValid);
             set(expression, SymbolicVoid::get());
             return;
-        } else if (name == IR::Type_Stack::push_front || name == IR::Type_Stack::pop_front) {
+        } else if (name == IR::Type_Array::push_front || name == IR::Type_Array::pop_front) {
             BUG_CHECK(base->is<SymbolicArray>(), "%1%: expected an array", base);
             auto array = base->to<SymbolicArray>();
             BUG_CHECK(expression->arguments->size() == 1, "%1%: not one argument?", expression);
@@ -1109,7 +1112,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
             }
             BUG_CHECK(amount->is<SymbolicInteger>(), "%1%: expected an integer", amount);
             int amt = amount->to<SymbolicInteger>()->constant->asInt();
-            if (name == IR::Type_Stack::pop_front) amt = -amt;
+            if (name == IR::Type_Array::pop_front) amt = -amt;
             array->shift(amt);
             set(expression, SymbolicVoid::get());
             return;

@@ -30,12 +30,13 @@ jobs:
       - name: Install git
         run: dnf install -y -q git
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
       - name: Install dependencies (Fedora Linux)
-        run: tools/install_fedora_deps.sh
+        run: |
+          tools/install_fedora_deps.sh
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1
@@ -50,5 +51,5 @@ jobs:
 
       - name: Run p4c tests (Fedora Linux)
         run: |
-          export PATH="$HOME/.local/bin:$PATH"; ctest --output-on-failure --schedule-random
+          uv run ctest --output-on-failure --schedule-random
         working-directory: ./build

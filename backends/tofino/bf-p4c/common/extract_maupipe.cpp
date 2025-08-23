@@ -322,7 +322,7 @@ class SetupActionProperties : public MauModifier {
             if (!path) BUG("Default action path %s cannot be found", default_action);
             auto actName = refMap->getDeclaration(path->path, true)->externalName();
 
-            if (actName == act->name) {
+            if (act->name == actName) {
                 is_the_default_action = true;
                 if (has_constant_default_action) {
                     can_be_default_action = true;  // this is the constant default action

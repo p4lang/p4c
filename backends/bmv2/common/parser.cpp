@@ -28,7 +28,7 @@ namespace P4::BMV2 {
 cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header"_cs;
-    if (auto ts = type->to<IR::Type_Stack>()) {
+    if (auto ts = type->to<IR::Type_Array>()) {
         auto et = ts->elementType;
         if (et->is<IR::Type_HeaderUnion>())
             return "assign_union_stack"_cs;
@@ -151,8 +151,8 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
 
                 if (auto mem = arg->expression->to<IR::Member>()) {
                     auto baseType = ctxt->typeMap->getType(mem->expr, true);
-                    if (baseType->is<IR::Type_Stack>()) {
-                        if (mem->member == IR::Type_Stack::next) {
+                    if (baseType->is<IR::Type_Array>()) {
+                        if (mem->member == IR::Type_Array::next) {
                             // stack.next
                             type = "stack"_cs;
                             j = ctxt->conv->convert(mem->expr);
@@ -163,9 +163,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                         auto parent = mem->expr->to<IR::Member>();
                         if (parent != nullptr) {
                             auto parentType = ctxt->typeMap->getType(parent->expr, true);
-                            if (parentType->is<IR::Type_Stack>()) {
+                            if (parentType->is<IR::Type_Array>()) {
                                 // stack.next.unionfield
-                                if (parent->member == IR::Type_Stack::next) {
+                                if (parent->member == IR::Type_Array::next) {
                                     type = "union_stack"_cs;
                                     j = ctxt->conv->convert(parent->expr);
                                     Util::JsonArray *a;
@@ -308,9 +308,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 primitive = "add_header"_cs;
             } else if (bi->name == IR::Type_Header::setInvalid) {
                 primitive = "remove_header"_cs;
-            } else if (bi->name == IR::Type_Stack::push_front ||
-                       bi->name == IR::Type_Stack::pop_front) {
-                if (bi->name == IR::Type_Stack::push_front)
+            } else if (bi->name == IR::Type_Array::push_front ||
+                       bi->name == IR::Type_Array::pop_front) {
+                if (bi->name == IR::Type_Array::push_front)
                     primitive = "push"_cs;
                 else
                     primitive = "pop"_cs;

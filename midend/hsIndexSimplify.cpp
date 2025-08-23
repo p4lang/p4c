@@ -53,6 +53,8 @@ const IR::Node *HSIndexTransform::postorder(IR::ArrayIndex *curArrayIndex) {
     return curArrayIndex;
 }
 
+int HSIndexContretizer::idCtr;
+
 IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
                                                     IR::Statement *statement,
                                                     const IR::Expression *expr) {
@@ -74,8 +76,16 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
     IR::IfStatement *result = nullptr;
     IR::IfStatement *curResult = nullptr;
     IR::IfStatement *newIf = nullptr;
-    const auto *typeStack = aiFinder.arrayIndex->left->type->checkedTo<IR::Type_Stack>();
+    const auto *typeStack = aiFinder.arrayIndex->left->type->checkedTo<IR::Type_Array>();
     size_t sz = typeStack->getSize();
+    if ((expansion += (sz - 1)) > maxExpansion) {
+        if (expansion - sz < maxExpansion)
+            error(ErrorType::ERR_OVERLIMIT, "%1%Too much expansion from non-const array indexes",
+                  statement->srcInfo);
+        return statement;
+    }
+    LOG5("HSIndexContretizer(" << id << ") expand " << aiFinder.arrayIndex << " by " << sz
+                               << ",  expansion = " << expansion);
     for (size_t i = 0; i < sz; i++) {
         HSIndexTransform aiRewriter(aiFinder, i);
         const auto *newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
@@ -174,7 +184,8 @@ IR::Node *HSIndexContretizer::preorder(IR::P4Control *control) {
     auto *newControl = controlKeySimplified->clone();
     IR::IndexedVector<IR::Declaration> newControlLocals;
     GeneratedVariablesMap blockGeneratedVariables;
-    HSIndexContretizer hsSimplifier(typeMap, nameGen, &newControlLocals, &blockGeneratedVariables);
+    HSIndexContretizer hsSimplifier(typeMap, maxExpansion, nameGen, &newControlLocals,
+                                    &blockGeneratedVariables);
     newControl->body = newControl->body->apply(hsSimplifier)->to<IR::BlockStatement>();
     for (const auto *declaration : controlKeySimplified->controlLocals) {
         if (declaration->is<IR::P4Action>()) {
@@ -184,6 +195,7 @@ IR::Node *HSIndexContretizer::preorder(IR::P4Control *control) {
         }
     }
     newControl->controlLocals = newControlLocals;
+    prune();
     return newControl;
 }
 
@@ -198,7 +210,8 @@ IR::Node *HSIndexContretizer::preorder(IR::BlockStatement *blockStatement) {
     if (aiFinder.arrayIndex == nullptr) {
         return blockStatement;
     }
-    HSIndexContretizer hsSimplifier(typeMap, nameGen, locals, generatedVariables);
+    HSIndexContretizer hsSimplifier(typeMap, maxExpansion, nameGen, locals, generatedVariables);
+    hsSimplifier.expansion = expansion;
     auto *newBlock = blockStatement->clone();
     IR::IndexedVector<IR::StatOrDecl> newComponents;
     for (auto &component : blockStatement->components) {
@@ -212,6 +225,7 @@ IR::Node *HSIndexContretizer::preorder(IR::BlockStatement *blockStatement) {
         }
     }
     newBlock->components = newComponents;
+    expansion = hsSimplifier.expansion;
     return newBlock;
 }
 

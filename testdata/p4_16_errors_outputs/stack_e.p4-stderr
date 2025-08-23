@@ -1,6 +1,21 @@
-stack_e.p4(23): [--Werror=type-error] error: Header stack struct s[5] used with non-header type struct s
-        s[5] stack1; // non-header illegal in header stack
-        ^^^^
+stack_e.p4(19): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+stack_e.p4(26): [--Wwarn=unused] warning: 'b' is unused
+        h b = stack[1231092310293];
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+stack_e.p4(27): [--Wwarn=unused] warning: 'c' is unused
+        h c = stack[-2];
+        ^^^^^^^^^^^^^^^
+stack_e.p4(28): [--Wwarn=unused] warning: 'd' is unused
+        h d = stack[6];
+        ^^^^^^^^^^^^^^
+stack_e.p4(29): [--Wwarn=unused] warning: 'e' is unused
+        s e = stack1.next;
+        ^^^^^^^^^^^^^^^^^
 stack_e.p4(26): [--Werror=overlimit] error: 1231092310293: Value too large for int
         h b = stack[1231092310293];
                     ^^^^^^^^^^^^^
+stack_e.p4(29): [--Werror=type-error] error: stack1.next: 'next' can only be used on header stacks
+        s e = stack1.next;
+              ^^^^^^^^^^^

@@ -1,4 +1,13 @@
-header.p4(42): [--Wwarn=unused] warning: Control p is not used; removing
+header.p4(42): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+header.p4(45): [--Wwarn=unused] warning: 'stack' is unused
+        your_header[5] stack;
+        ^^^^^^^^^^^^^^^^^^^^
+header.p4(49): [--Wwarn=unused] warning: 'your_stack' is unused
+typedef your_header[5] your_stack;
+                       ^^^^^^^^^^
+header.p4(42): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

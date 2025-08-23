@@ -1,0 +1,12 @@
+up4.p4(12): [--Wwarn=unused] warning: 'UDP_PORT_GTPU' is unused
+const bit<16> UDP_PORT_GTPU = 2152;
+              ^^^^^^^^^^^^^
+up4.p4(15): [--Wwarn=unused] warning: 'GTP_MESSAGE_TYPE_UPDU' is unused
+const bit<8> GTP_MESSAGE_TYPE_UPDU = 0xff;
+             ^^^^^^^^^^^^^^^^^^^^^
+up4.p4(19): [--Wwarn=unused] warning: 'GTPU_EXT_PSC_TYPE_UL' is unused
+const bit<4> GTPU_EXT_PSC_TYPE_UL = 4w1;
+             ^^^^^^^^^^^^^^^^^^^^
+up4.p4(30): [--Wwarn=unused] warning: 'DEFAULT_QFI' is unused
+const qfi_t DEFAULT_QFI = 0;
+            ^^^^^^^^^^^

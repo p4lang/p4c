@@ -110,9 +110,9 @@ bool P4ProgramDCGCreator::preorder(const IR::MethodCallExpression *call) {
                 BUG("Unknown method call on header instance: %1%", call);
             }
 
-            if (method->expr->type->is<IR::Type_Stack>()) {
-                if (method->member == IR::Type_Stack::push_front ||
-                    method->member == IR::Type_Stack::pop_front) {
+            if (method->expr->type->is<IR::Type_Array>()) {
+                if (method->member == IR::Type_Array::push_front ||
+                    method->member == IR::Type_Array::pop_front) {
                     return false;
                 }
                 BUG("Unknown method call on stack instance: %1%", call);

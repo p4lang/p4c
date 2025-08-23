@@ -35,19 +35,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
 
     if (auto ae = type->to<IR::Type_ActionEnum>()) {
         // switch (table.apply(...))
-        absl::flat_hash_map<cstring, const IR::Node *, Util::Hash> foundLabels;
-        const IR::Node *foundDefault = nullptr;
         for (auto c : stat->cases) {
             if (c->label->is<IR::DefaultExpression>()) {
-                if (foundDefault)
-                    typeError("%1%: multiple 'default' labels %2%", c->label, foundDefault);
-                foundDefault = c->label;
                 continue;
             } else if (auto pe = c->label->to<IR::PathExpression>()) {
                 cstring label = pe->path->name.name;
-                auto [it, inserted] = foundLabels.emplace(label, c->label);
-                if (!inserted)
-                    typeError("%1%: 'switch' label duplicates %2%", c->label, it->second);
                 if (!ae->contains(label))
                     typeError("%1% is not a legal label (action name)", c->label);
             } else {
@@ -58,8 +50,6 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
         // switch (expression)
         Comparison comp;
         comp.left = stat->expression;
-        if (isCompileTimeConstant(stat->expression))
-            warn(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch", stat->expression);
 
         auto *sclone = stat->clone();
         bool changed = false;
@@ -69,8 +59,10 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
             auto lt = getType(c->label);
             if (lt == nullptr) continue;
             if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
-                c = new IR::SwitchCase(c->srcInfo, new IR::Cast(c->label->srcInfo, type, c->label),
-                                       c->statement);
+                c = new IR::SwitchCase(
+                    c->srcInfo,
+                    new IR::Cast(c->label->srcInfo, type, c->label, /* implicit */ true),
+                    c->statement);
                 setType(c->label, type);
                 setCompileTimeConstant(c->label);
                 changed = true;
@@ -199,7 +191,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
                                            forin->body);
         else
             delete rclone;
-    } else if (auto *stack = ctype->to<IR::Type_Stack>()) {
+    } else if (auto *stack = ctype->to<IR::Type_Array>()) {
         if (!canCastBetween(stack->elementType, ltype))
             typeError("%1% does not match header stack type %2%", forin->ref, ctype);
     } else if (auto *list = ctype->to<IR::Type_P4List>()) {

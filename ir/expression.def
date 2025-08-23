@@ -474,7 +474,7 @@ class ArrayIndex : Operation_Binary {
     stringOp = "[]";
     precedence = DBPrint::Prec_Postfix;
     inline ArrayIndex {
-        if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
+        if (auto st = left ? left->type->to<IR::Type_Array>() : nullptr)
             type = st->elementType; }
     toString{ return absl::StrCat(left, "[", right, "]"); }
 }
@@ -515,10 +515,11 @@ class This : Expression {
 }
 
 class Cast : Operation_Unary {
-    Type destType = type;
     /// These will generally always be the same, except when a cast to a type argument of
     /// a generic occurs.  Then at some point, the 'destType' will be specialized to a concrete
     /// type, and 'type' will only be updated later when type inferencing occurs
+    Type destType = type;
+    optional bool implicit = false;
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
     toString{ return absl::StrCat("(", destType, ")", expr); }

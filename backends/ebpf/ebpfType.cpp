@@ -48,7 +48,7 @@ EBPFType *EBPFTypeFactory::create(const IR::Type *type) {
         result = new EBPFEnumType(te);
     } else if (auto te = type->to<IR::Type_Error>()) {
         result = new EBPFErrorType(te);
-    } else if (auto ts = type->to<IR::Type_Stack>()) {
+    } else if (auto ts = type->to<IR::Type_Array>()) {
         auto et = create(ts->elementType);
         if (et == nullptr) return nullptr;
         result = new EBPFStackType(ts, et);
@@ -196,6 +196,7 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike *strct) : EBPFType(strc
         }
         fields.push_back(new EBPFField(type, f));
     }
+    packed = false;
 }
 
 void EBPFStructType::declare(CodeBuilder *builder, cstring id, bool asPointer) {
@@ -232,6 +233,8 @@ void EBPFStructType::emitInitializer(CodeBuilder *builder) {
 void EBPFStructType::emit(CodeBuilder *builder) {
     builder->emitIndent();
     builder->append(kind);
+    builder->spc();
+    if (packed) builder->append("__attribute__((__packed__))");
     builder->spc();
     builder->append(name);
     builder->spc();

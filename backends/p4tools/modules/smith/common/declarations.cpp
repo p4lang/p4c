@@ -454,7 +454,7 @@ IR::Type *DeclarationGenerator::genHeaderStackType() {
     auto stackSize = Utils::getRandInt(1, MAX_HEADER_STACK_SIZE);
     auto *hdrTypeName = new IR::Type_Name(hdrTp->name);
     auto *ret =
-        new IR::Type_Stack(hdrTypeName, new IR::Constant(IR::Type_InfInt::get(), stackSize));
+        new IR::Type_Array(hdrTypeName, new IR::Constant(IR::Type_InfInt::get(), stackSize));
 
     P4Scope::addToScope(ret);
 
@@ -491,7 +491,7 @@ IR::Type_Struct *DeclarationGenerator::genStructTypeDeclaration() {
     for (size_t i = 0; i < len; i++) {
         const auto *fieldTp = target().expressionGenerator().pickRndType(typePercent);
         cstring fieldName = getRandomString(4);
-        if (fieldTp->to<IR::Type_Stack>() != nullptr) {
+        if (fieldTp->to<IR::Type_Array>() != nullptr) {
             // Right now there is now way to initialize a header stack
             // So we have to add the entire structure to the banned expressions
             P4Scope::notInitializedStructs.insert(name);
@@ -672,7 +672,7 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
         tp->is<IR::Type_Name>()) {
         auto *expr = target().expressionGenerator().genExpression(tp);
         ret = new IR::Declaration_Variable(name, tp, expr);
-    } else if (tp->is<IR::Type_Stack>()) {
+    } else if (tp->is<IR::Type_Array>()) {
         // header stacks do !have an initializer yet
         ret = new IR::Declaration_Variable(name, tp);
     } else {

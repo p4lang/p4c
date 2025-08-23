@@ -1,1 +1,4 @@
+twoPipe.p4(47): [--Wwarn=unused] warning: 'package Switch' is unused
+package Switch<T>(
+        ^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

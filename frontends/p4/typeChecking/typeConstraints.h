@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef TYPECHECKING_TYPECONSTRAINTS_H_
-#define TYPECHECKING_TYPECONSTRAINTS_H_
+#ifndef FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
+#define FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
 
 #include "ir/ir.h"
 #include "lib/castable.h"
@@ -236,4 +236,4 @@ class TypeConstraints final : public IHasDbPrint {
 };
 }  // namespace P4
 
-#endif /* TYPECHECKING_TYPECONSTRAINTS_H_ */
+#endif /* FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_ */

@@ -1,1 +1,4 @@
+intType.p4(3): [--Wwarn=unused] warning: 'c' is unused
+const int c = b - a + 3;
+          ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

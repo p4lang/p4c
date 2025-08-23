@@ -1,1 +1,4 @@
+bitExtract.p4(18): [--Wwarn=unused] warning: 'c' is unused
+const bit<2> c = b[3:2];
+             ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

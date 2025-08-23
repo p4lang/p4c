@@ -1,3 +1,6 @@
+issue3305.p4(13): [--Wwarn=unused] warning: 'v' is unused
+    s<s1> v;
+    ^^^^^^^
 issue3305.p4(13): [--Werror=type-error] error: s1: generic type needs type arguments
     s<s1> v;
       ^^

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_
-#define BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_
 
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
@@ -85,4 +85,4 @@ class CheckUninitializedAndOverlayedReads : public PassManager {
     CheckUninitializedAndOverlayedReads(const FieldDefUse &defuse, const PhvInfo &phv,
                                         const PHV::Pragmas &pragmas, const BFN_Options &options);
 };
-#endif /* BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_ */

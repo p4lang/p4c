@@ -246,13 +246,13 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Operation_Relation *expre
         return result;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left);
+        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left, /* implicit */ true);
         setType(e->left, rtype);
         ltype = rtype;
         expression = e;
     } else if (rtype->is<IR::Type_InfInt>() && ltype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
-        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right);
+        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right, /* implicit */ true);
         setType(e->right, ltype);
         rtype = ltype;
         expression = e;
@@ -339,14 +339,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Concat *expression) {
 
         if (castLeft) {
             auto e = expression->clone();
-            e->left = new IR::Cast(e->left->srcInfo, bl, e->left);
+            e->left = new IR::Cast(e->left->srcInfo, bl, e->left, /* implicit */ true);
             if (isCompileTimeConstant(expression->left)) setCompileTimeConstant(e->left);
             setType(e->left, ltype);
             expression = e;
         }
         if (castRight) {
             auto e = expression->clone();
-            e->right = new IR::Cast(e->right->srcInfo, br, e->right);
+            e->right = new IR::Cast(e->right->srcInfo, br, e->right, /* implicit */ true);
             if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(e->right);
             setType(e->right, rtype);
             expression = e;
@@ -596,7 +596,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
     if (done()) return expression;
     bool constant = true;
     auto stackType = getTypeType(expression->headerStackType);
-    if (auto st = stackType->to<IR::Type_Stack>()) {
+    if (auto st = stackType->to<IR::Type_Array>()) {
         auto elementType = st->elementType;
         IR::Vector<IR::Expression> vec;
         bool changed = false;
@@ -685,7 +685,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ArrayIndex *expression) {
     auto ltype = getType(expression->left);
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr) return expression;
-    auto hst = ltype->to<IR::Type_Stack>();
+    auto hst = ltype->to<IR::Type_Array>();
 
     int index = -1;
     if (auto cst = expression->right->to<IR::Constant>()) {
@@ -830,7 +830,7 @@ const IR::Node *TypeInferenceBase::binaryArith(const IR::Operation_Binary *expre
         auto leftResultType = br;
         if (castLeft && !br) leftResultType = bl;
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, leftResultType, e->left);
+        e->left = new IR::Cast(e->left->srcInfo, leftResultType, e->left, /* implicit */ true);
         setType(e->left, leftResultType);
         if (isCompileTimeConstant(expression->left)) {
             e->left = constantFold(e->left);
@@ -843,7 +843,7 @@ const IR::Node *TypeInferenceBase::binaryArith(const IR::Operation_Binary *expre
         auto e = expression->clone();
         auto rightResultType = bl;
         if (castRight && !bl) rightResultType = br;
-        e->right = new IR::Cast(e->right->srcInfo, rightResultType, e->right);
+        e->right = new IR::Cast(e->right->srcInfo, rightResultType, e->right, /* implicit */ true);
         setType(e->right, rightResultType);
         if (isCompileTimeConstant(expression->right)) {
             e->right = constantFold(e->right);
@@ -1011,14 +1011,14 @@ const IR::Node *TypeInferenceBase::typeSet(const IR::Operation_Binary *expressio
         }
     } else if (bl == nullptr && br != nullptr) {
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left);
+        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left, /* implicit */ true);
         setCompileTimeConstant(e->left);
         expression = e;
         sameType = rtype;
         setType(e->left, sameType);
     } else if (bl != nullptr && br == nullptr) {
         auto e = expression->clone();
-        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right);
+        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right, /* implicit */ true);
         setCompileTimeConstant(e->right);
         expression = e;
         setType(e->right, ltype);
@@ -1228,7 +1228,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
             return expression;
         }
     }
-    if (concreteType->is<IR::Type_Stack>()) {
+    if (concreteType->is<IR::Type_Array>()) {
         if (expression->expr->is<IR::ListExpression>()) {
             auto result = assignment(expression, concreteType, expression->expr);
             return result;
@@ -1263,7 +1263,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
         }
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
-            expression = new IR::Cast(expression->srcInfo, expression->destType, rhs);
+            expression =
+                new IR::Cast(expression->srcInfo, expression->destType, rhs, /* implicit */ true);
             sourceType = getTypeType(expression->destType);
         }
         if (!canCastBetween(castType, sourceType))
@@ -1704,9 +1705,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
         return expression;
     }
 
-    if (auto *stack = type->to<IR::Type_Stack>()) {
+    if (auto *stack = type->to<IR::Type_Array>()) {
         auto parser = findContext<IR::P4Parser>();
-        if (member == IR::Type_Stack::next || member == IR::Type_Stack::last) {
+        auto eltype = stack->elementType;
+        if (auto sc = eltype->to<IR::Type_SpecializedCanonical>()) eltype = sc->baseType;
+        if (!eltype->is<IR::Type_Header>() && !eltype->is<IR::Type_HeaderUnion>()) {
+            typeError("%1%: '%2%' can only be used on header stacks", expression, member);
+            return expression;
+        } else if (member == IR::Type_Array::next || member == IR::Type_Array::last) {
             if (parser == nullptr) {
                 typeError("%1%: 'last', and 'next' for stacks can only be used in a parser",
                           expression);
@@ -1714,16 +1720,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
             }
             setType(getOriginal(), stack->elementType);
             setType(expression, stack->elementType);
-            if (isLeftValue(expression->expr) && member == IR::Type_Stack::next) {
+            if (isLeftValue(expression->expr) && member == IR::Type_Array::next) {
                 setLeftValue(expression);
                 setLeftValue(getOriginal<IR::Expression>());
             }
             return expression;
-        } else if (member == IR::Type_Stack::arraySize) {
+        } else if (member == IR::Type_Array::arraySize) {
             setType(getOriginal(), IR::Type_Bits::get(32));
             setType(expression, IR::Type_Bits::get(32));
             return expression;
-        } else if (member == IR::Type_Stack::lastIndex) {
+        } else if (member == IR::Type_Array::lastIndex) {
             if (parser == nullptr) {
                 typeError("%1%: 'lastIndex' for stacks can only be used in a parser", expression);
                 return expression;
@@ -1731,10 +1737,10 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
             setType(getOriginal(), IR::Type_Bits::get(32, false));
             setType(expression, IR::Type_Bits::get(32, false));
             return expression;
-        } else if (member == IR::Type_Stack::push_front || member == IR::Type_Stack::pop_front) {
+        } else if (member == IR::Type_Array::push_front || member == IR::Type_Array::pop_front) {
             if (parser != nullptr)
                 typeError("%1%: '%2%' and '%3%' for stacks cannot be used in a parser", expression,
-                          IR::Type_Stack::push_front, IR::Type_Stack::pop_front);
+                          IR::Type_Array::push_front, IR::Type_Array::pop_front);
             if (!isLeftValue(expression->expr))
                 typeError("%1%: must be applied to a left-value", expression);
             IR::IndexedVector<IR::Parameter> params;
@@ -2170,8 +2176,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
         }
 
         auto bi = mi->to<BuiltInMethod>();
-        if (isInContext<IR::SelectCase>() && (!bi || (bi->name == IR::Type_Stack::pop_front ||
-                                                      bi->name == IR::Type_Stack::push_front))) {
+        if (isInContext<IR::SelectCase>() && (!bi || (bi->name == IR::Type_Array::pop_front ||
+                                                      bi->name == IR::Type_Array::push_front))) {
             typeError("%1%: no function calls allowed in this context", expression);
             return expression;
         }
@@ -2263,6 +2269,12 @@ const IR::SelectCase *TypeInferenceBase::matchCase(const IR::SelectExpression *s
         }
         useSelType = selectType->components.at(0);
     }
+    if (auto senum = useSelType->to<IR::Type_SerEnum>()) {
+        // With select of a serial enum type, the cases may be either the serenum type,
+        // or the underlying type, so match against the underlying type, because implicit
+        // casts to the senum type are not allowed.
+        useSelType = getTypeType(senum->type);
+    }
     auto tvs = unifyCast(
         select, useSelType, caseType,
         "'match' case label '%1%' has type '%2%' which does not match the expected type '%3%'",
@@ -2299,7 +2311,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::DefaultExpression *expres
 }
 
 bool TypeInferenceBase::containsHeader(const IR::Type *type) {
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Array>() ||
         type->is<IR::Type_HeaderUnion>())
         return true;
     if (auto *st = type->to<IR::Type_Struct>()) {

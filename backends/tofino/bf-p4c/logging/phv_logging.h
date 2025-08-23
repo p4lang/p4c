@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_LOGGING_PHV_LOGGING_H_
-#define BF_P4C_LOGGING_PHV_LOGGING_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_PHV_LOGGING_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_PHV_LOGGING_H_
 
 #include <algorithm>
 #include <string>
@@ -348,4 +348,4 @@ class PhvLogging : public MauInspector {
                         const ordered_map<cstring, ordered_set<int>> &t, const TableSummary &ts);
 };
 
-#endif /* BF_P4C_LOGGING_PHV_LOGGING_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_PHV_LOGGING_H_ */

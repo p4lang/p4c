@@ -1,3 +1,6 @@
-issue2514.p4(23): [--Wwarn=unused] warning: Parser prs is not used; removing
+issue2514.p4(23): [--Wwarn=unused] warning: parser 'prs' is unused
+parser prs(inout my_headers_t hdr) {
+       ^^^
+issue2514.p4(23): [--Winfo=removed] info: removing parser 'prs'
 parser prs(inout my_headers_t hdr) {
        ^^^

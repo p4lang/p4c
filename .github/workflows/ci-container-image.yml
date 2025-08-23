@@ -24,7 +24,7 @@ jobs:
     if: ${{ github.repository == 'p4lang/p4c' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
       - name: Determine Docker image tag
@@ -51,7 +51,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
           tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

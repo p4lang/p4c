@@ -1,7 +1,10 @@
-direct-call.p4(20): [--Wwarn=unused] warning: Control d is not used; removing
+direct-call.p4(20): [--Wwarn=unused] warning: control 'd' is unused
 control d() {
         ^
-direct-call.p4(16): [--Wwarn=unused] warning: Control c is not used; removing
+direct-call.p4(20): [--Winfo=removed] info: removing control 'd'
+control d() {
+        ^
+direct-call.p4(16): [--Winfo=removed] info: removing control 'c'
 control c() {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

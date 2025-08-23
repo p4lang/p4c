@@ -1,184 +1,184 @@
-structure-valued-expr-errs-1.p4(100): [--Werror=type-error] error: 'hdr.h1 = {}'
+structure-valued-expr-errs-1.p4(115): [--Werror=type-error] error: 'hdr.h1 = {}'
             hdr.h1 = {};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(100): Number of fields 0 in initializer tuple<> is different than number of fields 1 in 'header h1_t'
+structure-valued-expr-errs-1.p4(115): Number of fields 0 in initializer tuple<> is different than number of fields 1 in 'header h1_t'
               hdr.h1 = {};
                        ^^
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(100): Source expression '{}' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(115): Source expression '{}' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {};
                        ^^
-structure-valued-expr-errs-1.p4(100)
+structure-valued-expr-errs-1.p4(115)
               hdr.h1 = {};
                        ^^
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(101): [--Werror=type-error] error: 'hdr.h2 = {}'
+structure-valued-expr-errs-1.p4(116): [--Werror=type-error] error: 'hdr.h2 = {}'
             hdr.h2 = {};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(100): Number of fields 0 in initializer tuple<> is different than number of fields 2 in 'header h2_t'
+structure-valued-expr-errs-1.p4(115): Number of fields 0 in initializer tuple<> is different than number of fields 2 in 'header h2_t'
               hdr.h1 = {};
                        ^^
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(101): Source expression '{}' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h2_t'
+structure-valued-expr-errs-1.p4(116): Source expression '{}' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h2_t'
               hdr.h2 = {};
                        ^^
-structure-valued-expr-errs-1.p4(100)
+structure-valued-expr-errs-1.p4(115)
               hdr.h1 = {};
                        ^^
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(102): [--Werror=type-error] error: 'hdr.h0 = { 4 }'
+structure-valued-expr-errs-1.p4(117): [--Werror=type-error] error: 'hdr.h0 = { 4 }'
             hdr.h0 = {4};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(102): Number of fields 1 in initializer tuple<int> is different than number of fields 0 in 'header h0_t'
+structure-valued-expr-errs-1.p4(117): Number of fields 1 in initializer tuple<int> is different than number of fields 0 in 'header h0_t'
               hdr.h0 = {4};
                        ^^^
 structure-valued-expr-errs-1.p4(28)
   header h0_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(102): Source expression '{ 4 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h0_t'
+structure-valued-expr-errs-1.p4(117): Source expression '{ 4 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h0_t'
               hdr.h0 = {4};
                        ^^^
-structure-valued-expr-errs-1.p4(102)
+structure-valued-expr-errs-1.p4(117)
               hdr.h0 = {4};
                        ^^^
 structure-valued-expr-errs-1.p4(28)
   header h0_t {
          ^^^^
-structure-valued-expr-errs-1.p4(103): [--Werror=type-error] error: 'hdr.h1 = { 1, 2 }'
+structure-valued-expr-errs-1.p4(118): [--Werror=type-error] error: 'hdr.h1 = { 1, 2 }'
             hdr.h1 = {1, 2};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(103): Number of fields 2 in initializer tuple<int, int> is different than number of fields 1 in 'header h1_t'
+structure-valued-expr-errs-1.p4(118): Number of fields 2 in initializer tuple<int, int> is different than number of fields 1 in 'header h1_t'
               hdr.h1 = {1, 2};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(103): Source expression '{ 1, 2 }' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(118): Source expression '{ 1, 2 }' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {1, 2};
                        ^^^^^^
-structure-valued-expr-errs-1.p4(103)
+structure-valued-expr-errs-1.p4(118)
               hdr.h1 = {1, 2};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(104): [--Werror=type-error] error: 'hdr.h2 = { 3 }'
+structure-valued-expr-errs-1.p4(119): [--Werror=type-error] error: 'hdr.h2 = { 3 }'
             hdr.h2 = {3};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(104): Number of fields 1 in initializer tuple<int> is different than number of fields 2 in 'header h2_t'
+structure-valued-expr-errs-1.p4(119): Number of fields 1 in initializer tuple<int> is different than number of fields 2 in 'header h2_t'
               hdr.h2 = {3};
                        ^^^
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(104): Source expression '{ 3 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h2_t'
+structure-valued-expr-errs-1.p4(119): Source expression '{ 3 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h2_t'
               hdr.h2 = {3};
                        ^^^
-structure-valued-expr-errs-1.p4(104)
+structure-valued-expr-errs-1.p4(119)
               hdr.h2 = {3};
                        ^^^
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(105): [--Werror=type-error] error: 'hdr.hstructs.s0 = { 1 }'
+structure-valued-expr-errs-1.p4(120): [--Werror=type-error] error: 'hdr.hstructs.s0 = { 1 }'
             hdr.hstructs.s0 = {1};
                             ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(105): Number of fields 1 in initializer tuple<int> is different than number of fields 0 in 'struct s0_t'
+structure-valued-expr-errs-1.p4(120): Number of fields 1 in initializer tuple<int> is different than number of fields 0 in 'struct s0_t'
               hdr.hstructs.s0 = {1};
                                 ^^^
 structure-valued-expr-errs-1.p4(40)
   struct s0_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(105): Source expression '{ 1 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s0_t'
+structure-valued-expr-errs-1.p4(120): Source expression '{ 1 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s0_t'
               hdr.hstructs.s0 = {1};
                                 ^^^
-structure-valued-expr-errs-1.p4(105)
+structure-valued-expr-errs-1.p4(120)
               hdr.hstructs.s0 = {1};
                                 ^^^
 structure-valued-expr-errs-1.p4(40)
   struct s0_t {
          ^^^^
-structure-valued-expr-errs-1.p4(106): [--Werror=type-error] error: 'hdr.hstructs.s1 = { 1, 2 }'
+structure-valued-expr-errs-1.p4(121): [--Werror=type-error] error: 'hdr.hstructs.s1 = { 1, 2 }'
             hdr.hstructs.s1 = {1, 2};
                             ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(106): Number of fields 2 in initializer tuple<int, int> is different than number of fields 1 in 'struct s1_t'
+structure-valued-expr-errs-1.p4(121): Number of fields 2 in initializer tuple<int, int> is different than number of fields 1 in 'struct s1_t'
               hdr.hstructs.s1 = {1, 2};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(106): Source expression '{ 1, 2 }' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'struct s1_t'
+structure-valued-expr-errs-1.p4(121): Source expression '{ 1, 2 }' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'struct s1_t'
               hdr.hstructs.s1 = {1, 2};
                                 ^^^^^^
-structure-valued-expr-errs-1.p4(106)
+structure-valued-expr-errs-1.p4(121)
               hdr.hstructs.s1 = {1, 2};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(107): [--Werror=type-error] error: 'hdr.hstructs.s2 = { 3 }'
+structure-valued-expr-errs-1.p4(122): [--Werror=type-error] error: 'hdr.hstructs.s2 = { 3 }'
             hdr.hstructs.s2 = {3};
                             ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(107): Number of fields 1 in initializer tuple<int> is different than number of fields 2 in 'struct s2_t'
+structure-valued-expr-errs-1.p4(122): Number of fields 1 in initializer tuple<int> is different than number of fields 2 in 'struct s2_t'
               hdr.hstructs.s2 = {3};
                                 ^^^
 structure-valued-expr-errs-1.p4(47)
   struct s2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(107): Source expression '{ 3 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s2_t'
+structure-valued-expr-errs-1.p4(122): Source expression '{ 3 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s2_t'
               hdr.hstructs.s2 = {3};
                                 ^^^
-structure-valued-expr-errs-1.p4(107)
+structure-valued-expr-errs-1.p4(122)
               hdr.hstructs.s2 = {3};
                                 ^^^
 structure-valued-expr-errs-1.p4(47)
   struct s2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(112): [--Werror=type-error] error: 'hdr.h1 = { f2 = 5, f1 = 2 }'
+structure-valued-expr-errs-1.p4(127): [--Werror=type-error] error: 'hdr.h1 = { f2 = 5, f1 = 2 }'
             hdr.h1 = {f2=5, f1=2};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(112): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to header h1_t
+structure-valued-expr-errs-1.p4(127): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to header h1_t
               hdr.h1 = {f2=5, f1=2};
                        ^^^^^^^^^^^^
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(112): Source expression '{ f2 = 5, f1 = 2 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(127): Source expression '{ f2 = 5, f1 = 2 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {f2=5, f1=2};
                        ^^^^^^^^^^^^
-structure-valued-expr-errs-1.p4(112)
+structure-valued-expr-errs-1.p4(127)
               hdr.h1 = {f2=5, f1=2};
                        ^^^^^^^^^^^^
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(113): [--Werror=type-error] error: 'hdr.h1 = { f2 = 5 }'
+structure-valued-expr-errs-1.p4(128): [--Werror=type-error] error: 'hdr.h1 = { f2 = 5 }'
             hdr.h1 = {f2=5};
                    ^
   ---- Actual error:
@@ -186,36 +186,36 @@ structure-valued-expr-errs-1.p4(32): No initializer for field f1
       bit<8> f1;
              ^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(113): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(128): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {f2=5};
                        ^^^^^^
-structure-valued-expr-errs-1.p4(113)
+structure-valued-expr-errs-1.p4(128)
               hdr.h1 = {f2=5};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(114): [--Werror=type-error] error: 'hdr.hstructs.s1 = { f2 = 5, f1 = 2 }'
+structure-valued-expr-errs-1.p4(129): [--Werror=type-error] error: 'hdr.hstructs.s1 = { f2 = 5, f1 = 2 }'
             hdr.hstructs.s1 = {f2=5, f1=2};
                             ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(114): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to struct s1_t
+structure-valued-expr-errs-1.p4(129): Number of fields 2 in initializer different than number of fields in structure 1: unknown struct to struct s1_t
               hdr.hstructs.s1 = {f2=5, f1=2};
                                 ^^^^^^^^^^^^
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(114): Source expression '{ f2 = 5, f1 = 2 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
+structure-valued-expr-errs-1.p4(129): Source expression '{ f2 = 5, f1 = 2 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
               hdr.hstructs.s1 = {f2=5, f1=2};
                                 ^^^^^^^^^^^^
-structure-valued-expr-errs-1.p4(114)
+structure-valued-expr-errs-1.p4(129)
               hdr.hstructs.s1 = {f2=5, f1=2};
                                 ^^^^^^^^^^^^
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(115): [--Werror=type-error] error: 'hdr.hstructs.s1 = { f2 = 5 }'
+structure-valued-expr-errs-1.p4(130): [--Werror=type-error] error: 'hdr.hstructs.s1 = { f2 = 5 }'
             hdr.hstructs.s1 = {f2=5};
                             ^
   ---- Actual error:
@@ -223,52 +223,69 @@ structure-valued-expr-errs-1.p4(44): No initializer for field f1
       bit<8> f1;
              ^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(115): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
+structure-valued-expr-errs-1.p4(130): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
               hdr.hstructs.s1 = {f2=5};
                                 ^^^^^^
-structure-valued-expr-errs-1.p4(115)
+structure-valued-expr-errs-1.p4(130)
               hdr.hstructs.s1 = {f2=5};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(120): [--Werror=type-error] error: 'hdr.h2 = { f2 = 5 }'
+structure-valued-expr-errs-1.p4(135): [--Werror=type-error] error: 'hdr.h2 = { f2 = 5 }'
             hdr.h2 = {f2=5};
                    ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(120): Number of fields 1 in initializer different than number of fields in structure 2: unknown struct to header h2_t
+structure-valued-expr-errs-1.p4(135): Number of fields 1 in initializer different than number of fields in structure 2: unknown struct to header h2_t
               hdr.h2 = {f2=5};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(120): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h2_t'
+structure-valued-expr-errs-1.p4(135): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h2_t'
               hdr.h2 = {f2=5};
                        ^^^^^^
-structure-valued-expr-errs-1.p4(120)
+structure-valued-expr-errs-1.p4(135)
               hdr.h2 = {f2=5};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(121): [--Werror=type-error] error: 'hdr.hstructs.s2 = { f2 = 5 }'
+structure-valued-expr-errs-1.p4(136): [--Werror=type-error] error: 'hdr.hstructs.s2 = { f2 = 5 }'
             hdr.hstructs.s2 = {f2=5};
                             ^
   ---- Actual error:
-structure-valued-expr-errs-1.p4(121): Number of fields 1 in initializer different than number of fields in structure 2: unknown struct to struct s2_t
+structure-valued-expr-errs-1.p4(136): Number of fields 1 in initializer different than number of fields in structure 2: unknown struct to struct s2_t
               hdr.hstructs.s2 = {f2=5};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(47)
   struct s2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(121): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s2_t'
+structure-valued-expr-errs-1.p4(136): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s2_t'
               hdr.hstructs.s2 = {f2=5};
                                 ^^^^^^
-structure-valued-expr-errs-1.p4(121)
+structure-valued-expr-errs-1.p4(136)
               hdr.hstructs.s2 = {f2=5};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(47)
   struct s2_t {
          ^^^^
+structure-valued-expr-errs-1.p4(138): [--Werror=type-error] error: '{ f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType }'
+..._0){f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType});
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+structure-valued-expr-errs-1.p4(55): No initializer for field f2
+      bit<16> f2;
+              ^^
+  ---- Originating from:
+structure-valued-expr-errs-1.p4(138): Initializer type 'unknown struct' does not match expected type 'struct tuple_0'
+  ..._0){f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType});
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+structure-valued-expr-errs-1.p4(52)
+  struct tuple_0 {
+         ^^^^^^^
+structure-valued-expr-errs-1.p4(55): [--Werror=type-error] error: No initializer for field f2
+    bit<16> f2;
+            ^^

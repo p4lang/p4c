@@ -1,0 +1,30 @@
+pna-dpdk-add_on_miss1.p4(20): [--Wwarn=unused] warning: 'IPv6Address' is unused
+typedef bit<128> IPv6Address;
+                 ^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(70): [--Wwarn=unused] warning: 'TCP_URG_MASK' is unused
+const bit<8> TCP_URG_MASK = 0x20;
+             ^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(71): [--Wwarn=unused] warning: 'TCP_ACK_MASK' is unused
+const bit<8> TCP_ACK_MASK = 0x10;
+             ^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(72): [--Wwarn=unused] warning: 'TCP_PSH_MASK' is unused
+const bit<8> TCP_PSH_MASK = 0x08;
+             ^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(73): [--Wwarn=unused] warning: 'TCP_RST_MASK' is unused
+const bit<8> TCP_RST_MASK = 0x04;
+             ^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(74): [--Wwarn=unused] warning: 'TCP_SYN_MASK' is unused
+const bit<8> TCP_SYN_MASK = 0x02;
+             ^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(75): [--Wwarn=unused] warning: 'TCP_FIN_MASK' is unused
+const bit<8> TCP_FIN_MASK = 0x01;
+             ^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(89): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NOW' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW = (ExpireTimeProfileId_t) 0;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(91): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_ESTABLISHED' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t) 2;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-dpdk-add_on_miss1.p4(92): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NEVER' is unused
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER = (ExpireTimeProfileId_t) 3;
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

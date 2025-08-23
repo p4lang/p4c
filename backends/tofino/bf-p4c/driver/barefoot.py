@@ -259,26 +259,6 @@ class BarefootBackend(BackendDriver):
             help="Set compiler logging verbosity level: 0=OFF, 1=SUMMARY, 2=INFO, 3=DEBUG",
         )
         self._argGroup.add_argument(
-            "--Wdisable",
-            action="append",
-            nargs="?",
-            default=None,
-            const="",
-            type=str,
-            help="Disable a compiler diagnostic, or disable all warnings "
-            "if no diagnostic is specified.",
-        )
-        self._argGroup.add_argument(
-            "--Werror",
-            action="append",
-            nargs="?",
-            default=None,
-            const="",
-            type=str,
-            help="Report an error for a compiler diagnostic, or treat all "
-            "warnings as errors if no diagnostic is specified.",
-        )
-        self._argGroup.add_argument(
             "--help-warnings",
             help="Print warning types that can be used for --Werror and --Wdisable options.",
             action="store_true",
@@ -316,13 +296,6 @@ class BarefootBackend(BackendDriver):
             help="Reduce PHV allocation search space for faster compilation.",
         )
         if os.environ['P4C_BUILD_TYPE'] == "DEVELOPER":
-            for debugger in ["gdb", "cgdb", "lldb"]:
-                self._argGroup.add_argument(
-                    "--" + debugger,
-                    action="store_true",
-                    default=False,
-                    help="run the backend compiler under the %s debugger" % (debugger,),
-                )
             self._argGroup.add_argument(
                 "--validate-output",
                 action="store_true",
@@ -442,35 +415,6 @@ class BarefootBackend(BackendDriver):
     def config_p4c_gen_conf(self, maxPipe):
         self.add_command_option('p4c-gen-conf', "--max-pipe " + str(maxPipe))
 
-    def config_warning_modifiers(self, arguments, option):
-        """! Behaviour of warnings emitted by p4c can be modified by two options:
-        --Werror which turns all/selected warnings into errors
-        --Wdisable which ignores all/selected warnings
-        Both accept either no further options or they accept comma separated list of strings
-        or they can occur multiple times with a different CSL each time. If argparser is properly configured
-        (action="append", nargs="?", default=None, const="", type=str) it will create a list of strings
-        (plain or CSLs) or empty string (if no further option was provided).
-        You can then pass parsed argument to this function to properly select between everything or something
-        and to properly parse CSLs.
-
-        @param arguments Warning arguments
-        @param option String value, either "disable" or "error"
-        """
-        if option != "disable" and option != "error":
-            raise Exception(
-                "Programmer error - config_warning_modifiers does not support option " + option
-            )
-
-        all = len(arguments) == 1 and arguments[0] == ""
-
-        if all:
-            self.add_command_option('compiler', '--W{}'.format(option))
-        else:
-            for diag in arguments:
-                subdiags = diag.split(',')
-                for sd in subdiags:
-                    self.add_command_option('compiler', '--W{}={}'.format(option, sd))
-
     def should_not_check_input(self, opts):
         """!
         @return True if input should not be checked, otherwise False
@@ -529,11 +473,6 @@ class BarefootBackend(BackendDriver):
         self.checkVersionTargetArch(opts.target, opts.language, opts.arch)
         self.language = opts.language
 
-        # Make sure we don't have conflicting debugger options.
-        if os.environ['P4C_BUILD_TYPE'] == "DEVELOPER":
-            if sum(int(x) for x in [opts.gdb, opts.cgdb, opts.lldb]) > 1:
-                self.exitWithError("Cannot use more than one debugger at a time.")
-
         # process the options related to source file
         if self._output_directory == '.':
             # if no output directory set, set it to <program_name.target>
@@ -576,19 +515,6 @@ class BarefootBackend(BackendDriver):
 
         if opts.skip_linker:
             self._no_link = True
-
-        if os.environ['P4C_BUILD_TYPE'] == "DEVELOPER":
-            if opts.gdb or opts.cgdb or opts.lldb:
-                # XXX breaks abstraction
-                old_command = self._commands['compiler']
-                if opts.lldb:
-                    self.add_command('compiler', 'lldb')
-                    self.add_command_option('compiler', '--')
-                else:
-                    self.add_command('compiler', 'gdb' if opts.gdb else 'cgdb')
-                    self.add_command_option('compiler', '--args')
-                for arg in old_command:
-                    self.add_command_option('compiler', arg)
 
         if opts.create_graphs or opts.archive:
             self.add_command_option('compiler', '--create-graphs')
@@ -649,12 +575,6 @@ class BarefootBackend(BackendDriver):
             self.checkAndRunCmd('compiler')
             # no need for anything else, we printed the pragmas and we need to exit
             sys.exit(0)
-
-        if opts.Wdisable is not None:
-            self.config_warning_modifiers(opts.Wdisable, "disable")
-
-        if opts.Werror is not None:
-            self.config_warning_modifiers(opts.Werror, "error")
 
         self.pragmas_help = opts.help_pragmas
         if opts.help_pragmas:

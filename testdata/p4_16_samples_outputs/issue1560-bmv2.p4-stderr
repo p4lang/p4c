@@ -1,0 +1,6 @@
+issue1560-bmv2.p4(4): [--Wwarn=unused] warning: 'EthernetAddress' is unused
+typedef bit<48> EthernetAddress;
+                ^^^^^^^^^^^^^^^
+issue1560-bmv2.p4(123): [--Wwarn=unused] warning: 'foo3' is unused
+    action foo3(bit<8> ttl) {
+           ^^^^

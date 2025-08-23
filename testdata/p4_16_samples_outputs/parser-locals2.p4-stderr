@@ -1,0 +1,6 @@
+parser-locals2.p4(66): [--Wwarn=unused] warning: 'my_local' is unused
+        bit<8> my_local = 1;
+        ^^^^^^^^^^^^^^^^^^^
+parser-locals2.p4(74): [--Wwarn=unused] warning: 'my_local' is unused
+        bit<16> my_local = 2;
+        ^^^^^^^^^^^^^^^^^^^^

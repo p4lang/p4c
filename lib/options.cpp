@@ -20,6 +20,10 @@ limitations under the License.
 
 namespace P4 {
 
+void Util::Options::shortUsage() {
+    *outStream << "Use '--help' to see all available options." << std::endl;
+}
+
 void Util::Options::registerOption(const char *option, const char *argName,
                                    OptionProcessor processor, const char *description,
                                    OptionFlags flags /* = OptionFlags::Default */) {
@@ -58,6 +62,10 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
     char build_date[50];
     strftime(build_date, 50, "%c", localtime(&now));
     buildDate = cstring(build_date);
+    return process_options(argc, argv);
+}
+
+std::vector<const char *> *Util::Options::process_options(int argc, char *const argv[]) {
     for (int i = 1; i < argc; i++) {
         cstring opt = cstring(argv[i]);
         const char *arg = nullptr;
@@ -68,7 +76,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
             if (!option && (arg = opt.find('='))) option = get(options, opt.before(arg++));
             if (option == nullptr) {
                 ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
-                usage();
+                shortUsage();
                 return nullptr;
             }
         } else if (opt.startsWith("-") && opt.size() > 1) {
@@ -83,7 +91,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
             }
             if (option == nullptr) {
                 ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
-                usage();
+                shortUsage();
                 return nullptr;
             }
             if ((option->flags & OptionFlags::OptionalArgument) && (!arg || strlen(arg) == 0))
@@ -99,14 +107,14 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
                     ::P4::error(ErrorType::ERR_EXPECTED,
                                 "Option %1% is missing required argument %2%", opt,
                                 option->argName);
-                    usage();
+                    shortUsage();
                     return nullptr;
                 }
                 arg = argv[++i];
             }
             bool success = option->processor(arg);
             if (!success) {
-                usage();
+                shortUsage();
                 return nullptr;
             }
         }
@@ -114,7 +122,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
 
     auto result = validateOptions();
     if (!result) {
-        usage();
+        shortUsage();
         return nullptr;
     }
 

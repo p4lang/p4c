@@ -43,7 +43,8 @@ const int ErrorType::ERR_DUPLICATE = 13;
 const int ErrorType::ERR_IO = 14;
 const int ErrorType::ERR_UNREACHABLE = 15;
 const int ErrorType::ERR_MODEL = 16;
-const int ErrorType::ERR_RESERVED = 17;
+const int ErrorType::ERR_TABLE_KEYS = 17;
+const int ErrorType::ERR_RESERVED = 18;
 
 // ------ Warnings -----------
 const int ErrorType::LEGACY_WARNING = ERR_MAX + 1;
@@ -73,10 +74,12 @@ const int ErrorType::WARN_MULTI_HDR_EXTRACT = 1023;
 const int ErrorType::WARN_EXPRESSION = 1024;
 const int ErrorType::WARN_DUPLICATE = 1025;
 const int ErrorType::WARN_BRANCH_HINT = 1026;
+const int ErrorType::WARN_TABLE_KEYS = 1027;
 
 // ------ Info messages -----------
 const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
 const int ErrorType::INFO_PROGRESS = 2143;
+const int ErrorType::INFO_REMOVED = 2144;
 
 // map from errorCode to ErrorSig
 std::map<int, cstring> ErrorCatalog::errorCatalog = {
@@ -95,8 +98,10 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::ERR_TYPE_ERROR, "type-error"_cs},
     {ErrorType::ERR_UNSUPPORTED_ON_TARGET, "target-error"_cs},
     {ErrorType::ERR_DUPLICATE, "duplicate"_cs},
+    {ErrorType::ERR_UNREACHABLE, "unreachable"_cs},
     {ErrorType::ERR_IO, "I/O error"_cs},
     {ErrorType::ERR_MODEL, "Target model error"_cs},
+    {ErrorType::ERR_TABLE_KEYS, "keys"_cs},
     {ErrorType::ERR_RESERVED, "reserved"_cs},
 
     // Warnings
@@ -115,7 +120,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_IGNORE_PROPERTY, "ignore-prop"_cs},
     {ErrorType::WARN_TYPE_INFERENCE, "type-inference"_cs},
     {ErrorType::WARN_PARSER_TRANSITION, "parser-transition"_cs},
-    {ErrorType::WARN_UNREACHABLE, "parser-transition"_cs},
+    {ErrorType::WARN_UNREACHABLE, "unreachable"_cs},
     {ErrorType::WARN_SHADOWING, "shadow"_cs},
     {ErrorType::WARN_UNINITIALIZED_USE, "uninitialized_use"_cs},
     {ErrorType::WARN_UNINITIALIZED_OUT_PARAM, "uninitialized_out_param"_cs},
@@ -127,10 +132,12 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_EXPRESSION, "expr"_cs},
     {ErrorType::WARN_DUPLICATE, "duplicate"_cs},
     {ErrorType::WARN_BRANCH_HINT, "branch"_cs},
+    {ErrorType::WARN_TABLE_KEYS, "keys"_cs},
 
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},
-    {ErrorType::INFO_PROGRESS, "progress"_cs}};
+    {ErrorType::INFO_PROGRESS, "progress"_cs},
+    {ErrorType::INFO_REMOVED, "removed"_cs}};
 
 void ErrorCatalog::initReporter(ErrorReporter &reporter) {
     // by default, ignore warnings about branch hints -- user can turn them

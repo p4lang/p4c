@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MAU_RESOURCE_ESTIMATE_H_
-#define BF_P4C_MAU_RESOURCE_ESTIMATE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_ESTIMATE_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_ESTIMATE_H_
 
 #include "backends/tofino/bf-p4c/mau/attached_entries.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
@@ -232,4 +232,4 @@ class RangeEntries : public MauInspector {
 
 std::ostream &operator<<(std::ostream &, const StageUseEstimate &);
 
-#endif /* BF_P4C_MAU_RESOURCE_ESTIMATE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_RESOURCE_ESTIMATE_H_ */

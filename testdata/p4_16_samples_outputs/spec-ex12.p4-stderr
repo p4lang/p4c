@@ -1,1 +1,10 @@
+spec-ex12.p4(19): [--Wwarn=unused] warning: 'u32' is unused
+typedef bit<32> u32;
+                ^^^
+spec-ex12.p4(20): [--Wwarn=unused] warning: 'Pt' is unused
+typedef struct Point { int<32> x; int<32> y; } Pt;
+                                               ^^
+spec-ex12.p4(21): [--Wwarn=unused] warning: 'HeaderStack' is unused
+typedef Empty_h[32] HeaderStack;
+                    ^^^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

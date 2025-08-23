@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_EBPF_CONCOLIC_H_
-#define TESTGEN_TARGETS_EBPF_CONCOLIC_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONCOLIC_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONCOLIC_H_
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 
@@ -17,4 +17,4 @@ class EBPFConcolic : public Concolic {
 
 }  // namespace P4::P4Tools::P4Testgen::EBPF
 
-#endif /* TESTGEN_TARGETS_EBPF_CONCOLIC_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONCOLIC_H_ */

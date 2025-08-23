@@ -1,1 +1,4 @@
+issue2627.p4(9): [--Wwarn=unused] warning: 'h4' is unused
+const H3<S> h4 = {
+            ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

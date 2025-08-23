@@ -1,4 +1,37 @@
 const.p4(19): [--Wwarn=mismatch] warning: 48w0xaabbccddeeff00: value does not fit in 48 bits
 const bit<48> tooLarge = 48w0xAA_BB_CC_DD_EE_FF_00
                          ^^^^^^^^^^^^^^^^^^^^^^^^^
+const.p4(17): [--Wwarn=unused] warning: 'zero' is unused
+const bit<32> zero = 32w0;
+              ^^^^
+const.p4(19): [--Wwarn=unused] warning: 'tooLarge' is unused
+const bit<48> tooLarge = 48w0xAA_BB_CC_DD_EE_FF_00; // this is too large
+              ^^^^^^^^
+const.p4(20): [--Wwarn=unused] warning: 'one' is unused
+const bit<32> one = 32w1;
+              ^^^
+const.p4(21): [--Wwarn=unused] warning: 'max' is unused
+const bit<32> max = 32w0xFFFF_FFFF;
+              ^^^
+const.p4(29): [--Wwarn=unused] warning: 'v' is unused
+const S v = { 32w3, (bit<32>)z };
+        ^
+const.p4(33): [--Wwarn=unused] warning: 'twothree' is unused
+const bit<32> twothree = (bit<32>)twotwo;
+              ^^^^^^^^
+const.p4(34): [--Wwarn=unused] warning: 'twofour' is unused
+const bit<6> twofour = (bit<6>)(bit<32>)(int<32>)two;
+             ^^^^^^^
+const.p4(42): [--Wwarn=unused] warning: 'zz' is unused
+const T zz = {
+        ^^
+const.p4(47): [--Wwarn=unused] warning: 'x' is unused
+const bit<32> x = 32w0;
+              ^
+const.p4(48): [--Wwarn=unused] warning: 'x1' is unused
+const bit<32> x1 = ~32w0;
+              ^^
+const.p4(53): [--Wwarn=unused] warning: 'izero' is unused
+const int32 izero = (int32)32w0;
+            ^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

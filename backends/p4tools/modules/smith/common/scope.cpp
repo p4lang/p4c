@@ -99,9 +99,9 @@ void P4Scope::deleteLval(const IR::Type *tp, cstring name) {
     } else if (const auto *typeEnum = tp->to<IR::Type_Enum>()) {
         typeKey = typeEnum->name.name;
         bitBucket = 1;
-    } else if (const auto *ts = tp->to<IR::Type_Stack>()) {
+    } else if (const auto *ts = tp->to<IR::Type_Array>()) {
         size_t stackSize = ts->getSize();
-        typeKey = IR::Type_Stack::static_type_name();
+        typeKey = IR::Type_Array::static_type_name();
         bitBucket = 1;
         if (const auto *tnType = ts->elementType->to<IR::Type_Name>()) {
             std::stringstream ss;
@@ -179,9 +179,9 @@ void P4Scope::addLval(const IR::Type *tp, cstring name, bool read_only) {
         return;
         // typeKey = enumType->name.name;
         // bitBucket = 1;
-    } else if (const auto *ts = tp->to<IR::Type_Stack>()) {
+    } else if (const auto *ts = tp->to<IR::Type_Array>()) {
         size_t stackSize = ts->getSize();
-        typeKey = IR::Type_Stack::static_type_name();
+        typeKey = IR::Type_Array::static_type_name();
         bitBucket = 1;
         if (const auto *tnType = ts->elementType->to<IR::Type_Name>()) {
             std::stringstream ss;

@@ -44,6 +44,7 @@ limitations under the License.
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
+#include "metrics/metricsPassManager.h"
 #include "moveConstructors.h"
 #include "moveDeclarations.h"
 #include "parseAnnotations.h"
@@ -145,6 +146,36 @@ class SetStrictStruct : public NoVisit {
     }
 };
 
+/**
+ * This pass validates switch statement semantics.
+ * Must be run after ConstantFolding.
+ */
+class ValidateSwitchStatements : public Inspector {
+ public:
+    explicit ValidateSwitchStatements() {}
+    bool preorder(const IR::SwitchStatement *stat) override {
+        const IR::Node *foundDefault = nullptr;
+        for (unsigned i = 0; i < stat->cases.size(); i++) {
+            const auto *c = stat->cases.at(i);
+            if (c->label->is<IR::DefaultExpression>()) {
+                if (foundDefault)
+                    P4::error(P4::ErrorType::ERR_INVALID, "%1%: multiple 'default' labels %2%",
+                              c->label, foundDefault);
+                foundDefault = c->label;
+                continue;
+            }
+            for (unsigned j = i + 1; j < stat->cases.size(); j++) {
+                auto *other = stat->cases.at(j);
+                if (other->label->equiv(*c->label)) {
+                    P4::error(P4::ErrorType::ERR_INVALID, "%1%: duplicate case label %2%",
+                              other->label, c->label);
+                }
+            }
+        }
+        return true;
+    }
+};
+
 }  // namespace
 
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
@@ -152,6 +183,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     TypeMap typeMap;
+
+    MetricsPassManager metricsPassManager(options, &typeMap, P4CContext::get().options().metrics);
 
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
@@ -168,9 +201,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Synthesize some built-in constructs
         new CreateBuiltins(),
         new CheckShadowing(),
+        new WarnAboutUnusedDeclarations(*policy),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
+        new ValidateSwitchStatements(),
         // Validate @name/@deprecated/@noWarn. Should run after constant folding.
         new ValidateStringAnnotations(),
         // Desugars direct parser and control applications
@@ -198,6 +233,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         }),
         new CheckCoreMethods(&typeMap),
         new StaticAssert(&typeMap),
+    });
+    metricsPassManager.addUnusedCode(passes, true);
+    passes.addPasses({
         new RemoveParserIfs(&typeMap),
         new StructInitializers(&typeMap),
         new TableKeyNames(&typeMap),
@@ -232,7 +270,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
-        new RemoveAllUnusedDeclarations(*policy),
+        new RemoveAllUnusedDeclarations(*policy, true),
         new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
         new EvaluatorPass(&typeMap),
@@ -248,8 +286,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         });
     }
     if (policy->optimize(options)) {
+        passes.addPasses({new InlineActions(&typeMap, *policy)});
+        metricsPassManager.addInlined(passes);
         passes.addPasses({
-            new InlineActions(&typeMap, *policy),
             new LocalizeAllActions(*policy),
             new UniqueNames(),
             new UniqueParameters(&typeMap),
@@ -268,10 +307,13 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&typeMap),
-            new RemoveAllUnusedDeclarations(*policy),
+            new RemoveAllUnusedDeclarations(*policy, true),
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
     }
+    metricsPassManager.addUnusedCode(passes, false);
+    metricsPassManager.addMetricPasses(passes);
+
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this
         // check during inlining since it significantly slows compilation.

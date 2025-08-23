@@ -1,3 +1,6 @@
+function1_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
 function1_e.p4(21): [--Werror=type-error] error: 'f(1w0)'
         f(1w1 & 1w0); // non lvalue passed to out parameter
         ^^^^^^^^^^^^

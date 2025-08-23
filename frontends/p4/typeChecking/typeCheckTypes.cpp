@@ -35,7 +35,7 @@ bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type) {
             }
         }
         return varbit != nullptr;
-    } else if (auto at = type->to<IR::Type_Stack>()) {
+    } else if (auto at = type->to<IR::Type_Array>()) {
         return hasVarbitsOrUnions(typeMap, at->elementType);
     } else if (auto tpl = type->to<IR::Type_Tuple>()) {
         for (auto f : tpl->components) {
@@ -47,6 +47,7 @@ bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type) {
 
 bool TypeInferenceBase::onlyBitsOrBitStructs(const IR::Type *type) const {
     // called for a canonical type
+    while (auto *st = type->to<IR::Type_Array>()) type = st->elementType;
     if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() || type->is<IR::Type_SerEnum>()) {
         return true;
     } else if (auto ht = type->to<IR::Type_Struct>()) {
@@ -96,7 +97,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Table *type) {
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Type *type) {
-    BUG("Should never be found in IR: %1%", type);
+    BUG_CHECK(errorCount() > 0, "Should never be found in IR: %1%", type);
+    return type;
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::P4Control *cont) {
@@ -173,6 +175,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Specialized *type) {
         if (!argtype) return type;
         if (auto self = ContainsType::find(argtype, baseType, typeMap)) {
             typeError("%1%: contains self '%2%' as type argument", type->baseType, self);
+            // If we continue we could get a IR loop which would crash the compiler, so stop here.
+            FATAL_ERROR("Compilation cannot continue due to type errors");
             return type;
         }
         if (auto tg = argtype->to<IR::IMayBeGenericType>()) {
@@ -375,16 +379,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Typedef *tdecl) {
     return tdecl;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::Type_Stack *type) {
-    auto canon = setTypeType(type);
-    if (canon == nullptr) return type;
-
-    auto etype = canon->to<IR::Type_Stack>()->elementType;
-    if (etype == nullptr) return type;
-
-    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>() &&
-        !etype->is<IR::Type_SpecializedCanonical>())
-        typeError("Header stack %1% used with non-header type %2%", type, etype->toString());
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Array *type) {
+    setTypeType(type);
     return type;
 }
 
@@ -423,9 +419,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Header *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
         while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
-        return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
-               (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) || t->is<IR::Type_SerEnum>() ||
-               t->is<IR::Type_Boolean>() || t->is<IR::Type_Var>() ||
+        return onlyBitsOrBitStructs(t) || t->is<IR::Type_Varbits>() || t->is<IR::Type_Var>() ||
                t->is<IR::Type_SpecializedCanonical>();
     };
     validateFields(canon, validator);
@@ -438,7 +432,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Struct *type) {
         while (auto *nt = t->to<IR::Type_Newtype>()) t = getTypeType(nt->type);
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() || t->is<IR::Type_Header>() ||
                t->is<IR::Type_HeaderUnion>() || t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
-               t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() || t->is<IR::Type_Varbits>() ||
+               t->is<IR::Type_Boolean>() || t->is<IR::Type_Array>() || t->is<IR::Type_Varbits>() ||
                t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>() ||
                t->is<IR::Type_SerEnum>() || t->is<IR::Type_Var>() ||
                t->is<IR::Type_SpecializedCanonical>() || t->is<IR::Type_MatchKind>();

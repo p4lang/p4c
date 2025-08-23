@@ -1,0 +1,12 @@
+v1model-digest-custom-type.p4(9): [--Wwarn=unused] warning: 'switchID_t' is unused
+typedef bit<32> switchID_t;
+                ^^^^^^^^^^
+v1model-digest-custom-type.p4(10): [--Wwarn=unused] warning: 'qdepth_t' is unused
+typedef bit<19> qdepth_t;
+                ^^^^^^^^
+v1model-digest-custom-type.p4(11): [--Wwarn=unused] warning: 'timestamp_t' is unused
+typedef bit<48> timestamp_t;
+                ^^^^^^^^^^^
+v1model-digest-custom-type.p4(12): [--Wwarn=unused] warning: 'timedelta_t' is unused
+typedef bit<32> timedelta_t;
+                ^^^^^^^^^^^

@@ -1,1 +1,16 @@
+struct.p4(37): [--Wwarn=unused] warning: 'x' is unused
+const int<32> x = t.t1;
+              ^
+struct.p4(38): [--Wwarn=unused] warning: 'y' is unused
+const int<32> y = s.s1.t2;
+              ^
+struct.p4(40): [--Wwarn=unused] warning: 'w' is unused
+const int<32> w = .t.t1;
+              ^
+struct.p4(42): [--Wwarn=unused] warning: 't1' is unused
+const T t1 = s.s1;
+        ^^
+struct.p4(43): [--Wwarn=unused] warning: 'e' is unused
+const Empty e = {};
+            ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

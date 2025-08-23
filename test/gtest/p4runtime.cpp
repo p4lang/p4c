@@ -1854,7 +1854,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderStack) {
     const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
-    const auto *type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t"_cs);
+    const auto *type = findExternTypeParameterName<IR::Type_Array>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
     const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
@@ -1876,7 +1876,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderUnionStack) {
     auto pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t"_cs);
+    auto type = findExternTypeParameterName<IR::Type_Array>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
     auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);

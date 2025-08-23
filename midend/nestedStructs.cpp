@@ -12,7 +12,7 @@ bool ComplexValues::isNestedStruct(const IR::Type *type) const {
     for (const auto *f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->is<IR::Type_StructLike>() || ftype->is<IR::Type_Tuple>() ||
-            ftype->is<IR::Type_Stack>()) {
+            ftype->is<IR::Type_Array>()) {
             LOG3("Type " << dbp(type) << " is nested");
             return true;
         }

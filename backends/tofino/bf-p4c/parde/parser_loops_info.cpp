@@ -125,7 +125,7 @@ struct ParserLoopsInfo::GetMaxLoopDepth : public Inspector {
         if (!dest) return true;
         auto *expr = dest->expr->to<IR::Member>();
         if (!expr) return true;
-        auto *type_stack = expr->type->to<IR::Type_Stack>();
+        auto *type_stack = expr->type->to<IR::Type_Array>();
         if (!type_stack) return true;
 
         auto stack_size = type_stack->size->to<IR::Constant>()->asInt();
@@ -141,7 +141,7 @@ struct ParserLoopsInfo::GetMaxLoopDepth : public Inspector {
     /// Identify stack depth after SimplifyReferences
     bool preorder(const IR::HeaderStackItemRef *ref) override {
         auto stack_size =
-            ref->base()->type->to<IR::Type_Stack>()->size->to<IR::Constant>()->asInt();
+            ref->base()->type->to<IR::Type_Array>()->size->to<IR::Constant>()->asInt();
 
         if (max_loop_depth == -1)
             max_loop_depth = stack_size;

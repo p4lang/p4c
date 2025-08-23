@@ -4,6 +4,12 @@ default_action1.p4(20): [--Wwarn=shadow] warning: 'b' shadows 'b'
 default_action1.p4(16)
 action b() {}
        ^
+default_action1.p4(18): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+default_action1.p4(21): [--Wwarn=unused] warning: table 't' is unused
+    table t {
+          ^
 default_action1.p4(23): [--Werror=type-error] error: .b() and b refer to different actions
         default_action = .b(); // not the same b
                          ^^^^

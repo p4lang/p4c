@@ -1,3 +1,6 @@
+issue2359.p4(18): [--Wwarn=unused] warning: 'do_function' is unused
+bit<32> do_function() {
+        ^^^^^^^^^^^
 issue2359.p4(32): [--Wwarn=unused] warning: 'val' is unused
     action do_action(inout bit<48> val) {
                                    ^^^

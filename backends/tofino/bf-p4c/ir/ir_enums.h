@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_IR_IR_ENUMS_H_
-#define BF_P4C_IR_IR_ENUMS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_IR_IR_ENUMS_H_
+#define BACKENDS_TOFINO_BF_P4C_IR_IR_ENUMS_H_
 
 #include <lib/cstring.h>
 
@@ -119,4 +119,4 @@ bool operator>>(cstring s, IR::BFN::ParserWriteMode &t);
 
 }  // end namespace P4
 
-#endif /* BF_P4C_IR_IR_ENUMS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_IR_IR_ENUMS_H_ */

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PARDE_CREATE_POV_ENCODER_H_
-#define BF_P4C_PARDE_CREATE_POV_ENCODER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CREATE_POV_ENCODER_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_CREATE_POV_ENCODER_H_
 
 #include <ir/ir.h>
 
@@ -35,4 +35,4 @@ struct MatchAction {
 IR::MAU::Table *create_pov_encoder(gress_t gress, cstring tableName, cstring action_name,
                                    const MatchAction &match_action);
 
-#endif /*BF_P4C_PARDE_CREATE_POV_ENCODER_H_*/
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_CREATE_POV_ENCODER_H_ */

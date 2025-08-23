@@ -1,3 +1,9 @@
+gauntlet_various_ops-bmv2.p4(142): [--Wwarn=unused] warning: 'tmp2' is unused
+        bit<48> tmp2 = (1 | 2) |+| 48w0;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+gauntlet_various_ops-bmv2.p4(143): [--Wwarn=unused] warning: 'int_def' is unused
+        const int int_def = 1;
+                  ^^^^^^^
 gauntlet_various_ops-bmv2.p4(120): [--Wwarn=overflow] warning: 1 >> 16: Shifting 4-bit value with 16
         h.rshift.g = 4w1 >> 8w16;
                      ^^^^^^^^^^^

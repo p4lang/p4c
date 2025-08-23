@@ -81,7 +81,7 @@ const IR::Type *TypeInferenceBase::cloneWithFreshTypeVariables(const IR::IMayBeG
         BUG_CHECK(b, "%1%: failed replacing %2% with %3%", type, v, tv);
     }
 
-    TypeVariableSubstitutionVisitor sv(&tvs, true);
+    TypeVariableSubstitutionVisitor sv(&tvs, true, true);
     sv.setCalledBy(this);
     auto cl = type->to<IR::Type>()->apply(sv, getChildContext());
     CHECK_NULL(cl);
@@ -259,19 +259,19 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
     } else if (auto set = type->to<IR::Type_Set>()) {
         auto et = canonicalize(set->elementType);
         if (et == nullptr) return nullptr;
-        if (et->is<IR::Type_Stack>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
+        if (et->is<IR::Type_Array>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
             ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: Sets of %2% are not supported", type, et);
         if (et == set->elementType) return type;
         const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
         return canon;
-    } else if (auto stack = type->to<IR::Type_Stack>()) {
+    } else if (auto stack = type->to<IR::Type_Array>()) {
         auto et = canonicalize(stack->elementType);
         if (et == nullptr) return nullptr;
         const IR::Type *canon;
         if (et == stack->elementType)
             canon = type;
         else
-            canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
+            canon = new IR::Type_Array(stack->srcInfo, et, stack->size);
         canon = typeMap->getCanonical(canon);
         return canon;
     } else if (auto vec = type->to<IR::Type_P4List>()) {
@@ -472,7 +472,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         learn(result, this, getChildContext());
         return result;
     } else {
-        BUG_CHECK(::P4::errorCount(), "Unexpected type %1%", dbp(type));
+        BUG_CHECK(errorCount(), "Unexpected type %1%", dbp(type));
     }
 
     // If we reach this point some type error must have occurred, because
@@ -569,7 +569,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
 
     if (initType->is<IR::Type_InfInt>() && !destType->is<IR::Type_InfInt>()) {
         auto toType = destType->getP4Type();
-        sourceExpression = new IR::Cast(toType, sourceExpression);
+        sourceExpression = new IR::Cast(toType, sourceExpression, /* implicit */ true);
         setType(toType, new IR::Type_Type(destType));
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);
@@ -584,7 +584,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
         if (initType->is<IR::Type_UnknownStruct>() ||
             (si != nullptr && initType->is<IR::Type_Struct>())) {
             // Even if the structure is a struct expression with the right type,
-            // we still need to recurse over its fields; they many not have
+            // we still need to recurse over its fields; they may not have
             // the right type.
             CHECK_NULL(si);
             bool hasDots = si->containsDots();
@@ -597,8 +597,13 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             bool changes = false;
             for (const IR::StructField *fieldI : ts->fields) {
                 auto compI = si->components.getDeclaration<IR::NamedExpression>(fieldI->name);
-                if (hasDots && compI == nullptr) {
-                    continue;
+                if (compI == nullptr) {
+                    if (hasDots) {
+                        continue;
+                    } else {
+                        typeError("No initializer for field %1%", fieldI->name);
+                        return sourceExpression;
+                    }
                 }
                 auto src = assignment(sourceExpression, fieldI->type, compI->expression);
                 if (src != compI->expression) changes = true;
@@ -607,7 +612,8 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             if (hasDots) vec.push_back(si->getField("..."_cs));
             if (!changes) vec = si->components;
             if (initType->is<IR::Type_UnknownStruct>() || changes) {
-                sourceExpression = new IR::StructExpression(type, type, vec);
+                sourceExpression =
+                    new IR::StructExpression(sourceExpression->srcInfo, type, type, vec);
                 setType(sourceExpression, destType);
             }
         } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
@@ -630,7 +636,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
                 auto src = assignment(sourceExpression, fieldI->type, compI);
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
-            sourceExpression = new IR::StructExpression(type, type, vec);
+            sourceExpression = new IR::StructExpression(sourceExpression->srcInfo, type, type, vec);
             setType(sourceExpression, destType);
             assignment(errorPosition, destType, sourceExpression);
         }
@@ -665,7 +671,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             }
         }
         // else this is some other expression that evaluates to a tuple
-    } else if (auto tstack = concreteType->to<IR::Type_Stack>()) {
+    } else if (auto tstack = concreteType->to<IR::Type_Array>()) {
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
             bool hasDots = li->containsDots();
             if (tstack->getSize() != li->components.size() && !hasDots) {

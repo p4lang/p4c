@@ -20,6 +20,7 @@ set (MIDEND_SRCS
   convertErrors.cpp
   copyStructures.cpp
   coverage.cpp
+  checkTableEntries.cpp
   def_use.cpp
   eliminateActionRun.cpp
   eliminateInvalidHeaders.cpp
@@ -54,6 +55,7 @@ set (MIDEND_SRCS
   removeUnusedParameters.cpp
   saturationElim.cpp
   simplifyBitwise.cpp
+  simplifyExternMethod.cpp
   simplifyKey.cpp
   simplifySelectCases.cpp
   simplifySelectList.cpp
@@ -68,6 +70,7 @@ set (MIDEND_HDRS
   booleanKeys.h
   checkSize.h
   checkExternInvocationCommon.h
+  checkTableEntries.h
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
@@ -109,6 +112,7 @@ set (MIDEND_HDRS
   replaceSelectRange.h
   saturationElim.h
   simplifyBitwise.h
+  simplifyExternMethod.h
   simplifyKey.h
   simplifySelectCases.h
   simplifySelectList.h

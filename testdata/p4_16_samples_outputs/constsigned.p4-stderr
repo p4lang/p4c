@@ -22,6 +22,105 @@ const int<8> n0 = 8s255
 constsigned.p4(47): [--Wwarn=overflow] warning: 8s256: signed value does not fit in 8 bits
 const int<8> o0 = 8s256
                   ^^^^^
+constsigned.p4(17): [--Wwarn=unused] warning: 'a' is unused
+const int<8> a = 0;
+             ^
+constsigned.p4(18): [--Wwarn=unused] warning: 'b' is unused
+const int<8> b = -1;
+             ^
+constsigned.p4(19): [--Wwarn=unused] warning: 'c' is unused
+const int<8> c = -2;
+             ^
+constsigned.p4(20): [--Wwarn=unused] warning: 'd' is unused
+const int<8> d = -127;
+             ^
+constsigned.p4(21): [--Wwarn=unused] warning: 'e' is unused
+const int<8> e = -128;
+             ^
+constsigned.p4(22): [--Wwarn=unused] warning: 'f' is unused
+const int<8> f = -129;
+             ^
+constsigned.p4(23): [--Wwarn=unused] warning: 'g' is unused
+const int<8> g = -255;
+             ^
+constsigned.p4(24): [--Wwarn=unused] warning: 'h' is unused
+const int<8> h = -256;
+             ^
+constsigned.p4(25): [--Wwarn=unused] warning: 'i' is unused
+const int<8> i = 1;
+             ^
+constsigned.p4(26): [--Wwarn=unused] warning: 'j' is unused
+const int<8> j = 2;
+             ^
+constsigned.p4(27): [--Wwarn=unused] warning: 'k' is unused
+const int<8> k = 127;
+             ^
+constsigned.p4(28): [--Wwarn=unused] warning: 'l' is unused
+const int<8> l = 128;
+             ^
+constsigned.p4(29): [--Wwarn=unused] warning: 'm' is unused
+const int<8> m = 129;
+             ^
+constsigned.p4(30): [--Wwarn=unused] warning: 'n' is unused
+const int<8> n = 255;
+             ^
+constsigned.p4(31): [--Wwarn=unused] warning: 'o' is unused
+const int<8> o = 256;
+             ^
+constsigned.p4(33): [--Wwarn=unused] warning: 'a0' is unused
+const int<8> a0 = 8s0;
+             ^^
+constsigned.p4(34): [--Wwarn=unused] warning: 'b0' is unused
+const int<8> b0 = -8s1;
+             ^^
+constsigned.p4(35): [--Wwarn=unused] warning: 'c0' is unused
+const int<8> c0 = -8s2;
+             ^^
+constsigned.p4(36): [--Wwarn=unused] warning: 'd0' is unused
+const int<8> d0 = -8s127;
+             ^^
+constsigned.p4(37): [--Wwarn=unused] warning: 'e0' is unused
+const int<8> e0 = -8s128;
+             ^^
+constsigned.p4(38): [--Wwarn=unused] warning: 'f0' is unused
+const int<8> f0 = -8s129;
+             ^^
+constsigned.p4(39): [--Wwarn=unused] warning: 'g0' is unused
+const int<8> g0 = -8s255;
+             ^^
+constsigned.p4(40): [--Wwarn=unused] warning: 'h0' is unused
+const int<8> h0 = -8s256;
+             ^^
+constsigned.p4(41): [--Wwarn=unused] warning: 'i0' is unused
+const int<8> i0 = 8s1;
+             ^^
+constsigned.p4(42): [--Wwarn=unused] warning: 'j0' is unused
+const int<8> j0 = 8s2;
+             ^^
+constsigned.p4(43): [--Wwarn=unused] warning: 'k0' is unused
+const int<8> k0 = 8s127;
+             ^^
+constsigned.p4(44): [--Wwarn=unused] warning: 'l0' is unused
+const int<8> l0 = 8s128;
+             ^^
+constsigned.p4(45): [--Wwarn=unused] warning: 'm0' is unused
+const int<8> m0 = 8s129;
+             ^^
+constsigned.p4(46): [--Wwarn=unused] warning: 'n0' is unused
+const int<8> n0 = 8s255;
+             ^^
+constsigned.p4(47): [--Wwarn=unused] warning: 'o0' is unused
+const int<8> o0 = 8s256;
+             ^^
+constsigned.p4(49): [--Wwarn=unused] warning: 'zz0' is unused
+const int<1> zz0 = 0;
+             ^^^
+constsigned.p4(50): [--Wwarn=unused] warning: 'zz1' is unused
+const int<1> zz1 = 1;
+             ^^^
+constsigned.p4(52): [--Wwarn=unused] warning: 'zz3' is unused
+const int<1> zz3 = (int<1>) zz2[0:0];
+             ^^^
 constsigned.p4(22): [--Wwarn=overflow] warning: -8s129: signed value does not fit in 8 bits
 const int<8> f = -129;
                   ^^^

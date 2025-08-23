@@ -491,7 +491,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
             else
                 e = get_primary(m, ctxt->parent);
             if (!di.live[fi]) return e;
-        } else if (m->expr->type->to<IR::Type_Stack>()) {
+        } else if (m->expr->type->to<IR::Type_Array>()) {
             if (m->member.name == "lastIndex") {
                 // this depends on how much has been written to the header stack, but not
                 // on any data that has been written.  So what should the defs be?  For now,
@@ -534,6 +534,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
         defuse.uses[l->node].insert(loc);
         defuse.defs[loc->node].insert(l);
     }
+    LOG8("  " << defuse.defs[loc->node]);
     return e;
 }
 
@@ -573,7 +574,7 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
             di.live[fi] = 0;
             if (!di.live) di.defs.clear();
             return e;
-        } else if (auto *ts = m->expr->type->to<IR::Type_Stack>()) {
+        } else if (auto *ts = m->expr->type->to<IR::Type_Array>()) {
             if (m->member.name == "next" || m->member.name == "last") {
                 di.defs.insert(getLoc(m));
                 di.live.setrange(0, ts->getSize());
@@ -717,7 +718,7 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::loc_t &loc) {
 }
 
 std::ostream &operator<<(std::ostream &out, const hvec_set<const ComputeDefUse::loc_t *> &s) {
-    out << ": {";
+    out << "{";
     const char *sep = " ";
     for (auto *l : s) {
         out << sep << *l;
@@ -739,7 +740,7 @@ std::ostream &operator<<(
         out << '(' << p.first->srcInfo.toSourcePositionData(&line, &col);
         out << ':' << line << ':' << (col + 1) << ')';
     }
-    out << p.second;
+    out << ": " << p.second;
     return out;
 }
 

@@ -1,3 +1,6 @@
+issue3299.p4(21): [--Wwarn=unused] warning: 'a1' is unused
+    action a1(in bit<8> m0) {
+           ^^
 issue3299.p4(17): error: SwitchStatement: switch statements not supported in actions on this target
  switch (m.m0) {
  ^^^^^^

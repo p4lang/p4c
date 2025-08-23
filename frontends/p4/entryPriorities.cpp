@@ -67,6 +67,27 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
         priorityDelta = deltaProp->asUnsigned();
     }
 
+    // check to see if priorities are required or allowed
+    bool requiresPriorities = false;
+    auto key = table->getKey();
+    if (!key || key->keyElements.empty()) {
+        return entries;
+    }
+    for (auto element : key->keyElements) {
+        if (requiresPriority(element)) {
+            requiresPriorities = true;
+            break;
+        }
+    }
+
+    if (!requiresPriorities) {
+        if (withPriority)
+            ::P4::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1% key match type does not require priorities, but some are specified",
+                        key);
+        return entries;
+    }
+
     size_t currentPriority = 1;
     if (withPriority == nullptr) {
         // no priorities specified
@@ -90,22 +111,10 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
     }
 
     // Some priorities specified.
-    bool requiresPriorities = false;
-    auto key = table->getKey();
-    for (auto element : key->keyElements) {
-        if (requiresPriority(element)) {
-            requiresPriorities = true;
-            break;
-        }
-    }
-    if (!requiresPriorities) {
-        ::P4::error(ErrorType::ERR_UNSUPPORTED,
-                    "%1% key match type does not require priorities, but some are specified", key);
-        return entries;
-    }
 
     std::map<size_t, const IR::Entry *> usedPriorities;
     size_t previousPriority = 0;
+    bool out_of_order = false;
     for (size_t i = 0; i < entries->size(); ++i) {
         auto entry = entries->entries.at(i);
         if (entry->priority) {
@@ -135,11 +144,12 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
 
         size_t nextPriority;
         if (largestWins) {
-            if (i > 0 && currentPriority > previousPriority) {
+            if (i > 0 && currentPriority > previousPriority && !out_of_order) {
                 warn(ErrorType::WARN_ENTRIES_OUT_OF_ORDER,
                      "%1% (priority %2%) and %3% (priority %4%) have priorities out of order",
                      entries->entries[i - 1], previousPriority, entries->entries[i],
                      currentPriority);
+                out_of_order = true;
             }
 
             nextPriority = currentPriority - priorityDelta;
@@ -149,11 +159,12 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
                 return entries;
             }
         } else {
-            if (i > 0 && currentPriority < previousPriority) {
+            if (i > 0 && currentPriority < previousPriority && !out_of_order) {
                 warn(ErrorType::WARN_ENTRIES_OUT_OF_ORDER,
                      "%1% (priority %2%) and %3% (priority %4%) have priorities out of order",
                      entries->entries[i - 1], previousPriority, entries->entries[i],
                      currentPriority);
+                out_of_order = true;
             }
 
             nextPriority = currentPriority + priorityDelta;
@@ -165,6 +176,15 @@ const IR::Node *EntryPriorities::preorder(IR::EntriesList *entries) {
         }
         previousPriority = currentPriority;
         currentPriority = nextPriority;
+    }
+    if (out_of_order) {
+        // sort entries so they are in order
+        std::sort(entries->entries.begin(), entries->entries.end(),
+                  [largestWins](const IR::Entry *a, const IR::Entry *b) -> bool {
+                      auto ap = a->priority->to<IR::Constant>()->asUnsigned();
+                      auto bp = b->priority->to<IR::Constant>()->asUnsigned();
+                      return largestWins ? ap > bp : bp > ap;
+                  });
     }
     return entries;
 }

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef COMMON_CONSTANTFOLDING_H_
-#define COMMON_CONSTANTFOLDING_H_
+#ifndef FRONTENDS_COMMON_CONSTANTFOLDING_H_
+#define FRONTENDS_COMMON_CONSTANTFOLDING_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -87,8 +87,8 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     const IR::Expression *getConstant(const IR::Expression *expr) const;
 
     /// Statically cast constant @p node to @p type represented in the specified @p base.
-    const IR::Constant *cast(const IR::Constant *node, unsigned base,
-                             const IR::Type_Bits *type) const;
+    const IR::Constant *cast(const IR::Constant *node, unsigned base, const IR::Type_Bits *type,
+                             bool noWarning = false) const;
 
     /// Statically evaluate binary operation @p e implemented by @p func.
     const IR::Node *binary(const IR::Operation_Binary *op,
@@ -207,4 +207,4 @@ class ConstantFolding : public PassManager {
 
 }  // namespace P4
 
-#endif /* COMMON_CONSTANTFOLDING_H_ */
+#endif /* FRONTENDS_COMMON_CONSTANTFOLDING_H_ */

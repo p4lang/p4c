@@ -117,6 +117,24 @@ class Pattern {
         Pattern operator!=(int a) { return Pattern(*this) != Pattern(a); }
     };
 
+    template <class T = IR::AssignmentStatement>
+    class Assign : public Base {
+        static_assert(std::is_base_of_v<IR::BaseAssignmentStatement, T>);
+        Base *left, *right;
+
+     public:
+        bool match(const IR::Node *n) override {
+            if (auto as = n->to<T>()) {
+                if (left->match(as->left) && right->match(as->right)) return true;
+            }
+            return false;
+        }
+        Assign(Base *l, Base *r) : left(l), right(r) {}
+        Assign(const Pattern &l, const Pattern &r) : left(l.pattern), right(r.pattern) {}
+        Assign(Base *l, int val) : left(l), right(new Const(val)) {}
+        Assign(Base *l, big_int val) : left(l), right(new Const(val)) {}
+    };
+
     template <class T>
     Pattern(const T *&m) : pattern(new MatchExt<T>(m)) {}  // NOLINT(runtime/explicit)
     template <class T>
@@ -182,6 +200,22 @@ class Pattern {
     }
     Pattern operator||(const Pattern &r) const {
         return Pattern(new Binary<IR::LOr>(pattern, r.pattern));
+    }
+    /// We use these templates to deal with amgigous overloads introduced by C++20.
+    /// https://en.cppreference.com/w/cpp/language/default_comparisons
+    // TODO: Ideally, we would fix these ambiguous overloads by making the Pattern class explicit in
+    // its initialization but that is a breaking change.
+    template <class T>
+    Pattern operator==(Match<T> &m) const {
+        return *this == Pattern(m);
+    }
+    template <class T>
+    Pattern operator!=(Match<T> &m) const {
+        return *this != Pattern(m);
+    }
+    template <class T>
+    Pattern operator==(const Match<T> &m) const {
+        return *this == Pattern(m);
     }
 
     bool match(const IR::Node *n) { return pattern->match(n); }

@@ -26,13 +26,14 @@ namespace P4::EBPF {
 /// This pass rewrites expressions which are not supported natively on EBPF.
 class LowerExpressions : public Transform {
     P4::TypeMap *typeMap;
-    /// Cannot shift with a value larger than 5 bits.
-    const int maxShiftWidth = 5;
+    std::optional<int> maxShiftWidth;
     const IR::Expression *shift(const IR::Operation_Binary *expression) const;
 
  public:
-    explicit LowerExpressions(P4::TypeMap *typeMap) : typeMap(typeMap) {
+    explicit LowerExpressions(P4::TypeMap *typeMap, std::optional<int> maxShiftWidth)
+        : typeMap(typeMap) {
         CHECK_NULL(typeMap);
+        this->maxShiftWidth = maxShiftWidth;
         setName("LowerExpressions");
     }
 
@@ -46,10 +47,10 @@ class LowerExpressions : public Transform {
 
 class Lower : public PassManager {
  public:
-    Lower(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+    Lower(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, std::optional<int> maxShiftWidth) {
         setName("Lower");
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new LowerExpressions(typeMap));
+        passes.push_back(new LowerExpressions(typeMap, maxShiftWidth));
     }
 };
 

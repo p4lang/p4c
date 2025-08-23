@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
-#define DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
+#ifndef BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
+#define BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 
 #include "backends/dpdk/constants.h"
 #include "backends/dpdk/options.h"
@@ -97,4 +97,4 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
 
 }  // namespace P4
 
-#endif  // DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
+#endif  // BACKENDS_DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_

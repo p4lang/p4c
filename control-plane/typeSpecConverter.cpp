@@ -233,7 +233,7 @@ bool TypeSpecConverter::preorder(const IR::Type_BaseList *type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Stack *type) {
+bool TypeSpecConverter::preorder(const IR::Type_Array *type) {
     auto typeSpec = new P4DataTypeSpec();
     if (!type->elementType->is<IR::Type_Name>()) {
         BUG("Unexpected stack element type %1%", type->elementType);

@@ -1,1 +1,4 @@
+pna-example-mirror-packet-1.p4(6): [--Wwarn=unused] warning: 'MIRROR_SESSION1' is unused
+const MirrorSessionId_t MIRROR_SESSION1 = (MirrorSessionId_t) 58;
+                        ^^^^^^^^^^^^^^^
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table flowTable. Copying all match fields to metadata

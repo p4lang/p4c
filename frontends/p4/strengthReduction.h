@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4_STRENGTHREDUCTION_H_
-#define P4_STRENGTHREDUCTION_H_
+#ifndef FRONTENDS_P4_STRENGTHREDUCTION_H_
+#define FRONTENDS_P4_STRENGTHREDUCTION_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/sideEffects.h"
@@ -95,7 +95,9 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::LOr *expr) override;
     const IR::Node *postorder(IR::LNot *expr) override;
     const IR::Node *postorder(IR::Sub *expr) override;
+    const IR::Node *postorder(IR::SubSat *expr) override;
     const IR::Node *postorder(IR::Add *expr) override;
+    const IR::Node *postorder(IR::AddSat *expr) override;
     const IR::Node *postorder(IR::UPlus *expr) override;
     const IR::Node *postorder(IR::Shl *expr) override;
     const IR::Node *postorder(IR::Shr *expr) override;
@@ -135,4 +137,4 @@ class StrengthReduction : public PassManager {
 
 }  // namespace P4
 
-#endif /* P4_STRENGTHREDUCTION_H_ */
+#endif /* FRONTENDS_P4_STRENGTHREDUCTION_H_ */

@@ -9,6 +9,11 @@ on:
   push:
     branches: [main]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: validate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   # We run validation in parallel with the normal tests.
   # Validation ensures that P4C compiles P4-16 programs correctly.
@@ -22,7 +27,7 @@ jobs:
       VALIDATION: ON
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
 
@@ -38,5 +43,5 @@ jobs:
 
       - name: Validate
         run: |
-          ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
+          uv run ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
         working-directory: ./build

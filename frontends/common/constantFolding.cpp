@@ -340,8 +340,8 @@ const IR::Node *DoConstantFolding::postorder(IR::UPlus *e) {
 }
 
 const IR::Constant *DoConstantFolding::cast(const IR::Constant *node, unsigned base,
-                                            const IR::Type_Bits *type) const {
-    return new IR::Constant(node->srcInfo, type, node->value, base);
+                                            const IR::Type_Bits *type, bool noWarning) const {
+    return new IR::Constant(node->srcInfo, type, node->value, base, noWarning);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Add *e) {
@@ -729,8 +729,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Member *e) {
     auto type = typeMap->getType(orig->expr, true);
     auto origtype = typeMap->getType(orig);
 
-    if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
-        auto st = type->to<IR::Type_Stack>();
+    if (type->is<IR::Type_Array>() && e->member == IR::Type_Array::arraySize) {
+        auto st = type->to<IR::Type_Array>();
         auto size = st->getSize();
         return new IR::Constant(st->size->srcInfo, origtype, size);
     }
@@ -778,13 +778,13 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
     const auto *lstr = eleft->to<IR::StringLiteral>();
     const auto *rstr = eright->to<IR::StringLiteral>();
 
-    const auto *left = eleft->to<IR::Constant>();
-    const auto *right = eright->to<IR::Constant>();
-
     // handle string concatenations
     if (lstr && rstr) {
         return new IR::StringLiteral(e->srcInfo, IR::Type_String::get(), lstr->value + rstr->value);
     }
+
+    const auto *left = eleft->to<IR::Constant>();
+    const auto *right = eright->to<IR::Constant>();
 
     if (left == nullptr || right == nullptr) {
         // Could be a SerEnum
@@ -798,10 +798,20 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
         return e;
     }
 
+    // The concatenation result would be wrong if the negative value was used for the second
+    // argument (because the big_int binary representation does not match what the P4 spec expects).
+    // Therefore, we convert the second argument to a unsigned literal with the same binary
+    // representation as the P4 mandates for the signed value and concatenate these.
+    big_int rvalue = right->value;
+    if (rt->isSigned) {
+        // Reuse conversion from Constant's ctor. Temporary Type & Constant -> allocate on stack.
+        IR::Type_Bits utype(rt->width_bits(), false);
+        rvalue = IR::Constant(&utype, rvalue, 10, true /* no warning */).value;
+    }
+
     auto resultType = IR::Type_Bits::get(lt->width_bits() + rt->width_bits(), lt->isSigned);
     if (overflowWidth(e, resultType->width_bits())) return e;
-    big_int value =
-        Util::shift_left(left->value, static_cast<unsigned>(rt->width_bits())) + right->value;
+    big_int value = (left->value << rt->width_bits()) | rvalue;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
 
@@ -910,7 +920,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();
         if (auto arg = expr->to<IR::Constant>()) {
-            return cast(arg, arg->base, type);
+            // Do not emit overflow or mismatch warnings for explicit casts.
+            return cast(arg, arg->base, type, /* noWarning */ !e->implicit);
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
             if (type->isSigned || type->size != 1)
                 error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% directly to %2% (use bit<1>)",

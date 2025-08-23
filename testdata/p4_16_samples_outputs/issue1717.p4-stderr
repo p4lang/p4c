@@ -1,10 +1,15 @@
+issue1717.p4(40): [--Wwarn=unused] warning: 's' is unused
+    S s;
+    ^^^
 issue1717.p4(52): [--Wwarn=uninitialized_use] warning: h1.isValid may be uninitialized
         size = v(h1, h2);
                  ^^
 issue1717.p4(52): [--Wwarn=uninitialized_use] warning: h2.f may be uninitialized
         size = v(h1, h2);
                      ^^
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0
+issue1717.p4(41): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h2_0
+    bool b1 = h2.minSizeInBits == 32;
+              ^^
+issue1717.p4(44): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h1_0
+    return h1.isValid +
+           ^^

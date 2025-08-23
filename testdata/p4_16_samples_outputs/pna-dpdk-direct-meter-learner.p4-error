@@ -1,3 +1,6 @@
+pna-dpdk-direct-meter-learner.p4(47): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 4;
+              ^^^^^^^^^
 pna-dpdk-direct-meter-learner.p4(98): [--Wwarn=unsupported] warning: MainControlImpl.meter0: Packet metering is not supported. Falling back to byte metering.
     DirectMeter(PNA_MeterType_t.PACKETS) meter0;
                                          ^^^^^^

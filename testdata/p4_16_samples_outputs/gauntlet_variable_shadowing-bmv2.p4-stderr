@@ -1,0 +1,3 @@
+gauntlet_variable_shadowing-bmv2.p4(41): [--Wwarn=unused] warning: 'm' is unused
+        Meta m = {0};
+        ^^^^^^^^^^^^

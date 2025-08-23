@@ -1,0 +1,3 @@
+issue486-bmv2.p4(20): [--Wwarn=unused] warning: 'EthernetAddress' is unused
+typedef bit<48> EthernetAddress;
+                ^^^^^^^^^^^^^^^

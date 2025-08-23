@@ -82,7 +82,7 @@ const IR::Expression *AbstractExecutionState::convertToComplexExpression(
             auto fieldName = structField->name;
             const auto *fieldType = resolveType(structField->type);
             auto ref = new IR::Member(fieldType, parent, fieldName);
-            if (fieldType->is<IR::Type_StructLike>() || fieldType->to<IR::Type_Stack>()) {
+            if (fieldType->is<IR::Type_StructLike>() || fieldType->to<IR::Type_Array>()) {
                 components.push_back(
                     new IR::NamedExpression(fieldName, convertToComplexExpression(ref)));
             } else {
@@ -97,13 +97,13 @@ const IR::Expression *AbstractExecutionState::convertToComplexExpression(
             // We do not know the underlying type name of the struct, so keep it anonymous.
             return new IR::StructExpression(ts, nullptr, components);
         }
-    } else if (auto ts = parent->type->to<IR::Type_Stack>()) {
+    } else if (auto ts = parent->type->to<IR::Type_Array>()) {
         IR::Vector<IR::Expression> components;
         const auto *elementType = resolveType(ts->elementType);
         for (size_t idx = 0; idx < ts->getSize(); idx++) {
             auto ref = new IR::ArrayIndex(elementType, parent,
                                           new IR::Constant(static_cast<uint64_t>(idx)));
-            if (elementType->is<IR::Type_StructLike>() || elementType->to<IR::Type_Stack>()) {
+            if (elementType->is<IR::Type_StructLike>() || elementType->to<IR::Type_Array>()) {
                 components.push_back(convertToComplexExpression(ref));
             } else {
                 components.push_back(get(ref));
@@ -153,14 +153,11 @@ std::vector<IR::StateVariable> AbstractExecutionState::getFlatFields(
         if (validVector != nullptr && structType->is<IR::Type_Header>()) {
             validVector->push_back(ToolsVariables::getHeaderValidity(parent));
         }
-    } else if (const auto *typeStack = resolvedType->to<IR::Type_Stack>()) {
+    } else if (const auto *typeStack = resolvedType->to<IR::Type_Array>()) {
         const auto *stackElementsType = resolveType(typeStack->elementType);
         for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
             const auto *newArr =
                 HSIndexToMember::produceStackIndex(stackElementsType, parent, arrayIndex);
-            BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
-                      "Trying to get the flat fields for a non Type_StructLike element : %1%",
-                      stackElementsType);
             auto subFields = getFlatFields(newArr, validVector);
             flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
         }
@@ -213,7 +210,7 @@ void AbstractExecutionState::assignStructLike(const IR::StateVariable &left,
             set(flatTargetRef, flatStructField);
         }
     } else if (auto stackExpression = right->to<IR::HeaderStackExpression>()) {
-        auto stackType = stackExpression->headerStackType->checkedTo<IR::Type_Stack>();
+        auto stackType = stackExpression->headerStackType->checkedTo<IR::Type_Array>();
         auto stackSize = stackExpression->components.size();
         for (size_t idx = 0; idx < stackSize; idx++) {
             const auto *ref = HSIndexToMember::produceStackIndex(stackType->elementType, left, idx);
@@ -264,7 +261,7 @@ void AbstractExecutionState::declareVariable(const Target &target,
     const auto *leftExpr = new IR::PathExpression(declType, new IR::Path(declVar.name.name));
     if (declType->is<IR::Type_StructLike>()) {
         initializeStructLike(target, leftExpr, false);
-    } else if (const auto *stackType = declType->to<IR::Type_Stack>()) {
+    } else if (const auto *stackType = declType->to<IR::Type_Array>()) {
         const auto *stackSizeExpr = stackType->size;
         auto stackSize = stackSizeExpr->checkedTo<IR::Constant>()->asInt();
         const auto *stackElemType = stackType->elementType;

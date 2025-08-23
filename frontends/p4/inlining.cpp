@@ -90,9 +90,9 @@ class FindLocationSets : public Inspector {
         auto storage = get(expression->expr);
 
         auto basetype = storageMap->typeMap->getType(expression->expr, true);
-        if (basetype->is<IR::Type_Stack>()) {
-            if (expression->member.name == IR::Type_Stack::next ||
-                expression->member.name == IR::Type_Stack::last) {
+        if (basetype->is<IR::Type_Array>()) {
+            if (expression->member.name == IR::Type_Array::next ||
+                expression->member.name == IR::Type_Array::last) {
                 set(expression, storage);
                 return false;
             }

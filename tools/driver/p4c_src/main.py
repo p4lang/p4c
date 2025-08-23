@@ -97,6 +97,13 @@ def add_developer_options(parser):
         default=None,
         help="Pretty-print the program in the specified file.",
     )
+    for debugger in ["gdb", "cgdb", "lldb"]:
+        parser.add_argument(
+            "--" + debugger,
+            action="store_true",
+            default=False,
+            help="run the backend compiler under the %s debugger" % (debugger,),
+        )
 
 
 def s_and_were_or_just_was(parameter):
@@ -412,6 +419,39 @@ def main():
         ),
         action="store_true",
         default=False,
+    )
+    parser.add_argument(
+        "--metrics",
+        dest="inputMetrics",
+        help=(
+            "Select which code metrics will be collected (comma-separated list). "
+            "Valid options: all, loc, cyclomatic, halstead, unused-code, nesting-depth,"
+            "header-general, header-manipulation, header-modification, match-action,"
+            "parser, inlined, extern. "
+            "Example: --metrics cyclomatic,halstead"
+        ),
+        action="store",
+        default=None,
+    )
+    parser.add_argument(
+        "--Wdisable",
+        action="append",
+        nargs="?",
+        default=None,
+        const="",
+        type=str,
+        help="Disable a compiler diagnostic, or disable all warnings "
+        "if no diagnostic is specified.",
+    )
+    parser.add_argument(
+        "--Werror",
+        action="append",
+        nargs="?",
+        default=None,
+        const="",
+        type=str,
+        help="Report an error for a compiler diagnostic, or treat all "
+        "warnings as errors if no diagnostic is specified.",
     )
 
     ### DRYified “env_indicates_developer_build”

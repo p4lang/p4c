@@ -71,20 +71,7 @@ class SideEffects : public Inspector, public ResolutionContext {
     unsigned sideEffectCount = 0;
 
     void postorder(const IR::MethodCallExpression *mce) override {
-        auto mi = MethodInstance::resolve(mce, this, typeMap, !typeMap);
-        if (!mi) {
-            // conservative
-            sideEffectCount++;
-            nodeWithSideEffect = mce;
-            return;
-        }
-        if (!mi->is<BuiltInMethod>()) {
-            sideEffectCount++;
-            nodeWithSideEffect = mce;
-            return;
-        }
-        auto bim = mi->to<BuiltInMethod>();
-        if (bim->name.name != IR::Type_Header::isValid) {
+        if (mayHaveSideEffect(mce, this, typeMap)) {
             sideEffectCount++;
             nodeWithSideEffect = mce;
         }
@@ -109,12 +96,13 @@ class SideEffects : public Inspector, public ResolutionContext {
         return se.nodeWithSideEffect != nullptr;
     }
     /// @return true if the method call expression may have side-effects.
-    static bool hasSideEffect(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
-                              TypeMap *typeMap) {
+    static bool mayHaveSideEffect(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
+                                  TypeMap *typeMap) {
         // mce does not produce a side effect in few cases:
         //  * isValid()
         //  * function, extern function, or extern method with noSideEffects annotation
-        auto mi = MethodInstance::resolve(mce, refMap, typeMap);
+        auto mi = MethodInstance::resolve(mce, refMap, typeMap, !typeMap);
+        if (!mi) return true;
         if (const auto *ec = mi->to<P4::ExternCall>())
             return !ec->method->hasAnnotation(IR::Annotation::noSideEffectsAnnotation);
         if (const auto *ef = mi->to<P4::FunctionCall>())

@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_V2_KIND_SIZE_INDEXED_MAP_H_
-#define BF_P4C_PHV_V2_KIND_SIZE_INDEXED_MAP_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_KIND_SIZE_INDEXED_MAP_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_V2_KIND_SIZE_INDEXED_MAP_H_
 
 #include <map>
 #include <optional>
@@ -40,4 +40,4 @@ std::ostream &operator<<(std::ostream &, const KindSizeIndexedMap &);
 }  // namespace v2
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_V2_KIND_SIZE_INDEXED_MAP_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_V2_KIND_SIZE_INDEXED_MAP_H_ */

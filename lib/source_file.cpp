@@ -345,6 +345,10 @@ SourceFileLine SourceInfo::toPosition() const {
     return sources->getSourceLine(start.getLineNumber());
 }
 
+SourceFileLine SourceInfo::toPositionEnd() const {
+    return sources->getSourceLine(end.getLineNumber());
+}
+
 cstring SourceInfo::getSourceFile() const {
     auto sourceLine = sources->getSourceLine(start.getLineNumber());
     return sourceLine.fileName;

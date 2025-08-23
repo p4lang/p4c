@@ -135,9 +135,9 @@ void P4Parser::checkDuplicates() const {
     }
 }
 
-bool Type_Stack::sizeKnown() const { return size->is<Constant>(); }
+bool Type_Array::sizeKnown() const { return size->is<Constant>(); }
 
-size_t Type_Stack::getSize() const {
+size_t Type_Array::getSize() const {
     if (!sizeKnown()) BUG("%1%: Size not yet known", size);
     auto cst = size->to<IR::Constant>();
     if (!cst->fitsInt()) {

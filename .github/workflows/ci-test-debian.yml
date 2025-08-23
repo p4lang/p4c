@@ -14,6 +14,36 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+
+  # Build with GCC and test P4C on Ubuntu 24.04.
+  test-ubuntu24:
+    runs-on: ubuntu-24.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      BUILD_GENERATOR: Ninja
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ runner.os }}-gcc
+          max-size: 1000M
+
+      - name: Build (Ubuntu 24.04, GCC)
+        run: |
+          tools/ci-build.sh
+
+      - name: Run tests (Ubuntu 24.04)
+        # Need to use sudo for the eBPF kernel tests.
+        run: |
+          sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random
+        working-directory: ./build
+
   # Build with GCC and test P4C on Ubuntu 22.04.
   test-ubuntu22:
     name: test-ubuntu22 (Unity ${{ matrix.unity }}, GTest ${{ matrix.gtest }})
@@ -34,7 +64,7 @@ jobs:
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -50,7 +80,8 @@ jobs:
           tools/ci-build.sh
 
       - name: Run tests (Ubuntu 22.04)
-        run: sudo -E ctest --output-on-failure --schedule-random
+        run: |
+          sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random
         working-directory: ./build
         if: matrix.unity == 'ON' && matrix.gtest == 'ON'
 
@@ -73,7 +104,7 @@ jobs:
       ENABLE_P4TEST: OFF
       ENABLE_P4C_GRAPHS: OFF
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
@@ -89,5 +120,5 @@ jobs:
           tools/ci-build.sh
 
       - name: Run tests (Ubuntu 22.04)
-        run: ctest --output-on-failure --schedule-random -R tofino
+        run: uv run ctest --output-on-failure --schedule-random -R tofino
         working-directory: ./build

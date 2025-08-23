@@ -1,7 +1,10 @@
-spec-issue1068.p4(7): [--Wwarn=unused] warning: Parser MyParser1 is not used; removing
+spec-issue1068.p4(7): [--Wwarn=unused] warning: parser 'MyParser1' is unused
 parser MyParser1() {
        ^^^^^^^^^
-spec-issue1068.p4(1): [--Wwarn=unused] warning: Parser MyParser is not used; removing
+spec-issue1068.p4(7): [--Winfo=removed] info: removing parser 'MyParser1'
+parser MyParser1() {
+       ^^^^^^^^^
+spec-issue1068.p4(1): [--Winfo=removed] info: removing parser 'MyParser'
 parser MyParser<t>(t tt) {
        ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

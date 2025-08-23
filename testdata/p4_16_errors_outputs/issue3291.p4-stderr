@@ -1,6 +1,11 @@
+issue3291.p4(6): [--Wwarn=unused] warning: 't' is unused
+typedef h<tt> t;
+              ^
 issue3291.p4(6): [--Werror=type-error] error: h: contains self 'struct h' as type argument
 typedef h<tt> t;
         ^
 issue3291.p4(1)
 struct h<t>{
        ^
+Compilation cannot continue due to type errors
+

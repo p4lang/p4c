@@ -33,11 +33,13 @@ using namespace P4::literals;
 namespace {
 class IRDumper : public Inspector {
     std::ostream &out;
-    std::set<const IR::Node *> dumped;
     unsigned maxdepth;
     cstring ignore;
     bool source;
-    bool preorder(const IR::Node *n) override {
+    // @brief (maybe) output a one-line summary of a node (no newline or children)
+    // @return false if the node should not be printed (nothing output)
+    // @return true if the node is printed
+    bool firstLine(const IR::Node *n) const {
         if (auto ctxt = getContext()) {
             if (unsigned(ctxt->depth) > maxdepth) return false;
             if (ctxt->parent && ctxt->parent->child_name && ignore == ctxt->parent->child_name)
@@ -49,13 +51,18 @@ class IRDumper : public Inspector {
         if (source && n->srcInfo) out << "(" << n->srcInfo.toPositionString() << ") ";
         out << n->node_type_name();
         n->dump_fields(out);
-        if (dumped.count(n)) {
-            out << "..." << std::endl;
-            return false;
-        }
-        dumped.insert(n);
+        return true;
+    }
+    bool preorder(const IR::Node *n) override {
+        if (!firstLine(n)) return false;
         out << std::endl;
         return true;
+    }
+    void revisit(const IR::Node *n) override {
+        if (firstLine(n)) out << "..." << std::endl;
+    }
+    void loop_revisit(const IR::Node *n) override {
+        if (firstLine(n)) out << "...(loop)" << std::endl;
     }
     bool preorder(const IR::Expression *e) override {
         if (!preorder(static_cast<const IR::Node *>(e))) return false;
@@ -65,15 +72,13 @@ class IRDumper : public Inspector {
     bool preorder(const IR::Constant *c) override {
         return preorder(static_cast<const IR::Node *>(c));
     }
-    void postorder(const IR::Node *n) override {
-        if (getChildrenVisited() == 0) dumped.erase(n);
+    void postorder(const IR::Node *) override {
+        if (getChildrenVisited() == 0) visitAgain();
     }
 
  public:
     IRDumper(std::ostream &o, unsigned m, cstring ign, bool src)
-        : out(o), maxdepth(m), ignore(ign), source(src) {
-        visitDagOnce = false;
-    }
+        : out(o), maxdepth(m), ignore(ign), source(src) {}
 };
 }  // namespace
 

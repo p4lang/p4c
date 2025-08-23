@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_MIDEND_H_
-#define BF_P4C_MIDEND_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_H_
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "frontends/common/options.h"
@@ -39,8 +39,9 @@ class MidEnd : public PassManager {
     explicit MidEnd(BFN_Options &options);
 };
 
-bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression *);
+bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression *,
+                              const DeclarationLookup *);
 
 }  // namespace BFN
 
-#endif /* BF_P4C_MIDEND_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_H_ */

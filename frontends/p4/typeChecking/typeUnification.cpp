@@ -445,18 +445,12 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
         bool success = (*src) == (*dest);
         if (!success) return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
-    } else if (auto se = dest->to<IR::Type_SerEnum>()) {
-        if (constraint->is<P4::CanBeImplicitlyCastConstraint>()) {
-            constraints->add(constraint->create(se->type, src));
-            return true;
-        }
-        return constraint->reportError(constraints->getCurrentSubstitution());
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         if (dest->to<IR::Type_Declaration>()->name != src->to<IR::Type_Declaration>()->name)
             return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
-    } else if (auto dstack = dest->to<IR::Type_Stack>()) {
-        if (auto sstack = src->to<IR::Type_Stack>()) {
+    } else if (auto dstack = dest->to<IR::Type_Array>()) {
+        if (auto sstack = src->to<IR::Type_Array>()) {
             if (dstack->getSize() != sstack->getSize())
                 return constraint->reportError(
                     constraints->getCurrentSubstitution(),
@@ -478,7 +472,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                 constraints->add(constraint->create(dstack->elementType, comp));
             }
             if (hasDots) {
-                auto dotsType = new IR::Type_Stack(
+                auto dotsType = new IR::Type_Array(
                     dstack->elementType,
                     new IR::Constant((unsigned)(dstack->getSize() - listSize + 1)));
                 auto dotsField = list->components.at(listSize - 1);

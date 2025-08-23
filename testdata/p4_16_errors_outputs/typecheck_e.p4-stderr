@@ -1,3 +1,6 @@
+typecheck_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+control p<T>(in T x)
+        ^
 typecheck_e.p4(21): [--Werror=type-error] error: 'f(x)'
         f(x);
         ^^^^

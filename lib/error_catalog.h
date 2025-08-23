@@ -52,8 +52,9 @@ class ErrorType {
     static const int ERR_UNSUPPORTED_ON_TARGET;  // target can not handle construct
     static const int ERR_DUPLICATE;              // duplicate objects
     static const int ERR_IO;                     // IO error
-    static const int ERR_UNREACHABLE;            // unreachable parser state
+    static const int ERR_UNREACHABLE;            // unreachable code
     static const int ERR_MODEL;                  // something is wrong with the target model
+    static const int ERR_TABLE_KEYS;             // something is wrong with a table key
     static const int ERR_RESERVED;               // Reserved for target use
     // Backends should extend this class with additional errors in the range 500-999.
     static const int ERR_MIN_BACKEND = 500;  // first allowed backend error code
@@ -78,7 +79,7 @@ class ErrorType {
     static const int WARN_IGNORE_PROPERTY;          // invalid property for object, ignored
     static const int WARN_TYPE_INFERENCE;           // type inference can not infer, substitutes
     static const int WARN_PARSER_TRANSITION;        // parser transition non-fatal issues
-    static const int WARN_UNREACHABLE;              // parser state unreachable
+    static const int WARN_UNREACHABLE;              // unreachable code
     static const int WARN_SHADOWING;                // instance shadowing
     static const int WARN_IGNORE;                   // simply ignore
     static const int WARN_INVALID_HEADER;           // access to fields of an invalid header
@@ -88,6 +89,7 @@ class ErrorType {
     static const int WARN_EXPRESSION;               // expression related warnings
     static const int WARN_DUPLICATE;                // duplicate objects
     static const int WARN_BRANCH_HINT;              // branch frequency/likely hints
+    static const int WARN_TABLE_KEYS;               // something is wrong with a table key
     // Backends should extend this class with additional warnings in the range 1500-2141.
     static const int WARN_MIN_BACKEND = 1500;  // first allowed backend warning code
     static const int WARN_MAX = 2141;          // last allowed warning code
@@ -96,6 +98,7 @@ class ErrorType {
     // info messages as initially defined with a format string
     static const int INFO_INFERRED;  // information inferred by compiler
     static const int INFO_PROGRESS;  // compilation progress
+    static const int INFO_REMOVED;   // instance removed
 
     // Backends should extend this class with additional info messages in the range 3000-3999.
     static const int INFO_MIN_BACKEND = 3000;  // first allowed backend info code

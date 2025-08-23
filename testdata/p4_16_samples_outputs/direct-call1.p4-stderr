@@ -1,7 +1,10 @@
-direct-call1.p4(7): [--Wwarn=unused] warning: Parser q is not used; removing
+direct-call1.p4(7): [--Wwarn=unused] warning: parser 'q' is unused
 parser q() {
        ^
-direct-call1.p4(1): [--Wwarn=unused] warning: Parser p is not used; removing
+direct-call1.p4(7): [--Winfo=removed] info: removing parser 'q'
+parser q() {
+       ^
+direct-call1.p4(1): [--Winfo=removed] info: removing parser 'p'
 parser p() {
        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

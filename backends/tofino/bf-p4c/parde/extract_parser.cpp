@@ -90,7 +90,7 @@ struct GetHeaderStackIndex : public Inspector {
                 BUG_CHECK(hdr, "%1%: not a header reference in extract", statement);
 
                 if (!hdr->is<IR::HeaderStackItemRef>()) {
-                    if (header == hdr->to<IR::ConcreteHeaderRef>()->ref->name) {
+                    if (hdr->to<IR::ConcreteHeaderRef>()->ref->name == header) {
                         rv = 0;
                     }
                 }
@@ -280,7 +280,7 @@ struct ResolveHeaderStackIndex : public Transform {
         : state(s), backendStates(bs), topoAncestors(ans), pg(pg) {}
 
     bool isStackOutOfBound(const IR::HeaderStackItemRef *ref, int index) {
-        auto stackSize = ref->base()->type->to<IR::Type_Stack>()->size->to<IR::Constant>()->asInt();
+        auto stackSize = ref->base()->type->to<IR::Type_Array>()->size->to<IR::Constant>()->asInt();
 
         return index < 0 || index >= stackSize;
     }
@@ -553,7 +553,7 @@ const IR::BFN::Parser *GetBackendParser::createBackendParser() {
         while (bitr != binfo->end()) {
             auto b = *bitr;
             auto bparser = b.first->to<IR::P4Parser>();
-            if (bparser && (bparser->name.originalName == parser->name) &&
+            if (bparser && (parser->name == bparser->name.originalName) &&
                 (b.second.gress == parser->thread)) {
                 if (!b.second.parser_instance_name.isNullOrEmpty())
                     multiParserName = b.second.parser_instance_name;
@@ -714,7 +714,7 @@ std::optional<nw_bitrange> lookaheadToExtractRange(P4::TypeMap *typeMap, const I
         }
         BUG_CHECK(index->fitsUint64(), "%1%: Invalid index for header stack lookahead", expr);
         auto index_val = index->asUint64();
-        auto stack_type = stack->base()->type->to<IR::Type_Stack>();
+        auto stack_type = stack->base()->type->to<IR::Type_Array>();
         auto elem_type = stack->type;
         BUG_CHECK(stack_type, "%1%: Invalid type for header stack: %2%", expr, stack->base()->type);
         auto elem_size = typeMap->widthBits(elem_type, expr, false);

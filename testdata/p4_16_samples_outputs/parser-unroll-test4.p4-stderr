@@ -1,0 +1,9 @@
+parser-unroll-test4.p4(4): [--Wwarn=unused] warning: 'TYPE_IPV4' is unused
+const bit<16> TYPE_IPV4 = 0x800;
+              ^^^^^^^^^
+parser-unroll-test4.p4(5): [--Wwarn=unused] warning: 'TYPE_SRCROUTING' is unused
+const bit<16> TYPE_SRCROUTING = 0x1234;
+              ^^^^^^^^^^^^^^^
+parser-unroll-test4.p4(17): [--Wwarn=unused] warning: 'egressSpec_t' is unused
+typedef bit<9> egressSpec_t;
+               ^^^^^^^^^^^^

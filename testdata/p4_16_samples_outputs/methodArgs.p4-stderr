@@ -1,0 +1,3 @@
+methodArgs.p4(13): [--Wwarn=unused] warning: 'v' is unused
+        bit<16> v = r2.read();
+        ^^^^^^^^^^^^^^^^^^^^^

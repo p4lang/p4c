@@ -28,7 +28,7 @@ bool DoExpandEmit::expandArg(const IR::Type *type, const IR::Argument *arg,
         result->push_back(arg);
         resultTypes->push_back(type);
         return false;
-    } else if (auto st = type->to<IR::Type_Stack>()) {
+    } else if (auto st = type->to<IR::Type_Array>()) {
         int size = st->getSize();
         for (int i = 0; i < size; i++) {
             auto index = new IR::Constant(i);

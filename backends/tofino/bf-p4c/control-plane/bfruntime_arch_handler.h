@@ -573,7 +573,7 @@ class SnapshotFieldFinder : public Inspector {
         prefixList.push_back(prefix);
         // Setting visitDagOnce to false so IR nodes can be visited more than once. This is required
         // while dealing with header stacks where we have to loop for all elements in a stack.
-        // Type_Stack is not a vector so we have a single node which needs to output 'n' values for
+        // Type_Array is not a vector so we have a single node which needs to output 'n' values for
         // a size 'n' stack.
         visitDagOnce = false;
     }
@@ -617,7 +617,7 @@ class SnapshotFieldFinder : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Type_Stack *st) override {
+    bool preorder(const IR::Type_Array *st) override {
         Log::TempIndent indent;
         LOG4("SnapshotFinder preorder Stack : " << st << indent);
         // Remove stack name and re-insert based on index

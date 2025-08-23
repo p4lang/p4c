@@ -83,6 +83,35 @@ class BackendDriver:
         """Method for derived classes to add options to the parser"""
         self._argGroup = self._argParser.add_argument_group(title=self._backend)
 
+    def config_warning_modifiers(self, arguments, option):
+        """! Behaviour of warnings emitted by p4c can be modified by two options:
+        --Werror which turns all/selected warnings into errors
+        --Wdisable which ignores all/selected warnings
+        Both accept either no further options or they accept comma separated list of strings
+        or they can occur multiple times with a different CSL each time. If argparser is properly configured
+        (action="append", nargs="?", default=None, const="", type=str) it will create a list of strings
+        (plain or CSLs) or empty string (if no further option was provided).
+        You can then pass parsed argument to this function to properly select between everything or something
+        and to properly parse CSLs.
+
+        @param arguments Warning arguments
+        @param option String value, either "disable" or "error"
+        """
+        if option != "disable" and option != "error":
+            raise Exception(
+                "Programmer error - config_warning_modifiers does not support option " + option
+            )
+
+        all = len(arguments) == 1 and arguments[0] == ""
+
+        if all:
+            self.add_command_option('compiler', '--W{}'.format(option))
+        else:
+            for diag in arguments:
+                subdiags = diag.split(',')
+                for sd in subdiags:
+                    self.add_command_option('compiler', '--W{}={}'.format(option, sd))
+
     def process_command_line_options(self, opts):
         """Process all command line options"""
         self._dry_run = opts.dry_run
@@ -100,6 +129,10 @@ class BackendDriver:
         # set compiler options.
         for option in opts.compiler_options:
             self.add_command_option("compiler", option)
+        if opts.Wdisable is not None:
+            self.config_warning_modifiers(opts.Wdisable, "disable")
+        if opts.Werror is not None:
+            self.config_warning_modifiers(opts.Werror, "error")
 
         # set debug info
         if opts.debug_info:
@@ -195,6 +228,20 @@ class BackendDriver:
                 self.add_command_option("compiler", "--pp {}".format(opts.pretty_print))
             if opts.ndebug_mode:
                 self.add_command_option("compiler", "--ndebug")
+            # Make sure we don't have conflicting debugger options.
+            if sum(int(x) for x in [opts.gdb, opts.cgdb, opts.lldb]) > 1:
+                self.exitWithError("Cannot use more than one debugger at a time.")
+            if opts.gdb or opts.cgdb or opts.lldb:
+                # XXX breaks abstraction
+                old_command = self._commands['compiler']
+                if opts.lldb:
+                    self.add_command('compiler', 'lldb')
+                    self.add_command_option('compiler', '--')
+                else:
+                    self.add_command('compiler', 'gdb' if opts.gdb else 'cgdb')
+                    self.add_command_option('compiler', '--args')
+                for arg in old_command:
+                    self.add_command_option('compiler', arg)
 
         if (
             (os.environ["P4C_BUILD_TYPE"] == "DEVELOPER")
@@ -214,6 +261,9 @@ class BackendDriver:
             # this is the default, each backend driver is supposed to enable all
             # its commands and the order in which they execute
             pass
+
+        if opts.inputMetrics is not None:
+            self.add_command_option("compiler", "--metrics={}".format(opts.inputMetrics))
 
     def should_not_check_input(self, opts):
         """

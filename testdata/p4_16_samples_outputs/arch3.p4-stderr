@@ -1,1 +1,4 @@
+arch3.p4(37): [--Wwarn=unused] warning: 'package Switch' is unused
+package Switch<T,IH,OH>(Ingress<T, IH,OH> ingress, Egress<T, IH,OH> egress);
+        ^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

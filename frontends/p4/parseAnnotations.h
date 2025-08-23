@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4_PARSEANNOTATIONS_H_
-#define P4_PARSEANNOTATIONS_H_
+#ifndef FRONTENDS_P4_PARSEANNOTATIONS_H_
+#define FRONTENDS_P4_PARSEANNOTATIONS_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/parsers/parserDriver.h"
@@ -27,113 +27,95 @@ limitations under the License.
 namespace P4 {
 
 // A no-op handler. Useful for avoiding warnings about ignored annotations.
-#define PARSE_SKIP(aname) \
-    { aname, &P4::ParseAnnotations::parseSkip }
+#define PARSE_SKIP(aname) {aname, &P4::ParseAnnotations::parseSkip}
 
 // Parses an empty annotation.
-#define PARSE_EMPTY(aname) \
-    { aname, &P4::ParseAnnotations::parseEmpty }
+#define PARSE_EMPTY(aname) {aname, &P4::ParseAnnotations::parseEmpty}
 
 // Parses an annotation with a single-element body.
-#define PARSE(aname, tname)                                                                       \
-    {                                                                                             \
-        aname, [](IR::Annotation *annotation) {                                                   \
-            const IR::tname *parsed =                                                             \
-                P4::P4ParserDriver::parse##tname(annotation->srcInfo, annotation->getUnparsed()); \
-            if (parsed != nullptr) {                                                              \
-                annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed);           \
-            }                                                                                     \
-            return parsed != nullptr;                                                             \
-        }                                                                                         \
-    }
+#define PARSE(aname, tname)                                                                    \
+    {aname, [](IR::Annotation *annotation) {                                                   \
+         const IR::tname *parsed =                                                             \
+             P4::P4ParserDriver::parse##tname(annotation->srcInfo, annotation->getUnparsed()); \
+         if (parsed != nullptr) {                                                              \
+             annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed);           \
+         }                                                                                     \
+         return parsed != nullptr;                                                             \
+     }}
 
 // Parses an annotation that is either an integer constant or a string literal.
-#define PARSE_CONSTANT_OR_STRING_LITERAL(aname)                                              \
-    {                                                                                        \
-        aname, [](IR::Annotation *annotation) {                                              \
-            const IR::Expression *parsed = P4::P4ParserDriver::parseConstantOrStringLiteral( \
-                annotation->srcInfo, annotation->getUnparsed());                             \
-            if (parsed != nullptr) {                                                         \
-                annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed);      \
-            }                                                                                \
-            return parsed != nullptr;                                                        \
-        }                                                                                    \
-    }
+#define PARSE_CONSTANT_OR_STRING_LITERAL(aname)                                           \
+    {aname, [](IR::Annotation *annotation) {                                              \
+         const IR::Expression *parsed = P4::P4ParserDriver::parseConstantOrStringLiteral( \
+             annotation->srcInfo, annotation->getUnparsed());                             \
+         if (parsed != nullptr) {                                                         \
+             annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed);      \
+         }                                                                                \
+         return parsed != nullptr;                                                        \
+     }}
 
-#define PARSE_CONSTANT(aname)                                                                      \
-    {                                                                                              \
-        aname, [](IR::Annotation *annotation) {                                                    \
-            const IR::Expression *parsed =                                                         \
-                P4::P4ParserDriver::parseConstant(annotation->srcInfo, annotation->getUnparsed()); \
-            if (parsed != nullptr) {                                                               \
-                annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed);            \
-            }                                                                                      \
-            return parsed != nullptr;                                                              \
-        }                                                                                          \
-    }
+#define PARSE_CONSTANT(aname)                                                                   \
+    {aname, [](IR::Annotation *annotation) {                                                    \
+         const IR::Expression *parsed =                                                         \
+             P4::P4ParserDriver::parseConstant(annotation->srcInfo, annotation->getUnparsed()); \
+         if (parsed != nullptr) {                                                               \
+             annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed);            \
+         }                                                                                      \
+         return parsed != nullptr;                                                              \
+     }}
 
-#define PARSE_STRING_LITERAL(aname)                                                     \
-    {                                                                                   \
-        aname, [](IR::Annotation *annotation) {                                         \
-            const IR::Expression *parsed = P4::P4ParserDriver::parseStringLiteral(      \
-                annotation->srcInfo, annotation->getUnparsed());                        \
-            if (parsed != nullptr) {                                                    \
-                annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed); \
-            }                                                                           \
-            return parsed != nullptr;                                                   \
-        }                                                                               \
-    }
+#define PARSE_STRING_LITERAL(aname)                                                  \
+    {aname, [](IR::Annotation *annotation) {                                         \
+         const IR::Expression *parsed = P4::P4ParserDriver::parseStringLiteral(      \
+             annotation->srcInfo, annotation->getUnparsed());                        \
+         if (parsed != nullptr) {                                                    \
+             annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(parsed); \
+         }                                                                           \
+         return parsed != nullptr;                                                   \
+     }}
 
 // Parses an annotation whose body is a pair.
-#define PARSE_PAIR(aname, tname)                                                               \
-    {                                                                                          \
-        aname, [](IR::Annotation *annotation) {                                                \
-            const IR::Vector<IR::Expression> *parsed = P4::P4ParserDriver::parse##tname##Pair( \
-                annotation->srcInfo, annotation->getUnparsed());                               \
-            if (parsed != nullptr) {                                                           \
-                annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(*parsed);       \
-            }                                                                                  \
-            return parsed != nullptr;                                                          \
-        }                                                                                      \
-    }
+#define PARSE_PAIR(aname, tname)                                                            \
+    {aname, [](IR::Annotation *annotation) {                                                \
+         const IR::Vector<IR::Expression> *parsed = P4::P4ParserDriver::parse##tname##Pair( \
+             annotation->srcInfo, annotation->getUnparsed());                               \
+         if (parsed != nullptr) {                                                           \
+             annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(*parsed);       \
+         }                                                                                  \
+         return parsed != nullptr;                                                          \
+     }}
 
 // Parses an annotation whose body is a triple.
-#define PARSE_TRIPLE(aname, tname)                                                               \
-    {                                                                                            \
-        aname, [](IR::Annotation *annotation) {                                                  \
-            const IR::Vector<IR::Expression> *parsed = P4::P4ParserDriver::parse##tname##Triple( \
-                annotation->srcInfo, annotation->getUnparsed());                                 \
-            if (parsed != nullptr) {                                                             \
-                annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(*parsed);         \
-            }                                                                                    \
-            return parsed != nullptr;                                                            \
-        }                                                                                        \
-    }
+#define PARSE_TRIPLE(aname, tname)                                                            \
+    {aname, [](IR::Annotation *annotation) {                                                  \
+         const IR::Vector<IR::Expression> *parsed = P4::P4ParserDriver::parse##tname##Triple( \
+             annotation->srcInfo, annotation->getUnparsed());                                 \
+         if (parsed != nullptr) {                                                             \
+             annotation->body.emplace<IR::Annotation::ExpressionAnnotation>(*parsed);         \
+         }                                                                                    \
+         return parsed != nullptr;                                                            \
+     }}
 
 // Parses an annotation whose body is a list of expressions.
-#define PARSE_EXPRESSION_LIST(aname) \
-    { aname, &P4::ParseAnnotations::parseExpressionList }
+#define PARSE_EXPRESSION_LIST(aname) {aname, &P4::ParseAnnotations::parseExpressionList}
 
 // Parses an annotation whose body is a list of key-value pairs.
-#define PARSE_KV_LIST(aname) \
-    { aname, &P4::ParseAnnotations::parseKvList }
+#define PARSE_KV_LIST(aname) {aname, &P4::ParseAnnotations::parseKvList}
 
 // Parses an annotation whose body is a list of integer constants.
-#define PARSE_CONSTANT_LIST(aname) \
-    { aname, &P4::ParseAnnotations::parseConstantList }
+#define PARSE_CONSTANT_LIST(aname) {aname, &P4::ParseAnnotations::parseConstantList}
 
 // Parses an annotation whose body is a list, where each element is an integer constant or a string
 // literal.
 #define PARSE_CONSTANT_OR_STRING_LITERAL_LIST(aname) \
-    { aname, &P4::ParseAnnotations::parseConstantOrStringLiteralList }
+    {aname, &P4::ParseAnnotations::parseConstantOrStringLiteralList}
 
 // Parses an annotation whose body is a list of string literals.
-#define PARSE_STRING_LITERAL_LIST(aname) \
-    { aname, &P4::ParseAnnotations::parseStringLiteralList }
+#define PARSE_STRING_LITERAL_LIST(aname) {aname, &P4::ParseAnnotations::parseStringLiteralList}
 
 // Parses a P4Runtime translation which contains both types or expressions.
 #define PARSE_P4RUNTIME_TRANSLATION(aname) \
-    { aname, &P4::ParseAnnotations::parseP4rtTranslationAnnotation }
+    {aname, &P4::ParseAnnotations::parseP4rtTranslationAnnotation}
 
 class ParseAnnotations : public Modifier {
  public:
@@ -206,4 +188,4 @@ class ParseAnnotationBodies final : public PassManager {
 
 }  // namespace P4
 
-#endif /* P4_PARSEANNOTATIONS_H_ */
+#endif /* FRONTENDS_P4_PARSEANNOTATIONS_H_ */

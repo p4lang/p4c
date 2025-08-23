@@ -1,3 +1,15 @@
+very_simple_model.p4(26): [--Wwarn=unused] warning: 'REAL_PORT_COUNT' is unused
+const PortId REAL_PORT_COUNT = 4w8; // 4w8 is the number 8 in 4 bits
+             ^^^^^^^^^^^^^^^
+very_simple_model.p4(33): [--Wwarn=unused] warning: 'RECIRCULATE_IN_PORT' is unused
+const PortId RECIRCULATE_IN_PORT = 0xD;
+             ^^^^^^^^^^^^^^^^^^^
+very_simple_model.p4(34): [--Wwarn=unused] warning: 'CPU_IN_PORT' is unused
+const PortId CPU_IN_PORT = 0xE;
+             ^^^^^^^^^^^
+very_simple_model.p4(43): [--Wwarn=unused] warning: 'RECIRCULATE_OUT_PORT' is unused
+const PortId RECIRCULATE_OUT_PORT = 0xD;
+             ^^^^^^^^^^^^^^^^^^^^
 vss-example.p4(159): [--Wwarn=uninitialized_use] warning: nextHop may be uninitialized
           key = { nextHop : exact; }
                   ^^^^^^^

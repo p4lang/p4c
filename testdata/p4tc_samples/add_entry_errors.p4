@@ -84,9 +84,6 @@ control MainControlImpl(
     action default_route_drop() {
         drop_packet();
     }
-    action drop() {
-        drop_packet();
-    }
 
     table ipv4_tbl_1 {
         key = {

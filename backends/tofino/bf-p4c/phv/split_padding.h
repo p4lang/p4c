@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_SPLIT_PADDING_H_
-#define BF_P4C_PHV_SPLIT_PADDING_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_SPLIT_PADDING_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_SPLIT_PADDING_H_
 
 #include <ir/ir.h>
 
@@ -42,4 +42,4 @@ class SplitPadding : public Transform {
     explicit SplitPadding(const PhvInfo &phv) : phv(phv) {}
 };
 
-#endif /* BF_P4C_PHV_SPLIT_PADDING_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_SPLIT_PADDING_H_ */

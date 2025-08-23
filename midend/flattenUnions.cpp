@@ -194,7 +194,7 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Control *control) {
 bool DoFlattenHeaderUnionStack::hasHeaderUnionStackField(IR::Type_Struct *s) {
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
-        if (auto hus = ftype->to<IR::Type_Stack>()) {
+        if (auto hus = ftype->to<IR::Type_Array>()) {
             if (hus->elementType->is<IR::Type_HeaderUnion>()) return true;
         }
     }
@@ -211,7 +211,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Type_Struct *s) {
     std::vector<cstring> indexVec;
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
-        if (auto hus = ftype->to<IR::Type_Stack>()) {
+        if (auto hus = ftype->to<IR::Type_Array>()) {
             if (hus->elementType->is<IR::Type_HeaderUnion>()) {
                 size_t stackSize = hus->getSize();
                 for (size_t i = 0; i < stackSize; i++) {
@@ -237,7 +237,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Declaration_Variable *d
     auto ftype = typeMap->getTypeType(dv->type, true);
     IR::IndexedVector<IR::Declaration> toInsert;
     std::vector<cstring> indexVec;
-    if (auto hus = ftype->to<IR::Type_Stack>()) {
+    if (auto hus = ftype->to<IR::Type_Array>()) {
         if (hus->elementType->is<IR::Type_HeaderUnion>()) {
             size_t stackSize = hus->getSize();
             for (size_t i = 0; i < stackSize; i++) {
@@ -258,7 +258,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Declaration_Variable *d
 /* Replace all occurence of header union stack element references with the header union variables */
 const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
     auto ftype = typeMap->getType(e->left, true);
-    if (auto stack = ftype->to<IR::Type_Stack>()) {
+    if (auto stack = ftype->to<IR::Type_Array>()) {
         unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
         if (stack->elementType->is<IR::Type_HeaderUnion>()) {
             if (!e->right->is<IR::Constant>())

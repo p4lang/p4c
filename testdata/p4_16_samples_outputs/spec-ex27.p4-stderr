@@ -1,1 +1,4 @@
+spec-ex27.p4(20): [--Wwarn=unused] warning: 'control Dep' is unused
+control Dep<OH>(packet_out b,
+        ^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

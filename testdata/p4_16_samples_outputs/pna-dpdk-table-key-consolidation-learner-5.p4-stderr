@@ -1,0 +1,12 @@
+pna-dpdk-table-key-consolidation-learner-5.p4(48): [--Wwarn=unused] warning: 'ByteCounter_t' is unused
+typedef bit<48> ByteCounter_t;
+                ^^^^^^^^^^^^^
+pna-dpdk-table-key-consolidation-learner-5.p4(49): [--Wwarn=unused] warning: 'PacketCounter_t' is unused
+typedef bit<32> PacketCounter_t;
+                ^^^^^^^^^^^^^^^
+pna-dpdk-table-key-consolidation-learner-5.p4(50): [--Wwarn=unused] warning: 'PacketByteCounter_t' is unused
+typedef bit<80> PacketByteCounter_t;
+                ^^^^^^^^^^^^^^^^^^^
+pna-dpdk-table-key-consolidation-learner-5.p4(52): [--Wwarn=unused] warning: 'NUM_PORTS' is unused
+const bit<32> NUM_PORTS = 4;
+              ^^^^^^^^^

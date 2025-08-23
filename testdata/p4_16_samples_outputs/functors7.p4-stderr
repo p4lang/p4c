@@ -1,0 +1,3 @@
+functors7.p4(21): [--Wwarn=unused] warning: 'w' is unused
+        T w = a;
+        ^^^^^^^
