@@ -17,7 +17,7 @@ struct CopyStructuresConfig {
     /// Specific targets may allow functions or methods to return structs.
     /// Such methods will not be converted in this pass. Setting the
     /// errorOnMethodCall flag will produce an error message if such a
-    ///  method is encountered.
+    /// method is encountered.
     bool errorOnMethodCall = true;
 
     /// Do not only copy normal structures but also perform copy assignments for headers.
@@ -66,11 +66,11 @@ class DoCopyStructures : public Transform {
     TypeMap *typeMap;
 
     /// Configuration options.
-    CopyStructuresConfig _config;
+    CopyStructuresConfig config;
 
  public:
     explicit DoCopyStructures(TypeMap *typeMap, CopyStructuresConfig config)
-        : typeMap(typeMap), _config(config) {
+        : typeMap(typeMap), config(config) {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
