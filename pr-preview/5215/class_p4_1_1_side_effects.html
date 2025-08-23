@@ -374,8 +374,8 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_i_declaration.html">IR::IDeclarat
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a35a00c5b977ae2d46680d60845e900ec" id="r_a35a00c5b977ae2d46680d60845e900ec"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35a00c5b977ae2d46680d60845e900ec">check</a> (const IR::Expression *expression, const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *calledBy, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap=nullptr, const <a class="el" href="struct_p4_1_1_visitor___context.html">Visitor::Context</a> *ctxt=nullptr)</td></tr>
 <tr class="separator:a35a00c5b977ae2d46680d60845e900ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aec4cc01242f98b8e8f7fa35e7ff3e29d" id="r_aec4cc01242f98b8e8f7fa35e7ff3e29d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aec4cc01242f98b8e8f7fa35e7ff3e29d">hasSideEffect</a> (const IR::MethodCallExpression *mce, <a class="el" href="class_p4_1_1_declaration_lookup.html">DeclarationLookup</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</td></tr>
-<tr class="separator:aec4cc01242f98b8e8f7fa35e7ff3e29d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2665088320048153ad7a8ccfac35f438" id="r_a2665088320048153ad7a8ccfac35f438"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2665088320048153ad7a8ccfac35f438">mayHaveSideEffect</a> (const IR::MethodCallExpression *mce, <a class="el" href="class_p4_1_1_declaration_lookup.html">DeclarationLookup</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</td></tr>
+<tr class="separator:a2665088320048153ad7a8ccfac35f438"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
 <tr class="memitem:acc1e5976fdbd48c1d087e5b037325978 inherit pub_static_methods_class_p4_1_1_visitor" id="r_acc1e5976fdbd48c1d087e5b037325978"><td class="memItemLeft" align="right" valign="top">
 static <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>demangle</b> (const char *)</td></tr>
@@ -524,8 +524,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>anyOrder</b> = false<
 
 </div>
 </div>
-<a id="aec4cc01242f98b8e8f7fa35e7ff3e29d" name="aec4cc01242f98b8e8f7fa35e7ff3e29d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aec4cc01242f98b8e8f7fa35e7ff3e29d">&#9670;&#160;</a></span>hasSideEffect()</h2>
+<a id="a2665088320048153ad7a8ccfac35f438" name="a2665088320048153ad7a8ccfac35f438"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2665088320048153ad7a8ccfac35f438">&#9670;&#160;</a></span>mayHaveSideEffect()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -534,7 +534,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>anyOrder</b> = false<
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static bool P4::SideEffects::hasSideEffect </td>
+          <td class="memname">static bool P4::SideEffects::mayHaveSideEffect </td>
           <td>(</td>
           <td class="paramtype">const IR::MethodCallExpression *</td>          <td class="paramname"><span class="paramname"><em>mce</em></span>, </td>
         </tr>

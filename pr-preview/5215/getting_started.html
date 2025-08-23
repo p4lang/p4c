@@ -395,7 +395,7 @@ Dependencies</h2>
 <li>GNU Bison and Flex for the parser and lexical analyzer generators.</li>
 <li>Google Protocol Buffers v3.25.3 or higher for control plane API generation</li>
 <li>C++ boost library</li>
-<li>Python 3 for scripting and running tests</li>
+<li>Python 3 and uv for scripting and running tests</li>
 <li>Optional: Documentation generation requires Doxygen (1.13.2) and Graphviz (2.38.0 or higher).</li>
 </ul>
 <p>Backends may have additional dependencies. The dependencies for the backends included with <code>P4C</code> are documented here:</p><ul>
@@ -410,8 +410,8 @@ Ubuntu dependencies</h3>
 <div class="line">libfl-dev libboost-dev libboost-iostreams-dev \</div>
 <div class="line">libboost-graph-dev llvm pkg-config python3 python3-pip \</div>
 <div class="line">tcpdump</div>
-<div class="line"> </div>
-<div class="line">pip3 install --user -r requirements.txt</div>
+</div><!-- fragment --><p> Python dependencies can be installed using <code>uv</code>: </p><div class="fragment"><div class="line">curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh</div>
+<div class="line">uv sync</div>
 </div><!-- fragment --><p><b>For documentation building:</b></p>
 <p><b>Tools</b></p><ul>
 <li>Download the Doxygen 1.13.2 binary <div class="fragment"><div class="line">wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.2.linux.bin.tar.gz</div>
@@ -436,9 +436,9 @@ CMake</h4>
 Fedora dependencies</h3>
 <div class="fragment"><div class="line">sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \</div>
 <div class="line">libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \</div>
-<div class="line">python3 python3-pip tcpdump</div>
+<div class="line">python3 python3-pip tcpdump uv</div>
 <div class="line"> </div>
-<div class="line">sudo pip3 install -r requirements.txt</div>
+<div class="line">uv sync</div>
 </div><!-- fragment --><p><b>For documentation building:</b></p>
 <p><b>Tools</b></p><ul>
 <li>Download the Doxygen 1.13.2 binary <div class="fragment"><div class="line">wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.2.linux.bin.tar.gz</div>
@@ -536,7 +536,7 @@ Source files</h4>
 <div class="line">add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} &quot;${MY_SOURCES_AND_HEADERS}&quot;)</div>
 </div><!-- fragment --><p>Python files should be added to the black and isort target using the following rule: </p><div class="fragment"><div class="line">add_black_files (${CMAKE_CURRENT_SOURCE_DIR} &quot;${MY_SOURCES_AND_HEADERS}&quot;)</div>
 </div><!-- fragment --><p>The P4C CMakeLists.txt will use that name to figure the full path of the files to lint.</p>
-<p>clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command: </p><div class="fragment"><div class="line">pip3 install --user &quot;clang-format==18.1.0&quot; &quot;black==24.3.0&quot; &quot;isort==5.13.2&quot;</div>
+<p>clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command: </p><div class="fragment"><div class="line">uv pip install &quot;clang-format==18.1.8&quot; &quot;black==24.3.0&quot; &quot;isort==5.13.2&quot;</div>
 </div><!-- fragment --><p> clang-format can be checked using the <code>make clang-format</code> command. Complaints can be fixed by running <code>make clang-format-fix-errors</code>. black and isort can be checked using the <code>make black</code> or <code>make isort</code> command respectively. Complaints can be fixed by running <code>make black-fix-errors</code> or <code>make isort-fix-errors</code>.</p>
 <p>cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running </p><div class="fragment"><div class="line">./tools/install_git_hooks.sh</div>
 </div><!-- fragment --><p> clang-format, cpplint, and black/isort checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using <code>git commit --no-verify</code>.</p>

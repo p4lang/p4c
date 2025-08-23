@@ -131,8 +131,8 @@ $(function(){initNavTree('phv_2utils_2utils_8h_source.html',''); initResizable(t
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#ifndef BF_P4C_PHV_UTILS_UTILS_H_</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define BF_P4C_PHV_UTILS_UTILS_H_</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#ifndef BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
@@ -251,7 +251,7 @@ $(function(){initNavTree('phv_2utils_2utils_8h_source.html',''); initResizable(t
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        ConditionalConstraintData()</div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>            : <a class="code hl_variable" href="struct_p_h_v_1_1_allocation_1_1_conditional_constraint_data.html#ab7d29aa8bb4c4c3e2424c66cca796f5f">bitPosition</a>(-1), <a class="code hl_variable" href="struct_p_h_v_1_1_allocation_1_1_conditional_constraint_data.html#a64debbd3b41ef6c06a3edc242ddd7b9e">rotationAllowed</a>(false), <a class="code hl_variable" href="struct_p_h_v_1_1_allocation_1_1_conditional_constraint_data.html#a661021b934573e4d76b383e510390131">container</a>(<a class="code hl_namespace" href="namespacestd.html">std</a>::nullopt) {}</div>
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span> </div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <span class="keywordtype">bool</span> operator==(ConditionalConstraintData &amp;other)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> ConditionalConstraintData &amp;other)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="struct_p_h_v_1_1_allocation_1_1_conditional_constraint_data.html#ab7d29aa8bb4c4c3e2424c66cca796f5f">bitPosition</a> == other.bitPosition &amp;&amp; <a class="code hl_variable" href="struct_p_h_v_1_1_allocation_1_1_conditional_constraint_data.html#a64debbd3b41ef6c06a3edc242ddd7b9e">rotationAllowed</a> == other.rotationAllowed &amp;&amp;</div>
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>                   <a class="code hl_variable" href="struct_p_h_v_1_1_allocation_1_1_conditional_constraint_data.html#a661021b934573e4d76b383e510390131">container</a> == other.container;</div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        }</div>
@@ -1003,7 +1003,7 @@ $(function(){initNavTree('phv_2utils_2utils_8h_source.html',''); initResizable(t
 <div class="line"><a id="l01277" name="l01277"></a><span class="lineno"> 1277</span>}</div>
 <div class="line"><a id="l01278" name="l01278"></a><span class="lineno"> 1278</span>}  <span class="comment">// namespace P4</span></div>
 <div class="line"><a id="l01279" name="l01279"></a><span class="lineno"> 1279</span> </div>
-<div class="line"><a id="l01280" name="l01280"></a><span class="lineno"> 1280</span><span class="preprocessor">#endif </span><span class="comment">/* BF_P4C_PHV_UTILS_UTILS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l01280" name="l01280"></a><span class="lineno"> 1280</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_PHV_UTILS_UTILS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_map_field_to_parser_states_html"><div class="ttname"><a href="class_map_field_to_parser_states.html">MapFieldToParserStates</a></div><div class="ttdoc">Map field to the parser states in which they are extracted or assigned from checksums.</div><div class="ttdef"><b>Definition</b> phv_fields.h:1755</div></div>
 <div class="ttc" id="aclass_p4_1_1bitvec_html"><div class="ttname"><a href="class_p4_1_1bitvec.html">P4::bitvec</a></div><div class="ttdef"><b>Definition</b> bitvec.h:120</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>

@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_p4_1_1detail_1_1_dbprint_dispatch_ptr.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="struct_p4_1_1detail_1_1_dbprint_dispatch_ref.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="147,-30 0,-30 0,0 147,0 147,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::detail::DbprintDispatch</text>
-<text text-anchor="middle" x="73.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Ptr&lt; T &gt;</text>
+<text text-anchor="middle" x="73.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Ref&lt; T &gt;</text>
 </a>
 </g>
 </g>

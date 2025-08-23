@@ -764,7 +764,7 @@ ternary</h3>
 <div class="line">        __u32 tuple_id = v-&gt;tuple_id;</div>
 <div class="line">        next = v-&gt;next_tuple_mask;</div>
 <div class="line">        <span class="comment">// (3)</span></div>
-<div class="line">        <span class="keyword">struct </span><a class="code hl_struct" href="structbpf__elf__map.html">bpf_elf_map</a> *tuple = BPF_MAP_LOOKUP_ELEM(ingress_tbl_ternary_1_tuples_map, &amp;tuple_id);</div>
+<div class="line">        <span class="keyword">struct </span>bpf_elf_map *tuple = BPF_MAP_LOOKUP_ELEM(ingress_tbl_ternary_1_tuples_map, &amp;tuple_id);</div>
 <div class="line">        <span class="keywordflow">if</span> (!tuple) {</div>
 <div class="line">            <span class="keywordflow">break</span>;</div>
 <div class="line">        }</div>
@@ -788,7 +788,6 @@ ternary</h3>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// (6): go to default action if value == NULL</span></div>
-<div class="ttc" id="astructbpf__elf__map_html"><div class="ttname"><a href="structbpf__elf__map.html">bpf_elf_map</a></div><div class="ttdef"><b>Definition</b> ebpf_kernel.h:67</div></div>
 </div><!-- fragment --><p>The description of annotated lines:</p><ol type="1">
 <li>The algorithm starts to iterate over the ternary masks map. The loop is bounded by the <code>MAX_INGRESS_TBL_TERNARY_1_KEY_MASKS</code> which is configured by <code>--max-ternary-masks</code> compiler option (defaults to 128). Note that the eBPF program complexity (instruction count) depends on this constant, so some more complex P4 program may not compile if the max ternary masks value is too high (see the Limitations section).</li>
 <li>A lookup key to a next tuple map is created by masking the concatenation of match keys with the ternary masks retrieved from the <code>&lt;TBL-NAME&gt;_prefixes</code> map. Note that the key is masked in 4-byte chunks.</li>

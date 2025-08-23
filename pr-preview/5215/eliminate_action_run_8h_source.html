@@ -168,7 +168,7 @@ $(function(){initNavTree('eliminate_action_run_8h_source.html',''); initResizabl
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    std::map&lt;cstring, atinfo_t&gt; actionRunTables;</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    std::map&lt;cstring, atinfo_t *&gt; actionsToModify;</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    std::map&lt;const IR::Statement *, IR::Vector&lt;IR::StatOrDecl&gt; *&gt; prepend_statement;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    std::map&lt;const IR::Statement *, IR::IndexedVector&lt;IR::StatOrDecl&gt;&gt; prepend_statement;</div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <a class="code hl_class" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector&lt;IR::Declaration&gt;</a> add_to_control;</div>
 <div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keyword">class </span>ActionTableUse : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_inspector.html">Inspector</a>, <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_resolution_context.html">ResolutionContext</a> {</div>

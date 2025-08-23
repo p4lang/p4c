@@ -17,6 +17,7 @@ var class_p4_1_1_parser_options =
     [ "exe_name", "class_p4_1_1_parser_options.html#a4b3e52e1a5e3c6b149f40c8f7c6e8a3d", null ],
     [ "file", "class_p4_1_1_parser_options.html#a0da54641de222300cc86b574205cca7f", null ],
     [ "langVersion", "class_p4_1_1_parser_options.html#a5340ee56a38043493e903dc08f14f77d", null ],
+    [ "metrics", "class_p4_1_1_parser_options.html#a939d0432c1d867c783036a2249f7edbe", null ],
     [ "noIncludes", "class_p4_1_1_parser_options.html#a2694bc78190b880a1e923cc4331d4a66", null ],
     [ "optimizeParserInlining", "class_p4_1_1_parser_options.html#a8210f15636a99238c7d991dec4a1e7ce", null ],
     [ "preprocessor_options", "class_p4_1_1_parser_options.html#aaa586c4ba4584c6b19ffc2aa16de63d6", null ],

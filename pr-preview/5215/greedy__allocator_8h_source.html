@@ -131,8 +131,8 @@ $(function(){initNavTree('greedy__allocator_8h_source.html',''); initResizable(t
 <div class="contents">
 <div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#ifndef BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_</span></div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#ifndef BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/phv/utils/utils.h&quot;</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/phv/v2/allocator_base.h&quot;</span></div>
@@ -193,7 +193,7 @@ $(function(){initNavTree('greedy__allocator_8h_source.html',''); initResizable(t
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    GreedyAllocator(<span class="keyword">const</span> <a class="code hl_struct" href="struct_p_h_v_1_1v2_1_1_phv_kit.html">PhvKit</a> &amp;kit, <a class="code hl_class" href="class_phv_info.html">PhvInfo</a> &amp;phv, <span class="keywordtype">int</span> pipe_id)</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        : AllocatorBase(kit), phv_i(phv), pipe_id_i(pipe_id){};</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        : AllocatorBase(kit), phv_i(phv), pipe_id_i(pipe_id) {};</div>
 <div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span></div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keywordtype">bool</span> <a class="code hl_function" href="class_p_h_v_1_1v2_1_1_greedy_allocator.html#a381d7485f52adc6c8c75c58403f0cc76">allocate</a>(std::list&lt;SuperCluster *&gt; clusters, <a class="code hl_class" href="class_p_h_v_1_1v2_1_1_allocator_metrics.html">AllocatorMetrics</a> &amp;alloc_metrics);</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>};</div>
@@ -204,7 +204,7 @@ $(function(){initNavTree('greedy__allocator_8h_source.html',''); initResizable(t
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>}  <span class="comment">// namespace v2</span></div>
 <div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>}  <span class="comment">// namespace PHV</span></div>
 <div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#endif </span><span class="comment">/* BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_PHV_V2_GREEDY_ALLOCATOR_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__set_html"><div class="ttname"><a href="class_p4_1_1ordered__set.html">P4::ordered_set</a></div><div class="ttdef"><b>Definition</b> ordered_set.h:32</div></div>
 <div class="ttc" id="aclass_p_h_v_1_1_allocation_html"><div class="ttname"><a href="class_p_h_v_1_1_allocation.html">PHV::Allocation</a></div><div class="ttdef"><b>Definition</b> phv/utils/utils.h:117</div></div>

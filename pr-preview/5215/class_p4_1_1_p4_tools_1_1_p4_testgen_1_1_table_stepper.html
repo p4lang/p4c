@@ -157,6 +157,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a0d1ec24b8bbf2775812eae8c841130e9" id="r_a0d1ec24b8bbf2775812eae8c841130e9"><td class="memItemLeft" align="right" valign="top">static const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0d1ec24b8bbf2775812eae8c841130e9">getActiveTableVar</a> ()</td></tr>
+<tr class="separator:a0d1ec24b8bbf2775812eae8c841130e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac11a4c4fc55b44a963d2e15dda6567e5" id="r_ac11a4c4fc55b44a963d2e15dda6567e5"><td class="memItemLeft" align="right" valign="top">static const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac11a4c4fc55b44a963d2e15dda6567e5">getTableActionVar</a> (const IR::P4Table *<a class="el" href="#ae6bb6094c2b00c6158c872377db7986c">table</a>)</td></tr>
 <tr class="separator:ac11a4c4fc55b44a963d2e15dda6567e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d713e278e9aaec3533a435554610f6d" id="r_a3d713e278e9aaec3533a435554610f6d"><td class="memItemLeft" align="right" valign="top">static const IR::StateVariable &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d713e278e9aaec3533a435554610f6d">getTableHitVar</a> (const IR::P4Table *<a class="el" href="#ae6bb6094c2b00c6158c872377db7986c">table</a>)</td></tr>
@@ -482,6 +484,32 @@ const IR::P4Table *&#160;</td><td class="memItemRight" valign="bottom"><b>table<
 <p>This function allows target back ends to implement their own interpretation of table execution. How a table is evaluated is target-specific. </p>
 
 <p>Reimplemented in <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_table_stepper.html#a03b5670e3203e79f0632289f897739b5">P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelTableStepper</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_table_stepper.html#aca0b053afa6f060cc8da05932e20b9db">P4::P4Tools::P4Testgen::EBPF::EBPFTableStepper</a>, <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html#aee824f54e046655d28a3fc5aaf6830ac">P4::P4Tools::P4Testgen::Pna::SharedPnaTableStepper</a>, and <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_table_stepper.html#a2428db3f27d9f8497379eceb8c582533">P4::P4Tools::P4Testgen::Tofino::TofinoTableStepper</a>.</p>
+
+</div>
+</div>
+<a id="a0d1ec24b8bbf2775812eae8c841130e9" name="a0d1ec24b8bbf2775812eae8c841130e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d1ec24b8bbf2775812eae8c841130e9">&#9670;&#160;</a></span>getActiveTableVar()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::StateVariable &amp; P4::P4Tools::P4Testgen::TableStepper::getActiveTableVar </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the string-typed state variable that tracks the current active table. </dd></dl>
 
 </div>
 </div>

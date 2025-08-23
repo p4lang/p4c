@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,13,159,38"/>
-<area shape="rect" id="Node000001" href="$class_target_1_1_tofino_1_1_ternary_indirect_table.html" title=" " alt="" coords="207,5,420,45"/>
-<area shape="poly" id="edge2750_Node000000_Node000001" title=" " alt="" coords="172,23,206,23,206,28,172,28"/>
+<area shape="rect" id="Node000000" href="$struct_table_1_1_ref.html" title=" " alt="" coords="5,5,92,31"/>
+<area shape="rect" id="Node000001" href="$struct_table_1_1_call.html" title=" " alt="" coords="140,5,229,31"/>
+<area shape="poly" id="edge2760_Node000000_Node000001" title=" " alt="" coords="106,15,140,15,140,21,106,21"/>
 </map>

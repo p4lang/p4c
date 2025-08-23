@@ -140,12 +140,12 @@ Inheritance diagram for P4::RemoveUnusedPolicy:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8dcd6a9caada23dfceacd0f45e04182f" id="r_a8dcd6a9caada23dfceacd0f45e04182f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_remove_unused_declarations.html">RemoveUnusedDeclarations</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8dcd6a9caada23dfceacd0f45e04182f">getRemoveUnusedDeclarationsPass</a> (const <a class="el" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;used, bool warn=false) const</td></tr>
-<tr class="separator:a8dcd6a9caada23dfceacd0f45e04182f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a310d1b61027d39a058bba48e8e0c1cc4" id="r_a310d1b61027d39a058bba48e8e0c1cc4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_unused_declarations.html">UnusedDeclarations</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a310d1b61027d39a058bba48e8e0c1cc4">getUnusedDeclarationsPass</a> (const <a class="el" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;used, bool removeUnused, bool warnUnused, bool infoRemoved) const</td></tr>
+<tr class="separator:a310d1b61027d39a058bba48e8e0c1cc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a8dcd6a9caada23dfceacd0f45e04182f" name="a8dcd6a9caada23dfceacd0f45e04182f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8dcd6a9caada23dfceacd0f45e04182f">&#9670;&#160;</a></span>getRemoveUnusedDeclarationsPass()</h2>
+<a id="a310d1b61027d39a058bba48e8e0c1cc4" name="a310d1b61027d39a058bba48e8e0c1cc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a310d1b61027d39a058bba48e8e0c1cc4">&#9670;&#160;</a></span>getUnusedDeclarationsPass()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -154,14 +154,24 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="class_p4_1_1_remove_unused_declarations.html">RemoveUnusedDeclarations</a> * P4::RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass </td>
+          <td class="memname"><a class="el" href="class_p4_1_1_unused_declarations.html">UnusedDeclarations</a> * P4::RemoveUnusedPolicy::getUnusedDeclarationsPass </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>used</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>warn</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;) const</td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>removeUnused</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>warnUnused</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>infoRemoved</em></span>&#160;) const</td>
         </tr>
       </table>
   </td>
