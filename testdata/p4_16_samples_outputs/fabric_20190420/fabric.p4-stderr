@@ -88,6 +88,6 @@ const bit<8> IPV4_MIN_HEAD_LEN = 20;
 define.p4(163): [--Wwarn=unused] warning: 'UDP_HEADER_LEN' is unused
 const bit<8> UDP_HEADER_LEN = 8;
              ^^^^^^^^^^^^^^
-fabric.p4(84): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.gtpu_ipv4
+fabric.p4(84): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.gtpu_ipv4
         spgw_ingress.apply(hdr.gtpu_ipv4, hdr.gtpu_udp, hdr.gtpu,
                            ^^^^^^^^^^^^^

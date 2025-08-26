@@ -1,5 +1,5 @@
 // Control testcase to ensure that this program actually emits warnings
-// that can be disabled with --Wdisable=uninitialized_use and --Wdisable=invalid_header.
+// that can be disabled with --Wdisable=uninitialized-use and --Wdisable=invalid-header.
 header h_t {
     bit<28> f1;
     bit<4> f2;
