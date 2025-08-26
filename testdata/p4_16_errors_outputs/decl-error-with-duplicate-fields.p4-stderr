@@ -1,0 +1,10 @@
+decl-error-with-duplicate-fields.p4(6): [--Werror=duplicate] error: StackOutOfBounds: Duplicates declaration StackOutOfBounds
+  StackOutOfBounds
+  ^^^^^^^^^^^^^^^^
+decl-error-with-duplicate-fields.p4(5)
+  StackOutOfBounds,
+  ^^^^^^^^^^^^^^^^
+decl-error-with-duplicate-fields.p4(7):syntax error, unexpected }
+}
+^
+[--Werror=overlimit] error: 2 errors encountered, aborting compilation

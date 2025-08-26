@@ -1,0 +1,27 @@
+equate-type-control-and-non-object.p4(6): [--Werror=type-error] error: 'package P'
+package P(tuple<> c);
+        ^
+  ---- Actual error:
+equate-type-control-and-non-object.p4(3): Cannot cast implicitly type 'control MyC' to type 'tuple<>'
+  control MyC()() {
+          ^^^
+equate-type-control-and-non-object.p4(6)
+  package P(tuple<> c);
+            ^^^^^^^
+  ---- Originating from:
+equate-type-control-and-non-object.p4(7): Type of argument 'MyC' (control MyC) does not match type of parameter 'c' (tuple<>)
+  P(MyC()) main;
+    ^^^^^
+equate-type-control-and-non-object.p4(3)
+  control MyC()() {
+          ^^^
+equate-type-control-and-non-object.p4(6)
+  package P(tuple<> c);
+                    ^
+equate-type-control-and-non-object.p4(6)
+  package P(tuple<> c);
+            ^^^^^^^
+  ---- Originating from:
+equate-type-control-and-non-object.p4(7): Constructor invocation '<Method call>' does not match declaration 'P'
+  P(MyC()) main;
+           ^^^^

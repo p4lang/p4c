@@ -1,0 +1,33 @@
+implicit-cast-to-incompatible-type-from-int.p4(6): [--Wwarn=unused] warning: 'x' is unused
+const S<varbit<32>> x = {
+                    ^
+implicit-cast-to-incompatible-type-from-int.p4(6): [--Werror=type-error] error: 'x'
+const S<varbit<32>> x = {
+                    ^
+  ---- Actual error:
+implicit-cast-to-incompatible-type-from-int.p4(6): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'varbit<32>'
+  const S<varbit<32>> x = {
+          ^^^^^^^^^^
+  ---- Originating from:
+implicit-cast-to-incompatible-type-from-int.p4(7): Type of initializer 'tuple<int, int>' does not match type 'tuple<varbit<32>, varbit<32>>' of field 't' in 'struct S'
+    t = { 0, 0 }
+        ^^^^^^^^
+implicit-cast-to-incompatible-type-from-int.p4(4)
+    tuple<T, T> t;
+    ^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-int.p4(4)
+    tuple<T, T> t;
+                ^
+implicit-cast-to-incompatible-type-from-int.p4(3)
+  struct S<T> {
+         ^
+  ---- Originating from:
+implicit-cast-to-incompatible-type-from-int.p4(6): Source expression '{ t = { 0, 0 } }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct S<...>'
+  const S<varbit<32>> x = {
+                          ^
+implicit-cast-to-incompatible-type-from-int.p4(6)
+  const S<varbit<32>> x = {
+                          ^
+implicit-cast-to-incompatible-type-from-int.p4(6)
+  const S<varbit<32>> x = {
+        ^^^^^^^^^^^^^

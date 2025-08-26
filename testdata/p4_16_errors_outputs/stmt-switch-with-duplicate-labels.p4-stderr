@@ -1,0 +1,9 @@
+stmt-switch-with-duplicate-labels.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c(in e v)() {
+        ^
+stmt-switch-with-duplicate-labels.p4(8): [--Werror=invalid] error: e.a: duplicate case label e.a
+      e.a:
+      ^^^
+stmt-switch-with-duplicate-labels.p4(7)
+      e.a:
+      ^^^

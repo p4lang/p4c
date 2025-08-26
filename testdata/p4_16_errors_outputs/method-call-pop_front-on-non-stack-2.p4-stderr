@@ -1,0 +1,3 @@
+method-call-pop_front-on-non-stack-2.p4(4): [--Werror=not-found] error: error: declaration not found
+  error stack;
+  ^^^^^

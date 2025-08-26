@@ -1,0 +1,6 @@
+expr-bitslice-low-non-lctk.p4(3): [--Wwarn=unused] warning: 'tmp' is unused
+const bool tmp = (1 != 8w2[7:{ }]);
+           ^^^
+expr-bitslice-low-non-lctk.p4(3): [--Werror=expected] error: {}: expected an integer value
+const bool tmp = (1 != 8w2[7:{ }]);
+                             ^^^

@@ -1,0 +1,4 @@
+explicit-cast-to-incompatible-type-from-tuple-expr-3.p4(6):syntax error, unexpected }
+}
+^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

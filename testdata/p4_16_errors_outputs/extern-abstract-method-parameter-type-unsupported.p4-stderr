@@ -1,0 +1,6 @@
+extern-abstract-method-parameter-type-unsupported.p4(6): [--Werror=type-error] error: e: a parameter with type string cannot have a direction
+  abstract t f(out string e);
+                          ^
+extern-abstract-method-parameter-type-unsupported.p4(6)
+  abstract t f(out string e);
+                   ^^^^^^

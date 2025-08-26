@@ -1,0 +1,6 @@
+expr-mask-on-non-coercible-types.p4(6): [--Wwarn=unused] warning: parser 'parserI' is unused
+parser parserI(packet_in pkt) {
+       ^^^^^^^
+expr-mask-on-non-coercible-types.p4(9): [--Werror=type-error] error: 4096 &&& 4096: Cannot operate on values with different types bit<16> and int<16>
+      (16w4096 &&& 16s4096): accept;
+       ^^^^^^^^^^^^^^^^^^^

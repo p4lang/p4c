@@ -1,0 +1,13 @@
+decl-function-with-duplicate-type-paramter-names.p4(3): [--Werror=duplicate] error: t: Duplicates declaration t
+void f<t, t
+          ^
+decl-function-with-duplicate-type-paramter-names.p4(3)
+void f<t, t
+       ^
+decl-function-with-duplicate-type-paramter-names.p4(3): [--Werror=duplicate] error: Duplicate declaration of t; previous at 
+void f<t, t>
+          ^
+decl-function-with-duplicate-type-paramter-names.p4(3)
+void f<t, t>
+       ^
+[--Werror=overlimit] error: 2 errors encountered, aborting compilation

@@ -1,0 +1,28 @@
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(11): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(13): [--Werror=type-error] error: '{ y = { false, ... } }'
+    test((S1<int<6>>) { y = { false, ... } });
+                      ^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  Cannot unify type 'bool' with type 'int<6>'
+  ---- Originating from:
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(13): Type of initializer 'tuple<bool, ANYTYPE>' does not match type 'struct S2<...>' of field 'y' in 'struct S1'
+      test((S1<int<6>>) { y = { false, ... } });
+                              ^^^^^^^^^^^^^^
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(9)
+    S2<T2> y;
+    ^^^^^^
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(9)
+    S2<T2> y;
+           ^
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(8)
+  struct S1<T2> {
+         ^^
+  ---- Originating from:
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(13): Initializer type 'unknown struct' does not match expected type 'struct S1'
+      test((S1<int<6>>) { y = { false, ... } });
+                        ^^^^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(8)
+  struct S1<T2> {
+         ^^

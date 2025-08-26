@@ -1,0 +1,15 @@
+expr-typeaccess-on-serenum-with-no-such-field.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c(in e v)() {
+        ^
+expr-typeaccess-on-serenum-with-no-such-field.p4(7): [--Werror=type-error] error: e.a: Invalid enum tag
+      e.a:
+      ^^^
+expr-typeaccess-on-serenum-with-no-such-field.p4(6): [--Werror=type-error] error: 'v' with type 'e' cannot be compared to 'e.a' with type 'Type(e)'
+    switch (v) {
+            ^
+expr-typeaccess-on-serenum-with-no-such-field.p4(3)
+enum bit<4> e { e = 1 };
+            ^
+expr-typeaccess-on-serenum-with-no-such-field.p4(7)
+      e.a:
+      ^^^

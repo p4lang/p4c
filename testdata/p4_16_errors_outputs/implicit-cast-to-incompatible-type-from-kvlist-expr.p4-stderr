@@ -1,0 +1,23 @@
+implicit-cast-to-incompatible-type-from-kvlist-expr.p4(6): [--Wwarn=unused] warning: 'x' is unused
+const string x = { t = { 0, 0 } };
+             ^
+implicit-cast-to-incompatible-type-from-kvlist-expr.p4(6): [--Werror=type-error] error: 'x'
+const string x = { t = { 0, 0 } };
+             ^
+  ---- Actual error:
+implicit-cast-to-incompatible-type-from-kvlist-expr.p4(6): Cannot cast implicitly type 'unknown struct' to type 'string'
+  const string x = { t = { 0, 0 } };
+                   ^^^^^^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-kvlist-expr.p4(6)
+  const string x = { t = { 0, 0 } };
+        ^^^^^^
+  ---- Originating from:
+implicit-cast-to-incompatible-type-from-kvlist-expr.p4(6): Source expression '{ t = { 0, 0 } }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'string'
+  const string x = { t = { 0, 0 } };
+                   ^^^^^^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-kvlist-expr.p4(6)
+  const string x = { t = { 0, 0 } };
+                   ^^^^^^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-kvlist-expr.p4(6)
+  const string x = { t = { 0, 0 } };
+        ^^^^^^

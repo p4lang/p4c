@@ -1,0 +1,12 @@
+type-bit-with-non-lctk-width.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+type-bit-with-non-lctk-width.p4(4): [--Wwarn=unused] warning: 'a' is unused
+  action a(in bit<((tuple<>) {})> v) {}
+         ^
+type-bit-with-non-lctk-width.p4(4): [--Wwarn=unused] warning: 'v' is unused
+  action a(in bit<((tuple<>) {})> v) {}
+                                  ^
+type-bit-with-non-lctk-width.p4(4): [--Werror=expected] error: (tuple<>){}: expected a constant
+  action a(in bit<((tuple<>) {})> v) {}
+                   ^^^^^^^^^^^^

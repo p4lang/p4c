@@ -1,0 +1,12 @@
+explicit-cast-to-incompatible-type-from-kvlist-expr.p4(4): [--Wwarn=unused] warning: 'T1' is unused
+struct S1<T1, T2> {}
+          ^^
+explicit-cast-to-incompatible-type-from-kvlist-expr.p4(4): [--Wwarn=unused] warning: 'T2' is unused
+struct S1<T1, T2> {}
+              ^^
+explicit-cast-to-incompatible-type-from-kvlist-expr.p4(5): [--Wwarn=unused] warning: control 'c0' is unused
+control c0() {
+        ^^
+explicit-cast-to-incompatible-type-from-kvlist-expr.p4(9): [--Werror=type-error] error: string: cast not supported
+      y = (string) { x = 0, y = 0 }
+           ^^^^^^
