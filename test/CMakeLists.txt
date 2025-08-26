@@ -50,7 +50,6 @@ set (GTEST_UNITTEST_SOURCES
   gtest/ordered_map.cpp
   gtest/ordered_set.cpp
   gtest/parser_unroll.cpp
-  gtest/p4runtime.cpp
   gtest/remove_dontcare_args_test.cpp
   gtest/source_file_test.cpp
   gtest/strength_reduction.cpp
@@ -62,6 +61,11 @@ set (GTEST_UNITTEST_SOURCES
   gtest/metrics_test.cpp
 )
 
+if (ENABLE_CONTROL_PLANE)
+set (GTEST_UNITTEST_SOURCES ${GTEST_UNITTEST_SOURCES}
+  gtest/p4runtime.cpp
+)
+endif ()
 # Combine the executable and the non-backend-specific unit tests into a single
 # unity compilation group.
 set (GTEST_BASE_SOURCES
@@ -86,7 +90,6 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/test)
 configure_file(gtest/env.h.in ${CMAKE_CURRENT_BINARY_DIR}/gtest/env.h)
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
 target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
-add_dependencies(gtestp4c gtest genIR frontend controlplane)
 
 # The load_ir_from_json test needs this file. Easier to copy to build directory
 # rather than pass absolute path in the case where build/ isn't located in the

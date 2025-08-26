@@ -24,6 +24,8 @@ endif()
 
 project (P4C)
 
+include(CMakeDependentOption)
+
 # set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++20 rather than -std=gnu++20
 set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,18 +37,18 @@ set (P4C_ARTIFACTS_OUTPUT_DIRECTORY share/p4c)
 set (CMAKE_USE_RELATIVE_PATHS 1)
 
 OPTION (ENABLE_DOCS "Build the documentation" OFF)
+OPTION (ENABLE_CONTROL_PLANE "Build the control-plane library. This also pulls in Protobuf" ON)
 OPTION (ENABLE_GTESTS "Enable building and running GTest unit tests" ON)
-OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" ON)
-OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON)
-OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON)
-OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON)
-OPTION (ENABLE_TOFINO "Build the TOFINO backend (required for the full test suite)" OFF)
-OPTION (ENABLE_P4TC "Build the P4TC backend" ON)
+CMAKE_DEPENDENT_OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_TOFINO "Build the TOFINO backend (required for the full test suite)" OFF ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_P4TC "Build the P4TC backend" ON ENABLE_CONTROL_PLANE OFF)
 OPTION (ENABLE_P4FMT "Build the P4FMT backend" ON)
-OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
-OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
+CMAKE_DEPENDENT_OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF ENABLE_CONTROL_PLANE OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
-OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Compile with the Boehm-Demers-Weiser garbage collector." ON)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
@@ -212,8 +214,6 @@ if (ENABLE_GTESTS)
 endif ()
 include(Abseil)
 p4c_obtain_abseil()
-include(Protobuf)
-p4c_obtain_protobuf()
 
 # We require -pthread to make std::call_once work, even if we're not using threads...
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -403,7 +403,10 @@ set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
 # Component libraries: must be defined before being used in the back end executables.
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
+set (P4C_LIBRARIES midend frontend ir p4ctoolkit ir-generated)
+if (ENABLE_CONTROL_PLANE)
+  list (APPEND P4C_LIBRARIES controlplane)
+endif()
 
 # The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
@@ -418,6 +421,7 @@ set(EXTENSION_IR_SOURCES)
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
 
+if (ENABLE_CONTROL_PLANE)
 ########################################## P4Runtime Begin #########################################
 # TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
 # extensions which may depend on P4Runtime variables are instantiated before the control-plane we
@@ -440,11 +444,17 @@ message(STATUS "Done with setting up P4Runtime for P4C.")
 set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
                                                           "Path to the P4Runtime directory."
 )
+endif()
 ########################################## P4Runtime End ##########################################
 
 add_subdirectory (frontends)
 add_subdirectory (midend)
-add_subdirectory (control-plane)
+if (ENABLE_CONTROL_PLANE)
+    OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
+    include(Protobuf)
+    p4c_obtain_protobuf()
+    add_subdirectory (control-plane)
+endif()
 
 file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
 MESSAGE ("-- Available extensions ${p4c_extensions}")
