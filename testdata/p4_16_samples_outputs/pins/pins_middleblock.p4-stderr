@@ -91,16 +91,16 @@ pins_middleblock.p4(1512): [--Winfo=removed] info: removing table 'acl_pre_ingre
 pins_middleblock.p4(1574): [--Winfo=removed] info: removing control 'lag_hashing_config'
 control lag_hashing_config(in headers_t headers) {
         ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(632): [--Wwarn=uninitialized_use] warning: tunnel_id_value may not be completely initialized
+pins_middleblock.p4(632): [--Wwarn=uninitialized-use] warning: tunnel_id_value may not be completely initialized
             tunnel_id_value: exact @id(1) @name("tunnel_id");
             ^^^^^^^^^^^^^^^
-pins_middleblock.p4(580): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+pins_middleblock.p4(580): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id");
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(558): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+pins_middleblock.p4(558): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(route...
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(559): [--Wwarn=uninitialized_use] warning: neighbor_id_value may be uninitialized
+pins_middleblock.p4(559): [--Wwarn=uninitialized-use] warning: neighbor_id_value may be uninitialized
             neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
             ^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(846): [--Wwarn=mismatch] warning: 1w1: Constant key field
