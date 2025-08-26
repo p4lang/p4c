@@ -1,0 +1,6 @@
+name-duplicate-typedef-names.p4(4): [--Werror=duplicate] error: Narrow_t duplicates Narrow_t.
+typedef bit<9> Narrow_t;
+               ^^^^^^^^
+name-duplicate-typedef-names.p4(3)
+typedef bit<9> Narrow_t;
+               ^^^^^^^^

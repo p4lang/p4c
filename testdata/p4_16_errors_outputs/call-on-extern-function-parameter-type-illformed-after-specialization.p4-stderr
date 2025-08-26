@@ -1,0 +1,31 @@
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(6): [--Werror=type-error] error: 'f({ 32w2 })'
+    f<match_kind>({ 32w2 });
+    ^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(6): Cannot cast implicitly type 'bit<32>' to type 'match_kind'
+      f<match_kind>({ 32w2 });
+        ^^^^^^^^^^
+  ---- Originating from:
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(6): Type of argument '{ 32w2 }' (tuple<bit<32>>) does not match type of parameter 'x' (tuple<T>)
+      f<match_kind>({ 32w2 });
+                    ^^^^^^^^
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(6)
+      f<match_kind>({ 32w2 });
+                    ^^^^^^^^
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(3)
+  extern void f<T>(in tuple<T> x);
+                               ^
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(3)
+  extern void f<T>(in tuple<T> x);
+                      ^^^^^^^^
+  Where 'T' is bound to 'match_kind'
+  ---- Originating from:
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  extern void f<T>(in tuple<T> x);
+              ^
+call-on-extern-function-parameter-type-illformed-after-specialization.p4(6)
+      f<match_kind>({ 32w2 });
+      ^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,34 @@
+equate-type-variable-and-incompatible-type.p4(4): [--Wwarn=unused] warning: 'g' is unused
+void g<t>(in t b) {
+     ^
+equate-type-variable-and-incompatible-type.p4(5): [--Werror=type-error] error: 'f(b)'
+  f<match_kind>(b);
+  ^^^^^^^^^^^^^^^^
+  ---- Actual error:
+equate-type-variable-and-incompatible-type.p4(4): Cannot cast implicitly type 't' to type 'match_kind'
+  void g<t>(in t b) {
+         ^
+equate-type-variable-and-incompatible-type.p4(5)
+    f<match_kind>(b);
+      ^^^^^^^^^^
+  ---- Originating from:
+equate-type-variable-and-incompatible-type.p4(5): Type of argument 'b' (t) does not match type of parameter 'a' (t)
+    f<match_kind>(b);
+                  ^
+equate-type-variable-and-incompatible-type.p4(4)
+  void g<t>(in t b) {
+         ^
+equate-type-variable-and-incompatible-type.p4(3)
+  void f<t>(in t a) {}
+                 ^
+equate-type-variable-and-incompatible-type.p4(3)
+  void f<t>(in t a) {}
+         ^
+  Where 't' is bound to 'match_kind'
+  ---- Originating from:
+equate-type-variable-and-incompatible-type.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  void f<t>(in t a) {}
+       ^
+equate-type-variable-and-incompatible-type.p4(5)
+    f<match_kind>(b);
+    ^^^^^^^^^^^^^^^^

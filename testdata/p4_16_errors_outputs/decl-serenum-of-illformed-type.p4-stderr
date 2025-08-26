@@ -1,0 +1,3 @@
+decl-serenum-of-illformed-type.p4(3): [--Werror=type-error] error: tuple<tuple<>, int>: Illegal type for enum; only bit<> and int<> are allowed
+enum tuple<tuple<>, int> e { a = 1 };
+     ^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,31 @@
+type-conflicting-inferred-types.p4(4): [--Wwarn=unused] warning: control 'cIngress0' is unused
+control cIngress0() {
+        ^^^^^^^^^
+type-conflicting-inferred-types.p4(7): [--Werror=type-error] error: 'random(rand_val, 0)'
+    random(rand_val, 0);
+    ^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+type-conflicting-inferred-types.p4(5): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'bool'
+    bool rand_val;
+    ^^^^
+  ---- Originating from:
+type-conflicting-inferred-types.p4(7): Type of argument 'rand_val' (bool) does not match type of parameter 'result' (T)
+      random(rand_val, 0);
+             ^^^^^^^^
+type-conflicting-inferred-types.p4(5)
+    bool rand_val;
+    ^^^^
+type-conflicting-inferred-types.p4(3)
+  extern void random<T>(out T result, in T lo);
+                              ^^^^^^
+type-conflicting-inferred-types.p4(3)
+  extern void random<T>(out T result, in T lo);
+                     ^
+  Where 'T' is bound to 'int'
+  ---- Originating from:
+type-conflicting-inferred-types.p4(3): Function type 'random' does not match invocation type '<Method call>'
+  extern void random<T>(out T result, in T lo);
+              ^^^^^^
+type-conflicting-inferred-types.p4(7)
+      random(rand_val, 0);
+      ^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,6 @@
+expr-indexaccess-on-unsupported-type-2.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c(out bit<32> r)() {
+        ^
+expr-indexaccess-on-unsupported-type-2.p4(6): [--Werror=type-error] error: Indexing s[2] applied to non-array and non-tuple type list<string>
+    r = s[2];
+        ^^^^

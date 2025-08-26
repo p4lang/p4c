@@ -1,0 +1,9 @@
+instantiate-at-control-apply-of-unsupported-object-type.p4(4): [--Wwarn=unused] warning: control 'd' is unused
+control d()() {
+        ^
+instantiate-at-control-apply-of-unsupported-object-type.p4(6): [--Werror=type-error] error: Cannot extract field apply from c which has type Type(package c)
+    c.apply();
+      ^^^^^
+instantiate-at-control-apply-of-unsupported-object-type.p4(6)
+    c.apply();
+    ^

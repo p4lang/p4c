@@ -1,0 +1,6 @@
+expr-binary-logical-on-non-coercible-types.p4(4): [--Wwarn=unused] warning: 'f' is unused
+bool f() {
+     ^
+expr-binary-logical-on-non-coercible-types.p4(5): [--Werror=type-error] error: true || "isValid": not defined on bool and string
+  return ((h) {}).isValid() || "isValid";
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

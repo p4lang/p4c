@@ -1,0 +1,27 @@
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(6): [--Wwarn=unused] warning: control 'I' is unused
+control I()() {
+        ^
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(9): [--Werror=type-error] error: '{ b = { ... } }'
+    if (h == ((H) { b = { ... } })) h = { b = 2 };
+                  ^^^^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(9): Cannot unify type 'tuple<ANYTYPE>' with type 'bit<32>'
+      if (h == ((H) { b = { ... } })) h = { b = 2 };
+                          ^^^^^^^
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(9): Type of initializer 'tuple<ANYTYPE>' does not match type 'bit<32>' of field 'b' in 'header H'
+      if (h == ((H) { b = { ... } })) h = { b = 2 };
+                          ^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(4)
+    bit<32> b;
+            ^
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(3)
+  header H {
+         ^
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(9): Initializer type 'unknown struct' does not match expected type 'header H'
+      if (h == ((H) { b = { ... } })) h = { b = 2 };
+                    ^^^^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(3)
+  header H {
+         ^

@@ -1,0 +1,6 @@
+expr-binary-compare-non-coercible-types.p4(3): [--Wwarn=unused] warning: 'min' is unused
+bit<32> min(in bit<32> a, in bit<32> b) {
+        ^^^
+expr-binary-compare-non-coercible-types.p4(4): [--Werror=type-error] error: a > {false, {#}}: not defined on bit<32> and tuple<bool, Unknown type>
+  return (a > { false, {#} }) ? b : a;
+          ^^^^^^^^^^^^^^^^^^

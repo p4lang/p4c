@@ -1,0 +1,23 @@
+implicit-cast-to-stack-from-kvlist-expr-with-field-of-incompatible-type.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+implicit-cast-to-stack-from-kvlist-expr-with-field-of-incompatible-type.p4(8): [--Werror=type-error] error: 'stack = { h0, ... }'
+    stack = { h0, ... };
+          ^
+  ---- Actual error:
+implicit-cast-to-stack-from-kvlist-expr-with-field-of-incompatible-type.p4(7): Cannot cast implicitly type 'tuple<>' to type 'header H'
+      tuple<> h0;
+      ^^^^^^^
+implicit-cast-to-stack-from-kvlist-expr-with-field-of-incompatible-type.p4(3)
+  header H {}
+         ^
+  ---- Originating from:
+implicit-cast-to-stack-from-kvlist-expr-with-field-of-incompatible-type.p4(8): Source expression '{ h0, ... }' produces a result of type 'tuple<tuple<>, ANYTYPE>' which cannot be assigned to a left-value with type 'header H[2]'
+      stack = { h0, ... };
+              ^^^^^^^^^^^
+implicit-cast-to-stack-from-kvlist-expr-with-field-of-incompatible-type.p4(8)
+      stack = { h0, ... };
+              ^^^^^^^^^^^
+implicit-cast-to-stack-from-kvlist-expr-with-field-of-incompatible-type.p4(5)
+    H[2] stack;
+    ^^^^

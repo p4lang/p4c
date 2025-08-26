@@ -1,0 +1,13 @@
+name-duplicate-parameter-names.p4(5): [--Werror=duplicate] error: lazy: Duplicates declaration lazy
+  abstract t f(string lazy, out tuple<> lazy)
+                                        ^^^^
+name-duplicate-parameter-names.p4(5)
+  abstract t f(string lazy, out tuple<> lazy)
+                      ^^^^
+name-duplicate-parameter-names.p4(5): [--Werror=duplicate] error: Duplicate declaration of lazy; previous at 
+  abstract t f(string lazy, out tuple<> lazy)
+                                        ^^^^
+name-duplicate-parameter-names.p4(5)
+  abstract t f(string lazy, out tuple<> lazy)
+                      ^^^^
+[--Werror=overlimit] error: 2 errors encountered, aborting compilation

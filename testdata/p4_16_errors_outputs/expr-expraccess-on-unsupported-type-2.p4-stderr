@@ -1,0 +1,9 @@
+expr-expraccess-on-unsupported-type-2.p4(3): [--Wwarn=unused] warning: 'func' is unused
+bit<1> func(match_kind a) {
+       ^^^^
+expr-expraccess-on-unsupported-type-2.p4(4): [--Werror=type-error] error: Cannot extract field f from a which has type match_kind
+  return a.f;
+           ^
+expr-expraccess-on-unsupported-type-2.p4(4)
+  return a.f;
+         ^

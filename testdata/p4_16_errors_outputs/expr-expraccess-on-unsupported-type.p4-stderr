@@ -1,0 +1,9 @@
+expr-expraccess-on-unsupported-type.p4(3): [--Wwarn=unused] warning: control 'ctrl' is unused
+control ctrl()() {
+        ^^^^
+expr-expraccess-on-unsupported-type.p4(5): [--Werror=type-error] error: Cannot extract field action_run from {} which has type tuple<>
+    switch ({ }.action_run) { }
+                ^^^^^^^^^^
+expr-expraccess-on-unsupported-type.p4(5)
+    switch ({ }.action_run) { }
+            ^^^

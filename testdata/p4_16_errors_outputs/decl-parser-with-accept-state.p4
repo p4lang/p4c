@@ -1,0 +1,5 @@
+parser Parser() {
+    state start {
+    }
+}
+

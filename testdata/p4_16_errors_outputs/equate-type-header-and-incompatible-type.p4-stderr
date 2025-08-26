@@ -1,0 +1,27 @@
+equate-type-header-and-incompatible-type.p4(8): [--Werror=type-error] error: 'package P'
+package P(C c);
+        ^
+  ---- Actual error:
+equate-type-header-and-incompatible-type.p4(3): Cannot cast implicitly type 'header hdr_t' to type 'list<bool>'
+  header hdr_t {}
+         ^^^^^
+equate-type-header-and-incompatible-type.p4(7)
+  control C(inout list<bool> hdr);
+                  ^^^^^^^^^^
+  ---- Originating from:
+equate-type-header-and-incompatible-type.p4(9): Type of argument 'c' (control c) does not match type of parameter 'c' (control C)
+  P(c()) main;
+    ^^^
+equate-type-header-and-incompatible-type.p4(4)
+  control c(inout hdr_t hdr)() {
+          ^
+equate-type-header-and-incompatible-type.p4(8)
+  package P(C c);
+              ^
+equate-type-header-and-incompatible-type.p4(7)
+  control C(inout list<bool> hdr);
+          ^
+  ---- Originating from:
+equate-type-header-and-incompatible-type.p4(9): Constructor invocation '<Method call>' does not match declaration 'P'
+  P(c()) main;
+         ^^^^

@@ -1,0 +1,26 @@
+equate-type-enum-and-incompatible-type-2.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+equate-type-enum-and-incompatible-type-2.p4(8): [--Wwarn=unused] warning: 'v' is unused
+    tuple<> v = X.Field;
+    ^^^^^^^^^^^^^^^^^^^
+equate-type-enum-and-incompatible-type-2.p4(8): [--Werror=type-error] error: 'v'
+    tuple<> v = X.Field;
+    ^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+equate-type-enum-and-incompatible-type-2.p4(3): Cannot cast implicitly type 'X' to type 'tuple<>'
+  enum X {
+       ^
+equate-type-enum-and-incompatible-type-2.p4(8)
+      tuple<> v = X.Field;
+      ^^^^^^^
+  ---- Originating from:
+equate-type-enum-and-incompatible-type-2.p4(8): Source expression 'X.Field' produces a result of type 'X' which cannot be assigned to a left-value with type 'tuple<>'
+      tuple<> v = X.Field;
+                  ^^^^^^^
+equate-type-enum-and-incompatible-type-2.p4(3)
+  enum X {
+       ^
+equate-type-enum-and-incompatible-type-2.p4(8)
+      tuple<> v = X.Field;
+      ^^^^^^^

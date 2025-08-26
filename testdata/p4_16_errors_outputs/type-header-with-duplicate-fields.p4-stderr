@@ -1,0 +1,7 @@
+type-header-with-duplicate-fields.p4(5): [--Werror=duplicate] error: u: Duplicates declaration u
+  varbit<120> u;
+              ^
+type-header-with-duplicate-fields.p4(4)
+  varbit<120> u;
+              ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

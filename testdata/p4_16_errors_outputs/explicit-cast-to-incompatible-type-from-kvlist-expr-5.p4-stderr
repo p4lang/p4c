@@ -1,0 +1,23 @@
+explicit-cast-to-incompatible-type-from-kvlist-expr-5.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+explicit-cast-to-incompatible-type-from-kvlist-expr-5.p4(6): [--Wwarn=unused] warning: 'h8' is unused
+    H h8 = (H) { b = 2, ... };
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-5.p4(6): [--Werror=type-error] error: '{ b = 2, ... = ... }'
+    H h8 = (H) { b = 2, ... };
+               ^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-incompatible-type-from-kvlist-expr-5.p4(6): Cannot unify type 'unknown struct' with type 'header_union H'
+      H h8 = (H) { b = 2, ... };
+                 ^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-5.p4(3)
+  header_union H {}
+               ^
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-kvlist-expr-5.p4(6): Initializer type 'unknown struct' does not match expected type 'header_union H'
+      H h8 = (H) { b = 2, ... };
+                 ^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-5.p4(3)
+  header_union H {}
+               ^

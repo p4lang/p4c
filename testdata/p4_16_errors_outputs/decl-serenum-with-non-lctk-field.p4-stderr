@@ -1,0 +1,14 @@
+decl-serenum-with-non-lctk-field.p4(4): [--Werror=type-error] error: 'a'
+  a = { ... }
+  ^^^^^^^^^^^
+  ---- Actual error:
+decl-serenum-with-non-lctk-field.p4(4): Cannot cast implicitly type 'tuple<ANYTYPE>' to type 'bit<4>'
+    a = { ... }
+        ^^^^^^^
+  ---- Originating from:
+decl-serenum-with-non-lctk-field.p4(4): Enum member 'a' has type 'tuple<ANYTYPE>' and not the expected type 'bit<4>'
+    a = { ... }
+    ^^^^^^^^^^^
+decl-serenum-with-non-lctk-field.p4(4)
+    a = { ... }
+        ^^^^^^^

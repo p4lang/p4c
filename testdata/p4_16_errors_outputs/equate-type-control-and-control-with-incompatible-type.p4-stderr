@@ -1,0 +1,27 @@
+equate-type-control-and-control-with-incompatible-type.p4(5): [--Werror=type-error] error: 'package P'
+package P(C c);
+        ^
+  ---- Actual error:
+equate-type-control-and-control-with-incompatible-type.p4(3): Cannot cast implicitly type 'header hdr_t' to type 'bool'
+  header hdr_t {}
+         ^^^^^
+equate-type-control-and-control-with-incompatible-type.p4(4)
+  control C(inout bool b);
+                  ^^^^
+  ---- Originating from:
+equate-type-control-and-control-with-incompatible-type.p4(9): Type of argument 'c' (control c) does not match type of parameter 'c' (control C)
+  P(c()) main;
+    ^^^
+equate-type-control-and-control-with-incompatible-type.p4(6)
+  control c(inout hdr_t hdr)() {
+          ^
+equate-type-control-and-control-with-incompatible-type.p4(5)
+  package P(C c);
+              ^
+equate-type-control-and-control-with-incompatible-type.p4(4)
+  control C(inout bool b);
+          ^
+  ---- Originating from:
+equate-type-control-and-control-with-incompatible-type.p4(9): Constructor invocation '<Method call>' does not match declaration 'P'
+  P(c()) main;
+         ^^^^

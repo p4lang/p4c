@@ -1,0 +1,7 @@
+decl-parser-with-duplicate-parameter-names.p4(3): [--Werror=duplicate] error: ttt: Duplicates declaration ttt
+parser MyParser1(in bit<6> ttt, in bit<6> ttt)
+                                          ^^^
+decl-parser-with-duplicate-parameter-names.p4(3)
+parser MyParser1(in bit<6> ttt, in bit<6> ttt)
+                           ^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

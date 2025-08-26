@@ -1,0 +1,7 @@
+decl-control-with-duplicate-parameter-names.p4(4): [--Werror=duplicate] error: v: Duplicates declaration v
+control c(in e v, in e v)
+                       ^
+decl-control-with-duplicate-parameter-names.p4(4)
+control c(in e v, in e v)
+               ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

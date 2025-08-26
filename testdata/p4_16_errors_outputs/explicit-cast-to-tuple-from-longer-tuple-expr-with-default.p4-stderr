@@ -1,0 +1,6 @@
+explicit-cast-to-tuple-from-longer-tuple-expr-with-default.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+explicit-cast-to-tuple-from-longer-tuple-expr-with-default.p4(7): [--Werror=type-error] error: tuple<>: cast not supported
+    stack = (tuple<>) { (H) {#}, ... };
+             ^^^^^^^

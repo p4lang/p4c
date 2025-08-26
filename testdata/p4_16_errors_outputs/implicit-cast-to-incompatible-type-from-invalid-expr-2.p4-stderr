@@ -1,0 +1,25 @@
+implicit-cast-to-incompatible-type-from-invalid-expr-2.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+implicit-cast-to-incompatible-type-from-invalid-expr-2.p4(7): [--Wwarn=unused] warning: 'r' is unused
+  Random({#}) r;
+              ^
+implicit-cast-to-incompatible-type-from-invalid-expr-2.p4(7): [--Werror=type-error] error: 'r'
+  Random({#}) r;
+              ^
+  ---- Actual error:
+  Cannot cast implicitly type 'Unknown type' to type 'bit<16>'
+  ---- Originating from:
+implicit-cast-to-incompatible-type-from-invalid-expr-2.p4(7): Type of argument 'Invalid' (Unknown type) does not match type of parameter 'min' (bit<16>)
+    Random({#}) r;
+           ^^^
+implicit-cast-to-incompatible-type-from-invalid-expr-2.p4(4)
+    Random(bit<16> min);
+                   ^^^
+  ---- Originating from:
+implicit-cast-to-incompatible-type-from-invalid-expr-2.p4(7): Constructor invocation <Method call> does not match constructor declaration Random
+    Random({#}) r;
+                ^
+implicit-cast-to-incompatible-type-from-invalid-expr-2.p4(4)
+    Random(bit<16> min);
+    ^^^^^^

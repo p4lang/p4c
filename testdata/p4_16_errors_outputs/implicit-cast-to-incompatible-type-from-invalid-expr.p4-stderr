@@ -1,0 +1,6 @@
+implicit-cast-to-incompatible-type-from-invalid-expr.p4(3): [--Wwarn=unused] warning: 'Narrow_t' is unused
+typedef bit<({#} - "Narrow")> Narrow_t;
+                              ^^^^^^^^
+implicit-cast-to-incompatible-type-from-invalid-expr.p4(3): [--Werror=expected] error: {#} - "Narrow": expected a constant
+typedef bit<({#} - "Narrow")> Narrow_t;
+             ^^^^^^^^^^^^^^

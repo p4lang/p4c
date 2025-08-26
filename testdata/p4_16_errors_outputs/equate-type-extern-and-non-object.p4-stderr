@@ -1,0 +1,18 @@
+equate-type-extern-and-non-object.p4(13): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+equate-type-extern-and-non-object.p4(7): [--Wwarn=unused] warning: parser 'MyParser' is unused
+parser MyParser()() {
+       ^^^^^^^^
+equate-type-extern-and-non-object.p4(8): [--Wwarn=unused] warning: 'ee' is unused
+  e() ee = {
+      ^^
+equate-type-extern-and-non-object.p4(9): [--Werror=type-error] error: a: a parameter with type e cannot have a direction
+    t f(in .e a) {
+              ^
+equate-type-extern-and-non-object.p4(4)
+extern e {
+       ^
+equate-type-extern-and-non-object.p4(8): [--Werror=type-error] error: BlockStatement: instance initializers for extern without abstract methods
+  e() ee = {
+           ^

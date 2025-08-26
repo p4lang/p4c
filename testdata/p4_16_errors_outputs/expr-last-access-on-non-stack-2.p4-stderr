@@ -1,0 +1,9 @@
+expr-last-access-on-non-stack-2.p4(6): [--Wwarn=unused] warning: parser 'P' is unused
+parser P(out Headers h)() {
+       ^
+expr-last-access-on-non-stack-2.p4(8): [--Werror=type-error] error: Cannot extract field last from h.h1 which has type bool
+    transition select(h.h1.last.x) {}
+                           ^^^^
+expr-last-access-on-non-stack-2.p4(8)
+    transition select(h.h1.last.x) {}
+                      ^^^^

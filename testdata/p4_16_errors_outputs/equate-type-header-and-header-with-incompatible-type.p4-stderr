@@ -1,0 +1,18 @@
+equate-type-header-and-header-with-incompatible-type.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+equate-type-header-and-header-with-incompatible-type.p4(10): [--Werror=type-error] error: '{ { 32w0, 32w1 }, { 32w2, 32w3 }, InvalidHeader }'
+    s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<2>>) {#} };
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  Cannot cast implicitly type 'bit<2>' to type 'bit<32>'
+  ---- Originating from:
+equate-type-header-and-header-with-incompatible-type.p4(10): Source expression 'InvalidHeader' produces a result of type 'header H<...>' which cannot be assigned to a left-value with type 'header H<...>'
+      s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<2>>) {#} };
+                                                            ^^^
+equate-type-header-and-header-with-incompatible-type.p4(10)
+      s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<2>>) {#} };
+                                                 ^^^^^^^^^
+equate-type-header-and-header-with-incompatible-type.p4(9)
+      H<bit<32>>[3] s;
+      ^^^^^^^^^^

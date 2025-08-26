@@ -1,0 +1,33 @@
+decl-constant-with-illformed-type-after-specialization.p4(6): [--Wwarn=unused] warning: 'x' is unused
+const S<void> x = { t = { 0, 0 } };
+              ^
+decl-constant-with-illformed-type-after-specialization.p4(6): [--Werror=type-error] error: 'x'
+const S<void> x = { t = { 0, 0 } };
+              ^
+  ---- Actual error:
+decl-constant-with-illformed-type-after-specialization.p4(6): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'void'
+  const S<void> x = { t = { 0, 0 } };
+          ^^^^
+  ---- Originating from:
+decl-constant-with-illformed-type-after-specialization.p4(6): Type of initializer 'tuple<int, int>' does not match type 'tuple<void, void>' of field 't' in 'struct S'
+  const S<void> x = { t = { 0, 0 } };
+                          ^^^^^^^^
+decl-constant-with-illformed-type-after-specialization.p4(4)
+    tuple<T, T> t;
+    ^^^^^^^^^^^
+decl-constant-with-illformed-type-after-specialization.p4(4)
+    tuple<T, T> t;
+                ^
+decl-constant-with-illformed-type-after-specialization.p4(3)
+  struct S<T> {
+         ^
+  ---- Originating from:
+decl-constant-with-illformed-type-after-specialization.p4(6): Source expression '{ t = { 0, 0 } }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct S<...>'
+  const S<void> x = { t = { 0, 0 } };
+                    ^^^^^^^^^^^^^^^^
+decl-constant-with-illformed-type-after-specialization.p4(6)
+  const S<void> x = { t = { 0, 0 } };
+                    ^^^^^^^^^^^^^^^^
+decl-constant-with-illformed-type-after-specialization.p4(6)
+  const S<void> x = { t = { 0, 0 } };
+        ^^^^^^^

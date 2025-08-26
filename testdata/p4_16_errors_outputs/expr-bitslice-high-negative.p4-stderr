@@ -1,0 +1,6 @@
+expr-bitslice-high-negative.p4(3): [--Wwarn=unused] warning: 'tmp' is unused
+const bool tmp = (1 != 8w2[-2:0]);
+           ^^^
+expr-bitslice-high-negative.p4(3): [--Werror=expected] error: 8w2[-2:0]: bit slicing should be specified as [msb:lsb]
+const bool tmp = (1 != 8w2[-2:0]);
+                       ^^^^^^^^^

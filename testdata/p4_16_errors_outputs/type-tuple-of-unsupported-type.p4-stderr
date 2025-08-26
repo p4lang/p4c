@@ -1,0 +1,6 @@
+type-tuple-of-unsupported-type.p4(5): [--Werror=not-found] error: error: declaration not found
+    tuple<tuple<void, error>, bit<16>> x ;
+                      ^^^^^
+type-tuple-of-unsupported-type.p4(6): [--Werror=not-found] error: r: declaration not found
+    if (0) r = x[1];
+           ^

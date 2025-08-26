@@ -1,0 +1,6 @@
+explicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(4): [--Wwarn=unused] warning: control 'c0' is unused
+control c0() {
+        ^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(6): [--Werror=type-error] error: tuple<>: cast not supported
+    test((tuple<>) { x = 0, y = 0 });
+          ^^^^^^^

@@ -1,0 +1,3 @@
+implicit-cast-to-incompatible-type-from-kvlist-expr-3.p4(5): [--Werror=not-found] error: error: declaration not found
+    error s = { b = 2, ... };
+    ^^^^^

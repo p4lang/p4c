@@ -1,0 +1,30 @@
+equate-type-parser-and-parser-with-incompatible-type.p4(7): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+equate-type-parser-and-parser-with-incompatible-type.p4(9): [--Wwarn=unused] warning: 'ig1' is unused
+Ingress<int>(ing_parse()) ig1;
+                          ^^^
+equate-type-parser-and-parser-with-incompatible-type.p4(4): [--Werror=type-error] error: 'package Ingress'
+package Ingress<IH>(Parser<IH> p);
+        ^^^^^^^
+  ---- Actual error:
+equate-type-parser-and-parser-with-incompatible-type.p4(5): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'struct H'
+  struct H {}
+         ^
+  ---- Originating from:
+equate-type-parser-and-parser-with-incompatible-type.p4(9): Type of argument 'ing_parse' (parser ing_parse) does not match type of parameter 'p' (parser Parser<...>)
+  Ingress<int>(ing_parse()) ig1;
+               ^^^^^^^^^^^
+equate-type-parser-and-parser-with-incompatible-type.p4(6)
+  parser ing_parse(out H hdr) {
+         ^^^^^^^^^
+equate-type-parser-and-parser-with-incompatible-type.p4(4)
+  package Ingress<IH>(Parser<IH> p);
+                                 ^
+equate-type-parser-and-parser-with-incompatible-type.p4(4)
+  package Ingress<IH>(Parser<IH> p);
+                      ^^^^^^^^^^
+  ---- Originating from:
+equate-type-parser-and-parser-with-incompatible-type.p4(9): Constructor invocation '<Method call>' does not match declaration 'Ingress'
+  Ingress<int>(ing_parse()) ig1;
+                            ^^^

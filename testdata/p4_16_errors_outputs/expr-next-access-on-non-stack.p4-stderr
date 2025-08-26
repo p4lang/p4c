@@ -1,0 +1,18 @@
+expr-next-access-on-non-stack.p4(8): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+expr-next-access-on-non-stack.p4(7): [--Wwarn=unused] warning: parser 'P' is unused
+parser P(packet_in p, out Headers h)() {
+       ^
+expr-next-access-on-non-stack.p4(9): [--Werror=type-error] error: p.extract: extern packet_in does not have method matching this call
+    p.extract(h.h1.next);
+    ^^^^^^^^^
+expr-next-access-on-non-stack.p4(3)
+extern packet_in {}
+       ^^^^^^^^^
+expr-next-access-on-non-stack.p4(9): [--Werror=type-error] error: Cannot extract field next from h.h1 which has type bool
+    p.extract(h.h1.next);
+                   ^^^^
+expr-next-access-on-non-stack.p4(9)
+    p.extract(h.h1.next);
+              ^^^^

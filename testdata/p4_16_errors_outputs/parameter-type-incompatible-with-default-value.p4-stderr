@@ -1,0 +1,7 @@
+parameter-type-incompatible-with-default-value.p4(3): [--Werror=duplicate] error: Re-declaration of t with different type: 
+void g<t>(match_kind t = {#})
+                     ^
+parameter-type-incompatible-with-default-value.p4(3)
+void g<t>(match_kind t = {#})
+       ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

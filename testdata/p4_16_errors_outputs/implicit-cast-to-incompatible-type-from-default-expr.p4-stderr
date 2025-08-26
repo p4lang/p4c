@@ -1,0 +1,6 @@
+implicit-cast-to-incompatible-type-from-default-expr.p4(3): [--Wwarn=unused] warning: 'T' is unused
+struct S<T> {}
+         ^
+implicit-cast-to-incompatible-type-from-default-expr.p4(5): [--Werror=type-error] error: ...: could not find default value
+  E(list<S<bit<32>>> data = ...);
+                            ^^^

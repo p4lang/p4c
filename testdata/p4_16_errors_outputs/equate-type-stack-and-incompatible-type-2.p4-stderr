@@ -1,0 +1,20 @@
+equate-type-stack-and-incompatible-type-2.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+equate-type-stack-and-incompatible-type-2.p4(10): [--Werror=type-error] error: 's = { { b = 32w0, t = 32w1 }, { b = 32w2, t = 32w3 }, InvalidHeader }'
+    s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<32>>) {#} };
+      ^
+  ---- Actual error:
+equate-type-stack-and-incompatible-type-2.p4(10): Cannot cast implicitly type 'header H<...>[3]' to type 'tuple<bool>'
+      s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<32>>) {#} };
+           ^^^^^^^^^^^^^
+equate-type-stack-and-incompatible-type-2.p4(9)
+      tuple<bool> s;
+      ^^^^^^^^^^^
+  ---- Originating from:
+equate-type-stack-and-incompatible-type-2.p4(10): Source expression '{ { b = 32w0, t = 32w1 }, { b = 32w2, t = 32w3 }, InvalidHeader }' produces a result of type 'header H<...>[3]' which cannot be assigned to a left-value with type 'tuple<bool>'
+      s = (H<bit<32>>[3]) { { 0, 1 }, { 2, 3 }, (H<bit<32>>) {#} };
+           ^^^^^^^^^^^^^
+equate-type-stack-and-incompatible-type-2.p4(9)
+      tuple<bool> s;
+      ^^^^^^^^^^^

@@ -1,0 +1,31 @@
+equate-type-tuple-and-tuple-with-incompatible-type.p4(6): [--Wwarn=unused] warning: control 'c0' is unused
+control c0() {
+        ^^
+equate-type-tuple-and-tuple-with-incompatible-type.p4(7): [--Wwarn=unused] warning: 'e' is unused
+  E<int<32>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { { 2, 3 } }) e;
+                                                                    ^
+equate-type-tuple-and-tuple-with-incompatible-type.p4(7): [--Werror=type-error] error: 'e'
+  E<int<32>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { { 2, 3 } }) e;
+                                                                    ^
+  ---- Actual error:
+  Cannot cast implicitly type 'bit<32>' to type 'int<32>'
+  ---- Originating from:
+equate-type-tuple-and-tuple-with-incompatible-type.p4(7): Type of argument '{ { 32w2, 16w3 } }' (list<tuple<bit<32>, bit<16>>>) does not match type of parameter 'data' (list<tuple<int<32>, bit<16>>>)
+    E<int<32>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { { 2, 3 } }) e;
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+equate-type-tuple-and-tuple-with-incompatible-type.p4(7)
+    E<int<32>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { { 2, 3 } }) e;
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+equate-type-tuple-and-tuple-with-incompatible-type.p4(4)
+    E(list<tuple<T, S>> data);
+                        ^^^^
+equate-type-tuple-and-tuple-with-incompatible-type.p4(4)
+    E(list<tuple<T, S>> data);
+      ^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+equate-type-tuple-and-tuple-with-incompatible-type.p4(7): Constructor invocation <Method call> does not match constructor declaration E
+    E<int<32>, bit<16>>((list<tuple<bit<32>, bit<16>>>) { { 2, 3 } }) e;
+                                                                      ^
+equate-type-tuple-and-tuple-with-incompatible-type.p4(4)
+    E(list<tuple<T, S>> data);
+    ^
