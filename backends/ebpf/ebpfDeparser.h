@@ -88,6 +88,10 @@ class EBPFDeparser : public EBPFControl {
 
     void emitBufferAdjusts(CodeBuilder *builder) const;
 
+    cstring toString() const override {
+        return "EBPFDeparser:"_cs + controlBlock->container->name.name;
+    }
+
     DECLARE_TYPEINFO(EBPFDeparser, EBPFControl);
 };
 
