@@ -32,6 +32,9 @@ class EBPFObject : public ICastable {
  public:
     virtual ~EBPFObject() {}
 
+    /// Each EBPFObject must be able to be represented as a string.
+    [[nodiscard]] virtual cstring toString() const { return "EBPFObject"_cs; }
+
     static cstring externalName(const IR::IDeclaration *declaration) {
         cstring name = declaration->externalName();
         return name.replace('.', '_');
@@ -59,5 +62,9 @@ class EBPFObject : public ICastable {
 };
 
 }  // namespace P4::EBPF
+
+inline std::ostream &operator<<(std::ostream &out, const P4::EBPF::EBPFObject &obj) {
+    return out << obj.toString();
+}
 
 #endif /* BACKENDS_EBPF_EBPFOBJECT_H_ */
