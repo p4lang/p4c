@@ -80,6 +80,9 @@ class EBPFControl : public EBPFObject {
     virtual void emitTableInitializers(CodeBuilder *builder);
     virtual void emitTableInstances(CodeBuilder *builder);
     virtual bool build();
+    cstring toString() const override {
+        return "EBPFControl:"_cs + controlBlock->container->name.name;
+    }
     EBPFTable *getTable(cstring name) const {
         auto result = ::P4::get(tables, name);
         BUG_CHECK(result != nullptr, "No table named %1%", name);

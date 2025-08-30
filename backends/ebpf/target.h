@@ -41,6 +41,36 @@ enum TableKind {
     TableDevmap
 };
 
+/// Operator<< for TableKind
+inline std::ostream &operator<<(std::ostream &os, TableKind kind) {
+    switch (kind) {
+        case TableHash:
+            os << "hash";
+            break;
+        case TableArray:
+            os << "array";
+            break;
+        case TablePerCPUArray:
+            os << "percpu_array";
+            break;
+        case TableProgArray:
+            os << "prog_array";
+            break;
+        case TableLPMTrie:
+            os << "lpm_trie";
+            break;
+        case TableHashLRU:
+            os << "hash_lru";
+            break;
+        case TableDevmap:
+            os << "devmap";
+            break;
+        default:
+            BUG("Unknown table kind");
+    }
+    return os;
+}
+
 class Target {
  protected:
     explicit Target(cstring name) : name(name) {}

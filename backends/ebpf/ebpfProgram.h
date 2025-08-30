@@ -88,6 +88,8 @@ class EBPFProgram : public EBPFObject {
         errorEnum = EBPFModel::reserved("errorCodes"_cs);
     }
 
+    cstring toString() const override { return "EBPFProgram"_cs; }
+
  protected:
     virtual void emitPreamble(CodeBuilder *builder);
     virtual void emitTypes(CodeBuilder *builder);
