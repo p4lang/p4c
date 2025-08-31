@@ -74,6 +74,7 @@ class EBPFParserState : public EBPFObject {
     EBPFParserState(const IR::ParserState *state, EBPFParser *parser)
         : state(state), parser(parser) {}
     void emit(CodeBuilder *builder);
+    cstring toString() const override { return "EBPFParserState:"_cs + state->name.name; }
 
     DECLARE_TYPEINFO(EBPFParserState, EBPFObject);
 };
@@ -102,6 +103,7 @@ class EBPFParser : public EBPFObject {
     virtual void emitTypes(CodeBuilder *builder);
     virtual void emitValueSetInstances(CodeBuilder *builder);
     virtual void emitRejectState(CodeBuilder *builder);
+    cstring toString() const override { return "EBPFParser"_cs; }
 
     EBPFValueSet *getValueSet(cstring name) const { return ::P4::get(valueSets, name); }
 
