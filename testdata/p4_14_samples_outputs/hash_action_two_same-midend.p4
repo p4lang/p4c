@@ -42,9 +42,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
 @name(".meter1") meter<bit<10>>(32w1024, MeterType.bytes) meter1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".set_index") action set_index(@name("index") bit<16> index_1, @name("port") bit<9> port) {
         meta._counter_metadata_counter_index0 = index_1;

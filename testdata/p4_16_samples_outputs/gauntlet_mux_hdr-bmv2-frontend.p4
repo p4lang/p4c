@@ -25,7 +25,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp1") H[2] tmp1_0;
     @name("ingress.tmp2") H[2] tmp2_0;
     @name("ingress.inlinedRetval") bit<32> inlinedRetval_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
         tmp1_0[0].setInvalid();

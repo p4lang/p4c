@@ -31,7 +31,7 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
     @name("MainControlImpl.tmp_0") bool tmp;
     @name("MainControlImpl.tmp_1") bit<16> tmp_0;
     @name("MainControlImpl.year") priceX year_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.revie") action revie(@name("orde") bit<128> orde, @name("priv") bit<128> priv) {
         hdr.heal[3w0] = year_0;
