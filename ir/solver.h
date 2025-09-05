@@ -1,6 +1,7 @@
 #ifndef IR_SOLVER_H_
 #define IR_SOLVER_H_
 
+#include <functional>
 #include <optional>
 #include <vector>
 
