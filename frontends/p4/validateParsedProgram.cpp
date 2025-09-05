@@ -141,8 +141,10 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Variable *decl) {
 /// Instance names cannot be don't care
 /// Do not declare instances in apply {} blocks, parser states or actions
 void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
-    if (!decl->type->is<IR::Type_Name>() && !decl->type->is<IR::Type_Specialized>() &&
-        !decl->type->is<IR::Type_Extern>())  // P4_14 only?
+    auto *type = decl->type;
+    while (auto *at = type->to<IR::Type_Array>()) type = at->elementType;
+    if (!type->is<IR::Type_Name>() && !type->is<IR::Type_Specialized>() &&
+        !type->is<IR::Type_Extern>())  // P4_14 only?
         ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid type for declaration", decl->type);
     if (decl->name.isDontCare())
         ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid instance name.", decl);
