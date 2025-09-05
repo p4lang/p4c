@@ -17,6 +17,7 @@ limitations under the License.
 #include "copyStructures.h"
 
 #include "frontends/p4/alias.h"
+#include "ir/irutils.h"
 
 namespace P4 {
 
@@ -66,7 +67,8 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     const auto *ltype = typeMap->getType(statement->left, true);
 
     // If the left type is not a struct like or a header stack, return.
-    if (!(ltype->is<IR::Type_StructLike>() || ltype->is<IR::Type_Array>())) {
+    if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Array>() &&
+        !ltype->is<IR::Type_Tuple>()) {
         return statement;
     }
     /*
@@ -153,6 +155,15 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
                 new IR::ArrayIndex(stack->elementType, statement->right, new IR::Constant(i));
             retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
+    } else if (auto *tup = ltype->to<IR::Type_Tuple>()) {
+        if (!copyTuples) return statement;
+        int idx = 0;
+        for (auto *el : tup->components) {
+            const auto *left = new IR::ArrayIndex(el, statement->left, new IR::Constant(idx));
+            const auto *right = new IR::ArrayIndex(el, statement->right, new IR::Constant(idx));
+            retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
+            ++idx;
+        }
     } else {
         if (ltype->is<IR::Type_Header>() || ltype->is<IR::Type_Array>()) {
             // Leave headers as they are -- copy_header will also copy the valid bit
@@ -168,7 +179,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
     }
-    return new IR::BlockStatement(statement->srcInfo, std::move(retval));
+    return IR::inlineBlock(*this, std::move(retval));
 }
 
 }  // namespace P4
