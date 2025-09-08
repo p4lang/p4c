@@ -1,13 +1,13 @@
-issue-2123_e.p4(63): [--Wwarn=uninitialized_use] warning: hdr.ipv4.totalLen may be uninitialized
+issue-2123_e.p4(63): [--Wwarn=uninitialized-use] warning: hdr.ipv4.totalLen may be uninitialized
             hdr.ipv4.totalLen .. 0x0800 : parse_ipv4;
             ^^^^^^^^^^^^^^^^^
-issue-2123_e.p4(64): [--Wwarn=uninitialized_use] warning: hdr.ipv4.totalLen may be uninitialized
+issue-2123_e.p4(64): [--Wwarn=uninitialized-use] warning: hdr.ipv4.totalLen may be uninitialized
             0x0800 .. hdr.ipv4.totalLen : parse_ipv4;
                       ^^^^^^^^^^^^^^^^^
-issue-2123_e.p4(63): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.ipv4
+issue-2123_e.p4(63): [--Wwarn=invalid-header] warning: accessing a field of an invalid header hdr.ipv4
             hdr.ipv4.totalLen .. 0x0800 : parse_ipv4;
             ^^^^^^^^
-issue-2123_e.p4(64): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.ipv4
+issue-2123_e.p4(64): [--Wwarn=invalid-header] warning: accessing a field of an invalid header hdr.ipv4
             0x0800 .. hdr.ipv4.totalLen : parse_ipv4;
                       ^^^^^^^^
 issue-2123_e.p4(61): [--Wwarn=invalid] warning: 16w0x806-16w0x800: Range with end less than start is treated as an empty range
