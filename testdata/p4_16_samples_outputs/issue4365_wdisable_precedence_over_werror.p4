@@ -1,4 +1,4 @@
-@command_line("--Werror", "--Wdisable=uninitialized_use", "--Wdisable=invalid_header") header h_t {
+@command_line("--Werror", "--Wdisable=uninitialized-use", "--Wdisable=invalid-header") header h_t {
     bit<28> f1;
     bit<4>  f2;
 }
