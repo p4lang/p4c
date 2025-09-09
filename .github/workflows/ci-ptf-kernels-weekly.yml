@@ -25,7 +25,6 @@ env:
   P4C_IMAGE: p4c.img
   WORKING_DISK_IMAGE: /var/lib/libvirt/images/vm_disk.qcow2
   DOCKER_VOLUME_IMAGE: /var/lib/libvirt/images/docker_disk.qcow2
-  UBUNTU_2004_KERNELS: 5.8.0-63 5.11.0-46 5.13.0-52 5.15.0-69
 
 jobs:
   build-p4c:
@@ -52,12 +51,22 @@ jobs:
           docker build --network host -t p4c --build-arg MAKEFLAGS=-j2 --build-arg IMAGE_TYPE=test --build-arg CMAKE_UNITY_BUILD=ON --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON .
           docker save -o ${{ env.P4C_IMAGE }} p4c
 
-  build-ubuntu-2004:
+  build-ubuntu:
     # Prevent triggering by a fork because this workflow is resource intensive
     if: ${{ github.repository == 'p4lang/p4c' && github.ref == 'refs/heads/main' }}
+    name: Build VM images (${{ matrix.os }})
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+        # NB: Sync with kernels in other job
+        include:
+          - os: ubuntu-22.04
+            kernels: 6.8.0-79
+          - os: ubuntu-24.04
+            kernels: 6.8.0-79 6.11.0-25 6.14.0-29
     env:
-      OS_TYPE: ubuntu-20.04
+      OS_TYPE: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
 
@@ -66,7 +75,7 @@ jobs:
         id: vm_cache
         with:
           path: ${{ env.DISK_IMAGE }}
-          key: ${{ env.OS_TYPE }} ${{ env.UBUNTU_2004_KERNELS }}
+          key: ${{ env.OS_TYPE }} ${{ matrix.kernels }}
           # No need to download the image, because it is only build in this job
           lookup-only: true
 
@@ -74,26 +83,28 @@ jobs:
         if: steps.vm_cache.outputs.cache-hit != 'true'
         run: |
           sudo -E ./tools/ci-ptf/prepare_runner.sh
-          sudo -E ./tools/ci-ptf/build_vm.sh ${{ env.UBUNTU_2004_KERNELS }}
+          sudo -E ./tools/ci-ptf/build_vm.sh ${{ matrix.kernels }}
 
-  ptf-ubuntu-2004:
-    needs: [build-ubuntu-2004, build-p4c]
+  ptf-ubuntu:
+    name: Run PTF tests (${{ matrix.os }}, ${{ matrix.kernel_version }})
+    needs: [build-ubuntu, build-p4c]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        kernels: [5.8, 5.11, 5.13, 5.15]
+        os: [ubuntu-20.04, ubuntu-24.04]
+        # NB: Sync with kernels in other job
         include:
-          - kernels: 5.8
-            kernel_version: 5.8.0-63
-          - kernels: 5.11
-            kernel_version: 5.11.0-46
-          - kernels: 5.13
-            kernel_version: 5.13.0-52
-          - kernels: 5.15
-            kernel_version: 5.15.0-69
+          - os: ubuntu-22.04
+            kernel_version: 6.8.0-79
+          - os: ubuntu-24.04
+            kernel_version: 6.8.0-79
+          - os: ubuntu-24.04
+            kernel_version: 6.11.0-25
+          - os: ubuntu-24.04
+            kernel_version: 6.14.0-29
     env:
-      OS_TYPE: ubuntu-20.04
+      OS_TYPE: ${{ matrix.os }}
       KERNEL_VERSION: ${{ matrix.kernel_version }}
     steps:
       - uses: actions/checkout@v5
