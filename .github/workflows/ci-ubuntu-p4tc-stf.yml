@@ -19,7 +19,11 @@ jobs:
   test-ubuntu-p4tc-stf:
     # Only run on pull requests with the "p4tc" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'p4tc') }}
-    runs-on: ubuntu-24.04
+    name: P4TC STF tests (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
@@ -39,11 +43,11 @@ jobs:
           key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
           max-size: 1000M
 
-      - name: Build (Ubuntu 24.04, GCC)
+      - name: Build (${{ runner.os }}, GCC)
         run: |
           tools/ci-build.sh
 
-      - name: Run tests (Ubuntu 24.04)
+      - name: Run tests (${{ runner.os }})
         # Need to use sudo for the eBPF kernel tests.
         run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random -R "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build
