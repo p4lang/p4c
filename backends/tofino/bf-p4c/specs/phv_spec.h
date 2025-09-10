@@ -16,15 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PHV_SPEC_H_
-#define BACKENDS_TOFINO_BF_P4C_PHV_PHV_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_SPECS_PHV_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_SPECS_PHV_SPEC_H_
 
 #include <optional>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/bitvec.h"
-#include "lib/json.h"
 #include "lib/ordered_map.h"
 
 namespace P4 {
@@ -59,14 +58,19 @@ class PhvSpec {
     };
     using AddressSpec = std::map<PHV::Type, RangeSpec>;
 
+    // All cache fields
+    struct PhVCache {
+        bitvec physical_containers_i;
+        std::map<PHV::Size, std::vector<bitvec>> mau_groups_i;
+        bitvec ingress_only_containers_i;
+        bitvec egress_only_containers_i;
+        std::vector<bitvec> tagalong_collections_i;
+        bitvec individually_assigned_containers_i;
+    };
+
  protected:
     // All cache fields
-    mutable bitvec physical_containers_i;
-    mutable std::map<PHV::Size, std::vector<bitvec>> mau_groups_i;
-    mutable bitvec ingress_only_containers_i;
-    mutable bitvec egress_only_containers_i;
-    mutable std::vector<bitvec> tagalong_collections_i;
-    mutable bitvec individually_assigned_containers_i;
+    mutable PhVCache cache_;
 
     /// All types of containers supported by the device.
     std::vector<PHV::Type> definedTypes;
@@ -75,7 +79,7 @@ class PhvSpec {
     /// All kinds of containers supported by the device.
     std::set<PHV::Kind> definedKinds;
 
-    ordered_map<PHV::Type, unsigned> typeIdMap;
+    ordered_map<PHV::Type, unsigned> typeIdMap_;
 
     std::map<PHV::Size, std::set<PHV::Type>> sizeToTypeMap;
 
@@ -135,6 +139,10 @@ class PhvSpec {
         const std::map<PHV::Size, unsigned> &numContainersPerGroup) const;
 
  public:
+    PhVCache &mutablePhvCache() const { return cache_; }
+
+    const ordered_map<PHV::Type, unsigned> &typeIdMap() const { return typeIdMap_; }
+
     /// @return the PHV container types available on this device.
     const std::vector<PHV::Type> &containerTypes() const;
 
@@ -307,14 +315,11 @@ class PhvSpec {
     /// in the pipeline: PARSER, MAU, DEPARSER.
     std::optional<PHV::Container> physicalAddressToContainer(unsigned address,
                                                              ArchBlockType_t interface) const;
-
-    /// apply global pragmas to cached info about available PHV containers
-    void applyGlobalPragmas(const std::vector<const IR::Annotation *> &global_pragmas) const;
 };
 
 class TofinoPhvSpec : public PhvSpec {
  public:
-    TofinoPhvSpec();
+    TofinoPhvSpec(float phv_scale_factor, bool no_tagalong);
 
     /// @see PhvSpec::parserGroup(unsigned id).
     bitvec parserGroup(unsigned id) const override;
@@ -352,7 +357,7 @@ class TofinoPhvSpec : public PhvSpec {
 
 class JBayPhvSpec : public PhvSpec {
  public:
-    JBayPhvSpec();
+    explicit JBayPhvSpec(float phv_scale_factor);
 
     /// @see PhvSpec::parserGroup(unsigned id).
     bitvec parserGroup(unsigned id) const override;
@@ -398,4 +403,4 @@ class JBayPhvSpec : public PhvSpec {
     static AddressSpec _physicalDeparserAddresses;
 };
 
-#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PHV_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_SPECS_PHV_SPEC_H_ */
