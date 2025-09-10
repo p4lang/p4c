@@ -135,7 +135,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&typeMap),
             new P4::SimplifyComparisons(&typeMap),
-            new P4::CopyStructures(&typeMap),
+            new P4::CopyStructures(&typeMap, P4::CopyStructuresConfig()),
             new P4::NestedStructs(&typeMap),
             new P4::SimplifySelectList(&typeMap),
             new P4::RemoveSelectBooleans(&typeMap),

@@ -265,7 +265,11 @@ BFN::CopyHeaders::CopyHeaders(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
     passes.emplace_back(typeChecking);
     // `errorOnMethodCall = false` viz don't flag functions returning structs as an error.
     // E.g. Phase0 extern function returns a header struct.
-    passes.emplace_back(new P4::DoCopyStructures(typeMap, false));
-    passes.emplace_back(typeChecking);
+    new P4::CopyStructures(typeMap, P4::DoCopyStructures{
+                                        /*errorOnMethodCall*/ false,
+                                        /*copyHeaders*/ false,
+                                        /*expandUnions*/ false,
+                                    }),
+        passes.emplace_back(typeChecking);
     passes.emplace_back(new DoCopyHeaders(typeMap));
 }
