@@ -1,0 +1,18 @@
+expr-select-with-single-expression-and-keyset-of-incompatible-types.p4(3): [--Wwarn=unused] warning: parser 'p' is unused
+parser p(in bit<16> x)() {
+       ^
+expr-select-with-single-expression-and-keyset-of-incompatible-types.p4(5): [--Werror=type-error] error: 'SelectExpression'
+    transition select(x) {
+               ^
+  ---- Actual error:
+  Cannot cast implicitly type 'bit<4>' to type 'bit<16>'
+  ---- Originating from:
+expr-select-with-single-expression-and-keyset-of-incompatible-types.p4(6): 'match' case label '{ 2 .. (bit<4>)0 }' has type 'tuple<bit<4>>' which does not match the expected type 'tuple<bit<16>>'
+        (4w2 .. 0): accept;
+        ^^^^^^^^^^
+expr-select-with-single-expression-and-keyset-of-incompatible-types.p4(6)
+        (4w2 .. 0): accept;
+        ^^^^^^^^^^
+expr-select-with-single-expression-and-keyset-of-incompatible-types.p4(5)
+      transition select(x) {
+                        ^

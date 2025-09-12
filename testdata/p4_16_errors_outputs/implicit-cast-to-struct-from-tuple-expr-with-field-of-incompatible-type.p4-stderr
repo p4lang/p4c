@@ -1,0 +1,23 @@
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(9): [--Wwarn=unused] warning: 's' is unused
+    S s = { { ... }, ... };
+    ^^^^^^^^^^^^^^^^^^^^^^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(9): [--Werror=type-error] error: 's'
+    S s = { { ... }, ... };
+    ^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(9): Cannot cast implicitly type 'tuple<ANYTYPE>' to type 'bit<1>'
+      S s = { { ... }, ... };
+              ^^^^^^^
+  ---- Originating from:
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(9): Source expression '{ { ... }, ... }' produces a result of type 'tuple<tuple<ANYTYPE>, ANYTYPE>' which cannot be assigned to a left-value with type 'struct S'
+      S s = { { ... }, ... };
+            ^^^^^^^^^^^^^^^^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(9)
+      S s = { { ... }, ... };
+            ^^^^^^^^^^^^^^^^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type.p4(3)
+  struct S {
+         ^

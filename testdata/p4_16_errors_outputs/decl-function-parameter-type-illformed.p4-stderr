@@ -1,0 +1,7 @@
+decl-function-parameter-type-illformed.p4(3): [--Werror=duplicate] error: Re-declaration of t with different type: 
+void f<t>(inout error t = ...)
+                      ^
+decl-function-parameter-type-illformed.p4(3)
+void f<t>(inout error t = ...)
+       ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

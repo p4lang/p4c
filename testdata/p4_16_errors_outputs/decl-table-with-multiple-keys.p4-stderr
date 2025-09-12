@@ -1,0 +1,7 @@
+decl-table-with-multiple-keys.p4(6): [--Werror=duplicate] error: key: Duplicates declaration key
+    key = {}
+    ^^^^^^^^
+decl-table-with-multiple-keys.p4(5)
+    key = {}
+    ^^^^^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

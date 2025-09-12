@@ -1,0 +1,9 @@
+method-call-isValid-on-unsupported-type.p4(4): [--Wwarn=unused] warning: 'f' is unused
+bool f() {
+     ^
+method-call-isValid-on-unsupported-type.p4(5): [--Werror=type-error] error: Field isValid is not a member of structure struct h
+  return ((h) { }).isValid();
+                   ^^^^^^^
+method-call-isValid-on-unsupported-type.p4(3)
+struct h {}
+       ^

@@ -1,0 +1,29 @@
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(4): [--Wwarn=unused] warning: 'T1' is unused
+struct S1<T1, T2> {}
+          ^^
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(4): [--Wwarn=unused] warning: 'T2' is unused
+struct S1<T1, T2> {}
+              ^^
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(5): [--Wwarn=unused] warning: control 'c0' is unused
+control c0() {
+        ^^
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(7): [--Werror=type-error] error: '{ T = 0, y = 0 }'
+    test((S1<bit<4>, int<6>>) { T = 0, y = 0 });
+                              ^^^^^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(7): Number of fields 2 in initializer different than number of fields in structure 0: unknown struct to struct S1
+      test((S1<bit<4>, int<6>>) { T = 0, y = 0 });
+                                ^^^^^^^^^^^^^^^^
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(4)
+  struct S1<T1, T2> {}
+         ^^
+  ---- Originating from:
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(7): Initializer type 'unknown struct' does not match expected type 'struct S1'
+      test((S1<bit<4>, int<6>>) { T = 0, y = 0 });
+                                ^^^^^^^^^^^^^^^^
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(4)
+  struct S1<T1, T2> {}
+         ^^
+explicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(7): [--Werror=type-error] error: { T = 0, y = 0 }: destination type expects 0 fields, but source only has 2
+    test((S1<bit<4>, int<6>>) { T = 0, y = 0 });
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,0 +1,4 @@
+stmt-return-from-unsupported-scope.p4(5):syntax error, unexpected RETURN, expecting { or CONST
+    return
+    ^^^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

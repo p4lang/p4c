@@ -1,0 +1,23 @@
+explicit-cast-to-struct-from-tuple-expr-with-unmatched-field.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+explicit-cast-to-struct-from-tuple-expr-with-unmatched-field.p4(6): [--Wwarn=unused] warning: 's' is unused
+    S s = (S) { b = 2, ... };
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-struct-from-tuple-expr-with-unmatched-field.p4(6): [--Werror=type-error] error: '{ b = 2 }'
+    S s = (S) { b = 2, ... };
+              ^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-struct-from-tuple-expr-with-unmatched-field.p4(6): Number of fields 1 in initializer different than number of fields in structure 0: unknown struct to struct S
+      S s = (S) { b = 2, ... };
+                ^^^^^^^^^^^^
+explicit-cast-to-struct-from-tuple-expr-with-unmatched-field.p4(3)
+  struct S {}
+         ^
+  ---- Originating from:
+explicit-cast-to-struct-from-tuple-expr-with-unmatched-field.p4(6): Initializer type 'unknown struct' does not match expected type 'struct S'
+      S s = (S) { b = 2, ... };
+                ^^^^^^^^^^^^
+explicit-cast-to-struct-from-tuple-expr-with-unmatched-field.p4(3)
+  struct S {}
+         ^

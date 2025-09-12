@@ -1,0 +1,12 @@
+method-call-pop_front-on-non-stack.p4(7): [--Wwarn=unused] warning: control 'ctrl' is unused
+control ctrl(inout struct_t input, out bit<8> output) {
+        ^^^^
+method-call-pop_front-on-non-stack.p4(8): [--Wwarn=unused] warning: 'act' is unused
+  action act() {
+         ^^^
+method-call-pop_front-on-non-stack.p4(9): [--Werror=type-error] error: Field pop_front is not a member of header header_h
+    input.stack.pop_front();
+                ^^^^^^^^^
+method-call-pop_front-on-non-stack.p4(3)
+header header_h {}
+       ^^^^^^^^

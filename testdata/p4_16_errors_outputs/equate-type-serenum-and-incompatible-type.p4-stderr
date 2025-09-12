@@ -1,0 +1,29 @@
+equate-type-serenum-and-incompatible-type.p4(4): [--Wwarn=unused] warning: control 'c0' is unused
+control c0() {
+        ^^
+equate-type-serenum-and-incompatible-type.p4(5): [--Wwarn=unused] warning: 'v' is unused
+  action set_x(tuple<> v) {}
+                       ^
+equate-type-serenum-and-incompatible-type.p4(6): [--Wwarn=unused] warning: table 't' is unused
+  table t {
+        ^
+equate-type-serenum-and-incompatible-type.p4(10): [--Werror=type-error] error: 'foo_t.A'
+    default_action = set_x(foo_t.A);
+                           ^^^^^^^
+  ---- Actual error:
+equate-type-serenum-and-incompatible-type.p4(3): Cannot cast implicitly type 'foo_t' to type 'tuple<>'
+  enum bit<2> foo_t { A = 0 };
+              ^^^^^
+equate-type-serenum-and-incompatible-type.p4(5)
+    action set_x(tuple<> v) {}
+                 ^^^^^^^
+  ---- Originating from:
+equate-type-serenum-and-incompatible-type.p4(10): Source expression 'foo_t.A' produces a result of type 'foo_t' which cannot be assigned to a left-value with type 'tuple<>'
+      default_action = set_x(foo_t.A);
+                             ^^^^^^^
+equate-type-serenum-and-incompatible-type.p4(3)
+  enum bit<2> foo_t { A = 0 };
+              ^^^^^
+equate-type-serenum-and-incompatible-type.p4(5)
+    action set_x(tuple<> v) {}
+                 ^^^^^^^

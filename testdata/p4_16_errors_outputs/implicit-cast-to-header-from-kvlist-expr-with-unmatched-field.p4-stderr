@@ -1,0 +1,26 @@
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(4): [--Wwarn=unused] warning: control 'I' is unused
+control I()() {
+        ^
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Wwarn=unused] warning: 'h' is unused
+    H h = { b = 1 };
+    ^^^^^^^^^^^^^^^
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Werror=type-error] error: 'h'
+    H h = { b = 1 };
+    ^^^^^^^^^^^^^^^
+  ---- Actual error:
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): Number of fields 1 in initializer different than number of fields in structure 0: unknown struct to header H
+      H h = { b = 1 };
+            ^^^^^^^^^
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(3)
+  header H {}
+         ^
+  ---- Originating from:
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): Source expression '{ b = 1 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header H'
+      H h = { b = 1 };
+            ^^^^^^^^^
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6)
+      H h = { b = 1 };
+            ^^^^^^^^^
+implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(3)
+  header H {}
+         ^

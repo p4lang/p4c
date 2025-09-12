@@ -1,0 +1,26 @@
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(8): [--Wwarn=unused] warning: control 'c' is unused
+control c(packet_out p)() {
+        ^
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(10): [--Werror=type-error] error: p.emit: extern packet_out does not have method matching this call
+    p.emit((H) { 0, 1 });
+    ^^^^^^
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(3)
+extern packet_out {}
+       ^^^^^^^^^^
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(10): [--Werror=type-error] error: '(H){ 0, 1 }'
+    p.emit((H) { 0, 1 });
+           ^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(6): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'varbit<32>'
+    varbit<32> b;
+    ^^^^^^^^^^
+  ---- Originating from:
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(10): Source expression '{ 0, 1 }' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'header H'
+      p.emit((H) { 0, 1 });
+                 ^^^^^^^^
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(10)
+      p.emit((H) { 0, 1 });
+                 ^^^^^^^^
+explicit-cast-to-header-from-tuple-expr-with-field-of-incompatible-type.p4(4)
+  header H {
+         ^

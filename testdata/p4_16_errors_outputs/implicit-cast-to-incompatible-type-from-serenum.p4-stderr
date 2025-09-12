@@ -1,0 +1,6 @@
+implicit-cast-to-incompatible-type-from-serenum.p4(4): [--Wwarn=unused] warning: 'func' is unused
+bit<16> func() {
+        ^^^^
+implicit-cast-to-incompatible-type-from-serenum.p4(5): [--Werror=type-error] error: 11 * E.a: Cannot operate on values with different widths 16 and 8
+  return 16w11 * E.a;
+         ^^^^^^^^^^^

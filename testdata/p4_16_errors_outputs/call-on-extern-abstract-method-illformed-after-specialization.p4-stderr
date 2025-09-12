@@ -1,0 +1,34 @@
+call-on-extern-abstract-method-illformed-after-specialization.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c(packet_out p)() {
+        ^
+call-on-extern-abstract-method-illformed-after-specialization.p4(8): [--Werror=type-error] error: 'p.emit({ 0, 1 })'
+    p.emit<string>({ 0, 1 });
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+call-on-extern-abstract-method-illformed-after-specialization.p4(8): Cannot cast implicitly type 'tuple<int, int>' to type 'string'
+      p.emit<string>({ 0, 1 });
+                     ^^^^^^^^
+call-on-extern-abstract-method-illformed-after-specialization.p4(8)
+      p.emit<string>({ 0, 1 });
+             ^^^^^^
+  ---- Originating from:
+call-on-extern-abstract-method-illformed-after-specialization.p4(8): Type of argument '{ 0, 1 }' (tuple<int, int>) does not match type of parameter 'hdr' (T)
+      p.emit<string>({ 0, 1 });
+                     ^^^^^^^^
+call-on-extern-abstract-method-illformed-after-specialization.p4(8)
+      p.emit<string>({ 0, 1 });
+                     ^^^^^^^^
+call-on-extern-abstract-method-illformed-after-specialization.p4(4)
+    abstract void emit<T>(in T hdr);
+                               ^^^
+call-on-extern-abstract-method-illformed-after-specialization.p4(4)
+    abstract void emit<T>(in T hdr);
+                       ^
+  Where 'T' is bound to 'string'
+  ---- Originating from:
+call-on-extern-abstract-method-illformed-after-specialization.p4(4): Function type 'emit' does not match invocation type '<Method call>'
+    abstract void emit<T>(in T hdr);
+                  ^^^^
+call-on-extern-abstract-method-illformed-after-specialization.p4(8)
+      p.emit<string>({ 0, 1 });
+      ^^^^^^^^^^^^^^^^^^^^^^^^

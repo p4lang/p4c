@@ -1,0 +1,12 @@
+decl-action-parameter-type-illformed.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+decl-action-parameter-type-illformed.p4(4): [--Wwarn=unused] warning: 'b' is unused
+  action b(out bit<32> arg = ...) {}
+         ^
+decl-action-parameter-type-illformed.p4(4): [--Wwarn=unused] warning: 'arg' is unused
+  action b(out bit<32> arg = ...) {}
+                       ^^^
+decl-action-parameter-type-illformed.p4(4): [--Werror=invalid] error: arg: out parameters cannot have default values
+  action b(out bit<32> arg = ...) {}
+                       ^^^

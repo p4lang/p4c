@@ -1,0 +1,20 @@
+call-inout-parameter-with-non-lvalue-2.p4(4): [--Wwarn=unused] warning: 'g' is unused
+void g<t>(in t b) {
+     ^
+call-inout-parameter-with-non-lvalue-2.p4(5): [--Werror=type-error] error: 'f(b)'
+  f(b);
+  ^^^^
+  ---- Actual error:
+call-inout-parameter-with-non-lvalue-2.p4(5): : Read-only value used for out/inout parameter 'a'
+    f(b);
+      ^
+call-inout-parameter-with-non-lvalue-2.p4(3)
+  void f<t>(inout t a) {}
+                    ^
+  ---- Originating from:
+call-inout-parameter-with-non-lvalue-2.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  void f<t>(inout t a) {}
+       ^
+call-inout-parameter-with-non-lvalue-2.p4(5)
+    f(b);
+    ^^^^

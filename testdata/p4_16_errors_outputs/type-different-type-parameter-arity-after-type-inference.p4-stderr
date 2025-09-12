@@ -1,0 +1,31 @@
+type-different-type-parameter-arity-after-type-inference.p4(3): [--Wwarn=unused] warning: 'T' is unused
+extern void f<T>(out tuple<> lazy);
+              ^
+type-different-type-parameter-arity-after-type-inference.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+type-different-type-parameter-arity-after-type-inference.p4(7): [--Werror=type-error] error: 'f(x)'
+    f(x);
+    ^^^^
+  ---- Actual error:
+  Tuples with different sizes 0 vs 2
+  ---- Originating from:
+type-different-type-parameter-arity-after-type-inference.p4(7): Type of argument 'x' (tuple<bit<32>, bool>) does not match type of parameter 'lazy' (tuple<>)
+      f(x);
+        ^
+type-different-type-parameter-arity-after-type-inference.p4(5)
+    tuple<bit<32>, bool> x = { 10, false };
+    ^^^^^^^^^^^^^^^^^^^^
+type-different-type-parameter-arity-after-type-inference.p4(3)
+  extern void f<T>(out tuple<> lazy);
+                               ^^^^
+type-different-type-parameter-arity-after-type-inference.p4(3)
+  extern void f<T>(out tuple<> lazy);
+                       ^^^^^^^
+  ---- Originating from:
+type-different-type-parameter-arity-after-type-inference.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  extern void f<T>(out tuple<> lazy);
+              ^
+type-different-type-parameter-arity-after-type-inference.p4(7)
+      f(x);
+      ^^^^

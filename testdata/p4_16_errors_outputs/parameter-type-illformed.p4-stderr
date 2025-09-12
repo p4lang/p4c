@@ -1,0 +1,6 @@
+parameter-type-illformed.p4(3): [--Wwarn=unused] warning: control 'compute' is unused
+control compute(out list<void> h = { ... })() {
+        ^^^^^^^
+parameter-type-illformed.p4(3): [--Werror=invalid] error: h: out parameters cannot have default values
+control compute(out list<void> h = { ... })() {
+                               ^

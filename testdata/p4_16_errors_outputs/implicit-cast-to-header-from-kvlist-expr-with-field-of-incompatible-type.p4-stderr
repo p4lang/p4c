@@ -1,0 +1,30 @@
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(6): [--Wwarn=unused] warning: 'f' is unused
+void f(out H h) {
+     ^
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(7): [--Werror=type-error] error: 'h = { f = 10 }'
+  h = { f = 10 };
+    ^
+  ---- Actual error:
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(4): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'varbit<32>'
+    varbit<32> f;
+    ^^^^^^^^^^
+  ---- Originating from:
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(4): Type of initializer 'int' does not match type 'varbit<32>' of field 'f' in 'header H'
+    varbit<32> f;
+    ^^^^^^^^^^
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(4)
+    varbit<32> f;
+               ^
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(3)
+  header H {
+         ^
+  ---- Originating from:
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(7): Source expression '{ f = 10 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header H'
+    h = { f = 10 };
+        ^^^^^^^^^^
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(7)
+    h = { f = 10 };
+        ^^^^^^^^^^
+implicit-cast-to-header-from-kvlist-expr-with-field-of-incompatible-type.p4(3)
+  header H {
+         ^

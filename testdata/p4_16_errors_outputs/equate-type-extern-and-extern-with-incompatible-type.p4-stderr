@@ -1,0 +1,15 @@
+equate-type-extern-and-extern-with-incompatible-type.p4(6): [--Wwarn=unused] warning: 'W' is unused
+extern Hash<W> {
+            ^
+equate-type-extern-and-extern-with-incompatible-type.p4(9): [--Wwarn=unused] warning: control 'Ingress0' is unused
+control Ingress0() {
+        ^^^^^^^^
+equate-type-extern-and-extern-with-incompatible-type.p4(10): [--Wwarn=unused] warning: 'hash2' is unused
+  Hash<bit<32>, bit<32>>(poly = CRCPolynomial(coeff = 16w263)) hash2;
+                                                               ^^^^^
+equate-type-extern-and-extern-with-incompatible-type.p4(10): [--Werror=type-error] error: Hash<bit<32>, bit<32>>: Type Hash has 1 type parameter(s), but it is specialized with 2
+  Hash<bit<32>, bit<32>>(poly = CRCPolynomial(coeff = 16w263)) hash2;
+  ^^^^^^^^^^^^^^^^^^^^^^
+equate-type-extern-and-extern-with-incompatible-type.p4(6)
+extern Hash<W> {
+       ^^^^

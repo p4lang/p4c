@@ -1,0 +1,7 @@
+control ctrl() {
+    apply {
+        switch (...) {
+        }
+    }
+}
+

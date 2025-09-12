@@ -1,0 +1,7 @@
+decl-union-with-duplicate-fields.p4(6): [--Werror=duplicate] error: i1: Duplicates declaration i1
+  h_index1 i1;
+           ^^
+decl-union-with-duplicate-fields.p4(5)
+  h_index1 i1;
+           ^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

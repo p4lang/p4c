@@ -1,0 +1,18 @@
+extern-method-impl-illformed.p4(13): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+extern-method-impl-illformed.p4(7): [--Wwarn=unused] warning: parser 'MyParser' is unused
+parser MyParser()() {
+       ^^^^^^^^
+extern-method-impl-illformed.p4(8): [--Wwarn=unused] warning: 'ee' is unused
+  e() ee = {
+      ^^
+extern-method-impl-illformed.p4(9): [--Werror=type-error] error: a: parameters with type int must be directionless
+    t f(in int a) {
+               ^
+extern-method-impl-illformed.p4(9)
+    t f(in int a) {
+           ^^^
+extern-method-impl-illformed.p4(8): [--Werror=type-error] error: BlockStatement: instance initializers for extern without abstract methods
+  e() ee = {
+           ^

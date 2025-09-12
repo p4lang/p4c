@@ -1,0 +1,26 @@
+expr-binary-sat-on-non-coercible-types.p4(9): [--Wwarn=unused] warning: control 'ingress' is unused
+control ingress(inout Headers h)() {
+        ^^^^^^^
+expr-binary-sat-on-non-coercible-types.p4(11): [--Werror=type-error] error: 'tmp_hdr'
+    ethernet_t tmp_hdr = { 1, 1, 1 };
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+expr-binary-sat-on-non-coercible-types.p4(11): Number of fields 3 in initializer tuple<int, int, int> is different than number of fields 1 in 'header ethernet_t'
+      ethernet_t tmp_hdr = { 1, 1, 1 };
+                           ^^^^^^^^^^^
+expr-binary-sat-on-non-coercible-types.p4(3)
+  header ethernet_t {
+         ^^^^^^^^^^
+  ---- Originating from:
+expr-binary-sat-on-non-coercible-types.p4(11): Source expression '{ 1, 1, 1 }' produces a result of type 'tuple<int, int, int>' which cannot be assigned to a left-value with type 'header ethernet_t'
+      ethernet_t tmp_hdr = { 1, 1, 1 };
+                           ^^^^^^^^^^^
+expr-binary-sat-on-non-coercible-types.p4(11)
+      ethernet_t tmp_hdr = { 1, 1, 1 };
+                           ^^^^^^^^^^^
+expr-binary-sat-on-non-coercible-types.p4(3)
+  header ethernet_t {
+         ^^^^^^^^^^
+expr-binary-sat-on-non-coercible-types.p4(12): [--Werror=type-error] error: |-|: cannot be applied to expression 'false' with type 'bool'
+    h.eth_hdr.eth_type = (tmp_hdr.eth_type |-| false);
+                                               ^^^^^

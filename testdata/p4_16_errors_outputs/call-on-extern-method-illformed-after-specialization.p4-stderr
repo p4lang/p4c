@@ -1,0 +1,27 @@
+call-on-extern-method-illformed-after-specialization.p4(10): [--Wwarn=unused] warning: control 'c' is unused
+control c(packet_out p)() {
+        ^
+call-on-extern-method-illformed-after-specialization.p4(12): [--Werror=type-error] error: 'p.emit({ a = 32w0, b = 32w1 })'
+    p.emit<int>((H) { 0, 1 });
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+call-on-extern-method-illformed-after-specialization.p4(12): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'T'
+      p.emit<int>((H) { 0, 1 });
+             ^^^
+call-on-extern-method-illformed-after-specialization.p4(4)
+    void emit<T>(in T hdr);
+              ^
+  ---- Originating from:
+call-on-extern-method-illformed-after-specialization.p4(12): Type parameter 'int' substituted with type argument 'T'
+      p.emit<int>((H) { 0, 1 });
+             ^^^
+call-on-extern-method-illformed-after-specialization.p4(4)
+    void emit<T>(in T hdr);
+              ^
+  ---- Originating from:
+call-on-extern-method-illformed-after-specialization.p4(4): Function type 'emit' does not match invocation type '<Method call>'
+    void emit<T>(in T hdr);
+         ^^^^
+call-on-extern-method-illformed-after-specialization.p4(12)
+      p.emit<int>((H) { 0, 1 });
+      ^^^^^^^^^^^^^^^^^^^^^^^^^

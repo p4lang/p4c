@@ -1,0 +1,32 @@
+equate-type-struct-and-struct-with-different-name.p4(9): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+equate-type-struct-and-struct-with-different-name.p4(5): [--Werror=type-error] error: 'package V1Switch'
+package V1Switch<H, M>(Parser<H, M> p, Ingress<H, M> ig);
+        ^^^^^^^^
+  ---- Actual error:
+equate-type-struct-and-struct-with-different-name.p4(7): Cannot unify 'Meta' with 'Headers'
+  struct Meta {}
+         ^^^^
+equate-type-struct-and-struct-with-different-name.p4(6)
+  struct Headers {}
+         ^^^^^^^
+  ---- Originating from:
+equate-type-struct-and-struct-with-different-name.p4(14): Type of argument 'p' (parser p) does not match type of parameter 'p' (parser Parser<...>)
+  V1Switch(p(), ingress()) main;
+           ^^^
+equate-type-struct-and-struct-with-different-name.p4(8)
+  parser p(out Headers h, inout Meta m)() {
+         ^
+equate-type-struct-and-struct-with-different-name.p4(5)
+  package V1Switch<H, M>(Parser<H, M> p, Ingress<H, M> ig);
+                                      ^
+equate-type-struct-and-struct-with-different-name.p4(5)
+  package V1Switch<H, M>(Parser<H, M> p, Ingress<H, M> ig);
+                         ^^^^^^^^^^^^
+  Where 'H' is bound to 'struct Meta'
+  Where 'M' is bound to 'struct Headers'
+  ---- Originating from:
+equate-type-struct-and-struct-with-different-name.p4(14): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+  V1Switch(p(), ingress()) main;
+                           ^^^^

@@ -1,0 +1,3 @@
+type-bit-with-negative-width.p4(4): [--Werror=invalid] error: bit<-2>: invalid type size
+  bit<(-2)> f;
+  ^^^^^^^^^

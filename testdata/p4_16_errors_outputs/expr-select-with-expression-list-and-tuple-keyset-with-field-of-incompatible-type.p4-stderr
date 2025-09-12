@@ -1,0 +1,3 @@
+expr-select-with-expression-list-and-tuple-keyset-with-field-of-incompatible-type.p4(6): [--Werror=invalid] error: ... must be the last element
+    transition select(x, x, ..., x) {
+                            ^^^

@@ -1,0 +1,6 @@
+expr-indexaccess-with-negative-index.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c(out bit<16> r)() {
+        ^
+expr-indexaccess-with-negative-index.p4(6): [--Werror=type-error] error: Tuple index -2 must be constant
+    r = x[-2];
+           ^

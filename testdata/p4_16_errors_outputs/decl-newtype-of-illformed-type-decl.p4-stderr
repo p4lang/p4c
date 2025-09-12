@@ -1,0 +1,4 @@
+decl-newtype-of-illformed-type-decl.p4(3):syntax error, unexpected STRUCT
+type struct
+     ^^^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

@@ -1,0 +1,6 @@
+expr-binary-bitwise-on-unsupported-types.p4(4): [--Wwarn=unused] warning: 'f' is unused
+bool f() {
+     ^
+expr-binary-bitwise-on-unsupported-types.p4(5): [--Werror=type-error] error: &: cannot be applied to expression 'true' with type 'bool'
+  return ((h) { }).isValid() & ((h) {#}).isValid();
+         ^^^^^^^^^^^^^^^^^^^

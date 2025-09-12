@@ -1,0 +1,12 @@
+lvalue-assign-to-unsupported-type.p4(3): [--Wwarn=unused] warning: 'a' is unused
+action a(inout string x) {
+       ^
+lvalue-assign-to-unsupported-type.p4(4): [--Werror=type-error] error: x >> 3 left operand of shift must be a numeric type, not string
+  x = (x >> 3) >> 8;
+       ^^^^^^
+lvalue-assign-to-unsupported-type.p4(3): [--Werror=type-error] error: x: a parameter with type string cannot have a direction
+action a(inout string x) {
+                      ^
+lvalue-assign-to-unsupported-type.p4(3)
+action a(inout string x) {
+               ^^^^^^

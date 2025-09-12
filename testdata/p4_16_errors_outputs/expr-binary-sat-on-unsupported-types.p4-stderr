@@ -1,0 +1,9 @@
+expr-binary-sat-on-unsupported-types.p4(4): [--Wwarn=unused] warning: 'a' is unused
+const bool a = (X.a |-| X.b);
+           ^
+expr-binary-sat-on-unsupported-types.p4(4): [--Werror=type-error] error: |-|: cannot be applied to expression 'X.a' with type 'X'
+const bool a = (X.a |-| X.b);
+                ^^^
+expr-binary-sat-on-unsupported-types.p4(4): [--Werror=type-error] error: X.a | - | X.b: Cannot evaluate initializer to a compile-time constant
+const bool a = (X.a |-| X.b);
+                ^^^^^^^^^^^

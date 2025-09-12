@@ -1,0 +1,3 @@
+expr-binary-div-on-non-coercible-types.p4(4): [--Werror=expected] error: {...} / true: expected a constant
+  bit<({ ... } / true)> b;
+       ^^^^^^^^^^^^^^

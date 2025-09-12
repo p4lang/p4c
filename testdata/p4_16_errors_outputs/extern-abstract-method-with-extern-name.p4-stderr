@@ -1,0 +1,3 @@
+extern-abstract-method-with-extern-name.p4(4): [--Werror=invalid] error: e: invalid constructor; cannot have a return type.
+  abstract t e(in bit<1> a);
+             ^

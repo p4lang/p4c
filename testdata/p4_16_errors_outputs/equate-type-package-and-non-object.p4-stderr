@@ -1,0 +1,3 @@
+equate-type-package-and-non-object.p4(5): [--Werror=not-found] error: error: declaration not found
+package q(list<error> _p);
+               ^^^^^

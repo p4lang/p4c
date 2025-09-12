@@ -1,0 +1,28 @@
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(9): [--Werror=type-error] error: 'f({ true })'
+    f({ true });
+    ^^^^^^^^^^^
+  ---- Actual error:
+  Cannot cast implicitly type 'bool' to type 'bit<8>'
+  ---- Originating from:
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(9): Type of argument '{ true }' (tuple<bool>) does not match type of parameter 'sarg' (struct s)
+      f({ true });
+        ^^^^^^^^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(9)
+      f({ true });
+        ^^^^^^^^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(6)
+  extern void f(in s sarg);
+                     ^^^^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(3)
+  struct s {
+         ^
+  ---- Originating from:
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(6): Function type 'f' does not match invocation type '<Method call>'
+  extern void f(in s sarg);
+              ^
+implicit-cast-to-struct-from-tuple-expr-with-field-of-incompatible-type-2.p4(9)
+      f({ true });
+      ^^^^^^^^^^^

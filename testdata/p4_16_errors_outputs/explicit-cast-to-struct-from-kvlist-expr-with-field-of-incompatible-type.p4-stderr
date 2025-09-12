@@ -1,0 +1,3 @@
+explicit-cast-to-struct-from-kvlist-expr-with-field-of-incompatible-type.p4(4): [--Werror=not-found] error: error: declaration not found
+  error b;
+  ^^^^^

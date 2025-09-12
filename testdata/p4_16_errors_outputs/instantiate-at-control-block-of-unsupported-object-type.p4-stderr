@@ -1,0 +1,9 @@
+instantiate-at-control-block-of-unsupported-object-type.p4(4): [--Wwarn=unused] warning: control 't' is unused
+control t()() {
+        ^
+instantiate-at-control-block-of-unsupported-object-type.p4(5): [--Wwarn=unused] warning: 'c1_x' is unused
+  X() c1_x = {};
+      ^^^^
+instantiate-at-control-block-of-unsupported-object-type.p4(5): [--Werror=type-error] error: BlockStatement: initializers only allowed for extern instances
+  X() c1_x = {};
+             ^^

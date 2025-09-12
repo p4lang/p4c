@@ -1,0 +1,7 @@
+decl-parser-with-duplicate-state-names.p4(5): [--Werror=duplicate] error: start: Duplicates declaration start
+  state start {}
+        ^^^^^
+decl-parser-with-duplicate-state-names.p4(4)
+  state start {}
+        ^^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

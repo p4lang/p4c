@@ -1,0 +1,36 @@
+equate-type-list-and-incompatible-type.p4(9): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+equate-type-list-and-incompatible-type.p4(10): [--Wwarn=unused] warning: 'e' is unused
+  E((list<S<bit<32>>>) { { 10 } }) e;
+                                   ^
+equate-type-list-and-incompatible-type.p4(10): [--Werror=type-error] error: 'e'
+  E((list<S<bit<32>>>) { { 10 } }) e;
+                                   ^
+  ---- Actual error:
+equate-type-list-and-incompatible-type.p4(10): Cannot cast implicitly type 'list<struct S<...>>' to type 'tuple<bool, tuple<>>'
+    E((list<S<bit<32>>>) { { 10 } }) e;
+       ^^^^^^^^^^^^^^^^
+equate-type-list-and-incompatible-type.p4(7)
+    E(tuple<bool, tuple<>> data);
+      ^^^^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+equate-type-list-and-incompatible-type.p4(10): Type of argument '{ { t = 32w10 } }' (list<struct S<...>>) does not match type of parameter 'data' (tuple<bool, tuple<>>)
+    E((list<S<bit<32>>>) { { 10 } }) e;
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+equate-type-list-and-incompatible-type.p4(10)
+    E((list<S<bit<32>>>) { { 10 } }) e;
+       ^^^^^^^^^^^^^^^^
+equate-type-list-and-incompatible-type.p4(7)
+    E(tuple<bool, tuple<>> data);
+                           ^^^^
+equate-type-list-and-incompatible-type.p4(7)
+    E(tuple<bool, tuple<>> data);
+      ^^^^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+equate-type-list-and-incompatible-type.p4(10): Constructor invocation <Method call> does not match constructor declaration E
+    E((list<S<bit<32>>>) { { 10 } }) e;
+                                     ^
+equate-type-list-and-incompatible-type.p4(7)
+    E(tuple<bool, tuple<>> data);
+    ^

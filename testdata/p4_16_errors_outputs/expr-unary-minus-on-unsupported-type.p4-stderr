@@ -1,0 +1,12 @@
+expr-unary-minus-on-unsupported-type.p4(4): [--Wwarn=unused] warning: 'f' is unused
+bool f() {
+     ^
+expr-unary-minus-on-unsupported-type.p4(5): [--Werror=type-error] error: Cannot apply - to value Invalid of type Unknown type
+  return (-{#});
+           ^^^
+expr-unary-minus-on-unsupported-type.p4(5): [--Werror=type-error] error: Cannot apply - to value Invalid of type Unknown type
+  return (-{#});
+           ^^^
+expr-unary-minus-on-unsupported-type.p4(5): [--Werror=type-error] error: Error while analyzing -Invalid
+  return (-{#});
+          ^^^^

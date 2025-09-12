@@ -1,0 +1,9 @@
+expr-bitslice-low-unsupported-type.p4(3): [--Wwarn=unused] warning: 'tmp' is unused
+const bool tmp = (1 != 8w2[7:{#}]);
+           ^^^
+expr-bitslice-low-unsupported-type.p4(3): [--Werror=type-error] error: Invalid: slice bit index values must be constants
+const bool tmp = (1 != 8w2[7:{#}]);
+                             ^^^
+expr-bitslice-low-unsupported-type.p4(3): [--Werror=type-error] error: 1 != 2[7:{#}]: Cannot evaluate initializer to a compile-time constant
+const bool tmp = (1 != 8w2[7:{#}]);
+                  ^^^^^^^^^^^^^^^
