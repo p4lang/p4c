@@ -1,12 +1,11 @@
 #include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 
-#include <assert.h>
-#include <inttypes.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
+#include <cassert>
+#include <cinttypes>
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <vector>
 
 #define assert_macro assert
