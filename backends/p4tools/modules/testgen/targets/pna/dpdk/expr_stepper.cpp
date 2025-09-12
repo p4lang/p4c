@@ -34,8 +34,6 @@ void PnaDpdkExprStepper::evalExternMethodCall(const ExternInfo &externInfo) {
 }
 
 bool PnaDpdkExprStepper::preorder(const IR::P4Table *table) {
-    // Delegate to the tableStepper.
-    PnaDpdkTableStepper tableStepper(this, table);
     return PnaDpdkTableStepper(this, table).eval();
 }
 
