@@ -1,0 +1,5 @@
+[--Werror=type-error] error: Field 'f0' of 'struct tuple_0' cannot have type '_'
+extern-abstract-method-return-type-has-dont-care.p4(4): [--Werror=type-error] error: Field 'f1' of 'struct tuple_0' cannot have type 'void'
+  abstract tuple<_, void> f(in bit<1> a);
+                    ^^^^
+[--Werror=type-error] error: Error while analyzing struct tuple_0

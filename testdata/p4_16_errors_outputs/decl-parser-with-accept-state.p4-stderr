@@ -1,0 +1,3 @@
+decl-parser-with-accept-state.p4(5): [--Werror=invalid] error: Invalid parser state: accept should not be implemented, it is built-in
+  state accept {}
+        ^^^^^^

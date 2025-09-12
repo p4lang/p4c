@@ -1,0 +1,12 @@
+type-stack-with-negative-size.p4(3): [--Wwarn=unused] warning: 'T' is unused
+header H<T> {}
+         ^
+type-stack-with-negative-size.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+type-stack-with-negative-size.p4(6): [--Wwarn=unused] warning: 's' is unused
+    H<bit<32>>[-2] s;
+    ^^^^^^^^^^^^^^^^
+type-stack-with-negative-size.p4(6): [--Werror=overlimit] error: Illegal array size: -2
+    H<bit<32>>[-2] s;
+                ^

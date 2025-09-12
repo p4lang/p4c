@@ -1,0 +1,12 @@
+explicit-cast-to-incompatible-type-from-invalid-expr-2.p4(3): [--Wwarn=unused] warning: 'T' is unused
+struct S<T> {}
+         ^
+explicit-cast-to-incompatible-type-from-invalid-expr-2.p4(4): [--Wwarn=unused] warning: 'x' is unused
+const S<bit<32>> x = { T = (tuple<>) {#} };
+                 ^
+explicit-cast-to-incompatible-type-from-invalid-expr-2.p4(4): [--Werror=type-error] error: tuple<>: cast not supported
+const S<bit<32>> x = { T = (tuple<>) {#} };
+                            ^^^^^^^
+explicit-cast-to-incompatible-type-from-invalid-expr-2.p4(4): [--Werror=type-error] error: { T = (tuple<>)Invalid }: Cannot evaluate initializer to a compile-time constant
+const S<bit<32>> x = { T = (tuple<>) {#} };
+                     ^^^^^^^^^^^^^^^^^^^^^

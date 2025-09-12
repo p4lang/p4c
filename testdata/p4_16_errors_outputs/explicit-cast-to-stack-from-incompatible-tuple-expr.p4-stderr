@@ -1,0 +1,37 @@
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(7): [--Wwarn=unused] warning: control 'c0' is unused
+control c0() {
+        ^^
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10): [--Werror=type-error] error: '(H<bit<32>>[3]){ { 0, 1 }, "r" }'
+    s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10): Number of components 2 in initializer tuple<tuple<int, int>, string> is different than stack size 3
+      s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+                          ^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10): Source expression '{ { 0, 1 }, "r" }' produces a result of type 'tuple<tuple<int, int>, string>' which cannot be assigned to a left-value with type 'header H<...>[3]'
+      s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+                          ^^^^^^^^^^^^^^^^^
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10)
+      s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+                          ^^^^^^^^^^^^^^^^^
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(9)
+      H<bit<32>>[3] s;
+      ^^^^^^^^^^^^^
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10): [--Werror=type-error] error: 's = { { 0, 1 }, "r" }'
+    s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+      ^
+  ---- Actual error:
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10): Number of components 2 in initializer tuple<tuple<int, int>, string> is different than stack size 3
+      s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+                          ^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10): Source expression '{ { 0, 1 }, "r" }' produces a result of type 'tuple<tuple<int, int>, string>' which cannot be assigned to a left-value with type 'header H<...>[3]'
+      s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+                          ^^^^^^^^^^^^^^^^^
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(10)
+      s = (H<bit<32>>[3]) { { 0, 1 }, "r" };
+                          ^^^^^^^^^^^^^^^^^
+explicit-cast-to-stack-from-incompatible-tuple-expr.p4(9)
+      H<bit<32>>[3] s;
+      ^^^^^^^^^^^^^

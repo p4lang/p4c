@@ -1,0 +1,3 @@
+expr-select-transition-to-non-existant-value.p4(7): [--Werror=not-found] error: lazy: declaration not found
+      (myvs): lazy;
+              ^^^^

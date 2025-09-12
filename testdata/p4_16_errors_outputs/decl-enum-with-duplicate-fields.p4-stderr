@@ -1,0 +1,7 @@
+decl-enum-with-duplicate-fields.p4(6): [--Werror=duplicate] error: b: Duplicates declaration b
+  b
+  ^
+decl-enum-with-duplicate-fields.p4(4)
+  b,
+  ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

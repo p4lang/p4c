@@ -1,0 +1,30 @@
+equate-type-parser-and-non-object.p4(5): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+equate-type-parser-and-non-object.p4(3): [--Werror=type-error] error: 'package V1Switch'
+package V1Switch(tuple<> p);
+        ^^^^^^^^
+  ---- Actual error:
+equate-type-parser-and-non-object.p4(4): Cannot cast implicitly type 'parser MyP' to type 'tuple<>'
+  parser MyP()() {
+         ^^^
+equate-type-parser-and-non-object.p4(3)
+  package V1Switch(tuple<> p);
+                   ^^^^^^^
+  ---- Originating from:
+equate-type-parser-and-non-object.p4(7): Type of argument 'MyP' (parser MyP) does not match type of parameter 'p' (tuple<>)
+  V1Switch(MyP()) main;
+           ^^^^^
+equate-type-parser-and-non-object.p4(4)
+  parser MyP()() {
+         ^^^
+equate-type-parser-and-non-object.p4(3)
+  package V1Switch(tuple<> p);
+                           ^
+equate-type-parser-and-non-object.p4(3)
+  package V1Switch(tuple<> p);
+                   ^^^^^^^
+  ---- Originating from:
+equate-type-parser-and-non-object.p4(7): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+  V1Switch(MyP()) main;
+                  ^^^^

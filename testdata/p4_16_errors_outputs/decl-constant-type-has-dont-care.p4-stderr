@@ -1,0 +1,5 @@
+decl-constant-type-has-dont-care.p4(6): [--Wwarn=unused] warning: 'x' is unused
+const S<_> x = { t = { 0, 0 } };
+           ^
+[--Werror=type-error] error: Field 'f0' of 'struct tuple_0' cannot have type '_'
+[--Werror=type-error] error: Field 'f1' of 'struct tuple_0' cannot have type '_'

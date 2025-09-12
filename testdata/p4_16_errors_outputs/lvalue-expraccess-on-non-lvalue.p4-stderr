@@ -1,0 +1,6 @@
+lvalue-expraccess-on-non-lvalue.p4(7): [--Wwarn=unused] warning: 'f' is unused
+void f(Headers h) {
+     ^
+lvalue-expraccess-on-non-lvalue.p4(8): [--Werror=type-error] error: Expression h.eth_hdr cannot be the target of an assignment
+  h.eth_hdr = 0;
+  ^^^^^^^^^

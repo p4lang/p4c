@@ -1,0 +1,9 @@
+method-call-setValid-on-unsupported-type-2.p4(3): [--Wwarn=unused] warning: control 'compute' is unused
+control compute(inout bool h)() {
+        ^^^^^^^
+method-call-setValid-on-unsupported-type-2.p4(7): [--Werror=type-error] error: Cannot extract field setValid from h which has type bool
+      h.setValid();
+        ^^^^^^^^
+method-call-setValid-on-unsupported-type-2.p4(7)
+      h.setValid();
+      ^

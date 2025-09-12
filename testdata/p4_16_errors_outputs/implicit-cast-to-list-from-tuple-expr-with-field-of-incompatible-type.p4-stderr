@@ -1,0 +1,37 @@
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(3): [--Wwarn=unused] warning: 'T' is unused
+extern void f<T>(in list<bool> x);
+              ^
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(6): [--Werror=type-error] error: 'f({ 32w2 })'
+    f<bit<32>>({ 32w2 });
+    ^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(6): Cannot cast implicitly type 'tuple<bit<32>>' to type 'list<bool>'
+      f<bit<32>>({ 32w2 });
+                 ^^^^^^^^
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(3)
+  extern void f<T>(in list<bool> x);
+                      ^^^^^^^^^^
+  ---- Originating from:
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(6): Type of argument '{ 32w2 }' (tuple<bit<32>>) does not match type of parameter 'x' (list<bool>)
+      f<bit<32>>({ 32w2 });
+                 ^^^^^^^^
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(6)
+      f<bit<32>>({ 32w2 });
+                 ^^^^^^^^
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(3)
+  extern void f<T>(in list<bool> x);
+                                 ^
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(3)
+  extern void f<T>(in list<bool> x);
+                      ^^^^^^^^^^
+  ---- Originating from:
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  extern void f<T>(in list<bool> x);
+              ^
+implicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(6)
+      f<bit<32>>({ 32w2 });
+      ^^^^^^^^^^^^^^^^^^^^
+  Where 'T' is bound to 'bit<32>'

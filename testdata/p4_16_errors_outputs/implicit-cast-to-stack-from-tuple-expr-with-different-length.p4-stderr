@@ -1,0 +1,20 @@
+implicit-cast-to-stack-from-tuple-expr-with-different-length.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+implicit-cast-to-stack-from-tuple-expr-with-different-length.p4(7): [--Werror=type-error] error: 'stack = { { ... } }'
+    stack = { { ... } };
+          ^
+  ---- Actual error:
+implicit-cast-to-stack-from-tuple-expr-with-different-length.p4(7): Number of components 1 in initializer tuple<tuple<ANYTYPE>> is different than stack size 2
+      stack = { { ... } };
+              ^^^^^^^^^^^
+  ---- Originating from:
+implicit-cast-to-stack-from-tuple-expr-with-different-length.p4(7): Source expression '{ { ... } }' produces a result of type 'tuple<tuple<ANYTYPE>>' which cannot be assigned to a left-value with type 'header H[2]'
+      stack = { { ... } };
+              ^^^^^^^^^^^
+implicit-cast-to-stack-from-tuple-expr-with-different-length.p4(7)
+      stack = { { ... } };
+              ^^^^^^^^^^^
+implicit-cast-to-stack-from-tuple-expr-with-different-length.p4(5)
+    H[2] stack;
+    ^^^^

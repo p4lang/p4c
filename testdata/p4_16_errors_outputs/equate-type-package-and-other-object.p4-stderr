@@ -1,0 +1,27 @@
+equate-type-package-and-other-object.p4(5): [--Werror=type-error] error: 'package q'
+package q(c _p);
+        ^
+  ---- Actual error:
+equate-type-package-and-other-object.p4(4): Cannot cast implicitly type 'package p' to type 'control c'
+  package p(c _c);
+          ^
+equate-type-package-and-other-object.p4(3)
+  control c();
+          ^
+  ---- Originating from:
+equate-type-package-and-other-object.p4(9): Type of argument 'p' (package p) does not match type of parameter '_p' (control c)
+  q(p(empty())) main;
+    ^^^^^^^^^^
+equate-type-package-and-other-object.p4(4)
+  package p(c _c);
+          ^
+equate-type-package-and-other-object.p4(5)
+  package q(c _p);
+              ^^
+equate-type-package-and-other-object.p4(3)
+  control c();
+          ^
+  ---- Originating from:
+equate-type-package-and-other-object.p4(9): Constructor invocation '<Method call>' does not match declaration 'q'
+  q(p(empty())) main;
+                ^^^^

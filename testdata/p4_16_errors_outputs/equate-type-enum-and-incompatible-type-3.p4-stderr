@@ -1,0 +1,12 @@
+equate-type-enum-and-incompatible-type-3.p4(4): [--Wwarn=unused] warning: 'a' is unused
+const bool a = ({#} == X.b);
+           ^
+equate-type-enum-and-incompatible-type-3.p4(4): [--Werror=type-error] error: 'Invalid' with type 'Unknown type' cannot be compared to 'X.b' with type 'X'
+const bool a = ({#} == X.b);
+                ^^^
+equate-type-enum-and-incompatible-type-3.p4(4)
+const bool a = ({#} == X.b);
+                       ^^^
+equate-type-enum-and-incompatible-type-3.p4(3)
+enum X { b };
+     ^

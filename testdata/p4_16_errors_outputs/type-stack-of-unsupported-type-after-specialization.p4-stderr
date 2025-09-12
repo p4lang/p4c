@@ -1,0 +1,15 @@
+type-stack-of-unsupported-type-after-specialization.p4(6): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+type-stack-of-unsupported-type-after-specialization.p4(8): [--Wwarn=unused] warning: 's' is unused
+    H<int>[3] s;
+    ^^^^^^^^^^^
+type-stack-of-unsupported-type-after-specialization.p4(4): [--Werror=type-error] error: Field 't' of 'header H' cannot have type 'int'
+  T t;
+    ^
+type-stack-of-unsupported-type-after-specialization.p4(8)
+    H<int>[3] s;
+      ^^^
+type-stack-of-unsupported-type-after-specialization.p4(8): [--Werror=type-error] error: Error while analyzing header H<...>
+    H<int>[3] s;
+    ^^^^^^

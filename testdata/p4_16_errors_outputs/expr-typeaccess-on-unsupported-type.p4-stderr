@@ -1,0 +1,3 @@
+expr-typeaccess-on-unsupported-type.p4(3): [--Werror=not-found] error: error: declaration not found
+typedef error ParserError_t;
+        ^^^^^

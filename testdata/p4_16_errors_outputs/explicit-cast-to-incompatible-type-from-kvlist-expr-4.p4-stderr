@@ -1,0 +1,23 @@
+explicit-cast-to-incompatible-type-from-kvlist-expr-4.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+explicit-cast-to-incompatible-type-from-kvlist-expr-4.p4(6): [--Wwarn=unused] warning: 's8' is unused
+    S s8 = (bool) { b = 2, ... };
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-4.p4(6): [--Werror=type-error] error: '(bool){ b = 2, ... = ... }'
+    S s8 = (bool) { b = 2, ... };
+           ^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-incompatible-type-from-kvlist-expr-4.p4(6): Cannot unify type 'unknown struct' with type 'bool'
+      S s8 = (bool) { b = 2, ... };
+                    ^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-4.p4(6)
+      S s8 = (bool) { b = 2, ... };
+              ^^^^
+  ---- Originating from:
+explicit-cast-to-incompatible-type-from-kvlist-expr-4.p4(6): Cannot cast from 'unknown struct' to 'bool'
+      S s8 = (bool) { b = 2, ... };
+                    ^^^^^^^^^^^^
+explicit-cast-to-incompatible-type-from-kvlist-expr-4.p4(6)
+      S s8 = (bool) { b = 2, ... };
+              ^^^^

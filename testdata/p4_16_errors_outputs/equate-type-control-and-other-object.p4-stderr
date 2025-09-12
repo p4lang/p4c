@@ -1,0 +1,27 @@
+equate-type-control-and-other-object.p4(4): [--Werror=type-error] error: 'package V1Switch'
+package V1Switch(P p);
+        ^^^^^^^^
+  ---- Actual error:
+equate-type-control-and-other-object.p4(5): Cannot cast implicitly type 'control MyC' to type 'parser P'
+  control MyC()() {
+          ^^^
+equate-type-control-and-other-object.p4(3)
+  parser P();
+         ^
+  ---- Originating from:
+equate-type-control-and-other-object.p4(8): Type of argument 'MyC' (control MyC) does not match type of parameter 'p' (parser P)
+  V1Switch(MyC()) main;
+           ^^^^^
+equate-type-control-and-other-object.p4(5)
+  control MyC()() {
+          ^^^
+equate-type-control-and-other-object.p4(4)
+  package V1Switch(P p);
+                     ^
+equate-type-control-and-other-object.p4(3)
+  parser P();
+         ^
+  ---- Originating from:
+equate-type-control-and-other-object.p4(8): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+  V1Switch(MyC()) main;
+                  ^^^^

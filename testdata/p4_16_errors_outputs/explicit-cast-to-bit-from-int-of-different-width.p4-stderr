@@ -1,0 +1,10 @@
+explicit-cast-to-bit-from-int-of-different-width.p4(3): [--Wwarn=unused] warning: control 'p' is unused
+control p()() {
+        ^
+explicit-cast-to-bit-from-int-of-different-width.p4(7): [--Werror=type-error] error: '(int<2>)a'
+    b = (int<2>) a;
+        ^^^^^^^^^^
+  ---- Actual error:
+  Cannot unify type 'bit<0>' with type 'int<2>'
+  ---- Originating from:
+  Cannot cast from 'bit<0>' to 'int<2>'
