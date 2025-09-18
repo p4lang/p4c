@@ -90,7 +90,11 @@ jobs:
     name: test-${{ matrix.os }} (Tofino)
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
+        os:
+          - ubuntu-22.04
+          # Disabled due to failures.
+          # See https://github.com/p4lang/p4c/issues/5386
+          # - ubuntu-24.04
     runs-on: ${{ matrix.os }}
     env:
       CTEST_PARALLEL_LEVEL: 4
