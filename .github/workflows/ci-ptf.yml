@@ -33,7 +33,11 @@ jobs:
     name: PTF eBPF tests (${{ matrix.os }})
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
+        os:
+          - ubuntu-22.04
+          # Disabling due to many failures.
+          # https://github.com/p4lang/p4c/issues/5389
+          # - ubuntu-24.04
     runs-on: ${{ matrix.os }}
     env:
       CTEST_PARALLEL_LEVEL: 4
