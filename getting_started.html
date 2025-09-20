@@ -350,7 +350,7 @@ Debian</h4>
 </div><!-- fragment --><h3><a class="anchor" id="installing-p4c-from-source"></a>
 Installing P4C from source</h3>
 <ol type="1">
-<li>Clone the repository. It includes submodules, so be sure to use <code>--recursive</code> to pull them in: <code> git clone --recursive <a href="https://github.com/p4lang/p4c.git">https://github.com/p4lang/p4c.git</a> </code> If you forgot <code>--recursive</code>, you can update the submodules at any time using: <code> git submodule update --init --recursive </code></li>
+<li>Clone the repository. <code> git clone <a href="https://github.com/p4lang/p4c.git">https://github.com/p4lang/p4c.git</a> </code></li>
 <li>Install <a class="el" href="#dependencies">dependencies</a>. You can find specific instructions for Ubuntu 22.04 <a class="el" href="#ubuntu-dependencies">here</a> and for macOS 11 <a class="el" href="#macos-dependencies">here</a>. You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh">CI installation script</a>.</li>
 <li><p class="startli">Build. Building should also take place in a subdirectory named <code>build</code>. <code> mkdir build cd build cmake .. &lt;optional arguments&gt; make -j4 make -j4 check </code> The cmake command takes the following optional arguments to further customize the build (see file <code>CMakeLists.txt</code> for the full list):</p><ul>
 <li><code>-DCMAKE_BUILD_TYPE=Release|Debug</code> &ndash; set CMAKE_BUILD_TYPE to Release or Debug to build with optimizations or with debug symbols to run in gdb. Default is Release.</li>
