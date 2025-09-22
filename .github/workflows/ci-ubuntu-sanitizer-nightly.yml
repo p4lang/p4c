@@ -1,4 +1,4 @@
-name: "test-p4c-ubuntu-24.04-sanitizers"
+name: "test-p4c-ubuntu-sanitizers"
 
 on:
   schedule:
@@ -11,15 +11,18 @@ on:
 
 # Cancel any preceding run on the pull request.
 concurrency:
-  group: test-ubuntu24-clang-sanitizers-${{ github.event.pull_request.number || github.ref }}
+  group: test-ubuntu-clang-sanitizers-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # Build with clang and test p4c on Ubuntu 24.04.
-  test-ubuntu24-clang-sanitizers:
+  # Build with clang and test p4c on Ubuntu
+  test-ubuntu-clang-sanitizers:
     # Only run on pull requests with the "run-sanitizer" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-sanitizer') }}
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
     env:
       CTEST_PARALLEL_LEVEL: 2
       IMAGE_TYPE: test
@@ -39,11 +42,11 @@ jobs:
           key: test-${{ runner.os }}-clang
           max-size: 1000M
 
-      - name: Build (Ubuntu 24.04, Clang, Sanitizers)
+      - name: Build (${{ runner.os }}, Clang, Sanitizers)
         run: |
           tools/ci-build.sh
 
-      - name: Run tests (Ubuntu 24.04)
+      - name: Run tests (${{ runner.os }})
         # Need to use sudo for the eBPF kernel tests.
         run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random
         working-directory: ./build

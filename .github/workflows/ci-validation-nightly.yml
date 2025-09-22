@@ -21,11 +21,15 @@ jobs:
   validate:
     # Only run on pull requests with the "run-validation" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-validation') }}
+    name: Validate P4C (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       VALIDATION: ON
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -37,7 +41,7 @@ jobs:
           key: validation-${{ runner.os }}
           max-size: 1000M
 
-      - name: Build (Ubuntu 22.04)
+      - name: Build (${{runner.os}})
         run: |
           tools/ci-build.sh
 

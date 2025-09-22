@@ -229,7 +229,6 @@ function install_stf_p4tc_test_deps() (
     P4C_STF_P4TC_PACKAGES=" libmnl-dev \
                              bridge-utils \
                              python3-venv \
-                             virtme-ng \
                              qemu-kvm \
                              clang-15 \
                              python3-scapy \
@@ -237,7 +236,16 @@ function install_stf_p4tc_test_deps() (
     sudo apt-get install -y --no-install-recommends ${P4C_STF_P4TC_PACKAGES}
     git clone https://github.com/p4tc-dev/iproute2-p4tc-pub -b master-v17-rc8 ${P4C_DIR}/backends/tc/runtime/iproute2-p4tc-pub
     ${P4C_DIR}/backends/tc/runtime/build-iproute2 ${P4C_DIR}/backends/tc/runtime
-    sudo apt-get install -y virtme-ng
+    # virtme-ng still isn't available on Ubuntu 22. Earliest is 24.
+    git clone --recurse-submodules https://github.com/arighi/virtme-ng.git ${P4C_DIR}/backends/tc/runtime/virtme-ng
+    pushd ${P4C_DIR}/backends/tc/runtime/virtme-ng
+    git checkout v1.19
+    python3 -m venv ${P4C_DIR}/backends/tc/runtime/virtme-ng
+    source ${P4C_DIR}/backends/tc/runtime/virtme-ng/bin/activate
+    pip install --upgrade pip
+    pip install .
+    deactivate
+    popd
 )
 
 function build_p4tc() {

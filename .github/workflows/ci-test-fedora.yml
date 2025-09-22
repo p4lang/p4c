@@ -16,7 +16,8 @@ concurrency:
 jobs:
   # Build and test p4c on Fedora.
   test-fedora-linux:
-    # This job runs in Fedora container that runs in Ubuntu VM.
+    # This job runs in Fedora container that runs in Ubuntu VM. GitHub doesn't
+    # provide Fedora runners yet.
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:latest

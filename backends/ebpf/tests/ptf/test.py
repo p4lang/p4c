@@ -12,7 +12,6 @@
 import copy
 import platform
 import unittest
-from distutils.version import LooseVersion
 
 from common import *
 from ptf.mask import Mask
@@ -590,12 +589,20 @@ class VerifyPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
-@unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
-    "Skipping on Ubuntu 22.04+ due to clang/kernel version issues",
-)
 class PSATernaryTest(P4EbpfTest):
     p4_file_path = "p4testdata/psa-ternary.p4"
+
+    @classmethod
+    def setUpClass(cls):
+        # This test not supported on newer kernels yet
+        rel = platform.release()
+        m = re.match(r"^(\d+)\.(\d+)", rel)
+        if not m:
+            raise Exception(f"Cannot parse kernel version: {rel!r}")
+        if (int(m.group(1)), int(m.group(2))) >= (5, 15):
+            self.skipTest("Skipping on Ubuntu 22.04+ due to clang/kernel version issues")
+        else:
+            super().setUpClass()
 
     def runTest(self):
         # flow rules for 'tbl_ternary_0'
@@ -786,13 +793,21 @@ class PassToKernelStackTest(P4EbpfTest):
         self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
 
-@unittest.skipIf(
-    LooseVersion(platform.release()) >= LooseVersion("5.15"),
-    "Skipping on Ubuntu 22.04+ due to failure",
-)
 class LPMTableCachePSATest(P4EbpfTest):
     p4_file_path = "p4testdata/table-cache-lpm.p4"
     p4c_additional_args = "--table-caching"
+
+    @classmethod
+    def setUpClass(cls):
+        # This test not supported on newer kernels yet
+        rel = platform.release()
+        m = re.match(r"^(\d+)\.(\d+)", rel)
+        if not m:
+            raise Exception(f"Cannot parse kernel version: {rel!r}")
+        if (int(m.group(1)), int(m.group(2))) >= (5, 15):
+            self.skipTest("Skipping on Ubuntu 22.04+ due to clang/kernel version issues")
+        else:
+            super().setUpClass()
 
     def runTest(self):
         # TODO: make this additional entry working
