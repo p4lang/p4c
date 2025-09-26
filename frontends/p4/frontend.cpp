@@ -40,7 +40,6 @@ limitations under the License.
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
 #include "functionsInlining.h"
-#include "getV1ModelVersion.h"
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
@@ -192,7 +191,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     ConstantFoldingPolicy *constantFoldingPolicy = policy->getConstantFoldingPolicy();
 
     PassManager passes({
-        new P4V1::GetV1ModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(parseAnnotations, &typeMap),
         new PrettyPrint(options),
