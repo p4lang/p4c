@@ -32,7 +32,6 @@ limitations under the License.
 #include "backends/bmv2/common/sharedActionSelectorCheck.h"
 #include "backends/common/programStructure.h"
 #include "frontends/common/constantFolding.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
