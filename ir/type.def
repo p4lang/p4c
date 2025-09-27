@@ -964,6 +964,14 @@ class Type_Newtype : Type_Declaration, IAnnotated {
 #nodbprint
 }
 
+/// FIXME: Only required for P4-14. Remove.
+class Attribute : Declaration {
+    NullOK Type type = nullptr;
+    NullOK AttribLocals locals = nullptr;
+    bool optional = false;
+    dbprint { if (type) out << type << ' '; out << name; }
+}
+
 /// An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
                     IMayBeGenericType, IAnnotated {
