@@ -5,7 +5,6 @@
 
 #include "extern.h"
 
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "lib/json.h"
 
 namespace P4::BMV2 {
