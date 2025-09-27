@@ -465,13 +465,6 @@ class AttribLocals : ISimpleNamespace {
     IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }
 }
 
-class Attribute : Declaration {
-    NullOK Type type = nullptr;
-    NullOK AttribLocals locals = nullptr;
-    bool optional = false;
-    dbprint { if (type) out << type << ' '; out << name; }
-}
-
 class GlobalRef : Expression {
     Node        obj;            // FIXME -- should be IInstance, but IRgen doesn't allow
                                 // FIXME -- interface references directly in the IR

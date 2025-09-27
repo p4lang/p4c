@@ -68,6 +68,12 @@ OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 OPTION (FORMATTING_ONLY "Only configure formatting/linting targets, skip all build dependencies" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
+# Support compilation for the legacy P4-14 language.
+OPTION (SUPPORT_P4_14 "Support the deprecated P4_14 version of the language" OFF)
+# Tofino requires P4-14 support.
+if (ENABLE_TOFINO)
+  set (SUPPORT_P4_14 ON)
+endif()
 
 # Enable DumpPipe pass output
 OPTION(ENABLE_DUMP_PIPE "Enable DumpPipe pass output" ON)
@@ -168,7 +174,7 @@ if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
   if (NOT STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++")
   endif()
-  add_definitions(-DP4C_STATIC_BUILD)
+  add_definitions("-DP4C_STATIC_BUILD")
 endif()
 
 # Ensure we enable sanitizers before fetching dependencies so the correct flags
@@ -193,6 +199,9 @@ endif ()
 # Enable DumpPipe pass output
 if (ENABLE_DUMP_PIPE)
   add_definitions("-DENABLE_DUMP_PIPE=1")
+endif ()
+if (SUPPORT_P4_14)
+  add_definitions("-DSUPPORT_P4_14=1")
 endif ()
 
 # When FORMATTING_ONLY is set, skip all build dependencies and jump
@@ -237,7 +246,7 @@ if (ENABLE_GC)
   p4c_obtain_bdwgc()
 endif ()
 if (ENABLE_MULTITHREAD)
-  add_definitions(-DMULTITHREAD)
+  add_definitions("-DMULTITHREAD")
 endif()
 list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
