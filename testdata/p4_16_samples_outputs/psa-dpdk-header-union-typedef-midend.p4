@@ -114,7 +114,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
 }
 
 control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("MyIC.forward") action forward() {
         b.meta = 32w0x1 << c.ingress_port;

@@ -11,7 +11,7 @@ header H {
 
 control c(out bit<32> x) {
     @name("c.k") bit<32> k_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.t") table t_0 {
         actions = {

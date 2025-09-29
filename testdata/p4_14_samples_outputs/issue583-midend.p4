@@ -192,9 +192,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 @name(".cnt1") counter<bit<5>>(32w32, CounterType.packets) cnt1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".drop_pkt") action drop_pkt() {
         mark_to_drop(standard_metadata);
