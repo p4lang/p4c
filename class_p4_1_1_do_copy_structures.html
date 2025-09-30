@@ -142,9 +142,9 @@ Inheritance diagram for P4::DoCopyStructures:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a7c3e73d019545ebfd96fc407fe871eca" id="r_a7c3e73d019545ebfd96fc407fe871eca"><td class="memItemLeft" align="right" valign="top"><a id="a7c3e73d019545ebfd96fc407fe871eca" name="a7c3e73d019545ebfd96fc407fe871eca"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DoCopyStructures</b> (<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, bool errorOnMethodCall, bool copyHeaders=false)</td></tr>
-<tr class="separator:a7c3e73d019545ebfd96fc407fe871eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12787ad4fbd7517ba19bd84e9b807699" id="r_a12787ad4fbd7517ba19bd84e9b807699"><td class="memItemLeft" align="right" valign="top"><a id="a12787ad4fbd7517ba19bd84e9b807699" name="a12787ad4fbd7517ba19bd84e9b807699"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DoCopyStructures</b> (<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, bool errorOnMethodCall, bool copyHeaders=false, bool copyTuples=true)</td></tr>
+<tr class="separator:a12787ad4fbd7517ba19bd84e9b807699"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c1829c50bb0acf10bda426a308e54f6" id="r_a5c1829c50bb0acf10bda426a308e54f6"><td class="memItemLeft" align="right" valign="top"><a id="a5c1829c50bb0acf10bda426a308e54f6" name="a5c1829c50bb0acf10bda426a308e54f6"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::AssignmentStatement *statement) override</td></tr>
 <tr class="separator:a5c1829c50bb0acf10bda426a308e54f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -400,7 +400,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <p>is replaced by</p>
 <p>action test() { dst.hdr = src.hdr; }</p>
 <p>Further, struct initialization is converted to assignment on struct fields</p>
-<p>Note, header assignments are not converted in this pass.</p>
+<p>header assignments and tuple assignments are optionally converted in this pass, based on constructor argument</p>
 <dl class="section pre"><dt>Precondition</dt><dd>none </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd><ul>
 <li>struct to struct copy is replaced by field assignment</li>
