@@ -308,7 +308,7 @@ using namespace P4;
                             directApplication
                             forStatement breakStatement continueStatement
 %type<IR::BlockStatement*>  blockStatement parserBlockStatement controlBody
-                            objInitializer
+                            optObjInitializer
 %type<IR::StatOrDecl*>      statementOrDeclaration parserStatement
                             declOrAssignmentOrMethodCallStatement
 %type<IR::IndexedVector<IR::StatOrDecl>*>  objDeclarations statOrDeclList parserStatements
@@ -793,26 +793,19 @@ packageTypeDeclaration
     ;
 
 instantiation
-      : annotations typeRef "(" argumentList ")" name ";"
-                     { $$ = new IR::Declaration_Instance(@6, *$6, *$1,
-                                                         $2, $4);
-                       driver.structure->declareObject(*$6, $2->toString()); }
-      | typeRef "(" argumentList ")" name ";"
-                     { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
-                       driver.structure->declareObject(*$5, $1->toString()); }
-      | annotations typeRef "(" argumentList ")" name "=" objInitializer ";"
-                     { $$ = new IR::Declaration_Instance(@6, *$6, *$1,
-                                                         $2, $4, $8);
-                       driver.structure->declareObject(*$6, $2->toString()); }
-      | typeRef "(" argumentList ")" name "=" objInitializer ";"
-                     { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3, $7);
-                       driver.structure->declareObject(*$5, $1->toString()); }
+      : annotations typeRef "(" argumentList ")" <ConstType*>{ $$ = $2; } declarator optObjInitializer ";"
+                     { $$ = new IR::Declaration_Instance(@7, *$7.name, *$1, $7.type, $4, $8);
+                       driver.structure->declareObject(*$7.name, $2->toString()); }
+      | typeRef "(" argumentList ")" <ConstType*>{ $$ = $1; } declarator optObjInitializer ";"
+                     { $$ = new IR::Declaration_Instance(@6, *$6.name, $6.type, $3, $7);
+                       driver.structure->declareObject(*$6.name, $1->toString()); }
     ;
 
-objInitializer
-    : "{" { driver.structure->pushNamespace(@1, false); } objDeclarations "}"
+optObjInitializer
+    : %empty                   { $$ = nullptr; }
+    | "=" "{" { driver.structure->pushNamespace(@1, false); } objDeclarations "}"
                                { driver.structure->pop();
-                                 $$ = new IR::BlockStatement(@1+@4, *$3); }
+                                 $$ = new IR::BlockStatement(@2+@5, *$4); }
     ;
 
 objDeclarations
