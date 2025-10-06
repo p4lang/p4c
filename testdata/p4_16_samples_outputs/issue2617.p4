@@ -66,28 +66,37 @@ control c(out bit<32> v) {
             }
             2: 
         }
-        switch (E.C) {
-            E.A: {
-                v = v + 1;
+        switch (32w1) {
+            X.A: {
+                v = v + 20;
             }
-            default: {
-                v = v + 2;
+            X.B: {
+                v = v + 10;
             }
+            2: 
         }
         switch (E.C) {
             E.A: {
-                v = v + 1;
+                v = v + 200;
             }
             default: {
-                v = v + 3;
+                v = v + 100;
+            }
+        }
+        switch (E.B) {
+            E.B: {
+                v = v + 1000;
+            }
+            default: {
+                v = v + 2000;
             }
         }
         switch (X.B) {
             X.A: {
-                v = v + 10;
+                v = v + 20000;
             }
             X.B: {
-                v = v + 20;
+                v = v + 10000;
             }
         }
     }

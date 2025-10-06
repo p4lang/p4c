@@ -14,29 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "frontends/p4/simplifySwitch.h"
+#include "simplifySwitch.h"
+
+#include "enumInstance.h"
 
 namespace P4 {
 
 bool DoSimplifySwitch::matches(const IR::Expression *left, const IR::Expression *right) const {
     // We know that left and right have matching types
     if (left->is<IR::DefaultExpression>()) return true;
-    auto type = typeMap->getType(right);
-    if (auto cr = right->to<IR::Constant>()) {
+    if (auto *rei = EnumInstance::resolve(right, typeMap)) {
+        if (auto *lei = EnumInstance::resolve(left, typeMap)) return rei->equals(lei);
+        if (auto *se = rei->to<SerEnumInstance>()) return matches(left, se->value);
+    } else if (auto cr = right->to<IR::Constant>()) {
         if (auto cl = left->to<IR::Constant>()) return cr->value == cl->value;
-        BUG("Unexpected comparison %1% with %2%", left, right);
-    } else if (type->is<IR::Type_Enum>() || type->is<IR::Type_SerEnum>()) {
-        // We expect both left and right to be Member expressions.
-        return left->equiv(*right);
+        if (auto *lei = EnumInstance::resolve(left, typeMap))
+            if (auto *se = lei->to<SerEnumInstance>()) return matches(se->value, right);
     } else if (auto br = right->to<IR::BoolLiteral>()) {
         if (auto bl = left->to<IR::BoolLiteral>()) return bl->value == br->value;
     }
-    BUG("Unexpected expression %1%", right);
+    BUG("Unexpected comparison %1% with %2%", left, right);
     return false;
 }
 
 const IR::Node *DoSimplifySwitch::postorder(IR::SwitchStatement *stat) {
     if (!typeMap->isCompileTimeConstant(stat->expression)) return stat;
+    if (stat->expression->is<IR::PathExpression>()) {
+        // this must be a ref to a directionless arg in scope
+        return stat;
+    }
     bool foundMatch = false;
     for (auto ss : stat->cases) {
         if (matches(ss->label, stat->expression)) {
