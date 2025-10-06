@@ -60,7 +60,7 @@ jobs:
       - name: Post Initial Comment
         if: ${{ github.event_name == 'pull_request_target' && steps.check-label.outputs.result == 'true' && steps.find-comment.outputs.comment-id == '' }}
         id: post-initial-comment
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body: |
@@ -70,7 +70,7 @@ jobs:
       - name: Update Comment to In-Progress
         if: ${{ github.event_name == 'pull_request_target' && steps.check-label.outputs.result == 'true' && steps.find-comment.outputs.comment-id != '' }}
         id: update-in-progress-comment
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -149,7 +149,7 @@ jobs:
 
       - name: Update Comment with Preview Link
         if: ${{ github.event_name == 'pull_request_target' && steps.check-label.outputs.result == 'true' }}
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find-comment2.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -165,7 +165,7 @@ jobs:
 
       - name: Update Comment with Failure Message
         if: ${{ github.event_name == 'pull_request_target' && steps.check-label.outputs.result == 'true' && failure() }}
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find-comment2.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
