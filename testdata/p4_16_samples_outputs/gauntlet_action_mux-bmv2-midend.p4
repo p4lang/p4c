@@ -25,14 +25,14 @@ struct Meta {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.do_thing") action do_thing() {
+    }
+    @name("ingress.do_thing") action do_thing_1() {
         if (h.h.b >= 8w4) {
             tmp = h.h.b;
         } else {
             tmp = h.h.b + 8w1;
         }
         h.h.a = tmp;
-    }
-    @name("ingress.do_thing") action do_thing_1() {
     }
     @hidden table tbl_do_thing {
         actions = {
