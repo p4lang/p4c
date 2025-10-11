@@ -246,13 +246,13 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Operation_Relation *expre
         return result;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left);
+        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left, /* implicit */ true);
         setType(e->left, rtype);
         ltype = rtype;
         expression = e;
     } else if (rtype->is<IR::Type_InfInt>() && ltype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
-        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right);
+        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right, /* implicit */ true);
         setType(e->right, ltype);
         rtype = ltype;
         expression = e;
@@ -339,14 +339,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Concat *expression) {
 
         if (castLeft) {
             auto e = expression->clone();
-            e->left = new IR::Cast(e->left->srcInfo, bl, e->left);
+            e->left = new IR::Cast(e->left->srcInfo, bl, e->left, /* implicit */ true);
             if (isCompileTimeConstant(expression->left)) setCompileTimeConstant(e->left);
             setType(e->left, ltype);
             expression = e;
         }
         if (castRight) {
             auto e = expression->clone();
-            e->right = new IR::Cast(e->right->srcInfo, br, e->right);
+            e->right = new IR::Cast(e->right->srcInfo, br, e->right, /* implicit */ true);
             if (isCompileTimeConstant(expression->right)) setCompileTimeConstant(e->right);
             setType(e->right, rtype);
             expression = e;
@@ -830,7 +830,7 @@ const IR::Node *TypeInferenceBase::binaryArith(const IR::Operation_Binary *expre
         auto leftResultType = br;
         if (castLeft && !br) leftResultType = bl;
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, leftResultType, e->left);
+        e->left = new IR::Cast(e->left->srcInfo, leftResultType, e->left, /* implicit */ true);
         setType(e->left, leftResultType);
         if (isCompileTimeConstant(expression->left)) {
             e->left = constantFold(e->left);
@@ -843,7 +843,7 @@ const IR::Node *TypeInferenceBase::binaryArith(const IR::Operation_Binary *expre
         auto e = expression->clone();
         auto rightResultType = bl;
         if (castRight && !bl) rightResultType = br;
-        e->right = new IR::Cast(e->right->srcInfo, rightResultType, e->right);
+        e->right = new IR::Cast(e->right->srcInfo, rightResultType, e->right, /* implicit */ true);
         setType(e->right, rightResultType);
         if (isCompileTimeConstant(expression->right)) {
             e->right = constantFold(e->right);
@@ -1011,14 +1011,14 @@ const IR::Node *TypeInferenceBase::typeSet(const IR::Operation_Binary *expressio
         }
     } else if (bl == nullptr && br != nullptr) {
         auto e = expression->clone();
-        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left);
+        e->left = new IR::Cast(e->left->srcInfo, rtype, e->left, /* implicit */ true);
         setCompileTimeConstant(e->left);
         expression = e;
         sameType = rtype;
         setType(e->left, sameType);
     } else if (bl != nullptr && br == nullptr) {
         auto e = expression->clone();
-        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right);
+        e->right = new IR::Cast(e->right->srcInfo, ltype, e->right, /* implicit */ true);
         setCompileTimeConstant(e->right);
         expression = e;
         setType(e->right, ltype);
@@ -1263,7 +1263,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
         }
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
-            expression = new IR::Cast(expression->srcInfo, expression->destType, rhs);
+            expression =
+                new IR::Cast(expression->srcInfo, expression->destType, rhs, /* implicit */ true);
             sourceType = getTypeType(expression->destType);
         }
         if (!canCastBetween(castType, sourceType))
@@ -2267,6 +2268,12 @@ const IR::SelectCase *TypeInferenceBase::matchCase(const IR::SelectExpression *s
             return nullptr;
         }
         useSelType = selectType->components.at(0);
+    }
+    if (auto senum = useSelType->to<IR::Type_SerEnum>()) {
+        // With select of a serial enum type, the cases may be either the serenum type,
+        // or the underlying type, so match against the underlying type, because implicit
+        // casts to the senum type are not allowed.
+        useSelType = getTypeType(senum->type);
     }
     auto tvs = unifyCast(
         select, useSelType, caseType,

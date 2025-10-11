@@ -1,0 +1,12 @@
+explicit-cast-to-tuple-from-tuple-expr-with-field-of-incompatible-type.p4(6): [--Wwarn=unused] warning: control 'c0' is unused
+control c0() {
+        ^^
+explicit-cast-to-tuple-from-tuple-expr-with-field-of-incompatible-type.p4(7): [--Wwarn=unused] warning: 'e' is unused
+  E<bit<32>, bit<16>>((tuple<bit<32>, varbit<16>>) { 2, 3 }) e;
+                                                             ^
+explicit-cast-to-tuple-from-tuple-expr-with-field-of-incompatible-type.p4(7): [--Werror=type-error] error: tuple<bit<32>, varbit<16>>: cast not supported
+  E<bit<32>, bit<16>>((tuple<bit<32>, varbit<16>>) { 2, 3 }) e;
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-tuple-from-tuple-expr-with-field-of-incompatible-type.p4(7): [--Werror=type-error] error: (tuple<bit<32>, varbit<16>>){ 2, 3 }: cannot evaluate to a compile-time constant
+  E<bit<32>, bit<16>>((tuple<bit<32>, varbit<16>>) { 2, 3 }) e;
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

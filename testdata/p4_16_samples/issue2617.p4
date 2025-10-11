@@ -67,20 +67,35 @@ control c(out bit<32> v) {
             2:
         }
 
-        switch (E.C) {
-            E.A: { v = v + 1; }
-            default: { v = v + 2; }
+        switch (32w1) {
+            X.A: { v = v + 20; }
+            X.B: { v = v + 10; }
+            2:
         }
 
         switch (E.C) {
-            E.A: { v = v + 1; }
-            default: { v = v + 3; }
+            E.A: { v = v + 200; }
+            default: { v = v + 100; }
+        }
+
+        switch (E.B) {
+            E.B: { v = v + 1000; }
+            default: { v = v + 2000; }
         }
 
         switch (X.B) {
-            X.A: { v = v + 10; }
-            X.B: { v = v + 20; }
+            X.A: { v = v + 20000; }
+            X.B: { v = v + 10000; }
         }
+
+#if 0
+        // typechecking currently disallows this, and we have an error check in
+        // p4_16_errors/issue3623-2.p4
+        switch (X.B) {
+            0: { v = v + 200000; }
+            32w1: { v = v + 100000; }
+        }
+#endif
     }
 }
 

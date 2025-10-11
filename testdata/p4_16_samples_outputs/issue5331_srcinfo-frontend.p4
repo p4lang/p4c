@@ -1,8 +1,7 @@
-control C(out bit<64> v64) {
-    @name("C.value") bit<1> value;
+extern void __e(in bit<16> x);
+control C(in bit<16> x) {
     @name("C.a") action a() {
-        value = 1w1;
-        v64 = (bit<64>)(int<64>)(int<1>)value;
+        __e(x << 6w18);
     }
     @name("C.t") table t_0 {
         actions = {
@@ -15,6 +14,6 @@ control C(out bit<64> v64) {
     }
 }
 
-control proto(out bit<64> v64);
+control proto(in bit<16> x);
 package top(proto p);
 top(C()) main;

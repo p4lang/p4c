@@ -1,4 +1,10 @@
-initializer.p4(19): [--Wwarn=unused] warning: Control ingress is not used; removing
+initializer.p4(19): [--Wwarn=unused] warning: control 'ingress' is unused
+control ingress(out bit<32> field_d_32) {
+        ^^^^^^^
+initializer.p4(20): [--Wwarn=unused] warning: 'action_1' is unused
+    action action_1() {
+           ^^^^^^^^
+initializer.p4(19): [--Winfo=removed] info: removing control 'ingress'
 control ingress(out bit<32> field_d_32) {
         ^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

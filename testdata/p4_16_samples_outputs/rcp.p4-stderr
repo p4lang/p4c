@@ -1,3 +1,0 @@
-rcp.p4(40): [--Wwarn=unused] warning: 'MAX_ALLOWABLE_RTT' is unused
-const bit<32> MAX_ALLOWABLE_RTT = 2500;
-              ^^^^^^^^^^^^^^^^^

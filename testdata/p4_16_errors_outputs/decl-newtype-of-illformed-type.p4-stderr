@@ -1,0 +1,6 @@
+decl-newtype-of-illformed-type.p4(3): [--Wwarn=unused] warning: 'Narrow' is unused
+type tuple<int> Narrow;
+                ^^^^^^
+decl-newtype-of-illformed-type.p4(3): [--Werror=type-error] error: Narrow: `type' can only be applied to base types
+type tuple<int> Narrow;
+                ^^^^^^

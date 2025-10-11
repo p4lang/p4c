@@ -1,3 +1,6 @@
+div1.p4(16): [--Wwarn=unused] warning: 'act' is unused
+action act() {
+       ^^^
 div1.p4(18): [--Werror=type-error] error: a / -1: not defined on negative numbers
     a = a / -1; // not defined for negative numbers
         ^^^^^^

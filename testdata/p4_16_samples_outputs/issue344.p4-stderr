@@ -1,4 +1,7 @@
-issue344.p4(24): [--Wwarn=unused] warning: c: unused instance
+issue344.p4(24): [--Wwarn=unused] warning: 'c' is unused
 top(C<_>()) c;
             ^
+issue344.p4(17): [--Winfo=removed] info: removing control 'C'
+control C<H>() {
+        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

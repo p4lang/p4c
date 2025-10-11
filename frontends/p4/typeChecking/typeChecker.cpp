@@ -81,7 +81,7 @@ const IR::Type *TypeInferenceBase::cloneWithFreshTypeVariables(const IR::IMayBeG
         BUG_CHECK(b, "%1%: failed replacing %2% with %3%", type, v, tv);
     }
 
-    TypeVariableSubstitutionVisitor sv(&tvs, true);
+    TypeVariableSubstitutionVisitor sv(&tvs, true, true);
     sv.setCalledBy(this);
     auto cl = type->to<IR::Type>()->apply(sv, getChildContext());
     CHECK_NULL(cl);
@@ -569,7 +569,7 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
 
     if (initType->is<IR::Type_InfInt>() && !destType->is<IR::Type_InfInt>()) {
         auto toType = destType->getP4Type();
-        sourceExpression = new IR::Cast(toType, sourceExpression);
+        sourceExpression = new IR::Cast(toType, sourceExpression, /* implicit */ true);
         setType(toType, new IR::Type_Type(destType));
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);
@@ -597,8 +597,13 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             bool changes = false;
             for (const IR::StructField *fieldI : ts->fields) {
                 auto compI = si->components.getDeclaration<IR::NamedExpression>(fieldI->name);
-                if (hasDots && compI == nullptr) {
-                    continue;
+                if (compI == nullptr) {
+                    if (hasDots) {
+                        continue;
+                    } else {
+                        typeError("No initializer for field %1%", fieldI->name);
+                        return sourceExpression;
+                    }
                 }
                 auto src = assignment(sourceExpression, fieldI->type, compI->expression);
                 if (src != compI->expression) changes = true;

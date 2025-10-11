@@ -798,7 +798,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         if (hdr_24.customer_ipv6.isValid()) {
             customer_ip_len_0 = customer_ip_len_0 + 16w40 + hdr_24.customer_ipv6.payload_length;
         }
-        hdr_24.u0_ipv4.total_len = 16w50 + customer_ip_len_0;
+        hdr_24.u0_ipv4.total_len = customer_ip_len_0 + 16w50;
         hdr_24.u0_ipv4.version = 4w4;
         hdr_24.u0_ipv4.ihl = 4w5;
         hdr_24.u0_ipv4.diffserv = 8w0;
@@ -813,7 +813,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_24.u0_udp.setValid();
         hdr_24.u0_udp.src_port = 16w0;
         hdr_24.u0_udp.dst_port = 16w4789;
-        hdr_24.u0_udp.length = 16w30 + customer_ip_len_0;
+        hdr_24.u0_udp.length = customer_ip_len_0 + 16w30;
         hdr_24.u0_udp.checksum = 16w0;
         hdr_24.u0_vxlan.setValid();
         hdr_24.u0_vxlan.reserved = 24w0;
@@ -843,7 +843,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         if (hdr_25.customer_ipv6.isValid()) {
             customer_ip_len_3 = customer_ip_len_3 + 16w40 + hdr_25.customer_ipv6.payload_length;
         }
-        hdr_25.u0_ipv4.total_len = 16w50 + customer_ip_len_3;
+        hdr_25.u0_ipv4.total_len = customer_ip_len_3 + 16w50;
         hdr_25.u0_ipv4.version = 4w4;
         hdr_25.u0_ipv4.ihl = 4w5;
         hdr_25.u0_ipv4.diffserv = 8w0;
@@ -858,7 +858,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_25.u0_udp.setValid();
         hdr_25.u0_udp.src_port = 16w0;
         hdr_25.u0_udp.dst_port = 16w4789;
-        hdr_25.u0_udp.length = 16w30 + customer_ip_len_3;
+        hdr_25.u0_udp.length = customer_ip_len_3 + 16w30;
         hdr_25.u0_udp.checksum = 16w0;
         hdr_25.u0_vxlan.setValid();
         hdr_25.u0_vxlan.reserved = 24w0;
@@ -888,7 +888,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         if (hdr_26.customer_ipv6.isValid()) {
             customer_ip_len_4 = customer_ip_len_4 + 16w40 + hdr_26.customer_ipv6.payload_length;
         }
-        hdr_26.u0_ipv4.total_len = 16w50 + customer_ip_len_4;
+        hdr_26.u0_ipv4.total_len = customer_ip_len_4 + 16w50;
         hdr_26.u0_ipv4.version = 4w4;
         hdr_26.u0_ipv4.ihl = 4w5;
         hdr_26.u0_ipv4.diffserv = 8w0;
@@ -903,7 +903,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_26.u0_udp.setValid();
         hdr_26.u0_udp.src_port = 16w0;
         hdr_26.u0_udp.dst_port = 16w4789;
-        hdr_26.u0_udp.length = 16w30 + customer_ip_len_4;
+        hdr_26.u0_udp.length = customer_ip_len_4 + 16w30;
         hdr_26.u0_udp.checksum = 16w0;
         hdr_26.u0_vxlan.setValid();
         hdr_26.u0_vxlan.reserved = 24w0;
@@ -933,7 +933,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         if (hdr_27.u0_ipv6.isValid()) {
             u0_ip_len_0 = u0_ip_len_0 + 16w40 + hdr_27.u0_ipv6.payload_length;
         }
-        hdr_27.u1_ipv4.total_len = 16w50 + u0_ip_len_0;
+        hdr_27.u1_ipv4.total_len = u0_ip_len_0 + 16w50;
         hdr_27.u1_ipv4.version = 4w4;
         hdr_27.u1_ipv4.ihl = 4w5;
         hdr_27.u1_ipv4.diffserv = 8w0;
@@ -948,7 +948,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_27.u1_udp.setValid();
         hdr_27.u1_udp.src_port = 16w0;
         hdr_27.u1_udp.dst_port = 16w4789;
-        hdr_27.u1_udp.length = 16w30 + u0_ip_len_0;
+        hdr_27.u1_udp.length = u0_ip_len_0 + 16w30;
         hdr_27.u1_udp.checksum = 16w0;
         hdr_27.u1_vxlan.setValid();
         hdr_27.u1_vxlan.reserved = 24w0;
@@ -978,7 +978,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         if (hdr_28.u0_ipv6.isValid()) {
             u0_ip_len_3 = u0_ip_len_3 + 16w40 + hdr_28.u0_ipv6.payload_length;
         }
-        hdr_28.u1_ipv4.total_len = 16w50 + u0_ip_len_3;
+        hdr_28.u1_ipv4.total_len = u0_ip_len_3 + 16w50;
         hdr_28.u1_ipv4.version = 4w4;
         hdr_28.u1_ipv4.ihl = 4w5;
         hdr_28.u1_ipv4.diffserv = 8w0;
@@ -993,7 +993,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_28.u1_udp.setValid();
         hdr_28.u1_udp.src_port = 16w0;
         hdr_28.u1_udp.dst_port = 16w4789;
-        hdr_28.u1_udp.length = 16w30 + u0_ip_len_3;
+        hdr_28.u1_udp.length = u0_ip_len_3 + 16w30;
         hdr_28.u1_udp.checksum = 16w0;
         hdr_28.u1_vxlan.setValid();
         hdr_28.u1_vxlan.reserved = 24w0;
@@ -1023,7 +1023,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         if (hdr_29.u0_ipv6.isValid()) {
             u0_ip_len_4 = u0_ip_len_4 + 16w40 + hdr_29.u0_ipv6.payload_length;
         }
-        hdr_29.u1_ipv4.total_len = 16w50 + u0_ip_len_4;
+        hdr_29.u1_ipv4.total_len = u0_ip_len_4 + 16w50;
         hdr_29.u1_ipv4.version = 4w4;
         hdr_29.u1_ipv4.ihl = 4w5;
         hdr_29.u1_ipv4.diffserv = 8w0;
@@ -1038,7 +1038,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_29.u1_udp.setValid();
         hdr_29.u1_udp.src_port = 16w0;
         hdr_29.u1_udp.dst_port = 16w4789;
-        hdr_29.u1_udp.length = 16w30 + u0_ip_len_4;
+        hdr_29.u1_udp.length = u0_ip_len_4 + 16w30;
         hdr_29.u1_udp.checksum = 16w0;
         hdr_29.u1_vxlan.setValid();
         hdr_29.u1_vxlan.reserved = 24w0;

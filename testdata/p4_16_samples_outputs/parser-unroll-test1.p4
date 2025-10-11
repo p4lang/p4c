@@ -58,7 +58,8 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract(hdr.srcRoutes[index]);
-        index = index + 1;
+        index = (int<32>)((int)index + 1);
+        hdr.srcRoutes[index - 1].port = (bit<15>)((int)hdr.srcRoutes[index - 1].port + 1);
         transition select(hdr.srcRoutes[index - 1].bos) {
             1: parse_ipv4;
             default: parse_srcRouting;

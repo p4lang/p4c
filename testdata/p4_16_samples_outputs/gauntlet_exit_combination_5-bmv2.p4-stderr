@@ -1,3 +1,0 @@
-gauntlet_exit_combination_5-bmv2.p4(27): [--Wwarn=unused] warning: 'simple_action' is unused
-    action simple_action() {
-           ^^^^^^^^^^^^^

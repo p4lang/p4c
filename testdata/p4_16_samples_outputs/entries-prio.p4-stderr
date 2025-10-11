@@ -1,4 +1,13 @@
-entries-prio.p4(12): [--Wwarn=unused] warning: Control c is not used; removing
+entries-prio.p4(12): [--Wwarn=unused] warning: control 'c' is unused
+control c(in Headers h) {
+        ^
+entries-prio.p4(14): [--Wwarn=unused] warning: 'param' is unused
+    action a_params(bit<32> param) {}
+                            ^^^^^
+entries-prio.p4(44): [--Wwarn=unused] warning: 'priority' is unused
+        bit<32> priority = 6;
+        ^^^^^^^^^^^^^^^^^^^^
+entries-prio.p4(12): [--Winfo=removed] info: removing control 'c'
 control c(in Headers h) {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

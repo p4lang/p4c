@@ -1,0 +1,6 @@
+explicit-cast-to-incompatible-type-from-int.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+explicit-cast-to-incompatible-type-from-int.p4(6): [--Werror=type-error] error: varbit<4>: cast not supported
+    test((varbit<4>) 0);
+          ^^^^^^^^^

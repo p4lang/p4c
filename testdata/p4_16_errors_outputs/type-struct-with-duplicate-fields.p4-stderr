@@ -1,0 +1,7 @@
+type-struct-with-duplicate-fields.p4(5): [--Werror=duplicate] error: f0: Duplicates declaration f0
+  bit<1> f0;
+         ^^
+type-struct-with-duplicate-fields.p4(4)
+  bit<1> f0;
+         ^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

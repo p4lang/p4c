@@ -1,0 +1,6 @@
+decl-newtype-of-type-with-dont-care.p4(3): [--Wwarn=unused] warning: 'Narrow' is unused
+type list<_> Narrow;
+             ^^^^^^
+decl-newtype-of-type-with-dont-care.p4(3): [--Werror=type-error] error: Narrow: `type' can only be applied to base types
+type list<_> Narrow;
+             ^^^^^^

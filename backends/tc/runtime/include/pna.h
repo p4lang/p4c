@@ -18,7 +18,6 @@ and limitations under the License.
 #define P4C_PNA_H
 
 #include <stdbool.h>
-#include "crc32.h"
 
 // pna.p4 information
 
@@ -291,13 +290,16 @@ struct p4tc_ext_csum_params {
 /* Basic checksums are not implemented in DPDK */
 extern u16
 bpf_p4tc_ext_csum_crc16_add(struct p4tc_ext_csum_params *params,
-			    const void *data, const u32 data__sz) __ksym;
+			    const u32 params__sz, const void *data,
+			    const u32 data__sz) __ksym;
 
 extern u16
-bpf_p4tc_ext_csum_crc16_get(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_crc16_get(struct p4tc_ext_csum_params *params,
+			    const u32 params__sz) __ksym;
 
 extern void
-bpf_p4tc_ext_csum_crc16_clear(struct p4tc_ext_csum_params *params) __ksym;
+bpf_p4tc_ext_csum_crc16_clear(struct p4tc_ext_csum_params *params,
+			      const u32 params__sz) __ksym;
 
 /* Equivalent to PNA CRC32 checksum */
 /* Basic checksums are not implemented in DPDK */
@@ -450,16 +452,6 @@ int xdp_p4tc_extern_digest_pack(struct xdp_md *xdp_ctx,
 /* Timestamp  PNA extern */
 static inline u64 bpf_p4tc_extern_timestamp() {
 	return bpf_ktime_get_ns();
-}
-
-#define U32_MAX            ((u32)~0U)
-
-/* Random PNA extern */
-static inline u32 bpf_p4tc_extern_random(u32 min, u32 max) {
-	if (max == U32_MAX)
-		return (min + bpf_get_prandom_u32());
-
-	return (min + bpf_get_prandom_u32()) % (max + 1);
 }
 
 #define BIT(x) (1 << x)

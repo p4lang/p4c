@@ -1,3 +1,9 @@
+issue1296.p4(7): [--Wwarn=unused] warning: 'test' is unused
+test_extern<test_extern<bit<32>>>() test;
+                                    ^^^^
+issue1296.p4(13): [--Wwarn=unused] warning: 'test1' is unused
+test_extern1<test_extern<test_extern1<bit<32>>>>() test1;
+                                                   ^^^^^
 issue1296.p4(7): [--Werror=type-error] error: test_extern: contains self 'test_extern' as type argument
 test_extern<test_extern<bit<32>>>() test;
 ^^^^^^^^^^^

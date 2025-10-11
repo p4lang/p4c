@@ -1,3 +1,9 @@
+stack1_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+stack1_e.p4(22): [--Wwarn=unused] warning: 'stack' is unused
+        h[w] stack;
+        ^^^^^^^^^^
 stack1_e.p4(21): [--Wwarn=overflow] warning: 3s5: signed value does not fit in 3 bits
         int<3> w = 5;
                    ^

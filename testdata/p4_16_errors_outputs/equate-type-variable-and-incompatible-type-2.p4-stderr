@@ -1,0 +1,23 @@
+equate-type-variable-and-incompatible-type-2.p4(3): [--Wwarn=unused] warning: 'f' is unused
+tuple<string> f<T>(T x) {
+              ^
+equate-type-variable-and-incompatible-type-2.p4(4): [--Werror=type-error] error: 'return x'
+  return x;
+  ^^^^^^
+  ---- Actual error:
+equate-type-variable-and-incompatible-type-2.p4(3): Cannot cast implicitly type 'T' to type 'tuple<string>'
+  tuple<string> f<T>(T x) {
+                  ^
+equate-type-variable-and-incompatible-type-2.p4(3)
+  tuple<string> f<T>(T x) {
+  ^^^^^^^^^^^^^
+  ---- Originating from:
+equate-type-variable-and-incompatible-type-2.p4(4): Source expression 'x' produces a result of type 'T' which cannot be assigned to a left-value with type 'tuple<string>'
+    return x;
+           ^
+equate-type-variable-and-incompatible-type-2.p4(3)
+  tuple<string> f<T>(T x) {
+                  ^
+equate-type-variable-and-incompatible-type-2.p4(3)
+  tuple<string> f<T>(T x) {
+  ^^^^^^^^^^^^^

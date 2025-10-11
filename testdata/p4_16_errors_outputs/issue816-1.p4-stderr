@@ -1,3 +1,6 @@
+issue816-1.p4(26): [--Wwarn=unused] warning: 'c2' is unused
+  C c2 = MyC2(p);
+  ^^^^^^^^^^^^^^
 issue816-1.p4(14): [--Werror=type-error] error: p: parameter cannot be a package
 control MyC1()(P p) {
                  ^

@@ -16,6 +16,12 @@ issue4796.p4(35): [--Wwarn=unused] warning: 'compa' is unused
 issue4796.p4(37): [--Wwarn=unused] warning: 'resea' is unused
     action resea(out bit<32> janu, bit<4> revi) {
            ^^^^^
+issue4796.p4(37): [--Wwarn=unused] warning: 'janu' is unused
+    action resea(out bit<32> janu, bit<4> revi) {
+                             ^^^^
+issue4796.p4(37): [--Wwarn=unused] warning: 'revi' is unused
+    action resea(out bit<32> janu, bit<4> revi) {
+                                          ^^^^
 issue4796.p4(22): [--Wwarn=unreachable] warning: accept state in parser MainParserImpl is unreachable
 parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_mai...
        ^^^^^^^^^^^^^^

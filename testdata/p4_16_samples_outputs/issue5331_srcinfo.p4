@@ -1,9 +1,13 @@
-control C(out bit<64> v64) {
-    action a2(in bit<1> value) {
-        v64 = (bit<64>)(int<64>)(int<1>)value;
+extern void __e(in bit<16> x);
+control C(in bit<16> x) {
+    action a3(bit<16> y) {
+        __e(y);
+    }
+    action a2(bit<6> y) {
+        a3(x << 9 + y);
     }
     action a() {
-        a2(1);
+        a2(9);
     }
     table t {
         actions = {
@@ -16,6 +20,6 @@ control C(out bit<64> v64) {
     }
 }
 
-control proto(out bit<64> v64);
+control proto(in bit<16> x);
 package top(proto p);
 top(C()) main;

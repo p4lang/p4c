@@ -99,7 +99,9 @@ class RemoveBreakContinue : public Transform {
         prune();
         auto s2 = s->apply_visitor_postorder(*this)->to<IR::Statement>();
         BUG_CHECK(s2, "RemoveBreakContinue::postorder failed to return a statement");
-        return new IR::IfStatement(cond, s2, nullptr);
+        s = new IR::IfStatement(cond, s2, nullptr);
+        if (getParent<IR::SwitchCase>()) s = new IR::BlockStatement({s});
+        return s;
     }
 };
 
@@ -205,7 +207,7 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
         auto d = resolveUnique(v->path->name, P4::ResolutionType::Any);
         bounds.index = d ? d->to<IR::Declaration_Variable>() : nullptr;
         if (!bounds.index) return false;
-        const IR::BaseAssignmentStatement *incr = nullptr;
+        const ComputeDefUse::loc_t *incr_loc;
         Pattern::Match<IR::Constant> initval;
         auto &index_defs = defUse->getDefs(v);
         if (index_defs.size() != 2) {
@@ -213,13 +215,23 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
             // to a non-constant in the loop
             return false;
         } else if (Pattern::Assign(v, initval).match(index_defs.front()->parent->node)) {
-            incr = index_defs.back()->parent->node->to<IR::BaseAssignmentStatement>();
+            incr_loc = index_defs.back()->parent;
         } else if (Pattern::Assign(v, initval).match(index_defs.back()->parent->node)) {
-            incr = index_defs.front()->parent->node->to<IR::BaseAssignmentStatement>();
+            incr_loc = index_defs.front()->parent;
         } else {
             return false;
         }
+        auto incr = incr_loc->node->to<IR::BaseAssignmentStatement>();
         if (!incr) return false;
+        // the increment assignment must be in the ForStatement, possibly nested in one or
+        // more BlockStatements, but not in any other kind of statement (if, switch, etc)
+        for (auto *p = incr_loc->parent; true; p = p->parent) {
+            if (!p) return false;
+            if (p->node == getOriginal()) break;                       // ok
+            if (p->node->is<IR::BlockStatement>()) continue;           // keep looking
+            if (p->node->is<IR::BaseAssignmentStatement>()) continue;  // keep looking
+            if (p->node->is<IR::Statement>()) return false;
+        }
         bool fail = false;
         for (long val = initval->asLong();
              evalLoop(fstmt->condition, val, index_defs, fail) && !fail;

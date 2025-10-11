@@ -1,3 +1,6 @@
+tuple-newtype.p4(10): [--Wwarn=unused] warning: 'tt' is unused
+        T tt = (T){1};
+        ^^^^^^^^^^^^^
 tuple-newtype.p4(5): [--Werror=type-error] error: T: `type' can only be applied to base types
 type tuple<bit> T;
                 ^

@@ -12,6 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "ir/dump.h"
 #include "typeChecker.h"
 
 namespace P4 {
@@ -143,6 +144,7 @@ DEFINE_POSTORDER(IR::Annotation)
 Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
     auto rv = Transform::init_apply(node);
     TypeInferenceBase::start(node);
+    LOG5(Dump(node));
 
     return rv;
 }

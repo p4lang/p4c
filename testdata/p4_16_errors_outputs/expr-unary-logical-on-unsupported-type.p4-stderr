@@ -1,0 +1,6 @@
+expr-unary-logical-on-unsupported-type.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+expr-unary-logical-on-unsupported-type.p4(5): [--Werror=expected] error: "lazy": Expected a boolean value
+    if (!"lazy") {}
+              ^

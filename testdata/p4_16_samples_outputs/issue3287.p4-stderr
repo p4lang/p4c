@@ -1,3 +1,0 @@
-issue3287.p4(5): [--Wwarn=unused] warning: 'tt' is unused
-  const int<6> tt = 1;
-               ^^

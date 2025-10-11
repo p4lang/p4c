@@ -17,9 +17,10 @@ parser p1(out bit<32> v) {
 control c(out bit<32> v) {
     @hidden action issue2617l66() {
         v = 32w1;
-        v = 32w3;
-        v = 32w6;
-        v = 32w26;
+        v = 32w11;
+        v = 32w111;
+        v = 32w1111;
+        v = 32w11111;
     }
     @hidden table tbl_issue2617l66 {
         actions = {

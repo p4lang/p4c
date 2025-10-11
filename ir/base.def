@@ -300,8 +300,9 @@ class Annotation {
 
     /// Extracts name value from a name annotation
     cstring getName() const;
-    /// Extracts a single string argument; error if the argument is not a string
-    cstring getSingleString() const;
+    /// Extracts a single string argument; cstring::empty if the argument is not a string;
+    /// if error is true, emits an error if the argument is not a string
+    cstring getSingleString(bool error = true) const;
     /// Whether the annotation body needs to be parsed.
     inline bool needsParsing() const {
         return std::holds_alternative<UnparsedAnnotation>(body);

@@ -26,6 +26,8 @@ namespace P4 {
 
 using namespace literals;
 
+const cstring staticAssertMethodName = "static_assert"_cs;
+
 /**
  * Evaluates static_assert invocations.
  * A successful assertion is constant-folded to 'true'.
@@ -33,9 +35,6 @@ using namespace literals;
 class DoStaticAssert : public Transform, public ResolutionContext {
     TypeMap *typeMap;
     bool removeStatement = false;
-
-    // Cannot go static here as cstring is not constexpr
-    const cstring staticAssertMethodName = "static_assert"_cs;
 
  public:
     explicit DoStaticAssert(TypeMap *typeMap) : typeMap(typeMap) {

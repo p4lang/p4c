@@ -23,17 +23,22 @@ const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expres
     auto rhstype = typeMap->getType(rhs, true);
     if (rhstype->is<IR::Type_InfInt>()) {
         auto cst = rhs->to<IR::Constant>();
-        big_int maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth);
-        if (cst->value > maxShift)
-            ::P4::error(ErrorType::ERR_OVERLIMIT, "%1%: shift amount limited to %2% on this target",
-                        expression, maxShift);
+        if (LowerExpressions::maxShiftWidth.has_value()) {
+            big_int maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth.value());
+            if (cst->value > maxShift)
+                ::P4::error(ErrorType::ERR_OVERLIMIT,
+                            "%1%: shift amount limited to %2% on this target", expression,
+                            maxShift);
+        }
     } else {
         BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit<> type", rhstype);
-        auto bs = rhstype->to<IR::Type_Bits>();
-        if (bs->size > LowerExpressions::maxShiftWidth)
-            ::P4::error(ErrorType::ERR_OVERLIMIT,
-                        "%1%: shift amount limited to %2% bits on this target", expression,
-                        LowerExpressions::maxShiftWidth);
+        if (LowerExpressions::maxShiftWidth.has_value()) {
+            auto bs = rhstype->to<IR::Type_Bits>();
+            if (bs->size > LowerExpressions::maxShiftWidth)
+                ::P4::error(ErrorType::ERR_OVERLIMIT,
+                            "%1%: shift amount limited to %2% bits on this target", expression,
+                            LowerExpressions::maxShiftWidth.value());
+        }
     }
     auto ltype = typeMap->getType(getOriginal(), true);
     typeMap->setType(expression, ltype);

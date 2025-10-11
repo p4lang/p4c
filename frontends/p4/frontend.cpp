@@ -40,7 +40,6 @@ limitations under the License.
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
 #include "functionsInlining.h"
-#include "getV1ModelVersion.h"
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
@@ -192,7 +191,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     ConstantFoldingPolicy *constantFoldingPolicy = policy->getConstantFoldingPolicy();
 
     PassManager passes({
-        new P4V1::GetV1ModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(parseAnnotations, &typeMap),
         new PrettyPrint(options),
@@ -201,6 +199,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Synthesize some built-in constructs
         new CreateBuiltins(),
         new CheckShadowing(),
+        new WarnAboutUnusedDeclarations(*policy),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
@@ -269,7 +268,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
-        new RemoveAllUnusedDeclarations(*policy),
+        new RemoveAllUnusedDeclarations(*policy, true),
         new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
         new EvaluatorPass(&typeMap),
@@ -306,7 +305,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&typeMap),
-            new RemoveAllUnusedDeclarations(*policy),
+            new RemoveAllUnusedDeclarations(*policy, true),
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
     }

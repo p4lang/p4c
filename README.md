@@ -188,14 +188,9 @@ sudo dpkg -i /path/to/package.deb
 ```
 
 ### Installing P4C from source
-1.  Clone the repository. It includes submodules, so be sure to use
-    `--recursive` to pull them in:
+1.  Clone the repository.
     ```
-    git clone --recursive https://github.com/p4lang/p4c.git
-    ```
-    If you forgot `--recursive`, you can update the submodules at any time using:
-    ```
-    git submodule update --init --recursive
+    git clone https://github.com/p4lang/p4c.git
     ```
 
 2.  Install [dependencies](#dependencies). You can find specific instructions

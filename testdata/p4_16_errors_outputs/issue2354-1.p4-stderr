@@ -1,3 +1,12 @@
+issue2354-1.p4(2): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+issue2354-1.p4(3): [--Wwarn=unused] warning: 'a' is unused
+    action a(int x) {
+           ^
+issue2354-1.p4(3): [--Wwarn=unused] warning: 'x' is unused
+    action a(int x) {
+                 ^
 issue2354-1.p4(3): [--Werror=type-error] error: x: actions cannot have parameters with type int
     action a(int x) {
                  ^

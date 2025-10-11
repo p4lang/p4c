@@ -1,6 +1,27 @@
-issue2220.p4(11): [--Werror=type-error] error: '{ val = 8w0 }': values of type 'bit<8>' cannot be implicitly cast to type 'myEnum'
+issue2220.p4(11): [--Werror=type-error] error: 's1'
  S s1 = { val = (bit<8>)0 };
-        ^^^^^^^^^^^^^^^^^^^
-issue2220.p4(3)
-enum bit<8> myEnum { One = 1 }
-            ^^^^^^
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+issue2220.p4(3): Cannot cast implicitly type 'bit<8>' to type 'myEnum'
+  enum bit<8> myEnum { One = 1 }
+              ^^^^^^
+  ---- Originating from:
+issue2220.p4(3): Type of initializer 'bit<8>' does not match type 'myEnum' of field 'val' in 'struct S'
+  enum bit<8> myEnum { One = 1 }
+              ^^^^^^
+issue2220.p4(6)
+      myEnum val;
+             ^^^
+issue2220.p4(5)
+  struct S {
+         ^
+  ---- Originating from:
+issue2220.p4(11): Source expression '{ val = 8w0 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct S'
+   S s1 = { val = (bit<8>)0 };
+          ^^^^^^^^^^^^^^^^^^^
+issue2220.p4(11)
+   S s1 = { val = (bit<8>)0 };
+          ^^^^^^^^^^^^^^^^^^^
+issue2220.p4(5)
+  struct S {
+         ^

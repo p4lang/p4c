@@ -1,4 +1,7 @@
-crash-typechecker.p4(11): [--Wwarn=unused] warning: Control x is not used; removing
+crash-typechecker.p4(11): [--Wwarn=unused] warning: control 'x' is unused
+control x() {
+        ^
+crash-typechecker.p4(11): [--Winfo=removed] info: removing control 'x'
 control x() {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

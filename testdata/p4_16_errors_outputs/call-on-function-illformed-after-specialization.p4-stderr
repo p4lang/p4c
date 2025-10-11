@@ -1,0 +1,28 @@
+call-on-function-illformed-after-specialization.p4(4): [--Wwarn=unused] warning: 'bar' is unused
+void bar() {
+     ^^^
+call-on-function-illformed-after-specialization.p4(5): [--Werror=type-error] error: 'foo(true)'
+  foo<string>(true);
+  ^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+call-on-function-illformed-after-specialization.p4(5): Cannot cast implicitly type 'bool' to type 'string'
+    foo<string>(true);
+        ^^^^^^
+  ---- Originating from:
+call-on-function-illformed-after-specialization.p4(5): Type of argument 'true' (bool) does not match type of parameter 'x' (T)
+    foo<string>(true);
+                ^^^^
+call-on-function-illformed-after-specialization.p4(3)
+  void foo<T>(in T x) {}
+                   ^
+call-on-function-illformed-after-specialization.p4(3)
+  void foo<T>(in T x) {}
+           ^
+  Where 'T' is bound to 'string'
+  ---- Originating from:
+call-on-function-illformed-after-specialization.p4(3): Function type 'foo' does not match invocation type '<Method call>'
+  void foo<T>(in T x) {}
+       ^^^
+call-on-function-illformed-after-specialization.p4(5)
+    foo<string>(true);
+    ^^^^^^^^^^^^^^^^^

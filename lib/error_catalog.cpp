@@ -79,6 +79,7 @@ const int ErrorType::WARN_TABLE_KEYS = 1027;
 // ------ Info messages -----------
 const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
 const int ErrorType::INFO_PROGRESS = 2143;
+const int ErrorType::INFO_REMOVED = 2144;
 
 // map from errorCode to ErrorSig
 std::map<int, cstring> ErrorCatalog::errorCatalog = {
@@ -121,13 +122,13 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_PARSER_TRANSITION, "parser-transition"_cs},
     {ErrorType::WARN_UNREACHABLE, "unreachable"_cs},
     {ErrorType::WARN_SHADOWING, "shadow"_cs},
-    {ErrorType::WARN_UNINITIALIZED_USE, "uninitialized_use"_cs},
-    {ErrorType::WARN_UNINITIALIZED_OUT_PARAM, "uninitialized_out_param"_cs},
+    {ErrorType::WARN_UNINITIALIZED_USE, "uninitialized-use"_cs},
+    {ErrorType::WARN_UNINITIALIZED_OUT_PARAM, "uninitialized-out-param"_cs},
     {ErrorType::WARN_IGNORE, "ignore"_cs},
-    {ErrorType::WARN_INVALID_HEADER, "invalid_header"_cs},
-    {ErrorType::WARN_DUPLICATE_PRIORITIES, "duplicate_priorities"_cs},
-    {ErrorType::WARN_ENTRIES_OUT_OF_ORDER, "entries_out_of_priority_order"_cs},
-    {ErrorType::WARN_MULTI_HDR_EXTRACT, "multi_header_extract"_cs},
+    {ErrorType::WARN_INVALID_HEADER, "invalid-header"_cs},
+    {ErrorType::WARN_DUPLICATE_PRIORITIES, "duplicate-priorities"_cs},
+    {ErrorType::WARN_ENTRIES_OUT_OF_ORDER, "entries-out-of-priority-order"_cs},
+    {ErrorType::WARN_MULTI_HDR_EXTRACT, "multi-header-extract"_cs},
     {ErrorType::WARN_EXPRESSION, "expr"_cs},
     {ErrorType::WARN_DUPLICATE, "duplicate"_cs},
     {ErrorType::WARN_BRANCH_HINT, "branch"_cs},
@@ -135,7 +136,8 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
 
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},
-    {ErrorType::INFO_PROGRESS, "progress"_cs}};
+    {ErrorType::INFO_PROGRESS, "progress"_cs},
+    {ErrorType::INFO_REMOVED, "removed"_cs}};
 
 void ErrorCatalog::initReporter(ErrorReporter &reporter) {
     // by default, ignore warnings about branch hints -- user can turn them

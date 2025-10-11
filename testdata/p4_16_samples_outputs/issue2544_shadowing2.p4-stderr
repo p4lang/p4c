@@ -7,3 +7,6 @@ issue2544_shadowing2.p4(26)
 issue2544_shadowing2.p4(24): [--Wwarn=unused] warning: 'shadowing' is unused
 void shadowing() {
      ^^^^^^^^^
+issue2544_shadowing2.p4(28): [--Wwarn=unused] warning: 'foo' is unused
+        bit<8> foo = foo;
+        ^^^^^^^^^^^^^^^^

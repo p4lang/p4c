@@ -1,0 +1,7 @@
+table-action-duplicate-actions.p4(8): [--Werror=duplicate] error: a: Duplicates declaration a
+      a;
+      ^
+table-action-duplicate-actions.p4(7)
+      a;
+      ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

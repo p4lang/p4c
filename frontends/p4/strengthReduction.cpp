@@ -88,6 +88,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::BAnd *expr) {
     if (isZero(expr->left)) return expr->left;
     if (isZero(expr->right)) return expr->right;
     if (expr->left->equiv(*expr->right)) return expr->left;
+    if (expr->left->is<IR::Constant>()) std::swap(expr->left, expr->right);
     return expr;
 }
 
@@ -101,6 +102,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::BOr *expr) {
                             new IR::BAnd(expr->srcInfo, expr->type, l->expr, r->expr));
     if (hasSideEffects(expr)) return expr;
     if (expr->left->equiv(*expr->right)) return expr->left;
+    if (expr->left->is<IR::Constant>()) std::swap(expr->left, expr->right);
     return expr;
 }
 
@@ -122,6 +124,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::BXor *expr) {
         !expr->left->type->is<IR::Type_Unknown>())
         // we assume that this type is right
         return new IR::Constant(expr->srcInfo, expr->left->type, 0);
+    if (expr->left->is<IR::Constant>()) std::swap(expr->left, expr->right);
     return expr;
 }
 
@@ -195,9 +198,28 @@ const IR::Node *DoStrengthReduction::postorder(IR::Sub *expr) {
     return expr;
 }
 
+const IR::Node *DoStrengthReduction::postorder(IR::SubSat *expr) {
+    if (isZero(expr->right)) return expr->left;
+    if (hasSideEffects(expr)) return expr;
+    auto *type = expr->type->to<IR::Type::Bits>();
+    if (isZero(expr->left) && type && !type->isSigned) return expr->left;
+    if (expr->left->equiv(*expr->right) && expr->left->type &&
+        !expr->left->type->is<IR::Type_Unknown>())
+        return new IR::Constant(expr->srcInfo, expr->left->type, 0);
+    return expr;
+}
+
 const IR::Node *DoStrengthReduction::postorder(IR::Add *expr) {
     if (isZero(expr->right)) return expr->left;
     if (isZero(expr->left)) return expr->right;
+    if (expr->left->is<IR::Constant>()) std::swap(expr->left, expr->right);
+    return expr;
+}
+
+const IR::Node *DoStrengthReduction::postorder(IR::AddSat *expr) {
+    if (isZero(expr->right)) return expr->left;
+    if (isZero(expr->left)) return expr->right;
+    if (expr->left->is<IR::Constant>()) std::swap(expr->left, expr->right);
     return expr;
 }
 
@@ -252,6 +274,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Mul *expr) {
     if (hasSideEffects(expr)) return expr;
     if (isZero(expr->left)) return expr->left;
     if (isZero(expr->right)) return expr->right;
+    if (expr->left->is<IR::Constant>()) std::swap(expr->left, expr->right);
     return expr;
 }
 

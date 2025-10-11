@@ -85,9 +85,9 @@ cstring IR::dbp(const IR::INode *node) {
         } else if (node->is<IR::PathExpression>() || node->is<IR::Path>() ||
                    node->is<IR::TypeNameExpression>() || node->is<IR::Constant>() ||
                    node->is<IR::Type_Name>() || node->is<IR::Type_Base>() ||
-                   node->is<IR::Type_Specialized>()) {
+                   node->is<IR::ITypeVar>() || node->is<IR::Type_Specialized>()) {
             node->getNode()->Node::dbprint(str);
-            str << " " << node->toString();
+            str << " " << node->getNode();
         } else {
             node->getNode()->Node::dbprint(str);
         }

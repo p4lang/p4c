@@ -1,0 +1,6 @@
+expr-binary-compare-unsupported-types.p4(4): [--Wwarn=unused] warning: 'f' is unused
+bool f() {
+     ^
+expr-binary-compare-unsupported-types.p4(5): [--Werror=type-error] error: true >= false: not defined on bool and bool
+  return ((h) { }).isValid() >= ((h) {#}).isValid();
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

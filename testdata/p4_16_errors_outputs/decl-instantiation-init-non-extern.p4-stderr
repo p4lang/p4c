@@ -1,0 +1,3 @@
+decl-instantiation-init-non-extern.p4(10): [--Werror=not-found] error: error: declaration not found
+  error a() {}
+  ^^^^^

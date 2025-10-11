@@ -1,3 +1,12 @@
+width1_e.p4(17): [--Wwarn=unused] warning: 'c2' is unused
+const int<(c1 + c1)> c2 = 0;
+                     ^^
+width1_e.p4(18): [--Wwarn=unused] warning: 'c3' is unused
+const int<(-3)> c3 = 0;
+                ^^
+width1_e.p4(19): [--Wwarn=unused] warning: 'c4' is unused
+const int<(2w3 + 2w3)> c4 = 0;
+                       ^^
 width1_e.p4(16): [--Wwarn=overflow] warning: 32s0xffffffff: signed value does not fit in 32 bits
 const int<32> c1 = 0xFFFFFFFF;
                    ^^^^^^^^^^

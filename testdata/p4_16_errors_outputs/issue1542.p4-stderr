@@ -1,3 +1,6 @@
+issue1542.p4(11): [--Wwarn=unused] warning: 'multicast_group_id' is unused
+    action multicast(in bit<32> multicast_group_id) {}
+                                ^^^^^^^^^^^^^^^^^^
 issue1542.p4(27): [--Werror=type-error] error: (bit<32>)32w2: argument does not match declaration in actions list: (bit<32>)32w1
             ( true, 1, true ) : multicast(2);
                                           ^
