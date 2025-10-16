@@ -202,7 +202,7 @@ endif ()
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
-find_package (BISON 3.0 REQUIRED)
+find_package (BISON 3.1 REQUIRED)
 # If we enable GTest, install GoogleTest with the appropriate options.
 if (ENABLE_GTESTS)
   include(GoogleTest)
