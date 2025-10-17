@@ -123,6 +123,7 @@ const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
 const IR::Type *TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
     auto result = getType(element, notNull);
+    if (!result) return result;
     auto typeType = result->to<IR::Type_Type>();
     BUG_CHECK(typeType, "%1%: expected a TypeType", result);
     return typeType->type;
