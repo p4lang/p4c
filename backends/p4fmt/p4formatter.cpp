@@ -66,7 +66,7 @@ bool P4Formatter::preorder(const IR::P4Program *program) {
             if (includesEmitted.count(sourceFile.string()) == 0) {
                 if (sourceFile.parent_path() == p4includePath) {
                     std::filesystem::path p = sourceFile.filename();
-                    if (P4V1::V1Model::instance.file.name == p) {
+                    if (P4V1::V1Model::instance().file.name == p) {
                         P4V1::GetV1ModelVersion g;
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
