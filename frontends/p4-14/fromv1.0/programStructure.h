@@ -124,7 +124,7 @@ class ProgramStructure {
     ProgramStructure();
     virtual ~ProgramStructure() = default;
 
-    P4V1::V1Model &v1model;
+    const P4V1::V1Model &v1model;
     P4::P4CoreLibrary &p4lib;
 
     std::unordered_map<cstring, int> allNames;

@@ -152,11 +152,12 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
                  return root;
              }
              // Special handling when compiling for v1model.p4
-             if (main->type->name == P4V1::V1Model::instance.sw.name) {
+             if (main->type->name == P4V1::V1Model::instance().sw.name) {
                  if (main->getConstructorParameters()->size() != 6) return root;
-                 auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
-                 auto update = main->getParameterValue(P4V1::V1Model::instance.sw.compute.name);
-                 auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
+                 auto verify = main->getParameterValue(P4V1::V1Model::instance().sw.verify.name);
+                 auto update = main->getParameterValue(P4V1::V1Model::instance().sw.compute.name);
+                 auto deparser =
+                     main->getParameterValue(P4V1::V1Model::instance().sw.deparser.name);
                  if (verify == nullptr || update == nullptr || deparser == nullptr ||
                      !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
                      !deparser->is<IR::ControlBlock>()) {

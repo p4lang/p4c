@@ -345,10 +345,14 @@ class V1Model : public Model::Model {
     const DirectMeter_Model directMeter;
     const DirectCounter_Model directCounter;
 
-    static V1Model instance;
     // The following match constants appearing in v1model.p4
-    static const char *versionInitial;  // 20180101
-    static const char *versionCurrent;  // 20200408
+    static constexpr const char *versionInitial = "20180101";
+    static constexpr const char *versionCurrent = "20200408";
+
+    static const V1Model &instance() {
+        static V1Model INSTANCE;
+        return INSTANCE;
+    }
 };
 
 }  // namespace P4::P4V1
