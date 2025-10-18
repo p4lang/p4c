@@ -350,11 +350,11 @@ static std::optional<MatchField::MatchType> getMatchType(cstring matchTypeName) 
         return MatchField::MatchTypes::LPM;
     } else if (matchTypeName == P4CoreLibrary::instance().ternaryMatch.name) {
         return MatchField::MatchTypes::TERNARY;
-    } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
+    } else if (matchTypeName == P4V1::V1Model::instance().rangeMatchType.name) {
         return MatchField::MatchTypes::RANGE;
-    } else if (matchTypeName == P4V1::V1Model::instance.optionalMatchType.name) {
+    } else if (matchTypeName == P4V1::V1Model::instance().optionalMatchType.name) {
         return MatchField::MatchTypes::OPTIONAL;
-    } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
+    } else if (matchTypeName == P4V1::V1Model::instance().selectorMatchType.name) {
         // Nothing to do here, we cannot even perform some sanity-checking.
         return std::nullopt;
     } else {
@@ -1129,8 +1129,8 @@ class P4RuntimeEntriesConverter {
             auto matchType = getKeyMatchType(e, refMap);
             // TODO(antonin): remove dependency on v1model.
             if (matchType == P4CoreLibrary::instance().ternaryMatch.name ||
-                matchType == P4V1::V1Model::instance.rangeMatchType.name ||
-                matchType == P4V1::V1Model::instance.optionalMatchType.name) {
+                matchType == P4V1::V1Model::instance().rangeMatchType.name ||
+                matchType == P4V1::V1Model::instance().optionalMatchType.name) {
                 return true;
             }
         }
@@ -1180,9 +1180,9 @@ class P4RuntimeEntriesConverter {
                 addLpm(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance().ternaryMatch.name) {
                 addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
-            } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
+            } else if (matchType == P4V1::V1Model::instance().rangeMatchType.name) {
                 addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
-            } else if (matchType == P4V1::V1Model::instance.optionalMatchType.name) {
+            } else if (matchType == P4V1::V1Model::instance().optionalMatchType.name) {
                 addOptional(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())

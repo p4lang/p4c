@@ -168,7 +168,6 @@ if (SUPPORT_P4_14)
 
     ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/fromv1.0/converters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/fromv1.0/programStructure.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/fromv1.0/v1model.cpp
   )
   set (FRONTEND_SOURCES ${FRONTEND_SOURCES} ${V1_FRONTEND_SRCS})
   set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/ir-v1.def PARENT_SCOPE)
