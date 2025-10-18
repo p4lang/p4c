@@ -19,7 +19,9 @@ limitations under the License.
 #include <cstdio>
 #include <sstream>
 
+#ifdef SUPPORT_P4_14
 #include "frontends/p4-14/fromv1.0/converters.h"
+#endif
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
@@ -29,12 +31,17 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
                                    CompilerOptions::FrontendVersion version) {
     std::istringstream stream(input);
-    const auto *result =
-        version == CompilerOptions::FrontendVersion::P4_14
-            ? parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine)
-            : P4ParserDriver::parse(stream, sourceFile, sourceLine);
+    const IR::P4Program *result = nullptr;
+#ifdef SUPPORT_P4_14
+    if (version == CompilerOptions::FrontendVersion::P4_14)
+        result =
+            parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine);
+    else
+#else
+    result = P4ParserDriver::parse(stream, sourceFile, sourceLine);
+#endif
 
-    if (::P4::errorCount() > 0) {
+        if (::P4::errorCount() > 0) {
         ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
                     ::P4::errorCount());
         return nullptr;
