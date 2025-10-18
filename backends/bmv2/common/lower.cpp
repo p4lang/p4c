@@ -176,7 +176,7 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *ex
     if (mi->isApply() || mi->is<P4::BuiltInMethod>()) return expression;
 
     if (auto ef = mi->to<P4::ExternFunction>()) {
-        if (ef->method->name == P4V1::V1Model::instance.digest_receiver.name) {
+        if (ef->method->name == P4V1::V1Model::instance().digest_receiver.name) {
             // Special handling for digest; the semantics on bmv2 is to
             // execute the digest at the very end of the pipeline, and to
             // pass a reference to the fields, so fields can be modified

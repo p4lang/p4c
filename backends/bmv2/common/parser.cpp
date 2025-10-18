@@ -273,7 +273,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 paramsArray->append(expr);
                 paramValue->emplace("op", extFuncName);
                 paramValue->emplace_non_null("source_info"_cs, mce->sourceInfoJsonObj());
-            } else if (extFuncName == P4V1::V1Model::instance.log_msg.name) {
+            } else if (extFuncName == P4V1::V1Model::instance().log_msg.name) {
                 BUG_CHECK(mce->arguments->size() == 2 || mce->arguments->size() == 1,
                           "%1%: Expected 1 or 2 arguments", mce);
                 result->emplace("op", "primitive");

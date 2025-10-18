@@ -185,7 +185,7 @@ const IR::Node *ExpressionConverter::postorder(IR::ConcreteHeaderRef *nhr) {
     if (structure->isHeader(nhr)) {
         ref = structure->conversionContext->header->clone();
     } else {
-        if (nhr->ref->name == P4V1::V1Model::instance.standardMetadata.name)
+        if (nhr->ref->name == P4V1::V1Model::instance().standardMetadata.name)
             return structure->conversionContext->standardMetadata->clone();
         else
             ref = structure->conversionContext->userMetadata->clone();
