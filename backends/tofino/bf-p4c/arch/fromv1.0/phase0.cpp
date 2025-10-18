@@ -280,17 +280,17 @@ struct FindPhase0Table : public Inspector {
     bool hasNoSideEffects(const IR::P4Table *table, cstring &errStr) const {
         // Actions profiles aren't allowed.
         errStr = "Action profiles not allowed on phase 0 table"_cs;
-        auto implProp = P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
+        auto implProp = P4V1::V1Model::instance().tableAttributes.tableImplementation.name;
         if (table->properties->getProperty(implProp) != nullptr) return false;
 
         errStr = "Counters not allowed on phase 0 table"_cs;
         // Counters aren't allowed.
-        auto counterProp = P4V1::V1Model::instance.tableAttributes.counters.name;
+        auto counterProp = P4V1::V1Model::instance().tableAttributes.counters.name;
         if (table->properties->getProperty(counterProp) != nullptr) return false;
 
         // Meters aren't allowed.
         errStr = "Meters not allowed on phase 0 table"_cs;
-        auto meterProp = P4V1::V1Model::instance.tableAttributes.meters.name;
+        auto meterProp = P4V1::V1Model::instance().tableAttributes.meters.name;
         if (table->properties->getProperty(meterProp) != nullptr) return false;
 
         // Statefuls aren't allowed.
