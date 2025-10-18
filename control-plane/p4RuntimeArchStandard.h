@@ -65,10 +65,10 @@ template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.counters.name;
+        return P4V1::V1Model::instance().tableAttributes.counters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().counter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directCounter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
@@ -87,10 +87,10 @@ template <>
 struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "counter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.counters.name;
+        return P4V1::V1Model::instance().tableAttributes.counters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().counter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directCounter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::CounterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::CounterSpec;
@@ -156,10 +156,10 @@ template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
     static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.meters.name;
+        return P4V1::V1Model::instance().tableAttributes.meters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().meter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directMeter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
@@ -176,10 +176,10 @@ template <>
 struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring name() { return "meter"_cs; }
     static const cstring directPropertyName() {
-        return P4V1::V1Model::instance.tableAttributes.meters.name;
+        return P4V1::V1Model::instance().tableAttributes.meters.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
-    static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().meter.name; }
+    static const cstring directTypeName() { return P4V1::V1Model::instance().directMeter.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     static p4configv1::MeterSpec::Unit mapUnitName(const cstring name) {
         using p4configv1::MeterSpec;
@@ -301,9 +301,9 @@ template <>
 struct ActionProfileTraits<Arch::V1MODEL> {
     static const cstring name() { return "action profile"_cs; }
     static const cstring propertyName() {
-        return P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
+        return P4V1::V1Model::instance().tableAttributes.tableImplementation.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_profile.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_profile.name; }
     static const cstring sizeParamName() { return "size"_cs; }
 };
 
@@ -311,9 +311,9 @@ template <>
 struct ActionProfileTraits<Arch::V1MODEL2020> {
     static const cstring name() { return "action profile"_cs; }
     static const cstring propertyName() {
-        return P4V1::V1Model::instance.tableAttributes.tableImplementation.name;
+        return P4V1::V1Model::instance().tableAttributes.tableImplementation.name;
     }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_profile.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_profile.name; }
     static const cstring sizeParamName() { return "size"_cs; }
 };
 
@@ -341,13 +341,13 @@ struct ActionSelectorTraits;
 template <>
 struct ActionSelectorTraits<Arch::V1MODEL> : public ActionProfileTraits<Arch::V1MODEL> {
     static const cstring name() { return "action selector"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_selector.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_selector.name; }
 };
 
 template <>
 struct ActionSelectorTraits<Arch::V1MODEL2020> : public ActionProfileTraits<Arch::V1MODEL2020> {
     static const cstring name() { return "action selector"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.action_selector.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().action_selector.name; }
 };
 
 template <>
@@ -369,7 +369,7 @@ struct RegisterTraits;
 template <>
 struct RegisterTraits<Arch::V1MODEL> {
     static const cstring name() { return "register"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().registers.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
@@ -380,7 +380,7 @@ struct RegisterTraits<Arch::V1MODEL> {
 template <>
 struct RegisterTraits<Arch::V1MODEL2020> {
     static const cstring name() { return "register"_cs; }
-    static const cstring typeName() { return P4V1::V1Model::instance.registers.name; }
+    static const cstring typeName() { return P4V1::V1Model::instance().registers.name; }
     static const cstring sizeParamName() { return "size"_cs; }
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
