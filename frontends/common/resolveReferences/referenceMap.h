@@ -65,9 +65,11 @@ class DeclarationLookup {
 
 /// Class used to encode maps from paths to declarations.
 class ReferenceMap final : public ProgramMap, public NameGenerator, public DeclarationLookup {
+#ifdef SUPPORT_P4_14
     /// If `isv1` is true, then the map is for a P4_14 program
     /// (possibly translated into P4_16).
-    bool isv1;
+    bool isv1 = false;
+#endif
 
     /// Maps paths in the program to declarations.
     absl::flat_hash_map<const IR::Path *, const IR::IDeclaration *, Util::Hash> pathToDeclaration;
@@ -102,19 +104,19 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
 
     void dbprint(std::ostream &cout) const override;
 
-    /// Set boolean indicating whether map is for a P4_14 program to @p isV1.
-    void setIsV1(bool isv1) { this->isv1 = isv1; }
-    void setAnyOrder(bool anyOrder) { this->isv1 = anyOrder; }
-
     /// Generate a name from @p base that fresh for the program.
     cstring newName(std::string_view base) override;
 
     /// Clear the reference map
     void clear();
 
+#ifdef SUPPORT_P4_14
     /// @returns @true if this map is for a P4_14 program
     bool isV1() const { return isv1; }
-
+    /// Set boolean indicating whether map is for a P4_14 program to @p isV1.
+    void setIsV1(bool isv1) { this->isv1 = isv1; }
+    void setAnyOrder(bool anyOrder) { this->isv1 = anyOrder; }
+#endif
     /// @returns @true if @p decl is used in the program.
     bool isUsed(const IR::IDeclaration *decl) const { return used.count(decl) > 0; }
 
