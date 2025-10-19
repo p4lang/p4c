@@ -2,7 +2,7 @@
 #define FRONTENDS_P4_GETV1MODELVERSION_H_
 
 #include "absl/strings/numbers.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
+#include "backends/bmv2/common/v1model.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
