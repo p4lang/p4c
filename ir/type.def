@@ -964,7 +964,25 @@ class Type_Newtype : Type_Declaration, IAnnotated {
 #nodbprint
 }
 
-/// FIXME: Only required for P4-14. Remove.
+
+/// FIXME: Only required for P4-14 because Type_Extern uses Attribute. Remove.
+class AttribLocal : Expression, IDeclaration {
+    ID  name;
+    ID getName() const override { return name; }
+    dbprint { out << name; }
+}
+
+/// FIXME: Only required for P4-14 because Type_Extern uses Attribute. Remove.
+class AttribLocals : ISimpleNamespace {
+    inline NameMap<AttribLocal> locals = {};
+#nodbprint
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return locals.valueEnumerator()->as<const IDeclaration *>(); }
+    IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
+    IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }
+}
+
+/// FIXME: Only required for P4-14 because Type_Extern uses Attribute. Remove.
 class Attribute : Declaration {
     NullOK Type type = nullptr;
     NullOK AttribLocals locals = nullptr;

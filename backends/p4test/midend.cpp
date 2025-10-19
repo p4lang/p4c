@@ -80,8 +80,10 @@ class SkipControls : public P4::ActionSynthesisPolicy {
 };
 
 MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
+#ifdef SUPPORT_P4_14
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
+#endif
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 

@@ -37,7 +37,9 @@ class ToP4;
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
 extern std::filesystem::path p4includePath;
+#ifdef SUPPORT_P4_14
 extern std::filesystem::path p4_14includePath;
+#endif
 
 /// Try to guess whether a file is a "system" file
 bool isSystemFile(cstring filename);

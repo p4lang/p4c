@@ -140,17 +140,25 @@ macro(add_parser pname)
 
 endmacro(add_parser)
 
-add_parser(v1)
-add_parser(p4)
 
-add_library (frontend-parser-gen OBJECT ${p4PARSER_GEN_SRCS} ${v1PARSER_GEN_SRCS})
+
+add_parser(p4)
+set(FRONTEND_GEN_SOURCES ${p4PARSER_GEN_SRCS})
+
+if (SUPPORT_P4_14)
+add_parser(v1)
+set (FRONTEND_GEN_SOURCES ${FRONTEND_GEN_SOURCES} ${v1PARSER_GEN_SRCS})
+endif ()
+
+
+add_library (frontend-parser-gen OBJECT ${FRONTEND_GEN_SOURCES})
 target_link_libraries (frontend-parser-gen
   # Make sure to also expose the compile flags associated with the ir library.
   PUBLIC ir
   # These libraries are exposed by a header.
   PUBLIC p4ctoolkit
 )
-add_dependencies (frontend-parser-gen mkp4dirs mkv1dirs ir-generated)
+add_dependencies (frontend-parser-gen mkp4dirs ir-generated)
 
 
 
@@ -161,7 +169,11 @@ set (FRONTEND_SOURCES
   )
 
 if (SUPPORT_P4_14)
+  add_dependencies (frontend-parser-gen mkv1dirs)
+
   set (V1_FRONTEND_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/parsers/parserDriver_v1.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/p4/typeChecking/typeCheckExpr_v1.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/typecheck.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/header_type.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/v1.cpp

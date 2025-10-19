@@ -89,8 +89,8 @@ control MyIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-    X tmp = X.Field_0;
-    Y tmp2 = Y.Field_00;
+      X tmp = X.Field_0;
+      Y tmp2 = Y.Field_00;
       if (tmp == X.Field_0){
         if (tmp2 == Y.Field_00){
           standard_metadata.egress_spec = port;
