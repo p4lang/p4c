@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 
+#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/getV1ModelVersion.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
