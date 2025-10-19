@@ -57,19 +57,21 @@ class JSONLoader {
     std::unordered_map<int, IR::Node *> &node_refs;
     std::unique_ptr<JsonData> json_root;
     const JsonData *json = nullptr;
+    JsonData::LocationInfo *locinfo = nullptr;
 
-    JSONLoader(const JsonData *json, std::unordered_map<int, IR::Node *> &refs)
-        : node_refs(refs), json(json) {}
+    JSONLoader(const JsonData *json, std::unordered_map<int, IR::Node *> &refs,
+               JsonData::LocationInfo *locinfo)
+        : node_refs(refs), json(json), locinfo(locinfo) {}
 
  public:
-    explicit JSONLoader(std::istream &in)
-        : node_refs(*(new std::unordered_map<int, IR::Node *>())) {
+    explicit JSONLoader(std::istream &in, JsonData::LocationInfo *li = nullptr)
+        : node_refs(*(new std::unordered_map<int, IR::Node *>())), locinfo(li) {
         in >> json_root;
         json = json_root.get();
     }
 
     JSONLoader(const JSONLoader &unpacker, std::string_view field)
-        : node_refs(unpacker.node_refs), json(nullptr) {
+        : node_refs(unpacker.node_refs), json(nullptr), locinfo(unpacker.locinfo) {
         if (!unpacker) return;
         if (auto *obj = unpacker.json->to<JsonObject>()) {
             if (auto it = obj->find(field); it != obj->end()) {
@@ -86,6 +88,15 @@ class JSONLoader {
     template <typename T>
     [[nodiscard]] const T &as() const {
         return json->as<T>();
+    }
+
+    std::string locdesc(const JsonData &d) const {
+        if (!locinfo) return "";
+        return locinfo->desc(d);
+    }
+    std::string locdesc() const {
+        if (!json) return "";
+        return locdesc(*json);
     }
 
  private:
@@ -387,12 +398,12 @@ class JSONLoader {
  public:
     template <typename T>
     void load(const JsonData &json, T &v) {
-        JSONLoader(&json, node_refs).unpack_json(v);
+        JSONLoader(&json, node_refs, locinfo).unpack_json(v);
     }
 
     template <typename T>
     void load(const std::unique_ptr<JsonData> &json, T &v) {
-        JSONLoader(json.get(), node_refs).unpack_json(v);
+        JSONLoader(json.get(), node_refs, locinfo).unpack_json(v);
     }
 
     template <typename T>
