@@ -29,7 +29,11 @@ namespace P4 {
 
 const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
+#ifdef SUPPORT_P4_14
                                    CompilerOptions::FrontendVersion version) {
+#else
+                                   CompilerOptions::FrontendVersion /*version*/) {
+#endif
     std::istringstream stream(input);
     const IR::P4Program *result = nullptr;
 #ifdef SUPPORT_P4_14

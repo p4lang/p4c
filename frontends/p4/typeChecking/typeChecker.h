@@ -322,7 +322,9 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::SelectExpression *expression);
     const IR::Node *postorder(const IR::DefaultExpression *expression);
     const IR::Node *postorder(const IR::This *expression);
+#ifdef SUPPORT_P4_14
     const IR::Node *postorder(const IR::AttribLocal *local);
+#endif
     const IR::Node *postorder(const IR::ActionList *al);
 
     const IR::Node *postorder(const IR::ReturnStatement *stat);
@@ -470,7 +472,9 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::SelectExpression *expression) override;
     void postorder(const IR::DefaultExpression *expression) override;
     void postorder(const IR::This *expression) override;
+#ifdef SUPPORT_P4_14
     void postorder(const IR::AttribLocal *local) override;
+#endif
     void postorder(const IR::ActionList *al) override;
 
     void postorder(const IR::ReturnStatement *stat) override;
@@ -609,7 +613,9 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::SelectExpression *expression) override;
     const IR::Node *postorder(IR::DefaultExpression *expression) override;
     const IR::Node *postorder(IR::This *expression) override;
+#ifdef SUPPORT_P4_14
     const IR::Node *postorder(IR::AttribLocal *local) override;
+#endif
     const IR::Node *postorder(IR::ActionList *al) override;
 
     const IR::Node *postorder(IR::ReturnStatement *stat) override;

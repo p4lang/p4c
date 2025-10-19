@@ -450,20 +450,6 @@ class V1Control : IAnnotated {
     toString { return node_type_name() + " " + name; }
 }
 
-class AttribLocal : Expression, IDeclaration {
-    ID  name;
-    ID getName() const override { return name; }
-    dbprint { out << name; }
-}
-
-class AttribLocals : ISimpleNamespace {
-    inline NameMap<AttribLocal> locals = {};
-#nodbprint
-    Util::Enumerator<IDeclaration> *getDeclarations() const override {
-        return locals.valueEnumerator()->as<const IDeclaration *>(); }
-    IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
-    IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }
-}
 
 class GlobalRef : Expression {
     Node        obj;            // FIXME -- should be IInstance, but IRgen doesn't allow

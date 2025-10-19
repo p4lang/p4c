@@ -59,6 +59,7 @@ TEST(IR, Equiv) {
     EXPECT_TRUE(list1->equiv(*list2));
     EXPECT_FALSE(list1->equiv(*list3));
 
+#ifdef SUPPORT_P4_14
     auto *pr1 = new IR::V1Program;
     auto *pr2 = pr1->clone();
     pr1->add("a"_cs, a1);
@@ -71,4 +72,5 @@ TEST(IR, Equiv) {
     pr1->add("lista"_cs, list1);
     pr2->add("listb"_cs, list1);
     EXPECT_FALSE(pr1->equiv(*pr2));
+#endif
 }

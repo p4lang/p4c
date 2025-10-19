@@ -1480,7 +1480,9 @@ P4RuntimeAPI P4RuntimeSerializer::generateP4Runtime(const IR::P4Program *program
     // Generate a new version of the program that satisfies the prerequisites of
     // the P4Runtime analysis code.
     P4::ReferenceMap refMap;
+#ifdef SUPPORT_P4_14
     refMap.setIsV1(true);
+#endif
     P4::TypeMap typeMap;
     auto *evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager p4RuntimeFixups = {

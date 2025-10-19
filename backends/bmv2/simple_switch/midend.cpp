@@ -132,9 +132,11 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::TableHit(&typeMap),
              new P4::EliminateSwitch(&typeMap),
              new P4::RemoveLeftSlices(&typeMap),
-             // p4c-bm removed unused action parameters. To produce a compatible
-             // control plane API, we remove them as well for P4-14 programs.
+// p4c-bm removed unused action parameters. To produce a compatible
+// control plane API, we remove them as well for P4-14 programs.
+#ifdef SUPPORT_P4_14
              {isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr},
+#endif
              new P4::TypeChecking(&refMap, &typeMap),
              {options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr},
              evaluator,
