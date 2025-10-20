@@ -58,6 +58,7 @@ class JSONLoader {
     std::unique_ptr<JsonData> json_root;
     const JsonData *json = nullptr;
     JsonData::LocationInfo *locinfo = nullptr;
+    bool (*errfn)(const JSONLoader &, std::string_view msg) = nullptr;
 
     JSONLoader(const JsonData *json, std::unordered_map<int, IR::Node *> &refs,
                JsonData::LocationInfo *locinfo)
@@ -98,19 +99,23 @@ class JSONLoader {
         if (!json) return "";
         return locdesc(*json);
     }
+    bool error(std::string_view msg) const {
+        if ((!errfn || errfn(*this, msg)) && JsonData::strict) throw JsonData::error(msg, json);
+        return false;
+    }
 
  private:
     const IR::Node *get_node() {
         if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
         int id;
-        auto success = load("Node_ID", id);
+        auto success = load("Node_ID", id) || error("missing field Node_ID");
         if (!success) {
             return nullptr;
         }
         if (id >= 0) {
             if (node_refs.find(id) == node_refs.end()) {
                 cstring type;
-                auto success = load("Node_Type", type);
+                auto success = load("Node_Type", type) || error("missing field Node_Type");
                 if (!success) {
                     return nullptr;
                 }
@@ -261,20 +266,20 @@ class JSONLoader {
 
     template <typename T, typename U>
     void unpack_json(std::pair<T, U> &v) {
-        load("first", v.first);
-        load("second", v.second);
+        load("first", v.first) || error("missing field first");
+        load("second", v.second) || error("missing field second");
     }
 
     template <typename T>
     void unpack_json(std::optional<T> &v) {
         bool isValid = false;
-        load("valid", isValid);
+        load("valid", isValid) || error("missing field valid");
         if (!isValid) {
             v = std::nullopt;
             return;
         }
         T value;
-        auto success = load("value", value);
+        auto success = load("value", value) || error("missing field value");
         if (!success) {
             v = std::nullopt;
             return;
@@ -293,7 +298,7 @@ class JSONLoader {
                                                                         Variant &variant) {
         if (N == target) {
             variant.template emplace<N>();
-            load("value", std::get<N>(variant));
+            load("value", std::get<N>(variant)) || error("missing field value");
         } else
             unpack_variant<N + 1>(target, variant);
     }
@@ -301,7 +306,7 @@ class JSONLoader {
     template <class... Types>
     void unpack_json(std::variant<Types...> &v) {
         int index = -1;
-        load("variant_index", index);
+        load("variant_index", index) || error("missing field variant_index");
         unpack_variant<0>(index, v);
     }
 

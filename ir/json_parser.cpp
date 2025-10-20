@@ -70,6 +70,8 @@ std::ostream &operator<<(std::ostream &out, const JsonData *json) {
     return out;
 }
 
+void dump(const JsonData *json) { std::cout << json << std::endl; }
+
 bool JsonData::strict = false;
 
 static inline std::streamoff lastpos(std::istream &in) {
@@ -284,6 +286,11 @@ std::string JsonData::LocationInfo::desc(const JsonData &d) {
         return name + " lines " + std::to_string(s.first) + " to " + std::to_string(e.first) + ":";
     return name + " line " + std::to_string(s.first) + " cols " + std::to_string(s.second) +
            " to " + std::to_string(e.second) + ":";
+}
+
+std::string JsonData::LocationInfo::desc(const JsonData::error &e) {
+    if (e.data) return desc(*e.data);
+    return desc(e.loc);
 }
 
 }  // namespace P4

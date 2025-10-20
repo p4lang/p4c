@@ -30,9 +30,12 @@ class JsonData : public ICastable {
 
     friend std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
     struct error : public std::runtime_error {
-        std::streamoff loc;
-        error(const char *what, std::streamoff l) : runtime_error(what), loc(l) {}
-        error(const std::string &what, std::streamoff l) : runtime_error(what), loc(l) {}
+        const JsonData *data = nullptr;  // object/item with error if parsed
+        std::streamoff loc = -1;         // location of the error if no object
+        error(const std::string_view what, std::streamoff l)
+            : runtime_error(std::string(what)), loc(l) {}
+        error(const std::string_view what, const JsonData *d)
+            : runtime_error(std::string(what)), data(d) {}
     };
 
     class LocationInfo {
@@ -47,6 +50,7 @@ class JsonData : public ICastable {
         std::pair<int, int> loc(std::streamoff l);
         std::string desc(std::streamoff l);
         std::string desc(const JsonData &d);
+        std::string desc(const error &e);
     };
 
     DECLARE_TYPEINFO(JsonData);
