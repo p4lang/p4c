@@ -333,9 +333,10 @@ class JSONGenerator {
         end_object(t);
     }
 
+    // This should more naturally be `generate(const T *v)`, but the extra `const &` is needed
+    // to avoid ambiguous overload failures between this and the array generate below
     template <typename T>
-    std::enable_if_t<std::is_pointer_v<T> && has_toJSON<std::remove_pointer_t<T>>::value> generate(
-        T v) {
+    void generate(const T *const &v) {
         if (v)
             generate(*v);
         else
