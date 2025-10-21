@@ -5,6 +5,7 @@
 
 #include "converters.h"
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/p4-14/header_type.h"
@@ -12,7 +13,6 @@
 #include "frontends/p4/coreLibrary.h"
 #include "lib/big_int_util.h"
 #include "programStructure.h"
-#include "v1model.h"
 
 namespace P4::P4V1 {
 
