@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_
-#define FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_
+#ifndef BACKENDS_BMV2_COMMON_V1MODEL_H_
+#define BACKENDS_BMV2_COMMON_V1MODEL_H_
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
@@ -357,4 +357,4 @@ class V1Model : public Model::Model {
 
 }  // namespace P4::P4V1
 
-#endif /* FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_ */
+#endif /* BACKENDS_BMV2_COMMON_V1MODEL_H_ */

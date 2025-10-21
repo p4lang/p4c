@@ -20,12 +20,12 @@ limitations under the License.
 #include <set>
 #include <vector>
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
-#include "v1model.h"
 
 namespace P4::P4V1 {
 

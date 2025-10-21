@@ -18,12 +18,12 @@
 
 #include "mirror.h"
 
+#include "backends/bmv2/common/v1model.h"
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
 #include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
 #include "backends/tofino/bf-p4c/common/ir_utils.h"
 #include "backends/tofino/bf-p4c/lib/pad_alignment.h"
 #include "backends/tofino/bf-p4c/specs/device.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"

@@ -18,8 +18,8 @@ limitations under the License.
 
 #include "JsonObjects.h"
 #include "backend.h"
+#include "backends/bmv2/common/v1model.h"
 #include "extern.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "lib/algorithm.h"
 
