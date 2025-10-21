@@ -105,22 +105,21 @@ class JSONLoader {
     }
 
  private:
-    const IR::Node *get_node() {
+    const IR::Node *get_node(NodeFactoryFn factory = nullptr) {
         if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
         int id;
         auto success = load("Node_ID", id) || error("missing field Node_ID");
-        if (!success) {
-            return nullptr;
-        }
+        if (!success) return nullptr;
         if (id >= 0) {
             if (node_refs.find(id) == node_refs.end()) {
-                cstring type;
-                auto success = load("Node_Type", type) || error("missing field Node_Type");
-                if (!success) {
-                    return nullptr;
+                if (!factory) {
+                    cstring type;
+                    auto success = load("Node_Type", type) || error("missing field Node_Type");
+                    if (!success) return nullptr;
+                    factory = get(IR::unpacker_table, type);
                 }
-                if (auto fn = get(IR::unpacker_table, type)) {
-                    node_refs[id] = fn(*this);
+                if (factory) {
+                    node_refs[id] = factory(*this);
                     // Creating JsonObject from source_info read from jsonFile
                     // and setting SourceInfo for each node
                     // when "--fromJSON" flag is used
@@ -166,29 +165,32 @@ class JSONLoader {
 
     template <typename T>
     void unpack_json(IR::Vector<T> &v) {
-        v = *IR::Vector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::Vector<T>::fromJSON))->as<IR::Vector<T>>();
     }
     template <typename T>
     void unpack_json(const IR::Vector<T> *&v) {
-        v = IR::Vector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::Vector<T>::fromJSON))->checkedTo<IR::Vector<T>>();
     }
     template <typename T>
     void unpack_json(IR::IndexedVector<T> &v) {
-        v = *IR::IndexedVector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))->as<IR::IndexedVector<T>>();
     }
     template <typename T>
     void unpack_json(const IR::IndexedVector<T> *&v) {
-        v = IR::IndexedVector<T>::fromJSON(*this);
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))
+                ->checkedTo<IR::IndexedVector<T>>();
     }
     template <class T, template <class K, class V, class COMP, class ALLOC> class MAP, class COMP,
               class ALLOC>
     void unpack_json(IR::NameMap<T, MAP, COMP, ALLOC> &m) {
-        m = *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(*this);
+        m = get_node(NodeFactoryFn(&IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON))
+                ->as<IR::NameMap<T, MAP, COMP, ALLOC>>();
     }
     template <class T, template <class K, class V, class COMP, class ALLOC> class MAP, class COMP,
               class ALLOC>
     void unpack_json(const IR::NameMap<T, MAP, COMP, ALLOC> *&m) {
-        m = IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(*this);
+        m = get_node(NodeFactoryFn(&IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON))
+                ->checkedTo<IR::NameMap<T, MAP, COMP, ALLOC>>();
     }
 
     template <typename K, typename V>
@@ -362,21 +364,21 @@ class JSONLoader {
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::INode, T> &&
                      std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T *&v) {
         v = T::fromJSON(*this);
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::INode, T> &&
                      std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = *(T::fromJSON(*this));
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::INode, T>::value &&
                      !std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = T::fromJSON(*this);
