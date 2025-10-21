@@ -98,6 +98,7 @@
 
 #include "midend.h"
 
+#include "backends/bmv2/common/v1model.h"
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/control-plane/runtime.h"
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
@@ -130,7 +131,6 @@
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
