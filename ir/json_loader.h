@@ -442,7 +442,7 @@ class JSONLoader {
 
 template <class T>
 IR::Vector<T>::Vector(JSONLoader &json) : VectorBase(json) {
-    json.load("vec", vec);
+    json.load("vec", vec) || json.error("missing field vec");
 }
 template <class T>
 IR::Vector<T> *IR::Vector<T>::fromJSON(JSONLoader &json) {
@@ -450,7 +450,7 @@ IR::Vector<T> *IR::Vector<T>::fromJSON(JSONLoader &json) {
 }
 template <class T>
 IR::IndexedVector<T>::IndexedVector(JSONLoader &json) : Vector<T>(json) {
-    json.load("declarations", declarations);
+    json.load("declarations", declarations) || json.error("missing field declarations");
 }
 template <class T>
 IR::IndexedVector<T> *IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
@@ -460,7 +460,7 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 IR::NameMap<T, MAP, COMP, ALLOC>::NameMap(JSONLoader &json) : Node(json) {
-    json.load("symbols", symbols);
+    json.load("symbols", symbols) || json.error("missing field symbols");
 }
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
