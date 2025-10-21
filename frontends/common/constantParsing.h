@@ -29,6 +29,9 @@ class SourceInfo;
 
 namespace P4 {
 
+class JSONGenerator;
+class JSONLoader;
+
 /**
  * An unparsed numeric constant. We produce these as token values during
  * lexing. The parser is responsible for actually interpreting the raw text as a
@@ -67,6 +70,8 @@ struct UnparsedConstant {
     unsigned skip;  /// An ignored prefix of the numeric constant (e.g. '0x').
     unsigned base;  /// The base in which the constant is expressed.
     bool hasWidth;  /// If true, a bitwidth and separator are present.
+    void toJSON(JSONGenerator &) const;
+    static UnparsedConstant fromJSON(JSONLoader &);
 };
 
 std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant);
