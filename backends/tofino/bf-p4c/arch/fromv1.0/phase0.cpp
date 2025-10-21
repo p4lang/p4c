@@ -20,6 +20,7 @@
 
 #include <algorithm>
 
+#include "backends/bmv2/common/v1model.h"
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
 #include "backends/tofino/bf-p4c/arch/fromv1.0/programStructure.h"
 #include "backends/tofino/bf-p4c/arch/tna.h"
@@ -31,7 +32,6 @@
 #include "backends/tofino/bf-p4c/parde/field_packing.h"
 #include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/typeChecking/typeChecker.h"

@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "p4RuntimeArchHandler.h"

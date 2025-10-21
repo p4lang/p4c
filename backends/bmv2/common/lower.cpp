@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "lower.h"
 
-#include "frontends/p4-14/fromv1.0/v1model.h"
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 #include "lib/big_int_util.h"
