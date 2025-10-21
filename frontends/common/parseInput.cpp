@@ -41,11 +41,10 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
         result =
             parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine);
     else
-#else
-    result = P4ParserDriver::parse(stream, sourceFile, sourceLine);
 #endif
+        result = P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
-        if (::P4::errorCount() > 0) {
+    if (::P4::errorCount() > 0) {
         ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
                     ::P4::errorCount());
         return nullptr;
