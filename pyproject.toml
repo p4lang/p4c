@@ -6,12 +6,14 @@ authors = [{ name = "The P4 Language Consortium", email = "info@p4.org" }]
 requires-python = ">=3.8"
 readme = "README.md"
 license = "Apache"
+# for grpcio, 1.75.1 works fine for us, but on Ubuntu 22 and 24, the dependency
+# 'split' needs to use a different version under the hood. Thus we give a range.
 dependencies = [
     "pyroute2==0.7.3",
     "ply==3.11",
     "scapy==2.5.0",
     "googleapis-common-protos==1.53.0",
-    "grpcio==1.67.0 ; python_version > '3.6'",
+    "grpcio<=1.75.1,>=1.67.0; python_version > '3.6'",
     "grpcio==1.48.2 ; python_version <= '3.6'",
     "thrift==0.21.0",
     "protobuf==3.20.2 ; python_version > '3.6'",
