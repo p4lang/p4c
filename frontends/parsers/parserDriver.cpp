@@ -13,8 +13,10 @@
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
+#ifdef SUPPORT_P4_14
 #include "frontends/parsers/v1/v1lexer.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
+#endif
 #include "lib/error.h"
 
 #ifdef HAVE_LIBBOOST_IOSTREAMS
@@ -306,6 +308,7 @@ void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
 
 }  // namespace P4
 
+#ifdef SUPPORT_P4_14
 namespace P4::V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
@@ -363,3 +366,4 @@ IR::Vector<IR::Annotation> V1ParserDriver::takePragmasAsVector() {
 }
 
 }  // namespace P4::V1
+#endif
