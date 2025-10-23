@@ -100,17 +100,6 @@ class P4Thread {
     inline Vector<IR::P4Parser> parsers = {};
     const IR::P4Control *mau = nullptr;
     const IR::P4Control *deparser = nullptr;
-    toJSON {
-        json.emit("parsers", parsers);
-        json.emit("mau", mau);
-        json.emit("deparser", deparser); }
-    fromJSON {
-        IR::BFN::P4Thread * thread = new IR::BFN::P4Thread();
-        json.load("parsers", thread->parsers);
-        json.load("mau", thread->mau);
-        json.load("deparser", thread->deparser);
-        return thread;
-    }
 #apply
     visit_children {
         parsers.parallel_visit_children(v, n);

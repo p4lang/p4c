@@ -583,15 +583,15 @@ IR::MAU::HashFunction *IR::MAU::HashFunction::fromJSON(JSONLoader &json) {
     if (!json) return nullptr;
     auto *rv = new HashFunction;
     int type = 0;
-    json.load("type", type);
+    json.load("type", type) || json.error("missing field type");
     rv->type = static_cast<decltype(rv->type)>(type);
-    json.load("size", rv->size);
-    json.load("msb", rv->msb);
-    json.load("reverse", rv->reverse);
-    json.load("poly", rv->poly);
-    json.load("init", rv->init);
-    json.load("xor", rv->final_xor);
-    json.load("extend", rv->extend);
+    json.load("size", rv->size) || json.error("missing field size");
+    json.load("msb", rv->msb) || json.error("missing field msb");
+    json.load("reverse", rv->reverse) || json.error("missing field reverse");
+    json.load("poly", rv->poly) || json.error("missing field poly");
+    json.load("init", rv->init) || json.error("missing field init");
+    json.load("xor", rv->final_xor) || json.error("missing field final_xor");
+    json.load("extend", rv->extend) || json.error("missing field extend");
     return rv;
 }
 
