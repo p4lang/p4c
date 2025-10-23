@@ -78,7 +78,7 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
         fclose(file);
     } else {
         auto preprocessorResult = options.preprocess();
-        if (::P4::errorCount() > 0 || !preprocessorResult.has_value()) {
+        if (!preprocessorResult.has_value()) {
             return nullptr;
         }
         // Need to assign file here because the parser requires an lvalue.
