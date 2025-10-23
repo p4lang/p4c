@@ -18,6 +18,8 @@ limitations under the License.
 
 #include "frontends/common/options.h"
 #include "ir/ir.h"
+#include "ir/json_generator.h"
+#include "ir/json_loader.h"
 #include "lib/big_int_util.h"
 #include "lib/source_file.h"
 
@@ -32,6 +34,22 @@ std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {
 bool operator<(const UnparsedConstant &a, const UnparsedConstant &b) {
     return std::tie(a.text, a.skip, a.base, a.hasWidth) <
            std::tie(b.text, b.skip, b.base, b.hasWidth);
+}
+
+void UnparsedConstant::toJSON(JSONGenerator &json) const {
+    json.emit("text", text);
+    json.emit("skip", skip);
+    json.emit("base", base);
+    json.emit("hasWidth", hasWidth);
+}
+
+UnparsedConstant UnparsedConstant::fromJSON(JSONLoader &json) {
+    UnparsedConstant rv = {};
+    json.load("text", rv.text);
+    json.load("skip", rv.skip);
+    json.load("base", rv.base);
+    json.load("hasWidth", rv.hasWidth);
+    return rv;
 }
 
 /// A helper to parse constants which have an explicit width;
