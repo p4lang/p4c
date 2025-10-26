@@ -15,6 +15,8 @@
 namespace P4 {
 
 class JsonData : public ICastable {
+    std::streamoff start = -1, finish = -1;  // location in istream read from
+
  protected:
     JsonData() {}
     JsonData(const JsonData &) = default;
@@ -24,6 +26,32 @@ class JsonData : public ICastable {
 
  public:
     virtual ~JsonData() = default;
+    static bool strict;  // enforce strict syntax checking of json on input, default false.
+
+    friend std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
+    struct error : public std::runtime_error {
+        const JsonData *data = nullptr;  // object/item with error if parsed
+        std::streamoff loc = -1;         // location of the error if no object
+        error(const std::string_view what, std::streamoff l)
+            : runtime_error(std::string(what)), loc(l) {}
+        error(const std::string_view what, const JsonData *d)
+            : runtime_error(std::string(what)), data(d) {}
+    };
+
+    class LocationInfo {
+        std::string name;
+        std::istream &in;
+        std::streamoff scanned = 0;
+        std::map<std::streamoff, int> line;  // map offset (to start of line) to linenumber
+     public:
+        LocationInfo(std::string n, std::istream &i) : name(n), in(i) {
+            line[0] = 1;  // line 1 at the start of the file
+        }
+        std::pair<int, int> loc(std::streamoff l);
+        std::string desc(std::streamoff l);
+        std::string desc(const JsonData &d);
+        std::string desc(const error &e);
+    };
 
     DECLARE_TYPEINFO(JsonData);
 };

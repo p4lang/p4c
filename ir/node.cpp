@@ -55,7 +55,7 @@ void IR::Node::toJSON(JSONGenerator &json) const {
 }
 
 IR::Node::Node(JSONLoader &json) : id(-1) {
-    json.load("Node_ID", id);
+    json.load("Node_ID", id) || json.error("missing field Node_Id");
     if (id < 0)
         id = currentId++;
     else if (id >= currentId)

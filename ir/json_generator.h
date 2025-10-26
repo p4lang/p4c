@@ -311,13 +311,15 @@ class JSONGenerator {
     }
 
     template <typename T>
-    std::enable_if_t<has_toJSON<T>::value && !std::is_base_of_v<IR::Node, T>> generate(const T &v) {
+    std::enable_if_t<has_toJSON<T>::value && !std::is_base_of_v<IR::INode, T>> generate(
+        const T &v) {
         auto t = begin_object();
         v.toJSON(*this);
         end_object(t);
     }
 
-    void generate(const IR::Node &v) {
+    void generate(const IR::INode &v_) {
+        auto &v = *v_.getNode();
         auto t = begin_object();
         if (node_refs.find(v.id) != node_refs.end()) {
             emit("Node_ID", v.id);

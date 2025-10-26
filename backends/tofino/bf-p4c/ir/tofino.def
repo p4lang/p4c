@@ -95,19 +95,6 @@ class BFN::Pipe {
             return parsers == a.parsers && mau == a.mau && deparser == a.deparser &&
                 hw_constrained_fields == a.hw_constrained_fields;
         }
-        toJSON {
-            json.emit("parser", parsers);
-            json.emit("mau", mau);
-            json.emit("deparser", deparser);
-            json.emit("hw_constrained_fields",  hw_constrained_fields); }
-        fromJSON {
-            IR::BFN::Pipe::thread_t * thread = new IR::BFN::Pipe::thread_t();
-            json.load("parsers", thread->parsers);
-            json.load("mau", thread->mau);
-            json.load("deparser", thread->deparser);
-            json.load("hw_constrained_fields", thread->hw_constrained_fields);
-            return thread;
-        }
     }
     thread_t[2] thread = {};
 

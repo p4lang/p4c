@@ -272,8 +272,11 @@ class InOutReference : Expression {
     /// The value of the reference after it was resolved.
     Expression resolvedRef;
 
+    // FIXME -- this will fail trying to deserialize `ref` from the json.  There's no
+    // good way of getting to the `ref` field in the json object that can be done in the
+    // ctor initializer list -- need to call `json.load("ref", ref);`
     InOutReference(JSONLoader & json) : Expression(json), ref(json) {
-        json.load("resolvedRef", resolvedRef);
+        json.load("resolvedRef", resolvedRef) || json.error("missing field resolvedRef");
     }
 
     InOutReference(Util::SourceInfo srcInfo, IR::StateVariable &ref, const Expression* resolvedRef) :
