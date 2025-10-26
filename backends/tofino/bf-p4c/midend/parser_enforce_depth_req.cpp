@@ -24,9 +24,9 @@
 #include <boost/property_map/transform_value_property_map.hpp>
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend/parser_graph.h"
 #include "backends/tofino/bf-p4c/parde/parser_loops_info.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace BFN {
 

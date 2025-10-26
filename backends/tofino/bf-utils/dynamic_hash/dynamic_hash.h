@@ -1,8 +1,7 @@
 #ifndef BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_
 #define BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "backends/tofino/bf-utils/dynamic_hash/bfn_hash_algorithm.h"
 

@@ -203,7 +203,6 @@ set (BF_P4C_IR_SRCS
   bf-p4c/ir/control_flow_visitor.cpp
   bf-p4c/ir/ir_enums.cpp
   bf-p4c/ir/gateway_control_flow.cpp
-  bf-p4c/ir/gress.cpp
   bf-p4c/ir/mau.cpp
   bf-p4c/ir/thread_visitor.cpp
   bf-p4c/ir/tofino.cpp
@@ -224,6 +223,7 @@ foreach(src IN LISTS BF_P4C_IR_SRCS)
   set(QUAL_BF_P4C_IR_SRCS ${QUAL_BF_P4C_IR_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
 endforeach()
 set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_BF_P4C_IR_SRCS} PARENT_SCOPE)
+set(EXTENSION_IR_LIBS ${EXTENSION_IR_LIBS} tofinospecs PARENT_SCOPE)
 
 
 add_subdirectory(bf-p4c)

@@ -29,11 +29,11 @@
 #include "backends/tofino/bf-p4c/phv/analysis/dominator_tree.h"
 #include "backends/tofino/bf-p4c/phv/analysis/non_mocha_dark_fields.h"
 #include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "backends/tofino/bf-p4c/phv/utils/live_range_report.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/symbitmatrix.h"
 
 // Structure that represents the live range map.
