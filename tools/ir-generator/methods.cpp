@@ -369,9 +369,11 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << " {" << std::endl;
           for (auto f : *cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
-                  continue;  // FIXME -- deal with SourcInfo
-              buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");"
-                  << std::endl;
+                  continue;  // FIXME -- deal with SourceInfo
+              buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ")";
+              if (f->isInline || !f->nullOK)
+                  buf << " || json.error(\"missing field " << f->name << "\")";
+              buf << ";" << std::endl;
           }
           buf << "}";
           return {buf};

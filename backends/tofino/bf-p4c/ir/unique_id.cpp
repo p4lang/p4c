@@ -36,10 +36,8 @@ void UniqueAttachedId::toJSON(P4::JSONGenerator &json) const {
 
 UniqueAttachedId UniqueAttachedId::fromJSON(P4::JSONLoader &json) {
     UniqueAttachedId uai;
-    if (json) {
-        json.load("name", uai.name);
-        json.load("type", uai.type);
-    }
+    json.load("name", uai.name) || json.error("missing field name");
+    json.load("type", uai.type) || json.error("missing field type");
     return uai;
 }
 

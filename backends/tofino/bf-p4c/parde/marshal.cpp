@@ -37,8 +37,8 @@ void MarshaledFrom::toJSON(JSONGenerator &json) const {
 /* static */
 MarshaledFrom MarshaledFrom::fromJSON(JSONLoader &json) {
     MarshaledFrom rv;
-    json.load("gress", rv.gress);
-    json.load("field_name", rv.field_name);
-    json.load("pre_padding", rv.pre_padding);
+    json.load("gress", rv.gress) || json.error("missing field gress");
+    json.load("field_name", rv.field_name) || json.error("missing field field_name");
+    json.load("pre_padding", rv.pre_padding) || json.error("missing field pre_padding");
     return rv;
 }
