@@ -1,5 +1,7 @@
 var NAVTREEINDEX13 =
 {
+"class_p4_1_1_nested_structs.html":[12,0,14,323],
+"class_p4_1_1_nested_structs.html":[13,0,12,338],
 "class_p4_1_1_nesting_depth_metric_pass.html":[12,0,14,324],
 "class_p4_1_1_nesting_depth_metric_pass.html":[13,0,12,339],
 "class_p4_1_1_on_backtrack.html":[12,0,14,326],
@@ -247,7 +249,5 @@ var NAVTREEINDEX13 =
 "class_p4_1_1_p4_tools_1_1_namespace_context.html#a2f2aadd74e5a8a08d664696b915d7983":[13,0,12,18,22,0],
 "class_p4_1_1_p4_tools_1_1_namespace_context.html#a39975557bb0e338282b16f1030a4b674":[12,0,14,8,20,3],
 "class_p4_1_1_p4_tools_1_1_namespace_context.html#a39975557bb0e338282b16f1030a4b674":[13,0,12,18,22,3],
-"class_p4_1_1_p4_tools_1_1_namespace_context.html#a6fd0f45d92a085bc821199acfa6f4d2f":[12,0,14,8,20,2],
-"class_p4_1_1_p4_tools_1_1_namespace_context.html#a6fd0f45d92a085bc821199acfa6f4d2f":[13,0,12,18,22,2],
-"class_p4_1_1_p4_tools_1_1_namespace_context.html#a7ad34518222d149b4c4c53cf1689005b":[12,0,14,8,20,1]
+"class_p4_1_1_p4_tools_1_1_namespace_context.html#a6fd0f45d92a085bc821199acfa6f4d2f":[12,0,14,8,20,2]
 };

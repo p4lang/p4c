@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_p4_1_1_rename_map.html" title=" " alt="" coords="5,5,133,31"/>
+<area shape="rect" id="Node000000" href="$class_p4_1_1_remove_unused_policy.html" title=" " alt="" coords="5,31,193,56"/>
+<area shape="rect" id="Node000001" href="$class_p4_1_1_front_end_policy.html" title=" " alt="" coords="241,31,384,56"/>
+<area shape="poly" id="edge2573_Node000000_Node000001" title=" " alt="" coords="207,41,241,41,241,46,207,46"/>
+<area shape="rect" id="Node000002" href="$struct_b_f_n_1_1_front_end_policy.html" title=" " alt="" coords="432,5,585,31"/>
+<area shape="poly" id="edge2574_Node000001_Node000002" title=" " alt="" coords="397,30,431,25,432,31,398,35"/>
+<area shape="rect" id="Node000003" href="$class_test_f_e_policy.html" title=" " alt="" coords="457,55,560,80"/>
+<area shape="poly" id="edge2575_Node000001_Node000003" title=" " alt="" coords="398,51,458,58,457,64,398,56"/>
 </map>

@@ -1567,6 +1567,7 @@ var hierarchy =
     [ "P4::IR::Traversal::Index", "struct_p4_1_1_i_r_1_1_traversal_1_1_index.html", null ],
     [ "P4::IterKeys< PairIter >", "class_p4_1_1_iter_keys.html", null ],
     [ "P4::IterValues< PairIter >", "class_p4_1_1_iter_values.html", null ],
+    [ "P4::JsonData::LocationInfo", "class_p4_1_1_json_data_1_1_location_info.html", null ],
     [ "P4::JSONGenerator", "class_p4_1_1_j_s_o_n_generator.html", null ],
     [ "P4::JSONLoader", "class_p4_1_1_j_s_o_n_loader.html", null ],
     [ "P4::KeyIsSimple", "class_p4_1_1_key_is_simple.html", [
@@ -3996,6 +3997,9 @@ var hierarchy =
         [ "P4::Util::CompilationError", "class_p4_1_1_util_1_1_compilation_error.html", null ],
         [ "P4::Util::CompilerBug", "class_p4_1_1_util_1_1_compiler_bug.html", null ],
         [ "P4::Util::CompilerUnimplemented", "class_p4_1_1_util_1_1_compiler_unimplemented.html", null ]
+      ] ],
+      [ "std::runtime_error", null, [
+        [ "P4::JsonData::error", "struct_p4_1_1_json_data_1_1error.html", null ]
       ] ]
     ] ],
     [ "std::false_type", null, [

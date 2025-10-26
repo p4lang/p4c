@@ -443,48 +443,50 @@ $(function(){initNavTree('json__generator_8h_source.html',''); initResizable(tru
 <div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>    }</div>
 <div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span> </div>
 <div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    std::enable_if_t&lt;has_toJSON&lt;T&gt;::value &amp;&amp; !std::is_base_of_v&lt;IR::Node, T&gt;&gt; generate(<span class="keyword">const</span> T &amp;v) {</div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>        <span class="keyword">auto</span> t = begin_object();</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>        v.toJSON(*<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>        end_object(t);</div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>    }</div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span> </div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>    <span class="keywordtype">void</span> generate(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> &amp;v) {</div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>        <span class="keyword">auto</span> t = begin_object();</div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        <span class="keywordflow">if</span> (node_refs.find(v.id) != node_refs.end()) {</div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>            emit(<span class="stringliteral">&quot;Node_ID&quot;</span>, v.id);</div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>            node_refs.insert(v.id);</div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>            v.toJSON(*<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>            <span class="keywordflow">if</span> (dumpSourceInfo) {</div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>                v.sourceInfoToJSON(*<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>            }</div>
-<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        }</div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>        end_object(t);</div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>    }</div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span> </div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>    std::enable_if_t&lt;std::is_pointer_v&lt;T&gt; &amp;&amp; has_toJSON&lt;std::remove_pointer_t&lt;T&gt;&gt;::value&gt; generate(</div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>        T v) {</div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>        <span class="keywordflow">if</span> (v)</div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>            generate(*v);</div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>            out &lt;&lt; <span class="stringliteral">&quot;null&quot;</span>;</div>
-<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    }</div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span> </div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N&gt;</div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>    <span class="keywordtype">void</span> generate(<span class="keyword">const</span> T (&amp;v)[N]) {</div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>        <span class="keyword">auto</span> t = begin_vector();</div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;el : v) emit(el);</div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        end_vector(t);</div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    }</div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>};</div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    std::enable_if_t&lt;has_toJSON&lt;T&gt;::value &amp;&amp; !std::is_base_of_v&lt;IR::INode, T&gt;&gt; generate(</div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>        <span class="keyword">const</span> T &amp;v) {</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>        <span class="keyword">auto</span> t = begin_object();</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>        v.toJSON(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>        end_object(t);</div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>    }</div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span> </div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    <span class="keywordtype">void</span> generate(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_i_node.html">IR::INode</a> &amp;v_) {</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        <span class="keyword">auto</span> &amp;v = *v_.getNode();</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>        <span class="keyword">auto</span> t = begin_object();</div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>        <span class="keywordflow">if</span> (node_refs.find(v.id) != node_refs.end()) {</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>            emit(<span class="stringliteral">&quot;Node_ID&quot;</span>, v.id);</div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>            node_refs.insert(v.id);</div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>            v.toJSON(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>            <span class="keywordflow">if</span> (dumpSourceInfo) {</div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>                v.sourceInfoToJSON(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>            }</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        }</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>        end_object(t);</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    }</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span> </div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>    std::enable_if_t&lt;std::is_pointer_v&lt;T&gt; &amp;&amp; has_toJSON&lt;std::remove_pointer_t&lt;T&gt;&gt;::value&gt; generate(</div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>        T v) {</div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>        <span class="keywordflow">if</span> (v)</div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>            generate(*v);</div>
+<div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>        <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>            out &lt;&lt; <span class="stringliteral">&quot;null&quot;</span>;</div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    }</div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span> </div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">size_t</span> N&gt;</div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>    <span class="keywordtype">void</span> generate(<span class="keyword">const</span> T (&amp;v)[N]) {</div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>        <span class="keyword">auto</span> t = begin_vector();</div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;el : v) emit(el);</div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>        end_vector(t);</div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    }</div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>};</div>
 </div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span> </div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>}  <span class="comment">// namespace P4</span></div>
 <div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span> </div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span><span class="preprocessor">#endif </span><span class="comment">/* IR_JSON_GENERATOR_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span> </div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span><span class="preprocessor">#endif </span><span class="comment">/* IR_JSON_GENERATOR_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_i_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_i_node.html">P4::IR::INode</a></div><div class="ttdef"><b>Definition</b> node.h:66</div></div>
 <div class="ttc" id="aclass_p4_1_1bitvec_html"><div class="ttname"><a href="class_p4_1_1bitvec.html">P4::bitvec</a></div><div class="ttdef"><b>Definition</b> bitvec.h:120</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html_a31a3b029db13f3a15069e770294c5889"><div class="ttname"><a href="class_p4_1_1cstring.html#a31a3b029db13f3a15069e770294c5889">P4::cstring::escapeJson</a></div><div class="ttdeci">cstring escapeJson() const</div><div class="ttdef"><b>Definition</b> cstring.cpp:272</div></div>

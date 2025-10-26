@@ -173,6 +173,8 @@ var NAVTREEINDEX12 =
 "class_p4_1_1_json_boolean.html":[13,0,12,295],
 "class_p4_1_1_json_data.html":[12,0,14,281],
 "class_p4_1_1_json_data.html":[13,0,12,296],
+"class_p4_1_1_json_data_1_1_location_info.html":[12,0,14,281,1],
+"class_p4_1_1_json_data_1_1_location_info.html":[13,0,12,296,1],
 "class_p4_1_1_json_null.html":[12,0,14,284],
 "class_p4_1_1_json_null.html":[13,0,12,299],
 "class_p4_1_1_json_number.html":[12,0,14,285],
@@ -247,7 +249,5 @@ var NAVTREEINDEX12 =
 "class_p4_1_1_name_gateways.html":[12,0,14,320],
 "class_p4_1_1_name_gateways.html":[13,0,12,335],
 "class_p4_1_1_name_generator.html":[12,0,14,321],
-"class_p4_1_1_name_generator.html":[13,0,12,336],
-"class_p4_1_1_nested_structs.html":[12,0,14,323],
-"class_p4_1_1_nested_structs.html":[13,0,12,338]
+"class_p4_1_1_name_generator.html":[13,0,12,336]
 };

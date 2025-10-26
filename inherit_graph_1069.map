@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$struct_tofino_1_1_action_data_bus_1_1_use_1_1_random_number_generator.html" title=" " alt="" coords="5,5,240,45"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,13,149,38"/>
+<area shape="rect" id="Node000001" href="$class_target_1_1_tofino_1_1_ternary_match_table.html" title=" " alt="" coords="197,5,401,45"/>
+<area shape="poly" id="edge2776_Node000000_Node000001" title=" " alt="" coords="163,23,197,23,197,28,163,28"/>
 </map>

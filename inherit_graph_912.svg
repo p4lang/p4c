@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_p_h_v_1_1v2_1_1_kind_size_indexed_map.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="class_p_h_v_1_1v2_1_1_ixbar_friendly_packing.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="161,-19 0,-19 0,0 161,0 161,-19"/>
-<text text-anchor="middle" x="80.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PHV::v2::KindSizeIndexedMap</text>
+<text text-anchor="middle" x="80.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PHV::v2::IxbarFriendlyPacking</text>
 </a>
 </g>
 </g>

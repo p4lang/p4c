@@ -138,13 +138,16 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a145ee8c79c3423192c30819f3d608814" id="r_a145ee8c79c3423192c30819f3d608814"><td class="memItemLeft" align="right" valign="top"><a id="a145ee8c79c3423192c30819f3d608814" name="a145ee8c79c3423192c30819f3d608814"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>JSONLoader</b> (const <a class="el" href="class_p4_1_1_j_s_o_n_loader.html">JSONLoader</a> &amp;unpacker, std::string_view field)</td></tr>
 <tr class="separator:a145ee8c79c3423192c30819f3d608814"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adec564f46015c136debce3e0e1c45610" id="r_adec564f46015c136debce3e0e1c45610"><td class="memItemLeft" align="right" valign="top"><a id="adec564f46015c136debce3e0e1c45610" name="adec564f46015c136debce3e0e1c45610"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>JSONLoader</b> (std::istream &amp;in)</td></tr>
-<tr class="separator:adec564f46015c136debce3e0e1c45610"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b9563bca39eb4699f3c81b6fb9864f3" id="r_a0b9563bca39eb4699f3c81b6fb9864f3"><td class="memItemLeft" align="right" valign="top"><a id="a0b9563bca39eb4699f3c81b6fb9864f3" name="a0b9563bca39eb4699f3c81b6fb9864f3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>JSONLoader</b> (std::istream &amp;in, <a class="el" href="class_p4_1_1_json_data_1_1_location_info.html">JsonData::LocationInfo</a> *li=nullptr)</td></tr>
+<tr class="separator:a0b9563bca39eb4699f3c81b6fb9864f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23eb9ba31447a2978071b04f32fba947" id="r_a23eb9ba31447a2978071b04f32fba947"><td class="memTemplParams" colspan="2"><a id="a23eb9ba31447a2978071b04f32fba947" name="a23eb9ba31447a2978071b04f32fba947"></a>
 template&lt;typename T&gt; </td></tr>
 <tr class="memitem:a23eb9ba31447a2978071b04f32fba947"><td class="memTemplItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>as</b> () const</td></tr>
 <tr class="separator:a23eb9ba31447a2978071b04f32fba947"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c8da5a08a8c69acc8785fcc24d9898a" id="r_a6c8da5a08a8c69acc8785fcc24d9898a"><td class="memItemLeft" align="right" valign="top"><a id="a6c8da5a08a8c69acc8785fcc24d9898a" name="a6c8da5a08a8c69acc8785fcc24d9898a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>error</b> (std::string_view msg) const</td></tr>
+<tr class="separator:a6c8da5a08a8c69acc8785fcc24d9898a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abcc0594728e87ac957fc5b59fba3cec8" id="r_abcc0594728e87ac957fc5b59fba3cec8"><td class="memTemplParams" colspan="2"><a id="abcc0594728e87ac957fc5b59fba3cec8" name="abcc0594728e87ac957fc5b59fba3cec8"></a>
 template&lt;typename T&gt; </td></tr>
 <tr class="memitem:abcc0594728e87ac957fc5b59fba3cec8"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>is</b> () const</td></tr>
@@ -165,6 +168,12 @@ template&lt;typename T&gt; </td></tr>
 template&lt;typename T&gt; </td></tr>
 <tr class="memitem:a5ad157bc45ed90823139a95e63315cc7"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>load</b> (std::string_view field, T *&amp;v)</td></tr>
 <tr class="separator:a5ad157bc45ed90823139a95e63315cc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae60d60524c1039ac5f3c07a7ac447bbf" id="r_ae60d60524c1039ac5f3c07a7ac447bbf"><td class="memItemLeft" align="right" valign="top"><a id="ae60d60524c1039ac5f3c07a7ac447bbf" name="ae60d60524c1039ac5f3c07a7ac447bbf"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>locdesc</b> () const</td></tr>
+<tr class="separator:ae60d60524c1039ac5f3c07a7ac447bbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab28b916a5e16f255e1f773717ab410cb" id="r_ab28b916a5e16f255e1f773717ab410cb"><td class="memItemLeft" align="right" valign="top"><a id="ab28b916a5e16f255e1f773717ab410cb" name="ab28b916a5e16f255e1f773717ab410cb"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>locdesc</b> (const <a class="el" href="class_p4_1_1_json_data.html">JsonData</a> &amp;d) const</td></tr>
+<tr class="separator:ab28b916a5e16f255e1f773717ab410cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7bdfa0ec73cd1cb18e00198170a0e3a3" id="r_a7bdfa0ec73cd1cb18e00198170a0e3a3"><td class="memItemLeft" align="right" valign="top"><a id="a7bdfa0ec73cd1cb18e00198170a0e3a3" name="a7bdfa0ec73cd1cb18e00198170a0e3a3"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const</td></tr>
 <tr class="separator:a7bdfa0ec73cd1cb18e00198170a0e3a3"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -283,7 +283,7 @@ var namespace_p4 =
     [ "IterKeys", "class_p4_1_1_iter_keys.html", null ],
     [ "IterValues", "class_p4_1_1_iter_values.html", null ],
     [ "JsonBoolean", "class_p4_1_1_json_boolean.html", null ],
-    [ "JsonData", "class_p4_1_1_json_data.html", null ],
+    [ "JsonData", "class_p4_1_1_json_data.html", "class_p4_1_1_json_data" ],
     [ "JSONGenerator", "class_p4_1_1_j_s_o_n_generator.html", null ],
     [ "JSONLoader", "class_p4_1_1_j_s_o_n_loader.html", null ],
     [ "JsonNull", "class_p4_1_1_json_null.html", null ],
