@@ -1,0 +1,20 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/redirect_l2 numtables 1
+
+$TC p4template create action/redirect_l2/ingress/send_nh actid 1 \
+	param port_id type dev \
+	param dmac type macaddr \
+	param smac type macaddr
+$TC p4template update action/redirect_l2/ingress/send_nh state active
+
+$TC p4template create table/redirect_l2/ingress/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 permissions 0x3da4 tentries 262144 nummasks 1 \
+	table_acts act name redirect_l2/ingress/send_nh \
+	act name NoAction flags defaultonly
+$TC p4template update pipeline/redirect_l2 state ready
