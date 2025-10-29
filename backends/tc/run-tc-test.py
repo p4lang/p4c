@@ -77,6 +77,38 @@ PARSER.add_argument(
     action='store_true',
     help=("Replace"),
 )
+PARSER.add_argument(
+    "-e",
+    "--externs",
+    dest="externs",
+    action='store',
+    nargs='+',
+    help=("Specifies list of externs used in testcase"),
+)
+
+extern_to_mod_name = {
+    'Register': 'native',
+    'Random': 'native',
+    'InternetChecksum': 'ext_csum',
+    'Checksum': 'ext_csum',
+    'Hash': 'ext_csum',
+    'Counter': 'ext_Counter',
+    'DirectCounter': 'ext_Counter',
+    'Meter': 'ext_Meter',
+    'DirectMeter': 'ext_Meter',
+}
+
+
+def validate_externs(externs):
+    extern_mods = {}
+    for extern in externs:
+        if extern not in extern_to_mod_name:
+            testutils.log.error(f"Unknown extern {extern}")
+            sys.exit(1)
+        if extern_to_mod_name[extern] != 'native':
+            extern_mods[extern_to_mod_name[extern]] = True
+
+    return extern_mods
 
 
 class Options(object):
@@ -94,9 +126,10 @@ class Options(object):
         self.testdir = ""
         self.runtimedir = str(FILE_DIR.joinpath("runtime"))
         self.compilerOptions = []
+        self.extern_mods = {}
 
 
-def run_model(tc: TCInfra, testfile: Optional[Path]) -> int:
+def run_model(tc: TCInfra, testfile: Optional[Path], extern_mods) -> int:
     result = tc.compile_p4()
     if result != testutils.SUCCESS:
         return result
@@ -117,7 +150,7 @@ def run_model(tc: TCInfra, testfile: Optional[Path]) -> int:
     if result != testutils.SUCCESS:
         return result
 
-    result = tc.run(testfile)
+    result = tc.run(testfile, extern_mods)
     if result != testutils.SUCCESS:
         return result
 
@@ -139,7 +172,7 @@ def run_test(options: Options, argv: Any) -> int:
 
     tc = TCInfra(outputfolder, options, template)
 
-    return run_model(tc, options.testfile)
+    return run_model(tc, options.testfile, options.extern_mods)
 
 
 ######################### main
@@ -192,6 +225,9 @@ def main(argv: Any) -> None:
 
     if args.replace:
         options.replace = True
+
+    if args.externs:
+        options.extern_mods = validate_externs(args.externs)
 
     argv = argv[1:]
 

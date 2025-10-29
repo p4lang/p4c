@@ -448,7 +448,11 @@ class TCInfra:
     def send_packets(self, input_pkts):
         return self._send_pcap_files(input_pkts)
 
-    def run(self, testfile):
+    def _load_extern_mods(self, extern_mods):
+        for extern_mod, _ in extern_mods.items():
+            self.virtme.run(f"modprobe {extern_mod}")
+
+    def run(self, testfile, extern_mods):
         # Root is necessary to load ebpf into the kernel
         if not testutils.check_root():
             testutils.log.warning("This test requires root privileges; skipping execution.")
@@ -458,6 +462,8 @@ class TCInfra:
         result = self.virtme.ns_init()
         if result != testutils.SUCCESS:
             return result
+
+        self._load_extern_mods(extern_mods)
         # Load template script
         self.base_template = os.path.basename(self.template)
         result = self.virtme.run_intros("{introspection}/" + f"{self.base_template}.template")
