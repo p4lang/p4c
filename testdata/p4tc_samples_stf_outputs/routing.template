@@ -1,0 +1,34 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/routing numtables 2
+
+$TC p4template create action/routing/Main/drop actid 1
+$TC p4template update action/routing/Main/drop state active
+
+$TC p4template create action/routing/Main/set_nh actid 2 \
+	param dmac type macaddr \
+	param port type dev
+$TC p4template update action/routing/Main/set_nh state active
+
+$TC p4template create action/routing/Main/set_nhid actid 3 \
+	param index type bit32
+$TC p4template update action/routing/Main/set_nhid state active
+
+$TC p4template create table/routing/Main/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 1 \
+	table_acts act name routing/Main/drop \
+	act name routing/Main/set_nh
+$TC p4template update table/routing/Main/nh_table default_miss_action action routing/Main/drop
+
+$TC p4template create table/routing/Main/fib_table \
+	tblid 2 \
+	type lpm \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 8 \
+	table_acts act name routing/Main/set_nhid
+$TC p4template update table/routing/Main/fib_table default_miss_action action routing/Main/set_nhid param index 0
+$TC p4template update pipeline/routing state ready
