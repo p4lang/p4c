@@ -40,6 +40,8 @@ FILE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 sys.path.append(str(FILE_DIR.joinpath("../ebpf/targets")))
 
+import ipaddress
+
 import testutils
 from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
 from stf.stf_parser import STFParser
@@ -126,12 +128,28 @@ def int_to_mac(int_val):
     return mac
 
 
+def hex_to_ipv4(hex_ipv4):
+    ipv4_address = ipaddress.IPv4Address(hex_ipv4)
+    return str(ipv4_address)
+
+
+def hex_to_ipv6(hex_ipv6):
+    ipv6_address = ipaddress.IPv6Address(hex_ipv6)
+    return str(ipv6_address)
+
+
 def map_value(value, port_mapping, json_type):
     if json_type == 'dev':
         return port_mapping[int(value, 16)]
 
     if json_type == 'macaddr':
         return int_to_mac(int(value, 16))
+
+    if json_type == "ipv4":
+        return hex_to_ipv4(int(value, 16))
+
+    if json_type == "ipv6":
+        return hex_to_ipv6(int(value, 16))
 
     return value
 
