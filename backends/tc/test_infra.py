@@ -40,6 +40,8 @@ FILE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 sys.path.append(str(FILE_DIR.joinpath("../ebpf/targets")))
 
+import ipaddress
+
 import testutils
 from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
 from stf.stf_parser import STFParser
@@ -126,6 +128,16 @@ def int_to_mac(int_val):
     return mac
 
 
+def hex_to_ipv4(hex_ipv4):
+    ipv4_address = ipaddress.IPv4Address(hex_ipv4)
+    return str(ipv4_address)
+
+
+def hex_to_ipv6(hex_ipv6):
+    ipv6_address = ipaddress.IPv6Address(hex_ipv6)
+    return str(ipv6_address)
+
+
 def map_value(value, port_mapping, json_type):
     if json_type == 'dev':
         return port_mapping[int(value, 16)]
@@ -133,13 +145,20 @@ def map_value(value, port_mapping, json_type):
     if json_type == 'macaddr':
         return int_to_mac(int(value, 16))
 
+    if json_type == "ipv4":
+        return hex_to_ipv4(int(value, 16))
+
+    if json_type == "ipv6":
+        return hex_to_ipv6(int(value, 16))
+
     return value
 
 
 def build_runtime_file(rules_file, json_file, cmds, port_mapping):
     json_data = parse_p4_json(json_file)
+    generated = ""
     for index, cmd in enumerate(cmds):
-        generated = "$TC p4ctrl create "
+        generated += "$TC p4ctrl create "
         table_name = cmd.table
         table_name = table_name.replace(".", "/")
         generated += f"{cmd.pipe_name}/table/{table_name} "
@@ -158,8 +177,8 @@ def build_runtime_file(rules_file, json_file, cmds, port_mapping):
                 # Support for LPM key
                 generated += f"{field} "
                 if isinstance(key_field_val[1], tuple):
-                    key_field_val = map_value(key_field_val[1][0], port_mapping, key_json['type'])
-                    generated += f"{key_field_val[1][0]}/{key_field_val[1][1]} "
+                    value = map_value(key_field_val[1][0], port_mapping, key_json['type'])
+                    generated += f"{value}/{key_field_val[1][1]} "
                 else:
                     key_field_val = map_value(key_field_val[1], port_mapping, key_json['type'])
                     generated += f"{key_field_val} "
@@ -171,6 +190,7 @@ def build_runtime_file(rules_file, json_file, cmds, port_mapping):
                 param_json = action_json['params'][i]
                 param_val = map_value(val_field[1], port_mapping, param_json['type'])
                 generated += f"param {val_field[0]} {param_val} "
+        generated += "\n"
     file = open(rules_file, "w")
     file.write(generated)
     st = os.stat(rules_file)
@@ -448,7 +468,11 @@ class TCInfra:
     def send_packets(self, input_pkts):
         return self._send_pcap_files(input_pkts)
 
-    def run(self, testfile):
+    def _load_extern_mods(self, extern_mods):
+        for extern_mod, _ in extern_mods.items():
+            self.virtme.run(f"modprobe {extern_mod}")
+
+    def run(self, testfile, extern_mods):
         # Root is necessary to load ebpf into the kernel
         if not testutils.check_root():
             testutils.log.warning("This test requires root privileges; skipping execution.")
@@ -458,6 +482,8 @@ class TCInfra:
         result = self.virtme.ns_init()
         if result != testutils.SUCCESS:
             return result
+
+        self._load_extern_mods(extern_mods)
         # Load template script
         self.base_template = os.path.basename(self.template)
         result = self.virtme.run_intros("{introspection}/" + f"{self.base_template}.template")
