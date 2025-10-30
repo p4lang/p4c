@@ -156,8 +156,9 @@ def map_value(value, port_mapping, json_type):
 
 def build_runtime_file(rules_file, json_file, cmds, port_mapping):
     json_data = parse_p4_json(json_file)
+    generated = ""
     for index, cmd in enumerate(cmds):
-        generated = "$TC p4ctrl create "
+        generated += "$TC p4ctrl create "
         table_name = cmd.table
         table_name = table_name.replace(".", "/")
         generated += f"{cmd.pipe_name}/table/{table_name} "
@@ -176,8 +177,8 @@ def build_runtime_file(rules_file, json_file, cmds, port_mapping):
                 # Support for LPM key
                 generated += f"{field} "
                 if isinstance(key_field_val[1], tuple):
-                    key_field_val = map_value(key_field_val[1][0], port_mapping, key_json['type'])
-                    generated += f"{key_field_val[1][0]}/{key_field_val[1][1]} "
+                    value = map_value(key_field_val[1][0], port_mapping, key_json['type'])
+                    generated += f"{value}/{key_field_val[1][1]} "
                 else:
                     key_field_val = map_value(key_field_val[1], port_mapping, key_json['type'])
                     generated += f"{key_field_val} "
@@ -189,6 +190,7 @@ def build_runtime_file(rules_file, json_file, cmds, port_mapping):
                 param_json = action_json['params'][i]
                 param_val = map_value(val_field[1], port_mapping, param_json['type'])
                 generated += f"param {val_field[0]} {param_val} "
+        generated += "\n"
     file = open(rules_file, "w")
     file.write(generated)
     st = os.stat(rules_file)
