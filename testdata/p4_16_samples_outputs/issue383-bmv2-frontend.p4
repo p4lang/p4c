@@ -54,7 +54,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @name("ingress.s") tst_t s_0;
     @name("ingress.bh") bitvec_hdr bh_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_act") action do_act() {
         h.bvh1.row.alt1.valid = 1w0;

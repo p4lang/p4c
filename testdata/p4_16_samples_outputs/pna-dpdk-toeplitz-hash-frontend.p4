@@ -55,7 +55,7 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.h") Hash<bit<16>>(PNA_HashAlgorithm_t.TOEPLITZ) h_0;
     @name("MainControlImpl.a1") action a1() {
