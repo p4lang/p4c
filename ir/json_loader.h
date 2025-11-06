@@ -349,20 +349,6 @@ class JSONLoader {
         if (auto *s = json->to<JsonString>()) s->c_str() >> v;
     }
 
-    void unpack_json(UnparsedConstant *&v) {
-        cstring text("");
-        unsigned skip = 0;
-        unsigned base = 0;
-        bool hasWidth = false;
-
-        load("text", text);
-        load("skip", skip);
-        load("base", base);
-        load("hasWidth", hasWidth);
-
-        v = new UnparsedConstant({text, skip, base, hasWidth});
-    }
-
     template <typename T>
     std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::INode, T> &&
                      std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
@@ -382,6 +368,13 @@ class JSONLoader {
                      !std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = T::fromJSON(*this);
+    }
+
+    template <typename T>
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::INode, T>::value &&
+                     !std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
+    unpack_json(T *&v) {
+        v = new T(T::fromJSON(*this));
     }
 
     template <typename T>
