@@ -2258,7 +2258,7 @@ var hierarchy =
     [ "P4::TypeUnification", "class_p4_1_1_type_unification.html", null ],
     [ "P4::UniqueAttachedId", "class_p4_1_1_unique_attached_id.html", null ],
     [ "P4::UniqueId", "class_p4_1_1_unique_id.html", null ],
-    [ "P4::UnparsedConstant", "namespace_p4.html#struct_p4_1_1_unparsed_constant", null ],
+    [ "P4::UnparsedConstant", "struct_p4_1_1_unparsed_constant.html", null ],
     [ "P4::UnrollLoops::loop_bounds_t", "class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t", null ],
     [ "P4::UnrollLoops::Policy", "struct_p4_1_1_unroll_loops_1_1_policy.html", null ],
     [ "P4::UnusedCodeHelperVars", "namespace_p4.html#struct_p4_1_1_unused_code_helper_vars", null ],

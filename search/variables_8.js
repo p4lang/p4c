@@ -2,7 +2,7 @@ var searchData=
 [
   ['has_5fnarrow_5fto_5fwide_5fextract_0',['has_narrow_to_wide_extract',['../struct_parser_1_1_state_1_1_match.html#ad284f2336dd4165980d59012c3f9532e',1,'Parser::State::Match']]],
   ['hascoveragetracking_1',['hasCoverageTracking',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a55071cd40379e6426b9c3158668db78b',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
-  ['haswidth_2',['hasWidth',['../namespace_p4.html#ae88fd437c61a1658fc36aad9bba9ab2e',1,'P4::UnparsedConstant']]],
+  ['haswidth_2',['hasWidth',['../struct_p4_1_1_unparsed_constant.html#ae88fd437c61a1658fc36aad9bba9ab2e',1,'P4::UnparsedConstant']]],
   ['headers_3',['headers',['../class_parser_header_sequences.html#af3b141d025afe740662fd7692bf4dfce',1,'ParserHeaderSequences']]],
   ['headerstackmap_4',['headerStackMap',['../class_field_extract_info.html#a224f23ff93da7b29e7ffdff23c94746a',1,'FieldExtractInfo']]],
   ['headertocurrentindex_5',['headerToCurrentIndex',['../struct_b_f_n_1_1_resolve_header_stack_index.html#ac58c9045f663ebb9495b2d76004511b9',1,'BFN::ResolveHeaderStackIndex']]],
