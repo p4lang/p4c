@@ -40,8 +40,7 @@ namespace P4 {
 
 #define YYLTYPE Util::SourceInfo
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
-    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                  \
-                 : Util::SourceInfo(sources, YYRHSLOC(Rhs, 0).getEnd()))
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N) : yylloc)
 
 template<typename... Args>
 void yyerror(const char *fmt, Args&&... args);

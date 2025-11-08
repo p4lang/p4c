@@ -128,9 +128,8 @@ typedef const IR::Type ConstType;
 
 using namespace P4;
 
-#define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
-    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
-                 : Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd()))
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                     \
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N) : driver.yylloc)
 
 #undef yylex
 #define yylex lexer.yylex
