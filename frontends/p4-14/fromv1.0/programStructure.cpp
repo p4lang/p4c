@@ -2077,8 +2077,9 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::Register *re
         args->push_back(
             new IR::Argument(new IR::Constant(v1model.registers.size_type, reg->instance_count)));
     }
-    return new IR::Declaration_Instance(
-        newName, addGlobalNameAnnotation(reg->name, reg->annotations), spectype, args, nullptr);
+    return new IR::Declaration_Instance(reg->srcInfo, newName,
+                                        addGlobalNameAnnotation(reg->name, reg->annotations),
+                                        spectype, args, nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMeter *cm,
@@ -2103,7 +2104,8 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMet
         if (c->min_width >= 0) annos.emplace_back("min_width"_cs, new IR::Constant(c->min_width));
         if (c->max_width >= 0) annos.emplace_back("max_width"_cs, new IR::Constant(c->max_width));
     }
-    return new IR::Declaration_Instance(newName, std::move(annos), type, args, nullptr);
+    return new IR::Declaration_Instance(cm->srcInfo, newName, std::move(annos), type, args,
+                                        nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::Meter *m,
@@ -2131,7 +2133,8 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::M
         auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
         if (meterPreColor != nullptr) annos.emplace_back("pre_color"_cs, meterPreColor);
     }
-    return new IR::Declaration_Instance(newName, std::move(annos), specType, args, nullptr);
+    return new IR::Declaration_Instance(m->srcInfo, newName, std::move(annos), specType, args,
+                                        nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR::Counter *c,
@@ -2147,7 +2150,7 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR:
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     if (c->min_width >= 0) annos.emplace_back("min_width"_cs, new IR::Constant(c->min_width));
     if (c->max_width >= 0) annos.emplace_back("max_width"_cs, new IR::Constant(c->max_width));
-    return new IR::Declaration_Instance(newName, std::move(annos), type, args, nullptr);
+    return new IR::Declaration_Instance(c->srcInfo, newName, std::move(annos), type, args, nullptr);
 }
 
 IR::Vector<IR::Argument> *ProgramStructure::createApplyArguments(cstring /* name unused */) {
