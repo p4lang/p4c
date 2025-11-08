@@ -105,11 +105,11 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
         }
 
         const IR::Expression *method =
-            new IR::Member(structure->paramReference(structure->parserPacketIn),
+            new IR::Member(primitive->srcInfo, structure->paramReference(structure->parserPacketIn),
                            P4::P4CoreLibrary::instance().packetIn.lookahead.Id());
         auto typeargs = new IR::Vector<IR::Type>();
         typeargs->push_back(IR::Type_Bits::get(aval + bval));
-        auto lookahead = new IR::MethodCallExpression(method, typeargs);
+        auto lookahead = new IR::MethodCallExpression(primitive->srcInfo, method, typeargs);
         auto result = new IR::Slice(primitive->srcInfo, lookahead, bval - 1, 0);
         result->type = IR::Type_Bits::get(bval);
         return result;
@@ -123,7 +123,7 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
     } else {
         auto func = new IR::PathExpression(IR::ID(primitive->srcInfo, primitive->name));
         auto args = new IR::Vector<IR::Argument>;
-        for (auto *op : primitive->operands) args->push_back(new IR::Argument(op));
+        for (auto *op : primitive->operands) args->push_back(new IR::Argument(op->srcInfo, op));
         auto result = new IR::MethodCallExpression(primitive->srcInfo, func, args);
         return result;
     }
@@ -158,7 +158,7 @@ const IR::Node *ExpressionConverter::postorder(IR::ConcreteHeaderRef *nhr) {
     if (nhr->type->is<IR::Type_Header>()) {
         auto type = nhr->type->to<IR::Type_Header>();
         if (structure->parameterTypes.count(type->name)) {
-            auto path = new IR::Path(nhr->ref->name);
+            auto path = new IR::Path(nhr->srcInfo, nhr->ref->name);
             auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
             result->type = nhr->type;
             return result;
@@ -171,7 +171,7 @@ const IR::Node *ExpressionConverter::postorder(IR::ConcreteHeaderRef *nhr) {
     } else if (nhr->type->is<IR::Type_Struct>()) {
         auto type = nhr->type->to<IR::Type_Struct>();
         if (structure->parameterTypes.count(type->name)) {
-            auto path = new IR::Path(nhr->ref->name);
+            auto path = new IR::Path(nhr->srcInfo, nhr->ref->name);
             auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
             return result;
         } else if (structure->metadataTypes.count(type->name)) {
@@ -288,7 +288,7 @@ ExpressionConverter::funcType ExpressionConverter::get(cstring type) {
 const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
     auto table = structure->tables.get(apply->name);
     auto newname = structure->tables.get(table);
-    auto tbl = new IR::PathExpression(newname);
+    auto tbl = new IR::PathExpression(apply->srcInfo, new IR::Path(apply->srcInfo, newname));
     auto method = new IR::Member(apply->srcInfo, tbl, IR::ID(IR::IApply::applyMethodName));
     auto call = new IR::MethodCallExpression(apply->srcInfo, method);
     if (apply->actions.size() == 0) {
@@ -319,9 +319,9 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
 
         if (!otherLabels) {
             StatementConverter conv(structure, renameMap);
-            auto hitcase = hit ? conv.convert(hit) : new IR::EmptyStatement();
+            auto hitcase = hit ? conv.convert(hit) : new IR::EmptyStatement(apply->srcInfo);
             auto misscase = miss ? conv.convert(miss) : nullptr;
-            auto check = new IR::Member(call, IR::Type_Table::hit);
+            auto check = new IR::Member(apply->srcInfo, call, IR::Type_Table::hit);
             auto ifstat = new IR::IfStatement(apply->srcInfo, check, hitcase, misscase);
             prune();
             return ifstat;
@@ -340,7 +340,7 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
                 }
                 const IR::Expression *destination;
                 if (a.first == "default") {
-                    destination = new IR::DefaultExpression();
+                    destination = new IR::DefaultExpression(a.second->srcInfo);
                 } else {
                     cstring act_name = a.first;
                     auto path = apply->position.get<IR::Path>(act_name);
@@ -353,7 +353,7 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
                 auto swcase = new IR::SwitchCase(a.second->srcInfo, destination, stat);
                 cases.insert(insert_at, swcase);
             }
-            auto check = new IR::Member(call, IR::Type_Table::action_run);
+            auto check = new IR::Member(apply->srcInfo, call, IR::Type_Table::action_run);
             auto sw = new IR::SwitchStatement(apply->srcInfo, check, std::move(cases));
             prune();
             return sw;
@@ -365,8 +365,8 @@ const IR::Node *StatementConverter::preorder(IR::Primitive *primitive) {
     auto control = structure->controls.get(primitive->name);
     if (control != nullptr) {
         auto instanceName = ::P4::get(renameMap, control->name);
-        auto ctrl = new IR::PathExpression(IR::ID(instanceName));
-        auto method = new IR::Member(ctrl, IR::ID(IR::IApply::applyMethodName));
+        auto ctrl = new IR::PathExpression(IR::ID(primitive->srcInfo, instanceName));
+        auto method = new IR::Member(primitive->srcInfo, ctrl, IR::ID(IR::IApply::applyMethodName));
         auto args = structure->createApplyArguments(control->name);
         auto call = new IR::MethodCallExpression(primitive->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
@@ -383,7 +383,7 @@ const IR::Node *StatementConverter::preorder(IR::If *cond) {
     BUG_CHECK(pred != nullptr, "Expected to get an expression when converting %1%", cond->pred);
     const IR::Statement *t, *f;
     if (cond->ifTrue == nullptr)
-        t = new IR::EmptyStatement();
+        t = new IR::EmptyStatement(cond->srcInfo);
     else
         t = conv.convert(cond->ifTrue);
 
@@ -467,16 +467,17 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
                 ValidateLenExpr vle(type, field);
                 vle.setCalledBy(this);
                 lenexpr->apply(vle);
-                auto scale = new IR::Mul(lenexpr->srcInfo, lenexpr, new IR::Constant(8));
-                auto fieldlen =
-                    new IR::Sub(scale->srcInfo, scale, new IR::Constant(type->width_bits()));
-                field->addAnnotation(
-                    new IR::Annotation(IR::Annotation::lengthAnnotation, {fieldlen}));
+                auto scale =
+                    new IR::Mul(lenexpr->srcInfo, lenexpr, new IR::Constant(lenexpr->srcInfo, 8));
+                auto fieldlen = new IR::Sub(scale->srcInfo, scale,
+                                            new IR::Constant(scale->srcInfo, type->width_bits()));
+                field->addAnnotation(new IR::Annotation(
+                    field->srcInfo, IR::Annotation::lengthAnnotation, {fieldlen}));
             }
         }
     }
     if (auto vec = structure->listIndexes(type->name.name, field->name.name))
-        field->addAnnotation(new IR::Annotation("field_list"_cs, *vec));
+        field->addAnnotation(new IR::Annotation(field->srcInfo, "field_list"_cs, *vec));
     return field;
 }
 
@@ -504,14 +505,16 @@ class FixupExtern : public Modifier {
     void postorder(IR::Type_Extern *type) override {
         if (extname != type->name) {
             type->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                     new IR::StringLiteral(type->name.name), false);
+                                     new IR::StringLiteral(type->srcInfo, type->name.name), false);
             type->name = extname;
         }
         // FIXME -- should create ctors based on attributes?  For now just create a
         // FIXME -- 0-arg one if needed
         if (!type->lookupMethod(type->name, new IR::Vector<IR::Argument>())) {
             type->methods.push_back(new IR::Method(
-                type->name, new IR::Type_Method(new IR::ParameterList(), type->getName())));
+                type->srcInfo, type->name,
+                new IR::Type_Method(type->srcInfo, new IR::ParameterList(type->srcInfo),
+                                    type->getName())));
         }
     }
     void postorder(IR::Method *meth) override {
@@ -526,7 +529,7 @@ class FixupExtern : public Modifier {
     bool preorder(IR::Parameter *param) override {
         BUG_CHECK(typeParams, "recursion failure");
         if (param->type->is<IR::Type_FieldListCalculation>()) {
-            auto n = new IR::Type_Var(structure->makeUniqueName("FL"_cs));
+            auto n = new IR::Type_Var(param->srcInfo, structure->makeUniqueName("FL"_cs));
             param->type = n;
             typeParams->push_back(n);
         }
@@ -561,7 +564,8 @@ const IR::Declaration_Instance *ExternConverter::convertExternInstance(
         warning(ErrorType::WARN_UNSUPPORTED, "%s: P4_14 extern not fully supported", ext);
     if (structure->extern_remap.count(et)) et = structure->extern_remap.at(et);
     rv->name = name;
-    rv->type = new IR::Type_Name(new IR::Path(structure->extern_types.get(et)));
+    rv->type = new IR::Type_Name(ext->srcInfo,
+                                 new IR::Path(ext->srcInfo, structure->extern_types.get(et)));
     return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
 }
 
@@ -569,11 +573,14 @@ const IR::Statement *ExternConverter::convertExternCall(ProgramStructure *struct
                                                         const IR::Declaration_Instance *ext,
                                                         const IR::Primitive *prim) {
     ExpressionConverter conv(structure);
-    auto extref = new IR::PathExpression(structure->externs.get(ext));
+    auto extref = new IR::PathExpression(prim->srcInfo,
+                                         new IR::Path(prim->srcInfo, structure->externs.get(ext)));
     auto method = new IR::Member(prim->srcInfo, extref, prim->name);
     auto args = new IR::Vector<IR::Argument>();
-    for (unsigned i = 1; i < prim->operands.size(); ++i)
-        args->push_back(new IR::Argument(conv.convert(prim->operands.at(i))));
+    for (unsigned i = 1; i < prim->operands.size(); ++i) {
+        auto converted = conv.convert(prim->operands.at(i));
+        args->push_back(new IR::Argument(converted->srcInfo, converted));
+    }
     auto mc = new IR::MethodCallExpression(prim->srcInfo, method, args);
     return new IR::MethodCallStatement(prim->srcInfo, mc);
 }
