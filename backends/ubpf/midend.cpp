@@ -68,8 +68,6 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
                                      std::ostream *outStream) {
     if (program == nullptr && options.listMidendPasses == 0) return nullptr;
 
-    bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
-    refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
     PassManager midEnd;

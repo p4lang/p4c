@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "converters.h"
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/p4-14/header_type.h"
@@ -23,7 +24,6 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "lib/big_int_util.h"
 #include "programStructure.h"
-#include "v1model.h"
 
 namespace P4::P4V1 {
 
@@ -185,7 +185,7 @@ const IR::Node *ExpressionConverter::postorder(IR::ConcreteHeaderRef *nhr) {
     if (structure->isHeader(nhr)) {
         ref = structure->conversionContext->header->clone();
     } else {
-        if (nhr->ref->name == P4V1::V1Model::instance.standardMetadata.name)
+        if (nhr->ref->name == P4V1::V1Model::instance().standardMetadata.name)
             return structure->conversionContext->standardMetadata->clone();
         else
             ref = structure->conversionContext->userMetadata->clone();
