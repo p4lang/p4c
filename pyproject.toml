@@ -11,7 +11,6 @@ license = "Apache"
 dependencies = [
     "pyroute2==0.7.3",
     "ply==3.11",
-    "scapy==2.5.0",
     "googleapis-common-protos==1.53.0",
     "grpcio<=1.75.1,>=1.67.0; python_version > '3.6'",
     "grpcio==1.48.2 ; python_version <= '3.6'",
@@ -39,7 +38,7 @@ package = false
 # FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Python.
 # This is the same commit hash as defined in the top-level CMakelists.txt
 p4runtime = { git = "https://github.com/p4lang/p4runtime.git", rev = "ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5", subdirectory = "py" }
-ptf = { git = "https://github.com/p4lang/ptf.git", rev = "d016cdfe99f2d609cc9c7fd7f8c414b56d5b3c5c"}
+ptf = { git = "https://github.com/p4lang/ptf.git", rev = "27b19b563de545f08ad4297a6906ed1329d60d6d"}
 
 [build-system]
 requires = ["hatchling"]
