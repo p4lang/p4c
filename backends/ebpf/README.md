@@ -237,7 +237,8 @@ Additionally, the eBPF compiler test suite has the following python dependencies
 
 - The python ply package to parse .stf testing files.
 
-- The python scapy package to read and write pcap files.
+- The python scapy package, to easily construct test packets with
+  selected sequences of headers.
 
 You can install these using:
 ```
