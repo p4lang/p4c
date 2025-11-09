@@ -51,10 +51,22 @@ cstring SourcePosition::toString() const {
 SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, SourcePosition end)
     : sources(sources), start(start), end(end) {
     BUG_CHECK(sources != nullptr, "Invalid InputSources in SourceInfo");
-    if (!start.isValid() || !end.isValid())
-        BUG("Invalid source position in SourceInfo %1%-%2%", start.toString(), end.toString());
+    if (!start.isValid() || !end.isValid()) {
+        BUG("Invalid source position in SourceInfo %1%-%2% for %3%", start.toString(),
+            end.toString(), sources->toDebugString());
+    }
     if (start > end)
         BUG("SourceInfo position start %1% after end %2%", start.toString(), end.toString());
+}
+
+SourceInfo::SourceInfo(const InputSources *sources, SourcePosition point)
+    : SourceInfo(sources, point, point) {}
+
+SourceInfo::SourceInfo(cstring filename, int line, int column, cstring srcBrief) {
+    this->filename = filename;
+    this->line = line;
+    this->column = column;
+    this->srcBrief = srcBrief;
 }
 
 cstring SourceInfo::toString() const {

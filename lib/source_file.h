@@ -135,18 +135,12 @@ class SourceInfo final {
     int line = -1;
     int column = -1;
     cstring srcBrief = ""_cs;
-    SourceInfo(cstring filename, int line, int column, cstring srcBrief) {
-        this->filename = filename;
-        this->line = line;
-        this->column = column;
-        this->srcBrief = srcBrief;
-    }
+    SourceInfo(cstring filename, int line, int column, cstring srcBrief);
     /// Creates an "invalid" SourceInfo
     SourceInfo() = default;
 
     /// Creates a SourceInfo for a 'point' in the source, or invalid
-    SourceInfo(const InputSources *sources, SourcePosition point)
-        : sources(sources), start(point), end(point) {}
+    SourceInfo(const InputSources *sources, SourcePosition point);
 
     SourceInfo(const InputSources *sources, SourcePosition start, SourcePosition end);
 
