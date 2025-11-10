@@ -149,7 +149,7 @@ class NameMap : public Node {
     void visit_children(Visitor &v, const char *) override;
     void visit_children(Visitor &v, const char *) const override;
     void toJSON(JSONGenerator &json) const override;
-    static NameMap<T, MAP, COMP, ALLOC> *fromJSON(JSONLoader &json);
+    static Node *fromJSON(JSONLoader &json);
 
     Util::Enumerator<const T *> *valueEnumerator() const {
         return Util::enumerate(Values(symbols));
