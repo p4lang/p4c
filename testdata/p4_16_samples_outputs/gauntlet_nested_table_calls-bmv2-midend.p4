@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     @name("ingress.tmp") bool tmp;
     @name("ingress.tmp_0") bit<16> tmp_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.exit_action") action exit_action() {
         hasExited = true;
