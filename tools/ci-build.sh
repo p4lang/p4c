@@ -160,7 +160,7 @@ function build_bmv2() {
     export CC=gcc-9
     export CXX=g++-9
   elif [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
-    # Disable retrieving p4lang-bmv2 until it is working.
+    echo "Temporarily disabling retrieval of p4lang-bmv2 package until it is working"
     #sudo apt-get install -y wget ca-certificates
     ## Add the p4lang opensuse repository.
     #echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
