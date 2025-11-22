@@ -68,10 +68,18 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_METADATA)
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2MetadataXfail.cmake)
 endif()
 
-# PTF
-# TODO: The PTF test back end currently does not support packet sizes over 12000 bits, so we limit
-# the range.
-if(P4TOOLS_TESTGEN_BMV2_TEST_PTF)
+macro(add_bmv2_ptf_tests)
+  if(NOT P4TOOLS_TESTGEN_BMV2_TEST_PTF)
+    return()
+  endif()
+  if (NOT HAVE_SIMPLE_SWITCH_GRPC)
+    message(
+      WARNING
+      "BMv2 PTF tests are enabled, but simple_switch_grpc was not found. BMv2 PTF tests will be skipped."
+    )
+  return()
+  endif()
+
   execute_process(COMMAND bash -c "printf \"import google.rpc\nimport google.protobuf\" | python3" RESULT_VARIABLE result)
   if(result AND NOT result EQUAL 0)
     message(
@@ -93,14 +101,34 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_PTF)
     TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "--test-backend PTF --packet-size-range 0:12000 --port-ranges 0:8 ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2PTFXfail.cmake)
-endif()
+endmacro(add_bmv2_ptf_tests)
 
-# STF
-if(P4TOOLS_TESTGEN_BMV2_TEST_STF)
+macro(add_bmv2_stf_tests)
+  if(NOT P4TOOLS_TESTGEN_BMV2_TEST_STF)
+    return()
+  endif()
+  if (NOT HAVE_SIMPLE_SWITCH)
+    message(
+      WARNING
+      "BMv2 STF tests are enabled, but simple_switch was not found. BMv2 STF tests will be skipped."
+    )
+  return()
+  endif()
+
   p4tools_add_tests(
     TESTS "${P4C_V1_TEST_SUITES_P416}"
     TAG "testgen-p4c-bmv2-stf" DRIVER ${P4TESTGEN_DRIVER}
     TARGET "bmv2" ARCH "v1model" ENABLE_RUNNER TEST_ARGS "--test-backend STF ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2STFXfail.cmake)
-endif()
+endmacro(add_bmv2_stf_tests)
+
+
+# PTF
+# TODO: The PTF test back end currently does not support packet sizes over 12000 bits, so we limit
+# the range.
+add_bmv2_ptf_tests()
+
+
+# STF
+add_bmv2_stf_tests()
