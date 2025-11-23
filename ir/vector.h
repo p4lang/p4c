@@ -74,7 +74,7 @@ class Vector : public VectorBase {
     Vector(InputIt first, InputIt last) : vec(first, last) {}
     Vector(Util::Enumerator<const T *> *e)  // NOLINT(runtime/explicit)
         : vec(e->begin(), e->end()) {}
-    static Vector<T> *fromJSON(JSONLoader &json);
+    static Node *fromJSON(JSONLoader &json);
 
     using iterator = typename safe_vector<const T *>::iterator;
     using const_iterator = typename safe_vector<const T *>::const_iterator;

@@ -438,7 +438,7 @@ IR::Vector<T>::Vector(JSONLoader &json) : VectorBase(json) {
     json.load("vec", vec) || json.error("missing field vec");
 }
 template <class T>
-IR::Vector<T> *IR::Vector<T>::fromJSON(JSONLoader &json) {
+IR::Node *IR::Vector<T>::fromJSON(JSONLoader &json) {
     return new Vector<T>(json);
 }
 template <class T>
@@ -446,7 +446,7 @@ IR::IndexedVector<T>::IndexedVector(JSONLoader &json) : Vector<T>(json) {
     json.load("declarations", declarations) || json.error("missing field declarations");
 }
 template <class T>
-IR::IndexedVector<T> *IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
+IR::Node *IR::IndexedVector<T>::fromJSON(JSONLoader &json) {
     return new IndexedVector<T>(json);
 }
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
@@ -458,7 +458,7 @@ IR::NameMap<T, MAP, COMP, ALLOC>::NameMap(JSONLoader &json) : Node(json) {
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
-IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
+IR::Node *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSONLoader &json) {
     return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
 }
 
