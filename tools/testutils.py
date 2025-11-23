@@ -13,8 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Defines helper functions for a general testing framework. Used by multiple
-    Python testing scripts in the backends folder."""
+"""Defines helper functions for a general testing framework. Used by multiple
+Python testing scripts in the backends folder."""
 
 import logging
 import os
@@ -293,6 +293,19 @@ def check_if_file(input_path_str: str) -> Optional[Path]:
         log.error("%s is not a file", input_path)
         return None
     return Path(input_path.absolute())
+
+
+def check_if_binary(input_path: Union[Path, str]) -> Optional[Path]:
+    """Checks if a path is an executable binary and converts the input
+    to an absolute path"""
+    if not input_path:
+        log.error("input_path is None")
+        return None
+    binary_path = shutil.which(str(input_path))
+    if not binary_path:
+        log.error("%s is not an executable binary", input_path)
+        return None
+    return Path(binary_path).absolute()
 
 
 def check_if_dir(input_path_str: str) -> Optional[Path]:
