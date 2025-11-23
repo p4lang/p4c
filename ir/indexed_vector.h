@@ -220,7 +220,7 @@ class IndexedVector : public Vector<T> {
     void visit_children(Visitor &v, const char *name) const override;
 
     void toJSON(JSONGenerator &json) const override;
-    static IndexedVector<T> *fromJSON(JSONLoader &json);
+    static Node *fromJSON(JSONLoader &json);
     void validate() const override {
         if (invalid) return;  // don't crash the compiler because an error happened
         for (auto el : *this) {
