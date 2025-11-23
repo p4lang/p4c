@@ -69,7 +69,7 @@ struct AutoStdioInputStream {
 
 namespace P4 {
 
-AbstractParserDriver::AbstractParserDriver() : sources(new Util::InputSources) {}
+AbstractParserDriver::AbstractParserDriver() : sources(new Util::InputSources()) {}
 
 AbstractParserDriver::~AbstractParserDriver() {}
 
