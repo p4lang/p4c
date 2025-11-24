@@ -18,7 +18,7 @@ jobs:
   format_bazel_files:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: tools/format-bazel-files.sh
       - name: Check formatting diff
         run: |
@@ -37,7 +37,7 @@ jobs:
     needs: format_bazel_files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -91,7 +91,7 @@ jobs:
     needs: format_bazel_files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 

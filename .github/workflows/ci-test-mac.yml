@@ -20,7 +20,7 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
