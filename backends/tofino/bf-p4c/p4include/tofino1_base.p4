@@ -43,17 +43,29 @@
 
 #include <core.p4>
 
+@noWarn("unused")
 const bit<16> PARSER_ERROR_OK           = 16w0x0000;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_NO_MATCH     = 16w0x0001;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_PARTIAL_HDR  = 16w0x0002;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_CTR_RANGE    = 16w0x0004;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_TIMEOUT_USER = 16w0x0008;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_TIMEOUT_HW   = 16w0x0010;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_SRC_EXT      = 16w0x0020;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_DST_CONT     = 16w0x0040;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_PHV_OWNER    = 16w0x0080;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_MULTIWRITE   = 16w0x0100;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_ARAM_MBE     = 16w0x0400;
+@noWarn("unused")
 const bit<16> PARSER_ERROR_FCS          = 16w0x0800;
 
 /// Meter
