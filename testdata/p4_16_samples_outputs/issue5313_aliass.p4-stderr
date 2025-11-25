@@ -1,0 +1,7 @@
+issue5313_aliass.p4(5): [--Wwarn=uninitialized-out-param] warning: out parameter 'y' may be uninitialized when 'bar' terminates
+void bar(TwoBits x, out bit<8> y) {
+                               ^
+issue5313_aliass.p4(5)
+void bar(TwoBits x, out bit<8> y) {
+     ^^^
+[--Wwarn=uninitialized-use] warning: y_0 may be uninitialized

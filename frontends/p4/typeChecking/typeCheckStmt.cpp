@@ -48,6 +48,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
         }
     } else {
         // switch (expression)
+        if (!(type->is<IR::Type_Bits>() || type->is<IR::Type_InfInt>() ||
+              type->is<IR::Type_Enum>() || type->is<IR::Type_SerEnum>() ||
+              type->is<IR::Type_Error>())) {
+            typeError("%1%: switch expression cannot be of type %2%", stat->expression,
+                      type->toString());
+            return stat;
+        }
+
         Comparison comp;
         comp.left = stat->expression;
 

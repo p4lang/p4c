@@ -1,0 +1,3 @@
+issue5313_typealiass.p4(7): [--Werror=type-error] error: a: switch expression cannot be of type TwoBitsAlias
+    switch (a) {
+            ^
