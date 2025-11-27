@@ -23,14 +23,20 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
+#include "lib/stringify.h"
 #include "target.h"
 
 namespace P4::EBPF {
 
 /// Base class for EBPF objects.
-class EBPFObject : public ICastable {
+class EBPFObject : virtual public ICastable, public IHasDbPrint {
  public:
     virtual ~EBPFObject() {}
+
+    /// Each EBPFObject must be able to be represented as a string.
+    [[nodiscard]] virtual cstring toString() const { return "EBPFObject"_cs; }
+
+    void dbprint(std::ostream &out) const override { out << toString(); }
 
     static cstring externalName(const IR::IDeclaration *declaration) {
         cstring name = declaration->externalName();
@@ -59,5 +65,9 @@ class EBPFObject : public ICastable {
 };
 
 }  // namespace P4::EBPF
+
+inline std::ostream &operator<<(std::ostream &out, const P4::EBPF::EBPFObject &obj) {
+    return out << obj.toString();
+}
 
 #endif /* BACKENDS_EBPF_EBPFOBJECT_H_ */
