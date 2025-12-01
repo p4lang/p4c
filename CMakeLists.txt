@@ -72,6 +72,7 @@ OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during bu
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
+OPTION (ENABLE_PCH "Enable PCH for IR headers" OFF)
 
 # Enable DumpPipe pass output
 OPTION(ENABLE_DUMP_PIPE "Enable DumpPipe pass output" ON)
@@ -139,8 +140,8 @@ if(ENABLE_UNIFIED_COMPILATION)
   set(CMAKE_UNITY_BUILD ON)
 endif()
 
-# If unity builds are enabled, choose an aggressive batch size.
 if (CMAKE_UNITY_BUILD)
+  # If unity builds are enabled, choose an aggressive batch size.
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
 endif ()
 
@@ -555,7 +556,9 @@ set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
 target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
-
+if (ENABLE_PCH)
+  target_precompile_headers(ir-generated REUSE_FROM ir)
+endif()
 
 ######################################## IR Generation End ########################################
 
