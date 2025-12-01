@@ -15,7 +15,7 @@ control c(inout headers_t hdrs) {
     @name("c.result") bit<32> result_0;
     @name("c.mask") bit<8> mask_0;
     @name("c.i") bit<8> i_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a0") action a0(@name("m") bit<8> m_1) {
         result_0 = 32w0;

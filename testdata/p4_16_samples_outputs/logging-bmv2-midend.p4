@@ -28,7 +28,7 @@ struct tuple_0 {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.a") action a() {
         log_msg("Logging message.");

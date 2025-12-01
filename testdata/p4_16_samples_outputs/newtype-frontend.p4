@@ -17,7 +17,7 @@ control c(out B32 x) {
     @name("c.n") N32 n_0;
     @name("c.n1") N32 n1_0;
     @name("c.s") S s_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.t") table t_0 {
         actions = {

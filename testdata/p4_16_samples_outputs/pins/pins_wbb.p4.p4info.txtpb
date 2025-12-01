@@ -77,6 +77,7 @@ actions {
     id: 21257015
     name: "NoAction"
     alias: "NoAction"
+    annotations: "@corelib"
     annotations: "@noWarn(\"unused\")"
   }
 }

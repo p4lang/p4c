@@ -44,7 +44,7 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool pass) {
     @name("pipe.address_0") bit<32> address_0;
     @name("pipe.pass_0") bool pass_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.c1.Reject") action c1_Reject_0() {
         pass_0 = false;
