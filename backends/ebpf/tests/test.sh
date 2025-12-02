@@ -180,6 +180,7 @@ for xdp_enabled in "${XDP[@]}" ; do
     # Start tests
     ptf \
       --test-dir ptf/ \
+      --packet-manipulation-module ptf.packet_scapy \
       --test-params="$TEST_PARAMS" \
       --interface 0@s1-eth0 --interface 1@s1-eth1 --interface 2@s1-eth2 --interface 3@s1-eth3 \
       --interface 4@s1-eth4 --interface 5@s1-eth5 $TEST_CASE
