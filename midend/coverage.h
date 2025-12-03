@@ -29,6 +29,8 @@ struct CoverageOptions {
     bool coverTableEntries = false;
     /// Cover IR::P4Action
     bool coverActions = false;
+    /// Cover IR::ParserState
+    bool coverParserStates = false;
 
     /// Skip tests which do not increase coverage.
     bool onlyCoveringTests = false;
@@ -57,6 +59,9 @@ class CollectNodes : public Inspector {
 
     /// Actions coverage.
     bool preorder(const IR::P4Action *act) override;
+
+    /// Parser state coverage.
+    bool preorder(const IR::ParserState *state) override;
 
  public:
     explicit CollectNodes(CoverageOptions coverageOptions);
