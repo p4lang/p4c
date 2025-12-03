@@ -18,8 +18,8 @@ limitations under the License.
 
 #include "JsonObjects.h"
 #include "backend.h"
+#include "backends/bmv2/common/v1model.h"
 #include "extern.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "lib/algorithm.h"
 
@@ -273,7 +273,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 paramsArray->append(expr);
                 paramValue->emplace("op", extFuncName);
                 paramValue->emplace_non_null("source_info"_cs, mce->sourceInfoJsonObj());
-            } else if (extFuncName == P4V1::V1Model::instance.log_msg.name) {
+            } else if (extFuncName == P4V1::V1Model::instance().log_msg.name) {
                 BUG_CHECK(mce->arguments->size() == 2 || mce->arguments->size() == 1,
                           "%1%: Expected 1 or 2 arguments", mce);
                 result->emplace("op", "primitive");
