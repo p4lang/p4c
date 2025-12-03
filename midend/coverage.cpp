@@ -56,6 +56,13 @@ bool CollectNodes::preorder(const IR::P4Action *act) {
     return true;
 }
 
+bool CollectNodes::preorder(const IR::ParserState *state) {
+    if (coverageOptions.coverParserStates && state->getSourceInfo().isValid()) {
+        coverableNodes.insert(state);
+    }
+    return true;
+}
+
 void printCoverageReport(const CoverageSet &all, const CoverageSet &visited) {
     if (all.empty()) {
         return;

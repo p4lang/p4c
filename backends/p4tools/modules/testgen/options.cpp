@@ -280,7 +280,7 @@ TestgenOptions::TestgenOptions()
         "--track-coverage", "coverageItem",
         [this](const char *arg) {
             static std::set<cstring> const COVERAGE_OPTIONS = {"STATEMENTS"_cs, "TABLE_ENTRIES"_cs,
-                                                               "ACTIONS"_cs};
+                                                               "ACTIONS"_cs, "PARSER_STATES"_cs};
             hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
@@ -295,6 +295,10 @@ TestgenOptions::TestgenOptions()
                 }
                 if (selectionString == "ACTIONS") {
                     coverageOptions.coverActions = true;
+                    return true;
+                }
+                if (selectionString == "PARSER_STATES") {
+                    coverageOptions.coverParserStates = true;
                     return true;
                 }
             }
