@@ -23,6 +23,7 @@ namespace P4 {
 
 bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *ctxt) {
     if (!expression->is<IR::MethodCallExpression>()) return false;
+    Visitor::init_apply(expression, ctxt);
     auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), this, typeMap,
                                       false, ctxt);
     if (!mi->is<BuiltInMethod>()) return false;
