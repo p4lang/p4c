@@ -1491,6 +1491,18 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PlusSlice *expression) {
     }
     if (cloned) expression = cloned;
 
+    if (auto lsb = expression->e1->to<IR::Constant>()) {
+        if (!lsb->fitsInt()) {
+            typeError("%1%: lsb offset too large", lsb);
+            return expression;
+        }
+        int l = lsb->asInt();
+        if (l < 0) {
+            typeError("%1%: negative lsb offset", lsb);
+            return expression;
+        }
+    }
+
     if (!expression->e2->is<IR::Constant>()) {
         typeError("%1%: slice bit index values must be constants", expression->e2);
         return expression;
