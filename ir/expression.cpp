@@ -91,8 +91,8 @@ void IR::Constant::handleOverflow(bool noWarning) {
 
     if (width == 0) {
         if (value != 0 && !noWarning) {
-            P4::warning(ErrorType::WARN_OVERFLOW,
-                        "%1%: zero-width integer cannot have non-zero value", this);
+            warning(ErrorType::WARN_OVERFLOW, "%1%: zero-width integer cannot have non-zero value",
+                    this);
         }
         value = 0;
     } else if (tb->isSigned) {
