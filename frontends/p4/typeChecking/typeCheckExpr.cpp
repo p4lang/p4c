@@ -1133,7 +1133,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cmpl *expression) {
     BUG_CHECK(type, "Invalid Type_SerEnum/getTypeType");
 
     if (type->is<IR::Type_InfInt>()) {
-        typeError("'%1%' cannot be applied to an operand with an unknown width");
+        typeError("'%1%' operation cannot be applied to an operand '%2%' with an unknown width",
+                    expression->getStringOp(), expression->expr);
     } else if (type->is<IR::Type_Bits>()) {
         setType(getOriginal(), type);
         setType(expression, type);
