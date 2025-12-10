@@ -23,7 +23,6 @@ MESSAGE("-- Adding p4c-barefoot")
 set(BF_P4C_UNIFIED_SOURCE_CHUNK_SIZE "5" CACHE STRING
     "Target unified compilation chunk size for bf-p4c (an integer or ALL)")
 
-find_package (Boost REQUIRED COMPONENTS graph)
 if (ENABLE_BAREFOOT_INTERNAL)
   add_definitions("-DBAREFOOT_INTERNAL=1")
 endif()
@@ -82,11 +81,6 @@ add_definitions("-DSOURCE_INFO_SCHEMA_VERSION=\"${SOURCE_INFO_SCHEMA_VERSION}\""
 get_schema_version(resources_schema RESOURCES_SCHEMA_VERSION)
 MESSAGE(STATUS "Found source info schema version ${RESOURCES_SCHEMA_VERSION}")
 add_definitions("-DRESOURCES_SCHEMA_VERSION=\"${RESOURCES_SCHEMA_VERSION}\"")
-
-set (HAVE_LIBBOOST_GRAPH 1)
-
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${Z3_LIB}")
-set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
 
@@ -457,13 +451,6 @@ set (BF_P4C_IR_DEF_FILES
 # publish IR_DEF_FILES upstream
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BF_P4C_IR_DEF_FILES} PARENT_SCOPE)
 
-set (BF_P4C_GRAPHS_SRCS
-  ${P4C_SOURCE_DIR}/backends/graphs/controls.cpp
-  ${P4C_SOURCE_DIR}/backends/graphs/graphs.cpp
-  ${P4C_SOURCE_DIR}/backends/graphs/parsers.cpp
-  ${P4C_SOURCE_DIR}/backends/graphs/graph_visitor.cpp
-  )
-
 set (p4include_HEADERS
   p4include/tofino1_specs.p4
   p4include/tofino1_base.p4
@@ -520,7 +507,6 @@ set (BF_P4C_SOURCES
 set (P4C_BAREFOOT_SRCS
   frontend.cpp
   ${BF_P4C_BACKEND_CONV_SRCS}
-  ${BF_P4C_GRAPHS_SRCS}
   )
 
 if(BUILD_STATIC_BFP4C_LIBS)
@@ -528,7 +514,8 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
   add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
+target_link_libraries(tofinobackend PRIVATE absl::prefetch
+  PUBLIC ${P4C_LIB_DEPS} ${Z3_LIB} controlplane-gen ir p4cgraphs)
 target_include_directories(
   tofinobackend
   # We also export Z3's includes with the common library.
@@ -546,8 +533,7 @@ else()
   # $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime> to sources does not work)
   add_library(bfp4c OBJECT ${P4C_BAREFOOT_SRCS})
 endif()
-target_link_libraries (bfp4c tofinobackend bfn_p4runtime
-  ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (bfp4c PUBLIC tofinobackend bfn_p4runtime ${CMAKE_THREAD_LIBS_INIT})
 # XXX These compile definitions and include directories should be inherited
 # XXX from bfp4c's dependencies, but these CMake files aren't very modular.
 target_compile_definitions(bfp4c
@@ -586,7 +572,7 @@ else()
   # here explictly as well as their dependencies
   add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
-  target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${Z3_LIB} p4cgraphs ${CMAKE_THREAD_LIBS_INIT})
   # FIXME: These includes should be exported by earlier libraries.
   target_include_directories(
       p4c-barefoot
@@ -918,7 +904,7 @@ if (ENABLE_GTESTS)
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/tofino_gtest_utils.cpp")
   # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
   # Leave it in GTEST_BF_P4C_SOURCES for now.
-  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir ${P4C_LIB_DEPS})
+  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir ${P4C_LIB_DEPS} ${Z3_LIB} p4cgraphs)
   target_include_directories(
     bf_gtest_support
     # We also export Z3's includes with the common library.
@@ -1026,7 +1012,6 @@ if (ENABLE_GTESTS)
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/union_find.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/v1model_translate.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/utils/super_cluster_builder.cpp
-    ${BF_P4C_GRAPHS_SRCS}
     )
   if (NOT BUILD_STATIC_BFP4C_LIBS)
     # objlibs cannot be linked, need to add objects here explicitly
