@@ -1,5 +1,7 @@
 var NAVTREEINDEX37 =
 {
+"struct_p4_1_1_diagnostic_count_info_guard.html#a9a3a009109abd31efe93c03a2086a00f":[13,0,12,109,0],
+"struct_p4_1_1_diagnostic_count_info_state.html":[12,0,14,95],
 "struct_p4_1_1_diagnostic_count_info_state.html":[13,0,12,110],
 "struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html":[12,0,14,96,0],
 "struct_p4_1_1_direct_meter_map_1_1_direct_meter_info.html":[13,0,12,111,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX37 =
 "struct_p4_1_1_p4_v1_1_1_digest_receiver___model.html":[13,0,12,19,21],
 "struct_p4_1_1_p4_v1_1_1_direct_counter___model.html":[12,0,14,9,22],
 "struct_p4_1_1_p4_v1_1_1_direct_counter___model.html":[13,0,12,19,22],
-"struct_p4_1_1_p4_v1_1_1_direct_meter___model.html":[12,0,14,9,23],
-"struct_p4_1_1_p4_v1_1_1_direct_meter___model.html":[13,0,12,19,23],
-"struct_p4_1_1_p4_v1_1_1_hash___model.html":[12,0,14,9,43]
+"struct_p4_1_1_p4_v1_1_1_direct_meter___model.html":[12,0,14,9,23]
 };
