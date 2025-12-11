@@ -240,6 +240,11 @@ void ExtractSuccess::print(std::ostream &os) const {
 
 int ExtractSuccess::getOffset() const { return offset; }
 
+const std::vector<std::pair<IR::StateVariable, const IR::Expression *>> &ExtractSuccess::getFields()
+    const {
+    return fields;
+}
+
 const IR::Expression *ExtractSuccess::getExtractedHeader() const { return extractedHeader; }
 
 /* =============================================================================================
