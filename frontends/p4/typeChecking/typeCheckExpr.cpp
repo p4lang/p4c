@@ -951,6 +951,9 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
         }
     }
 
+    if (const auto *rt = rtype->to<IR::Type_SerEnum>()) {
+        rtype = getTypeType(rt->type);
+    }
     const auto *rbits = rtype->to<IR::Type_Bits>();
     if (rbits && rbits->isSigned) {
         typeError("%1%: Shift amount must be an unsigned number", expression->right);
