@@ -342,6 +342,9 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
     logStep(parserState);
 
     auto &nextState = state.clone();
+    if (TestgenOptions::get().coverageOptions.coverParserStates) {
+        nextState.markVisited(parserState);
+    }
     nextState.add(*new TraceEvents::ParserState(parserState));
 
     if (parserState->name == IR::ParserState::accept) {

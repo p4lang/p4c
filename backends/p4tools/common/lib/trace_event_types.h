@@ -188,6 +188,10 @@ class ExtractSuccess : public TraceEvent {
     /// @returns the offset stored in this class.
     [[nodiscard]] int getOffset() const;
 
+    /// @returns the bit fields stored in this class
+    [[nodiscard]] const std::vector<std::pair<IR::StateVariable, const IR::Expression *>> &
+    getFields() const;
+
     ExtractSuccess(const IR::Expression *extractedHeader, int offset,
                    const IR::Expression *condition,
                    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields);

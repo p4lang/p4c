@@ -280,7 +280,7 @@ TestgenOptions::TestgenOptions()
         "--track-coverage", "coverageItem",
         [this](const char *arg) {
             static std::set<cstring> const COVERAGE_OPTIONS = {"STATEMENTS"_cs, "TABLE_ENTRIES"_cs,
-                                                               "ACTIONS"_cs};
+                                                               "ACTIONS"_cs, "PARSER_STATES"_cs};
             hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
@@ -297,6 +297,10 @@ TestgenOptions::TestgenOptions()
                     coverageOptions.coverActions = true;
                     return true;
                 }
+                if (selectionString == "PARSER_STATES") {
+                    coverageOptions.coverParserStates = true;
+                    return true;
+                }
             }
             error(
                 "Coverage tracking for label %1% not supported. Supported coverage tracking "
@@ -307,7 +311,8 @@ TestgenOptions::TestgenOptions()
         },
         "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
         "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES (table rules encoded "
-        "in the table entries in P4), ACTIONS (actions invoked, directly or by tables). "
+        "in the table entries in P4), ACTIONS (actions invoked, directly or by tables), "
+        "PARSER_STATES (parser states which a particular path chose to visit)."
         "Defaults to no coverage.");
 
     registerOption(
