@@ -1,3 +1,3 @@
-issue5094-a-bmv2.p4(30): [--Werror=type-error] error: "aaaa": The right operand of shifts must be either an expression of type bit<S> or int, but is string
+issue5094-string-bmv2.p4(30): [--Werror=type-error] error: "aaaa": The right operand of shifts must be either an expression with the underlying type bit<S> or compile-time known value that is a non-negative integer, but is string
     { h.h.c = (int<64>)(h.h.a >> "aaaa"); sm.egress_spec = 0; }
                                       ^
