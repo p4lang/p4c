@@ -13,7 +13,9 @@ class GetV1ModelVersion : public Inspector {
         if (dc->name == "__v1model_version") {
             const auto *val = dc->initializer->to<IR::Constant>();
             if (!val || val->value < 0) {
-                P4::error(ErrorType::ERR_EXPECTED, "%1%: expected v1model version to be a non-negative number", dc->initializer);
+                P4::error(ErrorType::ERR_EXPECTED,
+                          "%1%: expected v1model version to be a non-negative number",
+                          dc->initializer);
                 return false;
             }
             version = static_cast<unsigned>(val->value);
