@@ -117,6 +117,7 @@ const IR::Node *LowerExpressions::postorder(IR::Slice *expression) {
     if (l != 0) {
         auto one = new IR::Constant(IR::Type_InfInt::get(), l);
         expr = new IR::Shr(expression->e0->srcInfo, expression->e0, one);
+        typeMap->cloneExpressionProperties(one, expression->e2);
         typeMap->setType(expr, e0type);
         typeMap->setType(one, one->type);
     } else {

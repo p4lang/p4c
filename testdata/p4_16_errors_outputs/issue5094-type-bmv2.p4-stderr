@@ -1,0 +1,6 @@
+issue5094-type-bmv2.p4(34): [--Werror=type-error] error: h.h.e: The right operand of shift must be either an expression of type bit<S> or a compile-time known value that is a non-negative integer, but is shiftEnum
+        h.h.c = (int<64>)(h.h.a << h.h.e);
+                                   ^^^^^
+issue5094-type-bmv2.p4(20)
+type bit<8> shiftEnum;
+            ^^^^^^^^^

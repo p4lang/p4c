@@ -945,9 +945,19 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
         }
     }
 
-    if (rtype->is<IR::Type_Bits>() && rtype->to<IR::Type_Bits>()->isSigned) {
+    if (const auto *rt = rtype->to<IR::Type_SerEnum>()) {
+        rtype = getTypeType(rt->type);
+    }
+    const auto *rbits = rtype->to<IR::Type_Bits>();
+    if (rbits && rbits->isSigned) {
         typeError("%1%: Shift amount must be an unsigned number", expression->right);
         return expression;
+    }
+    if (!rbits && !(rtype->is<IR::Type_InfInt>() && isCompileTimeConstant(expression->right))) {
+        typeError(
+            "%1%: The right operand of shift must be either an expression of type bit<S> "
+            "or a compile-time known value that is a non-negative integer, but is %2%",
+            expression->right, rtype);
     }
 
     if (!lt && !ltype->is<IR::Type_InfInt>()) {

@@ -117,7 +117,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("MyIC.forward") action forward() {
-        b.meta = 32w0x1 << c.ingress_port;
+        b.meta = 32w0x1 << (bit<32>)c.ingress_port;
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
