@@ -1810,6 +1810,10 @@ const IR::Expression *TypeInferenceBase::actionCall(bool inActionList,
         return actionCall;
     }
     LOG2("Action type " << baseType);
+    if (method->is<IR::MethodCallExpression>()) {
+        typeError("%1%: Cannot invoke result of an action call", method);
+        return actionCall;
+    }
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
     BUG_CHECK(baseType->returnType == nullptr, "%1%: action with return type?",
               baseType->returnType);
