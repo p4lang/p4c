@@ -915,12 +915,6 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
         // getTypeType should have already taken care of the error message
         return expression;
     }
-    // FIXME: #5100, strip the new-type introduced by `type` keyword for now. According to the spec,
-    // such code should be rejected, but before #5099 it was accepted, so keep it accepted for now,
-    // until we discuss what is the right approach here.
-    if (const auto *rt = rtype->to<IR::Type_Newtype>()) {
-        rtype = getTypeType(rt->type);
-    }
     auto lt = ltype->to<IR::Type_Bits>();
     if (auto cst = expression->right->to<IR::Constant>()) {
         if (!cst->fitsInt()) {
@@ -961,8 +955,8 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
     }
     if (!rbits && !(rtype->is<IR::Type_InfInt>() && isCompileTimeConstant(expression->right))) {
         typeError(
-            "%1%: The right operand of shifts must be either an expression with the underlying "
-            "type bit<S> or compile-time known value that is a non-negative integer, but is %2%",
+            "%1%: The right operand of shift must be either an expression of type bit<S> "
+            "or a compile-time known value that is a non-negative integer, but is %2%",
             expression->right, rtype);
     }
 

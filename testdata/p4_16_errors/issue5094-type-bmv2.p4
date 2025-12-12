@@ -31,8 +31,6 @@ header hdr {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action shift()
     {
-        // This should not be allowed. However, for backwards compatibility,
-        // it is, as discussed in the issue #5100.
         h.h.c = (int<64>)(h.h.a << h.h.e);
         sm.egress_spec = 0;
     }

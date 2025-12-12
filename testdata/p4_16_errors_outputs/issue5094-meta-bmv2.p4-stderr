@@ -1,4 +1,4 @@
-issue5094-meta-bmv2.p4(30): [--Werror=type-error] error: m: The right operand of shifts must be either an expression with the underlying type bit<S> or compile-time known value that is a non-negative integer, but is struct Meta
+issue5094-meta-bmv2.p4(30): [--Werror=type-error] error: m: The right operand of shift must be either an expression of type bit<S> or a compile-time known value that is a non-negative integer, but is struct Meta
     { h.h.c = (int<64>)(h.h.a << m); sm.egress_spec = 0; }
                                  ^
 arith-skeleton.p4(26)
