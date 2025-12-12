@@ -43,7 +43,7 @@ static const IR::IDeclaration *getFirstDeclaration(const IR::Vector<IR::Node> *n
 }
 
 ProgramStructure::ProgramStructure()
-    : v1model(P4V1::V1Model::instance),
+    : v1model(P4V1::V1Model::instance()),
       p4lib(P4::P4CoreLibrary::instance()),
       types(&allNames),
       metadata(&allNames),
@@ -699,7 +699,7 @@ void ProgramStructure::loadModel() {
     // This includes in turn core.p4
     std::stringstream versionArg;
     versionArg << "-DV1MODEL_VERSION=" << V1Model::versionCurrent;
-    include(V1Model::instance.file.name, versionArg.str());
+    include(V1Model::instance().file.name, versionArg.str());
 
     metadataInstances.insert(v1model.standardMetadataType.name);
     metadataTypes.insert(v1model.standardMetadataType.name);

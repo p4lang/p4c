@@ -261,8 +261,10 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::P4Table *c) override;
     bool preorder(const IR::P4ValueSet *c) override;
 
+#ifdef SUPPORT_P4_14
     // in case it is accidentally called on a V1Program
     bool preorder(const IR::V1Program *) override { return false; }
+#endif
 };
 
 std::string toP4(const IR::INode *node);

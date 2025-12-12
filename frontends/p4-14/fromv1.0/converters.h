@@ -431,8 +431,8 @@ class ComputeTableCallGraph : public Inspector {
 
         // skip control block that is unused.
         if (!structure->calledControls.isCallee(parent->name) &&
-            parent->name != P4V1::V1Model::instance.ingress.name &&
-            parent->name != P4V1::V1Model::instance.egress.name)
+            parent->name != P4V1::V1Model::instance().ingress.name &&
+            parent->name != P4V1::V1Model::instance().egress.name)
             return;
 
         if (ctrl != nullptr && ctrl != parent) {
