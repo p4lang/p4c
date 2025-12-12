@@ -1134,7 +1134,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cmpl *expression) {
 
     if (type->is<IR::Type_InfInt>()) {
         typeError("'%1%' operation cannot be applied to an operand '%2%' with an unknown width",
-                    expression->getStringOp(), expression->expr);
+                  expression->getStringOp(), expression->expr);
     } else if (type->is<IR::Type_Bits>()) {
         setType(getOriginal(), type);
         setType(expression, type);
