@@ -1492,12 +1492,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PlusSlice *expression) {
     if (cloned) expression = cloned;
 
     if (auto lsb = expression->e1->to<IR::Constant>()) {
-        if (!lsb->fitsInt()) {
+        if (lsb->value >= type->width_bits()) {
             typeError("%1%: lsb offset too large", lsb);
             return expression;
         }
-        int l = lsb->asInt();
-        if (l < 0) {
+        if (lsb->value < 0) {
             typeError("%1%: negative lsb offset", lsb);
             return expression;
         }
