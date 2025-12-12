@@ -87,7 +87,7 @@ control MyIC(
     bit<8> Op1 = 0x2;
     bit<16> Op2 = 0x23;
     action forward() {
-        b.meta = 32w0x1 << c.ingress_port;
+        b.meta = 32w0x1 << (PortIdUint_t)c.ingress_port;
     }
 
     table tbl {
