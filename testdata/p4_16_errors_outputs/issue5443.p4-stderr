@@ -1,0 +1,4 @@
+issue5443.p4(8): [--Werror=invalid] error: ~0x100: Operation cannot be applied to values with unknown width;
+please specify width explicitly
+        if (~0x100) {
+            ^^^^^^
