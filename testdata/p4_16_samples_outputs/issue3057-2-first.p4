@@ -7,8 +7,8 @@ control proto();
 package top(proto _p);
 control c() {
     apply {
-        bool b5 = (S){a = 32w1,b = 32w2} == (S){a = 32w1,b = 32w2};
-        bool b5_ = (S){a = 32w1,b = 32w2} == (S){a = 32w1,b = 32w2};
+        bool b5 = true;
+        bool b5_ = true;
     }
 }
 

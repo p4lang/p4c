@@ -9,9 +9,6 @@ control ingress(inout Headers h) {
     apply {
         h.a = 8w0;
         h.b = 8w0;
-        if (h.a != h.a) @likely {
-            h.b = 8w1;
-        }
     }
 }
 

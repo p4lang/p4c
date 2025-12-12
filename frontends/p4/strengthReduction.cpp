@@ -151,6 +151,9 @@ const IR::Node *DoStrengthReduction::postorder(IR::Equ *expr) {
     // a == false is the same as !a
     if (isFalse(expr->left)) return new IR::LNot(expr->srcInfo, expr->type, expr->right);
     if (isFalse(expr->right)) return new IR::LNot(expr->srcInfo, expr->type, expr->left);
+    // a == a is true (no float/Nan)
+    if (expr->left->equiv(*expr->right) && !hasSideEffects(expr->left))
+        return IR::BoolLiteral::get(true);
     return expr;
 }
 
@@ -161,6 +164,37 @@ const IR::Node *DoStrengthReduction::postorder(IR::Neq *expr) {
     // a != false is the same as a
     if (isFalse(expr->left)) return expr->right;
     if (isFalse(expr->right)) return expr->left;
+    // a != a is false (no float/Nan)
+    if (expr->left->equiv(*expr->right) && !hasSideEffects(expr->left))
+        return IR::BoolLiteral::get(false);
+    return expr;
+}
+
+const IR::Node *DoStrengthReduction::relation(IR::Operation_Relation *expr, bool grt, bool eq) {
+    if (hasSideEffects(expr)) return expr;
+    if (expr->left->equiv(*expr->right)) return IR::BoolLiteral::get(eq);
+    if (expr->left->type != expr->right->type) return expr;  // not typechecked (yet?)
+    if (auto bt = expr->left->type->to<IR::Type::Bits>()) {
+        big_int min_val = 0;
+        big_int max_val = (big_int(1) << bt->size) - 1;
+        if (bt->isSigned) {
+            max_val >>= 1;
+            min_val = -(max_val + 1);
+        }
+        if (auto cst = expr->right->to<IR::Constant>()) {
+            if (grt ^ eq) {
+                if (cst->value == max_val) return IR::BoolLiteral::get(eq);
+            } else {
+                if (cst->value == min_val) return IR::BoolLiteral::get(eq);
+            }
+        } else if (auto cst = expr->left->to<IR::Constant>()) {
+            if (grt ^ eq) {
+                if (cst->value == min_val) return IR::BoolLiteral::get(eq);
+            } else {
+                if (cst->value == max_val) return IR::BoolLiteral::get(eq);
+            }
+        }
+    }
     return expr;
 }
 
