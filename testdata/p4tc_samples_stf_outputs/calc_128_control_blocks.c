@@ -60,6 +60,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct metadata_t *meta;
@@ -203,13 +204,9 @@ assign_128(&hdr->p4calc.res[0], bitxor_128(loadfrom_128(&hdr->p4calc.operand_a[0
             return TC_ACT_SHOT;
         }
         int outHeaderLength = 0;
-        if (hdr->ethernet.ebpf_valid) {
-            outHeaderLength += 112;
-        }
-;        if (hdr->p4calc.ebpf_valid) {
-            outHeaderLength += 416;
-        }
-;
+        if (hdr->ethernet.ebpf_valid) outHeaderLength += 112;
+        if (hdr->p4calc.ebpf_valid) outHeaderLength += 416;
+
         __u16 saved_proto = 0;
         bool have_saved_proto = false;
         // bpf_skb_adjust_room works only when protocol is IPv4 or IPv6
@@ -239,50 +236,52 @@ assign_128(&hdr->p4calc.res[0], bitxor_128(loadfrom_128(&hdr->p4calc.operand_a[0
         pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
+// emitting header ethernet_t
         if (hdr->ethernet.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 112)) {
                 return TC_ACT_SHOT;
             }
             
             storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (htonll(getPrimitive64(hdr->ethernet.dstAddr, 48) << 16)));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
             storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (htonll(getPrimitive64(hdr->ethernet.srcAddr, 48) << 16)));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
             hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
-            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
         }
-;        if (hdr->p4calc.ebpf_valid) {
+;// emitting header p4calc_t
+        if (hdr->p4calc.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 416)) {
                 return TC_ACT_SHOT;
             }
@@ -303,106 +302,106 @@ assign_128(&hdr->p4calc.res[0], bitxor_128(loadfrom_128(&hdr->p4calc.operand_a[0
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[5];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[6];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[7];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[8];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[9];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[10];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[11];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[12];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[13];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[14];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[15];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 15, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[14];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[13];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[12];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[11];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[10];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[9];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[8];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[7];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[6];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_a))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 128;
 
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[5];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[6];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[7];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[8];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[9];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[10];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[11];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[12];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[13];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[14];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[15];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 15, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[14];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[13];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[12];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[11];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[10];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[9];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[8];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[7];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[6];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.operand_b))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 128;
 
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[5];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[6];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[7];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[8];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[9];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[10];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[11];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[12];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[13];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->p4calc.res))[14];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->p4calc.res))[15];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 15, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[14];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[13];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[12];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[11];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[10];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[9];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[8];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[7];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[6];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->p4calc.res))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 128;
 
         }
