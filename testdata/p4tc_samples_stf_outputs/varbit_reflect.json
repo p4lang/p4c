@@ -1,0 +1,44 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "varbit_reflect",
+  "externs" : [],
+  "tables" : [
+    {
+      "name" : "ingress/nh_table",
+      "id" : 1,
+      "tentries" : 2048,
+      "permissions" : "0x3da4",
+      "nummask" : 8,
+      "keysize" : 32,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "dstAddr",
+          "type" : "ipv4",
+          "match_type" : "exact",
+          "bitwidth" : 32
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 1,
+          "name" : "ingress/reflect",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        },
+        {
+          "id" : 2,
+          "name" : "ingress/drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        }
+      ]
+    }
+  ]
+}
