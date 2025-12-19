@@ -1,0 +1,3 @@
+v1model.p4(57): [--Werror=expected] error: -6419018: expected v1model version to be a non-negative number
+const bit<32> __v1model_version = -6419018;
+                                  ^^^^^^^^
