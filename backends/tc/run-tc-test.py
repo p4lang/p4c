@@ -44,8 +44,8 @@ PARSER.add_argument(
     "--clang-bin",
     dest="clang",
     action='store_true',
-    default="clang-15",
-    help="Specify clang binary, default is clang-15",
+    default="clang-19",
+    help="Specify clang binary, default is clang-19",
 )
 PARSER.add_argument(
     "-tf",
