@@ -22,7 +22,7 @@ if (NOT SUPPORTS_KERNEL OR NOT SUPPORTS_LIBC)
 endif()
 
 # A specific version of clang is required for the P4TC tests.
-set (P4TC_CLANG "clang-15")
+set (P4TC_CLANG "clang-19")
 find_program(P4TC_CLANG_EXEC ${P4TC_CLANG})
 
 if (NOT P4TC_CLANG_EXEC)
