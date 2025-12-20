@@ -1,0 +1,49 @@
+module(
+    name = "p4c",
+    version = "head",  # Fill in concrete versions only on release branches/in the BCR.
+)
+
+bazel_dep(name = "abseil-cpp", version = "20250814.1")
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "boost.algorithm", version = "1.89.0.bcr.2")
+bazel_dep(name = "boost.format", version = "1.89.0.bcr.2")
+bazel_dep(name = "boost.functional", version = "1.89.0.bcr.2")
+bazel_dep(name = "boost.graph", version = "1.89.0.bcr.2")
+bazel_dep(name = "boost.iostreams", version = "1.89.0.bcr.2")
+bazel_dep(name = "boost.multi_index", version = "1.89.0.bcr.2")
+bazel_dep(name = "boost.multiprecision", version = "1.89.0.bcr.2")
+bazel_dep(name = "boost.serialization", version = "1.89.0.bcr.2")
+bazel_dep(name = "googleapis", version = "0.0.0-20251211-05f65958")
+bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
+bazel_dep(name = "nlohmann_json", version = "3.12.0.bcr.1")
+bazel_dep(name = "protobuf", version = "33.2")
+bazel_dep(name = "rules_cc", version = "0.2.16")
+bazel_dep(name = "rules_license", version = "1.0.0")
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "z3", version = "4.15.2")
+bazel_dep(name = "p4runtime")
+
+# Providing p4runtime via an override is ugly because it requires every user of p4c to do the same.
+# TODO(https://github.com/p4lang/p4runtime/issues/572): Pull p4runtime from the BCR, once it's added.
+git_override(
+    module_name = "p4runtime",
+    # Newest commit on 'main' branch as of 2025-12-20.
+    commit = "b607cab199b69aacf21f7c9c7fbfb8368f0ad395",
+    remote = "https://github.com/p4lang/p4runtime.git",
+    strip_prefix = "proto",
+)
+
+p4c_repositories = use_extension("//:bazel/repositories.bzl", "p4c_repositories")
+use_repo(
+    p4c_repositories,
+    "inja",
+)
+
+p4c_ir_extensions = use_extension("//:bazel/extensions.bzl", "p4c_ir_extensions")
+use_repo(
+    p4c_ir_extensions,
+    "p4c_ir_extensions",
+)
+
+# Used by the `tools/format-bazel-files.sh` script.
+bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.1", dev_dependency = True)

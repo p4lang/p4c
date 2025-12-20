@@ -1,18 +1,13 @@
-filegroup(
-    name = "ir_extension",
-    srcs = glob(["*.def"]),
-    visibility = ["//visibility:public"],  # So p4c can compile these.
-)
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 cc_binary(
     name = "main",
     srcs = ["main.cc"],
-    data = ["//p4:program.p4info.txt"],
-    linkopts = [
-    ],
+    data = ["//p4:program.p4info.txtpb"],
     deps = [
-        "@com_github_p4lang_p4c//:ir_frontend_midend_control_plane",
-        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
-        "@com_google_protobuf//:protobuf",
+        "@p4c//:p4c_bmv2_common_lib",
+        "@p4c//:p4c_bmv2_simple_lib",
+        "@p4runtime//:p4info_cc_proto",
+        "@protobuf",
     ],
 )

@@ -1,0 +1,30 @@
+module(
+    name = "example_p4_project",
+)
+
+bazel_dep(name = "protobuf", version = "33.2")
+bazel_dep(name = "rules_cc", version = "0.2.16")
+bazel_dep(name = "p4c")
+
+# Replace this with git_override in your own project.
+# Once p4c is in the BCR, this can go away completely.
+local_path_override(
+    module_name = "p4c",
+    path = "../..",
+)
+
+bazel_dep(name = "p4runtime")
+
+# Providing p4runtime via an override is ugly because it requires every user of p4c to do the same.
+# TODO(https://github.com/p4lang/p4runtime/issues/572): Pull p4runtime from the BCR, once it's added.
+git_override(
+    module_name = "p4runtime",
+    # Newest commit on 'main' branch as of 2025-12-20.
+    commit = "b607cab199b69aacf21f7c9c7fbfb8368f0ad395",
+    remote = "https://github.com/p4lang/p4runtime.git",
+    strip_prefix = "proto",
+)
+
+p4c_ir_extensions = use_extension("@p4c//:bazel/extensions.bzl", "p4c_ir_extensions")
+p4c_ir_extensions.ir_extensions(srcs = ["//:my_custom_statement.ir"])
+use_repo(p4c_ir_extensions, "p4c_ir_extensions")

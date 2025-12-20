@@ -1,3 +1,6 @@
+load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_license//rules:license.bzl", "license")
 load("//:bazel/bison.bzl", "genyacc")
 load("//:bazel/flex.bzl", "genlex")
@@ -54,15 +57,17 @@ cc_library(
     hdrs = glob(["lib/*.h"]),
     deps = [
         ":config_h",
-        "@boost//:format",
-        "@boost//:multiprecision",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/container:node_hash_set",
-        "@com_google_absl//absl/numeric:bits",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:cord",
-        "@com_google_absl//absl/strings:str_format",
-        "@com_google_googletest//:gtest",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:node_hash_set",
+        "@abseil-cpp//absl/numeric:bits",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/types:span",
+        "@boost.format",
+        "@boost.multi_index",
+        "@boost.multiprecision",
+        "@googletest//:gtest",
+        "@protobuf",
     ],
 )
 
@@ -172,9 +177,8 @@ filegroup(
         "backends/bmv2/bmv2.def",
         "backends/dpdk/dpdk.def",
         "//backends/p4tools:ir_extension",
-        # p4c extensions may set this target to a `filegroup` containing
-        # additional .def files.
-        "@com_github_p4lang_p4c_extension//:ir_extension",
+        # p4c extensions can contribute to this file group using extensions.bzl.
+        "@p4c_ir_extensions//:ir_extension",
     ],
 )
 
@@ -238,20 +242,20 @@ cc_library(
         ":config_h",
         ":lib",
         ":p4info_dpdk_cc_proto",
-        "@boost//:algorithm",
-        "@boost//:functional",
-        "@boost//:iostreams",
-        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
-        "@com_github_p4lang_p4runtime//:p4runtime_cc_proto",
-        "@com_github_p4lang_p4runtime//:p4types_cc_proto",
-        "@com_google_absl//absl/container:btree",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/container:flat_hash_set",
-        "@com_google_absl//absl/container:inlined_vector",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/strings:str_format",
-        "@com_google_absl//absl/time",
-        "@com_google_protobuf//:protobuf",
+        "@abseil-cpp//absl/container:btree",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/container:inlined_vector",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/time",
+        "@boost.algorithm",
+        "@boost.functional",
+        "@boost.iostreams",
+        "@p4runtime//:p4info_cc_proto",
+        "@p4runtime//:p4runtime_cc_proto",
+        "@p4runtime//:p4types_cc_proto",
+        "@protobuf",
     ],
 )
 
@@ -262,7 +266,7 @@ cc_library(
     data = ["test"],
     deps = [
         ":ir_frontend_midend_control_plane",
-        "@com_google_googletest//:gtest",
+        "@googletest//:gtest",
     ],
 )
 
@@ -339,8 +343,8 @@ proto_library(
     name = "p4info_dpdk_proto",
     srcs = ["backends/dpdk/p4/config/p4info.proto"],
     deps = [
-        "@com_google_protobuf//:any_proto",
-        "@com_google_protobuf//:descriptor_proto",
+        "@protobuf//:any_proto",
+        "@protobuf//:descriptor_proto",
     ],
 )
 
@@ -480,6 +484,6 @@ cc_library(
         ":config_h",
         ":ir_frontend_midend_control_plane",
         ":lib",
-        "@boost//:graph",
+        "@boost.graph",
     ],
 )
