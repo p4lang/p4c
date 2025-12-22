@@ -24,10 +24,10 @@
 #include <numeric>
 #include <sstream>
 
+#include <boost/format.hpp>
 #include <boost/graph/breadth_first_search.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/lookup_edge.hpp>
-#include <boost/optional/optional_io.hpp>
 
 #include "backends/tofino/bf-p4c/common/run_id.h"
 #include "backends/tofino/bf-p4c/ir/gress.h"
