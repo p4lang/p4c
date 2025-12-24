@@ -42,6 +42,7 @@ build/
 
 # Bazel files
 bazel-*
+*.bazel.lock
 
 # JetBrains
 .idea/
