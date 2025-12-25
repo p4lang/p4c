@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$class_constraints_1_1_pair_constraint.html" title=" " alt="" coords="5,92,200,117"/>
+<area shape="rect" id="Node000001" href="$class_constraints_1_1_copack_constraint.html" title=" " alt="" coords="259,5,477,31"/>
+<area shape="poly" id="edge98_Node000000_Node000001" title=" " alt="" coords="141,84,191,62,247,41,295,28,296,33,249,46,193,66,143,88"/>
+<area shape="rect" id="Node000002" href="$class_constraints_1_1_mutually_aligned_constraint.html" title=" " alt="" coords="263,55,473,95"/>
+<area shape="poly" id="edge99_Node000000_Node000002" title=" " alt="" coords="213,90,262,84,263,90,214,95"/>
+<area shape="rect" id="Node000003" href="$class_constraints_1_1_no_overlap_constraint.html" title=" " alt="" coords="248,120,488,145"/>
+<area shape="poly" id="edge100_Node000000_Node000003" title=" " alt="" coords="214,114,248,117,247,123,214,119"/>
+<area shape="rect" id="Node000004" href="$class_constraints_1_1_no_pack_constraint.html" title=" " alt="" coords="259,169,477,195"/>
+<area shape="poly" id="edge101_Node000000_Node000004" title=" " alt="" coords="149,120,249,154,300,167,298,172,247,159,147,125"/>
+</map>

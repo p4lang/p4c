@@ -1,0 +1,12 @@
+<map id="P4::CreateSpecializedTypes" name="P4::CreateSpecializedTypes">
+<area shape="rect" id="Node000001" title=" " alt="" coords="33,152,233,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_modifier.html" title=" " alt="" coords="5,79,104,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,111,122,150,119,154,76,115"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="13,5,101,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="59,45,58,79,52,78,54,44"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="129,79,295,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="96,34,188,76,186,81,93,39"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="191,115,148,154,144,150,187,111"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="129,5,295,31"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="215,44,215,79,209,79,209,44"/>
+</map>

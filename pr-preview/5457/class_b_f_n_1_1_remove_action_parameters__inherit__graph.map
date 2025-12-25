@@ -1,0 +1,10 @@
+<map id="BFN::RemoveActionParameters" name="BFN::RemoveActionParameters">
+<area shape="rect" id="Node000001" title="Top level PassManager that governs moving of action parameters out of the actions (specialized for BF..." alt="" coords="5,225,232,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="53,152,185,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,191,121,225,116,225,116,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="75,5,163,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="110,44,101,73,100,104,116,151,111,153,95,104,96,72,105,42"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="110,79,221,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="136,41,160,77,156,80,132,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="152,117,128,153,124,150,148,114"/>
+</map>

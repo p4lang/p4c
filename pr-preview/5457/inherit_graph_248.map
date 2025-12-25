@@ -1,0 +1,13 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$class_device.html" title=" " alt="" coords="5,80,72,105"/>
+<area shape="rect" id="Node000001" href="$class_j_bay_device.html" title=" " alt="" coords="125,55,221,80"/>
+<area shape="poly" id="edge2199_Node000000_Node000001" title=" " alt="" coords="85,81,124,74,125,79,86,87"/>
+<area shape="rect" id="Node000005" href="$class_tofino_device.html" title=" " alt="" coords="120,104,225,129"/>
+<area shape="poly" id="edge2203_Node000000_Node000005" title=" " alt="" coords="86,98,120,105,119,110,85,104"/>
+<area shape="rect" id="Node000002" href="$class_j_bay_a0_device.html" title=" " alt="" coords="273,5,387,31"/>
+<area shape="poly" id="edge2200_Node000001_Node000002" title=" " alt="" coords="226,48,288,28,289,33,227,53"/>
+<area shape="rect" id="Node000003" href="$class_j_bay_m_device.html" title=" " alt="" coords="276,55,384,80"/>
+<area shape="poly" id="edge2201_Node000001_Node000003" title=" " alt="" coords="235,65,276,65,276,70,235,70"/>
+<area shape="rect" id="Node000004" href="$class_j_bay_u_device.html" title=" " alt="" coords="277,104,383,129"/>
+<area shape="poly" id="edge2202_Node000001_Node000004" title=" " alt="" coords="227,82,289,101,288,106,226,87"/>
+</map>
