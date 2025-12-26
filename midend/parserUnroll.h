@@ -111,23 +111,25 @@ struct ParserStateInfo {
 class ParserInfo {
     friend class RewriteAllParsers;
     // for each original state a vector of states produced by unrolling
+    std::vector<ParserStateInfo *> *ordered_states = new std::vector<ParserStateInfo *>();
     std::map<cstring, std::vector<ParserStateInfo *> *> states;
 
  public:
-    std::vector<ParserStateInfo *> *get(cstring origState) {
+    std::vector<ParserStateInfo *> *get(ParserStateInfo *si) {
+        cstring origState = si->state->name.name;
         std::vector<ParserStateInfo *> *vec;
         auto it = states.find(origState);
         if (it == states.end()) {
             vec = new std::vector<ParserStateInfo *>;
             states.emplace(origState, vec);
+            ordered_states->push_back(si);
         } else {
             vec = it->second;
         }
         return vec;
     }
     void add(ParserStateInfo *si) {
-        cstring origState = si->state->name.name;
-        auto vec = get(origState);
+        auto vec = get(si);
         vec->push_back(si);
     }
     std::map<cstring, std::vector<ParserStateInfo *> *> &getStates() { return states; }
@@ -225,12 +227,13 @@ class ParserRewriter : public PassManager {
 
 class RewriteAllParsers : public Transform {
     ReferenceMap *refMap;
+    bool order_states;
     TypeMap *typeMap;
     bool unroll;
 
  public:
-    RewriteAllParsers(ReferenceMap *refMap, TypeMap *typeMap, bool unroll)
-        : refMap(refMap), typeMap(typeMap), unroll(unroll) {
+    RewriteAllParsers(ReferenceMap *refMap, TypeMap *typeMap, bool unroll, bool order_states)
+        : refMap(refMap), order_states(order_states), typeMap(typeMap), unroll(unroll) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("RewriteAllParsers");
@@ -277,30 +280,43 @@ class RewriteAllParsers : public Transform {
                                        new IR::Path(IR::ParserState::reject, false)));
             newParser->states.push_back(outOfBoundsState);
         }
-        for (auto &i : rewriter->current.result->states) {
-            for (auto &j : *i.second)
-                if (j->newState) {
-                    if (rewriter->hasOutOfboundState &&
-                        j->newState->name.name == "stateOutOfBound") {
+
+        if (order_states) {
+            if (rewriter->current.result->ordered_states) {
+                for (auto &i : *rewriter->current.result->ordered_states) {
+                    if (rewriter->hasOutOfboundState && i->name == "stateOutOfBound") {
                         continue;
                     }
-                    newParser->states.push_back(j->newState);
+                    newParser->states.push_back(i->state);
                 }
+            }
+        } else {
+            for (auto &i : rewriter->current.result->states) {
+                for (auto &j : *i.second)
+                    if (j->newState) {
+                        if (rewriter->hasOutOfboundState &&
+                            j->newState->name.name == "stateOutOfBound") {
+                            continue;
+                        }
+                        newParser->states.push_back(j->newState);
+                    }
+            }
         }
         // adding accept/reject
         newParser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
         newParser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
+
         return newParser;
     }
 };
 
 class ParsersUnroll : public PassManager {
  public:
-    ParsersUnroll(bool unroll, ReferenceMap *refMap, TypeMap *typeMap) {
+    ParsersUnroll(bool unroll, bool order_states, ReferenceMap *refMap, TypeMap *typeMap) {
         // remove block statements
         passes.push_back(new SimplifyControlFlow(typeMap, false));
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new RewriteAllParsers(refMap, typeMap, unroll));
+        passes.push_back(new RewriteAllParsers(refMap, typeMap, unroll, order_states));
         setName("ParsersUnroll");
     }
 };

@@ -148,7 +148,7 @@ void MidEnd::addDefaultPasses() {
         // Replace any slices in the left side of assignments and convert them to casts.
         new P4::RemoveLeftSlices(&typeMap),
         // Remove loops from parsers by unrolling them as far as the stack indices allow.
-        new P4::ParsersUnroll(true, &refMap, &typeMap),
+        new P4::ParsersUnroll(true, false, &refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, true),
         mkConvertErrors(),
         // Convert tuples into structs.

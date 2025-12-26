@@ -14,6 +14,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct my_ingress_metadata_t *meta;
@@ -28,9 +29,38 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     meta = &(hdrMd->cpumap_usermeta);
     {
         goto start;
+        start: {
+/* extract(hdr->ethernet) */
+//compileExtract
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(112)) {
+                ebpf_errorCode = PacketTooShort;
+                goto reject;
+            }
+
+            __builtin_memcpy(&hdr->ethernet.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
+            ebpf_packetOffsetInBits += 48;
+
+            __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
+            ebpf_packetOffsetInBits += 48;
+
+            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            ebpf_packetOffsetInBits += 16;
+
+
+            hdr->ethernet.ebpf_valid = 1;
+            hdr_start += BYTES(112);
+
+;
+            u16 select_0;
+            select_0 = hdr->ethernet.etherType;
+            if (select_0 == 0x800)goto parse_ipv4;
+            if ((select_0 & 0x0) == (0x0 & 0x0))goto reject;
+            else goto reject;
+        }
         parse_ipv4: {
 /* extract(hdr->ipv4) */
-            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(160 + 0)) {
+//compileExtract
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(160)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -76,34 +106,95 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             hdr_start += BYTES(160);
 
 ;
-             goto accept;
+            u8 select_1;
+            select_1 = hdr->ipv4.ihl;
+            if (select_1 == 0)goto reject;
+            if (select_1 == 1)goto reject;
+            if (select_1 == 2)goto reject;
+            if (select_1 == 3)goto reject;
+            if (select_1 == 4)goto reject;
+            if (select_1 == 5)goto accept;
+            if ((select_1 & 0x0) == (0x0 & 0x0))goto parse_v4_opts;
+            else goto reject;
         }
-        start: {
-/* extract(hdr->ethernet) */
-            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(112 + 0)) {
-                ebpf_errorCode = PacketTooShort;
-                goto reject;
+        parse_v4_opts: {
+/* extract(hdr->opts, (u32)(((u16)((hdr->ipv4.ihl + 11) & ((1ULL << 4) - 1)) << 5) & ((1ULL << 9) - 1))) */
+//compileExtract
+
+/* compileExtract variable size = (u32)(((u16)((hdr->ipv4.ihl + 11) & ((1ULL << 4) - 1)) << 5) & ((1ULL << 9) - 1)) */
+            hdr_start += BYTES(0);
+            {
+
+                u32 ebpf_varbits_width = (u32)(((u16)((hdr->ipv4.ihl + 11) & ((1ULL << 4) - 1)) << 5) & ((1ULL << 9) - 1));
+                u32 ebpf_varbits_offset;
+                if (ebpf_varbits_width & 7) {
+                    ebpf_errorCode = ParserInvalidArgument;
+                    goto reject;
+                }
+                ebpf_varbits_width >>= 3;
+                if ((u8*)ebpf_packetEnd < hdr_start + ebpf_varbits_width) {
+tooshort:;
+                    ebpf_errorCode = PacketTooShort;
+                    goto reject;
+                }
+#define ASSIGN(n) do { if ((u8 *)ebpf_packetEnd < hdr_start + (n) + 1)\
+                goto tooshort;\
+            else\
+                hdr->opts.opts.data[(n)] = (u8)load_byte(pkt,BYTES(ebpf_packetOffsetInBits)+(n));\
+            } while (0)
+                switch (ebpf_varbits_width)
+                {
+                    case 40: ASSIGN(39);
+                    case 39: ASSIGN(38);
+                    case 38: ASSIGN(37);
+                    case 37: ASSIGN(36);
+                    case 36: ASSIGN(35);
+                    case 35: ASSIGN(34);
+                    case 34: ASSIGN(33);
+                    case 33: ASSIGN(32);
+                    case 32: ASSIGN(31);
+                    case 31: ASSIGN(30);
+                    case 30: ASSIGN(29);
+                    case 29: ASSIGN(28);
+                    case 28: ASSIGN(27);
+                    case 27: ASSIGN(26);
+                    case 26: ASSIGN(25);
+                    case 25: ASSIGN(24);
+                    case 24: ASSIGN(23);
+                    case 23: ASSIGN(22);
+                    case 22: ASSIGN(21);
+                    case 21: ASSIGN(20);
+                    case 20: ASSIGN(19);
+                    case 19: ASSIGN(18);
+                    case 18: ASSIGN(17);
+                    case 17: ASSIGN(16);
+                    case 16: ASSIGN(15);
+                    case 15: ASSIGN(14);
+                    case 14: ASSIGN(13);
+                    case 13: ASSIGN(12);
+                    case 12: ASSIGN(11);
+                    case 11: ASSIGN(10);
+                    case 10: ASSIGN(9);
+                    case 9: ASSIGN(8);
+                    case 8: ASSIGN(7);
+                    case 7: ASSIGN(6);
+                    case 6: ASSIGN(5);
+                    case 5: ASSIGN(4);
+                    case 4: ASSIGN(3);
+                    case 3: ASSIGN(2);
+                    case 2: ASSIGN(1);
+                    case 1: ASSIGN(0);
+                }
+#undef ASSIGN
+                hdr->opts.opts.curwidth = ebpf_varbits_width << 3;
+                ebpf_packetOffsetInBits += ebpf_varbits_width << 3;
+                hdr_start += ebpf_varbits_width;
             }
 
-            __builtin_memcpy(&hdr->ethernet.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
-            ebpf_packetOffsetInBits += 48;
-
-            __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
-            ebpf_packetOffsetInBits += 48;
-
-            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 16;
-
-
-            hdr->ethernet.ebpf_valid = 1;
-            hdr_start += BYTES(112);
+            hdr->opts.ebpf_valid = 1;
 
 ;
-            u16 select_0;
-            select_0 = hdr->ethernet.etherType;
-            if (select_0 == 0x800)goto parse_ipv4;
-            if ((select_0 & 0x0) == (0x0 & 0x0))goto reject;
-            else goto reject;
+             goto accept;
         }
 
         reject: {

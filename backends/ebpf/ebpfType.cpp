@@ -133,7 +133,10 @@ void EBPFScalarType::emit(CodeBuilder *builder) {
 }
 
 void EBPFScalarType::declare(CodeBuilder *builder, cstring id, bool asPointer) {
-    if (EBPFScalarType::generatesScalar(width)) {
+    if (type->variable()) {
+        builder->appendFormat("struct { u8 data[%d]; u16 curwidth; } %s", (width + 7) >> 3,
+                              id.c_str());
+    } else if (EBPFScalarType::generatesScalar(width)) {
         emit(builder);
         if (asPointer) builder->append("*");
         builder->spc();

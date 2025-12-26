@@ -105,6 +105,8 @@ class PNAArchTC : public PNAEbpfGenerator {
     void emit(EBPF::CodeBuilder *builder) const override;
     void emitParser(EBPF::CodeBuilder *builder) const override;
     void emitHeader(EBPF::CodeBuilder *builder) const override;
+    virtual void emitHeader_part1(EBPF::CodeBuilder *builder) const;
+    virtual void emitHeader_part2(EBPF::CodeBuilder *builder) const;
     void emitInstances(EBPF::CodeBuilder *builder) const override;
     void emitGlobalFunctions(EBPF::CodeBuilder *builder) const;
 };
@@ -130,14 +132,20 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
         : EBPF::PsaStateTranslationVisitor(refMap, typeMap, prsr) {}
 
     bool preorder(const IR::Member *expression) override;
+    mutable bool extractedVarbit = false;
 
  protected:
-    void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
-                             unsigned hdrOffsetBits, EBPF::EBPFType *type) override;
+    unsigned int compileExtractVarbits(const IR::Expression *, const IR::StructField *,
+                                       unsigned int, EBPF::EBPFType *, const char *);
+    unsigned int compileExtractField(const IR::Expression *, const IR::StructField *, unsigned int,
+                                     EBPF::EBPFType *, const char *);
     void compileLookahead(const IR::Expression *destination) override;
     bool preorder(const IR::SelectCase *selectCase) override;
     bool preorder(const IR::SelectExpression *expression) override;
     bool preorder(const IR::AssignmentStatement *statement) override;
+    void processMethod(const P4::ExternMethod *method) override;
+    void compileExtract(const IR::Expression *dest, const IR::Expression *varsize = 0);
+    char *visit_to_string(const IR::Expression *);
 };
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
@@ -473,11 +481,24 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
     const EBPF::EBPFDeparser *deparser;
 
  public:
+    bool in_var = false;
+    mutable bool hasVarbit = false;
     explicit DeparserHdrEmitTranslatorPNA(const EBPF::EBPFDeparser *deparser);
 
     void processMethod(const P4::ExternMethod *method) override;
     void emitField(EBPF::CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
                    unsigned alignment, EBPF::EBPFType *type, bool isMAC);
+};
+
+class SizeScanner : public EBPF::DeparserPrepareBufferTranslator {
+ protected:
+    const EBPF::EBPFDeparser *deparser;
+
+ public:
+    explicit SizeScanner(const EBPF::EBPFDeparser *deparser);
+
+    void processMethod(const P4::ExternMethod *method) override;
+    bool preorder(const IR::MethodCallStatement *) override;
 };
 
 class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactoryPSA {

@@ -232,7 +232,7 @@ function install_stf_p4tc_test_deps() (
                              python3-venv \
                              virtme-ng \
                              qemu-kvm \
-                             clang-15 \
+                             clang-19 \
                              python3-scapy \
                              qemu-system-x86"
     sudo apt-get install -y --no-install-recommends ${P4C_STF_P4TC_PACKAGES}
