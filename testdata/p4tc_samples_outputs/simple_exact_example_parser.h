@@ -3,9 +3,25 @@
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
+#define BITS(v) (v).bits
+#define SETGUARDS(x) do ; while (0)
+
+struct internal_bit_320 {
+  u8 bits[40];
+};
+
+static __always_inline struct internal_bit_320 loadfrom_320(u8 *in)
+{
+ struct internal_bit_320 rv;
+
+ __builtin_memcpy(&rv.bits[0],in,40);
+ return(rv);
+}
+
 
 #define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)
 #define BYTES(w) ((w) / 8)
+#define BYTES_ROUND_UP(w) (((w) + (8) - 1) / (8))
 #define write_partial(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) & ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)
 #define write_byte(base, offset, v) do { *(u8*)((base) + (offset)) = (v); } while (0)
 #define bpf_trace_message(fmt, ...)
@@ -32,9 +48,14 @@ struct ipv4_t {
     u32 dstAddr; /* bit<32> */
     u8 ebpf_valid;
 };
+struct v4_options_t {
+    struct { u8 data[40]; u16 curwidth; } opts; /* varbit<320> */
+    u8 ebpf_valid;
+};
 struct my_ingress_headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
     struct ipv4_t ipv4; /* ipv4_t */
+    struct v4_options_t opts; /* v4_options_t */
 };
 struct my_ingress_metadata_t {
 };
@@ -107,7 +128,4 @@ static inline void storePrimitive64(u8 *a, int size, u64 value) {
        a[6] = (u8)(value >> 48);
    }
 }
-
-#define BITS(v) (v).bits
-#define SETGUARDS(x) do ; while (0)
 
