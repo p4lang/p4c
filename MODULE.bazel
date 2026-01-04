@@ -33,13 +33,13 @@ git_override(
     strip_prefix = "proto",
 )
 
-p4c_repositories = use_extension("//:bazel/repositories.bzl", "p4c_repositories")
+p4c_repositories = use_extension("//bazel:repositories.bzl", "p4c_repositories")
 use_repo(
     p4c_repositories,
     "inja",
 )
 
-p4c_ir_extensions = use_extension("//:bazel/extensions.bzl", "p4c_ir_extensions")
+p4c_ir_extensions = use_extension("//bazel:extensions.bzl", "p4c_ir_extensions")
 use_repo(
     p4c_ir_extensions,
     "p4c_ir_extensions",

@@ -1,5 +1,4 @@
-load("@p4c//:bazel/p4_library.bzl", "p4_graphs", "p4_library")
-
+load("@p4c//bazel:p4_library.bzl", "p4_library")
 p4_library(
     name = "program",
     src = "program.p4",
