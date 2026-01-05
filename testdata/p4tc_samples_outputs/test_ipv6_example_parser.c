@@ -14,6 +14,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct main_metadata_t *user_meta;
@@ -28,9 +29,36 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
     user_meta = &(hdrMd->cpumap_usermeta);
     {
         goto start;
+        start: {
+/* extract(hdr->ethernet) */
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(112)) {
+                ebpf_errorCode = PacketTooShort;
+                goto reject;
+            }
+
+            __builtin_memcpy(&hdr->ethernet.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
+            ebpf_packetOffsetInBits += 48;
+
+            __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
+            ebpf_packetOffsetInBits += 48;
+
+            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            ebpf_packetOffsetInBits += 16;
+
+
+            hdr->ethernet.ebpf_valid = 1;
+            hdr_start += BYTES(112);
+
+;
+            u16 select_0;
+            select_0 = hdr->ethernet.etherType;
+            if (select_0 == 0x86dd)goto parse_ipv6;
+            if ((select_0 & 0x0) == (0x0 & 0x0))goto accept;
+            else goto reject;
+        }
         parse_ipv6: {
 /* extract(hdr->ipv6) */
-            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(320 + 0)) {
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(320)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -95,33 +123,6 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
 
 ;
              goto accept;
-        }
-        start: {
-/* extract(hdr->ethernet) */
-            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(112 + 0)) {
-                ebpf_errorCode = PacketTooShort;
-                goto reject;
-            }
-
-            __builtin_memcpy(&hdr->ethernet.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
-            ebpf_packetOffsetInBits += 48;
-
-            __builtin_memcpy(&hdr->ethernet.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 6);
-            ebpf_packetOffsetInBits += 48;
-
-            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 16;
-
-
-            hdr->ethernet.ebpf_valid = 1;
-            hdr_start += BYTES(112);
-
-;
-            u16 select_0;
-            select_0 = hdr->ethernet.etherType;
-            if (select_0 == 0x86dd)goto parse_ipv6;
-            if ((select_0 & 0x0) == (0x0 & 0x0))goto accept;
-            else goto reject;
         }
 
         reject: {
