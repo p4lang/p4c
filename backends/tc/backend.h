@@ -269,6 +269,7 @@ class ScanWidths : public Inspector {
     int nwr;
     WidthRec *wrv;
     P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
     EBPF::Target *target;
     void insert_wr(WidthRec &);
     void add_width(int);
@@ -284,8 +285,8 @@ class ScanWidths : public Inspector {
     void add_assign(unsigned int);
 
  public:
-    explicit ScanWidths(P4::TypeMap *tm, EBPF::Target *tgt)
-        : nwr(0), wrv(0), typemap(tm), target(tgt) {}
+    explicit ScanWidths(P4::TypeMap *tm, P4::ReferenceMap *rm, EBPF::Target *tgt)
+        : nwr(0), wrv(0), typemap(tm), refmap(rm), target(tgt) {}
     ~ScanWidths(void) { std::free(wrv); }
     void expr_common(const IR::Expression *);
     bool preorder(const IR::Expression *) override;
@@ -310,6 +311,7 @@ class ScanWidths : public Inspector {
     bool preorder(const IR::AddSat *) override;
     bool preorder(const IR::SubSat *) override;
     bool preorder(const IR::AssignmentStatement *) override;
+    bool preorder(const IR::MethodCallExpression *) override;
     bool arith_common_2(const IR::Operation_Binary *, WrType, bool = true);
     bool arith_common_1(const IR::Operation_Unary *, WrType, bool = true);
     bool sarith_common_2(const IR::Operation_Binary *, WrType, bool = true);

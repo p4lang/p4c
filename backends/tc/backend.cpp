@@ -90,6 +90,8 @@ void ScanWidths::expr_common(const IR::Expression *e) {
     if (t->is<IR::Type_Type>()) t = t->to<const IR::Type_Type>()->type;
     if (t->is<IR::Type_Bits>()) {
         add_width(t->width_bits());
+    } else if (t->is<IR::Type_Varbits>()) {
+        add_width(t->max_width_bits());
     }
 }
 
@@ -233,6 +235,29 @@ bool ScanWidths::preorder(const IR::Equ *e) {
     expr_common(e);
     auto lt = e->left->type->to<IR::Type_Bits>();
     if (lt) add_cmp(lt->width_bits(), CMP_EQ);  // isSigned doesn't matter for eq
+    return (true);
+}
+
+bool ScanWidths::preorder(const IR::MethodCallExpression *mx) {
+    auto mi = P4::MethodInstance::resolve(mx, refmap, typemap);
+    auto em = mi->to<P4::ExternMethod>();
+    P4::P4CoreLibrary &p4lib = P4::P4CoreLibrary::instance();
+    if (em && (em->method->name.name == p4lib.packetIn.extract.name)) {
+        int nargs = em->expr->arguments->size();
+        const IR::Expression *arg1 = em->expr->arguments->at(0)->expression;
+        auto xt = typemap->getType(arg1);
+        auto slt = xt->to<IR::Type_StructLike>();
+
+        switch (nargs) {
+            case 1:
+                break;
+            case 2:
+                if (slt->variable()) add_width(xt->max_width_bits());
+                break;
+            default:
+                break;
+        }
+    }
     return (true);
 }
 
@@ -1823,7 +1848,7 @@ bool Backend::process() {
     auto typeMapEBPF = typeMap;
     auto hook = options.getDebugHook();
     target = new EBPF::P4TCTarget(options.emitTraceMessages);
-    ScanWidths *sw = new ScanWidths(typeMap, target);
+    ScanWidths *sw = new ScanWidths(typeMap, refMap, target);
     parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
@@ -1904,11 +1929,12 @@ void Backend::serialize() const {
     EBPF::CodeBuilder c(target), p(target), h(target);
     ebpf_program->emit(&c);
     ebpf_program->emitParser(&p);
-    ebpf_program->emitHeader(&h);
+    dynamic_cast<const PNAArchTC *>(ebpf_program)->emitHeader_part1(&h);
     if (widths) {
         widths->gen_h(&h);
         widths->gen_c(&c);
     }
+    dynamic_cast<const PNAArchTC *>(ebpf_program)->emitHeader_part2(&h);
     if (::P4::errorCount() > 0) {
         return;
     }

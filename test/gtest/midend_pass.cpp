@@ -130,7 +130,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          },
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
-         options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+         options.loopsUnrolling ? new P4::ParsersUnroll(true, false, &refMap, &typeMap) : nullptr,
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::MidEndLast()});
