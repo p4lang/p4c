@@ -87,6 +87,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
 
     auto v1controls = new std::set<cstring>();
     auto defUse = new P4::ComputeDefUse;
+    ParserConfig config;
 
     addPasses(
         {new P4::DumpPipe("MidEnd start"),
@@ -170,7 +171,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          new P4::HSIndexSimplifier(&typeMap),
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
-         options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+         options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr,
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),

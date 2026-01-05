@@ -60,7 +60,7 @@ IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
         new P4::TableHit(&typeMap),
         new P4::RemoveLeftSlices(&typeMap),
         new EBPF::Lower(&refMap, &typeMap, std::nullopt),
-        new P4::ParsersUnroll(true, &refMap, &typeMap),
+        new P4::ParsersUnroll({true, true}, &refMap, &typeMap),
         evaluator,
         new P4::MidEndLast(),
     });

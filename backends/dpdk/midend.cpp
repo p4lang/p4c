@@ -167,6 +167,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
     };
 
     if (!DPDK::DpdkContext::get().options().loadIRFromJson) {
+        ParserConfig config;
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
             new P4::RemoveMiss(&typeMap),
@@ -202,7 +203,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::FlattenInterfaceStructs(&typeMap),
             new P4::EliminateTypedef(&typeMap),
             new P4::HSIndexSimplifier(&typeMap),
-            new P4::ParsersUnroll(true, &refMap, &typeMap),
+            new P4::ParsersUnroll(config, &refMap, &typeMap),
             new P4::FlattenHeaderUnion(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&typeMap, true),
             new P4::ReplaceSelectRange(),
