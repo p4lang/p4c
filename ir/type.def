@@ -147,6 +147,10 @@ class Type_Boolean : Type_Base {
     static Type_Boolean get();
     static Type_Boolean get(const Util::SourceInfo &si);
     int width_bits() const override { return 1; }
+    int min_width_bits() const override { BUG("min_width_bits() on fixed-width type: %1%", this); }
+    int max_width_bits() const override { BUG("max_width_bits() on fixed-width type: %1%", this); }
+    int min_or_fixed_width_bits() const override { return width_bits(); }
+    int max_or_fixed_width_bits() const override { return width_bits(); }
     toString{ return "bool"_cs; }
     dbprint { out << "bool"; }
 }
@@ -191,6 +195,8 @@ class Type_Bits : Type_Base {
     static Type_Bits get(int sz, bool isSigned = false);
     inline cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
     int width_bits() const override { return size; }
+    int min_width_bits() const override { BUG("min_width_bits() on fixed-width type: %1%", this); }
+    int max_width_bits() const override { BUG("max_width_bits() on fixed-width type: %1%", this); }
 
     toString{ return absl::StrCat(baseName(), "<", size, ">"); }
     dbprint { out << toString(); }
@@ -217,6 +223,11 @@ class Type_Varbits : Type_Base {
     toString{ return absl::StrCat("varbit<", size, ">"); }
     dbprint { out << "varbit<" << size << ">"; }
     int width_bits() const override { return size; }
+    int min_width_bits() const override { return 0; }
+    int max_width_bits() const override { return size; }
+    int min_or_fixed_width_bits() const override { return min_width_bits(); }
+    int max_or_fixed_width_bits() const override { return max_width_bits(); }
+    virtual bool variable() const override { return true; }
 }
 
 class Parameter : Declaration, IAnnotated {
@@ -306,6 +317,8 @@ class Type_InfInt : Type, ITypeVar {
     }
     const Type* getP4Type() const override { return this; }
     int width_bits() const override { return 0; }
+    int min_width_bits() const override { BUG("min_width_bits() on unsized type: %1%", this); }
+    int max_width_bits() const override { BUG("max_width_bits() on unsized type: %1%", this); }
 }
 
 class Type_Dontcare : Type_Base {
@@ -430,12 +443,34 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         }
         return -1;
     }
+    virtual bool variable() const override {
+        for (auto f : fields) {
+            if (f->type->variable()) {
+                return true;
+            }
+        }
+        return false;
+    }
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields) {
             rv += f->type->width_bits();
         }
         return rv; }
+    int min_width_bits() const override {
+        int rv = 0;
+        for (auto f : fields) {
+            rv += f->type->min_or_fixed_width_bits();
+        }
+        return rv;
+    }
+    int max_width_bits() const override {
+        int rv = 0;
+        for (auto f : fields) {
+             rv += f->type->max_or_fixed_width_bits();
+        }
+        return rv;
+    }
     IR::IDeclaration getDeclByName(cstring name) const override {
         return fields.getDeclaration(name); }
     IR::IDeclaration getDeclByName(std::string_view name) const override {
@@ -466,6 +501,24 @@ class Type_HeaderUnion : Type_StructLike {
         for (auto f : fields)
             rv = std::max(rv, f->type->width_bits());
         return rv; }
+    int min_width_bits() const override {
+        if (fields.empty()) {
+            return 0;
+        }
+
+        int rv = INT_MAX;
+        for (auto f : fields) {
+            rv = std::min(rv, f->type->min_or_fixed_width_bits());
+        }
+        return rv;
+    }
+    int max_width_bits() const override {
+        int rv = 0;
+        for (auto f : fields) {
+            rv = std::max(rv, f->type->max_or_fixed_width_bits());
+        }
+        return rv;
+    }
     /// start offset of any field in a union is 0
     inline int getFieldBitOffset(cstring name) const {
         for (auto f : fields) {
@@ -493,6 +546,8 @@ class Type_Set : Type {
         /// returning the width of the set elements, not the set itself, which doesn't
         /// really have a sensible size
         return elementType->width_bits(); }
+    int min_width_bits() const override { return elementType->min_width_bits(); }
+    int max_width_bits() const override { return elementType->max_width_bits(); }
 }
 
 interface Type_Indexed {
@@ -515,6 +570,20 @@ abstract Type_BaseList : Type, Type_Indexed {
             rv += f->width_bits();
         }
         return rv; }
+    int min_width_bits() const override {
+        int rv = 0;
+        for (auto f : components) {
+            rv += f->min_or_fixed_width_bits();
+        }
+        return rv;
+    }
+    int max_width_bits() const override {
+        int rv = 0;
+        for (auto f : components) {
+            rv += f->max_or_fixed_width_bits();
+        }
+        return rv;
+    }
     cstring asString(const char* name) const {
         return
             absl::StrCat(name,
@@ -615,6 +684,14 @@ class Type_Name : Type {
         BUG("Type_Name is not a canonical type, use getTypeType()?");
         return 0;
     }
+    int min_width_bits() const override {
+        BUG("Type_Name is not a canonical type, use getTypeType()?");
+        return 0;
+    }
+    int max_width_bits() const override {
+        BUG("Type_Name is not a canonical type, use getTypeType()?");
+        return 0;
+    }
 }
 
 class Type_Array : Type_Indexed, Type {
@@ -639,6 +716,8 @@ class Type_Array : Type_Indexed, Type {
     const Type* getP4Type() const override
     { return new IR::Type_Array(srcInfo, elementType->getP4Type(), size); }
     int width_bits() const override { return getSize() * elementType->width_bits(); }
+    int min_width_bits() const override { BUG("min_width_bits on a stack: %1%",this); }
+    int max_width_bits() const override { BUG("max_width_bits on a stack: %1%",this); }
 }
 
 /** Given a declaration
@@ -745,6 +824,8 @@ class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
 #nodbprint
     validate{ members.check_null(); }
     int width_bits() const override { return type->width_bits(); }
+    int min_width_bits() const override { return type->min_width_bits(); }
+    int max_width_bits() const override { return type->max_width_bits(); }
 }
 
 class Type_Table : Type, IApply {
@@ -860,6 +941,8 @@ class Type_Typedef : Type_Declaration, IAnnotated {
     optional inline Vector<Annotation> annotations;
     Type                 type;
     int width_bits() const override { return type->width_bits(); }
+    int min_width_bits() const override { return type->min_width_bits(); }
+    int max_width_bits() const override { return type->max_width_bits(); }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
 #nodbprint
@@ -874,6 +957,8 @@ class Type_Newtype : Type_Declaration, IAnnotated {
     optional inline Vector<Annotation> annotations;
     Type                 type;
     int width_bits() const override { return type->width_bits(); }
+    int min_width_bits() const override { return type->min_width_bits(); }
+    int max_width_bits() const override { return type->max_width_bits(); }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
 #nodbprint

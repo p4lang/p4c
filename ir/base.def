@@ -40,6 +40,11 @@ abstract Type {
 #end
     /// Well-defined only for types with fixed width
     virtual int width_bits() const { BUG("width_bits() on type with unknown size: %1%", this); }
+    virtual int min_width_bits() const { BUG("min_width_bits() on type of unknown size: %1%", this); }
+    virtual int max_width_bits() const { BUG("max_width_bits() on type of unknown size: %1%", this); }
+    virtual int min_or_fixed_width_bits() const { BUG("min_or_fixed_width_bits() on type of unknown size: %1%", this); }
+    virtual int max_or_fixed_width_bits() const { BUG("max_or_fixed_width_bits() on type of unknown size: %1%", this); }
+    virtual bool variable() const { return false; }
     /// When possible returns the corresponding type that can be inserted
     /// in a P4 program; may return a Type_Name
     virtual const Type* getP4Type() const = 0;
@@ -118,6 +123,7 @@ interface IContainer : IMayBeGenericType, IDeclaration, IFunctional {
 /// (called base type in the spec)
 abstract Type_Base : Type {
     const Type* getP4Type() const override { return this; }
+    virtual bool variable() const override { return false; }
 }
 
 /// This is needed by Expression
@@ -130,7 +136,6 @@ class Type_Unknown : Type_Base {
 
 /// A statement or a declaration
 abstract StatOrDecl {}
-
 /// Two declarations with the same name are not necessarily the same declaration.
 /// That's why declid is used to distinguish them.
 abstract Declaration : StatOrDecl, IDeclaration {
