@@ -64,7 +64,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         value = 16w0;
         bit<16> x = hdr.ipv4.identification;
         bit<16> y = hdr.ipv4.hdrChecksum;
-        bit<16> z = hdr.ipv4.totalLen;
+        bit<16> z = hdr.ipv4.srcAddr[15:0];
         c = hdr.ipv4.identification > 16w0;
         if (c) {
             x = 16w1;
