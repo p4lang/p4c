@@ -201,8 +201,14 @@ endif ()
 
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
-find_package (FLEX 2.0 REQUIRED)
-find_package (BISON 3.1 REQUIRED)
+
+if (NOT CMAKE_LINT_ONLY)
+  find_package (FLEX 2.0 REQUIRED)
+  find_package (BISON 3.1 REQUIRED)
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: skipping FLEX/BISON")
+endif()
+
 # If we enable GTest, install GoogleTest with the appropriate options.
 if (ENABLE_GTESTS)
   include(GoogleTest)
@@ -220,20 +226,34 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # The boost graph headers are optional and only required by the graphs back end.
-find_package (Boost QUIET COMPONENTS graph)
-if (Boost_FOUND)
-  set (HAVE_LIBBOOST_GRAPH 1)
-else ()
-  message (WARNING "Boost graph headers not found, will not build 'graphs' backend")
-endif ()
-find_package (Boost REQUIRED COMPONENTS iostreams)
+if (NOT CMAKE_LINT_ONLY)
+  # The boost graph headers are optional and only required by the graphs back end.
+  find_package (Boost QUIET COMPONENTS graph)
+
+  if (Boost_FOUND)
+    set (HAVE_LIBBOOST_GRAPH 1)
+  else ()
+    message (WARNING "Boost graph headers not found, will not build 'graphs' backend")
+  endif ()
+
+  find_package (Boost REQUIRED COMPONENTS iostreams)
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: skipping Boost")
+endif()
+
 
 # Compile with the Boehm garbage collector (https://github.com/ivmai/bdwgc), if requested.
 # One can disable the GC, e.g., to run under Valgrind, by editing config.h.
-if (ENABLE_GC)
+# Compile with the Boehm garbage collector
+if (ENABLE_GC AND NOT CMAKE_LINT_ONLY)
   include(BDWGC)
   p4c_obtain_bdwgc()
+else()
+  if (CMAKE_LINT_ONLY)
+    message(STATUS "CMAKE_LINT_ONLY enabled: skipping BDWGC")
+  endif()
 endif ()
+
 if (ENABLE_MULTITHREAD)
   add_definitions(-DMULTITHREAD)
 endif()
@@ -409,10 +429,16 @@ if (ENABLE_CONTROL_PLANE)
 endif()
 
 # The order of adding subdirectories matters because of target dependencies.
-add_subdirectory (tools/driver)
-add_subdirectory (lib)
-add_subdirectory (tools/ir-generator)
-add_subdirectory (ir)
+# The order of adding subdirectories matters because of target dependencies.
+if (NOT CMAKE_LINT_ONLY)
+  add_subdirectory (tools/driver)
+  add_subdirectory (lib)
+  add_subdirectory (tools/ir-generator)
+  add_subdirectory (ir)
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: skipping compiler subdirectories")
+endif()
+
 
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
@@ -421,14 +447,12 @@ set(EXTENSION_IR_SOURCES)
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
 
-if (ENABLE_CONTROL_PLANE)
+if (ENABLE_CONTROL_PLANE AND NOT CMAKE_LINT_ONLY)
 ########################################## P4Runtime Begin #########################################
-# TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
-# extensions which may depend on P4Runtime variables are instantiated before the control-plane we
-# need to keep the P4Runtime installation in the top-level CMakelists file.
 # Print download state while setting up P4Runtime.
 set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
 set(FETCHCONTENT_QUIET OFF)
+
 # Fetch and declare the P4Runtime library.
 FetchContent_Declare(
   p4runtime
@@ -437,127 +461,116 @@ FetchContent_Declare(
   GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(p4runtime)
+
 set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
 message(STATUS "Done with setting up P4Runtime for P4C.")
-# The standard P4Runtime protocol buffers message definitions live in the PI
-# repo, which is included in this repo as a git module.
-set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
-                                                          "Path to the P4Runtime directory."
-)
-endif()
-########################################## P4Runtime End ##########################################
 
-add_subdirectory (frontends)
-add_subdirectory (midend)
-if (ENABLE_CONTROL_PLANE)
+# The standard P4Runtime protocol buffers message definitions live in the PI repo.
+set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
+  "Path to the P4Runtime directory."
+)
+########################################## P4Runtime End ##########################################
+else()
+  if (CMAKE_LINT_ONLY)
+    message(STATUS "CMAKE_LINT_ONLY enabled: skipping P4Runtime")
+  endif()
+endif()
+
+if (NOT CMAKE_LINT_ONLY)
+  add_subdirectory (frontends)
+  add_subdirectory (midend)
+
+  if (ENABLE_CONTROL_PLANE)
     OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
     include(Protobuf)
     p4c_obtain_protobuf()
     add_subdirectory (control-plane)
+  endif()
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: skipping frontends/midend/control-plane")
 endif()
 
-file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
-MESSAGE ("-- Available extensions ${p4c_extensions}")
-foreach (ext ${p4c_extensions})
-  if (EXISTS ${P4C_SOURCE_DIR}/extensions/${ext}/CMakeLists.txt)
-    # Generate an option that makes it possible to disable this extension.
-    string(MAKE_C_IDENTIFIER ${ext} EXT_AS_IDENTIFIER)
-    string(TOUPPER ${EXT_AS_IDENTIFIER} EXT_AS_OPTION_NAME)
-    string(CONCAT ENABLE_EXT_OPTION "ENABLE_" ${EXT_AS_OPTION_NAME})
-    string(CONCAT EXT_HELP_TEXT "Build the " ${ext} " backend")
-    OPTION (${ENABLE_EXT_OPTION} ${EXT_HELP_TEXT} ON)
+if (NOT CMAKE_LINT_ONLY)
+  foreach(ext ${p4c_extensions})
+    if (EXISTS ${P4C_SOURCE_DIR}/extensions/${ext}/CMakeLists.txt)
+      string(MAKE_C_IDENTIFIER ${ext} EXT_AS_IDENTIFIER)
+      string(TOUPPER ${EXT_AS_IDENTIFIER} EXT_AS_OPTION_NAME)
+      string(CONCAT ENABLE_EXT_OPTION "ENABLE_" ${EXT_AS_OPTION_NAME})
+      string(CONCAT EXT_HELP_TEXT "Build the " ${ext} " backend")
+      OPTION (${ENABLE_EXT_OPTION} ${EXT_HELP_TEXT} ON)
 
-    if (${ENABLE_EXT_OPTION})
+      if (${ENABLE_EXT_OPTION})
         add_subdirectory (extensions/${ext})
+      endif()
     endif()
-  endif()
-endforeach(ext)
+  endforeach()
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: skipping extensions")
+endif()
+
 
 # With the current implementation of ir-generator, all targets share the
 # same ir-generated.h and ir-generated.cpp file, which means all targets
 # share the same set of IR classes (frontend and backend). Backends such as the DPDK backend
 # can introduce additional IR classes and cpp sources which need to be added to
 # EXTENSION_IR_SOURCES.
-add_subdirectory(backends/common)
-if (ENABLE_BMV2)
-    add_subdirectory (backends/bmv2)
-endif ()
-if (ENABLE_DPDK)
-    add_subdirectory (backends/dpdk)
-endif ()
-if (ENABLE_EBPF)
-    add_subdirectory (backends/ebpf)
-endif ()
-if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
-  add_subdirectory (backends/graphs)
-endif ()
-if (ENABLE_P4TC)
-    add_subdirectory (backends/tc)
-endif ()
-if (ENABLE_P4TEST)
-    add_subdirectory (backends/p4test)
-endif ()
-if (ENABLE_TEST_TOOLS)
-    add_subdirectory (backends/p4tools)
-endif ()
-if (ENABLE_P4FMT)
-    add_subdirectory (backends/p4fmt)
-endif ()
-if (ENABLE_UBPF)
-    add_subdirectory (backends/ubpf)
-endif ()
-if (ENABLE_TOFINO)
-    add_subdirectory (backends/tofino)
-endif ()
-if (ENABLE_GTESTS)
-  add_subdirectory (test)
-endif ()
+if (NOT CMAKE_LINT_ONLY)
+  add_subdirectory(backends/common)
 
+  if (ENABLE_BMV2)
+    add_subdirectory (backends/bmv2)
+  endif ()
+  if (ENABLE_DPDK)
+    add_subdirectory (backends/dpdk)
+  endif ()
+  if (ENABLE_EBPF)
+    add_subdirectory (backends/ebpf)
+  endif ()
+  if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
+    add_subdirectory (backends/graphs)
+  endif ()
+  if (ENABLE_P4TC)
+    add_subdirectory (backends/tc)
+  endif ()
+  if (ENABLE_P4TEST)
+    add_subdirectory (backends/p4test)
+  endif ()
+  if (ENABLE_TEST_TOOLS)
+    add_subdirectory (backends/p4tools)
+  endif ()
+  if (ENABLE_P4FMT)
+    add_subdirectory (backends/p4fmt)
+  endif ()
+  if (ENABLE_UBPF)
+    add_subdirectory (backends/ubpf)
+  endif ()
+  if (ENABLE_TOFINO)
+    add_subdirectory (backends/tofino)
+  endif ()
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: skipping backends")
+endif()
+
+if (NOT CMAKE_LINT_ONLY)
 ####################################### IR Generation Begin #######################################
 
 set (IR_GENERATED_SRCS
   ${P4C_BINARY_DIR}/ir/ir-generated.h
   ${P4C_BINARY_DIR}/ir/ir-generated.cpp
   ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
+
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
-# Fixup #line directives in the generated IR files
-# This is a vestige of automake. CMake handles dependencies correctly,
-# so we should output the line directives directly from the generator
-#
-# Moreover, we generate these files to a temporary location and update the
-# build files only if they have changed. This avoids rebuilding the whole
-# tree when small changes to the .def files affect only the .cpp file and
-# not the headers.
-set (fixup_file "${P4C_BINARY_DIR}/irgen-fixup.awk")
-file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${P4C_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
-set(temp_ir_genfiles
-  ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
-  ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
-  ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
-)
-
-add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
-  COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
-  COMMAND awk -v name=ir-generated.cpp -f ${fixup_file} ir/ir-generated.cpp.tmp > ir/ir-generated.cpp.fixup
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/ir-generated.cpp.fixup ir/ir-generated.cpp
-  COMMAND awk -v name=ir-generated.h   -f ${fixup_file} ir/ir-generated.h.tmp > ir/ir-generated.h.fixup
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/ir-generated.h.fixup ir/ir-generated.h
-  COMMAND awk -v name=gen-tree-macro.h -f ${fixup_file} ir/gen-tree-macro.h.tmp > ir/gen-tree-macro.h.fixup
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/gen-tree-macro.h.fixup ir/gen-tree-macro.h
-  MAIN_DEPENDENCY ${IR_GENERATOR}
-  DEPENDS irgenerator ${IR_DEF_FILES}
-  COMMENT "Generating IR class files"
-)
-
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
-set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
 target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
 
-
 ######################################## IR Generation End ########################################
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: skipping IR generation")
+endif()
 
 # Header files
 # p4test needs all the backend include files, whether the backend is enabled or not
