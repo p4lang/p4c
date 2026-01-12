@@ -429,7 +429,6 @@ if (ENABLE_CONTROL_PLANE)
 endif()
 
 # The order of adding subdirectories matters because of target dependencies.
-# The order of adding subdirectories matters because of target dependencies.
 if (NOT CMAKE_LINT_ONLY)
   add_subdirectory (tools/driver)
   add_subdirectory (lib)
@@ -551,25 +550,50 @@ else()
   message(STATUS "CMAKE_LINT_ONLY enabled: skipping backends")
 endif()
 
-if (NOT CMAKE_LINT_ONLY)
-####################################### IR Generation Begin #######################################
-
-set (IR_GENERATED_SRCS
+# IR sources (always declared)
+set(IR_GENERATED_SRCS
   ${P4C_BINARY_DIR}/ir/ir-generated.h
   ${P4C_BINARY_DIR}/ir/ir-generated.cpp
-  ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
+  ${P4C_BINARY_DIR}/ir/gen-tree-macro.h
+)
 
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
+if (NOT CMAKE_LINT_ONLY)
+
+  add_custom_command(
+    OUTPUT ${IR_GENERATED_SRCS}
+    COMMAND ${IR_GENERATOR}
+            -i ir/ir-generated.cpp.tmp
+            -o ir/ir-generated.h.tmp
+            -t ir/gen-tree-macro.h.tmp
+            ${IR_DEF_FILES}
+    DEPENDS irgenerator ${IR_DEF_FILES}
+    COMMENT "Generating IR class files"
+  )
+
+else()
+  message(STATUS "CMAKE_LINT_ONLY enabled: stubbing IR generation")
+
+  # Touch files so they exist
+  foreach(f ${IR_GENERATED_SRCS})
+    file(WRITE ${f} "// stub\n")
+  endforeach()
+
+endif()
+
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 
-add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
-add_dependencies(ir-generated ir genIR)
-target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
+add_library(ir-generated OBJECT
+  ${IR_GENERATED_SRCS}
+  ${EXTENSION_IR_SOURCES}
+)
 
-######################################## IR Generation End ########################################
+if (NOT CMAKE_LINT_ONLY)
+  add_dependencies(ir-generated ir genIR)
+  target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
 else()
-  message(STATUS "CMAKE_LINT_ONLY enabled: skipping IR generation")
+  add_dependencies(ir-generated genIR)
 endif()
 
 # Header files
