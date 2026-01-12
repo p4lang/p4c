@@ -559,7 +559,20 @@ set(IR_GENERATED_SRCS
 
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
-if (NOT CMAKE_LINT_ONLY)
+if (CMAKE_LINT_ONLY)
+
+  message(STATUS "CMAKE_LINT_ONLY enabled: IR generator is a no-op")
+
+  add_custom_command(
+    OUTPUT ${IR_GENERATED_SRCS}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/ir
+    COMMAND ${CMAKE_COMMAND} -E echo "// stub" > ${P4C_BINARY_DIR}/ir/ir-generated.h
+    COMMAND ${CMAKE_COMMAND} -E echo "// stub" > ${P4C_BINARY_DIR}/ir/ir-generated.cpp
+    COMMAND ${CMAKE_COMMAND} -E echo "// stub" > ${P4C_BINARY_DIR}/ir/gen-tree-macro.h
+    COMMENT "Stub IR generation for lint-only build"
+  )
+
+else()
 
   add_custom_command(
     OUTPUT ${IR_GENERATED_SRCS}
@@ -572,14 +585,6 @@ if (NOT CMAKE_LINT_ONLY)
     COMMENT "Generating IR class files"
   )
 
-else()
-  message(STATUS "CMAKE_LINT_ONLY enabled: stubbing IR generation")
-
-  # Touch files so they exist
-  foreach(f ${IR_GENERATED_SRCS})
-    file(WRITE ${f} "// stub\n")
-  endforeach()
-
 endif()
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
@@ -589,14 +594,12 @@ add_library(ir-generated OBJECT
   ${EXTENSION_IR_SOURCES}
 )
 
+add_dependencies(ir-generated genIR)
+
 if (NOT CMAKE_LINT_ONLY)
-  add_dependencies(ir-generated ir genIR)
   target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
-else()
-  add_dependencies(ir-generated genIR)
 endif()
 
-# Header files
 # p4test needs all the backend include files, whether the backend is enabled or not
 # Note that we only provide the headers for the build env, they are only installed by the
 # backend specific target.
