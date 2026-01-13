@@ -28,8 +28,7 @@
 
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
-#include "ir/ir-generated.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/exceptions.h"

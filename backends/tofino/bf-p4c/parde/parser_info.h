@@ -28,9 +28,9 @@
 #include <boost/graph/topological_sort.hpp>
 
 #include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/lib/assoc.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
