@@ -191,6 +191,7 @@ function build_ebpf() {
                  net-tools"
   P4C_EBPF_DEPS+=" llvm clang "
   sudo apt-get install -y --no-install-recommends ${P4C_EBPF_DEPS}
+  uv pip install scapy==2.5.0
 }
 
 function install_ptf_ebpf_test_deps() (
