@@ -1893,15 +1893,8 @@ const IR::Expression *TypeInferenceBase::actionCall(bool inActionList,
                 typeError("%1%: parameter %2% cannot be bound: it is set by the control plane", arg,
                           param);
             } else if (inTable) {
-                // For actions None parameters are treated as IN
-                // parameters when the action is called directly.  We
-                // don't require them to be bound to a compile-time
-                // constant.  But if the action is instantiated in a
-                // table (as default_action or entries), then the
-                // arguments do have to be compile-time constants.
-                if (!isCompileTimeConstant(arg->expression))
-                    typeError("%1%: action argument must be a compile-time constant",
-                              arg->expression);
+                // Directionless action parameters behave like 'in'
+                // parameters even when used in tables (P4 Spec Section 6.8).
             }
             // This is like an assignment; may make additional conversions.
             newExpr = assignment(arg, param->type, arg->expression);
