@@ -16,7 +16,7 @@ parser P() {
 
 control C() {
     bit<32> x = 32w0;
-    bit<32> y = x + 32w1;
+    bit<32> y = 32w1;
     Fake() fake;
     apply {
         fake.call(y);
