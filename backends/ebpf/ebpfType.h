@@ -39,11 +39,12 @@ class EBPFType : public EBPFObject {
     virtual void declareArray(CodeBuilder * /*builder*/, cstring /*id*/, unsigned /*size*/) {
         BUG("%1%: unsupported array", type);
     }
+    cstring toString() const override { return "EBPFType"_cs; }
 
     DECLARE_TYPEINFO(EBPFType, EBPFObject);
 };
 
-class IHasWidth : public ICastable {
+class IHasWidth : virtual public ICastable {
  public:
     virtual ~IHasWidth() {}
     /// P4 width
@@ -79,6 +80,7 @@ class EBPFBoolType : public EBPFType, public IHasWidth {
     void emitInitializer(CodeBuilder *builder) override { builder->append("0"); }
     unsigned widthInBits() const override { return 1; }
     unsigned implementationWidthInBits() const override { return 8; }
+    cstring toString() const override { return "EBPFBoolType"_cs; }
 
     DECLARE_TYPEINFO(EBPFBoolType, EBPFType, IHasWidth);
 };
@@ -101,6 +103,7 @@ class EBPFStackType : public EBPFType, public IHasWidth {
     void emitInitializer(CodeBuilder *builder) override;
     unsigned widthInBits() const override;
     unsigned implementationWidthInBits() const override;
+    cstring toString() const override { return "EBPFStackType"_cs; }
 
     DECLARE_TYPEINFO(EBPFStackType, EBPFType, IHasWidth);
 };
@@ -123,6 +126,9 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() const override { return bytesRequired() * 8; }
     // True if this width is small enough to store in a machine scalar
     static bool generatesScalar(unsigned width) { return width <= 64; }
+    cstring toString() const override {
+        return "EBPFScalarType<width=" + Util::toString(width) + ">";
+    }
 
     DECLARE_TYPEINFO(EBPFScalarType, EBPFType, IHasWidth);
 };
@@ -142,6 +148,7 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
     unsigned widthInBits() const override;
     unsigned implementationWidthInBits() const override;
     void declareArray(CodeBuilder *builder, cstring id, unsigned size) override;
+    cstring toString() const override { return "EBPFTypeName<"_cs + type->path->name.name + ">"; }
 
     template <typename T>
     bool canonicalTypeIs() const {
@@ -179,6 +186,7 @@ class EBPFStructType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() const override { return implWidth; }
     void emit(CodeBuilder *builder) override;
     void declareArray(CodeBuilder *builder, cstring id, unsigned size) override;
+    cstring toString() const override { return "EBPFStructType<"_cs + name + ">"; }
 
     DECLARE_TYPEINFO(EBPFStructType, EBPFType, IHasWidth);
 };
@@ -193,6 +201,7 @@ class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
     unsigned widthInBits() const override { return 32; }
     unsigned implementationWidthInBits() const override { return 32; }
     const IR::Type_Enum *getType() const { return type->to<IR::Type_Enum>(); }
+    cstring toString() const override { return "EBPFEnumType<"_cs + getType()->name.name + ">"; }
 
     DECLARE_TYPEINFO(EBPFEnumType, EBPFType, IHasWidth);
 };
@@ -207,6 +216,7 @@ class EBPFErrorType : public EBPFType, public EBPF::IHasWidth {
     unsigned widthInBits() const override { return 32; }
     unsigned implementationWidthInBits() const override { return 32; }
     const IR::Type_Error *getType() const { return type->to<IR::Type_Error>(); }
+    cstring toString() const override { return "EBPFErrorType"_cs; }
 
     DECLARE_TYPEINFO(EBPFErrorType, EBPFType, IHasWidth);
 };
@@ -222,6 +232,7 @@ class EBPFMethodDeclaration : public EBPFObject {
 
     /// Emit the signature declaration of this method in C-style form.
     void emit(CodeBuilder *builder);
+    cstring toString() const override { return "EBPFMethodDeclaration"_cs; }
 
     DECLARE_TYPEINFO(EBPFMethodDeclaration, EBPFObject);
 };
@@ -230,14 +241,17 @@ class EBPFScalarTypePNA : public EBPFScalarType {
     bool isPrimitiveByteAligned = false;
 
  public:
-    explicit EBPFScalarTypePNA(const IR::Type_Bits *bits) : EBPFScalarType(bits) {
-        isPrimitiveByteAligned = (width <= 8 || width <= 16 || (width > 24 && width <= 32) ||
-                                  (width > 56 && width <= 64));
-    }
+    explicit EBPFScalarTypePNA(const IR::Type_Bits *bits)
+        : EBPFScalarType(bits),
+          isPrimitiveByteAligned(width <= 8 || width <= 16 || (width > 24 && width <= 32) ||
+                                 (width > 56 && width <= 64)) {}
     unsigned alignment() const;
-    void declare(CodeBuilder *builder, cstring id, bool asPointer);
-    void declareInit(CodeBuilder *builder, cstring id, bool asPointer);
-    void emitInitializer(CodeBuilder *builder);
+    void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder *builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder *builder) override;
+    cstring toString() const override {
+        return "EBPFScalarTypePNA<width="_cs + Util::toString(width) + ">";
+    }
 };
 
 }  // namespace P4::EBPF
