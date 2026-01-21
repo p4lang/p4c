@@ -23,7 +23,7 @@
 #include <numeric>
 #include <optional>
 
-#include <boost/optional/optional_io.hpp>
+#include <boost/format.hpp>
 
 #include "backends/tofino/bf-p4c/common/table_printer.h"
 #include "backends/tofino/bf-p4c/device.h"
