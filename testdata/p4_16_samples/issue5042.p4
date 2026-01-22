@@ -54,12 +54,10 @@ control ingress(inout headers_t hdr, inout metadata_t meta,
     table t {
         key = { hdr.h.f : exact; }
         actions = { a; }
-        // meta.x is NOT compile-time known, but per P4 Spec 6.8
-        // directionless params behave as 'in' when provided by program
-        default_action = a(meta.x);
     }
 
     apply {
+        a(meta.x);
         t.apply();
     }
 }
