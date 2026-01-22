@@ -18,6 +18,8 @@ limitations under the License.
 
 namespace P4 {
 
+using namespace literals;
+
 bool TypeMap::typeIsEmpty(const IR::Type *type) const {
     if (auto bt = type->to<IR::Type_Bits>()) {
         return bt->size == 0;
@@ -399,6 +401,47 @@ int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool
     ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: width not well-defined for values of type %2%",
                 errorPosition, t);
     return -1;
+}
+
+const IR::Type *TypeMap::externImplicitAssignType(const IR::Type *type, bool skipIndex) const {
+    if (auto mappedType = getType(type)) type = mappedType;
+    if (auto typeType = type->to<IR::Type_Type>()) type = typeType->type;
+    if (skipIndex)
+        while (auto arrType = type->to<IR::Type_Array>()) type = arrType->elementType;
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) type = tsc->substituted;
+    if (auto ts = type->to<IR::Type_Specialized>()) type = ts->baseType;
+    if (auto et = type->to<IR::Type_Extern>()) {
+        for (auto m : et->methods) {
+            if (m->hasAnnotation("implicit"_cs) && m->type->returnType->is<IR::Type_Void>() &&
+                m->getParameters()->size() == 1) {
+                type = m->getParameters()->getParameter(0)->type;
+                if (auto mappedType = getType(type)) type = mappedType;
+                if (auto typeType = type->to<IR::Type_Type>()) type = typeType->type;
+                return type;
+            }
+        }
+    }
+    return nullptr;
+}
+
+const IR::Type *TypeMap::externImplicitReadType(const IR::Type *type, bool skipIndex) const {
+    if (auto mappedType = getType(type)) type = mappedType;
+    if (auto typeType = type->to<IR::Type_Type>()) type = typeType->type;
+    if (skipIndex)
+        while (auto arrType = type->to<IR::Type_Array>()) type = arrType->elementType;
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) type = tsc->substituted;
+    if (auto ts = type->to<IR::Type_Specialized>()) type = ts->baseType;
+    if (auto et = type->to<IR::Type_Extern>()) {
+        for (auto m : et->methods) {
+            if (m->hasAnnotation("implicit"_cs) && m->getParameters()->size() == 0) {
+                type = m->type->returnType;
+                if (auto mappedType = getType(type)) type = mappedType;
+                if (auto typeType = type->to<IR::Type_Type>()) type = typeType->type;
+                return type;
+            }
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace P4
