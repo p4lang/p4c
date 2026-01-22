@@ -17,7 +17,9 @@ set(REFCHECK_SRCS
 # p4fmt
 add_executable(p4fmt ${FMT_SRCS})
 target_link_libraries(p4fmt ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4fmt frontend)
+if (ENABLE_PCH)
+  target_precompile_headers(p4fmt REUSE_FROM ir)
+endif()
 
 add_custom_target(p4formatter
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4fmt ${P4C_BINARY_DIR}/p4fmt
@@ -26,6 +28,9 @@ add_custom_target(p4formatter
 # p4fmt - reference checker
 add_executable(checkfmt ${REFCHECK_SRCS})
 target_link_libraries(checkfmt ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+if (ENABLE_PCH)
+  target_precompile_headers(checkfmt REUSE_FROM ir)
+endif()
 
 add_custom_target(p4refchecker
     COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/checkfmt ${P4C_BINARY_DIR}/checkfmt

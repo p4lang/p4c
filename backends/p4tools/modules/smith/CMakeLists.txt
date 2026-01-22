@@ -63,6 +63,9 @@ target_link_libraries(smith
   # For Abseil includes.
   PRIVATE frontend
 )
+if (ENABLE_PCH)
+  target_precompile_headers(smith REUSE_FROM ir)
+endif()
 
 add_dependencies(smith p4tools-common)
 

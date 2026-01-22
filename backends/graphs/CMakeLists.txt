@@ -33,7 +33,10 @@ add_library(p4cgraphs STATIC ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries(p4cgraphs ir-generated frontend)
 
 add_executable(p4c-graphs p4c-graphs.cpp)
-target_link_libraries (p4c-graphs p4cgraphs ir-generated frontend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+target_link_libraries (p4c-graphs p4cgraphs frontend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+if (ENABLE_PCH)
+  target_precompile_headers(p4c-graphs REUSE_FROM ir)
+endif()
 
 install (TARGETS p4c-graphs
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
