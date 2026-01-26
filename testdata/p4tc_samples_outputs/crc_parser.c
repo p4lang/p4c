@@ -14,6 +14,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct my_ingress_metadata_t *meta;
@@ -28,29 +29,36 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     meta = &(hdrMd->cpumap_usermeta);
     {
         goto start;
-        parse_csum: {
-/* extract(hdr->csum) */
-            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(48 + 0)) {
+        start: {
+/* extract(hdr->ethernet) */
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(112)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
 
-            hdr->csum.crc16 = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48)));
+            ebpf_packetOffsetInBits += 48;
+
+            storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48)));
+            ebpf_packetOffsetInBits += 48;
+
+            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->csum.crc32 = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 32;
 
-
-            hdr->csum.ebpf_valid = 1;
-            hdr_start += BYTES(48);
+            hdr->ethernet.ebpf_valid = 1;
+            hdr_start += BYTES(112);
 
 ;
-             goto accept;
+            u16 select_0;
+            select_0 = hdr->ethernet.etherType;
+            if (select_0 == 0x800)goto parse_ipv4;
+            if ((select_0 & 0x0) == (0x0 & 0x0))goto reject;
+            else goto reject;
         }
         parse_ipv4: {
 /* extract(hdr->ipv4) */
-            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(160 + 0)) {
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(160)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -96,38 +104,31 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             hdr_start += BYTES(160);
 
 ;
-            u8 select_0;
-            select_0 = hdr->ipv4.protocol;
-            if (select_0 == 0x92)goto parse_csum;
-            if ((select_0 & 0x0) == (0x0 & 0x0))goto reject;
+            u8 select_1;
+            select_1 = hdr->ipv4.protocol;
+            if (select_1 == 0x92)goto parse_csum;
+            if ((select_1 & 0x0) == (0x0 & 0x0))goto reject;
             else goto reject;
         }
-        start: {
-/* extract(hdr->ethernet) */
-            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(112 + 0)) {
+        parse_csum: {
+/* extract(hdr->csum) */
+            if ((u8 *)ebpf_packetEnd < hdr_start + BYTES(48)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
 
-            storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48)));
-            ebpf_packetOffsetInBits += 48;
-
-            storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48)));
-            ebpf_packetOffsetInBits += 48;
-
-            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->csum.crc16 = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
+            hdr->csum.crc32 = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            ebpf_packetOffsetInBits += 32;
 
-            hdr->ethernet.ebpf_valid = 1;
-            hdr_start += BYTES(112);
+
+            hdr->csum.ebpf_valid = 1;
+            hdr_start += BYTES(48);
 
 ;
-            u16 select_1;
-            select_1 = hdr->ethernet.etherType;
-            if (select_1 == 0x800)goto parse_ipv4;
-            if ((select_1 & 0x0) == (0x0 & 0x0))goto reject;
-            else goto reject;
+             goto accept;
         }
 
         reject: {
