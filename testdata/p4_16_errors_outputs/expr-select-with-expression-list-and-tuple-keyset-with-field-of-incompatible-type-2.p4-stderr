@@ -1,0 +1,18 @@
+expr-select-with-expression-list-and-tuple-keyset-with-field-of-incompatible-type-2.p4(3): [--Wwarn=unused] warning: parser 'p0' is unused
+parser p0() {
+       ^^
+expr-select-with-expression-list-and-tuple-keyset-with-field-of-incompatible-type-2.p4(6): [--Werror=type-error] error: 'SelectExpression'
+    transition select(x, x, { x, x }, x) {
+               ^
+  ---- Actual error:
+  Cannot cast implicitly type 'int<8>' to type 'bit<8>'
+  ---- Originating from:
+expr-select-with-expression-list-and-tuple-keyset-with-field-of-incompatible-type-2.p4(7): 'match' case label '{ 0, 0, { 0, 8s3 }, 0 }' has type 'tuple<int, int, tuple<int, int<8>>, int>' which does not match the expected type 'tuple<bit<8>, bit<8>, tuple<bit<8>, bit<8>>, bit<8>>'
+        (0, 0, { 0, 8s3 }, 0): accept;
+        ^^^^^^^^^^^^^^^^^^^^^
+expr-select-with-expression-list-and-tuple-keyset-with-field-of-incompatible-type-2.p4(7)
+        (0, 0, { 0, 8s3 }, 0): accept;
+        ^^^^^^^^^^^^^^^^^^^^^
+expr-select-with-expression-list-and-tuple-keyset-with-field-of-incompatible-type-2.p4(6)
+      transition select(x, x, { x, x }, x) {
+                        ^^^^^^^^^^^^^^^^^

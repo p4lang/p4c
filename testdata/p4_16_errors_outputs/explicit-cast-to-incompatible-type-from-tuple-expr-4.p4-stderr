@@ -1,0 +1,6 @@
+explicit-cast-to-incompatible-type-from-tuple-expr-4.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+control c(out bit<((string) { ... })> y)() {
+        ^
+explicit-cast-to-incompatible-type-from-tuple-expr-4.p4(3): [--Werror=expected] error: (string){ ... }: expected a constant
+control c(out bit<((string) { ... })> y)() {
+                   ^^^^^^^^^^^^^^^^

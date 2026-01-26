@@ -1,0 +1,92 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "routing",
+  "externs" : [],
+  "tables" : [
+    {
+      "name" : "Main/nh_table",
+      "id" : 1,
+      "tentries" : 1024,
+      "permissions" : "0x3da4",
+      "nummask" : 8,
+      "keysize" : 32,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "nh_index",
+          "type" : "bit32",
+          "match_type" : "exact",
+          "bitwidth" : 32
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 1,
+          "name" : "Main/drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        },
+        {
+          "id" : 2,
+          "name" : "Main/set_nh",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "dmac",
+              "type" : "macaddr",
+              "bitwidth" : 48
+            },
+            {
+              "id" : 2,
+              "name" : "port",
+              "type" : "dev",
+              "bitwidth" : 32
+            }
+          ],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        }
+      ]
+    },
+    {
+      "name" : "Main/fib_table",
+      "id" : 2,
+      "tentries" : 1024,
+      "permissions" : "0x3da4",
+      "nummask" : 8,
+      "keysize" : 32,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "prefix",
+          "type" : "ipv4",
+          "match_type" : "lpm",
+          "bitwidth" : 32
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 3,
+          "name" : "Main/set_nhid",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "bitwidth" : 32
+            }
+          ],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        }
+      ]
+    }
+  ]
+}

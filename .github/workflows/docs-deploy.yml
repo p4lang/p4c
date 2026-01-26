@@ -1,0 +1,62 @@
+name: Deploy Doxygen
+on:
+  workflow_run:
+    workflows: ["Build Doxygen"]
+    types: [completed]
+
+permissions:
+  contents: write # Needed to push to gh-pages branch
+  pull-requests: write # Needed to post the comment
+  issues: write # Needed to post the comment
+  actions: read # Needed to read the build artifact
+
+jobs:
+  deploy:
+    # Only run if the build workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Artifact from Build
+        uses: actions/download-artifact@v4
+        with:
+          name: doxygen-html
+          path: build-results
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Read PR number from artifact metadata
+        id: pr
+        if: github.event.workflow_run.event == 'pull_request'
+        run: |
+          # PR number is passed via the build artifact (workflow_run.pull_requests may be empty).
+          pr="$(cat build-results/_meta/pr_number.txt 2>/dev/null || true)"
+          echo "number=$pr" >> "$GITHUB_OUTPUT"
+          # Don't publish internal metadata on GitHub Pages.
+          rm -f build-results/_meta/pr_number.txt
+          rmdir build-results/_meta 2>/dev/null || true
+
+      - name: Deploy to GitHub Pages (Main or PR)
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build-results
+          branch: gh-pages
+          # Logic: If triggered by a PR, use pr-preview folder, otherwise root
+          target-folder: >-
+            ${{ github.event.workflow_run.event == 'pull_request' 
+                && steps.pr.outputs.number != ''
+                && format('pr-preview/{0}', steps.pr.outputs.number) 
+                || '' }}
+          clean: ${{ github.event.workflow_run.event == 'push' }}
+          clean-exclude: pr-preview/
+
+      - name: Post/Update PR Comment
+        if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ steps.pr.outputs.number }}
+          body: |
+            🚀 **Doxygen Preview Ready!**
+            [Click here to view the preview](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-preview/${{ steps.pr.outputs.number }}/)

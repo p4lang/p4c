@@ -1,6 +1,6 @@
 """P4 compilation rule."""
 
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "CPP_TOOLCHAIN_TYPE", "find_cpp_toolchain", "use_cpp_toolchain")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
 def _extract_common_p4c_args(ctx):
     """Extract common arguments for p4c build rules."""
@@ -37,7 +37,9 @@ def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
         fail("The build rule does not specify the p4c backend executable via `p4c_backend` attribute.")
     p4c = ctx.executable.p4c_backend
 
-    cpp_toolchain = find_cpp_toolchain(ctx)
+    # The toolchain type is implicitly provided by the `toolchains` attribute of the rule.
+    # We need to explicitly retrieve the toolchain info from the context.
+    cc_toolchain = find_cpp_toolchain(ctx)
     ctx.actions.run_shell(
         command = """
             # p4c invokes cc for preprocessing; we provide it below.
@@ -46,15 +48,15 @@ def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
 
             {command}
         """.format(
-            cc = cpp_toolchain.compiler_executable,
+            cc = cc_toolchain.compiler_executable,
             command = command,
         ),
         tools = depset(
             direct = [p4c],
-            transitive = [cpp_toolchain.all_files],
+            transitive = [cc_toolchain.all_files],
         ),
         use_default_shell_env = True,
-        toolchain = CPP_TOOLCHAIN_TYPE,
+        toolchain = "@bazel_tools//tools/cpp:toolchain_type",
         **run_shell_kwargs
     )
 
@@ -162,12 +164,12 @@ p4_library = rule(
             default = "",
         ),
         "p4c_backend": attr.label(
-            default = Label("@com_github_p4lang_p4c//:p4c_bmv2"),
+            default = Label("//:p4c_bmv2"),
             executable = True,
             cfg = "exec",
         ),
         "_p4include": attr.label(
-            default = Label("@com_github_p4lang_p4c//:p4include"),
+            default = Label("//:p4include"),
             allow_files = [".p4", ".h"],
         ),
     },
@@ -241,12 +243,12 @@ p4_graphs = rule(
             default = "",
         ),
         "p4c_backend": attr.label(
-            default = Label("@com_github_p4lang_p4c//:p4c_graphs"),
+            default = Label("//:p4c_graphs"),
             executable = True,
             cfg = "exec",
         ),
         "_p4include": attr.label(
-            default = Label("@com_github_p4lang_p4c//:p4include"),
+            default = Label("//:p4include"),
             allow_files = [".p4", ".h"],
         ),
     },

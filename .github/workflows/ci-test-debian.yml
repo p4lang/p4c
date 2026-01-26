@@ -23,7 +23,7 @@ jobs:
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
@@ -64,7 +64,7 @@ jobs:
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
@@ -104,7 +104,7 @@ jobs:
       ENABLE_P4TEST: OFF
       ENABLE_P4C_GRAPHS: OFF
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0

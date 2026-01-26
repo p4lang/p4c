@@ -1,0 +1,9 @@
+type-int-with-non-lctk-width.p4(3): [--Wwarn=unused] warning: 'func' is unused
+bit<4> func(in bit<4> l) {
+       ^^^^
+type-int-with-non-lctk-width.p4(4): [--Wwarn=unused] warning: 'tt' is unused
+  const int<(l)> tt = 1;
+                 ^^
+type-int-with-non-lctk-width.p4(4): [--Werror=expected] error: l: expected a constant
+  const int<(l)> tt = 1;
+             ^

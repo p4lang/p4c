@@ -13,7 +13,7 @@ control c(inout Headers hdr) {
     @name("c.do_action") action do_action() {
     }
     @name("c.do_action") action do_action_1() {
-        hdr.eth_hdr.eth_type = 16w3 + (tmp_val_0 > 16w2 ? 16w3 : 16w1);
+        hdr.eth_hdr.eth_type = (tmp_val_0 > 16w2 ? 16w3 : 16w1) + 16w3;
     }
     apply {
         tmp_val_0 = 16w3;

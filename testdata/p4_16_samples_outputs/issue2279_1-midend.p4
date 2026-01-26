@@ -14,7 +14,7 @@ control c(inout Headers hdr) {
         tmp_val_0[7:0] = 8w4;
     }
     @name("c.do_action") action do_action_1() {
-        hdr.eth_hdr.eth_type = 16w3 + (tmp_val_0 > 16w2 ? 16w3 : 16w1);
+        hdr.eth_hdr.eth_type = (tmp_val_0 > 16w2 ? 16w3 : 16w1) + 16w3;
     }
     @hidden action issue2279_1l12() {
         tmp_val_0 = 16w3;

@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 
+#include "lib/exceptions.h"
+
 namespace {
 
 auto CaptureStderr = ::testing::internal::CaptureStderr;
@@ -39,8 +41,8 @@ TEST(asm_types, get_int64_0) {
     EXPECT_EQ(get_int64(v, 64, "no error"), i);
     EXPECT_TRUE(Stderr().find("error") == std::string::npos);
     // Slow tests...
-    EXPECT_EXIT(get_int64(v, 128), terminate, "Assembler BUG");
-    EXPECT_EXIT(get_int64(v, 128, "terminates"), terminate, "Assembler BUG");
+    EXPECT_THROW(get_int64(v, 128), P4::Util::CompilerBug);
+    EXPECT_THROW(get_int64(v, 128, "terminates"), P4::Util::CompilerBug);
 }
 
 TEST(asm_types, get_int64_32bit) {
@@ -98,8 +100,8 @@ TEST(asm_types, get_int64_bigi_0) {
     EXPECT_EQ(get_int64(v, 64, "no error"), i);
     EXPECT_TRUE(Stderr().find("error") == std::string::npos);
     // Slow tests...
-    EXPECT_EXIT(get_int64(v, 128), terminate, "Assembler BUG");
-    EXPECT_EXIT(get_int64(v, 128, "terminates"), terminate, "Assembler BUG");
+    EXPECT_THROW(get_int64(v, 128), P4::Util::CompilerBug);
+    EXPECT_THROW(get_int64(v, 128, "terminates"), P4::Util::CompilerBug);
 }
 
 TEST(asm_types, get_int64_bigi_32bit) {

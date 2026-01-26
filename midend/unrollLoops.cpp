@@ -99,7 +99,9 @@ class RemoveBreakContinue : public Transform {
         prune();
         auto s2 = s->apply_visitor_postorder(*this)->to<IR::Statement>();
         BUG_CHECK(s2, "RemoveBreakContinue::postorder failed to return a statement");
-        return new IR::IfStatement(cond, s2, nullptr);
+        s = new IR::IfStatement(cond, s2, nullptr);
+        if (getParent<IR::SwitchCase>()) s = new IR::BlockStatement({s});
+        return s;
     }
 };
 

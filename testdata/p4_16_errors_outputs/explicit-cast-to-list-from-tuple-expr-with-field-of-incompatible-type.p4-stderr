@@ -1,0 +1,50 @@
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(9): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): [--Wwarn=unused] warning: 'e' is unused
+  E((list<S<varbit<32>>>) { { 10 } }) e;
+                                      ^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): [--Werror=type-error] error: '(list<S<varbit<32>>>){ { 10 } }'
+  E((list<S<varbit<32>>>) { { 10 } }) e;
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'varbit<32>'
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+              ^^^^^^^^^^
+  ---- Originating from:
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): Source expression '{ 10 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct S<...>'
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+                              ^^^^^^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10)
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+                              ^^^^^^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10)
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+            ^^^^^^^^^^^^^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): [--Werror=type-error] error: 'e'
+  E((list<S<varbit<32>>>) { { 10 } }) e;
+                                      ^
+  ---- Actual error:
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): Cannot cast implicitly type 'varbit<32>' to type 'bit<32>'
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+              ^^^^^^^^^^
+  ---- Originating from:
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): Type of argument '{ { 10 } }' (list<struct S<...>>) does not match type of parameter 'data' (list<struct S<...>>)
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10)
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+       ^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(7)
+    E(list<S<bit<32>>> data);
+                       ^^^^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(7)
+    E(list<S<bit<32>>> data);
+      ^^^^^^^^^^^^^^^^
+  ---- Originating from:
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(10): Constructor invocation <Method call> does not match constructor declaration E
+    E((list<S<varbit<32>>>) { { 10 } }) e;
+                                        ^
+explicit-cast-to-list-from-tuple-expr-with-field-of-incompatible-type.p4(7)
+    E(list<S<bit<32>>> data);
+    ^

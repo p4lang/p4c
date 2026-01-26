@@ -160,11 +160,12 @@ function build_bmv2() {
     export CC=gcc-9
     export CXX=g++-9
   elif [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
-   sudo apt-get install -y wget ca-certificates
-    # Add the p4lang opensuse repository.
-    echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-    curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
-    P4C_RUNTIME_DEPS+=" p4lang-bmv2"
+    echo "Temporarily disabling retrieval of p4lang-bmv2 package until it is working"
+    #sudo apt-get install -y wget ca-certificates
+    ## Add the p4lang opensuse repository.
+    #echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+    #curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
+    #P4C_RUNTIME_DEPS+=" p4lang-bmv2"
   fi
 
   sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
@@ -231,6 +232,8 @@ function install_stf_p4tc_test_deps() (
                              python3-venv \
                              virtme-ng \
                              qemu-kvm \
+                             clang-15 \
+                             python3-scapy \
                              qemu-system-x86"
     sudo apt-get install -y --no-install-recommends ${P4C_STF_P4TC_PACKAGES}
     git clone https://github.com/p4tc-dev/iproute2-p4tc-pub -b master-v17-rc8 ${P4C_DIR}/backends/tc/runtime/iproute2-p4tc-pub

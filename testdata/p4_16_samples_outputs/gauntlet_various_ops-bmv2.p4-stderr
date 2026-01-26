@@ -7,7 +7,7 @@ gauntlet_various_ops-bmv2.p4(143): [--Wwarn=unused] warning: 'int_def' is unused
 gauntlet_various_ops-bmv2.p4(120): [--Wwarn=overflow] warning: 1 >> 16: Shifting 4-bit value with 16
         h.rshift.g = 4w1 >> 8w16;
                      ^^^^^^^^^^^
-gauntlet_various_ops-bmv2.p4(123): [--Wwarn=mismatch] warning: 4w16: value does not fit in 4 bits
+gauntlet_various_ops-bmv2.p4(123): [--Wwarn=overflow] warning: 4w16: value does not fit in 4 bits
         h.lshift.a = (bit<8>)(4w4 << 8w2);
                               ^^^^^^^^^^
 gauntlet_various_ops-bmv2.p4(124): [--Wwarn=overflow] warning: 4 << 16: Shifting 4-bit value with 16
@@ -22,6 +22,6 @@ gauntlet_various_ops-bmv2.p4(132): [--Wwarn=mismatch] warning: -4w1: negative va
 gauntlet_various_ops-bmv2.p4(133): [--Wwarn=mismatch] warning: -4w1: negative value with unsigned type
         if (4w8 > -1) { h.comp.d = 1; }
                    ^
-gauntlet_various_ops-bmv2.p4(138): [--Wwarn=mismatch] warning: 1w4: value does not fit in 1 bits
+gauntlet_various_ops-bmv2.p4(138): [--Wwarn=overflow] warning: 1w4: value does not fit in 1 bits
         h.div.a = (bit<8>)(4 / 1w1);
                            ^

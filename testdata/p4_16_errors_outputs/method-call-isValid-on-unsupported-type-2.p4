@@ -1,0 +1,3 @@
+bool f() {
+    return {  }.isValid();
+}

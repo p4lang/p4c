@@ -42,7 +42,7 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
 
     const IR::Node *postorder(IR::Constant *cst) override {
         auto cstType = typeMap->getType(getOriginal(), true);
-        if (!cstType->is<IR::ITypeVar>()) return cst;
+        if (!cstType || !cstType->is<IR::ITypeVar>()) return cst;
         auto repl = cstType;
         while (repl->is<IR::ITypeVar>()) {
             auto next = subst->get(repl->to<IR::ITypeVar>());

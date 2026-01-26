@@ -1,0 +1,9 @@
+decl-union-of-unsupported-type.p4(4): [--Werror=type-error] error: Field 't' of 'header_union S' cannot have type 'tuple<T, T>'
+  tuple<T, T> t;
+              ^
+decl-union-of-unsupported-type.p4(4)
+  tuple<T, T> t;
+  ^^^^^^^^^^^
+decl-union-of-unsupported-type.p4(3): [--Werror=type-error] error: Error while analyzing header_union S
+header_union S<T> {
+             ^

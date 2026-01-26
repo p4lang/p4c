@@ -27,6 +27,7 @@ class P4TestOptions : public CompilerOptions {
     bool validateOnly = false;
     bool loadIRFromJson = false;
     bool preferSwitch = false;
+    bool keepTuples = false;  // keep tuples but flatten assignments of them
     P4TestOptions();
 };
 

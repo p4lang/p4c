@@ -18,7 +18,7 @@ jobs:
   format_bazel_files:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: tools/format-bazel-files.sh
       - name: Check formatting diff
         run: |
@@ -37,12 +37,12 @@ jobs:
     needs: format_bazel_files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
       - name: Mount bazel cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-direct-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
@@ -81,7 +81,7 @@ jobs:
         run: rm -rf $(bazel info repository_cache)
 
       - name: Save bazel cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: always() && (github.ref_name == 'main' || env.duration > 180)
         with:
           path: ~/.cache/bazel
@@ -91,12 +91,12 @@ jobs:
     needs: format_bazel_files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
 
       - name: Mount bazel cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-indirect-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
@@ -135,7 +135,7 @@ jobs:
         run: rm -rf $(bazel info repository_cache)
 
       - name: Save bazel cache
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         if: always() && (github.ref_name == 'main' || env.duration > 180)
         with:
           path: ~/.cache/bazel

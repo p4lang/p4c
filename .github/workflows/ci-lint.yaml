@@ -21,10 +21,10 @@ jobs:
       CMAKE_ONLY: ON
       CTEST_PARALLEL_LEVEL: 4
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           submodules: recursive
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1

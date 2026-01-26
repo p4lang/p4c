@@ -1,0 +1,18 @@
+method-call-apply-on-parser-with-no-apply.p4(4): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {}
+        ^^^^^
+method-call-apply-on-parser-with-no-apply.p4(7): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+method-call-apply-on-parser-with-no-apply.p4(6): [--Wwarn=unused] warning: parser 'q' is unused
+parser q()() {
+       ^
+method-call-apply-on-parser-with-no-apply.p4(8): [--Werror=type-error] error: 'p_inst.apply(DefaultExpression)'
+    p.apply(_);
+    ^^^^^^^^^^
+  ---- Actual error:
+  p: 1 arguments supplied while 0 are expected
+  ---- Originating from:
+method-call-apply-on-parser-with-no-apply.p4(8): Function type 'p' does not match invocation type '<Method call>'
+      p.apply(_);
+      ^^^^^^^^^^

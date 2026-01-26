@@ -1,0 +1,15 @@
+equate-type-enum-and-incompatible-type.p4(4): [--Wwarn=unused] warning: 'a' is unused
+const bool a = (X.a == { });
+           ^
+equate-type-enum-and-incompatible-type.p4(4): [--Werror=type-error] error: 'X.a' with type 'X' cannot be compared to '{}' with type 'tuple<>'
+const bool a = (X.a == { });
+                ^^^
+equate-type-enum-and-incompatible-type.p4(3)
+enum X { a };
+     ^
+equate-type-enum-and-incompatible-type.p4(4)
+const bool a = (X.a == { });
+                       ^^^
+equate-type-enum-and-incompatible-type.p4(4)
+const bool a = (X.a == { });
+                       ^^^

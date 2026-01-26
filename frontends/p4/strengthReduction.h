@@ -90,12 +90,19 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::BOr *expr) override;
     const IR::Node *postorder(IR::Equ *expr) override;
     const IR::Node *postorder(IR::Neq *expr) override;
+    const IR::Node *relation(IR::Operation_Relation *expr, bool grt, bool eq);
+    const IR::Node *postorder(IR::Geq *expr) override { return relation(expr, true, true); }
+    const IR::Node *postorder(IR::Grt *expr) override { return relation(expr, true, false); }
+    const IR::Node *postorder(IR::Leq *expr) override { return relation(expr, false, true); }
+    const IR::Node *postorder(IR::Lss *expr) override { return relation(expr, false, false); }
     const IR::Node *postorder(IR::BXor *expr) override;
     const IR::Node *postorder(IR::LAnd *expr) override;
     const IR::Node *postorder(IR::LOr *expr) override;
     const IR::Node *postorder(IR::LNot *expr) override;
     const IR::Node *postorder(IR::Sub *expr) override;
+    const IR::Node *postorder(IR::SubSat *expr) override;
     const IR::Node *postorder(IR::Add *expr) override;
+    const IR::Node *postorder(IR::AddSat *expr) override;
     const IR::Node *postorder(IR::UPlus *expr) override;
     const IR::Node *postorder(IR::Shl *expr) override;
     const IR::Node *postorder(IR::Shr *expr) override;

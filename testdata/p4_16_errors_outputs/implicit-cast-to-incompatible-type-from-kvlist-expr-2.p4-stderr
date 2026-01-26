@@ -1,0 +1,26 @@
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(3): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(5): [--Wwarn=unused] warning: 's' is unused
+    tuple<> s = { b = 2, ... };
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(5): [--Werror=type-error] error: 's'
+    tuple<> s = { b = 2, ... };
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(5): Cannot cast implicitly type 'unknown struct' to type 'tuple<>'
+      tuple<> s = { b = 2, ... };
+                  ^^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(5)
+      tuple<> s = { b = 2, ... };
+      ^^^^^^^
+  ---- Originating from:
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(5): Source expression '{ b = 2, ... = ... }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'tuple<>'
+      tuple<> s = { b = 2, ... };
+                  ^^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(5)
+      tuple<> s = { b = 2, ... };
+                  ^^^^^^^^^^^^
+implicit-cast-to-incompatible-type-from-kvlist-expr-2.p4(5)
+      tuple<> s = { b = 2, ... };
+      ^^^^^^^

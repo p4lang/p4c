@@ -97,6 +97,7 @@ package Pipeline<IH, IM, EH, EM>(
     @optional GhostT ghost);
 
 @pkginfo(arch="T2NA", version="1.0.1")
+@noWarn("unused")
 package Switch<IH0, IM0, EH0, EM0, IH1, IM1, EH1, EM1,
                IH2, IM2, EH2, EM2, IH3, IM3, EH3, EM3>(
     Pipeline<IH0, IM0, EH0, EM0> pipe0,

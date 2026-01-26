@@ -1,0 +1,23 @@
+explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Wwarn=unused] warning: 'h8' is unused
+    H h8 = (H) { b = 2 };
+    ^^^^^^^^^^^^^^^^^^^^
+explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Werror=type-error] error: '{ b = 2 }'
+    H h8 = (H) { b = 2 };
+               ^^^^^^^^^
+  ---- Actual error:
+explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): Number of fields 1 in initializer different than number of fields in structure 0: unknown struct to header H
+      H h8 = (H) { b = 2 };
+                 ^^^^^^^^^
+explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(3)
+  header H {}
+         ^
+  ---- Originating from:
+explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): Initializer type 'unknown struct' does not match expected type 'header H'
+      H h8 = (H) { b = 2 };
+                 ^^^^^^^^^
+explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(3)
+  header H {}
+         ^

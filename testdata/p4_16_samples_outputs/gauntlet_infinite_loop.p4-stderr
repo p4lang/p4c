@@ -16,19 +16,19 @@ gauntlet_infinite_loop.p4(37): [--Wwarn=ordering] warning: hdr.p: 'out' argument
 gauntlet_infinite_loop.p4(37)
         sub_parser.apply(packet, hdr, hdr.p);
                                  ^^^
-gauntlet_infinite_loop.p4(23): [--Wwarn=uninitialized_use] warning: padding.p may be uninitialized
+gauntlet_infinite_loop.p4(23): [--Wwarn=uninitialized-use] warning: padding.p may be uninitialized
         transition select(padding.p) {
                           ^^^^^^^^^
-gauntlet_infinite_loop.p4(23): [--Wwarn=invalid_header] warning: accessing a field of an invalid header padding
+gauntlet_infinite_loop.p4(23): [--Wwarn=invalid-header] warning: accessing a field of an invalid header padding
         transition select(padding.p) {
                           ^^^^^^^
-[--Wwarn=uninitialized_use] warning: tmp.nop may be uninitialized
-[--Wwarn=uninitialized_use] warning: tmp.p may be uninitialized
-[--Wwarn=uninitialized_use] warning: tmp_0.p may be uninitialized
-[--Wwarn=uninitialized_use] warning: tmp.nop may be uninitialized
-[--Wwarn=uninitialized_use] warning: tmp.p may be uninitialized
-[--Wwarn=uninitialized_use] warning: tmp_0.p may be uninitialized
-[--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp_0
-[--Wwarn=uninitialized_use] warning: tmp.nop may be uninitialized
-[--Wwarn=uninitialized_use] warning: tmp.p may be uninitialized
-[--Wwarn=uninitialized_use] warning: tmp_0.p may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp.p may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp.p may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized
+[--Wwarn=invalid-header] warning: accessing a field of an invalid header tmp_0
+[--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp.p may be uninitialized
+[--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized

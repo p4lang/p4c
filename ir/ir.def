@@ -421,6 +421,7 @@ class Declaration_Constant : Declaration, IAnnotated {
 class Declaration_Instance : Declaration, IAnnotated, IInstance {
     optional inline Vector<Annotation> annotations;
     Type                  type;  // Either Type_Name or Type_Specialized or Type_Extern
+                                 // or Type_Array of any of the above
     Vector<Argument>      arguments;
     inline NameMap<Property> properties = {};  // P4_14 externs only, at the moment
     optional NullOK BlockStatement initializer = nullptr;

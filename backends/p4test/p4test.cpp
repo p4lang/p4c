@@ -86,6 +86,9 @@ P4TestOptions::P4TestOptions() {
             return true;
         },
         "use passes that use general switch instead of action_run");
+    registerOption(
+        "--keepTuples", nullptr, [this](const char *) { return keepTuples = true; },
+        "keep tuple type, but flatten assignments of them");
 }
 
 class P4TestPragmas : public P4::P4COptionPragmaParser {
@@ -155,6 +158,7 @@ int main(int argc, char *const argv[]) {
     if (options.loadIRFromJson) {
         std::ifstream json(options.file);
         if (json) {
+            JsonData::strict = true;
             JSONLoader loader(json);
             const IR::Node *node = nullptr;
             loader >> node;
@@ -224,6 +228,7 @@ int main(int argc, char *const argv[]) {
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
                 JSONGenerator gen1(ss1), gen2(ss2);
+                JsonData::strict = true;
                 gen1.emit(program);
 
                 const IR::Node *node = nullptr;

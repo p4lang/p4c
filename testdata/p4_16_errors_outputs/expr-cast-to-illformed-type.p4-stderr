@@ -1,0 +1,46 @@
+expr-cast-to-illformed-type.p4(3): [--Wwarn=unused] warning: 'T' is unused
+header H<T> {}
+         ^
+expr-cast-to-illformed-type.p4(4): [--Wwarn=unused] warning: control 'c' is unused
+control c()() {
+        ^
+expr-cast-to-illformed-type.p4(7): [--Werror=overlimit] error: Illegal array size: -2
+    s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+                     ^
+expr-cast-to-illformed-type.p4(7): [--Werror=type-error] error: '(H<bit<32>>[-2]){ { 0, 1 }, { 2, 3 }, InvalidHeader }'
+    s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+expr-cast-to-illformed-type.p4(7): Number of components 3 in initializer tuple<tuple<int, int>, tuple<int, int>, header H<...>> is different than stack size 0
+      s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+expr-cast-to-illformed-type.p4(7): Source expression '{ { 0, 1 }, { 2, 3 }, InvalidHeader }' produces a result of type 'tuple<tuple<int, int>, tuple<int, int>, header H<...>>' which cannot be assigned to a left-value with type 'header H<...>[-2]'
+      s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+expr-cast-to-illformed-type.p4(7)
+      s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+expr-cast-to-illformed-type.p4(7)
+      s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+           ^^^^^^^^^^^^^^
+expr-cast-to-illformed-type.p4(7): [--Werror=type-error] error: 's = { { 0, 1 }, { 2, 3 }, InvalidHeader }'
+    s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+      ^
+  ---- Actual error:
+expr-cast-to-illformed-type.p4(7): Number of fields 2 in initializer tuple<int, int> is different than number of fields 0 in 'header H'
+      s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+                                       ^^^^^^^^
+expr-cast-to-illformed-type.p4(3)
+  header H<T> {}
+         ^
+  ---- Originating from:
+expr-cast-to-illformed-type.p4(7): Source expression '{ { 0, 1 }, { 2, 3 }, InvalidHeader }' produces a result of type 'tuple<tuple<int, int>, tuple<int, int>, header H<...>>' which cannot be assigned to a left-value with type 'header H<...>[3]'
+      s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+expr-cast-to-illformed-type.p4(7)
+      s = (H<bit<32>>[-2]) { { 0, 1 }, { 2, 3 }, ((H<bit<32>>) {#}) };
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+expr-cast-to-illformed-type.p4(6)
+      H<bit<32>>[3] s;
+      ^^^^^^^^^^^^^

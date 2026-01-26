@@ -15,19 +15,19 @@ using SmallStepUtil::stepAndExamineOp;
 
 namespace {
 
-/// Test the step function for v + e binary operation.
+/// Test the step function for v - e binary operation.
 TEST_F(Bmv2SmallStepTest, Binary01) {
-    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "8w42 + hdr.h.f");
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "8w42 - hdr.h.f");
     ASSERT_TRUE(test);
 
     const auto *opBin = extractExpr<IR::Operation_Binary>(test->getProgram());
     ASSERT_TRUE(opBin);
 
     // Step on the binary operation and examine the resulting continuation
-    // to include the rebuilt IR::Add node.
+    // to include the rebuilt IR::Sub node.
     stepAndExamineOp(
         opBin, opBin->right, test->getCompilerResult(),
-        [opBin](const IR::PathExpression *expr) { return new IR::Add(opBin->left, expr); });
+        [opBin](const IR::PathExpression *expr) { return new IR::Sub(opBin->left, expr); });
 }
 
 /// Test the step function for e + e binary operation.

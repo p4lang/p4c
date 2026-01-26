@@ -1,0 +1,23 @@
+implicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(4): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+implicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(6): [--Wwarn=unused] warning: 's3' is unused
+    S s3 = { b = 2, ... };
+    ^^^^^^^^^^^^^^^^^^^^^
+implicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(6): [--Werror=type-error] error: '{ b = 2 }'
+    S s3 = { b = 2, ... };
+           ^^^^^^^^^^^^
+  ---- Actual error:
+implicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(6): Number of fields 1 in initializer different than number of fields in structure 0: unknown struct to struct S
+      S s3 = { b = 2, ... };
+             ^^^^^^^^^^^^
+implicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(3)
+  struct S {}
+         ^
+  ---- Originating from:
+implicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(6): Initializer type 'unknown struct' does not match expected type 'struct S'
+      S s3 = { b = 2, ... };
+             ^^^^^^^^^^^^
+implicit-cast-to-struct-from-kvlist-expr-with-unmatched-field.p4(3)
+  struct S {}
+         ^

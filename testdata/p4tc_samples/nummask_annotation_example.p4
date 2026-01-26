@@ -38,19 +38,10 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
-// Masks of the bit positions of some bit flags within the TCP flags field.
-const bit<8> TCP_URG_MASK = 0x20;
-const bit<8> TCP_ACK_MASK = 0x10;
-const bit<8> TCP_PSH_MASK = 0x08;
-const bit<8> TCP_RST_MASK = 0x04;
-const bit<8> TCP_SYN_MASK = 0x02;
-const bit<8> TCP_FIN_MASK = 0x01;
-
 // Define names for different expire time profile id values.
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW    = (ExpireTimeProfileId_t) 0;
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW    = (ExpireTimeProfileId_t) 1;
 const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t) 2;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER  = (ExpireTimeProfileId_t) 3;
 
 //////////////////////////////////////////////////////////////////////
 // Struct types for holding user-defined collections of headers and
@@ -107,10 +98,6 @@ control MainControlImpl(
     in    pna_main_input_metadata_t istd,
     inout pna_main_output_metadata_t ostd)
 {
-    action drop() {
-        drop_packet();
-    }
-
     bool do_add_on_miss;
     bool update_aging_info;
     bool update_expire_time;

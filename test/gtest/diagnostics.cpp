@@ -66,7 +66,7 @@ class Diagnostics : public P4CTest {};
 
 TEST_F(Diagnostics, P4_16_Disable) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-        @diagnostic("uninitialized_out_param", "disable")
+        @diagnostic("uninitialized-out-param", "disable")
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(0u, diagnosticCount());
@@ -77,7 +77,7 @@ TEST_F(Diagnostics, P4_16_Disable) {
 
 TEST_F(Diagnostics, P4_16_Warn) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-        @diagnostic("uninitialized_out_param", "warn")
+        @diagnostic("uninitialized-out-param", "warn")
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -87,7 +87,7 @@ TEST_F(Diagnostics, P4_16_Warn) {
 
 TEST_F(Diagnostics, P4_16_Error) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-        @diagnostic("uninitialized_out_param", "error")
+        @diagnostic("uninitialized-out-param", "error")
     )"));
     EXPECT_FALSE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -97,7 +97,7 @@ TEST_F(Diagnostics, P4_16_Error) {
 
 TEST_F(Diagnostics, DISABLED_P4_14_Disable) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
-        @pragma diagnostic uninitialized_use disable
+        @pragma diagnostic uninitialized-use disable
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(0u, diagnosticCount());
@@ -105,7 +105,7 @@ TEST_F(Diagnostics, DISABLED_P4_14_Disable) {
 
 TEST_F(Diagnostics, DISABLED_P4_14_Warn) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
-        @pragma diagnostic uninitialized_use warn
+        @pragma diagnostic uninitialized-use warn
     )"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -115,7 +115,7 @@ TEST_F(Diagnostics, DISABLED_P4_14_Warn) {
 
 TEST_F(Diagnostics, DISABLED_P4_14_Error) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
-        @pragma diagnostic uninitialized_use error
+        @pragma diagnostic uninitialized-use error
     )"));
     EXPECT_FALSE(test);
     EXPECT_EQ(1u, diagnosticCount());
@@ -133,9 +133,9 @@ TEST_F(Diagnostics, NestedCompileContexts) {
         {
             AutoCompileContext autoErrorContext(new GTestContext);
 
-            // Run a test with `uninitialized_out_param` set to trigger an error.
+            // Run a test with `uninitialized-out-param` set to trigger an error.
             auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-                @diagnostic("uninitialized_out_param", "error")
+                @diagnostic("uninitialized-out-param", "error")
             )"));
             EXPECT_FALSE(test);
             EXPECT_EQ(1u, diagnosticCount());
@@ -143,16 +143,16 @@ TEST_F(Diagnostics, NestedCompileContexts) {
             EXPECT_EQ(1u, errorCount());
         }
 
-        // Run a test with `uninitialized_out_param` disabled. The error from
+        // Run a test with `uninitialized-out-param` disabled. The error from
         // the previous test should be gone, and no new error should appear.
         auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
-            @diagnostic("uninitialized_out_param", "disable")
+            @diagnostic("uninitialized-out-param", "disable")
         )"));
         EXPECT_TRUE(test);
         EXPECT_EQ(0u, diagnosticCount());
     }
 
-    // Run a test with no diagnostic pragma for `uninitialized_out_param`. It
+    // Run a test with no diagnostic pragma for `uninitialized-out-param`. It
     // should default to triggering a warning; the diagnostic actions configured
     // by the previous tests should be gone.
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
@@ -205,7 +205,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({"(test)", "--Wdisable=uninitialized_out_param"});
+        auto test = parseWithCompilerOptions({"(test)", "--Wdisable=uninitialized-out-param"});
         EXPECT_TRUE(test);
         EXPECT_EQ(0u, diagnosticCount());
     }
@@ -221,7 +221,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({"(test)", "--Wwarn=uninitialized_out_param"});
+        auto test = parseWithCompilerOptions({"(test)", "--Wwarn=uninitialized-out-param"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, diagnosticCount());
         EXPECT_EQ(1u, warningCount());
@@ -230,7 +230,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({"(test)", "--Werror=uninitialized_out_param"});
+        auto test = parseWithCompilerOptions({"(test)", "--Werror=uninitialized-out-param"});
         EXPECT_FALSE(test);
         EXPECT_EQ(1u, diagnosticCount());
         EXPECT_EQ(0u, warningCount());
@@ -256,7 +256,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
         // We expect all warnings to be disabled. If `unknown_diagnostic` was
         // treated as an argument to `--Wdisable`, then
-        // `uninitialized_out_param` would still be enabled and a warning would
+        // `uninitialized-out-param` would still be enabled and a warning would
         // fire.
         EXPECT_EQ(0u, diagnosticCount());
     }

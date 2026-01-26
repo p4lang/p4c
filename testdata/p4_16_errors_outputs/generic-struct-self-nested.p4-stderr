@@ -13,7 +13,7 @@ const H3<S> h4 = {
 generic-struct-self-nested.p4(88): [--Wwarn=unused] warning: 'h5' is unused
         H3<S> h5;
         ^^^^^^^^
-generic-struct-self-nested.p4(47): [--Wwarn=mismatch] warning: 1w9223372036854775810: value does not fit in 1 bits
+generic-struct-self-nested.p4(47): [--Wwarn=overflow] warning: 1w9223372036854775810: value does not fit in 1 bits
     invalid = 9223372036854775810
               ^^^^^^^^^^^^^^^^^^^
 generic-struct-self-nested.p4(56): [--Werror=type-error] error: H2: contains self 'struct H2' as type argument

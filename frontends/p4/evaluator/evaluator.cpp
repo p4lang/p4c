@@ -159,9 +159,9 @@ const IR::Block *Evaluator::processConstructor(
             LOG2("Eliminating typedef " << dbp(decl));
             type = decl->to<IR::Type_Typedef>()->type;
         }
-        if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
-        if (type->is<IR::Type_Name>()) {
-            auto tn = type->to<IR::Type_Name>();
+        while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
+        if (auto st = type->to<IR::Type_Specialized>()) type = st->baseType;
+        if (auto tn = type->to<IR::Type_Name>()) {
             decl = refMap->getDeclaration(tn->path, true);
         } else {
             BUG_CHECK(type->is<IR::IDeclaration>(), "%1%: expected a type declaration", type);
@@ -176,8 +176,9 @@ const IR::Block *Evaluator::processConstructor(
         // We lookup the method in the instanceType, because it may contain compiler-synthesized
         // constructors with zero arguments that may not appear in the original extern declaration.
         auto canon = instanceType;
-        if (canon->is<IR::Type_SpecializedCanonical>())
-            canon = canon->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
+        if (auto at = canon->to<IR::Type_Array>()) canon = at->elementType;
+        if (auto tsc = canon->to<IR::Type_SpecializedCanonical>())
+            canon = tsc->substituted->to<IR::Type>();
         BUG_CHECK(canon->is<IR::Type_Extern>(), "%1%: expected an extern", canon);
         auto constructor = canon->to<IR::Type_Extern>()->lookupConstructor(arguments);
         BUG_CHECK(constructor != nullptr, "Type %1% has no constructor with %2% arguments", exttype,

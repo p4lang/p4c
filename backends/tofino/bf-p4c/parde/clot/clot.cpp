@@ -202,11 +202,11 @@ void Clot::toJSON(JSONGenerator &json) const {
 }
 
 Clot::Clot(JSONLoader &json) {
-    json.load("tag", tag);
-    json.load("gress", gress);
-    json.load("pov_bit", pov_bit);
-    json.load("stack_depth", stack_depth);
-    json.load("stack_inc", stack_inc);
+    json.load("tag", tag) || json.error("missing field tag");
+    json.load("gress", gress) || json.error("missing field gress");
+    json.load("pov_bit", pov_bit) || json.error("missing field pov_bit");
+    json.load("stack_depth", stack_depth) || json.error("missing field stack_depth");
+    json.load("stack_inc", stack_inc) || json.error("missing field stack_inc");
 }
 
 std::ostream &operator<<(std::ostream &out, const Clot &clot) { return out << "CLOT " << clot.tag; }

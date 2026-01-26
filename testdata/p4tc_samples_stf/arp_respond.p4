@@ -40,10 +40,6 @@ struct my_ingress_headers_t {
 }
 
 const bit<16> ETHERTYPE_ARP = 0x0806;
-const bit<16> ARP_HTYPE = 0x0001;
-const bit<16> ARP_PTYPE = 0x0800;
-const bit<8>  ARP_HLEN  = 6;
-const bit<8>  ARP_PLEN  = 4;
 const bit<16> ARP_REQ = 1;
 const bit<16> ARP_REPLY = 2;
 

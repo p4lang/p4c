@@ -1,7 +1,6 @@
-# Remove once #5066 is resolved.
-common --enable_workspace
-# Enable once #5066 is resolved.
-common --noenable_bzlmod
+# Enable Bzlmod.
+common --enable_bzlmod
+common --noenable_workspace
 
 # Use C++20.
 build --cxxopt=-std=c++20
