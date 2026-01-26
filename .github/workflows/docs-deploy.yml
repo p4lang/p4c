@@ -54,7 +54,7 @@ jobs:
 
       - name: Post/Update PR Comment
         if: github.event.workflow_run.event == 'pull_request' && steps.pr.outputs.number != ''
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ steps.pr.outputs.number }}
           body: |
