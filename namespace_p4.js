@@ -355,6 +355,7 @@ var namespace_p4 =
     [ "ParsePortableArchitecture", "class_p4_1_1_parse_portable_architecture.html", null ],
     [ "ParsePsaArchitecture", "class_p4_1_1_parse_psa_architecture.html", null ],
     [ "ParserAnalyzer", "class_p4_1_1_parser_analyzer.html", null ],
+    [ "ParserConfig", "namespace_p4.html#struct_p4_1_1_parser_config", null ],
     [ "ParserErrorMessage", "struct_p4_1_1_parser_error_message.html", null ],
     [ "ParserInfo", "class_p4_1_1_parser_info.html", null ],
     [ "ParserInstantiation", "class_p4_1_1_parser_instantiation.html", null ],

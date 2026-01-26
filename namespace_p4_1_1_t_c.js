@@ -52,6 +52,7 @@ var namespace_p4_1_1_t_c =
     [ "PnaProgramStructure", "class_p4_1_1_t_c_1_1_pna_program_structure.html", null ],
     [ "PnaStateTranslationVisitor", "class_p4_1_1_t_c_1_1_pna_state_translation_visitor.html", null ],
     [ "ScanWidths", "class_p4_1_1_t_c_1_1_scan_widths.html", null ],
+    [ "SizeScanner", "class_p4_1_1_t_c_1_1_size_scanner.html", null ],
     [ "stmtlist", "namespace_p4_1_1_t_c.html#struct_p4_1_1_t_c_1_1stmtlist", null ],
     [ "TableAttributes", "struct_p4_1_1_t_c_1_1_table_attributes.html", null ],
     [ "TCIngressPipelinePNA", "class_p4_1_1_t_c_1_1_t_c_ingress_pipeline_p_n_a.html", "class_p4_1_1_t_c_1_1_t_c_ingress_pipeline_p_n_a" ],

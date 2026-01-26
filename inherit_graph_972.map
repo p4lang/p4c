@@ -1,9 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" href="$classsolver_1_1_action_solver_base.html" title="ActionSolverBase contains basic methods and states for all solvers." alt="" coords="5,55,189,80"/>
 <area shape="rect" id="Node000001" href="$classsolver_1_1_action_dark_solver.html" title=" " alt="" coords="243,5,426,31"/>
-<area shape="poly" id="edge2664_Node000000_Node000001" title=" " alt="" coords="172,49,272,28,273,33,173,54"/>
+<area shape="poly" id="edge2666_Node000000_Node000001" title=" " alt="" coords="172,49,272,28,273,33,173,54"/>
 <area shape="rect" id="Node000002" href="$classsolver_1_1_action_mocha_solver.html" title=" " alt="" coords="237,55,432,80"/>
-<area shape="poly" id="edge2665_Node000000_Node000002" title=" " alt="" coords="203,65,237,65,237,70,203,70"/>
+<area shape="poly" id="edge2667_Node000000_Node000002" title=" " alt="" coords="203,65,237,65,237,70,203,70"/>
 <area shape="rect" id="Node000003" href="$classsolver_1_1_action_move_solver.html" title=" " alt="" coords="241,104,429,129"/>
-<area shape="poly" id="edge2666_Node000000_Node000003" title=" " alt="" coords="173,80,273,101,272,107,172,85"/>
+<area shape="poly" id="edge2668_Node000000_Node000003" title=" " alt="" coords="173,80,273,101,272,107,172,85"/>
 </map>

@@ -1,5 +1,7 @@
 var NAVTREEINDEX30 =
 {
+"class_pragma_1_1_pretty_print.html":[12,0,17,0],
+"class_pragma_1_1_pretty_print.html":[13,0,16,0],
 "class_pragma_alias.html":[13,0,543],
 "class_pragma_alias.html#a6d3ccbc1bca578ee4bacf1b10c94895e":[13,0,543,0,2],
 "class_pragma_alias.html#a7b58c49eb995462844ca6aced14cad24":[13,0,543,0,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX30 =
 "class_validate_attached_of_single_table.html":[13,0,700],
 "class_validate_table_size.html":[13,0,701],
 "class_verify_parallel_writes_and_reads.html":[13,0,707],
-"class_verify_unique_dynamic_hash.html":[13,0,708],
-"class_version.html":[13,0,709],
-"class_version_iter.html":[13,0,710]
+"class_verify_unique_dynamic_hash.html":[13,0,708]
 };
