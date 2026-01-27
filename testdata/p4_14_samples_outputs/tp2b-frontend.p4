@@ -29,11 +29,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
     @name(".setf1") action setf1(@name("val") bit<32> val) {
         hdr.data.f1 = val;
@@ -94,13 +94,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_8() {
     }
     @name(".setb1") action setb1_2(@name("val") bit<32> val_9) {
         hdr.data.b1 = val_9;

@@ -43,7 +43,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".test_action") action test_action() {
         digest<test1_digest>(32w0x666, (test1_digest){dstAddr = hdr.ethernet.dstAddr,standard_metadata = standard_metadata});

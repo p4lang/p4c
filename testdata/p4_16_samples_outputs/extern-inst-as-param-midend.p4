@@ -6,7 +6,7 @@ extern MyCounter<I> {
 }
 
 control Test() {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("Test.counter_set") MyCounter<bit<10>>(32w1024) counter_set_0;
     @name("Test.Inner.count") action Inner_count_0(@name("index") bit<10> index_1) {

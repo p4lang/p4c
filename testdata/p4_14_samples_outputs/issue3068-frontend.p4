@@ -43,9 +43,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._nop") action _nop() {
     }
