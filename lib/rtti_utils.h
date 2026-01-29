@@ -82,14 +82,8 @@ struct ToType {
 };
 
 template <typename... Targets>
-// TODO(C++20): use concepts to check enable_if_all_have_rtti_t<Targets...>> & that there is at
-// least 1 target type.
+    requires(sizeof...(Targets) > 0) && all_have_rtti_v<Targets...>
 struct IsType {
-    static_assert(sizeof...(Targets) > 0,
-                  "At least one target type needs to be given for RTTI::is");
-    static_assert(all_have_rtti_v<Targets...>,
-                  "All types in RTTI::is<Ts> need to be custom-rtti-enabled");
-
     template <typename From, typename = enable_if_has_rtti_t<From>>
     bool operator()(const From *obj) const {
         return obj && (obj->template is<Targets>() || ...);
