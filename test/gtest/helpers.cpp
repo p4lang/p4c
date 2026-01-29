@@ -143,7 +143,7 @@ P4CTestEnvironment::P4CTestEnvironment() {
     std::filesystem::path srcFilePath{__FILE__};
     auto srcFileDir = std::filesystem::absolute(srcFilePath.parent_path());
     auto includeDir = srcFileDir / "../../p4include";
-    P4::p4includePath = strdup(includeDir.c_str());
+    P4::p4includePath = includeDir;
     auto corePath = includeDir / "core.p4";
     auto v1modelPath = includeDir / "v1model.p4";
     auto psaPath = includeDir / "bmv2/psa.p4";
