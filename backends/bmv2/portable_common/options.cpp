@@ -16,7 +16,7 @@ std::vector<const char *> *PortableOptions::process(int argc, char *const argv[]
     this->exe_name = cstring(executablePath.stem().c_str());
     searchForIncludePath(p4includePath,
                          {"p4include/bmv2"_cs, "../p4include/bmv2"_cs, "../../p4include/bmv2"_cs},
-                         executablePath.c_str());
+                         executablePath);
 
     auto remainingOptions = CompilerOptions::process(argc, argv);
 

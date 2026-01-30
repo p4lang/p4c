@@ -162,8 +162,8 @@ bool ToP4::preorder(const IR::P4Program *program) {
              * non-system header */
             auto sourceFile = sourceFileOpt.value();
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                if (sourceFile.startsWith(p4includePath)) {
-                    const char *p = sourceFile.c_str() + strlen(p4includePath);
+                if (sourceFile.startsWith(p4includePath.generic_string().c_str())) {
+                    const char *p = sourceFile.c_str() + p4includePath.generic_string().size();
                     if (*p == '/') p++;
                     // TODO: This is v1model-specific code. This should be not part of the core
                     // pass.

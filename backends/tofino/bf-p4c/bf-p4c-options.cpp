@@ -724,10 +724,9 @@ std::vector<const char *> *BFN_Options::process(int argc, char *const argv[]) {
     //
     // Therefore, we need to search ../share/p4c/p4include from the
     // directory that p4c resides in.
-    searchForIncludePath(p4includePath, {"../share/p4c/p4include"_cs}, executablePath.c_str());
+    searchForIncludePath(p4includePath, {"../share/p4c/p4include"_cs}, executablePath);
 
-    searchForIncludePath(p4_14includePath, {"../share/p4c/p4_14include"_cs},
-                         executablePath.c_str());
+    searchForIncludePath(p4_14includePath, {"../share/p4c/p4_14include"_cs}, executablePath);
 
     auto remainingOptions = CompilerOptions::process(argc, argv);
 
