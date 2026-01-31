@@ -17,7 +17,7 @@ std::vector<const char *> *DpdkOptions::process(int argc, char *const argv[]) {
 
     searchForIncludePath(p4includePath,
                          {"p4include/dpdk"_cs, "../p4include/dpdk"_cs, "../../p4include/dpdk"_cs},
-                         executablePath.c_str());
+                         executablePath);
 
     auto *remainingOptions = CompilerOptions::process(argc, argv);
 
@@ -30,8 +30,8 @@ const char *DpdkOptions::getIncludePath() const {
     cstring path = cstring::empty;
     if (driverP4IncludePath != nullptr) path += " -I"_cs + cstring(driverP4IncludePath);
 
-    path += cstring(" -I") + (isv1() ? p4_14includePath : p4includePath);
-    if (!isv1()) path += " -I"_cs + p4includePath + "/dpdk"_cs;
+    path += cstring(" -I") + (isv1() ? p4_14includePath.string() : p4includePath.string());
+    if (!isv1()) path += " -I"_cs + (p4includePath / "dpdk").string();
     return path.c_str();
 }
 
