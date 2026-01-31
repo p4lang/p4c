@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "toP4.h"
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -162,12 +163,14 @@ bool ToP4::preorder(const IR::P4Program *program) {
              * non-system header */
             auto sourceFile = sourceFileOpt.value();
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                if (sourceFile.startsWith(p4includePath.generic_string().c_str())) {
-                    const char *p = sourceFile.c_str() + p4includePath.generic_string().size();
-                    if (*p == '/') p++;
+                std::filesystem::path sourceFilePath(sourceFile.c_str());
+                auto includePathStr = p4includePath.generic_string();
+                if (sourceFile.startsWith(includePathStr.c_str())) {
+                    auto relativePath =
+                        std::filesystem::relative(sourceFilePath, p4includePath).generic_string();
                     // TODO: This is v1model-specific code. This should be not part of the core
                     // pass.
-                    if (P4V1::V1Model::instance.file.name == p) {
+                    if (P4V1::V1Model::instance.file.name == relativePath) {
                         P4V1::GetV1ModelVersion g;
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
@@ -175,7 +178,7 @@ bool ToP4::preorder(const IR::P4Program *program) {
                         builder.newline();
                     }
                     builder.append("#include <");
-                    builder.append(p);
+                    builder.append(relativePath);
                     builder.append(">");
                     builder.newline();
                 } else {
