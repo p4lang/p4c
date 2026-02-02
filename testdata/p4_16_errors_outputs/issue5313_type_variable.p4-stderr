@@ -1,0 +1,3 @@
+issue5313_type_variable.p4(6): [--Werror=type-error] error: v: switch expression cannot be of type T
+    switch (v) {
+            ^
