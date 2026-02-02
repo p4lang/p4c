@@ -1,0 +1,6 @@
+unknown-struct1.p4(23): [--Werror=type-error] error: unknown struct: Cannot infer type for unknown struct type initializer
+        func({ a = hdrs.h.f1, b = hdrs.h.f2 });
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+unknown-struct1.p4(5): [--Werror=type-error] error: Error while analyzing func
+extern void func<T>(in T x);
+            ^^^^
