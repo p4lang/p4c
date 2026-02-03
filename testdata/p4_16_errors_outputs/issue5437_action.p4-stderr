@@ -1,3 +1,3 @@
-issue5437.p4(8): [--Werror=type-error] error: a0(): Cannot invoke result of an action call
+issue5437_action.p4(8): [--Werror=type-error] error: a0(): Cannot invoke result of an action call
     table t0 { actions = { a0; } default_action = a0()(); }
                                                   ^^^^

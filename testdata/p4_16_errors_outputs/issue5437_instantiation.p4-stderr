@@ -1,0 +1,3 @@
+issue5437_instantiation.p4(14): [--Werror=type-error] error: MyMAPipe() is not a method
+SimpleArch(MyMAPipe()()) main;
+           ^^^^^^^^^^^^
