@@ -1,0 +1,3 @@
+v1model.p4(57): [--Werror=unknown] error: 20000101: unknown v1model version; initial supported version is 20180101, latest is 20200408
+const bit<32> __v1model_version = 20000101;
+                                  ^^^^^^^^
