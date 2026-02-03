@@ -1,0 +1,4 @@
+issue5437_table.p4(10):syntax error, unexpected (, expecting ;
+        t0.apply()(
+                  ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation
