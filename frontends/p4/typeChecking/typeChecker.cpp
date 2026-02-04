@@ -149,6 +149,8 @@ const IR::Type *TypeInferenceBase::getTypeType(const IR::Node *element) const {
     const IR::Type *result = typeMap->getType(element);
     // See comment in getType() above.
     if (result == nullptr) {
+        if (auto *us = element->to<IR::Type_UnknownStruct>())
+            typeError("%1%: Cannot infer type for unknown struct type initializer", us);
         if (::P4::errorCount() == 0) BUG("Could not find type of %1%", element);
         return nullptr;
     }
