@@ -242,6 +242,10 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     const SetOfLocations *get(const IR::Expression *expression, const Visitor::Context *ctxt) {
+        if (auto it = rw.find(expression); it != rw.end()) {
+            LOG3("SetOfLocations(" << expression << ")=" << it->second << " [cached]");
+            return it->second;
+        }
         expression->apply(*this, ctxt);
         auto result = ::P4::get(rw, expression);
         CHECK_NULL(result);
@@ -258,6 +262,8 @@ class ReadsWrites : public Inspector, public ResolutionContext {
         LOG3("Checking overlap between " << llocs << " and " << rlocs);
         return llocs->overlaps(rlocs);
     }
+
+    void clear() { rw.clear(); }
 };
 
 }  // namespace P4
