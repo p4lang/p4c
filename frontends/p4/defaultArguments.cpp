@@ -66,7 +66,7 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
             const IR::Expression *value = param->defaultValue;
             TypeNameSubstitutionVisitor tsvv(tsv, typeMap);
             value = param->defaultValue->apply(tsvv);
-            arg = new IR::Argument(param->srcInfo, param->name, value);
+            arg = new IR::Argument(param->srcInfo, param->name, value->clone());
             changed = true;
         }
         args->push_back(arg);
