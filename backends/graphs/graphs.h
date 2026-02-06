@@ -17,15 +17,6 @@ limitations under the License.
 #ifndef BACKENDS_GRAPHS_GRAPHS_H_
 #define BACKENDS_GRAPHS_GRAPHS_H_
 
-#include "config.h"
-#include "lib/cstring.h"
-
-/// Shouldn't happen as cmake will not try to build this backend if the boost
-/// graph headers couldn't be found.
-#ifndef HAVE_LIBBOOST_GRAPH
-#error "This backend requires the boost graph headers, which could not be found"
-#endif
-
 #include <map>
 #include <optional>
 #include <utility>  // std::pair
@@ -35,9 +26,11 @@ limitations under the License.
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graphviz.hpp>
 
+#include "config.h"
 #include "frontends/p4/parserCallGraph.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 
