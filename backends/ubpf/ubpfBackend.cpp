@@ -54,13 +54,13 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
 
     if (options.outputFile.empty()) return;
 
-    auto *cstream = openFile(options.outputFile, false);
+    auto cstream = openFile(options.outputFile, false);
     if (cstream == nullptr) return;
 
     std::filesystem::path hfile = options.outputFile;
     hfile.replace_extension(".h");
 
-    auto *hstream = openFile(hfile, false);
+    auto hstream = openFile(hfile, false);
     if (hstream == nullptr) return;
 
     UbpfCodeBuilder c(target);

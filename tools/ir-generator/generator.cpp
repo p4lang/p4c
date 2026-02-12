@@ -41,9 +41,9 @@ void usage(const char *progname) {
 }
 
 int main(int argc, char *argv[]) {
-    std::ostream *t = new nullstream();
-    std::ostream *header = new nullstream();
-    std::ostream *impl = new nullstream();
+    std::unique_ptr<std::ostream> t = std::make_unique<nullstream>();
+    std::unique_ptr<std::ostream> header = std::make_unique<nullstream>();
+    std::unique_ptr<std::ostream> impl = std::make_unique<nullstream>();
 
     while (true) {
         int opt = getopt(argc, argv, "o:i:t:hP");

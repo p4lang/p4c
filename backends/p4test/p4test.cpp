@@ -223,8 +223,10 @@ int main(int argc, char *const argv[]) {
             }
         }
         if (program) {
-            if (!options.dumpJsonFile.empty())
-                JSONGenerator(*openFile(options.dumpJsonFile, true), true).emit(program);
+            if (!options.dumpJsonFile.empty()) {
+                auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+                JSONGenerator(*dumpJsonStream, true).emit(program);
+            }
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
                 JSONGenerator gen1(ss1), gen2(ss2);
