@@ -43,13 +43,16 @@ namespace P4 {
  * installed from source locally. If the compiled binary is moved to another
  * machine, the 'p4includePath' would contain the path on the original machine.
  */
-// TODO: This should be std::filesystem::path.
-const char *p4includePath = CONFIG_PKGDATADIR "/p4include";
-const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
+std::filesystem::path p4includePath = std::filesystem::path(CONFIG_PKGDATADIR) / "p4include";
+std::filesystem::path p4_14includePath = std::filesystem::path(CONFIG_PKGDATADIR) / "p4_14include";
 
 using namespace P4::literals;
 
-bool isSystemFile(cstring file) { return file.startsWith(p4includePath); }
+bool isSystemFile(const std::filesystem::path &file) {
+    return file.generic_string().starts_with(p4includePath.generic_string());
+}
+
+bool isSystemFile(cstring file) { return isSystemFile(std::filesystem::path(file.c_str())); }
 
 void ParserOptions::closeFile(FILE *file) {
     if (file == nullptr) {
@@ -357,14 +360,13 @@ void ParserOptions::setInputFile() {
     }
 }
 
-bool ParserOptions::searchForIncludePath(const char *&includePathOut,
+bool ParserOptions::searchForIncludePath(std::filesystem::path &includePathOut,
                                          const std::vector<cstring> &userSpecifiedPaths,
-                                         const char *exename) {
+                                         const std::filesystem::path &exename) {
     for (const auto &path : userSpecifiedPaths) {
-        auto includePath =
-            std::filesystem::path(exename).parent_path() / std::filesystem::path(path.c_str());
+        auto includePath = exename.parent_path() / std::filesystem::path(path.c_str());
         if (std::filesystem::exists(includePath)) {
-            includePathOut = strdup(std::filesystem::absolute(includePath).c_str());
+            includePathOut = std::filesystem::absolute(includePath);
             return true;
         }
     }
@@ -381,9 +383,9 @@ std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) 
 
     searchForIncludePath(p4_14includePath,
                          {"p4_14include"_cs, "../p4_14include"_cs, "../../p4_14include"_cs},
-                         executablePath.c_str());
+                         executablePath);
     searchForIncludePath(p4includePath, {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs},
-                         executablePath.c_str());
+                         executablePath);
 
     auto *remainingOptions = Util::Options::process(argc, argv);
     if (!validateOptions()) {
@@ -392,6 +394,8 @@ std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) 
     return remainingOptions;
 }
 
+// TODO: Store include paths as std::vector<std::filesystem::path> and convert
+// to a "-I"-separated string only when building the preprocessor command.
 const char *ParserOptions::getIncludePath() const {
     cstring path = cstring::empty;
     // the p4c driver sets environment variables for include
@@ -400,8 +404,8 @@ const char *ParserOptions::getIncludePath() const {
     char *driverP4IncludePath =
         isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
     if (driverP4IncludePath != nullptr) path += (" -I"_cs + cstring(driverP4IncludePath));
-    path += " -I"_cs + (isv1() ? p4_14includePath : p4includePath);
-    if (!isv1()) path += " -I"_cs + p4includePath + "/bmv2"_cs;
+    path += " -I"_cs + (isv1() ? p4_14includePath.string() : p4includePath.string());
+    if (!isv1()) path += " -I"_cs + (p4includePath / "bmv2").string();
     return path.c_str();
 }
 
