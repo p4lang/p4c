@@ -48,6 +48,8 @@ T *COWinfo<T>::getClone() const {
     return clone->checkedTo<T>();
 }
 
+/* COW reference to an element from a container.  Used by COWfieldref specializations
+ * of safe_vector, Vector, IndexedVector, and NameMap */
 template <class T, class C, class U, C T::*field>
 struct COW_element_ref {
     COWinfo<T> *info;
@@ -286,6 +288,66 @@ struct COWfieldref<T, std::variant<TYPES...>, field> {
     // FIXME -- what do we need here?  Do we need a specialization of std::visit?
 };
 #endif
+
+/* specialization for pairs */
+template <class T, typename U, typename V, std::pair<U, V> T::*field>
+struct COWpair_first {
+    COWinfo<T> *info;
+    const U &get() const { return info->get()->*field.first; }
+    U &modify() const { return info->mkClone()->*field.first; }
+    operator const U &() const { return get(); }
+    const U &operator=(const U &val) const {
+        if (!info->isCloned() && get() == val) return val;
+        return modify() = val;
+    }
+    const U &operator=(U &&val) const {
+        if (!info->isCloned() && get() == val) return val;
+        return modify() = std::move(val);
+    }
+    void set(const U &val) const { *this = val; }
+    void visit_children(Visitor &v, const char *name = nullptr) { get().visit_children(v, name); }
+    const U &operator->() const { return get(); }
+};
+
+template <class T, typename U, typename V, std::pair<U, V> T::*field>
+struct COWpair_second {
+    COWinfo<T> *info;
+    const V &get() const { return info->get()->*field.second; }
+    V &modify() const { return info->mkClone()->*field.second; }
+    operator const V &() const { return get(); }
+    const V &operator=(const V &val) const {
+        if (!info->isCloned() && get() == val) return val;
+        return modify() = val;
+    }
+    const V &operator=(V &&val) const {
+        if (!info->isCloned() && get() == val) return val;
+        return modify() = std::move(val);
+    }
+    void set(const V &val) const { *this = val; }
+    void visit_children(Visitor &v, const char *name = nullptr) { get().visit_children(v, name); }
+    const V &operator->() const { return get(); }
+};
+
+template <class T, typename U, typename V, std::pair<U, V> T::*field>
+struct COWfieldref<T, std::pair<U, V>, field> {
+    union {
+        COWinfo<T> *info;
+        COWpair_first<T, U, V, field> first;
+        COWpair_second<T, U, V, field> second;
+    };
+    const std::pair<U, V> &get() const { return info->get()->*field; }
+    std::pair<U, V> &modify() const { return info->mkClone()->*field; }
+    operator const std::pair<U, V> &() const { return get(); }
+    const std::pair<U, V> &operator=(const std::pair<U, V> &val) const {
+        if (!info->isCloned() && get() == val) return val;
+        return modify() = val;
+    }
+    const std::pair<U, V> &operator=(std::pair<U, V> &&val) const {
+        if (!info->isCloned() && get() == val) return val;
+        return modify() = std::move(val);
+    }
+    void set(const std::pair<U, V> &val) const { *this = val; }
+};
 
 }  // namespace P4::IR
 

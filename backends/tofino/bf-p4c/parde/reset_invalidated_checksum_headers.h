@@ -81,7 +81,7 @@ struct CollectInvalidatedHeaders : public Inspector {
         const std::map<const PHV::Field *, std::set<const PHV::Field *>> &pov_bit_to_fields)
         : phv(phv), pov_bit_to_fields(pov_bit_to_fields) {}
 
-    bool preorder(const IR::MAU::Primitive *p) override {
+    bool preorder(const IR::MAU::MauPrimitive *p) override {
         auto table = findContext<IR::MAU::Table>();
         auto gress = table->gress;
 

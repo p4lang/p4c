@@ -54,7 +54,7 @@
  *
  *  In this example, it is possible to carry tmp0/1 on 32, 16 or 8-bit field.
  */
-static void split_shl_instruction(IR::Vector<IR::MAU::Primitive> *split,
+static void split_shl_instruction(IR::Vector<IR::MAU::MauPrimitive> *split,
                                   std::vector<le_bitrange> &slices, const PHV::Field *field,
                                   IR::MAU::Instruction *inst) {
     std::queue<le_bitrange> slices_q;
@@ -194,7 +194,7 @@ static void split_shl_instruction(IR::Vector<IR::MAU::Primitive> *split,
  *
  *  In this example, it is possible to carry tmp0/1 on 32, 16 or 8-bit field.
  */
-static void split_shr_instruction(IR::Vector<IR::MAU::Primitive> *split,
+static void split_shr_instruction(IR::Vector<IR::MAU::MauPrimitive> *split,
                                   std::vector<le_bitrange> &slices, const PHV::Field *field,
                                   IR::MAU::Instruction *inst, bool signed_opcode) {
     std::queue<le_bitrange> slices_q;
@@ -484,7 +484,7 @@ const IR::Node *SplitInstructions::preorder(IR::MAU::Instruction *inst) {
     BUG_CHECK(opcode != "saddu" && opcode != "sadds" && opcode != "ssubu" && opcode != "ssubs",
               "Saturating arithmetic operations cannot be split");
 
-    auto split = new IR::Vector<IR::MAU::Primitive>();
+    auto split = new IR::Vector<IR::MAU::MauPrimitive>();
 
     if (opcode == "shl") {
         split_shl_instruction(split, slices, field, inst);
@@ -579,7 +579,7 @@ const IR::MAU::Instruction *ConstantsToActionData::preorder(IR::MAU::Instruction
 
 const IR::MAU::ActionArg *ConstantsToActionData::preorder(IR::MAU::ActionArg *arg) { return arg; }
 
-const IR::MAU::Primitive *ConstantsToActionData::preorder(IR::MAU::Primitive *prim) {
+const IR::MAU::MauPrimitive *ConstantsToActionData::preorder(IR::MAU::MauPrimitive *prim) {
     prune();
     return prim;
 }
@@ -929,7 +929,7 @@ const IR::Constant *MergeInstructions::preorder(IR::Constant *cst) {
     return cst;
 }
 
-const IR::MAU::Primitive *MergeInstructions::preorder(IR::MAU::Primitive *prim) {
+const IR::MAU::MauPrimitive *MergeInstructions::preorder(IR::MAU::MauPrimitive *prim) {
     prune();
     return prim;
 }

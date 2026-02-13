@@ -779,7 +779,7 @@ class TableSeq {
 #apply
 }
 
-class Primitive : IR::Primitive {
+class MauPrimitive : IR::Primitive {
     bool in_hash = false;
 #emit
     using IR::Primitive::Primitive;
@@ -789,18 +789,18 @@ class Primitive : IR::Primitive {
 }
 
 /// A primitive function, optionally annotated with its front end type.
-class TypedPrimitive : Primitive {
+class TypedPrimitive : MauPrimitive {
 #nodbprint
 #noconstructor
     IR::Type method_type;
 
     std::map<unsigned, cstring> op_names;
     TypedPrimitive(cstring name)
-    : Primitive(name), method_type(nullptr) { }
+    : MauPrimitive(name), method_type(nullptr) { }
     TypedPrimitive(Util::SourceInfo srcInfo, const IR::Type* return_type, const IR::Type* m_type, cstring name)
-    : Primitive(srcInfo, return_type, name), method_type(m_type) { }
+    : MauPrimitive(srcInfo, return_type, name), method_type(m_type) { }
 
-    visit_children { Primitive::visit_children(v, n); }
+    visit_children { MauPrimitive::visit_children(v, n); }
 }
 
 /// A single MAU instruction.  For the most part instructions look exactly like Primitives,
@@ -808,20 +808,20 @@ class TypedPrimitive : Primitive {
 /// destination and two sources as an "add" primitive, with the additional constraints that
 /// the dest and first source are PHV while second source can be PHV, action bus, or constant.
 /// We convert the primitive into an instruction when we check those constraints
-class Instruction : Primitive {
+class Instruction : MauPrimitive {
 #nodbprint
 #emit
-    using Primitive::Primitive;
+    using MauPrimitive::MauPrimitive;
 #end
     // This is a vector, filled after BackendCopyPropagation, indicating which operands
     // have been copy propagated from an earlier instruction.  Copy propagated operands
     // don't have to be checked in order to guarantee parallelism
     bitvec copy_propagated = {};
-    Instruction(const Primitive &p) : Primitive(p) {}
-    Instruction(cstring op, const std::vector<Expression> &args) : Primitive(op) {
+    Instruction(const MauPrimitive &p) : MauPrimitive(p) {}
+    Instruction(cstring op, const std::vector<Expression> &args) : MauPrimitive(op) {
         for (auto a : args) operands.push_back(a); }
     Instruction(Util::SourceInfo si, cstring op, const std::vector<Expression> &args)
-        : Primitive(si, op) { for (auto a : args) operands.push_back(a); }
+        : MauPrimitive(si, op) { for (auto a : args) operands.push_back(a); }
     bool isOutput(int operand_index) const override { return operand_index == 0; }
     virtual Expression getOutput() const { return operands.empty() ? nullptr : operands.at(0); }
     validate { BUG_CHECK(name, "empty name in instruction"); }
@@ -884,7 +884,7 @@ class StatefulCounter : Expression {
 class StatefulCall {
     // This will always be null after InstructionSelection is complete.  Everything
     // currently used for DefUse analysis is saved within the rest of the call
-    optional NullOK Primitive prim = nullptr;
+    optional NullOK MauPrimitive prim = nullptr;
     AttachedMemory  attached_callee;
     optional NullOK Expression index = nullptr;
 }
@@ -898,7 +898,7 @@ abstract VLIWInstruction {
 class Action : VLIWInstruction, IAnnotated {
     optional ID                 name;
     unsigned                    handle = 0;
-    inline Vector<Primitive>    action = {};
+    inline Vector<MauPrimitive> action = {};
     safe_vector<ActionArg>      args = {};
     optional inline Vector<Annotation> annotations;
     bool init_default = false;
