@@ -36,12 +36,12 @@ class ToP4;
 
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
-// TODO: This should be std::filesystem::path.
-extern const char *p4includePath;
-extern const char *p4_14includePath;
+extern std::filesystem::path p4includePath;
+extern std::filesystem::path p4_14includePath;
 
 /// Try to guess whether a file is a "system" file
 bool isSystemFile(cstring filename);
+bool isSystemFile(const std::filesystem::path &filename);
 
 /// Base class for compiler options.
 /// This class contains the options for the front-ends.
@@ -108,9 +108,9 @@ class ParserOptions : public Util::Options {
     bool isAnnotationDisabled(const IR::Annotation *a) const;
     /// Search and set 'includePathOut' to be the first valid path from the
     /// list of possible relative paths.
-    static bool searchForIncludePath(const char *&includePathOut,
+    static bool searchForIncludePath(std::filesystem::path &includePathOut,
                                      const std::vector<cstring> &userSpecifiedPaths,
-                                     const char *exename);
+                                     const std::filesystem::path &exename);
     /// If true do not generate #include statements.
     /// Used for debugging.
     bool noIncludes = false;
