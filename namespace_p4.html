@@ -1892,6 +1892,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isAsync</b> (const <a
 <tr class="memitem:a4e24d7c6f4fcf0134730b92c6b08e7cc" id="r_a4e24d7c6f4fcf0134730b92c6b08e7cc"><td class="memItemLeft" align="right" valign="top"><a id="a4e24d7c6f4fcf0134730b92c6b08e7cc" name="a4e24d7c6f4fcf0134730b92c6b08e7cc"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isReachable</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> stateName, const <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::ParserState &gt; &amp;states)</td></tr>
 <tr class="separator:a4e24d7c6f4fcf0134730b92c6b08e7cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1165b2464bb71e5692ab380cb6957e87" id="r_a1165b2464bb71e5692ab380cb6957e87"><td class="memItemLeft" align="right" valign="top"><a id="a1165b2464bb71e5692ab380cb6957e87" name="a1165b2464bb71e5692ab380cb6957e87"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isSystemFile</b> (const std::filesystem::path &amp;file)</td></tr>
+<tr class="separator:a1165b2464bb71e5692ab380cb6957e87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a218cbddc4da57c7df3b3c98534a760b4" id="r_a218cbddc4da57c7df3b3c98534a760b4"><td class="memItemLeft" align="right" valign="top"><a id="a218cbddc4da57c7df3b3c98534a760b4" name="a218cbddc4da57c7df3b3c98534a760b4"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isSystemFile</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> filename)</td></tr>
 <tr class="memdesc:a218cbddc4da57c7df3b3c98534a760b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Try to guess whether a file is a "system" file. <br /></td></tr>
@@ -2416,11 +2419,11 @@ auto &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>origNameMap</b>
 const char&#160;</td><td class="memItemRight" valign="bottom"><b>outOfBoundsStateName</b> [] = &quot;stateOutOfBound&quot;</td></tr>
 <tr class="memdesc:a132e88585329b8dba66c10b61d5bab01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Name of out of bound state. <br /></td></tr>
 <tr class="separator:a132e88585329b8dba66c10b61d5bab01"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10e3f0c89826da038a6ce45b6959f288" id="r_a10e3f0c89826da038a6ce45b6959f288"><td class="memItemLeft" align="right" valign="top"><a id="a10e3f0c89826da038a6ce45b6959f288" name="a10e3f0c89826da038a6ce45b6959f288"></a>
-const char *&#160;</td><td class="memItemRight" valign="bottom"><b>p4_14includePath</b> = CONFIG_PKGDATADIR &quot;/p4_14include&quot;</td></tr>
-<tr class="separator:a10e3f0c89826da038a6ce45b6959f288"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a563b674ae27014545a4c213790c2fbf6" id="r_a563b674ae27014545a4c213790c2fbf6"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a563b674ae27014545a4c213790c2fbf6">p4includePath</a> = CONFIG_PKGDATADIR &quot;/p4include&quot;</td></tr>
-<tr class="separator:a563b674ae27014545a4c213790c2fbf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1b9b5cccdbc4f8005d40cf66d09107c" id="r_aa1b9b5cccdbc4f8005d40cf66d09107c"><td class="memItemLeft" align="right" valign="top"><a id="aa1b9b5cccdbc4f8005d40cf66d09107c" name="aa1b9b5cccdbc4f8005d40cf66d09107c"></a>
+std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><b>p4_14includePath</b> = std::filesystem::path(CONFIG_PKGDATADIR) / &quot;p4_14include&quot;</td></tr>
+<tr class="separator:aa1b9b5cccdbc4f8005d40cf66d09107c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb68fd52131748ab61dbe357d0a70e6a" id="r_aeb68fd52131748ab61dbe357d0a70e6a"><td class="memItemLeft" align="right" valign="top">std::filesystem::path&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeb68fd52131748ab61dbe357d0a70e6a">p4includePath</a> = std::filesystem::path(CONFIG_PKGDATADIR) / &quot;p4include&quot;</td></tr>
+<tr class="separator:aeb68fd52131748ab61dbe357d0a70e6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a619f0cd778a7ab6b11736a0f77fe492b" id="r_a619f0cd778a7ab6b11736a0f77fe492b"><td class="memItemLeft" align="right" valign="top">const std::set&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a619f0cd778a7ab6b11736a0f77fe492b">reservedWords</a></td></tr>
 <tr class="separator:a619f0cd778a7ab6b11736a0f77fe492b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae92ec2ebd6f82509b81e3da39de744c5" id="r_ae92ec2ebd6f82509b81e3da39de744c5"><td class="memItemLeft" align="right" valign="top"><a id="ae92ec2ebd6f82509b81e3da39de744c5" name="ae92ec2ebd6f82509b81e3da39de744c5"></a>
@@ -4101,14 +4104,14 @@ template&lt;typename... Args&gt; </div>
 
 </div>
 </div>
-<a id="a563b674ae27014545a4c213790c2fbf6" name="a563b674ae27014545a4c213790c2fbf6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a563b674ae27014545a4c213790c2fbf6">&#9670;&#160;</a></span>p4includePath</h2>
+<a id="aeb68fd52131748ab61dbe357d0a70e6a" name="aeb68fd52131748ab61dbe357d0a70e6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb68fd52131748ab61dbe357d0a70e6a">&#9670;&#160;</a></span>p4includePath</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">const char * P4::p4includePath = CONFIG_PKGDATADIR &quot;/p4include&quot;</td>
+          <td class="memname">std::filesystem::path P4::p4includePath = std::filesystem::path(CONFIG_PKGDATADIR) / &quot;p4include&quot;</td>
         </tr>
       </table>
 </div><div class="memdoc">
