@@ -24,6 +24,7 @@ limitations under the License.
 #include <unordered_map>
 #include <utility>
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "error_catalog.h"
 #include "error_message.h"
@@ -81,10 +82,9 @@ void collectSourceInfo(ErrorMessage &msg, T &&arg, Rest &&...rest) {
 }  // namespace detail
 
 // Keeps track of compilation errors.
-// Errors are specified using the error() and warning() methods,
-// that use boost::format format strings, i.e.,
-// %1%, %2%, etc (starting at 1, not at 0).
-// Some compatibility for printf-style arguments is also supported.
+// Errors are specified using the error() and warning() methods.
+// Supported formatting styles are boost-style (%1%, %2%, ...) and
+// printf/absl::StrFormat-style (%s, %d, ...).
 class ErrorReporter {
  protected:
     unsigned int infoCount;
@@ -134,34 +134,21 @@ class ErrorReporter {
     }
     virtual ~ErrorReporter() = default;
 
-    // error message for a bug
-    // NOTE: Assumes bug_helper primarily did formatting + SourceInfo.
-    // If bug_helper did more (stack traces?), that logic is lost here.
+    // Error message for a bug.
     template <typename... Args>
     std::string bug_message(const char *format, Args &&...args) {
-        // 1. Format the message string
-        std::string formatted_msg = P4::createFormattedMessage(format, std::forward<Args>(args)...);
-
-        // 2. Extract SourceInfo (if bug_helper used to do this implicitly)
-        //    We create a dummy ErrorMessage to collect locations.
-        //    This might not be the ideal place, depending on bug_helper's exact role.
-        ErrorMessage dummy_msg;
-        detail::collectSourceInfo(dummy_msg, std::forward<Args>(args)...);
-
-        // 3. Combine? (This part depends on what bug_helper actually returned)
-        //    For now, just return the formatted message, ignoring collected SourceInfo.
-        //    If bug_helper included SourceInfo in its string, adjust accordingly.
-        //    Example: if (!dummy_msg.locations.empty()) {
-        //                 formatted_msg = dummy_msg.locations[0].toDebugString() + ": " +
-        //                 formatted_msg;
-        //              }
-        return formatted_msg;
+        auto argTuple = std::forward_as_tuple(args...);
+        std::string positionStr;
+        std::string tailStr;
+        extractBugSourceInfo(argTuple, positionStr, tailStr);
+        const std::string formattedCore = P4::createFormattedMessageFromTuple(format, argTuple);
+        return absl::StrCat(positionStr, positionStr.empty() ? "" : ": ", formattedCore, "\n",
+                            tailStr);
     }
 
-    // Formats a message string directly. Does not handle SourceInfo.
+    // Formats a message string directly. Does not attach SourceInfo metadata.
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
-        // Directly call the new formatting function
         return P4::createFormattedMessage(format, std::forward<Args>(args)...);
     }
 

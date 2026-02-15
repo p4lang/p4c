@@ -64,9 +64,8 @@ inline const char *cerr_clear_colors() {
 }
 
 /// Base class for all exceptions.
-/// Supports boost::format-style (%N%), std::format-style ({}),
-/// and simple printf-style (%s, %d, etc.) placeholders.
-/// All arguments are formatted using operator<<.
+/// Supports boost-style (%N%) and printf/absl::StrFormat-style (%s, %d, etc.)
+/// placeholders.
 class P4CExceptionBase : public std::exception {
  protected:
     std::string message;
@@ -77,15 +76,15 @@ class P4CExceptionBase : public std::exception {
     explicit P4CExceptionBase(const char *format, Args &&...args) {
         traceCreation();
 
-        // 1. Capture arguments
+        // Capture arguments once and reuse the tuple to avoid double-moving rvalues.
         auto argTuple = std::forward_as_tuple(args...);
-        // 2. Extract SourceInfo details (mimicking bug_helper pre-processing)
+        // Extract SourceInfo details.
         std::string positionStr;
         std::string tailStr;
-        extractBugSourceInfo(argTuple, positionStr, tailStr);  // Call the new helper
-        // 3. Format the core message using the enhanced createFormattedMessage
+        extractBugSourceInfo(argTuple, positionStr, tailStr);
+        // Format the core message.
         std::string formattedCore = P4::createFormattedMessageFromTuple(format, argTuple);
-        // 4. Assemble the final message string (mimicking bug_helper final step)
+        // Assemble the final message string.
         message = absl::StrCat(positionStr, positionStr.empty() ? "" : ": ", formattedCore, "\n",
                                tailStr);
     }
