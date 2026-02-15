@@ -1,8 +1,8 @@
 #ifndef LIB_BOOST_FORMAT_HELPER_H_
 #define LIB_BOOST_FORMAT_HELPER_H_
 
+#include <cctype>
 #include <charconv>
-#include <cstring>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -11,6 +11,7 @@
 #include <system_error>
 #include <tuple>
 #include <type_traits>
+#include <typeinfo>
 #include <utility>
 #include <vector>
 
@@ -23,6 +24,9 @@
 namespace P4 {
 
 namespace detail {
+// Formatter adapter for legacy boost::format placeholders (%N%) and
+// printf/absl::StrFormat placeholders (%s, %d, ...).
+// The style is auto-detected; mixed styles are rejected.
 
 template <typename T>
 constexpr bool is_char_pointer_v = std::is_same_v<T, char *> || std::is_same_v<T, const char *>;
