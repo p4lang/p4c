@@ -80,8 +80,8 @@ class RewriteEgressIntrinsicMetadataHeader : public P4::PassManager {
                         BUG_CHECK(
                             prev &&
                                 (canonicalType->width_bits() + prev_type->width_bits()) % 8 == 0,
-                            "%1% not padded to be byte-aligned in %2%", field->name,
-                            "egress_intrinsic_metadata_t");
+                            "%1% not padded to be byte-aligned in egress_intrinsic_metadata_t",
+                            field->name);
                         new_fields.push_back(prev);
                     }
                     new_fields.push_back(field);
