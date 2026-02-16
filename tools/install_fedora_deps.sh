@@ -82,15 +82,14 @@ make -j$((`nproc`+1))
 make -j$((`nproc`+1)) install
 popd
 
-# Install BMv2 from source
-pushd "${tmp_dir}"
-git clone --depth=1 https://github.com/p4lang/behavioral-model
-cd behavioral-model
-./autogen.sh
-./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger CC="ccache gcc" CXX="ccache g++"
-make -j$((`nproc`+1))
-make -j$((`nproc`+1)) install-strip
-popd
+# Install BMv2 from source via the shared CMake-based helper.
+BMV2_INSTALL_ARGS=(
+  --work-dir "${tmp_dir}"
+)
+if [[ -n "${BMV2_REF:-}" ]]; then
+  BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
+fi
+"${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
 
 git clone https://github.com/libbpf/libbpf/ -b v1.5.0 ${P4C_DIR}/backends/tc/runtime/libbpf
 ${P4C_DIR}/backends/tc/runtime/build-libbpf

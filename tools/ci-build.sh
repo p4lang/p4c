@@ -140,11 +140,19 @@ ccache --set-config max_size=1G
 function build_bmv2() {
 
   P4C_RUNTIME_DEPS="cpp \
-                    ${P4C_RUNTIME_DEPS_BOOST} \
                     libgc1* \
                     libgmp-dev \
                     python3-dev \
-                    libnanomsg-dev"
+                    libnanomsg-dev \
+                    libevent-dev \
+                    libssl-dev \
+                    libpcap-dev \
+                    libboost-thread-dev \
+                    libboost-program-options-dev \
+                    libboost-system-dev \
+                    libboost-filesystem-dev \
+                    libthrift-dev \
+                    thrift-compiler"
 
   # TODO: Remove this check once 18.04 is deprecated.
   if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
@@ -159,23 +167,23 @@ function build_bmv2() {
     P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
     export CC=gcc-9
     export CXX=g++-9
-  elif [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
-   sudo apt-get install -y wget ca-certificates
-    # Add the p4lang opensuse repository.
-    echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-    curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
-    P4C_RUNTIME_DEPS+=" p4lang-bmv2"
   fi
 
   sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
 
-  if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
-    # To run PTF nanomsg tests. Not available on 18.04.
-    uv pip install nnpy==1.4.2
+  # Install BMv2 from source via the shared CMake-based helper.
+  BMV2_INSTALL_ARGS=(
+  )
+  if [[ -n "${BMV2_REF:-}" ]]; then
+    BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
   fi
+  "${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
+
+  uv pip install nnpy==1.4.2
 }
 
-if [[ "${ENABLE_BMV2}" == "ON" ]] ; then
+# The docker image has BMv2 preinstalled.
+if [[ "${ENABLE_BMV2}" == "ON" ]] && [[ "$IN_DOCKER" != "TRUE" ]] ; then
   build_bmv2
 fi
 # ! ------  END BMV2 -----------------------------------------------
@@ -253,6 +261,9 @@ function build_p4tc() {
              python3 \
              python3-pip \
              wget \
+             lsb-release \
+             software-properties-common \
+             gnupg \
              python3-argcomplete"
 
   sudo apt-get install -y --no-install-recommends ${P4TC_DEPS}
