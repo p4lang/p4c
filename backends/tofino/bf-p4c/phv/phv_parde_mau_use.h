@@ -21,10 +21,10 @@
 
 #include "backends/tofino/bf-p4c/common/header_stack.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/ir/thread_visitor.h"
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 
 using namespace P4;

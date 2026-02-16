@@ -15,11 +15,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-
-/* clang-format off */
 #include "input_xbar.h"
+
 #include "backends/tofino/bf-p4c/common/slice.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/logging/resources.h"
 #include "backends/tofino/bf-p4c/mau/asm_hash_output.h"
 #include "backends/tofino/bf-p4c/mau/gateway.h"
@@ -27,18 +25,18 @@
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 #include "lib/algorithm.h"
-#include "lib/bitvec.h"
 #include "lib/bitops.h"
 #include "lib/bitrange.h"
+#include "lib/bitvec.h"
 #include "lib/hex.h"
-#include "lib/range.h"
 #include "lib/log.h"
+#include "lib/range.h"
 #include "lib/safe_vector.h"
 
-/* clang-format on */
-constexpr le_bitrange Tofino::IXBar::SELECT_BIT_RANGE;
+constexpr le_bitrange TofinoIXBarSpec::SELECT_BIT_RANGE;
 // = le_bitrange(RAM_SELECT_BIT_START, METER_ALU_HASH_BITS-1);
 
 // helper functions for logging -- these need to not be in namespace Tofino or they
@@ -154,10 +152,10 @@ safe_vector<IXBar::Use::TotalInfo> IXBar::Use::bits_per_search_bus() const {
     int hash_index = 0;
 
     for (auto &single_match : match_bytes) {
-        int bits_per[IXBar::EXACT_GROUPS] = {0};
-        int bytes_per[IXBar::EXACT_GROUPS] = {0};
-        int group_per[IXBar::EXACT_GROUPS];
-        std::fill(group_per, group_per + IXBar::EXACT_GROUPS, -1);
+        int bits_per[TofinoIXBarSpec::EXACT_GROUPS] = {0};
+        int bytes_per[TofinoIXBarSpec::EXACT_GROUPS] = {0};
+        int group_per[TofinoIXBarSpec::EXACT_GROUPS];
+        std::fill(group_per, group_per + TofinoIXBarSpec::EXACT_GROUPS, -1);
 
         for (auto &b : *single_match) {
             assert(b.loc.group >= 0 && b.loc.group < 8);
@@ -173,7 +171,7 @@ safe_vector<IXBar::Use::TotalInfo> IXBar::Use::bits_per_search_bus() const {
 
         safe_vector<GroupInfo> sizes;
         int search_bus_index = 0;
-        for (int i = 0; i < IXBar::EXACT_GROUPS; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::EXACT_GROUPS; i++) {
             if (bits_per[i] == 0) continue;
             sizes.emplace_back(search_bus_index, group_per[i], bytes_per[i], bits_per[i]);
             search_bus_index++;
@@ -191,7 +189,7 @@ safe_vector<IXBar::Use::TotalInfo> IXBar::Use::bits_per_search_bus() const {
 unsigned IXBar::Use::compute_hash_tables() {
     unsigned hash_table_input = 0;
     for (auto &b : use) {
-        assert(b.loc.group >= 0 && b.loc.group < HASH_TABLES / 2);
+        assert(b.loc.group >= 0 && b.loc.group < TofinoIXBarSpec::HASH_TABLES / 2);
         unsigned grp = 1U << (b.loc.group * 2);
         if (b.loc.byte >= 8) grp <<= 1;
         hash_table_input |= grp;
@@ -282,7 +280,7 @@ IXBar::Use::TotalBytes IXBar::Use::match_hash(safe_vector<int> *hash_groups) con
 }
 
 int IXBar::Use::ternary_align(const Loc &loc) const {
-    size_t byte_offset = loc.group * IXBar::TERNARY_BYTES_PER_GROUP;
+    size_t byte_offset = loc.group * TofinoIXBarSpec::TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP;
     byte_offset += (loc.group + 1) / 2;  // adjust for mid-byte
     byte_offset += loc.byte;
     return byte_offset % 4;
@@ -295,7 +293,9 @@ void IXBar::Use::update_resources(int stage, BFN::Resources::StageResources &sta
     // Used for the upper 12 bits of gateways
     for (auto &bits : bit_use) {
         for (int b = 0; b < bits.width; b++) {
-            int bit = bits.bit + b + IXBar::HASH_INDEX_GROUPS * TableFormat::RAM_GHOST_BITS;
+            int bit =
+                bits.bit + b +
+                TofinoIXBarSpec::TofinoIXBarSpec::HASH_INDEX_GROUPS * TableFormat::RAM_GHOST_BITS;
             auto key = std::make_pair(bit, bits.group);
 
             LOG_FEATURE("resources", 3,
@@ -343,7 +343,6 @@ void IXBar::Use::update_resources(int stage, BFN::Resources::StageResources &sta
     }
 }
 
-constexpr int IXBar::HASH_INDEX_GROUPS;
 constexpr IXBar::HashDistDest_t IXBar::HD_STATS_ADR;
 
 unsigned IXBar::hash_table_inputs(const HashDistUse &hdu) {
@@ -412,7 +411,7 @@ void IXBar::clear() {
     memset(hash_single_bit_inuse, 0, sizeof(hash_single_bit_inuse));
     memset(hash_group_use, 0, sizeof(hash_group_use));
     memset(hash_group_parity_use, 0, sizeof(hash_group_parity_use));
-    for (int i = 0; i < HASH_TABLES; ++i) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; ++i) {
         hash_dist_inuse[i] = bitvec();
         hash_dist_bit_inuse[i] = bitvec();
     }
@@ -443,22 +442,22 @@ void IXBar::update_hash_parity(IXBar::Use &use, int hash_group) {
 bool IXBar::hash_matrix_reqs::fit_requirements(bitvec hash_matrix_in_use) const {
     if (!hash_dist) {
         int free_indexes = 0;
-        for (int i = 0; i < HASH_INDEX_GROUPS; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::TofinoIXBarSpec::HASH_INDEX_GROUPS; i++) {
             bitvec idx_use =
                 hash_matrix_in_use.getslice(i * RAM_LINE_SELECT_BITS, RAM_LINE_SELECT_BITS);
             if (idx_use.empty()) free_indexes++;
         }
         if (free_indexes < index_groups) return false;
 
-        bitvec select_use =
-            hash_matrix_in_use.getslice(RAM_SELECT_BIT_START, IXBar::get_hash_single_bits());
+        bitvec select_use = hash_matrix_in_use.getslice(TofinoIXBarSpec::RAM_SELECT_BIT_START,
+                                                        IXBar::get_hash_single_bits());
         if (IXBar::get_hash_single_bits() - select_use.popcount() < select_bits) return false;
         return true;
     }
     return false;
 }
 
-static int align_flags[IXBar::REPEATING_CONSTRAINT_SECT] = {
+static int align_flags[TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT] = {
     /* these flags are the alignment restrictions that FAIL for each byte in 4 */
     IXBar::Use::Align16hi | IXBar::Use::Align32hi,
     IXBar::Use::Align16lo | IXBar::Use::Align32hi,
@@ -467,19 +466,24 @@ static int align_flags[IXBar::REPEATING_CONSTRAINT_SECT] = {
 };
 
 bitvec IXBar::can_use_from_flags(int flags) const {
-    bitvec rv(0, REPEATING_CONSTRAINT_SECT);
-    for (int i = 0; i < REPEATING_CONSTRAINT_SECT; i++) {
+    bitvec rv(0, TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT);
+    for (int i = 0; i < TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT; i++) {
         if ((flags & align_flags[i]) != 0) rv.clrbit(i);
     }
     return rv;
 }
 
-int inline IXBar::groups(bool ternary) const { return ternary ? TERNARY_GROUPS : EXACT_GROUPS; }
+int inline IXBar::groups(bool ternary) const {
+    return ternary ? TofinoIXBarSpec::TERNARY_GROUPS : TofinoIXBarSpec::EXACT_GROUPS;
+}
 
-int inline IXBar::mid_bytes(bool ternary) const { return ternary ? BYTE_GROUPS : 0; }
+int inline IXBar::mid_bytes(bool ternary) const {
+    return ternary ? TofinoIXBarSpec::BYTE_GROUPS : 0;
+}
 
 int inline IXBar::bytes_per_group(bool ternary) const {
-    return ternary ? TERNARY_BYTES_PER_GROUP : EXACT_BYTES_PER_GROUP;
+    return ternary ? TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP
+                   : TofinoIXBarSpec::EXACT_BYTES_PER_GROUP;
 }
 
 void IXBar::increase_ternary_ixbar_space(int &groups_needed, int &nibbles_needed,
@@ -505,7 +509,8 @@ bool IXBar::calculate_sizes(safe_vector<Use::Byte> &alloc_use, bool ternary,
         if (ternary) {
             groups_needed = 1;
             nibbles_needed = 0;
-            while (groups_needed * TERNARY_BYTES_PER_GROUP + (nibbles_needed + 1) / 2 <
+            while (groups_needed * TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP +
+                       (nibbles_needed + 1) / 2 <
                    total_bytes_needed) {
                 increase_ternary_ixbar_space(groups_needed, nibbles_needed, requires_versioning);
             }
@@ -537,20 +542,22 @@ bool IXBar::calculate_sizes(safe_vector<Use::Byte> &alloc_use, bool ternary,
  */
 void IXBar::calculate_available_hash_dist_groups(safe_vector<grp_use> &order,
                                                  hash_matrix_reqs &hm_reqs) {
-    for (int i = 0; i < HASH_DIST_UNITS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_DIST_UNITS; i++) {
         if (hash_dist_groups[i] == -1) continue;
         auto hash_tables = hash_group_use[hash_dist_groups[i]];
         bitvec slices_used;
         for (auto &grp : order) {
             for (int i = 0; i < 2; i++) {
                 if ((hash_tables & (1U << (2 * grp.group + i))) == 0U) continue;
-                for (int hash_slice = 0; hash_slice < HASH_DIST_SLICES; hash_slice++) {
+                for (int hash_slice = 0; hash_slice < TofinoIXBarSpec::HASH_DIST_SLICES;
+                     hash_slice++) {
                     if (hash_dist_inuse[2 * grp.group + i].getbit(hash_slice))
                         slices_used.setbit(hash_slice);
                 }
             }
         }
-        if (HASH_DIST_SLICES - slices_used.popcount() >= hm_reqs.index_groups) continue;
+        if (TofinoIXBarSpec::HASH_DIST_SLICES - slices_used.popcount() >= hm_reqs.index_groups)
+            continue;
         for (auto bit : bitvec(hash_tables)) {
             order[bit / 2].hash_open[bit % 2] = false;
         }
@@ -597,7 +604,7 @@ void IXBar::calculate_available_groups(safe_vector<grp_use> &order, hash_matrix_
             for (int i = 0; i < 2; i++) {
                 int ways_available = 0;
                 int select_bits_available = 0;
-                for (int hg = 0; hg < HASH_INDEX_GROUPS; hg++) {
+                for (int hg = 0; hg < TofinoIXBarSpec::HASH_INDEX_GROUPS; hg++) {
                     if (!(hash_index_inuse[hg] & (1 << (2 * grp.group + i)))) ways_available++;
                 }
                 for (int sb = 0; sb < IXBar::get_hash_single_bits(); sb++) {
@@ -622,7 +629,7 @@ void IXBar::calculate_available_groups(safe_vector<grp_use> &order, hash_matrix_
 
 /** Determine if a group is either for hash distribution or match only */
 IXBar::grp_use::type_t IXBar::is_group_for_hash_dist(int hash_table) {
-    for (int i = 0; i < HASH_GROUPS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_GROUPS; i++) {
         bool hash_dist = false;
         if (i == hash_dist_groups[0] || i == hash_dist_groups[1]) {
             hash_dist = true;
@@ -686,7 +693,7 @@ void IXBar::calculate_found(safe_vector<IXBar::Use::Byte *> &unalloced, safe_vec
 
     for (auto &need : unalloced) {
         for (auto &p : Values(fields.equal_range(need->container))) {
-            if (ternary && p.byte == TERNARY_BYTES_PER_GROUP) {
+            if (ternary && p.byte == TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP) {
                 if (need->is_range()) continue;
                 if (byte_group_use[p.group / 2].second == need->lo) {
                     mid_byte_order[p.group / 2].found[0] = true;
@@ -728,7 +735,9 @@ void IXBar::calculate_free(safe_vector<grp_use> &order, safe_vector<mid_byte_use
             for (int byte = 0; byte < bytes_per_group(ternary) && whole_section_free; byte++) {
                 if (!(byte_mask & (1U << byte))) continue;
                 Loc loc(grp, byte);
-                order[grp]._free[loc.getOrd(ternary) % REPEATING_CONSTRAINT_SECT][byte] = true;
+                order[grp]
+                    ._free[loc.getOrd(ternary) % TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT][byte] =
+                    true;
             }
         }
         return;
@@ -739,14 +748,16 @@ void IXBar::calculate_free(safe_vector<grp_use> &order, safe_vector<mid_byte_use
             Loc loc(grp, byte);
             if (!ternary && violates_hash_constraints(order, hash_dist, grp, byte)) continue;
             if (!use[grp][byte].first)
-                order[grp]._free[loc.getOrd(ternary) % REPEATING_CONSTRAINT_SECT][byte] = true;
+                order[grp]
+                    ._free[loc.getOrd(ternary) % TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT][byte] =
+                    true;
         }
     }
 
     for (int mid_byte = 0; mid_byte < mid_bytes(ternary); mid_byte++) {
-        Loc loc(mid_byte * 2, TERNARY_BYTES_PER_GROUP);
+        Loc loc(mid_byte * 2, TofinoIXBarSpec::TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP);
         if (!byte_group_use[mid_byte].first) {
-            int index = loc.getOrd(ternary) % REPEATING_CONSTRAINT_SECT;
+            int index = loc.getOrd(ternary) % TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT;
             mid_byte_order[mid_byte]._free[index][0] = true;
         }
     }
@@ -762,7 +773,8 @@ void IXBar::found_bytes(grp_use *grp, safe_vector<IXBar::Use::Byte *> &unalloced
     auto &fields = this->fields(ternary);
     int found_bytes = grp->found.popcount();
     int ixbar_bytes_placed = 0;
-    int total_match_bytes = ternary ? TERNARY_BYTES_PER_GROUP : EXACT_BYTES_PER_GROUP;
+    int total_match_bytes = ternary ? TofinoIXBarSpec::TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP
+                                    : TofinoIXBarSpec::EXACT_BYTES_PER_GROUP;
     for (size_t i = 0; i < unalloced.size(); i++) {
         auto &need = *(unalloced[i]);
         if (found_bytes == 0) break;
@@ -772,7 +784,8 @@ void IXBar::found_bytes(grp_use *grp, safe_vector<IXBar::Use::Byte *> &unalloced
         if (need.is_range() && grp->range_set() && need.range_index != grp->range_index) continue;
 
         for (auto &p : Values(fields.equal_range(need.container))) {
-            if (ternary && p.byte == TERNARY_BYTES_PER_GROUP) continue;
+            if (ternary && p.byte == TofinoIXBarSpec::TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP)
+                continue;
 
             if ((grp->group == p.group) && (use[p.group][p.byte].second == need.lo)) {
                 if (!grp->found.getbit(p.byte)) continue;
@@ -808,7 +821,8 @@ void IXBar::found_mid_bytes(mid_byte_use *mb_grp, safe_vector<IXBar::Use::Byte *
         if (found_bytes == 0) break;
         if (match_bytes_placed >= total_match_bytes) break;
         for (auto &p : Values(fields.equal_range(need.container))) {
-            if (!(ternary && p.byte == TERNARY_BYTES_PER_GROUP)) continue;
+            if (!(ternary && p.byte == TofinoIXBarSpec::TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP))
+                continue;
 
             if (only_alloc_nibble && !need.only_one_nibble_in_use()) continue;
 
@@ -834,9 +848,10 @@ void IXBar::free_bytes(grp_use *grp, safe_vector<IXBar::Use::Byte *> &unalloced,
     if (!grp) return;
     int ixbar_bytes_placed = 0;
     int free_bytes = grp->max_free().popcount();
-    int total_match_bytes = ternary ? TERNARY_BYTES_PER_GROUP : EXACT_BYTES_PER_GROUP;
-    int ternary_offset = (grp->group / 2) * TERNARY_BYTES_PER_BIG_GROUP;
-    ternary_offset += (grp->group % 2) * (TERNARY_BYTES_PER_GROUP + 1);
+    int total_match_bytes =
+        ternary ? TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP : TofinoIXBarSpec::EXACT_BYTES_PER_GROUP;
+    int ternary_offset = (grp->group / 2) * TofinoIXBarSpec::TERNARY_BYTES_PER_BIG_GROUP;
+    ternary_offset += (grp->group % 2) * (TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP + 1);
     int align_offset = ternary ? ternary_offset : 0;
     int align = align_offset & 3;
 
@@ -884,7 +899,8 @@ void IXBar::free_mid_bytes(mid_byte_use *mb_grp, safe_vector<IXBar::Use::Byte *>
 
     int ixbar_bytes_placed = 0;
     int free_bytes = 1;
-    int align_offset = (mb_grp->group * TERNARY_BYTES_PER_BIG_GROUP) + TERNARY_BYTES_PER_GROUP;
+    int align_offset = (mb_grp->group * TofinoIXBarSpec::TERNARY_BYTES_PER_BIG_GROUP) +
+                       TofinoIXBarSpec::TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP;
     int align = align_offset & 3;
     int total_match_bytes = 1;
 
@@ -1055,7 +1071,7 @@ void IXBar::allocate_mid_bytes(safe_vector<IXBar::Use::Byte *> &unalloced,
             // for gathering information about constraints
             if (only_alloc_nibble && !byte->only_one_nibble_in_use()) continue;
             bitvec key_bv = can_use_from_flags(byte->flags);
-            int key = key_bv.getrange(0, REPEATING_CONSTRAINT_SECT);
+            int key = key_bv.getrange(0, TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT);
             if (constraints_to_reqs.count(key) == 0)
                 constraints_to_reqs[key] = 1;
             else
@@ -1276,7 +1292,7 @@ void IXBar::allocate_groups(safe_vector<IXBar::Use::Byte *> &unalloced,
 
         for (auto byte : unalloced) {
             bitvec key_bv = can_use_from_flags(byte->flags);
-            int key = key_bv.getrange(0, REPEATING_CONSTRAINT_SECT);
+            int key = key_bv.getrange(0, TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT);
             if (constraints_to_reqs.count(key) == 0)
                 constraints_to_reqs[key] = 1;
             else
@@ -1419,7 +1435,7 @@ void IXBar::layout_option_calculation(const LayoutOption *layout_option, size_t 
 
 unsigned IXBar::index_groups_used(bitvec bv) const {
     unsigned rv = 0;
-    for (int i = 0; i < HASH_INDEX_GROUPS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_INDEX_GROUPS; i++) {
         if (bv.getrange(i * RAM_LINE_SELECT_BITS, RAM_LINE_SELECT_BITS)) rv |= (1 << i);
     }
     return rv;
@@ -1427,8 +1443,8 @@ unsigned IXBar::index_groups_used(bitvec bv) const {
 
 unsigned IXBar::select_bits_used(bitvec bv) const {
     unsigned rv = 0;
-    for (int i = RAM_SELECT_BIT_START; i < get_hash_matrix_size(); i++) {
-        if (bv.getbit(i)) rv |= (1 << (i - RAM_SELECT_BIT_START));
+    for (int i = TofinoIXBarSpec::RAM_SELECT_BIT_START; i < get_hash_matrix_size(); i++) {
+        if (bv.getbit(i)) rv |= (1 << (i - TofinoIXBarSpec::RAM_SELECT_BIT_START));
     }
     return rv;
 }
@@ -1446,7 +1462,8 @@ IXBar::hash_matrix_reqs IXBar::match_hash_reqs(const LayoutOption *lo, size_t st
         bits_required += ceil_log2(lo->way_sizes[index]);
     }
     bits_required = std::min(bits_required, IXBar::get_hash_single_bits());
-    int groups_required = std::min(last - start, static_cast<size_t>(IXBar::HASH_INDEX_GROUPS));
+    int groups_required =
+        std::min(last - start, static_cast<size_t>(TofinoIXBarSpec::HASH_INDEX_GROUPS));
     return hash_matrix_reqs(groups_required, bits_required, false);
 }
 
@@ -1557,7 +1574,7 @@ bool IXBar::allocMatch(bool ternary, const IR::MAU::Table *tbl, const PhvInfo &p
 unsigned IXBar::find_balanced_group(Use &alloc, int way_size) {
     std::map<unsigned, unsigned> sliceDepths;
     for (unsigned i = 0; i < alloc.way_use.size(); ++i) {
-        int slice_group = INDEX_RANGE_SUBGROUP(alloc.way_use[i].index);
+        int slice_group = TofinoIXBarSpec::INDEX_RANGE_SUBGROUP(alloc.way_use[i].index);
         int slice_ways = (1U << bitvec(alloc.way_use[i].select_mask).popcount());
         sliceDepths[slice_group] += slice_ways;
     }
@@ -1568,7 +1585,7 @@ unsigned IXBar::find_balanced_group(Use &alloc, int way_size) {
         bitvec slice_way_mask(alloc.way_use[i].select_mask);
         int slice_way_bits = slice_way_mask.popcount();
         if (way_bits > slice_way_bits) continue;
-        int slice_group = INDEX_RANGE_SUBGROUP(alloc.way_use[i].index);
+        int slice_group = TofinoIXBarSpec::INDEX_RANGE_SUBGROUP(alloc.way_use[i].index);
         unsigned sliceDepth = way_size + sliceDepths[slice_group];
         if (sliceDepth < minWayDepth) {
             minWayDepth = sliceDepth;
@@ -1600,7 +1617,7 @@ unsigned IXBar::find_balanced_group(Use &alloc, int way_size) {
 int IXBar::getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_reqs) {
     // One can assume that the find legal bytes will have legal space within the hash function
     // If not the higher functions will find space
-    for (int i = 0; i < HASH_GROUPS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_GROUPS; i++) {
         if (hash_group_use[i] == hash_table_input) {
             return i;
         }
@@ -1612,24 +1629,24 @@ int IXBar::getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_re
         bitvec ht_usage;
         // Gather all the hash matrix currently in use, to verify that there is space for the
         // other bits to possibly share.
-        for (auto idx : Range(0, HASH_INDEX_GROUPS - 1)) {
+        for (auto idx : Range(0, TofinoIXBarSpec::HASH_INDEX_GROUPS - 1)) {
             if ((hash_index_inuse[idx] & hash_table_input) != 0)
                 ht_usage.setrange(idx * RAM_LINE_SELECT_BITS, RAM_LINE_SELECT_BITS);
         }
 
         for (auto single_bit : Range(0, IXBar::get_hash_single_bits() - 1)) {
             if ((hash_single_bit_inuse[single_bit] & hash_table_input) != 0)
-                ht_usage.setbit(single_bit + RAM_SELECT_BIT_START);
+                ht_usage.setbit(single_bit + TofinoIXBarSpec::RAM_SELECT_BIT_START);
         }
 
         for (auto ht : bitvec(hash_table_input)) ht_usage |= hash_dist_bit_inuse[ht];
         LOG6("\t\tht_usage 0x" << ht_usage << " 0x" << hex(hash_table_input));
 
         bitvec hash_table_input_bv(hash_table_input);
-        bitvec hash_matrix_usage_hf[HASH_GROUPS];
-        bitvec hash_matrix_usage_collision[HASH_GROUPS];
+        bitvec hash_matrix_usage_hf[TofinoIXBarSpec::HASH_GROUPS];
+        bitvec hash_matrix_usage_collision[TofinoIXBarSpec::HASH_GROUPS];
 
-        for (int i = 0; i < HASH_GROUPS; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::HASH_GROUPS; i++) {
             bool is_hash_dist_group = hash_dist_groups[0] == i || hash_dist_groups[1] == i;
             if (is_hash_dist_group) continue;
             bitvec max_usage(0, get_hash_matrix_size());
@@ -1641,7 +1658,7 @@ int IXBar::getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_re
             unsigned collision_ht = hash_table_input & ~hash_group_use[i];
             LOG6("\t\thash group " << i << " 0x" << hex(hash_group_use[i]));
             LOG6("\t\twith_ht 0x" << hex(hf_ht) << " without_ht 0x" << hex(collision_ht));
-            for (auto idx : Range(0, HASH_INDEX_GROUPS - 1)) {
+            for (auto idx : Range(0, TofinoIXBarSpec::HASH_INDEX_GROUPS - 1)) {
                 if ((hash_index_inuse[idx] & hf_ht) != 0)
                     curr_usage_hf.setrange(idx * RAM_LINE_SELECT_BITS, RAM_LINE_SELECT_BITS);
                 if ((hash_index_inuse[idx] & collision_ht) != 0)
@@ -1649,9 +1666,9 @@ int IXBar::getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_re
             }
             for (auto single_bit : Range(0, IXBar::get_hash_single_bits() - 1)) {
                 if ((hash_single_bit_inuse[single_bit] & hf_ht) != 0)
-                    curr_usage_hf.setbit(single_bit + RAM_SELECT_BIT_START);
+                    curr_usage_hf.setbit(single_bit + TofinoIXBarSpec::RAM_SELECT_BIT_START);
                 if ((hash_single_bit_inuse[single_bit] & collision_ht) != 0)
-                    curr_usage_collision.setbit(single_bit + RAM_SELECT_BIT_START);
+                    curr_usage_collision.setbit(single_bit + TofinoIXBarSpec::RAM_SELECT_BIT_START);
             }
             hash_matrix_usage_hf[i] = curr_usage_hf;
             hash_matrix_usage_collision[i] = curr_usage_collision;
@@ -1662,7 +1679,7 @@ int IXBar::getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_re
 
         // Only pick a hash function that has the legal amount of space, as well as a hash
         // function that is already in use.
-        for (int i = 0; i < HASH_GROUPS; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::HASH_GROUPS; i++) {
             if (hash_group_use[i] == 0) continue;
             bool is_hash_dist_group = hash_dist_groups[0] == i || hash_dist_groups[1] == i;
             if (is_hash_dist_group != hm_reqs->hash_dist) continue;
@@ -1675,13 +1692,13 @@ int IXBar::getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_re
         // if an allocation that shares space with another hash function cannot share that
         // hash function, it's better if the allocation is not on those ixbar bytes.  The
         // second try will guarantee that the sharing is minimized
-        for (int i = 0; i < HASH_GROUPS; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::HASH_GROUPS; i++) {
             if (hash_group_use[i] == 0) continue;
             if ((hash_group_use[i] & hash_table_input) != 0U) return -1;
         }
     }
 
-    for (int i = 0; i < HASH_GROUPS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_GROUPS; i++) {
         if (hash_group_use[i] == 0) {
             return i;
         }
@@ -1696,11 +1713,12 @@ int IXBar::getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_re
  * used, what hash function (8x52 bit hashes) are available.  At most two options are
  * possible for hash distribution.
  */
-void IXBar::getHashDistGroups(unsigned hash_table_input, int hash_group_opt[HASH_DIST_UNITS]) {
+void IXBar::getHashDistGroups(unsigned hash_table_input,
+                              int hash_group_opt[TofinoIXBarSpec::HASH_DIST_UNITS]) {
     std::set<int> groups_with_overlap;
     // If both groups overlap with the given requirement, then this will lead to hash collisions
     // and will not work
-    for (int i = 0; i < HASH_DIST_UNITS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_DIST_UNITS; i++) {
         if (hash_dist_groups[i] >= 0 &&
             (hash_table_input & hash_group_use[hash_dist_groups[i]]) != 0U)
             groups_with_overlap.insert(i);
@@ -1711,7 +1729,7 @@ void IXBar::getHashDistGroups(unsigned hash_table_input, int hash_group_opt[HASH
     if (groups_with_overlap.size() > 1) {
         return;
     } else if (groups_with_overlap.size() == 1) {
-        for (int i = 0; i < HASH_DIST_UNITS; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::HASH_DIST_UNITS; i++) {
             if (groups_with_overlap.count(i) > 0)
                 hash_group_opt[i] = hash_dist_groups[i];
             else
@@ -1722,7 +1740,7 @@ void IXBar::getHashDistGroups(unsigned hash_table_input, int hash_group_opt[HASH
 
     // A new group might be required, so create at most one new group
     bool first_unused = false;
-    for (int i = 0; i < HASH_DIST_UNITS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_DIST_UNITS; i++) {
         if (hash_dist_groups[i] == -1) {
             if (!first_unused) {
                 first_unused = true;
@@ -1816,7 +1834,7 @@ bool IXBar::allocProxyHashKey(const IR::MAU::Table *tbl, const PhvInfo &phv, con
 
     // Determining what bits are available are within the hash matrix
     bitvec unavailable_bits;
-    for (int index = 0; index < HASH_INDEX_GROUPS; index++) {
+    for (int index = 0; index < TofinoIXBarSpec::HASH_INDEX_GROUPS; index++) {
         for (auto ht : bitvec(hash_table_input)) {
             if ((1 << ht) & hash_index_inuse[index]) {
                 unavailable_bits.setrange(index * RAM_LINE_SELECT_BITS, RAM_LINE_SELECT_BITS);
@@ -1826,7 +1844,7 @@ bool IXBar::allocProxyHashKey(const IR::MAU::Table *tbl, const PhvInfo &phv, con
     for (int bit = 0; bit < IXBar::get_hash_single_bits(); bit++) {
         for (auto ht : bitvec(hash_table_input)) {
             if ((1 << ht) & hash_single_bit_inuse[bit]) {
-                unavailable_bits.setbit(bit + RAM_SELECT_BIT_START);
+                unavailable_bits.setbit(bit + TofinoIXBarSpec::RAM_SELECT_BIT_START);
             }
         }
     }
@@ -1986,7 +2004,7 @@ bool IXBar::allocAllHashWays(bool ternary, const IR::MAU::Table *tbl, Use &alloc
                          << hex(hf_hash_table_input));
     int free_groups = 0;
     int group;
-    for (group = 0; group < HASH_INDEX_GROUPS; group++) {
+    for (group = 0; group < TofinoIXBarSpec::HASH_INDEX_GROUPS; group++) {
         if (!(hash_index_inuse[group] & hf_hash_table_input)) {
             free_groups++;
         }
@@ -2039,8 +2057,8 @@ bool IXBar::allocAllHashWays(bool ternary, const IR::MAU::Table *tbl, Use &alloc
 
     std::map<unsigned, std::set<std::pair<unsigned, unsigned>>> requiredSeedCombinations;
     for (auto way : alloc.way_use)
-        requiredSeedCombinations[way.source].emplace(INDEX_RANGE_SUBGROUP(way.index),
-                                                     way.select_mask);
+        requiredSeedCombinations[way.source].emplace(
+            TofinoIXBarSpec::INDEX_RANGE_SUBGROUP(way.index), way.select_mask);
 
     for (auto kv : requiredSeedCombinations) {
         unsigned group = kv.first;
@@ -2081,12 +2099,12 @@ bool IXBar::allocHashWay(const IR::MAU::Table *tbl, const LayoutOption *layout_o
     bool shared = false;
     LOG3("\tNeed " << way_bits << " mask bits for way " << alloc.way_use.size() << " in table "
                    << tbl->name);
-    for (group = 0; group < HASH_INDEX_GROUPS; group++) {
+    for (group = 0; group < TofinoIXBarSpec::HASH_INDEX_GROUPS; group++) {
         if (!(hash_index_inuse[group] & hf_hash_table_input)) {
             break;
         }
     }
-    if (group >= HASH_INDEX_GROUPS) {
+    if (group >= TofinoIXBarSpec::HASH_INDEX_GROUPS) {
         if (alloc.way_use.empty()) {
             group = 0;  // share with another table?
             BUG("Group was allocated with no available space to push hash ways");
@@ -2105,7 +2123,8 @@ bool IXBar::allocHashWay(const IR::MAU::Table *tbl, const LayoutOption *layout_o
         }
     }
     for (auto &way_use : alloc.way_use) {
-        BUG_CHECK(way_use.select.lo == RAM_SELECT_BIT_START, "invalid select range for tofino");
+        BUG_CHECK(way_use.select.lo == TofinoIXBarSpec::RAM_SELECT_BIT_START,
+                  "invalid select range for tofino");
     }
 
     if (way_bits == 0) {
@@ -2142,7 +2161,8 @@ bool IXBar::allocHashWay(const IR::MAU::Table *tbl, const LayoutOption *layout_o
 
     slice_to_select_bits[group] |= bitvec(way_mask);
 
-    alloc.way_use.emplace_back(hash_group, INDEX_BIT_RANGE(group), SELECT_BIT_RANGE, way_mask);
+    alloc.way_use.emplace_back(hash_group, TofinoIXBarSpec::INDEX_BIT_RANGE(group),
+                               TofinoIXBarSpec::SELECT_BIT_RANGE, way_mask);
     LOG3("\tAllocation of way " << hash_group << " " << group << " 0x" << hex(way_mask));
     hash_index_inuse[group] |= hf_hash_table_input;
     for (auto bit : bitvec(way_mask)) {
@@ -2219,7 +2239,7 @@ bool IXBar::allocPartition(const IR::MAU::Table *tbl, const PhvInfo &phv, Use &m
     unsigned hf_hash_table_input = local_hash_table_input | hash_group_use[hash_group];
 
     int group = -1;
-    for (int i = 0; i < HASH_INDEX_GROUPS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_INDEX_GROUPS; i++) {
         if ((hash_index_inuse[i] & hf_hash_table_input) == 0) {
             group = i;
             break;
@@ -2253,8 +2273,8 @@ bool IXBar::allocPartition(const IR::MAU::Table *tbl, const PhvInfo &phv, Use &m
     match_alloc.hash_table_inputs[hash_group] = local_hash_table_input;
     hash_group_use[hash_group] |= local_hash_table_input;
     update_hash_parity(match_alloc, hash_group);
-    match_alloc.way_use.emplace_back(hash_group, INDEX_BIT_RANGE(group), SELECT_BIT_RANGE,
-                                     way_mask);
+    match_alloc.way_use.emplace_back(hash_group, TofinoIXBarSpec::INDEX_BIT_RANGE(group),
+                                     TofinoIXBarSpec::SELECT_BIT_RANGE, way_mask);
     hash_index_inuse[group] |= hf_hash_table_input;
     for (auto bit : bitvec(way_mask)) {
         hash_single_bit_inuse[bit] |= hf_hash_table_input;
@@ -2352,7 +2372,7 @@ bool IXBar::allocGateway(const IR::MAU::Table *tbl, const PhvInfo &phv, Use &all
     if (collect->bytes > 0) {
         alloc.gw_search_bus = true;
         alloc.gw_search_bus_bytes = collect->bytes;
-        if (xor_required) alloc.gw_search_bus_bytes += GATEWAY_SEARCH_BYTES;
+        if (xor_required) alloc.gw_search_bus_bytes += TofinoIXBarSpec::GATEWAY_SEARCH_BYTES;
     }
 
     if (collect->bits > 0) {
@@ -2433,11 +2453,11 @@ int IXBar::max_bit_to_byte(bitvec bit_mask) {
 
 int IXBar::max_index_group(int max_bit) {
     int total_max = (max_bit + TableFormat::RAM_GHOST_BITS - 1) / TableFormat::RAM_GHOST_BITS;
-    return std::min(total_max, HASH_INDEX_GROUPS);
+    return std::min(total_max, TofinoIXBarSpec::HASH_INDEX_GROUPS);
 }
 
 int IXBar::max_index_single_bit(int max_bit) {
-    int max_single_bit = max_bit - TableFormat::RAM_GHOST_BITS * HASH_INDEX_GROUPS;
+    int max_single_bit = max_bit - TableFormat::RAM_GHOST_BITS * TofinoIXBarSpec::HASH_INDEX_GROUPS;
     max_single_bit = std::max(max_single_bit, 0);
     BUG_CHECK(max_single_bit <= IXBar::get_hash_single_bits(),
               "Requesting a bit beyond the size of the Galois matrix");
@@ -2445,7 +2465,7 @@ int IXBar::max_index_single_bit(int max_bit) {
 }
 
 bool IXBar::hash_use_free(int max_group, int max_single_bit, unsigned hash_table_input) {
-    for (int i = 0; i < HASH_TABLES; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; i++) {
         if (((1 << i) & hash_table_input) == 0) continue;
         for (int j = 0; j < max_group; j++) {
             if ((hash_index_inuse[j] & (1 << i)) != 0) return false;
@@ -2459,7 +2479,7 @@ bool IXBar::hash_use_free(int max_group, int max_single_bit, unsigned hash_table
 
 void IXBar::write_hash_use(int max_group, int max_single_bit, unsigned hash_table_input,
                            cstring name) {
-    for (int i = 0; i < HASH_TABLES; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; i++) {
         if (((1 << i) & hash_table_input) == 0) continue;
         for (int j = 0; j < max_group; j++) {
             hash_index_use[i][j] = name;
@@ -2541,8 +2561,9 @@ bool IXBar::allocSelector(const IR::MAU::Selector *as, const IR::MAU::Table *tbl
     mah.allocated = true;
     mah.group = hash_group;
     mah.algorithm = as->algorithm;
-    int mode_width_bits = as->mode == IR::MAU::SelectorMode::RESILIENT ? RESILIENT_MODE_HASH_BITS
-                                                                       : FAIR_MODE_HASH_BITS;
+    int mode_width_bits = as->mode == IR::MAU::SelectorMode::RESILIENT
+                              ? TofinoIXBarSpec::RESILIENT_MODE_HASH_BITS
+                              : TofinoIXBarSpec::FAIR_MODE_HASH_BITS;
     if (mah.algorithm.size_from_algorithm()) {
         if (mode_width_bits > mah.algorithm.size) {
             // FIXME: Debatably be moved to an error, but have to wait on a p4-tests update
@@ -2687,11 +2708,12 @@ bool IXBar::allocMeter(const IR::MAU::Meter *mtr, const IR::MAU::Table *tbl, con
                       return a_fi < b_fi;
                   });
         // Byte mask for a meter is 4 bytes
-        byte_mask = ((1U << LPF_INPUT_BYTES) - 1);
-        if (Device::currentDevice() == Device::TOFINO) byte_mask <<= TOFINO_METER_ALU_BYTE_OFFSET;
+        byte_mask = ((1U << TofinoIXBarSpec::LPF_INPUT_BYTES) - 1);
+        if (Device::currentDevice() == Device::TOFINO)
+            byte_mask <<= TofinoIXBarSpec::TOFINO_METER_ALU_BYTE_OFFSET;
         hm_reqs.max_search_buses = 1;
     } else {
-        hm_reqs.index_groups = HASH_INDEX_GROUPS;
+        hm_reqs.index_groups = TofinoIXBarSpec::HASH_INDEX_GROUPS;
     }
 
     LOG3("Alloc meter " << mtr->name << " on_search_bus " << on_search_bus << " with "
@@ -2821,8 +2843,9 @@ bool IXBar::setup_stateful_search_bus(const IR::MAU::StatefulAlu *salu, Use &all
         byte_offset += width;
     }
 
-    const int ixbar_initial_position =
-        Device::currentDevice() == Device::TOFINO ? TOFINO_METER_ALU_BYTE_OFFSET : 0;
+    const int ixbar_initial_position = Device::currentDevice() == Device::TOFINO
+                                           ? TofinoIXBarSpec::TOFINO_METER_ALU_BYTE_OFFSET
+                                           : 0;
     for (auto source : sources.phv_sources) {
         for (auto &range : Keys(source.second)) {
             unsigned source_byte_mask = (1 << ((range.size() + 7) / 8)) - 1;
@@ -2936,18 +2959,18 @@ bool IXBar::setup_stateful_hash_bus(const PhvInfo &, const IR::MAU::StatefulAlu 
             // Parity Enabled        - Bits Avail [47..0]
             auto parity_status = hash_group_parity_use[hash_group];
             if (parity_status == PARITY_NONE) {
-                if (end_bit >= METER_ALU_HASH_BITS) return false;
-                if (end_bit >= METER_ALU_HASH_PARITY_BYTE_START) {
+                if (end_bit >= TofinoIXBarSpec::METER_ALU_HASH_BITS) return false;
+                if (end_bit >= TofinoIXBarSpec::METER_ALU_HASH_PARITY_BYTE_START) {
                     // Explicitly disable parity on the hash group as we do not
                     // want any other shared resource to enable it
                     hash_group_parity_use[hash_group] = PARITY_DISABLED;
                 }
             } else if (parity_status == PARITY_ENABLED) {
-                if (end_bit >= METER_ALU_HASH_PARITY_BYTE_START) {
+                if (end_bit >= TofinoIXBarSpec::METER_ALU_HASH_PARITY_BYTE_START) {
                     return false;
                 }
             } else if (parity_status == PARITY_DISABLED) {
-                if (end_bit >= METER_ALU_HASH_BITS) return false;
+                if (end_bit >= TofinoIXBarSpec::METER_ALU_HASH_BITS) return false;
             }
             phv_src_inuse[alu_slot_index] = true;
             mah.computed_expressions[start_bit] = slice;
@@ -3143,7 +3166,7 @@ bool IXBar::isHashDistAddress(HashDistDest_t dest) const {
  * inputs to hash distribution)
  */
 void IXBar::determineHashDistInUse(int hash_group, bitvec &units_in_use, bitvec &hash_bits_in_use) {
-    for (int i = 0; i < HASH_TABLES; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; i++) {
         if (((1 << i) & hash_group_use[hash_group]) == 0) continue;
         units_in_use |= hash_dist_inuse[i];
         hash_bits_in_use |= hash_dist_bit_inuse[i];
@@ -3166,18 +3189,19 @@ bool IXBar::allocHashDistSection(bitvec post_expand_bits, bitvec possible_shifts
     determineHashDistInUse(hash_group, units_in_use, hash_bits_in_use);
 
     bool found = false;
-    for (int i = 0; i < HASH_DIST_SLICES; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_DIST_SLICES; i++) {
         if (units_in_use.getbit(i)) continue;
         unit_allocated = i;
-        bitvec hash_bits_in_unit = hash_bits_in_use.getslice(i * HASH_DIST_BITS, HASH_DIST_BITS);
+        bitvec hash_bits_in_unit = hash_bits_in_use.getslice(i * TofinoIXBarSpec::HASH_DIST_BITS,
+                                                             TofinoIXBarSpec::HASH_DIST_BITS);
         for (auto possible_shift : possible_shifts) {
             bitvec hash_bits_to_be_used = post_expand_bits << possible_shift;
-            BUG_CHECK(hash_bits_to_be_used.max().index() < HASH_DIST_BITS,
+            BUG_CHECK(hash_bits_to_be_used.max().index() < TofinoIXBarSpec::HASH_DIST_BITS,
                       "Data is not "
                       "contained within a single hash dist unit");
             if ((hash_bits_to_be_used & hash_bits_in_unit).empty()) {
                 found = true;
-                hash_bits_allocated = hash_bits_to_be_used << (i * HASH_DIST_BITS);
+                hash_bits_allocated = hash_bits_to_be_used << (i * TofinoIXBarSpec::HASH_DIST_BITS);
                 break;
             }
         }
@@ -3205,16 +3229,18 @@ bool IXBar::allocHashDistWideAddress(bitvec post_expand_bits, bitvec possible_sh
 
     bool found = false;
 
-    for (int i = 0; i < HASH_DIST_SLICES - 1; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_DIST_SLICES - 1; i++) {
         if (units_in_use.getbit(i)) continue;
-        if (chained_addr && units_in_use.getbit(HASH_DIST_SLICES - 1)) continue;
+        if (chained_addr && units_in_use.getbit(TofinoIXBarSpec::HASH_DIST_SLICES - 1)) continue;
         unit_allocated = i;
         for (auto possible_shift : possible_shifts) {
             bitvec shifted_bits = post_expand_bits << possible_shift;
-            bitvec lower_bits = shifted_bits.getslice(0, HASH_DIST_BITS);
-            bitvec upper_bits = shifted_bits.getslice(HASH_DIST_BITS, HASH_DIST_EXPAND_BITS);
-            hash_bits_allocated = lower_bits << (i * HASH_DIST_BITS);
-            hash_bits_allocated |= upper_bits << (HASH_DIST_BITS * 2 + HASH_DIST_EXPAND_BITS * i);
+            bitvec lower_bits = shifted_bits.getslice(0, TofinoIXBarSpec::HASH_DIST_BITS);
+            bitvec upper_bits = shifted_bits.getslice(TofinoIXBarSpec::HASH_DIST_BITS,
+                                                      TofinoIXBarSpec::HASH_DIST_EXPAND_BITS);
+            hash_bits_allocated = lower_bits << (i * TofinoIXBarSpec::HASH_DIST_BITS);
+            hash_bits_allocated |= upper_bits << (TofinoIXBarSpec::HASH_DIST_BITS * 2 +
+                                                  TofinoIXBarSpec::HASH_DIST_EXPAND_BITS * i);
             if ((hash_bits_allocated & hash_bits_in_use).empty()) {
                 found = true;
                 break;
@@ -3369,20 +3395,20 @@ void IXBar::lockInHashDistArrays(safe_vector<Use::Byte *> *alloced, int hash_gro
                                  unsigned hash_table_input, int asm_unit, bitvec hash_bits_used,
                                  HashDistDest_t /* dest */, cstring name) {
     if (alloced) fill_out_use(*alloced, false);
-    for (int i = 0; i < HASH_TABLES; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; i++) {
         if (((1 << i) & hash_table_input) == 0) continue;
-        hash_dist_use[i][asm_unit % HASH_DIST_SLICES] = name;
-        hash_dist_inuse[i].setbit(asm_unit % HASH_DIST_SLICES);
+        hash_dist_use[i][asm_unit % TofinoIXBarSpec::HASH_DIST_SLICES] = name;
+        hash_dist_inuse[i].setbit(asm_unit % TofinoIXBarSpec::HASH_DIST_SLICES);
     }
 
-    for (int i = 0; i < HASH_TABLES; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; i++) {
         if (((1 << i) & hash_table_input) == 0) continue;
         for (auto bit : hash_bits_used) {
             hash_dist_bit_use[i][bit] = name;
             hash_dist_bit_inuse[i].setbit(bit);
         }
     }
-    hash_dist_groups[asm_unit / HASH_DIST_SLICES] = hash_group;
+    hash_dist_groups[asm_unit / TofinoIXBarSpec::HASH_DIST_SLICES] = hash_group;
     hash_group_use[hash_group] |= hash_table_input;
 
     hash_used_per_function[hash_group] |= hash_bits_used;
@@ -3478,7 +3504,7 @@ bool IXBar::allocHashDist(safe_vector<HashDistAllocPostExpand> &alloc_reqs, Hash
     create_alloc(map_alloc, all_reqs.use);
 
     bool wide_address = false;
-    if (bits_in_use.max().index() >= HASH_DIST_BITS) {
+    if (bits_in_use.max().index() >= TofinoIXBarSpec::HASH_DIST_BITS) {
         BUG_CHECK(isHashDistAddress(dest), "Allocating illegal hash_dist");
         wide_address = true;
     }
@@ -3501,7 +3527,7 @@ bool IXBar::allocHashDist(safe_vector<HashDistAllocPostExpand> &alloc_reqs, Hash
     bitvec possible_shifts(0, 1);
 
     unsigned hash_table_input = all_reqs.compute_hash_tables();
-    int hash_group_opts[HASH_DIST_UNITS] = {-1, -1};
+    int hash_group_opts[TofinoIXBarSpec::HASH_DIST_UNITS] = {-1, -1};
     getHashDistGroups(hash_table_input, hash_group_opts);
 
     bool can_allocate_hash = false;
@@ -3512,7 +3538,7 @@ bool IXBar::allocHashDist(safe_vector<HashDistAllocPostExpand> &alloc_reqs, Hash
 
     // Determine the galois matrix positions, as well has hash_function (of 8) associated hash
     // functions.
-    for (int i = 0; i < HASH_DIST_UNITS; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_DIST_UNITS; i++) {
         if (hash_group_opts[i] == -1) continue;
         hash_group = hash_group_opts[i];
         three_unit_section = i;
@@ -3540,12 +3566,13 @@ bool IXBar::allocHashDist(safe_vector<HashDistAllocPostExpand> &alloc_reqs, Hash
     lockInHashDistArrays(&alloced, hash_group, hash_table_input, asm_unit, hash_bits_used, dest,
                          name);
 
-    if (wide_address) use.expand = (asm_unit % HASH_DIST_SLICES) * 7;
+    if (wide_address) use.expand = (asm_unit % TofinoIXBarSpec::HASH_DIST_SLICES) * 7;
     use.unit = asm_unit;
     if (dest != HD_PRECOLOR) {
         use.shift = post_expand_shift;
-        use.shift += (hash_bits_used.min().index() % HASH_DIST_BITS) - bits_in_use.min().index();
-        use.mask = bits_in_use.getslice(0, HASH_DIST_MAX_MASK_BITS);
+        use.shift += (hash_bits_used.min().index() % TofinoIXBarSpec::HASH_DIST_BITS) -
+                     bits_in_use.min().index();
+        use.mask = bits_in_use.getslice(0, TofinoIXBarSpec::HASH_DIST_MAX_MASK_BITS);
         if (chained_addr) use.outputs.insert("lo"_cs);
     }
 
@@ -3583,7 +3610,7 @@ void IXBar::createChainedHashDist(const HashDistUse &hd_alloc, HashDistUse &chai
         curr.p4_hash_range = ir_alloc.p4_hash_range;
         curr.dest = HD_IMMED_HI;
         curr.created_hd = ir_alloc.created_hd;
-        for (int i = 0; i < HASH_GROUPS; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::HASH_GROUPS; i++) {
             curr_use.hash_table_inputs[i] = ir_alloc_use.hash_table_inputs[i];
         }
         curr_use.hash_dist_hash.allocated = true;
@@ -3594,16 +3621,17 @@ void IXBar::createChainedHashDist(const HashDistUse &hd_alloc, HashDistUse &chai
         chained_hd_alloc.ir_allocations.emplace_back(curr);
     }
 
-    chained_hd_alloc.unit = (hd_alloc.unit / HASH_DIST_SLICES) * HASH_DIST_SLICES + 2;
+    chained_hd_alloc.unit =
+        (hd_alloc.unit / TofinoIXBarSpec::HASH_DIST_SLICES) * TofinoIXBarSpec::HASH_DIST_SLICES + 2;
     chained_hd_alloc.shift = hd_alloc.expand;
-    chained_hd_alloc.mask = bitvec(chained_hd_alloc.shift, HASH_DIST_EXPAND_BITS);
+    chained_hd_alloc.mask = bitvec(chained_hd_alloc.shift, TofinoIXBarSpec::HASH_DIST_EXPAND_BITS);
     chained_hd_alloc.outputs.insert("hi"_cs);
 
     unsigned ht_inputs = hash_table_inputs(chained_hd_alloc);
-    for (int ht = 0; ht < HASH_TABLES; ht++) {
+    for (int ht = 0; ht < TofinoIXBarSpec::HASH_TABLES; ht++) {
         if (((1 << ht) & ht_inputs) == 0) continue;
-        hash_dist_use[ht][chained_hd_alloc.unit % HASH_DIST_SLICES] = name;
-        hash_dist_inuse[ht].setbit(chained_hd_alloc.unit % HASH_DIST_SLICES);
+        hash_dist_use[ht][chained_hd_alloc.unit % TofinoIXBarSpec::HASH_DIST_SLICES] = name;
+        hash_dist_inuse[ht].setbit(chained_hd_alloc.unit % TofinoIXBarSpec::HASH_DIST_SLICES);
     }
 }
 
@@ -3795,14 +3823,16 @@ void IXBar::XBarHashDist::immediate_inputs() {
         if (hash == nullptr) continue;
         le_bitrange immed_range = {pos.first, pos.first + hash->size() - 1};
         for (int i = 0; i < 2; i++) {
-            le_bitrange immed_impact = {i * HASH_DIST_BITS, (i + 1) * HASH_DIST_BITS - 1};
+            le_bitrange immed_impact = {i * TofinoIXBarSpec::HASH_DIST_BITS,
+                                        (i + 1) * TofinoIXBarSpec::HASH_DIST_BITS - 1};
             auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>(
                 immed_range.intersectWith(immed_impact));
             if (boost_sl == std::nullopt) continue;
             le_bitrange overlap = *boost_sl;
             int hash_bits_shift = (-1 * pos.first);
             le_bitrange hash_range = overlap.shiftedByBits(hash_bits_shift);
-            le_bitrange hash_dist_range = overlap.shiftedByBits(-1 * i * HASH_DIST_BITS);
+            le_bitrange hash_dist_range =
+                overlap.shiftedByBits(-1 * i * TofinoIXBarSpec::HASH_DIST_BITS);
             P4HashFunction *func = new P4HashFunction(hash->func());
             func->slice(hash_range);
             HashDistDest_t dest = static_cast<HashDistDest_t>(i);
@@ -4207,19 +4237,22 @@ void IXBar::update(cstring name, const ::IXBar::Use &alloc_) {
         hash_group_use[bits.group] |= alloc.hash_table_inputs[bits.group];
         update_hash_parity(bits.group);
         hash_group_print_use[bits.group] = name;
-        hash_used_per_function[bits.group].setrange(bits.bit + RAM_SELECT_BIT_START, bits.width);
+        hash_used_per_function[bits.group].setrange(
+            bits.bit + TofinoIXBarSpec::RAM_SELECT_BIT_START, bits.width);
     }
     for (auto &way : alloc.way_use) {
         hash_group_use[way.source] |= alloc.hash_table_inputs[way.source];
         update_hash_parity(way.source);
         hash_group_print_use[way.source] = name;
         hash_used_per_function[way.source].setrange(way.index.lo, way.index.size());
-        BUG_CHECK(way.select.lo == RAM_SELECT_BIT_START, "invalid select range for tofino");
+        BUG_CHECK(way.select.lo == TofinoIXBarSpec::RAM_SELECT_BIT_START,
+                  "invalid select range for tofino");
         hash_used_per_function[way.source] |= bitvec(way.select_mask) << way.select.lo;
-        hash_index_inuse[INDEX_RANGE_SUBGROUP(way.index)] |= alloc.hash_table_inputs[way.source];
+        hash_index_inuse[TofinoIXBarSpec::INDEX_RANGE_SUBGROUP(way.index)] |=
+            alloc.hash_table_inputs[way.source];
         for (int hash : bitvec(alloc.hash_table_inputs[way.source])) {
-            if (!hash_index_use[hash][INDEX_RANGE_SUBGROUP(way.index)])
-                hash_index_use[hash][INDEX_RANGE_SUBGROUP(way.index)] = name;
+            if (!hash_index_use[hash][TofinoIXBarSpec::INDEX_RANGE_SUBGROUP(way.index)])
+                hash_index_use[hash][TofinoIXBarSpec::INDEX_RANGE_SUBGROUP(way.index)] = name;
             for (auto bit : bitvec(way.select_mask)) {
                 hash_single_bit_inuse[bit] |= alloc.hash_table_inputs[way.source];
                 if (!hash_single_bit_use[hash][bit]) hash_single_bit_use[hash][bit] = name;
@@ -4251,7 +4284,7 @@ void IXBar::update(cstring name, const ::IXBar::Use &alloc_) {
         cstring local_name = name;
         if (!hdh.name.isNullOrEmpty()) local_name = hdh.name;
 
-        for (int i = 0; i < HASH_TABLES; i++) {
+        for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; i++) {
             if (((1U << i) & alloc.hash_table_inputs[hdh.group]) == 0) continue;
             for (auto bit : bitvec(hdh.galois_matrix_bits)) {
                 if (!hash_dist_bit_use[i][bit]) {
@@ -4277,7 +4310,7 @@ void IXBar::update(cstring name, const ::IXBar::Use &alloc_) {
 
     if (alloc.proxy_hash_key_use.allocated) {
         auto &ph = alloc.proxy_hash_key_use;
-        for (int ht = 0; ht < HASH_TABLES; ht++) {
+        for (int ht = 0; ht < TofinoIXBarSpec::HASH_TABLES; ht++) {
             if (((1U << ht) & alloc.hash_table_inputs[ph.group]) == 0) continue;
             unsigned indexes = index_groups_used(ph.hash_bits);
             for (auto idx : bitvec(indexes)) {
@@ -4309,14 +4342,14 @@ void IXBar::update(cstring name, const HashDistUse &hash_dist_alloc) {
         update(name, *ir_alloc.use);
     }
 
-    for (int i = 0; i < HASH_TABLES; i++) {
+    for (int i = 0; i < TofinoIXBarSpec::HASH_TABLES; i++) {
         if (((1U << i) & hash_table_inputs(hash_dist_alloc)) == 0) continue;
-        int slice = hash_dist_alloc.unit % HASH_DIST_SLICES;
+        int slice = hash_dist_alloc.unit % TofinoIXBarSpec::HASH_DIST_SLICES;
         if (!hash_dist_use[i][slice].isNull()) hash_dist_use[i][slice] = name;
         hash_dist_inuse[i].setbit(slice);
     }
 
-    int hash_dist_48_bit_unit = hash_dist_alloc.unit / HASH_DIST_SLICES;
+    int hash_dist_48_bit_unit = hash_dist_alloc.unit / TofinoIXBarSpec::HASH_DIST_SLICES;
     if (hash_dist_groups[hash_dist_48_bit_unit] != hash_dist_alloc.hash_group() &&
         hash_dist_groups[hash_dist_48_bit_unit] != -1)
         BUG("Conflicting hash distribution unit groups");
@@ -4356,8 +4389,8 @@ void IXBar::update(const IR::MAU::Table *tbl) {
  * ixbar group 2.  This is to guarantee that this space is reserved.
  */
 void IXBar::add_collisions() {
-    for (int hg = 0; hg < HASH_GROUPS; hg++) {
-        for (int idx = 0; idx < HASH_INDEX_GROUPS; idx++) {
+    for (int hg = 0; hg < TofinoIXBarSpec::HASH_GROUPS; hg++) {
+        for (int idx = 0; idx < TofinoIXBarSpec::HASH_INDEX_GROUPS; idx++) {
             if ((hash_group_use[hg] & hash_index_inuse[idx]) != 0) {
                 for (auto ht : bitvec(hash_group_use[hg])) {
                     if (hash_index_use[ht][idx].isNull()) hash_index_use[ht][idx] = "$collision"_cs;
@@ -4385,16 +4418,16 @@ void IXBar::add_collisions() {
  * to be set, which is currently only guaranteed on update.
  */
 void IXBar::verify_hash_matrix() const {
-    for (int hg = 0; hg < HASH_GROUPS; hg++) {
-        std::vector<cstring> index_groups(HASH_INDEX_GROUPS, cstring());
-        for (int idx = 0; idx < HASH_INDEX_GROUPS; idx++) {
+    for (int hg = 0; hg < TofinoIXBarSpec::HASH_GROUPS; hg++) {
+        std::vector<cstring> index_groups(TofinoIXBarSpec::HASH_INDEX_GROUPS, cstring());
+        for (int idx = 0; idx < TofinoIXBarSpec::HASH_INDEX_GROUPS; idx++) {
             bitvec idx_in_use = hash_used_per_function[hg].getslice(idx * RAM_LINE_SELECT_BITS,
                                                                     RAM_LINE_SELECT_BITS);
             if (idx_in_use.empty()) continue;
-            BUG_CHECK(idx < HASH_INDEX_GROUPS, "Illegal idx %1%", idx);
+            BUG_CHECK(idx < TofinoIXBarSpec::HASH_INDEX_GROUPS, "Illegal idx %1%", idx);
             unsigned relevant_hash_tables = hash_group_use[hg] & hash_index_inuse[idx];
             for (auto ht : bitvec(relevant_hash_tables)) {
-                BUG_CHECK(ht < HASH_TABLES, "Illegal hash table %1%", ht);
+                BUG_CHECK(ht < TofinoIXBarSpec::HASH_TABLES, "Illegal hash table %1%", ht);
                 if (index_groups[idx].isNull())
                     index_groups[idx] = hash_index_use[ht][idx];
                 else
@@ -4407,11 +4440,12 @@ void IXBar::verify_hash_matrix() const {
 
         std::vector<cstring> single_bits(IXBar::get_hash_single_bits(), cstring());
         for (int bit = 0; bit < IXBar::get_hash_single_bits(); bit++) {
-            if (!hash_used_per_function[hg].getbit(bit + RAM_SELECT_BIT_START)) continue;
+            if (!hash_used_per_function[hg].getbit(bit + TofinoIXBarSpec::RAM_SELECT_BIT_START))
+                continue;
             unsigned relevant_hash_tables = hash_group_use[hg] & hash_single_bit_inuse[bit];
             BUG_CHECK(bit < IXBar::get_hash_single_bits(), "Illegal bit %1%", bit);
             for (auto ht : bitvec(relevant_hash_tables)) {
-                BUG_CHECK(ht < HASH_TABLES, "Illegal hash table %1%", ht);
+                BUG_CHECK(ht < TofinoIXBarSpec::HASH_TABLES, "Illegal hash table %1%", ht);
                 if (single_bits[bit].isNull())
                     single_bits[bit] = hash_single_bit_use[ht][bit];
                 else
@@ -4436,9 +4470,9 @@ void IXBar::dbprint(std::ostream &out) const {
     add_names(byte_group_use, fields);
     sort_names(fields);
     out << "exact ixbar groups                  ternary ixbar groups" << Log::endl;
-    for (int r = 0; r < IXBar::EXACT_GROUPS; r++) {
+    for (int r = 0; r < TofinoIXBarSpec::EXACT_GROUPS; r++) {
         write_group(out, exact_use[r], fields);
-        if (r < IXBar::BYTE_GROUPS) {
+        if (r < TofinoIXBarSpec::BYTE_GROUPS) {
             out << "  ";
             write_group(out, ternary_use[2 * r], fields);
             out << " ";
@@ -4469,12 +4503,12 @@ void IXBar::dbprint(std::ostream &out) const {
     sort_names(tables);
     out << "hash select bits  Groups  hd  /- hash dist bits --- (Groups: " << hash_dist_groups[0]
         << " " << hash_dist_groups[1] << ")" << Log::endl;
-    for (int h = 0; h < IXBar::HASH_TABLES; ++h) {
+    for (int h = 0; h < TofinoIXBarSpec::HASH_TABLES; ++h) {
         write_group(out, hash_index_use[h], tables);
         out << " ";
         write_group(out, hash_single_bit_use[h], tables);
         out << "  ";
-        if (h < IXBar::HASH_GROUPS) {
+        if (h < TofinoIXBarSpec::HASH_GROUPS) {
             write_one(out, hash_group_print_use[h], tables);
             out << hex(hash_group_use[h], 4, '0');
         } else {

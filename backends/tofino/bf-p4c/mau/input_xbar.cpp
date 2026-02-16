@@ -18,7 +18,6 @@
 
 #include "input_xbar.h"
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/logging/resources.h"
 #include "backends/tofino/bf-p4c/mau/gateway.h"
 #include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
@@ -26,6 +25,7 @@
 #include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 #include "lib/algorithm.h"
 #include "lib/bitops.h"

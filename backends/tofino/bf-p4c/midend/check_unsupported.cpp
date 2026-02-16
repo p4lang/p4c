@@ -18,8 +18,8 @@
 
 #include "backends/tofino/bf-p4c/midend/check_unsupported.h"
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace BFN {
 

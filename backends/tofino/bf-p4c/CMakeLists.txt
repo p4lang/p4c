@@ -12,7 +12,7 @@
 # specific language governing permissions and limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-# # # #### Barefoot back-end
+# # ##### Barefoot back-end
 
 MESSAGE("-- Adding p4c-barefoot")
 
@@ -89,6 +89,21 @@ set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
+
+set (BF_P4C_SPEC_SRCS
+  specs/arch_spec.cpp
+  specs/device.cpp
+  specs/gress.cpp
+  specs/mau_spec.cpp
+  specs/match_register_spec.cpp
+  specs/phv.cpp
+  specs/phv_spec.cpp
+)
+
+add_library(tofinospecs STATIC ${BF_P4C_SPEC_SRCS})
+target_link_libraries(tofinospecs PUBLIC p4ctoolkit)
+# We depend on the gen-tree-macro.h file, which is generated.
+add_dependencies(tofinospecs genIR)
 
 set (BF_P4C_MIDEND_SRCS
   midend/annotate_with_in_hash.cpp
@@ -213,7 +228,6 @@ set (BF_P4C_BACKEND_MAU_SRCS
   mau/jbay_next_table.cpp
   mau/mau_alloc.cpp
   mau/mau_power.cpp
-  mau/mau_spec.cpp
   mau/memories.cpp
   mau/payload_gateway.cpp
   mau/reduction_or.cpp
@@ -241,7 +255,6 @@ set (BF_P4C_BACKEND_MAU_TOFINO_SRCS
   mau/tofino/action_data_bus.cpp
   mau/tofino/asm_output.cpp
   mau/tofino/input_xbar.cpp
-  mau/tofino/mau_spec.cpp
   mau/tofino/memories.cpp
   )
 
@@ -324,7 +337,6 @@ set (BF_P4C_BACKEND_PHV_SRCS
   phv/phv_analysis.cpp
   phv/phv_fields.cpp
   phv/phv_parde_mau_use.cpp
-  phv/phv_spec.cpp
   phv/split_padding.cpp
   phv/table_phv_constraints.cpp
   phv/validate_allocation.cpp
@@ -390,7 +402,6 @@ set (BF_P4C_BACKEND_PHV_SRCS
 
 set (BF_P4C_BACKEND_ARCH_SRCS
   arch/arch.cpp
-  arch/arch_spec.cpp
   arch/add_t2na_meta.cpp
   arch/intrinsic_metadata.cpp
   arch/bridge_metadata.cpp
@@ -442,7 +453,6 @@ set (BF_P4C_BACKEND_MAIN_SRCS
   asm.cpp
   backend.cpp
   bf-p4c-options.cpp
-  device.cpp
   midend.cpp
   )
 
@@ -806,7 +816,7 @@ endif()
 install (FILES ${P4C_BINARY_DIR}/p4c_src/main.py
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 
-# # # ############# Proto
+# # ############## Proto
 set (BFN_P4RUNTIME_DIR ${CMAKE_CURRENT_SOURCE_DIR}/control-plane/proto)
 set (BFN_P4RUNTIME_INFO_PROTO ${BFN_P4RUNTIME_DIR}/barefoot/p4info.proto)
 set (BFN_P4RUNTIME_INFO_GEN_SRCS ${P4C_BINARY_DIR}/control-plane/barefoot/p4info.pb.cc)
@@ -840,7 +850,7 @@ target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefet
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
 
-# # # ############# Testing
+# # ############## Testing
 
 if (ENABLE_GTESTS)
   # # Tofino-specific GTests.

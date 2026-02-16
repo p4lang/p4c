@@ -25,8 +25,8 @@
 #include "backends/tofino/bf-p4c/common/map_tables_to_actions.h"
 #include "backends/tofino/bf-p4c/mau/action_analysis.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/safe_vector.h"
 #include "mau_backtracker.h"
 

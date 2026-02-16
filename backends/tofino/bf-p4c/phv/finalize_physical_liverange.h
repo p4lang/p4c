@@ -23,9 +23,9 @@
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
 #include "backends/tofino/bf-p4c/mau/table_mutex.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/pragma/pa_no_init.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 
 namespace PHV {

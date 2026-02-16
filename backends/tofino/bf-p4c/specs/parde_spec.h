@@ -5,7 +5,7 @@
  * use this file except in compliance with the License.  You may obtain a copy
  * of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/ilcenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed
  * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -16,15 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_
-#define BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_SPECS_PARDE_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_SPECS_PARDE_SPEC_H_
 
 #include <map>
+#include <unordered_set>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/parde/match_register.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/match_register_spec.h"
 
 using namespace P4::literals;
 
@@ -419,13 +420,13 @@ class PardeSpec {
     virtual const std::map<unsigned, unsigned> &extractorSpec() const = 0;
 
     /// Specifies the available match registers
-    virtual const std::vector<MatchRegister> matchRegisters() const = 0;
+    virtual const std::vector<MatchRegisterSpec> matchRegisters() const = 0;
 
     /// Specifies the available scracth registers
-    virtual const std::vector<MatchRegister> scratchRegisters() const = 0;
+    virtual const std::vector<MatchRegisterSpec> scratchRegisters() const = 0;
 
     // Region in the input buffer where the specified scratch register is located.
-    virtual const nw_bitrange bitScratchRegisterRange(const MatchRegister &reg) const = 0;
+    virtual const nw_bitrange bitScratchRegisterRange(const MatchRegisterSpec &reg) const = 0;
 
     // Verifies if the provided range is a valid scratch register location.
     virtual bool byteScratchRegisterRangeValid(nw_byterange range) const = 0;
@@ -510,19 +511,20 @@ class TofinoPardeSpec : public PardeSpec {
         return extractorSpec;
     }
 
-    const std::vector<MatchRegister> matchRegisters() const override {
-        static std::vector<MatchRegister> spec;
+    const std::vector<MatchRegisterSpec> matchRegisters() const override {
+        static std::vector<MatchRegisterSpec> spec;
 
         if (spec.empty()) {
-            spec = {MatchRegister("half"_cs), MatchRegister("byte0"_cs), MatchRegister("byte1"_cs)};
+            spec = {MatchRegisterSpec("half"_cs), MatchRegisterSpec("byte0"_cs),
+                    MatchRegisterSpec("byte1"_cs)};
         }
 
         return spec;
     }
 
-    const std::vector<MatchRegister> scratchRegisters() const override { return {}; }
+    const std::vector<MatchRegisterSpec> scratchRegisters() const override { return {}; }
 
-    const nw_bitrange bitScratchRegisterRange(const MatchRegister &reg) const override {
+    const nw_bitrange bitScratchRegisterRange(const MatchRegisterSpec &reg) const override {
         // Bug check while silencing unused variable warning.
         BUG("Scratch registers not available in Tofino. Register: %1%", reg.name);
         return nw_bitrange();
@@ -573,7 +575,11 @@ class TofinoPardeSpec : public PardeSpec {
 };
 
 class JBayPardeSpec : public PardeSpec {
+    bool tof2lab44_workaround_;
+
  public:
+    explicit JBayPardeSpec(bool tof2lab44_workaround)
+        : tof2lab44_workaround_(tof2lab44_workaround) {}
     size_t bytePhase0Size() const override { return 16; }
     size_t byteIngressPrePacketPaddingSize() const override { return 8; }
 
@@ -582,31 +588,31 @@ class JBayPardeSpec : public PardeSpec {
         return extractorSpec;
     }
 
-    const std::vector<MatchRegister> matchRegisters() const override {
-        static std::vector<MatchRegister> spec;
+    const std::vector<MatchRegisterSpec> matchRegisters() const override {
+        static std::vector<MatchRegisterSpec> spec;
 
         if (spec.empty()) {
-            spec = {MatchRegister("byte0"_cs), MatchRegister("byte1"_cs), MatchRegister("byte2"_cs),
-                    MatchRegister("byte3"_cs)};
+            spec = {MatchRegisterSpec("byte0"_cs), MatchRegisterSpec("byte1"_cs),
+                    MatchRegisterSpec("byte2"_cs), MatchRegisterSpec("byte3"_cs)};
         }
 
         return spec;
     }
 
-    const std::vector<MatchRegister> scratchRegisters() const override {
-        static std::vector<MatchRegister> spec;
+    const std::vector<MatchRegisterSpec> scratchRegisters() const override {
+        static std::vector<MatchRegisterSpec> spec;
 
         if (spec.empty()) {
             matchRegisters();  // make sure the match registers are created first
 
-            spec = {MatchRegister("save_byte0"_cs), MatchRegister("save_byte1"_cs),
-                    MatchRegister("save_byte2"_cs), MatchRegister("save_byte3"_cs)};
+            spec = {MatchRegisterSpec("save_byte0"_cs), MatchRegisterSpec("save_byte1"_cs),
+                    MatchRegisterSpec("save_byte2"_cs), MatchRegisterSpec("save_byte3"_cs)};
         }
 
         return spec;
     }
 
-    const nw_bitrange bitScratchRegisterRange(const MatchRegister &reg) const override {
+    const nw_bitrange bitScratchRegisterRange(const MatchRegisterSpec &reg) const override {
         if (reg.name == "save_byte0")
             return nw_bitrange(504, 511);
         else if (reg.name == "save_byte1")
@@ -631,9 +637,7 @@ class JBayPardeSpec : public PardeSpec {
     unsigned maxClotsPerState() const override { return 2; }
 
     // Cap max size to 56 as a workaround of TF2LAB-44
-    unsigned byteMaxClotSize() const override {
-        return BackendOptions().tof2lab44_workaround ? 56 : 64;
-    }
+    unsigned byteMaxClotSize() const override { return tof2lab44_workaround_ ? 56 : 64; }
 
     unsigned numClotsPerGress() const override { return 64; }
     unsigned maxClotsLivePerGress() const override { return 16; }
@@ -669,7 +673,9 @@ class JBayPardeSpec : public PardeSpec {
 
 class JBayA0PardeSpec : public JBayPardeSpec {
  public:
+    explicit JBayA0PardeSpec(bool tof2lab44_workaround) : JBayPardeSpec(tof2lab44_workaround) {}
+
     unsigned numDeparserInvertChecksumUnits() const override { return 0; }
 };
 
-#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_SPECS_PARDE_SPEC_H_ */

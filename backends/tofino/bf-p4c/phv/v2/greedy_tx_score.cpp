@@ -24,14 +24,14 @@
 #include <utility>
 
 #include "backends/tofino/bf-p4c/common/table_printer.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "backends/tofino/bf-p4c/phv/v2/kind_size_indexed_map.h"
 #include "backends/tofino/bf-p4c/phv/v2/sort_macros.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 namespace PHV {
 namespace v2 {

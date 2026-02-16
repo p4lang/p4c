@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/cstring.h"
 
 namespace P4 {
@@ -52,7 +52,6 @@ struct MarshaledFrom {
     static MarshaledFrom fromJSON(JSONLoader &json);
 
     friend std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m);
-    friend P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const MarshaledFrom &c);
 
     MarshaledFrom() : gress(INGRESS), field_name(cstring::empty), pre_padding(0) {}
     MarshaledFrom(gress_t gress, cstring name) : gress(gress), field_name(name), pre_padding(0) {}
