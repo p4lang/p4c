@@ -18,8 +18,6 @@
 
 #include <fstream>
 
-#include <boost/format.hpp>
-
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/logging/collect_diagnostic_checks.h"
 #include "bf_gtest_helpers.h"
@@ -78,9 +76,8 @@ class ErrorReporterTest : public ::testing::Test {
 };
 
 TEST_F(ErrorReporterTest, ErrorHelperPlainFormatsCorrectly) {
-    boost::format fmt("Str: %1%, Dec: %2%");
-
-    EXPECT_EQ(::error_helper(fmt, "hello", 10).toString(), "Str: hello, Dec: 10\n");
+    EXPECT_EQ(::error_helper("Str: %1%, Dec: %2%", "hello", 10).toString(),
+              "Str: hello, Dec: 10\n");
 }
 
 TEST_F(ErrorReporterTest, WarningsConformToExpectedFormat) {
