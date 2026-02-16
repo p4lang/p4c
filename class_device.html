@@ -131,6 +131,7 @@ $(function(){initNavTree('class_device.html',''); initResizable(true); });
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="class_device-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Device Class Reference<span class="mlabels"><span class="mlabel abstract">abstract</span></span></div></div>
 </div><!--header-->
@@ -147,6 +148,8 @@ Inheritance diagram for Device:</div>
 Classes</h2></td></tr>
 <tr class="memitem:struct_device_1_1_gateway_spec" id="r_struct_device_1_1_gateway_spec"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_device_1_1_gateway_spec">GatewaySpec</a></td></tr>
 <tr class="separator:struct_device_1_1_gateway_spec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:struct_device_1_1_options" id="r_struct_device_1_1_options"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_device_1_1_options">Options</a></td></tr>
+<tr class="separator:struct_device_1_1_options"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_device_1_1_stateful_alu_spec.html">StatefulAluSpec</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -210,8 +213,8 @@ static bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasMirrorIOSel
 <tr class="memitem:a5ba301a2b82b34f3638f90d8a5129054" id="r_a5ba301a2b82b34f3638f90d8a5129054"><td class="memItemLeft" align="right" valign="top"><a id="a5ba301a2b82b34f3638f90d8a5129054" name="a5ba301a2b82b34f3638f90d8a5129054"></a>
 static const <a class="el" href="class_i_mem_spec.html">IMemSpec</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>imemSpec</b> ()</td></tr>
 <tr class="separator:a5ba301a2b82b34f3638f90d8a5129054"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a09dec66452aed7a89c98296cea6a3910" id="r_a09dec66452aed7a89c98296cea6a3910"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09dec66452aed7a89c98296cea6a3910">init</a> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> name)</td></tr>
-<tr class="separator:a09dec66452aed7a89c98296cea6a3910"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91bf6587d57466b7a3aa81c65aee3544" id="r_a91bf6587d57466b7a3aa81c65aee3544"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a91bf6587d57466b7a3aa81c65aee3544">init</a> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> name, <a class="el" href="#struct_device_1_1_options">Options</a> options)</td></tr>
+<tr class="separator:a91bf6587d57466b7a3aa81c65aee3544"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43f780ffcdeb45223b1ce26a3f028ee8" id="r_a43f780ffcdeb45223b1ce26a3f028ee8"><td class="memItemLeft" align="right" valign="top"><a id="a43f780ffcdeb45223b1ce26a3f028ee8" name="a43f780ffcdeb45223b1ce26a3f028ee8"></a>
 static int&#160;</td><td class="memItemRight" valign="bottom"><b>isMemoryCoreSplit</b> ()</td></tr>
 <tr class="separator:a43f780ffcdeb45223b1ce26a3f028ee8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -317,9 +320,9 @@ static bool&#160;</td><td class="memItemRight" valign="bottom"><b>threadsSharePi
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a73409c465d4b1d6fe9791641ebdb4e7a" id="r_a73409c465d4b1d6fe9791641ebdb4e7a"><td class="memItemLeft" align="right" valign="top"><a id="a73409c465d4b1d6fe9791641ebdb4e7a" name="a73409c465d4b1d6fe9791641ebdb4e7a"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Device</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> name)</td></tr>
-<tr class="separator:a73409c465d4b1d6fe9791641ebdb4e7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66914a701bfb7649cf57be6ee0495e26" id="r_a66914a701bfb7649cf57be6ee0495e26"><td class="memItemLeft" align="right" valign="top"><a id="a66914a701bfb7649cf57be6ee0495e26" name="a66914a701bfb7649cf57be6ee0495e26"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Device</b> (<a class="el" href="#struct_device_1_1_options">Options</a> options, <a class="el" href="class_p4_1_1cstring.html">cstring</a> name)</td></tr>
+<tr class="separator:a66914a701bfb7649cf57be6ee0495e26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe1e444ec3b0bf6105a2912f7092dd60" id="r_abe1e444ec3b0bf6105a2912f7092dd60"><td class="memItemLeft" align="right" valign="top"><a id="abe1e444ec3b0bf6105a2912f7092dd60" name="abe1e444ec3b0bf6105a2912f7092dd60"></a>
 virtual Device_t&#160;</td><td class="memItemRight" valign="bottom"><b>device_type</b> () const =0</td></tr>
 <tr class="separator:abe1e444ec3b0bf6105a2912f7092dd60"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -338,7 +341,8 @@ virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>getCloneSessio
 <tr class="memitem:a9c14301da2bd8a519d47e3dfede88b9b" id="r_a9c14301da2bd8a519d47e3dfede88b9b"><td class="memItemLeft" align="right" valign="top"><a id="a9c14301da2bd8a519d47e3dfede88b9b" name="a9c14301da2bd8a519d47e3dfede88b9b"></a>
 virtual unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>getEgressIntrinsicMetadataMinLen</b> () const =0</td></tr>
 <tr class="separator:a9c14301da2bd8a519d47e3dfede88b9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3440e8c9f1387ee40390cbd04d4d89f" id="r_aa3440e8c9f1387ee40390cbd04d4d89f"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="#struct_device_1_1_gateway_spec">GatewaySpec</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa3440e8c9f1387ee40390cbd04d4d89f">getGatewaySpec</a> () const =0</td></tr>
+<tr class="memitem:aa3440e8c9f1387ee40390cbd04d4d89f" id="r_aa3440e8c9f1387ee40390cbd04d4d89f"><td class="memItemLeft" align="right" valign="top"><a id="aa3440e8c9f1387ee40390cbd04d4d89f" name="aa3440e8c9f1387ee40390cbd04d4d89f"></a>
+virtual const <a class="el" href="#struct_device_1_1_gateway_spec">GatewaySpec</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getGatewaySpec</b> () const =0</td></tr>
 <tr class="separator:aa3440e8c9f1387ee40390cbd04d4d89f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a144091e00fb7757977e35876d2c27965" id="r_a144091e00fb7757977e35876d2c27965"><td class="memItemLeft" align="right" valign="top"><a id="a144091e00fb7757977e35876d2c27965" name="a144091e00fb7757977e35876d2c27965"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>getHasCompareInstructions</b> () const =0</td></tr>
@@ -445,11 +449,18 @@ virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>getSramMaxPack
 <tr class="memitem:aafa31153b87ab21d3f91669d81f8bb11" id="r_aafa31153b87ab21d3f91669d81f8bb11"><td class="memItemLeft" align="right" valign="top"><a id="aafa31153b87ab21d3f91669d81f8bb11" name="aafa31153b87ab21d3f91669d81f8bb11"></a>
 virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>getSramMinPackEntries</b> () const =0</td></tr>
 <tr class="separator:aafa31153b87ab21d3f91669d81f8bb11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad62c57a1cf452aad197ce4a71abb9a37" id="r_ad62c57a1cf452aad197ce4a71abb9a37"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="struct_device_1_1_stateful_alu_spec.html">StatefulAluSpec</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad62c57a1cf452aad197ce4a71abb9a37">getStatefulAluSpec</a> () const =0</td></tr>
+<tr class="memitem:ad62c57a1cf452aad197ce4a71abb9a37" id="r_ad62c57a1cf452aad197ce4a71abb9a37"><td class="memItemLeft" align="right" valign="top"><a id="ad62c57a1cf452aad197ce4a71abb9a37" name="ad62c57a1cf452aad197ce4a71abb9a37"></a>
+virtual const <a class="el" href="struct_device_1_1_stateful_alu_spec.html">StatefulAluSpec</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getStatefulAluSpec</b> () const =0</td></tr>
 <tr class="separator:ad62c57a1cf452aad197ce4a71abb9a37"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38029f9f5c858b44f6f7023bb5d72bc6" id="r_a38029f9f5c858b44f6f7023bb5d72bc6"><td class="memItemLeft" align="right" valign="top"><a id="a38029f9f5c858b44f6f7023bb5d72bc6" name="a38029f9f5c858b44f6f7023bb5d72bc6"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>getThreadsSharePipe</b> (gress_t a, gress_t b) const =0</td></tr>
 <tr class="separator:a38029f9f5c858b44f6f7023bb5d72bc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:ab3ae7f0ce02c786c94ec654cf32185d1" id="r_ab3ae7f0ce02c786c94ec654cf32185d1"><td class="memItemLeft" align="right" valign="top"><a id="ab3ae7f0ce02c786c94ec654cf32185d1" name="ab3ae7f0ce02c786c94ec654cf32185d1"></a>
+struct <a class="el" href="#struct_device_1_1_options">Device::Options</a>&#160;</td><td class="memItemRight" valign="bottom"><b>options_</b></td></tr>
+<tr class="separator:ab3ae7f0ce02c786c94ec654cf32185d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Copyright (C) 2024 Intel Corporation</p>
@@ -535,63 +546,44 @@ XorByteSlots</td>
 
 </div>
 </div>
+<a name="struct_device_1_1_options" id="struct_device_1_1_options"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#struct_device_1_1_options">&#9670;&#160;</a></span>Device::Options</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct Device::Options</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"></div><table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a3dbc4fef40622b18175a8d9471c14f1d" name="a3dbc4fef40622b18175a8d9471c14f1d"></a>bool</td>
+<td class="fieldname">
+no_tagalong = false</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a3a37808e45aa6c6548cc98a619aa24c8" name="a3a37808e45aa6c6548cc98a619aa24c8"></a>float</td>
+<td class="fieldname">
+phv_scale_factor = 1.0</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="ae21a3cc1266ea8f0411cb2e8972330ba" name="ae21a3cc1266ea8f0411cb2e8972330ba"></a>bool</td>
+<td class="fieldname">
+tof2lab44_workaround = false</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aa3440e8c9f1387ee40390cbd04d4d89f" name="aa3440e8c9f1387ee40390cbd04d4d89f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3440e8c9f1387ee40390cbd04d4d89f">&#9670;&#160;</a></span>getGatewaySpec()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual const <a class="el" href="#struct_device_1_1_gateway_spec">GatewaySpec</a> &amp; Device::getGatewaySpec </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel pure-virtual">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="class_tofino_device.html#a112795c6ca17d16067ff66ce70d89acd">TofinoDevice</a>.</p>
-
-</div>
-</div>
-<a id="ad62c57a1cf452aad197ce4a71abb9a37" name="ad62c57a1cf452aad197ce4a71abb9a37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad62c57a1cf452aad197ce4a71abb9a37">&#9670;&#160;</a></span>getStatefulAluSpec()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual const <a class="el" href="struct_device_1_1_stateful_alu_spec.html">StatefulAluSpec</a> &amp; Device::getStatefulAluSpec </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span><span class="mlabel pure-virtual">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="class_tofino_device.html#a209d8f1d037a573c817bd4d2f94f6a22">TofinoDevice</a>.</p>
-
-</div>
-</div>
-<a id="a09dec66452aed7a89c98296cea6a3910" name="a09dec66452aed7a89c98296cea6a3910"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a09dec66452aed7a89c98296cea6a3910">&#9670;&#160;</a></span>init()</h2>
+<a id="a91bf6587d57466b7a3aa81c65aee3544" name="a91bf6587d57466b7a3aa81c65aee3544"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91bf6587d57466b7a3aa81c65aee3544">&#9670;&#160;</a></span>init()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -602,8 +594,12 @@ XorByteSlots</td>
         <tr>
           <td class="memname">void Device::init </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="class_p4_1_1cstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1cstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="#struct_device_1_1_options">Options</a></td>          <td class="paramname"><span class="paramname"><em>options</em></span>&#160;)</td>
         </tr>
       </table>
   </td>

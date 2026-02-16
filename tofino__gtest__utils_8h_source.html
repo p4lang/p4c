@@ -139,12 +139,12 @@ $(function(){initNavTree('tofino__gtest__utils_8h_source.html',''); initResizabl
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/arch/arch.h&quot;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/bf-p4c-options.h&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/device.h&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/device.h&quot;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;gtest/gtest.h&quot;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;lib/compile_context.h&quot;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">namespace </span>IR {</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_i_r.html">IR</a> {</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">namespace </span>BFN {</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">class </span>Pipe;</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>}  <span class="comment">// namespace BFN</span></div>
@@ -192,22 +192,31 @@ $(function(){initNavTree('tofino__gtest__utils_8h_source.html',''); initResizabl
 <div class="foldopen" id="foldopen00081" data-start="{" data-end="};">
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="class_p4_1_1_test_1_1_tofino_backend_test.html">   81</a></span><span class="keyword">class </span>TofinoBackendTest : <span class="keyword">public</span> BackendTest {</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    TofinoBackendTest() { <a class="code hl_function" href="class_device.html#a09dec66452aed7a89c98296cea6a3910">Device::init</a>(<span class="stringliteral">&quot;Tofino&quot;</span>_cs); }</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>};</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    TofinoBackendTest() {</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        <span class="keyword">auto</span> &amp;options = BackendOptions();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        <a class="code hl_function" href="class_device.html#a91bf6587d57466b7a3aa81c65aee3544">Device::init</a>(<span class="stringliteral">&quot;Tofino&quot;</span>_cs,</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                     {options.phv_scale_factor, options.no_tagalong, options.tof2lab44_workaround});</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    }</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>};</div>
 </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span></div>
-<div class="foldopen" id="foldopen00087" data-start="{" data-end="};">
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="class_p4_1_1_test_1_1_j_bay_backend_test.html">   87</a></span><span class="keyword">class </span>JBayBackendTest : <span class="keyword">public</span> BackendTest {</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    JBayBackendTest() { <a class="code hl_function" href="class_device.html#a09dec66452aed7a89c98296cea6a3910">Device::init</a>(<span class="stringliteral">&quot;Tofino2&quot;</span>_cs); }</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>};</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span></div>
+<div class="foldopen" id="foldopen00091" data-start="{" data-end="};">
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="class_p4_1_1_test_1_1_j_bay_backend_test.html">   91</a></span><span class="keyword">class </span>JBayBackendTest : <span class="keyword">public</span> BackendTest {</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    JBayBackendTest() {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keyword">auto</span> &amp;options = BackendOptions();</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <a class="code hl_function" href="class_device.html#a91bf6587d57466b7a3aa81c65aee3544">Device::init</a>(<span class="stringliteral">&quot;Tofino2&quot;</span>_cs,</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                     {options.phv_scale_factor, options.no_tagalong, options.tof2lab44_workaround});</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    }</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>};</div>
 </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}  <span class="comment">// namespace P4::Test</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_TEST_GTEST_TOFINO_GTEST_UTILS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>}  <span class="comment">// namespace P4::Test</span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_TEST_GTEST_TOFINO_GTEST_UTILS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_b_f_n_context_html"><div class="ttname"><a href="class_b_f_n_context.html">BFNContext</a></div><div class="ttdoc">A CompileContext for bf-p4c.</div><div class="ttdef"><b>Definition</b> bf-p4c-options.h:135</div></div>
-<div class="ttc" id="aclass_device_html_a09dec66452aed7a89c98296cea6a3910"><div class="ttname"><a href="class_device.html#a09dec66452aed7a89c98296cea6a3910">Device::init</a></div><div class="ttdeci">static void init(cstring name)</div><div class="ttdef"><b>Definition</b> device.cpp:28</div></div>
+<div class="ttc" id="aclass_device_html_a91bf6587d57466b7a3aa81c65aee3544"><div class="ttname"><a href="class_device.html#a91bf6587d57466b7a3aa81c65aee3544">Device::init</a></div><div class="ttdeci">static void init(cstring name, Options options)</div><div class="ttdef"><b>Definition</b> device.cpp:28</div></div>
+<div class="ttc" id="anamespace_p4_1_1_i_r_html"><div class="ttname"><a href="namespace_p4_1_1_i_r.html">P4::IR</a></div><div class="ttdef"><b>Definition</b> constantParsing.h:22</div></div>
 <div class="ttc" id="anamespace_p4_1_1_test_html"><div class="ttname"><a href="namespace_p4_1_1_test.html">P4::Test</a></div><div class="ttdef"><b>Definition</b> lib/json.h:35</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 <div class="ttc" id="astruct_p4_1_1_auto_compile_context_html"><div class="ttname"><a href="struct_p4_1_1_auto_compile_context.html">P4::AutoCompileContext</a></div><div class="ttdef"><b>Definition</b> compile_context.h:77</div></div>

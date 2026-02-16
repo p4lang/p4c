@@ -141,7 +141,7 @@ $(function(){initNavTree('instruction__adjustment_8h_source.html',''); initResiz
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/mau_visitor.h&quot;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/resource.h&quot;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/tofino/input_xbar.h&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/phv/phv.h&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/phv.h&quot;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;lib/safe_vector.h&quot;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a>;</div>
@@ -387,11 +387,11 @@ $(function(){initNavTree('instruction__adjustment_8h_source.html',''); initResiz
 <div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_MAU_INSTRUCTION_ADJUSTMENT_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_instruction_adjustment_html_a66f5adefe7ae7232f1ab4886ccf8629b"><div class="ttname"><a href="class_instruction_adjustment.html#a66f5adefe7ae7232f1ab4886ccf8629b">InstructionAdjustment::InstructionAdjustment</a></div><div class="ttdeci">InstructionAdjustment(const PhvInfo &amp;p, const ReductionOrInfo &amp;ri)</div><div class="ttdef"><b>Definition</b> instruction_adjustment.cpp:1805</div></div>
 <div class="ttc" id="aclass_mau_transform_html"><div class="ttname"><a href="class_mau_transform.html">MauTransform</a></div><div class="ttdef"><b>Definition</b> mau_visitor.h:55</div></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:53</div></div>
 <div class="ttc" id="aclass_p4_1_1bitvec_html"><div class="ttname"><a href="class_p4_1_1bitvec.html">P4::bitvec</a></div><div class="ttdef"><b>Definition</b> bitvec.h:120</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__set_html"><div class="ttname"><a href="class_p4_1_1ordered__set.html">P4::ordered_set</a></div><div class="ttdef"><b>Definition</b> ordered_set.h:32</div></div>
-<div class="ttc" id="aclass_p_h_v_1_1_container_html"><div class="ttname"><a href="class_p_h_v_1_1_container.html">PHV::Container</a></div><div class="ttdef"><b>Definition</b> bf-p4c/phv/phv.h:176</div></div>
+<div class="ttc" id="aclass_p_h_v_1_1_container_html"><div class="ttname"><a href="class_p_h_v_1_1_container.html">PHV::Container</a></div><div class="ttdef"><b>Definition</b> bf-p4c/specs/phv.h:171</div></div>
 <div class="ttc" id="aclass_p_h_v_1_1_field_html"><div class="ttname"><a href="class_p_h_v_1_1_field.html">PHV::Field</a></div><div class="ttdef"><b>Definition</b> phv_fields.h:154</div></div>
 <div class="ttc" id="aclass_phv_info_html"><div class="ttname"><a href="class_phv_info.html">PhvInfo</a></div><div class="ttdef"><b>Definition</b> phv_fields.h:1095</div></div>
 <div class="ttc" id="aclass_tofino_write_context_html"><div class="ttname"><a href="class_tofino_write_context.html">TofinoWriteContext</a></div><div class="ttdef"><b>Definition</b> tofino_write_context.h:24</div></div>
@@ -400,8 +400,8 @@ $(function(){initNavTree('instruction__adjustment_8h_source.html',''); initResiz
 <div class="ttc" id="astruct_action_analysis_1_1_container_action_html"><div class="ttname"><a href="struct_action_analysis_1_1_container_action.html">ActionAnalysis::ContainerAction</a></div><div class="ttdef"><b>Definition</b> action_analysis.h:346</div></div>
 <div class="ttc" id="astruct_action_data_1_1_unique_location_key_html"><div class="ttname"><a href="struct_action_data_1_1_unique_location_key.html">ActionData::UniqueLocationKey</a></div><div class="ttdef"><b>Definition</b> action_format.h:454</div></div>
 <div class="ttc" id="astruct_reduction_or_info_html"><div class="ttname"><a href="struct_reduction_or_info.html">ReductionOrInfo</a></div><div class="ttdef"><b>Definition</b> reduction_or.h:47</div></div>
-<div class="ttc" id="astruct_tofino_1_1_i_x_bar_1_1_use_1_1_meter_alu_hash_html"><div class="ttname"><a href="struct_tofino_1_1_i_x_bar_1_1_use_1_1_meter_alu_hash.html">Tofino::IXBar::Use::MeterAluHash</a></div><div class="ttdef"><b>Definition</b> bf-p4c/mau/tofino/input_xbar.h:225</div></div>
-<div class="ttc" id="astruct_tofino_1_1_i_x_bar_1_1_use_html"><div class="ttname"><a href="struct_tofino_1_1_i_x_bar_1_1_use.html">Tofino::IXBar::Use</a></div><div class="ttdef"><b>Definition</b> bf-p4c/mau/tofino/input_xbar.h:192</div></div>
+<div class="ttc" id="astruct_tofino_1_1_i_x_bar_1_1_use_1_1_meter_alu_hash_html"><div class="ttname"><a href="struct_tofino_1_1_i_x_bar_1_1_use_1_1_meter_alu_hash.html">Tofino::IXBar::Use::MeterAluHash</a></div><div class="ttdef"><b>Definition</b> bf-p4c/mau/tofino/input_xbar.h:198</div></div>
+<div class="ttc" id="astruct_tofino_1_1_i_x_bar_1_1_use_html"><div class="ttname"><a href="struct_tofino_1_1_i_x_bar_1_1_use.html">Tofino::IXBar::Use</a></div><div class="ttdef"><b>Definition</b> bf-p4c/mau/tofino/input_xbar.h:163</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.13.2-->

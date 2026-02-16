@@ -82,6 +82,7 @@ var NAVTREEINDEX3 =
 "class_determine_candidate_headers.html":[13,0,232],
 "class_device.html":[13,0,233],
 "class_device.html#struct_device_1_1_gateway_spec":[13,0,233,0],
+"class_device.html#struct_device_1_1_options":[13,0,233,1],
 "class_disable_auto_init_metadata.html":[13,0,235],
 "class_disasm.html":[13,0,236],
 "class_do_instruction_selection.html":[13,0,238],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "class_hash_gen_setup.html":[13,0,352],
 "class_hash_mask_annotations.html":[13,0,353],
 "class_hash_match_source.html":[13,0,354],
-"class_header_mutex.html":[13,0,356],
-"class_header_name_mau_inspector.html":[13,0,357]
+"class_header_mutex.html":[13,0,356]
 };

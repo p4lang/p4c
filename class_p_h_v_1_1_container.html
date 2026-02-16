@@ -128,15 +128,44 @@ $(function(){initNavTree('class_p_h_v_1_1_container.html',''); initResizable(tru
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
+<a href="#pro-static-attribs">Static Protected Attributes</a> &#124;
 <a href="class_p_h_v_1_1_container-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">PHV::Container Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+<div class="dynheader">
+Inheritance diagram for PHV::Container:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p_h_v_1_1_container__inherit__graph.svg" width="206" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:aa4f240ee981981170a635831a9c0bc4c" id="r_aa4f240ee981981170a635831a9c0bc4c"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa4f240ee981981170a635831a9c0bc4c">Container</a> ()</td></tr>
 <tr class="separator:aa4f240ee981981170a635831a9c0bc4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a5fafecdf944159b4b91e6c75abac9483" id="r_a5fafecdf944159b4b91e6c75abac9483"><td class="memItemLeft" align="right" valign="top"><a id="a5fafecdf944159b4b91e6c75abac9483" name="a5fafecdf944159b4b91e6c75abac9483"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Container</b> (<a class="el" href="namespace_p_h_v.html#aba5418d9e37657e37eb63ee0aa0a435f">Kind</a> k, <a class="el" href="namespace_p_h_v.html#a3ff115c4ef9dcfb7a3565ddc263f0ece">Size</a> s, unsigned i)</td></tr>
+<tr class="separator:a5fafecdf944159b4b91e6c75abac9483"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:a525d7d0f4d5d7a1c3d3eebfae78fae9a" id="r_a525d7d0f4d5d7a1c3d3eebfae78fae9a"><td class="memItemLeft" align="right" valign="top"><a id="a525d7d0f4d5d7a1c3d3eebfae78fae9a" name="a525d7d0f4d5d7a1c3d3eebfae78fae9a"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>index_</b></td></tr>
+<tr class="separator:a525d7d0f4d5d7a1c3d3eebfae78fae9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef2d2772e9180fc7ac6619e8520035b6" id="r_aef2d2772e9180fc7ac6619e8520035b6"><td class="memItemLeft" align="right" valign="top"><a id="aef2d2772e9180fc7ac6619e8520035b6" name="aef2d2772e9180fc7ac6619e8520035b6"></a>
+<a class="el" href="class_p_h_v_1_1_type.html">Type</a>&#160;</td><td class="memItemRight" valign="bottom"><b>type_</b></td></tr>
+<tr class="separator:aef2d2772e9180fc7ac6619e8520035b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-static-attribs" name="pro-static-attribs"></a>
+Static Protected Attributes</h2></td></tr>
+<tr class="memitem:a9184bc7c93539bda84d727a09b2b7fab" id="r_a9184bc7c93539bda84d727a09b2b7fab"><td class="memItemLeft" align="right" valign="top"><a id="a9184bc7c93539bda84d727a09b2b7fab" name="a9184bc7c93539bda84d727a09b2b7fab"></a>
+static constexpr unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_INDEX</b> = std::numeric_limits&lt;unsigned&gt;::max()</td></tr>
+<tr class="separator:a9184bc7c93539bda84d727a09b2b7fab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader">- e.g., "B0" for container B0.</h2></td></tr>
 <tr><td class="ititle" colspan="2"><p>Construct a container from </p>
@@ -187,18 +216,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator!=</b> (<a cl
 <tr class="memitem:a142b80214ba25350e7b4c09d5916238e" id="r_a142b80214ba25350e7b4c09d5916238e"><td class="memItemLeft" align="right" valign="top"><a id="a142b80214ba25350e7b4c09d5916238e" name="a142b80214ba25350e7b4c09d5916238e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;</b> (<a class="el" href="class_p_h_v_1_1_container.html">Container</a> c) const</td></tr>
 <tr class="separator:a142b80214ba25350e7b4c09d5916238e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b5c4cce97d3b21db19db06ede0474a3" id="r_a4b5c4cce97d3b21db19db06ede0474a3"><td class="memItemLeft" align="right" valign="top"><a id="a4b5c4cce97d3b21db19db06ede0474a3" name="a4b5c4cce97d3b21db19db06ede0474a3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>toJSON</b> (<a class="el" href="class_p4_1_1_j_s_o_n_generator.html">P4::JSONGenerator</a> &amp;json) const</td></tr>
-<tr class="memdesc:a4b5c4cce97d3b21db19db06ede0474a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">JSON serialization/deserialization. <br /></td></tr>
-<tr class="separator:a4b5c4cce97d3b21db19db06ede0474a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae304687497a5269f39ed8d83acf0ada6" id="r_ae304687497a5269f39ed8d83acf0ada6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae304687497a5269f39ed8d83acf0ada6">toString</a> () const</td></tr>
 <tr class="separator:ae304687497a5269f39ed8d83acf0ada6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5cb628d927ca75d8df39a76907dabe75" id="r_a5cb628d927ca75d8df39a76907dabe75"><td class="memItemLeft" align="right" valign="top"><a id="a5cb628d927ca75d8df39a76907dabe75" name="a5cb628d927ca75d8df39a76907dabe75"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><b>hash_value</b> (const <a class="el" href="class_p_h_v_1_1_container.html">Container</a> &amp;c)</td></tr>
 <tr class="separator:a5cb628d927ca75d8df39a76907dabe75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a741356a9408f733168363bbf865817fb" id="r_a741356a9408f733168363bbf865817fb"><td class="memItemLeft" align="right" valign="top"><a id="a741356a9408f733168363bbf865817fb" name="a741356a9408f733168363bbf865817fb"></a>
-static <a class="el" href="class_p_h_v_1_1_container.html">Container</a>&#160;</td><td class="memItemRight" valign="bottom"><b>fromJSON</b> (<a class="el" href="class_p4_1_1_j_s_o_n_loader.html">P4::JSONLoader</a> &amp;json)</td></tr>
-<tr class="separator:a741356a9408f733168363bbf865817fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aa4f240ee981981170a635831a9c0bc4c" name="aa4f240ee981981170a635831a9c0bc4c"></a>

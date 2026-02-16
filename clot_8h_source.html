@@ -138,15 +138,15 @@ $(function(){initNavTree('clot_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &lt;set&gt;</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/ir/gress.h&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/lib/cmp.h&quot;</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/lib/cmp.h&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/gress.h&quot;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;lib/exceptions.h&quot;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;lib/ordered_map.h&quot;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">using namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a>;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">namespace </span>IR {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_i_r.html">IR</a> {</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">namespace </span>BFN {</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">class </span>ParserState;</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">class </span>FieldLVal;</div>
@@ -301,12 +301,13 @@ $(function(){initNavTree('clot_8h_source.html',''); initResizable(true); });
 <div class="ttc" id="aclass_clot_html_af05fe650321a7dd6d52b96355760f8d7"><div class="ttname"><a href="class_clot.html#af05fe650321a7dd6d52b96355760f8d7">Clot::is_first_field_in_clot</a></div><div class="ttdeci">bool is_first_field_in_clot(const PHV::Field *field) const</div><div class="ttdef"><b>Definition</b> parde/clot/clot.cpp:137</div></div>
 <div class="ttc" id="aclass_lift_compare_html"><div class="ttname"><a href="class_lift_compare.html">LiftCompare</a></div><div class="ttdef"><b>Definition</b> cmp.h:84</div></div>
 <div class="ttc" id="aclass_p4_1_1_j_s_o_n_generator_html"><div class="ttname"><a href="class_p4_1_1_j_s_o_n_generator.html">P4::JSONGenerator</a></div><div class="ttdef"><b>Definition</b> json_generator.h:39</div></div>
-<div class="ttc" id="aclass_p4_1_1_j_s_o_n_loader_html"><div class="ttname"><a href="class_p4_1_1_j_s_o_n_loader.html">P4::JSONLoader</a></div><div class="ttdef"><b>Definition</b> json_loader.h:40</div></div>
+<div class="ttc" id="aclass_p4_1_1_j_s_o_n_loader_html"><div class="ttname"><a href="class_p4_1_1_j_s_o_n_loader.html">P4::JSONLoader</a></div><div class="ttdef"><b>Definition</b> json_loader.h:41</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
 <div class="ttc" id="aclass_p_h_v_1_1_field_html"><div class="ttname"><a href="class_p_h_v_1_1_field.html">PHV::Field</a></div><div class="ttdef"><b>Definition</b> phv_fields.h:154</div></div>
 <div class="ttc" id="aclass_p_h_v_1_1_field_slice_html"><div class="ttname"><a href="class_p_h_v_1_1_field_slice.html">PHV::FieldSlice</a></div><div class="ttdef"><b>Definition</b> phv_fields.h:898</div></div>
 <div class="ttc" id="aclass_phv_info_html"><div class="ttname"><a href="class_phv_info.html">PhvInfo</a></div><div class="ttdef"><b>Definition</b> phv_fields.h:1095</div></div>
+<div class="ttc" id="anamespace_p4_1_1_i_r_html"><div class="ttname"><a href="namespace_p4_1_1_i_r.html">P4::IR</a></div><div class="ttdef"><b>Definition</b> constantParsing.h:22</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 <div class="ttc" id="anamespace_p_h_v_html"><div class="ttname"><a href="namespace_p_h_v.html">PHV</a></div><div class="ttdoc">The namespace encapsulating PHV-related stuff.</div><div class="ttdef"><b>Definition</b> bf-p4c/mau/gateway.h:32</div></div>
 <div class="ttc" id="anamespacejson_html"><div class="ttname"><a href="namespacejson.html">json</a></div><div class="ttdef"><b>Definition</b> bson.cpp:69</div></div>

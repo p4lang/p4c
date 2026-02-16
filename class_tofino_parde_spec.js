@@ -9,7 +9,7 @@ var class_tofino_parde_spec =
     [ "clkFreq", "class_tofino_parde_spec.html#ab8e13910aee262c44a38e985241d2cc8", null ],
     [ "extractorSpec", "class_tofino_parde_spec.html#a861e105249de874b527bc35c4d5f67cd", null ],
     [ "lineRate", "class_tofino_parde_spec.html#a1bbd1065c41438b944a8d2ca807eb560", null ],
-    [ "matchRegisters", "class_tofino_parde_spec.html#a07f8c104157b407e9b71f37fe41a85ce", null ],
+    [ "matchRegisters", "class_tofino_parde_spec.html#aebde64c708612fc2414dc2b0b9a5bd2d", null ],
     [ "maxClotsLivePerGress", "class_tofino_parde_spec.html#a2aa05e733c0ae36553d570dc9ba26af9", null ],
     [ "maxClotsPerState", "class_tofino_parde_spec.html#a2ee19e374cbf7521fbaa34a1f2d50490", null ],
     [ "maxParseDepth", "class_tofino_parde_spec.html#ac793a81c39f6cd582647c022aaeefb22", null ],
@@ -20,5 +20,5 @@ var class_tofino_parde_spec =
     [ "numParsers", "class_tofino_parde_spec.html#af948cd0421754343519ccf3ce1098d11", null ],
     [ "numTcamRows", "class_tofino_parde_spec.html#afb135ff2f29cef38ab6a7fa8259f2130", null ],
     [ "parserAllExtractorsSupportSingleByte", "class_tofino_parde_spec.html#a172448b01f081383c207ed75b78804d0", null ],
-    [ "scratchRegisters", "class_tofino_parde_spec.html#ad75f7b6e5d1283d9584fa28ae263ef1f", null ]
+    [ "scratchRegisters", "class_tofino_parde_spec.html#afdaad07a84d7073defdbca16a6b5cce1", null ]
 ];

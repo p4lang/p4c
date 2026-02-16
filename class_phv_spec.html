@@ -146,6 +146,8 @@ Inheritance diagram for PhvSpec:</div>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_phv_spec_1_1_mau_group_type.html">MauGroupType</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:struct_phv_spec_1_1_ph_v_cache" id="r_struct_phv_spec_1_1_ph_v_cache"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_phv_spec_1_1_ph_v_cache">PhVCache</a></td></tr>
+<tr class="separator:struct_phv_spec_1_1_ph_v_cache"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:struct_phv_spec_1_1_range_spec" id="r_struct_phv_spec_1_1_range_spec"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_phv_spec_1_1_range_spec">RangeSpec</a></td></tr>
 <tr class="separator:struct_phv_spec_1_1_range_spec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -162,10 +164,6 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>AddressSpec</b> = st
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a41f1081b23653433c85ed8a9f19c52d8" id="r_a41f1081b23653433c85ed8a9f19c52d8"><td class="memItemLeft" align="right" valign="top"><a id="a41f1081b23653433c85ed8a9f19c52d8" name="a41f1081b23653433c85ed8a9f19c52d8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>applyGlobalPragmas</b> (const std::vector&lt; const IR::Annotation * &gt; &amp;global_pragmas) const</td></tr>
-<tr class="memdesc:a41f1081b23653433c85ed8a9f19c52d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">apply global pragmas to cached info about available PHV containers <br /></td></tr>
-<tr class="separator:a41f1081b23653433c85ed8a9f19c52d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab82584539a4164c0b1dfe91bb81b8e95" id="r_ab82584539a4164c0b1dfe91bb81b8e95"><td class="memItemLeft" align="right" valign="top">const std::set&lt; <a class="el" href="namespace_p_h_v.html#aba5418d9e37657e37eb63ee0aa0a435f">PHV::Kind</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab82584539a4164c0b1dfe91bb81b8e95">containerKinds</a> () const</td></tr>
 <tr class="separator:ab82584539a4164c0b1dfe91bb81b8e95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf9751c299d390abfce184e899df4d61" id="r_adf9751c299d390abfce184e899df4d61"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adf9751c299d390abfce184e899df4d61">containerSetToString</a> (const <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &amp;set) const</td></tr>
@@ -231,6 +229,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasContainerKind</b> 
 <tr class="separator:a9c0fc21742e8da3d06dbd489afbd23f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae93fdaa882decf18a8c06c7ab3fb55a2" id="r_ae93fdaa882decf18a8c06c7ab3fb55a2"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae93fdaa882decf18a8c06c7ab3fb55a2">mauGroups</a> (<a class="el" href="namespace_p_h_v.html#a3ff115c4ef9dcfb7a3565ddc263f0ece">PHV::Size</a> sz) const</td></tr>
 <tr class="separator:ae93fdaa882decf18a8c06c7ab3fb55a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6237556ed551ff837b13ffafcd49c648" id="r_a6237556ed551ff837b13ffafcd49c648"><td class="memItemLeft" align="right" valign="top"><a id="a6237556ed551ff837b13ffafcd49c648" name="a6237556ed551ff837b13ffafcd49c648"></a>
+<a class="el" href="#struct_phv_spec_1_1_ph_v_cache">PhVCache</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>mutablePhvCache</b> () const</td></tr>
+<tr class="separator:a6237556ed551ff837b13ffafcd49c648"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9135d082d9caa0d14205b7850c9d3566" id="r_a9135d082d9caa0d14205b7850c9d3566"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9135d082d9caa0d14205b7850c9d3566">numContainersInGroup</a> () const</td></tr>
 <tr class="separator:a9135d082d9caa0d14205b7850c9d3566"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0bf6e6b11672b6a5212e2570de54b75" id="r_ad0bf6e6b11672b6a5212e2570de54b75"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0bf6e6b11672b6a5212e2570de54b75">numContainerTypes</a> () const</td></tr>
@@ -257,6 +258,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>hasContainerKind</b> 
 <tr class="separator:a02d359bc656d4a36e7ed08b50809c495"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1f50ad817b680f37a0a1765ce61cd27" id="r_aa1f50ad817b680f37a0a1765ce61cd27"><td class="memItemLeft" align="right" valign="top">const std::vector&lt; <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1f50ad817b680f37a0a1765ce61cd27">tagalongCollections</a> () const</td></tr>
 <tr class="separator:aa1f50ad817b680f37a0a1765ce61cd27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9774a7898c466cfb5c85309fcd779de1" id="r_a9774a7898c466cfb5c85309fcd779de1"><td class="memItemLeft" align="right" valign="top"><a id="a9774a7898c466cfb5c85309fcd779de1" name="a9774a7898c466cfb5c85309fcd779de1"></a>
+const <a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; <a class="el" href="class_p_h_v_1_1_type.html">PHV::Type</a>, unsigned &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>typeIdMap</b> () const</td></tr>
+<tr class="separator:a9774a7898c466cfb5c85309fcd779de1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -269,6 +273,9 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>getContainersPerG
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a7d6b5e983618ee345ed915fd5c9a52c6" id="r_a7d6b5e983618ee345ed915fd5c9a52c6"><td class="memItemLeft" align="right" valign="top"><a id="a7d6b5e983618ee345ed915fd5c9a52c6" name="a7d6b5e983618ee345ed915fd5c9a52c6"></a>
+<a class="el" href="#struct_phv_spec_1_1_ph_v_cache">PhVCache</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cache_</b></td></tr>
+<tr class="separator:a7d6b5e983618ee345ed915fd5c9a52c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af61de1844fbaa9288f42c983ec76cdb7" id="r_af61de1844fbaa9288f42c983ec76cdb7"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af61de1844fbaa9288f42c983ec76cdb7">containersPerGroup</a> = 0</td></tr>
 <tr class="separator:af61de1844fbaa9288f42c983ec76cdb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90dfecb697b8303dac63a092c02651df" id="r_a90dfecb697b8303dac63a092c02651df"><td class="memItemLeft" align="right" valign="top"><a id="a90dfecb697b8303dac63a092c02651df" name="a90dfecb697b8303dac63a092c02651df"></a>
@@ -289,24 +296,12 @@ std::map&lt; <a class="el" href="class_p_h_v_1_1_type.html">PHV::Type</a>, unsig
 <tr class="memitem:ae83e37b55012f6c811f45e6fe23dc3c9" id="r_ae83e37b55012f6c811f45e6fe23dc3c9"><td class="memItemLeft" align="right" valign="top"><a id="ae83e37b55012f6c811f45e6fe23dc3c9" name="ae83e37b55012f6c811f45e6fe23dc3c9"></a>
 std::map&lt; <a class="el" href="class_p_h_v_1_1_type.html">PHV::Type</a>, std::pair&lt; unsigned, unsigned &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>deparserGroupSpec</b></td></tr>
 <tr class="separator:ae83e37b55012f6c811f45e6fe23dc3c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accbd07ec98e00244ec92058e28159ebb" id="r_accbd07ec98e00244ec92058e28159ebb"><td class="memItemLeft" align="right" valign="top"><a id="accbd07ec98e00244ec92058e28159ebb" name="accbd07ec98e00244ec92058e28159ebb"></a>
-<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>egress_only_containers_i</b></td></tr>
-<tr class="separator:accbd07ec98e00244ec92058e28159ebb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a065dd8365330ec6f467f4f62a22a082b" id="r_a065dd8365330ec6f467f4f62a22a082b"><td class="memItemLeft" align="right" valign="top"><a id="a065dd8365330ec6f467f4f62a22a082b" name="a065dd8365330ec6f467f4f62a22a082b"></a>
 std::map&lt; <a class="el" href="namespace_p_h_v.html#a3ff115c4ef9dcfb7a3565ddc263f0ece">PHV::Size</a>, std::vector&lt; unsigned &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>egressOnlyMauGroupIds</b></td></tr>
 <tr class="separator:a065dd8365330ec6f467f4f62a22a082b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a88bd2f94f9473be6ec0b489164d41d1f" id="r_a88bd2f94f9473be6ec0b489164d41d1f"><td class="memItemLeft" align="right" valign="top"><a id="a88bd2f94f9473be6ec0b489164d41d1f" name="a88bd2f94f9473be6ec0b489164d41d1f"></a>
-<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>individually_assigned_containers_i</b></td></tr>
-<tr class="separator:a88bd2f94f9473be6ec0b489164d41d1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a158d1d0469ddc7e550b48abb0898ba01" id="r_a158d1d0469ddc7e550b48abb0898ba01"><td class="memItemLeft" align="right" valign="top"><a id="a158d1d0469ddc7e550b48abb0898ba01" name="a158d1d0469ddc7e550b48abb0898ba01"></a>
-<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ingress_only_containers_i</b></td></tr>
-<tr class="separator:a158d1d0469ddc7e550b48abb0898ba01"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a768f07ad213aa6da10203cebfc0e0845" id="r_a768f07ad213aa6da10203cebfc0e0845"><td class="memItemLeft" align="right" valign="top"><a id="a768f07ad213aa6da10203cebfc0e0845" name="a768f07ad213aa6da10203cebfc0e0845"></a>
 std::map&lt; <a class="el" href="namespace_p_h_v.html#a3ff115c4ef9dcfb7a3565ddc263f0ece">PHV::Size</a>, std::vector&lt; unsigned &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ingressOnlyMauGroupIds</b></td></tr>
 <tr class="separator:a768f07ad213aa6da10203cebfc0e0845"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a98cf62dbabc5635cde30ccc5620ba4fd" id="r_a98cf62dbabc5635cde30ccc5620ba4fd"><td class="memItemLeft" align="right" valign="top"><a id="a98cf62dbabc5635cde30ccc5620ba4fd" name="a98cf62dbabc5635cde30ccc5620ba4fd"></a>
-std::map&lt; <a class="el" href="namespace_p_h_v.html#a3ff115c4ef9dcfb7a3565ddc263f0ece">PHV::Size</a>, std::vector&lt; <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>mau_groups_i</b></td></tr>
-<tr class="separator:a98cf62dbabc5635cde30ccc5620ba4fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35a754535129baa54bfc613b27009612" id="r_a35a754535129baa54bfc613b27009612"><td class="memItemLeft" align="right" valign="top">std::map&lt; <a class="el" href="namespace_p_h_v.html#a3ff115c4ef9dcfb7a3565ddc263f0ece">PHV::Size</a>, <a class="el" href="struct_phv_spec_1_1_mau_group_type.html">MauGroupType</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a35a754535129baa54bfc613b27009612">mauGroupSpec</a></td></tr>
 <tr class="separator:a35a754535129baa54bfc613b27009612"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa403c4b1f786cbb592de4360954182d9" id="r_aa403c4b1f786cbb592de4360954182d9"><td class="memItemLeft" align="right" valign="top"><a id="aa403c4b1f786cbb592de4360954182d9" name="aa403c4b1f786cbb592de4360954182d9"></a>
@@ -315,23 +310,70 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>numPovBits</b> = 
 <tr class="memitem:a07503b547b516b7b89d7692e0ba71084" id="r_a07503b547b516b7b89d7692e0ba71084"><td class="memItemLeft" align="right" valign="top"><a id="a07503b547b516b7b89d7692e0ba71084" name="a07503b547b516b7b89d7692e0ba71084"></a>
 unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>numTagalongCollections</b> = 0</td></tr>
 <tr class="separator:a07503b547b516b7b89d7692e0ba71084"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0329d00f5da2ccb8db8a0c61db8724c" id="r_ab0329d00f5da2ccb8db8a0c61db8724c"><td class="memItemLeft" align="right" valign="top"><a id="ab0329d00f5da2ccb8db8a0c61db8724c" name="ab0329d00f5da2ccb8db8a0c61db8724c"></a>
-<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>physical_containers_i</b></td></tr>
-<tr class="separator:ab0329d00f5da2ccb8db8a0c61db8724c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6d46542ff3d6dbe323e4ddbec884ae5" id="r_af6d46542ff3d6dbe323e4ddbec884ae5"><td class="memItemLeft" align="right" valign="top"><a id="af6d46542ff3d6dbe323e4ddbec884ae5" name="af6d46542ff3d6dbe323e4ddbec884ae5"></a>
 std::map&lt; <a class="el" href="namespace_p_h_v.html#a3ff115c4ef9dcfb7a3565ddc263f0ece">PHV::Size</a>, std::set&lt; <a class="el" href="class_p_h_v_1_1_type.html">PHV::Type</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>sizeToTypeMap</b></td></tr>
 <tr class="separator:af6d46542ff3d6dbe323e4ddbec884ae5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27ffc3a011aade4387ede2a15f78ff5a" id="r_a27ffc3a011aade4387ede2a15f78ff5a"><td class="memItemLeft" align="right" valign="top"><a id="a27ffc3a011aade4387ede2a15f78ff5a" name="a27ffc3a011aade4387ede2a15f78ff5a"></a>
-std::vector&lt; <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>tagalong_collections_i</b></td></tr>
-<tr class="separator:a27ffc3a011aade4387ede2a15f78ff5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7fc128db27d6987df953f8523f1902f5" id="r_a7fc128db27d6987df953f8523f1902f5"><td class="memItemLeft" align="right" valign="top"><a id="a7fc128db27d6987df953f8523f1902f5" name="a7fc128db27d6987df953f8523f1902f5"></a>
 std::map&lt; <a class="el" href="class_p_h_v_1_1_type.html">PHV::Type</a>, unsigned &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>tagalongCollectionSpec</b></td></tr>
 <tr class="separator:a7fc128db27d6987df953f8523f1902f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d9f2f69eef2fcb272ee9e8f8feb5818" id="r_a8d9f2f69eef2fcb272ee9e8f8feb5818"><td class="memItemLeft" align="right" valign="top"><a id="a8d9f2f69eef2fcb272ee9e8f8feb5818" name="a8d9f2f69eef2fcb272ee9e8f8feb5818"></a>
-<a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; <a class="el" href="class_p_h_v_1_1_type.html">PHV::Type</a>, unsigned &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>typeIdMap</b></td></tr>
-<tr class="separator:a8d9f2f69eef2fcb272ee9e8f8feb5818"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4fc97cd3ff85814a0016b7308c9a981" id="r_ac4fc97cd3ff85814a0016b7308c9a981"><td class="memItemLeft" align="right" valign="top"><a id="ac4fc97cd3ff85814a0016b7308c9a981" name="ac4fc97cd3ff85814a0016b7308c9a981"></a>
+<a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; <a class="el" href="class_p_h_v_1_1_type.html">PHV::Type</a>, unsigned &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>typeIdMap_</b></td></tr>
+<tr class="separator:ac4fc97cd3ff85814a0016b7308c9a981"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="struct_phv_spec_1_1_ph_v_cache" id="struct_phv_spec_1_1_ph_v_cache"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#struct_phv_spec_1_1_ph_v_cache">&#9670;&#160;</a></span>PhvSpec::PhVCache</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct PhvSpec::PhVCache</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"></div><table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a07633b92475564dd92c0e09bdec3b81f" name="a07633b92475564dd92c0e09bdec3b81f"></a><a class="el" href="class_p4_1_1bitvec.html">bitvec</a></td>
+<td class="fieldname">
+egress_only_containers_i</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a037ae4ff752974a8c9c15074ef1e0bb9" name="a037ae4ff752974a8c9c15074ef1e0bb9"></a><a class="el" href="class_p4_1_1bitvec.html">bitvec</a></td>
+<td class="fieldname">
+individually_assigned_containers_i</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a3c2a9a6ab240ad0aaf40507f62f03a72" name="a3c2a9a6ab240ad0aaf40507f62f03a72"></a><a class="el" href="class_p4_1_1bitvec.html">bitvec</a></td>
+<td class="fieldname">
+ingress_only_containers_i</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a8e9e617de68f314413b0fa0cb27bacca" name="a8e9e617de68f314413b0fa0cb27bacca"></a>map&lt; Size, vector&lt; <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &gt; &gt;</td>
+<td class="fieldname">
+mau_groups_i</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a9d1951d47eadfcaa87dfb15786e4cfad" name="a9d1951d47eadfcaa87dfb15786e4cfad"></a><a class="el" href="class_p4_1_1bitvec.html">bitvec</a></td>
+<td class="fieldname">
+physical_containers_i</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a4cecaf4b1d01108da2babd2d154dc911" name="a4cecaf4b1d01108da2babd2d154dc911"></a>vector&lt; <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &gt;</td>
+<td class="fieldname">
+tagalong_collections_i</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 <a name="struct_phv_spec_1_1_range_spec" id="struct_phv_spec_1_1_range_spec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#struct_phv_spec_1_1_range_spec">&#9670;&#160;</a></span>PhvSpec::RangeSpec</h2>
 

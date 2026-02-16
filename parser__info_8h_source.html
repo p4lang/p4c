@@ -143,9 +143,9 @@ $(function(){initNavTree('parser__info_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &lt;boost/graph/topological_sort.hpp&gt;</span></div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/ir/control_flow_visitor.h&quot;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/ir/gress.h&quot;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/lib/assoc.h&quot;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/parde/parde_visitor.h&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/lib/assoc.h&quot;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/parde/parde_visitor.h&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/gress.h&quot;</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;lib/cstring.h&quot;</span></div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
@@ -759,7 +759,7 @@ $(function(){initNavTree('parser__info_8h_source.html',''); initResizable(true);
 </div>
 <div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span> </div>
 <div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span><span class="keyword">namespace </span>IR {</div>
+<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_i_r.html">IR</a> {</div>
 <div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span><span class="keyword">namespace </span>BFN {</div>
 <div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span> </div>
 <div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span><span class="keyword">using </span>ParserGraph = ParserGraphImpl&lt;IR::BFN::Parser, IR::BFN::ParserState, IR::BFN::Transition&gt;;</div>
@@ -912,7 +912,7 @@ $(function(){initNavTree('parser__info_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00887" name="l00887"></a><span class="lineno">  887</span>  <span class="comment">// end of group parde</span></div>
 <div class="line"><a id="l00889" name="l00889"></a><span class="lineno">  889</span> </div>
 <div class="line"><a id="l00890" name="l00890"></a><span class="lineno">  890</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_INFO_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:53</div></div>
 <div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> visitor.h:78</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
@@ -934,6 +934,7 @@ $(function(){initNavTree('parser__info_8h_source.html',''); initResizable(true);
 <div class="ttc" id="agroup__parde_html_class_parser"><div class="ttname"><a href="group__parde.html#class_parser">Parser</a></div><div class="ttdoc">Representation of the Tofino 1/2 parser in assembler.</div><div class="ttdef"><b>Definition</b> parser-tofino-jbay.h:48</div></div>
 <div class="ttc" id="agroup__parde_html_class_parser_graph_impl"><div class="ttname"><a href="group__parde.html#class_parser_graph_impl">ParserGraphImpl</a></div><div class="ttdef"><b>Definition</b> parser_info.h:186</div></div>
 <div class="ttc" id="agroup__parde_html_struct_parser_state_map"><div class="ttname"><a href="group__parde.html#struct_parser_state_map">ParserStateMap</a></div><div class="ttdef"><b>Definition</b> parser_info.h:183</div></div>
+<div class="ttc" id="anamespace_p4_1_1_i_r_html"><div class="ttname"><a href="namespace_p4_1_1_i_r.html">P4::IR</a></div><div class="ttdef"><b>Definition</b> constantParsing.h:22</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 <div class="ttc" id="anamespaceboost_html"><div class="ttname"><a href="namespaceboost.html">boost</a></div><div class="ttdef"><b>Definition</b> table_flow_graph.h:33</div></div>
 </div><!-- fragment --></div><!-- contents -->

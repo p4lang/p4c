@@ -386,6 +386,11 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This class detects a following pattern: </p>
+<p>Copyright (C) 2024 Intel Corporation</p>
+<p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p>
+<p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>
+<p>SPDX-License-Identifier: Apache-2.0 </p>
 <p>if (expr1 &amp;&amp; expr2) { dst = rvval1 | rvval2; } else if (expr1) { dst = rvval1; } else if (expr2) { dst = rvval2; }</p>
 <p>This can be optimized into two instructions which are executed at the same time and results are OR-ed together. This pattern is typical for the translation from P4 14 to P4 16 </p>
 </div></div><!-- contents -->

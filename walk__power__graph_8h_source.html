@@ -139,15 +139,15 @@ $(function(){initNavTree('walk__power__graph_8h_source.html',''); initResizable(
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &lt;set&gt;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/bf-p4c-options.h&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/ir/gress.h&quot;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/logging/power_schema.h&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/build_power_graph.h&quot;</span></div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/determine_power_usage.h&quot;</span></div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/jbay_next_table.h&quot;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/mau_power.h&quot;</span></div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/mau_visitor.h&quot;</span></div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/table_dependency_graph.h&quot;</span></div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/phv/phv_fields.h&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/logging/power_schema.h&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/build_power_graph.h&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/determine_power_usage.h&quot;</span></div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/jbay_next_table.h&quot;</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/mau_power.h&quot;</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/mau_visitor.h&quot;</span></div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/mau/table_dependency_graph.h&quot;</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/phv/phv_fields.h&quot;</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/gress.h&quot;</span></div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_mau_power.html">MauPower</a> {</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span></div>
@@ -238,7 +238,7 @@ $(function(){initNavTree('walk__power__graph_8h_source.html',''); initResizable(
 <div class="ttc" id="aclass_mau_power_1_1_mau_features_html"><div class="ttname"><a href="class_mau_power_1_1_mau_features.html">MauPower::MauFeatures</a></div><div class="ttdef"><b>Definition</b> mau_power.h:64</div></div>
 <div class="ttc" id="aclass_mau_power_1_1_walk_power_graph_html_ad5018ea37310b2d3bdee9079bff8e169"><div class="ttname"><a href="class_mau_power_1_1_walk_power_graph.html#ad5018ea37310b2d3bdee9079bff8e169">MauPower::WalkPowerGraph::end_apply</a></div><div class="ttdeci">void end_apply(const IR::Node *root) override</div><div class="ttdef"><b>Definition</b> walk_power_graph.cpp:68</div></div>
 <div class="ttc" id="aclass_next_table_html"><div class="ttname"><a href="class_next_table.html">NextTable</a></div><div class="ttdef"><b>Definition</b> next_table.h:26</div></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:53</div></div>
 <div class="ttc" id="anamespace_mau_power_html"><div class="ttname"><a href="namespace_mau_power.html">MauPower</a></div><div class="ttdef"><b>Definition</b> mau/asm_output.h:39</div></div>
 <div class="ttc" id="anamespace_p4_1_1graphs_html"><div class="ttname"><a href="namespace_p4_1_1graphs.html">P4::graphs</a></div><div class="ttdef"><b>Definition</b> controls.cpp:30</div></div>
 </div><!-- fragment --></div><!-- contents -->

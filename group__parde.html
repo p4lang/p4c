@@ -317,7 +317,7 @@ General information</h1>
 <li>BaseAsmParser</li>
 </ul>
 <p>The parde can also be affected at the beginning of <a class="el" href="midend.html">Midend</a> by architecture translation, see <a class="el" href="group___arch_translation.html">BFN::ArchTranslation</a> for more information.</p>
-<h1><a class="anchor" id="parser"></a>
+<h1><a class="anchor" id="parser-1"></a>
 Parser</h1>
 <p>In frontend and midend, the IR::P4Parser IR node is used to represent a parser. During architecture translation, i.e. within the BFN::ArchTranslation midend pass, the Tofino parser becomes represented with the IR::BFN::TnaParser IR node.</p>
 <p>In backend, after transformation within the BFN::BackendConverter post-midend pass, the Tofino parser is represented with the IR::BFN::Parser IR node. Within the LowerParser pass, the parser is transformed (lowered) into the representation that is closer to how HW works. For Tofino 1/2, IR::BFN::LoweredParser is produced,</p>
@@ -497,7 +497,7 @@ Write mode downgrading</h3>
 Tofino 2 considerations</h3>
 <p>All containers within the parser are 16b. Parser containers are combined or split to form 32b and 8b MAU containers. Different write modes <em>can</em> be used for the two adjacent 16b parser containers that form a 32b MAU container. A single write most applies to the 16b parser container that is split to form two 8b MAU containers, so both 8b containers must have the same write mode.</p>
 <p>Tofino 2 extractors can write a full 16b to a parser container, or they can write 8b to either the upper or lower half of a container. The container write mode is applied to any write to the container. An 8b extract to a SINGLE_WRITE marks the whole container as having been written, so a subsequent extract to the other 8b half will trigger a container multi-write error. Similarly, an 8b extract to a CLEAR_ON_WRITE container clears the whole container before writing the new data: an 8b extract to one half followed by an 8b extract to the other half of a CLEAR_ON_WRITE container results in only the second write being present. Except for very rare circumstances, containers should be set to BITWISE_OR if the upper and lower halves are expected to be written independently for any packet.</p>
-<h1><a class="anchor" id="deparser"></a>
+<h1><a class="anchor" id="deparser-1"></a>
 Deparser</h1>
 <p>The deparser reassembles packets prior to storage in TM (Tofino 1/2) and prior to transmission via the MAC (all chips).</p>
 <h2><a class="anchor" id="target-constants"></a>

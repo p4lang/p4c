@@ -135,9 +135,9 @@ $(function(){initNavTree('extract__parser_8h_source.html',''); initResizable(tru
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#define BACKENDS_TOFINO_BF_P4C_PARDE_EXTRACT_PARSER_H_</span></div>
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/bf-p4c-options.h&quot;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/ir/gress.h&quot;</span></div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/logging/pass_manager.h&quot;</span></div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/parde/parde_visitor.h&quot;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/logging/pass_manager.h&quot;</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/parde/parde_visitor.h&quot;</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/gress.h&quot;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;frontends/common/resolveReferences/referenceMap.h&quot;</span></div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;frontends/p4/typeMap.h&quot;</span></div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
@@ -145,7 +145,7 @@ $(function(){initNavTree('extract__parser_8h_source.html',''); initResizable(tru
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;lib/exceptions.h&quot;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span> </div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">namespace </span>IR {</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_i_r.html">IR</a> {</div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="keyword">namespace </span>BFN {</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">class </span>Deparser;</div>
@@ -202,12 +202,13 @@ $(function(){initNavTree('extract__parser_8h_source.html',''); initResizable(tru
 <div class="ttc" id="aclass_b_f_n_1_1_process_parde_html_a382c97744486a9a1f3211fcb1cfe6978"><div class="ttname"><a href="class_b_f_n_1_1_process_parde.html#a382c97744486a9a1f3211fcb1cfe6978">BFN::ProcessParde::ProcessParde</a></div><div class="ttdeci">ProcessParde(const IR::BFN::Pipe *rv, bool useTna)</div><div class="ttdef"><b>Definition</b> extract_parser.cpp:1861</div></div>
 <div class="ttc" id="aclass_logging_1_1_file_log_html"><div class="ttname"><a href="class_logging_1_1_file_log.html">Logging::FileLog</a></div><div class="ttdoc">A FileLog is used to redirect the logging output of a visitor pass to a file.</div><div class="ttdef"><b>Definition</b> filelog.h:48</div></div>
 <div class="ttc" id="aclass_logging_1_1_pass_manager_html"><div class="ttname"><a href="class_logging_1_1_pass_manager.html">Logging::PassManager</a></div><div class="ttdef"><b>Definition</b> backends/tofino/bf-p4c/logging/pass_manager.h:36</div></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:53</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:67</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
 <div class="ttc" id="agroup___arch_translation_html_class_b_f_n_1_1_parse_tna"><div class="ttname"><a href="group___arch_translation.html#class_b_f_n_1_1_parse_tna">BFN::ParseTna</a></div><div class="ttdef"><b>Definition</b> arch.h:326</div></div>
 <div class="ttc" id="agroup__parde_html_class_parser_inspector"><div class="ttname"><a href="group__parde.html#class_parser_inspector">ParserInspector</a></div><div class="ttdef"><b>Definition</b> parde_visitor.h:66</div></div>
 <div class="ttc" id="anamespace_b_f_n_html"><div class="ttname"><a href="namespace_b_f_n.html">BFN</a></div><div class="ttdoc">The namespace encapsulating Barefoot/Intel-specific stuff.</div><div class="ttdef"><b>Definition</b> bf-asm/alloc.h:10</div></div>
+<div class="ttc" id="anamespace_p4_1_1_i_r_html"><div class="ttname"><a href="namespace_p4_1_1_i_r.html">P4::IR</a></div><div class="ttdef"><b>Definition</b> constantParsing.h:22</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

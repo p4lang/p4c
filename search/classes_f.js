@@ -11,7 +11,7 @@ var searchData=
   ['option_5ft_8',['option_t',['../structoption__t.html',1,'']]],
   ['optional_9',['Optional',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_optional.html',1,'P4::P4Tools::P4Testgen::Bmv2::Optional'],['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_optional.html',1,'P4::P4Tools::P4Testgen::Pna::Optional']]],
   ['optionaltoternarymatchtypeconverter_10',['OptionalToTernaryMatchTypeConverter',['../group__midend.html#class_b_f_n_1_1_optional_to_ternary_match_type_converter',1,'BFN']]],
-  ['options_11',['Options',['../class_p4_1_1graphs_1_1_options.html',1,'P4::graphs::Options'],['../class_p4_1_1_util_1_1_options.html',1,'P4::Util::Options']]],
+  ['options_11',['Options',['../class_device.html#struct_device_1_1_options',1,'Device::Options'],['../class_p4_1_1graphs_1_1_options.html',1,'P4::graphs::Options'],['../class_p4_1_1_util_1_1_options.html',1,'P4::Util::Options']]],
   ['orderarguments_12',['OrderArguments',['../class_p4_1_1_order_arguments.html',1,'P4']]],
   ['ordered_5fmap_13',['ordered_map',['../class_p4_1_1ordered__map.html',1,'P4']]],
   ['ordered_5fmap_3c_20actionbussource_2c_20p4_3a_3aordered_5fmap_3c_20unsigned_2c_20unsigned_20_3e_20_3e_14',['ordered_map&lt; ActionBusSource, P4::ordered_map&lt; unsigned, unsigned &gt; &gt;',['../class_p4_1_1ordered__map.html',1,'P4']]],

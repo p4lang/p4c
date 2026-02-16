@@ -139,9 +139,9 @@ $(function(){initNavTree('extract__deparser_8h_source.html',''); initResizable(t
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/common/ir_utils.h&quot;</span></div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/common/pragma/all_pragmas.h&quot;</span></div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h&quot;</span></div>
-<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/device.h&quot;</span></div>
-<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/ir/gress.h&quot;</span></div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/parde/parde_visitor.h&quot;</span></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/parde/parde_visitor.h&quot;</span></div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/device.h&quot;</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#include &quot;backends/tofino/bf-p4c/specs/gress.h&quot;</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#include &quot;frontends/common/resolveReferences/referenceMap.h&quot;</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;frontends/p4/typeMap.h&quot;</span></div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
@@ -149,7 +149,7 @@ $(function(){initNavTree('extract__deparser_8h_source.html',''); initResizable(t
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &quot;lib/exceptions.h&quot;</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">namespace </span>IR {</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4_1_1_i_r.html">IR</a> {</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="keyword">namespace </span>BFN {</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="keyword">class </span>Pipe;</div>
@@ -274,6 +274,7 @@ $(function(){initNavTree('extract__deparser_8h_source.html',''); initResizable(t
 <div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
 <div class="ttc" id="agroup__parde_html_class_deparser_inspector"><div class="ttname"><a href="group__parde.html#class_deparser_inspector">DeparserInspector</a></div><div class="ttdef"><b>Definition</b> parde_visitor.h:117</div></div>
 <div class="ttc" id="anamespace_b_f_n_html"><div class="ttname"><a href="namespace_b_f_n.html">BFN</a></div><div class="ttdoc">The namespace encapsulating Barefoot/Intel-specific stuff.</div><div class="ttdef"><b>Definition</b> bf-asm/alloc.h:10</div></div>
+<div class="ttc" id="anamespace_p4_1_1_i_r_html"><div class="ttname"><a href="namespace_p4_1_1_i_r.html">P4::IR</a></div><div class="ttdef"><b>Definition</b> constantParsing.h:22</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 <div class="ttc" id="anamespace_p4_html_a9fe6085b1cee8f21f098c9db89644b58"><div class="ttname"><a href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">P4::error</a></div><div class="ttdeci">void error(const char *format, Args &amp;&amp;...args)</div><div class="ttdoc">Report an error with the given message.</div><div class="ttdef"><b>Definition</b> lib/error.h:58</div></div>
 <div class="ttc" id="astruct_p4_1_1_i_r_1_1_i_d_html"><div class="ttname"><a href="struct_p4_1_1_i_r_1_1_i_d.html">P4::IR::ID</a></div><div class="ttdef"><b>Definition</b> id.h:28</div></div>
