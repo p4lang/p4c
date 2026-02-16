@@ -1467,7 +1467,6 @@ forUpdateStatementsNonEmpty
 forCollectionExpr
     : expression                        { $$ = $1; }
     | expression ".." expression        { $$ = new IR::Range(@1 + @3, $1, $3); }
-    | typeRef                           { $$ = new IR::ConstructorCallExpression(@1, $1, {}); }
     ;
 
 /************************* TABLE *********************************/
