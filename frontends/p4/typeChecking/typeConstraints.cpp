@@ -126,30 +126,30 @@ std::string TypeConstraint::localError(Explain *explainer) const {
     if (errFormat.isNullOrEmpty()) return "";
 
     std::string message, explanation;
-    boost::format fmt = boost::format(errFormat.c_str());
     switch (errArguments.size()) {
         case 0:
-            message = boost::str(fmt);
+            message = ::P4::createFormattedMessage(errFormat.c_str());
             break;
         case 1:
             absl::StrAppend(&explanation, explain(0, explainer));
-            message = ::P4::error_helper(fmt, errArguments.at(0)).toString();
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0)).toString();
             break;
         case 2:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer));
-            message = ::P4::error_helper(fmt, errArguments.at(0), errArguments.at(1)).toString();
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0), errArguments.at(1))
+                          .toString();
             break;
         case 3:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer));
-            message =
-                ::P4::error_helper(fmt, errArguments.at(0), errArguments.at(1), errArguments.at(2))
-                    .toString();
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0), errArguments.at(1),
+                                         errArguments.at(2))
+                          .toString();
             break;
         case 4:
             absl::StrAppend(&explanation, explain(0, explainer), explain(1, explainer),
                             explain(2, explainer), explain(3, explainer));
-            message = ::P4::error_helper(fmt, errArguments.at(0), errArguments.at(1),
+            message = ::P4::error_helper(errFormat.c_str(), errArguments.at(0), errArguments.at(1),
                                          errArguments.at(2), errArguments.at(3))
                           .toString();
             break;
