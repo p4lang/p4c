@@ -51,20 +51,23 @@ T *COWinfo<T>::getClone() const {
 /* COW reference to an element from a container.  Used by COWfieldref specializations
  * of safe_vector, Vector, IndexedVector, and NameMap */
 template <class T, class C, class U, C T::*field>
-struct COW_element_ref {
+struct COW_element_ref
+    : public COWref_base<T, U, COW_element_ref<T, C, U, field>>
+{
     COWinfo<T> *info;
-    bool is_const;
+    mutable bool is_const;
     union {
         typename C::const_iterator ci;
-        typename C::iterator ni;
+        mutable typename C::iterator ni;
     };
-    COW_element_ref(COWinfo<T> *inf, typename C::const_iterator i) : info(inf), is_const(true) {
+    COW_element_ref(COWinfo<T> *inf, typename C::const_iterator i)
+        : info(inf), is_const(true) {
         ci = i;
     }
     COW_element_ref(COWinfo<T> *inf, typename C::iterator i) : info(inf), is_const(false) {
         ni = i;
     }
-    void clone_fixup() {
+    void clone_fixup() const {
         if (is_const) {
             // messy problem -- need to clone (iff not yet cloned) and then find the
             // corresponding iterator in the clone
@@ -76,20 +79,15 @@ struct COW_element_ref {
             is_const = false;
         }
     }
-    U get() {
+    using COWref_base<T, U, COW_element_ref<T, C, U, field>>::operator=;
+    const U &get() const {
         if (is_const && info->isCloned()) clone_fixup();
         return *ci;
     }
-    operator U() { return get(); }
-    U operator=(U val) {
+    U &modify() const {
         clone_fixup();
-        return *ni = val;
+        return *ni;
     }
-    void set(U val) {
-        clone_fixup();
-        *ni = val;
-    }
-    void visit_children(Visitor &v, const char *name) { get().visit_children(v, name); }
 };
 
 template <class T, class C, class U, C T::*field>
@@ -132,148 +130,95 @@ struct COW_iterator {
     COW_element_ref<T, C, U, field> &operator*() { return ref; }
 };
 
+template <class T, class U, class REF, class ITER>
+struct COW_iterableref_base : public COWref_base<T, U, REF> {
+    using iterator = ITER;
+    iterator begin() {
+        REF *self = static_cast<REF *>(this);
+        if (self->info->isCloned())
+            return iterator(self->info, self->modify().begin());
+        else
+            return iterator(self->info, self->get().begin());
+    }
+    iterator end() {
+        REF *self = static_cast<REF *>(this);
+        if (self->info->isCloned())
+            return iterator(self->info, self->modify().end());
+        else
+            return iterator(self->info, self->get().end());
+    }
+    iterator erase(iterator i) {
+        REF *self = static_cast<REF *>(this);
+        i.ref.clone_fixup();
+        U &vec = self->modify();
+        return iterator(self->info, vec.erase(i.ref.ni));
+    }
+    // FIXME should add insert/append/prepend/emplace_back specializations
+};
+
 /* specialization for safe_vector */
 template <class T, typename U, safe_vector<U> T::*field>
-struct COWfieldref<T, safe_vector<U>, field> {
+struct COWfieldref<T, safe_vector<U>, field>
+    : public COW_iterableref_base<T, safe_vector<U>, COWfieldref<T, safe_vector<U>, field>,
+                                  COW_iterator<T, safe_vector<U>, U, field>> {
     COWinfo<T> *info;
-
-    using iterator = COW_iterator<T, safe_vector<U>, U, field>;
+    using COWref_base<T, safe_vector<U>, COWfieldref<T, safe_vector<U>, field>>::operator=;
+    const safe_vector<U> &get() const { return info->get()->*field; }
+    safe_vector<U> &modify() const { return info->mkClone()->*field; }
 
     void visit_children(Visitor &v, const char *name = nullptr) {
         auto res = visit_safe_vector(get(), "safe_vector", v, name);
         if (res != get()) modify() = std::move(res);
     }
-
-    const safe_vector<U> &get() const { return info->get()->*field; }
-    safe_vector<U> &modify() const { return info->mkClone()->*field; }
-    operator const safe_vector<U> &() const { return get(); }
-    safe_vector<U> &operator=(const safe_vector<U> &val) const { return modify() = val; }
-    safe_vector<U> &operator=(safe_vector<U> &&val) const { return modify() = std::move(val); }
-    iterator begin() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).begin());
-        else
-            return iterator(info, (info->get()->*field).begin());
-    }
-    iterator end() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).begin());
-        else
-            return iterator(info, (info->get()->*field).begin());
-    }
-    // FIXME need to add insert/appeand/prepend/emplace_back specializations
 };
 
 /* specializations for IR::Vector */
 template <class T, typename U, Vector<U> T::*field>
-struct COWfieldref<T, Vector<U>, field> {
+struct COWfieldref<T, Vector<U>, field>
+    : public COW_iterableref_base<T, Vector<U>, COWfieldref<T, Vector<U>, field>,
+                                  COW_iterator<T, Vector<U>, const U *, field>> {
     COWinfo<T> *info;
-
-    using iterator = COW_iterator<T, Vector<U>, const U *, field>;
+    using COWref_base<T, Vector<U>, COWfieldref<T, Vector<U>, field>>::operator=;
+    const Vector<U> &get() const { return info->get()->*field; }
+    Vector<U> &modify() const { return info->mkClone()->*field; }
 
     void visit_children(Visitor &v, const char *name = nullptr) {
         auto res = visit_safe_vector(get().get_contents(), "Vector", v, name);
         if (res != get().get_contents()) modify().replace_contents(std::move(res));
     }
-
-    const Vector<U> &get() const { return info->get()->*field; }
-    Vector<U> &modify() const { return info->mkClone()->*field; }
-    operator const Vector<U> &() const { return get(); }
-    Vector<U> &operator=(const Vector<U> &val) const { return modify() = val; }
-    Vector<U> &operator=(Vector<U> &&val) const { return modify() = std::move(val); }
-    iterator begin() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).begin());
-        else
-            return iterator(info, (info->get()->*field).begin());
-    }
-    iterator end() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).end());
-        else
-            return iterator(info, (info->get()->*field).end());
-    }
-    iterator erase(iterator i) {
-        i.ref.clone_fixup();
-        Vector<U> &vec = info->getClone()->*field;
-        return iterator(info, vec.erase(i.ref.ni));
-    }
-    // FIXME need to add insert/appeand/prepend/emplace_back specializations
 };
 
 /* specializations for IR::IndexedVector */
 template <class T, typename U, IndexedVector<U> T::*field>
-struct COWfieldref<T, IndexedVector<U>, field> {
+struct COWfieldref<T, IndexedVector<U>, field>
+    : public COW_iterableref_base<T, IndexedVector<U>, COWfieldref<T, IndexedVector<U>, field>,
+                                  COW_iterator<T, IndexedVector<U>, const U *, field>> {
     COWinfo<T> *info;
-
-    using iterator = COW_iterator<T, IndexedVector<U>, const U *, field>;
+    using COWref_base<T, IndexedVector<U>, COWfieldref<T, IndexedVector<U>, field>>::operator=;
+    const IndexedVector<U> &get() const { return info->get()->*field; }
+    IndexedVector<U> &modify() const { return info->mkClone()->*field; }
 
     void visit_children(Visitor &v, const char *name = nullptr) {
         auto res = visit_safe_vector(get().get_contents(), "IndexedVector", v, name);
         if (res != get().get_contents()) modify().replace_contents(std::move(res));
     }
-
-    const IndexedVector<U> &get() const { return info->get()->*field; }
-    IndexedVector<U> &modify() const { return info->mkClone()->*field; }
-    operator const IndexedVector<U> &() const { return get(); }
-    IndexedVector<U> &operator=(const IndexedVector<U> &val) const { return modify() = val; }
-    IndexedVector<U> &operator=(IndexedVector<U> &&val) const { return modify() = std::move(val); }
-    iterator begin() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).begin());
-        else
-            return iterator(info, (info->get()->*field).begin());
-    }
-    iterator end() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).end());
-        else
-            return iterator(info, (info->get()->*field).end());
-    }
-    iterator erase(iterator i) {
-        i.ref.clone_fixup();
-        IndexedVector<U> &vec = info->getClone()->*field;
-        return iterator(info, vec.erase(i.ref.ni));
-    }
-    // FIXME need to add insert/appeand/prepend/emplace_back/removeByName specializations
 };
 
 /* specializations for IR::NameMap */
 template <class T, typename U, template <class K, class V, class COMP, class ALLOC> class MAP,
           NameMap<U, MAP> T::*field>
-struct COWfieldref<T, NameMap<U, MAP>, field> {
+struct COWfieldref<T, NameMap<U, MAP>, field>
+    : public COW_iterableref_base<T, NameMap<U, MAP>, COWfieldref<T, NameMap<U, MAP>, field>,
+                                  COW_iterator<T, NameMap<U, MAP>, const U *, field>> {
     COWinfo<T> *info;
-
-    using iterator = COW_iterator<T, NameMap<U, MAP>, const U *, field>;
+    using COWref_base<T, NameMap<U, MAP>, COWfieldref<T, NameMap<U, MAP>, field>>::operator=;
+    const NameMap<U, MAP> &get() const { return info->get()->*field; }
+    NameMap<U, MAP> &modify() const { return info->mkClone()->*field; }
 
     void visit_children(Visitor &v, const char *name = nullptr) {
         auto res = get().visit_symbols(v, name);
         if (!get().match_contents(res)) modify().replace_contents(std::move(res));
     }
-
-    const NameMap<U, MAP> &get() const { return info->get()->*field; }
-    NameMap<U, MAP> &modify() const { return info->mkClone()->*field; }
-    operator const NameMap<U, MAP> &() const { return get(); }
-    NameMap<U, MAP> &operator=(const NameMap<U, MAP> &val) const { return modify() = val; }
-    NameMap<U, MAP> &operator=(NameMap<U, MAP> &&val) const { return modify() = std::move(val); }
-    iterator begin() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).begin());
-        else
-            return iterator(info, (info->get()->*field).begin());
-    }
-    iterator end() {
-        if (info->isCloned())
-            return iterator(info, (info->getClone()->*field).end());
-        else
-            return iterator(info, (info->get()->*field).end());
-    }
-    iterator erase(iterator i) {
-        i.ref.clone_fixup();
-        NameMap<U, MAP> &nm = info->getClone()->*field;
-        return iterator(info, nm.erase(i.ref.ni));
-    }
-    // FIXME need to add insert/appeand/prepend/emplace_back/removeByName specializations
 };
 
 // FIXME -- need NodeMap specializations if any backend ever uses that template
@@ -289,64 +234,75 @@ struct COWfieldref<T, std::variant<TYPES...>, field> {
 };
 #endif
 
+/* wrapper to allow modifications of a COWref.  Generally used to access fields of
+ * a COWref of some composite */
+template <class T, class U, class COW, class X, U X::*field>
+//requires COWref<COW>
+struct COWref_subfield : public COWref_base<T, U, COWref_subfield<T, U, COW, X, field>> {
+    COWinfo<T> *info;
+    using COWref_base<T, U, COWref_subfield<T, U, COW, X, field>>::operator=;
+    const U &get() const { return (reinterpret_cast<const COW *>(this)->get()).*field; }
+    U &modify() const { return (reinterpret_cast<const COW *>(this)->modify()).*field; }
+};
+
 /* specialization for pairs */
 template <class T, typename U, typename V, std::pair<U, V> T::*field>
-struct COWpair_first {
-    COWinfo<T> *info;
-    const U &get() const { return info->get()->*field.first; }
-    U &modify() const { return info->mkClone()->*field.first; }
-    operator const U &() const { return get(); }
-    const U &operator=(const U &val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = val;
-    }
-    const U &operator=(U &&val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = std::move(val);
-    }
-    void set(const U &val) const { *this = val; }
-    void visit_children(Visitor &v, const char *name = nullptr) { get().visit_children(v, name); }
-    const U &operator->() const { return get(); }
-};
-
-template <class T, typename U, typename V, std::pair<U, V> T::*field>
-struct COWpair_second {
-    COWinfo<T> *info;
-    const V &get() const { return info->get()->*field.second; }
-    V &modify() const { return info->mkClone()->*field.second; }
-    operator const V &() const { return get(); }
-    const V &operator=(const V &val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = val;
-    }
-    const V &operator=(V &&val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = std::move(val);
-    }
-    void set(const V &val) const { *this = val; }
-    void visit_children(Visitor &v, const char *name = nullptr) { get().visit_children(v, name); }
-    const V &operator->() const { return get(); }
-};
-
-template <class T, typename U, typename V, std::pair<U, V> T::*field>
-struct COWfieldref<T, std::pair<U, V>, field> {
+struct COWfieldref<T, std::pair<U, V>, field>
+    : public COWref_base<T, std::pair<U, V>, COWfieldref<T, std::pair<U, V>, field>>
+{
     union {
         COWinfo<T> *info;
-        COWpair_first<T, U, V, field> first;
-        COWpair_second<T, U, V, field> second;
+        COWref_subfield<T, U, COWfieldref<T, std::pair<U, V>, field>, std::pair<U, V>, &std::pair<U, V>::first> first;
+        COWref_subfield<T, V, COWfieldref<T, std::pair<U, V>, field>, std::pair<U, V>, &std::pair<U, V>::second> second;
     };
+    using COWref_base<T, std::pair<U, V>, COWfieldref<T, std::pair<U, V>, field>>::operator=;
     const std::pair<U, V> &get() const { return info->get()->*field; }
     std::pair<U, V> &modify() const { return info->mkClone()->*field; }
-    operator const std::pair<U, V> &() const { return get(); }
-    const std::pair<U, V> &operator=(const std::pair<U, V> &val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = val;
+};
+
+/* specialization for a vector<pair> element */
+template <class T, class C, class U, class V, C T::*field>
+struct COW_element_ref<T, C, std::pair<U, V>, field>
+    : public COWref_base<T, std::pair<U, V>, COW_element_ref<T, C, std::pair<U, V>, field>>
+{
+    union {
+        COWinfo<T> *info;
+        COWref_subfield<T, U, COW_element_ref<T, C, std::pair<U, V>, field>, std::pair<U, V>, &std::pair<U, V>::first> first;
+        COWref_subfield<T, V, COW_element_ref<T, C, std::pair<U, V>, field>, std::pair<U, V>, &std::pair<U, V>::second> second;
+    };
+    mutable bool is_const;
+    union {
+        typename C::const_iterator ci;
+        mutable typename C::iterator ni;
+    };
+    COW_element_ref(COWinfo<T> *inf, typename C::const_iterator i)
+        : info(inf), is_const(true) {
+        ci = i;
     }
-    const std::pair<U, V> &operator=(std::pair<U, V> &&val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = std::move(val);
+    COW_element_ref(COWinfo<T> *inf, typename C::iterator i) : info(inf), is_const(false) {
+        ni = i;
     }
-    void set(const std::pair<U, V> &val) const { *this = val; }
+    void clone_fixup() const {
+        if (is_const) {
+            // messy problem -- need to clone (iff not yet cloned) and then find the
+            // corresponding iterator in the clone
+            auto i = (info->mkClone()->*field).begin();
+            auto &orig_vec = info->getOrig()->*field;
+            for (auto oi = orig_vec.begin(); oi != ci; ++oi, ++i)
+                BUG_CHECK(oi != orig_vec.end(), "Invalid iterator in clone_fixup");
+            ni = i;
+            is_const = false;
+        }
+    }
+    using COWref_base<T, std::pair<U, V>, COW_element_ref<T, C, std::pair<U, V>, field>>::operator=;
+    const std::pair<U, V> &get() const {
+        if (is_const && info->isCloned()) clone_fixup();
+        return *ci;
+    }
+    std::pair<U, V> &modify() const {
+        clone_fixup();
+        return *ni;
+    }
 };
 
 }  // namespace P4::IR

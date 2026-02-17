@@ -57,11 +57,13 @@ class NameMap : public Node {
     explicit NameMap(JSONLoader &);
     NameMap &operator=(const NameMap &) = default;
     NameMap &operator=(NameMap &&) = default;
-    typedef typename map_t::value_type value_type;
-    typedef typename map_t::iterator iterator;
-    typedef typename map_t::const_iterator const_iterator;
-    typedef typename map_t::reverse_iterator reverse_iterator;
-    typedef typename map_t::const_reverse_iterator const_reverse_iterator;
+    using value_type = map_t::value_type;
+    using reference = map_t::reference;
+    using const_reference = map_t::const_reference;
+    using iterator = map_t::iterator;
+    using const_iterator = map_t::const_iterator;
+    using reverse_iterator = map_t::reverse_iterator;
+    using const_reverse_iterator = map_t::const_reverse_iterator;
 
  private:
     struct elem_ref {

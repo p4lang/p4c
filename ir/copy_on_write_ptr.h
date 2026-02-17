@@ -33,6 +33,7 @@ class Node;
 template <typename T>
 concept COWref = requires(T r) {
     r.set(r.get());
+    r.modify() = r.get();
 };
 
 class COWNode_info {
@@ -65,24 +66,33 @@ class COWinfo : public COWNode_info {
     }
 };
 
-template <class T, typename U, U T::*field>
-struct COWfieldref {
-    COWinfo<T> *info;
-
-    const U &get() const { return info->get()->*field; }
-    U &modify() const { return info->mkClone()->*field; }
-    operator const U &() const { return get(); }
+template <class T, class U, class REF>
+// requires REF inherits from COWref_base, and has COWinfo<T> *info;
+struct COWref_base {
+    operator const U &() const { return static_cast<const REF *>(this)->get(); }
     const U &operator=(const U &val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = val;
+        const REF *self = static_cast<const REF *>(this);
+        if (!self->info->isCloned() && self->get() == val) return val;
+        return self->modify() = val;
     }
     const U &operator=(U &&val) const {
-        if (!info->isCloned() && get() == val) return val;
-        return modify() = std::move(val);
+        const REF *self = static_cast<const REF *>(this);
+        if (!self->info->isCloned() && self->get() == val) return val;
+        return self->modify() = std::move(val);
     }
     void set(const U &val) const { *this = val; }
-    void visit_children(Visitor &v, const char *name = nullptr) { get().visit_children(v, name); }
-    const U &operator->() const { return get(); }
+    void visit_children(Visitor &v, const char *name = nullptr) {
+        static_cast<REF *>(this)->get().visit_children(v, name);
+    }
+    const U &operator->() const { return static_cast<const REF *>(this)->get(); }
+};
+
+template <class T, typename U, U T::*field>
+struct COWfieldref : public COWref_base<T, U, COWfieldref<T, U, field>> {
+    COWinfo<T> *info;
+    using COWref_base<T, U, COWfieldref<T, U, field>>::operator=;
+    const U &get() const { return info->get()->*field; }
+    U &modify() const { return info->mkClone()->*field; }
 };
 
 template <class T>

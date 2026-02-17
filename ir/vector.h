@@ -67,7 +67,6 @@ class Vector : public VectorBase {
     safe_vector<const T *> vec;
 
  public:
-    typedef const T *value_type;
     Vector() = default;
     Vector(const Vector &) = default;
     Vector(Vector &&) = default;
@@ -83,8 +82,14 @@ class Vector : public VectorBase {
         : vec(e->begin(), e->end()) {}
     static Node *fromJSON(JSONLoader &json);
 
+    // container requirements
+    using value_type = typename safe_vector<const T *>::value_type;
+    using reference = typename safe_vector<const T *>::reference;
+    using const_reference = typename safe_vector<const T *>::const_reference;
     using iterator = typename safe_vector<const T *>::iterator;
     using const_iterator = typename safe_vector<const T *>::const_iterator;
+    using difference_type = typename safe_vector<const T *>::difference_type;
+    using size_type = typename safe_vector<const T *>::size_type;
 
     iterator begin() { return vec.begin(); }
     const_iterator begin() const { return vec.begin(); }
