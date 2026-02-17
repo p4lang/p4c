@@ -93,7 +93,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "P4Testgen Bug: Unable to find var .* in the symbolic environment"
-  tna_simple_switch.p4
 )
 
 p4tools_add_xfail_reason(
