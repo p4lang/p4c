@@ -1614,12 +1614,11 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file.string(), false);
-            if (!out) {
+            if (auto out = openFile(file.string(), false)) {
+                p4Runtime.serializeP4InfoTo(out.get(), format);
+            } else {
                 ::P4::error(ErrorType::ERR_IO, "Couldn't open P4Runtime API file: %1%", file);
-                continue;
             }
-            p4Runtime.serializeP4InfoTo(out, format);
         }
     }
 
@@ -1636,13 +1635,12 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file.string(), false);
-            if (!out) {
+            if (auto out = openFile(file.string(), false)) {
+                p4Runtime.serializeEntriesTo(out.get(), format);
+            } else {
                 ::P4::error(ErrorType::ERR_IO, "Couldn't open P4Runtime static entries file: %1%",
                             options.p4RuntimeEntriesFile);
-                continue;
             }
-            p4Runtime.serializeEntriesTo(out, format);
         }
     }
 }

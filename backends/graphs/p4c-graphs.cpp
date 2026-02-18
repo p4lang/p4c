@@ -180,8 +180,10 @@ int main(int argc, char *const argv[]) {
     const IR::ToplevelBlock *top = nullptr;
     try {
         top = midEnd.process(program);
-        if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(program);
+        if (!options.dumpJsonFile.empty()) {
+            auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+            JSONGenerator(*dumpJsonStream).emit(program);
+        }
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

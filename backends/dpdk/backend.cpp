@@ -116,8 +116,8 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new VisitFunctor([this, genContextJson] {
             // Serialize context json object into user specified file
             if (!options.ctxtFile.empty()) {
-                if (std::ostream *out = openFile(options.ctxtFile, false)) {
-                    genContextJson->serializeContextJson(out);
+                if (auto out = openFile(options.ctxtFile, false)) {
+                    genContextJson->serializeContextJson(out.get());
                     out->flush();
                 } else
                     ::P4::error(ErrorType::ERR_IO, "Could not open file: %1%", options.ctxtFile);

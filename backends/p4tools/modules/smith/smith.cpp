@@ -65,7 +65,7 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
     if (outputFile.empty()) {
         outputFile = "out.p4";
     }
-    auto *ostream = openFile(outputFile, false);
+    auto ostream = openFile(outputFile, false);
     if (ostream == nullptr) {
         error("must have [file]");
         exit(EXIT_FAILURE);
@@ -83,13 +83,13 @@ int Smith::mainImpl(const CompilerResult & /*result*/) {
     printInfo("============ Program seed %1% =============\n", *smithOptions.seed);
     const auto &smithTarget = SmithTarget::get();
 
-    auto result = smithTarget.writeTargetPreamble(ostream);
+    auto result = smithTarget.writeTargetPreamble(ostream.get());
     if (result != EXIT_SUCCESS) {
         return result;
     }
     const auto *generatedProgram = smithTarget.generateP4Program();
     // Use ToP4 to write the P4 program to the specified stream.
-    P4::ToP4 top4(ostream, false);
+    P4::ToP4 top4(ostream.get(), false);
     generatedProgram->apply(top4);
     ostream->flush();
     P4Scope::endLocalScope();

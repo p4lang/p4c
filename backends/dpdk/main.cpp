@@ -54,12 +54,11 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
 
     std::filesystem::path filename = isTDI ? options.tdiFile : options.bfRtSchema;
     auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
-    std::ostream *out = openFile(filename, false);
-    if (!out) {
+    if (auto out = openFile(filename, false)) {
+        p4rt->serializeBFRuntimeSchema(out.get());
+    } else {
         ::P4::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
-        return;
     }
-    p4rt->serializeBFRuntimeSchema(out);
 }
 
 int main(int argc, char *const argv[]) {
@@ -134,8 +133,10 @@ int main(int argc, char *const argv[]) {
         toplevel = midEnd.process(program);
         if (::P4::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr)
             return 1;
-        if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true).emit(program);
+        if (!options.dumpJsonFile.empty()) {
+            auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+            JSONGenerator(*dumpJsonStream, true).emit(program);
+        }
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -148,8 +149,7 @@ int main(int argc, char *const argv[]) {
     if (::P4::errorCount() > 0) return 1;
 
     if (!options.outputFile.empty()) {
-        std::ostream *out = openFile(options.outputFile, false);
-        if (out != nullptr) {
+        if (auto out = openFile(options.outputFile, false)) {
             backend->codegen(*out);
             out->flush();
         }
