@@ -160,6 +160,14 @@ class ErrorCatalog {
 
         return error;
     }
+    /// return true if the given diagnostic name exists in the catalog
+    bool diagnosticExists(std::string_view name) {
+        cstring lookup(name);
+        for (const auto &pair : errorCatalog) {
+            if (pair.second == lookup) return true;
+        }
+        return false;
+    }
 
     void initReporter(ErrorReporter &reporter);
 
