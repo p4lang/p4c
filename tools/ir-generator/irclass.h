@@ -20,6 +20,7 @@ limitations under the License.
 #include <map>
 #include <set>
 #include <stdexcept>
+#include <unordered_set>
 #include <vector>
 
 #include "lib/cstring.h"
@@ -349,7 +350,9 @@ class IrClass : public IrElement {
     void generate_impl(std::ostream &out) const override;
     void generateTreeMacro(std::ostream &out) const;
     access_t outputCOWfieldrefs(std::ostream &out) const;
+    access_t outputCOWmethodrefs(access_t, std::ostream &out, std::unordered_set<cstring>) const;
     void outputCOWref(std::ostream &out) const;
+    void outputCOWnested(std::ostream &out) const;
     void resolve() override;
     cstring toString() const override { return name; }
     std::string fullName() const;

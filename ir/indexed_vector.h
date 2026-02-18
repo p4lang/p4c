@@ -223,7 +223,7 @@ class IndexedVector : public Vector<T> {
     static cstring static_type_name() { return "IndexedVector<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v, const char *name) override;
     void visit_children(Visitor &v, const char *name) const override;
-    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const;
+    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const override;
 
     void toJSON(JSONGenerator &json) const override;
     static Node *fromJSON(JSONLoader &json);

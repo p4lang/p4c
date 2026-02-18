@@ -519,23 +519,25 @@ void IrClass::generateMethods() {
                     ->where([name](IrElement *el) { return el->to<IrMethod>()->name == name; })
                     ->nextOrDefault());
             cstring body;
+            Util::SourceInfo srcInfo;
             if (exist) {
+                srcInfo = exist->srcInfo;
                 if (def.second.flags & COWREF_METHOD) {
                     if (exist->body) body = rewriteCOWMethodBody(exist->body);
                     exist = nullptr;
                 } else if (!(def.second.flags & EXTEND))
                     continue;
                 else
-                    body = def.second.create(this, exist->srcInfo, exist->body);
+                    body = def.second.create(this, srcInfo, exist->body);
             } else
-                body = def.second.create(this, Util::SourceInfo(), cstring());
+                body = def.second.create(this, srcInfo, cstring());
             if (body) {
                 if (!body.size()) body = nullptr;
                 if (exist) {
                     exist->body = body;
                     if (def.second.flags & FRIEND) exist->isFriend = true;
                 } else {
-                    auto *m = new IrMethod(def.first, body);
+                    auto *m = new IrMethod(srcInfo, def.first, body);
                     if (def.second.flags & FRIEND) m->isFriend = true;
                     m->clss = this;
                     if (!(def.second.flags & CONSTRUCTOR) || !shouldSkip("method_constructor"_cs)) {
