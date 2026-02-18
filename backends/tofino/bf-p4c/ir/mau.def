@@ -169,7 +169,7 @@ class Table : BFN::Unit, IAnnotated  {
         int   total_actions                = 0;
         int   sel_len_bits                 = 0;
         int   proxy_hash_width             = 0;
-        HashFunction proxy_hash_algorithm  = {};
+        MAU::HashFunction proxy_hash_algorithm  = {};
         inline IndirectAddress meter_addr  = {};
         inline IndirectAddress stats_addr  = {};
         inline IndirectAddress action_addr = {};

@@ -24,7 +24,7 @@ namespace P4 {
 class COWModifier;
 class COWTransform;
 class Visitor;
-class Visitor_Context;
+struct Visitor_Context;
 
 namespace IR {
 
@@ -34,6 +34,8 @@ template <typename T>
 concept COWref = requires(T r) {
     r.set(r.get());
     r.modify() = r.get();
+    // also requires `this == &this->info` where `this->info` is a `COWinfo<X> *`
+    // where X is some IR::Node subclass
 };
 
 class COWNode_info {
@@ -66,6 +68,7 @@ class COWinfo : public COWNode_info {
     }
 };
 
+// CRTP base class for all classes that implement concept COWref<U>
 template <class T, class U, class REF>
 // requires REF inherits from COWref_base, and has COWinfo<T> *info;
 struct COWref_base {
@@ -80,6 +83,7 @@ struct COWref_base {
         if (!self->info->isCloned() && self->get() == val) return val;
         return self->modify() = std::move(val);
     }
+    bool isCloned() const { return static_cast<const REF *>(this)->info->isCloned(); }
     void set(const U &val) const { *this = val; }
     void visit_children(Visitor &v, const char *name = nullptr) {
         static_cast<REF *>(this)->get().visit_children(v, name);
@@ -87,12 +91,27 @@ struct COWref_base {
     const U &operator->() const { return static_cast<const REF *>(this)->get(); }
 };
 
+/* basic COWref reference to a field of a COW object */
 template <class T, typename U, U T::*field>
 struct COWfieldref : public COWref_base<T, U, COWfieldref<T, U, field>> {
     COWinfo<T> *info;
     using COWref_base<T, U, COWfieldref<T, U, field>>::operator=;
     const U &get() const { return info->get()->*field; }
+    const U &getOrig() const { return info->getOrig()->*field; }
     U &modify() const { return info->mkClone()->*field; }
+};
+
+/* COWref reference to a field of a COWref */
+template <class T, class U, class COW, class X, U X::*field>
+// requires COWref<COW>
+struct COWref_subfield : public COWref_base<T, U, COWref_subfield<T, U, COW, X, field>> {
+    COWinfo<T> *info;
+    // FIXME -- should be `union { COWinfo<T> *info; COW ref; };`, but that causes errors
+    // about incomplete types when trying to instantiate specializations.
+    using COWref_base<T, U, COWref_subfield<T, U, COW, X, field>>::operator=;
+    const U &get() const { return (reinterpret_cast<const COW *>(this)->get()).*field; }
+    const U &getOrig() const { return (reinterpret_cast<const COW *>(this)->getOrig()).*field; }
+    U &modify() const { return (reinterpret_cast<const COW *>(this)->modify()).*field; }
 };
 
 template <class T>

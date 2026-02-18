@@ -153,7 +153,7 @@ class NameMap : public Node {
     map_t visit_symbols(Visitor &v, const char *name) const;
     void visit_children(Visitor &v, const char *) override;
     void visit_children(Visitor &v, const char *) const override;
-    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const;
+    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const override;
     void toJSON(JSONGenerator &json) const override;
     static Node *fromJSON(JSONLoader &json);
 

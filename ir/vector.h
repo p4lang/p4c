@@ -204,7 +204,7 @@ class Vector : public VectorBase {
 
     void visit_children(Visitor &v, const char *name) override;
     void visit_children(Visitor &v, const char *name) const override;
-    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const;
+    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const override;
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr);
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr) const;
     void toJSON(JSONGenerator &json) const override;

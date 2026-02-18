@@ -460,7 +460,7 @@ IrElement::access_t IrClass::outputCOWfieldrefs(std::ostream &out) const {
     for (auto e : elements) {
         if (auto *fld = e->to<IrField>()) {
             if (fld->isStatic) continue;
-            if (e->access != access) out << indent << (access = e->access);
+            if (e->access != access) out << (access = e->access);
             out << indent << "COWfieldref<" << name << ", " << fld->typeName() << ", &" << name
                 << "::" << fld->name << "> " << fld->name << ";\n";
         }
@@ -468,16 +468,82 @@ IrElement::access_t IrClass::outputCOWfieldrefs(std::ostream &out) const {
     return access;
 }
 
+IrElement::access_t IrClass::outputCOWmethodrefs(IrElement::access_t access, std::ostream &out,
+                                                 std::unordered_set<cstring> overridden) const {
+    std::unordered_set<cstring> override_parent = overridden;
+    for (auto e : elements) {
+        if (auto *m = e->to<IrMethod>()) {
+            if (m->isStatic) continue;
+            if (m->name == name) continue;  // constructor
+            if (overridden.count(m->name)) continue;
+            override_parent.insert(m->name);
+            if (e->access != access) out << (access = e->access);
+            out << indent;
+            m->generate_proto(out, false, true);
+            out << " { return info->" << (m->isConst ? "get" : "mkClone") << "()->"
+                << m->name << "(";
+            const char *sep = "";
+            for (auto *a : m->args) {
+                out << sep << a->name;
+                sep = ", ";
+            }
+            out << "); }\n";
+        }
+    }
+    if (concreteParent)
+        return concreteParent->outputCOWmethodrefs(access, out, override_parent);
+    return access;
+}
+
 void IrClass::outputCOWref(std::ostream &out) const {
     if (kind != NodeKind::Concrete && kind != NodeKind::Template) return;
-    out << "union P4::" << qualified_name(nullptr) << "::COWref {\n";
+    for (auto e : elements) {
+        if (auto *nc = e->to<IrClass>()) {
+            nc->outputCOWnested(out);
+        }
+    }
+    out << "namespace P4::IR {" << std::endl;
+    enter_namespace(out, containedIn);
+    out << "union " << name << "::COWref {\n";
     out << IrElement::Private;
     out << indent << "COWNode_info *_info;\n";
+    out << indent << "COWinfo<" << name << "> *info;\n";
     if (outputCOWfieldrefs(out) != IrElement::Public) out << IrElement::Public;
     out << indent << "COWref(COWNode_info *i) { _info = i; }\n";
     out << indent << "COWref *operator->() { return this; }\n";
     out << indent << "void visit_children(Visitor &, const char *);\n";
+    outputCOWmethodrefs(IrElement::Public, out,
+        { "visit_children"_cs, "COWref::visit_children"_cs, "COWref_visit_children"_cs });
     out << "};\n";
+    exit_namespace(out, containedIn);
+    out << "}  // namespace P4::IR" << std::endl;
+}
+
+void IrClass::outputCOWnested(std::ostream &out) const {
+    std::stringstream COWfieldref;
+    cstring qname = qualified_name(&IrNamespace::global());
+    COWfieldref << "COWfieldref<T, " << qname << ", field>";
+    out << "namespace P4::IR {" << std::endl;
+    out << "template <class T, " << qname << " T::*field>\n";
+    out << "struct " << COWfieldref << "\n";
+    out << indent << ": public COWref_base<T, " << qname << ", " << COWfieldref << "> {\n";
+    out << indent << "union {\n";
+    out << indent << indent << "COWinfo<T> *info;\n";
+    for (auto e : elements) {
+        if (auto *fld = e->to<IrField>()) {
+            if (fld->isStatic) continue;
+            out << indent << indent << "COWref_subfield<T, " << fld->typeName() << ", "
+                                    << COWfieldref << ", " << qname << ", &" << qname << "::"
+                                    << fld->name << "> " << fld->name << ";\n";
+        }
+    }
+    out << indent << "};\n";
+    out << indent << "using COWref_base<T, " << qname << ", " << COWfieldref << ">::operator=;\n";
+    out << indent << "const " << qname << " &get() const { return info->get()->*field; }\n";
+    out << indent << "const " << qname << " &getOrig() const { return info->getOrig()->*field; }\n";
+    out << indent << qname << " &modify() const { return info->mkClone()->*field; }\n";
+    out << "};\n";
+    out << "}  // namespace P4::IR" << std::endl;
 }
 
 void IrClass::generate_hdr(std::ostream &out) const {
