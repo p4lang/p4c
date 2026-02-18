@@ -105,8 +105,8 @@ class PrettyPrint : public Inspector {
     }
     bool preorder(const IR::P4Program *program) override {
         if (!ppfile.empty()) {
-            std::ostream *ppStream = openFile(ppfile, true);
-            P4::ToP4 top4(ppStream, false, inputfile);
+            auto ppStream = openFile(ppfile, true);
+            P4::ToP4 top4(ppStream.get(), false, inputfile);
             (void)program->apply(top4);
         }
         return false;  // prune

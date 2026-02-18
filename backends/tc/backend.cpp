@@ -1933,8 +1933,7 @@ void Backend::serialize() const {
     }
     std::filesystem::path outputFile = options.outputFolder / (progName + ".template");
 
-    auto outstream = openFile(outputFile, false);
-    if (outstream != nullptr) {
+    if (auto outstream = openFile(outputFile, false)) {
         *outstream << pipeline->toString();
         outstream->flush();
         std::filesystem::permissions(outputFile.c_str(),

@@ -101,8 +101,10 @@ int main(int argc, char *const argv[]) {
         toplevel = midEnd.process(program);
         if (::P4::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr)
             return 1;
-        if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true).emit(program);
+        if (!options.dumpJsonFile.empty()) {
+            auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+            JSONGenerator(*dumpJsonStream, true).emit(program);
+        }
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -123,8 +125,7 @@ int main(int argc, char *const argv[]) {
     if (::P4::errorCount() > 0) return 1;
 
     if (!options.outputFile.empty()) {
-        std::ostream *out = openFile(options.outputFile, false);
-        if (out != nullptr) {
+        if (auto out = openFile(options.outputFile, false)) {
             backend->serialize(*out);
             out->flush();
         }

@@ -82,8 +82,10 @@ int main(int argc, char *const argv[]) {
             ::P4::error("Cannot process input file. Program does not contain a 'main' module");
             return 1;
         }
-        if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(toplevel);
+        if (!options.dumpJsonFile.empty()) {
+            auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+            JSONGenerator(*dumpJsonStream).emit(toplevel);
+        }
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -95,8 +97,7 @@ int main(int argc, char *const argv[]) {
     if (!backend.process()) return 1;
     std::string progName = backend.tcIR->getPipelineName().string();
     std::string introspecFile = options.outputFolder / (progName + ".json");
-    std::ostream *outIntro = openFile(introspecFile, false);
-    if (outIntro != nullptr) {
+    if (auto outIntro = openFile(introspecFile, false)) {
         bool serialized = backend.serializeIntrospectionJson(*outIntro);
         if (!serialized) {
             std::remove(introspecFile.c_str());
