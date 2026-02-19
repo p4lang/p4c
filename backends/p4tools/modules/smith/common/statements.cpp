@@ -445,7 +445,7 @@ IR::ForInStatement *StatementGenerator::genForInLoopStatement(bool is_in_func) {
 
     // Create the IR nodes for the for-in-loop component expressions.
     auto declVar =
-        new IR::Declaration_Variable(IR::ID(loopVar), varType, new IR::Constant(varType, 0));
+        new IR::Declaration_Variable(IR::ID(loopVar), varType);
     auto collectionExpr =
         new IR::Range(new IR::Constant(varType, lowerBound), new IR::Constant(varType, upperBound));
     auto *bodyStmt = genBlockStatement(is_in_func);
