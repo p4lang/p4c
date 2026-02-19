@@ -1,5 +1,7 @@
 var NAVTREEINDEX35 =
 {
+"struct_b_f_n_1_1_parser_loops_info.html#a9412a2fe817b68f579c9aff9d935da54":[12,0,4,149,2],
+"struct_b_f_n_1_1_parser_loops_info.html#a9412a2fe817b68f579c9aff9d935da54":[13,0,4,153,2],
 "struct_b_f_n_1_1_parser_loops_info.html#acc347770072933254c6b716c033d4cc5":[12,0,4,149,1],
 "struct_b_f_n_1_1_parser_loops_info.html#acc347770072933254c6b716c033d4cc5":[13,0,4,153,1],
 "struct_b_f_n_1_1_parser_loops_info_1_1_get_max_loop_depth.html":[12,0,4,149,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX35 =
 "struct_insert_parser_counter_stall.html":[13,0,380],
 "struct_instruction.html":[13,0,383],
 "struct_instruction_1_1_decode.html":[13,0,383,0],
-"struct_instruction_memory.html":[13,0,385],
-"struct_instruction_memory.html#a3765208dcfe21426c8bdd2d10766734c":[13,0,385,1],
-"struct_instruction_memory_1_1_use.html":[13,0,385,0]
+"struct_instruction_memory.html":[13,0,385]
 };

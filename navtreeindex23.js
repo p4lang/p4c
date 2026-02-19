@@ -1,5 +1,7 @@
 var NAVTREEINDEX23 =
 {
+"class_p4_1_1_storage_factory.html":[13,0,12,486],
+"class_p4_1_1_storage_location.html":[12,0,14,473],
 "class_p4_1_1_storage_location.html":[13,0,12,487],
 "class_p4_1_1_storage_location.html#ae23674b6eeb9e271d1f41260970fad24":[12,0,14,473,1],
 "class_p4_1_1_storage_location.html#ae23674b6eeb9e271d1f41260970fad24":[13,0,12,487,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX23 =
 "class_p4_1_1_test_1_1_event_logger_test.html#aa45e828613b6256b0a9ff4a01243a34c":[13,0,12,23,23,0],
 "class_p4_1_1_test_1_1_event_logger_testable.html":[12,0,14,12,23],
 "class_p4_1_1_test_1_1_event_logger_testable.html":[13,0,12,23,24],
-"class_p4_1_1_test_1_1_field_def_use_test.html":[12,0,14,12,24],
-"class_p4_1_1_test_1_1_field_def_use_test.html":[13,0,12,23,25],
-"class_p4_1_1_test_1_1_field_slice_live_range_test.html":[12,0,14,12,25]
+"class_p4_1_1_test_1_1_field_def_use_test.html":[12,0,14,12,24]
 };
