@@ -319,10 +319,8 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::LOr *expression) {
 }
 
 bool DoSimplifyExpressions::mayAlias(const IR::Expression *left, const IR::Expression *right,
-                                     const Visitor::Context *ctxt) const {
-    // FIXME: This recreates ReadWrites() over and over again, loosing all
-    // declaration lookup caching
-    return ReadsWrites().mayAlias(left, right, ctxt);
+                                     const Visitor::Context *ctxt) {
+    return readsWrites.mayAlias(left, right, ctxt);
 }
 
 /// Returns true if type is a header or a struct containing a header.
@@ -406,24 +404,25 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     // large structs.  We want to avoid copying these large
     // structs if possible.
     std::set<const IR::Parameter *> useTemporary;
-    // Set of expressions modified while evaluating this method call.
-    ordered_set<const IR::Expression *> modifies;
-    // FIXME: We need to be able to cache results here and not to recompute over
-    // and over again
-    GetWrittenExpressions gwe(typeMap);
-    gwe.setCalledBy(this);
-    mce->apply(gwe, getContext());
+    const auto &modifies = writtenExpressionsCache
+                               .lazy_emplace(orig,
+                                             [this, mce, orig](const auto &ctor) {
+                                                 GetWrittenExpressions gwe(typeMap);
+                                                 gwe.setCalledBy(this);
+                                                 mce->apply(gwe, getContext());
+                                                 ctor(orig, gwe.written);
+                                             })
+                               ->second;
 
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction == IR::Direction::None) continue;
         auto arg = mi->substitution.lookup(p);
-        if (gwe.written.find(GetWrittenExpressions::everything) != gwe.written.end()) {
+        if (modifies.find(GetWrittenExpressions::everything) != modifies.end()) {
             // just copy everything.
             LOG3("Detected table application, using temporaries for all parameters " << arg);
             for (auto p : *mi->substitution.getParametersInArgumentOrder()) useTemporary.emplace(p);
             break;
         }
-        modifies.insert(gwe.written.begin(), gwe.written.end());
 
         // If an argument evaluation has side-effects then
         // always use a temporary to hold the argument value.
@@ -718,6 +717,8 @@ Visitor::profile_t DoSimplifyExpressions::init_apply(const IR::Node *node) {
 void DoSimplifyExpressions::end_apply(const IR::Node *) {
     BUG_CHECK(toInsert.empty(), "DoSimplifyExpressions::end_apply orphaned declarations");
     BUG_CHECK(statements.empty(), "DoSimplifyExpressions::end_apply orphaned statements");
+    readsWrites.clear();
+    writtenExpressionsCache.clear();
 }
 
 ///////////////////////////////////////////////

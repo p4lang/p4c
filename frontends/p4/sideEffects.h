@@ -19,11 +19,14 @@ limitations under the License.
 
 /* makes explicit side effect ordering */
 
+#include "absl/container/flat_hash_map.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/alias.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
+#include "lib/hash.h"
 
 namespace P4 {
 
@@ -149,6 +152,10 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     TypeMap *typeMap;
     // Expressions holding temporaries that are already added.
     std::set<const IR::Expression *> *added;
+    ReadsWrites readsWrites;
+    absl::flat_hash_map<const IR::MethodCallExpression *, ordered_set<const IR::Expression *>,
+                        Util::Hash>
+        writtenExpressionsCache;
 
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
     IR::IndexedVector<IR::StatOrDecl> statements;
@@ -160,7 +167,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     const IR::Expression *addAssignment(Util::SourceInfo srcInfo, cstring varName,
                                         const IR::Expression *expression);
     bool mayAlias(const IR::Expression *left, const IR::Expression *right,
-                  const Visitor::Context *ctxt) const;
+                  const Visitor::Context *ctxt);
     bool containsHeaderType(const IR::Type *type);
 
  public:
