@@ -149,7 +149,7 @@ void hash_vector_base::freehash() {
             delete[] hash.s2;
             break;
         case sizeof(uint32_t):
-            delete[] hash.s2;
+            delete[] hash.s3;
             break;
     }
     hash.s1 = nullptr;
