@@ -52,6 +52,27 @@ TEST(Util, Format) {
 
     message = context.errorReporter().format_message("%1% %2%", x, 5);
     EXPECT_EQ("x 5", message);
+
+    message = context.errorReporter().format_message("String={}", "abc");
+    EXPECT_EQ("String=abc", message);
+
+    message = context.errorReporter().format_message("Int={}", -5);
+    EXPECT_EQ("Int=-5", message);
+
+    message = context.errorReporter().format_message("Unsigned={}", 7u);
+    EXPECT_EQ("Unsigned=7", message);
+
+    message = context.errorReporter().format_message("Hex={:x}", 255);
+    EXPECT_EQ("Hex=ff", message);
+
+    message = context.errorReporter().format_message("Escaped {{}} {}", "ok");
+    EXPECT_EQ("Escaped {} ok", message);
+
+    message = context.errorReporter().format_message("Value={}", nf);
+    EXPECT_EQ("Value=(1,2,3)", message);
+
+    message = context.errorReporter().format_message("Legacy=%s", "abc");
+    EXPECT_NE(std::string(message).find("Internal Formatting Error"), std::string::npos);
 }
 
 }  // namespace P4::Util

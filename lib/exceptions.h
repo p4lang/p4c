@@ -64,7 +64,7 @@ inline const char *cerr_clear_colors() {
 }
 
 /// Base class for all exceptions.
-/// Supports boost-style (%N%) and printf/absl::StrFormat-style (%s, %d, etc.)
+/// Supports boost-style (%N%) and std::format-style ({}, {:x}, etc.)
 /// placeholders.
 class P4CExceptionBase : public std::exception {
  protected:

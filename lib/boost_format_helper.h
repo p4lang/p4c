@@ -3,6 +3,8 @@
 
 #include <cctype>
 #include <charconv>
+#include <filesystem>
+#include <format>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -16,7 +18,6 @@
 #include <vector>
 
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_format.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 #include "lib/stringify.h"
@@ -25,7 +26,7 @@ namespace P4 {
 
 namespace detail {
 // Formatter adapter for legacy boost::format placeholders (%N%) and
-// printf/absl::StrFormat placeholders (%s, %d, ...).
+// std::format placeholders ({}, {:x}, ...).
 // The style is auto-detected; mixed styles are rejected.
 
 template <typename T>
@@ -131,19 +132,23 @@ void extractBugSourceInfoImpl(const Tuple &tup, std::string &position, std::stri
     };
 }
 
-enum class FormatStyle { Unknown, Boost, Abseil, Literal };
+enum class FormatStyle { Unknown, Boost, Std, Literal };
 
 inline constexpr FormatStyle detectFormatStyle(std::string_view fmt) {
     bool hasBoost = false;
-    bool hasAbseil = false;
+    bool hasStd = false;
+    bool hasUnsupportedPercent = false;
 
     for (size_t i = 0; i < fmt.size(); ++i) {
+        if (fmt[i] == '{' || fmt[i] == '}') {
+            hasStd = true;
+            continue;
+        }
+
         if (fmt[i] == '%') {
             if (i + 1 >= fmt.size()) {
-                // Lone % at end - consider it Abseil style
-                hasAbseil = true;
-                if (hasBoost) return FormatStyle::Unknown;  // Mixed
-                break;                                      // Nothing more to parse
+                hasUnsupportedPercent = true;
+                break;
             }
 
             char nextChar = fmt[i + 1];
@@ -163,32 +168,21 @@ inline constexpr FormatStyle detectFormatStyle(std::string_view fmt) {
                 if (j < fmt.size() && fmt[j] == '%') {
                     // Found %N% pattern
                     hasBoost = true;
-                    if (hasAbseil) return FormatStyle::Unknown;  // Mixed style detected
-                    i = j;                                       // Move index past the closing '%'
+                    i = j;     // Move index past the closing '%'
                     continue;  // Proceed to next part of the string
                 }
-                // If it was digits but didn't end in '%', it's Abseil style
-                // Let it fall through to the general Abseil case below.
             }
 
-            // If it wasn't %% and wasn't a valid %N% sequence,
-            // treat it as the start of an Abseil style specifier.
-            // We don't need to parse the rest of the Abseil specifier for detection.
-            hasAbseil = true;
-            if (hasBoost) return FormatStyle::Unknown;  // Mixed style detected
-
-            // We can simply skip the next character (% followed by non-digit/non-%),
-            // as the outer loop will increment 'i'. More complex skipping isn't needed
-            // just for *detection*. The actual formatting function handles parsing.
-            // i++; // Implicitly skipped by outer loop increment
+            hasUnsupportedPercent = true;
         }
         // Ignore non-% characters
     }
 
     // Final classification based on exclusively found styles
-    if (hasBoost && hasAbseil) return FormatStyle::Unknown;
+    if (hasUnsupportedPercent) return FormatStyle::Unknown;
+    if (hasBoost && hasStd) return FormatStyle::Unknown;
     if (hasBoost) return FormatStyle::Boost;
-    if (hasAbseil) return FormatStyle::Abseil;
+    if (hasStd) return FormatStyle::Std;
     return FormatStyle::Literal;
 }
 
@@ -247,61 +241,43 @@ std::string formatBoostStyle(std::string_view formatSv, const Tuple &argTuple) {
     return ss.str();
 }
 
-template <typename Tuple, std::size_t... Is>  // Is is the pack 0, 1, 2...
-void populateSelectiveAbseilArgsImpl(const Tuple &tup, std::vector<std::string> &argStrings,
-                                     std::vector<absl::FormatArg> &abslArgs,
-                                     std::index_sequence<Is...>) {
-    abslArgs.reserve(std::tuple_size_v<Tuple>);
-    argStrings.reserve(std::tuple_size_v<Tuple>);
-
-    // Use initializer list and lambda with constexpr if to process each element.
-    (void)std::initializer_list<int>{
-        (
-            [&] {
-                const auto &element = std::get<Is>(tup);
-                using ElementType = std::decay_t<decltype(element)>;
-
-                if constexpr (std::is_integral_v<ElementType>) {
-                    // Pass integral natively.
-                    abslArgs.push_back(absl::FormatArg(element));
-                } else {
-                    // Convert other types to string.
-                    std::stringstream tempSs;
-                    detail::streamArgument(tempSs, element);
-                    argStrings.push_back(tempSs.str());
-                    abslArgs.push_back(absl::FormatArg(argStrings.back()));
-                }
-            }(),
-            0)...  // 0 is placeholder for initializer list expansion
-    };
-}
-
-// Wrapper to generate the index sequence
-template <typename Tuple>
-void populateSelectiveAbseilArgs(const Tuple &tup, std::vector<std::string> &argStrings,
-                                 std::vector<absl::FormatArg> &abslArgs) {
-    populateSelectiveAbseilArgsImpl(tup, argStrings, abslArgs,
-                                    std::make_index_sequence<std::tuple_size_v<Tuple>>{});
-}
-
-template <typename Tuple>
-std::string formatAbslStyle(std::string_view formatSv, const Tuple &argTuple) {
-    // 1. Populate abslArgs vector: integrals passed directly, others as strings
-    std::vector<std::string> argStrings;
-    std::vector<absl::FormatArg> abslArgs;
-    populateSelectiveAbseilArgs(argTuple, argStrings, abslArgs);
-
-    // 2. Call Abseil Format
-    std::string result;
-    absl::UntypedFormatSpec spec(formatSv);
-    if (!absl::FormatUntyped(&result, spec, abslArgs)) {
-        // Formatting might fail if specifier doesn't match type.
-        // e.g., %d applied to a pre-rendered string or the "" placeholder.
-        // Or %s applied to an integral (Abseil might handle this, though).
-        throw std::runtime_error(
-            absl::StrCat("absl::Format error. Can not format with the provided arguments"));
+template <typename T>
+auto makeStdFormatArg(const T &element) {
+    using ElementType = std::decay_t<T>;
+    if constexpr (std::is_same_v<ElementType, P4::Util::SourceInfo>) {
+        return std::string();
+    } else if constexpr (is_char_pointer_v<ElementType>) {
+        return std::string(element ? element : "<nullptr>");
+    } else if constexpr (std::is_same_v<ElementType, P4::cstring>) {
+        return element;
+    } else if constexpr (std::is_same_v<ElementType, std::filesystem::path>) {
+        return element.string();
+    } else if constexpr (std::is_same_v<ElementType, std::string> ||
+                         std::is_same_v<ElementType, std::string_view>) {
+        return element;
+    } else if constexpr (std::is_enum_v<ElementType>) {
+        return static_cast<std::underlying_type_t<ElementType>>(element);
+    } else if constexpr (std::is_arithmetic_v<ElementType>) {
+        return element;
+    } else {
+        std::stringstream tempSs;
+        detail::streamArgument(tempSs, element);
+        return tempSs.str();
     }
-    return result;
+}
+
+template <typename Tuple, std::size_t... Is>
+auto prepareStdFormatArgsTuple(const Tuple &tup, std::index_sequence<Is...>) {
+    return std::make_tuple(makeStdFormatArg(std::get<Is>(tup))...);
+}
+
+template <typename Tuple>
+std::string formatStdStyle(std::string_view formatSv, const Tuple &argTuple) {
+    auto prepared =
+        prepareStdFormatArgsTuple(argTuple, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    return std::apply(
+        [&](const auto &...args) { return std::vformat(formatSv, std::make_format_args(args...)); },
+        prepared);
 }
 
 }  // namespace detail
@@ -321,9 +297,8 @@ std::string createFormattedMessageFromTuple(const char *format, const Tuple &arg
         switch (style) {
             case detail::FormatStyle::Boost:
                 return detail::formatBoostStyle(formatSv, argTuple);
-            case detail::FormatStyle::Abseil:
-                // Pass the original tuple to the Abseil formatter.
-                return detail::formatAbslStyle(formatSv, argTuple);
+            case detail::FormatStyle::Std:
+                return detail::formatStdStyle(formatSv, argTuple);
             case detail::FormatStyle::Literal:
                 return std::string(formatSv);
             // Mixed or invalid style

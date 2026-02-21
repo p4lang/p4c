@@ -48,7 +48,7 @@ inline unsigned diagnosticCount() {
 }
 
 // Errors, warnings, and infos support boost-style placeholders (%1%, %2%, ...)
-// and printf/absl::StrFormat-style placeholders (%s, %d, ...).
+// and std::format-style placeholders ({}, {:x}, ...).
 
 /// Report an error with the given message.
 // LEGACY: once we transition to error types, this should be deprecated

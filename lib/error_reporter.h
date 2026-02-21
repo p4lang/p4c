@@ -25,7 +25,6 @@ limitations under the License.
 #include <utility>
 
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_format.h"
 #include "error_catalog.h"
 #include "error_message.h"
 #include "exceptions.h"
@@ -84,7 +83,7 @@ void collectSourceInfo(ErrorMessage &msg, T &&arg, Rest &&...rest) {
 // Keeps track of compilation errors.
 // Errors are specified using the error() and warning() methods.
 // Supported formatting styles are boost-style (%1%, %2%, ...) and
-// printf/absl::StrFormat-style (%s, %d, ...).
+// std::format-style ({}, {:x}, ...).
 class ErrorReporter {
  protected:
     unsigned int infoCount;
@@ -256,13 +255,7 @@ class ErrorReporter {
         Util::SourcePosition position = sources->getCurrentPosition();
         position--;
 
-        // Unfortunately, we cannot go with statically checked format string
-        // here as it would require some changes to yyerror
-        std::string message;
-        if (!absl::FormatUntyped(&message, absl::UntypedFormatSpec(fmt),
-                                 {absl::FormatArg(args)...})) {
-            BUG("Failed to format string %s", fmt);
-        }
+        std::string message = P4::createFormattedMessage(fmt, std::forward<Args>(args)...);
 
         emit_message(ParserErrorMessage(Util::SourceInfo(sources, position), std::move(message)));
     }
