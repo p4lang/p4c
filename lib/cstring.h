@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <cstddef>
 #include <cstring>
+#include <format>
 #include <functional>
 #include <ostream>
 #include <sstream>
@@ -422,6 +423,13 @@ inline cstring operator""_cs(const char *str, std::size_t len) {
 }  // namespace P4::literals
 
 namespace std {
+template <>
+struct formatter<P4::cstring, char> : formatter<std::string_view, char> {
+    auto format(P4::cstring value, format_context &ctx) const {
+        return formatter<std::string_view, char>::format(value.string_view(), ctx);
+    }
+};
+
 template <>
 struct hash<P4::cstring> {
     std::size_t operator()(const P4::cstring &c) const {

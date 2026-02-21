@@ -22,16 +22,15 @@ limitations under the License.
 #include <unistd.h>
 
 #include <exception>
-
-#include <boost/format.hpp>
+#include <string>  //
+#include <utility>
 
 #include "absl/strings/str_cat.h"
-#include "lib/bug_helper.h"
+#include "lib/boost_format_helper.h"
 
 namespace P4::Util {
 
 // colors to pretty print messages
-// \e is non-standard escape sequence, use codepoint \33 instead
 constexpr char ANSI_RED[] = "\33[31m";
 constexpr char ANSI_BLUE[] = "\33[34m";
 constexpr char ANSI_CLR[] = "\33[0m";
@@ -65,8 +64,8 @@ inline const char *cerr_clear_colors() {
 }
 
 /// Base class for all exceptions.
-/// The constructor uses boost::format for the format string, i.e.,
-/// %1%, %2%, etc (starting at 1, not at 0)
+/// Supports boost-style (%N%) and std::format-style ({}, {:x}, etc.)
+/// placeholders.
 class P4CExceptionBase : public std::exception {
  protected:
     std::string message;
@@ -76,13 +75,21 @@ class P4CExceptionBase : public std::exception {
     template <typename... Args>
     explicit P4CExceptionBase(const char *format, Args &&...args) {
         traceCreation();
-        boost::format fmt(format);
-        // FIXME: This will implicitly take location of the first argument having
-        // SourceInfo. Not sure if this always desireable or not.
-        message = ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+
+        // Capture arguments once and reuse the tuple to avoid double-moving rvalues.
+        auto argTuple = std::forward_as_tuple(args...);
+        // Extract SourceInfo details.
+        std::string positionStr;
+        std::string tailStr;
+        extractBugSourceInfo(argTuple, positionStr, tailStr);
+        // Format the core message.
+        std::string formattedCore = P4::createFormattedMessageFromTuple(format, argTuple);
+        // Assemble the final message string.
+        message = absl::StrCat(positionStr, positionStr.empty() ? "" : ": ", formattedCore, "\n",
+                               tailStr);
     }
 
-    const char *what() const noexcept override { return message.c_str(); }
+    [[nodiscard]] const char *what() const noexcept override { return message.c_str(); }
 };
 
 /// This class indicates a bug in the compiler

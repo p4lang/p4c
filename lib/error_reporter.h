@@ -22,14 +22,14 @@ limitations under the License.
 #include <set>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 
-#include <boost/format.hpp>
-
-#include "absl/strings/str_format.h"
-#include "bug_helper.h"
+#include "absl/strings/str_cat.h"
 #include "error_catalog.h"
-#include "error_helper.h"
+#include "error_message.h"
 #include "exceptions.h"
+#include "lib/boost_format_helper.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 
@@ -41,11 +41,49 @@ enum class DiagnosticAction {
     Error    /// Print an error and signal that compilation should be aborted.
 };
 
+namespace detail {
+// Base case
+inline void collectSourceInfo(ErrorMessage & /*msg*/) {}
+// Recursive step
+template <typename T, typename... Rest>
+void collectSourceInfo(ErrorMessage &msg, T &&arg, Rest &&...rest) {
+    using ArgType = std::decay_t<T>;
+    if constexpr (Util::has_SourceInfo_v<ArgType>) {
+        if constexpr (std::is_convertible_v<ArgType, Util::SourceInfo>) {
+            Util::SourceInfo info(arg);
+            if (info.isValid()) {
+                msg.locations.push_back(info);
+            }
+        } else {
+            auto info = arg.getSourceInfo();
+            if (info.isValid()) {
+                msg.locations.push_back(info);
+            }
+        }
+    } else if constexpr (std::is_pointer_v<ArgType>) {
+        using PointeeType = std::remove_pointer_t<ArgType>;
+        if constexpr (Util::has_SourceInfo_v<PointeeType>) {
+            if (arg != nullptr) {
+                auto info = arg->getSourceInfo();
+                if (info.isValid()) {
+                    msg.locations.push_back(info);
+                }
+            }
+        }
+    } else if constexpr (std::is_same_v<ArgType, P4::Util::SourceInfo>) {
+        if (arg.isValid()) {
+            msg.locations.push_back(arg);
+        }
+    }
+
+    collectSourceInfo(msg, std::forward<Rest>(rest)...);
+}
+}  // namespace detail
+
 // Keeps track of compilation errors.
-// Errors are specified using the error() and warning() methods,
-// that use boost::format format strings, i.e.,
-// %1%, %2%, etc (starting at 1, not at 0).
-// Some compatibility for printf-style arguments is also supported.
+// Errors are specified using the error() and warning() methods.
+// Supported formatting styles are boost-style (%1%, %2%, ...) and
+// std::format-style ({}, {:x}, ...).
 class ErrorReporter {
  protected:
     unsigned int infoCount;
@@ -88,26 +126,29 @@ class ErrorReporter {
           warningCount(0),
           errorCount(0),
           maxErrorCount(20),
+          outputstream(&std::cerr),
           defaultInfoDiagnosticAction(DiagnosticAction::Info),
           defaultWarningDiagnosticAction(DiagnosticAction::Warn) {
-        outputstream = &std::cerr;
         ErrorCatalog::getCatalog().initReporter(*this);
     }
     virtual ~ErrorReporter() = default;
 
-    // error message for a bug
+    // Error message for a bug.
     template <typename... Args>
     std::string bug_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
-        // FIXME: This will implicitly take location of the first argument having
-        // SourceInfo. Not sure if this always desireable or not.
-        return ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
+        auto argTuple = std::forward_as_tuple(args...);
+        std::string positionStr;
+        std::string tailStr;
+        extractBugSourceInfo(argTuple, positionStr, tailStr);
+        const std::string formattedCore = P4::createFormattedMessageFromTuple(format, argTuple);
+        return absl::StrCat(positionStr, positionStr.empty() ? "" : ": ", formattedCore, "\n",
+                            tailStr);
     }
 
+    // Formats a message string directly. Does not attach SourceInfo metadata.
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
-        return ::P4::error_helper(fmt, std::forward<Args>(args)...).toString();
+        return P4::createFormattedMessage(format, std::forward<Args>(args)...);
     }
 
     template <class T, typename = decltype(std::declval<T>()->getSourceInfo()), typename... Args>
@@ -159,9 +200,9 @@ class ErrorReporter {
             msgType = ErrorMessage::MessageType::Error;
         }
 
-        boost::format fmt(format);
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
-        msg = ::P4::error_helper(fmt, msg, std::forward<Args>(args)...);
+        detail::collectSourceInfo(msg, std::forward<Args>(args)...);
+        msg.message = P4::createFormattedMessage(format, std::forward<Args>(args)...);
         emit_message(msg);
 
         if (errorCount > maxErrorCount)
@@ -214,13 +255,7 @@ class ErrorReporter {
         Util::SourcePosition position = sources->getCurrentPosition();
         position--;
 
-        // Unfortunately, we cannot go with statically checked format string
-        // here as it would require some changes to yyerror
-        std::string message;
-        if (!absl::FormatUntyped(&message, absl::UntypedFormatSpec(fmt),
-                                 {absl::FormatArg(args)...})) {
-            BUG("Failed to format string %s", fmt);
-        }
+        std::string message = P4::createFormattedMessage(fmt, std::forward<Args>(args)...);
 
         emit_message(ParserErrorMessage(Util::SourceInfo(sources, position), std::move(message)));
     }

@@ -27,8 +27,8 @@ namespace P4 {
  *  Structure populated via error_helper functions
  *
  *  Typically, calls to ::P4::error/::P4::warning have many parameters, some of them
- *  might have SourceInfo attribute. ::P4::error_helper parse those parameters, format
- *  parameters to output message and extracts SourceInfo wherever possible.
+ *  might have SourceInfo. ::P4::error_helper parses those parameters, formats the
+ *  message, and extracts SourceInfo wherever possible.
  *
  *  Populated structure can be serialized to canonical error message with toString() method.
  *

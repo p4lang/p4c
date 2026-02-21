@@ -87,7 +87,7 @@ void AbstractParserDriver::onReadLineNumber(const char *text) {
     const bool consumedEntireToken = strlen(last) == 0;
     if (errno != 0 || !consumedEntireToken) {
         auto &context = BaseCompileContext::get();
-        context.errorReporter().parser_error(sources, "Error parsing line number %s", text);
+        context.errorReporter().parser_error(sources, "Error parsing line number {}", text);
     }
 }
 
