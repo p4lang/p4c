@@ -60,13 +60,15 @@ STATIC_BUILD_WITH_DYNAMIC_STDLIB." OFF)
 OPTION (STATIC_BUILD_WITH_DYNAMIC_STDLIB "Build a (mostly) statically linked release binary. \
 Glibc and C++ standard library is linked dynamically." OFF)
 
-if (STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
-    # We want to optimize the binary size for a static release binary by default.
-    set (_ENABLE_LTO_DEFAULT ON)
-else()
-    set (_ENABLE_LTO_DEFAULT OFF)
+# Build with LTO (deprecated: use CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+if (DEFINED ENABLE_LTO)
+    set (CMAKE_INTERPROCEDURAL_OPTIMIZATION ${ENABLE_LTO})
 endif()
-OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" ${_ENABLE_LTO_DEFAULT})
+
+if ((STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB) AND NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+    # We want to optimize the binary size for a static release binary by default.
+    set (CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
 
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
@@ -331,12 +333,11 @@ set(BUILD_LINK_WITH_GOLD ON CACHE BOOL "Use Gold linker for build if available")
 set(BUILD_LINK_WITH_LLD ON CACHE BOOL "Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD)")
 
 # Build with LTO
-if (ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (CMAKE_INTERPROCEDURAL_OPTIMIZATION AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if (BUILD_LINK_WITH_LLD)
     message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
     set(BUILD_LINK_WITH_LLD OFF)
   endif ()
-  add_cxx_compiler_option("-flto")
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
