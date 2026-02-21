@@ -40,15 +40,15 @@ class NameMap : public Node {
     map_t symbols;
     /* if the object has a 'name' field, is it the same as name? */
     template <class U>
-    auto match_name(cstring name, const U *obj) -> decltype(name == obj->name) {
+    auto match_name(cstring name, const U *obj) const -> decltype(name == obj->name) {
         return name == obj->name;
     }
-    bool match_name(cstring, const void *) { return true; }
+    bool match_name(cstring, const void *) const { return true; }
     template <class U>
-    auto obj_name(const U *obj) -> decltype(obj->name) {
+    auto obj_name(const U *obj) const -> decltype(obj->name) {
         return obj->name;
     }
-    cstring obj_name(const void *) { return nullptr; }
+    cstring obj_name(const void *) const { return nullptr; }
 
  public:
     NameMap() = default;
@@ -57,11 +57,13 @@ class NameMap : public Node {
     explicit NameMap(JSONLoader &);
     NameMap &operator=(const NameMap &) = default;
     NameMap &operator=(NameMap &&) = default;
-    typedef typename map_t::value_type value_type;
-    typedef typename map_t::iterator iterator;
-    typedef typename map_t::const_iterator const_iterator;
-    typedef typename map_t::reverse_iterator reverse_iterator;
-    typedef typename map_t::const_reverse_iterator const_reverse_iterator;
+    using value_type = map_t::value_type;
+    using reference = map_t::reference;
+    using const_reference = map_t::const_reference;
+    using iterator = map_t::iterator;
+    using const_iterator = map_t::const_iterator;
+    using reverse_iterator = map_t::reverse_iterator;
+    using const_reverse_iterator = map_t::const_reverse_iterator;
 
  private:
     struct elem_ref {
@@ -130,6 +132,8 @@ class NameMap : public Node {
     void check_null() const {
         for (auto &e : symbols) CHECK_NULL(e.second);
     }
+    bool match_contents(const map_t &n) const { return symbols == n; }
+    void replace_contents(map_t &&n) { symbols = std::move(n); }
 
     IRNODE_SUBCLASS(NameMap)
     bool operator==(const Node &a) const override { return a.operator==(*this); }
@@ -146,8 +150,10 @@ class NameMap : public Node {
     }
     cstring node_type_name() const override { return "NameMap<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "NameMap<" + T::static_type_name() + ">"; }
+    map_t visit_symbols(Visitor &v, const char *name) const;
     void visit_children(Visitor &v, const char *) override;
     void visit_children(Visitor &v, const char *) const override;
+    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const override;
     void toJSON(JSONGenerator &json) const override;
     static Node *fromJSON(JSONLoader &json);
 

@@ -175,7 +175,7 @@ class FindAddedHeaderFields : public MauInspector {
         rv.clear();
         return Inspector::init_apply(root);
     }
-    bool preorder(const IR::MAU::Primitive *prim) override;
+    bool preorder(const IR::MAU::MauPrimitive *prim) override;
     void markFields(const IR::HeaderRef *hr);
 
  public:

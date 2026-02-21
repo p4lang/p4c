@@ -189,6 +189,11 @@ class IndexedVector : public Vector<T> {
         Vector<T>::push_back(a);
         insertInMap(a);
     }
+    void replace_contents(safe_vector<const T *> &&n) {
+        clear();
+        Vector<T>::replace_contents(std::move(n));
+        for (auto *e : *this) insertInMap(e);
+    }
 
     IRNODE_SUBCLASS(IndexedVector)
     IRNODE_DECLARE_APPLY_OVERLOAD(IndexedVector)
@@ -218,6 +223,7 @@ class IndexedVector : public Vector<T> {
     static cstring static_type_name() { return "IndexedVector<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v, const char *name) override;
     void visit_children(Visitor &v, const char *name) const override;
+    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const override;
 
     void toJSON(JSONGenerator &json) const override;
     static Node *fromJSON(JSONLoader &json);

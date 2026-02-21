@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <iosfwd>
 
+#include "ir/copy_on_write_ptr.h"
 #include "ir/gen-tree-macro.h"
 #include "ir/inode.h"
 #include "ir/ir-tree-macros.h"
@@ -30,7 +31,9 @@ class Visitor;
 struct Visitor_Context;
 class Inspector;
 class Modifier;
+class COWModifier;
 class Transform;
+class COWTransform;
 class JSONGenerator;
 class JSONLoader;
 }  // namespace P4
@@ -56,6 +59,10 @@ class Node : public virtual INode {
     virtual void apply_visitor_postorder(Modifier &v);
     virtual void apply_visitor_revisit(Modifier &v, const Node *n) const;
     virtual void apply_visitor_loop_revisit(Modifier &v) const;
+    virtual bool apply_visitor_preorder(COWNode_info *, COWModifier &v) const;
+    virtual void apply_visitor_postorder(COWNode_info *, COWModifier &v) const;
+    virtual void apply_visitor_revisit(COWModifier &v, const Node *n) const;
+    virtual void apply_visitor_loop_revisit(COWModifier &v) const;
     virtual bool apply_visitor_preorder(Inspector &v) const;
     virtual void apply_visitor_postorder(Inspector &v) const;
     virtual void apply_visitor_revisit(Inspector &v) const;
@@ -64,6 +71,10 @@ class Node : public virtual INode {
     virtual const Node *apply_visitor_postorder(Transform &v);
     virtual void apply_visitor_revisit(Transform &v, const Node *n) const;
     virtual void apply_visitor_loop_revisit(Transform &v) const;
+    virtual const Node *apply_visitor_preorder(COWNode_info *, COWTransform &v) const;
+    virtual const Node *apply_visitor_postorder(COWNode_info *, COWTransform &v) const;
+    virtual void apply_visitor_revisit(COWTransform &v, const Node *n) const;
+    virtual void apply_visitor_loop_revisit(COWTransform &v) const;
     Node &operator=(const Node &) = default;
     Node &operator=(Node &&) = default;
 
@@ -73,7 +84,9 @@ class Node : public virtual INode {
     friend class ::P4::Visitor;
     friend class ::P4::Inspector;
     friend class ::P4::Modifier;
+    friend class ::P4::COWModifier;
     friend class ::P4::Transform;
+    friend class ::P4::COWTransform;
     cstring prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineNumber,
                                      unsigned *columnNumber) const;
 
@@ -121,6 +134,7 @@ class Node : public virtual INode {
 #undef DEFINE_OPEQ_FUNC
     virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) {}
     virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) const {}
+    virtual void COWref_visit_children(COWNode_info *, Visitor &, const char *) const {}
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 
@@ -131,6 +145,16 @@ class Node : public virtual INode {
     friend void AbslStringify(Sink &sink, const IR::Node *n) {
         sink.Append(n->toString());
     }
+
+    union COWref {
+        COWfieldref<Node, Util::SourceInfo, &Node::srcInfo> srcInfo;
+        COWref(COWNode_info *i) { _info = i; }
+        COWref *operator->() { return this; }
+        void visit_children(Visitor &, const char * /*name*/ = nullptr) {}
+
+     private:
+        COWNode_info *_info;
+    };
 
     DECLARE_TYPEINFO_WITH_TYPEID(Node, NodeKind::Node, INode);
 };
@@ -158,21 +182,29 @@ inline bool equiv(const INode *a, const INode *b) {
     IRNODE_COMMON_SUBCLASS(T)
 
 // NOLINTEND(bugprone-macro-parentheses)
-#define IRNODE_COMMON_SUBCLASS(T)                                           \
- public:                                                                    \
-    using Node::operator==;                                                 \
-    bool apply_visitor_preorder(Modifier &v) override;                      \
-    void apply_visitor_postorder(Modifier &v) override;                     \
-    void apply_visitor_revisit(Modifier &v, const Node *n) const override;  \
-    void apply_visitor_loop_revisit(Modifier &v) const override;            \
-    bool apply_visitor_preorder(Inspector &v) const override;               \
-    void apply_visitor_postorder(Inspector &v) const override;              \
-    void apply_visitor_revisit(Inspector &v) const override;                \
-    void apply_visitor_loop_revisit(Inspector &v) const override;           \
-    const Node *apply_visitor_preorder(Transform &v) override;              \
-    const Node *apply_visitor_postorder(Transform &v) override;             \
-    void apply_visitor_revisit(Transform &v, const Node *n) const override; \
-    void apply_visitor_loop_revisit(Transform &v) const override;
+#define IRNODE_COMMON_SUBCLASS(T)                                                        \
+ public:                                                                                 \
+    using Node::operator==;                                                              \
+    bool apply_visitor_preorder(Modifier &v) override;                                   \
+    void apply_visitor_postorder(Modifier &v) override;                                  \
+    void apply_visitor_revisit(Modifier &v, const Node *n) const override;               \
+    void apply_visitor_loop_revisit(Modifier &v) const override;                         \
+    bool apply_visitor_preorder(COWNode_info *, COWModifier &v) const override;          \
+    void apply_visitor_postorder(COWNode_info *, COWModifier &v) const override;         \
+    void apply_visitor_revisit(COWModifier &v, const Node *n) const override;            \
+    void apply_visitor_loop_revisit(COWModifier &v) const override;                      \
+    bool apply_visitor_preorder(Inspector &v) const override;                            \
+    void apply_visitor_postorder(Inspector &v) const override;                           \
+    void apply_visitor_revisit(Inspector &v) const override;                             \
+    void apply_visitor_loop_revisit(Inspector &v) const override;                        \
+    const Node *apply_visitor_preorder(Transform &v) override;                           \
+    const Node *apply_visitor_postorder(Transform &v) override;                          \
+    void apply_visitor_revisit(Transform &v, const Node *n) const override;              \
+    void apply_visitor_loop_revisit(Transform &v) const override;                        \
+    const Node *apply_visitor_preorder(COWNode_info *, COWTransform &v) const override;  \
+    const Node *apply_visitor_postorder(COWNode_info *, COWTransform &v) const override; \
+    void apply_visitor_revisit(COWTransform &v, const Node *n) const override;           \
+    void apply_visitor_loop_revisit(COWTransform &v) const override;
 
 /* only define 'apply' for a limited number of classes (those we want to call
  * visitors directly on), as defining it and making it virtual would mean that

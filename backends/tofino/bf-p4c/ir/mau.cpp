@@ -37,6 +37,7 @@ namespace MAU {
 // function templates to be in the same compilation unit.
 void Table::visit_children(Visitor &v, const char *n) { visit_children(this, v, n); }
 void Table::visit_children(Visitor &v, const char *n) const { visit_children(this, v, n); }
+void Table::COWref::visit_children(Visitor &v, const char *n) { Table::visit_children(this, v, n); }
 
 /**
  * The potential control flow(s) through an IR::MAU::Table object are quite complex, which
@@ -167,7 +168,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
     std::set<cstring> gw_tags_seen;
     bool fallen_through = false;
     for (auto &gw : self->gateway_rows) {
-        auto tag = gw.second;
+        cstring tag = gw.second;
         if (!tag || gw_tags_seen.count(tag)) continue;
 
         gw_tags_seen.emplace(tag);
@@ -193,7 +194,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
         if (self->next.count(tag)) {
             if (!current) current = &saved->flow_clone();
             if (auto *gwcf = dynamic_cast<::BFN::GatewayControlFlow *>(current))
-                gwcf->pre_visit_table_next(self, tag);
+                gwcf->pre_visit_table_next(&*self, tag);
             current->visit(self->next.at(tag), tag.c_str());
             if (payload_info.post_payload) {
                 if (current != payload_info.post_payload)
