@@ -1,0 +1,3 @@
+union-valid-bmv2.p4(43): [--Wwarn=parser-transition] warning: '{ h.h1.a }': transition does not depend on select argument
+        transition select(h.h1.a) {
+                          ^^^^^^

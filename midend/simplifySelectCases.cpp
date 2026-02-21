@@ -17,8 +17,25 @@ limitations under the License.
 #include "simplifySelectCases.h"
 
 #include "frontends/p4/enumInstance.h"
+#include "lib/algorithm.h"
 
 namespace P4 {
+
+bool isCompileTimeConstant(const IR::Expression *expr, const TypeMap *typeMap) {
+    if (expr->is<IR::Constant>()) return true;
+    if (expr->is<IR::BoolLiteral>()) return true;
+
+    if (auto list = expr->to<IR::ListExpression>()) {
+        const auto &components = list->components;
+        return std::all_of(components.begin(), components.end(), [&](const IR::Expression *e) {
+            return isCompileTimeConstant(e, typeMap);
+        });
+    }
+
+    if (EnumInstance::resolve(expr, typeMap)) return true;
+
+    return false;
+}
 
 void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
@@ -64,6 +81,37 @@ const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression
         if (c->keyset->is<IR::DefaultExpression>()) seenDefault = true;
         if (requireConstants) checkSimpleConstant(c->keyset);
     }
+
+    bool allConst = std::all_of(cases.begin(), cases.end(), [&](const IR::SelectCase *c) {
+        if (!typeMap->isCompileTimeConstant(c->keyset)) return false;
+
+        return isCompileTimeConstant(c->keyset, typeMap) || c->keyset->is<IR::DefaultExpression>();
+    });
+    // Remove all duplicated select cases by keyset.
+    if (allConst) {
+        IR::Vector<IR::SelectCase> tmp;
+        for (auto c : cases) {  // exclude last
+            auto pred = [&](const IR::SelectCase *other) {
+                return c->keyset->equiv(*other->keyset);
+            };
+            if (!contains_if(tmp, pred)) tmp.push_back(c);
+        }
+        if (cases.size() != tmp.size()) {
+            cases = tmp;
+            changes = true;
+        }
+    }
+    // Remove all duplicated select cases equal to default state.
+    if (seenDefault && allConst) {
+        auto excludeDefault = std::prev(cases.end());
+        auto state = getDeclaration(cases.back()->state->path)->to<IR::ParserState>();
+        auto it = std::remove_if(cases.begin(), excludeDefault, [&](const IR::SelectCase *c) {
+            return state == getDeclaration(c->state->path)->to<IR::ParserState>();
+        });
+        changes |= it != excludeDefault;
+        cases.erase(it, excludeDefault);
+    }
+
     if (changes) {
         if (cases.size() == 1) {
             // just one default label

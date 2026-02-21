@@ -4,3 +4,6 @@ parser-locals2.p4(66): [--Wwarn=unused] warning: 'my_local' is unused
 parser-locals2.p4(74): [--Wwarn=unused] warning: 'my_local' is unused
         bit<16> my_local = 2;
         ^^^^^^^^^^^^^^^^^^^^
+parser-locals2.p4(76): [--Wwarn=parser-transition] warning: '{ hdr.ipv4.version, hdr.ipv4.protocol }': transition does not depend on select argument
+        transition select(hdr.ipv4.version, hdr.ipv4.protocol) {
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
