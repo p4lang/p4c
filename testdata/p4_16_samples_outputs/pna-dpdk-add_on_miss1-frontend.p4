@@ -148,7 +148,7 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
     @name("MainControlImpl.inbound_port_3") bit<16> inbound_port_6;
     @name("MainControlImpl.retval_0") bit<16> retval_8;
     @name("MainControlImpl.inlinedRetval_6") bit<16> inlinedRetval_14;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.drop") action drop() {
         drop_packet();

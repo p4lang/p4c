@@ -41,7 +41,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
     @name("ingress.tmp") bit<16> tmp_0;
     @name("ingress.x1") bit<32> x1_0;
     @name("ingress.x2") bit<16> x2_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_table_cksum1") table debug_table_cksum1_0 {
         key = {

@@ -72,7 +72,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     bitvec_hdr s_0_bvh0;
     bitvec_hdr s_0_bvh1;
     @name("ingress.bh") bitvec_hdr bh_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_act") action do_act() {
         h.bvh1._row_alt1_valid2 = 1w0;

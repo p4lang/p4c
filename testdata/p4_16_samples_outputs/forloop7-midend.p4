@@ -18,7 +18,7 @@ control c(inout headers_t hdrs) {
     bool breakFlag;
     bool breakFlag_0;
     bool breakFlag_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a0") action a0(@name("m") bit<8> m_1) {
         hasReturned = false;

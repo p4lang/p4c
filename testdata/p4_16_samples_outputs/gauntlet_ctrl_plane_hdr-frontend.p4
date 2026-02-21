@@ -18,7 +18,7 @@ parser p(packet_in pkt, out Headers hdr) {
 }
 
 control ingress(inout Headers h) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action(@name("ctrl_hdr") ethernet_t ctrl_hdr) {
         h.eth_hdr.dst_addr = ctrl_hdr.dst_addr;

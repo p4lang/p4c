@@ -30,7 +30,7 @@ control deparser(packet_out packet, in headers_t headers) {
 
 control ingress(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @name("ingress.y") bit<4> y_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.A") action A(@name("t") bit<5> t) {
     }

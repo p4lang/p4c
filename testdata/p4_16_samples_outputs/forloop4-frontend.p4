@@ -19,7 +19,7 @@ control c(inout headers_t hdrs) {
     @name("c.i") bit<8> i_4;
     @name("c.i") bit<8> i_5;
     @name("c.k") bit<8> k_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a0") action a0(@name("x") bit<8> x_3, @name("y") bit<8> y) {
         for (@name("c.i") bit<8> i_0 in 8w1 .. x_3 + y) {

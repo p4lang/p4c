@@ -26,10 +26,10 @@ control ingress(inout Headers h) {
     @name("ingress.hasReturned") bool hasReturned;
     bit<48> key_0;
     bit<48> key_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
         simple_table_action_run = simple_table_action_run_t.simple_table_NoAction;
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
         simple_table_0_action_run = simple_table_0_action_run_t.simple_table_0_NoAction;
     }
     @name("ingress.dummy_action") action dummy_action() {

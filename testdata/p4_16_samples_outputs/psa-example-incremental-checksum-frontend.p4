@@ -83,7 +83,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name("ingress.meta") psa_ingress_output_metadata_t meta_2;
     @name("ingress.meta") psa_ingress_output_metadata_t meta_3;
     @name("ingress.egress_port") PortId_t egress_port_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop_1() {
         meta_2 = ostd;

@@ -84,7 +84,7 @@ parser MainParserImpl(packet_in p, out headers_t headers, inout main_metadata_t 
 control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("MainControlImpl.tmp") bit<128> tmp_0;
     @name("MainControlImpl.tmp1") bit<32> tmp1_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.Reject") action Reject() {
         drop_packet();

@@ -84,7 +84,7 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.tmp1") bit<32> tmp1_0;
     @name("MainControlImpl.tmp") bit<128> tmp_0;
     @name("MainControlImpl.tmp_1") bit<128> tmp_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.Reject") action Reject() {
         drop_packet();

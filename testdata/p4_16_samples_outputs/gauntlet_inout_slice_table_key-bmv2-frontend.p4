@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_val") bit<8> tmp_val_0;
     @name("ingress.tmp") bit<4> tmp;
     @name("ingress.dummy") bit<4> dummy_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
         dummy_0 = tmp;

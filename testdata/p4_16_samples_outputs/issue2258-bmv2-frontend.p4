@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.key_0") bit<16> key_0;
     @name("ingress.retval") bit<16> retval;
     @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {

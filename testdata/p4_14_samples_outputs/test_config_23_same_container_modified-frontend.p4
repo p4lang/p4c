@@ -65,7 +65,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".action_0") action action_0(@name("my_param0") bit<8> my_param0, @name("my_param1") bit<8> my_param1) {
         hdr.ipv4.protocol[7:3] = my_param0[7:3];

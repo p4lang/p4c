@@ -14,7 +14,7 @@ struct headers_t {
 control c(inout headers_t hdrs) {
     @name("c.result") bit<32> result_0;
     bool breakFlag;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a0") action a0(@name("m") bit<8> m_1) {
         result_0 = 32w0;

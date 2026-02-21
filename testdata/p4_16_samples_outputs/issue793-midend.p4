@@ -13,7 +13,7 @@ struct my_packet {
 }
 
 control c(in my_packet hdr) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.nop") action nop() {
     }

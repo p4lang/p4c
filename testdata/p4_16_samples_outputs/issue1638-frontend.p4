@@ -20,7 +20,7 @@ struct meta_t {
 }
 
 control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyC.c2.a") table c2_a {
         key = {

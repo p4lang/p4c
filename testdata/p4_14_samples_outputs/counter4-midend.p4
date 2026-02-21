@@ -31,7 +31,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 @name(".cntDum") counter<bit<8>>(32w200, CounterType.packets) cntDum;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".act") action act(@name("port") bit<9> port, @name("idx") bit<8> idx) {
         standard_metadata.egress_spec = port;
