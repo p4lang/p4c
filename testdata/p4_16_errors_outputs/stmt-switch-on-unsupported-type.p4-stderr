@@ -1,6 +1,6 @@
 stmt-switch-on-unsupported-type.p4(3): [--Wwarn=unused] warning: control 'ctrl' is unused
 control ctrl()() {
         ^^^^
-stmt-switch-on-unsupported-type.p4(5): [--Werror=type-error] error: ...: could not find default value
+stmt-switch-on-unsupported-type.p4(5): [--Werror=type-error] error: ...: switch expression cannot be of type ANYTYPE
     switch (...) { }
             ^^^
