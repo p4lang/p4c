@@ -298,7 +298,7 @@ Most dependencies can be installed using `apt-get install`:
 sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
 libfl-dev libboost-dev libboost-iostreams-dev \
 libboost-graph-dev llvm pkg-config python3 python3-pip \
-tcpdump
+tcpdump libpcap-dev gcc-multilib
 
 ```
 Python dependencies can be installed using `uv`:
