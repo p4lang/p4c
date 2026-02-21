@@ -51,6 +51,7 @@ sudo dnf install -y -q \
     pkg-config \
     procps-ng \
     python3 \
+    python3-devel \
     python3-pip \
     python3-virtualenv \
     python3-thrift \

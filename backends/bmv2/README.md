@@ -30,8 +30,6 @@ To run and test this back-end you need some additional tools:
 - the BMv2 behavioral model itself.  Installation instructions are available [here](https://github.com/p4lang/behavioral-model#installing-bmv2).  You may need to update your
   dynamic libraries after installing bmv2: `sudo ldconfig`
 
-- the Python scapy library `sudo pip3 install scapy`
-
 # Unsupported P4_16 language features
 
 Here are some unsupported features we are aware of. We will update this list as
