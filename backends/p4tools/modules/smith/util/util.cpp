@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <string>
-#include <vector>
+#include <unordered_set>
 
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
@@ -14,9 +14,13 @@
 namespace P4::P4Tools::P4Smith {
 
 std::string getRandomString(size_t len) {
-    // Add "for" and "in" to the list of P4 keywords, even though the wordlist doesn't contain them.
-    static const std::vector<std::string> P4_KEYWORDS = {"if",      "void", "else", "key",
-                                                         "actions", "true", "for",  "in"};
+    static const std::unordered_set<std::string_view> P4_KEYWORDS = {
+        "abstract", "action",  "actions", "apply",   "bit",    "bool",     "const",      "continue",
+        "control",  "default", "else",    "entries", "enum",   "error",    "exit",       "extern",
+        "false",    "for",     "header",  "if",      "in",     "inout",    "int",        "key",
+        "list",     "out",     "package", "parser",  "pragma", "priority", "return",     "select",
+        "state",    "string",  "struct",  "switch",  "table",  "this",     "transition", "true",
+        "tuple",    "type",    "typedef", "varbit",  "void"};
     static const std::array<char, 53> ALPHANUMERIC_CHARACTERS = {
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz"};
@@ -45,7 +49,7 @@ std::string getRandomString(size_t len) {
             ret = ss.str();
         }
 
-        if (std::find(P4_KEYWORDS.begin(), P4_KEYWORDS.end(), ret) != P4_KEYWORDS.end()) {
+        if (P4_KEYWORDS.contains(ret)) {
             continue;
         }
 
