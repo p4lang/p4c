@@ -10,4 +10,10 @@ const ConcolicMethodImpls::ImplList *PnaDpdkConcolic::getPnaDpdkConcolicMethodIm
     return &PNA_DPDK_CONCOLIC_METHOD_IMPLS;
 }
 
+const ConcolicMethodImpls::ImplList PnaP4TCConcolic::PNA_P4TC_CONCOLIC_METHOD_IMPLS{};
+
+const ConcolicMethodImpls::ImplList *PnaP4TCConcolic::getPnaP4TCConcolicMethodImpls() {
+    return &PNA_P4TC_CONCOLIC_METHOD_IMPLS;
+}
+
 }  // namespace P4::P4Tools::P4Testgen::Pna

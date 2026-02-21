@@ -25,12 +25,13 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/backend/metadata/metadata.h"
 #include "backends/p4tools/modules/testgen/targets/pna/backend/ptf/ptf.h"
+#include "backends/p4tools/modules/testgen/targets/pna/backend/stf/stf.h"
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4::P4Tools::P4Testgen::Pna {
 
-const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA", "PTF"};
+const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA", "PTF", "STF"};
 
 PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo,
                                const TestBackendConfiguration &testBackendConfiguration,
@@ -48,6 +49,8 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo,
         testWriter = new Metadata(testBackendConfiguration);
     } else if (testBackendString == "PTF") {
         testWriter = new PTF(testBackendConfiguration);
+    } else if (testBackendString == "STF") {
+        testWriter = new STF(testBackendConfiguration);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
