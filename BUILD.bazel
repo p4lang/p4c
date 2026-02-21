@@ -2,8 +2,9 @@ load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_license//rules:license.bzl", "license")
-load("//:bazel/bison.bzl", "genyacc")
-load("//:bazel/flex.bzl", "genlex")
+load("//bazel:bison.bzl", "genyacc")
+load("//bazel:flex.bzl", "genlex")
+
 
 package(
     default_applicable_licenses = ["//:license"],

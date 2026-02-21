@@ -25,6 +25,6 @@ git_override(
     strip_prefix = "proto",
 )
 
-p4c_ir_extensions = use_extension("@p4c//:bazel/extensions.bzl", "p4c_ir_extensions")
+p4c_ir_extensions = use_extension("@p4c//bazel:extensions.bzl", "p4c_ir_extensions")
 p4c_ir_extensions.ir_extensions(srcs = ["//:my_custom_statement.ir"])
 use_repo(p4c_ir_extensions, "p4c_ir_extensions")

@@ -4,7 +4,7 @@ This extension allows users to register custom IR definitions by providing a lis
 of files containing the extensions.
 
 Example usage in MODULE.bazel:
-    p4c_ir_extensions = use_extension("@p4c//:bazel/extensions.bzl", "p4c_ir_extensions")
+    p4c_ir_extensions = use_extension("@p4c//bazel:extensions.bzl", "p4c_ir_extensions")
     p4c_ir_extensions.ir_extensions(srcs = ["//path/to:ir_extensions_files"])
     use_repo(p4c_ir_extensions, "p4c_ir_extensions")
 """
