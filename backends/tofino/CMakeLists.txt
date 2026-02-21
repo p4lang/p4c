@@ -231,3 +231,11 @@ add_subdirectory(bf-p4c)
 # Initialize bf-asm after bf-p4c.
 add_subdirectory(bf-asm)
 
+set (XFAIL_TESTS
+)
+set (TOFINO_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
+)
+set (TOFINO_TEST_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/scripts/run-tofino-test.sh)
+p4c_add_tests("tofino" ${TOFINO_TEST_DRIVER} "${TOFINO_TEST_SUITES}" "${XFAIL_TESTS}")
+
