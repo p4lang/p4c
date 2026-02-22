@@ -965,37 +965,12 @@ class Type_Newtype : Type_Declaration, IAnnotated {
 }
 
 
-/// FIXME: Only required for P4-14 because Type_Extern uses Attribute. Remove.
-class AttribLocal : Expression, IDeclaration {
-    ID  name;
-    ID getName() const override { return name; }
-    dbprint { out << name; }
-}
-
-/// FIXME: Only required for P4-14 because Type_Extern uses Attribute. Remove.
-class AttribLocals : ISimpleNamespace {
-    inline NameMap<AttribLocal> locals = {};
-#nodbprint
-    Util::Enumerator<IDeclaration> *getDeclarations() const override {
-        return locals.valueEnumerator()->as<const IDeclaration *>(); }
-    IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
-    IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }
-}
-
-/// FIXME: Only required for P4-14 because Type_Extern uses Attribute. Remove.
-class Attribute : Declaration {
-    NullOK Type type = nullptr;
-    NullOK AttribLocals locals = nullptr;
-    bool optional = false;
-    dbprint { if (type) out << type << ' '; out << name; }
-}
-
 /// An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
                     IMayBeGenericType, IAnnotated {
     optional TypeParameters typeParameters = new TypeParameters;
     optional inline Vector<Method> methods;  // methods can be overloaded, so this is not NameMap
-    optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
+    optional inline NameMap<Declaration, ordered_map> attributes;  // P4_14 only, currently
     optional inline Vector<Annotation> annotations;
 
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }

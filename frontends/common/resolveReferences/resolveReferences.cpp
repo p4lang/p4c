@@ -363,9 +363,11 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 // These can overload each other.
                 // Also, the constructor is supposed to have the same name as the class.
                 continue;
+#ifdef SUPPORT_P4_14
             if (pnode->is<IR::Attribute>() && node->is<IR::AttribLocal>())
                 // attribute locals often match attributes
                 continue;
+#endif
 
             // parameter shadowing
             if (node->is<IR::Declaration>() && !node->is<IR::Parameter>()) {

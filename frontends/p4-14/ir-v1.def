@@ -461,6 +461,28 @@ class GlobalRef : Expression {
     dbprint { out << obj->to<IInstance>()->Name(); }
 }
 
+class AttribLocal : Expression, IDeclaration {
+    ID  name;
+    ID getName() const override { return name; }
+    dbprint { out << name; }
+}
+
+class AttribLocals : ISimpleNamespace {
+    inline NameMap<AttribLocal> locals = {};
+#nodbprint
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return locals.valueEnumerator()->as<const IDeclaration *>(); }
+    IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
+    IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }
+}
+
+class Attribute : Declaration {
+    NullOK Type type = nullptr;
+    NullOK AttribLocals locals = nullptr;
+    bool optional = false;
+    dbprint { if (type) out << type << ' '; out << name; }
+}
+
 class AttributeRef : Expression {
     cstring             extern_name;
     Type_Extern         extern_type;
