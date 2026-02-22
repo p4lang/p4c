@@ -10,6 +10,15 @@ package(
     default_visibility = ["//visibility:public"],
 )
 
+# Configuration setting to enable P4-14 support via --define=SUPPORT_P4_14=true
+config_setting(
+    name = "p4_14_enabled",
+    define_values = {
+        "SUPPORT_P4_14": "true",
+    },
+    visibility = ["//visibility:public"],
+)
+
 license(
     name = "license",
     package_name = "com_github_p4lang_p4c",
@@ -71,6 +80,7 @@ cc_library(
     ],
 )
 
+# P4-16 parser.
 genyacc(
     name = "p4_parser_yacc",
     src = "frontends/parsers/p4/p4parser.ypp",
@@ -80,6 +90,7 @@ genyacc(
     visibility = ["//visibility:private"],
 )
 
+# P4-14 parser.
 genyacc(
     name = "v1_parser_yacc",
     src = "frontends/parsers/v1/v1parser.ypp",
@@ -89,6 +100,7 @@ genyacc(
     visibility = ["//visibility:private"],
 )
 
+# P4-16 lexer.
 genrule(
     name = "p4lexer_lex",
     srcs = ["frontends/parsers/p4/p4lexer.ll"],
@@ -97,6 +109,7 @@ genrule(
     visibility = ["//visibility:private"],
 )
 
+# P4-16 lexer.
 genlex(
     name = "p4lexer",
     src = "frontends/parsers/p4/p4lexer.lex",
@@ -105,6 +118,7 @@ genlex(
     visibility = ["//visibility:private"],
 )
 
+# P4-14 lexer.
 genrule(
     name = "v1lexer_lex",
     srcs = ["frontends/parsers/v1/v1lexer.ll"],
@@ -113,6 +127,7 @@ genrule(
     visibility = ["//visibility:private"],
 )
 
+# P4-14 lexer.
 genlex(
     name = "v1lexer",
     src = "frontends/parsers/v1/v1lexer.lex",
@@ -172,8 +187,11 @@ cc_binary(
 
 filegroup(
     name = "ir_extra_defs",
-    srcs = [
-        "frontends/p4-14/ir-v1.def",
+    srcs = select({
+        # Conditionally include the P4-14 IR definition file.
+        ":p4_14_enabled": ["frontends/p4-14/ir-v1.def"],
+        "//conditions:default": [],
+    }) + [
         "backends/bmv2/bmv2.def",
         "backends/dpdk/dpdk.def",
         "//backends/p4tools:ir_extension",
@@ -205,25 +223,49 @@ genrule(
     visibility = ["//visibility:private"],
 )
 
+# Define the srcs list in a variable for readability
+IR_FRONTEND_MIDEND_CONTROL_PLANE_SRCS = glob(
+    [
+        "ir/**/*.cpp",
+        "midend/**/*.cpp",
+        "control-plane/**/*.cpp",
+    ],
+) + [
+    # Back end files.
+    "backends/dpdk/dbprint-dpdk.cpp",
+    "backends/dpdk/printUtils.cpp",
+    "backends/dpdk/spec.cpp",
+    "frontends/parsers/p4/p4lexer.cc",
+    "frontends/parsers/p4/p4parser.cc",
+    "ir/ir-generated.cpp",
+] + select({
+    # Conditionally select the glob for frontend C++ files.
+    ":p4_14_enabled": [
+        "frontends/parsers/v1/v1lexer.cc",
+        "frontends/parsers/v1/v1parser.cc",
+    ] + glob(["frontends/**/*.cpp"]),
+    "//conditions:default": glob(
+        ["frontends/**/*.cpp"],
+        exclude = [
+            "frontends/parsers/parserDriver_v1.cpp",
+            "frontends/parsers/v1/v1lexer.cc",
+            "frontends/parsers/v1/v1parser.cc",
+            "frontends/p4-14/**/*.cpp",
+            "frontends/parsers/v1/**/*.cpp",
+        ],
+    ),
+})
+
 # It would be better to build these modules separately, but they have cyclic
 # dependencies.
 cc_library(
     name = "ir_frontend_midend_control_plane",
-    srcs = glob([
-        "ir/**/*.cpp",
-        "frontends/**/*.cpp",
-        "midend/**/*.cpp",
-        "control-plane/**/*.cpp",
-    ]) + [
-        "backends/dpdk/dbprint-dpdk.cpp",
-        "backends/dpdk/printUtils.cpp",
-        "backends/dpdk/spec.cpp",
-        "frontends/parsers/p4/p4lexer.cc",
-        "frontends/parsers/p4/p4parser.cc",
-        "frontends/parsers/v1/v1lexer.cc",
-        "frontends/parsers/v1/v1parser.cc",
-        "ir/ir-generated.cpp",
-    ],
+    srcs = IR_FRONTEND_MIDEND_CONTROL_PLANE_SRCS,
+    defines = select({
+        # Define SUPPORT_P4_14 for C++ code when the flag is set.
+        ":p4_14_enabled": ["SUPPORT_P4_14"],
+        "//conditions:default": [],
+    }),
     textual_hdrs = glob([
         "ir/**/*.h",
         "frontends/**/*.h",
@@ -233,11 +275,16 @@ cc_library(
         "backends/**/*.h",
     ]) + [
         ":p4_parser_yacc",
-        ":v1_parser_yacc",
         ":p4lexer",
-        ":v1lexer",
         ":ir_generated_files",
-    ],
+    ] + select({
+        # Conditionally include the P4-14 IR definition file.
+        ":p4_14_enabled": [
+            ":v1_parser_yacc",
+            ":v1lexer",
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         ":config_h",
         ":lib",
@@ -476,9 +523,6 @@ cc_library(
         "backends/graphs/version.h",
     ],
     defines = [
-        # Disable ADL for boost, otherwise the method resolution for
-        # `ordered_map` and `graph` clash on method `boost::get`
-        "BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP",
     ],
     deps = [
         ":config_h",

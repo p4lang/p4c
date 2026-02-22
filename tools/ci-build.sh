@@ -52,6 +52,8 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${ENABLE_EBPF:=ON}"
 # P4TC is enabled by default.
 : "${ENABLE_P4TC:=ON}"
+# P4-14 is disabled by default.
+: "${SUPPORT_P4_14:=OFF}"
 # P4TC STF is only enabled when running p4tc tagged PRs.
 : "${INSTALL_STF_P4TC_DEPENDENCIES:=OFF}"
 # This is the list of back ends that can be enabled.
@@ -352,6 +354,8 @@ CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
 # Enable auto var initialization with pattern.
 CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
+# Enable P4-14 support.
+CMAKE_FLAGS+="-DSUPPORT_P4_14=${SUPPORT_P4_14} "
 # Assemble the enabled back ends as a single CMake variable.
 build_cmake_enabled_backend_string
 CMAKE_FLAGS+="${CMAKE_ENABLE_BACKENDS} "

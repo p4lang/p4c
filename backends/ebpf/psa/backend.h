@@ -38,9 +38,7 @@ class PSASwitchBackend {
           refMap(refMap),
           typeMap(typeMap),
           corelib(P4::P4CoreLibrary::instance()),
-          target(target) {
-        refMap->setIsV1(options.isv1());
-    }
+          target(target) {}
 
     void convert(const IR::ToplevelBlock *tlb);
     void codegen(std::ostream &cstream) const {

@@ -964,12 +964,13 @@ class Type_Newtype : Type_Declaration, IAnnotated {
 #nodbprint
 }
 
+
 /// An 'extern' black-box (not a function)
 class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
                     IMayBeGenericType, IAnnotated {
     optional TypeParameters typeParameters = new TypeParameters;
     optional inline Vector<Method> methods;  // methods can be overloaded, so this is not NameMap
-    optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
+    optional inline NameMap<Declaration, ordered_map> attributes;  // P4_14 only, currently
     optional inline Vector<Annotation> annotations;
 
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }

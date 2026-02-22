@@ -48,9 +48,13 @@ class MidEnd : public PassManager {
     }
 };
 
+#ifdef SUPPORT_P4_14
 MidEnd::MidEnd(CompilerOptions &options) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
+#else
+MidEnd::MidEnd(CompilerOptions & /*options*/) {
+#endif
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 

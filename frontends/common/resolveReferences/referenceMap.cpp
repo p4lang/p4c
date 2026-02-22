@@ -26,7 +26,15 @@ MinimalNameGenerator::MinimalNameGenerator() {
     for (auto &reserved : P4::reservedWords) usedNames.insert({reserved, 0});
 }
 
-ReferenceMap::ReferenceMap() : ProgramMap("ReferenceMap"), isv1(false) { clear(); }
+ReferenceMap::ReferenceMap()
+    : ProgramMap("ReferenceMap")
+#ifdef SUPPORT_P4_14
+      ,
+      isv1(false)
+#endif
+{
+    clear();
+}
 
 void ReferenceMap::clear() {
     LOG2("Clearing reference map");

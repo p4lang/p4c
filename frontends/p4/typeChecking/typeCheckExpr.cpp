@@ -2393,10 +2393,4 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SelectExpression *express
     return expression;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::AttribLocal *local) {
-    setType(local, local->type);
-    setType(getOriginal(), local->type);
-    return local;
-}
-
 }  // namespace P4

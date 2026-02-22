@@ -43,6 +43,7 @@ os.environ['P4C_BUILD_TYPE'] = build_type
 os.environ['P4C_BIN_DIR'] = install_dir
 os.environ['P4C_CFG_PATH'] = os.path.join(artifacts_dir, "p4c_src")
 os.environ['P4C_16_INCLUDE_PATH'] = os.path.realpath(os.path.join(artifacts_dir, "p4include"))
+# TODO: Remove once SUPPORT_P4_14 is not available anymore.
 os.environ['P4C_14_INCLUDE_PATH'] = os.path.realpath(os.path.join(artifacts_dir, "p4_14include"))
 
 from p4c_src.main import main

@@ -139,11 +139,17 @@ add_custom_target(linkbmv2
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-psa ${P4C_BINARY_DIR}/p4c-bm2-psa
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-pna ${P4C_BINARY_DIR}/p4c-bm2-pna
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   DEPENDS update_includes
   )
 add_dependencies(p4c_driver linkbmv2)
 
+if (SUPPORT_P4_14)
+add_custom_target(linkp414bmv2
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
+  DEPENDS update_includes
+  )
+add_dependencies(p4c_driver linkp414bmv2)
+endif()
 
 # Tests
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
@@ -159,10 +165,15 @@ set (BMV2_V1MODEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   ${v1tests}
   )
+
+if (SUPPORT_P4_14)
+  list(APPEND BMV2_V1MODEL_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
+    )
+endif()
 
 set (PSA_INCLUDE_PATTERNS "include.*psa.p4")
 set (PSA_EXCLUDE_PATTERNS "include.*v1model.p4" "include.*dpdk")
@@ -209,10 +220,6 @@ set (testExtraFlagsPNA "${testExtraFlags} --use_pna -a='--target bmv2 --arch pna
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
   # Even though the P4 spec allows it, it doesn't really make sense in a switch
-  # so we allow it to fail on BMv2.
-  testdata/p4_14_samples/issue60.p4
-  # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
-  testdata/p4_14_samples/issue-1426.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2
@@ -221,8 +228,6 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1062-bmv2.p4
   # This test uses an undefined extern
   testdata/p4_16_samples/issue1193-bmv2.p4
-  # This test also uses a custom extern
-  testdata/p4_14_samples/issue604.p4
   # This test uses an incorrect model
   testdata/p4_16_samples/issue1205-bmv2.p4
   # These psa tests are not ready to run on bmv2 yet
@@ -255,6 +260,16 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/pna-example-tcp-connection-tracking.p4  # Conditional execution in actions not supported
   testdata/p4_16_samples/pna-extract-local-header.p4  # error: IfStatement: not supported within a deparser on this target
 )
+if (SUPPORT_P4_14)
+  list(APPEND XFAIL_TESTS
+    # so we allow it to fail on BMv2.
+    testdata/p4_14_samples/issue60.p4
+    # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
+    testdata/p4_14_samples/issue-1426.p4
+    # This test also uses a custom extern
+    testdata/p4_14_samples/issue604.p4
+  )
+endif()
 
 set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
 
