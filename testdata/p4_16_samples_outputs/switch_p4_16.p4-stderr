@@ -1,0 +1,51 @@
+switch_p4_16.p4(2254): [--Wwarn=unused] warning: '.process_egress_bd_stats.nop' is unused
+    @name(".process_egress_bd_stats.nop") action nop() {
+                                                 ^^^
+switch_p4_16.p4(3281): [--Wwarn=unused] warning: 'enable_dod' is unused
+    @name(".process_global_params.deflect_on_drop") action deflect_on_drop(bit<8> enable_dod) {
+                                                                                  ^^^^^^^^^^
+switch_p4_16.p4(4174): [--Wwarn=unused] warning: '.process_ingress_sflow.sflow_ing_pkt_to_cpu' is unused
+..._sflow.sflow_ing_pkt_to_cpu") action sflow_ing_pkt_to_cpu(bit<32> sflow_i2e_mirror_id, bit<16>...
+                                        ^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4590): [--Wwarn=unused] warning: '.process_ipv4_multicast.multicast_route_s_g_hit' is unused
+...st.multicast_route_s_g_hit") action multicast_route_s_g_hit(bit<16> mc_index, bit<16> mcast_rp...
+                                       ^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4596): [--Wwarn=unused] warning: '.process_ipv4_multicast.multicast_route_star_g_miss' is unused
+...ame(".process_ipv4_multicast.multicast_route_star_g_miss") action multicast_route_star_g_miss() {
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4599): [--Wwarn=unused] warning: '.process_ipv4_multicast.multicast_route_sm_star_g_hit' is unused
+...ast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit(bit<16> mc_index, bit<16> mcast...
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4605): [--Wwarn=unused] warning: '.process_ipv4_multicast.multicast_route_bidir_star_g_hit' is unused
+...oute_bidir_star_g_hit") action multicast_route_bidir_star_g_hit(bit<16> mc_index, bit<16> mcas...
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4721): [--Wwarn=unused] warning: '.process_ipv6_multicast.multicast_route_s_g_hit' is unused
+...st.multicast_route_s_g_hit") action multicast_route_s_g_hit(bit<16> mc_index, bit<16> mcast_rp...
+                                       ^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4727): [--Wwarn=unused] warning: '.process_ipv6_multicast.multicast_route_star_g_miss' is unused
+...ame(".process_ipv6_multicast.multicast_route_star_g_miss") action multicast_route_star_g_miss() {
+                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4730): [--Wwarn=unused] warning: '.process_ipv6_multicast.multicast_route_sm_star_g_hit' is unused
+...ast_route_sm_star_g_hit") action multicast_route_sm_star_g_hit(bit<16> mc_index, bit<16> mcast...
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(4736): [--Wwarn=unused] warning: '.process_ipv6_multicast.multicast_route_bidir_star_g_hit' is unused
+...oute_bidir_star_g_hit") action multicast_route_bidir_star_g_hit(bit<16> mc_index, bit<16> mcas...
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+switch_p4_16.p4(5170): [--Wwarn=unused] warning: '.process_meter_index.nop' is unused
+    @name(".process_meter_index.nop") action nop() {
+                                             ^^^
+switch_p4_16.p4(5260): [--Wwarn=unused] warning: '.process_meter_action.meter_permit' is unused
+    @name(".process_meter_action.meter_permit") action meter_permit() {
+                                                       ^^^^^^^^^^^^
+switch_p4_16.p4(5262): [--Wwarn=unused] warning: '.process_meter_action.meter_deny' is unused
+    @name(".process_meter_action.meter_deny") action meter_deny() {
+                                                     ^^^^^^^^^^
+switch_p4_16.p4(5325): [--Wwarn=unused] warning: '.process_storm_control_stats.nop' is unused
+    @name(".process_storm_control_stats.nop") action nop() {
+                                                     ^^^
+switch_p4_16.p4(5592): [--Wwarn=unused] warning: 'fabric_mgid' is unused
+...ame(".process_fabric_lag.set_fabric_multicast") action set_fabric_multicast(bit<8> fabric_mgid) {
+                                                                                      ^^^^^^^^^^^
+switch_p4_16.p4(1045): [--Wwarn=parser-transition] warning: SelectCase: unreachable
+            default: parse_all_int_meta_value_heders;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
