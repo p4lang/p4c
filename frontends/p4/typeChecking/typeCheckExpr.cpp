@@ -1201,11 +1201,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
                 setType(type, new IR::Type_Type(castType));
                 auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
                 setType(result, castType);
+                setCompileTimeConstant(result);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
                 return result;
             } else if (concreteCastType->is<IR::Type_HeaderUnion>()) {
                 setType(type, new IR::Type_Type(castType));
                 auto result = new IR::InvalidHeaderUnion(ih->srcInfo, type, type);
                 setType(result, castType);
+                setCompileTimeConstant(result);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
                 return result;
             } else {
                 typeError("%1%: 'invalid' expression type `%2%` must be a header or header union",

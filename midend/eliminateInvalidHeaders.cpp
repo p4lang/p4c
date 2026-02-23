@@ -54,8 +54,9 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Action *action) {
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expression) {
     if (!isInContext<IR::BlockStatement>() && !isInContext<IR::P4Action>() &&
         !isInContext<IR::ParserState>()) {
-        // We need some place to insert the setInvalid call.
-        ::P4::error("%1%: Cannot eliminate invalid header", expression);
+        // We have no place to insert the setInvalid call.
+        // This could happen, for example, when {#} is used as the argument to a header
+        // param of a table's default action.
         return expression;
     }
     cstring name = nameGen.newName("ih");
@@ -74,8 +75,9 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *expression) {
     if (!isInContext<IR::BlockStatement>() && !isInContext<IR::P4Action>() &&
         !isInContext<IR::ParserState>()) {
-        // We need some place to insert the setInvalid call.
-        ::P4::error("%1%: Cannot eliminate invalid header union", expression);
+        // We have no place to insert the setInvalid call.
+        // This could happen, for example, when {#} is used as the argument to a header union
+        // param of a table's default action.
         return expression;
     }
     cstring name = nameGen.newName("ih");
