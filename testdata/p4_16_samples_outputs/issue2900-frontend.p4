@@ -59,7 +59,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t meta, in pna_
     @name("MainControlImpl.istd_0") pna_main_input_metadata_t istd_1;
     @name("MainControlImpl.retval") bool retval;
     @name("MainControlImpl.inlinedRetval") bool inlinedRetval_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.clb_pinned_flows") table clb_pinned_flows_0 {
         key = {

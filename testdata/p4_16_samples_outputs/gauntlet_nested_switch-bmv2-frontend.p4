@@ -25,7 +25,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.simple_val") bit<16> simple_val_0;
     @name("ingress.val") bit<48> val_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.call_action") action call_action() {
         val_0 = h.eth_hdr.src_addr;

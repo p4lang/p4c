@@ -30,7 +30,7 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.retval") bit<16> retval;
     @name("ingressImpl.retval") bit<16> retval_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingressImpl.my_drop") action my_drop() {
         mark_to_drop(stdmeta);
