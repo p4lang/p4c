@@ -121,6 +121,10 @@ class Table : BFN::Unit, IAnnotated  {
         int address_bits = 0;
         bool per_flow_enable = false;
         int meter_type_bits = 0;
+        bool isSemanticallyLess(IndirectAddress const &a) const {
+            return std::tie(shifter_enabled, address_bits, per_flow_enable, meter_type_bits) <
+                   std::tie(a.shifter_enabled, a.address_bits, a.per_flow_enable, a.meter_type_bits);
+        }
 #emit
         IndirectAddress &operator+=(const IndirectAddress &a);
 #end
@@ -999,6 +1003,14 @@ class SaluAction : VLIWInstruction, IAnnotated {
         Type_Enum                       return_type;
         std::map<cstring, unsigned>     tag_used = {};  // bits that might be set for each tag
         unsigned                        cmp_used = 0;   // bits that might be set for instr
+        bool isSemanticallyLess(ReturnEnumEncoding const &a) const {
+            return ::P4::IR::isSemanticallyLess(return_type, a.return_type) ||
+                   (!::P4::IR::isSemanticallyLess(a.return_type, return_type) &&
+                    ::P4::IR::isSemanticallyLess(tag_used, a.tag_used)) ||
+                   (!::P4::IR::isSemanticallyLess(a.return_type, return_type) &&
+                    !::P4::IR::isSemanticallyLess(a.tag_used, tag_used) &&
+                    ::P4::IR::isSemanticallyLess(cmp_used, a.cmp_used));
+        }
         bool operator<=(const ReturnEnumEncoding &a) const;  // partial ordering
         bool operator<(const ReturnEnumEncoding &a) const;  // partial ordering
         const ReturnEnumEncoding *merge(const ReturnEnumEncoding *a) const;

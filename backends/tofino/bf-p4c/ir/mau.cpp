@@ -473,18 +473,42 @@ IR::MAU::Table::Layout &IR::MAU::Table::Layout::operator+=(const IR::MAU::Table:
 }
 
 bool IR::MAU::Table::Layout::operator<(const IR::MAU::Table::Layout &a) const {
-    return std::tie(gateway, ternary, gateway_match, hash_action, atcam, has_range, proxy_hash,
-                    requires_versioning, is_lamb, is_direct, is_local_tind, action_data_bytes,
-                    action_data_bytes_in_table, total_actions, entries, ixbar_bytes,
-                    ixbar_width_bits, match_width_bits, overhead_bits, immediate_bits, meter_addr,
-                    stats_addr, action_addr, ghost_bytes, partition_bits, partition_count,
-                    entries_per_set, sets_per_word) <
-           std::tie(a.gateway, a.ternary, a.gateway_match, a.hash_action, a.atcam, a.has_range,
-                    a.proxy_hash, a.requires_versioning, a.is_lamb, a.is_direct, a.is_local_tind,
-                    a.action_data_bytes, a.action_data_bytes_in_table, a.total_actions, a.entries,
-                    a.ixbar_bytes, a.ixbar_width_bits, a.match_width_bits, a.overhead_bits,
-                    a.immediate_bits, a.meter_addr, a.stats_addr, a.action_addr, a.ghost_bytes,
-                    a.partition_bits, a.partition_count, a.entries_per_set, a.sets_per_word);
+    auto compare = [](const auto &left, const auto &right) {
+        return ::P4::IR::isSemanticallyLess(left, right)
+                   ? 1
+                   : (::P4::IR::isSemanticallyLess(right, left) ? -1 : 0);
+    };
+
+    if (auto c = compare(gateway, a.gateway); c != 0) return c > 0;
+    if (auto c = compare(ternary, a.ternary); c != 0) return c > 0;
+    if (auto c = compare(gateway_match, a.gateway_match); c != 0) return c > 0;
+    if (auto c = compare(hash_action, a.hash_action); c != 0) return c > 0;
+    if (auto c = compare(atcam, a.atcam); c != 0) return c > 0;
+    if (auto c = compare(has_range, a.has_range); c != 0) return c > 0;
+    if (auto c = compare(proxy_hash, a.proxy_hash); c != 0) return c > 0;
+    if (auto c = compare(requires_versioning, a.requires_versioning); c != 0) return c > 0;
+    if (auto c = compare(is_lamb, a.is_lamb); c != 0) return c > 0;
+    if (auto c = compare(is_direct, a.is_direct); c != 0) return c > 0;
+    if (auto c = compare(is_local_tind, a.is_local_tind); c != 0) return c > 0;
+    if (auto c = compare(action_data_bytes, a.action_data_bytes); c != 0) return c > 0;
+    if (auto c = compare(action_data_bytes_in_table, a.action_data_bytes_in_table); c != 0)
+        return c > 0;
+    if (auto c = compare(total_actions, a.total_actions); c != 0) return c > 0;
+    if (auto c = compare(entries, a.entries); c != 0) return c > 0;
+    if (auto c = compare(ixbar_bytes, a.ixbar_bytes); c != 0) return c > 0;
+    if (auto c = compare(ixbar_width_bits, a.ixbar_width_bits); c != 0) return c > 0;
+    if (auto c = compare(match_width_bits, a.match_width_bits); c != 0) return c > 0;
+    if (auto c = compare(overhead_bits, a.overhead_bits); c != 0) return c > 0;
+    if (auto c = compare(immediate_bits, a.immediate_bits); c != 0) return c > 0;
+    if (auto c = compare(meter_addr, a.meter_addr); c != 0) return c > 0;
+    if (auto c = compare(stats_addr, a.stats_addr); c != 0) return c > 0;
+    if (auto c = compare(action_addr, a.action_addr); c != 0) return c > 0;
+    if (auto c = compare(ghost_bytes, a.ghost_bytes); c != 0) return c > 0;
+    if (auto c = compare(partition_bits, a.partition_bits); c != 0) return c > 0;
+    if (auto c = compare(partition_count, a.partition_count); c != 0) return c > 0;
+    if (auto c = compare(entries_per_set, a.entries_per_set); c != 0) return c > 0;
+    if (auto c = compare(sets_per_word, a.sets_per_word); c != 0) return c > 0;
+    return false;
 }
 
 bool IR::MAU::Table::isSemanticallyLess(IR::Node const &a_) const {
