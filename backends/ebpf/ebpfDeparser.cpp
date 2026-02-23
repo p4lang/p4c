@@ -47,11 +47,29 @@ DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDepar
 
 bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement *s) {
     for (auto a : s->components) {
-        if (a->is<IR::MethodCallStatement>()) {
+        if (a->is<IR::MethodCallStatement>() || a->is<IR::IfStatement>()) {
             visit(a);
         }
     }
 
+    return false;
+}
+
+bool DeparserPrepareBufferTranslator::preorder(const IR::IfStatement *ifstmt) {
+    visit(ifstmt->ifTrue);
+    if (ifstmt->ifFalse != nullptr) {
+        visit(ifstmt->ifFalse);
+    }
+    return false;
+}
+
+bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallStatement *s) {
+    auto mce = s->methodCall;
+    auto mi = P4::MethodInstance::resolve(mce, control->program->refMap, control->program->typeMap);
+    auto ext = mi->to<P4::ExternMethod>();
+    if (ext != nullptr && ext->method->name.name == p4lib.packetOut.emit.name) {
+        visit(mce);
+    }
     return false;
 }
 
@@ -104,6 +122,61 @@ DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser *deparse
       DeparserPrepareBufferTranslator(deparser),
       deparser(deparser) {
     setName("DeparserHdrEmitTranslator");
+}
+
+namespace {
+
+class EmitFinder : public Inspector {
+ public:
+    bool found = false;
+    bool preorder(const IR::MethodCallExpression *mce) override {
+        auto method = mce->method;
+        if (auto mem = method->to<IR::Member>()) {
+            if (mem->member.name == P4::P4CoreLibrary::instance().packetOut.emit.name) {
+                found = true;
+            }
+        }
+        return !found;
+    }
+};
+
+static bool hasEmitInBlock(const IR::Node *node) {
+    EmitFinder finder;
+    node->apply(finder);
+    return finder.found;
+}
+
+}  // namespace
+
+bool DeparserHdrEmitTranslator::preorder(const IR::IfStatement *ifstmt) {
+    if (!hasEmitInBlock(ifstmt)) return false;
+
+    builder->emitIndent();
+    builder->append("if (");
+    ifstmt->condition->apply(*deparser->codeGen);
+    builder->append(") ");
+    builder->blockStart();
+    visit(ifstmt->ifTrue);
+    builder->blockEnd(true);
+    if (ifstmt->ifFalse != nullptr) {
+        builder->emitIndent();
+        builder->append("else ");
+        builder->blockStart();
+        visit(ifstmt->ifFalse);
+        builder->blockEnd(true);
+    }
+    return false;
+}
+
+bool DeparserHdrEmitTranslator::preorder(const IR::MethodCallExpression *expression) {
+    auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
+                                          control->program->typeMap);
+    auto ext = mi->to<P4::ExternMethod>();
+    if (ext != nullptr) {
+        processMethod(ext);
+        return false;
+    }
+    return CodeGenInspector::preorder(expression);
 }
 
 void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
