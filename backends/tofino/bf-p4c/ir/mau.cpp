@@ -194,7 +194,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
         if (self->next.count(tag)) {
             if (!current) current = &saved->flow_clone();
             if (auto *gwcf = dynamic_cast<::BFN::GatewayControlFlow *>(current))
-                gwcf->pre_visit_table_next(&*self, tag);
+                gwcf->pre_visit_table_next(self, tag);
             current->visit(self->next.at(tag), tag.c_str());
             if (payload_info.post_payload) {
                 if (current != payload_info.post_payload)

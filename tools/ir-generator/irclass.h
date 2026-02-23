@@ -352,7 +352,7 @@ class IrClass : public IrElement {
     access_t outputCOWfieldrefs(std::ostream &out) const;
     access_t outputCOWmethodrefs(access_t, std::ostream &out, std::unordered_set<cstring>) const;
     void outputCOWref(std::ostream &out) const;
-    void outputCOWnested(std::ostream &out) const;
+    void outputCOWnested(std::ostream &out, IrNamespace *containedIn) const;
     void resolve() override;
     cstring toString() const override { return name; }
     std::string fullName() const;

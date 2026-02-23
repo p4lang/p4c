@@ -496,19 +496,25 @@ IrElement::access_t IrClass::outputCOWmethodrefs(IrElement::access_t access, std
 
 void IrClass::outputCOWref(std::ostream &out) const {
     if (kind != NodeKind::Concrete && kind != NodeKind::Template) return;
-    for (auto e : elements) {
-        if (auto *nc = e->to<IrClass>()) {
-            nc->outputCOWnested(out);
-        }
-    }
     out << "namespace P4::IR {" << std::endl;
     enter_namespace(out, containedIn);
+    for (auto e : elements) {
+        if (auto *nc = e->to<IrClass>()) {
+            nc->outputCOWnested(out, containedIn ? containedIn : &IrNamespace::global());
+        }
+    }
     out << "union " << name << "::COWref {\n";
+    out << indent << "friend class COWptr<" << name << ">;\n";
     out << IrElement::Private;
     out << indent << "COWNode_info *_info;\n";
     out << indent << "COWinfo<" << name << "> *info;\n";
     if (outputCOWfieldrefs(out) != IrElement::Public) out << IrElement::Public;
     out << indent << "COWref(COWNode_info *i) { _info = i; }\n";
+#if 0
+    out << indent << "operator COWptr<" << name << ">() const { return COWptr<" << name
+        << ">(info); }\n";
+    out << indent << "operator const " << name << " *() const { return info->get(); }\n";
+#endif
     out << indent << "COWref *operator->() { return this; }\n";
     out << indent << "void visit_children(Visitor &, const char *);\n";
     outputCOWmethodrefs(
@@ -519,31 +525,30 @@ void IrClass::outputCOWref(std::ostream &out) const {
     out << "}  // namespace P4::IR" << std::endl;
 }
 
-void IrClass::outputCOWnested(std::ostream &out) const {
+void IrClass::outputCOWnested(std::ostream &out, IrNamespace *containedIn) const {
     std::stringstream COWfieldref;
-    cstring qname = qualified_name(&IrNamespace::global());
-    COWfieldref << "COWfieldref<T, " << qname << ", field>";
-    out << "namespace P4::IR {" << std::endl;
-    out << "template <class T, " << qname << " T::*field>\n";
-    out << "struct " << COWfieldref << "\n";
-    out << indent << ": public COWref_base<T, " << qname << ", " << COWfieldref << "> {\n";
+    cstring qname = qualified_name(containedIn);
+    out << "template <class T, class COW>\n";
+    out << "class " << qname << "::COW_nested : public P4::IR::COW_nested_class {\n";
+    out << IrElement::Public;  // FIXME can't mix public and private in an anonymous union,
+                               // so the whole thing must be public
     out << indent << "union {\n";
     out << indent << indent << "COWinfo<T> *info;\n";
     for (auto e : elements) {
         if (auto *fld = e->to<IrField>()) {
             if (fld->isStatic) continue;
-            out << indent << indent << "COWref_subfield<T, " << fld->typeName() << ", "
-                << COWfieldref << ", " << qname << ", &" << qname << "::" << fld->name << "> "
-                << fld->name << ";\n";
+            out << indent << indent << "COWref_subfield<T, " << fld->typeName() << ", COW, "
+                << qname << ", &" << qname << "::" << fld->name << "> " << fld->name << ";\n";
         }
     }
     out << indent << "};\n";
-    out << indent << "using COWref_base<T, " << qname << ", " << COWfieldref << ">::operator=;\n";
-    out << indent << "const " << qname << " &get() const { return info->get()->*field; }\n";
-    out << indent << "const " << qname << " &getOrig() const { return info->getOrig()->*field; }\n";
-    out << indent << qname << " &modify() const { return info->mkClone()->*field; }\n";
+    out << indent << "const " << qname
+        << " &get() const { return reinterpret_cast<const COW *>(this)->get(); }\n";
+    out << indent << "const " << qname
+        << " &getOrig() const { return reinterpret_cast<const COW *>(this)->getOrig(); }\n";
+    out << indent << qname
+        << " &modify() const { return reinterpret_cast<const COW *>(this)->modify(); }\n";
     out << "};\n";
-    out << "}  // namespace P4::IR" << std::endl;
 }
 
 void IrClass::generate_hdr(std::ostream &out) const {
@@ -592,6 +597,8 @@ void IrClass::generate_hdr(std::ostream &out) const {
     if (kind == NodeKind::Concrete || kind == NodeKind::Template) {
         out << indent << "union COWref;\n";
     }
+    if (kind == NodeKind::Nested)
+        out << indent << "template<class T, class COW> class COW_nested;\n";
 
     auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
     if (kind != NodeKind::Nested) {

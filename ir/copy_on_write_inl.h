@@ -234,6 +234,31 @@ struct COWfieldref<T, Vector<U>, field>
         auto res = visit_safe_vector(get().get_contents(), "Vector", v, name);
         if (res != get().get_contents()) modify().replace_contents(std::move(res));
     }
+    void parallel_visit_children(Visitor &v, const char *name = nullptr) const {
+        SplitFlowVisitVector<IR::Vector<T>, T>(v, *this).run_visit();
+    }
+};
+
+template <class T, class U, class COW, class X, Vector<U> X::*field>
+struct COWref_subfield<T, Vector<U>, COW, X, field>
+    : public COW_iterableref_base<
+          T, Vector<U>, COWref_subfield<T, Vector<U>, COW, X, field>,
+          COW_iterator<T, Vector<U>, U, COWref_subfield<T, Vector<U>, COW, X, field>>> {
+    COWinfo<T> *info;
+    using COWref_base<T, Vector<U>, COWref_subfield<T, Vector<U>, COW, X, field>>::operator=;
+    const Vector<U> &get() const { return (reinterpret_cast<const COW *>(this)->get()).*field; }
+    const Vector<U> &getOrig() const {
+        return (reinterpret_cast<const COW *>(this)->getOrig()).*field;
+    }
+    Vector<U> &modify() const { return (reinterpret_cast<const COW *>(this)->modify()).*field; }
+
+    void visit_children(Visitor &v, const char *name = nullptr) const {
+        auto res = visit_safe_vector(get(), "vector", v, name);
+        if (res != get()) modify() = std::move(res);
+    }
+    void parallel_visit_children(Visitor &v, const char *name = nullptr) const {
+        SplitFlowVisitVector<IR::Vector<T>, T>(v, *this).run_visit();
+    }
 };
 
 /* specializations for IR::IndexedVector */
@@ -276,19 +301,28 @@ struct COWfieldref<T, NameMap<U, MAP>, field>
 // FIXME -- need NodeMap specializations if any backend ever uses that template
 
 template <class T, class C, class K, class V, class COW>
-struct COW_map_value_ref : public COW_element_ref<T, C, std::pair<const K, V>, COW> {
-    explicit COW_map_value_ref(COW_element_ref<T, C, std::pair<const K, V>, COW> ref)
-        : COW_element_ref<T, C, std::pair<const K, V>, COW>(ref) {}
+struct COW_map_value_ref : public COWref_base<T, V, COW_map_value_ref<T, C, K, V, COW>> {
+    union {
+        COWinfo<T> *info;
+        COW ref;
+    };
+    mutable bool is_const;
+    union {
+        typename C::const_iterator ci;
+        mutable typename C::iterator ni;
+    };
+    COW_map_value_ref(COW r, typename C::const_iterator i) : ref(r), is_const(true), ci(i) {}
+    COW_map_value_ref(COW r, typename C::iterator i) : ref(r), is_const(false), ni(i) {}
     void clone_fixup() const {
         if (this->is_const) {
             // messy problem -- need to clone (iff not yet cloned) and then find the
             // corresponding iterator in the clone.  If the element has been removed
             // in the clone, we end up returning end(), which may or may not be ok
-            this->ni = this->ref.modified().find(this->ci->first);
+            this->ni = this->ref.modify().find(this->ci->first);
             this->is_const = false;
         }
     }
-    using COW_element_ref<T, C, std::pair<const K, V>, COW>::operator=;
+    using COWref_base<T, V, COW_map_value_ref<T, C, K, V, COW>>::operator=;
     const V &get() const {
         if (this->is_const && this->isCloned()) clone_fixup();
         return this->ci->second;
@@ -313,23 +347,18 @@ struct COWfieldref<T, std::map<KEY, VAL, COMP, ALLOC>, field>
           COW_iterator<T, std::map<KEY, VAL, COMP, ALLOC>, std::pair<const KEY, VAL>,
                        COWfieldref<T, std::map<KEY, VAL, COMP, ALLOC>, field>>> {
     COWinfo<T> *info;
-    using COWref_base<T, std::map<KEY, VAL, COMP, ALLOC>,
-                      COWfieldref<T, std::map<KEY, VAL, COMP, ALLOC>, field>>::operator=;
+    using THIS = COWfieldref<T, std::map<KEY, VAL, COMP, ALLOC>, field>;
+    using COWref_base<T, std::map<KEY, VAL, COMP, ALLOC>, THIS>::operator=;
     const std::map<KEY, VAL, COMP, ALLOC> &get() const { return info->get()->*field; }
     const std::map<KEY, VAL, COMP, ALLOC> &getOrig() const { return info->getOrig()->*field; }
     std::map<KEY, VAL, COMP, ALLOC> &modify() const { return info->mkClone()->*field; }
 
-    using iterator = COW_iterator<T, std::map<KEY, VAL, COMP, ALLOC>, std::pair<const KEY, VAL>,
-                                  COWfieldref<T, std::map<KEY, VAL, COMP, ALLOC>, field>>;
-    size_t count(KEY &k) const { return get().count(k); }
-    COW_map_value_ref<T, std::map<KEY, VAL, COMP, ALLOC>, KEY, VAL,
-                      COWfieldref<T, std::map<KEY, VAL, COMP, ALLOC>, field>>
-    at(KEY &k) const {
-        iterator it(info, get().find(k));
+    COW_map_value_ref<T, std::map<KEY, VAL, COMP, ALLOC>, KEY, VAL, THIS> at(const KEY &k) const {
+        auto it = get().find(k);
         if (it == get().end()) get().at(k);  // throw exception
-        return COW_map_value_ref<T, std::map<KEY, VAL, COMP, ALLOC>, KEY, VAL,
-                                 COWfieldref<T, std::map<KEY, VAL, COMP, ALLOC>, field>>(*it);
+        return COW_map_value_ref<T, std::map<KEY, VAL, COMP, ALLOC>, KEY, VAL, THIS>(*this, it);
     }
+    size_t count(const KEY &k) const { return get().count(k); }
 };
 
 /* specializations for ordered_map */
@@ -342,23 +371,19 @@ struct COWfieldref<T, ordered_map<KEY, VAL, COMP, ALLOC>, field>
           COW_iterator<T, ordered_map<KEY, VAL, COMP, ALLOC>, std::pair<const KEY, VAL>,
                        COWfieldref<T, ordered_map<KEY, VAL, COMP, ALLOC>, field>>> {
     COWinfo<T> *info;
-    using COWref_base<T, ordered_map<KEY, VAL, COMP, ALLOC>,
-                      COWfieldref<T, ordered_map<KEY, VAL, COMP, ALLOC>, field>>::operator=;
+    using THIS = COWfieldref<T, ordered_map<KEY, VAL, COMP, ALLOC>, field>;
+    using COWref_base<T, ordered_map<KEY, VAL, COMP, ALLOC>, THIS>::operator=;
     const ordered_map<KEY, VAL, COMP, ALLOC> &get() const { return info->get()->*field; }
     const ordered_map<KEY, VAL, COMP, ALLOC> &getOrig() const { return info->getOrig()->*field; }
     ordered_map<KEY, VAL, COMP, ALLOC> &modify() const { return info->mkClone()->*field; }
 
-    using iterator = COW_iterator<T, ordered_map<KEY, VAL, COMP, ALLOC>, std::pair<const KEY, VAL>,
-                                  COWfieldref<T, ordered_map<KEY, VAL, COMP, ALLOC>, field>>;
-    size_t count(KEY &k) const { return get().count(k); }
-    COW_map_value_ref<T, ordered_map<KEY, VAL, COMP, ALLOC>, KEY, VAL,
-                      COWfieldref<T, ordered_map<KEY, VAL, COMP, ALLOC>, field>>
-    at(KEY &k) const {
-        iterator it(info, get().find(k));
+    COW_map_value_ref<T, ordered_map<KEY, VAL, COMP, ALLOC>, KEY, VAL, THIS> at(
+        const KEY &k) const {
+        auto it = get().find(k);
         if (it == get().end()) get().at(k);  // throw exception
-        return COW_map_value_ref<T, ordered_map<KEY, VAL, COMP, ALLOC>, KEY, VAL,
-                                 COWfieldref<T, ordered_map<KEY, VAL, COMP, ALLOC>, field>>(*it);
+        return COW_map_value_ref<T, ordered_map<KEY, VAL, COMP, ALLOC>, KEY, VAL, THIS>(*this, it);
     }
+    size_t count(const KEY &k) const { return get().count(k); }
 };
 
 #if 0
@@ -416,7 +441,7 @@ struct COW_element_ref<T, C, std::pair<U, V>, COW>
         if (is_const) {
             // messy problem -- need to clone (iff not yet cloned) and then find the
             // corresponding iterator in the clone
-            auto i = ref.modified().begin();
+            auto i = ref.modify().begin();
             auto &orig_vec = ref.getOrig();
             for (auto oi = orig_vec.begin(); oi != ci; ++oi, ++i)
                 BUG_CHECK(oi != orig_vec.end(), "Invalid iterator in clone_fixup");
@@ -437,6 +462,51 @@ struct COW_element_ref<T, C, std::pair<U, V>, COW>
     std::pair<U, V> &modify() const {
         clone_fixup();
         return *ni;
+    }
+};
+
+template <class T, class C, class K, class U, class V, class COW>
+struct COW_map_value_ref<T, C, K, std::pair<U, V>, COW>
+    : public COWref_base<T, std::pair<U, V>, COW_map_value_ref<T, C, K, std::pair<U, V>, COW>> {
+    union {
+        COWinfo<T> *info;
+        COW ref;
+        COWref_subfield<T, U, COW_map_value_ref<T, C, K, std::pair<U, V>, COW>, std::pair<U, V>,
+                        &std::pair<U, V>::first>
+            first;
+        COWref_subfield<T, V, COW_map_value_ref<T, C, K, std::pair<U, V>, COW>, std::pair<U, V>,
+                        &std::pair<U, V>::second>
+            second;
+    };
+    mutable bool is_const;
+    union {
+        typename C::const_iterator ci;
+        mutable typename C::iterator ni;
+    };
+    COW_map_value_ref(COW r, typename C::const_iterator i) : ref(r), is_const(true), ci(i) {}
+    COW_map_value_ref(COW r, typename C::iterator i) : ref(r), is_const(false), ni(i) {}
+    void clone_fixup() const {
+        if (this->is_const) {
+            // messy problem -- need to clone (iff not yet cloned) and then find the
+            // corresponding iterator in the clone.  If the element has been removed
+            // in the clone, we end up returning end(), which may or may not be ok
+            this->ni = this->ref.modify().find(this->ci->first);
+            this->is_const = false;
+        }
+    }
+    using COWref_base<T, std::pair<U, V>,
+                      COW_map_value_ref<T, C, K, std::pair<U, V>, COW>>::operator=;
+    const std::pair<U, V> &get() const {
+        if (this->is_const && this->isCloned()) clone_fixup();
+        return this->ci->second;
+    }
+    const std::pair<U, V> &getOrig() const {
+        if (this->is_const) return this->ci->second;
+        BUG("getOrig on cloned COW_map_value_ref");
+    }
+    std::pair<U, V> &modify() const {
+        clone_fixup();
+        return this->ni->second;
     }
 };
 
@@ -476,6 +546,20 @@ struct COW_array_element_ref : public COWref_base<T, U, COW_array_element_ref<T,
         clone_fixup();
         return *ni;
     }
+};
+
+template <class T, typename U, size_t N, U (T::*field)[N]>
+requires std::derived_from<
+    typename U::template COW_nested<T, COW_array_element_ref<T, U, N, field>>, COW_nested_class>
+struct COW_array_element_ref<T, U, N, field>
+    : public COWref_base<T, U, COW_array_element_ref<T, U, N, field>>,
+      public U::template COW_nested<T, COW_array_element_ref<T, U, N, field>> {
+    mutable bool is_const;
+    union {
+        const U *ci;
+        mutable U *ni;
+    };
+    using COWref_base<T, U, COW_array_element_ref<T, U, N, field>>::operator=;
 };
 
 template <class T, typename U, size_t N, U (T::*field)[N]>

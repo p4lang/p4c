@@ -114,6 +114,17 @@ struct COWref_subfield : public COWref_base<T, U, COWref_subfield<T, U, COW, X, 
     U &modify() const { return (reinterpret_cast<const COW *>(this)->modify()).*field; }
 };
 
+/* a nested IR class defined in ir-generated.h -- base class marker for template speciaizations */
+struct COW_nested_class {};
+
+template <class T, typename U, U T::*field>
+requires std::derived_from<typename U::template COW_nested<T, COWfieldref<T, U, field>>,
+                           COW_nested_class>
+struct COWfieldref<T, U, field> : public COWref_base<T, U, COWfieldref<T, U, field>>,
+                                  public U::template COW_nested<T, COWfieldref<T, U, field>> {
+    using COWref_base<T, U, COWfieldref<T, U, field>>::operator=;
+};
+
 template <class T>
 class COWptr {
     COWinfo<T> *info;
@@ -127,19 +138,20 @@ class COWptr {
     explicit COWptr(COWNode_info *p) : info(static_cast<COWinfo<T> *>(p)) {
         BUG_CHECK(info->get()->template is<T>(), "incorrect type in COWptr ctor");
     }
-    const T *get() const { return info->get(); }
     typename T::COWref getRef() const { return typename T::COWref(info); }
 
  public:
     COWptr() = default;
     COWptr(const COWptr &) = default;
     COWptr(COWptr &&) = default;
+    COWptr(const T::COWref *r) : info(r->info) {}
     template <typename U>
     requires std::derived_from<U, T> COWptr(const COWptr<U> &a) : COWptr(a.info) {}
     ~COWptr() = default;
     COWptr &operator=(const COWptr &) = default;
     COWptr &operator=(COWptr &&) = default;
 
+    const T *get() const { return info->get(); }
     operator const T *() const { return get(); }
     typename T::COWref operator->() const { return getRef(); }
     typename T::COWref operator*() const { return getRef(); }
