@@ -15,7 +15,6 @@ and limitations under the License.
 #define BACKENDS_TC_TCEXTERNS_H_
 
 #include "backend.h"
-#include "ebpfCodeGen.h"
 
 namespace P4::TC {
 

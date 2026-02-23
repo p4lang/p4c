@@ -21,7 +21,6 @@ and limitations under the License.
 
 #include "backends/ebpf/psa/ebpfPsaGen.h"
 #include "control-plane/p4RuntimeArchHandler.h"
-#include "ebpfCodeGen.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/parseAnnotations.h"
 #include "frontends/p4/parserCallGraph.h"
