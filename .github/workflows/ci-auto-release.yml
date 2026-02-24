@@ -1,8 +1,13 @@
 name: Automated Release
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: "0 12 1 * *" # At 12:00 on day-of-month 1
+    - cron: "17 12 1 * *" # At 12:17 on day-of-month 1 (avoid top-of-hour load)
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   build:
@@ -29,11 +34,10 @@ jobs:
           $GIT_LOG
           EOF
           )
-          CHANGELOG="${CHANGELOG//'%'/'%25'}"
-          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
           CHANGELOG="${CHANGELOG//'#'/''}"
-          echo "::set-output name=content::$CHANGELOG"
+          echo "content<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGELOG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Display changelog
         run: |
@@ -56,10 +60,9 @@ jobs:
           ${{ steps.changelog.outputs.content }}
           EOF
           )
-          COMMIT_MSG="${COMMIT_MSG//'%'/'%25'}"
-          COMMIT_MSG="${COMMIT_MSG//$'\n'/'%0A'}"
-          COMMIT_MSG="${COMMIT_MSG//$'\r'/'%0D'}"
-          echo "::set-output name=content::$COMMIT_MSG"
+          echo "content<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$COMMIT_MSG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Get pull request body message
         id: body
@@ -72,10 +75,9 @@ jobs:
           ${{ steps.changelog.outputs.content }}
           EOF
           )
-          MSG="${MSG//'%'/'%25'}"
-          MSG="${MSG//$'\n'/'%0A'}"
-          MSG="${MSG//$'\r'/'%0D'}"
-          echo "::set-output name=content::$MSG"
+          echo "content<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$MSG" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v8
