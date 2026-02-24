@@ -49,32 +49,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bazel-direct-
 
-      - name: Save start time
-        uses: josStorer/get-current-time@v2
-        id: start-time
-        with:
-          format: X
-
       - name: Install Flex and Bison
         run: sudo apt install bison flex libfl-dev
+
+      - name: Save start time
+        run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
 
       - name: Build p4c
         run: bazel build //... --verbose_failures
 
-      - name: Save end time
-        if: always()
-        uses: josStorer/get-current-time@v2
-        id: end-time
-        with:
-          format: X
-
       - name: Calculate build duration
         if: always()
-        run: |
-          START=${{ steps.start-time.outputs.formattedTime }}
-          END=${{ steps.end-time.outputs.formattedTime }}
-          DURATION=$(( END - START ))
-          echo "duration=$DURATION" | tee "$GITHUB_ENV"
+        run: echo "duration=$(( $(date +%s) - START_TIME ))" >> "$GITHUB_ENV"
 
       - name: Compress cache
         if: always()
@@ -103,32 +89,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bazel-indirect-
 
-      - name: Save start time
-        uses: josStorer/get-current-time@v2
-        id: start-time
-        with:
-          format: X
-
       - name: Install Flex and Bison
         run: sudo apt install bison flex libfl-dev
 
-      - name: Build bazel/example
-        run: cd ./bazel/example && bazel build //... --verbose_failures
+      - name: Save start time
+        run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
 
-      - name: Save end time
-        if: always()
-        uses: josStorer/get-current-time@v2
-        id: end-time
-        with:
-          format: X
+      - name: Build bazel/example
+        run: |
+          cd ./bazel/example
+          bazel build @p4c//... //... --verbose_failures
 
       - name: Calculate build duration
         if: always()
-        run: |
-          START=${{ steps.start-time.outputs.formattedTime }}
-          END=${{ steps.end-time.outputs.formattedTime }}
-          DURATION=$(( END - START ))
-          echo "duration=$DURATION" | tee "$GITHUB_ENV"
+        run: echo "duration=$(( $(date +%s) - START_TIME ))" >> "$GITHUB_ENV"
 
       - name: Compress cache
         if: always()

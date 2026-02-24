@@ -25,15 +25,15 @@ proto_library(
     deps = [
         "@googleapis//google/rpc:code_proto",
         "@googleapis//google/rpc:status_proto",
-        "@p4runtime//:p4info_proto",
-        "@p4runtime//:p4runtime_proto",
+        "@p4runtime//proto/p4/config/v1:p4info_proto",
+        "@p4runtime//proto/p4/v1:p4runtime_proto",
     ],
 )
 
 proto_library(
     name = "p4testgen_proto",
     srcs = ["modules/testgen/targets/bmv2/proto/p4testgen.proto"],
-    deps = ["@p4runtime//:p4runtime_proto"],
+    deps = ["@p4runtime//proto/p4/v1:p4runtime_proto"],
 )
 
 proto_library(
@@ -88,7 +88,7 @@ cc_library(
         "@abseil-cpp//absl/container:btree",
         "@abseil-cpp//absl/strings:str_format",
         "@boost.multiprecision",
-        "@p4runtime//:p4info_cc_proto",
+        "@p4runtime//proto/p4/config/v1:p4info_cc_proto",
         "@z3//:z3_static",
     ],
 )

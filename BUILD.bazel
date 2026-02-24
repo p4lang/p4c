@@ -2,8 +2,8 @@ load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_license//rules:license.bzl", "license")
-load("//:bazel/bison.bzl", "genyacc")
-load("//:bazel/flex.bzl", "genlex")
+load("//bazel:bison.bzl", "genyacc")
+load("//bazel:flex.bzl", "genlex")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -252,9 +252,9 @@ cc_library(
         "@boost.algorithm",
         "@boost.functional",
         "@boost.iostreams",
-        "@p4runtime//:p4info_cc_proto",
-        "@p4runtime//:p4runtime_cc_proto",
-        "@p4runtime//:p4types_cc_proto",
+        "@p4runtime//proto/p4/config/v1:p4info_cc_proto",
+        "@p4runtime//proto/p4/config/v1:p4types_cc_proto",
+        "@p4runtime//proto/p4/v1:p4runtime_cc_proto",
         "@protobuf",
     ],
 )

@@ -3,3 +3,8 @@ control-plane/p4runtime
 test/frameworks/gtest
 bazel/example
 build
+# Bazel output symlinks.
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-p4c

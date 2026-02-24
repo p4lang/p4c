@@ -1,6 +1,6 @@
 """P4 compilation rule."""
 
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
+load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_TYPE", "find_cc_toolchain", "use_cc_toolchain")
 
 def _extract_common_p4c_args(ctx):
     """Extract common arguments for p4c build rules."""
@@ -39,7 +39,7 @@ def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
 
     # The toolchain type is implicitly provided by the `toolchains` attribute of the rule.
     # We need to explicitly retrieve the toolchain info from the context.
-    cc_toolchain = find_cpp_toolchain(ctx)
+    cc_toolchain = find_cc_toolchain(ctx)
     ctx.actions.run_shell(
         command = """
             # p4c invokes cc for preprocessing; we provide it below.
@@ -56,7 +56,7 @@ def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
             transitive = [cc_toolchain.all_files],
         ),
         use_default_shell_env = True,
-        toolchain = "@bazel_tools//tools/cpp:toolchain_type",
+        toolchain = CC_TOOLCHAIN_TYPE,
         **run_shell_kwargs
     )
 
@@ -173,7 +173,7 @@ p4_library = rule(
             allow_files = [".p4", ".h"],
         ),
     },
-    toolchains = use_cpp_toolchain(),
+    toolchains = use_cc_toolchain(),
 )
 
 def _p4_graphs_impl(ctx):
@@ -252,5 +252,5 @@ p4_graphs = rule(
             allow_files = [".p4", ".h"],
         ),
     },
-    toolchains = use_cpp_toolchain(),
+    toolchains = use_cc_toolchain(),
 )

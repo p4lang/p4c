@@ -1,0 +1,29 @@
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+package(default_visibility = ["//visibility:public"])
+
+bzl_library(
+    name = "bison",
+    srcs = ["bison.bzl"],
+)
+
+bzl_library(
+    name = "flex",
+    srcs = ["flex.bzl"],
+)
+
+bzl_library(
+    name = "extensions",
+    srcs = ["extensions.bzl"],
+)
+
+bzl_library(
+    name = "repositories",
+    srcs = ["repositories.bzl"],
+)
+
+bzl_library(
+    name = "p4_library",
+    srcs = ["p4_library.bzl"],
+    deps = ["@rules_cc//cc:find_cc_toolchain.bzl"],
+)
