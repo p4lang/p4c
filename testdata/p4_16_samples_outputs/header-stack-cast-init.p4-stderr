@@ -1,0 +1,9 @@
+header-stack-cast-init.p4(11): [--Wwarn=unused] warning: table 't' is unused
+    table t {
+          ^
+header-stack-cast-init.p4(17): [--Wwarn=unused] warning: 'arr' is unused
+        h_t[1] arr = { (h_t) { func() } };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+header-stack-cast-init.p4(11): [--Winfo=removed] info: removing table 't'
+    table t {
+          ^

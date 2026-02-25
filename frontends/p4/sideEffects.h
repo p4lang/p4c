@@ -371,6 +371,7 @@ class SideEffectOrdering : public PassRepeated {
         if (!skipSideEffectOrdering) {
             passes.push_back(new TypeChecking(nullptr, typeMap));
             passes.push_back(new DoSimplifyExpressions(typeMap, &added));
+            passes.push_back(new ClearTypeMap(typeMap));
             passes.push_back(typeChecking);
             passes.push_back(new TablesInActions(typeMap));
             passes.push_back(new TablesInKeys(typeMap, &invokedInKey));
