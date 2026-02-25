@@ -170,7 +170,7 @@ set (BFAS_COMMON_SOURCES
   ternary_match.cpp
   top_level.cpp
   ubits.cpp
-  vector.c
+  vector.cpp
   widereg.cpp
   # FIXME: This should be a library.
   ${BFN_P4C_SOURCE_DIR}/bf-utils/dynamic_hash/dynamic_hash.cpp
@@ -234,9 +234,6 @@ endif()
 
 
 set_source_files_properties(${BFAS_SOURCES} PROPERTIES COMPILE_FLAGS ${BFASM_CXX_FLAGS})
-# Remove compiler flag that is C++ only for vector.c
-string(REPLACE "-Wno-overloaded-virtual" "" vector_c_flags ${BFASM_CXX_FLAGS})
-set_source_files_properties(vector.c PROPERTIES COMPILE_FLAGS ${vector_c_flags})
 add_executable (bfas ${BFAS_SOURCES})
 # Disable errors for warnings. FIXME: Get rid of this.
 target_compile_options(bfas PUBLIC "-Wno-error")
