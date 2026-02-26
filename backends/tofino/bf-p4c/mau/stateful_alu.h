@@ -31,7 +31,7 @@
  *       represented by a register action in P4 code and IR::MAU::SaluAction IR node
  *       * The SALU VLIW instruction contains instructions for particular units
  *         (four sub-ALUs, two comparators, output sub-ALU) represented by primitives
- *         (IR::MAU::Primitive) both in backend and assembler.
+ *         (IR::MAU::MauPrimitive) both in backend and assembler.
  *   * Register file:
  *     * Four rows, each one is 32b (Tofino) / 34b (Tofino 2) register
  *       represented by a register parameter in P4 code and IR::MAU::SaluRegfileRow IR node
@@ -267,7 +267,7 @@ class CreateSaluInstruction : public Inspector {
     bool preorder(const IR::BoolLiteral *) override;
     bool preorder(const IR::AttribLocal *) override { BUG("unconverted p4_14"); }
     bool preorder(const IR::Slice *) override;
-    bool preorder(const IR::MAU::Primitive *) override;
+    bool preorder(const IR::MAU::MauPrimitive *) override;
     bool preorder(const IR::MAU::SaluRegfileRow *) override;
     bool preorder(const IR::Operation::Relation *, cstring op, bool eq);
     bool preorder(const IR::Equ *r) override { return preorder(r, "equ"_cs, true); }
@@ -349,7 +349,7 @@ class CheckStatefulAlu : public MauModifier {
 
     bool preorder(IR::MAU::StatefulAlu *) override;
     bool preorder(IR::MAU::SaluFunction *) override;
-    bool preorder(IR::MAU::Primitive *) override;
+    bool preorder(IR::MAU::MauPrimitive *) override;
 
     /**
      * @brief Check that register params and large constants used in register actions associated

@@ -23,17 +23,19 @@ namespace P4 {
 
 enum flags {
     // flags that control the creation of auto-created methods
-    EXTEND = 1,          // call the creation function to extend even when user-defined
-    IN_IMPL = 2,         // output in the implementation file, not the header
-    OVERRIDE = 4,        // give an 'override' tag (overrides something in IR::Node)
-    NOT_DEFAULT = 8,     // don't create if not user-defined
-    CONCRETE_ONLY = 16,  // don't create in abstract classes
-    CONST = 32,          // give a 'const' tag
-    CLASSREF = 64,       // add an argument `const CLASS &a'
-    INCL_NESTED = 128,   // create even in nested (non-Node sublass) classes
-    CONSTRUCTOR = 256,   // is a constructor
-    FACTORY = 512,       // factory (static) method
-    FRIEND = 1024        // friend function, not a method
+    EXTEND = 1,                 // call the creation function to extend even when user-defined
+    IN_IMPL = 2,                // output in the implementation file, not the header
+    OVERRIDE = 4,               // give an 'override' tag (overrides something in IR::Node)
+    NOT_DEFAULT = 8,            // don't create if not user-defined
+    CONCRETE_ONLY = 16,         // don't create in abstract classes
+    CONST = 32,                 // give a 'const' tag
+    CLASSREF = 64,              // add an argument `const CLASS &a'
+    INCL_NESTED = 128,          // create even in nested (non-Node sublass) classes
+    CONSTRUCTOR = 256,          // is a constructor
+    FACTORY = 512,              // factory (static) method
+    FRIEND = 1024,              // friend function, not a method
+    CONST_AND_NONCONST = 2048,  // generate twice, with and without const tag
+    COWREF_METHOD = 4096,       // part of COWref nested class
 };
 
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
@@ -173,11 +175,63 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << LineDirective(true) << cl->indent << "return out; }";
           return {buf};
       }}},
+    {"COWref::visit_children"_cs,
+     {&NamedType::Void(),
+      {new IrField(&ReferenceType::VisitorRef, "v"_cs),
+       new IrField(new PointerType(&NamedType::Char(), true), "n"_cs, "nullptr"_cs)},
+      IN_IMPL + OVERRIDE + COWREF_METHOD,
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+          bool needed = false;
+          std::stringstream buf;
+          buf << "{" << std::endl;
+          // Silence "not used" warnings in case of name `n` is not used
+          buf << cl->indent << "(void)n;" << std::endl;
+          if (auto parent = cl->getParent())
+              buf << cl->indent << "reinterpret_cast<" << parent->qualified_name(cl->containedIn)
+                  << "::COWref *>(this)->visit_children(v, n);" << std::endl;
+          for (auto f : *cl->getFields()) {
+              if (f->type) {
+                  if (f->type->resolve(cl->containedIn) == nullptr)
+                      // This is not an IR pointer
+                      continue;
+                  if (f->isInline)
+                      buf << cl->indent << f->name << ".visit_children(v, \"" << f->name << "\");"
+                          << std::endl;
+                  else
+                      buf << cl->indent << "v.visit(" << f->name << ", \"" << f->name << "\");"
+                          << std::endl;
+                  needed = true;
+              } else {
+                  const auto *varF = f->to<IrVariantField>();
+                  buf << cl->indent << "std::visit([&](auto &&variant) {\n"
+                      << cl->indent << cl->indent << "using T = std::decay_t<decltype(variant)>;\n";
+                  bool first = true;
+                  for (const auto *type : *varF->types) {
+                      needed = true;
+                      buf << cl->indent << cl->indent
+                          << (first ? "if constexpr (std::is_same_v<T, "
+                                    : "else if constexpr (std::is_same_v<T,")
+                          << type->toString() << ">) {";
+                      if (type->resolve(cl->containedIn)) {
+                          buf << " v.visit(variant, \"" << f->name << "::" << type->toString()
+                              << "\"); ";
+                      }
+                      buf << "}\n";
+                      first = false;
+                  }
+                  buf << cl->indent << cl->indent
+                      << R"(else { BUG("Unexpected variant field"); } }, )" << f->name << ".get());"
+                      << std::endl;
+              }
+          }
+          buf << "}";
+          return needed ? buf : cstring();
+      }}},
     {"visit_children"_cs,
      {&NamedType::Void(),
       {new IrField(&ReferenceType::VisitorRef, "v"_cs),
        new IrField(new PointerType(&NamedType::Char(), true), "n"_cs, "nullptr"_cs)},
-      IN_IMPL + OVERRIDE,
+      IN_IMPL + OVERRIDE + CONST_AND_NONCONST,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           bool needed = false;
           std::stringstream buf;
@@ -224,6 +278,35 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           }
           buf << "}";
           return needed ? buf : cstring();
+      }}},
+    {"COWref_visit_children"_cs,
+     {&NamedType::Void(),
+      {new IrField(new PointerType(&NamedType::COWNode_info()), "info"_cs),
+       new IrField(&ReferenceType::VisitorRef, "v"_cs),
+       new IrField(new PointerType(&NamedType::Char(), true), "n"_cs)},
+      CONST + IN_IMPL + OVERRIDE + CONCRETE_ONLY,
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+          bool needed = false;
+          for (auto f : *cl->getFields()) {
+              if (f->type) {
+                  if (f->type->resolve(cl->containedIn)) {
+                      needed = true;
+                      break;
+                  }
+              } else {
+                  const auto *varF = f->to<IrVariantField>();
+                  if (!varF->types->empty()) {
+                      needed = true;
+                      break;
+                  }
+              }
+          }
+          if (!needed) return cstring();
+          std::stringstream buf;
+          buf << "{" << std::endl;
+          buf << cl->indent << "COWref(info).visit_children(v, n);" << std::endl;
+          buf << "}";
+          return buf;
       }}},
     {"validate"_cs,
      {&NamedType::Void(),
@@ -396,6 +479,22 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       [](IrClass *, Util::SourceInfo, cstring) -> cstring { return cstring(); }}},
 };
 
+static cstring rewriteCOWMethodBody(cstring body) {
+    std::string rv;
+    const char *p = body.c_str();
+    while (const char *vccall = std::strstr(p, "::visit_children(")) {
+        const char *t = vccall;
+        while (t > p && (std::isalnum(t[-1]) || t[-1] == '_' || t[-1] == ':')) t--;
+        rv.append(p, t - p);
+        rv.append("reinterpret_cast<");
+        rv.append(t, vccall - t);
+        rv.append("::COWref *>(this)->");
+        p = vccall + 2;
+    }
+    rv.append(p);
+    return rv;
+}
+
 void IrClass::generateMethods() {
     if (this == nodeClass() || this == vectorClass()) return;
     if (kind != NodeKind::Interface) {
@@ -408,24 +507,37 @@ void IrClass::generateMethods() {
                     ->where([&def](IrElement *el) { return el->to<IrNo>()->text == def.first; })
                     ->any())
                 continue;
+            auto name = def.first;
+            if (def.second.flags & COWREF_METHOD) {
+                auto *p = name.find("::");
+                BUG_CHECK(p, "%s is not a COWref method", name);
+                name = cstring(p + 2);
+            }
             IrMethod *exist = dynamic_cast<IrMethod *>(
                 Util::enumerate(elements)
                     ->where([](IrElement *el) { return el->is<IrMethod>(); })
-                    ->where([&def](IrElement *el) { return el->to<IrMethod>()->name == def.first; })
+                    ->where([name](IrElement *el) { return el->to<IrMethod>()->name == name; })
                     ->nextOrDefault());
-            if (exist && !(def.second.flags & EXTEND)) continue;
             cstring body;
-            if (exist)
-                body = def.second.create(this, exist->srcInfo, exist->body);
-            else
-                body = def.second.create(this, Util::SourceInfo(), cstring());
+            Util::SourceInfo srcInfo;
+            if (exist) {
+                srcInfo = exist->srcInfo;
+                if (def.second.flags & COWREF_METHOD) {
+                    if (exist->body) body = rewriteCOWMethodBody(exist->body);
+                    exist = nullptr;
+                } else if (!(def.second.flags & EXTEND))
+                    continue;
+                else
+                    body = def.second.create(this, srcInfo, exist->body);
+            } else
+                body = def.second.create(this, srcInfo, cstring());
             if (body) {
                 if (!body.size()) body = nullptr;
                 if (exist) {
                     exist->body = body;
                     if (def.second.flags & FRIEND) exist->isFriend = true;
                 } else {
-                    auto *m = new IrMethod(def.first, body);
+                    auto *m = new IrMethod(srcInfo, def.first, body);
                     if (def.second.flags & FRIEND) m->isFriend = true;
                     m->clss = this;
                     if (!(def.second.flags & CONSTRUCTOR) || !shouldSkip("method_constructor"_cs)) {
@@ -494,6 +606,8 @@ void IrClass::generateMethods() {
         if (info.flags & CONST) m->isConst = true;
         if ((info.flags & OVERRIDE) && kind != NodeKind::Nested) m->isOverride = true;
         if (info.flags & FACTORY) m->isStatic = true;
+        if (info.flags & CONST_AND_NONCONST) m->constAndNonconst = true;
+        if (info.flags & COWREF_METHOD) m->COWrefMethod = true;
     }
     if (ctor) elements.erase(find(elements, ctor));
     if (kind != NodeKind::Interface && !shouldSkip("constructor"_cs)) {
