@@ -44,7 +44,9 @@ namespace P4 {
  * machine, the 'p4includePath' would contain the path on the original machine.
  */
 std::filesystem::path p4includePath = std::filesystem::path(CONFIG_PKGDATADIR) / "p4include";
+#ifdef SUPPORT_P4_14
 std::filesystem::path p4_14includePath = std::filesystem::path(CONFIG_PKGDATADIR) / "p4_14include";
+#endif
 
 using namespace P4::literals;
 
@@ -166,13 +168,15 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             return true;
         },
         "Like -Mt, override target but quote special characters (passed to preprocessor)");
-
     registerOption(
         "--p4v", "{14|16}",
         [this](const char *arg) {
+#ifdef SUPPORT_P4_14
             if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
                 langVersion = ParserOptions::FrontendVersion::P4_14;
-            } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
+            } else
+#endif
+                if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
                 langVersion = ParserOptions::FrontendVersion::P4_16;
             } else {
                 ::P4::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
@@ -184,9 +188,12 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
     registerOption(
         "--std", "{p4-14|p4-16}",
         [this](const char *arg) {
+#ifdef SUPPORT_P4_14
             if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
                 langVersion = ParserOptions::FrontendVersion::P4_14;
-            } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
+            } else
+#endif
+                if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
                 langVersion = ParserOptions::FrontendVersion::P4_16;
             } else {
                 ::P4::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
@@ -381,9 +388,11 @@ std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) 
     }
     this->exe_name = cstring(executablePath.stem().c_str());
 
+#ifdef SUPPORT_P4_14
     searchForIncludePath(p4_14includePath,
                          {"p4_14include"_cs, "../p4_14include"_cs, "../../p4_14include"_cs},
                          executablePath);
+#endif
     searchForIncludePath(p4includePath, {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs},
                          executablePath);
 
@@ -401,11 +410,17 @@ const char *ParserOptions::getIncludePath() const {
     // the p4c driver sets environment variables for include
     // paths.  check the environment and add these to the command
     // line for the preprocessor
+#ifdef SUPPORT_P4_14
     char *driverP4IncludePath =
         isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
-    if (driverP4IncludePath != nullptr) path += (" -I"_cs + cstring(driverP4IncludePath));
     path += " -I"_cs + (isv1() ? p4_14includePath.string() : p4includePath.string());
-    if (!isv1()) path += " -I"_cs + (p4includePath / "bmv2").string();
+    if (!isv1()) path += " -I"_cs + p4includePath.string() + "/bmv2"_cs;
+#else
+    char *driverP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
+    path += " -I"_cs + p4includePath.string();
+    path += " -I"_cs + p4includePath.string() + "/bmv2"_cs;
+#endif
+    if (driverP4IncludePath != nullptr) path += (" -I"_cs + cstring(driverP4IncludePath));
     return path.c_str();
 }
 
@@ -458,7 +473,9 @@ static std::filesystem::path makeFileName(const std::filesystem::path &folder,
     return folder / newName;
 }
 
+#ifdef SUPPORT_P4_14
 bool ParserOptions::isv1() const { return langVersion == ParserOptions::FrontendVersion::P4_14; }
+#endif
 
 void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass,
                              const IR::Node *node) const {

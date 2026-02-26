@@ -76,7 +76,9 @@ class Backend {
           enumMap(enumMap),
           corelib(P4::P4CoreLibrary::instance()),
           json(new BMV2::JsonObjects()) {
+#ifdef SUPPORT_P4_14
         refMap->setIsV1(options.isv1());
+#endif
     }
     void serialize(std::ostream &out) const { json->toplevel->serialize(out); }
     virtual void convert(const IR::ToplevelBlock *block) = 0;

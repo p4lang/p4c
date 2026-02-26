@@ -357,7 +357,9 @@ EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap) {
     setName("EvaluatorPass");
     if (!refMap) {
         selfRefMap.reset(new ReferenceMap);
+#ifdef SUPPORT_P4_14
         selfRefMap->setIsV1(P4CContext::get().options().isv1());
+#endif
         refMap = selfRefMap.get();
     }
     evaluator = new P4::Evaluator(refMap, typeMap);

@@ -77,36 +77,8 @@ class InlineActions : public PassManager {
 
 }  // namespace P4
 
-namespace P4::P4_14 {
-
-/// Special inliner which works directly on P4-14 representation
-class InlineActions : public Transform {
-    const IR::V1Program *global;
-    class SubstActionArgs : public Transform {
-        const IR::ActionFunction *function;
-        const IR::Primitive *callsite;
-        const IR::Node *postorder(IR::ActionArg *arg) override {
-            for (unsigned i = 0; i < function->args.size(); ++i)
-                if (function->args[i] == getOriginal()) return callsite->operands[i];
-            BUG("Action arg not argument of action");
-            return arg;
-        }
-
-     public:
-        SubstActionArgs(const IR::ActionFunction *f, const IR::Primitive *c)
-            : function(f), callsite(c) {}
-    };
-    const IR::V1Program *preorder(IR::V1Program *gl) override { return global = gl; }
-    const IR::Node *preorder(IR::Primitive *p) override {
-        if (auto af = global->get<IR::ActionFunction>(p->name)) {
-            SubstActionArgs saa(af, p);
-            saa.setCalledBy(this);
-            return af->action.clone()->apply(saa);
-        }
-        return p;
-    }
-};
-
-}  // namespace P4::P4_14
+#ifdef SUPPORT_P4_14
+#include "actionsInlining_p4_14.h"
+#endif
 
 #endif /* FRONTENDS_P4_ACTIONSINLINING_H_ */
