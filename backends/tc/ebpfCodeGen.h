@@ -17,19 +17,12 @@ and limitations under the License.
 #ifndef BACKENDS_TC_EBPFCODEGEN_H_
 #define BACKENDS_TC_EBPFCODEGEN_H_
 
-// FIXME: these include each other and present file
 #include "backend.h"
 #include "tcExterns.h"
 
 namespace P4::TC {
 
 using namespace P4::literals;
-
-class ConvertToBackendIR;
-class EBPFPnaParser;
-class EBPFRegisterPNA;
-class EBPFHashPNA;
-class EBPFRandomPNA;
 
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 

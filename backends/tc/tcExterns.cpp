@@ -16,6 +16,8 @@ and limitations under the License.
 
 #include "tcExterns.h"
 
+#include "ebpfCodeGen.h"
+
 namespace P4::TC {
 
 void EBPFRegisterPNA::emitInitializer(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,

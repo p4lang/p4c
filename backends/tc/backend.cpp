@@ -23,6 +23,7 @@ and limitations under the License.
 #include "backend.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/target.h"
+#include "ebpfCodeGen.h"
 
 namespace P4::TC {
 
