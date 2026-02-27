@@ -350,9 +350,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Range *range) {
     // For-in-loops do not currently see integer constants as
     // singleton sets, so this optimization should not be performed
     // in this context (see: https://github.com/p4lang/p4c/pull/5500)
-    if (getContext()->node->is<IR::ForInStatement>()) {
-        return range;
-    }
+    if (getParent<IR::ForInStatement>()) return range;
     // Range a..a is the same as a
     if (auto c0 = range->left->to<IR::Constant>()) {
         if (auto c1 = range->right->to<IR::Constant>()) {
