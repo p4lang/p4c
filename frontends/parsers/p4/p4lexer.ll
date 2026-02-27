@@ -323,6 +323,7 @@ using Parser = P4::P4Parser;
 
 "!"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(NOT); }
 ":"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(COLON); }
+"+:"    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS_COLON); }
 ","     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(COMMA); }
 "?"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(QUESTION); }
 "."     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(DOT); }
