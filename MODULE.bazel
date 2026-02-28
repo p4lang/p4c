@@ -17,8 +17,13 @@ bazel_dep(name = "googleapis", version = "0.0.0-20260223-edfe7983")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
 bazel_dep(name = "nlohmann_json", version = "3.12.0.bcr.1")
 bazel_dep(name = "protobuf", version = "33.5")
+bazel_dep(name = "rules_bison", version = "0.4")
 bazel_dep(name = "rules_cc", version = "0.2.17")
+bazel_dep(name = "rules_flex", version = "0.4")
 bazel_dep(name = "rules_license", version = "1.0.0")
+
+# Transitive dep of rules_bison and rules_flex; pinned to 0.3 for Bazel 9+ compatibility.
+bazel_dep(name = "rules_m4", version = "0.3")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "z3", version = "4.15.2")
 bazel_dep(name = "p4runtime", version = "1.5.0")

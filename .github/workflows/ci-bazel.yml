@@ -49,9 +49,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bazel-direct-
 
-      - name: Install Flex and Bison
-        run: sudo apt install bison flex libfl-dev
-
       - name: Save start time
         run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
 
@@ -88,9 +85,6 @@ jobs:
           key: ${{ runner.os }}-bazel-indirect-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
           restore-keys: |
             ${{ runner.os }}-bazel-indirect-
-
-      - name: Install Flex and Bison
-        run: sudo apt install bison flex libfl-dev
 
       - name: Save start time
         run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"

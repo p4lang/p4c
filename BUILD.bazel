@@ -3,7 +3,7 @@ load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_license//rules:license.bzl", "license")
 load("//bazel:bison.bzl", "genyacc")
-load("//bazel:flex.bzl", "genlex")
+load("//bazel:flex.bzl", "flex_lexer_h", "genlex")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -89,33 +89,22 @@ genyacc(
     visibility = ["//visibility:private"],
 )
 
-genrule(
-    name = "p4lexer_lex",
-    srcs = ["frontends/parsers/p4/p4lexer.ll"],
-    outs = ["frontends/parsers/p4/p4lexer.lex"],
-    cmd = "sed '/%option outfile=\"lex.yy.c\"/d' $(SRCS) > $(OUTS)",
+flex_lexer_h(
+    name = "flex_lexer_h",
     visibility = ["//visibility:private"],
 )
 
 genlex(
     name = "p4lexer",
-    src = "frontends/parsers/p4/p4lexer.lex",
+    src = "frontends/parsers/p4/p4lexer.ll",
     out = "frontends/parsers/p4/p4lexer.cc",
     prefix = "yy",
     visibility = ["//visibility:private"],
 )
 
-genrule(
-    name = "v1lexer_lex",
-    srcs = ["frontends/parsers/v1/v1lexer.ll"],
-    outs = ["frontends/parsers/v1/v1lexer.lex"],
-    cmd = "sed '/%option outfile=\"lex.yy.c\"/d' $(SRCS) > $(OUTS)",
-    visibility = ["//visibility:private"],
-)
-
 genlex(
     name = "v1lexer",
-    src = "frontends/parsers/v1/v1lexer.lex",
+    src = "frontends/parsers/v1/v1lexer.ll",
     out = "frontends/parsers/v1/v1lexer.cc",
     prefix = "yy",
     visibility = ["//visibility:private"],
@@ -240,6 +229,7 @@ cc_library(
     ],
     deps = [
         ":config_h",
+        ":flex_lexer_h",
         ":lib",
         ":p4info_dpdk_cc_proto",
         "@abseil-cpp//absl/container:btree",

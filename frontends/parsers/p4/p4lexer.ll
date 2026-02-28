@@ -35,7 +35,6 @@ using Parser = P4::P4Parser;
 %}
 
 %option c++
-%option outfile="lex.yy.c"
 %option yyclass="P4::P4Lexer"
 %option prefix="p4"
 %option nodefault noyywrap nounput noinput noyyget_leng
