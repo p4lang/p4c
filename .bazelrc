@@ -9,3 +9,9 @@ build --host_cxxopt=-std=c++20
 # Force the use of Clang for all builds.
 build --action_env=CC=clang
 build --action_env=CXX=clang++
+
+# macOS: use Command Line Tools clang (avoids requiring a full Xcode install)
+# and raise the deployment target to 10.15, which is the minimum for
+# std::filesystem support in libc++.
+build --repo_env=CC=/usr/bin/clang
+build --macos_minimum_os=10.15
