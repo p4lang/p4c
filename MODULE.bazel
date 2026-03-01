@@ -26,7 +26,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_m4", version = "0.3")
 bazel_dep(name = "rules_proto", version = "7.1.0")
 bazel_dep(name = "z3", version = "4.15.2")
-bazel_dep(name = "p4runtime", version = "1.5.0")
+bazel_dep(name = "p4runtime", version = "1.5.0.bcr.1")
 
 p4c_repositories = use_extension("//bazel:repositories.bzl", "p4c_repositories")
 use_repo(
