@@ -40,7 +40,7 @@ jobs:
 
       - name: Post DCO Instructions
         if: steps.pr-context.outputs.should_comment == 'true'
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ steps.pr-context.outputs.pr_number }}
           body: |
