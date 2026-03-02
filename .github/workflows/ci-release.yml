@@ -17,6 +17,8 @@ jobs:
   build:
     if: ${{ github.repository == 'p4lang/p4c' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
