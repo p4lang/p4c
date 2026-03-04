@@ -1922,6 +1922,15 @@ SizeScanner::SizeScanner(const EBPF::EBPFDeparser *deparser)
     setName("SizeScanner");
 }
 
+bool SizeScanner::preorder(const IR::BlockStatement *s) {
+    for (auto a : s->components) {
+        if (a->is<IR::MethodCallStatement>()) {
+            visit(a);
+        }
+    }
+    return false;
+}
+
 bool SizeScanner::preorder(const IR::MethodCallStatement *s) {
     visit(s->methodCall);
     return false;
@@ -3092,6 +3101,19 @@ DeparserHdrEmitTranslatorPNA::DeparserHdrEmitTranslatorPNA(const EBPF::EBPFDepar
       EBPF::DeparserPrepareBufferTranslator(deparser),
       deparser(deparser) {
     setName("DeparserHdrEmitTranslatorPNA");
+}
+
+bool DeparserHdrEmitTranslatorPNA::preorder(const IR::BlockStatement *s) {
+    for (auto a : s->components) {
+        if (a->is<IR::MethodCallStatement>()) {
+            visit(a);
+        }
+    }
+    return false;
+}
+
+bool DeparserHdrEmitTranslatorPNA::preorder(const IR::MethodCallStatement *s) {
+    return EBPF::CodeGenInspector::preorder(s);
 }
 
 void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method) {
