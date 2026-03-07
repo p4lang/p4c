@@ -1,0 +1,5 @@
+<map id="P4::ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder" name="P4::ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder">
+<area shape="rect" id="Node000001" title="The architecture handler builder implementation for v1model." alt="" coords="5,108,239,163"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_builder_iface.html" title=" " alt="" coords="9,5,235,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,74,125,108,119,108,119,74"/>
+</map>

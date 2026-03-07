@@ -1,0 +1,7 @@
+<map id="CharacterizeParser" name="CharacterizeParser">
+<area shape="rect" id="Node000001" title="Prints various info about parser to the log file." alt="" coords="5,152,149,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="24,79,131,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,118,80,152,75,152,75,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="33,5,121,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,44,80,79,75,79,75,44"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="Device" name="Device">
+<area shape="rect" id="Node000001" title=" " alt="" coords="226,5,293,31"/>
+<area shape="rect" id="Node000002" href="$class_j_bay_device.html" title=" " alt="" coords="149,79,245,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,43,209,80,205,77,238,39"/>
+<area shape="rect" id="Node000006" href="$class_tofino_device.html" title=" " alt="" coords="269,79,375,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="281,39,314,77,310,80,277,43"/>
+<area shape="rect" id="Node000003" href="$class_j_bay_a0_device.html" title=" " alt="" coords="5,152,119,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="164,113,85,154,83,149,162,108"/>
+<area shape="rect" id="Node000004" href="$class_j_bay_m_device.html" title=" " alt="" coords="143,152,251,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="199,118,199,152,194,152,194,118"/>
+<area shape="rect" id="Node000005" href="$class_j_bay_u_device.html" title=" " alt="" coords="275,152,382,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="231,108,308,149,306,154,228,113"/>
+</map>

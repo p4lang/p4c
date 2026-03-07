@@ -1,0 +1,14 @@
+<map id="P4::IsValid" name="P4::IsValid">
+<area shape="rect" id="Node000001" title=" " alt="" coords="165,152,255,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_key_is_simple.html" title=" " alt="" coords="5,79,132,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,108,188,149,186,154,102,112"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="157,79,263,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="213,118,213,152,207,152,207,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="171,5,259,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="216,45,214,79,208,78,211,44"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="288,79,455,104"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="254,34,347,76,345,81,252,39"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="334,112,237,154,235,149,332,107"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="288,5,455,31"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="374,44,374,79,369,79,369,44"/>
+</map>

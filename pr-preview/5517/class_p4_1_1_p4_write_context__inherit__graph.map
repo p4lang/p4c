@@ -1,0 +1,25 @@
+<map id="P4::P4WriteContext" name="P4::P4WriteContext">
+<area shape="rect" id="Node000001" title=" " alt="" coords="141,240,289,265"/>
+<area shape="rect" id="Node000003" href="$struct_b_f_n_1_1_collect_bridged_fields.html" title=" " alt="" coords="347,5,537,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="222,226,236,184,260,134,293,83,313,60,336,40,356,28,359,33,339,44,317,64,297,86,264,136,241,186,227,227"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_compute_def_use.html" title="Compute defuse info within P4Parser and P4Control blocks in the midend." alt="" coords="365,55,519,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="226,226,243,195,268,157,299,120,336,89,364,76,366,81,339,94,302,124,272,160,248,197,231,229"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_do_local_copy_propagation.html" title=" " alt="" coords="337,104,547,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="233,228,277,182,305,158,336,138,364,127,366,132,339,143,308,162,280,186,237,231"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_do_simplify_expressions.html" title="Convert expressions so that each expression contains at most one side effect." alt="" coords="345,153,539,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="249,231,290,209,336,189,378,176,380,181,338,194,292,214,252,235"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_p4_v1_1_1_collect_bridged_fields.html" title=" " alt="" coords="351,203,533,243"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="302,239,350,233,351,238,303,244"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_replace_headers.html" title=" " alt="" coords="366,268,518,293"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="303,261,366,269,365,274,302,266"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_replace_index_refs.html" title=" " alt="" coords="361,317,523,343"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="255,269,338,303,378,315,377,320,336,309,253,274"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_replace_log_msg.html" title=" " alt="" coords="368,367,516,392"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="239,274,282,315,309,335,339,353,369,365,367,370,336,358,306,340,279,319,235,277"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_replace_structs.html" title=" " alt="" coords="371,416,513,441"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="232,276,274,340,304,374,339,402,371,417,369,421,336,407,300,378,269,344,227,279"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_type_check_1_1_make_implicit_casts_explicit.html" title=" " alt="" coords="338,466,546,506"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="228,277,243,316,267,363,299,411,339,452,358,463,355,468,336,456,295,414,262,366,238,318,223,279"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,240,93,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,250,141,250,141,255,107,255"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="P4::P4Tools::P4Testgen::Tofino::AbstractTofinoTestgenTarget" name="P4::P4Tools::P4Testgen::Tofino::AbstractTofinoTestgenTarget">
+<area shape="rect" id="Node000001" title=" " alt="" coords="664,30,883,85"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay___t2na_testgen_target.html" title=" " alt="" coords="931,5,1165,45"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="896,40,930,36,931,42,897,46"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino___tna_testgen_target.html" title=" " alt="" coords="931,69,1165,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="897,69,931,73,930,78,896,74"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_target.html" title=" " alt="" coords="447,37,616,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="630,55,664,55,664,60,630,60"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_compiler_target.html" title="Encapsulates the details of invoking the P4 compiler for a target device and architecture." alt="" coords="196,45,399,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="412,55,446,55,446,60,412,60"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_tools_1_1_target.html" title=" " alt="" coords="5,45,148,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="162,55,196,55,196,60,162,60"/>
+</map>

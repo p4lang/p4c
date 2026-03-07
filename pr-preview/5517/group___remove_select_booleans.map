@@ -1,0 +1,4 @@
+<map id="BFN::RemoveSelectBooleans" name="BFN::RemoveSelectBooleans">
+<area shape="rect" id="Node000001" title="Set of passes that convert boolean values in select statements to bit&lt;1&gt; values. The node is also tra..." alt="" coords="124,5,335,31"/>
+<area shape="rect" id="Node000002" href="$group__midend.html" title="Overview of midend passes." alt="" coords="5,5,76,31"/>
+</map>
