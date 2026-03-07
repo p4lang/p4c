@@ -456,12 +456,14 @@ SymbolicArray::SymbolicArray(const IR::Type_Array *type, bool uninitialized,
         if (type->elementType->to<IR::Type_Header>()) {
             auto elem = factory->create(elemType, uninitialized);
             BUG_CHECK(elem->is<SymbolicHeader>(), "%1%: expected a header", elem);
-            values.push_back(elem->to<SymbolicHeader>());
-        }
-        if (auto newElemType = type->elementType->to<IR::Type_HeaderUnion>()) {
+            values.push_back(elem);
+        } else if (auto newElemType = type->elementType->to<IR::Type_HeaderUnion>()) {
             auto elem = factory->create(newElemType, uninitialized);
             BUG_CHECK(elem->is<SymbolicHeaderUnion>(), "%1%: expected a header union", elem);
-            values.push_back(elem->to<SymbolicHeaderUnion>());
+            values.push_back(elem);
+        } else {
+            auto elem = factory->create(type->elementType, uninitialized);
+            values.push_back(elem);
         }
     }
 }
@@ -543,8 +545,7 @@ void SymbolicArray::setAllUnknown() {
 
 SymbolicValue *SymbolicArray::clone() const {
     auto result = new SymbolicArray(type->to<IR::Type_Array>());
-    for (unsigned i = 0; i < values.size(); i++)
-        result->values.push_back(get(nullptr, i)->clone()->to<SymbolicStruct>());
+    for (unsigned i = 0; i < values.size(); i++) result->values.push_back(get(nullptr, i)->clone());
     return result;
 }
 
