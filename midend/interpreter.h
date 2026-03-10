@@ -483,7 +483,7 @@ class SymbolicHeaderUnion : public SymbolicStruct {
 };
 
 class SymbolicArray final : public SymbolicValue {
-    std::vector<SymbolicStruct *> values;
+    std::vector<SymbolicValue *> values;
     friend class AnyElement;
     explicit SymbolicArray(const IR::Type_Array *type)
         : SymbolicValue(type),
