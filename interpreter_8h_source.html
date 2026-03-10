@@ -648,7 +648,7 @@ $(function(){initNavTree('interpreter_8h_source.html',''); initResizable(true); 
 <div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span> </div>
 <div class="foldopen" id="foldopen00485" data-start="{" data-end="};">
 <div class="line"><a id="l00485" name="l00485"></a><span class="lineno"><a class="line" href="class_p4_1_1_symbolic_array.html">  485</a></span><span class="keyword">class </span>SymbolicArray final : <span class="keyword">public</span> SymbolicValue {</div>
-<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>    std::vector&lt;SymbolicStruct *&gt; values;</div>
+<div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>    std::vector&lt;SymbolicValue *&gt; values;</div>
 <div class="line"><a id="l00487" name="l00487"></a><span class="lineno">  487</span>    <span class="keyword">friend</span> <span class="keyword">class </span>AnyElement;</div>
 <div class="line"><a id="l00488" name="l00488"></a><span class="lineno">  488</span>    <span class="keyword">explicit</span> SymbolicArray(<span class="keyword">const</span> IR::Type_Array *type)</div>
 <div class="line"><a id="l00489" name="l00489"></a><span class="lineno">  489</span>        : SymbolicValue(type),</div>
