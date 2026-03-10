@@ -36,7 +36,7 @@ while [ $# -gt 0 ]; do
 done
 
 installdir="$topdir/install"
-rm -rf $installdir
+rm -rf "$installdir"
 mkdir -p $installdir
 
 if [ $skip_os_deps = false ]; then
@@ -69,7 +69,7 @@ gitclone() {
     if [ ! -z $3 ]; then branch=$3; fi
     [ -e "$2" ] && die "$2 already exists!"
     [ ! -d "$(dirname $2)" ] && die "$(dirname $2) not a directory"
-    git clone --recursive -b $branch $1 $2 || { rm -rf $2; die "can't clone $1"; }
+    git clone --recursive -b $branch $1 $2 || { rm -rf "$2"; die "can't clone $1"; }
 }
 
 echo "Using $topdir as top level directory for git repositories"
@@ -388,7 +388,7 @@ cd ..
 $SUDO rm -rf ptf
 popd # tmpdir
 echo "Removing $tmpdir"
-rm -rf $tmpdir
+rm -rf "$tmpdir"
 
 if [ $(uname -s) == 'Linux' ]; then
     echo "Checking for huge pages"

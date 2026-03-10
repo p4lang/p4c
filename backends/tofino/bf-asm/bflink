@@ -175,7 +175,7 @@ if ! $debug_info && test -e $output_dir/bfas.config.log ; then
 fi
 # if we uncompressed, remove the directory
 if [ -d "$tmpdir" ]; then
-    rm -rf $tmpdir
+    rm -rf "$tmpdir"
 fi
 
 # exit with a return code if walle failed
