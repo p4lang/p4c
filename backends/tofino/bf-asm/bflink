@@ -168,7 +168,7 @@ if ! $debug_info; then
 fi
 if [ ! -z "$base_program" ] ; then
     pp=$output_dir/${base_program}.p4i
-    if ! $debug_info && test -e $pp ; then rm -f "$pp"; fi
+    if ! $debug_info && test -e "$pp" ; then rm -f "$pp"; fi
 fi
 if ! $debug_info && test -e $output_dir/bfas.config.log ; then
     rm -f "$output_dir/bfas.config.log"
