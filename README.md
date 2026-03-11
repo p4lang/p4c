@@ -200,11 +200,10 @@ sudo dpkg -i /path/to/package.deb
 
 3.  Build. Building should also take place in a subdirectory named `build`.
     ```
-    mkdir build
-    cd build
-    cmake .. <optional arguments>
-    make -j4
-    make -j4 check
+    mkdir -p build
+    cmake -B build <optional arguments>
+    cmake --build build
+    cmake --build build --target check
     ```
     The cmake command takes the following optional arguments to
     further customize the build (see file `CMakeLists.txt` for the full list):
@@ -212,7 +211,7 @@ sudo dpkg -i /path/to/package.deb
       Release or Debug to build with optimizations or with debug
       symbols to run in gdb. Default is Release.
      - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
-       `make install` installs the compiler. Defaults to /usr/local.
+     `cmake --build build --target install` installs the compiler. Defaults to /usr/local.
      - `-DENABLE_BMV2=ON|OFF`. Enable [the bmv2 backend](backends/bmv2/README.md). Default ON.
      - `-DENABLE_EBPF=ON|OFF`. Enable [the ebpf backend](backends/ebpf/README.md). Default ON.
      - `-DENABLE_P4TC=ON|OFF`. Enable [the TC backend](backends/tc/README.md). Default ON.
@@ -245,7 +244,7 @@ sudo dpkg -i /path/to/package.deb
 
 4.  (Optional) Install the compiler and the P4 shared headers globally.
     ```
-    sudo make install
+    sudo cmake --build build --target install
     ```
     The compiler driver `p4c` and binaries for each of the backends are
     installed in `/usr/local/bin` by default; the P4 headers are placed in
@@ -410,8 +409,8 @@ Installing on macOS:
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
   they would conflict with a version provided by the base system. This
-  includes Bison, since an older version ships with macOS. `make
-  check` depends on the newer Bison we just installed from Homebrew
+  includes Bison, since an older version ships with macOS. `cmake --build build --target check`
+  depends on the newer Bison we just installed from Homebrew
   (see [#83](http://github.com/p4lang/p4c/issues/83)), so you'll want
   to add it to your `$PATH` one way or another. One simple way to do
   that is to request that Homebrew link it into `/usr/local/bin`:
@@ -475,10 +474,11 @@ We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb),
 because older gdb versions do not always handle C++11 or newer correctly.
 
 We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
-apt-get install exuberant-ctags.` The Makefile targets `make ctags` and `make
-etags` generate tags for vi and Emacs respectively.  (Make sure that you are
-using the correct version of ctags; there are several competing programs with
-the same name in existence.)
+apt-get install exuberant-ctags.` The CMake targets `ctags` and `etags` generate
+tags for vi and Emacs respectively via `cmake --build build --target ctags` or
+`cmake --build build --target etags`.  (Make sure that you are using the correct
+version of ctags; there are several competing programs with the same name in
+existence.)
 
 To build code documentation, after installing Doxygen and the other
 required packages:
@@ -583,7 +583,7 @@ clang-format, black, and isort need to be installed before the linter can be use
 ```
 uv pip install "clang-format==18.1.8" "black==24.3.0" "isort==5.13.2"
 ```
-clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`. black and isort can be checked using the `make black` or `make isort` command respectively. Complaints can be fixed by running `make black-fix-errors` or `make isort-fix-errors`.
+clang-format can be checked using `cmake --build build --target clang-format`. Complaints can be fixed by running `cmake --build build --target clang-format-fix-errors`. black and isort can be checked using `cmake --build build --target black` or `cmake --build build --target isort` respectively. Complaints can be fixed by running `cmake --build build --target black-fix-errors` or `cmake --build build --target isort-fix-errors`.
 
 cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
 ```
@@ -612,9 +612,9 @@ add_dependencies(p4c-mybackend genIR)
 
 #### Tests
 
-We implemented support equivalent to the automake `make check` rules.
-All tests should be included in `make check` and in addition, we support
-`make check-*` rules. To enable this support, add the following rules:
+We implemented support equivalent to the automake `cmake --build build --target check` rules.
+All tests should be included in `cmake --build build --target check` and in addition, we support
+`cmake --build build --target check-*` rules. To enable this support, add the following rules:
 
 ```
 set(MY_DRIVER <driver or compiler executable>)
@@ -645,7 +645,7 @@ arguments to these macros.
 
 To pass custom arguments to P4C, you can set the environment variable `P4C_ARGS`:
 ```
-make check P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG"
+P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG" cmake --build build --target check
 ```
 
 When making changes to P4C, it is sometimes useful to be able to run
@@ -657,7 +657,7 @@ tests, assign a value to the shell environment variable
 `P4TEST_REPLACE`.  Here is one example Bash command to do so:
 
 ```
-P4TEST_REPLACE=1 make check
+P4TEST_REPLACE=1 cmake --build build --target check
 ```
 
 #### Installation
@@ -738,4 +738,3 @@ We appreciate your contributions and look forward to working with you to improve
 - For further assistance or questions regarding contributions, reach out to us in our [community chat](https://p4lang.zulipchat.com/).  [Joining link](https://p4lang.zulipchat.com/join/kjtv2reafrylssget425wx6c/) .
 - For general P4-related questions, use the [P4 forum](https://forum.p4.org/).
 - For other communication channels click [here](https://p4.org/join/).
-
