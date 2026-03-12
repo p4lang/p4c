@@ -99,6 +99,7 @@
 #include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 #include "mau_visitor.h"
 
 using namespace P4;
