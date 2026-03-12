@@ -2420,6 +2420,7 @@ var hierarchy =
           [ "AddSelectorSalu", "class_add_selector_salu.html", null ],
           [ "AddSliceInitialization", "class_add_slice_initialization.html", null ],
           [ "AllocateClot", "class_allocate_clot.html", null ],
+          [ "AllocateParserMatchRegisters", "group___lower_parser_i_r.html#struct_allocate_parser_match_registers", null ],
           [ "ArithCompareAdjustment", "class_arith_compare_adjustment.html", null ],
           [ "AssignActionHandle", "class_assign_action_handle.html", null ],
           [ "AssignCounterLRTValues", "class_assign_counter_l_r_t_values.html", null ],
@@ -3780,7 +3781,6 @@ var hierarchy =
     ] ],
     [ "PassManager", null, [
       [ "AdjustEgressPacketLength", "class_adjust_egress_packet_length.html", null ],
-      [ "AllocateParserMatchRegisters", "group___lower_parser_i_r.html#struct_allocate_parser_match_registers", null ],
       [ "CheckForUnimplementedFeatures", "class_check_for_unimplemented_features.html", null ],
       [ "CopyBlockPragmas", "group__midend.html#class_copy_block_pragmas", null ],
       [ "CreateThreadLocalInstances", "struct_create_thread_local_instances.html", null ],
