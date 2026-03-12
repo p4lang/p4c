@@ -39,5 +39,4 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-ebpf"
   "IndexError: list index out of range"
-  two_ebpf.p4
 )
