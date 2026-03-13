@@ -11,3 +11,8 @@ updates:
     # Specify labels for github-actions pull requests
     labels:
       - "infrastructure"
+    # Bundle updates into a single PR.
+    groups:
+      actions:
+        patterns:
+          - "*"
