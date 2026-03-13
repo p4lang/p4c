@@ -19,25 +19,30 @@ license(
 
 exports_files(["LICENSE"])
 
-filegroup(
+# Deprecated: use //p4include instead.
+alias(
     name = "p4include",
-    srcs = glob(["p4include/**/*.p4"]),
+    actual = "//p4include",
+    deprecation = "Use @p4c//p4include instead of @p4c//:p4include.",
 )
 
 genrule(
     name = "sed_config_h",
     srcs = ["cmake/config.h.cmake"],
     outs = ["config.h"],
-    # TODO: We should actually check these properly instead of just #undefing them.
-    # Maybe select() can help here?
     # CONFIG_PKGDATADIR is where p4c should look for p4include at runtime.
     # This will work only if the binary is executed by Bazel. For a general
     # solution, we would need to make p4c aware of Bazel, specifically:
     # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
+    # pipe2 is Linux-only (crash.cpp has a pipe()+fcntl() fallback); ucontext.h
+    # requires _XOPEN_SOURCE on macOS SDKs ≥14 and is crash-handler register dumps
+    # only. Both are safe to leave undefined everywhere.
     cmd = "sed -e 's|cmakedefine|define|g' \
              -e 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' \
              -e 's|define HAVE_LIBBACKTRACE 1|undef HAVE_LIBBACKTRACE|g' \
              -e 's|define HAVE_MM_MALLOC_H 1|undef HAVE_MM_MALLOC_H|g' \
+             -e 's|define HAVE_PIPE2 1|undef HAVE_PIPE2|g' \
+             -e 's|define HAVE_UCONTEXT_H 1|undef HAVE_UCONTEXT_H|g' \
              -e 's|@MAX_LOGGING_LEVEL@|10|g' \
              -e 's|@CONFIG_PKGDATADIR@|external/%s|g' \
              < $(SRCS) > $(OUTS)" % repository_name(),
