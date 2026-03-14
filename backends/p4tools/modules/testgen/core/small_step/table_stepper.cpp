@@ -316,6 +316,9 @@ void TableStepper::evalTableControlEntries(
     // support multiple entries that are executed at different times when stepping through the same
     // table. To work around this, we check if there is already a table config for this table. If
     // there is, we only follow the paths that are consistent with the already configured action.
+    // A concrete test can only install one control-plane configuration per table.
+    // If this table was already configured earlier on this path, keep using the
+    // same action for subsequent apply() calls of that table.
     const auto *existingTableConfigObject =
         stepper->state.getTestObject("tableconfigs"_cs, properties.tableName, false);
     cstring configuredActionName;
@@ -338,6 +341,7 @@ void TableStepper::evalTableControlEntries(
 
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
+        // Make sure actions stay consistent across repeated apply() calls of the same table.
         if (!configuredActionName.isNullOrEmpty() && actionName != configuredActionName) {
             continue;
         }
@@ -361,6 +365,8 @@ void TableStepper::evalTableControlEntries(
         synthesizedAction->arguments = arguments;
 
         // Finally, add all the new rules to the execution stepper->state.
+        // Only create the table entry once. Later apply() calls on the same path
+        // reuse the installed table configuration.
         if (existingTableConfigObject == nullptr) {
             auto tableRule =
                 TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
