@@ -483,6 +483,8 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
     explicit DeparserHdrEmitTranslatorPNA(const EBPF::EBPFDeparser *deparser);
 
     void processMethod(const P4::ExternMethod *method) override;
+    bool preorder(const IR::BlockStatement *s) override;
+    bool preorder(const IR::MethodCallStatement *s) override;
     void emitField(EBPF::CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
                    unsigned alignment, EBPF::EBPFType *type, bool isMAC);
 };
@@ -495,6 +497,7 @@ class SizeScanner : public EBPF::DeparserPrepareBufferTranslator {
     explicit SizeScanner(const EBPF::EBPFDeparser *deparser);
 
     void processMethod(const P4::ExternMethod *method) override;
+    bool preorder(const IR::BlockStatement *s) override;
     bool preorder(const IR::MethodCallStatement *) override;
 };
 
