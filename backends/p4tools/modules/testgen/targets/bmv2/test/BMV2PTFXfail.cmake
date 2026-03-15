@@ -32,7 +32,6 @@ p4tools_add_xfail_reason(
   bmv2_hs1.p4
   control-hs-index-test1.p4
   control-hs-index-test2.p4
-  action_selector_shared-bmv2.p4
 
   # terminate called after throwing an instance of 'boost::wrapexcept<std::range_error>'
   issue2726-bmv2.p4
@@ -74,6 +73,16 @@ p4tools_add_xfail_reason(
   "Error when importing p4info"
   v1model-digest-containing-ser-enum.p4
   v1model-digest-custom-type.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Error encountered when cleaning up action profile group"
+  action_profile-bmv2.p4
+  action_profile_max_group_size_annotation.p4
+  action_profile_sum_of_members_annotation.p4
+  action_selector_shared-bmv2.p4
+  issue297-bmv2.p4
 )
 
 ####################################################################################################
