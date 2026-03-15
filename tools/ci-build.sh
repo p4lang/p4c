@@ -119,6 +119,8 @@ sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
 # TODO: Consider using a system-provided package here.
 sudo apt-get install -y python3-venv curl
 curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
+# Ensure uv is in the PATH
+export PATH="${PATH}:$HOME/.local/bin"
 uv sync
 uv tool update-shell
 
