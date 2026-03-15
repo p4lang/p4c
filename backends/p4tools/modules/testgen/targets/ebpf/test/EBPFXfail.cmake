@@ -5,19 +5,8 @@
 p4tools_add_xfail_reason(
   "testgen-p4c-ebpf"
   "Failed to build the filter"
-  lpm_ebpf.p4
-  issue2793_ebpf.p4
-  key_ebpf.p4
   ternary_ebpf.p4
-  hit_ebpf.p4
-  key-issue-1020_ebpf.p4
-  issue2816_ebpf.p4
-  issue870_ebpf.p4
-  issue2791_ebpf.p4
-  test_ebpf.p4
-  switch_ebpf.p4
-  issue2816-1_ebpf.p4
-  stack_ebpf.p4
+  lpm_ebpf.p4
 )
 
 p4tools_add_xfail_reason(
@@ -34,10 +23,10 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-ebpf"
   "Expected .* packets on port .* got .*"
+  issue2793_ebpf.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-ebpf"
   "IndexError: list index out of range"
-  two_ebpf.p4
 )

@@ -10,6 +10,7 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
+#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 
@@ -137,7 +138,7 @@ class TableMatch : public TestObject {
     DECLARE_TYPEINFO(TableMatch, TestObject);
 };
 
-using TableMatchMap = std::map<cstring, const TableMatch *>;
+using TableMatchMap = ordered_map<cstring, const TableMatch *>;
 
 class Ternary : public TableMatch {
  private:

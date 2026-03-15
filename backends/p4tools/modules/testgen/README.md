@@ -160,10 +160,13 @@ P4Testgen can also be used to detect flaws in P4 program. P4Testgen supplies a s
 Coverage tracking can also be used to identify dead code in the program. If P4Testgen does not achieve 100% coverage within a reasonable amount of time (say 10k tests or an hour of test generation) one can use the  `--print-coverage` to emit the nodes which can not be covered. Often, P4Testgen simply does have control-plane support for the node, but in many cases the code may simply not executable.
 
 ## Limitations
-P4Testgen only performs functional validation for single inputs. It does not support tests which involve multiple packets as input. It also does not support generating any performance or resource usage tests. Target-specific limitations are documented in the corresponding relevant target-folder or Github issue.
+- P4Testgen performs functional validation for single-packet inputs only. It does not support tests that require multiple input packets.
+- P4Testgen does not generate performance or resource-usage tests.
+- If a P4 program applies the same table more than once for a single input packet, P4Testgen generates at most one table entry for that table (on the first apply call) and reuses it for later apply calls on the same path.
+- Target-specific limitations are documented in the corresponding target folder and GitHub issues.
 
 ## Further Reading
-P4Testgen has been published at SIGCOMM 2023. The paper describing the tool is available [here](https://arxiv.org/abs/2211.15300).
+P4Testgen has been published at SIGCOMM 2023. The paper describing the tool is available [here](https://dl.acm.org/doi/10.1145/3603269.3604834).
 
 A talk is also available on Youtube: [p4testgen: Automated Test Generation for Real-World P4 Data Planes](https://www.youtube.com/watch?v=yucl3azbh8Q)
 
@@ -193,4 +196,3 @@ Contributions to P4Testgen in any form are welcome! Please follow the guidelines
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](https://github.com/p4lang/p4c/blob/main/backends/p4tools/LICENSE) file for details.
-
