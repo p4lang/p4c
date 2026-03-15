@@ -12,6 +12,7 @@ Usage: install_bmv2_from_source.sh [options]
 Options:
   --ref <ref>                Git ref (branch, tag, or commit).
   --repo-url <url>           BMv2 repository URL.
+  --with-pi                  Enable PI support (builds simple_switch_grpc).
   --prefix <path>            Install prefix (default: /usr/local).
   --jobs <N>                 Number of build jobs (default: nproc+1 or hw.ncpu+1).
   --work-dir <path>          Parent work directory (default: temporary dir).
@@ -61,6 +62,7 @@ REF=""
 PREFIX="/usr/local"
 JOBS="$(default_jobs)"
 WORK_DIR=""
+WITH_PI="OFF"
 CMAKE_ARGS=()
 BUILD_ARGS=()
 INSTALL_ARGS=()
@@ -74,6 +76,10 @@ while [[ $# -gt 0 ]]; do
     --repo-url)
       REPO_URL="$2"
       shift 2
+      ;;
+    --with-pi)
+      WITH_PI="ON"
+      shift
       ;;
     --prefix)
       PREFIX="$2"
@@ -134,6 +140,10 @@ fi
 
 BMV2_SHA=$(git rev-parse HEAD)
 echo "Building BMv2 from $REPO_URL @ $BMV2_SHA"
+
+if [[ "$WITH_PI" == "ON" ]]; then
+  CMAKE_ARGS+=("-DWITH_PI=ON")
+fi
 
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX="$PREFIX" "${CMAKE_ARGS[@]}"
 cmake --build build --parallel "$JOBS" "${BUILD_ARGS[@]}"
