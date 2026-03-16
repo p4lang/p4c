@@ -21,15 +21,14 @@ limitations under the License.
 
 namespace P4 {
 
-bool isCompileTimeConstant(const IR::Expression *expr, const TypeMap *typeMap) {
+bool isConstant(const IR::Expression *expr, const TypeMap *typeMap) {
     if (expr->is<IR::Constant>()) return true;
     if (expr->is<IR::BoolLiteral>()) return true;
 
     if (auto list = expr->to<IR::ListExpression>()) {
         const auto &components = list->components;
-        return std::all_of(components.begin(), components.end(), [&](const IR::Expression *e) {
-            return isCompileTimeConstant(e, typeMap);
-        });
+        return std::all_of(components.begin(), components.end(),
+                           [&](const IR::Expression *e) { return isConstant(e, typeMap); });
     }
 
     if (EnumInstance::resolve(expr, typeMap)) return true;
@@ -85,7 +84,7 @@ const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression
     bool allConst = std::all_of(cases.begin(), cases.end(), [&](const IR::SelectCase *c) {
         if (!typeMap->isCompileTimeConstant(c->keyset)) return false;
 
-        return isCompileTimeConstant(c->keyset, typeMap) || c->keyset->is<IR::DefaultExpression>();
+        return isConstant(c->keyset, typeMap) || c->keyset->is<IR::DefaultExpression>();
     });
     // Remove all duplicated select cases by keyset.
     if (allConst) {
