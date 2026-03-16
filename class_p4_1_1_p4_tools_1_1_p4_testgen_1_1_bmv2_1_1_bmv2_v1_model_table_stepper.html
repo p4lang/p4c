@@ -155,7 +155,7 @@ Public Member Functions</h2></td></tr>
 Protected Member Functions</h2></td></tr>
 <tr class="memitem:a5e3600e5d4e2dfa208d4323fbdbadbf4" id="r_a5e3600e5d4e2dfa208d4323fbdbadbf4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5e3600e5d4e2dfa208d4323fbdbadbf4">checkTargetProperties</a> (const std::vector&lt; const IR::ActionListElement * &gt; &amp;tableActionList) override</td></tr>
 <tr class="separator:a5e3600e5d4e2dfa208d4323fbdbadbf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e8a2eccaa1ba59554bdd27efae98c3b" id="r_a8e8a2eccaa1ba59554bdd27efae98c3b"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e8a2eccaa1ba59554bdd27efae98c3b">computeTargetMatchType</a> (const <a class="el" href="struct_p4_1_1_p4_tools_1_1_table_utils_1_1_key_properties.html">TableUtils::KeyProperties</a> &amp;keyProperties, TableMatchMap *matches, const IR::Expression *hitCondition) override</td></tr>
+<tr class="memitem:a8e8a2eccaa1ba59554bdd27efae98c3b" id="r_a8e8a2eccaa1ba59554bdd27efae98c3b"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8e8a2eccaa1ba59554bdd27efae98c3b">computeTargetMatchType</a> (const <a class="el" href="struct_p4_1_1_p4_tools_1_1_table_utils_1_1_key_properties.html">TableUtils::KeyProperties</a> &amp;keyProperties, <a class="el" href="class_p4_1_1ordered__map.html">TableMatchMap</a> *matches, const IR::Expression *hitCondition) override</td></tr>
 <tr class="separator:a8e8a2eccaa1ba59554bdd27efae98c3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a03b5670e3203e79f0632289f897739b5" id="r_a03b5670e3203e79f0632289f897739b5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a03b5670e3203e79f0632289f897739b5">evalTargetTable</a> (const std::vector&lt; const IR::ActionListElement * &gt; &amp;tableActionList) override</td></tr>
 <tr class="separator:a03b5670e3203e79f0632289f897739b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -168,7 +168,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addDefaultAction</b> 
 std::vector&lt; const IR::ActionListElement * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>buildTableActionList</b> ()</td></tr>
 <tr class="memdesc:aa4d706cf9596683abcd64fa32ee65472 inherit pro_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper"><td class="mdescLeft">&#160;</td><td class="mdescRight">Helper function that collects the list of actions contained in the table. <br /></td></tr>
 <tr class="separator:aa4d706cf9596683abcd64fa32ee65472 inherit pro_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a454f00b8e0093fdfd5666703aa299491 inherit pro_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper" id="r_a454f00b8e0093fdfd5666703aa299491"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper.html#a454f00b8e0093fdfd5666703aa299491">computeHit</a> (TableMatchMap *matches)</td></tr>
+<tr class="memitem:a454f00b8e0093fdfd5666703aa299491 inherit pro_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper" id="r_a454f00b8e0093fdfd5666703aa299491"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper.html#a454f00b8e0093fdfd5666703aa299491">computeHit</a> (<a class="el" href="class_p4_1_1ordered__map.html">TableMatchMap</a> *matches)</td></tr>
 <tr class="separator:a454f00b8e0093fdfd5666703aa299491 inherit pro_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73c23e075ebf9db451912a551a150edf inherit pro_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper" id="r_a73c23e075ebf9db451912a551a150edf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper.html#a73c23e075ebf9db451912a551a150edf">evalTableCall</a> ()</td></tr>
 <tr class="separator:a73c23e075ebf9db451912a551a150edf inherit pro_methods_class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -267,7 +267,7 @@ const IR::P4Table *&#160;</td><td class="memItemRight" valign="bottom"><b>table<
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">TableMatchMap *</td>          <td class="paramname"><span class="paramname"><em>matches</em></span>, </td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1ordered__map.html">TableMatchMap</a> *</td>          <td class="paramname"><span class="paramname"><em>matches</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>

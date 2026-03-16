@@ -331,10 +331,15 @@ Detecting P4 Program Flaws</h3>
 <p>Coverage tracking can also be used to identify dead code in the program. If P4Testgen does not achieve 100% coverage within a reasonable amount of time (say 10k tests or an hour of test generation) one can use the <code>--print-coverage</code> to emit the nodes which can not be covered. Often, P4Testgen simply does have control-plane support for the node, but in many cases the code may simply not executable.</p>
 <h2><a class="anchor" id="limitations"></a>
 Limitations</h2>
-<p>P4Testgen only performs functional validation for single inputs. It does not support tests which involve multiple packets as input. It also does not support generating any performance or resource usage tests. Target-specific limitations are documented in the corresponding relevant target-folder or Github issue.</p>
+<ul>
+<li>P4Testgen performs functional validation for single-packet inputs only. It does not support tests that require multiple input packets.</li>
+<li>P4Testgen does not generate performance or resource-usage tests.</li>
+<li>If a P4 program applies the same table more than once for a single input packet, P4Testgen generates at most one table entry for that table (on the first apply call) and reuses it for later apply calls on the same path.</li>
+<li>Target-specific limitations are documented in the corresponding target folder and GitHub issues.</li>
+</ul>
 <h2><a class="anchor" id="further-reading-1"></a>
 Further Reading</h2>
-<p>P4Testgen has been published at SIGCOMM 2023. The paper describing the tool is available <a href="https://arxiv.org/abs/2211.15300">here</a>.</p>
+<p>P4Testgen has been published at SIGCOMM 2023. The paper describing the tool is available <a href="https://dl.acm.org/doi/10.1145/3603269.3604834">here</a>.</p>
 <p>A talk is also available on Youtube: <a href="https://www.youtube.com/watch?v=yucl3azbh8Q">p4testgen: Automated Test Generation for Real-World P4 Data Planes</a></p>
 <p>If you would like to cite this work please use this citation format: </p><div class="fragment"><div class="line">@inproceedings{ruffy-sigcom2023,</div>
 <div class="line">    author = {Ruffy, Fabian and Liu, Jed and Kotikalapudi, Prathima and Havel, Vojtěch and Tavante, Hanneli and Sherwood, Rob and Dubina, Vladislav and Peschanenko, Volodymyr and Sivaraman, Anirudh and Foster, Nate},</div>
