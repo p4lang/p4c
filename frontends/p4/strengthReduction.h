@@ -27,7 +27,14 @@ namespace P4 {
 
 using namespace literals;
 
-struct StrengthReductionPolicy {
+class StrengthReductionPolicy {
+ public:
+    StrengthReductionPolicy() {}
+    StrengthReductionPolicy(bool enableSubConstToAddTransform,
+                            bool enableNarrowingCastToSliceTransform)
+        : enableSubConstToAddTransform(enableSubConstToAddTransform),
+          enableNarrowingCastToSliceTransform(enableNarrowingCastToSliceTransform) {}
+
     /// Enable the subtract constant to add negative constant transform.
     /// Replaces `a - constant` with `a + (-constant)`.
     bool enableSubConstToAddTransform = true;

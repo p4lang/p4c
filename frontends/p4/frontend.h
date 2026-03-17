@@ -24,8 +24,8 @@ limitations under the License.
 
 namespace P4 {
 
-class ConstantFoldingPolicy;     // forward declare to avoid having to include
-struct StrengthReductionPolicy;  // forward declare to avoid having to include
+class ConstantFoldingPolicy;    // forward declare to avoid having to include
+class StrengthReductionPolicy;  // forward declare to avoid having to include
 
 /// A customization point for frontend. The each tool can provide their own implementation of the
 /// policy that customizes its behaviour, or use instance of this class directly to provide the
