@@ -25,6 +25,7 @@ header H
    bit<32> f1;
    bit<32> f2;
    bit<32> f3;
+   bit<16> f4;
 }
 
 struct Headers { H h; }
@@ -67,14 +68,17 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(),
 
 class StrengthReductionTest : public P4CTest {};
 
-struct StrengthReductionPolicy : public P4::FrontEndPolicy {
-    bool enableSubConstToAddTransform() const override { return enableSubConstToAddTransform_; }
+struct GTestStrengthReductionPolicy : public P4::FrontEndPolicy {
+    P4::StrengthReductionPolicy *getStrengthReductionPolicy() const override { return policy_; }
 
-    explicit StrengthReductionPolicy(bool enableSubConstToAddTransform = true)
-        : enableSubConstToAddTransform_(enableSubConstToAddTransform) {}
+    GTestStrengthReductionPolicy(bool enableSubConstToAddTransform = true,
+                                 bool enableCastToSliceTransform = false) {
+        policy_ = new P4::StrengthReductionPolicy(enableSubConstToAddTransform,
+                                                  enableCastToSliceTransform);
+    }
 
  private:
-    bool enableSubConstToAddTransform_ = true;
+    P4::StrengthReductionPolicy *policy_;
 };
 
 TEST_F(StrengthReductionTest, Default) {
@@ -92,7 +96,7 @@ TEST_F(StrengthReductionTest, Default) {
 }
 
 TEST_F(StrengthReductionTest, DisableSubConstToAddConst) {
-    StrengthReductionPolicy policy(false);
+    GTestStrengthReductionPolicy policy(false, false);
     auto test =
         createStrengthReductionTestCase(P4_SOURCE(R"(headers.h.f1 = headers.h.f1 - 1;)"), &policy);
 
@@ -103,6 +107,37 @@ TEST_F(StrengthReductionTest, DisableSubConstToAddConst) {
     std::string program_string = builder.toString();
     std::string value1 = "headers.h.f1 = headers.h.f1 + 32w4294967295";
     std::string value2 = "headers.h.f1 = headers.h.f1 - 32w1";
+    EXPECT_TRUE(program_string.find(value1) == std::string::npos);
+    EXPECT_FALSE(program_string.find(value2) == std::string::npos);
+}
+
+TEST_F(StrengthReductionTest, DefaultDisableNarrowingCastToSliceTransform) {
+    auto test =
+        createStrengthReductionTestCase(P4_SOURCE(R"(headers.h.f4 = (bit<16>)headers.h.f1;)"));
+
+    Util::SourceCodeBuilder builder;
+    ToP4 top4(builder, false);
+    test->program->apply(top4);
+
+    std::string program_string = builder.toString();
+    std::string value1 = "headers.h.f4 = (bit<16>)headers.h.f1";
+    std::string value2 = "headers.h.f4 = headers.h.f1[15:0]";
+    EXPECT_FALSE(program_string.find(value1) == std::string::npos);
+    EXPECT_TRUE(program_string.find(value2) == std::string::npos);
+}
+
+TEST_F(StrengthReductionTest, EnableNarrowingCastToSliceTransform) {
+    GTestStrengthReductionPolicy policy(true, true);
+    auto test = createStrengthReductionTestCase(
+        P4_SOURCE(R"(headers.h.f4 = (bit<16>)headers.h.f1;)"), &policy);
+
+    Util::SourceCodeBuilder builder;
+    ToP4 top4(builder, false);
+    test->program->apply(top4);
+
+    std::string program_string = builder.toString();
+    std::string value1 = "headers.h.f4 = (bit<16>)headers.h.f1";
+    std::string value2 = "headers.h.f4 = headers.h.f1[15:0]";
     EXPECT_TRUE(program_string.find(value1) == std::string::npos);
     EXPECT_FALSE(program_string.find(value2) == std::string::npos);
 }

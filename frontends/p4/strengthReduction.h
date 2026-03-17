@@ -27,6 +27,23 @@ namespace P4 {
 
 using namespace literals;
 
+class StrengthReductionPolicy {
+ public:
+    StrengthReductionPolicy() {}
+    StrengthReductionPolicy(bool enableSubConstToAddTransform,
+                            bool enableNarrowingCastToSliceTransform)
+        : enableSubConstToAddTransform(enableSubConstToAddTransform),
+          enableNarrowingCastToSliceTransform(enableNarrowingCastToSliceTransform) {}
+
+    /// Enable the subtract constant to add negative constant transform.
+    /// Replaces `a - constant` with `a + (-constant)`.
+    bool enableSubConstToAddTransform = true;
+
+    /// Replace narrowing casts with slices.
+    /// i.e. replaces (bit<n>)(expr) with expr[n-1:0] when n is smaller than the width of expr.
+    bool enableNarrowingCastToSliceTransform = false;
+};
+
 /** Implements a pass that replaces expensive arithmetic and boolean
  * operations with cheaper ones -- i.e., strength reduction
  *
@@ -46,9 +63,8 @@ using namespace literals;
  */
 class DoStrengthReduction final : public Transform {
  protected:
-    /// Enable the subtract constant to add negative constant transform.
-    /// Replaces `a - constant` with `a + (-constant)`.
-    bool enableSubConstToAddTransform = true;
+    TypeMap *typeMap = nullptr;
+    StrengthReductionPolicy *policy;
 
     /// @returns `true` if @p expr is the constant `1`.
     bool isOne(const IR::Expression *expr) const;
@@ -72,16 +88,13 @@ class DoStrengthReduction final : public Transform {
     }
 
  public:
-    DoStrengthReduction() {
+    DoStrengthReduction(TypeMap *typeMap, StrengthReductionPolicy *policy)
+        : typeMap(typeMap), policy(policy ? policy : new StrengthReductionPolicy()) {
         visitDagOnce = true;
         setName("StrengthReduction");
     }
 
-    explicit DoStrengthReduction(bool enableSubConstToAddTransform)
-        : enableSubConstToAddTransform(enableSubConstToAddTransform) {
-        // FIXME: This does not call a constructor
-        DoStrengthReduction();
-    }
+    DoStrengthReduction() : DoStrengthReduction(nullptr, nullptr) {}
 
     using Transform::postorder;
 
@@ -112,6 +125,7 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::Mux *expr) override;
     const IR::Node *postorder(IR::Slice *expr) override;
     const IR::Node *postorder(IR::PlusSlice *expr) override;
+    const IR::Node *postorder(IR::Cast *expr) override;
     const IR::Node *postorder(IR::Mask *expr) override;
     const IR::Node *postorder(IR::Range *expr) override;
     const IR::Node *postorder(IR::Concat *expr) override;
@@ -128,16 +142,16 @@ class DoStrengthReduction final : public Transform {
 class StrengthReduction : public PassManager {
  public:
     explicit StrengthReduction(TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
-                               bool enableSubConstToAddTransform = true) {
+                               StrengthReductionPolicy *policy = nullptr) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap, true);
             passes.push_back(typeChecking);
         }
-        passes.push_back(new DoStrengthReduction(enableSubConstToAddTransform));
+        passes.push_back(new DoStrengthReduction(typeMap, policy));
     }
 
-    explicit StrengthReduction(TypeMap *typeMap, bool enableSubConstToAddTransform)
-        : StrengthReduction(typeMap, nullptr, enableSubConstToAddTransform) {}
+    explicit StrengthReduction(TypeMap *typeMap, StrengthReductionPolicy *policy)
+        : StrengthReduction(typeMap, nullptr, policy) {}
 };
 
 }  // namespace P4

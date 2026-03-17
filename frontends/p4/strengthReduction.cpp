@@ -219,7 +219,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Sub *expr) {
     if (isZero(expr->right)) return expr->left;
     if (isZero(expr->left)) return new IR::Neg(expr->srcInfo, expr->type, expr->right);
     // Replace `a - constant` with `a + (-constant)`
-    if (enableSubConstToAddTransform && expr->right->is<IR::Constant>()) {
+    if (policy->enableSubConstToAddTransform && expr->right->is<IR::Constant>()) {
         auto cst = expr->right->to<IR::Constant>();
         auto neg = new IR::Constant(cst->srcInfo, cst->type, -cst->value, cst->base, true);
         auto result = new IR::Add(expr->srcInfo, expr->type, expr->left, neg);
@@ -526,6 +526,24 @@ const IR::Node *DoStrengthReduction::postorder(IR::PlusSlice *expr) {
         expr->e1 = new IR::Sub(sh->srcInfo, expr->e1, sh->right);
     }
     return expr;
+}
+
+const IR::Node *DoStrengthReduction::postorder(IR::Cast *cast) {
+    if (!policy->enableNarrowingCastToSliceTransform) return cast;
+
+    CHECK_NULL(typeMap);
+    int castWidth = typeMap->widthBits(cast->destType, cast, /* max */ true);
+    int castExprWidth = typeMap->widthBits(cast->expr->type, cast, /* max */ true);
+
+    // TypeMap::widthBits(...) emits an error and returns -1 if width cannot be
+    // calculated for the type. Emit the original cast in this case and let the
+    // caller code bail out.
+    if (castWidth == -1 || castExprWidth == -1) return cast;
+
+    if (castWidth >= castExprWidth) return cast;
+
+    // Replace narrowing casts with slices.
+    return new IR::Slice(cast->expr, castWidth - 1, 0);
 }
 
 }  // namespace P4
