@@ -24,7 +24,8 @@ limitations under the License.
 
 namespace P4 {
 
-class ConstantFoldingPolicy;  // forward declare to avoid having to include
+class ConstantFoldingPolicy;     // forward declare to avoid having to include
+struct StrengthReductionPolicy;  // forward declare to avoid having to include
 
 /// A customization point for frontend. The each tool can provide their own implementation of the
 /// policy that customizes its behaviour, or use instance of this class directly to provide the
@@ -73,6 +74,11 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
     /// @returns Defaults to nullptr, which causes constant folding to use the default policy, which
     /// does not modify the pass defaults in any way.
     virtual ConstantFoldingPolicy *getConstantFoldingPolicy() const { return nullptr; }
+
+    /// Get policy for the strength reduction pass. @see StrengthReductionPolicy
+    /// @returns Defaults to nullptr, which causes strength reduction to use the default policy,
+    /// which does not modify the pass defaults in any way.
+    virtual StrengthReductionPolicy *getStrengthReductionPolicy() const { return nullptr; }
 };
 
 class FrontEnd {

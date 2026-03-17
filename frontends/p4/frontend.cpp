@@ -239,7 +239,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TableKeyNames(&typeMap),
         new PassRepeated({
             new ConstantFolding(&typeMap, constantFoldingPolicy),
-            new StrengthReduction(&typeMap, policy->enableSubConstToAddTransform()),
+            new StrengthReduction(&typeMap, policy->getStrengthReductionPolicy()),
             new Reassociation(),
             new UselessCasts(&typeMap),
         }),
