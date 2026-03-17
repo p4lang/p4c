@@ -307,7 +307,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-tofino"
-  "is trying to match on a tainted key set"
+  "PHV allocation was not successful"
   # lookahead1.p4
   switchml.p4
   # parser_multi_write_checksum_verify_5.p4
