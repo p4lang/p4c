@@ -307,7 +307,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-tofino"
-  "PHV allocation was not successful (1 set of unsatisfiable constraints remaining)"
+  "PHV allocation was not successful"
   # lookahead1.p4
   switchml.p4
   # parser_multi_write_checksum_verify_5.p4
