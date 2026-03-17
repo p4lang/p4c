@@ -58,10 +58,6 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
     /// @returns Defaults to true
     virtual bool foldInlinedFrom() const { return true; }
 
-    /// Indicates whether to enable the `a - constant` to `a + (-constant)` in StrengthReduction.
-    /// @returns Defaults to true.
-    virtual bool enableSubConstToAddTransform() const { return true; }
-
     /// Indicates whether the frontend should run some optimizations (inlining, action localization,
     /// etc.).
     /// @returns default to enabled optimizations unless -O0 was given in the options (i.e. enabled
