@@ -592,16 +592,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::P4ListExpression *express
     return expression;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ArrayExpression *expression) {
     if (done()) return expression;
     bool constant = true;
-    auto stackType = getTypeType(expression->headerStackType);
-    if (auto st = stackType->to<IR::Type_Array>()) {
+    auto arrayType = getTypeType(expression->arrayType);
+    if (auto st = arrayType->to<IR::Type_Array>()) {
         auto elementType = st->elementType;
         IR::Vector<IR::Expression> vec;
         bool changed = false;
         if (expression->size() != st->getSize()) {
-            typeError("%1%: number of initializers %2% has to match stack size %3%", expression,
+            typeError("%1%: number of initializers %2% has to match array size %3%", expression,
                       expression->size(), st->getSize());
             return expression;
         }
@@ -610,7 +610,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
             auto type = getType(c);
             if (type == nullptr) return expression;
             auto tvs = unify(expression, elementType, type,
-                             "Stack element type '%1%' does not match expected type '%2%'",
+                             "Array element type '%1%' does not match expected type '%2%'",
                              {type, elementType});
             if (tvs == nullptr) return expression;
             if (!tvs->isIdentity()) {
@@ -623,16 +623,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
             }
             if (changed)
                 expression =
-                    new IR::HeaderStackExpression(expression->srcInfo, std::move(vec), stackType);
+                    new IR::ArrayExpression(expression->srcInfo, std::move(vec), arrayType);
         }
     } else {
-        typeError("%1%: header stack expression has an incorrect type `%2%`", expression,
-                  stackType);
+        typeError("%1%: Array expression has an incorrect type `%2%`", expression, arrayType);
         return expression;
     }
 
-    setType(getOriginal(), stackType);
-    setType(expression, stackType);
+    setType(getOriginal(), arrayType);
+    setType(expression, arrayType);
     if (constant) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
@@ -1248,7 +1247,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
             auto result = assignment(expression, concreteType, expression->expr);
             return result;
         } else {
-            typeError("%1%: casts to header stack not supported", expression);
+            typeError("%1%: casts to array not supported", expression);
             return expression;
         }
     }
@@ -1731,9 +1730,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
         return expression;
     }
 
-    if (auto *stack = type->to<IR::Type_Array>()) {
+    if (auto *array = type->to<IR::Type_Array>()) {
         auto parser = findContext<IR::P4Parser>();
-        auto eltype = stack->elementType;
+        auto eltype = array->elementType;
         if (auto sc = eltype->to<IR::Type_SpecializedCanonical>()) eltype = sc->baseType;
         if (!eltype->is<IR::Type_Header>() && !eltype->is<IR::Type_HeaderUnion>()) {
             typeError("%1%: '%2%' can only be used on header stacks", expression, member);
@@ -1744,8 +1743,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
                           expression);
                 return expression;
             }
-            setType(getOriginal(), stack->elementType);
-            setType(expression, stack->elementType);
+            setType(getOriginal(), array->elementType);
+            setType(expression, array->elementType);
             if (isLeftValue(expression->expr) && member == IR::Type_Array::next) {
                 setLeftValue(expression);
                 setLeftValue(getOriginal<IR::Expression>());

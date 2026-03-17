@@ -63,8 +63,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
 
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *assignType = state.resolveType(left->type);
-    if (assign->right->is<IR::StructExpression>() ||
-        assign->right->to<IR::HeaderStackExpression>()) {
+    if (assign->right->is<IR::StructExpression>() || assign->right->to<IR::ArrayExpression>()) {
         state.assignStructLike(left, assign->right);
     } else if (assignType->is<IR::Type_Base>()) {
         state.set(left, assign->right);

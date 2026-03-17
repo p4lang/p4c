@@ -749,11 +749,11 @@ bool P4Formatter::preorder(const IR::StructExpression *e) {
     return false;
 }
 
-bool P4Formatter::preorder(const IR::HeaderStackExpression *e) {
+bool P4Formatter::preorder(const IR::ArrayExpression *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
-    if (e->headerStackType != nullptr) {
+    if (e->arrayType != nullptr) {
         builder.append("(");
-        visit(e->headerStackType);
+        visit(e->arrayType);
         builder.append(")");
     }
     builder.append("{");

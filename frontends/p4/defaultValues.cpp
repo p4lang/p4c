@@ -34,7 +34,7 @@ const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expres
 
 const IR::Node *DoDefaultValues::postorder(IR::Dots *expression) {
     auto parent = getContext()->node;
-    if (parent->is<IR::ListExpression>() || parent->is<IR::HeaderStackExpression>())
+    if (parent->is<IR::ListExpression>() || parent->is<IR::ArrayExpression>())
         // Handled by the parent in postorder
         return expression;
     auto type = typeMap->getType(getOriginal(), true);
@@ -81,7 +81,7 @@ const IR::Node *DoDefaultValues::postorder(IR::ListExpression *expression) {
     return expression;
 }
 
-const IR::Node *DoDefaultValues::postorder(IR::HeaderStackExpression *expression) {
+const IR::Node *DoDefaultValues::postorder(IR::ArrayExpression *expression) {
     if (expression->containsDots()) {
         auto dots = expression->components.at(expression->size() - 1);
         auto vec = IR::Vector<IR::Expression>();
@@ -89,16 +89,16 @@ const IR::Node *DoDefaultValues::postorder(IR::HeaderStackExpression *expression
             vec.push_back(expression->components.at(i));  // skip '...'
 
         auto expressionType = typeMap->getType(getOriginal(), true);
-        auto stackType = expressionType->to<IR::Type_Array>();
-        BUG_CHECK(stackType, "%1%: expected a stack type", expressionType);
+        auto arrayType = expressionType->to<IR::Type_Array>();
+        BUG_CHECK(arrayType, "%1%: expected an array type", expressionType);
         auto dotsType = typeMap->getType(dots, true);
         auto result = defaultValue(expression, dotsType);
         if (result == nullptr) return expression;
-        auto se = result->to<IR::HeaderStackExpression>();
-        CHECK_NULL(se);
-        vec.append(se->components);
-        return new IR::HeaderStackExpression(expression->srcInfo, stackType->getP4Type(), vec,
-                                             stackType->getP4Type());
+        auto ae = result->to<IR::ArrayExpression>();
+        CHECK_NULL(ae);
+        vec.append(ae->components);
+        return new IR::ArrayExpression(expression->srcInfo, arrayType->getP4Type(), vec,
+                                       arrayType->getP4Type());
     }
     return expression;
 }

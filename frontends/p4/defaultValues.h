@@ -37,7 +37,7 @@ class DoDefaultValues final : public Transform {
     const IR::Node *postorder(IR::Dots *dots) override;
     const IR::Node *postorder(IR::StructExpression *expression) override;
     const IR::Node *postorder(IR::ListExpression *expression) override;
-    const IR::Node *postorder(IR::HeaderStackExpression *expression) override;
+    const IR::Node *postorder(IR::ArrayExpression *expression) override;
 };
 
 class DefaultValues : public PassManager {

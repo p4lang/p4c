@@ -393,14 +393,14 @@ const IR::Node *DoStrengthReduction::postorder(IR::Concat *expr) {
 }
 
 const IR::Node *DoStrengthReduction::postorder(IR::ArrayIndex *expr) {
-    if (auto hse = expr->left->to<IR::HeaderStackExpression>()) {
+    if (auto ae = expr->left->to<IR::ArrayExpression>()) {
         if (auto cst = expr->right->to<IR::Constant>()) {
             auto index = cst->asInt();
-            if (index < 0 || static_cast<size_t>(index) >= hse->components.size()) {
+            if (index < 0 || static_cast<size_t>(index) >= ae->components.size()) {
                 ::P4::error(ErrorType::ERR_EXPRESSION, "%1%: Index %2% out of bounds", index, expr);
                 return expr;
             }
-            return hse->components.at(index);
+            return ae->components.at(index);
         }
     }
     return expr;

@@ -134,25 +134,24 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         return new IR::IfStatement(srcInfo, isSrcValidCall,
                                    new IR::BlockStatement(srcInfo, thenStmts), elseStmt);
     } else if (ltype->is<IR::Type_Array>() &&
-               ((!isInContext<IR::P4Parser>()) ||
-                (statement->right->is<IR::HeaderStackExpression>()))) {
+               ((!isInContext<IR::P4Parser>()) || (statement->right->is<IR::ArrayExpression>()))) {
         // no copies in parsers -- copying stacks looses the .next field
-        const auto *stack = ltype->checkedTo<IR::Type_Array>();
-        const auto *stackSize = stack->size->to<IR::Constant>();
-        BUG_CHECK(stackSize && stackSize->value > 0, "Size of stack %s is not a positive constant",
+        const auto *array = ltype->checkedTo<IR::Type_Array>();
+        const auto *arraySize = array->size->to<IR::Constant>();
+        BUG_CHECK(arraySize && arraySize->value > 0, "Size of array %s is not a positive constant",
                   ltype);
         BUG_CHECK(statement->right->is<IR::PathExpression>() ||
-                      statement->right->is<IR::HeaderStackExpression>() ||
+                      statement->right->is<IR::ArrayExpression>() ||
                       statement->right->is<IR::Member>() || statement->right->is<IR::ArrayIndex>(),
-                  "%1%: Unexpected operation encountered while eliminating stack copying",
+                  "%1%: Unexpected operation encountered while eliminating array copying",
                   statement->right);
 
-        // Copy each stack element.
-        for (int i = 0; i < stackSize->asInt(); ++i) {
+        // Copy each array element.
+        for (int i = 0; i < arraySize->asInt(); ++i) {
             const auto *left =
-                new IR::ArrayIndex(stack->elementType, statement->left, new IR::Constant(i));
+                new IR::ArrayIndex(array->elementType, statement->left, new IR::Constant(i));
             const auto *right =
-                new IR::ArrayIndex(stack->elementType, statement->right, new IR::Constant(i));
+                new IR::ArrayIndex(array->elementType, statement->right, new IR::Constant(i));
             retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
     } else if (auto *tup = ltype->to<IR::Type_Tuple>()) {

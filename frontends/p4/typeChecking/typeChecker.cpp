@@ -673,18 +673,18 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
             }
         }
         // else this is some other expression that evaluates to a tuple
-    } else if (auto tstack = concreteType->to<IR::Type_Array>()) {
+    } else if (auto tArray = concreteType->to<IR::Type_Array>()) {
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
             bool hasDots = li->containsDots();
-            if (tstack->getSize() != li->components.size() && !hasDots) {
+            if (tArray->getSize() != li->components.size() && !hasDots) {
                 typeError("%1%: destination type expects %2% elements, but source only has %3%",
-                          errorPosition, tstack->getSize(), li->components.size());
+                          errorPosition, tArray->getSize(), li->components.size());
                 return sourceExpression;
             }
             IR::Vector<IR::Expression> vec;
             size_t sourceSize = li->size();
-            auto elementType = tstack->elementType;
-            for (size_t i = 0; i < tstack->getSize(); i++) {
+            auto elementType = tArray->elementType;
+            for (size_t i = 0; i < tArray->getSize(); i++) {
                 auto compI = li->components.at(i);
                 if (hasDots && (i == sourceSize - 1)) {
                     vec.push_back(compI);  // this is '...'
@@ -693,8 +693,8 @@ const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPositio
                 auto src = assignment(sourceExpression, elementType, compI);
                 vec.push_back(src);
             }
-            auto p4stack = tstack->getP4Type();
-            sourceExpression = new IR::HeaderStackExpression(p4stack, vec, p4stack);
+            auto p4array = tArray->getP4Type();
+            sourceExpression = new IR::ArrayExpression(p4array, vec, p4array);
             setType(sourceExpression, destType);
             if (cst) setCompileTimeConstant(sourceExpression);
         }

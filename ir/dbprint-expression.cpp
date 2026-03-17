@@ -256,7 +256,7 @@ void IR::InvalidHeaderUnion::dbprint(std::ostream &out) const { out << "(" << ty
 
 void IR::Invalid::dbprint(std::ostream &out) const { out << "{#}"; }
 
-void IR::HeaderStackExpression::dbprint(std::ostream &out) const {
+void IR::ArrayExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';
     out << setprec(Prec_Postfix) << "{" << setprec(Prec_Low);
