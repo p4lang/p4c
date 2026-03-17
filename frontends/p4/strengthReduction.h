@@ -56,7 +56,7 @@ struct StrengthReductionPolicy {
  */
 class DoStrengthReduction final : public Transform {
  protected:
-    TypeMap *typeMap;
+    TypeMap *typeMap = nullptr;
     StrengthReductionPolicy *policy;
 
     /// @returns `true` if @p expr is the constant `1`.
@@ -81,16 +81,13 @@ class DoStrengthReduction final : public Transform {
     }
 
  public:
-    DoStrengthReduction() {
+    DoStrengthReduction(TypeMap *typeMap, StrengthReductionPolicy *policy)
+        : typeMap(typeMap), policy(policy ? policy : new StrengthReductionPolicy()) {
         visitDagOnce = true;
         setName("StrengthReduction");
     }
 
-    explicit DoStrengthReduction(TypeMap *typeMap, StrengthReductionPolicy *policy)
-        : typeMap(typeMap), policy(policy ? policy : new StrengthReductionPolicy()) {
-        // FIXME: This does not call a constructor
-        DoStrengthReduction();
-    }
+    DoStrengthReduction() : DoStrengthReduction(nullptr, nullptr) {}
 
     using Transform::postorder;
 
