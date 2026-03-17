@@ -32,6 +32,7 @@ class DeparserBodyTranslator : public ControlBodyTranslator {
     explicit DeparserBodyTranslator(const EBPFDeparser *deparser);
 
     bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::IfStatement *ifstmt) override;
 };
 
 /// This translator emits buffer preparation (eg. which headers will be emitted)
@@ -44,6 +45,9 @@ class DeparserPrepareBufferTranslator : public ControlBodyTranslator {
 
     void processMethod(const P4::ExternMethod *method) override;
     bool preorder(const IR::BlockStatement *s) override;
+    bool preorder(const IR::IfStatement *ifstmt) override;
+    bool preorder(const IR::AssignmentStatement *) override { return false; }
+    bool preorder(const IR::MethodCallStatement *s) override;
     bool preorder(const IR::MethodCallExpression *expression) override;
 };
 
@@ -55,6 +59,8 @@ class DeparserHdrEmitTranslator : public DeparserPrepareBufferTranslator {
  public:
     explicit DeparserHdrEmitTranslator(const EBPFDeparser *deparser);
 
+    bool preorder(const IR::IfStatement *ifstmt) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
     void processMethod(const P4::ExternMethod *method) override;
     void emitField(CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
                    unsigned alignment, EBPF::EBPFType *type);

@@ -43,6 +43,8 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${CMAKE_ONLY:=OFF}"
 # The build generator to use. Defaults to Make.
 : "${BUILD_GENERATOR:="Unix Makefiles"}"
+# Install prefix used for both BMv2 and p4c.
+: "${CMAKE_INSTALL_PREFIX:=/usr/local}"
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 : "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
@@ -143,9 +145,13 @@ ccache --set-config max_size=1G
 function build_bmv2() {
 
   P4C_RUNTIME_DEPS="cpp \
+                    autoconf \
+                    automake \
                     libgc1* \
                     libgmp-dev \
+                    libtool-bin \
                     python3-dev \
+                    python3-thrift \
                     libnanomsg-dev \
                     libevent-dev \
                     libssl-dev \
@@ -154,6 +160,10 @@ function build_bmv2() {
                     libboost-program-options-dev \
                     libboost-system-dev \
                     libboost-filesystem-dev \
+                    libgrpc++-dev \
+                    libprotobuf-dev \
+                    protobuf-compiler \
+                    protobuf-compiler-grpc \
                     libthrift-dev \
                     thrift-compiler"
 
@@ -174,13 +184,31 @@ function build_bmv2() {
 
   sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
 
+  # Install PI from source for BMv2 gRPC target support.
+  tmp_dir=$(mktemp -d -t pi-build-XXXXXXXXXX)
+  pushd "${tmp_dir}"
+  git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
+  cd PI
+  ./autogen.sh
+  ./configure --with-proto
+  make -j$(( $(nproc) + 1 ))
+  sudo make install
+  popd
+  rm -rf "${tmp_dir}"
+
   # Install BMv2 from source via the shared CMake-based helper.
   BMV2_INSTALL_ARGS=(
+    --with-pi
+    --prefix "${CMAKE_INSTALL_PREFIX}"
   )
   if [[ -n "${BMV2_REF:-}" ]]; then
     BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
   fi
   "${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
+
+  command -v simple_switch
+  command -v simple_switch_CLI
+  command -v simple_switch_grpc
 
   uv pip install nnpy==1.4.2
 }
@@ -358,6 +386,7 @@ CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
 # Assemble the enabled back ends as a single CMake variable.
 build_cmake_enabled_backend_string
 CMAKE_FLAGS+="${CMAKE_ENABLE_BACKENDS} "
+CMAKE_FLAGS+="-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} "
 
 if [ "$ENABLE_SANITIZERS" == "ON" ]; then
   CMAKE_FLAGS+="-DENABLE_GC=OFF"
