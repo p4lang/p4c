@@ -166,6 +166,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const 
 <tr class="memitem:a3617cb9419fa332c6f997cc07784d0aa" id="r_a3617cb9419fa332c6f997cc07784d0aa"><td class="memItemLeft" align="right" valign="top"><a id="a3617cb9419fa332c6f997cc07784d0aa" name="a3617cb9419fa332c6f997cc07784d0aa"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Argument *arg) override</td></tr>
 <tr class="separator:a3617cb9419fa332c6f997cc07784d0aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2af67522ba036c22d49f40dfc3c96382" id="r_a2af67522ba036c22d49f40dfc3c96382"><td class="memItemLeft" align="right" valign="top"><a id="a2af67522ba036c22d49f40dfc3c96382" name="a2af67522ba036c22d49f40dfc3c96382"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ArrayExpression *expression) override</td></tr>
+<tr class="separator:a2af67522ba036c22d49f40dfc3c96382"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c27c995631cadaabc35ffebfde58603" id="r_a6c27c995631cadaabc35ffebfde58603"><td class="memItemLeft" align="right" valign="top"><a id="a6c27c995631cadaabc35ffebfde58603" name="a6c27c995631cadaabc35ffebfde58603"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ArrayIndex *expression) override</td></tr>
 <tr class="separator:a6c27c995631cadaabc35ffebfde58603"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,9 +229,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const 
 <tr class="memitem:a9beba38e3cd8b33559bd61be3a4bf74c" id="r_a9beba38e3cd8b33559bd61be3a4bf74c"><td class="memItemLeft" align="right" valign="top"><a id="a9beba38e3cd8b33559bd61be3a4bf74c" name="a9beba38e3cd8b33559bd61be3a4bf74c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ForInStatement *stat) override</td></tr>
 <tr class="separator:a9beba38e3cd8b33559bd61be3a4bf74c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28775054f9646f1574469816f4ccabdd" id="r_a28775054f9646f1574469816f4ccabdd"><td class="memItemLeft" align="right" valign="top"><a id="a28775054f9646f1574469816f4ccabdd" name="a28775054f9646f1574469816f4ccabdd"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::HeaderStackExpression *expression) override</td></tr>
-<tr class="separator:a28775054f9646f1574469816f4ccabdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4d9c525313f732ec1c49ca296401ed3" id="r_ab4d9c525313f732ec1c49ca296401ed3"><td class="memItemLeft" align="right" valign="top"><a id="ab4d9c525313f732ec1c49ca296401ed3" name="ab4d9c525313f732ec1c49ca296401ed3"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::IfStatement *stat) override</td></tr>
 <tr class="separator:ab4d9c525313f732ec1c49ca296401ed3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -694,6 +694,9 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</
 <tr class="memitem:abba4679d610668cbcd814d3b27569dbb inherit pub_methods_class_p4_1_1_type_inference_base" id="r_abba4679d610668cbcd814d3b27569dbb"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Argument *arg)</td></tr>
 <tr class="separator:abba4679d610668cbcd814d3b27569dbb inherit pub_methods_class_p4_1_1_type_inference_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe07ba8dc7a56e5f622a9e354c4ce4d2 inherit pub_methods_class_p4_1_1_type_inference_base" id="r_afe07ba8dc7a56e5f622a9e354c4ce4d2"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ArrayExpression *expression)</td></tr>
+<tr class="separator:afe07ba8dc7a56e5f622a9e354c4ce4d2 inherit pub_methods_class_p4_1_1_type_inference_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad48bacd2aa9769c0b960458f915d6d0f inherit pub_methods_class_p4_1_1_type_inference_base" id="r_ad48bacd2aa9769c0b960458f915d6d0f"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ArrayIndex *expression)</td></tr>
 <tr class="separator:ad48bacd2aa9769c0b960458f915d6d0f inherit pub_methods_class_p4_1_1_type_inference_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -753,9 +756,6 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</
 <tr class="memitem:a25a5a6f784b795967b4d99bb2f12a596 inherit pub_methods_class_p4_1_1_type_inference_base" id="r_a25a5a6f784b795967b4d99bb2f12a596"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ForInStatement *stat)</td></tr>
 <tr class="separator:a25a5a6f784b795967b4d99bb2f12a596 inherit pub_methods_class_p4_1_1_type_inference_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae40c9362cc46babcf4b5e173e2ea8bc1 inherit pub_methods_class_p4_1_1_type_inference_base" id="r_ae40c9362cc46babcf4b5e173e2ea8bc1"><td class="memItemLeft" align="right" valign="top">
-const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::HeaderStackExpression *expression)</td></tr>
-<tr class="separator:ae40c9362cc46babcf4b5e173e2ea8bc1 inherit pub_methods_class_p4_1_1_type_inference_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aadffbec649b0bc020e9fc6cfabbd630e inherit pub_methods_class_p4_1_1_type_inference_base" id="r_aadffbec649b0bc020e9fc6cfabbd630e"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::IfStatement *stat)</td></tr>
 <tr class="separator:aadffbec649b0bc020e9fc6cfabbd630e inherit pub_methods_class_p4_1_1_type_inference_base"><td class="memSeparator" colspan="2">&#160;</td></tr>

@@ -390,7 +390,7 @@ template&lt;class T&gt; </td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>the "default" value for a given type. The resulting expression will have the specified srcInfo position. The current mapping as defined in the P4 specification is: Type_Bits 0 Type_Boolean false Type_InfInt 0 Type_Enum first member Type_SerEnum first member Type_Error NoError Type_String "" Type_Header InvalidHeader Type_HeaderUnion InvalidHeaderUnion Type_StructLike StructExpression (fields filled with getDefaultValue) Type_Fragment recurses into getDefaultValue Type_BaseList ListExpression (fields filled with getDefaultValue) Type_Array HeaderStackExpression (fields filled with getDefaultValue) Definition: <a href="https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values">https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values</a> </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the "default" value for a given type. The resulting expression will have the specified srcInfo position. The current mapping as defined in the P4 specification is: Type_Bits 0 Type_Boolean false Type_InfInt 0 Type_Enum first member Type_SerEnum first member Type_Error NoError Type_String "" Type_Header InvalidHeader Type_HeaderUnion InvalidHeaderUnion Type_StructLike StructExpression (fields filled with getDefaultValue) Type_Fragment recurses into getDefaultValue Type_BaseList ListExpression (fields filled with getDefaultValue) Type_Array ArrayExpression (fields filled with getDefaultValue) Definition: <a href="https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values">https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values</a> </dd></dl>
 
 </div>
 </div>
