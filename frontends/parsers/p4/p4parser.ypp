@@ -280,7 +280,7 @@ using namespace P4;
                             simpleKeysetExpression transitionStatement switchLabel
                             p4rtControllerType reducedSimpleKeysetExpression entryPriority
                             nonBraceExpression forCollectionExpr
-%type<ConstType*>           baseType typeOrVoid specializedType headerStackType
+%type<ConstType*>           baseType typeOrVoid specializedType arrayType
                             typeRef tupleType typeArg realTypeArg namedType p4listType
                             derivedTypeDeclarationAsType
 %type<IR::Type_Name*>       typeName
@@ -1062,7 +1062,7 @@ typeRef
     : baseType                         { $$ = $1; }
     | typeName                         { $$ = $1; }
     | specializedType                  { $$ = $1; }
-    | headerStackType                  { $$ = $1; }
+    | arrayType                        { $$ = $1; }
     | p4listType                       { $$ = $1; }
     | tupleType                        { $$ = $1; }
     ;
@@ -1090,7 +1090,7 @@ tupleType
     : TUPLE l_angle typeArgumentList r_angle    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
     ;
 
-headerStackType
+arrayType
     : typeRef "[" expression "]"         { $$ = new IR::Type_Array(@1+@4, $1, $3); }
     ;
 

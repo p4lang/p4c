@@ -109,7 +109,7 @@ const IR::Expression *AbstractExecutionState::convertToComplexExpression(
                 components.push_back(get(ref));
             }
         }
-        return new IR::HeaderStackExpression(parent->type, components, parent->type);
+        return new IR::ArrayExpression(parent->type, components, parent->type);
     }
     P4C_UNIMPLEMENTED("Unsupported struct-like type %1% for member %2%",
                       parent->type->node_type_name(), parent);
@@ -126,9 +126,9 @@ std::vector<const IR::Expression *> AbstractExecutionState::flattenComplexExpres
         if (const auto *headerExpr = structExpr->to<IR::HeaderExpression>()) {
             flatValids.emplace_back(headerExpr->validity);
         }
-    } else if (const auto *headerStackExpr = inputExpression->to<IR::HeaderStackExpression>()) {
-        for (const auto *headerStackElem : headerStackExpr->components) {
-            auto subList = flattenComplexExpression(headerStackElem, flatValids);
+    } else if (const auto *arrayExpr = inputExpression->to<IR::ArrayExpression>()) {
+        for (const auto *arrayElem : arrayExpr->components) {
+            auto subList = flattenComplexExpression(arrayElem, flatValids);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         }
     } else {
@@ -209,12 +209,12 @@ void AbstractExecutionState::assignStructLike(const IR::StateVariable &left,
             const auto *flatStructField = flatStructFields[idx];
             set(flatTargetRef, flatStructField);
         }
-    } else if (auto stackExpression = right->to<IR::HeaderStackExpression>()) {
-        auto stackType = stackExpression->headerStackType->checkedTo<IR::Type_Array>();
-        auto stackSize = stackExpression->components.size();
-        for (size_t idx = 0; idx < stackSize; idx++) {
-            const auto *ref = HSIndexToMember::produceStackIndex(stackType->elementType, left, idx);
-            const auto *rightElem = stackExpression->components.at(idx);
+    } else if (auto arrayExpression = right->to<IR::ArrayExpression>()) {
+        auto arrayType = arrayExpression->arrayType->checkedTo<IR::Type_Array>();
+        auto arraySize = arrayExpression->components.size();
+        for (size_t idx = 0; idx < arraySize; idx++) {
+            const auto *ref = HSIndexToMember::produceStackIndex(arrayType->elementType, left, idx);
+            const auto *rightElem = arrayExpression->components.at(idx);
             assignStructLike(ref, rightElem);
         }
     } else if (right->is<IR::PathExpression>() || right->is<IR::Member>() ||

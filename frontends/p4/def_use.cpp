@@ -538,7 +538,7 @@ bool ComputeWriteSet::preorder(const IR::StructExpression *expression) {
     return false;
 }
 
-bool ComputeWriteSet::preorder(const IR::HeaderStackExpression *expression) {
+bool ComputeWriteSet::preorder(const IR::ArrayExpression *expression) {
     expressionWrites(expression, LocationSet::empty);
     return false;
 }

@@ -89,12 +89,12 @@ class AbstractExecutionState {
      * ========================================================================================= */
  protected:
     /// Convert the input reference into a complex expression such as a HeaderExpression,
-    /// StructExpression, or HeaderStackExpression. @returns nullptr if the expression is not
+    /// StructExpression, or ArrayExpression. @returns nullptr if the expression is not
     /// complex.
     const IR::Expression *convertToComplexExpression(const IR::StateVariable &parent) const;
 
     /// Takes in a complex expression as a StructExpression, ListExpression, or
-    /// HeaderStackExpression, flattens it into a vector and @returns this vector. In parallel this
+    /// ArrayExpression, flattens it into a vector and @returns this vector. In parallel this
     /// function fills a vector of the validity variables of any Type_Header encountered in this
     /// expression.
     static std::vector<const IR::Expression *> flattenComplexExpression(

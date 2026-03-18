@@ -173,7 +173,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
         rw.emplace(expression, new SetOfLocations());
     }
 
-    void postorder(const IR::HeaderStackExpression *expression) override {
+    void postorder(const IR::ArrayExpression *expression) override {
         rw.emplace(expression, new SetOfLocations());
     }
 

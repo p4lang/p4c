@@ -752,7 +752,7 @@ class FindUninitialized : public Inspector {
                 for (const auto *storage : headerDefs->getStorageLocation(dst)) {
                     headerDefs->setValueToStorage(storage, TernaryBool::Yes);
                 }
-            } else if (auto stack_exp = src->to<IR::HeaderStackExpression>()) {
+            } else if (auto stack_exp = src->to<IR::ArrayExpression>()) {
                 for (size_t index = 0; index < st->getSize(); index++) {
                     auto dst_elem = new IR::ArrayIndex(dst, new IR::Constant((uint64_t)index));
                     auto source = stack_exp->components.at(index);
@@ -1455,9 +1455,7 @@ class FindUninitialized : public Inspector {
 
     void postorder(const IR::P4ListExpression *expression) override { otherExpression(expression); }
 
-    void postorder(const IR::HeaderStackExpression *expression) override {
-        otherExpression(expression);
-    }
+    void postorder(const IR::ArrayExpression *expression) override { otherExpression(expression); }
 
     void postorder(const IR::Operation_Unary *expression) override { otherExpression(expression); }
 

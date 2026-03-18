@@ -615,7 +615,7 @@ const IR::Type *DeclarationGenerator::genType() {
             break;
         }
         case 2: {
-            // tp = headerStackType::gen();
+            // tp = arrayType::gen();
             break;
         }
     }
