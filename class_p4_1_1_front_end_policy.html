@@ -142,8 +142,6 @@ Inheritance diagram for P4::FrontEndPolicy:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae731738c9792f2b99e61eb29504cb9c2" id="r_ae731738c9792f2b99e61eb29504cb9c2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae731738c9792f2b99e61eb29504cb9c2">enableSubConstToAddTransform</a> () const</td></tr>
-<tr class="separator:ae731738c9792f2b99e61eb29504cb9c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acf526aa06ad400e8db23e894d6eaf644" id="r_acf526aa06ad400e8db23e894d6eaf644"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf526aa06ad400e8db23e894d6eaf644">foldInlinedFrom</a> () const</td></tr>
 <tr class="separator:acf526aa06ad400e8db23e894d6eaf644"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b5f51f92db63dea3da16a94bfb98a03" id="r_a8b5f51f92db63dea3da16a94bfb98a03"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_constant_folding_policy.html">ConstantFoldingPolicy</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b5f51f92db63dea3da16a94bfb98a03">getConstantFoldingPolicy</a> () const</td></tr>
@@ -152,6 +150,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:abe005cdad5f19114c7a91b3bbd9f923b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae2f8eb05332dffdbfff3326c3afa12bf" id="r_ae2f8eb05332dffdbfff3326c3afa12bf"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_parse_annotations.html">ParseAnnotations</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae2f8eb05332dffdbfff3326c3afa12bf">getParseAnnotations</a> () const</td></tr>
 <tr class="separator:ae2f8eb05332dffdbfff3326c3afa12bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac749c0cd3b5ddba81db6eb7f3bf760f7" id="r_ac749c0cd3b5ddba81db6eb7f3bf760f7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_strength_reduction_policy.html">StrengthReductionPolicy</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac749c0cd3b5ddba81db6eb7f3bf760f7">getStrengthReductionPolicy</a> () const</td></tr>
+<tr class="separator:ac749c0cd3b5ddba81db6eb7f3bf760f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af373947a553e5ba14e0dc59c8cb41c00" id="r_af373947a553e5ba14e0dc59c8cb41c00"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af373947a553e5ba14e0dc59c8cb41c00">optimize</a> (const <a class="el" href="class_p4_1_1_compiler_options.html">CompilerOptions</a> &amp;options) const</td></tr>
 <tr class="separator:af373947a553e5ba14e0dc59c8cb41c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0c6f0ffbcf40b0905f28d9f161ecc71" id="r_ad0c6f0ffbcf40b0905f28d9f161ecc71"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0c6f0ffbcf40b0905f28d9f161ecc71">removeOpAssign</a> () const</td></tr>
@@ -165,32 +165,6 @@ Public Member Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A customization point for frontend. The each tool can provide their own implementation of the policy that customizes its behaviour, or use instance of this class directly to provide the defaults. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae731738c9792f2b99e61eb29504cb9c2" name="ae731738c9792f2b99e61eb29504cb9c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae731738c9792f2b99e61eb29504cb9c2">&#9670;&#160;</a></span>enableSubConstToAddTransform()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual bool P4::FrontEndPolicy::enableSubConstToAddTransform </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Indicates whether to enable the <code>a - constant</code> to <code>a + (-constant)</code> in StrengthReduction. </p><dl class="section return"><dt>Returns</dt><dd>Defaults to true. </dd></dl>
-
-</div>
-</div>
 <a id="acf526aa06ad400e8db23e894d6eaf644" name="acf526aa06ad400e8db23e894d6eaf644"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#acf526aa06ad400e8db23e894d6eaf644">&#9670;&#160;</a></span>foldInlinedFrom()</h2>
 
@@ -295,6 +269,33 @@ Public Member Functions</h2></td></tr>
 <p>A specialized instance of annotations parser for the target, or nullptr to use the default configuration. </p><dl class="section return"><dt>Returns</dt><dd>Defaults to nullptr. </dd></dl>
 
 <p>Reimplemented in <a class="el" href="struct_b_f_n_1_1_front_end_policy.html#a6720a4fa2a362144b0447f6841313c83">BFN::FrontEndPolicy</a>.</p>
+
+</div>
+</div>
+<a id="ac749c0cd3b5ddba81db6eb7f3bf760f7" name="ac749c0cd3b5ddba81db6eb7f3bf760f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac749c0cd3b5ddba81db6eb7f3bf760f7">&#9670;&#160;</a></span>getStrengthReductionPolicy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="class_p4_1_1_strength_reduction_policy.html">StrengthReductionPolicy</a> * P4::FrontEndPolicy::getStrengthReductionPolicy </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Get policy for the strength reduction pass. </p><dl class="section see"><dt>See also</dt><dd>StrengthReductionPolicy </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Defaults to nullptr, which causes strength reduction to use the default policy, which does not modify the pass defaults in any way. </dd></dl>
 
 </div>
 </div>

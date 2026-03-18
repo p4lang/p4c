@@ -1,3 +1,21 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structpcap__pkt.html" title=" " alt="" coords="5,5,87,31"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,203,113,228"/>
+<area shape="rect" id="Node000001" href="$class_adjust_egress_packet_length.html" title=" " alt="" coords="187,5,379,31"/>
+<area shape="poly" id="edge2634_Node000000_Node000001" title=" " alt="" coords="66,188,78,154,98,114,125,73,160,40,185,27,188,31,163,44,129,77,102,116,83,156,71,190"/>
+<area shape="rect" id="Node000002" href="$class_check_for_unimplemented_features.html" title=" " alt="" coords="161,55,404,80"/>
+<area shape="poly" id="edge2635_Node000000_Node000002" title=" " alt="" coords="72,189,107,138,131,111,160,89,184,78,186,83,163,94,135,115,111,141,76,192"/>
+<area shape="rect" id="Node000003" href="$group__midend.html#class_copy_block_pragmas" title="Pass that copies block annotations to the block&#39;s tables." alt="" coords="209,104,357,129"/>
+<area shape="poly" id="edge2636_Node000000_Node000003" title=" " alt="" coords="82,191,117,163,160,138,207,123,209,129,162,143,120,168,86,195"/>
+<area shape="rect" id="Node000004" href="$struct_create_thread_local_instances.html" title=" " alt="" coords="179,153,386,179"/>
+<area shape="poly" id="edge2637_Node000000_Node000004" title=" " alt="" coords="122,197,161,187,214,176,215,181,162,193,123,202"/>
+<area shape="rect" id="Node000005" href="$group__parde.html#struct_merge_parser_states" title="Merges a chain of states into a large state (before parser lowering). Find the longest chain that: Fo..." alt="" coords="211,203,355,228"/>
+<area shape="poly" id="edge2638_Node000000_Node000005" title=" " alt="" coords="127,213,211,213,211,218,127,218"/>
+<area shape="rect" id="Node000006" href="$class_move_to_egress.html" title=" " alt="" coords="225,252,340,277"/>
+<area shape="poly" id="edge2639_Node000000_Node000006" title=" " alt="" coords="127,229,162,237,226,251,225,256,161,242,125,234"/>
+<area shape="rect" id="Node000007" href="$class_normalize_hash_list.html" title="Normalize field lists in hashing expression (Hash.get primitive)" alt="" coords="210,301,355,327"/>
+<area shape="poly" id="edge2640_Node000000_Node000007" title=" " alt="" coords="86,235,121,262,162,286,211,302,209,307,160,291,118,267,83,239"/>
+<area shape="rect" id="Node000008" href="$group__bridged__packing.html#class_rename_arch_params" title="Pass that governs replacement of the user&#45;supplied parameter names with the corresponding parameter n..." alt="" coords="206,351,359,376"/>
+<area shape="poly" id="edge2641_Node000000_Node000008" title=" " alt="" coords="76,238,111,289,135,314,163,336,206,353,204,358,160,340,131,318,107,292,72,241"/>
+<area shape="rect" id="Node000009" href="$struct_simplify_references.html" title=" " alt="" coords="209,400,357,425"/>
+<area shape="poly" id="edge2642_Node000000_Node000009" title=" " alt="" coords="71,240,83,274,103,313,129,353,163,385,185,397,209,405,207,410,183,402,160,389,125,356,98,316,79,276,66,242"/>
 </map>

@@ -478,6 +478,7 @@ var namespace_p4 =
     [ "StorageLocation", "class_p4_1_1_storage_location.html", "class_p4_1_1_storage_location" ],
     [ "StorageMap", "class_p4_1_1_storage_map.html", null ],
     [ "StrengthReduction", "class_p4_1_1_strength_reduction.html", null ],
+    [ "StrengthReductionPolicy", "class_p4_1_1_strength_reduction_policy.html", "class_p4_1_1_strength_reduction_policy" ],
     [ "string_map", "class_p4_1_1string__map.html", "class_p4_1_1string__map" ],
     [ "StringRef", "struct_p4_1_1_string_ref.html", "struct_p4_1_1_string_ref" ],
     [ "StructInitializers", "class_p4_1_1_struct_initializers.html", null ],

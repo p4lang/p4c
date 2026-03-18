@@ -144,9 +144,9 @@ Inheritance diagram for P4::DoStrengthReduction:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a80561d8cec715a411a50ecab272e93bc" id="r_a80561d8cec715a411a50ecab272e93bc"><td class="memItemLeft" align="right" valign="top"><a id="a80561d8cec715a411a50ecab272e93bc" name="a80561d8cec715a411a50ecab272e93bc"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DoStrengthReduction</b> (bool <a class="el" href="#afa8c611fe4ebcda5d90fb2879ae46689">enableSubConstToAddTransform</a>)</td></tr>
-<tr class="separator:a80561d8cec715a411a50ecab272e93bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf9226b3240275f90498c3a8e3503dbc" id="r_abf9226b3240275f90498c3a8e3503dbc"><td class="memItemLeft" align="right" valign="top"><a id="abf9226b3240275f90498c3a8e3503dbc" name="abf9226b3240275f90498c3a8e3503dbc"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DoStrengthReduction</b> (<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="el" href="class_p4_1_1_strength_reduction_policy.html">StrengthReductionPolicy</a> *policy)</td></tr>
+<tr class="separator:abf9226b3240275f90498c3a8e3503dbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7795b5615af68d7ac470905ee123d0f5" id="r_a7795b5615af68d7ac470905ee123d0f5"><td class="memItemLeft" align="right" valign="top"><a id="a7795b5615af68d7ac470905ee123d0f5" name="a7795b5615af68d7ac470905ee123d0f5"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::Add *expr) override</td></tr>
 <tr class="separator:a7795b5615af68d7ac470905ee123d0f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -165,6 +165,9 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</
 <tr class="memitem:abe5bb3de54f534837780cddb3155e2d3" id="r_abe5bb3de54f534837780cddb3155e2d3"><td class="memItemLeft" align="right" valign="top"><a id="abe5bb3de54f534837780cddb3155e2d3" name="abe5bb3de54f534837780cddb3155e2d3"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::BXor *expr) override</td></tr>
 <tr class="separator:abe5bb3de54f534837780cddb3155e2d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adbb4035aee027a5e31c061e19ae4dcdf" id="r_adbb4035aee027a5e31c061e19ae4dcdf"><td class="memItemLeft" align="right" valign="top"><a id="adbb4035aee027a5e31c061e19ae4dcdf" name="adbb4035aee027a5e31c061e19ae4dcdf"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::Cast *expr) override</td></tr>
+<tr class="separator:adbb4035aee027a5e31c061e19ae4dcdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09d63050ed80cb7244cd437211d4fb5c" id="r_a09d63050ed80cb7244cd437211d4fb5c"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a09d63050ed80cb7244cd437211d4fb5c">postorder</a> (IR::Cmpl *expr) override</td></tr>
 <tr class="separator:a09d63050ed80cb7244cd437211d4fb5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd4c65b9addbae4cd10c2b19b70b7f43" id="r_acd4c65b9addbae4cd10c2b19b70b7f43"><td class="memItemLeft" align="right" valign="top"><a id="acd4c65b9addbae4cd10c2b19b70b7f43" name="acd4c65b9addbae4cd10c2b19b70b7f43"></a>
@@ -466,8 +469,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>visit_children</b> (c
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:afa8c611fe4ebcda5d90fb2879ae46689" id="r_afa8c611fe4ebcda5d90fb2879ae46689"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afa8c611fe4ebcda5d90fb2879ae46689">enableSubConstToAddTransform</a> = true</td></tr>
-<tr class="separator:afa8c611fe4ebcda5d90fb2879ae46689"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a280e300f21965c80e6e8867eb31380e6" id="r_a280e300f21965c80e6e8867eb31380e6"><td class="memItemLeft" align="right" valign="top"><a id="a280e300f21965c80e6e8867eb31380e6" name="a280e300f21965c80e6e8867eb31380e6"></a>
+<a class="el" href="class_p4_1_1_strength_reduction_policy.html">StrengthReductionPolicy</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>policy</b></td></tr>
+<tr class="separator:a280e300f21965c80e6e8867eb31380e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a03e12f6e98849109f68442532e6e0d39" id="r_a03e12f6e98849109f68442532e6e0d39"><td class="memItemLeft" align="right" valign="top"><a id="a03e12f6e98849109f68442532e6e0d39" name="a03e12f6e98849109f68442532e6e0d39"></a>
+<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>typeMap</b> = nullptr</td></tr>
+<tr class="separator:a03e12f6e98849109f68442532e6e0d39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_p4_1_1_transform"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_1_1_transform')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_1_1_transform.html">P4::Transform</a></td></tr>
 <tr class="memitem:a866c6912a6acf02fcade6f759bdb291a inherit pro_attribs_class_p4_1_1_transform" id="r_a866c6912a6acf02fcade6f759bdb291a"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>forceClone</b> = false</td></tr>
@@ -758,30 +765,6 @@ Methods</h1>
 </div><div class="memdoc">
 
 <p>Reimplemented from <a class="el" href="class_p4_1_1_transform.html">P4::Transform</a>.</p>
-
-</div>
-</div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a id="afa8c611fe4ebcda5d90fb2879ae46689" name="afa8c611fe4ebcda5d90fb2879ae46689"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afa8c611fe4ebcda5d90fb2879ae46689">&#9670;&#160;</a></span>enableSubConstToAddTransform</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool P4::DoStrengthReduction::enableSubConstToAddTransform = true</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Enable the subtract constant to add negative constant transform. Replaces <code>a - constant</code> with <code>a + (-constant)</code>. </p>
 
 </div>
 </div>

@@ -137,7 +137,7 @@ $(function(){initNavTree('class_p4_1_1_do_simplify_select_cases.html',''); initR
 <div class="dynheader">
 Inheritance diagram for P4::DoSimplifySelectCases:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_do_simplify_select_cases__inherit__graph.svg" width="207" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_do_simplify_select_cases__inherit__graph.svg" width="312" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -398,6 +398,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <div class="textblock"><p>This pass analyzes reachability of select cases.</p><ul>
 <li>If there is just one case label, the select statement is eliminated.</li>
 <li>If a case label appears after the default label, the case is unreachable and therefore eliminated.</li>
+<li>If all select case labels are compile-time constants, and if multiple different states match a given case label, then all but the first select case with this label are eliminated.</li>
+<li>If all select case labels are compile-time constants, then all non-default transitions to state s are eliminated if the select statement contains a default transition to state s.</li>
 </ul>
 <p>If requireConstants is true this pass requires that all select labels evaluate to constants.</p>
 <dl class="section pre"><dt>Precondition</dt><dd>Assumes that there are no side-effects in the evaluation of select labels. </dd></dl>

@@ -7,6 +7,5 @@ var class_p4_1_1_do_strength_reduction =
     [ "isPowerOf2", "class_p4_1_1_do_strength_reduction.html#ae1bd2058713f98355a1aeb51e2da10af", null ],
     [ "isTrue", "class_p4_1_1_do_strength_reduction.html#a430e39c46cd804978545e8b7ca3aa76c", null ],
     [ "isZero", "class_p4_1_1_do_strength_reduction.html#a0ae8e133282a7d0e3193c1cd90d0b3d9", null ],
-    [ "postorder", "class_p4_1_1_do_strength_reduction.html#a09d63050ed80cb7244cd437211d4fb5c", null ],
-    [ "enableSubConstToAddTransform", "class_p4_1_1_do_strength_reduction.html#afa8c611fe4ebcda5d90fb2879ae46689", null ]
+    [ "postorder", "class_p4_1_1_do_strength_reduction.html#a09d63050ed80cb7244cd437211d4fb5c", null ]
 ];
