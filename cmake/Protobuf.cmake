@@ -1,5 +1,5 @@
 macro(p4c_obtain_protobuf)
-  set(P4C_PROTOBUF_VERSION 25.3)
+  set(P4C_PROTOBUF_VERSION 29.6)
   option(
     P4C_USE_PREINSTALLED_PROTOBUF
     "Look for a preinstalled version of Protobuf in the system instead of installing a prebuilt binary using FetchContent."
@@ -63,7 +63,7 @@ macro(p4c_obtain_protobuf)
     fetchcontent_declare(
       protobuf
       URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protobuf-${P4C_PROTOBUF_VERSION}.tar.gz
-      URL_HASH SHA256=d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e
+      URL_HASH SHA256=877bf9f880631aa31daf2c09896276985696728137fcd43cc534a28c5566d9ba
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
       DOWNLOAD_EXTRACT_TIMESTAMP TRUE

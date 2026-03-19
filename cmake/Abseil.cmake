@@ -54,20 +54,10 @@ macro(p4c_obtain_abseil)
         # Do not suppress warnings for Abseil library targets that are aliased.
         get_target_property(target_type ${target} TYPE)
         if (NOT ${target_type} STREQUAL "INTERFACE_LIBRARY")
-          # We need this workaround because of https://github.com/abseil/abseil-cpp/issues/1664.
-          # TODO: Remove once the Abseil compilation issue is fixed.
-          if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 14)
-            target_compile_options(${target} PUBLIC "-mbmi")
-          endif()
           target_compile_options(${target} PRIVATE "-Wno-error" "-w")
         endif()
       endif()
     endforeach()
-    # TODO: Remove once the Abseil compilation issue is fixed.
-    if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 14)
-      message(WARNING "Compiling with GCC > 14. Adding -mbmi to Abseil targets, this may cause incompatibility with old CPUs.")
-    endif()
-
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
