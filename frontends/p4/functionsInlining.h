@@ -76,7 +76,7 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     class isLocalExpression;  // functor to test actual arguments scope use
 
  public:
-    FunctionsInliner() = default;
+    FunctionsInliner() { visitDagOnce = false; }
     Visitor::profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *node) override;
     const IR::Node *preorder(IR::Function *function) override;

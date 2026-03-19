@@ -1,0 +1,3 @@
+inline-function-to-array-index.p4(21): [--Wwarn=unused] warning: 'hdr' is unused
+    action a(inout h_t hdr) {}
+                       ^^^
