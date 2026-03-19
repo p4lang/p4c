@@ -11,7 +11,7 @@ using ::p4::config::v1::P4Info;
 
 using namespace P4::literals;
 
-const char kP4InfoFile[] = "p4/program.p4info.txtpb";
+const char kP4InfoFile[] = "program.p4info.txt";
 
 int main() {
   // Demonstrate that compile-time generate p4info file can be accessed.

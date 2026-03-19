@@ -1,9 +1,6 @@
 # The BUILD file for p4testgen, inspired by the tool's cmake build rules.
 
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
-load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
-load("@protobuf//bazel:proto_library.bzl", "proto_library")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -23,17 +20,17 @@ proto_library(
     name = "ir_proto",
     srcs = ["modules/testgen/targets/bmv2/proto/ir.proto"],
     deps = [
-        "@googleapis//google/rpc:code_proto",
-        "@googleapis//google/rpc:status_proto",
-        "@p4runtime//proto/p4/config/v1:p4info_proto",
-        "@p4runtime//proto/p4/v1:p4runtime_proto",
+        "@com_github_p4lang_p4runtime//:p4info_proto",
+        "@com_github_p4lang_p4runtime//:p4runtime_proto",
+        "@com_google_googleapis//google/rpc:code_proto",
+        "@com_google_googleapis//google/rpc:status_proto",
     ],
 )
 
 proto_library(
     name = "p4testgen_proto",
     srcs = ["modules/testgen/targets/bmv2/proto/p4testgen.proto"],
-    deps = ["@p4runtime//proto/p4/v1:p4runtime_proto"],
+    deps = ["@com_github_p4lang_p4runtime//:p4runtime_proto"],
 )
 
 proto_library(
@@ -85,11 +82,11 @@ cc_library(
     deps = [
         "//:ir_frontend_midend_control_plane",
         "//:lib",
-        "@abseil-cpp//absl/container:btree",
-        "@abseil-cpp//absl/strings:str_format",
-        "@boost.multiprecision",
-        "@p4runtime//proto/p4/config/v1:p4info_cc_proto",
-        "@z3//:z3_static",
+        "@boost//:multiprecision",
+        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
+        "@com_github_z3prover_z3//:api",
+        "@com_google_absl//absl/container:btree",
+        "@com_google_absl//absl/strings:str_format",
     ],
 )
 
@@ -166,10 +163,10 @@ cc_library(
         ":register_testgen_targets",
         "//:ir_frontend_midend_control_plane",
         "//:lib",
-        "@abseil-cpp//absl/container:btree",
-        "@abseil-cpp//absl/strings",
-        "@boost.multiprecision",
-        "@inja",
+        "@boost//:multiprecision",
+        "@com_github_pantor_inja//:inja",
+        "@com_google_absl//absl/container:btree",
+        "@com_google_absl//absl/strings",
         "@nlohmann_json//:json",
     ],
 )
@@ -188,7 +185,7 @@ cc_binary(
     deps = [
         ":testgen_lib",
         "//:lib",
-        "@boost.multiprecision",
+        "@boost//:multiprecision",
     ],
 )
 
@@ -218,8 +215,8 @@ cc_library(
     deps = [
         ":testgen_lib",
         "//:test_helpers",
-        "@abseil-cpp//absl/strings",
-        "@googletest//:gtest_main",
+        "@com_google_absl//absl/strings",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -234,6 +231,6 @@ cc_test(
     ],
     deps = [
         ":testgen_test_lib",
-        "@abseil-cpp//absl/strings",
+        "@com_google_absl//absl/strings",
     ],
 )
