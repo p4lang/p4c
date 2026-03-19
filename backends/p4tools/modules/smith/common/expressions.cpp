@@ -578,11 +578,10 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
         case 12: {
             // pick an concatenation that matches the type
             size_t typeWidth = tb->width_bits();
-            size_t split = Utils::getRandInt(1, typeWidth - 1);
-            // TODO(fruffy): lazy fallback
-            if (split >= typeWidth) {
+            if (typeWidth < 2) {
                 return genBitLiteral(tb);
             }
+            size_t split = Utils::getRandInt(1, typeWidth - 1);
             const auto *tl = IR::Type_Bits::get(typeWidth - split, false);
             const auto *tr = IR::Type_Bits::get(split, false);
             // width must be known so we cast
