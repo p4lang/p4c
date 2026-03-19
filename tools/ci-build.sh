@@ -146,7 +146,10 @@ function build_bmv2() {
   if [[ "${DISTRIB_RELEASE}" == "22.04" ]]; then
     sudo add-apt-repository -y ppa:chreekat/p4lang
     sudo apt-get update
-    sudo apt-get install -y p4lang-bmv2
+    # p4lang-bmv2's own dependencies take care of most of the runtime deps. An
+    # exception seems to be python3-dev.
+    P4C_RUNTIME_DEPS="p4lang-bmv2 python3-dev"
+    sudo apt-get install --no-install-recommends -y ${P4C_RUNTIME_DEPS}
   else
     P4C_RUNTIME_DEPS="cpp \
                         autoconf \
