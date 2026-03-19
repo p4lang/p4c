@@ -1,0 +1,56 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "h.h.count"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32782623
+  }
+  action_refs {
+    id: 20785542
+  }
+  action_refs {
+    id: 30654005
+  }
+  const_default_action_id: 32782623
+  initial_default_action {
+    action_id: 32782623
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 32782623
+    name: "ingress.sum_loop"
+    alias: "sum_loop"
+  }
+}
+actions {
+  preamble {
+    id: 20785542
+    name: "ingress.nested_loop"
+    alias: "nested_loop"
+  }
+}
+actions {
+  preamble {
+    id: 30654005
+    name: "ingress.conditional_loop"
+    alias: "conditional_loop"
+  }
+}
+type_info {
+}
