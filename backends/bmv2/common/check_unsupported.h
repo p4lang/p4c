@@ -25,12 +25,8 @@ limitations under the License.
 namespace P4::BMV2 {
 
 class CheckUnsupported : public Inspector {
-    bool preorder(const IR::ForStatement *fs) override {
-        error(ErrorType::ERR_UNSUPPORTED, "%sBMV2 does not support loops", fs->srcInfo);
-        return false;
-    }
     bool preorder(const IR::ForInStatement *fs) override {
-        error(ErrorType::ERR_UNSUPPORTED, "%sBMV2 does not support loops", fs->srcInfo);
+        error(ErrorType::ERR_UNSUPPORTED, "%sBMV2 does not support for-in loops", fs->srcInfo);
         return false;
     }
 };

@@ -267,6 +267,57 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             }
             (jumpInfo->labelIdToJumpOffset)[labelIdEndOfIf] = result->size();
             continue;
+        } else if (s->is<IR::ForStatement>()) {
+            auto forStmt = s->to<IR::ForStatement>();
+
+            // Allocate labels for the loop structure:
+            //   labelCondition: where the condition check starts
+            //   labelEndOfLoop: where to jump after the loop (or on break)
+            int labelIdCondition = jumpInfo->numLabels;
+            jumpInfo->numLabels += 1;
+            int labelIdEndOfLoop = jumpInfo->numLabels;
+            jumpInfo->numLabels += 1;
+
+            // Step 1: Emit init statements
+            convertActionBody(&forStmt->init, result, inConditional, jumpInfo);
+
+            // Step 2: Record label for condition check
+            (jumpInfo->labelIdToJumpOffset)[labelIdCondition] = result->size();
+
+            // Step 3: Emit condition check - _jump_if_zero(cond, labelEndOfLoop)
+            {
+                unsigned int curOffset = result->size();
+                auto parameters = new Util::JsonArray();
+                auto primitive = mkPrimitive("_jump_if_zero"_cs, result);
+                auto cond = ctxt->conv->convert(forStmt->condition, true, true, true);
+                parameters->append(cond);
+                (jumpInfo->offsetToTargetLabelId)[curOffset] = labelIdEndOfLoop;
+                (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+                primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            }
+
+            // Step 4: Emit loop body (marked as conditional so return/exit
+            // emit jumps rather than just stopping code generation)
+            auto bodyVec = new IR::IndexedVector<IR::StatOrDecl>();
+            bodyVec->push_back(forStmt->body);
+            convertActionBody(bodyVec, result, true, jumpInfo);
+
+            // Step 5: Emit update statements
+            convertActionBody(&forStmt->updates, result, true, jumpInfo);
+
+            // Step 6: Unconditional jump back to condition check
+            {
+                unsigned int curOffset = result->size();
+                auto parameters = new Util::JsonArray();
+                auto primitive = mkPrimitive("_jump"_cs, result);
+                (jumpInfo->offsetToTargetLabelId)[curOffset] = labelIdCondition;
+                (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+                primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            }
+
+            // Step 7: Record label for end of loop
+            (jumpInfo->labelIdToJumpOffset)[labelIdEndOfLoop] = result->size();
+            continue;
         }
         ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% not yet supported on this target", s);
     }
