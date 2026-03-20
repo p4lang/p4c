@@ -1,0 +1,25 @@
+# Scenario 1: Default Action: Simple for Loop (sum_loop)
+# Input packet: count=5 (0x05), sum=0, product=0
+packet 0 050000000000000000
+# Expected output: sum=15 (0x0f)
+expect 0 050000000f00000000
+
+# Scenario 2: Nested for Loop (nested_loop)
+add t h.h.count:0x04 nested_loop()
+# Input packet: count=4 (0x04)
+packet 0 040000000000000000
+# Expected output: product=16 (0x10)
+expect 0 040000000000000010
+
+# Scenario 3: Conditional for Loop (conditional_loop)
+add t h.h.count:0x0a conditional_loop()
+# Input packet: count=10 (0x0a)
+packet 0 0a0000000000000000
+# Expected output: sum=5 (0x05)
+expect 0 0a0000000500000000
+
+# Scenario 4: Zero Iterations (Default Action sum_loop)
+# Input packet: count=0 (0x00)
+packet 0 000000000000000000
+# Expected output: sum=0
+expect 0 000000000000000000
