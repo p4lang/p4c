@@ -143,6 +143,26 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
             primitive2->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             continue;
+        } else if (s->is<IR::BreakStatement>()) {
+            BUG_CHECK(jumpInfo->labelIdBreak >= 0,
+                      "%1%: break statement outside of a loop", s);
+            unsigned int curOffset = result->size();
+            auto parameters = new Util::JsonArray();
+            auto primitive = mkPrimitive("_jump"_cs, result);
+            (jumpInfo->offsetToTargetLabelId)[curOffset] = jumpInfo->labelIdBreak;
+            (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+            primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            continue;
+        } else if (s->is<IR::ContinueStatement>()) {
+            BUG_CHECK(jumpInfo->labelIdContinue >= 0,
+                      "%1%: continue statement outside of a loop", s);
+            unsigned int curOffset = result->size();
+            auto parameters = new Util::JsonArray();
+            auto primitive = mkPrimitive("_jump"_cs, result);
+            (jumpInfo->offsetToTargetLabelId)[curOffset] = jumpInfo->labelIdContinue;
+            (jumpInfo->offsetToJumpParams)[curOffset] = parameters;
+            primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            continue;
         } else if (s->is<IR::AssignmentStatement>()) {
             const IR::Expression *l, *r;
             auto assign = s->to<IR::AssignmentStatement>();
@@ -272,8 +292,11 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
 
             // Allocate labels for the loop structure:
             //   labelCondition: where the condition check starts
+            //   labelUpdate:    where continue jumps to (update section)
             //   labelEndOfLoop: where to jump after the loop (or on break)
             int labelIdCondition = jumpInfo->numLabels;
+            jumpInfo->numLabels += 1;
+            int labelIdUpdate = jumpInfo->numLabels;
             jumpInfo->numLabels += 1;
             int labelIdEndOfLoop = jumpInfo->numLabels;
             jumpInfo->numLabels += 1;
@@ -296,16 +319,29 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             }
 
-            // Step 4: Emit loop body (marked as conditional so return/exit
-            // emit jumps rather than just stopping code generation)
+            // Step 4: Emit loop body with break/continue context.
+            // Save and set the innermost loop labels so that
+            // BreakStatement/ContinueStatement handlers know where to jump.
+            int savedBreak = jumpInfo->labelIdBreak;
+            int savedContinue = jumpInfo->labelIdContinue;
+            jumpInfo->labelIdBreak = labelIdEndOfLoop;
+            jumpInfo->labelIdContinue = labelIdUpdate;
+
             auto bodyVec = new IR::IndexedVector<IR::StatOrDecl>();
             bodyVec->push_back(forStmt->body);
             convertActionBody(bodyVec, result, true, jumpInfo);
 
-            // Step 5: Emit update statements
+            // Restore previous loop context (for nested loops)
+            jumpInfo->labelIdBreak = savedBreak;
+            jumpInfo->labelIdContinue = savedContinue;
+
+            // Step 5: Record label for update section (continue target)
+            (jumpInfo->labelIdToJumpOffset)[labelIdUpdate] = result->size();
+
+            // Step 6: Emit update statements
             convertActionBody(&forStmt->updates, result, true, jumpInfo);
 
-            // Step 6: Unconditional jump back to condition check
+            // Step 7: Unconditional jump back to condition check
             {
                 unsigned int curOffset = result->size();
                 auto parameters = new Util::JsonArray();
@@ -315,7 +351,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             }
 
-            // Step 7: Record label for end of loop
+            // Step 8: Record label for end of loop (break target)
             (jumpInfo->labelIdToJumpOffset)[labelIdEndOfLoop] = result->size();
             continue;
         }

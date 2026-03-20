@@ -36,6 +36,12 @@ struct JumpLabelInfo {
     // 'exit' statement within a conditionally executed part of an
     // action body, to jump to the end of the action.
     int labelIdEndOfAction;
+    // Label ID for the end of the innermost enclosing loop (break target).
+    // -1 means we are not inside any loop.
+    int labelIdBreak = -1;
+    // Label ID for the update section of the innermost enclosing loop (continue target).
+    // -1 means we are not inside any loop.
+    int labelIdContinue = -1;
     // Let F be the set of offsets in the action that contain a
     // primitive "_jump" or _jump_if_zero".  For each offset f in F,
     // offsetToTargetLabelId[f] is the label ID to which the primitive
