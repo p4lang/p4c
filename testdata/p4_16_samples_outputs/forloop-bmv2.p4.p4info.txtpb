@@ -25,6 +25,12 @@ tables {
   action_refs {
     id: 30654005
   }
+  action_refs {
+    id: 18796045
+  }
+  action_refs {
+    id: 31911374
+  }
   const_default_action_id: 32782623
   initial_default_action {
     action_id: 32782623
@@ -50,6 +56,20 @@ actions {
     id: 30654005
     name: "ingress.conditional_loop"
     alias: "conditional_loop"
+  }
+}
+actions {
+  preamble {
+    id: 18796045
+    name: "ingress.break_loop"
+    alias: "break_loop"
+  }
+}
+actions {
+  preamble {
+    id: 31911374
+    name: "ingress.continue_loop"
+    alias: "continue_loop"
   }
 }
 type_info {

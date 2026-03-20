@@ -66,6 +66,24 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             }
         }
     }
+    action break_loop() {
+        h.h.sum = 32w0;
+        for (bit<8> i = 8w0; i < h.h.count; i = i + 8w1) {
+            if (i == 8w5) {
+                break;
+            }
+            h.h.sum = h.h.sum + 32w1;
+        }
+    }
+    action continue_loop() {
+        h.h.sum = 32w0;
+        for (bit<8> i = 8w0; i < 8w10; i = i + 8w1) {
+            if (i & 8w1 == 8w0) {
+                continue;
+            }
+            h.h.sum = h.h.sum + 32w1;
+        }
+    }
     table t {
         key = {
             h.h.count: exact @name("h.h.count");
@@ -74,6 +92,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             sum_loop();
             nested_loop();
             conditional_loop();
+            break_loop();
+            continue_loop();
         }
         const default_action = sum_loop();
     }

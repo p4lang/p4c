@@ -48,6 +48,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.i") bit<8> i_1;
     @name("ingress.j") bit<8> j_0;
     @name("ingress.i") bit<8> i_2;
+    @name("ingress.i") bit<8> i_3;
+    @name("ingress.i") bit<8> i_4;
     @name("ingress.sum_loop") action sum_loop() {
         h.h.sum = 32w0;
         for (i_0 = 8w1; i_0 <= h.h.count; i_0 = i_0 + 8w1) {
@@ -70,6 +72,26 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             }
         }
     }
+    @name("ingress.break_loop") action break_loop() {
+        h.h.sum = 32w0;
+        for (i_3 = 8w0; i_3 < h.h.count; i_3 = i_3 + 8w1) {
+            if (i_3 == 8w5) {
+                break;
+            } else {
+                h.h.sum = h.h.sum + 32w1;
+            }
+        }
+    }
+    @name("ingress.continue_loop") action continue_loop() {
+        h.h.sum = 32w0;
+        for (i_4 = 8w0; i_4 < 8w10; i_4 = i_4 + 8w1) {
+            if (i_4 & 8w1 == 8w0) {
+                continue;
+            } else {
+                h.h.sum = h.h.sum + 32w1;
+            }
+        }
+    }
     @name("ingress.t") table t_0 {
         key = {
             h.h.count: exact @name("h.h.count");
@@ -78,6 +100,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             sum_loop();
             nested_loop();
             conditional_loop();
+            break_loop();
+            continue_loop();
         }
         const default_action = sum_loop();
     }

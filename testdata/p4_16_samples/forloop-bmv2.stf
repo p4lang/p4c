@@ -23,3 +23,17 @@ expect 0 0a0000000500000000
 packet 0 000000000000000000
 # Expected output: sum=0
 expect 0 000000000000000000
+
+# Scenario 5: Break Loop (break_loop)
+# Loop from 0..9, break when i==5 → sum increments for i=0,1,2,3,4 → sum=5
+add t h.h.count:0x06 break_loop()
+packet 0 060000000000000000
+# Expected output: sum=5 (0x05)
+expect 0 060000000500000000
+
+# Scenario 6: Continue Loop (continue_loop)
+# Loop from 0..9, skip even i (continue), sum++ for odd i → 1,3,5,7,9 → sum=5
+add t h.h.count:0x07 continue_loop()
+packet 0 070000000000000000
+# Expected output: sum=5 (0x05)
+expect 0 070000000500000000

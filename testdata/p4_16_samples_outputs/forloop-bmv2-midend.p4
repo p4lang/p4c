@@ -47,6 +47,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.i") bit<8> i_0;
     @name("ingress.i") bit<8> i_1;
     @name("ingress.j") bit<8> j_0;
+    @name("ingress.i") bit<8> i_3;
     @name("ingress.sum_loop") action sum_loop() {
         h.h.sum = 32w0;
         for (i_0 = 8w1; i_0 <= h.h.count; i_0 = i_0 + 8w1) {
@@ -69,6 +70,24 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.sum = 32w4;
         h.h.sum = 32w5;
     }
+    @name("ingress.break_loop") action break_loop() {
+        h.h.sum = 32w0;
+        for (i_3 = 8w0; i_3 < h.h.count; i_3 = i_3 + 8w1) {
+            if (i_3 == 8w5) {
+                break;
+            } else {
+                h.h.sum = h.h.sum + 32w1;
+            }
+        }
+    }
+    @name("ingress.continue_loop") action continue_loop() {
+        h.h.sum = 32w0;
+        h.h.sum = 32w1;
+        h.h.sum = 32w2;
+        h.h.sum = 32w3;
+        h.h.sum = 32w4;
+        h.h.sum = 32w5;
+    }
     @name("ingress.t") table t_0 {
         key = {
             h.h.count: exact @name("h.h.count");
@@ -77,21 +96,23 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             sum_loop();
             nested_loop();
             conditional_loop();
+            break_loop();
+            continue_loop();
         }
         const default_action = sum_loop();
     }
-    @hidden action forloopbmv2l77() {
+    @hidden action forloopbmv2l99() {
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_forloopbmv2l77 {
+    @hidden table tbl_forloopbmv2l99 {
         actions = {
-            forloopbmv2l77();
+            forloopbmv2l99();
         }
-        const default_action = forloopbmv2l77();
+        const default_action = forloopbmv2l99();
     }
     apply {
         t_0.apply();
-        tbl_forloopbmv2l77.apply();
+        tbl_forloopbmv2l99.apply();
     }
 }
 
