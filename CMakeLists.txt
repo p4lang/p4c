@@ -70,6 +70,7 @@ OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" ${_ENABLE_LTO_DEFAULT})
 
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
+OPTION (FORMATTING_ONLY "Only configure formatting/linting targets, skip all build dependencies" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 
@@ -198,6 +199,12 @@ endif ()
 if (ENABLE_DUMP_PIPE)
   add_definitions("-DENABLE_DUMP_PIPE=1")
 endif ()
+
+# When FORMATTING_ONLY is set, skip all build dependencies and jump
+# straight to the linter/formatter targets.  This allows running
+# clang-format, cpplint, black, and isort without installing flex,
+# bison, Boost, Protobuf, or any other compile-time dependency.
+if (NOT FORMATTING_ONLY)
 
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
@@ -587,10 +594,13 @@ add_custom_target(update_includes ALL
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
+endif (NOT FORMATTING_ONLY)
+
 ########################################## Linters Begin ##########################################
 include(Linters)
 ########################################### Linters End ###########################################
 
+if (NOT FORMATTING_ONLY)
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
@@ -663,3 +673,5 @@ SET(CPACK_SOURCE_IGNORE_FILES
    "${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-*;${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}_*;/build/;/.git/;/config.log;/CMakeFiles/;CMakeCache.txt$;.tar.gz$;/_CPack_Packages;/Makefile$;~$;/build-deb;/clean-deb;/filter-empty-entries;/make-symbols;/make-ppa;/make-deb;/debian.conf;/make-rpm;/rpm.conf;${CPACK_SOURCE_IGNORE_FILES}")
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
+
+endif (NOT FORMATTING_ONLY)
