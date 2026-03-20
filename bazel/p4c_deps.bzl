@@ -48,10 +48,11 @@ filegroup(
             sha256 = "daa1b06a19b5f7e4603e1f8980eeab43cf69b6e89bee3b2547f275fa5af7f480",
         )
     if not native.existing_rule("com_github_p4lang_p4runtime"):
-        git_repository(
+        http_archive(
             name = "com_github_p4lang_p4runtime",
-            remote = "https://github.com/p4lang/p4runtime",
-            branch = "bazel-workspace-support",
+            url = "https://github.com/p4lang/p4runtime/archive/bd2a626484e125da30422326d27fad0ddebdd645.tar.gz",
+            strip_prefix = "p4runtime-bd2a626484e125da30422326d27fad0ddebdd645/proto",
+            sha256 = "5cad9290fce6748ef3e76a857f9d2cb6747ec3540423a325eff61a718d464cfd",
         )
     if not native.existing_rule("com_google_googletest"):
         # Cannot currently use local_repository due to Bazel limitation,
