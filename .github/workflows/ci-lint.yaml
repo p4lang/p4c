@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       IMAGE_TYPE: test
+      CMAKE_FLAGS: "-DFORMATTING_ONLY=ON"
       CMAKE_ONLY: ON
       CTEST_PARALLEL_LEVEL: 4
     steps:
