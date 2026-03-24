@@ -155,9 +155,7 @@ const IR::Node *FunctionsInliner::preorder(IR::MethodCallExpression *expr) {
     auto it = pendingReplacements.find(orig);
     if (it != pendingReplacements.end()) {
         LOG2("Performing pending replacement of " << dbp(expr) << " with " << dbp(it->second));
-        auto result = it->second;
-        pendingReplacements.erase(it);
-        return result;
+        return it->second;
     }
 
     return expr;

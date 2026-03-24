@@ -35,8 +35,8 @@ namespace BFN {
  */
 class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
  public:
-    explicit DoRemoveActionParametersTofino(P4::ActionInvocation *inv)
-        : P4::DoRemoveActionParameters(inv) {}
+    explicit DoRemoveActionParametersTofino(P4::ActionInvocation *inv, P4::TypeMap *typeMap)
+        : P4::DoRemoveActionParameters(inv, typeMap) {}
 
     /**
      * Check if there is a mark_to_drop action and don't replace parameters.
@@ -187,7 +187,7 @@ class RemoveActionParameters : public PassManager {
         if (!tc) tc = new P4::TypeChecking(refMap, typeMap);
         passes.emplace_back(tc);
         passes.emplace_back(new P4::FindActionParameters(typeMap, ai));
-        passes.emplace_back(new DoRemoveActionParametersTofino(ai));
+        passes.emplace_back(new DoRemoveActionParametersTofino(ai, typeMap));
         passes.emplace_back(new P4::ClearTypeMap(typeMap));
     }
 };

@@ -19,12 +19,47 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/sideEffects.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
 namespace {
+
+// Extract side-effecting array index expressions into temporaries
+// to ensure they are evaluated exactly once for inout copy-in/copy-out.
+class ExtractArrayIndices : public Transform {
+    TypeMap *typeMap;
+    MinimalNameGenerator &nameGen;
+    IR::IndexedVector<IR::Declaration> &tempDecls;
+    IR::IndexedVector<IR::StatOrDecl> &tempAssigns;
+
+ public:
+    ExtractArrayIndices(TypeMap *typeMap, MinimalNameGenerator &nameGen,
+                        IR::IndexedVector<IR::Declaration> &tempDecls,
+                        IR::IndexedVector<IR::StatOrDecl> &tempAssigns)
+        : typeMap(typeMap), nameGen(nameGen), tempDecls(tempDecls), tempAssigns(tempAssigns) {
+        setName("ExtractArrayIndices");
+    }
+    const IR::Node *preorder(IR::ArrayIndex *aindex) override {
+        visit(aindex->left);
+        if (SideEffects::check(aindex->right, called_by, typeMap)) {
+            if (auto indexType = typeMap->getType(aindex->right, true)) {
+                auto tmp = nameGen.newName("tmp_idx");
+                auto decl = new IR::Declaration_Variable(aindex->right->srcInfo, tmp, indexType);
+                tempDecls.push_back(decl);
+                auto assign = new IR::AssignmentStatement(
+                    aindex->right->srcInfo, new IR::PathExpression(tmp), aindex->right);
+                tempAssigns.push_back(assign);
+                aindex->right = new IR::PathExpression(aindex->right->srcInfo, new IR::Path(tmp));
+            }
+        }
+        prune();
+        return aindex;
+    }
+};
+
 // Remove arguments from any embedded MethodCallExpression
 class RemoveMethodCallArguments : public Transform {
     int argumentsToRemove;  // -1 => all
@@ -117,6 +152,8 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
     ParameterSubstitution substitution;
     substitution.populate(action->parameters, args);
 
+    MinimalNameGenerator nameGen(action);
+
     bool removeAll = invocations->removeAllParameters(getOriginal<IR::P4Action>());
     for (auto p : action->parameters->parameters) {
         if (p->direction == IR::Direction::None && !removeAll) {
@@ -133,16 +170,35 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
                 continue;
             }
 
-            if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut ||
-                p->direction == IR::Direction::None) {
+            if (p->direction == IR::Direction::InOut) {
+                // For inout parameters, extract side-effecting array indices
+                // into temporaries to evaluate them once and avoid DAG sharing.
+                IR::IndexedVector<IR::Declaration> tempDecls;
+                IR::IndexedVector<IR::StatOrDecl> tempAssigns;
+                ExtractArrayIndices eai(typeMap, nameGen, tempDecls, tempAssigns);
+                eai.setCalledBy(this);
+                auto argExpr = arg->expression->apply(eai)->to<IR::Expression>();
+                for (auto *d : tempDecls) result->push_back(d);
+                body.append(tempAssigns);
+
                 auto left = new IR::PathExpression(p->name);
-                auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
+                auto assign = new IR::AssignmentStatement(arg->srcInfo, left, argExpr);
                 body.push_back(assign);
-            }
-            if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
+
                 auto right = new IR::PathExpression(p->name);
-                auto assign = new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
-                postamble.push_back(assign);
+                auto assign2 = new IR::AssignmentStatement(arg->srcInfo, argExpr->clone(), right);
+                postamble.push_back(assign2);
+            } else {
+                if (p->direction == IR::Direction::In || p->direction == IR::Direction::None) {
+                    auto left = new IR::PathExpression(p->name);
+                    auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
+                    body.push_back(assign);
+                }
+                if (p->direction == IR::Direction::Out) {
+                    auto right = new IR::PathExpression(p->name);
+                    auto assign = new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
+                    postamble.push_back(assign);
+                }
             }
         }
     }
@@ -198,7 +254,7 @@ RemoveActionParameters::RemoveActionParameters(TypeMap *typeMap, TypeChecking *t
     if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
     passes.emplace_back(typeChecking);
     passes.emplace_back(new FindActionParameters(typeMap, ai));
-    passes.emplace_back(new DoRemoveActionParameters(ai));
+    passes.emplace_back(new DoRemoveActionParameters(ai, typeMap));
     passes.emplace_back(new ClearTypeMap(typeMap));
 }
 
