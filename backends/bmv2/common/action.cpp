@@ -144,8 +144,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             primitive2->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             continue;
         } else if (s->is<IR::BreakStatement>()) {
-            BUG_CHECK(jumpInfo->labelIdBreak >= 0,
-                      "%1%: break statement outside of a loop", s);
+            BUG_CHECK(jumpInfo->labelIdBreak >= 0, "%1%: break statement outside of a loop", s);
             unsigned int curOffset = result->size();
             auto parameters = new Util::JsonArray();
             auto primitive = mkPrimitive("_jump"_cs, result);
@@ -154,8 +153,8 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             continue;
         } else if (s->is<IR::ContinueStatement>()) {
-            BUG_CHECK(jumpInfo->labelIdContinue >= 0,
-                      "%1%: continue statement outside of a loop", s);
+            BUG_CHECK(jumpInfo->labelIdContinue >= 0, "%1%: continue statement outside of a loop",
+                      s);
             unsigned int curOffset = result->size();
             auto parameters = new Util::JsonArray();
             auto primitive = mkPrimitive("_jump"_cs, result);
