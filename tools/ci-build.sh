@@ -119,6 +119,8 @@ sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
 # TODO: Consider using a system-provided package here.
 sudo apt-get install -y python3-venv curl
 curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
+# Ensure uv is in the PATH
+export PATH="${PATH}:$HOME/.local/bin"
 uv sync
 uv tool update-shell
 
@@ -140,68 +142,77 @@ ccache --set-config max_size=1G
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
+  # Install BMv2 - use PPA package on 22.04, source build on other versions
+  if [[ "${DISTRIB_RELEASE}" == "22.04" ]]; then
+    sudo add-apt-repository -y ppa:chreekat/p4lang
+    sudo apt-get update
+    # p4lang-bmv2's own dependencies take care of most of the runtime deps. An
+    # exception seems to be python3-dev.
+    P4C_RUNTIME_DEPS="p4lang-bmv2 python3-dev"
+    sudo apt-get install --no-install-recommends -y ${P4C_RUNTIME_DEPS}
+  else
+    P4C_RUNTIME_DEPS="cpp \
+                        autoconf \
+                        automake \
+                        libgc1* \
+                        libgmp-dev \
+                        libtool-bin \
+                        python3-dev \
+                        python3-thrift \
+                        libnanomsg-dev \
+                        libevent-dev \
+                        libssl-dev \
+                        libpcap-dev \
+                        libboost-thread-dev \
+                        libboost-program-options-dev \
+                        libboost-system-dev \
+                        libboost-filesystem-dev \
+                        libgrpc++-dev \
+                        libprotobuf-dev \
+                        protobuf-compiler \
+                        protobuf-compiler-grpc \
+                        libthrift-dev \
+                        thrift-compiler"
 
-  P4C_RUNTIME_DEPS="cpp \
-                    autoconf \
-                    automake \
-                    libgc1* \
-                    libgmp-dev \
-                    libtool-bin \
-                    python3-dev \
-                    python3-thrift \
-                    libnanomsg-dev \
-                    libevent-dev \
-                    libssl-dev \
-                    libpcap-dev \
-                    libboost-thread-dev \
-                    libboost-program-options-dev \
-                    libboost-system-dev \
-                    libboost-filesystem-dev \
-                    libgrpc++-dev \
-                    libprotobuf-dev \
-                    protobuf-compiler \
-                    protobuf-compiler-grpc \
-                    libthrift-dev \
-                    thrift-compiler"
+    # TODO: Remove this check once 18.04 is deprecated.
+    if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+        P4C_RUNTIME_DEPS+=" libboost-graph1.65.1 libboost-iostreams1.65.1 "
+    fi
 
-  # TODO: Remove this check once 18.04 is deprecated.
-  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-    P4C_RUNTIME_DEPS+=" libboost-graph1.65.1 libboost-iostreams1.65.1 "
+    # TODO: Remove this check once 18.04 is deprecated.
+    if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
+        # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
+        sudo apt-get update && sudo apt-get install -y software-properties-common
+        sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
+        P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
+        export CC=gcc-9
+        export CXX=g++-9
+    fi
+
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
+
+    # Install PI from source for BMv2 gRPC target support.
+    tmp_dir=$(mktemp -d -t pi-build-XXXXXXXXXX)
+    pushd "${tmp_dir}"
+    git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
+    cd PI
+    ./autogen.sh
+    ./configure --with-proto
+    make -j$(( $(nproc) + 1 ))
+    sudo make install
+    popd
+    rm -rf "${tmp_dir}"
+
+    # Install BMv2 from source via the shared CMake-based helper.
+    BMV2_INSTALL_ARGS=(
+        --with-pi
+        --prefix "${CMAKE_INSTALL_PREFIX}"
+    )
+    if [[ -n "${BMV2_REF:-}" ]]; then
+        BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
+    fi
+    "${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
   fi
-
-  # TODO: Remove this check once 18.04 is deprecated.
-  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
-    # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
-    sudo apt-get update && sudo apt-get install -y software-properties-common
-    sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
-    P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
-    export CC=gcc-9
-    export CXX=g++-9
-  fi
-
-  sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
-
-  # Install PI from source for BMv2 gRPC target support.
-  tmp_dir=$(mktemp -d -t pi-build-XXXXXXXXXX)
-  pushd "${tmp_dir}"
-  git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
-  cd PI
-  ./autogen.sh
-  ./configure --with-proto
-  make -j$(( $(nproc) + 1 ))
-  sudo make install
-  popd
-  rm -rf "${tmp_dir}"
-
-  # Install BMv2 from source via the shared CMake-based helper.
-  BMV2_INSTALL_ARGS=(
-    --with-pi
-    --prefix "${CMAKE_INSTALL_PREFIX}"
-  )
-  if [[ -n "${BMV2_REF:-}" ]]; then
-    BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
-  fi
-  "${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
 
   command -v simple_switch
   command -v simple_switch_CLI
@@ -405,7 +416,7 @@ fi
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
   sudo apt-get purge -y ${P4C_DEPS} git
   sudo apt-get autoremove --purge -y
-  rm -rf ${P4C_DIR} /var/cache/apt/* /var/lib/apt/lists/*
+  rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 
 elif [[ "${IMAGE_TYPE}" == "test" ]] ; then

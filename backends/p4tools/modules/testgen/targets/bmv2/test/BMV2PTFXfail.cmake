@@ -78,9 +78,13 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Error encountered when cleaning up action profile group"
+  # bmv2 issue with one-shot indirect table programming
+  # Tracked as https://github.com/p4lang/p4c/issues/5547
   action_profile-bmv2.p4
   action_profile_max_group_size_annotation.p4
   action_profile_sum_of_members_annotation.p4
+  # This was previously in this file under a different failure. May revert to
+  # "terminate called after throwing" when this one is fixed.
   action_selector_shared-bmv2.p4
   issue297-bmv2.p4
 )
@@ -200,7 +204,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
-  custom-type-restricted-fields.p4
   issue3225.p4
 )
 
