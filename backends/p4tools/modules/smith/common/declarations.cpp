@@ -685,7 +685,7 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
                 elems.push_back(elem);
             }
         }
-        IR::ArrayExpression *init = new IR::ArrayExpression(elems, tp);
+        IR::ListExpression *init = new IR::ListExpression(elems);
         ret = new IR::Declaration_Variable(name, tp, init);
     } else {
         BUG("Type %s not supported!", tp->node_type_name());
