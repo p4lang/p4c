@@ -115,12 +115,15 @@ class FindActionParameters : public Inspector, public ResolutionContext {
 class DoRemoveActionParameters : public Transform {
     ActionInvocation *invocations;
     TypeMap *typeMap;
+    MinimalNameGenerator *nameGen;
 
  public:
-    DoRemoveActionParameters(ActionInvocation *invocations, TypeMap *typeMap)
-        : invocations(invocations), typeMap(typeMap) {
+    DoRemoveActionParameters(ActionInvocation *invocations, TypeMap *typeMap,
+                             MinimalNameGenerator *nameGen)
+        : invocations(invocations), typeMap(typeMap), nameGen(nameGen) {
         CHECK_NULL(invocations);
         CHECK_NULL(typeMap);
+        CHECK_NULL(nameGen);
         setName("DoRemoveActionParameters");
     }
 
