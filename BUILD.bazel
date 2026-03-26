@@ -315,7 +315,7 @@ cc_binary(
         "backends/bmv2/simple_switch/main.cpp",
         "backends/bmv2/simple_switch/version.h",
     ],
-    data = [":p4include"],
+    data = ["//p4include"],
     deps = [
         ":ir_frontend_midend_control_plane",
         ":lib",
@@ -387,7 +387,7 @@ cc_binary(
         "backends/dpdk/main.cpp",
         "backends/dpdk/version.h",
     ],
-    data = [":p4include"],
+    data = ["//p4include"],
     deps = [
         ":ir_frontend_midend_control_plane",
         ":lib",
@@ -437,7 +437,7 @@ cc_binary(
     srcs = [
         "backends/graphs/p4c-graphs.cpp",
     ],
-    data = [":p4include"],
+    data = ["//p4include"],
     deps = [
         ":config_h",
         ":ir_frontend_midend_control_plane",
