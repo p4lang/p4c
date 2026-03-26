@@ -71,7 +71,7 @@ cc_library(
         "@boost.format",
         "@boost.multi_index",
         "@boost.multiprecision",
-        "@googletest//:gtest",
+        "@googletest//:gtest_prod",
         "@protobuf",
     ],
 )
