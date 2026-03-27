@@ -100,23 +100,8 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(
                 new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
         }
-    } else if ((copyHeaders && ltype->is<IR::Type_Header>()) ||
-               // Targeted lowering: some pipelines keep copyHeaders=false and rely on later
-               // backend-specific passes to eliminate whole-header copies. If those passes do not
-               // handle copies where the RHS is a header-stack element (ArrayIndex), lower just
-               // that case here.
-               (!copyHeaders && ltype->is<IR::Type_Header>() &&
-                statement->right->is<IR::ArrayIndex>())) {
+    } else if (copyHeaders && ltype->is<IR::Type_Header>()) {
         const auto *header = ltype->checkedTo<IR::Type_Header>();
-        // If copyHeaders is false, only lower the header assignment if the RHS is an array index
-        // into a header stack / array of headers. Otherwise preserve existing behavior.
-        if (!copyHeaders) {
-            const auto *ai = statement->right->to<IR::ArrayIndex>();
-            if (ai == nullptr) return statement;
-            const auto *arrType = typeMap->getType(ai->left, true)->to<IR::Type_Array>();
-            if (arrType == nullptr) return statement;
-            if (!arrType->elementType->is<IR::Type_Header>()) return statement;
-        }
         // Build a "src.isValid()" call.
         const auto *isSrcValidCall = new IR::MethodCallExpression(
             srcInfo, IR::Type::Boolean::get(),
