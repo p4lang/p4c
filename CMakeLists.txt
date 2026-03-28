@@ -598,8 +598,15 @@ include(Linters)
 if (NOT FORMATTING_ONLY)
 
 # tags, etags
-set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
-add_custom_target(tags
+set (CTAGS_DIRS_ALL backends extensions frontends ir lib tools midend)
+set (CTAGS_DIRS "")
+foreach(_dir IN LISTS CTAGS_DIRS_ALL)
+  if(EXISTS "${P4C_SOURCE_DIR}/${_dir}")
+    list(APPEND CTAGS_DIRS ${_dir})
+  endif()
+endforeach()
+
+add_custom_target(ctags
   COMMAND ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp -I abstract=class -I interface=class ${CTAGS_DIRS}
   COMMAND cd tools/ir-generator && ctags -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
