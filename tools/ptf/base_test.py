@@ -192,9 +192,8 @@ class _AssertP4RuntimeErrorContext:
         return True
 
 
-# This code is common to all tests. setUp() is invoked at the beginning of the
-# test and tearDown is called at the end, no matter whether the test passed /
-# failed / errored.
+# This code is common to all tests. Register stream cleanup with addCleanup so
+# it also runs when setUp fails (unittest does not call tearDown in that case).
 class P4RuntimeTest(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
@@ -221,6 +220,11 @@ class P4RuntimeTest(BaseTest):
 
         self.channel = grpc.insecure_channel(grpc_addr)
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
+        self.stream = None
+        self.stream_out_q = None
+        self.stream_in_q = None
+        self.stream_recv_thread = None
+        self.addCleanup(self._cleanup_runtime_stream)
 
         proto_txt_path = ptfutils.test_param_get("p4info")
         testutils.log.info(f"Reading p4info from {proto_txt_path}")
@@ -326,12 +330,20 @@ class P4RuntimeTest(BaseTest):
                 yield p
 
         def stream_recv(stream):
-            for p in stream:
-                now = time.time()
-                logging.debug(
-                    f"stream_recv received at time {now} and stored stream msg in stream_in_q: {p}"
-                )
-                self.stream_in_q.put({"time": now, "message": p})
+            try:
+                for p in stream:
+                    now = time.time()
+                    logging.debug(
+                        f"stream_recv received at time {now} and stored stream msg in stream_in_q: {p}"
+                    )
+                    self.stream_in_q.put({"time": now, "message": p})
+            except grpc.RpcError as e:
+                if e.code() == grpc.StatusCode.CANCELLED:
+                    # Cancelling our stream during cleanup is expected. Other errors,
+                    # including a crashed or unreachable server, must remain visible.
+                    logging.debug("stream_recv exiting on RpcError: %s", e)
+                    return
+                raise
 
         self.stream = self.stub.StreamChannel(stream_req_iterator())
         self.stream_recv_thread = threading.Thread(target=stream_recv, args=(self.stream,))
@@ -354,13 +366,18 @@ class P4RuntimeTest(BaseTest):
         if rep is None:
             self.fail("Failed to establish handshake")
 
-    def tearDown(self):
-        self.tear_down_stream()
-        BaseTest.tearDown(self)
+    def _cleanup_runtime_stream(self):
+        if self.stream_out_q is not None:
+            self.stream_out_q.put(None)
+        if self.stream is not None:
+            self.stream.cancel()
+        if self.channel is not None:
+            self.channel.close()
+        if self.stream_recv_thread is not None and self.stream_recv_thread.is_alive():
+            self.stream_recv_thread.join(timeout=2)
 
     def tear_down_stream(self):
-        self.stream_out_q.put(None)
-        self.stream_recv_thread.join()
+        self._cleanup_runtime_stream()
 
     def get_packet_in(self, timeout=1):
         msg = self.get_stream_packet("packet", timeout)
@@ -1114,7 +1131,7 @@ class P4RuntimeTest(BaseTest):
 
         return table_entries, table_default_entry
 
-    def push_update_add_entry_to_member(self, req, t_name, mk, mbr_id):
+    def push_update_add_entry_to_member(self, req, t_name, mk, mbr_id, priority=None):
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
         table_entry = update.entity.table_entry
@@ -1124,13 +1141,15 @@ class P4RuntimeTest(BaseTest):
         else:
             table_entry.is_default_action = True
         table_entry.action.action_profile_member_id = mbr_id
+        if priority is not None:
+            table_entry.priority = priority
 
-    def send_request_add_entry_to_member(self, t_name, mk, mbr_id):
+    def send_request_add_entry_to_member(self, t_name, mk, mbr_id, priority=None):
         req = self.get_new_write_request()
-        self.push_update_add_entry_to_member(req, t_name, mk, mbr_id)
+        self.push_update_add_entry_to_member(req, t_name, mk, mbr_id, priority)
         return req, self.write_request(req, store=mk is not None)
 
-    def push_update_add_entry_to_group(self, req, t_name, mk, grp_id):
+    def push_update_add_entry_to_group(self, req, t_name, mk, grp_id, priority=None):
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
         table_entry = update.entity.table_entry
@@ -1140,10 +1159,12 @@ class P4RuntimeTest(BaseTest):
         else:
             table_entry.is_default_action = True
         table_entry.action.action_profile_group_id = grp_id
+        if priority is not None:
+            table_entry.priority = priority
 
-    def send_request_add_entry_to_group(self, t_name, mk, grp_id):
+    def send_request_add_entry_to_group(self, t_name, mk, grp_id, priority=None):
         req = self.get_new_write_request()
-        self.push_update_add_entry_to_group(req, t_name, mk, grp_id)
+        self.push_update_add_entry_to_group(req, t_name, mk, grp_id, priority)
         return req, self.write_request(req, store=mk is not None)
 
     # iterates over all requests in reverse order; if they are INSERT updates,

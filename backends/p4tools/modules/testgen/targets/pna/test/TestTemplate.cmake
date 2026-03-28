@@ -18,15 +18,16 @@ endfunction(check_empty_folder)
 #   - testfolder is target folder of the test.
 #   - p4test is the file that is to be tested.
 macro(check_pna_with_ptf testfile testfolder p4test)
-  set(__p4cdpdkpath "${P4C_BINARY_DIR}")
   set(__dpdk_runner " ${P4C_SOURCE_DIR}/backends/dpdk/run-dpdk-ptf-test.py")
   # Find all the ptf tests generated for this P4 file and test them
   file(APPEND ${testfile} "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n")
+  file(APPEND ${testfile} "if (( \${#ptffiles[@]} == 0 )); then echo 'No PTF tests generated'; exit 1; fi\n")
   file(APPEND ${testfile} "for item in \${ptffiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\t python3 ${__dpdk_runner} -tf \${item} ${P4C_SOURCE_DIR} \
+  file(APPEND ${testfile} "\t python3 ${__dpdk_runner} -tf \"\${item}\" -td \"\${item%.py}.ptf\" ${P4C_SOURCE_DIR} \
       --ipdk-install-dir=${IPDK_INSTALL_DIR} \
+      --compiler=${P4C_BINARY_DIR}/p4c-dpdk \
       -ll=DEBUG ${p4test}\n")
   file(APPEND ${testfile} "done\n")
 endmacro(check_pna_with_ptf)
@@ -77,6 +78,7 @@ function(p4tools_add_test_with_args)
   file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file(APPEND ${__testfile} "set -e\n")
   file(APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
+  file(APPEND ${__testfile} "rm -rf \"${__testfolder}\"\n")
   # Generate tests
   file(
     APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
@@ -86,7 +88,7 @@ function(p4tools_add_test_with_args)
   # TODO: not sure if we have assert/assume mode for PNA/DPDK as well
   # If P416_PTF is active, run the PTF PNA/DPDK runner.
   if(${TOOLS_PNA_TESTS_P416_PTF})
-    check_pna_with_ptf(${__testfile} ${__testfolder} ${p4test} ${__ptfRunerFolder})
+    check_pna_with_ptf(${__testfile} ${__testfolder} ${p4test})
   endif()
 
   execute_process(COMMAND chmod +x ${__testfile})
@@ -100,5 +102,8 @@ function(p4tools_add_test_with_args)
     set(${tag}_timeout 300)
   endif()
   set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
+  if(TOOLS_PNA_TESTS_P416_PTF)
+    # DPDK EAL files and hugepage allocations are shared across network namespaces.
+    set_tests_properties(${__testname} PROPERTIES RESOURCE_LOCK dpdk)
+  endif()
 endfunction(p4tools_add_test_with_args)
-

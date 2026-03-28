@@ -57,6 +57,7 @@ inja::json PTF::getControlPlane(const TestSpec *testSpec) {
 
     // Map of actionProfiles and actionSelectors for easy reference.
     std::map<cstring, cstring> apAsMap;
+    std::map<std::string, size_t> profileRuleIds;
 
     auto tables = testSpec->getTestObjectCategory("tables"_cs);
     if (!tables.empty()) {
@@ -83,6 +84,13 @@ inja::json PTF::getControlPlane(const TestSpec *testSpec) {
         // Collect action profiles and selectors associated with the table.
         checkForTableActionProfile<PnaDpdkActionProfile, PnaDpdkActionSelector>(tblJson, apAsMap,
                                                                                 tblConfig);
+        if (tblJson.contains("has_ap")) {
+            const auto &profileName = tblJson["action_profile"].get_ref<const std::string &>();
+            auto &nextId = profileRuleIds[profileName];
+            for (auto &rule : tblJson["rules"]) {
+                rule["profile_id"] = ++nextId;
+            }
+        }
 
         // Check whether the default action is overridden for this table.
         checkForDefaultActionOverride(tblJson, tblConfig);
@@ -192,17 +200,13 @@ void PTF::emitPreamble() {
 # p4testgen seed: {{ default(seed, "none") }}
 
 from enum import Enum
-from pathlib import Path
 
 from ptf.mask import Mask
 
 from ptf.packet import *
 from ptf import testutils as ptfutils
 
-# The base_test.py path is relative to the test file, this should be improved
-FILE_DIR = Path(__file__).resolve().parent
-BASE_TEST_PATH = FILE_DIR.joinpath("../../backends/dpdk/base_test.py")
-sys.path.append(str(BASE_TEST_PATH))
+# The runner supplies tools/ptf through --pypath.
 import base_test as bt
 
 # This global variable ensures that the forwarding pipeline will only be pushed once in one test.
@@ -316,9 +320,7 @@ class Test{{test_id}}(AbstractTest):
 ## if control_plane
 ## for table in control_plane.tables
 ## for rule in table.rules
-        self.table_add(
-            ('{{table.table_name}}',
-            [
+        table_key = [
 ## for r in rule.rules.single_exact_matches
                 self.Exact('{{r.field_name}}', {{r.value}}),
 ## endfor
@@ -334,16 +336,31 @@ class Test{{test_id}}(AbstractTest):
 ## for r in rule.rules.lpm_matches
                 self.Lpm('{{r.field_name}}', {{r.value}}, {{r.prefix_len}}),
 ## endfor
-            ]),
-            ('{{rule.action_name}}',
+        ]
+        action = ('{{rule.action_name}}',
             [
 ## for act_param in rule.rules.act_args
                 ('{{act_param.param}}', {{act_param.value}}),
 ## endfor
             ])
-            , {% if rule.rules.needs_priority %}{{rule.priority}}{% else %}None{% endif %}
-            {% if existsIn(table, "has_ap") %}, {"oneshot": True}{% endif %}
+        priority = {% if rule.rules.needs_priority %}{{rule.priority}}{% else %}None{% endif %}
+## if existsIn(table, "has_ap")
+        self.send_request_add_member('{{table.action_profile}}', {{rule.profile_id}}, *action)
+## if existsIn(table, "has_as")
+        self.send_request_add_group(
+            '{{table.action_profile}}', {{rule.profile_id}}, 1, [{{rule.profile_id}}]
         )
+        self.send_request_add_entry_to_group(
+            '{{table.table_name}}', table_key, {{rule.profile_id}}, priority
+        )
+## else
+        self.send_request_add_entry_to_member(
+            '{{table.table_name}}', table_key, {{rule.profile_id}}, priority
+        )
+## endif
+## else
+        self.table_add(('{{table.table_name}}', table_key), action, priority)
+## endif
 ## endfor
 ## endfor
 ## endif
@@ -367,9 +384,9 @@ class Test{{test_id}}(AbstractTest):
 ## endfor
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 ## else
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
+        ptfutils.verify_no_other_packets(self, timeout=self.packet_wait_time)
 ## endif
 
     def runTest(self):
