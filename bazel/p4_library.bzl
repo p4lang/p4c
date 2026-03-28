@@ -169,7 +169,7 @@ p4_library = rule(
             cfg = "exec",
         ),
         "_p4include": attr.label(
-            default = Label("//:p4include"),
+            default = Label("//p4include"),
             allow_files = [".p4", ".h"],
         ),
     },
@@ -248,7 +248,7 @@ p4_graphs = rule(
             cfg = "exec",
         ),
         "_p4include": attr.label(
-            default = Label("//:p4include"),
+            default = Label("//p4include"),
             allow_files = [".p4", ".h"],
         ),
     },
