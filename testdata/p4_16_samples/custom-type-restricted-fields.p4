@@ -38,7 +38,7 @@ header ethernet_t {
 header packet_out_t {
   bit<9> egress_port; /* suggested port where the packet
                          should be sent */
-  bit<8> queue_id;    /* suggested queue ID */
+  bit<7> queue_id;    /* suggested queue ID */
   EthernetAddr_t not_actually_useful;
 }
 

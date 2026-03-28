@@ -139,12 +139,12 @@ for DISTRIBUTION in ${DISTRIBUTIONS} ; do
       cp ${UPSTREAM_PACKAGE}.asc ${PACKAGE}_${OUTPUT_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc
       cp ${UPSTREAM_PACKAGE}.asc ${PACKAGE}_${DEBIAN_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc
    else
-      rm -f ${PACKAGE}_${UPSTREAM_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc
-      rm -f ${PACKAGE}_${OUTPUT_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc
-      rm -f ${PACKAGE}_${DEBIAN_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc
+      rm -f "${PACKAGE}_${UPSTREAM_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc"
+      rm -f "${PACKAGE}_${OUTPUT_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc"
+      rm -f "${PACKAGE}_${DEBIAN_VERSION}.orig.tar.${UPSTREAM_PACKAGE_TYPE}.asc"
    fi
-   rm -rf ${PACKAGE}-${UPSTREAM_VERSION}
-   rm -rf ${PACKAGE}-${UPSTREAM_VERSION}.orig
+   rm -rf "${PACKAGE}-${UPSTREAM_VERSION}"
+   rm -rf "${PACKAGE}-${UPSTREAM_VERSION}.orig"
    if [ "${UPSTREAM_PACKAGE_TYPE}" == "gz" ] ; then
       tar xzf ${UPSTREAM_PACKAGE}
    elif [ "${UPSTREAM_PACKAGE_TYPE}" == "bz2" ] ; then

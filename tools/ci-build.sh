@@ -419,7 +419,7 @@ fi
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
   sudo apt-get purge -y ${P4C_DEPS} git
   sudo apt-get autoremove --purge -y
-  rm -rf ${P4C_DIR} /var/cache/apt/* /var/lib/apt/lists/*
+  rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 
 elif [[ "${IMAGE_TYPE}" == "test" ]] ; then

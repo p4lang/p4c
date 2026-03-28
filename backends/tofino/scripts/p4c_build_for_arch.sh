@@ -33,7 +33,7 @@ chmod 755 bootstrap.${arch}.sh
 cd $WORKSPACE/bf-p4c-compilers/
 ./bootstrap.${arch}.sh  --prefix $install_dir --exec-prefix=$install_dir/$arch
 
-rm -f ./bootstrap.${arch}.sh p4c/bootstrap.${arch}.sh
+rm -f "./bootstrap.${arch}.sh" "p4c/bootstrap.${arch}.sh"
 
 cd ${build_dir}
 make -j $parallel_make install
