@@ -17,13 +17,11 @@ limitations under the License.
 #include "exename.h"
 
 #include <array>
+#include <climits>
 #include <cstring>
 #include <filesystem>
 #include <system_error>
 
-namespace P4 {
-
-#include <climits>
 #ifdef __APPLE__
 #include <unistd.h>
 
@@ -33,6 +31,8 @@ namespace P4 {
 #else
 #include <unistd.h>
 #endif
+
+namespace P4 {
 
 std::filesystem::path getExecutablePath() {
 #if defined(__APPLE__)

@@ -20,6 +20,7 @@ limitations under the License.
 #include <getopt.h>
 
 #include "frontends/common/options.h"
+#include "lib/options.h"
 
 namespace P4::BMV2 {
 
