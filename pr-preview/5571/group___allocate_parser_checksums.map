@@ -1,0 +1,4 @@
+<map id="AllocateParserChecksums" name="AllocateParserChecksums">
+<area shape="rect" id="Node000001" title="Allocates parser checksums." alt="" coords="168,5,359,31"/>
+<area shape="rect" id="Node000002" href="$group___lower_parser_i_r.html" title="Generates a lowered version of the parser IR in this program and swaps it in for the existing represe..." alt="" coords="5,5,120,31"/>
+</map>

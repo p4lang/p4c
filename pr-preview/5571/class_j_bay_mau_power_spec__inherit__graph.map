@@ -1,0 +1,9 @@
+<map id="JBayMauPowerSpec" name="JBayMauPowerSpec">
+<area shape="rect" id="Node000001" title=" " alt="" coords="103,79,254,104"/>
+<area shape="rect" id="Node000003" href="$class_j_bay_m_mau_power_spec.html" title=" " alt="" coords="5,152,168,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="155,114,103,154,100,150,152,110"/>
+<area shape="rect" id="Node000004" href="$class_j_bay_u_mau_power_spec.html" title=" " alt="" coords="192,152,352,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="206,110,258,150,255,154,203,114"/>
+<area shape="rect" id="Node000002" href="$class_mau_power_spec.html" title=" " alt="" coords="118,5,239,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="181,44,181,79,176,79,176,44"/>
+</map>

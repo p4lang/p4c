@@ -1,0 +1,11 @@
+<map id="P4::P4V1::DirectMeter_Model" name="P4::P4V1::DirectMeter_Model">
+<area shape="rect" id="Node000001" title=" " alt="" coords="19,313,183,353"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_p4_v1_1_1_counter_or_meter___model.html" title=" " alt="" coords="5,225,196,265"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,279,103,313,98,313,98,279"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_model_1_1_extern___model.html" title="Extern_Model : Type_Model." alt="" coords="9,152,192,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,191,103,225,98,225,98,191"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_model_1_1_type___model.html" title=" " alt="" coords="15,79,186,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="103,118,103,152,98,152,98,118"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_model_1_1_elem.html" title=" " alt="" coords="37,5,164,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="103,44,103,79,98,79,98,44"/>
+</map>

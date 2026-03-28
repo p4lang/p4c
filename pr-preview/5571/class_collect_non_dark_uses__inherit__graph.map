@@ -1,0 +1,9 @@
+<map id="CollectNonDarkUses" name="CollectNonDarkUses">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,161,251"/>
+<area shape="rect" id="Node000002" href="$class_mau_inspector.html" title=" " alt="" coords="28,152,139,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,191,86,225,81,225,81,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="30,79,137,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="86,118,86,152,81,152,81,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="39,5,127,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="86,44,86,79,81,79,81,44"/>
+</map>

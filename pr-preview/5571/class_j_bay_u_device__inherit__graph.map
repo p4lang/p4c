@@ -1,0 +1,7 @@
+<map id="JBayUDevice" name="JBayUDevice">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,112,177"/>
+<area shape="rect" id="Node000002" href="$class_j_bay_device.html" title=" " alt="" coords="11,79,107,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="61,118,61,152,56,152,56,118"/>
+<area shape="rect" id="Node000003" href="$class_device.html" title=" " alt="" coords="25,5,92,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="61,44,61,79,56,79,56,44"/>
+</map>

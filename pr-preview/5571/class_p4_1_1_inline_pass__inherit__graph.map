@@ -1,0 +1,10 @@
+<map id="P4::InlinePass" name="P4::InlinePass">
+<area shape="rect" id="Node000001" title="Performs one round of inlining bottoms&#45;up." alt="" coords="16,225,127,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="5,152,137,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="74,191,74,225,69,225,69,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="27,5,115,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="62,44,54,73,53,104,68,151,63,153,47,104,48,72,57,42"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="63,79,173,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="89,41,113,77,108,80,84,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="105,117,81,153,77,150,101,114"/>
+</map>

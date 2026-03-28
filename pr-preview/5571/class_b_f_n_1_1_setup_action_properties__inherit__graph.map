@@ -1,0 +1,9 @@
+<map id="BFN::SetupActionProperties" name="BFN::SetupActionProperties">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,207,251"/>
+<area shape="rect" id="Node000002" href="$class_mau_modifier.html" title=" " alt="" coords="55,152,157,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,191,109,225,103,225,103,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_modifier.html" title=" " alt="" coords="57,79,155,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="109,118,109,152,103,152,103,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="62,5,150,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="109,44,109,79,103,79,103,44"/>
+</map>

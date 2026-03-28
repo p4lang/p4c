@@ -1,0 +1,7 @@
+<map id="BFN::ParserResourcesLogging" name="BFN::ParserResourcesLogging">
+<area shape="rect" id="Node000001" title="Class for generating JSON info with parser resources usage for visualization in P4I." alt="" coords="5,152,220,177"/>
+<area shape="rect" id="Node000002" href="$group__parde.html#class_parser_inspector" title=" " alt="" coords="51,79,174,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,118,115,152,110,152,110,118"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="71,5,154,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="115,44,115,79,110,79,110,44"/>
+</map>

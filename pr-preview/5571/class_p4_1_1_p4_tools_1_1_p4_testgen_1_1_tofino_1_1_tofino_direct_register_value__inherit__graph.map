@@ -1,0 +1,9 @@
+<map id="P4::P4Tools::P4Testgen::Tofino::TofinoDirectRegisterValue" name="P4::P4Tools::P4Testgen::Tofino::TofinoDirectRegisterValue">
+<area shape="rect" id="Node000001" title="DirectRegisters do not have an index and are attached to tables." alt="" coords="5,240,248,280"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="42,152,211,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,206,129,240,124,240,124,206"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="73,79,180,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="129,118,129,152,124,152,124,118"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="69,5,184,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="129,44,129,79,124,79,124,44"/>
+</map>

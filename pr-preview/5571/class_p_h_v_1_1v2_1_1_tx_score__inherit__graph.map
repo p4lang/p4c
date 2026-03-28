@@ -1,0 +1,9 @@
+<map id="PHV::v2::TxScore" name="PHV::v2::TxScore">
+<area shape="rect" id="Node000001" title="TxScore is the interface of an allocation score." alt="" coords="235,5,367,31"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_greedy_tx_score.html" title="GreedyTxScore is the default allocation heuristics." alt="" coords="5,79,184,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="256,38,129,81,127,76,254,33"/>
+<area shape="rect" id="Node000003" href="$class_p_h_v_1_1v2_1_1_min_pack_tx_score.html" title="MinPackTxScore prefers minimal packing." alt="" coords="208,79,395,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="304,44,304,79,299,79,299,44"/>
+<area shape="rect" id="Node000004" href="$class_p_h_v_1_1v2_1_1_nil_tx_score.html" title=" " alt="" coords="419,79,570,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="346,33,464,76,462,81,344,38"/>
+</map>

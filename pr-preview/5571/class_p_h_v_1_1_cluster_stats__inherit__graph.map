@@ -1,0 +1,9 @@
+<map id="PHV::ClusterStats" name="PHV::ClusterStats">
+<area shape="rect" id="Node000001" title="An interface for gathering statistics common across each kind of cluster." alt="" coords="197,5,332,31"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1_aligned_cluster.html" title=" " alt="" coords="5,79,156,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="223,38,112,81,110,76,221,33"/>
+<area shape="rect" id="Node000003" href="$class_p_h_v_1_1_rotational_cluster.html" title=" " alt="" coords="180,79,349,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="267,44,267,79,262,79,262,44"/>
+<area shape="rect" id="Node000004" href="$class_p_h_v_1_1_super_cluster.html" title=" " alt="" coords="374,79,513,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="307,33,415,76,413,81,305,38"/>
+</map>

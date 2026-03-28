@@ -1,0 +1,31 @@
+<map id="ParserModifier" name="ParserModifier">
+<area shape="rect" id="Node000001" title=" " alt="" coords="128,324,243,349"/>
+<area shape="rect" id="Node000003" href="$group__parde.html#class_add_parser_metadata" title="Extend parsers to extract standard metadata." alt="" coords="329,5,479,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="185,310,191,253,208,180,221,142,239,105,261,70,289,40,307,28,328,20,330,25,310,33,292,44,265,73,243,107,226,144,213,182,197,254,190,310"/>
+<area shape="rect" id="Node000004" href="$struct_clip_terminal_transition.html" title=" " alt="" coords="321,55,487,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,309,197,261,215,202,245,141,265,113,289,89,319,73,321,78,292,93,269,117,249,144,220,204,202,263,193,310"/>
+<area shape="rect" id="Node000005" href="$group___parser_copy_prop.html#struct_copy_prop_parser_def" title=" " alt="" coords="331,104,477,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="190,310,203,271,222,225,251,178,269,157,289,139,309,127,330,120,331,125,311,132,292,143,272,160,255,181,227,227,208,273,195,311"/>
+<area shape="rect" id="Node000006" href="$group___allocate_parser_checksums.html#class_elim_dead_parser_checksums" title=" " alt="" coords="304,153,504,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="195,310,230,248,257,215,289,188,312,176,314,181,292,192,261,219,235,251,200,313"/>
+<area shape="rect" id="Node000007" href="$group___reset_invalidated_checksum_headers.html#class_insert_parsed_valid_bits" title=" " alt="" coords="325,203,483,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="204,311,241,274,264,254,289,238,323,225,325,230,292,243,267,259,244,277,207,315"/>
+<area shape="rect" id="Node000008" href="$struct_insert_parser_clot_checksums_1_1_insert_parser_primitives.html" title=" " alt="" coords="304,253,504,293"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="240,317,290,302,331,290,332,295,291,307,241,322"/>
+<area shape="rect" id="Node000009" href="$group___lower_parser.html#class_parde_1_1_lowered_1_1_compute_buffer_requirements" title="Computes the number of bytes which must be available for each parser match to avoid a stall." alt="" coords="291,317,517,357"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="256,334,291,334,291,339,256,339"/>
+<area shape="rect" id="Node000010" href="$group___lower_parser.html#class_parde_1_1_lowered_1_1_compute_init_zero_containers" title="Computes containers that have fields relying on parser zero initialization." alt="" coords="299,381,509,421"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="241,351,291,366,332,378,331,383,290,371,240,356"/>
+<area shape="rect" id="Node000011" href="$group___lower_parser.html#class_parde_1_1_lowered_1_1_compute_multi_write_containers" title="Collects all containers that are written more than once by the parser." alt="" coords="293,445,515,485"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="208,358,245,396,292,430,318,442,315,447,289,435,241,400,204,362"/>
+<area shape="rect" id="Node000012" href="$struct_remove_empty_stall_state.html" title=" " alt="" coords="313,509,495,535"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="198,361,212,392,233,429,259,465,292,494,316,507,314,512,289,499,255,468,228,432,208,395,194,363"/>
+<area shape="rect" id="Node000013" href="$struct_resolve_negative_extract_1_1_adjust_shift.html" title=" " alt="" coords="315,559,493,599"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="195,362,207,403,226,452,254,503,272,525,292,545,316,560,313,564,289,549,268,529,250,506,221,455,202,405,190,364"/>
+<area shape="rect" id="Node000014" href="$struct_resolve_negative_extract_1_1_adjust_shift_out_of_buffer.html" title=" " alt="" coords="315,623,493,663"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="192,363,200,415,217,482,247,550,267,582,292,609,316,625,313,629,289,613,263,585,242,553,212,483,194,416,186,364"/>
+<area shape="rect" id="Node000015" href="$struct_slice_extracts.html" title=" " alt="" coords="351,688,457,713"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="189,363,193,427,207,511,220,555,238,598,262,639,292,673,320,690,351,697,350,702,318,695,289,677,258,642,233,601,215,557,202,512,188,427,184,363"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,324,80,349"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,334,128,334,128,339,94,339"/>
+</map>

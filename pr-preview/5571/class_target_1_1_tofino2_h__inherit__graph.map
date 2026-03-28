@@ -1,0 +1,7 @@
+<map id="Target::Tofino2H" name="Target::Tofino2H">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,132,177"/>
+<area shape="rect" id="Node000002" href="$class_target_1_1_j_bay.html" title=" " alt="" coords="19,79,118,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="71,118,71,152,66,152,66,118"/>
+<area shape="rect" id="Node000003" href="$class_target.html" title=" " alt="" coords="37,5,100,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="71,44,71,79,66,79,66,44"/>
+</map>
