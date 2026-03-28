@@ -261,11 +261,9 @@ If you plan to contribute to P4C, you'll find more useful information
 
 ## Dependencies
 
-Ubuntu 22.04 is the officially supported platform for P4C. There's also
-unofficial support for macOS 11. Other platforms are untested; you can try to
-use them, but YMMV.
+Ubuntu 22.04 and 24.04 are supported platforms for P4C. There is also support for macOS (including Apple Silicon / M1).
 
-- A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.
+- A C++17 compiler. GCC 9.4 or later or Clang 10.0 or later is required.
 
 - `git` for version control
 
@@ -275,7 +273,7 @@ use them, but YMMV.
 
 - GNU Bison and Flex for the parser and lexical analyzer generators.
 
-- Google Protocol Buffers v3.25.3 or higher for control plane API generation
+- Google Protocol Buffers (handled automatically via CMake FetchContent)
 
 - C++ boost library
 
