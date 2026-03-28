@@ -16,12 +16,6 @@
 # This is the CMake version supplied by Ubuntu 20.04.
 cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
 
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    MESSAGE(STATUS "Enabling ccache")
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif()
-
 project (P4C)
 
 include(CMakeDependentOption)
@@ -31,6 +25,7 @@ set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+include(ccache)
 set (P4C_RUNTIME_OUTPUT_DIRECTORY bin)
 set (P4C_LIBRARY_OUTPUT_DIRECTORY lib)
 set (P4C_ARTIFACTS_OUTPUT_DIRECTORY share/p4c)

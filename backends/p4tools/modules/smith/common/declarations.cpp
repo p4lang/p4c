@@ -673,8 +673,20 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
         auto *expr = target().expressionGenerator().genExpression(tp);
         ret = new IR::Declaration_Variable(name, tp, expr);
     } else if (tp->is<IR::Type_Array>()) {
-        // header stacks do !have an initializer yet
-        ret = new IR::Declaration_Variable(name, tp);
+        IR::Vector<IR::Expression> elems;
+        const IR::Type_Array *arrayTp = dynamic_cast<const IR::Type_Array *>(tp);
+        for (unsigned i = 0; i < arrayTp->getSize(); i++) {
+            const IR::Expression *elem =
+                target().expressionGenerator().genExpression(arrayTp->elementType);
+            // To be safe, cast tuple expressions to the element type
+            if (elem->is<IR::ListExpression>()) {
+                elems.push_back(new IR::Cast(arrayTp->elementType, elem));
+            } else {
+                elems.push_back(elem);
+            }
+        }
+        IR::ListExpression *init = new IR::ListExpression(elems);
+        ret = new IR::Declaration_Variable(name, tp, init);
     } else {
         BUG("Type %s not supported!", tp->node_type_name());
     }

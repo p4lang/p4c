@@ -12,6 +12,7 @@ KNOWN_BUGS=(
     "Cannot evaluate initializer for constant"
     "Null expr"
     "error: retval_1: declaration not found"  # V1model failure.
+    "At this point in the compilation typechecking should not infer new types anymore" # See #5560
 )
 
 # Function to check if an error is triggered by a known bug.
