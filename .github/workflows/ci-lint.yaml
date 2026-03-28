@@ -21,9 +21,6 @@ jobs:
       CMAKE_FLAGS: "-DFORMATTING_ONLY=ON"
       CMAKE_ONLY: ON
       CTEST_PARALLEL_LEVEL: 4
-      ENABLE_BMV2: OFF
-      ENABLE_EBPF: OFF
-      ENABLE_P4TC: OFF
     steps:
       - uses: actions/checkout@v6
         with:

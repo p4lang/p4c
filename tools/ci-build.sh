@@ -222,7 +222,8 @@ function build_bmv2() {
 }
 
 # The docker image has BMv2 preinstalled.
-if [[ "${ENABLE_BMV2}" == "ON" ]] && [[ "$IN_DOCKER" != "TRUE" ]] ; then
+# Skip installation when CMAKE_ONLY is active (e.g., formatting/linting runs).
+if [[ "${ENABLE_BMV2}" == "ON" ]] && [[ "$IN_DOCKER" != "TRUE" ]] && [[ "${CMAKE_ONLY}" != "ON" ]] ; then
   build_bmv2
 fi
 # ! ------  END BMV2 -----------------------------------------------
@@ -263,7 +264,8 @@ function install_ptf_ebpf_test_deps() (
     popd
 )
 
-if [[ "${ENABLE_EBPF}" == "ON" ]] ; then
+# Skip installation when CMAKE_ONLY is active (e.g., formatting/linting runs).
+if [[ "${ENABLE_EBPF}" == "ON" ]] && [[ "${CMAKE_ONLY}" != "ON" ]] ; then
   build_ebpf
   if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
     install_ptf_ebpf_test_deps
@@ -321,7 +323,8 @@ fi
              install_stf_p4tc_test_deps
   fi
 }
-if [[ "${ENABLE_P4TC}" == "ON" ]] ; then
+# Skip installation when CMAKE_ONLY is active (e.g., formatting/linting runs).
+if [[ "${ENABLE_P4TC}" == "ON" ]] && [[ "${CMAKE_ONLY}" != "ON" ]] ; then
   build_p4tc
 fi
 # ! ------  END P4TC -----------------------------------------------
