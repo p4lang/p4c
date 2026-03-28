@@ -300,13 +300,13 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             int labelIdEndOfLoop = jumpInfo->numLabels;
             jumpInfo->numLabels += 1;
 
-            // Step 1: Emit init statements
+            // Emit init statements
             convertActionBody(&forStmt->init, result, inConditional, jumpInfo);
 
-            // Step 2: Record label for condition check
+            // Record label for condition check
             (jumpInfo->labelIdToJumpOffset)[labelIdCondition] = result->size();
 
-            // Step 3: Emit condition check - _jump_if_zero(cond, labelEndOfLoop)
+            // Emit condition check - _jump_if_zero(cond, labelEndOfLoop)
             {
                 unsigned int curOffset = result->size();
                 auto parameters = new Util::JsonArray();
@@ -318,7 +318,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             }
 
-            // Step 4: Emit loop body with break/continue context.
+            // Emit loop body with break/continue context.
             // Save and set the innermost loop labels so that
             // BreakStatement/ContinueStatement handlers know where to jump.
             int savedBreak = jumpInfo->labelIdBreak;
@@ -334,13 +334,13 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             jumpInfo->labelIdBreak = savedBreak;
             jumpInfo->labelIdContinue = savedContinue;
 
-            // Step 5: Record label for update section (continue target)
+            // Record label for update section (continue target)
             (jumpInfo->labelIdToJumpOffset)[labelIdUpdate] = result->size();
 
-            // Step 6: Emit update statements
+            // Emit update statements
             convertActionBody(&forStmt->updates, result, true, jumpInfo);
 
-            // Step 7: Unconditional jump back to condition check
+            // Unconditional jump back to condition check
             {
                 unsigned int curOffset = result->size();
                 auto parameters = new Util::JsonArray();
@@ -350,7 +350,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             }
 
-            // Step 8: Record label for end of loop (break target)
+            // Record label for end of loop (break target)
             (jumpInfo->labelIdToJumpOffset)[labelIdEndOfLoop] = result->size();
             continue;
         }
