@@ -5,10 +5,6 @@
 p4tools_add_xfail_reason(
     "testgen-p4c-pna-ptf"
     "P4Info is missing these required resources: Tables Actions."
-        pna-dpdk-bvec_union.p4
-        pna-dpdk-header-union-stack.p4
-        pna-dpdk-header-union-stack1.p4
-        pna-dpdk-union-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -30,16 +26,6 @@ p4tools_add_xfail_reason(
         "Unknown or unimplemented extern method: .*[.]from_ipsec"
         pna-example-ipsec.p4
 )
-
-p4tools_add_xfail_reason(
-        "testgen-p4c-pna-ptf"
-        "terminate called after throwing an instance of \'Util::CompilerBug\'"
-        pna-dpdk-header-union-stack2.p4
-        pna-dpdk-invalid-hdr-warnings5.p4
-        pna-dpdk-invalid-hdr-warnings6.p4
-        pna-dpdk-wrong-warning.p4
-)
-
 
 p4tools_add_xfail_reason(
         "testgen-p4c-pna-ptf"
