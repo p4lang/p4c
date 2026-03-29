@@ -108,6 +108,31 @@ class Options:
     num_taps: int = 2
 
 
+def normalize_library_path(path_value: str) -> str:
+    """Normalize user-provided library path separators to ':' for Linux."""
+    return path_value.replace(";", ":")
+
+
+def default_library_path(ipdk_install_dir: Path) -> str:
+    """Build a sane default LD_LIBRARY_PATH for IPDK/Stratum runtime tools."""
+    candidate_dirs = [
+        ipdk_install_dir / "lib",
+        ipdk_install_dir / "lib/x86_64-linux-gnu",
+    ]
+
+    # Support both common dependency env names.
+    for deps_env in ("DEPEND_INSTALL", "DEPS_INSTALL_DIR"):
+        deps_dir = os.environ.get(deps_env)
+        if deps_dir:
+            deps_path = Path(deps_dir)
+            candidate_dirs.extend(
+                [deps_path / "lib", deps_path / "lib/x86_64-linux-gnu"]
+            )
+
+    existing_dirs = [str(lib_dir) for lib_dir in candidate_dirs if lib_dir.exists()]
+    return ":".join(existing_dirs)
+
+
 class PTFTestEnv:
     options: Options = Options()
     switch_proc: testutils.subprocess.Popen = None
@@ -239,11 +264,21 @@ class PTFTestEnv:
         self, p4c_conf: Path, conf_bin: Path, info_name: Path, proc_env_vars: dict
     ) -> int:
         testutils.log.info("---------------------- Build and Load Pipeline ----------------------")
-        command = (
-            f"{self.options.ipdk_install_dir}/bin/tdi_pipeline_builder "
-            f"--p4c_conf_file={p4c_conf} "
-            f"--bf_pipeline_config_binary_file={conf_bin}"
-        )
+        builder = f"{self.options.ipdk_install_dir}/bin/tdi_pipeline_builder"
+        command = f"{builder} --p4c_conf_file={p4c_conf}"
+
+        # tdi_pipeline_builder CLI changed across IPDK releases; probe supported
+        # binary-output flag and use it when available.
+        help_result = testutils.exec_process(f"{builder} --help", capture_output=True, env=proc_env_vars)
+        help_text = help_result.output if help_result.output else ""
+        for candidate_flag in (
+            "--bf_pipeline_config_binary_file",
+            "--p4_pipeline_config_binary_file",
+            "--pipeline_config_binary_file",
+        ):
+            if candidate_flag in help_text:
+                command += f" {candidate_flag}={conf_bin}"
+                break
 
         _, returncode = testutils.exec_process(command, timeout=30, env=proc_env_vars)
         if returncode != testutils.SUCCESS:
@@ -280,10 +315,10 @@ class PTFTestEnv:
 def run_test(options: Options) -> int:
     # Add necessary environment variables for libs and executables
     proc_env_vars: dict = os.environ.copy()
-    if "LD_LIBRARY_PATH" in proc_env_vars:
-        proc_env_vars["LD_LIBRARY_PATH"] += f"{options.ld_library_path}"
-    else:
-        proc_env_vars["LD_LIBRARY_PATH"] = f"{options.ld_library_path}"
+    existing_ld_library_path = proc_env_vars.get("LD_LIBRARY_PATH", "")
+    proc_env_vars["LD_LIBRARY_PATH"] = ":".join(
+        [value for value in [options.ld_library_path, existing_ld_library_path] if value]
+    )
     proc_env_vars["SDE_INSTALL"] = f"{options.ipdk_install_dir}"
 
     # Define the test environment and compile the P4 target
@@ -366,11 +401,9 @@ def create_options(test_args) -> testutils.Optional[Options]:
     options.p4c_dir = Path(test_args.p4c_dir)
     options.ipdk_install_dir = Path(test_args.ipdk_install_dir)
     if test_args.ld_library_path:
-        options.ld_library_path = test_args.ld_library_path
+        options.ld_library_path = normalize_library_path(test_args.ld_library_path)
     else:
-        options.ld_library_path = (
-            f"{options.ipdk_install_dir}/lib;{options.ipdk_install_dir}/lib/x86_64-linux-gnu"
-        )
+        options.ld_library_path = default_library_path(options.ipdk_install_dir)
     options.num_taps = test_args.num_taps
 
     # Configure logging.

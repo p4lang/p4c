@@ -124,5 +124,4 @@ jobs:
         working-directory: p4c/build
         run: |
           sudo "$IPDK_INSTALL_DIR"/sbin/set_hugepages.sh
-          export LD_LIBRARY_PATH="$IPDK_INSTALL_DIR/lib:$IPDK_INSTALL_DIR/lib/x86_64-linux-gnu:$DEPS_INSTALL_DIR/lib:$DEPS_INSTALL_DIR/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH:-}"
-          sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH" ctest -j1 --output-on-failure --schedule-random -R "testgen-p4c-pna-ptf|dpdk-ptf"
+          sudo -E env PATH="$PATH" ctest -j1 --output-on-failure --schedule-random -R "testgen-p4c-pna-ptf|dpdk-ptf"

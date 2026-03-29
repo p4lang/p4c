@@ -32,6 +32,12 @@ p4tools_add_xfail_reason(
         "Unexpected error."
         pna-dpdk-parser-state-err.p4
         pna-elim-hdr-copy-dpdk.p4
+)
+
+p4tools_add_xfail_reason(
+        "testgen-p4c-pna-ptf"
+        ""
+        pna-elim-hdr-copy-dpdk.p4
         pna-too-big-label-name-dpdk.p4
 )
 
