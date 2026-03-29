@@ -149,9 +149,7 @@ def default_library_path(ipdk_install_dir: Path) -> str:
         deps_dir = os.environ.get(deps_env)
         if deps_dir:
             deps_path = Path(deps_dir)
-            candidate_dirs.extend(
-                [deps_path / "lib", deps_path / "lib/x86_64-linux-gnu"]
-            )
+            candidate_dirs.extend([deps_path / "lib", deps_path / "lib/x86_64-linux-gnu"])
 
     existing_dirs = [str(lib_dir) for lib_dir in candidate_dirs if lib_dir.exists()]
     return ":".join(existing_dirs)
@@ -290,65 +288,31 @@ class PTFTestEnv:
         testutils.log.info("---------------------- Build and Load Pipeline ----------------------")
         builder = f"{self.options.ipdk_install_dir}/bin/tdi_pipeline_builder"
 
-        # NOTE: We intentionally use a fallback matrix instead of probing
-        # `tdi_pipeline_builder --help`.
-        #
-        # Why this exists:
-        # - Different IPDK/networking-recipe releases ship incompatible CLI
-        #   variants for the pipeline binary output option.
-        # - Some versions only accept one of the following flags:
-        #     * --bf_pipeline_config_binary_file
-        #     * --p4_pipeline_config_binary_file
-        #     * --pipeline_config_binary_file
-        # - Some builds can also succeed with only --p4c_conf_file.
-        #
-        # Why we do not parse `--help` output:
-        # - In practice, `--help` may return a non-zero exit status and can be
-        #   unreliable in this test harness, which caused failures unrelated to
-        #   the actual test objective.
-        #
-        # Behavior below:
-        # - Try command variants in deterministic order.
-        # - If failure clearly indicates an unknown option/flag, try next variant.
-        # - For any other failure, stop immediately and surface the real error.
-        commands = [[builder, f"--p4c_conf_file={p4c_conf}"]]
-        for candidate_flag in (
-            "--bf_pipeline_config_binary_file",
-            "--p4_pipeline_config_binary_file",
-            "--pipeline_config_binary_file",
-        ):
-            commands.append(
-                [builder, f"--p4c_conf_file={p4c_conf}", f"{candidate_flag}={conf_bin}"]
-            )
-
-        last_returncode = testutils.FAILURE
-        for command in commands:
-            testutils.log.info("Executing command: %s", " ".join(command))
-            result = subprocess.run(
-                command,
-                env=proc_env_vars,
-                capture_output=True,
-                text=True,
-                check=False,
-                timeout=30,
-            )
-            output = f"{result.stdout or ''}\n{result.stderr or ''}"
-            if result.stdout:
-                testutils.log.info(result.stdout.rstrip())
-            if result.stderr:
-                testutils.log.warning(result.stderr.rstrip())
-
-            last_returncode = result.returncode
-            if result.returncode == testutils.SUCCESS:
-                return testutils.SUCCESS
-
-            lowered_output = output.lower()
-            if "unknown command line flag" in lowered_output or "unrecognized option" in lowered_output:
-                continue
-            break
-
-        testutils.log.error("Failed to build pipeline")
-        return last_returncode
+        command = [
+            builder,
+            f"--p4c_conf_file={p4c_conf}",
+            f"--bf_pipeline_config_binary_file={conf_bin}",
+        ]
+        testutils.log.info("Executing command: %s", " ".join(command))
+        result = subprocess.run(
+            command,
+            env=proc_env_vars,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=30,
+        )
+        if result.stdout:
+            testutils.log.info(result.stdout.rstrip())
+        if result.stderr:
+            testutils.log.warning(result.stderr.rstrip())
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to build pipeline")
+            return result.returncode
+        if not conf_bin.exists():
+            testutils.log.error("Expected pipeline config was not generated: %s", conf_bin)
+            return testutils.FAILURE
+        return testutils.SUCCESS
 
     def run_ptf(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> int:
         """Run the PTF test."""

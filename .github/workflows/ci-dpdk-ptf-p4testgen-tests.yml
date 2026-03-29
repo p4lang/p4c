@@ -45,6 +45,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: p4lang/p4-dpdk-target
+          ref: 1604e1829dcc613067cda6dd26a8a784fb804bd7
           path: p4sde
           submodules: recursive
 
@@ -52,6 +53,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: ipdk-io/networking-recipe
+          ref: cd584d4acccc49e9577fde2bfcdf16522577ac22
           path: ipdk.recipe
           submodules: recursive
 
