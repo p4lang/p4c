@@ -79,6 +79,18 @@ GNMI_PORT: int = 9339
 PTF_ADDR: str = "0.0.0.0"
 
 
+def check_python_module(module: str, proc_env_vars: dict) -> bool:
+    """Return True if module can be imported by the current Python."""
+    result = subprocess.run(
+        [sys.executable, "-c", f"import {module}"],
+        env=proc_env_vars,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return result.returncode == testutils.SUCCESS
+
+
 # Check if target ports are ready to be connected (make sure infrap4d is on)
 def is_port_alive(ns, port) -> bool:
     command = f"sudo ip netns exec {ns} netstat -tuln"
@@ -332,8 +344,11 @@ class PTFTestEnv:
         testutils.log.info("---------------------- Run PTF test ----------------------")
         # Add the tools PTF folder to the python path, it contains the base test.
         pypath = TOOLS_PATH.joinpath("ptf")
+        python_runner = sys.executable
         # Show list of the tests
-        testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
+        testListCmd = (
+            f"{python_runner} -m ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
+        )
         returncode = self.bridge.ns_exec(testListCmd)
         if returncode != testutils.SUCCESS:
             return returncode
@@ -345,7 +360,8 @@ class PTFTestEnv:
         )
         test_params += "device_id=1"
         run_ptf_cmd = (
-            f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
+            f"{python_runner} -m ptf --pypath {pypath} {taps} "
+            f"--log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-params={test_params} --test-dir {self.options.testdir}"
         )
         returncode = self.bridge.ns_exec(run_ptf_cmd)
@@ -360,6 +376,14 @@ def run_test(options: Options) -> int:
         [value for value in [options.ld_library_path, existing_ld_library_path] if value]
     )
     proc_env_vars["SDE_INSTALL"] = f"{options.ipdk_install_dir}"
+
+    if not check_python_module("ptf", proc_env_vars):
+        testutils.log.error(
+            "The Python module 'ptf' is not available for %s. "
+            "Run this test via `uv run` (recommended) or install the module in the active Python.",
+            sys.executable,
+        )
+        return testutils.FAILURE
 
     # Define the test environment and compile the P4 target
     test_name = Path(options.p4_file.name)
