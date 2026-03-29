@@ -3,13 +3,13 @@
 import argparse
 import logging
 import os
-import random
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
@@ -92,25 +92,22 @@ def check_python_module(module: str, proc_env_vars: dict) -> bool:
     return result.returncode == testutils.SUCCESS
 
 
-def get_ptf_runner() -> testutils.Optional[str]:
+def get_ptf_runner(proc_env_vars: dict) -> testutils.Optional[str]:
     """Return an executable path for the ptf runner."""
     venv_ptf = Path(sys.executable).with_name("ptf")
     if venv_ptf.exists() and os.access(venv_ptf, os.X_OK):
         return str(venv_ptf)
-    return shutil.which("ptf")
+    return shutil.which("ptf", path=proc_env_vars.get("PATH"))
 
 
 # Check if target ports are ready to be connected (make sure infrap4d is on)
 def is_port_alive(ns, port) -> bool:
     command = f"sudo ip netns exec {ns} netstat -tuln"
     out, _ = testutils.exec_process(command, timeout=10, capture_output=True)
-    if not out:
-        return False
-    if str(port) in out:
-        return True
-    return False
+    return bool(out and str(port) in out)
 
 
+@dataclass
 class Options:
     """Options for this testing script. Usually correspond to command line inputs."""
 
@@ -156,12 +153,9 @@ def default_library_path(ipdk_install_dir: Path) -> str:
 
 
 class PTFTestEnv:
-    options: Options = Options()
-    switch_proc: testutils.subprocess.Popen = None
-    proc_env_vars: dict = {}
-
     def __init__(self, options):
         self.options = options
+        self.switch_proc = None
         # Create the virtual environment for the test execution.
         self.bridge = self.create_bridge()
 
@@ -177,7 +171,6 @@ class PTFTestEnv:
         testutils.log.info(
             "---------------------- Creating a namespace ----------------------",
         )
-        random.seed(datetime.now().timestamp())
         bridge = Bridge(uuid.uuid4())
         result = bridge.create_virtual_env(0)
         if result != testutils.SUCCESS:
@@ -191,11 +184,12 @@ class PTFTestEnv:
         )
         return bridge
 
-    def create_TAPs(self, proc_env_vars: dict, insecure_mode: bool = True) -> int:
+    def create_taps(self, proc_env_vars: dict, insecure_mode: bool = True) -> int:
         """Create TAPs with gNMI"""
         testutils.log.info(
             "---------------------- Creating TAPs ----------------------",
         )
+        returncode = testutils.SUCCESS
         for index in range(self.options.num_taps):
             tap_name = f"TAP{index}"
             cmd = (
@@ -240,13 +234,13 @@ class PTFTestEnv:
         return returncode
 
     def run_infrap4d(
-        self, proc_env_vars: dict, options: Options, insecure_mode: bool = True
-    ) -> testutils.subprocess.Popen:
+        self, proc_env_vars: dict, insecure_mode: bool = True
+    ) -> testutils.Optional[testutils.subprocess.Popen]:
         # Start infrap4d and return the process handle.
         testutils.log.info(
             "---------------------- Start infrap4d ----------------------",
         )
-        log_dir = options.testdir.joinpath("infrap4d")
+        log_dir = self.options.testdir.joinpath("infrap4d")
         testutils.check_and_create_dir(log_dir)
 
         run_infrap4d_cmd = (
@@ -255,9 +249,9 @@ class PTFTestEnv:
             f"-log_dir={log_dir} "
             f"-detach=false "
             f"-external_stratum_urls={PTF_ADDR}:{P4RUNTIME_PORT},{PTF_ADDR}:{GNMI_PORT} "
-            f"-dpdk_sde_install={options.ipdk_install_dir} "
-            f"-dpdk_infrap4d_cfg={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_skip_p4.conf "
-            f"-chassis_config_file={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_port_config.pb.txt "
+            f"-dpdk_sde_install={self.options.ipdk_install_dir} "
+            f"-dpdk_infrap4d_cfg={self.options.ipdk_install_dir}/share/stratum/dpdk/dpdk_skip_p4.conf "
+            f"-chassis_config_file={self.options.ipdk_install_dir}/share/stratum/dpdk/dpdk_port_config.pb.txt "
         )
         bridge_cmd = self.bridge.get_ns_prefix() + " " + run_infrap4d_cmd
         self.switch_proc = testutils.open_process(bridge_cmd, env=proc_env_vars)
@@ -279,19 +273,17 @@ class PTFTestEnv:
                 testutils.log.error(
                     "######## Infrap4d Warning ######## \n%s", warning_file.read_text()
                 )
-            return testutils.FAILURE
+            return None
         return self.switch_proc
 
-    def build_and_load_pipeline(
-        self, p4c_conf: Path, conf_bin: Path, info_name: Path, proc_env_vars: dict
-    ) -> int:
+    def build_and_load_pipeline(self, p4c_conf: Path, conf_bin: Path, proc_env_vars: dict) -> int:
         testutils.log.info("---------------------- Build and Load Pipeline ----------------------")
         builder = f"{self.options.ipdk_install_dir}/bin/tdi_pipeline_builder"
 
         command = [
             builder,
             f"--p4c_conf_file={p4c_conf}",
-            f"--bf_pipeline_config_binary_file={conf_bin}",
+            f"--tdi_pipeline_config_binary_file={conf_bin}",
         ]
         testutils.log.info("Executing command: %s", " ".join(command))
         result = subprocess.run(
@@ -359,7 +351,7 @@ def run_test(options: Options) -> int:
         )
         return testutils.FAILURE
 
-    ptf_runner = get_ptf_runner()
+    ptf_runner = get_ptf_runner(proc_env_vars)
     if ptf_runner is None:
         testutils.log.error(
             "Unable to locate the 'ptf' executable. "
@@ -388,19 +380,22 @@ def run_test(options: Options) -> int:
     returncode = testenv.compile_program(info_name, bf_rt_schema, context, dpdk_spec)
     if returncode != testutils.SUCCESS:
         return returncode
+    if not p4c_conf.exists():
+        testutils.log.error("Expected p4c conf was not generated: %s", p4c_conf)
+        return testutils.FAILURE
 
     # Run the switch.
-    switch_proc = testenv.run_infrap4d(proc_env_vars, options)
+    switch_proc = testenv.run_infrap4d(proc_env_vars)
     if switch_proc is None:
         return testutils.FAILURE
 
     # Create the TAP interfaces.
-    returncode = testenv.create_TAPs(proc_env_vars)
+    returncode = testenv.create_taps(proc_env_vars)
     if returncode != testutils.SUCCESS:
         return returncode
 
     # Build and load the pipeline
-    returncode = testenv.build_and_load_pipeline(p4c_conf, conf_bin, info_name, proc_env_vars)
+    returncode = testenv.build_and_load_pipeline(p4c_conf, conf_bin, proc_env_vars)
     if returncode != testutils.SUCCESS:
         return returncode
 
@@ -410,9 +405,7 @@ def run_test(options: Options) -> int:
     del testenv
     # Print switch log if the results were not successful.
     if result != testutils.SUCCESS:
-        # Get errno
-        errno, _ = testutils.exec_process('echo $?', shell=True, capture_output=True, text=True)
-        testutils.log.error("######## Errno (in case it is a OS error) ######## \n%s", errno)
+        testutils.log.error("######## Test result code ######## \n%s", result)
         if switch_proc.stdout:
             out = switch_proc.stdout.read()
             # Do not bother to print whitespace.
@@ -429,7 +422,10 @@ def run_test(options: Options) -> int:
 def create_options(test_args) -> testutils.Optional[Options]:
     """Parse the input arguments and create a processed options object."""
     options = Options()
-    options.p4_file = Path(testutils.check_if_file(test_args.p4_file))
+    p4_file = testutils.check_if_file(test_args.p4_file)
+    if not p4_file:
+        return None
+    options.p4_file = Path(p4_file)
     testfile = test_args.testfile
     if not testfile:
         testutils.log.info("No test file provided. Checking for file in folder.")
@@ -468,7 +464,7 @@ def create_options(test_args) -> testutils.Optional[Options]:
 
 if __name__ == "__main__":
     # Parse options and process argv
-    args, argv = PARSER.parse_known_args()
+    args = PARSER.parse_args()
 
     test_options = create_options(args)
     if not test_options:
