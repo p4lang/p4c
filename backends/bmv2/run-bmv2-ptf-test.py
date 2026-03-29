@@ -148,11 +148,17 @@ class PTFTestEnv:
 
 class NNEnv(PTFTestEnv):
     bridge: Optional[Bridge] = None
+    use_namespace: bool = True
 
     def __init__(self, options: Options) -> None:
         super().__init__(options)
-        # Create the virtual environment for the test execution.
-        self.bridge = self.create_bridge(options.num_ifaces)
+        # Rooted runs use an isolated namespace. Non-root runs execute directly on the host while
+        # still using nanomsg sockets for packet IO.
+        self.use_namespace = testutils.check_root()
+        if self.use_namespace:
+            self.bridge = self.create_bridge(options.num_ifaces)
+        else:
+            testutils.log.info("Running NN mode without network namespace (non-root mode).")
 
     def __del__(self) -> None:
         if self.bridge:
@@ -160,9 +166,6 @@ class NNEnv(PTFTestEnv):
         super().__del__()
 
     def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> Optional[subprocess.Popen]:
-        if not self.bridge:
-            testutils.log.error("Unable to run simple_switch_grpc without a bridge.")
-            return None
         """Start simple_switch_grpc and return the process handle."""
         testutils.log.info(
             "---------------------- Start simple_switch_grpc ----------------------",
@@ -177,15 +180,17 @@ class NNEnv(PTFTestEnv):
             f"--log-flush --packet-in ipc://{self.options.testdir}/bmv2_packets_1.ipc  --no-p4 "
             f"-- --grpc-server-addr {GRPC_ADDRESS}:{grpc_port} & "
         )
-        bridge_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
-        self.switch_proc = testutils.open_process(bridge_cmd)
+        if self.use_namespace:
+            if not self.bridge:
+                testutils.log.error("Unable to run simple_switch_grpc without a bridge.")
+                return None
+            run_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
+        else:
+            run_cmd = simple_switch_grpc
+        self.switch_proc = testutils.open_process(run_cmd)
         return self.switch_proc
 
     def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
-        if not self.bridge:
-            testutils.log.error("Unable to run run_ptf without a bridge.")
-            return testutils.FAILURE
-
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
         # Add the tools PTF folder to the python path, it contains the base test.
@@ -196,7 +201,13 @@ class NNEnv(PTFTestEnv):
             f"--log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-dir {self.options.testdir} --list"
         )
-        returncode = self.bridge.ns_exec(test_list_cmd)
+        if self.use_namespace:
+            if not self.bridge:
+                testutils.log.error("Unable to run run_ptf without a bridge.")
+                return testutils.FAILURE
+            returncode = self.bridge.ns_exec(test_list_cmd)
+        else:
+            returncode = testutils.exec_process(test_list_cmd).returncode
         if returncode != testutils.SUCCESS:
             return returncode
         test_params = (
@@ -212,7 +223,13 @@ class NNEnv(PTFTestEnv):
             f"--log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-params={test_params} --test-dir {self.options.testdir}"
         )
-        returncode = self.bridge.ns_exec(run_ptf_cmd)
+        if self.use_namespace:
+            if not self.bridge:
+                testutils.log.error("Unable to run run_ptf without a bridge.")
+                return testutils.FAILURE
+            returncode = self.bridge.ns_exec(run_ptf_cmd)
+        else:
+            returncode = testutils.exec_process(run_ptf_cmd).returncode
         return returncode
 
 
@@ -389,8 +406,8 @@ if __name__ == "__main__":
     if not test_options:
         sys.exit(testutils.FAILURE)
 
-    if not testutils.check_root():
-        testutils.log.error("This script requires root privileges; Exiting.")
+    if not testutils.check_root() and not test_options.use_nn:
+        testutils.log.error("This script requires root privileges unless --use-nanomsg is enabled.")
         sys.exit(1)
 
     # Run the test with the extracted options
