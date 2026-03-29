@@ -11,7 +11,11 @@ package(
 )
 
 # Extend the list with the name of the desired targets (in "modules/testgen/targets/).
-TESTGEN_TARGETS = ["bmv2"]
+TESTGEN_TARGETS = [
+    "bmv2",
+    "ebpf",
+    "pna",
+]
 
 filegroup(
     name = "ir_extension",
@@ -147,12 +151,14 @@ cc_library(
         ":target_register_headers",
         ":testgen_targets_src",
     ],
-    # We onlu make top-level, library, and test backend header files visible to other targets.
+    # We only make top-level, library, and test backend header files visible to other targets.
     hdrs = ["common/options.h"] + glob([
         "modules/testgen/lib/*.h",
         "modules/testgen/*.h",
     ]) + glob(
+        ["modules/testgen/targets/%s/backend/*.h" % target for target in TESTGEN_TARGETS] +
         ["modules/testgen/targets/%s/test_backend/*.h" % target for target in TESTGEN_TARGETS],
+        allow_empty = True,
     ),
     copts = [
         "-fexceptions",
