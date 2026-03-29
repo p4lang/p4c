@@ -143,7 +143,7 @@ ccache --set-config max_size=1G
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
   # Install BMv2 - use OBS package on 22.04, source build on other versions
-  if [[ "${DISTRIB_RELEASE}" == "22.04" ]]; then
+  if [[ "${DISTRIB_RELEASE}" == "22.04" ]] && [[ -z "${BMV2_REF:-}" ]]; then
     # Installation instructions documented at
     # https://software.opensuse.org/download.html?project=home%3Ap4lang&package=p4lang-bmv2
     echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
@@ -221,7 +221,7 @@ function build_bmv2() {
   command -v simple_switch_CLI
   command -v simple_switch_grpc
 
-  uv pip install nnpy==1.4.2
+  uv pip install pynng
 }
 
 # The docker image has BMv2 preinstalled.

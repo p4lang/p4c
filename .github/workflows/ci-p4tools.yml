@@ -23,6 +23,8 @@ jobs:
       CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
+      # Temporary until pynng-enabled BMv2 is available on default branch.
+      BMV2_REF: ac3f42bbf28b5fecff324cf6071825fe6f8e54ce
     steps:
       - uses: actions/checkout@v6
         with:

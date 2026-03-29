@@ -51,8 +51,15 @@ PARSER.add_argument(
     "--use-nanomsg",
     action="store_true",
     dest="use_nn",
-    help="Use nanomsg for packet sending instead of virtual interfaces.",
+    help="Use nn platform sockets for packet sending (default).",
 )
+PARSER.add_argument(
+    "--use-veth",
+    action="store_false",
+    dest="use_nn",
+    help="Use virtual interfaces instead of nn platform sockets.",
+)
+PARSER.set_defaults(use_nn=True)
 PARSER.add_argument(
     "-ll",
     "--log_level",
@@ -92,7 +99,7 @@ class Options:
     rootdir: Path = Path(".")
     # The number of interfaces to create for this particular test.
     num_ifaces: int = 10
-    # Whether to use nanomsg for packet delivery as opposed to Linux veth interfaces.
+    # Whether to use nn platform sockets for packet delivery instead of Linux veth interfaces.
     use_nn: bool = False
 
 
@@ -379,13 +386,18 @@ def create_options(test_args: Any) -> Optional[Options]:
     options.rootdir = Path(test_args.rootdir)
     options.num_ifaces = test_args.num_ifaces
 
-    try:
-        import nnpy  # pylint: disable=W0611,C0415
+    if test_args.use_nn:
+        try:
+            import pynng  # pylint: disable=W0611,C0415
 
-        assert nnpy
-        options.use_nn = test_args.use_nn
-    except ImportError:
-        testutils.log.error("nnpy is not available on this system. Falling back to veth testing.")
+            assert pynng
+            options.use_nn = True
+        except ImportError:
+            testutils.log.error(
+                "pynng is not available on this system. Falling back to veth testing."
+            )
+            options.use_nn = False
+    else:
         options.use_nn = False
 
     # Configure logging.

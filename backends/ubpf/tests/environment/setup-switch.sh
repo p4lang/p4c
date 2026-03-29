@@ -158,7 +158,7 @@ if ! type "ptf" > /dev/null; then
  sudo python setup.py install
 fi
 
-# Install nanomsg and nnpy
+# Install nanomsg and pynng
 if [ ! -d "/home/vagrant/nanomsg" ]
 then
  cd /home/vagrant
@@ -174,8 +174,8 @@ then
  sudo cp /home/vagrant/nanomsg/build/*.* /usr/lib
 
  cd /home/vagrant/ptf/ptf_nn
- sudo python -m pip install nnpy
- ./check-nnpy.py
+  sudo python -m pip install pynng
+  ../CI/check-pynng.py
 fi
 
 # Install P4c
