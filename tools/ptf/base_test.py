@@ -708,8 +708,7 @@ class P4RuntimeTest(BaseTest):
         self._push_update_member(req, ap_name, mbr_id, a_name, params, p4runtime_pb2.Update.INSERT)
 
     def send_request_add_member(self, ap_name, mbr_id, a_name, params):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_member(req, ap_name, mbr_id, a_name, params)
         return req, self.write_request(req)
 
@@ -717,8 +716,7 @@ class P4RuntimeTest(BaseTest):
         self._push_update_member(req, ap_name, mbr_id, a_name, params, p4runtime_pb2.Update.MODIFY)
 
     def send_request_modify_member(self, ap_name, mbr_id, a_name, params):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_modify_member(req, ap_name, mbr_id, a_name, params)
         return req, self.write_request(req, store=False)
 
@@ -732,10 +730,10 @@ class P4RuntimeTest(BaseTest):
         for mbr_id in mbr_ids:
             member = ap_group.members.add()
             member.member_id = mbr_id
+            member.weight = 1
 
     def send_request_add_group(self, ap_name, grp_id, grp_size=32, mbr_ids=[]):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_group(req, ap_name, grp_id, grp_size, mbr_ids)
         return req, self.write_request(req)
 
@@ -748,10 +746,10 @@ class P4RuntimeTest(BaseTest):
         for mbr_id in mbr_ids:
             member = ap_group.members.add()
             member.member_id = mbr_id
+            member.weight = 1
 
     def send_request_set_group_membership(self, ap_name, grp_id, mbr_ids=[]):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_set_group_membership(req, ap_name, grp_id, mbr_ids)
         return req, self.write_request(req, store=False)
 
@@ -779,8 +777,7 @@ class P4RuntimeTest(BaseTest):
         self.set_action_entry(table_entry, a_name, params)
 
     def send_request_add_entry_to_action(self, t_name, mk, a_name, params, priority=None):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_entry_to_action(req, t_name, mk, a_name, params, priority)
         return req, self.write_request(req, store=mk is not None)
 
@@ -842,11 +839,7 @@ class P4RuntimeTest(BaseTest):
             table_name_and_key, action_name_and_params, priority, options
         )
         testutils.log.info(f"table_add: table_entry={table_entry}")
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
-        election_id = req.election_id
-        election_id.high = 0
-        election_id.low = 1
+        req = self.get_new_write_request()
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
         update.entity.table_entry.CopyFrom(table_entry)
@@ -1050,8 +1043,7 @@ class P4RuntimeTest(BaseTest):
         table_entry.action.action_profile_member_id = mbr_id
 
     def send_request_add_entry_to_member(self, t_name, mk, mbr_id):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_entry_to_member(req, t_name, mk, mbr_id)
         return req, self.write_request(req, store=mk is not None)
 
@@ -1067,8 +1059,7 @@ class P4RuntimeTest(BaseTest):
         table_entry.action.action_profile_group_id = grp_id
 
     def send_request_add_entry_to_group(self, t_name, mk, grp_id):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_entry_to_group(req, t_name, mk, grp_id)
         return req, self.write_request(req, store=mk is not None)
 
