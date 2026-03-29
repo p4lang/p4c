@@ -79,9 +79,9 @@ To add a new target:
 - **Targeted eBPF test run**: use `ctest --test-dir build --output-on-failure -R testgen-p4c-ebpf/<name>.p4` for quick iteration.
 - **Inspect generated tests**: testgen outputs live under `build/testgen/testgen-p4c-<target>/<program>.out/` and are often the fastest way to diagnose mismatches between symbolic traces and emitted control-plane commands.
 - **Root-required eBPF tests**: some eBPF executions require root/network namespace setup; in non-root environments they may be skipped or fail for environment reasons rather than compiler logic.
+- **Prefer non-root BMv2 PTF runs**: install `pynng` in the active environment and run BMv2 PTF tests with nanomsg mode (the testgen runner already passes `--use-nanomsg`), so `uv run ctest ...` works without sudo.
 
 ## P4Testgen Structure Notes
-- **Where table choices are made**: shared table application logic lives in `modules/testgen/core/small_step/table_stepper.cpp` (and target-specific steppers may extend behavior).
 - **Where backend outputs are emitted**: each target backend converts `TestSpec` objects to target-specific artifacts under `modules/testgen/targets/<target>/` (for example STF, PTF, metadata, or protobuf emitters).
 
 ## Key Entry Points
