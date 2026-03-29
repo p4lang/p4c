@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import random
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -91,6 +92,14 @@ def check_python_module(module: str, proc_env_vars: dict) -> bool:
     return result.returncode == testutils.SUCCESS
 
 
+def get_ptf_runner() -> testutils.Optional[str]:
+    """Return an executable path for the ptf runner."""
+    venv_ptf = Path(sys.executable).with_name("ptf")
+    if venv_ptf.exists() and os.access(venv_ptf, os.X_OK):
+        return str(venv_ptf)
+    return shutil.which("ptf")
+
+
 # Check if target ports are ready to be connected (make sure infrap4d is on)
 def is_port_alive(ns, port) -> bool:
     command = f"sudo ip netns exec {ns} netstat -tuln"
@@ -119,6 +128,8 @@ class Options:
     ld_library_path: str = ""
     # Number of TAPs to create.
     num_taps: int = 2
+    # Executable path for ptf runner.
+    ptf_runner: str = "ptf"
 
 
 def normalize_library_path(path_value: str) -> str:
@@ -344,10 +355,9 @@ class PTFTestEnv:
         testutils.log.info("---------------------- Run PTF test ----------------------")
         # Add the tools PTF folder to the python path, it contains the base test.
         pypath = TOOLS_PATH.joinpath("ptf")
-        python_runner = sys.executable
         # Show list of the tests
         testListCmd = (
-            f"{python_runner} -m ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
+            f"{self.options.ptf_runner} --pypath {pypath} --test-dir {self.options.testdir} --list"
         )
         returncode = self.bridge.ns_exec(testListCmd)
         if returncode != testutils.SUCCESS:
@@ -360,7 +370,7 @@ class PTFTestEnv:
         )
         test_params += "device_id=1"
         run_ptf_cmd = (
-            f"{python_runner} -m ptf --pypath {pypath} {taps} "
+            f"{self.options.ptf_runner} --pypath {pypath} {taps} "
             f"--log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-params={test_params} --test-dir {self.options.testdir}"
         )
@@ -384,6 +394,15 @@ def run_test(options: Options) -> int:
             sys.executable,
         )
         return testutils.FAILURE
+
+    ptf_runner = get_ptf_runner()
+    if ptf_runner is None:
+        testutils.log.error(
+            "Unable to locate the 'ptf' executable. "
+            "Run this test via `uv run` (recommended) or ensure 'ptf' is on PATH."
+        )
+        return testutils.FAILURE
+    options.ptf_runner = ptf_runner
 
     # Define the test environment and compile the P4 target
     test_name = Path(options.p4_file.name)
