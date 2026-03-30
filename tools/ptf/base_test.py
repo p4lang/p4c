@@ -221,6 +221,11 @@ class P4RuntimeTest(BaseTest):
 
         self.channel = grpc.insecure_channel(grpc_addr)
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
+        self.stream = None
+        self.stream_out_q = None
+        self.stream_in_q = None
+        self.stream_recv_thread = None
+        self.addCleanup(self._cleanup_runtime_stream)
 
         proto_txt_path = ptfutils.test_param_get("p4info")
         testutils.log.info(f"Reading p4info from {proto_txt_path}")
@@ -326,12 +331,20 @@ class P4RuntimeTest(BaseTest):
                 yield p
 
         def stream_recv(stream):
-            for p in stream:
-                now = time.time()
-                logging.debug(
-                    f"stream_recv received at time {now} and stored stream msg in stream_in_q: {p}"
-                )
-                self.stream_in_q.put({"time": now, "message": p})
+            try:
+                for p in stream:
+                    now = time.time()
+                    logging.debug(
+                        f"stream_recv received at time {now} and stored stream msg in stream_in_q: {p}"
+                    )
+                    self.stream_in_q.put({"time": now, "message": p})
+            except grpc.RpcError as e:
+                if e.code() in (grpc.StatusCode.CANCELLED, grpc.StatusCode.UNAVAILABLE):
+                    # Normal during test cleanup or when the server goes away after
+                    # a test-triggered crash. Avoid noisy thread tracebacks.
+                    logging.debug("stream_recv exiting on RpcError: %s", e)
+                    return
+                raise
 
         self.stream = self.stub.StreamChannel(stream_req_iterator())
         self.stream_recv_thread = threading.Thread(target=stream_recv, args=(self.stream,))
@@ -355,12 +368,29 @@ class P4RuntimeTest(BaseTest):
             self.fail("Failed to establish handshake")
 
     def tearDown(self):
-        self.tear_down_stream()
         BaseTest.tearDown(self)
 
+    def _cleanup_runtime_stream(self):
+        if self.stream_out_q is not None:
+            try:
+                self.stream_out_q.put(None)
+            except Exception:
+                pass
+        if self.stream is not None:
+            try:
+                self.stream.cancel()
+            except Exception:
+                pass
+        if self.stream_recv_thread is not None and self.stream_recv_thread.is_alive():
+            self.stream_recv_thread.join(timeout=2)
+        if self.channel is not None:
+            try:
+                self.channel.close()
+            except Exception:
+                pass
+
     def tear_down_stream(self):
-        self.stream_out_q.put(None)
-        self.stream_recv_thread.join()
+        self._cleanup_runtime_stream()
 
     def get_packet_in(self, timeout=1):
         msg = self.get_stream_packet("packet", timeout)
