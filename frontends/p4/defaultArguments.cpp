@@ -26,6 +26,7 @@ class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     const TypeMap *typeMap;
 
  public:
+    using TypeVariableSubstitutionVisitor::preorder;
     explicit TypeNameSubstitutionVisitor(const TypeVariableSubstitution *bindings,
                                          const TypeMap *typeMap)
         : TypeVariableSubstitutionVisitor(bindings, true), typeMap(typeMap) {

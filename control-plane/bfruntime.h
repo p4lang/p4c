@@ -270,6 +270,7 @@ class TypeSpecParser {
 
 class BFRuntimeGenerator {
  public:
+    virtual ~BFRuntimeGenerator() = default;
     explicit BFRuntimeGenerator(const p4configv1::P4Info &p4info) : p4info(p4info) {}
 
     /// Generates the schema as a Json object for the provided P4Info instance.
