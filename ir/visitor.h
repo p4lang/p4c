@@ -386,6 +386,7 @@ class Modifier : public virtual Visitor {
     std::shared_ptr<ChangeTracker> visited;
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;
+    std::function<void(const IR::Node *from, const IR::Node *to)> onNodeTransformedHook;
 
  public:
     profile_t init_apply(const IR::Node *root) override;
@@ -405,6 +406,10 @@ class Modifier : public virtual Visitor {
     bool visit_in_progress(const IR::Node *) const;
     void visitOnce() const override;
     void visitAgain() const override;
+    void setOnNodeTransformedHook(
+        const std::function<void(const IR::Node *from, const IR::Node *to)> &hook) {
+        onNodeTransformedHook = hook;
+    }
 
  protected:
     bool forceClone = false;  // force clone whole tree even if unchanged
@@ -439,6 +444,7 @@ class Transform : public virtual Visitor {
     bool prune_flag = false;
     void visitor_const_error() override;
     bool check_clone(const Visitor *) override;
+    std::function<void(const IR::Node *from, const IR::Node *to)> onNodeTransformedHook;
 
  public:
     profile_t init_apply(const IR::Node *root) override;
@@ -460,6 +466,10 @@ class Transform : public virtual Visitor {
     void visitAgain() const override;
     // can only be called usefully from a 'preorder' function (directly or indirectly)
     void prune() { prune_flag = true; }
+    void setOnNodeTransformedHook(
+        const std::function<void(const IR::Node *from, const IR::Node *to)> &hook) {
+        onNodeTransformedHook = hook;
+    }
 
  protected:
     const IR::Node *transform_child(const IR::Node *child) {
