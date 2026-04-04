@@ -142,10 +142,13 @@ ccache --set-config max_size=1G
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
-  # Install BMv2 - use PPA package on 22.04, source build on other versions
+  # Install BMv2 - use OBS package on 22.04, source build on other versions
   if [[ "${DISTRIB_RELEASE}" == "22.04" ]]; then
-    sudo add-apt-repository -y ppa:chreekat/p4lang
-    sudo apt-get update
+    # Installation instructions documented at
+    # https://software.opensuse.org/download.html?project=home%3Ap4lang&package=p4lang-bmv2
+    echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+    curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
+    sudo apt update
     # p4lang-bmv2's own dependencies take care of most of the runtime deps. An
     # exception seems to be python3-dev.
     P4C_RUNTIME_DEPS="p4lang-bmv2 python3-dev"
