@@ -28,6 +28,7 @@ class ExternConverter {
     static std::map<cstring, ExternConverter *> *cvtForType;
 
  public:
+    virtual ~ExternConverter() = default;
     static void registerExternConverter(cstring, ExternConverter *);
 
     virtual Util::IJson *convertExternObject(ConversionContext *ctxt, const P4::ExternMethod *em,
