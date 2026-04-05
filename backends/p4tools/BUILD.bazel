@@ -156,7 +156,7 @@ cc_library(
         "modules/testgen/lib/*.h",
         "modules/testgen/*.h",
     ]) + glob(
-        ["modules/testgen/targets/%s/backend/*.h" % target for target in TESTGEN_TARGETS] +
+        ["modules/testgen/targets/%s/backend/**/*.h" % target for target in TESTGEN_TARGETS] +
         ["modules/testgen/targets/%s/test_backend/*.h" % target for target in TESTGEN_TARGETS],
         allow_empty = True,
     ),
