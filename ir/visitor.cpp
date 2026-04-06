@@ -494,7 +494,11 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
                     copy->visit_children(*this, name);
                     copy->apply_visitor_postorder(*this);
                 }
-                if (visited->finish(n, copy)) (n = copy)->validate();
+                if (visited->finish(n, copy)) {
+                    copy->validate();
+                    if (onNodeTransformedHook) onNodeTransformedHook(n, copy);
+                    n = copy;
+                }
                 break;
             }
         }
@@ -587,8 +591,12 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 if (final_result == copy && final_result != preorder_result &&
                     *final_result == *preorder_result)
                     final_result = preorder_result;
-                if (visited->finish(n, final_result) && (n = final_result))
-                    final_result->validate();
+                if (visited->finish(n, final_result)) {
+                    if (final_result) final_result->validate();
+                    if (n != final_result && onNodeTransformedHook)
+                        onNodeTransformedHook(n, final_result);
+                    n = final_result;
+                }
                 if (extra_clone) visited->finish(preorder_result, final_result);
                 break;
             }

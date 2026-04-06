@@ -122,6 +122,7 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     }
     void early_exit() { early_exit_flag = true; }
     PassManager *clone() const override { return new PassManager(*this); }
+    auto getPasses() { return Util::iterator_range(passes); }
 };
 
 template <class T>
