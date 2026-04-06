@@ -1,17 +1,19 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_framework.html" title=" " alt="" coords="5,293,175,333"/>
+<area shape="rect" id="Node000000" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_framework.html" title=" " alt="" coords="5,325,175,365"/>
 <area shape="rect" id="Node000001" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_test_framework.html" title="Bmv2TestFramework provides common utility functions for BMv2&#45;style test frameworks." alt="" coords="223,133,436,173"/>
-<area shape="poly" id="edge2534_Node000000_Node000001" title=" " alt="" coords="113,281,160,231,189,205,221,183,246,171,249,176,224,188,193,209,164,235,117,284"/>
+<area shape="poly" id="edge2534_Node000000_Node000001" title=" " alt="" coords="108,311,154,246,185,212,221,183,244,171,246,176,224,188,189,216,158,250,112,315"/>
 <area shape="rect" id="Node000007" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_s_t_f.html" title="Extracts information from the @testSpec to emit a STF test case." alt="" coords="245,197,414,237"/>
-<area shape="poly" id="edge2540_Node000000_Node000007" title=" " alt="" coords="140,285,222,247,255,235,257,240,224,252,142,289"/>
+<area shape="poly" id="edge2540_Node000000_Node000007" title=" " alt="" coords="123,314,168,279,221,247,250,235,252,240,224,252,171,284,126,318"/>
 <area shape="rect" id="Node000008" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_metadata.html" title="Extracts information from the @testSpec to emit a Metadata test case." alt="" coords="245,261,414,301"/>
-<area shape="poly" id="edge2541_Node000000_Node000008" title=" " alt="" coords="188,298,244,290,245,295,189,303"/>
+<area shape="poly" id="edge2541_Node000000_Node000008" title=" " alt="" coords="178,319,253,299,255,304,179,324"/>
 <area shape="rect" id="Node000009" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_p_t_f.html" title="Extracts information from the @testSpec to emit a PTF test case." alt="" coords="245,325,414,365"/>
-<area shape="poly" id="edge2542_Node000000_Node000009" title=" " alt="" coords="189,324,245,331,244,337,188,329"/>
-<area shape="rect" id="Node000010" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_p_t_f.html" title="Extracts information from the @testSpec to emit a PTF test case." alt="" coords="245,389,414,429"/>
-<area shape="poly" id="edge2543_Node000000_Node000010" title=" " alt="" coords="142,337,224,375,257,387,255,392,222,380,140,342"/>
-<area shape="rect" id="Node000011" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_s_t_f.html" title="Extracts information from the @testSpec to emit a STF test case." alt="" coords="245,453,414,493"/>
-<area shape="poly" id="edge2544_Node000000_Node000011" title=" " alt="" coords="117,342,164,392,193,417,224,439,249,451,246,456,221,444,189,422,160,396,113,346"/>
+<area shape="poly" id="edge2542_Node000000_Node000009" title=" " alt="" coords="188,343,245,343,245,348,188,348"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_s_t_f.html" title="Extracts information from the @testSpec to emit an STF test case." alt="" coords="245,389,414,429"/>
+<area shape="poly" id="edge2543_Node000000_Node000010" title=" " alt="" coords="179,366,255,387,253,392,178,372"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_p_t_f.html" title="Extracts information from the @testSpec to emit a PTF test case." alt="" coords="245,453,414,493"/>
+<area shape="poly" id="edge2544_Node000000_Node000011" title=" " alt="" coords="126,372,171,407,224,439,252,451,250,456,221,444,168,411,123,377"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_s_t_f.html" title="Extracts information from the @testSpec to emit a STF test case." alt="" coords="245,517,414,557"/>
+<area shape="poly" id="edge2545_Node000000_Node000012" title=" " alt="" coords="112,376,158,441,189,474,224,503,246,515,244,520,221,508,185,478,154,444,108,379"/>
 <area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_metadata.html" title="Extracts information from the @testSpec to emit a Metadata test case." alt="" coords="484,5,653,45"/>
 <area shape="poly" id="edge2535_Node000001_Node000002" title=" " alt="" coords="369,123,422,89,483,55,510,43,512,48,485,60,425,94,372,128"/>
 <area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_p_t_f.html" title="Extracts information from the @testSpec to emit a PTF test case." alt="" coords="484,69,653,109"/>

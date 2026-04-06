@@ -1808,6 +1808,7 @@ var hierarchy =
       [ "P4::P4Tools::P4Testgen::EBPF::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_s_t_f.html", null ],
       [ "P4::P4Tools::P4Testgen::Pna::Metadata", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_metadata.html", null ],
       [ "P4::P4Tools::P4Testgen::Pna::PTF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_p_t_f.html", null ],
+      [ "P4::P4Tools::P4Testgen::Pna::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_s_t_f.html", null ],
       [ "P4::P4Tools::P4Testgen::Tofino::PTF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_p_t_f.html", null ],
       [ "P4::P4Tools::P4Testgen::Tofino::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_s_t_f.html", null ]
     ] ],

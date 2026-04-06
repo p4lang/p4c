@@ -1035,7 +1035,8 @@ var annotated_dup =
             [ "SharedPnaCmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_cmd_stepper.html", null ],
             [ "SharedPnaExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_expr_stepper.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_expr_stepper" ],
             [ "SharedPnaProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info" ],
-            [ "SharedPnaTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper" ]
+            [ "SharedPnaTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper" ],
+            [ "STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_s_t_f.html", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_s_t_f" ]
           ] ],
           [ "Tofino", null, [
             [ "AbstractTofinoProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_abstract_tofino_program_info.html", null ],

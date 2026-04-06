@@ -1,5 +1,9 @@
 var NAVTREEINDEX23 =
 {
+"class_p4_1_1_static_assert.html":[13,0,12,485],
+"class_p4_1_1_storage_factory.html":[12,0,14,472],
+"class_p4_1_1_storage_factory.html":[13,0,12,486],
+"class_p4_1_1_storage_location.html":[12,0,14,473],
 "class_p4_1_1_storage_location.html":[13,0,12,487],
 "class_p4_1_1_storage_location.html#ae23674b6eeb9e271d1f41260970fad24":[12,0,14,473,1],
 "class_p4_1_1_storage_location.html#ae23674b6eeb9e271d1f41260970fad24":[13,0,12,487,1],
@@ -245,9 +249,5 @@ var NAVTREEINDEX23 =
 "class_p4_1_1_test_1_1_dynamic_dep_test.html":[13,0,12,23,20],
 "class_p4_1_1_test_1_1_equivalent_align_extractor_test.html":[12,0,14,12,20],
 "class_p4_1_1_test_1_1_equivalent_align_extractor_test.html":[13,0,12,23,21],
-"class_p4_1_1_test_1_1_error_reporter_test.html":[12,0,14,12,21],
-"class_p4_1_1_test_1_1_error_reporter_test.html":[13,0,12,23,22],
-"class_p4_1_1_test_1_1_event_logger_test.html":[12,0,14,12,22],
-"class_p4_1_1_test_1_1_event_logger_test.html":[13,0,12,23,23],
-"class_p4_1_1_test_1_1_event_logger_test.html#aa45e828613b6256b0a9ff4a01243a34c":[12,0,14,12,22,0]
+"class_p4_1_1_test_1_1_error_reporter_test.html":[12,0,14,12,21]
 };
