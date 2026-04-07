@@ -149,8 +149,8 @@ class Node : public virtual INode {
     union COWref {
         COWfieldref<Node, Util::SourceInfo, &Node::srcInfo> srcInfo;
         COWref(COWNode_info *i) { _info = i; }
-        COWref *operator->() { return this; }
-        void visit_children(Visitor &, const char * /*name*/ = nullptr) {}
+        // COWref *operator->() { return this; }
+        void visit_children(Visitor &, const char * /*name*/ = nullptr) const {}
 
      private:
         COWNode_info *_info;

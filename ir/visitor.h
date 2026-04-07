@@ -168,7 +168,7 @@ class Visitor {
         n.visit_children(*this, name);
     }
     template <class COW>
-    requires IR::COWref<COW> && std::convertible_to<COW, const IR::Node *>
+        requires IR::COWref<COW> && std::convertible_to<COW, const IR::Node *>
     void visit(COW ref, const char *name = 0, int cidx = -1) {
         auto o = ref.get();
         if (cidx >= 0 && ctxt) ctxt->child_index = cidx;
@@ -955,7 +955,6 @@ void SplitFlowVisitVector(Visitor &v,
 
     COWvec_subf(v, vec, name).run_visit();
 }
-
 
 class Backtrack : public virtual Visitor {
  public:
