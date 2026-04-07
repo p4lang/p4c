@@ -45,7 +45,7 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
 
 void IR::ForStatement::visit_children(Visitor &v, const char *) { visit_children(this, v); }
 void IR::ForStatement::visit_children(Visitor &v, const char *) const { visit_children(this, v); }
-void IR::ForStatement::COWref::visit_children(Visitor &v, const char *) {
+void IR::ForStatement::COWref::visit_children(Visitor &v, const char *) const {
     IR::ForStatement::visit_children(this, v);
 }
 
@@ -74,7 +74,7 @@ void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
 }
 void IR::ForInStatement::visit_children(Visitor &v, const char *) { visit_children(this, v); }
 void IR::ForInStatement::visit_children(Visitor &v, const char *) const { visit_children(this, v); }
-void IR::ForInStatement::COWref::visit_children(Visitor &v, const char *) {
+void IR::ForInStatement::COWref::visit_children(Visitor &v, const char *) const {
     IR::ForInStatement::visit_children(this, v);
 }
 

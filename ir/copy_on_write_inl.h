@@ -203,13 +203,13 @@ struct COWref_subfield<T, std::vector<U>, COW, X, field>
     using COWref_base<T, std::vector<U>,
                       COWref_subfield<T, std::vector<U>, COW, X, field>>::operator=;
     const std::vector<U> &get() const {
-        return (reinterpret_cast<const COW *>(this)->get()).*field;
+        return std::launder(reinterpret_cast<const COW *>(this))->get().*field;
     }
     const std::vector<U> &getOrig() const {
-        return (reinterpret_cast<const COW *>(this)->getOrig()).*field;
+        return std::launder(reinterpret_cast<const COW *>(this))->getOrig().*field;
     }
     std::vector<U> &modify() const {
-        return (reinterpret_cast<const COW *>(this)->modify()).*field;
+        return std::launder(reinterpret_cast<const COW *>(this))->modify().*field;
     }
 
     void visit_children(Visitor &v, const char *name = nullptr) const {
@@ -246,11 +246,15 @@ struct COWref_subfield<T, Vector<U>, COW, X, field>
           COW_iterator<T, Vector<U>, U, COWref_subfield<T, Vector<U>, COW, X, field>>> {
     COWinfo<T> *info;
     using COWref_base<T, Vector<U>, COWref_subfield<T, Vector<U>, COW, X, field>>::operator=;
-    const Vector<U> &get() const { return (reinterpret_cast<const COW *>(this)->get()).*field; }
-    const Vector<U> &getOrig() const {
-        return (reinterpret_cast<const COW *>(this)->getOrig()).*field;
+    const Vector<U> &get() const {
+        return std::launder(reinterpret_cast<const COW *>(this))->get().*field;
     }
-    Vector<U> &modify() const { return (reinterpret_cast<const COW *>(this)->modify()).*field; }
+    const Vector<U> &getOrig() const {
+        return std::launder(reinterpret_cast<const COW *>(this))->getOrig().*field;
+    }
+    Vector<U> &modify() const {
+        return std::launder(reinterpret_cast<const COW *>(this))->modify().*field;
+    }
 
     void visit_children(Visitor &v, const char *name = nullptr) const {
         auto res = visit_safe_vector(get(), "Vector", v, name);
@@ -466,26 +470,28 @@ struct COW_element_ref<T, C, std::pair<U, V>, COW>
 };
 
 template <class T, class C, class U, class COW>
-requires std::derived_from<typename U::template COW_nested<T, COW_element_ref<T, C, U, COW>>,
-                           COW_nested_class>
-struct COW_element_ref<T, C, U, COW> : public COWref_base<T, U, COW_element_ref<T, C, U, COW>>,
-    public U::template COW_nested<T, COW_element_ref<T, C, U, COW>>
-{
+    requires std::derived_from<typename U::template COW_nested<T, COW_element_ref<T, C, U, COW>>,
+                               COW_nested_class>
+struct COW_element_ref<T, C, U, COW>
+    : public COWref_base<T, U, COW_element_ref<T, C, U, COW>>,
+      public U::template COW_nested<T, COW_element_ref<T, C, U, COW>> {
     mutable bool is_const;
     union {
         typename C::const_iterator ci;
         mutable typename C::iterator ni;
     };
     COW_element_ref(COW r, typename C::const_iterator i)
-      : U::template COW_nested<T, COW_element_ref<T, C, U, COW>>(r.info), is_const(true), ci(i) {}
+        : U::template COW_nested<T, COW_element_ref<T, C, U, COW>>(r.info), is_const(true), ci(i) {}
     COW_element_ref(COW r, typename C::iterator i)
-      : U::template COW_nested<T, COW_element_ref<T, C, U, COW>>(r.info), is_const(false), ni(i) {}
+        : U::template COW_nested<T, COW_element_ref<T, C, U, COW>>(r.info),
+          is_const(false),
+          ni(i) {}
     void clone_fixup() const {
         if (is_const) {
             // messy problem -- need to clone (iff not yet cloned) and then find the
             // corresponding iterator in the clone
-            auto i = reinterpret_cast<const COW *>(this)->modify().begin();
-            auto &orig_vec = reinterpret_cast<const COW *>(this)->getOrig();
+            auto i = std::launder(reinterpret_cast<const COW *>(this))->modify().begin();
+            auto &orig_vec = std::launder(reinterpret_cast<const COW *>(this))->getOrig();
             for (auto oi = orig_vec.begin(); oi != ci; ++oi, ++i)
                 BUG_CHECK(oi != orig_vec.end(), "Invalid iterator in clone_fixup");
             ni = i;
@@ -494,20 +500,19 @@ struct COW_element_ref<T, C, U, COW> : public COWref_base<T, U, COW_element_ref<
     }
     using COWref_base<T, U, COW_element_ref<T, C, U, COW>>::operator=;
     const U &get() const {
-        if (is_const && reinterpret_cast<const COW *>(this)->isCloned()) clone_fixup();
+        if (is_const && isCloned()) clone_fixup();
         return *ci;
     }
     const U &getOrig() const {
         if (is_const) return *ci;
         BUG("getOrig on cloned COW_element_ref");
     }
-    bool isCloned() const { return reinterpret_cast<const COW *>(this)->isCloned(); }
+    bool isCloned() const { return std::launder(reinterpret_cast<const COW *>(this))->isCloned(); }
     U &modify() const {
         clone_fixup();
         return *ni;
     }
 };
-
 
 // specialization for maps with value type pair
 template <class T, class C, class K, class U, class V, class COW>
@@ -581,8 +586,8 @@ struct COW_map_value_ref<T, C, K, std::vector<U>, COW>
             this->is_const = false;
         }
     }
-    using COWref_base<T, std::vector<U>,
-                      COW_map_value_ref<T, C, K, std::vector<U>, COW>>::operator=;
+    using COWref_base<T, std::vector<U>, COW_map_value_ref<T, C, K, std::vector<U>, COW>>::operator=
+        ;
     const std::vector<U> &get() const {
         if (this->is_const && this->isCloned()) clone_fixup();
         return this->ci->second;
@@ -636,8 +641,9 @@ struct COW_array_element_ref : public COWref_base<T, U, COW_array_element_ref<T,
 };
 
 template <class T, typename U, size_t N, U (T::*field)[N]>
-requires std::derived_from<
-    typename U::template COW_nested<T, COW_array_element_ref<T, U, N, field>>, COW_nested_class>
+    requires std::derived_from<
+                 typename U::template COW_nested<T, COW_array_element_ref<T, U, N, field>>,
+                 COW_nested_class>
 struct COW_array_element_ref<T, U, N, field>
     : public COWref_base<T, U, COW_array_element_ref<T, U, N, field>>,
       public U::template COW_nested<T, COW_array_element_ref<T, U, N, field>> {
@@ -647,11 +653,13 @@ struct COW_array_element_ref<T, U, N, field>
         mutable U *ni;
     };
     COW_array_element_ref(COWinfo<T> *inf, const U *i)
-      : U::template COW_nested<T, COW_array_element_ref<T, U, N, field>>(inf),
-        is_const(true), ci(i) {}
+        : U::template COW_nested<T, COW_array_element_ref<T, U, N, field>>(inf),
+          is_const(true),
+          ci(i) {}
     COW_array_element_ref(COWinfo<T> *inf, U *i)
-      : U::template COW_nested<T, COW_array_element_ref<T, U, N, field>>(inf),
-      is_const(false), ni(i) {}
+        : U::template COW_nested<T, COW_array_element_ref<T, U, N, field>>(inf),
+          is_const(false),
+          ni(i) {}
     void clone_fixup() const {
         if (is_const) {
             // messy problem -- need to clone (iff not yet cloned) and then find the
@@ -683,9 +691,9 @@ struct COW_array_iterator {
     COW_array_element_ref<T, U, N, field> ref;
     COW_array_iterator(COWinfo<T> *inf, const U *i) : ref(inf, i) {}
     COW_array_iterator(COWinfo<T> *inf, U *i) : ref(inf, i) {}
-    template<class COW>  // requires COWref<COW>
+    template <class COW>  // requires COWref<COW>
     COW_array_iterator(COW r, const U *i) : ref(r.info, i) {}
-    template<class COW>  // requires COWref<COW>
+    template <class COW>  // requires COWref<COW>
     COW_array_iterator(COW r, U *i) : ref(r.info, i) {}
 
     COW_array_iterator &operator++() {
