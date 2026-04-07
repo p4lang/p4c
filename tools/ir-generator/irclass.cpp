@@ -514,9 +514,9 @@ void IrClass::outputCOWref(std::ostream &out) const {
     out << indent << "operator COWptr<" << name << ">() const { return COWptr<" << name
         << ">(info); }\n";
     out << indent << "operator const " << name << " *() const { return info->get(); }\n";
+    out << indent << "const COWref *operator->() const { return this; }\n";
 #endif
-    out << indent << "COWref *operator->() { return this; }\n";
-    out << indent << "void visit_children(Visitor &, const char *);\n";
+    out << indent << "void visit_children(Visitor &, const char *) const;\n";
     outputCOWmethodrefs(
         IrElement::Public, out,
         {"visit_children"_cs, "COWref::visit_children"_cs, "COWref_visit_children"_cs});
@@ -543,11 +543,13 @@ void IrClass::outputCOWnested(std::ostream &out, IrNamespace *containedIn) const
     }
     out << indent << "};\n";
     out << indent << "const " << qname
-        << " &get() const { return reinterpret_cast<const COW *>(this)->get(); }\n";
+        << " &get() const { return std::launder(reinterpret_cast<const COW *>(this))->get(); }\n";
     out << indent << "const " << qname
-        << " &getOrig() const { return reinterpret_cast<const COW *>(this)->getOrig(); }\n";
+        << " &getOrig() const { return std::launder(reinterpret_cast<const COW "
+           "*>(this))->getOrig(); }\n";
     out << indent << qname
-        << " &modify() const { return reinterpret_cast<const COW *>(this)->modify(); }\n";
+        << " &modify() const { return std::launder(reinterpret_cast<const COW *>(this))->modify(); "
+           "}\n";
     out << IrElement::Protected;
     out << indent << "COW_nested() = delete;\n";
     out << indent << "COW_nested(const COW_nested &) = default;\n";

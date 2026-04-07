@@ -109,17 +109,19 @@ struct COWref_subfield : public COWref_base<T, U, COWref_subfield<T, U, COW, X, 
     // FIXME -- should be `union { COWinfo<T> *info; COW ref; };`, but that causes errors
     // about incomplete types when trying to instantiate specializations.
     using COWref_base<T, U, COWref_subfield<T, U, COW, X, field>>::operator=;
-    const U &get() const { return (reinterpret_cast<const COW *>(this)->get()).*field; }
-    const U &getOrig() const { return (reinterpret_cast<const COW *>(this)->getOrig()).*field; }
-    U &modify() const { return (reinterpret_cast<const COW *>(this)->modify()).*field; }
+    const U &get() const { return std::launder(reinterpret_cast<const COW *>(this))->get().*field; }
+    const U &getOrig() const {
+        return std::launder(reinterpret_cast<const COW *>(this))->getOrig().*field;
+    }
+    U &modify() const { return std::launder(reinterpret_cast<const COW *>(this))->modify().*field; }
 };
 
 /* a nested IR class defined in ir-generated.h -- base class marker for template speciaizations */
 struct COW_nested_class {};
 
 template <class T, typename U, U T::*field>
-requires std::derived_from<typename U::template COW_nested<T, COWfieldref<T, U, field>>,
-                           COW_nested_class>
+    requires std::derived_from<typename U::template COW_nested<T, COWfieldref<T, U, field>>,
+                               COW_nested_class>
 struct COWfieldref<T, U, field> : public COWref_base<T, U, COWfieldref<T, U, field>>,
                                   public U::template COW_nested<T, COWfieldref<T, U, field>> {
     using COWref_base<T, U, COWfieldref<T, U, field>>::operator=;
@@ -138,23 +140,26 @@ class COWptr {
     explicit COWptr(COWNode_info *p) : info(static_cast<COWinfo<T> *>(p)) {
         BUG_CHECK(info->get()->template is<T>(), "incorrect type in COWptr ctor");
     }
-    typename T::COWref getRef() const { return typename T::COWref(info); }
+    const typename T::COWref *getRef() const {
+        return std::launder(reinterpret_cast<const T::COWref *>(this));
+    }
 
  public:
     COWptr() = default;
     COWptr(const COWptr &) = default;
     COWptr(COWptr &&) = default;
-    COWptr(const T::COWref *r) : info(r->info) {}               // NOLINT(runtime/explicit)
+    COWptr(const T::COWref *r) : info(r->info) {}  // NOLINT(runtime/explicit)
     template <typename U>
-    requires std::derived_from<U, T> COWptr(const COWptr<U> &a) : COWptr(a.info) {}
+        requires std::derived_from<U, T>
+    COWptr(const COWptr<U> &a) : COWptr(a.info) {}
     ~COWptr() = default;
     COWptr &operator=(const COWptr &) = default;
     COWptr &operator=(COWptr &&) = default;
 
     const T *get() const { return info->get(); }
     operator const T *() const { return get(); }
-    typename T::COWref operator->() const { return getRef(); }
-    typename T::COWref operator*() const { return getRef(); }
+    const typename T::COWref *operator->() const { return getRef(); }
+    const typename T::COWref &operator*() const { return *getRef(); }
     void visit_children(Visitor &v, const char *name = nullptr) const {
         get()->COWref_visit_children(info, v, name);
     }

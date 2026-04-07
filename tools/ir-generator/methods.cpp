@@ -179,15 +179,16 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Void(),
       {new IrField(&ReferenceType::VisitorRef, "v"_cs),
        new IrField(new PointerType(&NamedType::Char(), true), "n"_cs, "nullptr"_cs)},
-      IN_IMPL + OVERRIDE + COWREF_METHOD,
+      CONST + IN_IMPL + OVERRIDE + COWREF_METHOD,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{" << std::endl;
           // Silence "not used" warnings in case of name `n` is not used
           buf << cl->indent << "(void)n;" << std::endl;
           if (auto parent = cl->getParent())
-              buf << cl->indent << "reinterpret_cast<" << parent->qualified_name(cl->containedIn)
-                  << "::COWref *>(this)->visit_children(v, n);" << std::endl;
+              buf << cl->indent << "std::launder(reinterpret_cast<const "
+                  << parent->qualified_name(cl->containedIn)
+                  << "::COWref *>(this))->visit_children(v, n);" << std::endl;
           for (auto f : *cl->getFields()) {
               if (f->type) {
                   if (f->type->resolve(cl->containedIn) == nullptr)
@@ -483,9 +484,9 @@ static cstring rewriteCOWMethodBody(cstring body) {
         const char *t = vccall;
         while (t > p && (std::isalnum(t[-1]) || t[-1] == '_' || t[-1] == ':')) t--;
         rv.append(p, t - p);
-        rv.append("reinterpret_cast<");
+        rv.append("std::launder(reinterpret_cast<const ");
         rv.append(t, vccall - t);
-        rv.append("::COWref *>(this)->");
+        rv.append("::COWref *>(this))->");
         p = vccall + 2;
     }
     rv.append(p);
