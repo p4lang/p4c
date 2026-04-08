@@ -19,6 +19,7 @@ set (P4_FRONTEND_SRCS
   p4/checkCoreMethods.cpp
   p4/checkNamedArgs.cpp
   p4/createBuiltins.cpp
+  p4/decl_copyprop.cpp
   p4/def_use.cpp
   p4/defaultArguments.cpp
   p4/defaultValues.cpp
@@ -110,6 +111,7 @@ set (P4_FRONTEND_HDRS
   p4/commonInlining.h
   p4/coreLibrary.h
   p4/createBuiltins.h
+  p4/decl_copyprop.h
   p4/def_use.h
   p4/defaultArguments.h
   p4/defaultValues.h
