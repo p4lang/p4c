@@ -132,9 +132,12 @@ fi
 
 # ! ------  END CORE -----------------------------------------------
 
-  # TODO: Remove this check once 18.04 is deprecated.
-if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+if [[ "$IN_DOCKER" == "TRUE" ]] ; then
   ccache --set-config cache_dir=.ccache
+fi
+
+# TODO: Remove this check once 18.04 is deprecated.
+if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
   # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
   uv pip install cmake==3.16.3
 fi
