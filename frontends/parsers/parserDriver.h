@@ -188,7 +188,9 @@ class P4ParserDriver final : public AbstractParserDriver {
     friend class P4::P4Parser;
 
     /// Notify that the parser parsed a P4 `error` declaration.
-    void onReadErrorDeclaration(IR::Type_Error *error);
+    //  @return true if this is the first error declaration, false if it has
+    //          been combined into a previous one (and should be elided)
+    bool onReadErrorDeclaration(IR::Type_Error *error);
 
     ////////////////////////////////////////////////////////////////////////////
     // Shared state manipulated directly by the lexer and parser.
@@ -197,9 +199,9 @@ class P4ParserDriver final : public AbstractParserDriver {
     /// Semantic information about the program being parsed.
     Util::ProgramStructure *structure = nullptr;
 
-    /// The top-level nodes that make up the P4 program (or program fragment)
+    /// The top-level object that makes up the P4 program (or program fragment)
     /// we're parsing.
-    IR::Vector<IR::Node> *nodes = nullptr;
+    IR::Node *result = nullptr;
 
     /// A scratch buffer to hold the current string literal. (They're lexed
     /// incrementally, so we need to hold some state between tokens.)

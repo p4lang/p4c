@@ -352,6 +352,7 @@ using namespace P4;
 %type<IR::Vector<IR::Expression>*> intOrStrList
 %type<IR::Vector<IR::Expression>*> strList
 %type<IR::Expression*> intOrStr
+%type<IR::P4Program*>   input
 
 // %precedence COMMA
 %precedence QUESTION
@@ -396,7 +397,7 @@ a syntax error causing a spurious error cascade, which isn't too bad.
 // Simulate multiple start symbols to allow the parser to be reused for
 // annotation bodies.
 start
-    : fragment END_ANNOTATION { driver.nodes->push_back($1->getNode()); YYACCEPT; }
+    : fragment END_ANNOTATION { driver.result = $1->getNode(); YYACCEPT; }
     | START_PROGRAM program
     ;
 
@@ -484,9 +485,10 @@ p4rtControllerType
 program : input END { YYACCEPT; };
 
 input
-    : %empty
-    | input declaration  { if ($2) driver.nodes->push_back($2->getNode()); }
-    | input ";"          {}   // empty declaration
+    : %empty             { driver.result = $$ = new IR::P4Program; }
+    | input declaration  { if ($2) $1->objects.push_back($2->getNode());
+                           $$ = $1; }
+    | input ";"          { $$ = $1; }   // empty declaration
     ;
 
 declaration
@@ -497,7 +499,7 @@ declaration
     | typeDeclaration         { $$ = $1; }
     | controlDeclaration      { $$ = $1; }
     | instantiation           { $$ = $1; }
-    | errorDeclaration        { driver.onReadErrorDeclaration($1); $$ = nullptr; }
+    | errorDeclaration        { $$ = driver.onReadErrorDeclaration($1) ? $1 : nullptr; }
     | matchKindDeclaration    { $$ = $1; }
     | functionDeclaration     { $$ = $1; }
     ;
