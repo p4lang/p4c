@@ -112,6 +112,8 @@ def _p4_library_impl(ctx):
         progress_message = "Compiling P4 program %s" % p4file.short_path,
     )
 
+    return [DefaultInfo(files = depset(outputs), runfiles = ctx.runfiles(files = outputs))]
+
 p4_library = rule(
     doc = "Compiles P4 program using the p4c compiler.",
     implementation = _p4_library_impl,
