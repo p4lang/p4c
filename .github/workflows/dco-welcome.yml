@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Load PR Context
         id: pr-context
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const prs = context.payload.check_run.pull_requests || [];
