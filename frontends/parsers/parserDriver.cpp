@@ -114,8 +114,7 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
     }
 }
 
-P4ParserDriver::P4ParserDriver()
-    : structure(new Util::ProgramStructure), nodes(new IR::Vector<IR::Node>()) {}
+P4ParserDriver::P4ParserDriver() : structure(new Util::ProgramStructure) {}
 
 bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
                            unsigned sourceLine /* = 1 */) {
@@ -144,7 +143,9 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
     P4ParserDriver driver;
     P4Lexer lexer(in);
     if (!driver.parse(lexer, sourceFile, sourceLine)) return nullptr;
-    return new IR::P4Program(driver.nodes->srcInfo, *driver.nodes);
+    IR::P4Program *rv = driver.result->to<IR::P4Program>();
+    BUG_CHECK(rv, "parse result is not a program?");
+    return rv;
 }
 
 /* static */ const IR::P4Program *P4ParserDriver::parse(FILE *in, std::string_view sourceFile,
@@ -162,7 +163,8 @@ P4ParserDriver::parseProgramSources(std::istream &in, std::string_view sourceFil
         return {nullptr, nullptr};
     }
 
-    auto *program = new IR::P4Program(driver.nodes->srcInfo, *driver.nodes);
+    auto *program = driver.result->to<IR::P4Program>();
+    BUG_CHECK(program, "parse result is not a program?");
     const Util::InputSources *sources = driver.sources;
 
     return {program, sources};
@@ -185,7 +187,7 @@ const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceI
         return nullptr;
     }
 
-    return nodes->front()->to<T>();
+    return result->to<T>();
 }
 
 /* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseExpressionList(
@@ -295,13 +297,13 @@ const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceI
                                                     srcInfo, body);
 }
 
-void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
+bool P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
     if (allErrors == nullptr) {
-        nodes->push_back(error);
         allErrors = error;
-        return;
+        return true;
     }
     allErrors->members.append(error->members);
+    return false;
 }
 
 }  // namespace P4
