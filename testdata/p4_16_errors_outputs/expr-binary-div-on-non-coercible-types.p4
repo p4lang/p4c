@@ -1,4 +1,4 @@
 header H {
-    bit<({ ... } / true)> b;
+    bit<{ ... } / true> b;
 }
 
