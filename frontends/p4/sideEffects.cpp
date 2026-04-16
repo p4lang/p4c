@@ -511,7 +511,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
                 typeMap->setLeftValue(argValue);
                 if (p->direction != IR::Direction::Out) {
                     auto clone = argValue->clone();
-                    auto stat = new IR::AssignmentStatement(clone, argex);
+                    auto stat = new IR::AssignmentStatement(argex->srcInfo, clone, argex);
                     LOG3(clone << " = " << argex);
                     statements.push_back(stat);
                     typeMap->setType(clone, paramtype);

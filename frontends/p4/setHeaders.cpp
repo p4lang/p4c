@@ -30,10 +30,11 @@ void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expres
 
     if (structType->is<IR::Type_Header>()) {
         LOG3("Inserting setValid for " << dest);
-        auto method = new IR::Member(dest->srcInfo, dest, IR::Type_Header::setValid);
-        auto mc =
-            new IR::MethodCallExpression(dest->srcInfo, method, new IR::Vector<IR::Argument>());
-        auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+        auto srcInfo = dest->srcInfo;
+        if (!srcInfo) srcInfo = src->srcInfo;
+        auto method = new IR::Member(srcInfo, dest, IR::Type_Header::setValid);
+        auto mc = new IR::MethodCallExpression(srcInfo, method, new IR::Vector<IR::Argument>());
+        auto stat = new IR::MethodCallStatement(srcInfo, mc);
         insert.push_back(stat);
         return;
     }
