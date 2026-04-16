@@ -74,6 +74,16 @@ To add a new target:
 - CTest labels are defined per target under `modules/testgen/targets/*`.
 - Benchmarks and plotting scripts live in `modules/testgen/benchmarks/`.
 
+## P4Testgen Workflow Notes
+- **Rebuild after code changes**: after editing `backends/p4tools/modules/testgen/**`, rebuild `p4testgen` explicitly (`cmake --build build --target p4testgen -j<N>`) before trusting test results.
+- **Targeted eBPF test run**: use `ctest --test-dir build --output-on-failure -R testgen-p4c-ebpf/<name>.p4` for quick iteration.
+- **Inspect generated tests**: testgen outputs live under `build/testgen/testgen-p4c-<target>/<program>.out/` and are often the fastest way to diagnose mismatches between symbolic traces and emitted control-plane commands.
+- **Root-required eBPF tests**: some eBPF executions require root/network namespace setup; in non-root environments they may be skipped or fail for environment reasons rather than compiler logic.
+- **Prefer non-root BMv2 PTF runs**: install `pynng` in the active environment and run BMv2 PTF tests with nanomsg mode (the testgen runner already passes `--use-nanomsg`), so `uv run ctest ...` works without sudo.
+
+## P4Testgen Structure Notes
+- **Where backend outputs are emitted**: each target backend converts `TestSpec` objects to target-specific artifacts under `modules/testgen/targets/<target>/` (for example STF, PTF, metadata, or protobuf emitters).
+
 ## Key Entry Points
 - `README.md`: overview, dependencies, and layout.
 - `modules/testgen/README.md`: P4Testgen usage, extensions, and limitations.

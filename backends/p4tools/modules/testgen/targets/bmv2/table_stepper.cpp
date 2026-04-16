@@ -282,7 +282,7 @@ bool Bmv2V1ModelTableStepper::checkForActionProfile() {
     if (const auto *implCall = implExpr->expression->to<IR::ConstructorCallExpression>()) {
         const auto *implDeclType = state->resolveType(implCall->constructedType);
         implExtern = implDeclType->checkedTo<IR::Type_Extern>();
-        implDecl = implExtern;
+        implDecl = impl;
     } else if (const auto *implPath = implExpr->expression->to<IR::PathExpression>()) {
         const auto *declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
         const auto *implDeclType = state->resolveType(declInst->type);
@@ -324,7 +324,7 @@ bool Bmv2V1ModelTableStepper::checkForActionSelector() {
     if (const auto *implCall = selectorExpr->expression->to<IR::ConstructorCallExpression>()) {
         const auto *selectorDeclType = state->resolveType(implCall->constructedType);
         selectorExtern = selectorDeclType->checkedTo<IR::Type_Extern>();
-        selectorDecl = selectorExtern;
+        selectorDecl = impl;
     } else if (const auto *implPath = selectorExpr->expression->to<IR::PathExpression>()) {
         const auto *declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
         const auto *selectorDeclType = state->resolveType(declInst->type);
@@ -338,18 +338,19 @@ bool Bmv2V1ModelTableStepper::checkForActionSelector() {
     if (selectorExtern->name != "action_selector") {
         return false;
     }
-    // Treat action selectors like action profiles for now.
-    // The behavioral model P4Runtime is unclear how to configure action selectors.
     const auto *testObject =
-        state->getTestObject("action_profile"_cs, selectorDecl->controlPlaneName(), false);
+        state->getTestObject("action_selector"_cs, selectorDecl->controlPlaneName(), false);
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
-        // add the generated action profile.
+        // add the generated action selector and backing profile.
         bmv2V1ModelProperties.addProfileToState = true;
         bmv2V1ModelProperties.actionProfile = new Bmv2V1ModelActionProfile(selectorDecl);
+        bmv2V1ModelProperties.actionSelector =
+            new Bmv2V1ModelActionSelector(selectorDecl, bmv2V1ModelProperties.actionProfile);
         return true;
     }
-    bmv2V1ModelProperties.actionProfile = testObject->checkedTo<Bmv2V1ModelActionProfile>();
+    bmv2V1ModelProperties.actionSelector = testObject->checkedTo<Bmv2V1ModelActionSelector>();
+    bmv2V1ModelProperties.actionProfile = bmv2V1ModelProperties.actionSelector->getActionProfile();
     bmv2V1ModelProperties.addProfileToState = false;
     return true;
 }
@@ -378,8 +379,7 @@ void Bmv2V1ModelTableStepper::checkTargetProperties(
 
     // Check whether the table has an action selector associated with it.
     if (checkForActionSelector()) {
-        // TODO: This should be a selector. Implement.
-        bmv2V1ModelProperties.implementaton = TableImplementation::profile;
+        bmv2V1ModelProperties.implementaton = TableImplementation::selector;
         return;
     }
 }
@@ -388,9 +388,17 @@ void Bmv2V1ModelTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *keys = table->getKey();
     const auto &testgenOptions = TestgenOptions::get();
+    auto hasMatchKeys = false;
+    for (const auto &keyProperties : properties.resolvedKeys) {
+        if (keyProperties.matchType != BMv2Constants::MATCH_KIND_SELECTOR) {
+            hasMatchKeys = true;
+            break;
+        }
+    }
 
-    // If we have no keys, there is nothing to match.
-    if (keys == nullptr) {
+    // If we have no match keys, there is nothing to match.
+    // Selector keys influence action selection within a group and are not table match keys.
+    if (keys == nullptr || !hasMatchKeys) {
         // Either override the default action or fall back to executing it.
         auto testBackend = testgenOptions.testBackend;
         if (testBackend == "STF" && !properties.defaultIsImmutable) {

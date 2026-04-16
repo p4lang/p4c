@@ -90,6 +90,7 @@ class TestFramework {
         if (apObject != nullptr) {
             const auto *actionProfile = apObject->checkedTo<ProfileType>();
             tblJson["has_ap"] = true;
+            tblJson["action_profile"] = actionProfile->getProfileDecl()->controlPlaneName();
             // Check if we have an Action Selector too.
             // TODO: Change this to check in ActionSelector with table
             // property "action_selectors".
@@ -99,6 +100,7 @@ class TestFramework {
                 apAsMap[actionProfile->getProfileDecl()->controlPlaneName()] =
                     actionSelector->getSelectorDecl()->controlPlaneName();
                 tblJson["has_as"] = true;
+                tblJson["action_selector"] = actionSelector->getSelectorDecl()->controlPlaneName();
             }
         }
     }

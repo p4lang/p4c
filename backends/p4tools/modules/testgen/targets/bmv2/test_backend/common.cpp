@@ -89,6 +89,8 @@ inja::json Bmv2TestFramework::getControlPlane(const TestSpec *testSpec) const {
     auto controlPlaneJson = inja::json::object();
     // Map of actionProfiles and actionSelectors for easy reference.
     std::map<cstring, cstring> apAsMap;
+    // Action profile member/group IDs are profile-scoped in P4Runtime.
+    std::map<std::string, size_t> profileRuleIds;
 
     auto tables = testSpec->getTestObjectCategory("tables"_cs);
     if (!tables.empty()) {
@@ -101,6 +103,19 @@ inja::json Bmv2TestFramework::getControlPlane(const TestSpec *testSpec) const {
         // Collect action profiles and selectors associated with the table.
         checkForTableActionProfile<Bmv2V1ModelActionProfile, Bmv2V1ModelActionSelector>(
             tblJson, apAsMap, tblConfig);
+
+        if (tblJson.contains("has_as")) {
+            const auto &profileName = tblJson["action_profile"].get_ref<const std::string &>();
+            auto &nextId = profileRuleIds[profileName];
+            if (nextId == 0) {
+                nextId = 1;
+            }
+            for (auto &rule : tblJson["rules"]) {
+                rule["profile_member_id"] = nextId;
+                rule["profile_group_id"] = nextId;
+                ++nextId;
+            }
+        }
 
         // Check whether the default action is overridden for this table.
         checkForDefaultActionOverride(tblJson, tblConfig);

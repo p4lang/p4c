@@ -6,18 +6,24 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
 #include <map>
+#include <sstream>
 #include <vector>
 
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/exceptions.h"
 
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
+
 namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
 using ::testing::HasSubstr;
+using ::testing::Not;
 
 TableConfig PTFTest::getForwardTableConfig() {
     ActionArg port(new IR::Parameter("port", IR::Direction::None, IR::Type_Bits::get(9)),
@@ -237,6 +243,92 @@ TEST_F(PTFTest, Ptf04) {
     } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("Unimplemented for Ternary FieldMatch"));
     }
+}
+
+TEST_F(PTFTest, PtfActionSelectorProgramming) {
+    const auto *payload =
+        IR::Constant::get(IR::Type_Bits::get(112), big_int("0x0000010100000202030355667788"));
+    const auto *payloadMask =
+        IR::Constant::get(IR::Type_Bits::get(112), big_int("0x0000000000000000000000000000"));
+    const auto ingressPacket = Packet(0, payload, payloadMask);
+    const auto egressPacket = Packet(2, payload, payloadMask);
+
+    auto selectorConfig = getForwardTableConfig();
+    const auto *apDecl = new IR::P4Table("selector_profile_decl", new IR::TableProperties());
+    const auto actionProfile = P4Testgen::Bmv2::Bmv2V1ModelActionProfile(apDecl);
+    const auto *asDecl = new IR::P4Table("selector_decl", new IR::TableProperties());
+    const auto actionSelector = P4Testgen::Bmv2::Bmv2V1ModelActionSelector(asDecl, &actionProfile);
+    selectorConfig.addTableProperty("action_profile"_cs, &actionProfile);
+    selectorConfig.addTableProperty("action_selector"_cs, &actionSelector);
+
+    auto testSpec = TestSpec(ingressPacket, egressPacket, {});
+    testSpec.addTestObject("tables"_cs, "SwitchIngress.forward"_cs, &selectorConfig);
+
+    const auto fileBasePath = std::filesystem::path("/tmp/p4c-bmv2-ptf-selector-test");
+    TestBackendConfiguration testBackendConfiguration{"selector_programming"_cs, 1, fileBasePath,
+                                                      1};
+    auto testWriter = PTF(testBackendConfiguration);
+    testWriter.writeTestToFile(&testSpec, cstring::empty, 5, 0);
+
+    auto generatedFile = fileBasePath;
+    generatedFile.replace_extension(".py");
+    std::ifstream stream(generatedFile);
+    ASSERT_TRUE(stream.is_open());
+    std::stringstream buffer;
+    buffer << stream.rdbuf();
+    const auto rendered = buffer.str();
+    EXPECT_THAT(rendered, HasSubstr("self.send_request_add_member("));
+    EXPECT_THAT(rendered, HasSubstr("self.send_request_add_group("));
+    EXPECT_THAT(rendered, HasSubstr("self.send_request_add_entry_to_group("));
+    EXPECT_THAT(rendered, HasSubstr("'selector_profile_decl'"));
+    EXPECT_THAT(rendered, Not(HasSubstr("'selector_decl'")));
+    std::filesystem::remove(generatedFile);
+}
+
+TEST_F(PTFTest, PtfActionSelectorSharedProfileIdsAreUniqueAcrossTables) {
+    const auto *payload =
+        IR::Constant::get(IR::Type_Bits::get(112), big_int("0x0000010100000202030355667788"));
+    const auto *payloadMask =
+        IR::Constant::get(IR::Type_Bits::get(112), big_int("0x0000000000000000000000000000"));
+    const auto ingressPacket = Packet(0, payload, payloadMask);
+    const auto egressPacket = Packet(2, payload, payloadMask);
+
+    auto selectorConfig1 = getForwardTableConfig();
+    auto selectorConfig2 = getForwardTableConfig();
+    const auto *apDecl = new IR::P4Table("hashed_selector", new IR::TableProperties());
+    const auto actionProfile = P4Testgen::Bmv2::Bmv2V1ModelActionProfile(apDecl);
+    const auto *asDecl1 = new IR::P4Table("selector_decl_1", new IR::TableProperties());
+    const auto *asDecl2 = new IR::P4Table("selector_decl_2", new IR::TableProperties());
+    const auto actionSelector1 =
+        P4Testgen::Bmv2::Bmv2V1ModelActionSelector(asDecl1, &actionProfile);
+    const auto actionSelector2 =
+        P4Testgen::Bmv2::Bmv2V1ModelActionSelector(asDecl2, &actionProfile);
+    selectorConfig1.addTableProperty("action_profile"_cs, &actionProfile);
+    selectorConfig1.addTableProperty("action_selector"_cs, &actionSelector1);
+    selectorConfig2.addTableProperty("action_profile"_cs, &actionProfile);
+    selectorConfig2.addTableProperty("action_selector"_cs, &actionSelector2);
+
+    auto testSpec = TestSpec(ingressPacket, egressPacket, {});
+    testSpec.addTestObject("tables"_cs, "SwitchIngress.forward_1"_cs, &selectorConfig1);
+    testSpec.addTestObject("tables"_cs, "SwitchIngress.forward_2"_cs, &selectorConfig2);
+
+    const auto fileBasePath = std::filesystem::path("/tmp/p4c-bmv2-ptf-selector-shared-profile");
+    TestBackendConfiguration testBackendConfiguration{"selector_shared_profile"_cs, 1, fileBasePath,
+                                                      1};
+    auto testWriter = PTF(testBackendConfiguration);
+    testWriter.writeTestToFile(&testSpec, cstring::empty, 7, 0);
+
+    auto generatedFile = fileBasePath;
+    generatedFile.replace_extension(".py");
+    std::ifstream stream(generatedFile);
+    ASSERT_TRUE(stream.is_open());
+    std::stringstream buffer;
+    buffer << stream.rdbuf();
+    const auto rendered = buffer.str();
+    EXPECT_THAT(rendered, HasSubstr("'hashed_selector'"));
+    EXPECT_THAT(rendered, HasSubstr("'hashed_selector',\n            1,"));
+    EXPECT_THAT(rendered, HasSubstr("'hashed_selector',\n            2,"));
+    std::filesystem::remove(generatedFile);
 }
 
 }  // namespace P4::P4Tools::Test

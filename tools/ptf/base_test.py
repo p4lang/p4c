@@ -662,7 +662,41 @@ class P4RuntimeTest(BaseTest):
     def set_action_entry(self, table_entry, a_name, params):
         self.set_action(table_entry.action.action, a_name, params)
 
-    def set_one_shot_profile(self, table_entry, a_name, params):
+    def _get_table_action_profile(self, t_name):
+        table = self.get_table(t_name)
+        if table is None:
+            return None
+        action_profile_id = table.implementation_id
+        if action_profile_id == 0:
+            return None
+        for ap in self.p4info.action_profiles:
+            if ap.preamble.id == action_profile_id:
+                return ap
+        return None
+
+    def _validate_selector_weight(self, action_profile, weight):
+        # P4Runtime spec 9.2.2 and 9.2.3:
+        # - weights_disallowed=true  => only weight 0 is valid
+        # - weights_disallowed=false => weight 0 is invalid
+        if weight < 0:
+            self.fail("Action selector member weight must be >= 0")
+        if action_profile is None:
+            return
+        field_names = {field.name for field in action_profile.DESCRIPTOR.fields}
+        if "with_selector" in field_names and not getattr(action_profile, "with_selector"):
+            return
+        if "weights_disallowed" not in field_names:
+            return
+        if action_profile.weights_disallowed:
+            if weight != 0:
+                self.fail(
+                    "Action selector disallows explicit weights, but non-zero weight was provided"
+                )
+        elif weight == 0:
+            self.fail("Action selector requires positive weights, but weight 0 was provided")
+
+    def set_one_shot_profile(self, table_entry, a_name, params, weight=1, watch=0, watch_port=b""):
+        # P4Runtime spec 9.2.3 one-shot selector programming path.
         action_profile_action = (
             table_entry.action.action_profile_action_set.action_profile_actions.add()
         )
@@ -676,7 +710,54 @@ class P4RuntimeTest(BaseTest):
             param = action_profile_action.action.params.add()
             param.param_id = self.get_param_id(a_name, p_name)
             param.value = stringify(v)
-        action_profile_action.weight = 1
+        action_profile_action.weight = weight
+        if watch != 0:
+            action_profile_action.watch = watch
+        if watch_port:
+            action_profile_action.watch_port = watch_port
+
+    def set_one_shot_profile_actions(self, table_entry, t_name, actions):
+        action_profile = self._get_table_action_profile(t_name)
+        for action_data in actions:
+            if len(action_data) == 2:
+                action_name, action_params = action_data
+                action_options = None
+            else:
+                action_name, action_params, action_options = action_data
+            options = {} if action_options is None else dict(action_options)
+            weight = options.get("weight", 1)
+            watch = options.get("watch", 0)
+            watch_port = options.get("watch_port", b"")
+            self._validate_selector_weight(action_profile, weight)
+            self.set_one_shot_profile(
+                table_entry,
+                action_name,
+                action_params,
+                weight=weight,
+                watch=watch,
+                watch_port=watch_port,
+            )
+
+    def _normalize_group_members(self, mbr_ids, members):
+        if members is not None:
+            if mbr_ids:
+                self.fail("Provide either mbr_ids or members, not both")
+            return members
+        # P4Runtime spec 9.2.2 group members carry a weight. For legacy callers,
+        # assign default weight 1.
+        return [(mbr_id, 1) for mbr_id in mbr_ids]
+
+    def _add_group_members_to_entry(self, ap_group, members, action_profile=None):
+        # P4Runtime spec 9.2.2 rejects duplicate member IDs in one group update.
+        seen_member_ids = set()
+        for member_id, member_weight in members:
+            if member_id in seen_member_ids:
+                self.fail("Duplicate member_id in action profile group membership")
+            seen_member_ids.add(member_id)
+            self._validate_selector_weight(action_profile, member_weight)
+            member = ap_group.members.add()
+            member.member_id = member_id
+            member.weight = member_weight
 
     def _write(self, req):
         try:
@@ -708,8 +789,7 @@ class P4RuntimeTest(BaseTest):
         self._push_update_member(req, ap_name, mbr_id, a_name, params, p4runtime_pb2.Update.INSERT)
 
     def send_request_add_member(self, ap_name, mbr_id, a_name, params):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_member(req, ap_name, mbr_id, a_name, params)
         return req, self.write_request(req)
 
@@ -717,42 +797,39 @@ class P4RuntimeTest(BaseTest):
         self._push_update_member(req, ap_name, mbr_id, a_name, params, p4runtime_pb2.Update.MODIFY)
 
     def send_request_modify_member(self, ap_name, mbr_id, a_name, params):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_modify_member(req, ap_name, mbr_id, a_name, params)
         return req, self.write_request(req, store=False)
 
-    def push_update_add_group(self, req, ap_name, grp_id, grp_size=32, mbr_ids=[]):
+    def push_update_add_group(self, req, ap_name, grp_id, grp_size=32, mbr_ids=[], members=None):
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
         ap_group = update.entity.action_profile_group
         ap_group.action_profile_id = self.get_ap_id(ap_name)
         ap_group.group_id = grp_id
         ap_group.max_size = grp_size
-        for mbr_id in mbr_ids:
-            member = ap_group.members.add()
-            member.member_id = mbr_id
+        normalized_members = self._normalize_group_members(mbr_ids, members)
+        action_profile = self.get_ap(ap_name)
+        self._add_group_members_to_entry(ap_group, normalized_members, action_profile)
 
-    def send_request_add_group(self, ap_name, grp_id, grp_size=32, mbr_ids=[]):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
-        self.push_update_add_group(req, ap_name, grp_id, grp_size, mbr_ids)
+    def send_request_add_group(self, ap_name, grp_id, grp_size=32, mbr_ids=[], members=None):
+        req = self.get_new_write_request()
+        self.push_update_add_group(req, ap_name, grp_id, grp_size, mbr_ids, members)
         return req, self.write_request(req)
 
-    def push_update_set_group_membership(self, req, ap_name, grp_id, mbr_ids=[]):
+    def push_update_set_group_membership(self, req, ap_name, grp_id, mbr_ids=[], members=None):
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.MODIFY
         ap_group = update.entity.action_profile_group
         ap_group.action_profile_id = self.get_ap_id(ap_name)
         ap_group.group_id = grp_id
-        for mbr_id in mbr_ids:
-            member = ap_group.members.add()
-            member.member_id = mbr_id
+        normalized_members = self._normalize_group_members(mbr_ids, members)
+        action_profile = self.get_ap(ap_name)
+        self._add_group_members_to_entry(ap_group, normalized_members, action_profile)
 
-    def send_request_set_group_membership(self, ap_name, grp_id, mbr_ids=[]):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
-        self.push_update_set_group_membership(req, ap_name, grp_id, mbr_ids)
+    def send_request_set_group_membership(self, ap_name, grp_id, mbr_ids=[], members=None):
+        req = self.get_new_write_request()
+        self.push_update_set_group_membership(req, ap_name, grp_id, mbr_ids, members)
         return req, self.write_request(req, store=False)
 
     #
@@ -779,8 +856,7 @@ class P4RuntimeTest(BaseTest):
         self.set_action_entry(table_entry, a_name, params)
 
     def send_request_add_entry_to_action(self, t_name, mk, a_name, params, priority=None):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_entry_to_action(req, t_name, mk, a_name, params, priority)
         return req, self.write_request(req, store=mk is not None)
 
@@ -822,7 +898,11 @@ class P4RuntimeTest(BaseTest):
             if "metadata" in options:
                 table_entry.metadata = options["metadata"]
             if "oneshot" in options and options["oneshot"]:
-                self.set_one_shot_profile(table_entry, action_name, action_params)
+                actions = options.get("oneshot_actions")
+                if actions is None:
+                    self.set_one_shot_profile(table_entry, action_name, action_params)
+                else:
+                    self.set_one_shot_profile_actions(table_entry, table_name, actions)
                 return table_entry
         self.set_action_entry(table_entry, action_name, action_params)
         return table_entry
@@ -842,11 +922,7 @@ class P4RuntimeTest(BaseTest):
             table_name_and_key, action_name_and_params, priority, options
         )
         testutils.log.info(f"table_add: table_entry={table_entry}")
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
-        election_id = req.election_id
-        election_id.high = 0
-        election_id.low = 1
+        req = self.get_new_write_request()
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
         update.entity.table_entry.CopyFrom(table_entry)
@@ -1050,8 +1126,7 @@ class P4RuntimeTest(BaseTest):
         table_entry.action.action_profile_member_id = mbr_id
 
     def send_request_add_entry_to_member(self, t_name, mk, mbr_id):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_entry_to_member(req, t_name, mk, mbr_id)
         return req, self.write_request(req, store=mk is not None)
 
@@ -1067,8 +1142,7 @@ class P4RuntimeTest(BaseTest):
         table_entry.action.action_profile_group_id = grp_id
 
     def send_request_add_entry_to_group(self, t_name, mk, grp_id):
-        req = p4runtime_pb2.WriteRequest()
-        req.device_id = self.device_id
+        req = self.get_new_write_request()
         self.push_update_add_entry_to_group(req, t_name, mk, grp_id)
         return req, self.write_request(req, store=mk is not None)
 

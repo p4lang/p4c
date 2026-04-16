@@ -173,7 +173,9 @@ Bmv2V1ModelActionSelector::Bmv2V1ModelActionSelector(const IR::IDeclaration *sel
                                                      const Bmv2V1ModelActionProfile *actionProfile)
     : selectorDecl(selectorDecl), actionProfile(actionProfile) {}
 
-cstring Bmv2V1ModelActionSelector::getObjectName() const { return "Bmv2V1ModelActionSelector"_cs; }
+cstring Bmv2V1ModelActionSelector::getObjectName() const {
+    return selectorDecl->controlPlaneName();
+}
 
 const IR::IDeclaration *Bmv2V1ModelActionSelector::getSelectorDecl() const { return selectorDecl; }
 

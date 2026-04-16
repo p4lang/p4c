@@ -182,6 +182,51 @@ class Test{{test_id}}(AbstractTest):
 ## if control_plane
 ## for table in control_plane.tables
 ## for rule in table.rules
+## if existsIn(table, "has_as")
+        self.send_request_add_member(
+            '{{table.action_profile}}',
+            {{rule.profile_member_id}},
+            '{{rule.action_name}}',
+            [
+## for act_param in rule.rules.act_args
+                ('{{act_param.param}}', {{act_param.value}}),
+## endfor
+            ]
+        )
+        self.send_request_add_group(
+            '{{table.action_profile}}',
+            {{rule.profile_group_id}},
+            1,
+            [{{rule.profile_member_id}}]
+        )
+## endif
+## endfor
+## endfor
+## for table in control_plane.tables
+## for rule in table.rules
+## if existsIn(table, "has_as")
+        self.send_request_add_entry_to_group(
+            '{{table.table_name}}',
+            [
+## for r in rule.rules.single_exact_matches
+                self.Exact('{{r.field_name}}', {{r.value}}),
+## endfor
+## for r in rule.rules.optional_matches
+                self.Optional('{{r.field_name}}', {{r.value}}, {{r.use_exact}}),
+## endfor
+## for r in rule.rules.range_matches
+                self.Range('{{r.field_name}}', {{r.lo}}, {{r.hi}}),
+## endfor
+## for r in rule.rules.ternary_matches
+                self.Ternary('{{r.field_name}}', {{r.value}}, {{r.mask}}),
+## endfor
+## for r in rule.rules.lpm_matches
+                self.Lpm('{{r.field_name}}', {{r.value}}, {{r.prefix_len}}),
+## endfor
+            ],
+            {{rule.profile_group_id}}
+        )
+## else
         self.table_add(
             ('{{table.table_name}}',
             [
@@ -210,6 +255,7 @@ class Test{{test_id}}(AbstractTest):
             , {% if rule.rules.needs_priority %}{{rule.priority}}{% else %}None{% endif %}
             {% if existsIn(table, "has_ap") %}, {"oneshot": True}{% endif %}
         )
+## endif
 ## endfor
 ## endfor
 ## endif
