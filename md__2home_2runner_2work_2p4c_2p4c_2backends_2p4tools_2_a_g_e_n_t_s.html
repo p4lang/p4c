@@ -206,6 +206,20 @@ Tests &amp; Benchmarks</h1>
 <li>CTest labels are defined per target under <code>modules/testgen/targets/*</code>.</li>
 <li>Benchmarks and plotting scripts live in <code>modules/testgen/benchmarks/</code>.</li>
 </ul>
+<h1><a class="anchor" id="p4testgen-workflow-notes"></a>
+P4Testgen Workflow Notes</h1>
+<ul>
+<li><b>Rebuild after code changes</b>: after editing <code>backends/p4tools/modules/testgen/**</code>, rebuild <code>p4testgen</code> explicitly (<code>cmake --build build --target p4testgen -j&lt;N&gt;</code>) before trusting test results.</li>
+<li><b>Targeted eBPF test run</b>: use <code>ctest --test-dir build --output-on-failure -R testgen-p4c-ebpf/&lt;name&gt;.p4</code> for quick iteration.</li>
+<li><b>Inspect generated tests</b>: testgen outputs live under <code>build/testgen/testgen-p4c-&lt;target&gt;/&lt;program&gt;.out/</code> and are often the fastest way to diagnose mismatches between symbolic traces and emitted control-plane commands.</li>
+<li><b>Root-required eBPF tests</b>: some eBPF executions require root/network namespace setup; in non-root environments they may be skipped or fail for environment reasons rather than compiler logic.</li>
+<li><b>Prefer non-root BMv2 PTF runs</b>: install <code>pynng</code> in the active environment and run BMv2 PTF tests with nanomsg mode (the testgen runner already passes <code>--use-nanomsg</code>), so <code>uv run ctest ...</code> works without sudo.</li>
+</ul>
+<h1><a class="anchor" id="p4testgen-structure-notes"></a>
+P4Testgen Structure Notes</h1>
+<ul>
+<li><b>Where backend outputs are emitted</b>: each target backend converts <code>TestSpec</code> objects to target-specific artifacts under <code>modules/testgen/targets/&lt;target&gt;/</code> (for example STF, PTF, metadata, or protobuf emitters).</li>
+</ul>
 <h1><a class="anchor" id="key-entry-points-7"></a>
 Key Entry Points</h1>
 <ul>
