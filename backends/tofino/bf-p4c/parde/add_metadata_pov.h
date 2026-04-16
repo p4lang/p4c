@@ -37,16 +37,16 @@ class AddMetadataPOV : public Transform {
     const IR::BFN::Deparser *dp = nullptr;
 
     bool equiv(const IR::Expression *a, const IR::Expression *b);
-    static IR::MAU::Primitive *create_pov_write(const IR::Expression *povBit, bool validate);
-    IR::Node *insert_deparser_param_pov_write(const IR::MAU::Primitive *p, bool validate);
-    IR::Node *insert_deparser_digest_pov_write(const IR::MAU::Primitive *p, bool validate);
-    IR::Node *insert_field_pov_read(const IR::MAU::Primitive *p);
+    static IR::MAU::MauPrimitive *create_pov_write(const IR::Expression *povBit, bool validate);
+    IR::Node *insert_deparser_param_pov_write(const IR::MAU::MauPrimitive *p, bool validate);
+    IR::Node *insert_deparser_digest_pov_write(const IR::MAU::MauPrimitive *p, bool validate);
+    IR::Node *insert_field_pov_read(const IR::MAU::MauPrimitive *p);
 
     IR::BFN::Pipe *preorder(IR::BFN::Pipe *pipe) override;
 
     IR::BFN::DeparserParameter *postorder(IR::BFN::DeparserParameter *param) override;
     IR::BFN::Digest *postorder(IR::BFN::Digest *digest) override;
-    IR::Node *postorder(IR::MAU::Primitive *p) override;
+    IR::Node *postorder(IR::MAU::MauPrimitive *p) override;
     IR::Node *postorder(IR::BFN::Extract *e) override;
 
  public:
