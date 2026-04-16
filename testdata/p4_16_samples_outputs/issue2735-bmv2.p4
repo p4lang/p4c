@@ -28,7 +28,7 @@ control SnvsVerifyChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-typedef bit<(48 + 12 + 9)> Mac_entry;
+typedef bit<48 + 12 + 9> Mac_entry;
 const bit<32> N_MAC_ENTRIES = 4096;
 typedef register<Mac_entry> Mac_table;
 control SnvsIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {

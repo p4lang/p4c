@@ -280,7 +280,7 @@ using namespace P4;
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
                             p4rtControllerType reducedSimpleKeysetExpression entryPriority
-                            nonBraceExpression forCollectionExpr
+                            nonBraceExpression nonGrtExpression forCollectionExpr
 %type<ConstType*>           baseType typeOrVoid specializedType arrayType
                             typeRef tupleType typeArg realTypeArg namedType p4listType
                             derivedTypeDeclarationAsType
@@ -1108,19 +1108,12 @@ baseType
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
     | STRING { $$ = IR::Type::String::get(@1); }
     | INT    { $$ = IR::Type_InfInt::get(@1); }
-    | BIT l_angle INTEGER r_angle
-      { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
-    | INT l_angle INTEGER r_angle
-      { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), true); }
-    | VARBIT l_angle INTEGER r_angle
-      { $$ = IR::Type::Varbits::get(@1+@4, parseConstantChecked(@3, $3)); }
-
-    | BIT l_angle "(" expression ")" r_angle
-      { $$ = IR::Type_Bits::get(@1+@6, $4, false); }
-    | INT l_angle "(" expression ")" r_angle
-      { $$ = IR::Type_Bits::get(@1+@6, $4, true); }
-    | VARBIT l_angle "(" expression ")" r_angle
-      { $$ = IR::Type_Varbits::get(@1+@6, $4); }
+    | BIT l_angle nonGrtExpression r_angle
+      { $$ = IR::Type_Bits::get(@1+@4, $3, false); }
+    | INT l_angle nonGrtExpression r_angle
+      { $$ = IR::Type_Bits::get(@1+@4, $3, true); }
+    | VARBIT l_angle nonGrtExpression r_angle
+      { $$ = IR::Type_Varbits::get(@1+@4, $3); }
     ;
 
 typeOrVoid
@@ -1781,6 +1774,73 @@ nonBraceExpression
     | nonBraceExpression l_angle realTypeArgumentList r_angle "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
     | nonBraceExpression "(" argumentList ")"
+        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
+    | namedType "(" argumentList ")"
+        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
+    | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
+    ;
+
+nonGrtExpression
+    : INTEGER                                 { $$ = parseConstant(@1, $1, 0); }
+    | STRING_LITERAL                          { $$ = new IR::StringLiteral(@1, $1); }
+    | TRUE                                    { $$ = new IR::BoolLiteral(@1, true); }
+    | FALSE                                   { $$ = new IR::BoolLiteral(@1, false); }
+    | THIS                                    { $$ = new IR::This(@1); }
+    | prefixedNonTypeName                     { $$ = new IR::PathExpression($1); }
+    | nonGrtExpression "[" expression "]"     { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
+    | nonGrtExpression "[" expression ":" expression "]" {
+                                                $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
+    | nonGrtExpression "[" expression "+:" expression "]" {
+                                                $$ = new IR::PlusSlice(@1 + @6, $1, $3, $5); }
+    | "{" expressionList optTrailingComma "}" { $$ = new IR::ListExpression(@1 + @4, *$2); }
+    | INVALID                                 { $$ = new IR::Invalid(
+                                                        @1, IR::Type::Unknown::get()); }
+    | "{" kvList optTrailingComma "}"         { $$ = new IR::StructExpression(
+                                                          @1 + @4, IR::Type::Unknown::get(),
+                                                          (IR::Type_Name*)nullptr, *$2); }
+    | "{" kvList "," DOTS optTrailingComma "}" {
+                                                auto list = $2;
+                                                list->push_back(new IR::NamedDots(@4));
+                                                list->srcInfo = list->srcInfo + @4;
+                                                $$ = new IR::StructExpression(
+                                                        @1 + @4, IR::Type::Unknown::get(),
+                                                        (IR::Type_Name*)nullptr, *list); }
+    | "(" expression ")"                      { $$ = $2; }
+    | "!" expression %prec PREFIX             { $$ = new IR::LNot(@1 + @2, $2); }
+    | "~" expression %prec PREFIX             { $$ = new IR::Cmpl(@1 + @2, $2); }
+    | "-" expression %prec PREFIX             { $$ = new IR::Neg(@1 + @2, $2); }
+    | "+" expression %prec PREFIX             { $$ = new IR::UPlus(@1 + @2, $2); }
+    | typeName dot_name %prec DOT
+        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
+    | ERROR "." name
+        { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs)));
+          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
+    | nonGrtExpression dot_name %prec DOT     { $$ = new IR::Member(@1 + @2, $1, *$2); }
+    | nonGrtExpression "*" expression         { $$ = new IR::Mul(@1 + @3, $1, $3); }
+    | nonGrtExpression "/" expression         { $$ = new IR::Div(@1 + @3, $1, $3); }
+    | nonGrtExpression "%" expression         { $$ = new IR::Mod(@1 + @3, $1, $3); }
+    | nonGrtExpression "+" expression         { $$ = new IR::Add(@1 + @3, $1, $3); }
+    | nonGrtExpression "-" expression         { $$ = new IR::Sub(@1 + @3, $1, $3); }
+    | nonGrtExpression "|+|" expression       { $$ = new IR::AddSat(@1 + @3, $1, $3); }
+    | nonGrtExpression "|-|" expression       { $$ = new IR::SubSat(@1 + @3, $1, $3); }
+    | nonGrtExpression "<<" expression        { $$ = new IR::Shl(@1 + @3, $1, $3); }
+    | nonGrtExpression "<=" nonGrtExpression  { $$ = new IR::Leq(@1 + @3, $1, $3); }
+    | nonGrtExpression ">=" nonGrtExpression  { $$ = new IR::Geq(@1 + @3, $1, $3); }
+    | nonGrtExpression l_angle nonGrtExpression %prec "<" {
+                                                $$ = new IR::Lss(@1 + @3, $1, $3); }
+    | nonGrtExpression "!=" nonGrtExpression  { $$ = new IR::Neq(@1 + @3, $1, $3); }
+    | nonGrtExpression "==" nonGrtExpression  { $$ = new IR::Equ(@1 + @3, $1, $3); }
+    | nonGrtExpression "&" nonGrtExpression   { $$ = new IR::BAnd(@1 + @3, $1, $3); }
+    | nonGrtExpression "^" nonGrtExpression   { $$ = new IR::BXor(@1 + @3, $1, $3); }
+    | nonGrtExpression "|" nonGrtExpression   { $$ = new IR::BOr(@1 + @3, $1, $3); }
+    | nonGrtExpression "++" expression        { $$ = new IR::Concat(@1 + @3, $1, $3); }
+    | nonGrtExpression "&&" nonGrtExpression  { $$ = new IR::LAnd(@1 + @2 + @3, $1, $3); }
+    | nonGrtExpression "||" nonGrtExpression  { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
+    | nonGrtExpression "?" expression ":" nonGrtExpression {
+                                                $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
+    | nonGrtExpression l_angle realTypeArgumentList r_angle "(" argumentList ")"
+        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
+    | nonGrtExpression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
     | namedType "(" argumentList ")"
         { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }

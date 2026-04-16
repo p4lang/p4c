@@ -200,9 +200,12 @@ bool ToP4::preorder(const IR::P4Program *program) {
 
 bool ToP4::preorder(const IR::Type_Bits *t) {
     if (t->expression) {
-        builder.append("bit<(");
+        int prec = expressionPrecedence;
+        builder.append("bit<");
+        expressionPrecedence = P4::DBPrint::Prec_Grt;
         visit(t->expression);
-        builder.append(")>");
+        builder.append(">");
+        expressionPrecedence = prec;
     } else {
         builder.append(t->toString());
     }
@@ -474,9 +477,12 @@ bool ToP4::preorder(const IR::Type_Boolean *) {
 
 bool ToP4::preorder(const IR::Type_Varbits *t) {
     if (t->expression) {
-        builder.append("varbit<(");
+        int prec = expressionPrecedence;
+        builder.append("varbit<");
+        expressionPrecedence = P4::DBPrint::Prec_Grt;
         visit(t->expression);
-        builder.append(")>");
+        builder.append(">");
+        expressionPrecedence = prec;
     } else {
         builder.appendFormat("varbit<%d>", t->size);
     }
