@@ -3,10 +3,10 @@ control C()() {
         ^
 expr-ternary-with-non-coercible-branch-types.p4(6): [--Wwarn=unused] warning: 's' is unused
     S s = (false ? { ... } : true);
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      ^
 expr-ternary-with-non-coercible-branch-types.p4(6): [--Werror=type-error] error: 's'
     S s = (false ? { ... } : true);
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      ^
   ---- Actual error:
 expr-ternary-with-non-coercible-branch-types.p4(3): Cannot cast implicitly type 'bool' to type 'struct S'
   struct S {}

@@ -1571,10 +1571,10 @@ variableDeclaration
 
 variableDeclarationWithoutSemicolon
     : annotations typeRef declarator optInitializer
-                         { $$ = new IR::Declaration_Variable(@1+@4, *$3.name, *$1, $3.type, $4);
+                         { $$ = new IR::Declaration_Variable(@3, *$3.name, *$1, $3.type, $4);
                            driver.structure->declareObject(*$3.name, $3.type->toString()); }
     | typeRef declarator optInitializer
-                         { $$ = new IR::Declaration_Variable(@1+@3, *$2.name, $2.type, $3);
+                         { $$ = new IR::Declaration_Variable(@2, *$2.name, $2.type, $3);
                            driver.structure->declareObject(*$2.name, $2.type->toString()); }
     ;
 
@@ -1678,9 +1678,9 @@ expression
                                            list->push_back(new IR::NamedDots(@4));
                                            list->srcInfo = list->srcInfo + @4;
                                            $$ = new IR::StructExpression(
-                                                  @1 + @4, IR::Type::Unknown::get(),
+                                                  @1 + @6, IR::Type::Unknown::get(),
                                                   (IR::Type_Name*)nullptr, *list); }
-    | "(" expression ")"                 { $$ = $2; }
+    | "(" expression ")"                 { ($$ = $2)->srcInfo = @1 + @3; }
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
@@ -1716,7 +1716,7 @@ expression
     | expression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
     | expression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
     | expression l_angle realTypeArgumentList r_angle "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
+        { $$ = new IR::MethodCallExpression(@1 + @7, $1, $3, $6); }
     | expression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
     | namedType "(" argumentList ")"
@@ -1736,7 +1736,7 @@ nonBraceExpression
         { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | nonBraceExpression "[" expression "+:" expression "]"
         { $$ = new IR::PlusSlice(@1 + @6, $1, $3, $5); }
-    | "(" expression ")"                 { $$ = $2; }
+    | "(" expression ")"                 { ($$ = $2)->srcInfo = @1 + @3; }
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
@@ -1772,7 +1772,7 @@ nonBraceExpression
     | nonBraceExpression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
     | nonBraceExpression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
     | nonBraceExpression l_angle realTypeArgumentList r_angle "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
+        { $$ = new IR::MethodCallExpression(@1 + @7, $1, $3, $6); }
     | nonBraceExpression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
     | namedType "(" argumentList ")"
@@ -1803,9 +1803,9 @@ nonGrtExpression
                                                 list->push_back(new IR::NamedDots(@4));
                                                 list->srcInfo = list->srcInfo + @4;
                                                 $$ = new IR::StructExpression(
-                                                        @1 + @4, IR::Type::Unknown::get(),
+                                                        @1 + @6, IR::Type::Unknown::get(),
                                                         (IR::Type_Name*)nullptr, *list); }
-    | "(" expression ")"                      { $$ = $2; }
+    | "(" expression ")"                      { ($$ = $2)->srcInfo = @1 + @3; }
     | "!" expression %prec PREFIX             { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX             { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX             { $$ = new IR::Neg(@1 + @2, $2); }
@@ -1839,7 +1839,7 @@ nonGrtExpression
     | nonGrtExpression "?" expression ":" nonGrtExpression {
                                                 $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
     | nonGrtExpression l_angle realTypeArgumentList r_angle "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
+        { $$ = new IR::MethodCallExpression(@1 + @7, $1, $3, $6); }
     | nonGrtExpression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
     | namedType "(" argumentList ")"

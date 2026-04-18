@@ -3,5 +3,5 @@ action a() {
        ^
 template.p4(22): [--Wwarn=unused] warning: 'r' is unused
     bit<32> r = f(x) + f(y);
-    ^^^^^^^^^^^^^^^^^^^^^^^
+            ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -12,4 +12,4 @@ const H3<S> h4 = {
             ^^
 generic-struct.p4(88): [--Wwarn=unused] warning: 'h5' is unused
         H3<S> h5;
-        ^^^^^^^^
+              ^^

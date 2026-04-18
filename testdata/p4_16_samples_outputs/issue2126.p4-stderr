@@ -3,10 +3,10 @@ parser p() {
        ^
 issue2126.p4(4): [--Wwarn=unused] warning: 'retval' is unused
             bit<16> retval = 0;
-            ^^^^^^^^^^^^^^^^^^
+                    ^^^^^^
 issue2126.p4(7): [--Wwarn=unused] warning: 'retval' is unused
             bit<16> retval = 1;
-            ^^^^^^^^^^^^^^^^^^
+                    ^^^^^^
 issue2126.p4(1): [--Winfo=removed] info: removing parser 'p'
 parser p() {
        ^

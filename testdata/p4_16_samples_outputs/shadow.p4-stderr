@@ -1,15 +1,15 @@
 shadow.p4(22): [--Wwarn=shadow] warning: 'x' shadows 'x'
             bit x;
-            ^^^^^
+                ^
 shadow.p4(20)
         bit x;
-        ^^^^^
+            ^
 shadow.p4(17): [--Wwarn=unused] warning: control 'c' is unused
 control c()
         ^
 shadow.p4(20): [--Wwarn=unused] warning: 'x' is unused
         bit x;
-        ^^^^^
+            ^
 shadow.p4(17): [--Winfo=removed] info: removing control 'c'
 control c()
         ^

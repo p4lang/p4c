@@ -3,7 +3,7 @@ control dp()
         ^^
 spec-ex03.p4(22): [--Wwarn=unused] warning: 't' is unused
         bi/**/t; // declaration of variable t type bi
-        ^^^^^^^
+              ^
 spec-ex03.p4(19): [--Winfo=removed] info: removing control 'dp'
 control dp()
         ^^

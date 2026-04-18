@@ -1,6 +1,6 @@
 issue1717.p4(40): [--Wwarn=unused] warning: 's' is unused
     S s;
-    ^^^
+      ^
 issue1717.p4(52): [--Wwarn=uninitialized-use] warning: h1.isValid may be uninitialized
         size = v(h1, h2);
                  ^^

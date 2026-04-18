@@ -13,3 +13,6 @@ const bool a = (X.a == { });
 equate-type-enum-and-incompatible-type.p4(4)
 const bool a = (X.a == { });
                        ^^^
+equate-type-enum-and-incompatible-type.p4(4): [--Werror=type-error] error: X.a == {}: Cannot evaluate initializer to a compile-time constant
+const bool a = (X.a == { });
+               ^^^^^^^^^^^^

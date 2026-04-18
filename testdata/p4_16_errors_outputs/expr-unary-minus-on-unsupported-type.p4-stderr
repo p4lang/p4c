@@ -9,4 +9,4 @@ expr-unary-minus-on-unsupported-type.p4(5): [--Werror=type-error] error: Cannot 
            ^^^
 expr-unary-minus-on-unsupported-type.p4(5): [--Werror=type-error] error: Error while analyzing -Invalid
   return (-{#});
-          ^^^^
+         ^^^^^^
