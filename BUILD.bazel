@@ -10,6 +10,11 @@ package(
     default_visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "p4_14_enabled",
+    define_values = {"p4_14": "true"},
+)
+
 license(
     name = "license",
     package_name = "com_github_p4lang_p4c",
@@ -167,13 +172,15 @@ cc_binary(
 filegroup(
     name = "ir_extra_defs",
     srcs = [
-        "frontends/p4-14/ir-v1.def",
         "backends/bmv2/bmv2.def",
         "backends/dpdk/dpdk.def",
         "//backends/p4tools:ir_extension",
         # p4c extensions can contribute to this file group using extensions.bzl.
         "@p4c_ir_extensions//:ir_extension",
-    ],
+    ] + select({
+        ":p4_14_enabled": ["frontends/p4-14/ir-v1.def"],
+        "//conditions:default": [],
+    }),
 )
 
 genrule(
@@ -203,21 +210,43 @@ genrule(
 # dependencies.
 cc_library(
     name = "ir_frontend_midend_control_plane",
-    srcs = glob([
-        "ir/**/*.cpp",
-        "frontends/**/*.cpp",
-        "midend/**/*.cpp",
-        "control-plane/**/*.cpp",
-    ]) + [
+    srcs = glob(
+        [
+            "ir/**/*.cpp",
+            "frontends/**/*.cpp",
+            "midend/**/*.cpp",
+            "control-plane/**/*.cpp",
+        ],
+        exclude = [
+            "frontends/p4-14/**/*.cpp",
+            "frontends/parsers/parserDriver_v1.cpp",
+            "frontends/p4/typeChecking/typeCheckExpr_v1.cpp",
+        ],
+    ) + [
         "backends/dpdk/dbprint-dpdk.cpp",
         "backends/dpdk/printUtils.cpp",
         "backends/dpdk/spec.cpp",
         "frontends/parsers/p4/p4lexer.cc",
         "frontends/parsers/p4/p4parser.cc",
-        "frontends/parsers/v1/v1lexer.cc",
-        "frontends/parsers/v1/v1parser.cc",
         "ir/ir-generated.cpp",
-    ],
+    ] + select({
+        ":p4_14_enabled": [
+            "frontends/p4-14/fromv1.0/converters.cpp",
+            "frontends/p4-14/fromv1.0/programStructure.cpp",
+            "frontends/p4-14/header_type.cpp",
+            "frontends/p4-14/typecheck.cpp",
+            "frontends/p4-14/v1.cpp",
+            "frontends/p4/typeChecking/typeCheckExpr_v1.cpp",
+            "frontends/parsers/parserDriver_v1.cpp",
+            "frontends/parsers/v1/v1lexer.cc",
+            "frontends/parsers/v1/v1parser.cc",
+        ],
+        "//conditions:default": [],
+    }),
+    defines = select({
+        ":p4_14_enabled": ["SUPPORT_P4_14=1"],
+        "//conditions:default": [],
+    }),
     textual_hdrs = glob([
         "ir/**/*.h",
         "frontends/**/*.h",
@@ -227,11 +256,15 @@ cc_library(
         "backends/**/*.h",
     ]) + [
         ":p4_parser_yacc",
-        ":v1_parser_yacc",
         ":p4lexer",
-        ":v1lexer",
         ":ir_generated_files",
-    ],
+    ] + select({
+        ":p4_14_enabled": [
+            ":v1_parser_yacc",
+            ":v1lexer",
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         ":config_h",
         ":flex_lexer_h",
