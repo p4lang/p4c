@@ -33,6 +33,7 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
         PARSE_EMPTY("disable_optimization"_cs),
         PARSE_EMPTY("unroll"_cs),
         PARSE_EMPTY("nounroll"_cs),
+        PARSE_EMPTY(IR::Annotation::corelibAnnotation),
 
         // String arguments. These are allowed to contain concatenation which will be
         // constant-folded, so just parse them as expressions.

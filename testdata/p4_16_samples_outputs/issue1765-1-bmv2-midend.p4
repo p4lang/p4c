@@ -187,11 +187,11 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyIngress.mac_tmp") bit<48> mac_tmp_0;
     @name("MyIngress.addr_tmp") bit<128> addr_tmp_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("MyIngress.set_egress_port") action set_egress_port(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;

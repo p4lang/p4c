@@ -2,7 +2,7 @@
 
 extern void log(string msg);
 control c() {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.foo_y_bar_x_") action foo() {
     }
