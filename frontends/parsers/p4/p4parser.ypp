@@ -90,7 +90,7 @@ inline std::ostream& operator<<(std::ostream& out, const OptionalConst& oc) {
 typedef const IR::Type ConstType;
 
 struct NameTypePair {
-    const IR::ID *name;
+    IR::ID name;
     const IR::Type *type;
 };
 
@@ -270,12 +270,11 @@ using namespace P4;
 // End of token definitions ///////////////////////////////////////////////////
 
 
-%type<IR::ID*>              name dot_name nonTypeName nonTableKwName annotationName
+%type<IR::ID>               name dot_name nonTypeName nonTableKwName annotationName
 %type<NameTypePair>         declarator
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
-%type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
-%type<IR::TypeParameters*>  optTypeParameters typeParameters
+%type<IR::TypeParameters*>  optTypeParameters typeParameters typeParameterList
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
@@ -286,20 +285,20 @@ using namespace P4;
                             derivedTypeDeclarationAsType
 %type<IR::Type_Name*>       typeName
 %type<IR::Argument*>        argument
-%type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
+%type<IR::Vector<IR::Argument>> argumentList nonEmptyArgList
 %type<IR::Parameter*>       parameter
 %type<OptionalConst>        optCONST
-%type<IR::Vector<IR::Annotation>*>  optAnnotations annotations
+%type<IR::Vector<IR::Annotation>> optAnnotations annotations
 %type<IR::Annotation*>      annotation
-%type<IR::Vector<IR::AnnotationToken>*> annotationBody
+%type<IR::Vector<IR::AnnotationToken>> annotationBody
 %type<Token>                annotationToken
-%type<IR::IndexedVector<IR::Parameter>*>  parameterList nonEmptyParameterList
+%type<IR::IndexedVector<IR::Parameter>>   parameterList nonEmptyParameterList
                                           optConstructorParameters
-%type<IR::Vector<IR::Expression>*>        expressionList
+%type<IR::Vector<IR::Expression>>         expressionList
                                           simpleExpressionList tupleKeysetExpression
-%type<IR::IndexedVector<IR::Declaration_ID>*>  identifierList
+%type<IR::IndexedVector<IR::Declaration_ID>> identifierList
 %type<IR::SelectCase*>      selectCase
-%type<IR::Vector<IR::SelectCase>*>  selectCaseList
+%type<IR::Vector<IR::SelectCase>> selectCaseList
 %type<IR::Statement*>       statement emptyStatement returnStatement
                             switchStatement exitStatement
                             assignmentOrMethodCallStatement conditionalStatement
@@ -309,14 +308,14 @@ using namespace P4;
                             optObjInitializer
 %type<IR::StatOrDecl*>      statementOrDeclaration parserStatement
                             declOrAssignmentOrMethodCallStatement
-%type<IR::IndexedVector<IR::StatOrDecl>*>  objDeclarations statOrDeclList parserStatements
+%type<IR::IndexedVector<IR::StatOrDecl>>  objDeclarations statOrDeclList parserStatements
                             forInitStatements forInitStatementsNonEmpty
                             forUpdateStatements forUpdateStatementsNonEmpty
 %type<IR::SwitchCase*>      switchCase
-%type<IR::Vector<IR::SwitchCase>*>  switchCases
-%type<IR::Vector<IR::Type>*>  typeArgumentList realTypeArgumentList
+%type<IR::Vector<IR::SwitchCase>> switchCases
+%type<IR::Vector<IR::Type>> typeArgumentList realTypeArgumentList
 %type<IR::ParserState*>     parserState
-%type<IR::IndexedVector<IR::ParserState>*>  parserStates
+%type<IR::IndexedVector<IR::ParserState>> parserStates
 %type<IR::Declaration*>     constantDeclaration actionDeclaration
                             variableDeclaration variableDeclarationWithoutSemicolon instantiation functionDeclaration
                             objDeclaration tableDeclaration controlLocalDeclaration
@@ -330,28 +329,28 @@ using namespace P4;
 %type<IR::Node*>            declaration externDeclaration matchKindDeclaration
 %type<IR::Type_Parser*>     parserTypeDeclaration
 %type<IR::Type_Control*>    controlTypeDeclaration
-%type<IR::IndexedVector<IR::Declaration>*>  parserLocalElements controlLocalDeclarations
+%type<IR::IndexedVector<IR::Declaration>>  parserLocalElements controlLocalDeclarations
 %type<IR::StructField*>     structField
-%type<IR::IndexedVector<IR::StructField>*>  structFieldList
-%type<IR::IndexedVector<IR::SerEnumMember>*> specifiedIdentifierList
+%type<IR::IndexedVector<IR::StructField>>  structFieldList
+%type<IR::IndexedVector<IR::SerEnumMember>> specifiedIdentifierList
 %type<IR::SerEnumMember*>   specifiedIdentifier
 %type<IR::Method*>          methodPrototype functionPrototype
-%type<IR::Vector<IR::Method>*>  methodPrototypes
+%type<IR::Vector<IR::Method>> methodPrototypes
 %type<IR::Property*>        tableProperty
-%type<IR::IndexedVector<IR::Property>*>  tablePropertyList
+%type<IR::TableProperties*> tablePropertyList
 %type<IR::KeyElement*>      keyElement
-%type<IR::Vector<IR::KeyElement>*>  keyElementList
+%type<IR::Vector<IR::KeyElement>> keyElementList
 %type<IR::Expression*>  actionRef
-%type<IR::IndexedVector<IR::ActionListElement>*>  actionList
+%type<IR::IndexedVector<IR::ActionListElement>> actionList
 %type<IR::Entry*>           entry
-%type<IR::Vector<IR::Entry>*>  entriesList
-%type<IR::IndexedVector<IR::NamedExpression>*> kvList
+%type<IR::Vector<IR::Entry>> entriesList
+%type<IR::IndexedVector<IR::NamedExpression>> kvList
 %type<IR::NamedExpression*> kvPair
-%type<IR::Vector<IR::Expression>*> intList
-%type<IR::Vector<IR::Expression>*> intOrStrList
-%type<IR::Vector<IR::Expression>*> strList
-%type<IR::Expression*> intOrStr
-%type<IR::P4Program*>   input
+%type<IR::Vector<IR::Expression>> intList
+%type<IR::Vector<IR::Expression>> intOrStrList
+%type<IR::Vector<IR::Expression>> strList
+%type<IR::Expression*>      intOrStr
+%type<IR::P4Program*>       input
 
 // %precedence COMMA
 %precedence QUESTION
@@ -402,11 +401,16 @@ start
 
 fragment
       // Lists
-    : START_EXPRESSION_LIST expressionList              { $$ = $2; }
-    | START_KV_LIST kvList                              { $$ = $2; }
-    | START_INTEGER_LIST intList                        { $$ = $2; }
-    | START_INTEGER_OR_STRING_LITERAL_LIST intOrStrList { $$ = $2; }
-    | START_STRING_LITERAL_LIST strList                 { $$ = $2; }
+    : START_EXPRESSION_LIST expressionList {
+                $$ = new IR::Vector<IR::Expression>(std::move($2)); }
+    | START_KV_LIST kvList {
+                $$ = new IR::IndexedVector<IR::NamedExpression>(std::move($2)); }
+    | START_INTEGER_LIST intList {
+                $$ = new IR::Vector<IR::Expression>(std::move($2)); }
+    | START_INTEGER_OR_STRING_LITERAL_LIST intOrStrList {
+                $$ = new IR::Vector<IR::Expression>(std::move($2)); }
+    | START_STRING_LITERAL_LIST strList {
+                $$ = new IR::Vector<IR::Expression>(std::move($2)); }
 
       // Singletons
     | START_EXPRESSION expression                       { $$ = $2; }
@@ -504,29 +508,29 @@ declaration
     ;
 
 nonTypeName
-    : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | ACTIONS     { $$ = new IR::ID(@1, "actions"_cs); }
-    | APPLY       { $$ = new IR::ID(@1, "apply"_cs); }
-    | ENTRIES     { $$ = new IR::ID(@1, "entries"_cs); }
-    | KEY         { $$ = new IR::ID(@1, "key"_cs); }
-    | PRIORITY    { $$ = new IR::ID(@1, "priority"_cs); }
-    | STATE       { $$ = new IR::ID(@1, "state"_cs); }
-    | TYPE        { $$ = new IR::ID(@1, "type"_cs); }
+    : IDENTIFIER  { $$ = IR::ID(@1, $1); }
+    | ACTIONS     { $$ = IR::ID(@1, "actions"_cs); }
+    | APPLY       { $$ = IR::ID(@1, "apply"_cs); }
+    | ENTRIES     { $$ = IR::ID(@1, "entries"_cs); }
+    | KEY         { $$ = IR::ID(@1, "key"_cs); }
+    | PRIORITY    { $$ = IR::ID(@1, "priority"_cs); }
+    | STATE       { $$ = IR::ID(@1, "state"_cs); }
+    | TYPE        { $$ = IR::ID(@1, "type"_cs); }
     ;
 
 name
     : nonTypeName { $$ = $1; }
-    | LIST { $$ = new IR::ID(@1, "list"_cs); }
-    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    | LIST { $$ = IR::ID(@1, "list"_cs); }
+    | TYPE_IDENTIFIER  { $$ = IR::ID(@1, $1); }
     ;
 
 nonTableKwName
-    : IDENTIFIER       { $$ = new IR::ID(@1, $1); }
-    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | APPLY            { $$ = new IR::ID(@1, "apply"_cs); }
-    | PRIORITY         { $$ = new IR::ID(@1, "priority"_cs); }
-    | STATE            { $$ = new IR::ID(@1, "state"_cs); }
-    | TYPE             { $$ = new IR::ID(@1, "type"_cs); }
+    : IDENTIFIER       { $$ = IR::ID(@1, $1); }
+    | TYPE_IDENTIFIER  { $$ = IR::ID(@1, $1); }
+    | APPLY            { $$ = IR::ID(@1, "apply"_cs); }
+    | PRIORITY         { $$ = IR::ID(@1, "priority"_cs); }
+    | STATE            { $$ = IR::ID(@1, "state"_cs); }
+    | TYPE             { $$ = IR::ID(@1, "type"_cs); }
     ;
 
 optCONST
@@ -535,22 +539,22 @@ optCONST
     ;
 
 optAnnotations
-    : %empty      { $$ = new IR::Vector<IR::Annotation>(); }
+    : %empty      { $$ = {}; }
     | annotations { $$ = $1; }
     ;
 
 annotations
     : annotation  {
-       $$ = new IR::Vector<IR::Annotation>();
-       if (! P4CContext::get().options().isAnnotationDisabled($1)) {
-         $$->push_back($1);
-         $$->srcInfo = @1;
+       $$ = {};
+       if (!P4CContext::get().options().isAnnotationDisabled($1)) {
+         $$.push_back($1);
+         $$.srcInfo = @1;
        }}
     | annotations annotation {
-       $$ = $1;
-       if (! P4CContext::get().options().isAnnotationDisabled($2)) {
-          $$->push_back($2);
-          $$->srcInfo = @1 + @2;
+       $$ = std::move($1);
+       if (!P4CContext::get().options().isAnnotationDisabled($2)) {
+          $$.push_back($2);
+          $$.srcInfo = @1 + @2;
        }}
     ;
 
@@ -558,88 +562,86 @@ annotation
     : "@" annotationName
         { // Initialize with an empty sequence of annotation tokens so that the
           // annotation node is marked as unparsed.
-          IR::Vector<IR::AnnotationToken> body;
-          $$ = new IR::Annotation(@1, *$2, body); }
+          $$ = new IR::Annotation(@1, $2, IR::Vector<IR::AnnotationToken>()); }
     | "@" annotationName "(" annotationBody ")"
-        { $$ = new IR::Annotation(@1, *$2, *$4); }
+        { $$ = new IR::Annotation(@1, $2, std::move($4)); }
     | "@" annotationName "[" expressionList optTrailingComma "]"
-        { $$ = new IR::Annotation(@1, *$2, *$4, true); }
+        { $$ = new IR::Annotation(@1, $2, std::move($4), true); }
     | "@" annotationName "[" kvList optTrailingComma "]"
-        { $$ = new IR::Annotation(@1, *$2, *$4, true); }
+        { $$ = new IR::Annotation(@1, $2, std::move($4), true); }
     // Experimental: backwards compatibility with P4-14 pragmas (which
     // themselves are experimental!)
     | PRAGMA annotationName annotationBody END_PRAGMA
-        { $$ = new IR::Annotation(@1, *$2, *$3, false); }
+        { $$ = new IR::Annotation(@1, $2, std::move($3), false); }
     ;
 
 annotationBody
-    : %empty  { $$ = new IR::Vector<IR::AnnotationToken>; }
+    : %empty  { $$ = {}; }
     | annotationBody "(" annotationBody ")"
-        { $$ = $1;
-          $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text));
-          $$->append(*$3);
-          $$->push_back(new IR::AnnotationToken(@4, $4.type, $4.text));
-          $$->srcInfo = @1 + @4;
+        { ($$ = std::move($1)).push_back(new IR::AnnotationToken(@2, $2.type, $2.text));
+          $$.append($3);
+          $$.push_back(new IR::AnnotationToken(@4, $4.type, $4.text));
+          $$.srcInfo = @1 + @4;
         }
     | annotationBody annotationToken
-        { $$ = $1;
-          $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text, $2.unparsedConstant));
-          $$->srcInfo = @1 + @2;
+        { $$ = std::move($1);
+          $$.push_back(new IR::AnnotationToken(@2, $2.type, $2.text, $2.unparsedConstant));
+          $$.srcInfo = @1 + @2;
         }
     ;
 
 annotationName
-    : ABSTRACT         { $$ = new IR::ID(@1, "abstract"_cs); }
-    | ACTION           { $$ = new IR::ID(@1, "action"_cs); }
-    | ACTIONS          { $$ = new IR::ID(@1, "actions"_cs); }
-    | APPLY            { $$ = new IR::ID(@1, "apply"_cs); }
-    | BOOL             { $$ = new IR::ID(@1, "bool"_cs); }
-    | BIT              { $$ = new IR::ID(@1, "bit"_cs); }
-    | BREAK            { $$ = new IR::ID(@1, "break"_cs); }
-    | CONST            { $$ = new IR::ID(@1, "const"_cs); }
-    | CONTINUE         { $$ = new IR::ID(@1, "continue"_cs); }
-    | CONTROL          { $$ = new IR::ID(@1, "control"_cs); }
-    | DEFAULT          { $$ = new IR::ID(@1, "default"_cs); }
-    | ELSE             { $$ = new IR::ID(@1, "else"_cs); }
-    | ENTRIES          { $$ = new IR::ID(@1, "entries"_cs); }
-    | ENUM             { $$ = new IR::ID(@1, "enum"_cs); }
-    | ERROR            { $$ = new IR::ID(@1, "error"_cs); }
-    | EXIT             { $$ = new IR::ID(@1, "exit"_cs); }
-    | EXTERN           { $$ = new IR::ID(@1, "extern"_cs); }
-    | FALSE            { $$ = new IR::ID(@1, "false"_cs); }
-    | FOR              { $$ = new IR::ID(@1, "for"_cs); }
-    | HEADER           { $$ = new IR::ID(@1, "header"_cs); }
-    | HEADER_UNION     { $$ = new IR::ID(@1, "header_union"_cs); }
-    | IF               { $$ = new IR::ID(@1, "if"_cs); }
-    | IN               { $$ = new IR::ID(@1, "in"_cs); }
-    | INOUT            { $$ = new IR::ID(@1, "inout"_cs); }
-    | INT              { $$ = new IR::ID(@1, "int"_cs); }
-    | KEY              { $$ = new IR::ID(@1, "key"_cs); }
-    | LIST             { $$ = new IR::ID(@1, "list"_cs); }
-    | MATCH_KIND       { $$ = new IR::ID(@1, "match_kind"_cs); }
-    | OUT              { $$ = new IR::ID(@1, "out"_cs); }
-    | PARSER           { $$ = new IR::ID(@1, "parser"_cs); }
-    | PACKAGE          { $$ = new IR::ID(@1, "package"_cs); }
-    | PRIORITY         { $$ = new IR::ID(@1, "priority"_cs); }
-    | RETURN           { $$ = new IR::ID(@1, "return"_cs); }
-    | SELECT           { $$ = new IR::ID(@1, "select"_cs); }
-    | STATE            { $$ = new IR::ID(@1, "state"_cs); }
-    | STRING           { $$ = new IR::ID(@1, "string"_cs); }
-    | STRUCT           { $$ = new IR::ID(@1, "struct"_cs); }
-    | SWITCH           { $$ = new IR::ID(@1, "switch"_cs); }
-    | TABLE            { $$ = new IR::ID(@1, "table"_cs); }
-    | THIS             { $$ = new IR::ID(@1, "this"_cs); }
-    | TRANSITION       { $$ = new IR::ID(@1, "transition"_cs); }
-    | TRUE             { $$ = new IR::ID(@1, "true"_cs); }
-    | TUPLE            { $$ = new IR::ID(@1, "tuple"_cs); }
-    | TYPE             { $$ = new IR::ID(@1, "type"_cs); }
-    | TYPEDEF          { $$ = new IR::ID(@1, "typedef"_cs); }
-    | VARBIT           { $$ = new IR::ID(@1, "varbit"_cs); }
-    | VALUESET         { $$ = new IR::ID(@1, "valueset"_cs); }
-    | VOID             { $$ = new IR::ID(@1, "void"_cs); }
-    | "_"              { $$ = new IR::ID(@1, "_"_cs); }
-    | IDENTIFIER       { $$ = new IR::ID(@1, $1); }
-    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
+    : ABSTRACT         { $$ = IR::ID(@1, "abstract"_cs); }
+    | ACTION           { $$ = IR::ID(@1, "action"_cs); }
+    | ACTIONS          { $$ = IR::ID(@1, "actions"_cs); }
+    | APPLY            { $$ = IR::ID(@1, "apply"_cs); }
+    | BOOL             { $$ = IR::ID(@1, "bool"_cs); }
+    | BIT              { $$ = IR::ID(@1, "bit"_cs); }
+    | BREAK            { $$ = IR::ID(@1, "break"_cs); }
+    | CONST            { $$ = IR::ID(@1, "const"_cs); }
+    | CONTINUE         { $$ = IR::ID(@1, "continue"_cs); }
+    | CONTROL          { $$ = IR::ID(@1, "control"_cs); }
+    | DEFAULT          { $$ = IR::ID(@1, "default"_cs); }
+    | ELSE             { $$ = IR::ID(@1, "else"_cs); }
+    | ENTRIES          { $$ = IR::ID(@1, "entries"_cs); }
+    | ENUM             { $$ = IR::ID(@1, "enum"_cs); }
+    | ERROR            { $$ = IR::ID(@1, "error"_cs); }
+    | EXIT             { $$ = IR::ID(@1, "exit"_cs); }
+    | EXTERN           { $$ = IR::ID(@1, "extern"_cs); }
+    | FALSE            { $$ = IR::ID(@1, "false"_cs); }
+    | FOR              { $$ = IR::ID(@1, "for"_cs); }
+    | HEADER           { $$ = IR::ID(@1, "header"_cs); }
+    | HEADER_UNION     { $$ = IR::ID(@1, "header_union"_cs); }
+    | IF               { $$ = IR::ID(@1, "if"_cs); }
+    | IN               { $$ = IR::ID(@1, "in"_cs); }
+    | INOUT            { $$ = IR::ID(@1, "inout"_cs); }
+    | INT              { $$ = IR::ID(@1, "int"_cs); }
+    | KEY              { $$ = IR::ID(@1, "key"_cs); }
+    | LIST             { $$ = IR::ID(@1, "list"_cs); }
+    | MATCH_KIND       { $$ = IR::ID(@1, "match_kind"_cs); }
+    | OUT              { $$ = IR::ID(@1, "out"_cs); }
+    | PARSER           { $$ = IR::ID(@1, "parser"_cs); }
+    | PACKAGE          { $$ = IR::ID(@1, "package"_cs); }
+    | PRIORITY         { $$ = IR::ID(@1, "priority"_cs); }
+    | RETURN           { $$ = IR::ID(@1, "return"_cs); }
+    | SELECT           { $$ = IR::ID(@1, "select"_cs); }
+    | STATE            { $$ = IR::ID(@1, "state"_cs); }
+    | STRING           { $$ = IR::ID(@1, "string"_cs); }
+    | STRUCT           { $$ = IR::ID(@1, "struct"_cs); }
+    | SWITCH           { $$ = IR::ID(@1, "switch"_cs); }
+    | TABLE            { $$ = IR::ID(@1, "table"_cs); }
+    | THIS             { $$ = IR::ID(@1, "this"_cs); }
+    | TRANSITION       { $$ = IR::ID(@1, "transition"_cs); }
+    | TRUE             { $$ = IR::ID(@1, "true"_cs); }
+    | TUPLE            { $$ = IR::ID(@1, "tuple"_cs); }
+    | TYPE             { $$ = IR::ID(@1, "type"_cs); }
+    | TYPEDEF          { $$ = IR::ID(@1, "typedef"_cs); }
+    | VARBIT           { $$ = IR::ID(@1, "varbit"_cs); }
+    | VALUESET         { $$ = IR::ID(@1, "valueset"_cs); }
+    | VOID             { $$ = IR::ID(@1, "void"_cs); }
+    | "_"              { $$ = IR::ID(@1, "_"_cs); }
+    | IDENTIFIER       { $$ = IR::ID(@1, $1); }
+    | TYPE_IDENTIFIER  { $$ = IR::ID(@1, $1); }
     ;
 
 annotationToken
@@ -748,30 +750,29 @@ annotationToken
     ;
 
 kvList
-    : kvPair            { $$ = new IR::IndexedVector<IR::NamedExpression>; $$->push_back($1); $$->srcInfo = @1; }
-    | kvList "," kvPair { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3;}
+    : kvPair            { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | kvList "," kvPair { ($$ = std::move($1)).push_back($3); $$.srcInfo = @1 + @3;}
     ;
 
 kvPair
-    : name "=" expression             { $$ = new IR::NamedExpression(@1, *$1, $3); }
+    : name "=" expression             { $$ = new IR::NamedExpression(@1, $1, $3); }
     ;
 
 parameterList
-    : %empty                          { $$ = new IR::IndexedVector<IR::Parameter>(); }
+    : %empty                          { $$ = {}; }
     | nonEmptyParameterList           { $$ = $1; }
     ;
 
 nonEmptyParameterList
-    : parameter                           { $$ = new IR::IndexedVector<IR::Parameter>();
-                                            $$->push_back($1); $$->srcInfo = @1; }
-    | nonEmptyParameterList "," parameter { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
+    : parameter                           { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | nonEmptyParameterList "," parameter { ($$ = std::move($1)).push_back($3); $$.srcInfo = @1 + @3; }
     ;
 
 parameter
     : optAnnotations direction typeRef declarator {
-            $$ = new IR::Parameter(@4, *$4.name, *$1, $2, $4.type, nullptr); }
+            $$ = new IR::Parameter(@4, $4.name, $1, $2, $4.type, nullptr); }
     | optAnnotations direction typeRef declarator "=" expression {
-            $$ = new IR::Parameter(@4, *$4.name, *$1, $2, $4.type, $6); }
+            $$ = new IR::Parameter(@4, $4.name, $1, $2, $4.type, $6); }
     ;
 
 direction
@@ -782,35 +783,35 @@ direction
     ;
 
 packageTypeDeclaration
-    : optAnnotations PACKAGE name { driver.structure->pushContainerType(*$3, false); }
+    : optAnnotations PACKAGE name { driver.structure->pushContainerType($3, false); }
       optTypeParameters {
-          if (!$5->empty()) driver.structure->markAsTemplate(*$3);
-          driver.structure->declareTypes(&$5->parameters); }
+          if (!$5->empty()) driver.structure->markAsTemplate($3);
+          driver.structure->declareTypes($5->parameters); }
       "(" parameterList ")"        {
           driver.structure->declareParameters($8);
-          auto pl = new IR::ParameterList(@8, *$8);
-          $$ = new IR::Type_Package(@3, *$3, *$1, $5, pl); }
+          auto pl = new IR::ParameterList(@8, $8);
+          $$ = new IR::Type_Package(@3, $3, std::move($1), $5, pl); }
     ;
 
 instantiation
       : annotations typeRef "(" argumentList ")" <ConstType*>{ $$ = $2; } declarator optObjInitializer ";"
-                     { $$ = new IR::Declaration_Instance(@7, *$7.name, *$1, $7.type, $4, $8);
-                       driver.structure->declareObject(*$7.name, $2->toString()); }
+                     { $$ = new IR::Declaration_Instance(@7, $7.name, std::move($1), $7.type, std::move($4), $8);
+                       driver.structure->declareObject($7.name, $2->toString()); }
       | typeRef "(" argumentList ")" <ConstType*>{ $$ = $1; } declarator optObjInitializer ";"
-                     { $$ = new IR::Declaration_Instance(@6, *$6.name, $6.type, $3, $7);
-                       driver.structure->declareObject(*$6.name, $1->toString()); }
+                     { $$ = new IR::Declaration_Instance(@6, $6.name, $6.type, std::move($3), $7);
+                       driver.structure->declareObject($6.name, $1->toString()); }
     ;
 
 optObjInitializer
     : %empty                   { $$ = nullptr; }
     | "=" "{" { driver.structure->pushNamespace(@1, false); } objDeclarations "}"
                                { driver.structure->pop();
-                                 $$ = new IR::BlockStatement(@2+@5, *$4); }
+                                 $$ = new IR::BlockStatement(@2+@5, std::move($4)); }
     ;
 
 objDeclarations
-    : %empty                         { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
-    | objDeclarations objDeclaration { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2;}
+    : %empty                         { $$ = {}; }
+    | objDeclarations objDeclaration { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2;}
     ;
 
 objDeclaration
@@ -819,7 +820,7 @@ objDeclaration
     ;
 
 optConstructorParameters
-    : %empty                 { $$ = new IR::IndexedVector<IR::Parameter>(); }
+    : %empty                 { $$ = {}; }
     | "(" parameterList ")"  { $$ = $2; }
     ;
 
@@ -833,14 +834,14 @@ parserDeclaration
     : parserTypeDeclaration optConstructorParameters
       "{" parserLocalElements parserStates "}"
                              { driver.structure->pop();
-                               auto pl = new IR::ParameterList(@2, *$2);
+                               auto pl = new IR::ParameterList(@2, std::move($2));
                                $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
-                                                     $1, pl, *$4, *$5);}
+                                                     $1, pl, std::move($4), std::move($5));}
     ;
 
 parserLocalElements
-    : %empty                                 { $$ = new IR::IndexedVector<IR::Declaration>(); }
-    | parserLocalElements parserLocalElement { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                                 { $$ = {}; }
+    | parserLocalElements parserLocalElement { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 parserLocalElement
@@ -852,30 +853,30 @@ parserLocalElement
 
 parserTypeDeclaration
     : optAnnotations
-        PARSER name       { driver.structure->pushContainerType(*$3, true); }
-        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
-                            driver.structure->declareTypes(&$5->parameters); }
-        "(" parameterList ")" { driver.structure->declareParameters($8);
-                                auto pl = new IR::ParameterList(@8, *$8);
-                                $$ = new IR::Type_Parser(@3, *$3, *$1, $5, pl); }
+        PARSER name       { driver.structure->pushContainerType($3, true); }
+        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate($3);
+                            driver.structure->declareTypes($5->parameters); }
+        "(" parameterList ")" {
+                            driver.structure->declareParameters($8);
+                            auto pl = new IR::ParameterList(@8, std::move($8));
+                            $$ = new IR::Type_Parser(@3, std::move($3), std::move($1), $5, pl); }
     ;
 
 parserStates
-    : parserState                     { $$ = new IR::IndexedVector<IR::ParserState>();
-                                        $$->push_back($1); $$->srcInfo = @1; }
-    | parserStates parserState        { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : parserState                     { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | parserStates parserState        { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 parserState
-    : optAnnotations STATE name { driver.structure->pushContainerType(*$3, false); }
-      "{" parserStatements transitionStatement "}"
-                                      { driver.structure->pop();
-                                        $$ = new IR::ParserState(@3, *$3, *$1, *$6, $7); }
+    : optAnnotations STATE name { driver.structure->pushContainerType($3, false); }
+      "{" parserStatements transitionStatement "}" {
+                  driver.structure->pop();
+                  $$ = new IR::ParserState(@3, std::move($3), std::move($1), std::move($6), $7); }
     ;
 
 parserStatements
-    : %empty                           { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
-    | parserStatements parserStatement { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                           { $$ = {}; }
+    | parserStatements parserStatement { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 parserStatement
@@ -888,8 +889,9 @@ parserStatement
     ;
 
 parserBlockStatement
-    : optAnnotations "{" { driver.structure->pushNamespace(@2, false); }
-      parserStatements "}" { driver.structure->pop(); $$ = new IR::BlockStatement(@1+@5, *$1, *$4); }
+    : optAnnotations "{"    { driver.structure->pushNamespace(@2, false); }
+      parserStatements "}"  { driver.structure->pop();
+                              $$ = new IR::BlockStatement(@1+@5, std::move($1), std::move($4)); }
     ;
 
 transitionStatement
@@ -898,36 +900,37 @@ transitionStatement
     ;
 
 stateExpression
-    : name ";"         { $$ = new IR::PathExpression(*$1); }
+    : name ";"         { $$ = new IR::PathExpression($1); }
     | selectExpression { $$ = $1; }
     ;
 
 selectExpression
-    : SELECT "(" expressionList ")" "{" selectCaseList "}"
-                              { $$ = new IR::SelectExpression(@1 + @7,
-                                     new IR::ListExpression(@3, *$3), std::move(*$6)); }
+    : SELECT "(" expressionList ")" "{" selectCaseList "}" {
+                $$ = new IR::SelectExpression(@1 + @7,
+                        new IR::ListExpression(@3, std::move($3)), std::move($6)); }
     ;
 
 selectCaseList
-    : %empty                     { $$ = new IR::Vector<IR::SelectCase>(); }
-    | selectCaseList selectCase  { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2;}
+    : %empty                     { $$ = {}; }
+    | selectCaseList selectCase  { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2;}
     ;
 
 selectCase
-    : keysetExpression ":" name ";"
-      { auto expr = new IR::PathExpression(*$3);
-        $$ = new IR::SelectCase(@1 + @3, $1, expr); }
+    : keysetExpression ":" name ";" { auto expr = new IR::PathExpression($3);
+                                      $$ = new IR::SelectCase(@1 + @3, $1, expr); }
     ;
 
 keysetExpression
-    : tupleKeysetExpression     { $$ = new IR::ListExpression(@1, *$1); }
+    : tupleKeysetExpression     { $$ = new IR::ListExpression(@1, std::move($1)); }
     | simpleKeysetExpression    { $$ = $1; }
     ;
 
 tupleKeysetExpression
-    : "(" simpleKeysetExpression "," simpleExpressionList ")"
-                                            { $$ = $4; $4->insert($4->begin(), $2); $$->srcInfo = @2 + @4; }
-    | "(" reducedSimpleKeysetExpression ")" { $$ = new IR::Vector<IR::Expression>(); $$->push_back($2); $$->srcInfo = @2; }
+    : "(" simpleKeysetExpression "," simpleExpressionList ")" {
+                $$ = std::move($4);
+                $$.insert($$.begin(), $2);
+                $$.srcInfo = @2 + @4; }
+    | "(" reducedSimpleKeysetExpression ")" { $$ = {}; $$.push_back($2); $$.srcInfo = @2; }
     ;
 
 optTrailingComma
@@ -936,8 +939,9 @@ optTrailingComma
     ;
 
 simpleExpressionList
-    : simpleKeysetExpression { $$ = new IR::Vector<IR::Expression>(); $$->push_back($1); $$->srcInfo = @1; }
-    | simpleExpressionList "," simpleKeysetExpression { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
+    : simpleKeysetExpression { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | simpleExpressionList "," simpleKeysetExpression { ($$ = std::move($1)).push_back($3);
+                                                        $$.srcInfo = @1 + @3; }
     ;
 
 reducedSimpleKeysetExpression
@@ -957,15 +961,12 @@ simpleKeysetExpression
     ;
 
 valueSetDeclaration
-    : optAnnotations
-        VALUESET l_angle baseType r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, *$1, $4, $7); }
-    | optAnnotations
-        VALUESET l_angle tupleType r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, *$1, $4, $7); }
-    | optAnnotations
-        VALUESET l_angle typeName r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, *$1, $4, $7); }
+    : optAnnotations VALUESET l_angle baseType r_angle "(" expression ")" name ";" {
+                $$ = new IR::P4ValueSet(@9, std::move($9), std::move($1), $4, $7); }
+    | optAnnotations VALUESET l_angle tupleType r_angle "(" expression ")" name ";" {
+                $$ = new IR::P4ValueSet(@9, std::move($9), std::move($1), $4, $7); }
+    | optAnnotations VALUESET l_angle typeName r_angle "(" expression ")" name ";" {
+                $$ = new IR::P4ValueSet(@9, std::move($9), std::move($1), $4, $7); }
     ;
 
 /*************************** CONTROL ************************/
@@ -974,23 +975,23 @@ controlDeclaration
     : controlTypeDeclaration optConstructorParameters
       "{" controlLocalDeclarations APPLY controlBody "}"
         { driver.structure->pop();
-          auto pl = new IR::ParameterList(@2, *$2);
-          $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1, pl, *$4, $6); }
+          auto pl = new IR::ParameterList(@2, std::move($2));
+          $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1, pl, std::move($4), $6); }
     ;
 
 controlTypeDeclaration
     : optAnnotations
-        CONTROL name { driver.structure->pushContainerType(*$3, true); }
-        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
-                            driver.structure->declareTypes(&$5->parameters); }
+        CONTROL name { driver.structure->pushContainerType($3, true); }
+        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate($3);
+                            driver.structure->declareTypes($5->parameters); }
         "(" parameterList ")" { driver.structure->declareParameters($8);
-                                auto pl = new IR::ParameterList(@8, *$8);
-                                $$ = new IR::Type_Control(@3, *$3, *$1, $5, pl); }
+                                auto pl = new IR::ParameterList(@8, std::move($8));
+                                $$ = new IR::Type_Control(@3, std::move($3), std::move($1), $5, pl); }
     ;
 
 controlLocalDeclarations
-    : %empty { $$ = new IR::IndexedVector<IR::Declaration>(); }
-    | controlLocalDeclarations controlLocalDeclaration { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty { $$ = {}; }
+    | controlLocalDeclarations controlLocalDeclaration { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 controlLocalDeclaration
@@ -1009,52 +1010,53 @@ controlBody
 
 externDeclaration
     : optAnnotations
-        EXTERN nonTypeName { driver.structure->pushContainerType(*$3, true); }
-        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
-                            driver.structure->declareTypes(&$5->parameters); }
-        "{" methodPrototypes "}" { driver.structure->pop();
-                                   $$ = new IR::Type_Extern(@3, *$3, $5, *$8, *$1); }
+        EXTERN nonTypeName { driver.structure->pushContainerType($3, true); }
+        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate($3);
+                            driver.structure->declareTypes($5->parameters); }
+        "{" methodPrototypes "}" {
+            driver.structure->pop();
+            $$ = new IR::Type_Extern(@3, std::move($3), $5, std::move($8), std::move($1)); }
     | optAnnotations EXTERN functionPrototype ";" {
             driver.structure->pop();
-            $$ = $3;
-            $3->annotations = *$1; }
+            $3->annotations = std::move($1);
+            $$ = $3; }
     | optAnnotations EXTERN name ";" {
             // forward declaration;
-            driver.structure->pushContainerType(*$3, true);
+            driver.structure->pushContainerType($3, true);
             driver.structure->pop();
             $$ = nullptr; }
     ;
 
 methodPrototypes
-    : %empty                           { $$ = new IR::Vector<IR::Method>(); }
-    | methodPrototypes methodPrototype { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                           { $$ = {}; }
+    | methodPrototypes methodPrototype { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 functionPrototype
     : typeOrVoid
         name optTypeParameters {
-            driver.structure->declareObject(*$2, $1->toString());
-            if (!$3->empty()) driver.structure->markAsTemplate(*$2);
+            driver.structure->declareObject($2, $1->toString());
+            if (!$3->empty()) driver.structure->markAsTemplate($2);
             driver.structure->pushNamespace(@2, false);
-            driver.structure->declareTypes(&$3->parameters); }
+            driver.structure->declareTypes($3->parameters); }
         "(" parameterList ")" { driver.structure->declareParameters($6);
-                                auto params = new IR::ParameterList(@6, *$6);
-                                auto mt = new IR::Type_Method(@2, $3, $1, params, *$2);
-                                $$ = new IR::Method(@2, *$2, mt); }
+                                auto params = new IR::ParameterList(@6, std::move($6));
+                                auto mt = new IR::Type_Method(@2, $3, $1, params, $2);
+                                $$ = new IR::Method(@2, $2, mt); }
     ;
 
 methodPrototype
     : optAnnotations functionPrototype ";" {
             driver.structure->pop();
-            $$ = $2; $2->annotations = *$1; }
+            $$ = $2; $2->annotations = std::move($1); }
     | optAnnotations ABSTRACT functionPrototype ";" {
             driver.structure->pop();
             $$ = $3; $$->setAbstract();
-            $3->annotations = *$1; }
-    | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";"  // constructor
-                                        { auto par = new IR::ParameterList(@4, *$4);
-                                          auto mt = new IR::Type_Method(@2, par, $2);
-                                          $$ = new IR::Method(@2, IR::ID(@2, $2), mt, *$1); }
+            $3->annotations = std::move($1); }
+    | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";" {  // constructor
+            auto par = new IR::ParameterList(@4, std::move($4));
+            auto mt = new IR::Type_Method(@2, par, $2);
+            $$ = new IR::Method(@2, IR::ID(@2, $2), mt, std::move($1)); }
     ;
 
 /************************** TYPES ****************************/
@@ -1088,7 +1090,7 @@ p4listType
     ;
 
 tupleType
-    : TUPLE l_angle typeArgumentList r_angle    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
+    : TUPLE l_angle typeArgumentList r_angle    { $$ = new IR::Type_Tuple(@1+@4, std::move($3)); }
     ;
 
 arrayType
@@ -1096,7 +1098,8 @@ arrayType
     ;
 
 specializedType
-    : typeName l_angle typeArgumentList r_angle { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
+    : typeName l_angle typeArgumentList r_angle {
+                $$ = new IR::Type_Specialized(@1 + @4, $1, std::move($3)); }
     ;
 
 baseType
@@ -1124,27 +1127,29 @@ optTypeParameters
     ;
 
 typeParameters
-    : l_angle typeParameterList r_angle { $$ = new IR::TypeParameters(@1+@3, *$2); }
+    : l_angle typeParameterList r_angle { $$ = $2; }
     ;
 
 typeParameterList
-    : name                           { $$ = new IR::IndexedVector<IR::Type_Var>();
-                                       $$->push_back(new IR::Type_Var(@1, *$1)); $$->srcInfo = @1; }
-    | typeParameterList "," name     { ($$=$1)->push_back(new IR::Type_Var(@3, *$3)); $$->srcInfo = @1 + @3; }
+    : name                        { $$ = new IR::TypeParameters;
+                                    $$->parameters.push_back(new IR::Type_Var(@1, $1));
+                                    $$->srcInfo += @1; }
+    | typeParameterList "," name  { ($$ = $1)->parameters.push_back(new IR::Type_Var(@3, $3));
+                                    $$->srcInfo += @3; }
     ;
 
 typeArg
     : typeRef                     { $$ = $1; }
-    | nonTypeName                 { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
+    | nonTypeName                 { $$ = new IR::Type_Name(@1, new IR::Path($1)); }
         // This is necessary because template arguments may introduce the return type
     | VOID                        { $$ = IR::Type_Void::get(@1); }
     | "_"                         { $$ = IR::Type_Dontcare::get(@1); }
     ;
 
 typeArgumentList
-    : %empty                         { $$ = new IR::Vector<IR::Type>(); }
-    | typeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); $$->srcInfo = @1; }
-    | typeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
+    : %empty                         { $$ = {}; }
+    | typeArg                        { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | typeArgumentList "," typeArg   { ($$ = std::move($1)).push_back($3); $$.srcInfo = @1 + @3; }
     ;
 
 realTypeArg
@@ -1156,8 +1161,8 @@ realTypeArg
 // For use in contexts where the `<` might be a less-than rather than introducing a type
 // argument list -- we only allow the token after `<` to be a TYPE_IDENTIFIER, not an ID
 realTypeArgumentList
-    : realTypeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); $$->srcInfo = @1; }
-    | realTypeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
+    : realTypeArg                        { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | realTypeArgumentList "," typeArg   { ($$ = std::move($1)).push_back($3); $$.srcInfo = @1 + @3; }
     ;
 
 typeDeclaration
@@ -1182,86 +1187,85 @@ derivedTypeDeclarationAsType
     ;
 
 headerTypeDeclaration
-    : optAnnotations HEADER name { driver.structure->pushContainerType(*$3, true); } optTypeParameters {
-        driver.structure->markAsTemplate(*$3);
-        driver.structure->declareTypes(&$5->parameters); }
-      "{" structFieldList "}" { $$ = new IR::Type_Header(@3, *$3, *$1, $5, *$8);
+    : optAnnotations HEADER name { driver.structure->pushContainerType($3, true); } optTypeParameters {
+        driver.structure->markAsTemplate($3);
+        driver.structure->declareTypes($5->parameters); }
+      "{" structFieldList "}" { $$ = new IR::Type_Header(@3, std::move($3), std::move($1), $5, std::move($8));
                                 driver.structure->pop(); }
     ;
 
 structTypeDeclaration
-    : optAnnotations STRUCT name  { driver.structure->pushContainerType(*$3, true); } optTypeParameters {
-        driver.structure->markAsTemplate(*$3);
-        driver.structure->declareTypes(&$5->parameters); }
-      "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, *$1, $5, *$8);
+    : optAnnotations STRUCT name  { driver.structure->pushContainerType($3, true); } optTypeParameters {
+        driver.structure->markAsTemplate($3);
+        driver.structure->declareTypes($5->parameters); }
+      "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, std::move($3), std::move($1), $5, std::move($8));
                                 driver.structure->pop(); }
     ;
 
 headerUnionDeclaration
-    : optAnnotations HEADER_UNION name { driver.structure->pushContainerType(*$3, true); } optTypeParameters {
-        driver.structure->markAsTemplate(*$3);
-        driver.structure->declareTypes(&$5->parameters); }
-      "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, *$1, $5, *$8);
+    : optAnnotations HEADER_UNION name { driver.structure->pushContainerType($3, true); } optTypeParameters {
+        driver.structure->markAsTemplate($3);
+        driver.structure->declareTypes($5->parameters); }
+      "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, std::move($3), std::move($1), $5, std::move($8));
                                 driver.structure->pop(); }
     ;
 
 structFieldList
-    : %empty                           { $$ = new IR::IndexedVector<IR::StructField>(); }
-    | structFieldList structField      { $$ = $1; $1->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                           { $$ = {}; }
+    | structFieldList structField      { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 structField
-    : optAnnotations typeRef declarator ";"  { $$ = new IR::StructField(@3, *$3.name, *$1, $3.type); }
+    : optAnnotations typeRef declarator ";"  {
+                $$ = new IR::StructField(@3, $3.name, std::move($1), $3.type); }
     ;
 
 enumDeclaration
     : optAnnotations
-        ENUM name { driver.structure->declareType(*$3); }
-        "{" identifierList optTrailingComma "}" { $$ = new IR::Type_Enum(@3, *$3, *$1, *$6); }
-    | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
-         "{" specifiedIdentifierList optTrailingComma "}" {
-              auto type = $typeRef;
-              $$ = new IR::Type_SerEnum(@4, *$4, *$1, type, *$7);
-          }
+        ENUM name { driver.structure->declareType($3); }
+        "{" identifierList optTrailingComma "}" { $$ = new IR::Type_Enum(@3, $3, std::move($1), std::move($6)); }
+    | optAnnotations ENUM typeRef name { driver.structure->declareType($4); }
+      "{" specifiedIdentifierList optTrailingComma "}" {
+              $$ = new IR::Type_SerEnum(@4, $4, std::move($1), $3, std::move($7)); }
     ;
 
 specifiedIdentifierList
-    : specifiedIdentifier                  { $$ = new IR::IndexedVector<IR::SerEnumMember>();
-                                             $$->push_back($1); $$->srcInfo = @1; }
-    | specifiedIdentifierList "," specifiedIdentifier { $$ = $1; $1->push_back($3); $$->srcInfo = @1 + @3; }
+    : specifiedIdentifier                  { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | specifiedIdentifierList "," specifiedIdentifier { ($$ = std::move($1)).push_back($3);
+                                                        $$.srcInfo = @1 + @3; }
     ;
 
 specifiedIdentifier
-    : name "=" initializer    { $$ = new IR::SerEnumMember(@1+@3, *$1, $3); }
+    : name "=" initializer    { $$ = new IR::SerEnumMember(@1+@3, $1, $3); }
     ;
 
 errorDeclaration
     : ERROR "{" identifierList "}"
-        { $$ = new IR::Type_Error(@1 + @4, IR::ID(@1, "error"_cs), *$3); }
+        { $$ = new IR::Type_Error(@1 + @4, IR::ID(@1, "error"_cs), std::move($3)); }
     ;
 
 matchKindDeclaration
     : MATCH_KIND "{" identifierList optTrailingComma "}"
-        { $$ = new IR::Declaration_MatchKind(@1 + @4, *$3); }
+        { $$ = new IR::Declaration_MatchKind(@1 + @4, std::move($3)); }
     ;
 
 identifierList
-    : name                    { $$ = new IR::IndexedVector<IR::Declaration_ID>();
-                                $$->push_back(new IR::Declaration_ID(@1, *$1)); $$->srcInfo = @1; }
-    | identifierList "," name { $$ = $1; $$->push_back(new IR::Declaration_ID(@3, *$3));
-                                $$->srcInfo = @1 + @3; }
+    : name                    { $$ = {};
+                                $$.push_back(new IR::Declaration_ID(@1, $1)); $$.srcInfo = @1; }
+    | identifierList "," name { ($$ = std::move($1)).push_back(new IR::Declaration_ID(@3, $3));
+                                $$.srcInfo = @1 + @3; }
     ;
 
 typedefDeclaration
     : optAnnotations TYPEDEF typeRef declarator {
-            driver.structure->declareType(*$4.name);
-            $$ = new IR::Type_Typedef(@4, *$4.name, *$1, $4.type); }
+            driver.structure->declareType($4.name);
+            $$ = new IR::Type_Typedef(@4, $4.name, std::move($1), $4.type); }
     | optAnnotations TYPEDEF derivedTypeDeclarationAsType declarator {
-            driver.structure->declareType(*$4.name);
-            $$ = new IR::Type_Typedef(@4, *$4.name, *$1, $4.type); }
+            driver.structure->declareType($4.name);
+            $$ = new IR::Type_Typedef(@4, $4.name, std::move($1), $4.type); }
     | optAnnotations TYPE typeRef declarator {
-            driver.structure->declareType(*$4.name);
-            $$ = new IR::Type_Newtype(@4, *$4.name, *$1, $4.type); }
+            driver.structure->declareType($4.name);
+            $$ = new IR::Type_Newtype(@4, $4.name, std::move($1), $4.type); }
     ;
 
 /*************************** STATEMENTS *************************/
@@ -1273,18 +1277,13 @@ assignmentOrMethodCallStatement
 assignmentOrMethodCallStatementWithoutSemicolon
     // These rules are overly permissive, but they avoid some conflicts
     : lvalue "(" argumentList ")"
-        { auto mc = new IR::MethodCallExpression(@1 + @4, $1,
-                                                 new IR::Vector<IR::Type>(), $3);
+        { auto mc = new IR::MethodCallExpression(@1 + @4, $1, std::move($3));
           $$ = new IR::MethodCallStatement(@1 + @4, mc); }
-
     | lvalue l_angle typeArgumentList r_angle "(" argumentList ")"
-        { auto mc = new IR::MethodCallExpression(@1 + @7,
-                                                 $1, $3, $6);
+        { auto mc = new IR::MethodCallExpression(@1 + @7, $1, std::move($3), std::move($6));
           $$ = new IR::MethodCallStatement(@1 + @7, mc); }
-
     | lvalue "=" expression
         { $$ = new IR::AssignmentStatement(@2, $1, $3); }
-
     | lvalue "*=" expression
         { $$ = new IR::MulAssign(@2, $1, $3); }
     | lvalue "/=" expression
@@ -1357,22 +1356,23 @@ statement
 blockStatement
     : optAnnotations "{" { driver.structure->pushNamespace(@2, false); }
       statOrDeclList "}" { driver.structure->pop();
-                           $$ = new IR::BlockStatement(@1 + @5, *$1, *$4); }
+                           $$ = new IR::BlockStatement(@1 + @5, std::move($1), std::move($4)); }
     ;
 
 statOrDeclList
-    : %empty                                { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
-    | statOrDeclList statementOrDeclaration { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                                { $$ = {}; }
+    | statOrDeclList statementOrDeclaration { ($$ = std::move($1)).push_back($2);
+                                              $$.srcInfo = @1 + @2; }
     ;
 
 switchStatement
     : SWITCH "(" expression ")" "{" switchCases "}" {
-            $$ = new IR::SwitchStatement(@1, $3, std::move(*$6)); }
+            $$ = new IR::SwitchStatement(@1, $3, std::move($6)); }
     ;
 
 switchCases
-    : %empty                   { $$ = new IR::Vector<IR::SwitchCase>(); }
-    | switchCases switchCase   { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                   { $$ = {}; }
+    | switchCases switchCase   { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 switchCase
@@ -1401,24 +1401,24 @@ forStatement
               expression ";"
 	      forUpdateStatements ")"
       statement
-    { $$ = new IR::ForStatement(@2+@9, *$1, *$4, $6, *$8, $10); }
+    { $$ = new IR::ForStatement(@2+@9, std::move($1), std::move($4), $6, std::move($8), $10); }
     | optAnnotations FOR "(" typeRef name IN forCollectionExpr ")" statement
-    { auto decl = new IR::Declaration_Variable(@4+@5, *$5, $4);
-      $$ = new IR::ForInStatement(@2+@7, *$1, decl, $7, $9); }
+    { auto decl = new IR::Declaration_Variable(@4+@5, $5, $4);
+      $$ = new IR::ForInStatement(@2+@7, std::move($1), decl, $7, $9); }
     | optAnnotations FOR "(" annotations typeRef name IN forCollectionExpr ")" statement
-    { auto decl = new IR::Declaration_Variable(@5+@6, *$6, *$4, $5);
-      $$ = new IR::ForInStatement(@2+@8, *$1, decl, $8, $10); }
+    { auto decl = new IR::Declaration_Variable(@5+@6, $6, $4, $5);
+      $$ = new IR::ForInStatement(@2+@8, std::move($1), decl, $8, $10); }
     ;
 
 forInitStatements
-    : %empty                    { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
+    : %empty                    { $$ = {}; }
     | forInitStatementsNonEmpty { $$ = $1; }
     ;
 
 forInitStatementsNonEmpty
-    : declOrAssignmentOrMethodCallStatement     { $$ = new IR::IndexedVector<IR::StatOrDecl>($1); }
+    : declOrAssignmentOrMethodCallStatement     { $$.push_back($1); }
     | forInitStatementsNonEmpty "," declOrAssignmentOrMethodCallStatement {
-            ($$ = $1)->push_back($3); }
+            ($$ = std::move($1)).push_back($3); }
     ;
 
 declOrAssignmentOrMethodCallStatement
@@ -1427,15 +1427,14 @@ declOrAssignmentOrMethodCallStatement
     ;
 
 forUpdateStatements
-    : %empty                            { $$ = new IR::IndexedVector<IR::StatOrDecl>(); }
+    : %empty                            { $$ = {}; }
     | forUpdateStatementsNonEmpty       { $$ = $1; }
     ;
 
 forUpdateStatementsNonEmpty
-    : assignmentOrMethodCallStatementWithoutSemicolon   {
-            $$ = new IR::IndexedVector<IR::StatOrDecl>($1); }
+    : assignmentOrMethodCallStatementWithoutSemicolon   { $$.push_back($1); }
     | forUpdateStatementsNonEmpty "," assignmentOrMethodCallStatementWithoutSemicolon {
-            ($$ = $1)->push_back($3); }
+            ($$ = std::move($1)).push_back($3); }
     ;
 
 forCollectionExpr
@@ -1446,51 +1445,50 @@ forCollectionExpr
 /************************* TABLE *********************************/
 
 tableDeclaration
-    : optAnnotations
-        TABLE name "{" tablePropertyList "}"
-          { $$ = new IR::P4Table(@3, *$3, *$1, new IR::TableProperties(@5, *$5)); }
+    : optAnnotations TABLE name "{" tablePropertyList "}"
+          { $$ = new IR::P4Table(@3, $3, std::move($1), $5); }
     ;
 
 tablePropertyList
-    : tableProperty                      { $$ = new IR::IndexedVector<IR::Property>();
-                                           $$->push_back($1); $$->srcInfo = @1; }
-    | tablePropertyList tableProperty    { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : tableProperty                      { $$ = new IR::TableProperties(@1, { $1 }); }
+    | tablePropertyList tableProperty    { ($$ = $1)->properties.push_back($2);
+                                           $$->srcInfo += @2; }
     ;
 
 tableProperty
     : KEY "=" "{" keyElementList "}"
-        { auto v = new IR::Key(@4, *$4);
+        { auto v = new IR::Key(@4, std::move($4));
           auto id = IR::ID(@1, "key"_cs);
           $$ = new IR::Property( @1 + @5, id, v, false); }
     | ACTIONS "=" "{" actionList "}"
-        { auto v = new IR::ActionList(@4, *$4);
+        { auto v = new IR::ActionList(@4, std::move($4));
           auto id = IR::ID(@1, "actions"_cs);
           $$ = new IR::Property(@1 + @5, id, v, false); }
     | optAnnotations optCONST ENTRIES "=" "{" entriesList "}"
-        { auto l = new IR::EntriesList(@3, *$6);
+        { auto l = new IR::EntriesList(@3, std::move($6));
           auto id = IR::ID(@3+@7, "entries"_cs);
-          $$ = new IR::Property(@3, id, *$1, l, $2.isConst); }
+          $$ = new IR::Property(@3, id, std::move($1), l, $2.isConst); }
     | optAnnotations optCONST nonTableKwName "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
-          auto id = *$3;
-          $$ = new IR::Property($3->srcInfo, id, *$1, v, $2.isConst); }
+          $$ = new IR::Property(@3, $3, std::move($1), v, $2.isConst); }
     ;
 
 keyElementList
-    : %empty                             { $$ = new IR::Vector<IR::KeyElement>(); }
-    | keyElementList keyElement          { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                             { $$ = {}; }
+    | keyElementList keyElement          { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 keyElement
     : expression ":" name optAnnotations ";"
-                                         { auto expr = new IR::PathExpression(*$3);
-                                           $$ = new IR::KeyElement(@1, $1, expr, *$4); }
+                                         { auto expr = new IR::PathExpression($3);
+                                           $$ = new IR::KeyElement(@1, $1, expr, std::move($4)); }
     ;
 
 actionList
-    : %empty { $$ = new IR::IndexedVector<IR::ActionListElement>(); }
-    | actionList optAnnotations actionRef ";"
-             { $$ = $1; $$->push_back(new IR::ActionListElement(@3, *$2, $3)); $$->srcInfo = @1 + @3; }
+    : %empty { $$ = {}; }
+    | actionList optAnnotations actionRef ";" {
+                ($$ = std::move($1)).push_back(new IR::ActionListElement(@3, std::move($2), $3));
+                $$.srcInfo = @1 + @3; }
     ;
 
 actionRef
@@ -1501,28 +1499,22 @@ actionRef
     ;
 
 entry
-    : optCONST entryPriority keysetExpression ":" actionRef optAnnotations ";"
-        // below we set the position starting at @3 because optional
-        // fields generate weird position information.
-        { if (auto l = $3->to<IR::ListExpression>())
-            $$ = new IR::Entry(@3+@6, *$6, $1.isConst, $2, l, $5, false);
-          else {  // if not a tuple, make it a list of 1
-            IR::Vector<IR::Expression> le($3);
-            $$ = new IR::Entry(@3+@6, *$6, $1.isConst, $2,
-                   new IR::ListExpression(@3, le), $5, true);
-          }
-        }
-    | optCONST keysetExpression ":" actionRef optAnnotations ";"
-        // below we set the position starting at @2 because optional
-        // fields generate weird position information.
-        { if (auto l = $2->to<IR::ListExpression>())
-            $$ = new IR::Entry(@2+@5, *$5, $1.isConst, nullptr, l, $4, false);
-          else {  // if not a tuple, make it a list of 1
-            IR::Vector<IR::Expression> le($2);
-            $$ = new IR::Entry(@2+@5, *$5, $1.isConst, nullptr,
-                   new IR::ListExpression(@2, le), $4, true);
-          }
-        }
+    : optCONST entryPriority keysetExpression ":" actionRef optAnnotations ";" {
+                // below we set the position starting at @3 because optional
+                // fields generate weird position information.
+                if (auto l = $3->to<IR::ListExpression>())
+                    $$ = new IR::Entry(@3+@6, std::move($6), $1.isConst, $2, l, $5, false);
+                else   // if not a tuple, make it a list of 1
+                    $$ = new IR::Entry(@3+@6, std::move($6), $1.isConst, $2,
+                                       new IR::ListExpression(@3, {$3}), $5, true); }
+    | optCONST keysetExpression ":" actionRef optAnnotations ";" {
+                // below we set the position starting at @2 because optional
+                // fields generate weird position information.
+                if (auto l = $2->to<IR::ListExpression>())
+                    $$ = new IR::Entry(@2+@5, std::move($5), $1.isConst, nullptr, l, $4, false);
+                else   // if not a tuple, make it a list of 1
+                    $$ = new IR::Entry(@2+@5, std::move($5), $1.isConst, nullptr,
+                                       new IR::ListExpression(@2, {$2}), $4, true); }
     ;
 
 entryPriority
@@ -1531,16 +1523,16 @@ entryPriority
     ;
 
 entriesList
-    : %empty                         { $$ = new IR::Vector<IR::Entry>(); }
-    | entriesList entry              { $$ = $1; $$->push_back($2); $$->srcInfo = @1 + @2; }
+    : %empty                         { $$ = {}; }
+    | entriesList entry              { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
     ;
 
 /************************* ACTION ********************************/
 
 actionDeclaration
     : optAnnotations ACTION name "(" parameterList ")" blockStatement
-        { auto pl = new IR::ParameterList(@5, *$5);
-          $$ = new IR::P4Action(@3, *$3, *$1, pl, $7); }
+        { auto pl = new IR::ParameterList(@5, std::move($5));
+          $$ = new IR::P4Action(@3, $3, std::move($1), pl, $7); }
     ;
 
 /************************* VARIABLES *****************************/
@@ -1550,18 +1542,18 @@ variableDeclaration
     ;
 
 variableDeclarationWithoutSemicolon
-    : annotations typeRef declarator optInitializer
-                         { $$ = new IR::Declaration_Variable(@3, *$3.name, *$1, $3.type, $4);
-                           driver.structure->declareObject(*$3.name, $3.type->toString()); }
-    | typeRef declarator optInitializer
-                         { $$ = new IR::Declaration_Variable(@2, *$2.name, $2.type, $3);
-                           driver.structure->declareObject(*$2.name, $2.type->toString()); }
+    : annotations typeRef declarator optInitializer {
+                $$ = new IR::Declaration_Variable(@3, $3.name, std::move($1), $3.type, $4);
+                driver.structure->declareObject($3.name, $3.type->toString()); }
+    | typeRef declarator optInitializer {
+                $$ = new IR::Declaration_Variable(@2, $2.name, $2.type, $3);
+                driver.structure->declareObject($2.name, $2.type->toString()); }
     ;
 
 constantDeclaration
-    : optAnnotations CONST typeRef declarator "=" initializer ";"
-                         { $$ = new IR::Declaration_Constant(@4, *$4.name, *$1, $4.type, $6);
-                           driver.structure->declareObject(*$4.name, $4.type->toString()); }
+    : optAnnotations CONST typeRef declarator "=" initializer ";" {
+                $$ = new IR::Declaration_Constant(@4, $4.name, std::move($1), $4.type, $6);
+                driver.structure->declareObject($4.name, $4.type->toString()); }
     ;
 
 declarator
@@ -1584,40 +1576,38 @@ initializer
 functionDeclaration
     : annotations functionPrototype blockStatement   {
             driver.structure->pop();
-            $$ = new IR::Function($2->srcInfo, $2->name, *$1, $2->type, $3); }
+            $$ = new IR::Function($2->srcInfo, $2->name, std::move($1), $2->type, $3); }
     | functionPrototype blockStatement   {
             driver.structure->pop();
             $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
     ;
 
 argumentList
-    : %empty                             { $$ = new IR::Vector<IR::Argument>(); }
+    : %empty                             { $$ = {}; }
     | nonEmptyArgList                    { $$ = $1; }
     ;
 
 nonEmptyArgList
-    : argument                           { $$ = new IR::Vector<IR::Argument>();
-                                           $$->push_back($1); $$->srcInfo = @1; }
-    | nonEmptyArgList "," argument       { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
+    : argument                           { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | nonEmptyArgList "," argument       { ($$ = std::move($1)).push_back($3); $$.srcInfo = @1 + @3; }
     ;
 
 argument
     : expression                         { $$ = new IR::Argument(@1, $1); }
-    | name "=" expression                { $$ = new IR::Argument(@1, *$1, $3); }
+    | name "=" expression                { $$ = new IR::Argument(@1, $1, $3); }
     | "_"                                { $$ = new IR::Argument(@1, new IR::DefaultExpression(@1)); }
-    | name "=" "_"                       { $$ = new IR::Argument(@1, *$1, new IR::DefaultExpression(@3)); }
+    | name "=" "_"                       { $$ = new IR::Argument(@1, $1, new IR::DefaultExpression(@3)); }
     ;
 
 expressionList
-    : %empty                             { $$ = new IR::Vector<IR::Expression>(); }
-    | expression                         { $$ = new IR::Vector<IR::Expression>();
-                                           $$->push_back($1); $$->srcInfo = @1; }
-    | expressionList "," expression      { $$ = $1; $$->push_back($3); $$->srcInfo = @1 + @3; }
+    : %empty                             { $$ = {}; }
+    | expression                         { $$ = {}; $$.push_back($1); $$.srcInfo = @1; }
+    | expressionList "," expression      { ($$ = std::move($1)).push_back($3); $$.srcInfo = @1 + @3; }
     ;
 
 prefixedNonTypeName
-    : nonTypeName                        { $$ = new IR::Path(*$1); }
-    | dotPrefix nonTypeName              { $$ = new IR::Path(*$2, true);
+    : nonTypeName                        { $$ = new IR::Path($1); }
+    | dotPrefix nonTypeName              { $$ = new IR::Path($2, true);
                                            driver.structure->clearPath(); }
     ;
 
@@ -1629,11 +1619,11 @@ dot_name:
 lvalue
     : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
     | THIS                               { $$ = new IR::This(@1); }
-    | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, *$2); }
+    | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, $2); }
     | typeName dot_name %prec DOT        {
-                    $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression($1), *$2); }
+                    $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression($1), $2); }
     | specializedType dot_name %prec DOT {
-                    $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression($1), *$2); }
+                    $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression($1), $2); }
     | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | lvalue "[" expression "+:" expression "]" { $$ = new IR::PlusSlice(@1 + @6, $1, $3, $5); }
@@ -1653,28 +1643,27 @@ expression
         { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | expression "[" expression "+:" expression "]"
         { $$ = new IR::PlusSlice(@1 + @6, $1, $3, $5); }
-    | "{" expressionList optTrailingComma "}" { $$ = new IR::ListExpression(@1 + @4, *$2); }
+    | "{" expressionList optTrailingComma "}" { $$ = new IR::ListExpression(@1 + @4, std::move($2)); }
     | INVALID                            { $$ = new IR::Invalid(@1, IR::Type::Unknown::get()); }
     | "{" kvList optTrailingComma "}"    { $$ = new IR::StructExpression(
-                                                  @1 + @4, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, *$2); }
+                                                  @1 + @4, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, std::move($2)); }
     | "{" kvList "," DOTS optTrailingComma "}" {
-                                           auto list = $2;
-                                           list->push_back(new IR::NamedDots(@4));
-                                           list->srcInfo = list->srcInfo + @4;
+                                           $2.push_back(new IR::NamedDots(@4));
+                                           $2.srcInfo += @4;
                                            $$ = new IR::StructExpression(
                                                   @1 + @6, IR::Type::Unknown::get(),
-                                                  (IR::Type_Name*)nullptr, *list); }
+                                                  (IR::Type_Name*)nullptr, $2); }
     | "(" expression ")"                 { ($$ = $2)->srcInfo = @1 + @3; }
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
     | "+" expression %prec PREFIX        { $$ = new IR::UPlus(@1 + @2, $2); }
     | typeName dot_name %prec DOT
-        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
+        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), $2); }
     | ERROR "." name
         { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs)));
-          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
-    | expression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, *$2); }
+          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), $3); }
+    | expression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, $2); }
     | expression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
     | expression "/" expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
     | expression "%" expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
@@ -1700,11 +1689,11 @@ expression
     | expression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
     | expression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
     | expression l_angle realTypeArgumentList r_angle "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @7, $1, $3, $6); }
+        { $$ = new IR::MethodCallExpression(@1 + @7, $1, std::move($3), std::move($6)); }
     | expression "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
+        { $$ = new IR::MethodCallExpression(@1 + @4, $1, std::move($3)); }
     | namedType "(" argumentList ")"
-        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
+        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, std::move($3)); }
     | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
     ;
 
@@ -1726,11 +1715,11 @@ nonBraceExpression
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
     | "+" expression %prec PREFIX        { $$ = new IR::UPlus(@1 + @2, $2); }
     | typeName dot_name %prec DOT
-        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
+        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), $2); }
     | ERROR "." name
         { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs)));
-          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
-    | nonBraceExpression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, *$2); }
+          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), $3); }
+    | nonBraceExpression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, $2); }
     | nonBraceExpression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
     | nonBraceExpression "/" expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
     | nonBraceExpression "%" expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
@@ -1756,11 +1745,11 @@ nonBraceExpression
     | nonBraceExpression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
     | nonBraceExpression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
     | nonBraceExpression l_angle realTypeArgumentList r_angle "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @7, $1, $3, $6); }
+        { $$ = new IR::MethodCallExpression(@1 + @7, $1, std::move($3), std::move($6)); }
     | nonBraceExpression "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
+        { $$ = new IR::MethodCallExpression(@1 + @4, $1, std::move($3)); }
     | namedType "(" argumentList ")"
-        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
+        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, std::move($3)); }
     | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
     ;
 
@@ -1776,30 +1765,29 @@ nonGrtExpression
                                                 $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | nonGrtExpression "[" expression "+:" expression "]" {
                                                 $$ = new IR::PlusSlice(@1 + @6, $1, $3, $5); }
-    | "{" expressionList optTrailingComma "}" { $$ = new IR::ListExpression(@1 + @4, *$2); }
+    | "{" expressionList optTrailingComma "}" { $$ = new IR::ListExpression(@1 + @4, std::move($2)); }
     | INVALID                                 { $$ = new IR::Invalid(
                                                         @1, IR::Type::Unknown::get()); }
     | "{" kvList optTrailingComma "}"         { $$ = new IR::StructExpression(
                                                           @1 + @4, IR::Type::Unknown::get(),
-                                                          (IR::Type_Name*)nullptr, *$2); }
+                                                          (IR::Type_Name*)nullptr, std::move($2)); }
     | "{" kvList "," DOTS optTrailingComma "}" {
-                                                auto list = $2;
-                                                list->push_back(new IR::NamedDots(@4));
-                                                list->srcInfo = list->srcInfo + @4;
+                                                $2.push_back(new IR::NamedDots(@4));
+                                                $2.srcInfo = $2.srcInfo + @4;
                                                 $$ = new IR::StructExpression(
                                                         @1 + @6, IR::Type::Unknown::get(),
-                                                        (IR::Type_Name*)nullptr, *list); }
+                                                        (IR::Type_Name*)nullptr, $2); }
     | "(" expression ")"                      { ($$ = $2)->srcInfo = @1 + @3; }
     | "!" expression %prec PREFIX             { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX             { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX             { $$ = new IR::Neg(@1 + @2, $2); }
     | "+" expression %prec PREFIX             { $$ = new IR::UPlus(@1 + @2, $2); }
     | typeName dot_name %prec DOT
-        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
+        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), $2); }
     | ERROR "." name
         { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs)));
-          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
-    | nonGrtExpression dot_name %prec DOT     { $$ = new IR::Member(@1 + @2, $1, *$2); }
+          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), $3); }
+    | nonGrtExpression dot_name %prec DOT     { $$ = new IR::Member(@1 + @2, $1, $2); }
     | nonGrtExpression "*" expression         { $$ = new IR::Mul(@1 + @3, $1, $3); }
     | nonGrtExpression "/" expression         { $$ = new IR::Div(@1 + @3, $1, $3); }
     | nonGrtExpression "%" expression         { $$ = new IR::Mod(@1 + @3, $1, $3); }
@@ -1823,11 +1811,11 @@ nonGrtExpression
     | nonGrtExpression "?" expression ":" nonGrtExpression {
                                                 $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
     | nonGrtExpression l_angle realTypeArgumentList r_angle "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @7, $1, $3, $6); }
+        { $$ = new IR::MethodCallExpression(@1 + @7, $1, std::move($3), std::move($6)); }
     | nonGrtExpression "(" argumentList ")"
-        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
+        { $$ = new IR::MethodCallExpression(@1 + @4, $1, std::move($3)); }
     | namedType "(" argumentList ")"
-        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
+        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, std::move($3)); }
     | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
     ;
 
@@ -1837,30 +1825,27 @@ intOrStr
     ;
 
 intList
-    : INTEGER                    { $$ = new IR::Vector<IR::Expression>();
-                                   $$->push_back(parseConstant(@1, $1, 0));
-                                   $$->srcInfo = @1; }
-    | intList "," INTEGER        { $$ = $1;
-                                   $$->push_back(parseConstant(@3, $3, 0));
-                                   $$->srcInfo = @1 + @3; }
+    : INTEGER                    { $$ = {};
+                                   $$.push_back(parseConstant(@1, $1, 0));
+                                   $$.srcInfo = @1; }
+    | intList "," INTEGER        { ($$ = std::move($1)).push_back(parseConstant(@3, $3, 0));
+                                   $$.srcInfo = @1 + @3; }
     ;
 
 intOrStrList
-    : intOrStr                  { $$ = new IR::Vector<IR::Expression>();
-                                   $$->push_back($1);
-                                   $$->srcInfo = @1; }
-    | intOrStrList "," intOrStr { $$ = $1;
-                                   $$->push_back($3);
-                                   $$->srcInfo = @1 + @3; }
+    : intOrStr                  { $$ = {};
+                                  $$.push_back($1);
+                                  $$.srcInfo = @1; }
+    | intOrStrList "," intOrStr { ($$ = std::move($1)).push_back($3);
+                                  $$.srcInfo = @1 + @3; }
     ;
 
 strList
-    : STRING_LITERAL             { $$ = new IR::Vector<IR::Expression>();
-                                   $$->push_back(new IR::StringLiteral(@1, $1));
-                                   $$->srcInfo = @1; }
-    | strList "," STRING_LITERAL { $$ = $1;
-                                   $$->push_back(new IR::StringLiteral(@3, $3));
-                                   $$->srcInfo = @1 + @3; }
+    : STRING_LITERAL             { $$ = {};
+                                   $$.push_back(new IR::StringLiteral(@1, $1));
+                                   $$.srcInfo = @1; }
+    | strList "," STRING_LITERAL { ($$ = std::move($1)).push_back(new IR::StringLiteral(@3, $3));
+                                   $$.srcInfo = @1 + @3; }
     ;
 
 l_angle : "<" | L_ANGLE_ARGS ;

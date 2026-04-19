@@ -565,6 +565,19 @@ class MethodCallExpression : Expression {
         auto arguments = new Vector<Argument>;
         for (auto arg : a) arguments->push_back(new Argument(arg));
         this->arguments = arguments; }
+#emit
+    // FIXME -- should not need #emit here, but ir-generator does not understand rvalue refs
+    // FIXME -- should have ir-generator autogenerate these?  ctor with rvalue ref for any
+    // IR type arg, or perhaps just Vector/IndexedVector?
+    // FIXME -- could instead make typeArguments/arguments inline, in which case these would
+    // be unnecessary (but perhaps desirable for efficiency)
+    MethodCallExpression(Util::SourceInfo si, const Expression *m, Vector<Type> &&ta,
+                         Vector<Argument> args)
+    : MethodCallExpression(si, m, new Vector<Type>(std::move(ta)),
+                           new Vector<Argument>(std::move(args))) {}
+    MethodCallExpression(Util::SourceInfo si, const Expression *m, Vector<Argument> args)
+    : MethodCallExpression(si, m, new Vector<Argument>(std::move(args))) {}
+#end
 }
 
 class ConstructorCallExpression : Expression {
@@ -575,6 +588,11 @@ class ConstructorCallExpression : Expression {
                         constructedType->is<Type_Specialized>(),
                         "%1%: unexpected type", constructedType);
         arguments->check_null(); }
+#emit
+    // FIXME -- should not need #emit here, but ir-generator does not understand rvalue refs
+    ConstructorCallExpression(Util::SourceInfo si, const IR::Type *t, Vector<Argument> &&args)
+    : ConstructorCallExpression(si, t, new Vector<Argument>(std::move(args))) {}
+#end
 }
 
 class BaseListExpression : Expression {
