@@ -1,6 +1,6 @@
 issue2220.p4(11): [--Werror=type-error] error: 's1'
  S s1 = { val = (bit<8>)0 };
- ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   ^^
   ---- Actual error:
 issue2220.p4(3): Cannot cast implicitly type 'bit<8>' to type 'myEnum'
   enum bit<8> myEnum { One = 1 }

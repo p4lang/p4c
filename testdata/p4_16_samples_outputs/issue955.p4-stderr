@@ -3,4 +3,4 @@ action empty() { }
        ^^^^^
 issue955.p4(33): [--Wwarn=unused] warning: 'b' is unused
     apply { bool b = hdr.h.isValid(); }
-            ^^^^^^^^^^^^^^^^^^^^^^^^
+                 ^

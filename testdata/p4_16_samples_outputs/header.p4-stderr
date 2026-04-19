@@ -3,7 +3,7 @@ control p()
         ^
 header.p4(45): [--Wwarn=unused] warning: 'stack' is unused
         your_header[5] stack;
-        ^^^^^^^^^^^^^^^^^^^^
+                       ^^^^^
 header.p4(49): [--Wwarn=unused] warning: 'your_stack' is unused
 typedef your_header[5] your_stack;
                        ^^^^^^^^^^

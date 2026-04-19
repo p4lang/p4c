@@ -6,7 +6,7 @@ control bar() {
         ^^^
 issue1524.p4(54): [--Wwarn=unused] warning: 'tmp' is unused
         foo_t tmp = FOO;
-        ^^^^^^^^^^^^^^^
+              ^^^
 issue1524.p4(36): [--Winfo=removed] info: removing parser 'ParserImpl'
 parser ParserImpl(packet_in packet,
        ^^^^^^^^^^

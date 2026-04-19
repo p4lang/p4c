@@ -39,10 +39,10 @@ psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bi
                     ^
 psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)s_0/s[47:0] + (bit<48>)hdr.ipv4.totalLen
     s[(48 -1):0] = (s[(48 -1):0] +
-                    ^
+                   ^
 psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)(s_0/s[47:0] + (bit<48>)hdr.ipv4.totalLen) << 0
     s[(48 -1):0] = (s[(48 -1):0] +
-                    ^
+                   ^
 psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in 80w0xffffffffffff
     s[(48 -1):0] = (s[(48 -1):0] +
     ^^^^^^^^^^^^
@@ -51,4 +51,4 @@ psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bi
     ^^^^^^^^^^^^
 psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)(s_0/s[47:0] + (bit<48>)hdr.ipv4.totalLen) << 0 & 281474976710655
     s[(48 -1):0] = (s[(48 -1):0] +
-                    ^
+                   ^
