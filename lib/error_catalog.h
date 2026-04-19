@@ -91,6 +91,7 @@ class ErrorType {
     static constexpr int WARN_DUPLICATE = 1025;    // duplicate objects
     static constexpr int WARN_BRANCH_HINT = 1026;  // branch frequency/likely hints
     static constexpr int WARN_TABLE_KEYS = 1027;   // something is wrong with a table key
+    static constexpr int WARN_EXTENSION = 1028;    // non-standard extension
     // Backends should extend this class with additional warnings in the range 1500-2141.
     static constexpr int WARN_MIN_BACKEND = 1500;  // first allowed backend warning code
     static constexpr int WARN_MAX = 2141;          // last allowed warning code

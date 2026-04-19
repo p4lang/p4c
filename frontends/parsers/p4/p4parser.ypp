@@ -89,12 +89,14 @@ inline std::ostream& operator<<(std::ostream& out, const OptionalConst& oc) {
 // forbidden in C++. We avoid the problem using a typedef.
 typedef const IR::Type ConstType;
 
-struct NameTypePair {
+struct DeclaratorInfo {
+    Util::SourceInfo srcInfo;
     IR::ID name;
     const IR::Type *type;
+    const IR::Expression *init;
 };
 
-inline std::ostream &operator<<(std::ostream &out, const NameTypePair &nt) {
+inline std::ostream &operator<<(std::ostream &out, const DeclaratorInfo &nt) {
     return out << nt.name << ":" << nt.type;
 }
 
@@ -117,7 +119,7 @@ class Token {
 
     Token() : Token(0, cstring::empty, nullptr) { }
     Token(int type, cstring text) : Token(type, text, nullptr) { }
-    Token(int type, const char* text) : Token(type, cstring(text), nullptr) { }    
+    Token(int type, const char* text) : Token(type, cstring(text), nullptr) { }
     Token(int type, UnparsedConstant unparsedConstant)
             : Token(type, unparsedConstant.text,
                     new UnparsedConstant(unparsedConstant)) { }
@@ -271,7 +273,8 @@ using namespace P4;
 
 
 %type<IR::ID>               name dot_name nonTypeName nonTableKwName annotationName
-%type<NameTypePair>         declarator
+%type<DeclaratorInfo>       declarator
+%type<std::vector<DeclaratorInfo>> declaratorList initDeclaratorList
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::TypeParameters*>  optTypeParameters typeParameters typeParameterList
@@ -306,20 +309,20 @@ using namespace P4;
                             forStatement breakStatement continueStatement
 %type<IR::BlockStatement*>  blockStatement parserBlockStatement controlBody
                             optObjInitializer
-%type<IR::StatOrDecl*>      statementOrDeclaration parserStatement
-                            declOrAssignmentOrMethodCallStatement
-%type<IR::IndexedVector<IR::StatOrDecl>>  objDeclarations statOrDeclList parserStatements
+%type<IR::StatOrDecl*>      declOrAssignmentOrMethodCallStatement
+%type<IR::IndexedVector<IR::StatOrDecl>>  objDeclarations parserStatement
+                            statementOrDeclaration parserStatements statOrDeclList
                             forInitStatements forInitStatementsNonEmpty
                             forUpdateStatements forUpdateStatementsNonEmpty
 %type<IR::SwitchCase*>      switchCase
 %type<IR::Vector<IR::SwitchCase>> switchCases
 %type<IR::Vector<IR::Type>> typeArgumentList realTypeArgumentList
 %type<IR::ParserState*>     parserState
-%type<IR::IndexedVector<IR::ParserState>> parserStates
-%type<IR::Declaration*>     constantDeclaration actionDeclaration
-                            variableDeclaration variableDeclarationWithoutSemicolon instantiation functionDeclaration
-                            objDeclaration tableDeclaration controlLocalDeclaration
-                            parserLocalElement valueSetDeclaration
+%type<IR::IndexedVector<IR::ParserState>>  parserStates
+%type<IR::IndexedVector<IR::Declaration>> constantDeclaration variableDeclaration parserLocalElement controlLocalDeclaration
+%type<IR::Declaration*>     actionDeclaration variableDeclarationWithoutSemicolon instantiation
+                            functionDeclaration objDeclaration tableDeclaration
+                            valueSetDeclaration
 %type<IR::Type_Declaration*>  headerTypeDeclaration structTypeDeclaration
                               headerUnionDeclaration derivedTypeDeclaration
                               parserDeclaration controlDeclaration enumDeclaration
@@ -330,8 +333,7 @@ using namespace P4;
 %type<IR::Type_Parser*>     parserTypeDeclaration
 %type<IR::Type_Control*>    controlTypeDeclaration
 %type<IR::IndexedVector<IR::Declaration>>  parserLocalElements controlLocalDeclarations
-%type<IR::StructField*>     structField
-%type<IR::IndexedVector<IR::StructField>>  structFieldList
+%type<IR::IndexedVector<IR::StructField>>  structField structFieldList
 %type<IR::IndexedVector<IR::SerEnumMember>> specifiedIdentifierList
 %type<IR::SerEnumMember*>   specifiedIdentifier
 %type<IR::Method*>          methodPrototype functionPrototype
@@ -488,14 +490,18 @@ p4rtControllerType
 program : input END { YYACCEPT; };
 
 input
-    : %empty             { driver.result = $$ = new IR::P4Program; }
-    | input declaration  { if ($2) $1->objects.push_back($2->getNode());
-                           $$ = $1; }
-    | input ";"          { $$ = $1; }   // empty declaration
+    : %empty              { driver.result = $$ = new IR::P4Program; }
+    | input declaration   { $$ = $1;
+                            if (!$2) { /* do nothing */ }
+                            else if (auto *v = $2->to<IR::VectorBase>())
+                                $$->objects.append(*v);
+                            else
+                                $$->objects.push_back($2); }
+    | input ";"           { $$ = $1; }   // empty declaration
     ;
 
 declaration
-    : constantDeclaration     { $$ = $1; }
+    : constantDeclaration     { $$ = new IR::IndexedVector<IR::Declaration>(std::move($1)); }
     | externDeclaration       { $$ = $1; }
     | actionDeclaration       { $$ = $1; }
     | parserDeclaration       { $$ = $1; }
@@ -841,14 +847,14 @@ parserDeclaration
 
 parserLocalElements
     : %empty                                 { $$ = {}; }
-    | parserLocalElements parserLocalElement { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
+    | parserLocalElements parserLocalElement { ($$ = std::move($1)).append($2); $$.srcInfo = @1 + @2; }
     ;
 
 parserLocalElement
-    : constantDeclaration             { $$ = $1; }
-    | instantiation                   { $$ = $1; }
-    | variableDeclaration             { $$ = $1; }
-    | valueSetDeclaration             { $$ = $1; }
+    : constantDeclaration             { $$ = std::move($1); }
+    | instantiation                   { $$.push_back($1); }
+    | variableDeclaration             { $$ = std::move($1); }
+    | valueSetDeclaration             { $$.push_back($1); }
     ;
 
 parserTypeDeclaration
@@ -876,16 +882,16 @@ parserState
 
 parserStatements
     : %empty                           { $$ = {}; }
-    | parserStatements parserStatement { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
+    | parserStatements parserStatement { ($$ = std::move($1)).append($2); $$.srcInfo = @1 + @2; }
     ;
 
 parserStatement
-    : assignmentOrMethodCallStatement { $$ = $1; }
-    | emptyStatement                  { $$ = $1; }
-    | variableDeclaration             { $$ = $1; }
-    | constantDeclaration             { $$ = $1; }
-    | parserBlockStatement            { $$ = $1; }
-    | conditionalStatement            { $$ = $1; }
+    : assignmentOrMethodCallStatement { $$.push_back($1); }
+    | emptyStatement                  { $$.push_back($1); }
+    | variableDeclaration             { for (auto *decl : $1) $$.push_back(decl); }
+    | constantDeclaration             { for (auto *decl : $1) $$.push_back(decl); }
+    | parserBlockStatement            { $$.push_back($1); }
+    | conditionalStatement            { $$.push_back($1); }
     ;
 
 parserBlockStatement
@@ -991,14 +997,16 @@ controlTypeDeclaration
 
 controlLocalDeclarations
     : %empty { $$ = {}; }
-    | controlLocalDeclarations controlLocalDeclaration { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
+    | controlLocalDeclarations controlLocalDeclaration {
+                ($$ = std::move($1)).append($2);
+                $$.srcInfo = @1 + @2; }
     ;
 
 controlLocalDeclaration
     : constantDeclaration      { $$ = $1; }
-    | actionDeclaration        { $$ = $1; }
-    | tableDeclaration         { $$ = $1; }
-    | instantiation            { $$ = $1; }
+    | actionDeclaration        { $$.push_back($1); }
+    | tableDeclaration         { $$.push_back($1); }
+    | instantiation            { $$.push_back($1); }
     | variableDeclaration      { $$ = $1; }
     ;
 
@@ -1212,12 +1220,22 @@ headerUnionDeclaration
 
 structFieldList
     : %empty                           { $$ = {}; }
-    | structFieldList structField      { ($$ = std::move($1)).push_back($2); $$.srcInfo = @1 + @2; }
+    | structFieldList structField      { ($$ = std::move($1)).append($2); $$.srcInfo = @1 + @2; }
     ;
 
 structField
-    : optAnnotations typeRef declarator ";"  {
-                $$ = new IR::StructField(@3, $3.name, std::move($1), $3.type); }
+    : optAnnotations typeRef declaratorList ";"  {
+        for (auto &decl : $3)
+            $$.push_back(new IR::StructField(decl.srcInfo, decl.name, std::move($1), decl.type)); }
+    ;
+
+declaratorList
+    : declarator { $$.emplace_back($1); }
+    | declaratorList "," <ConstType*>{ $$ = $<ConstType*>0; } declarator {
+            if ($1.size() == 1)
+                warning(ErrorType::WARN_EXTENSION,
+                        "%1%Multiple declarators is a non-standard extension", @4);
+            ($$=$1).emplace_back($4); }
     ;
 
 enumDeclaration
@@ -1361,7 +1379,7 @@ blockStatement
 
 statOrDeclList
     : %empty                                { $$ = {}; }
-    | statOrDeclList statementOrDeclaration { ($$ = std::move($1)).push_back($2);
+    | statOrDeclList statementOrDeclaration { ($$ = std::move($1)).append($2);
                                               $$.srcInfo = @1 + @2; }
     ;
 
@@ -1386,14 +1404,14 @@ switchLabel
     ;
 
 statementOrDeclaration
-    : variableDeclaration      { $$ = $1; }
-    | constantDeclaration      { $$ = $1; }
-    | statement                { $$ = $1; }
+    : variableDeclaration      { for (auto *decl : $1) $$.push_back(decl); }
+    | constantDeclaration      { for (auto *decl : $1) $$.push_back(decl); }
+    | statement                { $$.push_back($1); }
       // The transition to instantiation below is not required by the
       // languge spec, but it does help p4c give a more clear error
       // message if one erroneously attempts to perform an
       // instantiation inside of a block.
-    | instantiation            { $$ = $1; }
+    | instantiation            { $$.push_back($1); }
     ;
 
 forStatement
@@ -1538,7 +1556,16 @@ actionDeclaration
 /************************* VARIABLES *****************************/
 
 variableDeclaration
-    : variableDeclarationWithoutSemicolon ";"    { $$ = $1; }
+    : annotations typeRef initDeclaratorList ";" {
+            for (auto &decl : $3) {
+                $$.push_back(new IR::Declaration_Variable(decl.srcInfo, decl.name, std::move($1),
+                                                           decl.type, decl.init));
+                driver.structure->declareObject(decl.name, decl.type->toString()); } }
+    | typeRef initDeclaratorList ";" {
+            for (auto &decl : $2) {
+                $$.push_back(new IR::Declaration_Variable(decl.srcInfo, decl.name,
+                                                           decl.type, decl.init));
+                driver.structure->declareObject(decl.name, decl.type->toString()); } }
     ;
 
 variableDeclarationWithoutSemicolon
@@ -1551,15 +1578,26 @@ variableDeclarationWithoutSemicolon
     ;
 
 constantDeclaration
-    : optAnnotations CONST typeRef declarator "=" initializer ";" {
-                $$ = new IR::Declaration_Constant(@4, $4.name, std::move($1), $4.type, $6);
-                driver.structure->declareObject($4.name, $4.type->toString()); }
+    : optAnnotations CONST typeRef initDeclaratorList ";" {
+            for (auto &decl : $4) {
+                if (!decl.init)
+                    P4::error(ErrorType::ERR_EXPECTED,
+                              "Const %1% declaration requires an initializer", decl.name);
+                $$.push_back(new IR::Declaration_Constant(decl.srcInfo, decl.name, std::move($1),
+                                                          decl.type, decl.init));
+                driver.structure->declareObject(decl.name, decl.type->toString()); } }
     ;
 
 declarator
-    : name                { $$.name = $1; $$.type = $<ConstType *>0; }
-    | declarator "[" expression "]"
-                          { $$ = $1; $$.type = new IR::Type_Array(@2+@4, $1.type, $3); }
+    : name    { $$.srcInfo = @1;
+                $$.name = $1;
+                $$.type = $<ConstType *>0;
+                $$.init = nullptr; }
+    | declarator "[" expression "]" {
+                $$ = $1;
+                $$.srcInfo += @4;
+                $$.type = new IR::Type_Array(@2+@4, $1.type, $3);
+                $$.init = nullptr; }
     ;
 
 optInitializer
@@ -1569,6 +1607,18 @@ optInitializer
 
 initializer
     : expression                          { $$ = $1; }
+    ;
+
+initDeclaratorList
+    : declarator optInitializer {
+            $$.emplace_back($1);
+            $$.back().init = $2; }
+    | initDeclaratorList "," <ConstType*>{ $$ = $<ConstType*>0; } declarator optInitializer {
+            if ($1.size() == 1)
+                warning(ErrorType::WARN_EXTENSION,
+                        "%1%Multiple declarators is a non-standard extension", @4);
+            ($$=$1).emplace_back($4);
+            $$.back().init = $5; }
     ;
 
 /**************** Expressions ****************/
