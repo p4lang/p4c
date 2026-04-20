@@ -258,11 +258,11 @@ using namespace P4;
 %token<Token>      MASK "&&&"
 %token<Token>      DOTS "..."
 %token<Token>      RANGE ".."
-%token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT BREAK CONST CONTINUE CONTROL DEFAULT
-                   ELSE ENTRIES ENUM ERROR EXIT EXTERN FOR HEADER HEADER_UNION IF IN INOUT
-                   INT KEY  LIST SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA PRIORITY RETURN
-                   STATE STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+                   ELSE ENTRIES ENUM ERROR EXIT EXTERN FALSE FOR HEADER HEADER_UNION IF IN INOUT
+                   INT KEY LIST MATCH_KIND OUT PACKAGE PARSER PRAGMA PRIORITY RETURN SELECT
+                   STATE STRING STRUCT SWITCH TABLE THIS TRANSITION TRUE TUPLE TYPE TYPEDEF
+                   VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -506,13 +506,13 @@ declaration
 
 nonTypeName
     : IDENTIFIER  { $$ = new IR::ID(@1, $1); }
-    | APPLY       { $$ = new IR::ID(@1, "apply"_cs); }
-    | KEY         { $$ = new IR::ID(@1, "key"_cs); }
     | ACTIONS     { $$ = new IR::ID(@1, "actions"_cs); }
-    | STATE       { $$ = new IR::ID(@1, "state"_cs); }
+    | APPLY       { $$ = new IR::ID(@1, "apply"_cs); }
     | ENTRIES     { $$ = new IR::ID(@1, "entries"_cs); }
-    | TYPE        { $$ = new IR::ID(@1, "type"_cs); }
+    | KEY         { $$ = new IR::ID(@1, "key"_cs); }
     | PRIORITY    { $$ = new IR::ID(@1, "priority"_cs); }
+    | STATE       { $$ = new IR::ID(@1, "state"_cs); }
+    | TYPE        { $$ = new IR::ID(@1, "type"_cs); }
     ;
 
 name
@@ -525,9 +525,9 @@ nonTableKwName
     : IDENTIFIER       { $$ = new IR::ID(@1, $1); }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     | APPLY            { $$ = new IR::ID(@1, "apply"_cs); }
+    | PRIORITY         { $$ = new IR::ID(@1, "priority"_cs); }
     | STATE            { $$ = new IR::ID(@1, "state"_cs); }
     | TYPE             { $$ = new IR::ID(@1, "type"_cs); }
-    | PRIORITY         { $$ = new IR::ID(@1, "priority"_cs); }
     ;
 
 optCONST
@@ -616,8 +616,8 @@ annotationName
     | INOUT            { $$ = new IR::ID(@1, "inout"_cs); }
     | INT              { $$ = new IR::ID(@1, "int"_cs); }
     | KEY              { $$ = new IR::ID(@1, "key"_cs); }
+    | LIST             { $$ = new IR::ID(@1, "list"_cs); }
     | MATCH_KIND       { $$ = new IR::ID(@1, "match_kind"_cs); }
-    | TYPE             { $$ = new IR::ID(@1, "type"_cs); }
     | OUT              { $$ = new IR::ID(@1, "out"_cs); }
     | PARSER           { $$ = new IR::ID(@1, "parser"_cs); }
     | PACKAGE          { $$ = new IR::ID(@1, "package"_cs); }
@@ -633,10 +633,10 @@ annotationName
     | TRANSITION       { $$ = new IR::ID(@1, "transition"_cs); }
     | TRUE             { $$ = new IR::ID(@1, "true"_cs); }
     | TUPLE            { $$ = new IR::ID(@1, "tuple"_cs); }
+    | TYPE             { $$ = new IR::ID(@1, "type"_cs); }
     | TYPEDEF          { $$ = new IR::ID(@1, "typedef"_cs); }
     | VARBIT           { $$ = new IR::ID(@1, "varbit"_cs); }
     | VALUESET         { $$ = new IR::ID(@1, "valueset"_cs); }
-    | LIST             { $$ = new IR::ID(@1, "list"_cs); }
     | VOID             { $$ = new IR::ID(@1, "void"_cs); }
     | "_"              { $$ = new IR::ID(@1, "_"_cs); }
     | IDENTIFIER       { $$ = new IR::ID(@1, $1); }
@@ -671,8 +671,8 @@ annotationToken
     | INOUT            { $$ = $1; }
     | INT              { $$ = $1; }
     | KEY              { $$ = $1; }
+    | LIST             { $$ = $1; }
     | MATCH_KIND       { $$ = $1; }
-    | TYPE             { $$ = $1; }
     | OUT              { $$ = $1; }
     | PARSER           { $$ = $1; }
     | PACKAGE          { $$ = $1; }
@@ -688,10 +688,10 @@ annotationToken
     | TRANSITION       { $$ = $1; }
     | TRUE             { $$ = $1; }
     | TUPLE            { $$ = $1; }
+    | TYPE             { $$ = $1; }
     | TYPEDEF          { $$ = $1; }
     | VARBIT           { $$ = $1; }
     | VALUESET         { $$ = $1; }
-    | LIST             { $$ = $1; }
     | VOID             { $$ = $1; }
     | "_"              { $$ = $1; }
 
@@ -777,8 +777,8 @@ parameter
 
 direction
     : IN           { $$ = IR::Direction::In; }
-    | OUT          { $$ = IR::Direction::Out; }
     | INOUT        { $$ = IR::Direction::InOut; }
+    | OUT          { $$ = IR::Direction::Out; }
     | %empty       { $$ = IR::Direction::None; }
     ;
 
@@ -1102,18 +1102,15 @@ specializedType
     ;
 
 baseType
-    : BOOL   { $$ = IR::Type_Boolean::get(@1); }
-    | MATCH_KIND { $$ = IR::Type_MatchKind::get(@1); }
+    : BIT    { $$ = IR::Type::Bits::get(@1, 1); }
+    | BIT l_angle nonGrtExpression r_angle { $$ = IR::Type_Bits::get(@1+@4, $3, false); }
+    | BOOL   { $$ = IR::Type_Boolean::get(@1); }
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"_cs))); }
-    | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
-    | STRING { $$ = IR::Type::String::get(@1); }
     | INT    { $$ = IR::Type_InfInt::get(@1); }
-    | BIT l_angle nonGrtExpression r_angle
-      { $$ = IR::Type_Bits::get(@1+@4, $3, false); }
-    | INT l_angle nonGrtExpression r_angle
-      { $$ = IR::Type_Bits::get(@1+@4, $3, true); }
-    | VARBIT l_angle nonGrtExpression r_angle
-      { $$ = IR::Type_Varbits::get(@1+@4, $3); }
+    | INT l_angle nonGrtExpression r_angle { $$ = IR::Type_Bits::get(@1+@4, $3, true); }
+    | MATCH_KIND { $$ = IR::Type_MatchKind::get(@1); }
+    | STRING { $$ = IR::Type::String::get(@1); }
+    | VARBIT l_angle nonGrtExpression r_angle { $$ = IR::Type_Varbits::get(@1+@4, $3); }
     ;
 
 typeOrVoid

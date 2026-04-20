@@ -156,10 +156,10 @@ using Parser = P4::P4Parser;
                   return makeToken(INT); }
 "key"           { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(KEY); }
+"list"          { BEGIN(driver.saveState); driver.template_args = true;
+                  return makeToken(LIST); }
 "match_kind"    { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(MATCH_KIND); }
-"type"          { BEGIN(driver.saveState); driver.template_args = false;
-                  return makeToken(TYPE); }
 "out"           { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(OUT); }
 "parser"        { BEGIN(driver.saveState); driver.template_args = false;
@@ -190,14 +190,14 @@ using Parser = P4::P4Parser;
                   return makeToken(TRUE); }
 "tuple"         { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(TUPLE); }
+"type"          { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(TYPE); }
 "typedef"       { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(TYPEDEF); }
 "varbit"        { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VARBIT); }
 "value_set"     { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VALUESET); }
-"list"          { BEGIN(driver.saveState); driver.template_args = true;
-                  return makeToken(LIST); }
 "void"          { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(VOID); }
 "_"             { BEGIN(driver.saveState); driver.template_args = false;
