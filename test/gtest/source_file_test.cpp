@@ -33,7 +33,7 @@ TEST(UtilSourceFile, SourcePosition) {
 
     auto &context = BaseCompileContext::get();
     cstring str = context.errorReporter().format_message("%1% - %2%", position, position);
-    EXPECT_EQ("3:3 - 3:3\n", str);
+    EXPECT_EQ("3:3 - 3:3", str);
 
     SourcePosition next(3, 4);
     EXPECT_LT(position, next);
