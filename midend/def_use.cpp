@@ -514,7 +514,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
             BUG_CHECK(e == sl, "slice %s is not primary in ComputeDefUse::do_read", sl);
         }
         e = sl;
-        if (!di.live.getrange(range.lo, range.size())) return e;
+        if (di.live.getslice(range.lo, range.size()).empty()) return e;
     } else if (auto *ai = ctxt->node->to<IR::ArrayIndex>()) {
         if (auto idx = ai->right->to<IR::Constant>()) {
             int i = idx->asInt();
