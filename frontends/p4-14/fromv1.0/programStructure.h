@@ -20,12 +20,12 @@ limitations under the License.
 #include <set>
 #include <vector>
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
-#include "v1model.h"
 
 namespace P4::P4V1 {
 
@@ -124,7 +124,7 @@ class ProgramStructure {
     ProgramStructure();
     virtual ~ProgramStructure() = default;
 
-    P4V1::V1Model &v1model;
+    const P4V1::V1Model &v1model;
     P4::P4CoreLibrary &p4lib;
 
     std::unordered_map<cstring, int> allNames;

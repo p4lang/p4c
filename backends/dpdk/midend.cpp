@@ -16,10 +16,10 @@ limitations under the License.
 
 #include "midend.h"
 
+#include "backends/bmv2/common/v1model.h"
 #include "dpdkArch.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"

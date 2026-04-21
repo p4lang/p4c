@@ -19,7 +19,9 @@ limitations under the License.
 
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
+#ifdef SUPPORT_P4_14
 #include "frontends/p4-14/fromv1.0/converters.h"
+#endif
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 
@@ -29,6 +31,7 @@ class P4Program;
 
 namespace P4 {
 
+#ifdef SUPPORT_P4_14
 template <typename Input, typename C = P4V1::Converter>
 static const IR::P4Program *parseV1Program(Input stream, std::string_view sourceFile,
                                            unsigned sourceLine,
@@ -50,7 +53,7 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
     BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
     return v1->to<IR::P4Program>();
 }
-
+#endif
 /**
  * Parse P4 source from a file. The filename and language version are specified
  * by @options. If the language version is not P4-16, then the program is
@@ -59,7 +62,11 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
  * @return a P4-16 IR tree representing the contents of the given file, or null
  * on failure. If failure occurs, an error will also be reported.
  */
+#ifdef SUPPORT_P4_14
 template <typename C = P4V1::Converter>
+#else
+inline
+#endif
 const IR::P4Program *parseP4File(const ParserOptions &options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
@@ -72,21 +79,29 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
             ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
             return nullptr;
         }
+#ifdef SUPPORT_P4_14
         result = options.isv1() ? parseV1Program<FILE *, C>(file, options.file.string(), 1,
                                                             options.getDebugHook())
                                 : P4ParserDriver::parse(file, options.file.string());
+#else
+        result = P4ParserDriver::parse(file, options.file.string());
+#endif
         fclose(file);
     } else {
         auto preprocessorResult = options.preprocess();
         if (!preprocessorResult.has_value()) {
             return nullptr;
         }
-        // Need to assign file here because the parser requires an lvalue.
+// Need to assign file here because the parser requires an lvalue.
+#ifdef SUPPORT_P4_14
         result =
             options.isv1()
                 ? parseV1Program<FILE *, C>(preprocessorResult.value().get(), options.file.string(),
                                             1, options.getDebugHook())
                 : P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
+#else
+        result = P4ParserDriver::parse(preprocessorResult.value().get(), options.file.string());
+#endif
     }
 
     if (::P4::errorCount() > 0) {

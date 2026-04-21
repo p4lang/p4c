@@ -124,7 +124,9 @@ DEFINE_POSTORDER(IR::ConstructorCallExpression)
 DEFINE_POSTORDER(IR::SelectExpression)
 DEFINE_POSTORDER(IR::DefaultExpression)
 DEFINE_POSTORDER(IR::This)
+#ifdef SUPPORT_P4_14
 DEFINE_POSTORDER(IR::AttribLocal)
+#endif
 DEFINE_POSTORDER(IR::ActionList)
 
 DEFINE_POSTORDER(IR::ReturnStatement)

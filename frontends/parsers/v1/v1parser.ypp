@@ -48,7 +48,7 @@ using namespace P4::literals;
 
 struct BBoxType {
     IR::Vector<IR::Method>* methods;
-    IR::NameMap<IR::Attribute, ordered_map>* attribs;
+    IR::NameMap<IR::Declaration, ordered_map>* attribs;
 };
 
 struct HeaderType {
@@ -886,7 +886,7 @@ blackbox_type_declaration: BLACKBOX_TYPE name "{" blackbox_body "}"
 
 blackbox_body: /* epsilon */ {
             $$.methods = new IR::Vector<IR::Method>;
-            $$.attribs = new IR::NameMap<IR::Attribute, ordered_map>; }
+            $$.attribs = new IR::NameMap<IR::Declaration, ordered_map>; }
     | blackbox_body ATTRIBUTE name "{" blackbox_attribute "}"
           { ($$=$1).attribs->addUnique($3, $5); }
     | blackbox_body METHOD name "(" opt_argument_list ")" ";"

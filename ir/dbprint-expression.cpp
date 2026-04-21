@@ -89,6 +89,7 @@ void IR::PlusSlice::dbprint(std::ostream &out) const {
     if (prec == 0) out << ';';
 }
 
+#ifdef SUPPORT_P4_14
 void IR::Primitive::dbprint(std::ostream &out) const {
     const char *sep = "";
     int prec = getprec(out);
@@ -100,6 +101,37 @@ void IR::Primitive::dbprint(std::ostream &out) const {
     out << setprec(prec) << ')';
     if (prec == 0) out << ';';
 }
+
+void IR::Apply::dbprint(std::ostream &out) const {
+    out << "apply(" << name << ")";
+    int prec = getprec(out);
+    if (!actions.empty()) {
+        out << " {" << indent << setprec(0);
+        for (const auto &[actName, actExprs] : actions)
+            out << Log::endl << actName << " {" << indent << actExprs << unindent << " }";
+        out << setprec(prec) << " }" << unindent;
+    } else if (prec == 0) {
+        out << ';';
+    }
+}
+
+void IR::If::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    if (prec) {
+        if (prec > Prec_Cond) out << '(';
+        out << setprec(Prec_Cond + 1) << pred << " ? " << setprec(Prec_Low) << ifTrue << " : "
+            << setprec(Prec_Cond) << ifFalse << setprec(prec);
+        if (prec > Prec_Cond) out << ')';
+    } else {
+        out << "if (" << setprec(Prec_Low) << pred << ") {" << indent << setprec(0) << ifTrue;
+        if (ifFalse) {
+            if (!ifFalse->empty()) out << unindent << Log::endl << "} else {" << indent;
+            out << ifFalse;
+        }
+        out << " }" << unindent;
+    }
+}
+#endif
 
 void IR::Constant::dbprint(std::ostream &out) const {
     // Node::dbprint(out);
@@ -119,36 +151,6 @@ void IR::Member::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Postfix) << expr << setprec(prec) << '.' << member;
     if (prec == 0) out << ';';
-}
-
-void IR::If::dbprint(std::ostream &out) const {
-    int prec = getprec(out);
-    if (prec) {
-        if (prec > Prec_Cond) out << '(';
-        out << setprec(Prec_Cond + 1) << pred << " ? " << setprec(Prec_Low) << ifTrue << " : "
-            << setprec(Prec_Cond) << ifFalse << setprec(prec);
-        if (prec > Prec_Cond) out << ')';
-    } else {
-        out << "if (" << setprec(Prec_Low) << pred << ") {" << indent << setprec(0) << ifTrue;
-        if (ifFalse) {
-            if (!ifFalse->empty()) out << unindent << Log::endl << "} else {" << indent;
-            out << ifFalse;
-        }
-        out << " }" << unindent;
-    }
-}
-
-void IR::Apply::dbprint(std::ostream &out) const {
-    out << "apply(" << name << ")";
-    int prec = getprec(out);
-    if (!actions.empty()) {
-        out << " {" << indent << setprec(0);
-        for (const auto &[actName, actExprs] : actions)
-            out << Log::endl << actName << " {" << indent << actExprs << unindent << " }";
-        out << setprec(prec) << " }" << unindent;
-    } else if (prec == 0) {
-        out << ';';
-    }
 }
 
 void IR::BoolLiteral::dbprint(std::ostream &out) const {

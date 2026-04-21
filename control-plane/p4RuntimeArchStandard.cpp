@@ -77,7 +77,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     static std::optional<Digest> getDigestCall(const P4::ExternFunction *function,
                                                ReferenceMap *refMap, P4::TypeMap *typeMap,
                                                p4configv1::P4TypeInfo *p4RtTypeInfo) {
-        if (function->method->name != P4V1::V1Model::instance.digest_receiver.name)
+        if (function->method->name != P4V1::V1Model::instance().digest_receiver.name)
             return std::nullopt;
 
         auto call = function->expr;
@@ -126,7 +126,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     /// indicates that @table supports entry ageing.
     static bool getSupportsTimeout(const IR::P4Table *table) {
         auto timeout = table->properties->getProperty(
-            P4V1::V1Model::instance.tableAttributes.supportTimeout.name);
+            P4V1::V1Model::instance().tableAttributes.supportTimeout.name);
         if (timeout == nullptr) return false;
         if (!timeout->value->is<IR::ExpressionValue>()) {
             ::P4::error(ErrorType::ERR_UNEXPECTED,

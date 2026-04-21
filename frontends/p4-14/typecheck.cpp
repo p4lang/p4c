@@ -153,7 +153,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
             if (!ext && !global) return prop;
             if (!ext && di->type->is<IR::Type_Name>()) return prop;
             BUG_CHECK(ext, "%s is not an extern", di);
-            if (auto attr = ext->attributes[prop->name]) {
+            if (auto attr = ext->attributes.get<IR::Attribute>(prop->name)) {
                 if (attr->type->is<IR::Type::String>())
                     prune();
                 else if (attr->type->is<IR::Type_AnyTable>())

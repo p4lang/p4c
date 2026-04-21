@@ -20,8 +20,8 @@ limitations under the License.
 #include <sstream>
 #include <string>
 
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/common/parser_options.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/getV1ModelVersion.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
@@ -168,7 +168,7 @@ bool ToP4::preorder(const IR::P4Program *program) {
                 if (!relativePathStr.empty() && relativePathStr.rfind("..", 0) != 0) {
                     // TODO: This is v1model-specific code. This should be not part of the core
                     // pass.
-                    if (P4V1::V1Model::instance.file.name == relativePathStr) {
+                    if (P4V1::V1Model::instance().file.name == relativePathStr) {
                         P4V1::GetV1ModelVersion g;
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
