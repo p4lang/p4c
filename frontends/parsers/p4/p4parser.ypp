@@ -304,7 +304,6 @@ using namespace P4;
                             switchStatement exitStatement
                             assignmentOrMethodCallStatement conditionalStatement
                             assignmentOrMethodCallStatementWithoutSemicolon
-                            directApplication
                             forStatement breakStatement continueStatement
 %type<IR::BlockStatement*>  blockStatement parserBlockStatement controlBody
                             optObjInitializer
@@ -881,7 +880,6 @@ parserStatements
 
 parserStatement
     : assignmentOrMethodCallStatement { $$ = $1; }
-    | directApplication               { $$ = $1; }
     | emptyStatement                  { $$ = $1; }
     | variableDeclaration             { $$ = $1; }
     | constantDeclaration             { $$ = $1; }
@@ -1343,23 +1341,8 @@ continueStatement
     : CONTINUE ";" { $$ = new IR::ContinueStatement(@1); }
     ;
 
-// To support direct invocation of a control or parser without instantiation
-directApplication
-    : typeName "." APPLY "(" argumentList ")" ";" {
-                                  auto method = new IR::Member(
-                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"_cs));
-                                  auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
-                                  $$ = new IR::MethodCallStatement(@1 + @6, mce); }
-    | specializedType "." APPLY "(" argumentList ")" ";" {
-                                  auto method = new IR::Member(
-                                      @1 + @3, new IR::TypeNameExpression($1), IR::ID(@3, "apply"_cs));
-                                  auto mce = new IR::MethodCallExpression(@1 + @6, method, $5);
-                                  $$ = new IR::MethodCallStatement(@1 + @6, mce); }
-    ;
-
 statement
     : assignmentOrMethodCallStatement  { $$ = $1; }
-    | directApplication                { $$ = $1; }
     | conditionalStatement             { $$ = $1; }
     | emptyStatement                   { $$ = $1; }
     | blockStatement                   { $$ = $1; }
@@ -1647,6 +1630,10 @@ lvalue
     : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
     | THIS                               { $$ = new IR::This(@1); }
     | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, *$2); }
+    | typeName dot_name %prec DOT        {
+                    $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression($1), *$2); }
+    | specializedType dot_name %prec DOT {
+                    $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression($1), *$2); }
     | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | lvalue "[" expression "+:" expression "]" { $$ = new IR::PlusSlice(@1 + @6, $1, $3, $5); }
