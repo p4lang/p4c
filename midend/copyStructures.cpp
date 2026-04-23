@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "copyStructures.h"
 
-#include "frontends/p4/alias.h"
 #include "ir/irutils.h"
 
 namespace P4 {
@@ -27,10 +26,7 @@ const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
         return statement;
     }
 
-    // FIXME: This recreates ReadWrites() over and over again, loosing all
-    // declaration lookup caching
-    ReadsWrites rw;
-    if (!rw.mayAlias(statement->left, statement->right, getContext())) {
+    if (!readsWrites.mayAlias(statement->left, statement->right, getContext())) {
         return statement;
     }
     auto tmp = nameGen.newName("tmp");
