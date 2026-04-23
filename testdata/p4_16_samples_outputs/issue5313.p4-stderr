@@ -1,0 +1,7 @@
+issue5313.p4(3): [--Wwarn=uninitialized-out-param] warning: out parameter 'y' may be uninitialized when 'bar' terminates
+void bar(bit<2> x, out bit<8> y) {
+                              ^
+issue5313.p4(3)
+void bar(bit<2> x, out bit<8> y) {
+     ^^^
+[--Wwarn=uninitialized-use] warning: y_0 may be uninitialized
