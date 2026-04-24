@@ -23,10 +23,19 @@ jobs:
   build:
     if: ${{ github.repository == 'p4lang/p4c' }}
     runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 4
     steps:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
+      - name: Build Docker test image
+        run: |
+          docker build --network host -t p4c-test --build-arg IMAGE_TYPE=test .
+      - name: Run p4c tests (Docker image)
+        run: |
+          sudo -E docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c-test \
+            uv run ctest --output-on-failure --schedule-random
       - name: Determine Docker image tag
         id: get-tag
         shell: bash
