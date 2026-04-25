@@ -24,6 +24,8 @@ P4Tools is a collection of tools that make testing P4 targets and programs a lit
 
 - [P4Smith](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith): A random P4 program generator in the spirit of Csmith.
 
+- [RtSmith](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/rtsmith): A random control-plane configuration generator for P4 APIs.
+
 
 ## Directory Structure
 
@@ -36,6 +38,7 @@ p4tools
  │  ├─ core          ── definitions for core parts of the P4Tools modules.
  │  └─ lib           ── helper functions and utilities for P4Tools modules.  
  └─  modules         ── P4Tools extensions.
+    ├─ rtsmith     ── RtSmith: a random control-plane configuration generator.
     ├─ smith       ── P4Smith: a random P4 program generator.
     └─ testgen       ── P4Testgen: a test-case generator for P4 programs.
 ```
