@@ -67,7 +67,8 @@ const IR::Expression *ElimActionRun::RewriteActionRun::postorder(IR::Member *mem
     BUG_CHECK(parent && parent->is<IR::SwitchStatement>(), "action_run not in switch");
     auto &pps = self.prepend_statement[parent];
     pps.push_back(new IR::MethodCallStatement(mce));
-    self.add_to_control.push_back(info.action_run);
+    if (!self.add_to_control.getDeclaration(info.action_run->name))
+        self.add_to_control.push_back(info.action_run);
     return new IR::PathExpression(new IR::Type_Name(info.action_tags->name), info.action_run->name);
 }
 
