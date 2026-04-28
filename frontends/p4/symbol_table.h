@@ -73,8 +73,8 @@ class ProgramStructure final {
     // the last namespace has been exited
     void pop();
     // Declares these types in the current scope
-    void declareTypes(const IR::IndexedVector<IR::Type_Var> *typeVars);
-    void declareParameters(const IR::IndexedVector<IR::Parameter> *params);
+    void declareTypes(const IR::IndexedVector<IR::Type_Var> &typeVars);
+    void declareParameters(const IR::IndexedVector<IR::Parameter> &params);
     SymbolKind lookupIdentifier(cstring identifier);
 
     void startAbsolutePath();

@@ -742,6 +742,12 @@ class Type_Specialized : Type {
     }
     Type_Specialized(cstring bt, std::initializer_list<Type> args)
     : baseType(new Type_Name(bt)), arguments(new Vector<Type>(args)) {}
+#emit
+    // FIXME -- should not need #emit here, but ir-generator does not understand rvalue refs
+    // see FIXME notes in expression.def
+    Type_Specialized(Util::SourceInfo si, const Type_Name *bt, Vector<Type> &&args)
+    : Type_Specialized(si, bt, new Vector<Type>(std::move(args))) {}
+#end
 }
 
 /** Canonical representation of a Type_Specialized;
