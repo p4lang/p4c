@@ -28,6 +28,17 @@ namespace P4 {
 using namespace DBPrint;
 using namespace IndentCtl;
 
+void IR::Type_Bits::dbprint(std::ostream &out) const {
+    out << baseName() << "<";
+    if (expression) {
+        int prec = getprec(out);
+        out << setprec(Prec_Low) << expression << setprec(prec);
+    } else {
+        out << size;
+    }
+    out << ">";
+}
+
 void IR::ParameterList::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
     const char *sep = "";

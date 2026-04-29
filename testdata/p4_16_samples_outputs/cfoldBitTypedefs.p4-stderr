@@ -1,0 +1,10 @@
+cfoldBitTypedefs.p4(5): [--Wwarn=unused] warning: 't2_t' is unused
+typedef bit<v1> t2_t;
+                ^^^^
+cfoldBitTypedefs.p4(6): [--Wwarn=unused] warning: 't3_t' is unused
+typedef bit<v2> t3_t;
+                ^^^^
+cfoldBitTypedefs.p4(11): [--Wwarn=unused] warning: 't6_t' is unused
+typedef bit<v4[7:0]-v1> t6_t;
+                        ^^^^
+[--Wwarn=missing] warning: Program does not contain a `main' module
