@@ -51,7 +51,7 @@ class ProgramStructure {
     /// We place scalar user metadata fields (i.e., bit<>, bool)
     /// in the scalarsName metadata object, so we may need to rename
     /// these fields.  This map holds the new names.
-    std::map<const IR::StructField *, cstring> scalarMetadataFields;
+    ordered_map<const IR::StructField *, cstring> scalarMetadataFields;
     /// All match kinds
     std::set<cstring> match_kinds;
     /// map IR node to compile-time allocated resource blocks.
