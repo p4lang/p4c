@@ -166,6 +166,13 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             return true;
         },
         "Like -Mt, override target but quote special characters (passed to preprocessor)");
+    registerOption(
+        "-W", "warning flag",
+        [this](const char *arg) {
+            preprocessor_options += std::string(" -W") + arg;
+            return true;
+        },
+        "Specify warning flag (passed to preprocessor)");
 
     registerOption(
         "--p4v", "{14|16}",
