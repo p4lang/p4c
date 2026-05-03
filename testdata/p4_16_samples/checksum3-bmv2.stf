@@ -1,4 +1,7 @@
 # Copyright 2018 Cisco Systems, Inc.
+# SPDX-FileCopyrightText: 2018 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
 
 # Scapy commands that can be used to generate some of the input
 # packets below.
