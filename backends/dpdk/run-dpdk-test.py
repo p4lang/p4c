@@ -179,7 +179,9 @@ def check_generated_files(options, tmpdir, expecteddir):
         if produced.endswith(".spec") and environ.get("DPDK_PIPELINE") is not None:
             clifile = os.path.splitext(produced)[0] + ".cli"
             with open(clifile, "w", encoding="utf-8") as f:
+                # REUSE-IgnoreStart
                 f.write("; SPDX-License-Identifier: BSD-3-Clause\n")
+                # REUSE-IgnoreEnd
                 f.write("; Copyright(c) 2020 Intel Corporation\n")
                 f.write("\n")
                 f.write("mempool MEMPOOL0 buffer 9304 pool 32K cache 256 cpu 0\n")
