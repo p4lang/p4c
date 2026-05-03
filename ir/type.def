@@ -199,7 +199,6 @@ class Type_Bits : Type_Base {
     int max_width_bits() const override { BUG("max_width_bits() on fixed-width type: %1%", this); }
 
     toString{ return absl::StrCat(baseName(), "<", size, ">"); }
-    dbprint { out << toString(); }
 }
 
 class Type_Varbits : Type_Base {
