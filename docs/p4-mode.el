@@ -1,7 +1,11 @@
 ;;; p4-mode.el --- Support for the P4_16 programming language
 ;;; This file is still incomplete
 
-;; Copyright (C) 2016- Barefoot Networks
+;;; SPDX-FileCopyrightText: 2016 Barefoot Networks
+;;; Copyright (C) 2016- Barefoot Networks
+;;;
+;;; SPDX-License-Identifier: Apache-2.0
+
 ;; Version: 1.2
 ;; Keywords: languages p4
 ;; Homepage: http://p4.org
