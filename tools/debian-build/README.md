@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2021 Fabian Ruffy
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 How to create Ubuntu (or Debian) packages, to be buildable locally or
 in a Ubuntu Launchpad PPA:
 
