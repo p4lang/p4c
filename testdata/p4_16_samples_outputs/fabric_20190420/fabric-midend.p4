@@ -675,103 +675,103 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         const default_action = nop_10();
     }
-    @hidden action spgw35() {
+    @hidden action spgw26() {
         hdr.udp = hdr.inner_udp;
     }
-    @hidden action spgw37() {
+    @hidden action spgw28() {
         hdr.udp.setInvalid();
     }
-    @hidden action spgw31() {
+    @hidden action spgw22() {
         hdr.gtpu_ipv4 = hdr.ipv4;
         hdr.ipv4 = hdr.inner_ipv4;
         hdr.gtpu_udp = hdr.udp;
     }
-    @hidden action fabric78() {
+    @hidden action fabric69() {
         hasExited = false;
         hdr.gtpu_ipv4.setInvalid();
         hdr.gtpu_udp.setInvalid();
     }
-    @hidden action packetio25() {
+    @hidden action packetio16() {
         standard_metadata.egress_spec = hdr.packet_out.egress_port;
         hdr.packet_out.setInvalid();
         fabric_metadata._is_controller_packet_out12 = true;
         hasExited = true;
     }
-    @hidden action filtering105() {
+    @hidden action filtering96() {
         fabric_metadata._eth_type0 = hdr.vlan_tag.eth_type;
         fabric_metadata._vlan_id2 = hdr.vlan_tag.vlan_id;
         fabric_metadata._vlan_pri3 = hdr.vlan_tag.pri;
         fabric_metadata._vlan_cfi4 = hdr.vlan_tag.cfi;
     }
-    @hidden action filtering115() {
+    @hidden action filtering106() {
         fabric_metadata._mpls_ttl6 = 8w65;
     }
-    @hidden action spgw149() {
+    @hidden action spgw140() {
         mark_to_drop(standard_metadata);
     }
-    @hidden action spgw151() {
+    @hidden action spgw142() {
         fabric_metadata._spgw_direction17 = 2w1;
     }
-    @hidden action spgw154() {
+    @hidden action spgw145() {
         fabric_metadata._spgw_direction17 = 2w2;
     }
-    @hidden action spgw156() {
+    @hidden action spgw147() {
         fabric_metadata._spgw_direction17 = 2w0;
         spgw_ingress_hasReturned = true;
     }
     @hidden action act() {
         spgw_ingress_hasReturned = false;
     }
-    @hidden action spgw175() {
+    @hidden action spgw166() {
         fabric_metadata._spgw_ipv4_len18 = hdr.ipv4.total_len;
     }
-    @hidden action port_counter31() {
+    @hidden action port_counter22() {
         port_counters_control_egress_port_counter.count((bit<32>)standard_metadata.egress_spec);
     }
-    @hidden action port_counter34() {
+    @hidden action port_counter25() {
         port_counters_control_ingress_port_counter.count((bit<32>)standard_metadata.ingress_port);
     }
-    @hidden table tbl_fabric78 {
+    @hidden table tbl_fabric69 {
         actions = {
-            fabric78();
+            fabric69();
         }
-        const default_action = fabric78();
+        const default_action = fabric69();
     }
-    @hidden table tbl_spgw31 {
+    @hidden table tbl_spgw22 {
         actions = {
-            spgw31();
+            spgw22();
         }
-        const default_action = spgw31();
+        const default_action = spgw22();
     }
-    @hidden table tbl_spgw35 {
+    @hidden table tbl_spgw26 {
         actions = {
-            spgw35();
+            spgw26();
         }
-        const default_action = spgw35();
+        const default_action = spgw26();
     }
-    @hidden table tbl_spgw37 {
+    @hidden table tbl_spgw28 {
         actions = {
-            spgw37();
+            spgw28();
         }
-        const default_action = spgw37();
+        const default_action = spgw28();
     }
-    @hidden table tbl_packetio25 {
+    @hidden table tbl_packetio16 {
         actions = {
-            packetio25();
+            packetio16();
         }
-        const default_action = packetio25();
+        const default_action = packetio16();
     }
-    @hidden table tbl_filtering105 {
+    @hidden table tbl_filtering96 {
         actions = {
-            filtering105();
+            filtering96();
         }
-        const default_action = filtering105();
+        const default_action = filtering96();
     }
-    @hidden table tbl_filtering115 {
+    @hidden table tbl_filtering106 {
         actions = {
-            filtering115();
+            filtering106();
         }
-        const default_action = filtering115();
+        const default_action = filtering106();
     }
     @hidden table tbl_act {
         actions = {
@@ -779,17 +779,17 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         const default_action = act();
     }
-    @hidden table tbl_spgw149 {
+    @hidden table tbl_spgw140 {
         actions = {
-            spgw149();
+            spgw140();
         }
-        const default_action = spgw149();
+        const default_action = spgw140();
     }
-    @hidden table tbl_spgw151 {
+    @hidden table tbl_spgw142 {
         actions = {
-            spgw151();
+            spgw142();
         }
-        const default_action = spgw151();
+        const default_action = spgw142();
     }
     @hidden table tbl_spgw_ingress_gtpu_decap {
         actions = {
@@ -797,61 +797,61 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         const default_action = spgw_ingress_gtpu_decap_0();
     }
-    @hidden table tbl_spgw154 {
+    @hidden table tbl_spgw145 {
         actions = {
-            spgw154();
+            spgw145();
         }
-        const default_action = spgw154();
+        const default_action = spgw145();
     }
-    @hidden table tbl_spgw156 {
+    @hidden table tbl_spgw147 {
         actions = {
-            spgw156();
+            spgw147();
         }
-        const default_action = spgw156();
+        const default_action = spgw147();
     }
-    @hidden table tbl_spgw175 {
+    @hidden table tbl_spgw166 {
         actions = {
-            spgw175();
+            spgw166();
         }
-        const default_action = spgw175();
+        const default_action = spgw166();
     }
-    @hidden table tbl_port_counter31 {
+    @hidden table tbl_port_counter22 {
         actions = {
-            port_counter31();
+            port_counter22();
         }
-        const default_action = port_counter31();
+        const default_action = port_counter22();
     }
-    @hidden table tbl_port_counter34 {
+    @hidden table tbl_port_counter25 {
         actions = {
-            port_counter34();
+            port_counter25();
         }
-        const default_action = port_counter34();
+        const default_action = port_counter25();
     }
     apply {
-        tbl_fabric78.apply();
+        tbl_fabric69.apply();
         if (hdr.gtpu.isValid()) {
-            tbl_spgw31.apply();
+            tbl_spgw22.apply();
             if (hdr.inner_udp.isValid()) {
-                tbl_spgw35.apply();
+                tbl_spgw26.apply();
             } else {
-                tbl_spgw37.apply();
+                tbl_spgw28.apply();
             }
         } else {
             ;
         }
         if (hdr.packet_out.isValid()) {
-            tbl_packetio25.apply();
+            tbl_packetio16.apply();
         }
         if (hasExited) {
             ;
         } else {
             if (hdr.vlan_tag.isValid()) {
-                tbl_filtering105.apply();
+                tbl_filtering96.apply();
             }
             if (hdr.mpls.isValid()) {
                 ;
             } else {
-                tbl_filtering115.apply();
+                tbl_filtering106.apply();
             }
             filtering_ingress_port_vlan.apply();
             filtering_fwd_classifier.apply();
@@ -860,19 +860,19 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
                 if (spgw_ingress_s1u_filter_table.apply().hit) {
                     ;
                 } else {
-                    tbl_spgw149.apply();
+                    tbl_spgw140.apply();
                 }
-                tbl_spgw151.apply();
+                tbl_spgw142.apply();
                 tbl_spgw_ingress_gtpu_decap.apply();
             } else if (spgw_ingress_dl_sess_lookup.apply().hit) {
-                tbl_spgw154.apply();
+                tbl_spgw145.apply();
             } else {
-                tbl_spgw156.apply();
+                tbl_spgw147.apply();
             }
             if (spgw_ingress_hasReturned) {
                 ;
             } else {
-                tbl_spgw175.apply();
+                tbl_spgw166.apply();
             }
             if (fabric_metadata._skip_forwarding7) {
                 ;
@@ -892,10 +892,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
                 next_multicast.apply();
                 next_next_vlan.apply();
                 if (standard_metadata.egress_spec < 9w511) {
-                    tbl_port_counter31.apply();
+                    tbl_port_counter22.apply();
                 }
                 if (standard_metadata.ingress_port < 9w511) {
-                    tbl_port_counter34.apply();
+                    tbl_port_counter25.apply();
                 }
             }
         }
@@ -976,13 +976,13 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         hdr.gtpu.msglen = fabric_metadata._spgw_ipv4_len18;
         hdr.gtpu.teid = fabric_metadata._spgw_teid19;
     }
-    @hidden action packetio41() {
+    @hidden action packetio32() {
         hasExited_0 = true;
     }
-    @hidden action packetio47() {
+    @hidden action packetio38() {
         mark_to_drop(standard_metadata);
     }
-    @hidden action packetio49() {
+    @hidden action packetio40() {
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port = standard_metadata.ingress_port;
         hasExited_0 = true;
@@ -990,19 +990,19 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     @hidden action act_0() {
         hasExited_0 = false;
     }
-    @hidden action next308() {
+    @hidden action next299() {
         mark_to_drop(standard_metadata);
     }
-    @hidden action next327() {
+    @hidden action next318() {
         mark_to_drop(standard_metadata);
     }
-    @hidden action next326() {
+    @hidden action next317() {
         hdr.mpls.ttl = hdr.mpls.ttl + 8w255;
     }
-    @hidden action next331() {
+    @hidden action next322() {
         mark_to_drop(standard_metadata);
     }
-    @hidden action next330() {
+    @hidden action next321() {
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @hidden table tbl_act_0 {
@@ -1011,29 +1011,29 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         }
         const default_action = act_0();
     }
-    @hidden table tbl_packetio41 {
+    @hidden table tbl_packetio32 {
         actions = {
-            packetio41();
+            packetio32();
         }
-        const default_action = packetio41();
+        const default_action = packetio32();
     }
-    @hidden table tbl_packetio47 {
+    @hidden table tbl_packetio38 {
         actions = {
-            packetio47();
+            packetio38();
         }
-        const default_action = packetio47();
+        const default_action = packetio38();
     }
-    @hidden table tbl_packetio49 {
+    @hidden table tbl_packetio40 {
         actions = {
-            packetio49();
+            packetio40();
         }
-        const default_action = packetio49();
+        const default_action = packetio40();
     }
-    @hidden table tbl_next308 {
+    @hidden table tbl_next299 {
         actions = {
-            next308();
+            next299();
         }
-        const default_action = next308();
+        const default_action = next299();
     }
     @hidden table tbl_egress_next_pop_mpls_if_present {
         actions = {
@@ -1053,29 +1053,29 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         }
         const default_action = egress_next_push_vlan_0();
     }
-    @hidden table tbl_next326 {
+    @hidden table tbl_next317 {
         actions = {
-            next326();
+            next317();
         }
-        const default_action = next326();
+        const default_action = next317();
     }
-    @hidden table tbl_next327 {
+    @hidden table tbl_next318 {
         actions = {
-            next327();
+            next318();
         }
-        const default_action = next327();
+        const default_action = next318();
     }
-    @hidden table tbl_next330 {
+    @hidden table tbl_next321 {
         actions = {
-            next330();
+            next321();
         }
-        const default_action = next330();
+        const default_action = next321();
     }
-    @hidden table tbl_next331 {
+    @hidden table tbl_next322 {
         actions = {
-            next331();
+            next322();
         }
-        const default_action = next331();
+        const default_action = next322();
     }
     @hidden table tbl_spgw_egress_gtpu_encap {
         actions = {
@@ -1086,18 +1086,18 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     apply {
         tbl_act_0.apply();
         if (fabric_metadata._is_controller_packet_out12) {
-            tbl_packetio41.apply();
+            tbl_packetio32.apply();
         } else if (standard_metadata.egress_port == 9w255) {
             if (fabric_metadata._is_multicast11 && !fabric_metadata._clone_to_cpu13) {
-                tbl_packetio47.apply();
+                tbl_packetio38.apply();
             }
-            tbl_packetio49.apply();
+            tbl_packetio40.apply();
         }
         if (hasExited_0) {
             ;
         } else {
             if (fabric_metadata._is_multicast11 && standard_metadata.ingress_port == standard_metadata.egress_port) {
-                tbl_next308.apply();
+                tbl_next299.apply();
             }
             if (fabric_metadata._mpls_label5 == 20w0) {
                 if (hdr.mpls.isValid()) {
@@ -1112,14 +1112,14 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
                 tbl_egress_next_push_vlan.apply();
             }
             if (hdr.mpls.isValid()) {
-                tbl_next326.apply();
+                tbl_next317.apply();
                 if (hdr.mpls.ttl == 8w0) {
-                    tbl_next327.apply();
+                    tbl_next318.apply();
                 }
             } else if (hdr.ipv4.isValid()) {
-                tbl_next330.apply();
+                tbl_next321.apply();
                 if (hdr.ipv4.ttl == 8w0) {
-                    tbl_next331.apply();
+                    tbl_next322.apply();
                 }
             }
             if (fabric_metadata._spgw_direction17 == 2w2) {

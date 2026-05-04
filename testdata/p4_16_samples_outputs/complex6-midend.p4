@@ -2,16 +2,16 @@ extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     @name("c.tmp") bit<32> tmp;
     @name("c.tmp_1") bit<32> tmp_1;
-    @hidden action complex6l23() {
+    @hidden action complex6l14() {
         r = 32w1;
     }
-    @hidden action complex6l25() {
+    @hidden action complex6l16() {
         r = 32w3;
     }
     @hidden action act() {
         tmp_1 = f(32w2);
     }
-    @hidden action complex6l27() {
+    @hidden action complex6l18() {
         r = 32w2;
     }
     @hidden action act_0() {
@@ -29,35 +29,35 @@ control c(inout bit<32> r) {
         }
         const default_action = act();
     }
-    @hidden table tbl_complex6l23 {
+    @hidden table tbl_complex6l14 {
         actions = {
-            complex6l23();
+            complex6l14();
         }
-        const default_action = complex6l23();
+        const default_action = complex6l14();
     }
-    @hidden table tbl_complex6l25 {
+    @hidden table tbl_complex6l16 {
         actions = {
-            complex6l25();
+            complex6l16();
         }
-        const default_action = complex6l25();
+        const default_action = complex6l16();
     }
-    @hidden table tbl_complex6l27 {
+    @hidden table tbl_complex6l18 {
         actions = {
-            complex6l27();
+            complex6l18();
         }
-        const default_action = complex6l27();
+        const default_action = complex6l18();
     }
     apply {
         tbl_act.apply();
         if (tmp > 32w0) {
             tbl_act_0.apply();
             if (tmp_1 < 32w2) {
-                tbl_complex6l23.apply();
+                tbl_complex6l14.apply();
             } else {
-                tbl_complex6l25.apply();
+                tbl_complex6l16.apply();
             }
         } else {
-            tbl_complex6l27.apply();
+            tbl_complex6l18.apply();
         }
     }
 }

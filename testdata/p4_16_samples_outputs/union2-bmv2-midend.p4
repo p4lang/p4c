@@ -61,7 +61,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action union2bmv2l75() {
+    @hidden action union2bmv2l66() {
         h.u_h2.setInvalid();
         h.u_h1.setValid();
         h.u_h2.setInvalid();
@@ -69,15 +69,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.u_h1.a = 8w0xff;
         h.u_h2.setInvalid();
     }
-    @hidden table tbl_union2bmv2l75 {
+    @hidden table tbl_union2bmv2l66 {
         actions = {
-            union2bmv2l75();
+            union2bmv2l66();
         }
-        const default_action = union2bmv2l75();
+        const default_action = union2bmv2l66();
     }
     apply {
         if (h.u_h2.isValid()) {
-            tbl_union2bmv2l75.apply();
+            tbl_union2bmv2l66.apply();
         }
     }
 }

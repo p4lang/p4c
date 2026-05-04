@@ -1,4 +1,4 @@
-issue407-3.p4(64): [--Wwarn=unused] warning: 'myTuple1' is unused
+issue407-3.p4(55): [--Wwarn=unused] warning: 'myTuple1' is unused
     > myTuple1;
       ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

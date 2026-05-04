@@ -45,7 +45,7 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @hidden action issue2213bmv2l71() {
+    @hidden action issue2213bmv2l62() {
         meta._s1_f10 = 16w2;
         meta._s1_f21 = 8w3;
         meta._s2_s1_f12 = 16w2;
@@ -54,14 +54,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         meta._s2_f45 = 32w8;
         stdmeta.egress_spec = 9w3;
     }
-    @hidden table tbl_issue2213bmv2l71 {
+    @hidden table tbl_issue2213bmv2l62 {
         actions = {
-            issue2213bmv2l71();
+            issue2213bmv2l62();
         }
-        const default_action = issue2213bmv2l71();
+        const default_action = issue2213bmv2l62();
     }
     apply {
-        tbl_issue2213bmv2l71.apply();
+        tbl_issue2213bmv2l62.apply();
     }
 }
 

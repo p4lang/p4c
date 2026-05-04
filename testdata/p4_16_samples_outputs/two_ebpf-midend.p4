@@ -71,17 +71,17 @@ control pipe(inout Headers_t headers, out bool pass) {
     @hidden action act_1() {
         pass = pass_0;
     }
-    @hidden action two_ebpf69() {
+    @hidden action two_ebpf60() {
         pass = false;
     }
-    @hidden action two_ebpf66() {
+    @hidden action two_ebpf57() {
         pass = true;
     }
-    @hidden table tbl_two_ebpf66 {
+    @hidden table tbl_two_ebpf57 {
         actions = {
-            two_ebpf66();
+            two_ebpf57();
         }
-        const default_action = two_ebpf66();
+        const default_action = two_ebpf57();
     }
     @hidden table tbl_act {
         actions = {
@@ -101,14 +101,14 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = act_1();
     }
-    @hidden table tbl_two_ebpf69 {
+    @hidden table tbl_two_ebpf60 {
         actions = {
-            two_ebpf69();
+            two_ebpf60();
         }
-        const default_action = two_ebpf69();
+        const default_action = two_ebpf60();
     }
     apply {
-        tbl_two_ebpf66.apply();
+        tbl_two_ebpf57.apply();
         if (headers.ipv4.isValid()) {
             tbl_act.apply();
             c1_Check_ip.apply();
@@ -116,7 +116,7 @@ control pipe(inout Headers_t headers, out bool pass) {
             c1_Check_ip.apply();
             tbl_act_1.apply();
         } else {
-            tbl_two_ebpf69.apply();
+            tbl_two_ebpf60.apply();
         }
     }
 }

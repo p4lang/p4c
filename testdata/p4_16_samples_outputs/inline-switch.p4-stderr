@@ -1,15 +1,15 @@
-inline-switch.p4(20): [--Wwarn=unused] warning: 'a3' is unused
+inline-switch.p4(11): [--Wwarn=unused] warning: 'a3' is unused
     action a3() {}
            ^^
-inline-switch.p4(17): [--Wwarn=uninitialized-out-param] warning: out parameter 'x' may be uninitialized when 'c' terminates
+inline-switch.p4(8): [--Wwarn=uninitialized-out-param] warning: out parameter 'x' may be uninitialized when 'c' terminates
 control c(out bit<32> x) {
                       ^
-inline-switch.p4(17)
+inline-switch.p4(8)
 control c(out bit<32> x) {
         ^
-inline-switch.p4(36): [--Wwarn=uninitialized-out-param] warning: out parameter 'x' may be uninitialized when 'd' terminates
+inline-switch.p4(27): [--Wwarn=uninitialized-out-param] warning: out parameter 'x' may be uninitialized when 'd' terminates
 control d(out bit<32> x) {
                       ^
-inline-switch.p4(36)
+inline-switch.p4(27)
 control d(out bit<32> x) {
         ^

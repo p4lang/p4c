@@ -1,6 +1,6 @@
-self-call.p4(17): [--Werror=unsupported] error: Self-referencing types not supported: 'c' within 'control c'
+self-call.p4(8): [--Werror=unsupported] error: Self-referencing types not supported: 'c' within 'control c'
     c() c_inst;
     ^
-self-call.p4(16)
+self-call.p4(7)
 control c() {
         ^

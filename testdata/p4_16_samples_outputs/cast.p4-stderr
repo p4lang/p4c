@@ -1,7 +1,7 @@
-cast.p4(17): [--Wwarn=unused] warning: control 'p' is unused
+cast.p4(8): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
-cast.p4(17): [--Winfo=removed] info: removing control 'p'
+cast.p4(8): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

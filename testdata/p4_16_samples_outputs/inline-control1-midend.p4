@@ -6,19 +6,19 @@ extern Y {
 control d(out bit<32> x) {
     @name("d.x_0") bit<32> x_0;
     @name("d.cinst.y") Y(32w16) cinst_y;
-    @hidden action inlinecontrol1l24() {
+    @hidden action inlinecontrol1l15() {
         x_0 = cinst_y.get();
         x = x_0;
         cinst_y.get();
     }
-    @hidden table tbl_inlinecontrol1l24 {
+    @hidden table tbl_inlinecontrol1l15 {
         actions = {
-            inlinecontrol1l24();
+            inlinecontrol1l15();
         }
-        const default_action = inlinecontrol1l24();
+        const default_action = inlinecontrol1l15();
     }
     apply {
-        tbl_inlinecontrol1l24.apply();
+        tbl_inlinecontrol1l15.apply();
     }
 }
 

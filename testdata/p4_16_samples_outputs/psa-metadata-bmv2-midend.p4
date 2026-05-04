@@ -53,17 +53,17 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         }
         default_action = NoAction_1();
     }
-    @hidden action psametadatabmv2l104() {
+    @hidden action psametadatabmv2l95() {
         user_meta.field = hdr.ethernet.dstAddr[7:0];
     }
-    @hidden table tbl_psametadatabmv2l104 {
+    @hidden table tbl_psametadatabmv2l95 {
         actions = {
-            psametadatabmv2l104();
+            psametadatabmv2l95();
         }
-        const default_action = psametadatabmv2l104();
+        const default_action = psametadatabmv2l95();
     }
     apply {
-        tbl_psametadatabmv2l104.apply();
+        tbl_psametadatabmv2l95.apply();
         match_meta_0.apply();
     }
 }
@@ -74,32 +74,32 @@ control egress(inout headers hdr, inout metadata_t user_meta, in psa_egress_inpu
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psametadatabmv2l121() {
+    @hidden action psametadatabmv2l112() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psametadatabmv2l121 {
+    @hidden table tbl_psametadatabmv2l112 {
         actions = {
-            psametadatabmv2l121();
+            psametadatabmv2l112();
         }
-        const default_action = psametadatabmv2l121();
+        const default_action = psametadatabmv2l112();
     }
     apply {
-        tbl_psametadatabmv2l121.apply();
+        tbl_psametadatabmv2l112.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out empty_t recirculate_meta, inout headers hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psametadatabmv2l121_0() {
+    @hidden action psametadatabmv2l112_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psametadatabmv2l121_0 {
+    @hidden table tbl_psametadatabmv2l112_0 {
         actions = {
-            psametadatabmv2l121_0();
+            psametadatabmv2l112_0();
         }
-        const default_action = psametadatabmv2l121_0();
+        const default_action = psametadatabmv2l112_0();
     }
     apply {
-        tbl_psametadatabmv2l121_0.apply();
+        tbl_psametadatabmv2l112_0.apply();
     }
 }
 

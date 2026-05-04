@@ -1,13 +1,13 @@
-shadow1.p4(20): [--Wwarn=shadow] warning: 'counter' shadows 'counter'
+shadow1.p4(11): [--Wwarn=shadow] warning: 'counter' shadows 'counter'
   bit<16> counter;
           ^^^^^^^
-shadow1.p4(17)
+shadow1.p4(8)
 extern counter {}
        ^^^^^^^
-shadow1.p4(19): [--Wwarn=unused] warning: parser 'p' is unused
+shadow1.p4(10): [--Wwarn=unused] warning: parser 'p' is unused
 parser p() {
        ^
-shadow1.p4(19): [--Winfo=removed] info: removing parser 'p'
+shadow1.p4(10): [--Winfo=removed] info: removing parser 'p'
 parser p() {
        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

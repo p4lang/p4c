@@ -58,17 +58,17 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = act_pass();
     }
-    @hidden action ternary_ebpf64() {
+    @hidden action ternary_ebpf59() {
         pass = false;
     }
-    @hidden table tbl_ternary_ebpf64 {
+    @hidden table tbl_ternary_ebpf59 {
         actions = {
-            ternary_ebpf64();
+            ternary_ebpf59();
         }
-        const default_action = ternary_ebpf64();
+        const default_action = ternary_ebpf59();
     }
     apply {
-        tbl_ternary_ebpf64.apply();
+        tbl_ternary_ebpf59.apply();
         Check_src_ip_0.apply();
     }
 }

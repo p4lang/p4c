@@ -25,41 +25,41 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.n") bit<8> n_0;
     @name("ingressImpl.i") bit<8> i_0;
-    @hidden action issue4739l52() {
+    @hidden action issue4739l43() {
         i_0 = i_0 + 8w1;
         n_0 = n_0 + 8w1;
     }
-    @hidden action issue4739l50() {
+    @hidden action issue4739l41() {
         n_0 = 8w0;
     }
-    @hidden action issue4739l55() {
+    @hidden action issue4739l46() {
         hdr.ethernet.srcAddr[7:0] = n_0;
         stdmeta.egress_spec = 9w1;
     }
-    @hidden table tbl_issue4739l50 {
+    @hidden table tbl_issue4739l41 {
         actions = {
-            issue4739l50();
+            issue4739l41();
         }
-        const default_action = issue4739l50();
+        const default_action = issue4739l41();
     }
-    @hidden table tbl_issue4739l52 {
+    @hidden table tbl_issue4739l43 {
         actions = {
-            issue4739l52();
+            issue4739l43();
         }
-        const default_action = issue4739l52();
+        const default_action = issue4739l43();
     }
-    @hidden table tbl_issue4739l55 {
+    @hidden table tbl_issue4739l46 {
         actions = {
-            issue4739l55();
+            issue4739l46();
         }
-        const default_action = issue4739l55();
+        const default_action = issue4739l46();
     }
     apply {
-        tbl_issue4739l50.apply();
+        tbl_issue4739l41.apply();
         for (i_0 = 8w0; i_0 < 8w8; i_0 = i_0 + 8w1) {
-            tbl_issue4739l52.apply();
+            tbl_issue4739l43.apply();
         }
-        tbl_issue4739l55.apply();
+        tbl_issue4739l46.apply();
     }
 }
 

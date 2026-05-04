@@ -65,32 +65,32 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psabasiccounterbmv2l104() {
+    @hidden action psabasiccounterbmv2l95() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psabasiccounterbmv2l104 {
+    @hidden table tbl_psabasiccounterbmv2l95 {
         actions = {
-            psabasiccounterbmv2l104();
+            psabasiccounterbmv2l95();
         }
-        const default_action = psabasiccounterbmv2l104();
+        const default_action = psabasiccounterbmv2l95();
     }
     apply {
-        tbl_psabasiccounterbmv2l104.apply();
+        tbl_psabasiccounterbmv2l95.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psabasiccounterbmv2l104_0() {
+    @hidden action psabasiccounterbmv2l95_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psabasiccounterbmv2l104_0 {
+    @hidden table tbl_psabasiccounterbmv2l95_0 {
         actions = {
-            psabasiccounterbmv2l104_0();
+            psabasiccounterbmv2l95_0();
         }
-        const default_action = psabasiccounterbmv2l104_0();
+        const default_action = psabasiccounterbmv2l95_0();
     }
     apply {
-        tbl_psabasiccounterbmv2l104_0.apply();
+        tbl_psabasiccounterbmv2l95_0.apply();
     }
 }
 

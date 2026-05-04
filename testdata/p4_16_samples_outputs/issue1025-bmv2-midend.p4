@@ -85,17 +85,17 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action issue1025bmv2l135() {
+    @hidden action issue1025bmv2l126() {
         hdr.ethernet.dstAddr = 31w0 ++ (bit<1>)hdr.ethernet.isValid() ++ 7w0 ++ (bit<1>)hdr.ipv4.isValid() ++ 7w0 ++ (bit<1>)hdr.tcp.isValid();
     }
-    @hidden table tbl_issue1025bmv2l135 {
+    @hidden table tbl_issue1025bmv2l126 {
         actions = {
-            issue1025bmv2l135();
+            issue1025bmv2l126();
         }
-        const default_action = issue1025bmv2l135();
+        const default_action = issue1025bmv2l126();
     }
     apply {
-        tbl_issue1025bmv2l135.apply();
+        tbl_issue1025bmv2l126.apply();
     }
 }
 

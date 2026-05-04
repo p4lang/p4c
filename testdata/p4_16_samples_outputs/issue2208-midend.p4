@@ -36,17 +36,17 @@ parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standa
 }
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action issue2208l57() {
+    @hidden action issue2208l48() {
         hdr.h.a = 8w255;
     }
-    @hidden table tbl_issue2208l57 {
+    @hidden table tbl_issue2208l48 {
         actions = {
-            issue2208l57();
+            issue2208l48();
         }
-        const default_action = issue2208l57();
+        const default_action = issue2208l48();
     }
     apply {
-        tbl_issue2208l57.apply();
+        tbl_issue2208l48.apply();
     }
 }
 

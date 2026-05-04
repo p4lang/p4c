@@ -66,32 +66,32 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaunicastordropcorrectedbmv2l100() {
+    @hidden action psaunicastordropcorrectedbmv2l91() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psaunicastordropcorrectedbmv2l100 {
+    @hidden table tbl_psaunicastordropcorrectedbmv2l91 {
         actions = {
-            psaunicastordropcorrectedbmv2l100();
+            psaunicastordropcorrectedbmv2l91();
         }
-        const default_action = psaunicastordropcorrectedbmv2l100();
+        const default_action = psaunicastordropcorrectedbmv2l91();
     }
     apply {
-        tbl_psaunicastordropcorrectedbmv2l100.apply();
+        tbl_psaunicastordropcorrectedbmv2l91.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaunicastordropcorrectedbmv2l100_0() {
+    @hidden action psaunicastordropcorrectedbmv2l91_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psaunicastordropcorrectedbmv2l100_0 {
+    @hidden table tbl_psaunicastordropcorrectedbmv2l91_0 {
         actions = {
-            psaunicastordropcorrectedbmv2l100_0();
+            psaunicastordropcorrectedbmv2l91_0();
         }
-        const default_action = psaunicastordropcorrectedbmv2l100_0();
+        const default_action = psaunicastordropcorrectedbmv2l91_0();
     }
     apply {
-        tbl_psaunicastordropcorrectedbmv2l100_0.apply();
+        tbl_psaunicastordropcorrectedbmv2l91_0.apply();
     }
 }
 

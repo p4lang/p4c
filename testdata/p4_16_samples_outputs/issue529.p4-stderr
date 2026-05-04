@@ -1,13 +1,13 @@
-issue529.p4(25): [--Wwarn=unused] warning: control 'c' is unused
+issue529.p4(16): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-issue529.p4(28): [--Wwarn=unused] warning: 'h1' is unused
+issue529.p4(19): [--Wwarn=unused] warning: 'h1' is unused
         h_t h1 = h;
             ^^
-issue529.p4(29): [--Wwarn=unused] warning: 'h3' is unused
+issue529.p4(20): [--Wwarn=unused] warning: 'h3' is unused
         h_t h3 = { h.f };
             ^^
-issue529.p4(25): [--Winfo=removed] info: removing control 'c'
+issue529.p4(16): [--Winfo=removed] info: removing control 'c'
 control c() {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -1,7 +1,7 @@
-parser-conditional.p4(19): [--Wwarn=uninitialized-out-param] warning: out parameter 'b' may be uninitialized when 'p' terminates
+parser-conditional.p4(10): [--Wwarn=uninitialized-out-param] warning: out parameter 'b' may be uninitialized when 'p' terminates
 parser p(out bit<32> b) {
                      ^
-parser-conditional.p4(19)
+parser-conditional.p4(10)
 parser p(out bit<32> b) {
        ^
 [--Wwarn=parser-transition] warning: SelectCase: unreachable case
