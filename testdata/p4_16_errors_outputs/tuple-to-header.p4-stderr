@@ -1,23 +1,23 @@
-tuple-to-header.p4(19): [--Wwarn=unused] warning: control 'c' is unused
+tuple-to-header.p4(10): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-tuple-to-header.p4(23): [--Werror=type-error] error: 'h = t'
+tuple-to-header.p4(14): [--Werror=type-error] error: 'h = t'
         h = t; // illegal assignment between tuple and header
           ^
   ---- Actual error:
-tuple-to-header.p4(20): Cannot cast implicitly type 'tuple<bit<32>>' to type 'header H'
+tuple-to-header.p4(11): Cannot cast implicitly type 'tuple<bit<32>>' to type 'header H'
       tuple<bit<32>> t = { 0 };
       ^^^^^^^^^^^^^^
-tuple-to-header.p4(17)
+tuple-to-header.p4(8)
   header H { bit<32> x; }
          ^
   ---- Originating from:
-tuple-to-header.p4(23): Source expression 't' produces a result of type 'tuple<bit<32>>' which cannot be assigned to a left-value with type 'header H'
+tuple-to-header.p4(14): Source expression 't' produces a result of type 'tuple<bit<32>>' which cannot be assigned to a left-value with type 'header H'
           h = t; // illegal assignment between tuple and header
               ^
-tuple-to-header.p4(20)
+tuple-to-header.p4(11)
       tuple<bit<32>> t = { 0 };
       ^^^^^^^^^^^^^^
-tuple-to-header.p4(17)
+tuple-to-header.p4(8)
   header H { bit<32> x; }
          ^

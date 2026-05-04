@@ -43,30 +43,30 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     @name("pipe.counters") CounterArray(32w10, true) counters_0;
-    @hidden action count_ebpf54() {
+    @hidden action count_ebpf45() {
         counters_0.increment(headers.ipv4.dstAddr);
         pass = true;
     }
-    @hidden action count_ebpf58() {
+    @hidden action count_ebpf49() {
         pass = false;
     }
-    @hidden table tbl_count_ebpf54 {
+    @hidden table tbl_count_ebpf45 {
         actions = {
-            count_ebpf54();
+            count_ebpf45();
         }
-        const default_action = count_ebpf54();
+        const default_action = count_ebpf45();
     }
-    @hidden table tbl_count_ebpf58 {
+    @hidden table tbl_count_ebpf49 {
         actions = {
-            count_ebpf58();
+            count_ebpf49();
         }
-        const default_action = count_ebpf58();
+        const default_action = count_ebpf49();
     }
     apply {
         if (headers.ipv4.isValid()) {
-            tbl_count_ebpf54.apply();
+            tbl_count_ebpf45.apply();
         } else {
-            tbl_count_ebpf58.apply();
+            tbl_count_ebpf49.apply();
         }
     }
 }

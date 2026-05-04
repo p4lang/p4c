@@ -21,17 +21,17 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @hidden action verify_ebpf43() {
+    @hidden action verify_ebpf35() {
         pass = true;
     }
-    @hidden table tbl_verify_ebpf43 {
+    @hidden table tbl_verify_ebpf35 {
         actions = {
-            verify_ebpf43();
+            verify_ebpf35();
         }
-        const default_action = verify_ebpf43();
+        const default_action = verify_ebpf35();
     }
     apply {
-        tbl_verify_ebpf43.apply();
+        tbl_verify_ebpf35.apply();
     }
 }
 

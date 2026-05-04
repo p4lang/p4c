@@ -22,21 +22,21 @@ extern void f<T>(in T data);
 control c(inout bit<1> r) {
     T s_0_f1_f0;
     T s_0_f1_f1;
-    @hidden action nestedtuple34() {
+    @hidden action nestedtuple25() {
         s_0_f1_f0.f = 1w0;
         s_0_f1_f1.f = 1w1;
         f<tuple_1>((tuple_1){f0 = s_0_f1_f0,f1 = s_0_f1_f1});
         f<tuple_0>((tuple_0){field = (T){f = 1w0},field_0 = (T){f = 1w1}});
         r = 1w0;
     }
-    @hidden table tbl_nestedtuple34 {
+    @hidden table tbl_nestedtuple25 {
         actions = {
-            nestedtuple34();
+            nestedtuple25();
         }
-        const default_action = nestedtuple34();
+        const default_action = nestedtuple25();
     }
     apply {
-        tbl_nestedtuple34.apply();
+        tbl_nestedtuple25.apply();
     }
 }
 

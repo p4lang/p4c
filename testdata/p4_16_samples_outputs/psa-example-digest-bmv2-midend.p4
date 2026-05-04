@@ -132,17 +132,17 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
         default_action = NoAction_3();
     }
-    @hidden action psaexampledigestbmv2l197() {
+    @hidden action psaexampledigestbmv2l188() {
         meta._send_mac_learn_msg0 = false;
     }
-    @hidden table tbl_psaexampledigestbmv2l197 {
+    @hidden table tbl_psaexampledigestbmv2l188 {
         actions = {
-            psaexampledigestbmv2l197();
+            psaexampledigestbmv2l188();
         }
-        const default_action = psaexampledigestbmv2l197();
+        const default_action = psaexampledigestbmv2l188();
     }
     apply {
-        tbl_psaexampledigestbmv2l197.apply();
+        tbl_psaexampledigestbmv2l188.apply();
         learned_sources_0.apply();
         l2_tbl_0.apply();
         tst_tbl_0.apply();
@@ -156,46 +156,46 @@ control egress(inout headers hdr, inout metadata meta, in psa_egress_input_metad
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
     @name("IngressDeparserImpl.mac_learn_digest") Digest<mac_learn_digest_t>() mac_learn_digest_0;
-    @hidden action psaexampledigestbmv2l236() {
+    @hidden action psaexampledigestbmv2l227() {
         mac_learn_digest_0.pack((mac_learn_digest_t){srcAddr = meta._mac_learn_msg_srcAddr1,ingress_port = meta._mac_learn_msg_ingress_port2});
     }
-    @hidden action psaexampledigestbmv2l218() {
+    @hidden action psaexampledigestbmv2l209() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampledigestbmv2l236 {
+    @hidden table tbl_psaexampledigestbmv2l227 {
         actions = {
-            psaexampledigestbmv2l236();
+            psaexampledigestbmv2l227();
         }
-        const default_action = psaexampledigestbmv2l236();
+        const default_action = psaexampledigestbmv2l227();
     }
-    @hidden table tbl_psaexampledigestbmv2l218 {
+    @hidden table tbl_psaexampledigestbmv2l209 {
         actions = {
-            psaexampledigestbmv2l218();
+            psaexampledigestbmv2l209();
         }
-        const default_action = psaexampledigestbmv2l218();
+        const default_action = psaexampledigestbmv2l209();
     }
     apply {
         if (meta._send_mac_learn_msg0) {
-            tbl_psaexampledigestbmv2l236.apply();
+            tbl_psaexampledigestbmv2l227.apply();
         }
-        tbl_psaexampledigestbmv2l218.apply();
+        tbl_psaexampledigestbmv2l209.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaexampledigestbmv2l218_0() {
+    @hidden action psaexampledigestbmv2l209_0() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampledigestbmv2l218_0 {
+    @hidden table tbl_psaexampledigestbmv2l209_0 {
         actions = {
-            psaexampledigestbmv2l218_0();
+            psaexampledigestbmv2l209_0();
         }
-        const default_action = psaexampledigestbmv2l218_0();
+        const default_action = psaexampledigestbmv2l209_0();
     }
     apply {
-        tbl_psaexampledigestbmv2l218_0.apply();
+        tbl_psaexampledigestbmv2l209_0.apply();
     }
 }
 

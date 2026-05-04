@@ -73,41 +73,41 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = my_drop_0();
     }
-    @hidden action issue1544bmv2l24() {
+    @hidden action issue1544bmv2l15() {
         retval = hdr.ethernet.srcAddr[15:0] + 16w65535;
     }
-    @hidden action issue1544bmv2l26() {
+    @hidden action issue1544bmv2l17() {
         retval = hdr.ethernet.srcAddr[15:0];
     }
-    @hidden action issue1544bmv2l81() {
+    @hidden action issue1544bmv2l72() {
         hdr.ethernet.srcAddr[15:0] = retval;
     }
-    @hidden table tbl_issue1544bmv2l24 {
+    @hidden table tbl_issue1544bmv2l15 {
         actions = {
-            issue1544bmv2l24();
+            issue1544bmv2l15();
         }
-        const default_action = issue1544bmv2l24();
+        const default_action = issue1544bmv2l15();
     }
-    @hidden table tbl_issue1544bmv2l26 {
+    @hidden table tbl_issue1544bmv2l17 {
         actions = {
-            issue1544bmv2l26();
+            issue1544bmv2l17();
         }
-        const default_action = issue1544bmv2l26();
+        const default_action = issue1544bmv2l17();
     }
-    @hidden table tbl_issue1544bmv2l81 {
+    @hidden table tbl_issue1544bmv2l72 {
         actions = {
-            issue1544bmv2l81();
+            issue1544bmv2l72();
         }
-        const default_action = issue1544bmv2l81();
+        const default_action = issue1544bmv2l72();
     }
     apply {
         mac_da_0.apply();
         if (hdr.ethernet.srcAddr[15:0] > 16w5) {
-            tbl_issue1544bmv2l24.apply();
+            tbl_issue1544bmv2l15.apply();
         } else {
-            tbl_issue1544bmv2l26.apply();
+            tbl_issue1544bmv2l17.apply();
         }
-        tbl_issue1544bmv2l81.apply();
+        tbl_issue1544bmv2l72.apply();
     }
 }
 

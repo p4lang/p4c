@@ -62,23 +62,23 @@ control c(out bit<32> v) {
         }
         default_action = a1();
     }
-    @hidden action uninitnowarnings93() {
+    @hidden action uninitnowarnings84() {
         e_0 = 32w1;
     }
-    @hidden action uninitnowarnings98() {
+    @hidden action uninitnowarnings89() {
         e_0 = e_0 + 32w1;
     }
-    @hidden table tbl_uninitnowarnings93 {
+    @hidden table tbl_uninitnowarnings84 {
         actions = {
-            uninitnowarnings93();
+            uninitnowarnings84();
         }
-        const default_action = uninitnowarnings93();
+        const default_action = uninitnowarnings84();
     }
-    @hidden table tbl_uninitnowarnings98 {
+    @hidden table tbl_uninitnowarnings89 {
         actions = {
-            uninitnowarnings98();
+            uninitnowarnings89();
         }
-        const default_action = uninitnowarnings98();
+        const default_action = uninitnowarnings89();
     }
     @hidden table tbl_a1 {
         actions = {
@@ -88,11 +88,11 @@ control c(out bit<32> v) {
     }
     apply @noWarn("uninitialized-use") {
         if (e_0 > 32w0) {
-            tbl_uninitnowarnings93.apply();
+            tbl_uninitnowarnings84.apply();
         } else {
             ;
         }
-        tbl_uninitnowarnings98.apply();
+        tbl_uninitnowarnings89.apply();
         switch (t_0.apply().action_run) {
             a1: {
             }

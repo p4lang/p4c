@@ -67,29 +67,29 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_1();
     }
-    @hidden action issue28161_ebpf81() {
+    @hidden action issue28161_ebpf72() {
         pass = false;
     }
-    @hidden action issue28161_ebpf77() {
+    @hidden action issue28161_ebpf68() {
         pass = true;
     }
-    @hidden table tbl_issue28161_ebpf77 {
+    @hidden table tbl_issue28161_ebpf68 {
         actions = {
-            issue28161_ebpf77();
+            issue28161_ebpf68();
         }
-        const default_action = issue28161_ebpf77();
+        const default_action = issue28161_ebpf68();
     }
-    @hidden table tbl_issue28161_ebpf81 {
+    @hidden table tbl_issue28161_ebpf72 {
         actions = {
-            issue28161_ebpf81();
+            issue28161_ebpf72();
         }
-        const default_action = issue28161_ebpf81();
+        const default_action = issue28161_ebpf72();
     }
     apply {
-        tbl_issue28161_ebpf77.apply();
+        tbl_issue28161_ebpf68.apply();
         switch (Check_src_ip_0.apply().action_run) {
             Reject: {
-                tbl_issue28161_ebpf81.apply();
+                tbl_issue28161_ebpf72.apply();
             }
             NoAction_1: {
             }

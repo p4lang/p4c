@@ -1,4 +1,4 @@
-spec-ex15.p4(40): [--Wwarn=unused] warning: 'package Switch' is unused
+spec-ex15.p4(31): [--Wwarn=unused] warning: 'package Switch' is unused
 package Switch<T>( // Top-level switch contains two modules
         ^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

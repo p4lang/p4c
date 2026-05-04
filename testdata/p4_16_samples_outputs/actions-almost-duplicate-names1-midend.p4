@@ -93,30 +93,30 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         size = 32;
         default_action = NoAction_2();
     }
-    @hidden action actionsalmostduplicatenames1l133() {
+    @hidden action actionsalmostduplicatenames1l124() {
         tmp1_0 = hdr.ethernet.srcAddr[7:0];
         tmp2_0 = hdr.ethernet.dstAddr[7:0];
     }
-    @hidden action actionsalmostduplicatenames1l140() {
+    @hidden action actionsalmostduplicatenames1l131() {
         hdr.ethernet.etherType = (bit<16>)(tmp1_0 - tmp2_0);
     }
-    @hidden table tbl_actionsalmostduplicatenames1l133 {
+    @hidden table tbl_actionsalmostduplicatenames1l124 {
         actions = {
-            actionsalmostduplicatenames1l133();
+            actionsalmostduplicatenames1l124();
         }
-        const default_action = actionsalmostduplicatenames1l133();
+        const default_action = actionsalmostduplicatenames1l124();
     }
-    @hidden table tbl_actionsalmostduplicatenames1l140 {
+    @hidden table tbl_actionsalmostduplicatenames1l131 {
         actions = {
-            actionsalmostduplicatenames1l140();
+            actionsalmostduplicatenames1l131();
         }
-        const default_action = actionsalmostduplicatenames1l140();
+        const default_action = actionsalmostduplicatenames1l131();
     }
     apply {
-        tbl_actionsalmostduplicatenames1l133.apply();
+        tbl_actionsalmostduplicatenames1l124.apply();
         c1_t2.apply();
         t1_0.apply();
-        tbl_actionsalmostduplicatenames1l140.apply();
+        tbl_actionsalmostduplicatenames1l131.apply();
     }
 }
 

@@ -53,15 +53,27 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
         }
         default_action = NoAction_1();
     }
-    @hidden action issue2153bmv2l74() {
+    @hidden action issue2153bmv2l65() {
         tmp_condition_0 = 8w1;
     }
-    @hidden action issue2153bmv2l70() {
+    @hidden action issue2153bmv2l61() {
         tmp_condition_0 = 8w0;
         stdmeta.egress_spec = 9w0;
     }
-    @hidden action issue2153bmv2l79() {
+    @hidden action issue2153bmv2l70() {
         hdr.h.a = 8w0;
+    }
+    @hidden table tbl_issue2153bmv2l61 {
+        actions = {
+            issue2153bmv2l61();
+        }
+        const default_action = issue2153bmv2l61();
+    }
+    @hidden table tbl_issue2153bmv2l65 {
+        actions = {
+            issue2153bmv2l65();
+        }
+        const default_action = issue2153bmv2l65();
     }
     @hidden table tbl_issue2153bmv2l70 {
         actions = {
@@ -69,29 +81,17 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
         }
         const default_action = issue2153bmv2l70();
     }
-    @hidden table tbl_issue2153bmv2l74 {
-        actions = {
-            issue2153bmv2l74();
-        }
-        const default_action = issue2153bmv2l74();
-    }
-    @hidden table tbl_issue2153bmv2l79 {
-        actions = {
-            issue2153bmv2l79();
-        }
-        const default_action = issue2153bmv2l79();
-    }
     apply {
-        tbl_issue2153bmv2l70.apply();
+        tbl_issue2153bmv2l61.apply();
         switch (simple_table_0.apply().action_run) {
             do_something: {
-                tbl_issue2153bmv2l74.apply();
+                tbl_issue2153bmv2l65.apply();
             }
             default: {
             }
         }
         if (tmp_condition_0 > 8w0) {
-            tbl_issue2153bmv2l79.apply();
+            tbl_issue2153bmv2l70.apply();
         }
     }
 }

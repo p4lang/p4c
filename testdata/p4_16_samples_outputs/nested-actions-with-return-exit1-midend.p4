@@ -64,33 +64,33 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = NoAction_1();
         size = 32;
     }
-    @hidden action nestedactionswithreturnexit1l79() {
+    @hidden action nestedactionswithreturnexit1l70() {
         h.eth_hdr.src_addr[7:0] = ret_0;
     }
-    @hidden action nestedactionswithreturnexit1l41() {
+    @hidden action nestedactionswithreturnexit1l32() {
         hasExited = false;
         ret_0 = 8w0;
     }
-    @hidden table tbl_nestedactionswithreturnexit1l41 {
+    @hidden table tbl_nestedactionswithreturnexit1l32 {
         actions = {
-            nestedactionswithreturnexit1l41();
+            nestedactionswithreturnexit1l32();
         }
-        const default_action = nestedactionswithreturnexit1l41();
+        const default_action = nestedactionswithreturnexit1l32();
     }
-    @hidden table tbl_nestedactionswithreturnexit1l79 {
+    @hidden table tbl_nestedactionswithreturnexit1l70 {
         actions = {
-            nestedactionswithreturnexit1l79();
+            nestedactionswithreturnexit1l70();
         }
-        const default_action = nestedactionswithreturnexit1l79();
+        const default_action = nestedactionswithreturnexit1l70();
     }
     apply {
-        tbl_nestedactionswithreturnexit1l41.apply();
+        tbl_nestedactionswithreturnexit1l32.apply();
         if (h.eth_hdr.isValid()) {
             t1_0.apply();
             if (hasExited) {
                 ;
             } else {
-                tbl_nestedactionswithreturnexit1l79.apply();
+                tbl_nestedactionswithreturnexit1l70.apply();
             }
         }
     }

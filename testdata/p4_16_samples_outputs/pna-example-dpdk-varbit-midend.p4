@@ -111,35 +111,35 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         default_action = NoAction_2();
     }
-    @hidden action pnaexampledpdkvarbit124() {
+    @hidden action pnaexampledpdkvarbit115() {
         send_to_port(32w0);
     }
-    @hidden table tbl_pnaexampledpdkvarbit124 {
+    @hidden table tbl_pnaexampledpdkvarbit115 {
         actions = {
-            pnaexampledpdkvarbit124();
+            pnaexampledpdkvarbit115();
         }
-        const default_action = pnaexampledpdkvarbit124();
+        const default_action = pnaexampledpdkvarbit115();
     }
     apply {
-        tbl_pnaexampledpdkvarbit124.apply();
+        tbl_pnaexampledpdkvarbit115.apply();
         tbl_0.apply();
         tbl2_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampledpdkvarbit137() {
+    @hidden action pnaexampledpdkvarbit128() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_base_t>(hdr.ipv4_base);
     }
-    @hidden table tbl_pnaexampledpdkvarbit137 {
+    @hidden table tbl_pnaexampledpdkvarbit128 {
         actions = {
-            pnaexampledpdkvarbit137();
+            pnaexampledpdkvarbit128();
         }
-        const default_action = pnaexampledpdkvarbit137();
+        const default_action = pnaexampledpdkvarbit128();
     }
     apply {
-        tbl_pnaexampledpdkvarbit137.apply();
+        tbl_pnaexampledpdkvarbit128.apply();
     }
 }
 

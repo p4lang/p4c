@@ -1,6 +1,6 @@
-mask.p4(26): [--Wwarn=unused] warning: parser 'Parser' is unused
+mask.p4(17): [--Wwarn=unused] warning: parser 'Parser' is unused
 parser Parser(packet_in b, out Parsed_Packet p) {
        ^^^^^^
-mask.p4(26): [--Winfo=removed] info: removing parser 'Parser'
+mask.p4(17): [--Winfo=removed] info: removing parser 'Parser'
 parser Parser(packet_in b, out Parsed_Packet p) {
        ^^^^^^

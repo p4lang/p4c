@@ -1,15 +1,15 @@
-spec-ex16.p4(26): [--Wwarn=unused] warning: control 'Map2' is unused
+spec-ex16.p4(17): [--Wwarn=unused] warning: control 'Map2' is unused
 control Map2(in bit<8> d) { apply {} }
         ^^^^
-spec-ex16.p4(32): [--Wwarn=unused] warning: 'main1' is unused
+spec-ex16.p4(23): [--Wwarn=unused] warning: 'main1' is unused
                 Map1()) main1;
                         ^^^^^
-spec-ex16.p4(26): [--Winfo=removed] info: removing control 'Map2'
+spec-ex16.p4(17): [--Winfo=removed] info: removing control 'Map2'
 control Map2(in bit<8> d) { apply {} }
         ^^^^
-spec-ex16.p4(24): [--Wwarn=uninitialized-out-param] warning: out parameter 'd' may be uninitialized when 'P' terminates
+spec-ex16.p4(15): [--Wwarn=uninitialized-out-param] warning: out parameter 'd' may be uninitialized when 'P' terminates
 parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
                                   ^
-spec-ex16.p4(24)
+spec-ex16.p4(15)
 parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
        ^

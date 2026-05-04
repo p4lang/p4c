@@ -37,19 +37,19 @@ parser p(packet_in b, out Headers h, inout Meta m, in pna_main_parser_input_meta
 }
 
 control deparser(packet_out b, in Headers h, in Meta m, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkunionbmv2l64() {
+    @hidden action pnadpdkunionbmv2l55() {
         b.emit<Hdr1>(h.h1);
         b.emit<Hdr1>(h.u_h1);
         b.emit<Hdr2>(h.u_h2);
     }
-    @hidden table tbl_pnadpdkunionbmv2l64 {
+    @hidden table tbl_pnadpdkunionbmv2l55 {
         actions = {
-            pnadpdkunionbmv2l64();
+            pnadpdkunionbmv2l55();
         }
-        const default_action = pnadpdkunionbmv2l64();
+        const default_action = pnadpdkunionbmv2l55();
     }
     apply {
-        tbl_pnadpdkunionbmv2l64.apply();
+        tbl_pnadpdkunionbmv2l55.apply();
     }
 }
 

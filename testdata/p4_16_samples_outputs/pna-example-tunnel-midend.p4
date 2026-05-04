@@ -64,20 +64,20 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
 }
 
 control packet_deparser(packet_out packet, in headers_t headers, in local_metadata_t local_metadata, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampletunnel116() {
+    @hidden action pnaexampletunnel107() {
         packet.emit<ethernet_t>(headers.outer_ethernet);
         packet.emit<ipv4_t>(headers.outer_ipv4);
         packet.emit<ethernet_t>(headers.ethernet);
         packet.emit<ipv4_t>(headers.ipv4);
     }
-    @hidden table tbl_pnaexampletunnel116 {
+    @hidden table tbl_pnaexampletunnel107 {
         actions = {
-            pnaexampletunnel116();
+            pnaexampletunnel107();
         }
-        const default_action = pnaexampletunnel116();
+        const default_action = pnaexampletunnel107();
     }
     apply {
-        tbl_pnaexampletunnel116.apply();
+        tbl_pnaexampletunnel107.apply();
     }
 }
 

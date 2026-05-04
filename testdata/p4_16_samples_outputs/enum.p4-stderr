@@ -1,10 +1,10 @@
-enum.p4(24): [--Wwarn=unused] warning: control 'c' is unused
+enum.p4(15): [--Wwarn=unused] warning: control 'c' is unused
 control c()
         ^
-enum.p4(27): [--Wwarn=unused] warning: 'v' is unused
+enum.p4(18): [--Wwarn=unused] warning: 'v' is unused
         X v = X.Field;
           ^
-enum.p4(24): [--Winfo=removed] info: removing control 'c'
+enum.p4(15): [--Winfo=removed] info: removing control 'c'
 control c()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

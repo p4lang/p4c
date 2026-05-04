@@ -120,19 +120,19 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action simpleactions_ubpf158() {
+    @hidden action simpleactions_ubpf149() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_simpleactions_ubpf158 {
+    @hidden table tbl_simpleactions_ubpf149 {
         actions = {
-            simpleactions_ubpf158();
+            simpleactions_ubpf149();
         }
-        const default_action = simpleactions_ubpf158();
+        const default_action = simpleactions_ubpf149();
     }
     apply {
-        tbl_simpleactions_ubpf158.apply();
+        tbl_simpleactions_ubpf149.apply();
     }
 }
 

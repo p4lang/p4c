@@ -1,10 +1,10 @@
-valid.p4(21): [--Wwarn=unused] warning: control 'c' is unused
+valid.p4(12): [--Wwarn=unused] warning: control 'c' is unused
 control c(inout h hdr)
         ^
-valid.p4(23): [--Wwarn=unused] warning: 'a' is unused
+valid.p4(14): [--Wwarn=unused] warning: 'a' is unused
     action a() {
            ^
-valid.p4(21): [--Winfo=removed] info: removing control 'c'
+valid.p4(12): [--Winfo=removed] info: removing control 'c'
 control c(inout h hdr)
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -165,19 +165,19 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         }
         default_action = drop_3();
     }
-    @hidden action pnaexampleipsec248() {
+    @hidden action pnaexampleipsec239() {
         drop_packet();
     }
-    @hidden action pnaexampleipsec241() {
+    @hidden action pnaexampleipsec232() {
         drop_packet();
     }
     @hidden action act() {
         tmp = ipsec.from_ipsec(status_1);
     }
-    @hidden action pnaexampleipsec265() {
+    @hidden action pnaexampleipsec256() {
         drop_packet();
     }
-    @hidden action pnaexampleipsec258() {
+    @hidden action pnaexampleipsec249() {
         drop_packet();
     }
     @hidden action act_0() {
@@ -189,17 +189,17 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         }
         const default_action = act();
     }
-    @hidden table tbl_pnaexampleipsec248 {
+    @hidden table tbl_pnaexampleipsec239 {
         actions = {
-            pnaexampleipsec248();
+            pnaexampleipsec239();
         }
-        const default_action = pnaexampleipsec248();
+        const default_action = pnaexampleipsec239();
     }
-    @hidden table tbl_pnaexampleipsec241 {
+    @hidden table tbl_pnaexampleipsec232 {
         actions = {
-            pnaexampleipsec241();
+            pnaexampleipsec232();
         }
-        const default_action = pnaexampleipsec241();
+        const default_action = pnaexampleipsec232();
     }
     @hidden table tbl_act_0 {
         actions = {
@@ -207,17 +207,17 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         }
         const default_action = act_0();
     }
-    @hidden table tbl_pnaexampleipsec265 {
+    @hidden table tbl_pnaexampleipsec256 {
         actions = {
-            pnaexampleipsec265();
+            pnaexampleipsec256();
         }
-        const default_action = pnaexampleipsec265();
+        const default_action = pnaexampleipsec256();
     }
-    @hidden table tbl_pnaexampleipsec258 {
+    @hidden table tbl_pnaexampleipsec249 {
         actions = {
-            pnaexampleipsec258();
+            pnaexampleipsec249();
         }
-        const default_action = pnaexampleipsec258();
+        const default_action = pnaexampleipsec249();
     }
     apply {
         if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
@@ -227,7 +227,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                     routing_table_0.apply();
                     next_hop_table_0.apply();
                 } else {
-                    tbl_pnaexampleipsec248.apply();
+                    tbl_pnaexampleipsec239.apply();
                 }
             } else if (hdrs.ipv4.isValid()) {
                 if (hdrs.esp.isValid()) {
@@ -241,7 +241,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                     next_hop_table_0.apply();
                 }
             } else {
-                tbl_pnaexampleipsec241.apply();
+                tbl_pnaexampleipsec232.apply();
             }
         } else {
             tbl_act_0.apply();
@@ -250,31 +250,31 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                     routing_table_0.apply();
                     next_hop_table_0.apply();
                 } else {
-                    tbl_pnaexampleipsec265.apply();
+                    tbl_pnaexampleipsec256.apply();
                 }
             } else if (hdrs.ipv4.isValid()) {
                 outbound_table_0.apply();
             } else {
-                tbl_pnaexampleipsec258.apply();
+                tbl_pnaexampleipsec249.apply();
             }
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdrs, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampleipsec281() {
+    @hidden action pnaexampleipsec272() {
         pkt.emit<ethernet_t>(hdrs.ethernet);
         pkt.emit<ipv4_t>(hdrs.ipv4);
         pkt.emit<esp_t>(hdrs.esp);
     }
-    @hidden table tbl_pnaexampleipsec281 {
+    @hidden table tbl_pnaexampleipsec272 {
         actions = {
-            pnaexampleipsec281();
+            pnaexampleipsec272();
         }
-        const default_action = pnaexampleipsec281();
+        const default_action = pnaexampleipsec272();
     }
     apply {
-        tbl_pnaexampleipsec281.apply();
+        tbl_pnaexampleipsec272.apply();
     }
 }
 

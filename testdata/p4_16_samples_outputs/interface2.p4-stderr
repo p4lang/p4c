@@ -1,10 +1,10 @@
-interface2.p4(21): [--Wwarn=unused] warning: control 'p' is unused
+interface2.p4(12): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
-interface2.p4(23): [--Wwarn=unused] warning: 'x' is unused
+interface2.p4(14): [--Wwarn=unused] warning: 'x' is unused
     X() x;
         ^
-interface2.p4(21): [--Winfo=removed] info: removing control 'p'
+interface2.p4(12): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

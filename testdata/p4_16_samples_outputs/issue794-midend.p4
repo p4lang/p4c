@@ -18,17 +18,17 @@ parser caller() {
 
 control ingress() {
     @name("ingress.rand1") Random2() rand1_1;
-    @hidden action issue794l47() {
+    @hidden action issue794l38() {
         rand1_1.read();
     }
-    @hidden table tbl_issue794l47 {
+    @hidden table tbl_issue794l38 {
         actions = {
-            issue794l47();
+            issue794l38();
         }
-        const default_action = issue794l47();
+        const default_action = issue794l38();
     }
     apply {
-        tbl_issue794l47.apply();
+        tbl_issue794l38.apply();
     }
 }
 

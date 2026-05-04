@@ -80,38 +80,38 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout user_metadata_t us
 
 control MainControlImpl(inout headers_t hdr, inout user_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("MainControlImpl.tmp") bit<8> tmp_0;
-    @hidden action pnadpdkparserwrongarith104() {
+    @hidden action pnadpdkparserwrongarith95() {
         tmp_0 = 8w0;
         tmp_0[0:0] = user_meta.ipv4_hdr_truncated;
         tmp_0[1:1] = (bit<1>)hdr.ipv4.isValid();
         hdr.ethernet.srcAddr[7:0] = tmp_0;
     }
-    @hidden table tbl_pnadpdkparserwrongarith104 {
+    @hidden table tbl_pnadpdkparserwrongarith95 {
         actions = {
-            pnadpdkparserwrongarith104();
+            pnadpdkparserwrongarith95();
         }
-        const default_action = pnadpdkparserwrongarith104();
+        const default_action = pnadpdkparserwrongarith95();
     }
     apply {
         if (hdr.ethernet.isValid()) {
-            tbl_pnadpdkparserwrongarith104.apply();
+            tbl_pnadpdkparserwrongarith95.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in user_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkparserwrongarith119() {
+    @hidden action pnadpdkparserwrongarith110() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkparserwrongarith119 {
+    @hidden table tbl_pnadpdkparserwrongarith110 {
         actions = {
-            pnadpdkparserwrongarith119();
+            pnadpdkparserwrongarith110();
         }
-        const default_action = pnadpdkparserwrongarith119();
+        const default_action = pnadpdkparserwrongarith110();
     }
     apply {
-        tbl_pnadpdkparserwrongarith119.apply();
+        tbl_pnadpdkparserwrongarith110.apply();
     }
 }
 

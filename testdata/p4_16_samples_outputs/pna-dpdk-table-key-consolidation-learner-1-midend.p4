@@ -96,18 +96,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action2();
     }
-    @hidden action pnadpdktablekeyconsolidationlearner1l125() {
+    @hidden action pnadpdktablekeyconsolidationlearner1l116() {
         key_0 = 8w0x48;
     }
-    @hidden table tbl_pnadpdktablekeyconsolidationlearner1l125 {
+    @hidden table tbl_pnadpdktablekeyconsolidationlearner1l116 {
         actions = {
-            pnadpdktablekeyconsolidationlearner1l125();
+            pnadpdktablekeyconsolidationlearner1l116();
         }
-        const default_action = pnadpdktablekeyconsolidationlearner1l125();
+        const default_action = pnadpdktablekeyconsolidationlearner1l116();
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            tbl_pnadpdktablekeyconsolidationlearner1l125.apply();
+            tbl_pnadpdktablekeyconsolidationlearner1l116.apply();
             ipv4_da_0.apply();
             ipv4_da2_0.apply();
         }
@@ -115,18 +115,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdktablekeyconsolidationlearner1l168() {
+    @hidden action pnadpdktablekeyconsolidationlearner1l159() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdktablekeyconsolidationlearner1l168 {
+    @hidden table tbl_pnadpdktablekeyconsolidationlearner1l159 {
         actions = {
-            pnadpdktablekeyconsolidationlearner1l168();
+            pnadpdktablekeyconsolidationlearner1l159();
         }
-        const default_action = pnadpdktablekeyconsolidationlearner1l168();
+        const default_action = pnadpdktablekeyconsolidationlearner1l159();
     }
     apply {
-        tbl_pnadpdktablekeyconsolidationlearner1l168.apply();
+        tbl_pnadpdktablekeyconsolidationlearner1l159.apply();
     }
 }
 

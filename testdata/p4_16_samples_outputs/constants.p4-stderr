@@ -1,7 +1,7 @@
-constants.p4(17): [--Wwarn=unused] warning: control 'p' is unused
+constants.p4(8): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
-constants.p4(17): [--Winfo=removed] info: removing control 'p'
+constants.p4(8): [--Winfo=removed] info: removing control 'p'
 control p()
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

@@ -70,36 +70,36 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action pnaexamplebAndintableKey141() {
+    @hidden action pnaexamplebAndintableKey132() {
         key_0 = hdr.ipv4.dstAddr & 32w0xf;
     }
-    @hidden table tbl_pnaexamplebAndintableKey141 {
+    @hidden table tbl_pnaexamplebAndintableKey132 {
         actions = {
-            pnaexamplebAndintableKey141();
+            pnaexamplebAndintableKey132();
         }
-        const default_action = pnaexamplebAndintableKey141();
+        const default_action = pnaexamplebAndintableKey132();
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            tbl_pnaexamplebAndintableKey141.apply();
+            tbl_pnaexamplebAndintableKey132.apply();
             ipv4_da_lpm_0.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplebAndintableKey164() {
+    @hidden action pnaexamplebAndintableKey155() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaexamplebAndintableKey164 {
+    @hidden table tbl_pnaexamplebAndintableKey155 {
         actions = {
-            pnaexamplebAndintableKey164();
+            pnaexamplebAndintableKey155();
         }
-        const default_action = pnaexamplebAndintableKey164();
+        const default_action = pnaexamplebAndintableKey155();
     }
     apply {
-        tbl_pnaexamplebAndintableKey164.apply();
+        tbl_pnaexamplebAndintableKey155.apply();
     }
 }
 
