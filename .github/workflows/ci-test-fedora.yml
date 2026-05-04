@@ -28,7 +28,9 @@ jobs:
     steps:
       # We need to install git here because it is not provided out of the box in Fedora container.
       - name: Install git
-        run: dnf install -y -q git
+        run: |
+          cat /etc/os-release
+          dnf install -y -q git
 
       - uses: actions/checkout@v6
         with:
