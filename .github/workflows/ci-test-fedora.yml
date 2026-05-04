@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Fabian Ruffy
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "test-p4c-fedora"
 
 on:
