@@ -420,6 +420,9 @@ if [ "$CMAKE_ONLY" == "OFF" ]; then
 fi
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
+  # Keep runtime library required by installed backend executables.
+  sudo apt-get install -y --no-install-recommends libboost-iostreams1.71.0
+
   sudo apt-get purge -y ${P4C_DEPS} git
   sudo apt-get autoremove --purge -y
   rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*
