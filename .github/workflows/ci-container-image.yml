@@ -27,6 +27,11 @@ jobs:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ubuntu-container-image
+          max-size: 1000M
       - name: Determine Docker image tag
         id: get-tag
         shell: bash
@@ -39,6 +44,17 @@ jobs:
           fi
           echo "Tag is $TAG"
           echo "::set-output name=tag::$TAG"
+      - name: Determine build mode
+        id: build-mode
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == "refs/heads/main" && "${GITHUB_EVENT_NAME}" == "push" ]]; then
+            echo "image_type=build" >> "$GITHUB_OUTPUT"
+            echo "export_ccache=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_type=test" >> "$GITHUB_OUTPUT"
+            echo "export_ccache=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
       - name: Login to DockerHub
@@ -51,7 +67,18 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+          load: true
+          push: false
           tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
+          build-args: |
+            IMAGE_TYPE=${{ steps.build-mode.outputs.image_type }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Export ccache
+        if: ${{ steps.build-mode.outputs.export_ccache == 'true' }}
+        run: |
+          ./tools/export_ccache.sh p4lang/p4c:${{ steps.get-tag.outputs.tag }}
+      - name: Push Docker image to registry
+        if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+        run: |
+          docker push p4lang/p4c:${{ steps.get-tag.outputs.tag }}
