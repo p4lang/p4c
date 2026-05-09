@@ -80,7 +80,7 @@ endif()
   
 # check for pna_nic
 find_program (PNA_NIC_CLI pna_nic_CLI
-  paths ${BMV2_PNA_NIC_SEARCH_PATHS} )
+  PATHS ${BMV2_PNA_NIC_SEARCH_PATHS} )
 if (PNA_NIC_CLI)
   find_program (PNA_NIC pna_nic
     PATHS ${BMV2_PNA_NIC_SEARCH_PATHS} )
