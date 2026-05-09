@@ -92,5 +92,5 @@ endif (PNA_NIC_CLI)
 mark_as_advanced(PNA_NIC PNA_NIC_CLI)
 
 find_package_handle_standard_args ("BMV2"
-  "Program 'pna_nic_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_PNA_NIC_SEARCH_PATHS}.\nWill not run PNA PNA BMv2 tests."
+  "Program 'pna_nic_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_PNA_NIC_SEARCH_PATHS}.\nWill not run PNA BMv2 tests."
   PNA_NIC PNA_NIC_CLI)
