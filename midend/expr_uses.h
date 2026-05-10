@@ -37,10 +37,12 @@ class exprUses : public Inspector {
         }
         return !result;
     }
+#ifdef SUPPORT_P4_14
     bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
         return !result;
     }
+#endif
     bool preorder(const IR::Expression *) override { return !result; }
 
     void postorder(const IR::Member *m) override {

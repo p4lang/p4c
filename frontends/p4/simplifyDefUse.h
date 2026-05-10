@@ -92,8 +92,9 @@ class SimplifyDefUse : public PassManager {
  public:
     explicit SimplifyDefUse(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(typeMap);
-
+#ifdef SUPPORT_P4_14
         refMap.setIsV1(P4CContext::get().options().isv1());
+#endif
 
         // SimplifyDefUse needs the expression tree *not* to be a DAG,
         // because it keeps state in hash-maps indexed with PathExpressions.

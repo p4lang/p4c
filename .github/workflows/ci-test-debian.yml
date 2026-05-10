@@ -22,6 +22,8 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
+      SUPPORT_P4_14: ON
+
     steps:
       - uses: actions/checkout@v6
         with:

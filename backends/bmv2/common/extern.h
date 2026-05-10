@@ -73,8 +73,8 @@ class ExternConverter {
 
 #define EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(extern_name, model_type, model_name)                \
     class ExternConverter_##extern_name : public ExternConverter {                                \
-        model_type &model_name;                                                                   \
-        ExternConverter_##extern_name() : model_name(model_type::instance) {                      \
+        const model_type &model_name;                                                             \
+        ExternConverter_##extern_name() : model_name(model_type::instance()) {                    \
             registerExternConverter(cstring(#extern_name), this);                                 \
         }                                                                                         \
         static ExternConverter_##extern_name singleton;                                           \
@@ -96,8 +96,8 @@ class ExternConverter {
 
 #define EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(extern_name, model_type, model_name)               \
     class ExternConverter_##extern_name : public ExternConverter {                               \
-        model_type &model_name;                                                                  \
-        ExternConverter_##extern_name() : model_name(model_type::instance) {                     \
+        const model_type &model_name;                                                            \
+        ExternConverter_##extern_name() : model_name(model_type::instance()) {                   \
             registerExternConverter(cstring(#extern_name), this);                                \
         }                                                                                        \
         static ExternConverter_##extern_name singleton;                                          \
@@ -115,8 +115,8 @@ class ExternConverter {
 
 #define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(extern_name, type, name)                 \
     class ExternConverter_##extern_name : public ExternConverter {                                \
-        type &name;                                                                               \
-        ExternConverter_##extern_name() : name(type::instance) {                                  \
+        const type &name;                                                                         \
+        ExternConverter_##extern_name() : name(type::instance()) {                                \
             registerExternConverter(cstring(#extern_name), this);                                 \
         }                                                                                         \
         static ExternConverter_##extern_name singleton;                                           \

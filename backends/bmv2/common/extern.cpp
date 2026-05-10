@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "extern.h"
 
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "lib/json.h"
 
 namespace P4::BMV2 {
@@ -222,14 +221,16 @@ cstring ExternConverter::createCalculation(ConversionContext *ctxt, cstring algo
 }
 
 cstring ExternConverter::convertHashAlgorithm(cstring algorithm) {
-    if (algorithm == P4V1::V1Model::instance.algorithm.crc32.name) return "crc32"_cs;
-    if (algorithm == P4V1::V1Model::instance.algorithm.crc32_custom.name) return "crc32_custom"_cs;
-    if (algorithm == P4V1::V1Model::instance.algorithm.crc16.name) return "crc16"_cs;
-    if (algorithm == P4V1::V1Model::instance.algorithm.crc16_custom.name) return "crc16_custom"_cs;
-    if (algorithm == P4V1::V1Model::instance.algorithm.random.name) return "random"_cs;
-    if (algorithm == P4V1::V1Model::instance.algorithm.identity.name) return "identity"_cs;
-    if (algorithm == P4V1::V1Model::instance.algorithm.csum16.name) return "csum16"_cs;
-    if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name) return "xor16"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.crc32.name) return "crc32"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.crc32_custom.name)
+        return "crc32_custom"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.crc16.name) return "crc16"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.crc16_custom.name)
+        return "crc16_custom"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.random.name) return "random"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.identity.name) return "identity"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.csum16.name) return "csum16"_cs;
+    if (algorithm == P4V1::V1Model::instance().algorithm.xor16.name) return "xor16"_cs;
 
     ::P4::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algorithm);
     return cstring::empty;

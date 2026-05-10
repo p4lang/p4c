@@ -454,7 +454,9 @@ class Inline : public PassManager {
  public:
     Inline(TypeMap *typeMap, const RemoveUnusedPolicy &policy, bool optimizeParserInlining,
            EvaluatorPass *evaluator = nullptr) {
+#ifdef SUPPORT_P4_14
         refMap.setIsV1(P4CContext::get().options().isv1());
+#endif
         auto *evInstance = evaluator ? evaluator : new EvaluatorPass(&refMap, typeMap);
         addPasses({
             evInstance,

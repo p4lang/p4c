@@ -40,9 +40,14 @@
 
 namespace P4::P4Tools {
 
+#ifdef SUPPORT_P4_14
 MidEnd::MidEnd(const CompilerOptions &options) {
     setName("MidEnd");
-    refMap.setIsV1(options.langVersion == CompilerOptions::FrontendVersion::P4_16);
+    refMap.setIsV1(options.langVersion == CompilerOptions::FrontendVersion::P4_14);
+#else
+MidEnd::MidEnd(const CompilerOptions & /*options*/) {
+    setName("MidEnd");
+#endif
 }
 
 Visitor *MidEnd::mkConvertEnums() { return new P4::ConvertEnums(&typeMap, mkConvertEnumsPolicy()); }

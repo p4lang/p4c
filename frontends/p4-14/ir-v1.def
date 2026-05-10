@@ -450,6 +450,17 @@ class V1Control : IAnnotated {
     toString { return node_type_name() + " " + name; }
 }
 
+
+class GlobalRef : Expression {
+    Node        obj;            // FIXME -- should be IInstance, but IRgen doesn't allow
+                                // FIXME -- interface references directly in the IR
+    GlobalRef { type = obj->to<IInstance>()->getType(); }
+    validate { BUG_CHECK(obj->is<IInstance>(), "Invalid object %1%", obj); }
+    toString { return obj->to<IInstance>()->toString(); }
+    ID Name() const { return obj->to<IInstance>()->Name(); }
+    dbprint { out << obj->to<IInstance>()->Name(); }
+}
+
 class AttribLocal : Expression, IDeclaration {
     ID  name;
     ID getName() const override { return name; }
@@ -470,16 +481,6 @@ class Attribute : Declaration {
     NullOK AttribLocals locals = nullptr;
     bool optional = false;
     dbprint { if (type) out << type << ' '; out << name; }
-}
-
-class GlobalRef : Expression {
-    Node        obj;            // FIXME -- should be IInstance, but IRgen doesn't allow
-                                // FIXME -- interface references directly in the IR
-    GlobalRef { type = obj->to<IInstance>()->getType(); }
-    validate { BUG_CHECK(obj->is<IInstance>(), "Invalid object %1%", obj); }
-    toString { return obj->to<IInstance>()->toString(); }
-    ID Name() const { return obj->to<IInstance>()->Name(); }
-    dbprint { out << obj->to<IInstance>()->Name(); }
 }
 
 class AttributeRef : Expression {

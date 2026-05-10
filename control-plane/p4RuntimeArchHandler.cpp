@@ -20,7 +20,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 // TODO(antonin): this include should go away when we cleanup getTableSize
 // implementation.
-#include "frontends/p4-14/fromv1.0/v1model.h"
+#include "backends/bmv2/common/v1model.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeMap.h"
@@ -92,7 +92,7 @@ int64_t getTableSize(const IR::P4Table *table) {
     // TODO(antonin): we should not be referring to v1model in this
     // architecture-independent code; each architecture may have a different
     // default table size.
-    const int64_t defaultTableSize = P4V1::V1Model::instance.tableAttributes.defaultTableSize;
+    const int64_t defaultTableSize = P4V1::V1Model::instance().tableAttributes.defaultTableSize;
 
     auto sizeProperty = table->properties->getProperty("size");
     if (sizeProperty == nullptr) {

@@ -26,6 +26,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/toP4/toP4.h"
+#include "ir/dump.h"
 #include "ir/ir.h"
 #include "ir/json_loader.h"
 #include "ir/pass_utils.h"

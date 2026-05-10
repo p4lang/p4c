@@ -93,8 +93,12 @@ class FunctionsInliner::isLocalExpression : public Inspector, ResolutionContext 
         const Context *ctxt = nullptr;
         while (auto scope = findOrigCtxt<IR::INamespace>(ctxt)) {
             if (scope->is<IR::P4Control>() || scope->is<IR::P4Parser>() ||
-                scope->is<IR::P4Program>() || scope->is<IR::V1Control>() ||
-                scope->is<IR::V1Parser>() || scope->is<IR::V1Program>()) {
+                scope->is<IR::P4Program>()
+#ifdef SUPPORT_P4_14
+                || scope->is<IR::V1Control>() || scope->is<IR::V1Parser>() ||
+                scope->is<IR::V1Program>()
+#endif
+            ) {
                 // these are "global" things that may contain functions
                 return result = false;
             }
@@ -116,7 +120,7 @@ class FunctionsInliner::isLocalExpression : public Inspector, ResolutionContext 
         BUG_CHECK(done, "isLocalExpression not computed");
         return result;
     }
-};
+};  // namespace P4
 
 bool FunctionsInliner::preCaller() {
     LOG2("Visiting: " << dbp(getOriginal()));

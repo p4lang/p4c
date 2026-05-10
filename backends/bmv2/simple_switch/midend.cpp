@@ -17,10 +17,10 @@ limitations under the License.
 #include "midend.h"
 
 #include "backends/bmv2/common/check_unsupported.h"
+#include "backends/bmv2/common/v1model.h"
 #include "backends/bmv2/simple_switch/options.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
@@ -132,9 +132,11 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::TableHit(&typeMap),
              new P4::EliminateSwitch(&typeMap),
              new P4::RemoveLeftSlices(&typeMap),
-             // p4c-bm removed unused action parameters. To produce a compatible
-             // control plane API, we remove them as well for P4-14 programs.
+// p4c-bm removed unused action parameters. To produce a compatible
+// control plane API, we remove them as well for P4-14 programs.
+#ifdef SUPPORT_P4_14
              {isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr},
+#endif
              new P4::TypeChecking(&refMap, &typeMap),
              {options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr},
              evaluator,

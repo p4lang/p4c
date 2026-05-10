@@ -20,7 +20,11 @@ limitations under the License.
 
 namespace P4 {
 
-ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
+ResolutionContext::ResolutionContext() {
+#ifdef SUPPORT_P4_14
+    anyOrder = P4CContext::get().options().isv1();
+#endif
+}
 
 const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
     const IR::INamespace *ns) const {
@@ -359,9 +363,11 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 // These can overload each other.
                 // Also, the constructor is supposed to have the same name as the class.
                 continue;
+#ifdef SUPPORT_P4_14
             if (pnode->is<IR::Attribute>() && node->is<IR::AttribLocal>())
                 // attribute locals often match attributes
                 continue;
+#endif
 
             // parameter shadowing
             if (node->is<IR::Declaration>() && !node->is<IR::Parameter>()) {
@@ -378,7 +384,9 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
 }
 
 Visitor::profile_t ResolveReferences::init_apply(const IR::Node *node) {
+#ifdef SUPPORT_P4_14
     anyOrder = refMap->isV1();
+#endif
     // Check shadowing even if the program map is up-to-date.
     if (!refMap->checkMap(node) || checkShadow) refMap->clear();
     return Inspector::init_apply(node);

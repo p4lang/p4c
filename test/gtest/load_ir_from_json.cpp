@@ -38,6 +38,7 @@ namespace P4::Test {
 class FromJSONTest : public P4CTest {};
 
 TEST_F(FromJSONTest, load_ir_from_json) {
+    // FIXME: This path should be set by the build system.
     int exitCode = system(
         "./p4c-bm2-ss -o outputTO.json test/test_fromJSON.p4 "
         "--toJSON jsonFile.json");

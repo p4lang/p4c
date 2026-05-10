@@ -1,0 +1,55 @@
+/*
+Copyright 2013-present Barefoot Networks, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+#ifndef FRONTENDS_P4_ACTIONSINLINING_P4_14_H_
+#define FRONTENDS_P4_ACTIONSINLINING_P4_14_H_
+
+#include "ir/ir.h"
+
+namespace P4::P4_14 {
+
+/// Special inliner which works directly on P4-14 representation.
+class InlineActions : public Transform {
+    const IR::V1Program *global;
+    class SubstActionArgs : public Transform {
+        const IR::ActionFunction *function;
+        const IR::Primitive *callsite;
+        const IR::Node *postorder(IR::ActionArg *arg) override {
+            for (unsigned i = 0; i < function->args.size(); ++i)
+                if (function->args[i] == getOriginal()) return callsite->operands[i];
+            BUG("Action arg not argument of action");
+            return arg;
+        }
+
+     public:
+        SubstActionArgs(const IR::ActionFunction *f, const IR::Primitive *c)
+            : function(f), callsite(c) {}
+    };
+
+    const IR::V1Program *preorder(IR::V1Program *gl) override { return global = gl; }
+    const IR::Node *preorder(IR::Primitive *p) override {
+        if (auto af = global->get<IR::ActionFunction>(p->name)) {
+            SubstActionArgs saa(af, p);
+            saa.setCalledBy(this);
+            return af->action.clone()->apply(saa);
+        }
+        return p;
+    }
+};
+
+}  // namespace P4::P4_14
+
+#endif /* FRONTENDS_P4_ACTIONSINLINING_P4_14_H_ */

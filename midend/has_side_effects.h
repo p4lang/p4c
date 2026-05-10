@@ -49,10 +49,12 @@ class hasSideEffects : public Inspector, public ResolutionContext {
         return false;
     }
 
+#ifdef SUPPORT_P4_14
     bool preorder(const IR::Primitive *) override {
         result = true;
         return false;
     }
+#endif
     bool preorder(const IR::Expression *) override { return !result; }
 
  public:

@@ -37,7 +37,9 @@ class ToP4;
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
 extern std::filesystem::path p4includePath;
+#ifdef SUPPORT_P4_14
 extern std::filesystem::path p4_14includePath;
+#endif
 
 /// Try to guess whether a file is a "system" file
 bool isSystemFile(cstring filename);
@@ -99,8 +101,10 @@ class ParserOptions : public Util::Options {
     const char *getIncludePath() const override;
     /// Returns the output of the preprocessor.
     std::optional<ParserOptions::PreprocessorResult> preprocess() const;
+#ifdef SUPPORT_P4_14
     /// True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
+#endif
     /// Get a debug hook function suitable for insertion in the pass managers. The hook is
     /// responsible for dumping P4 according to th --top4 and related options.
     DebugHook getDebugHook() const;

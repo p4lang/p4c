@@ -54,11 +54,14 @@ class MidEnd : public PassManager {
     P4::TypeMap typeMap;
     const IR::ToplevelBlock *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
+#ifdef SUPPORT_P4_14
     bool isv1;
-
     explicit MidEnd(CompilerOptions &options) {
         isv1 = options.isv1();
         refMap.setIsV1(isv1);  // must be done BEFORE creating passes
+#else
+    explicit MidEnd(CompilerOptions & /*options*/) {
+#endif
     }
     const IR::ToplevelBlock *process(const IR::P4Program *&program) {
         program = program->apply(*this);
