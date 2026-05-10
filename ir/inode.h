@@ -59,12 +59,23 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     std::enable_if_t<!has_static_type_name_v<T>, const T *> checkedTo() const {
         return ICastable::checkedTo<T>();
     }
+    template <typename T>
+    std::enable_if_t<!has_static_type_name_v<T>, T *> checkedTo() {
+        return ICastable::checkedTo<T>();
+    }
 
     // alternative checkedTo implementation that produces slightly better error message
     // due to node_type_name() / static_type_name() being available
     template <typename T>
     std::enable_if_t<has_static_type_name_v<T>, const T *> checkedTo() const {
         const auto *result = to<T>();
+        BUG_CHECK(result, "Cast failed: %1% with type %2% is not a %3%.", this, node_type_name(),
+                  T::static_type_name());
+        return result;
+    }
+    template <typename T>
+    std::enable_if_t<has_static_type_name_v<T>, T *> checkedTo() {
+        auto *result = to<T>();
         BUG_CHECK(result, "Cast failed: %1% with type %2% is not a %3%.", this, node_type_name(),
                   T::static_type_name());
         return result;

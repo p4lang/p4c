@@ -136,6 +136,11 @@ NamedType &NamedType::Char() {
     return nt;
 }
 
+NamedType &NamedType::COWNode_info() {
+    static NamedType nt("COWNode_info"_cs);
+    return nt;
+}
+
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
     if (!lookup && name == "ID") return "IR::ID"_cs;  // hack -- ID is in namespace P4::IR

@@ -265,7 +265,7 @@ Visitor::profile_t MarkMutexPragmaFields::init_apply(const IR::Node *root) {
     return Inspector::init_apply(root);
 }
 
-bool FindAddedHeaderFields::preorder(const IR::MAU::Primitive *prim) {
+bool FindAddedHeaderFields::preorder(const IR::MAU::MauPrimitive *prim) {
     LOG5("Prim name: " << prim->name);
     // If this is a well-formed field modification...
     if (prim->name == "set" && prim->operands.size() > 1) {
