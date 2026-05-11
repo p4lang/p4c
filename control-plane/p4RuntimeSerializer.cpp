@@ -1639,7 +1639,7 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
                 p4Runtime.serializeEntriesTo(out.get(), format);
             } else {
                 ::P4::error(ErrorType::ERR_IO, "Couldn't open P4Runtime static entries file: %1%",
-                            options.p4RuntimeEntriesFile);
+                            file);
             }
         }
     }
