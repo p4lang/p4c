@@ -77,6 +77,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_DUPLICATE, "duplicate"_cs},
     {ErrorType::WARN_BRANCH_HINT, "branch"_cs},
     {ErrorType::WARN_TABLE_KEYS, "keys"_cs},
+    {ErrorType::WARN_EXTENSION, "extension"_cs},
 
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},
@@ -87,6 +88,9 @@ void ErrorCatalog::initReporter(ErrorReporter &reporter) {
     // by default, ignore warnings about branch hints -- user can turn them
     // on with --Wwarn=branch
     reporter.setDiagnosticAction("branch"_cs, DiagnosticAction::Ignore);
+    // by default, ignore warnings about extensions -- user can turn them
+    // on with --Wwarn=extension
+    reporter.setDiagnosticAction("extension"_cs, DiagnosticAction::Ignore);
 }
 
 }  // namespace P4
