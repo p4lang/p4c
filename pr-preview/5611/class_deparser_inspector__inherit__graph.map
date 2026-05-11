@@ -1,0 +1,17 @@
+<map id="DeparserInspector" name="DeparserInspector">
+<area shape="rect" id="Node000001" title=" " alt="" coords="136,145,277,170"/>
+<area shape="rect" id="Node000003" href="$struct_b_f_n_1_1_assignment_stmt_error_check.html" title=" " alt="" coords="349,5,545,45"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="227,132,269,93,324,55,352,43,354,48,327,60,273,97,231,136"/>
+<area shape="rect" id="Node000004" href="$group__parde.html#class_b_f_n_1_1_extract_deparser" title="Transforms midend deparser IR::BFN::TnaDeparser into backend deparser IR::BFN::Deparser." alt="" coords="365,70,528,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="245,136,325,104,369,93,370,98,326,109,247,141"/>
+<area shape="rect" id="Node000005" href="$class_check_clot_groups.html" title=" " alt="" coords="379,119,514,145"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="291,146,379,136,379,142,292,151"/>
+<area shape="rect" id="Node000006" href="$struct_collect_pov_bit_to_fields.html" title=" " alt="" coords="366,169,527,194"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="292,163,366,171,366,176,291,168"/>
+<area shape="rect" id="Node000007" href="$struct_insert_parser_clot_checksums_1_1_collect_clot_checksum_fields.html" title=" " alt="" coords="343,219,550,259"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="249,173,326,204,365,216,363,221,324,209,247,178"/>
+<area shape="rect" id="Node000008" href="$group___lower_deparser_i_r.html#struct_parde_1_1_lowered_1_1_compute_lowered_deparser_i_r" title="Generates lowered deparser IR with container references." alt="" coords="325,283,568,323"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="228,179,270,225,297,248,327,268,352,280,350,285,324,273,294,253,266,229,224,183"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,145,88,170"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,155,136,155,136,160,102,160"/>
+</map>
