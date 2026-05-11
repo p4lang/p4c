@@ -1,0 +1,19 @@
+<map id="P4::EBPF::EBPFTableImplementationPSA" name="P4::EBPF::EBPFTableImplementationPSA">
+<area shape="rect" id="Node000001" title="Base class for ActionProfile and ActionSelector." alt="" coords="103,445,386,471"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_action_profile_p_s_a.html" title=" " alt="" coords="5,519,231,544"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="214,480,140,521,137,516,211,475"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_action_selector_p_s_a.html" title=" " alt="" coords="254,519,491,544"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="279,475,353,516,350,521,276,480"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a.html" title=" " alt="" coords="155,372,334,397"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="247,411,247,445,242,445,242,411"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table.html" title=" " alt="" coords="169,299,321,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="247,338,247,372,242,372,242,338"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_base.html" title="Also used to represent counters." alt="" coords="153,225,337,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="247,264,247,299,242,299,242,264"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="164,152,325,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="247,191,247,225,242,225,242,191"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="191,79,298,104"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="247,118,247,152,242,152,242,118"/>
+<area shape="rect" id="Node000007" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="187,5,302,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="247,44,247,79,242,79,242,44"/>
+</map>

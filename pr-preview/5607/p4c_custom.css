@@ -1,0 +1,27 @@
+/* Color Scheme  */
+html {
+--primary-color : #8cc63f ;
+--primary-dark-color : #4b6c21 ;
+--primary-light-color : #c4f0a1 ;
+--side-nav-fixed-width: 335px;
+}
+
+html.dark-mode {
+    --primary-color : #8cc63f; 
+	--primary-dark-color : #4b6c21;
+	--primary-light-color : #c4f0a1 ;
+}
+
+/* Default spacing for larger screens */
+.content-spacing {
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
+/* Remove spacing for smaller screens */
+@media (max-width: 700px) {
+    .content-spacing {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}

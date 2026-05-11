@@ -1,0 +1,12 @@
+<map id="BFN::TypeChecking" name="BFN::TypeChecking">
+<area shape="rect" id="Node000001" title="A TypeChecking pass in BFN namespace that uses the extended TypeInference pass. This should be used i..." alt="" coords="5,299,152,324"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_type_checking.html" title=" " alt="" coords="11,225,147,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,264,81,299,76,299,76,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="13,152,145,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="81,191,81,225,76,225,76,191"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="35,5,123,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="70,44,60,79,59,99,63,119,75,151,70,153,58,120,54,99,55,78,65,43"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="70,79,181,104"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="96,41,120,77,116,80,92,44"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="112,117,88,153,84,150,108,114"/>
+</map>
