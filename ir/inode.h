@@ -32,6 +32,9 @@ class JSONLoader;
 namespace P4::IR {
 
 class Node;
+class Annotation;
+template <class>
+class Vector;
 
 /// SFINAE helper to check if given class has a `static_type_name`
 /// method. Definite node classes have them while interfaces do not
@@ -69,6 +72,11 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
                   T::static_type_name());
         return result;
     }
+
+    // helpers for getting annotations
+    bool hasAnnotation(cstring) const;
+    const Annotation *getAnnotation(cstring) const;
+    const Vector<Annotation> &getAnnotations() const;
 
     DECLARE_TYPEINFO_WITH_TYPEID(INode, NodeKind::INode);
 };
