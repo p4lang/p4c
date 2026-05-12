@@ -63,7 +63,8 @@ sudo dnf install -y -q \
     valgrind \
     zlib-devel \
     glibc-devel.i686 \
-    ninja-build
+    ninja-build \
+    xxhash-devel
 
 # Set up uv for Python dependency management.
 uv sync
