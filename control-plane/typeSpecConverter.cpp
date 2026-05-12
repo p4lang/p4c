@@ -41,9 +41,7 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 bool hasTranslationAnnotation(const IR::Type *type, TranslationAnnotation *payload) {
-    const IR::Annotation *ann = nullptr;
-    if (auto *annotated = type->to<IR::IAnnotated>())
-        ann = annotated->getAnnotation("p4runtime_translation"_cs);
+    auto *ann = type->getAnnotation("p4runtime_translation"_cs);
     if (!ann) return false;
 
     // Syntax: @pruntime_translation(<uri>, <basic_type>).

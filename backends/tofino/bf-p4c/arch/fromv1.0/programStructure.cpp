@@ -2454,8 +2454,7 @@ void TnaProgramStructure::loadModel() {
 
     // iterate over tna declarations, find the type for intrinsic metadata
     for (auto decl : *declarations) {
-        auto *ann = decl->to<IR::IAnnotated>();
-        if (ann && ann->getAnnotation("__intrinsic_metadata"_cs)) {
+        if (decl->getAnnotation("__intrinsic_metadata"_cs)) {
             auto st = decl->to<IR::Type_StructLike>();
             tna_intr_md_types.emplace(st->name.toString(), st);
         }

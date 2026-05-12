@@ -695,9 +695,7 @@ const IR::Node *MeterConverter::postorder(IR::MethodCallStatement *node) {
     BUG_CHECK(meter_pe != nullptr, "Cannot find meter %1%", member->expr);
 
     auto args = new IR::Vector<IR::Argument>();
-    auto inst = refMap->getDeclaration(meter_pe->path)->to<IR::IAnnotated>();
-    auto annot = inst ? inst->getAnnotation("pre_color"_cs) : nullptr;
-    if (annot != nullptr) {
+    if (auto annot = refMap->getDeclaration(meter_pe->path)->getAnnotation("pre_color"_cs)) {
         auto size = annot->getExpr(0)->type->width_bits();
         auto expr = annot->getExpr(0);
         auto castedExpr = cast_if_needed(expr, size, 8);

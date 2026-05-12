@@ -334,13 +334,11 @@ bool Visitor::warning_enabled(const Visitor *visitor, int warning_kind) {
     while (visitor != nullptr) {
         auto crt = visitor->ctxt;
         while (crt != nullptr) {
-            if (const auto *annotated = crt->node->to<IR::IAnnotated>()) {
-                for (const auto *a : annotated->getAnnotations()) {
-                    if (a->name != IR::Annotation::noWarnAnnotation) continue;
+            for (auto *a : crt->node->getAnnotations()) {
+                if (a->name != IR::Annotation::noWarnAnnotation) continue;
 
-                    auto arg = a->getSingleString();
-                    if (arg == errorString) return false;
-                }
+                auto arg = a->getSingleString();
+                if (arg == errorString) return false;
             }
             crt = crt->parent;
         }
@@ -438,10 +436,8 @@ struct PushContext {
     bool saved_logging_disable;
     PushContext(const Visitor::Context *&stck, const IR::Node *node) : stack(stck) {
         saved_logging_disable = Log::Detail::enableLoggingInContext;
-        if (const auto *annotated = node->to<IR::IAnnotated>()) {
-            if (annotated->getAnnotation(IR::Annotation::debugLoggingAnnotation))
-                Log::Detail::enableLoggingInContext = true;
-        }
+        if (node->hasAnnotation(IR::Annotation::debugLoggingAnnotation))
+            Log::Detail::enableLoggingInContext = true;
         current.parent = stack;
         current.node = current.original = node;
         current.child_index = 0;
