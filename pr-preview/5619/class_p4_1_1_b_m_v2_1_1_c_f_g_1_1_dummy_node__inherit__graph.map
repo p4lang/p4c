@@ -1,0 +1,11 @@
+<map id="P4::BMV2::CFG::DummyNode" name="P4::BMV2::CFG::DummyNode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="29,225,243,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_b_m_v2_1_1_c_f_g_1_1_node.html" title=" " alt="" coords="55,152,217,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,191,139,225,133,225,133,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_has_db_print.html" title=" " alt="" coords="5,79,128,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="89,112,127,150,123,154,86,116"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="152,79,259,104"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="186,116,149,154,145,150,183,112"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="148,5,263,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="208,44,208,79,203,79,203,44"/>
+</map>

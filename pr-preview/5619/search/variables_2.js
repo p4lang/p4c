@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['base_0',['base',['../struct_p4_1_1_unparsed_constant.html#a34f6ea300913bcdcae5836d98b6789d4',1,'P4::UnparsedConstant']]],
+  ['basetype_1',['baseType',['../struct_p4_1_1_spec_signature.html#a001dd5368cac5e60b3eb34b32384c6f1',1,'P4::SpecSignature']]],
+  ['beforeallocatedclot_2',['beforeAllocatedClot',['../class_clot_candidate.html#a8fc6386e5da0ccab3ac004d7a0dad9b8',1,'ClotCandidate']]],
+  ['beforestart_3',['beforeStart',['../class_p4_1_1_program_point.html#a0286dfece92c3c9dc0b48ab654dfb229',1,'P4::ProgramPoint']]],
+  ['bfrtschemaversion_4',['bfrtSchemaVersion',['../namespace_p4.html#afe1ef4bd2d0d3ac1b220571d2f6e56d8',1,'P4']]],
+  ['bit_5fwidth_5',['bit_width',['../struct_action_data_1_1_local_packing.html#a391cec94cb8f4cc33e9dc2e6c179f07f',1,'ActionData::LocalPacking']]],
+  ['bitposition_6',['bitPosition',['../struct_p_h_v_1_1_allocation_1_1_conditional_constraint_data.html#ab7d29aa8bb4c4c3e2424c66cca796f5f',1,'PHV::Allocation::ConditionalConstraintData']]],
+  ['bits_5fin_5fuse_7',['bits_in_use',['../struct_action_data_1_1_local_packing.html#a200129b3450211998adf1679cc8bd93b',1,'ActionData::LocalPacking']]],
+  ['bitwidth_8',['bitwidth',['../class_p4_1_1_test_1_1_v1_model_std_meta_translate_test.html#aa4924d8fc0f5a124e1f5d8b09bcd3bac',1,'P4::Test::V1ModelStdMetaTranslateTest']]],
+  ['bitwise_5fops_9',['BITWISE_OPS',['../class_p_h_v___field___operations.html#a376284cb08e0cbcc3b800c0942fd121b',1,'PHV_Field_Operations']]],
+  ['block_5findex_10',['block_index',['../group___arch_translation.html#a03de2b14cb1a5233f0038a61f2e90628',1,'BFN::BlockInfo']]],
+  ['block_5ftype_11',['block_type',['../class_p4_1_1_b_m_v2_1_1_pna_program_structure.html#a52633caea0e3ff545a30f3d6fb3a570a',1,'P4::BMV2::PnaProgramStructure::block_type'],['../class_p4_1_1_psa_program_structure.html#ab567729e474f848df8dfbf448bf2dbf8',1,'P4::PsaProgramStructure::block_type'],['../group___arch_translation.html#aa4cd6e9e9b237977f867123236a2b2cc',1,'BFN::BlockInfo::block_type']]],
+  ['blockconverted_12',['blockConverted',['../struct_p4_1_1_b_m_v2_1_1_conversion_context.html#ab28d12e44b6033a4f8ce54d3ad0019f4',1,'P4::BMV2::ConversionContext']]],
+  ['blockmap_13',['blockMap',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html#a0ab7b814f869f272a7c1dd3b6cafbffc',1,'P4::P4Tools::P4Testgen::ProgramInfo']]],
+  ['blocknames_14',['blockNames',['../struct_b_f_n_1_1_program_structure.html#aa48960747accad010b21f8df28d4d8dc',1,'BFN::ProgramStructure']]],
+  ['breakdefinitions_15',['breakDefinitions',['../class_p4_1_1_compute_write_set.html#a0f1f0ef207ccf9849813aedcb1384c94',1,'P4::ComputeWriteSet']]],
+  ['bridged_16',['bridged',['../class_p_h_v_1_1_field.html#aa8621a5edf58e28fde136f3a0e59c187',1,'PHV::Field']]],
+  ['bridged_5fto_5forig_17',['bridged_to_orig',['../class_collect_ingress_bridged_fields.html#ad132e8b1786052ded4a9b2a261041cb1',1,'CollectIngressBridgedFields::bridged_to_orig'],['../class_collect_egress_bridged_fields.html#a94f6f5b6a1f21c9705e3e057b185f466',1,'CollectEgressBridgedFields::bridged_to_orig']]],
+  ['bus_5finputs_18',['bus_inputs',['../struct_action_data_1_1_format_1_1_use.html#acb02c70ab1b7131ea5462ac9f4502aba',1,'ActionData::Format::Use']]],
+  ['bytes_5fused_19',['bytes_used',['../struct_action_data_bus_1_1_use_1_1_reserved_space.html#ae755c8c74fb4ea1fe133ad743c24c118',1,'ActionDataBus::Use::ReservedSpace']]]
+];

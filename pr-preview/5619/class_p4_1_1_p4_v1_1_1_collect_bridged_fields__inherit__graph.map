@@ -1,0 +1,10 @@
+<map id="P4::P4V1::CollectBridgedFields" name="P4::P4V1::CollectBridgedFields">
+<area shape="rect" id="Node000001" title=" " alt="" coords="43,152,226,192"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="5,79,112,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,112,118,150,114,154,77,116"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="91,5,179,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="114,42,73,80,69,76,111,38"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_write_context.html" title=" " alt="" coords="137,79,285,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="159,38,200,76,196,80,155,42"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="192,116,155,154,151,150,188,112"/>
+</map>

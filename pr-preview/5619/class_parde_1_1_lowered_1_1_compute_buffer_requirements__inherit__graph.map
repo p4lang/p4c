@@ -1,0 +1,7 @@
+<map id="Parde::Lowered::ComputeBufferRequirements" name="Parde::Lowered::ComputeBufferRequirements">
+<area shape="rect" id="Node000001" title="Computes the number of bytes which must be available for each parser match to avoid a stall." alt="" coords="5,152,232,192"/>
+<area shape="rect" id="Node000002" href="$group__parde.html#class_parser_modifier" title=" " alt="" coords="61,79,176,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,118,121,152,116,152,116,118"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="81,5,156,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,44,121,79,116,79,116,44"/>
+</map>
