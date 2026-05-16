@@ -58,7 +58,7 @@ class ElimActionRun : public PassManager {
     std::map<cstring, atinfo_t> actionRunTables;
     std::map<cstring, atinfo_t *> actionsToModify;
     std::map<const IR::Statement *, IR::IndexedVector<IR::StatOrDecl>> prepend_statement;
-    IR::Vector<IR::Declaration> add_to_control;
+    IR::IndexedVector<IR::Declaration> add_to_control;
 
     class ActionTableUse : public Inspector, public ResolutionContext {
         ElimActionRun &self;

@@ -432,6 +432,16 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
     Type getType() const override { return type; }
     ID Name() const override { return name; }
     validate{ arguments->check_null(); }
+#emit
+    // FIXME -- should not need #emit here, but ir-generator does not understand rvalue refs
+    // see FIXME notes in expression.def
+    Declaration_Instance(Util::SourceInfo si, ID id, Vector<Annotation> &&ann, const Type *t, 
+                         Vector<Argument> &&args, const BlockStatement *init = nullptr)
+    : Declaration_Instance(si, id, ann, t, new Vector<Argument>(std::move(args)), init) {}
+    Declaration_Instance(Util::SourceInfo si, ID id, const Type *t, Vector<Argument> &&args,
+                         const BlockStatement *init = nullptr)
+    : Declaration_Instance(si, id, t, new Vector<Argument>(std::move(args)), init) {}
+#end
 }
 
 /// Toplevel program representation

@@ -175,7 +175,8 @@ function build_bmv2() {
                         protobuf-compiler \
                         protobuf-compiler-grpc \
                         libthrift-dev \
-                        thrift-compiler"
+                        thrift-compiler \
+                        libxxhash-dev"
 
     # TODO: Remove this check once 18.04 is deprecated.
     if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
@@ -420,6 +421,9 @@ if [ "$CMAKE_ONLY" == "OFF" ]; then
 fi
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
+  # Keep runtime library required by installed backend executables.
+  sudo apt-get install -y --no-install-recommends libboost-iostreams1.71.0
+
   sudo apt-get purge -y ${P4C_DEPS} git
   sudo apt-get autoremove --purge -y
   rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*

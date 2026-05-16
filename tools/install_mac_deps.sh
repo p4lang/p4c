@@ -42,7 +42,7 @@ BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake libtool
     openssl coreutils bison grep ninja virtualenv uv
-    libevent nanomsg thrift
+    libevent nanomsg thrift xxhash
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
