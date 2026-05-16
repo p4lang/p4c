@@ -39,7 +39,7 @@ package = false
 # FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Python.
 # This is the same commit hash as defined in the top-level CMakelists.txt
 p4runtime = { git = "https://github.com/p4lang/p4runtime.git", rev = "ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5", subdirectory = "py" }
-ptf = { git = "https://github.com/p4lang/ptf.git", rev = "ebc00f94fe8a3763cf90339d7c69be7976cf0767"}
+ptf = { git = "https://github.com/p4lang/ptf.git", rev = "a5231746104798ba06473a3d9ca1217255f2cbc5"}
 
 [build-system]
 requires = ["hatchling"]
