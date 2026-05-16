@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 SCRIPT_DIR=$(realpath "$(dirname "$0")")
 
 SCHEMAS_DIR=$(realpath "$SCRIPT_DIR/../compiler_interfaces/schemas")

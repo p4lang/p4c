@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # ###### Barefoot Compilers Toolchain
 MESSAGE("-- Adding p4c-barefoot")
 

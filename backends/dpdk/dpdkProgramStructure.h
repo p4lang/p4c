@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_
 #define BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_
 

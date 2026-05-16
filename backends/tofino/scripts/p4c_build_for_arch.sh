@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # params:
 #  workspace
 #  architecture: one of x86_64-apple-darwin, x86_64-linux-gnu, i386-linux-gnu

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2020 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "constants.h"
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"

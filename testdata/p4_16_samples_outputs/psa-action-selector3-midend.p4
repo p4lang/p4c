@@ -65,17 +65,17 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaactionselector3l89() {
+    @hidden action psaactionselector3l95() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psaactionselector3l89 {
+    @hidden table tbl_psaactionselector3l95 {
         actions = {
-            psaactionselector3l89();
+            psaactionselector3l95();
         }
-        const default_action = psaactionselector3l89();
+        const default_action = psaactionselector3l95();
     }
     apply {
-        tbl_psaactionselector3l89.apply();
+        tbl_psaactionselector3l95.apply();
     }
 }
 

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Intel Corporation
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Slicing Iterator Made Easy
 
 The slicing iterator takes a super cluster and some other constraints, like `packingConflict`,

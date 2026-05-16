@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Install prerequisites for source_release_clean.py
 
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
