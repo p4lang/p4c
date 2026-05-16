@@ -1,6 +1,6 @@
-duplicate-label.p4(26): [--Werror=invalid] error: a: duplicate case label a
+duplicate-label.p4(17): [--Werror=invalid] error: a: duplicate case label a
             a: { arun = 1; } // duplicate label
             ^
-duplicate-label.p4(25)
+duplicate-label.p4(16)
             a: { arun = 1; }
             ^

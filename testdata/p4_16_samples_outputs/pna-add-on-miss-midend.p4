@@ -103,18 +103,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaaddonmiss186() {
+    @hidden action pnaaddonmiss177() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaaddonmiss186 {
+    @hidden table tbl_pnaaddonmiss177 {
         actions = {
-            pnaaddonmiss186();
+            pnaaddonmiss177();
         }
-        const default_action = pnaaddonmiss186();
+        const default_action = pnaaddonmiss177();
     }
     apply {
-        tbl_pnaaddonmiss186.apply();
+        tbl_pnaaddonmiss177.apply();
     }
 }
 

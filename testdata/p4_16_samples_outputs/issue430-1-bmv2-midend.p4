@@ -31,18 +31,18 @@ struct tuple_0 {
 }
 
 control cIngress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action issue4301bmv2l44() {
+    @hidden action issue4301bmv2l35() {
         digest<tuple_0>(32w5, (tuple_0){f0 = hdr.ethernet.srcAddr});
         hdr.ethernet.srcAddr = 48w0;
     }
-    @hidden table tbl_issue4301bmv2l44 {
+    @hidden table tbl_issue4301bmv2l35 {
         actions = {
-            issue4301bmv2l44();
+            issue4301bmv2l35();
         }
-        const default_action = issue4301bmv2l44();
+        const default_action = issue4301bmv2l35();
     }
     apply {
-        tbl_issue4301bmv2l44.apply();
+        tbl_issue4301bmv2l35.apply();
     }
 }
 

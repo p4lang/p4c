@@ -1,16 +1,16 @@
-shadow3.p4(20): [--Wwarn=shadow] warning: 'p' shadows 'p'
+shadow3.p4(11): [--Wwarn=shadow] warning: 'p' shadows 'p'
   bit<8> p = 0;
          ^
-shadow3.p4(19)
+shadow3.p4(10)
 control MyIngress(inout H p) {
                           ^
-shadow3.p4(19): [--Wwarn=unused] warning: control 'MyIngress' is unused
+shadow3.p4(10): [--Wwarn=unused] warning: control 'MyIngress' is unused
 control MyIngress(inout H p) {
         ^^^^^^^^^
-shadow3.p4(20): [--Wwarn=unused] warning: 'p' is unused
+shadow3.p4(11): [--Wwarn=unused] warning: 'p' is unused
   bit<8> p = 0;
          ^
-shadow3.p4(19): [--Winfo=removed] info: removing control 'MyIngress'
+shadow3.p4(10): [--Winfo=removed] info: removing control 'MyIngress'
 control MyIngress(inout H p) {
         ^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

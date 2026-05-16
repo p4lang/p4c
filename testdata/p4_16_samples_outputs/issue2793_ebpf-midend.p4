@@ -59,43 +59,43 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_1();
     }
-    @hidden action issue2793_ebpf70() {
+    @hidden action issue2793_ebpf61() {
         pass = false;
     }
-    @hidden action issue2793_ebpf68() {
+    @hidden action issue2793_ebpf59() {
         pass = true;
     }
-    @hidden action issue2793_ebpf75() {
+    @hidden action issue2793_ebpf66() {
         pass = false;
     }
-    @hidden table tbl_issue2793_ebpf68 {
+    @hidden table tbl_issue2793_ebpf59 {
         actions = {
-            issue2793_ebpf68();
+            issue2793_ebpf59();
         }
-        const default_action = issue2793_ebpf68();
+        const default_action = issue2793_ebpf59();
     }
-    @hidden table tbl_issue2793_ebpf70 {
+    @hidden table tbl_issue2793_ebpf61 {
         actions = {
-            issue2793_ebpf70();
+            issue2793_ebpf61();
         }
-        const default_action = issue2793_ebpf70();
+        const default_action = issue2793_ebpf61();
     }
-    @hidden table tbl_issue2793_ebpf75 {
+    @hidden table tbl_issue2793_ebpf66 {
         actions = {
-            issue2793_ebpf75();
+            issue2793_ebpf66();
         }
-        const default_action = issue2793_ebpf75();
+        const default_action = issue2793_ebpf66();
     }
     apply {
-        tbl_issue2793_ebpf68.apply();
+        tbl_issue2793_ebpf59.apply();
         if (Check_src_ip_0.apply().hit) {
             ;
         } else {
-            tbl_issue2793_ebpf70.apply();
+            tbl_issue2793_ebpf61.apply();
         }
         switch (Check_src_ip_0.apply().action_run) {
             Reject: {
-                tbl_issue2793_ebpf75.apply();
+                tbl_issue2793_ebpf66.apply();
             }
             NoAction_1: {
             }

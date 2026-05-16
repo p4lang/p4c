@@ -1,16 +1,16 @@
-spec-ex25.p4(23): [--Wwarn=unused] warning: control 'c' is unused
+spec-ex25.p4(14): [--Wwarn=unused] warning: control 'c' is unused
 control c(bit<32> x)
         ^
-spec-ex25.p4(25): [--Wwarn=unused] warning: 'dmac' is unused
+spec-ex25.p4(16): [--Wwarn=unused] warning: 'dmac' is unused
     action Set_dmac(EthernetAddress dmac)
                                     ^^^^
-spec-ex25.p4(30): [--Wwarn=unused] warning: table 'unit' is unused
+spec-ex25.p4(21): [--Wwarn=unused] warning: table 'unit' is unused
     table unit {
           ^^^^
-spec-ex25.p4(31): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+spec-ex25.p4(22): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
         key = { x : exact; }
                 ^
-spec-ex25.p4(23): [--Winfo=removed] info: removing control 'c'
+spec-ex25.p4(14): [--Winfo=removed] info: removing control 'c'
 control c(bit<32> x)
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

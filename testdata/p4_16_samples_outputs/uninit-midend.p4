@@ -59,23 +59,23 @@ control c(out bit<32> v) {
         }
         default_action = a1();
     }
-    @hidden action uninit87() {
+    @hidden action uninit78() {
         e_0 = 32w1;
     }
-    @hidden action uninit92() {
+    @hidden action uninit83() {
         e_0 = e_0 + 32w1;
     }
-    @hidden table tbl_uninit87 {
+    @hidden table tbl_uninit78 {
         actions = {
-            uninit87();
+            uninit78();
         }
-        const default_action = uninit87();
+        const default_action = uninit78();
     }
-    @hidden table tbl_uninit92 {
+    @hidden table tbl_uninit83 {
         actions = {
-            uninit92();
+            uninit83();
         }
-        const default_action = uninit92();
+        const default_action = uninit83();
     }
     @hidden table tbl_a1 {
         actions = {
@@ -85,11 +85,11 @@ control c(out bit<32> v) {
     }
     apply {
         if (e_0 > 32w0) {
-            tbl_uninit87.apply();
+            tbl_uninit78.apply();
         } else {
             ;
         }
-        tbl_uninit92.apply();
+        tbl_uninit83.apply();
         switch (t_0.apply().action_run) {
             a1: {
             }

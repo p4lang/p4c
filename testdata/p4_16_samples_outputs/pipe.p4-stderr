@@ -1,3 +1,3 @@
-pipe.p4(39): [--Wwarn=unused] warning: 'PArg2' is unused
+pipe.p4(30): [--Wwarn=unused] warning: 'PArg2' is unused
 typedef bit<32> PArg2;
                 ^^^^^

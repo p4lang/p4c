@@ -1,4 +1,4 @@
-version.p4(23): [--Wwarn=unused] warning: 'version' is unused
+version.p4(14): [--Wwarn=unused] warning: 'version' is unused
 const .Version version = { 8w0, 8w1 };
                ^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

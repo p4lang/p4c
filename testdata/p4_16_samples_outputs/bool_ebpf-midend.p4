@@ -11,17 +11,17 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @hidden action bool_ebpf31() {
+    @hidden action bool_ebpf22() {
         pass = true;
     }
-    @hidden table tbl_bool_ebpf31 {
+    @hidden table tbl_bool_ebpf22 {
         actions = {
-            bool_ebpf31();
+            bool_ebpf22();
         }
-        const default_action = bool_ebpf31();
+        const default_action = bool_ebpf22();
     }
     apply {
-        tbl_bool_ebpf31.apply();
+        tbl_bool_ebpf22.apply();
     }
 }
 

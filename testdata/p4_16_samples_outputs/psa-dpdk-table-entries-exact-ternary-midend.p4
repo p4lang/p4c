@@ -79,17 +79,17 @@ control egressControlImpl(inout EMPTY_H h, inout Meta_t meta, in psa_egress_inpu
 }
 
 control deparser(packet_out b, out EMPTY_CLONE clone_i2e_meta, out EMPTY_RESUB resubmit_meta, out EMPTY_BRIDGE normal_meta, inout Header_t h, in Meta_t local_metadata, in psa_ingress_output_metadata_t istd) {
-    @hidden action psadpdktableentriesexactternary106() {
+    @hidden action psadpdktableentriesexactternary100() {
         b.emit<hdr>(h.h);
     }
-    @hidden table tbl_psadpdktableentriesexactternary106 {
+    @hidden table tbl_psadpdktableentriesexactternary100 {
         actions = {
-            psadpdktableentriesexactternary106();
+            psadpdktableentriesexactternary100();
         }
-        const default_action = psadpdktableentriesexactternary106();
+        const default_action = psadpdktableentriesexactternary100();
     }
     apply {
-        tbl_psadpdktableentriesexactternary106.apply();
+        tbl_psadpdktableentriesexactternary100.apply();
     }
 }
 

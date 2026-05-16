@@ -30,29 +30,29 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @hidden action value_set_ebpf54() {
+    @hidden action value_set_ebpf46() {
         pass = true;
     }
-    @hidden action value_set_ebpf56() {
+    @hidden action value_set_ebpf48() {
         pass = false;
     }
-    @hidden table tbl_value_set_ebpf54 {
+    @hidden table tbl_value_set_ebpf46 {
         actions = {
-            value_set_ebpf54();
+            value_set_ebpf46();
         }
-        const default_action = value_set_ebpf54();
+        const default_action = value_set_ebpf46();
     }
-    @hidden table tbl_value_set_ebpf56 {
+    @hidden table tbl_value_set_ebpf48 {
         actions = {
-            value_set_ebpf56();
+            value_set_ebpf48();
         }
-        const default_action = value_set_ebpf56();
+        const default_action = value_set_ebpf48();
     }
     apply {
         if (headers.next.isValid()) {
-            tbl_value_set_ebpf54.apply();
+            tbl_value_set_ebpf46.apply();
         } else {
-            tbl_value_set_ebpf56.apply();
+            tbl_value_set_ebpf48.apply();
         }
     }
 }

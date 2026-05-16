@@ -1,21 +1,21 @@
-psa-example-digest-bmv2.p4(183): [--Wwarn=unused] warning: 'serEnumT' is unused
+psa-example-digest-bmv2.p4(174): [--Wwarn=unused] warning: 'serEnumT' is unused
     action do_tst (PortId_t egress_port, EthTypes serEnumT) {
                                                   ^^^^^^^^
-psa-example-digest-bmv2.p4(84): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'CommonParser' terminates
+psa-example-digest-bmv2.p4(75): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'CommonParser' terminates
     out headers parsed_hdr,
                 ^^^^^^^^^^
-psa-example-digest-bmv2.p4(82)
+psa-example-digest-bmv2.p4(73)
 parser CommonParser(
        ^^^^^^^^^^^^
-psa-example-digest-bmv2.p4(104): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'IngressParserImpl' terminates
+psa-example-digest-bmv2.p4(95): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'IngressParserImpl' terminates
                          out headers parsed_hdr,
                                      ^^^^^^^^^^
-psa-example-digest-bmv2.p4(103)
+psa-example-digest-bmv2.p4(94)
 parser IngressParserImpl(packet_in buffer,
        ^^^^^^^^^^^^^^^^^
-psa-example-digest-bmv2.p4(123): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'EgressParserImpl' terminates
+psa-example-digest-bmv2.p4(114): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'EgressParserImpl' terminates
                         out headers parsed_hdr,
                                     ^^^^^^^^^^
-psa-example-digest-bmv2.p4(122)
+psa-example-digest-bmv2.p4(113)
 parser EgressParserImpl(packet_in buffer,
        ^^^^^^^^^^^^^^^^

@@ -368,7 +368,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
 control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
     clone_0_t clone_md_0_data_h0;
     clone_1_t clone_md_0_data_h1;
-    @hidden action issue982l420() {
+    @hidden action issue982l411() {
         ostd.clone_metadata.type = 3w0;
         if (clone_md_0_data_h0.isValid()) {
             ostd.clone_metadata.data_h0.setValid();
@@ -385,7 +385,7 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
             ostd.clone_metadata.data_h1.setInvalid();
         }
     }
-    @hidden action issue982l416() {
+    @hidden action issue982l407() {
         clone_md_0_data_h0.setInvalid();
         clone_md_0_data_h1.setInvalid();
         clone_md_0_data_h1.setValid();
@@ -394,15 +394,41 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         clone_md_0_data_h1.data = 32w0;
         clone_md_0_data_h0.setInvalid();
     }
-    @hidden action issue982l422() {
+    @hidden action issue982l413() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_issue982l416 {
+    @hidden table tbl_issue982l407 {
         actions = {
-            issue982l416();
+            issue982l407();
         }
-        const default_action = issue982l416();
+        const default_action = issue982l407();
+    }
+    @hidden table tbl_issue982l411 {
+        actions = {
+            issue982l411();
+        }
+        const default_action = issue982l411();
+    }
+    @hidden table tbl_issue982l413 {
+        actions = {
+            issue982l413();
+        }
+        const default_action = issue982l413();
+    }
+    apply {
+        tbl_issue982l407.apply();
+        if (meta._custom_clone_id1 == 3w1) {
+            tbl_issue982l411.apply();
+        }
+        tbl_issue982l413.apply();
+    }
+}
+
+control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
+    @hidden action issue982l420() {
+        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit<ipv4_t>(hdr.ipv4);
     }
     @hidden table tbl_issue982l420 {
         actions = {
@@ -410,34 +436,8 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         }
         const default_action = issue982l420();
     }
-    @hidden table tbl_issue982l422 {
-        actions = {
-            issue982l422();
-        }
-        const default_action = issue982l422();
-    }
     apply {
-        tbl_issue982l416.apply();
-        if (meta._custom_clone_id1 == 3w1) {
-            tbl_issue982l420.apply();
-        }
-        tbl_issue982l422.apply();
-    }
-}
-
-control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
-    @hidden action issue982l429() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-    }
-    @hidden table tbl_issue982l429 {
-        actions = {
-            issue982l429();
-        }
-        const default_action = issue982l429();
-    }
-    apply {
-        tbl_issue982l429.apply();
+        tbl_issue982l420.apply();
     }
 }
 

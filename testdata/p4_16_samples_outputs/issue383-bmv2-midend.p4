@@ -88,13 +88,13 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         }
         default_action = NoAction_1();
     }
-    @hidden action issue383bmv2l75() {
+    @hidden action issue383bmv2l65() {
         s_0_col_bvh.setInvalid();
         s_0_bvh0.setInvalid();
         s_0_bvh1.setInvalid();
         bh_0.setInvalid();
     }
-    @hidden action issue383bmv2l105() {
+    @hidden action issue383bmv2l95() {
         local_metadata._col_bvh8._row_alt0_valid0 = 1w0;
         local_metadata._row0_alt0_valid0 = local_metadata._row1_alt1_valid6;
         local_metadata._row0_alt0_port1 = local_metadata._row1_alt1_port7;
@@ -102,22 +102,22 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         local_metadata._row1_alt1_port7 = local_metadata._row0_alt1_port3 + 7w1;
         clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
-    @hidden table tbl_issue383bmv2l75 {
+    @hidden table tbl_issue383bmv2l65 {
         actions = {
-            issue383bmv2l75();
+            issue383bmv2l65();
         }
-        const default_action = issue383bmv2l75();
+        const default_action = issue383bmv2l65();
     }
-    @hidden table tbl_issue383bmv2l105 {
+    @hidden table tbl_issue383bmv2l95 {
         actions = {
-            issue383bmv2l105();
+            issue383bmv2l95();
         }
-        const default_action = issue383bmv2l105();
+        const default_action = issue383bmv2l95();
     }
     apply {
-        tbl_issue383bmv2l75.apply();
+        tbl_issue383bmv2l65.apply();
         tns_0.apply();
-        tbl_issue383bmv2l105.apply();
+        tbl_issue383bmv2l95.apply();
     }
 }
 

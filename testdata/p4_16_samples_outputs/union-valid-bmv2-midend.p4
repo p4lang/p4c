@@ -63,7 +63,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = a_1();
     }
-    @hidden action unionvalidbmv2l76() {
+    @hidden action unionvalidbmv2l67() {
         bit<32> tmp;
         tmp = 32w0;
         if (h.u_h1.isValid()) {
@@ -74,14 +74,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         key_0 = tmp == 32w1;
     }
-    @hidden table tbl_unionvalidbmv2l76 {
+    @hidden table tbl_unionvalidbmv2l67 {
         actions = {
-            unionvalidbmv2l76();
+            unionvalidbmv2l67();
         }
-        const default_action = unionvalidbmv2l76();
+        const default_action = unionvalidbmv2l67();
     }
     apply {
-        tbl_unionvalidbmv2l76.apply();
+        tbl_unionvalidbmv2l67.apply();
         t_0.apply();
     }
 }

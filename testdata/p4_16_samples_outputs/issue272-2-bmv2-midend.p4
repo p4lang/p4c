@@ -31,17 +31,17 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) {
-    @hidden action issue2722bmv2l44() {
+    @hidden action issue2722bmv2l35() {
         meta.flag = true;
     }
-    @hidden table tbl_issue2722bmv2l44 {
+    @hidden table tbl_issue2722bmv2l35 {
         actions = {
-            issue2722bmv2l44();
+            issue2722bmv2l35();
         }
-        const default_action = issue2722bmv2l44();
+        const default_action = issue2722bmv2l35();
     }
     apply {
-        tbl_issue2722bmv2l44.apply();
+        tbl_issue2722bmv2l35.apply();
     }
 }
 

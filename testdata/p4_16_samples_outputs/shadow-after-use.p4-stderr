@@ -1,6 +1,6 @@
-shadow-after-use.p4(21): [--Wwarn=shadow] warning: 'x' shadows 'x'
+shadow-after-use.p4(12): [--Wwarn=shadow] warning: 'x' shadows 'x'
     table x {
           ^
-shadow-after-use.p4(18)
+shadow-after-use.p4(9)
 control c(inout bit<16> x) {
                         ^

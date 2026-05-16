@@ -50,19 +50,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaextractlocalheader92() {
+    @hidden action pnaextractlocalheader83() {
         pkt.emit<my_header_t>(hdr.h1);
         pkt.emit<my_header_t>(hdr.h2);
     }
-    @hidden table tbl_pnaextractlocalheader92 {
+    @hidden table tbl_pnaextractlocalheader83 {
         actions = {
-            pnaextractlocalheader92();
+            pnaextractlocalheader83();
         }
-        const default_action = pnaextractlocalheader92();
+        const default_action = pnaextractlocalheader83();
     }
     apply {
         if (hdr.h1.isValid() && hdr.h2.isValid()) {
-            tbl_pnaextractlocalheader92.apply();
+            tbl_pnaextractlocalheader83.apply();
         }
     }
 }

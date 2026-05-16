@@ -83,18 +83,18 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action bvec_unionbmv2l88() {
+    @hidden action bvec_unionbmv2l78() {
         h.u_h2.setInvalid();
     }
-    @hidden table tbl_bvec_unionbmv2l88 {
+    @hidden table tbl_bvec_unionbmv2l78 {
         actions = {
-            bvec_unionbmv2l88();
+            bvec_unionbmv2l78();
         }
-        const default_action = bvec_unionbmv2l88();
+        const default_action = bvec_unionbmv2l78();
     }
     apply {
         if (h.u_h2.isValid()) {
-            tbl_bvec_unionbmv2l88.apply();
+            tbl_bvec_unionbmv2l78.apply();
         }
     }
 }

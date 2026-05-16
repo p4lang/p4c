@@ -1,7 +1,7 @@
-hashext2.p4(33): [--Wwarn=unused] warning: control 'test' is unused
+hashext2.p4(24): [--Wwarn=unused] warning: control 'test' is unused
 control test(inout hdrs hdr) {
         ^^^^
-hashext2.p4(33): [--Winfo=removed] info: removing control 'test'
+hashext2.p4(24): [--Winfo=removed] info: removing control 'test'
 control test(inout hdrs hdr) {
         ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

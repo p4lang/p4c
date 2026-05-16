@@ -47,17 +47,17 @@ control cIngress(inout Parsed_packet hdr, inout metadata m, inout standard_metad
         }
         default_action = foo();
     }
-    @hidden action issue486bmv2l58() {
+    @hidden action issue486bmv2l49() {
         z_0 = 32w5;
     }
-    @hidden table tbl_issue486bmv2l58 {
+    @hidden table tbl_issue486bmv2l49 {
         actions = {
-            issue486bmv2l58();
+            issue486bmv2l49();
         }
-        const default_action = issue486bmv2l58();
+        const default_action = issue486bmv2l49();
     }
     apply {
-        tbl_issue486bmv2l58.apply();
+        tbl_issue486bmv2l49.apply();
         t_0.apply();
     }
 }

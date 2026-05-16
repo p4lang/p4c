@@ -46,17 +46,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_1();
     }
-    @hidden action exact_match_mask1l41() {
+    @hidden action exact_match_mask1l32() {
         key_0 = hdr.data.f1 & 32w0xff00ff;
     }
-    @hidden table tbl_exact_match_mask1l41 {
+    @hidden table tbl_exact_match_mask1l32 {
         actions = {
-            exact_match_mask1l41();
+            exact_match_mask1l32();
         }
-        const default_action = exact_match_mask1l41();
+        const default_action = exact_match_mask1l32();
     }
     apply {
-        tbl_exact_match_mask1l41.apply();
+        tbl_exact_match_mask1l32.apply();
         test1_0.apply();
     }
 }

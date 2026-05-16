@@ -9,14 +9,14 @@ control Ing(out bit<32> a) {
             a = 32w10;
         }
     }
-    @hidden action issue210l30() {
+    @hidden action issue210l21() {
         b_0 = true;
     }
-    @hidden table tbl_issue210l30 {
+    @hidden table tbl_issue210l21 {
         actions = {
-            issue210l30();
+            issue210l21();
         }
-        const default_action = issue210l30();
+        const default_action = issue210l21();
     }
     @hidden table tbl_cond {
         actions = {
@@ -25,7 +25,7 @@ control Ing(out bit<32> a) {
         const default_action = cond();
     }
     apply {
-        tbl_issue210l30.apply();
+        tbl_issue210l21.apply();
         tbl_cond.apply();
     }
 }
