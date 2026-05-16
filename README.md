@@ -317,7 +317,7 @@ uv sync
 **Tools**
 - Download the Doxygen 1.13.2 binary 
 ```bash
-wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz 
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz
 ```
 - Extract and install Doxygen 
 ```bash
@@ -368,7 +368,7 @@ uv sync
 **Tools**
 - Download the Doxygen 1.13.2 binary
 ```bash 
-wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.2.linux.bin.tar.gz 
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_2/doxygen-1.13.2.linux.bin.tar.gz
 ```
 - Extract and install Doxygen
 ```bash
