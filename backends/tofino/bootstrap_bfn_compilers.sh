@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # This script replicates the directory structure for p4c with
 # extensions and invokes the p4lang/p4c/bootstrap to configure the
 # build environment

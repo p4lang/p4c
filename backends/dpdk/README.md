@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2020 Intel Corporation
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!--!
 \page dpdk_backend DPDK Backend                                                             
 -->

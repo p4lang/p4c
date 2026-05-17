@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 p4c_add_xfail_reason("dpdk"
   "use dpdk specific `dpdk_execute` method"
   testdata/p4_16_samples/psa-example-dpdk-meter-execute-err.p4

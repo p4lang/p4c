@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 context_schema.py: Generates a JSON Schema model for resource allocation information
 on the p4 compiler for Tofino.

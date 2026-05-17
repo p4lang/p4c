@@ -1,4 +1,9 @@
 #! /usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Base class to validate json schema files.
 #
 # The class constructor initializes arguments, including the expected

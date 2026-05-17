@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 jgf_schema.py: Generates the JSON Graph Format schema and provides the schema in JSL
 format so that other JSL documents may extend this schema.
