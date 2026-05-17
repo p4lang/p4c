@@ -50,11 +50,11 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control sw(inout Headers_t headers, in xdp_input imd, out xdp_output omd) {
-    @hidden action xdp_vlan_push_pop_ebpfkernel36() {
+    @hidden action xdp_vlan_push_pop_ebpfkernel42() {
         headers.ethernet.etherType = headers.vlan.tpid;
         headers.vlan.setInvalid();
     }
-    @hidden action xdp_vlan_push_pop_ebpfkernel39() {
+    @hidden action xdp_vlan_push_pop_ebpfkernel45() {
         headers.vlan.setValid();
         headers.vlan.tpid = headers.ethernet.etherType;
         headers.ethernet.etherType = 16w0x8100;
@@ -62,51 +62,51 @@ control sw(inout Headers_t headers, in xdp_input imd, out xdp_output omd) {
         headers.vlan.dei = 1w0;
         headers.vlan.vid = 12w42;
     }
-    @hidden action xdp_vlan_push_pop_ebpfkernel47() {
+    @hidden action xdp_vlan_push_pop_ebpfkernel53() {
         omd.output_action = xdp_action.XDP_PASS;
         omd.output_port = imd.input_port;
     }
-    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel36 {
+    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel42 {
         actions = {
-            xdp_vlan_push_pop_ebpfkernel36();
+            xdp_vlan_push_pop_ebpfkernel42();
         }
-        const default_action = xdp_vlan_push_pop_ebpfkernel36();
+        const default_action = xdp_vlan_push_pop_ebpfkernel42();
     }
-    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel39 {
+    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel45 {
         actions = {
-            xdp_vlan_push_pop_ebpfkernel39();
+            xdp_vlan_push_pop_ebpfkernel45();
         }
-        const default_action = xdp_vlan_push_pop_ebpfkernel39();
+        const default_action = xdp_vlan_push_pop_ebpfkernel45();
     }
-    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel47 {
+    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel53 {
         actions = {
-            xdp_vlan_push_pop_ebpfkernel47();
+            xdp_vlan_push_pop_ebpfkernel53();
         }
-        const default_action = xdp_vlan_push_pop_ebpfkernel47();
+        const default_action = xdp_vlan_push_pop_ebpfkernel53();
     }
     apply {
         if (headers.vlan.isValid()) {
-            tbl_xdp_vlan_push_pop_ebpfkernel36.apply();
+            tbl_xdp_vlan_push_pop_ebpfkernel42.apply();
         } else {
-            tbl_xdp_vlan_push_pop_ebpfkernel39.apply();
+            tbl_xdp_vlan_push_pop_ebpfkernel45.apply();
         }
-        tbl_xdp_vlan_push_pop_ebpfkernel47.apply();
+        tbl_xdp_vlan_push_pop_ebpfkernel53.apply();
     }
 }
 
 control deprs(in Headers_t headers, packet_out packet) {
-    @hidden action xdp_vlan_push_pop_ebpfkernel55() {
+    @hidden action xdp_vlan_push_pop_ebpfkernel61() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<VLAN_h>(headers.vlan);
     }
-    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel55 {
+    @hidden table tbl_xdp_vlan_push_pop_ebpfkernel61 {
         actions = {
-            xdp_vlan_push_pop_ebpfkernel55();
+            xdp_vlan_push_pop_ebpfkernel61();
         }
-        const default_action = xdp_vlan_push_pop_ebpfkernel55();
+        const default_action = xdp_vlan_push_pop_ebpfkernel61();
     }
     apply {
-        tbl_xdp_vlan_push_pop_ebpfkernel55.apply();
+        tbl_xdp_vlan_push_pop_ebpfkernel61.apply();
     }
 }
 
