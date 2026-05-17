@@ -16,50 +16,50 @@ struct headers_t {
 control c(inout headers_t hdrs) {
     @name("c.sum") bit<32> sum_0;
     @name("c.i") bit<32> i_0;
-    @hidden action forloop10l23() {
+    @hidden action forloop10l29() {
         i_0 = i_0 + 32w4294967295;
     }
-    @hidden action forloop10l21() {
+    @hidden action forloop10l27() {
         sum_0 = sum_0 + i_0;
     }
-    @hidden action forloop10l25() {
+    @hidden action forloop10l31() {
         hdrs.head.cnt = hdrs.head.cnt + 8w1;
     }
-    @hidden action forloop10l18() {
+    @hidden action forloop10l24() {
         sum_0 = 32w1;
     }
-    @hidden table tbl_forloop10l18 {
+    @hidden table tbl_forloop10l24 {
         actions = {
-            forloop10l18();
+            forloop10l24();
         }
-        const default_action = forloop10l18();
+        const default_action = forloop10l24();
     }
-    @hidden table tbl_forloop10l21 {
+    @hidden table tbl_forloop10l27 {
         actions = {
-            forloop10l21();
+            forloop10l27();
         }
-        const default_action = forloop10l21();
+        const default_action = forloop10l27();
     }
-    @hidden table tbl_forloop10l23 {
+    @hidden table tbl_forloop10l29 {
         actions = {
-            forloop10l23();
+            forloop10l29();
         }
-        const default_action = forloop10l23();
+        const default_action = forloop10l29();
     }
-    @hidden table tbl_forloop10l25 {
+    @hidden table tbl_forloop10l31 {
         actions = {
-            forloop10l25();
+            forloop10l31();
         }
-        const default_action = forloop10l25();
+        const default_action = forloop10l31();
     }
     apply {
-        tbl_forloop10l18.apply();
+        tbl_forloop10l24.apply();
         @unroll for (i_0 = 32w5; i_0 != 32w0; ) {
-            tbl_forloop10l21.apply();
+            tbl_forloop10l27.apply();
             if (sum_0 == 32w10) {
-                tbl_forloop10l23.apply();
+                tbl_forloop10l29.apply();
             }
-            tbl_forloop10l25.apply();
+            tbl_forloop10l31.apply();
         }
     }
 }

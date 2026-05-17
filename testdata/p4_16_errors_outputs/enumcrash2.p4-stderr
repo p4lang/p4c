@@ -1,24 +1,24 @@
-enumcrash2.p4(26): [--Werror=type-error] error: 'obj.set(1w1)'
+enumcrash2.p4(32): [--Werror=type-error] error: 'obj.set(1w1)'
         obj.set(1w1);
         ^^^^^^^^^^^^
   ---- Actual error:
-enumcrash2.p4(15): Cannot cast implicitly type 'bit<1>' to type 'Foo'
+enumcrash2.p4(21): Cannot cast implicitly type 'bit<1>' to type 'Foo'
   enum Foo_t Foo { A = 1w0 , B = 1w1 };
              ^^^
   ---- Originating from:
-enumcrash2.p4(26): Type of argument '1w1' (bit<1>) does not match type of parameter 't' (Foo)
+enumcrash2.p4(32): Type of argument '1w1' (bit<1>) does not match type of parameter 't' (Foo)
           obj.set(1w1);
                   ^^^
-enumcrash2.p4(19)
+enumcrash2.p4(25)
       void set(Foo t);
                    ^
-enumcrash2.p4(15)
+enumcrash2.p4(21)
   enum Foo_t Foo { A = 1w0 , B = 1w1 };
              ^^^
   ---- Originating from:
-enumcrash2.p4(19): Function type 'set' does not match invocation type '<Method call>'
+enumcrash2.p4(25): Function type 'set' does not match invocation type '<Method call>'
       void set(Foo t);
            ^^^
-enumcrash2.p4(26)
+enumcrash2.p4(32)
           obj.set(1w1);
           ^^^^^^^^^^^^

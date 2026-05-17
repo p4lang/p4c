@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
 
 add A A.A:0x01010101 A(val:0x7f, port:2, idx:25)
 add A A.A:0x02020202 A(val:7, port:3, idx:50)

@@ -19,17 +19,17 @@ struct headers {
 }
 
 control c(inout headers hdr) {
-    @hidden action array3l25() {
+    @hidden action array3l31() {
         hdr.data.arr[0].nested_arr[1] = hdr.data.arr[2].nested_arr[3];
     }
-    @hidden table tbl_array3l25 {
+    @hidden table tbl_array3l31 {
         actions = {
-            array3l25();
+            array3l31();
         }
-        const default_action = array3l25();
+        const default_action = array3l31();
     }
     apply {
-        tbl_array3l25.apply();
+        tbl_array3l31.apply();
     }
 }
 

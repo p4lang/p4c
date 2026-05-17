@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Nvidia Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 control generic<M>(inout M m);
 package top<M>(generic<M> c);

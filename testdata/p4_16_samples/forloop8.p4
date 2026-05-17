@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Nvidia Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 @test_keep_opassign
 
 header ipv4_t {

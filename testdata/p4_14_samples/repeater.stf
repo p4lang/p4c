@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add repeater ingress_port:0 my_drop()
 add repeater ingress_port:1 set_egress_port(egress_port:2)
 add repeater ingress_port:2 my_drop()
