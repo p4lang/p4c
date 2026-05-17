@@ -28,19 +28,19 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action opassign1bmv2l35() {
+    @hidden action opassign1bmv2l41() {
         hdr.data.h1 = hdr.data.h1 + hdr.data.h2;
         hdr.data.b1 = hdr.data.b1 - hdr.data.b2;
         hdr.data.b3 = hdr.data.b3 ^ hdr.data.b4;
     }
-    @hidden table tbl_opassign1bmv2l35 {
+    @hidden table tbl_opassign1bmv2l41 {
         actions = {
-            opassign1bmv2l35();
+            opassign1bmv2l41();
         }
-        const default_action = opassign1bmv2l35();
+        const default_action = opassign1bmv2l41();
     }
     apply {
-        tbl_opassign1bmv2l35.apply();
+        tbl_opassign1bmv2l41.apply();
     }
 }
 

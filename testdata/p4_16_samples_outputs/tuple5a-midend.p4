@@ -14,7 +14,7 @@ struct t2 {
 
 control c(inout t2 t) {
     tuple<bit<8>, bit<16>> tmp_0_a;
-    @hidden action tuple5a18() {
+    @hidden action tuple5a24() {
         tmp_0_a[0] = t.x[1].a[0];
         tmp_0_a[1] = t.x[1].a[1];
         t.x[0] = t.x[0] + t.y[0].b;
@@ -24,14 +24,14 @@ control c(inout t2 t) {
         t.y[0].a[1] = tmp_0_a[1];
         t.y[0].b = t.x[1].b;
     }
-    @hidden table tbl_tuple5a18 {
+    @hidden table tbl_tuple5a24 {
         actions = {
-            tuple5a18();
+            tuple5a24();
         }
-        const default_action = tuple5a18();
+        const default_action = tuple5a24();
     }
     apply {
-        tbl_tuple5a18.apply();
+        tbl_tuple5a24.apply();
     }
 }
 
