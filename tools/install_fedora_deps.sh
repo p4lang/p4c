@@ -23,7 +23,6 @@ sudo dnf install -y -q \
     boost-graph \
     boost-iostreams \
     boost-program-options \
-    boost-system \
     boost-test \
     boost-thread \
     ccache \
