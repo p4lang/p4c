@@ -141,8 +141,10 @@ Directories</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<h1><a class="anchor" id="binary-distribution-support"></a>
-Binary distribution support</h1>
+<h1><a class="anchor" id="helper-scripts"></a>
+Helper scripts</h1>
+<h2><a class="anchor" id="binary-distribution-support"></a>
+Binary distribution support</h2>
 <p>bf_p4c_distro.sh and p4c_build_for_arch.sh are supporting scripts to build a binary distribution for the compiler.</p>
 <p>bf_p4c_distro.sh clones the master branch and invokes p4c_build_for_arch.sh to build and install MacOS and Linux 64-bit versions of the compiler. It assumes it is running on a Mac, and it uses an Ubuntu 16.04 docker image that has all the necessary dependencies installed (as the one defined by Dockerfile). The name of the image should be p4c-tofino:ubuntu16.04. These pre-requisites will need to be adjusted when building in Jenkins/Travis.</p>
 <p>The result is a tar file with the following structure: </p><div class="fragment"><div class="line">p4c-&lt;version&gt;</div>

@@ -135,6 +135,8 @@ Directory dependency graph for compiler_interfaces:</div>
 <div class="center"><iframe scrolling="no" frameborder="0" src="dir_c43d7fa2c03efac4ea79dbaa086eae9c_dep.svg" width="206" height="104"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h1><a class="anchor" id="compiler-interfaces"></a>
+Compiler Interfaces</h1>
 <p>Definitions for compiler interfaces</p>
 <p>This repo contains the schema definitions for the compiler outputs:</p>
 <ul>
@@ -148,13 +150,13 @@ Directory dependency graph for compiler_interfaces:</div>
 </li>
 </ul>
 <p>The intent of this repo is to be imported as a submodule in Glass and Brig, and any other tools that need to be aware of the schema definition.</p>
-<h1><a class="anchor" id="tools"></a>
-Tools</h1>
+<h2><a class="anchor" id="tools"></a>
+Tools</h2>
 <p>The tools/ directory contains a set of scripts that generate JSON and text outputs from context.json and resources.json to match files that are otherwise produced by the compiler.</p>
 <p>These scripts run standalone or can be packaged with pyinstaller using the following: </p><div class="fragment"><div class="line">pyinstaller --onefile p4c-build-logs.spec</div>
 </div><!-- fragment --><p> The resulting p4c-build-log executable will be located in dist.</p>
-<h1><a class="anchor" id="contributions-and-change-process"></a>
-Contributions and change process</h1>
+<h2><a class="anchor" id="contributions-and-change-process"></a>
+Contributions and change process</h2>
 <p>Schema changes are coordinated between multiple projects and teams via the schema review board. Follow these steps to submit a change for review:</p>
 <ol type="1">
 <li>Make sure there is a Jira in the project driving the change (this is usually P4C project with various bugfixes). If there is no applicable project, create a Jira within the <a href="https://jira.devtools.intel.com/projects/CPIF/issues">CPIF project</a>. Make sure you know answers to following bulletpoints and can communicate them to the review board:<ul>
@@ -176,16 +178,16 @@ Contributions and change process</h1>
 </ul>
 </li>
 </ol>
-<h1><a class="anchor" id="schema-review-board-members"></a>
-Schema review board members</h1>
+<h2><a class="anchor" id="schema-review-board-members"></a>
+Schema review board members</h2>
 <p>As a schema review board member you are expected to:</p>
 <ol type="1">
 <li>Provide code review to PRs against compiler-interfaces</li>
 <li>Consider stakeholder projects (p4c, driver, API generation, Harlyn model, p4i or BF-Runtime)</li>
 <li>Follow our schema versioning policy</li>
 </ol>
-<h1><a class="anchor" id="schema-versioning-policy"></a>
-Schema versioning policy</h1>
+<h2><a class="anchor" id="schema-versioning-policy"></a>
+Schema versioning policy</h2>
 <ol type="1">
 <li>Each schema must be versioned.</li>
 <li>This version must communicate backwards-compatibility between the new schema and existing data which adheres to earlier schema versions.</li>

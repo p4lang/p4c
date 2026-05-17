@@ -176,14 +176,16 @@ Files</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<h1><a class="anchor" id="setup-1"></a>
-Setup</h1>
+<h1><a class="anchor" id="overview-of-bf-p4c"></a>
+Overview of bf-p4c</h1>
+<h2><a class="anchor" id="setup-1"></a>
+Setup</h2>
 <p>This repo contains the tofino backend for p4c v1.2 compiler. It contains <em>just</em> the backend and can only be built within the p4c build infrastructure in <a href="#" onclick="location.href='mai'+'lto:'+'git'+'@g'+'ith'+'ub'+'.co'+'m'; return false;">git@g<span class="obfuscator">.nosp@m.</span>ithu<span class="obfuscator">.nosp@m.</span>b.com</a>:p4lang/p4c. To use this repo: </p><pre class="fragment">git clone git@github.com:barefootnetworks/p4c-extension-tofino.git
 cd p4c-extension-tofino
 ./bootstrap.sh
 </pre><p>This will check out the p4lang/p4c repository, move the p4c-extension-tofino to <code>p4c/extensions/bfn</code>, install the necessary dependences, and build the project.</p>
-<h1><a class="anchor" id="dependencies-8"></a>
-Dependencies</h1>
+<h2><a class="anchor" id="dependencies-8"></a>
+Dependencies</h2>
 <ul>
 <li>Tofino assembler and Harlyn model for testing the output of the Tofino backend. The test scripts will look for sibling repos (in preference to installed versions), so the easiest is to check out these repos in parent of the <code>p4c</code> folder and build them there:</li>
 </ul>
@@ -201,11 +203,11 @@ Dependencies</h1>
 <li>The Harlyn model requires additional dependences; please refer to its own documentation: <a href="https://barefootnetworks.atlassian.net/wiki/pages/viewpage.action?pageId=17006668">https://barefootnetworks.atlassian.net/wiki/pages/viewpage.action?pageId=17006668</a>. Only the dependences required by the "model" are needed (i.e., we don't use the driver in the compiler tests).</li>
 <li>The tests depend on GNU utilities. On macOS, these can be installed with <code>brew install coreutils</code>.</li>
 </ul>
-<h1><a class="anchor" id="tofino-mid-end-and-back-end-design"></a>
-Tofino mid-end and back-end design</h1>
+<h2><a class="anchor" id="tofino-mid-end-and-back-end-design"></a>
+Tofino mid-end and back-end design</h2>
 <p>The mid-end and back-end of the compiler are where all the Tofino-specific work is done. To some extenet the boundary between mid-end and back-end is arbitrary, but the most logical place to put it is at the point where we transform the IR from frontend P4-oriented form (generally, a global scope containing a bunch of named symbols of various types) to Tofino-oriented form (a Pipe object containing ingress and egress parsers, deparsers, and tables).</p>
-<h2><a class="anchor" id="mid-end-1"></a>
-Mid-end</h2>
+<h3><a class="anchor" id="mid-end-1"></a>
+Mid-end</h3>
 <p>There are a variety of transformations we may want to do on the IR when it is still in P4 oriented form. These could be considered non-tofino-specific transforms, since they operate at the frontend IR level, but are generally directed by target-specific considerations. Some could also be implemented to operate on the backend IR form.</p>
 <ul>
 <li>Sequential action analysis. Tofino actions happen in parallel, so to ensure proper sequential behavior, we need to analyze actions and substitute intermediate temporaries (essentially, copt propagation) to ensure that each of the primitives within an action can be executed in parallel.</li>
@@ -213,22 +215,22 @@ Mid-end</h2>
 <li>POV allocation. Tofino requires POV bits stored as additional metadata for the deparser to control deparsing. These bit should also be used for validity checking of headers in tables.</li>
 <li>Bridged metadata. We need to introduce a bridged metadata fake header that is deparsed from the ingress and parser in egress to carry metadat information between ingress and egress.</li>
 </ul>
-<h2><a class="anchor" id="back-end"></a>
-Back-end</h2>
+<h3><a class="anchor" id="back-end"></a>
+Back-end</h3>
 <p>The backend is where most of the resource allocation decisions take place. Resource allocation passes should take extra ‘hints’ inputs to drive decisions based on previous failed attempts that triggered backtracking. This is a potential exponential blowup, so care needs to be taken to avoid attempts that are probably unprofitable &ndash; tuning will be needed.</p>
 <p>To the extent that it does not complicate the code too much, it should be parameterized based on architecture details. The intent is that the code should be reusable for multiple architecture families.</p>
 <p>The code here is organized into <code>parde</code> (parser-deparser), <code>mau</code> (match-action table), and <code>phv</code> (phv allocation and management) directories. To some extent these are independent, but there are interdependecies.</p>
-<h3><a class="anchor" id="ir"></a>
-IR</h3>
+<h4><a class="anchor" id="ir"></a>
+IR</h4>
 <p>There are a variety of Tofino-specific IR classes used to hold information needed to track tofino resource use and manage the allocation of those resources.</p>
-<h5><code>IR::BFN::Pipe</code></h5>
+<h6><code>IR::BFN::Pipe</code></h6>
 <p>An abstraction of a single Tofino pipeline, this object is basically just a container for other (Parser, Deparser, and MAU) specific objects. This becomes the root object of the IR tree after the mid-end.</p>
 <p>Because most visitors only care about part of the Pipe object (eg, just the MAU, or just the Parser), we define special visitor bases <code>MauInspector</code>, <code>MauModifier</code>, <code>MauTransform</code>, <code>PardeInspector</code>, <code>PardeModifier</code>, and <code>PardeTransform</code> that visit just those parts of the tree of interest to Mau or Parde. Other parts of the tree are skipped.</p>
-<h5><code>IR::BFN::Unit</code></h5>
+<h6><code>IR::BFN::Unit</code></h6>
 <p>Abstract base class for parts of the pipe that access the PHV &ndash; tables, parser states, and the deparser. The <code>stage()</code> function returns an integer associated with the order of the unit's execution &ndash; the actual stage for tables, -1 for parser states (they come before stage 0), and a large number for the deparser (after all stages).</p>
-<h5><code>IR::BFN::Parser</code></h5>
-<h5><code>IR::BFN::Deparser</code></h5>
-<h5><code>IR::MAU::Table</code></h5>
+<h6><code>IR::BFN::Parser</code></h6>
+<h6><code>IR::BFN::Deparser</code></h6>
+<h6><code>IR::MAU::Table</code></h6>
 <p>The mau code is largely organized around the <code>IR::MAU::Table</code> ir class, which represents a Tofino-specific logical table. Such a table has an (optional) gateway, with an expression, condition, and (optional) payload action, an (optional) match table, and zero or more attached tables (indirect, action data, selector, meter, counter, ...). There is a next table map that contains references to sequences of other tables to run based on the gateway result or action run.</p>
 <ul>
 <li><code>gateway_expr</code> boolean expression that the gateway tests, or <code>nullptr</code> if there is no gateway</li>
@@ -247,13 +249,13 @@ IR</h3>
 </li>
 </ul>
 <p><code>IR::MAU::Table</code> objects are initially created by the mid-end corresponding to each gateway and match table in the P4 program. These tables will then be manipulated (split, combined, and reordered) by various passes to get them into a form where they can be fit into the Tofino pipeline, then allocated to specific stages/logical ids/resources within the pipeline.</p>
-<h5><code>IR::MAU::TableSeq</code></h5>
+<h6><code>IR::MAU::TableSeq</code></h6>
 <p>A sequence of logical tables to run in order. Each table will run, followed by any control dependent tables, followed by the next table in the sequence. By definition, tables in a <code>TableSeq</code> are control-independent, but may be data-dependent. The <code>TableSeq</code> also contains a bit-matrix that tracks data dependencies between tables in the sequence including their control-depedent tables. Tables that are not data dependent may be reordered.</p>
-<h3><a class="anchor" id="passes"></a>
-Passes</h3>
+<h4><a class="anchor" id="passes"></a>
+Passes</h4>
 <p>The first step in the Tofino backend is converting the P4-level IR into the needed forms for the backend. In most cases, this will be a fairly simple wrapper around some P4-level IR objects, organizing them into the rough form that tofino requires.</p>
-<h4><a class="anchor" id="parde"></a>
-parde</h4>
+<h5><a class="anchor" id="parde"></a>
+parde</h5>
 <p>Parser and deparser processing starts with extracting the state machine graph from the P4-level IR. Since the IR (currently) does not support loops, but the state machine may involve loops, this will require using a representation that breaks the loops. We could extend the IR to allow loops (would require extending the Visitor base classes to deal with loops rather than just detecting them and throwing an error), but that may not be necessary. A series of transformation passes can then optimize the parser:</p>
 <ul>
 <li>Loop unrolling &ndash; states that have backreferences (loops) can be unrolled by cloning the backreferenced tree, limited by the maximum header stack size involved</li>
@@ -262,8 +264,8 @@ parde</h4>
 </ul>
 <p>It may be that simply splitting states into the smallest possible fragments and then recombining them works well for general optimization. Alternately, other things could be tried. The important thing is flexibility in the representation, to permit experimentation.</p>
 <p>Deparser handling in v1.1 is a matter of extracting the deparser from the parser state machine and blackboxes that do deparser-relevant processing (checksum units, learning filters, ...). Its not clear whether this is best done from the P4-level parser IR, or from some later state of the parser IR (after some backend transformations).</p>
-<h4><a class="anchor" id="mau-1"></a>
-mau</h4>
+<h5><a class="anchor" id="mau-1"></a>
+mau</h5>
 <p>Mau processing begins by converting the P4 IR into a pair of <code>IR::MAU::TableSeq</code> objects (one for ingress, and one for egress &ndash; this is the 'mid-end'), which is prototyped in <code>extract_maupipe.cpp</code>. Then the code can reorganized by various optimization passes that will be needed:</p>
 <ul>
 <li>Gateway analysis and splitting &ndash; gateway tables that are too complex for tofino must be split int multiple gateways.</li>
@@ -283,8 +285,8 @@ mau</h4>
 <li>allocate action data to the action bus based on which PHV registers need access to it.</li>
 </ul>
 <p>a single pass over the final IR should suffice for generating asm code.</p>
-<h4><a class="anchor" id="phv-1"></a>
-phv</h4>
+<h5><a class="anchor" id="phv-1"></a>
+phv</h5>
 <p>PHV allocation and management interacts heavily with the other parts of the compiler. The basic design is to have an initial PHV pass that gathers basic information on all header and metadata fields in the program, then passes in mau and parde can augment this information with additional constraints as the run.</p>
 <p>Once most of the allocation decisions for other passes have been made, PHV allocation will assign physical PHV slots for each field, possibly splitting fields. When this fails, PHV allocation needs to provide information about why it is failing (running out of a particular size, or group, or ?) that can be used by passes we backtrack to to modify their uses.</p>
 <p>We can build an interference graph for all fields, allowing use to experiment with graph coloring algorithms for PHV allocation, as well as simpler greedy allocation.</p>

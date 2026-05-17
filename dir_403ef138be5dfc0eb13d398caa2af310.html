@@ -143,9 +143,11 @@ Files</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h1><a class="anchor" id="action-phv-constraint-solvers"></a>
+Action Phv Constraint Solvers</h1>
 <p>Action constraint solvers are used to validate PHV packing. When a candidate allocation list is proposed and passed to can_pack function in action phv constrait, a solver will be created to collect all move-based instructions for all actions related to fields in the candidate container. If both source and destination has been allocated, the solver will check and generate instruction based on the PHV allocation.</p>
-<h1><a class="anchor" id="example-of-using-z3"></a>
-Example of using Z3</h1>
+<h2><a class="anchor" id="example-of-using-z3"></a>
+Example of using Z3</h2>
 <p>an example of using z3 to validate deposit field. Unfortunately it's about 20ms per invocation, which is too slow for us. </p><div class="fragment"><div class="line"> c++</div>
 <div class="line">boost::optional&lt;Error&gt; ActionMoveSolver::run_deposit_field_z3_solver(</div>
 <div class="line">    const ContainerID dest, const std::vector&lt;Assign&gt;&amp; src1,</div>

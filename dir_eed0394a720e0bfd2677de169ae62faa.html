@@ -148,18 +148,20 @@ Files</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h1><a class="anchor" id="using-gtest"></a>
+Using GTEST</h1>
 <p>We use Google's <a href="https://github.com/google/googletest">gtest</a> framework for unit tests.</p>
 <blockquote class="doxtable">
 <p>NB: There are known issues with include paths for P4 include files. Until these are fixed, you must take care to invoke <code>gtestp4c</code> from <code>bf-p4c-compilers/build/p4c</code>. </p>
 </blockquote>
-<h1><a class="anchor" id="building-1"></a>
-Building</h1>
+<h2><a class="anchor" id="building-1"></a>
+Building</h2>
 <p>The gtest binary is built as part of the default <code>make</code> target:</p>
 <div class="fragment"><div class="line">cd bf-p4c-compilers/build</div>
 <div class="line">make</div>
 </div><!-- fragment --><p>For general build instructions, see <a href="https://github.com/barefootnetworks/bf-p4c-compilers">here</a>.</p>
-<h1><a class="anchor" id="running"></a>
-Running</h1>
+<h2><a class="anchor" id="running"></a>
+Running</h2>
 <p>Running <code>make</code> produces a <code>gtestp4c</code> binary. To run it, your current working directory <b>must</b> be <code>build/p4c</code>. (This is a known bug.)</p>
 <div class="fragment"><div class="line">cd bf-p4c-compilers/build/p4c</div>
 <div class="line">./test/gtestp4c</div>

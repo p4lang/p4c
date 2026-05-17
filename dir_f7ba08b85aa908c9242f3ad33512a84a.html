@@ -168,9 +168,11 @@ Files</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h1><a class="anchor" id="clot_alloc_and_metric"></a>
+CLOT allocator and metric</h1>
 <p>This documents the design of the CLOT allocator and the metric associated with CLOT allocation.</p>
-<h1><a class="anchor" id="definitions-1"></a>
-Definitions</h1>
+<h2><a class="anchor" id="definitions-1"></a>
+Definitions</h2>
 <p>When an object (field, slice, byte, etc.) is allocated to both PHVs and to a CLOT, we say that the object is double-allocated.</p>
 <p>We categorize the field slices in the program, as follows:</p><ul>
 <li><em>Checksum</em>: These are slices whose values are replaced with checksum calculations in the deparser. While checksum slices will not necessarily have a PHV allocation, it is only useful to allocate these slices to CLOTs when doing so would allow us to join groups of slices into a larger CLOT.</li>
@@ -189,14 +191,14 @@ Definitions</h1>
 <li>The slice is co-allocated to a PHV container with a modified slice.</li>
 <li>The slice is co-allocated to a PHV container with a slice that is not allocated to the same CLOT (i.e., the PHV container straddles the CLOT boundary).</li>
 </ul>
-<h1><a class="anchor" id="objective"></a>
-Objective</h1>
+<h2><a class="anchor" id="objective"></a>
+Objective</h2>
 <p>The objective of the CLOT allocator is two-fold:</p><ol type="1">
 <li>CLOT-allocate as many unused and read-only slices as possible, while minimizing the number of CLOTs used.</li>
 <li>Identify checksum and modified slices and compute their offsets within their CLOT. This is so that we can produce the correct overwrite offsets for the slices’ PHV containers and checksum values in the deparser. Because CLOT allocation occurs before PHV allocation, the CLOT allocator needs to do this itself.</li>
 </ol>
-<h1><a class="anchor" id="clot-layout-constraints"></a>
-CLOT layout constraints</h1>
+<h2><a class="anchor" id="clot-layout-constraints"></a>
+CLOT layout constraints</h2>
 <p>The following are the layout constraints for CLOT allocation.</p><ul>
 <li>Each CLOT can hold up to 64 bytes of contiguous packet data. The deparser emits this data in an all-or-none fashion.</li>
 <li>Each parser state can issue up to 2 CLOTs.</li>
@@ -211,8 +213,8 @@ CLOT layout constraints</h1>
 <li>There are a total of 64 unique CLOT tags while only up to 16 CLOTs can be live in a packet. These limits apply on a per-gress basis.</li>
 <li>The offset + length in the input packet of each CLOT can be no larger than 384 bytes.</li>
 </ul>
-<h1><a class="anchor" id="clot-eligible-field-slices"></a>
-CLOT-eligible field slices</h1>
+<h2><a class="anchor" id="clot-eligible-field-slices"></a>
+CLOT-eligible field slices</h2>
 <p>A field slice is CLOT-eligible if it is part of a CLOT-eligible field. A field is CLOT-eligible if it is extracted by the parser and satisfies all of the following properties.</p><ul>
 <li>The field’s header is not added by the MAU pipeline. This ensures that a CLOT allocated to the field is not deparsed when the field is not part of the input packet, but is added by the MAU pipeline.</li>
 <li>The field is emitted by the deparser.</li>
@@ -222,8 +224,8 @@ CLOT-eligible field slices</h1>
 <li>The parser extracts the full width of the field from the packet.</li>
 <li>The field is extracted on all parser paths through that any state that marks the field’s header as valid.</li>
 </ul>
-<h1><a class="anchor" id="clot-candidates"></a>
-CLOT candidates</h1>
+<h2><a class="anchor" id="clot-candidates"></a>
+CLOT candidates</h2>
 <p>A CLOT candidate consists of a maximal sequence of CLOT-eligible field slices whose extracts satisfy all of the following properties.</p><ul>
 <li>A contiguous, byte-aligned sequence of bits is extracted from the packet.</li>
 <li>All extracted field slices are contiguous when emitted by the deparser.</li>
@@ -233,18 +235,18 @@ CLOT candidates</h1>
 <li>The extracts are all made in the same set of parser states: if a parser state extracts one field slice in a candidate, then also it extracts all other field slices in the same candidate.</li>
 </ul>
 <p>While CLOTs can span more than one parser state, this allocation algorithm does not use this property.</p>
-<h2><a class="anchor" id="identifying-clot-candidates"></a>
-Identifying CLOT candidates</h2>
+<h3><a class="anchor" id="identifying-clot-candidates"></a>
+Identifying CLOT candidates</h3>
 <p>An initial set of CLOT candidates is identified and created through the following sequence of phases.</p><ol type="1">
 <li>Finding pseudoheaders. With the decaf optimization, headers are no longer the units of deparsing: fields may be emitted separately from the rest of their header. Fields are therefore grouped into pseudoheaders, which are contiguous sequences of fields emitted by the deparser, with all fields sharing the same set of POV bits.2</li>
 <li>Grouping field extracts by pseudoheader. CLOT-eligible fields are grouped by pseudoheader. Each CLOT-eligible field is associated with a map from each parser state in which it is extracted to the field’s offset from the start of the parser state.</li>
 <li>Creating CLOT candidates. The sequence of fields in each pseudoheader is traversed, and the parser-state and field-offset information from Phase 2 is used to find corresponding contiguous sequences of field extracts that satisfy the requirements for CLOT candidacy.</li>
 </ol>
-<h1><a class="anchor" id="clot_alloc"></a>
-Allocation algorithm</h1>
+<h2><a class="anchor" id="clot_alloc"></a>
+Allocation algorithm</h2>
 <p>The CLOT allocator uses a greedy algorithm to allocate CLOTs in each gress independently. For each gress, it identifies CLOT candidates and allocates them in descending order of number of unused bits. Ties are broken by preferring candidates with more read-only bits. As each candidate is allocated, the remaining candidates are adjusted by splitting, shrinking, or removing from candidacy as needed, to account for the inter-CLOT-gap requirement. This adjustment must account for overlapping fields and look-ahead extracts. The numbers of unused and read-only bits in each candidate are updated to account for this adjustment. Shrinking of candidates is done at the granularity of slices.</p>
-<h2><a class="anchor" id="candidate-adjustment"></a>
-Candidate adjustment</h2>
+<h3><a class="anchor" id="candidate-adjustment"></a>
+Candidate adjustment</h3>
 <p>After allocating a CLOT candidate C, we adjust the remaining candidates by splitting, shrinking, or removing from candidacy as needed to ensure the bytes in the remaining candidates do not overlap with C in the input packet. We further remove the beginning and end of every remaining unallocated candidate C’ to account for the inter-CLOT gap. First, a couple of definitions.</p>
 <ul>
 <li>Define a CLOT-candidate gap function, GAPS, which summarizes all possible gaps between two CLOT candidates: GAPS(C, C’) gives the set of all possible gap sizes between C and C’ when C is parsed before C’ in the input packet. Some examples:<ul>
@@ -282,8 +284,8 @@ Candidate adjustment</h2>
 <li>C and C’ can become separated during deparsing: SEP(C’, C) = true.</li>
 </ul>
 <p>These adjustments are not mutually exclusive; adjustments may be necessary at both the beginning and end of C’. The number of bytes removed by these adjustments is computed to be the smallest amount needed to achieve the required inter-CLOT gap separation between C and C’ on all paths through the parser.</p>
-<h1><a class="anchor" id="clot_alloc_adjust"></a>
-Allocation adjustment</h1>
+<h2><a class="anchor" id="clot_alloc_adjust"></a>
+Allocation adjustment</h2>
 <p>Once PHV allocation is complete, the allocated CLOTs are adjusted to account for PHV container packing. Consider the example shown below. The CLOT begins with the field f2, which is double-allocated, read-only, and packed into a PHV container with f1. The PHV container also has a slice of f3 to ensure the container is byte-aligned.</p>
 <p>Because f1 is modified, the PHV container will be deparsed, and will overwrite the CLOT. But the overwriting container straddles the CLOT boundary, which is not permitted. The CLOT, therefore, needs to be adjusted to exclude those portions that overlap the PHV container. A similar situation occurs for overwrites straddling the end of CLOTs.</p>
 <div class="fragment"><div class="line">header h_t {</div>
@@ -305,8 +307,8 @@ Allocation adjustment</h1>
 <div class="line">└ ─ ─ ─ ─ ─ ┬ ─ ─ ─ ─ ─</div>
 <div class="line">            └ ──── ──── ──── ──── ──── ───┘</div>
 </div><!-- fragment --><p>To make these adjustments, we shrink all allocated CLOTs until they neither start nor end with an overwritten field slice. If the entire CLOT is overwritten, then the CLOT is unnecessary, and is de-allocated.</p>
-<h1><a class="anchor" id="metrics"></a>
-Metrics</h1>
+<h2><a class="anchor" id="metrics"></a>
+Metrics</h2>
 <p>We form a metric for CLOT allocation by first identifying header bis that can benefit from CLOT allocation. These are bits satisfying all of the following conditions.</p>
 <ul>
 <li>Belongs to a field whose full width is extracted by the parser.</li>
