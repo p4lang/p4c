@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
 
 add tab1 ethernet.dstAddr:0xa1a2a3a4a5a6 act(port:2) = A
 add tab1 ethernet.dstAddr:0xb1b2b3b4b5b6 act(port:3) = B

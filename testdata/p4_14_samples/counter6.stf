@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2019 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add tabA hdrA.f1:0x01010101 act(port:2, idx:10)
 add tabB hdrB.f1:0x01010101 act(port:3, idx:10)
 
