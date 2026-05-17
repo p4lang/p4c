@@ -76,7 +76,7 @@ export MAKEFLAGS
 tmp_dir=$(mktemp -d -t ci-XXXXXXXXXX)
 
 pushd "${tmp_dir}"
-git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
+git clone --recurse-submodules https://github.com/p4lang/PI
 cd PI
 ./autogen.sh
 ./configure --with-proto
