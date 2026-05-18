@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <xdp_model.p4>
 #include <core.p4>
 
