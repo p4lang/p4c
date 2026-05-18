@@ -93,7 +93,7 @@ if [[ -n "${BMV2_REF:-}" ]]; then
 fi
 "${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
 
-git clone https://github.com/libbpf/libbpf/ -b v1.5.0 ${P4C_DIR}/backends/tc/runtime/libbpf
+git clone https://github.com/libbpf/libbpf/ -b v1.7.0 ${P4C_DIR}/backends/tc/runtime/libbpf
 ${P4C_DIR}/backends/tc/runtime/build-libbpf
 
 rm -rf "${tmp_dir}"

@@ -320,7 +320,7 @@ if [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
   rm llvm.sh
 fi
 
-  git clone https://github.com/libbpf/libbpf/ -b v1.5.0 ${P4C_DIR}/backends/tc/runtime/libbpf
+  git clone https://github.com/libbpf/libbpf/ -b v1.7.0 ${P4C_DIR}/backends/tc/runtime/libbpf
   ${P4C_DIR}/backends/tc/runtime/build-libbpf
 
   if [[ "${INSTALL_STF_P4TC_DEPENDENCIES}" == "ON" ]] ; then
