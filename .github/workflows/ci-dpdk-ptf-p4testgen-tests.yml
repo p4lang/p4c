@@ -1,0 +1,129 @@
+name: "p4c-dpdk-ptf-p4testgen-tests"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    branches: [main]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: p4c-dpdk-ptf-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# Envs for infrap4d and dpdk libs.
+# IPDK_INSTALL_DIR is set to a default search directory for
+# visibility of different libs like libprotobuf.
+env:
+  IPDK_INSTALL_DIR: ${{ github.workspace }}/ipdk_install
+  DEPS_REPOSITORY: ipdk-io/stratum-deps
+  DEPS_TAG: v1.3.5
+  DEPS_FILENAME: deps-ubuntu-22.04-1.3.5-x86_64.tar.gz
+  DEPS_INSTALL_DIR: /opt/p4dev/x86deps
+  CMAKE_UNITY_BUILD: ON
+  ENABLE_TEST_TOOLS: ON
+  ENABLE_DPDK: ON
+  ENABLE_BMV2: OFF
+  ENABLE_EBPF: OFF
+  IMAGE_TYPE: test
+  CTEST_PARALLEL_LEVEL: 4
+  BUILD_GENERATOR: Ninja
+
+jobs:
+  build-p4dpdk-ubuntu:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ptf-${{ runner.os }}-test
+          max-size: 1000M
+
+      - name: Checkout DPDK target
+        uses: actions/checkout@v6
+        with:
+          repository: p4lang/p4-dpdk-target
+          ref: 1604e1829dcc613067cda6dd26a8a784fb804bd7
+          path: p4sde
+          submodules: recursive
+
+      - name: Checkout ipdk-recipe
+        uses: actions/checkout@v6
+        with:
+          repository: ipdk-io/networking-recipe
+          ref: cd584d4acccc49e9577fde2bfcdf16522577ac22
+          path: ipdk.recipe
+          submodules: recursive
+
+      - name: Checkout P4C
+        uses: actions/checkout@v6
+        with:
+          path: p4c
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install hugepages and set transparent hugepages to madvise
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libhugetlbfs-bin
+          sudo hugeadm --thp-madvise
+
+      - name: Install DPDK dependencies
+        working-directory: p4sde/tools/setup
+        run: |
+          sudo apt-get update -y
+          python3 install_dep.py
+
+      - name: Compile p4sde dpdk target
+        working-directory: p4sde
+        run: |
+          ./autogen.sh
+          ./configure --prefix="$IPDK_INSTALL_DIR"
+          make
+          make install
+
+      - name: Install infrap4d build prerequisites
+        working-directory: ipdk.recipe
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libatomic1 libbsd-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev openssl
+          python3 -m pip install -r requirements.txt
+
+      - name: Install stratum dependencies
+        uses: robinraju/release-downloader@v1.12
+        with:
+          repository: ${{ env.DEPS_REPOSITORY }}
+          tag: ${{ env.DEPS_TAG }}
+          fileName: ${{ env.DEPS_FILENAME }}
+
+      - name: Extract stratum dependencies
+        run: |
+          sudo tar -xzf "$DEPS_FILENAME" -C /
+          rm "$DEPS_FILENAME"
+
+      - name: Build infrap4d
+        working-directory: ipdk.recipe
+        run: |
+          ./make-all.sh --target=dpdk --no-krnlmon --no-ovs -S "$IPDK_INSTALL_DIR" -D "$DEPS_INSTALL_DIR" --prefix="$IPDK_INSTALL_DIR"
+
+      - name: Build P4C with only the DPDK backend
+        working-directory: p4c
+        run: |
+          export CMAKE_FLAGS+="-DENABLE_BMV2=OFF "
+          export CMAKE_FLAGS+="-DENABLE_EBPF=OFF "
+          export CMAKE_FLAGS+="-DENABLE_UBPF=OFF "
+          export CMAKE_FLAGS+="-DENABLE_GTESTS=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4TEST=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4TC=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4C_GRAPHS=OFF "
+          export CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=ON "
+          export CMAKE_FLAGS+="-DIPDK_INSTALL_DIR=$IPDK_INSTALL_DIR "
+          tools/ci-build.sh
+
+      - name: Run DPDK PTF tests using P4Testgen
+        working-directory: p4c/build
+        run: |
+          sudo "$IPDK_INSTALL_DIR"/sbin/set_hugepages.sh
+          sudo -E env PATH="$PATH" uv run ctest -j1 --output-on-failure --schedule-random -R "testgen-p4c-pna-ptf|dpdk-ptf"
