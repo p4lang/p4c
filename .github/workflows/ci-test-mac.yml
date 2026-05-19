@@ -58,5 +58,5 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
-          uv run ctest --output-on-failure --schedule-random -E "ubpf|testgen|smith"
+          uv run ctest --output-on-failure --schedule-random -E "ubpf|testgen|smith|rtsmith"
         working-directory: ./build

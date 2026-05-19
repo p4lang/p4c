@@ -54,6 +54,14 @@ include_directories(BEFORE ${P4C_BINARY_DIR}/control-plane)
 enable_testing()
 set(ENABLE_TESTING ON)
 
+# Protobuf generation
+set(P4TOOLS_CONTROL_PLANE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/common/control_plane)
+set(P4TOOLS_P4RUNTIME_DIR ${P4TOOLS_CONTROL_PLANE_DIR}/p4runtime)
+set(P4TOOLS_P4RUNTIME_DIR ${P4C_BINARY_DIR}/control-plane/p4/v1)
+set(P4TOOLS_P4RUNTIME_RT_PROTO ${P4RUNTIME_STD_DIR}/p4/v1/p4runtime.proto)
+set(P4TOOLS_BFRUNTIME_DIR ${P4TOOLS_CONTROL_PLANE_DIR}/bfruntime)
+set(P4TOOLS_BFRUNTIME_RT_PROTO ${P4TOOLS_BFRUNTIME_DIR}/bfruntime.proto)
+
 # Include sub projects.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
 
