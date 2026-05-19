@@ -55,52 +55,52 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         }
         const default_action = NoAction_1();
     }
-    @hidden action pnaexampleheaderunion66() {
+    @hidden action pnaexampleheaderunion72() {
         hdr.u_short.setValid();
         hdr.u_short.data = 16w0xffff;
         hdr.u_byte.setInvalid();
     }
-    @hidden action pnaexampleheaderunion68() {
+    @hidden action pnaexampleheaderunion74() {
         hdr.u_byte.setValid();
         hdr.u_byte.data = 8w0xff;
         hdr.u_short.setInvalid();
     }
-    @hidden table tbl_pnaexampleheaderunion66 {
+    @hidden table tbl_pnaexampleheaderunion72 {
         actions = {
-            pnaexampleheaderunion66();
+            pnaexampleheaderunion72();
         }
-        const default_action = pnaexampleheaderunion66();
+        const default_action = pnaexampleheaderunion72();
     }
-    @hidden table tbl_pnaexampleheaderunion68 {
+    @hidden table tbl_pnaexampleheaderunion74 {
         actions = {
-            pnaexampleheaderunion68();
+            pnaexampleheaderunion74();
         }
-        const default_action = pnaexampleheaderunion68();
+        const default_action = pnaexampleheaderunion74();
     }
     apply {
         debug_hdr_0.apply();
         if (hdr.u_short.isValid()) {
-            tbl_pnaexampleheaderunion66.apply();
+            tbl_pnaexampleheaderunion72.apply();
         } else if (hdr.u_byte.isValid()) {
-            tbl_pnaexampleheaderunion68.apply();
+            tbl_pnaexampleheaderunion74.apply();
         }
     }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr, in metadata meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampleheaderunion77() {
+    @hidden action pnaexampleheaderunion83() {
         packet.emit<S>(hdr.base);
         packet.emit<O1>(hdr.u_byte);
         packet.emit<O2>(hdr.u_short);
     }
-    @hidden table tbl_pnaexampleheaderunion77 {
+    @hidden table tbl_pnaexampleheaderunion83 {
         actions = {
-            pnaexampleheaderunion77();
+            pnaexampleheaderunion83();
         }
-        const default_action = pnaexampleheaderunion77();
+        const default_action = pnaexampleheaderunion83();
     }
     apply {
-        tbl_pnaexampleheaderunion77.apply();
+        tbl_pnaexampleheaderunion83.apply();
     }
 }
 

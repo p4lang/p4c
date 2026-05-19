@@ -151,25 +151,25 @@ control MainControlImpl(inout parsed_headers_t hdrs, inout user_meta_t umeta, in
         }
         const default_action = NoAction_1();
     }
-    @hidden action pnadpdkheaderstackassignment186() {
+    @hidden action pnadpdkheaderstackassignment192() {
         send_to_port(32w1);
     }
-    @hidden table tbl_pnadpdkheaderstackassignment186 {
+    @hidden table tbl_pnadpdkheaderstackassignment192 {
         actions = {
-            pnadpdkheaderstackassignment186();
+            pnadpdkheaderstackassignment192();
         }
-        const default_action = pnadpdkheaderstackassignment186();
+        const default_action = pnadpdkheaderstackassignment192();
     }
     apply {
         if (hdrs.mac.isValid()) {
             header_mod_0.apply();
         }
-        tbl_pnadpdkheaderstackassignment186.apply();
+        tbl_pnadpdkheaderstackassignment192.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in parsed_headers_t hdrs, in user_meta_t umeta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkheaderstackassignment197() {
+    @hidden action pnadpdkheaderstackassignment203() {
         pkt.emit<eth_t>(hdrs.mac);
         pkt.emit<ipv4_t>(hdrs.ipv4[0]);
         pkt.emit<ipv4_t>(hdrs.ipv4[1]);
@@ -178,14 +178,14 @@ control MainDeparserImpl(packet_out pkt, in parsed_headers_t hdrs, in user_meta_
         pkt.emit<tcp_t>(hdrs.tcp);
         pkt.emit<udp_t>(hdrs.udp);
     }
-    @hidden table tbl_pnadpdkheaderstackassignment197 {
+    @hidden table tbl_pnadpdkheaderstackassignment203 {
         actions = {
-            pnadpdkheaderstackassignment197();
+            pnadpdkheaderstackassignment203();
         }
-        const default_action = pnadpdkheaderstackassignment197();
+        const default_action = pnadpdkheaderstackassignment203();
     }
     apply {
-        tbl_pnadpdkheaderstackassignment197.apply();
+        tbl_pnadpdkheaderstackassignment203.apply();
     }
 }
 

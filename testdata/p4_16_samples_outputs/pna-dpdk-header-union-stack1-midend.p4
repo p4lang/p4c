@@ -76,7 +76,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
 }
 
 control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden @name("pnadpdkheaderunionstack1l62") action pnadpdkheaderunionstack1l62_0() {
+    @hidden @name("pnadpdkheaderunionstack1l68") action pnadpdkheaderunionstack1l68_0() {
         hdr.u[0].h1.setValid();
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
@@ -136,14 +136,14 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h2.setInvalid();
     }
-    @hidden @name("tbl_pnadpdkheaderunionstack1l62") table tbl_pnadpdkheaderunionstack1l62_0 {
+    @hidden @name("tbl_pnadpdkheaderunionstack1l68") table tbl_pnadpdkheaderunionstack1l68_0 {
         actions = {
-            pnadpdkheaderunionstack1l62_0();
+            pnadpdkheaderunionstack1l68_0();
         }
-        const default_action = pnadpdkheaderunionstack1l62_0();
+        const default_action = pnadpdkheaderunionstack1l68_0();
     }
     apply {
-        tbl_pnadpdkheaderunionstack1l62_0.apply();
+        tbl_pnadpdkheaderunionstack1l68_0.apply();
     }
 }
 

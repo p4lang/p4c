@@ -44,33 +44,33 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         size = 1000000;
         default_action = NoAction_1();
     }
-    @hidden action psadpdk128bitCast67() {
+    @hidden action psadpdk128bitCast73() {
         d.egress_port = (bit<32>)c.ingress_port ^ 32w1;
     }
-    @hidden table tbl_psadpdk128bitCast67 {
+    @hidden table tbl_psadpdk128bitCast73 {
         actions = {
-            psadpdk128bitCast67();
+            psadpdk128bitCast73();
         }
-        const default_action = psadpdk128bitCast67();
+        const default_action = psadpdk128bitCast73();
     }
     apply {
-        tbl_psadpdk128bitCast67.apply();
+        tbl_psadpdk128bitCast73.apply();
         stub_0.apply();
     }
 }
 
 control MyIngressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_data_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psadpdk128bitCast82() {
+    @hidden action psadpdk128bitCast88() {
         pkt.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psadpdk128bitCast82 {
+    @hidden table tbl_psadpdk128bitCast88 {
         actions = {
-            psadpdk128bitCast82();
+            psadpdk128bitCast88();
         }
-        const default_action = psadpdk128bitCast82();
+        const default_action = psadpdk128bitCast88();
     }
     apply {
-        tbl_psadpdk128bitCast82.apply();
+        tbl_psadpdk128bitCast88.apply();
     }
 }
 

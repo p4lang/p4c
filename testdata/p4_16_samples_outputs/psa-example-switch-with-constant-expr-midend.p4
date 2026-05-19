@@ -51,17 +51,17 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexampleswitchwithconstantexpr69() {
+    @hidden action psaexampleswitchwithconstantexpr75() {
         b.meta = 48w7;
     }
-    @hidden table tbl_psaexampleswitchwithconstantexpr69 {
+    @hidden table tbl_psaexampleswitchwithconstantexpr75 {
         actions = {
-            psaexampleswitchwithconstantexpr69();
+            psaexampleswitchwithconstantexpr75();
         }
-        const default_action = psaexampleswitchwithconstantexpr69();
+        const default_action = psaexampleswitchwithconstantexpr75();
     }
     apply {
-        tbl_psaexampleswitchwithconstantexpr69.apply();
+        tbl_psaexampleswitchwithconstantexpr75.apply();
         tbl_0.apply();
     }
 }

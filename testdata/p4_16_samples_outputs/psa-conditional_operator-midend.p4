@@ -54,40 +54,40 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
         }
         default_action = NoAction_1();
     }
-    @hidden action psaconditional_operator67() {
+    @hidden action psaconditional_operator73() {
         tmp_1 = 16w2;
     }
-    @hidden action psaconditional_operator67_0() {
+    @hidden action psaconditional_operator73_0() {
         tmp_1 = 16w5;
     }
-    @hidden action psaconditional_operator68() {
+    @hidden action psaconditional_operator74() {
         b.data = tmp_1 + 16w5;
     }
-    @hidden table tbl_psaconditional_operator67 {
+    @hidden table tbl_psaconditional_operator73 {
         actions = {
-            psaconditional_operator67();
+            psaconditional_operator73();
         }
-        const default_action = psaconditional_operator67();
+        const default_action = psaconditional_operator73();
     }
-    @hidden table tbl_psaconditional_operator67_0 {
+    @hidden table tbl_psaconditional_operator73_0 {
         actions = {
-            psaconditional_operator67_0();
+            psaconditional_operator73_0();
         }
-        const default_action = psaconditional_operator67_0();
+        const default_action = psaconditional_operator73_0();
     }
-    @hidden table tbl_psaconditional_operator68 {
+    @hidden table tbl_psaconditional_operator74 {
         actions = {
-            psaconditional_operator68();
+            psaconditional_operator74();
         }
-        const default_action = psaconditional_operator68();
+        const default_action = psaconditional_operator74();
     }
     apply {
         if (b.data != 16w0) {
-            tbl_psaconditional_operator67.apply();
+            tbl_psaconditional_operator73.apply();
         } else {
-            tbl_psaconditional_operator67_0.apply();
+            tbl_psaconditional_operator73_0.apply();
         }
-        tbl_psaconditional_operator68.apply();
+        tbl_psaconditional_operator74.apply();
         tbl_0.apply();
     }
 }
