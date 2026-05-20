@@ -575,13 +575,16 @@ class MethodCallExpression : Expression {
     // IR type arg, or perhaps just Vector/IndexedVector?
     // FIXME -- could instead make typeArguments/arguments inline, in which case these would
     // be unnecessary (but perhaps desirable for efficiency)
+    // DANGER -- when using IR::shared_ptr (ENABLE_LIBGC=OFF), we can't call 'new' in a ctor
+    // before calling the base class ctor, due to the way IR::shared_ptr_base detects whether
+    // it is on the heap or not.  So we can't implement these with forwarding ctors
     MethodCallExpression(Util::SourceInfo si, const Expression *m, Vector<Type> &&ta,
                          Vector<Argument> args)
-    : MethodCallExpression(si, m, new Vector<Type>(std::move(ta)),
-                           new Vector<Argument>(std::move(args))) {}
+    : Expression(si), method(m), typeArguments(new Vector<Type>(std::move(ta))),
+      arguments(new Vector<Argument>(std::move(args))) { }
 
     MethodCallExpression(Util::SourceInfo si, const Expression *m, Vector<Argument> args)
-    : MethodCallExpression(si, m, new Vector<Argument>(std::move(args))) {}
+    : Expression(si), method(m), arguments(new Vector<Argument>(std::move(args))) {}
 #end
 }
 
@@ -594,7 +597,7 @@ class ConstructorCallExpression : Expression {
                         "%1%: unexpected type", constructedType);
         arguments->check_null(); }
     ConstructorCallExpression(Util::SourceInfo si, const IR::Type *t, Vector<Argument> &&args)
-    : ConstructorCallExpression(si, t, new Vector<Argument>(std::move(args))) {}
+    : Expression(si, t), arguments(new Vector<Argument>(std::move(args))) {}
 }
 
 class BaseListExpression : Expression {

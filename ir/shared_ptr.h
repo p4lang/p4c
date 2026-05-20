@@ -41,6 +41,10 @@ class shared_ptr_base {
         last_alloc = ::operator new(size);
         return last_alloc;
     }
+    void *operator new(size_t, void *ptr) {
+        BUG_CHECK(last_alloc == nullptr, "Failed to catch IR::Node heap allocation");
+        return ptr;
+    }
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -56,6 +60,9 @@ class shared_ptr_base {
     shared_ptr_base(shared_ptr_base &&) : shared_ptr_base() {}             // moving ignores refcnt
     shared_ptr_base &operator=(const shared_ptr_base &) { return *this; }  // copying ignores refcnt
     shared_ptr_base &operator=(shared_ptr_base &&) { return *this; }       // moving ignores refcnt
+
+    // to be used only for BUG_CHECKs checking for proper referencing
+    bool check_referenced() const { return refcount > 0; }
 
  protected:
     const char *dbheap() const { return not_on_heap ? "" : " (heap)"; }

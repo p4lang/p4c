@@ -150,7 +150,7 @@ std::string TypeConstraint::localError(Explain *explainer) const {
 
 bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
                                      std::string message) const {
-    const auto *o = origin;
+    auto o = origin;
     const auto *constraint = this;
 
     Explain explainer(subst);
@@ -171,7 +171,7 @@ bool TypeConstraint::reportErrorImpl(const TypeVariableSubstitution *subst,
     if (lastIsEmpty) message += "\n";
 
     CHECK_NULL(o);
-    ::P4::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
+    ::P4::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), &*o);
     return false;
 }
 

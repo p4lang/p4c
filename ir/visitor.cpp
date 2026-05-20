@@ -504,11 +504,14 @@ IR::Ptr<IR::Node> Modifier::apply_visitor(const IR::Node *n, const char *name) {
             }
         }
     }
-    if (ctxt)
+    if (ctxt) {
         ctxt->child_index++;
-    else
+        return n;
+    } else {
+        IR::Ptr<IR::Node> rv = n;
         visited.reset();
-    return n;
+        return rv;
+    }
 }
 
 IR::Ptr<IR::Node> Inspector::apply_visitor(const IR::Node *n, const char *name) {
@@ -531,10 +534,13 @@ IR::Ptr<IR::Node> Inspector::apply_visitor(const IR::Node *n, const char *name) 
         }
         post_join_flows(n, n);
     }
-    if (ctxt)
+    if (ctxt) {
         ctxt->child_index++;
-    else {
+        return n;
+    } else {
+        IR::Ptr<IR::Node> rv = n;
         visited.reset();
+        return rv;
     }
     return n;
 }
@@ -607,11 +613,14 @@ IR::Ptr<IR::Node> Transform::apply_visitor(const IR::Node *n, const char *name) 
             }
         }
     }
-    if (ctxt)
+    if (ctxt) {
         ctxt->child_index++;
-    else
+        return n;
+    } else {
+        IR::Ptr<IR::Node> rv = n;
         visited.reset();
-    return n;
+        return rv;
+    }
 }
 
 void Inspector::revisit_visited() { visited->revisit_visited(); }

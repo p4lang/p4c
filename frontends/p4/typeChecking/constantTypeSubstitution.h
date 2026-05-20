@@ -51,20 +51,22 @@ class ConstantTypeSubstitution : public Transform, ResolutionContext {
         return cst;
     }
 
-    const IR::Expression *convert(const IR::Expression *expr, const Visitor::Context *ctxt) {
-        auto result = expr->apply(*this, ctxt)->to<IR::Expression>();
+    IR::Ptr<IR::Expression> convert(const IR::Expression *expr, const Visitor::Context *ctxt) {
+        IR::Ptr<IR::Expression> result = expr->apply(*this, ctxt)->to<IR::Expression>();
         if (result != expr && (::P4::errorCount() == 0)) tc->learn(result, this, ctxt);
         return result;
     }
-    const IR::Vector<IR::Expression> *convert(const IR::Vector<IR::Expression> *vec,
-                                              const Visitor::Context *ctxt) {
-        auto result = vec->apply(*this, ctxt)->to<IR::Vector<IR::Expression>>();
+    IR::Ptr<IR::Vector<IR::Expression>> convert(const IR::Vector<IR::Expression> *vec,
+                                                const Visitor::Context *ctxt) {
+        IR::Ptr<IR::Vector<IR::Expression>> result =
+            vec->apply(*this, ctxt)->to<IR::Vector<IR::Expression>>();
         if (result != vec) tc->learn(result, this, ctxt);
         return result;
     }
-    const IR::Vector<IR::Argument> *convert(const IR::Vector<IR::Argument> *vec,
-                                            const Visitor::Context *ctxt) {
-        auto result = vec->apply(*this, ctxt)->to<IR::Vector<IR::Argument>>();
+    IR::Ptr<IR::Vector<IR::Argument>> convert(const IR::Vector<IR::Argument> *vec,
+                                              const Visitor::Context *ctxt) {
+        IR::Ptr<IR::Vector<IR::Argument>> result =
+            vec->apply(*this, ctxt)->to<IR::Vector<IR::Argument>>();
         if (result != vec) tc->learn(result, this, ctxt);
         return result;
     }
