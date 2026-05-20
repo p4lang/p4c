@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2018 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # These tests are similar to those for the corresponding P4_16 test
 # program with the same name, but they were written after all of the
 # changes were made to p4c and behavioral-model that make P4_14

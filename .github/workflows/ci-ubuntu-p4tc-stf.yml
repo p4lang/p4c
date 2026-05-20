@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "test-p4tc-ubuntu"
 
 on:

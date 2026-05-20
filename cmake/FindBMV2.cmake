@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # To find the BMv2 executables in the BMv2 source tree instead of
 # an installed location, set BMV2_SOURCE_DIR to the BMv2 source directory.
 set(BMV2_SIMPLE_SWITCH_SEARCH_PATHS
