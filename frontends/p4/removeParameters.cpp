@@ -216,11 +216,11 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::MethodCallExpression *ex
     if (invocations->isCall(orig)) {
         RemoveMethodCallArguments rmca;
         rmca.setCalledBy(this);
-        return expression->apply(rmca);
+        return guardReturn(expression->apply(rmca, getContext()));
     } else if (unsigned toRemove = invocations->argsToRemove(orig)) {
         RemoveMethodCallArguments rmca(toRemove);
         rmca.setCalledBy(this);
-        return expression->apply(rmca);
+        return guardReturn(expression->apply(rmca, getContext()));
     }
     return expression;
 }
