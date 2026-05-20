@@ -4,7 +4,7 @@ typedef int<32> MySignedInt;
 issue407-1.p4(38): [--Werror=type-error] error: Field 'x7' of 'header H' cannot have type 'error'
     error x7;
           ^^
-core.p4(23)
+core.p4(14)
 error {
 ^
 issue407-1.p4(40): [--Werror=type-error] error: Field 'x9' of 'header H' cannot have type 'myenum1'
