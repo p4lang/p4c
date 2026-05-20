@@ -221,6 +221,7 @@ int main(int argc, char *const argv[]) {
                 JSONGenerator gen1(ss1), gen2(ss2);
                 JsonData::strict = true;
                 gen1.emit(program);
+                std::string ss1_data = ss1.str();
 
                 IR::Ptr<IR::Node> node = nullptr;
                 JSONLoader loader(ss1);
