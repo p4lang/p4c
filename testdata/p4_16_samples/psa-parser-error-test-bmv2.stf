@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # parser error occurs only during ingress parser
 # error PacketTooShort
 packet  1 0000 0000000a 0000 00000000 0800  00000000 00000000 00000000 00000000
