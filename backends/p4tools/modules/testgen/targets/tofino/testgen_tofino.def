@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /// An extension of TaintExpression. This class is used for variables that exhibit special behavior
 /// when not initialized. For example, in Tofino, if the port variable has not been written to, the
 /// packet will be dropped. However, reading from this uninitialized variable will still produce

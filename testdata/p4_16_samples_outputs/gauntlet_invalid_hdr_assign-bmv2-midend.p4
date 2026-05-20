@@ -31,18 +31,18 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") H tmp;
-    @hidden action gauntlet_invalid_hdr_assignbmv2l39() {
+    @hidden action gauntlet_invalid_hdr_assignbmv2l45() {
         h.h = tmp;
         h.eth_hdr.eth_type = (bit<16>)h.h.a;
     }
-    @hidden table tbl_gauntlet_invalid_hdr_assignbmv2l39 {
+    @hidden table tbl_gauntlet_invalid_hdr_assignbmv2l45 {
         actions = {
-            gauntlet_invalid_hdr_assignbmv2l39();
+            gauntlet_invalid_hdr_assignbmv2l45();
         }
-        const default_action = gauntlet_invalid_hdr_assignbmv2l39();
+        const default_action = gauntlet_invalid_hdr_assignbmv2l45();
     }
     apply {
-        tbl_gauntlet_invalid_hdr_assignbmv2l39.apply();
+        tbl_gauntlet_invalid_hdr_assignbmv2l45.apply();
     }
 }
 

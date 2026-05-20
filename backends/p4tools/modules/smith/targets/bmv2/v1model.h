@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_V1MODEL_H_
 #define BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_V1MODEL_H_
 

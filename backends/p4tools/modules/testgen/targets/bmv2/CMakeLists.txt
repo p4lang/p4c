@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 if(ENABLE_TESTING)
   # Include the test subdirectory.
   message("-- Adding p4testgen bmv2 test suite")

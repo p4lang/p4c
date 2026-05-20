@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Google LLC
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that *temporarily* fail
 # ================================================
 # Xfails are _temporary_ failures: the tests should work but we haven't fixed p4testgen yet.

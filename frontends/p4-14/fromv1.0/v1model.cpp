@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "frontends/p4-14/fromv1.0/v1model.h"
 
 /* These must be in the same compilation unit to ensure that P4CoreLibrary::instance

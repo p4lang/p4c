@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 set(
   P4C_TOOLS_CONTROL_PLANE_SOURCES
   p4info_map.cpp

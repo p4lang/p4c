@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <v1model.p4>
 #include <testgen.p4>
 
