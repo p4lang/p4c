@@ -27,7 +27,7 @@ class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     const IR::Node *preorder(IR::Type_Name *tn) override {
         auto t = typeMap->getTypeType(getOriginal<IR::Type>(), true);
         if (auto tv = t->to<IR::ITypeVar>())
-            return replacement(tv, tn)->to<IR::Type>()->getP4Type();
+            return guardReturn(replacement(tv, tn)->to<IR::Type>()->getP4Type());
         return tn;
     }
     // When cloning the value of an argument we want to make a fresh
@@ -53,7 +53,7 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
                 arg = new IR::Argument(arg->srcInfo, param->name, arg->expression);
         } else if (param->defaultValue != nullptr) {
             // Parameter with default value: add a corresponding argument
-            const IR::Expression *value = param->defaultValue;
+            auto value = param->defaultValue;
             TypeNameSubstitutionVisitor tsvv(tsv, typeMap);
             value = param->defaultValue->apply(tsvv);
             arg = new IR::Argument(param->srcInfo, param->name, value);

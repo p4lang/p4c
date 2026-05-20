@@ -313,8 +313,8 @@ IR::Expression *DoLocalCopyPropagation::preorder(IR::Expression *exp) {
     return exp;
 }
 
-const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
-                                                            const Util::SourceInfo &srcInfo) {
+IR::Ptr<IR::Expression> DoLocalCopyPropagation::copyprop_name(cstring name,
+                                                              const Util::SourceInfo &srcInfo) {
     if (!name) return nullptr;
     if (inferForTable) {
         const Visitor::Context *ctxt = nullptr;
@@ -364,14 +364,14 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
 
 const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
     auto rv = copyprop_name(path->path->name, path->srcInfo);
-    return rv ? rv : path;
+    return rv ? guardReturn(rv) : path;
 }
 
 const IR::Expression *DoLocalCopyPropagation::preorder(IR::Member *member) {
     visitAgain();
     if (auto name = expr_name(member)) {
         prune();
-        if (auto rv = copyprop_name(name, member->srcInfo)) return rv;
+        if (auto rv = copyprop_name(name, member->srcInfo)) return guardReturn(rv);
     }
     return member;
 }
@@ -380,7 +380,7 @@ const IR::Expression *DoLocalCopyPropagation::preorder(IR::ArrayIndex *arr) {
     visitAgain();
     if (auto name = expr_name(arr)) {
         prune();
-        if (auto rv = copyprop_name(name, arr->srcInfo)) return rv;
+        if (auto rv = copyprop_name(name, arr->srcInfo)) return guardReturn(rv);
     }
     return arr;
 }
@@ -899,7 +899,7 @@ const IR::P4Parser *DoLocalCopyPropagation::postorder(IR::P4Parser *parser) {
     auto rv = parser->apply(ElimDead(*this), getChildContext());
     working = false;
     available.clear();
-    return rv;
+    return guardReturn(rv);
 }
 
 IR::ParserState *DoLocalCopyPropagation::preorder(IR::ParserState *state) {
