@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* Issue #4087 p4c-dpdk back end gives error for assignment between elements of a header stack */
 #include <core.p4>
 #include <pna.p4>

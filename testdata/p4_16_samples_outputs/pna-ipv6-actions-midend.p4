@@ -185,36 +185,36 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
         }
         default_action = NoAction_1();
     }
-    @hidden action pnaipv6actions109() {
+    @hidden action pnaipv6actions115() {
         tmp = 128w0x76;
     }
-    @hidden table tbl_pnaipv6actions109 {
+    @hidden table tbl_pnaipv6actions115 {
         actions = {
-            pnaipv6actions109();
+            pnaipv6actions115();
         }
-        const default_action = pnaipv6actions109();
+        const default_action = pnaipv6actions115();
     }
     apply {
-        tbl_pnaipv6actions109.apply();
+        tbl_pnaipv6actions115.apply();
         filter_tbl_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out packet, in headers_t headers, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaipv6actions233() {
+    @hidden action pnaipv6actions239() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv6_h>(headers.ipv6);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_pnaipv6actions233 {
+    @hidden table tbl_pnaipv6actions239 {
         actions = {
-            pnaipv6actions233();
+            pnaipv6actions239();
         }
-        const default_action = pnaipv6actions233();
+        const default_action = pnaipv6actions239();
     }
     apply {
-        tbl_pnaipv6actions233.apply();
+        tbl_pnaipv6actions239.apply();
     }
 }
 

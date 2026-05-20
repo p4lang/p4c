@@ -80,32 +80,32 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexampledpdkexterns78() {
+    @hidden action psaexampledpdkexterns84() {
         counter0_0.count(12w1023, 32w20);
         counter1_0.count(12w512, 32w32);
         counter2_0.count(12w1023, 32w64);
         user_meta.port_out = reg_0.read(12w1);
     }
-    @hidden action psaexampledpdkexterns60() {
+    @hidden action psaexampledpdkexterns66() {
         color_in_0 = PSA_MeterColor_t.RED;
     }
-    @hidden table tbl_psaexampledpdkexterns60 {
+    @hidden table tbl_psaexampledpdkexterns66 {
         actions = {
-            psaexampledpdkexterns60();
+            psaexampledpdkexterns66();
         }
-        const default_action = psaexampledpdkexterns60();
+        const default_action = psaexampledpdkexterns66();
     }
-    @hidden table tbl_psaexampledpdkexterns78 {
+    @hidden table tbl_psaexampledpdkexterns84 {
         actions = {
-            psaexampledpdkexterns78();
+            psaexampledpdkexterns84();
         }
-        const default_action = psaexampledpdkexterns78();
+        const default_action = psaexampledpdkexterns84();
     }
     apply {
-        tbl_psaexampledpdkexterns60.apply();
+        tbl_psaexampledpdkexterns66.apply();
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
-            tbl_psaexampledpdkexterns78.apply();
+            tbl_psaexampledpdkexterns84.apply();
         } else {
             ;
         }
@@ -124,18 +124,18 @@ control egress(inout headers hdr, inout metadata_t user_meta, in psa_egress_inpu
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampledpdkexterns101() {
+    @hidden action psaexampledpdkexterns107() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampledpdkexterns101 {
+    @hidden table tbl_psaexampledpdkexterns107 {
         actions = {
-            psaexampledpdkexterns101();
+            psaexampledpdkexterns107();
         }
-        const default_action = psaexampledpdkexterns101();
+        const default_action = psaexampledpdkexterns107();
     }
     apply {
-        tbl_psaexampledpdkexterns101.apply();
+        tbl_psaexampledpdkexterns107.apply();
     }
 }
 

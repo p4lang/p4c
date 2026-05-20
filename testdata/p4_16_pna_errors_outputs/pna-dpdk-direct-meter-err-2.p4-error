@@ -1,7 +1,7 @@
-pna-dpdk-direct-meter-err-2.p4(5): [--Wwarn=unused] warning: 'ETHERNET_HEADER_LEN' is unused
+pna-dpdk-direct-meter-err-2.p4(11): [--Wwarn=unused] warning: 'ETHERNET_HEADER_LEN' is unused
 const bit<8> ETHERNET_HEADER_LEN = 14;
              ^^^^^^^^^^^^^^^^^^^
-pna-dpdk-direct-meter-err-2.p4(81): [--Wwarn=unsupported] warning: MainControlImpl.meter0: Packet metering is not supported. Falling back to byte metering.
+pna-dpdk-direct-meter-err-2.p4(87): [--Wwarn=unsupported] warning: MainControlImpl.meter0: Packet metering is not supported. Falling back to byte metering.
     DirectMeter(PNA_MeterType_t.PACKETS) meter0;
                                          ^^^^^^
 [--Werror=unexpected] error: dpdk_execute method of meter0 extern must only be called from within an action

@@ -154,33 +154,33 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
         pna_idle_timeout = PNA_IdleTimeout_t.NOTIFY_CONTROL;
         const default_action = inbound_conntrack_ct_tcp_table_miss_0();
     }
-    @hidden action pnadpdkadd_on_miss1l253() {
+    @hidden action pnadpdkadd_on_miss1l259() {
         meta.direction = 16w1;
         outbound_conntrack_new_expire_time_profile_id = 8w1;
     }
-    @hidden action pnadpdkadd_on_miss1l253_0() {
+    @hidden action pnadpdkadd_on_miss1l259_0() {
         meta.direction = 16w2;
         inbound_conntrack_new_expire_time_profile_id = 8w1;
     }
-    @hidden table tbl_pnadpdkadd_on_miss1l253 {
+    @hidden table tbl_pnadpdkadd_on_miss1l259 {
         actions = {
-            pnadpdkadd_on_miss1l253();
+            pnadpdkadd_on_miss1l259();
         }
-        const default_action = pnadpdkadd_on_miss1l253();
+        const default_action = pnadpdkadd_on_miss1l259();
     }
-    @hidden table tbl_pnadpdkadd_on_miss1l253_0 {
+    @hidden table tbl_pnadpdkadd_on_miss1l259_0 {
         actions = {
-            pnadpdkadd_on_miss1l253_0();
+            pnadpdkadd_on_miss1l259_0();
         }
-        const default_action = pnadpdkadd_on_miss1l253_0();
+        const default_action = pnadpdkadd_on_miss1l259_0();
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
             if (istd.direction == PNA_Direction_t.HOST_TO_NET) {
-                tbl_pnadpdkadd_on_miss1l253.apply();
+                tbl_pnadpdkadd_on_miss1l259.apply();
                 outbound_conntrack_ct_tcp_table.apply();
             } else {
-                tbl_pnadpdkadd_on_miss1l253_0.apply();
+                tbl_pnadpdkadd_on_miss1l259_0.apply();
                 inbound_conntrack_ct_tcp_table.apply();
             }
         }
@@ -191,20 +191,20 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkadd_on_miss1l330() {
+    @hidden action pnadpdkadd_on_miss1l336() {
         pkt.emit<ethernet_h>(hdr.ethernet);
         pkt.emit<ipv4_h>(hdr.ipv4);
         pkt.emit<tcp_h>(hdr.tcp);
         pkt.emit<udp_h>(hdr.udp);
     }
-    @hidden table tbl_pnadpdkadd_on_miss1l330 {
+    @hidden table tbl_pnadpdkadd_on_miss1l336 {
         actions = {
-            pnadpdkadd_on_miss1l330();
+            pnadpdkadd_on_miss1l336();
         }
-        const default_action = pnadpdkadd_on_miss1l330();
+        const default_action = pnadpdkadd_on_miss1l336();
     }
     apply {
-        tbl_pnadpdkadd_on_miss1l330.apply();
+        tbl_pnadpdkadd_on_miss1l336.apply();
     }
 }
 
