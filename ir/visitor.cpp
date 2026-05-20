@@ -619,6 +619,9 @@ IR::Ptr<IR::Node> Transform::apply_visitor(const IR::Node *n, const char *name) 
     } else {
         IR::Ptr<IR::Node> rv = n;
         visited.reset();
+#if !HAVE_LIBGC
+        guard_hold = nullptr;
+#endif
         return rv;
     }
 }
