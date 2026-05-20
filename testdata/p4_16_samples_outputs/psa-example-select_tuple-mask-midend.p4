@@ -104,36 +104,36 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampleselect_tuplemask135() {
+    @hidden action psaexampleselect_tuplemask141() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleselect_tuplemask135 {
+    @hidden table tbl_psaexampleselect_tuplemask141 {
         actions = {
-            psaexampleselect_tuplemask135();
+            psaexampleselect_tuplemask141();
         }
-        const default_action = psaexampleselect_tuplemask135();
+        const default_action = psaexampleselect_tuplemask141();
     }
     apply {
-        tbl_psaexampleselect_tuplemask135.apply();
+        tbl_psaexampleselect_tuplemask141.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaexampleselect_tuplemask151() {
+    @hidden action psaexampleselect_tuplemask157() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleselect_tuplemask151 {
+    @hidden table tbl_psaexampleselect_tuplemask157 {
         actions = {
-            psaexampleselect_tuplemask151();
+            psaexampleselect_tuplemask157();
         }
-        const default_action = psaexampleselect_tuplemask151();
+        const default_action = psaexampleselect_tuplemask157();
     }
     apply {
-        tbl_psaexampleselect_tuplemask151.apply();
+        tbl_psaexampleselect_tuplemask157.apply();
     }
 }
 
