@@ -224,8 +224,8 @@ class ValidateOverloadedMethods : public Inspector {
 
 }  // namespace
 
-const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
-                                   std::ostream *outStream) {
+IR::Ptr<IR::P4Program> FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
+                                     std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     TypeMap typeMap;
@@ -380,7 +380,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
     passes.addDebugHooks(hooks, true);
-    const IR::P4Program *result = program->apply(passes);
+    IR::Ptr<IR::P4Program> result = program->apply(passes);
     return result;
 }
 

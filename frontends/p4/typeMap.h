@@ -59,8 +59,12 @@ class TypeMap final : public ProgramMap {
     /// equivalent, if false only that the have the same fields.
     bool strictStruct;
     void setStrictStruct(bool value) { strictStruct = value; }
-    bool contains(const IR::Node *element) { return typeMap.count(element) != 0; }
-    void setType(const IR::Node *element, const IR::Type *type);
+    bool contains(const IR::Node *element) {
+#if !HAVE_LIBGC
+        BUG_CHECK(element->check_referenced(), "checking unreferenced node in typeMap");
+#endif
+        return typeMap.count(element) != 0; }
+    void setType(IR::Ptr<IR::Node> element, const IR::Type *type);
     IR::Ptr<IR::Type> getType(const IR::Node *element, bool notNull = false) const;
     // unwraps a TypeType into its contents
     IR::Ptr<IR::Type> getTypeType(const IR::Node *element, bool notNull) const;

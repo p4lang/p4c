@@ -54,7 +54,7 @@ bool TypeInferenceBase::checkParameters(const IR::ParameterList *paramList, bool
     return true;
 }
 
-const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
+IR::Ptr<IR::ParameterList> TypeInferenceBase::canonicalizeParameters(
     const IR::ParameterList *params) {
     if (params == nullptr) return params;
 

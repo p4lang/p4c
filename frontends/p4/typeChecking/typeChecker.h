@@ -156,10 +156,10 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     /** Converts each type to a canonical representation.
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
      */
-    virtual const IR::Type *canonicalize(const IR::Type *type);
+    virtual IR::Ptr<IR::Type> canonicalize(IR::Ptr<IR::Type> type);
     template <class Ctor>
-    const IR::Type *canonicalizeFields(const IR::Type_StructLike *type, Ctor constructor);
-    virtual const IR::ParameterList *canonicalizeParameters(const IR::ParameterList *params);
+    IR::Ptr<IR::Type> canonicalizeFields(const IR::Type_StructLike *type, Ctor constructor);
+    virtual IR::Ptr<IR::ParameterList> canonicalizeParameters(const IR::ParameterList *params);
 
     // various helpers
     bool onlyBitsOrBitStructs(const IR::Type *type) const;
@@ -186,10 +186,11 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     static constexpr bool forbidPackages = true;
     bool checkParameters(const IR::ParameterList *paramList, bool forbidModules = false,
                          bool forbidPackage = false) const;
-    virtual const IR::Type *setTypeType(const IR::Type *type, bool learn = true);
+    // CTD -- why is this virtual? it does not appear to need to be; never overridden
+    virtual IR::Ptr<IR::Type> setTypeType(IR::Ptr<IR::Type> type, bool learn = true);
 
     /// Action list of the current table.
-    const IR::ActionList *currentActionList;
+    IR::Ptr<IR::ActionList> currentActionList;
     /// This is used to validate the initializer for the default_action
     /// or for actions in the entries list.  Returns the action list element
     /// on success.
@@ -216,9 +217,9 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     PreorderResult preorderDeclarationInstanceImpl(Node *decl);
 
  public:
-    static const IR::Type *specialize(const IR::IMayBeGenericType *type,
-                                      const IR::Vector<IR::Type> *arguments,
-                                      const Visitor::Context *ctxt);
+    static IR::Ptr<IR::Type> specialize(const IR::IMayBeGenericType *type,
+                                        const IR::Vector<IR::Type> *arguments,
+                                        const Visitor::Context *ctxt);
 
     struct Comparison {
         const IR::Expression *left;

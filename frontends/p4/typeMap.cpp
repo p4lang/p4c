@@ -86,7 +86,7 @@ void TypeMap::checkPrecondition(const IR::Node *element, const IR::Type *type) c
         BUG("Element %1% maps to a Type_Name %2%", dbp(element), dbp(type));
 }
 
-void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
+void TypeMap::setType(IR::Ptr<IR::Node> element, const IR::Type *type) {
     checkPrecondition(element, type);
     auto [it, inserted] = typeMap.emplace(element, type);
     if (!inserted) {
@@ -101,6 +101,9 @@ void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
 
 IR::Ptr<IR::Type> TypeMap::getType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
+#if !HAVE_LIBGC
+    BUG_CHECK(element->check_referenced(), "checking unreferenced node in typeMap");
+#endif
     IR::Ptr<IR::Type> result = get(typeMap, element);
     LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr)
@@ -111,6 +114,9 @@ IR::Ptr<IR::Type> TypeMap::getType(const IR::Node *element, bool notNull) const 
 
 IR::Ptr<IR::Type> TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
+#if !HAVE_LIBGC
+    BUG_CHECK(element->check_referenced(), "checking unreferenced node in typeMap");
+#endif
     const IR::Type *result = getType(element, notNull);
     if (!result) return result;
     auto typeType = result->to<IR::Type_Type>();

@@ -387,6 +387,10 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Concat *expression) {
 const IR::Node *TypeInferenceBase::postorder(const IR::Key *key) {
     // compute the type and store it in typeMap
     auto keyTuple = new IR::Type_Tuple;
+#if !HAVE_LIBGC
+    // keep keyTuple alive at least to end of function; clean it up if it is not needed
+    IR::Ptr<IR::Type> keyTuple_ = keyTuple;
+#endif
     for (auto ke : key->keyElements) {
         auto kt = typeMap->getType(ke->expression);
         if (kt == nullptr) {
@@ -1730,7 +1734,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
     }
 
     if (auto *apply = type->to<IR::IApply>(); apply && member == IR::IApply::applyMethodName) {
-        auto *canon = canonicalize(apply->getApplyMethodType());
+        auto canon = canonicalize(apply->getApplyMethodType());
         if (!canon) return expression;
         auto *methodType = canon->to<IR::Type_Method>();
         if (methodType == nullptr) return expression;
