@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 extern T f<T>(T x);
 extern Object {
     T foo<T>();
