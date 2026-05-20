@@ -109,18 +109,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkdirectcounter157() {
+    @hidden action pnadpdkdirectcounter163() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkdirectcounter157 {
+    @hidden table tbl_pnadpdkdirectcounter163 {
         actions = {
-            pnadpdkdirectcounter157();
+            pnadpdkdirectcounter163();
         }
-        const default_action = pnadpdkdirectcounter157();
+        const default_action = pnadpdkdirectcounter163();
     }
     apply {
-        tbl_pnadpdkdirectcounter157.apply();
+        tbl_pnadpdkdirectcounter163.apply();
     }
 }
 

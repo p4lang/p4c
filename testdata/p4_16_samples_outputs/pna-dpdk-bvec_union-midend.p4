@@ -59,35 +59,35 @@ parser ParserImpl(packet_in b, out Headers h, inout Meta m, in pna_main_parser_i
 }
 
 control DeparserImpl(packet_out b, in Headers h, in Meta m, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkbvec_union61() {
+    @hidden action pnadpdkbvec_union67() {
         b.emit<Hdr1>(h.h1);
         b.emit<Hdr1>(h.u_h1);
         b.emit<Hdr2>(h.u_h2);
     }
-    @hidden table tbl_pnadpdkbvec_union61 {
+    @hidden table tbl_pnadpdkbvec_union67 {
         actions = {
-            pnadpdkbvec_union61();
+            pnadpdkbvec_union67();
         }
-        const default_action = pnadpdkbvec_union61();
+        const default_action = pnadpdkbvec_union67();
     }
     apply {
-        tbl_pnadpdkbvec_union61.apply();
+        tbl_pnadpdkbvec_union67.apply();
     }
 }
 
 control ingress(inout Headers h, inout Meta m, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkbvec_union71() {
+    @hidden action pnadpdkbvec_union77() {
         h.u_h2.setInvalid();
     }
-    @hidden table tbl_pnadpdkbvec_union71 {
+    @hidden table tbl_pnadpdkbvec_union77 {
         actions = {
-            pnadpdkbvec_union71();
+            pnadpdkbvec_union77();
         }
-        const default_action = pnadpdkbvec_union71();
+        const default_action = pnadpdkbvec_union77();
     }
     apply {
         if (h.u_h2.isValid()) {
-            tbl_pnadpdkbvec_union71.apply();
+            tbl_pnadpdkbvec_union77.apply();
         }
     }
 }

@@ -75,17 +75,17 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexampledpdkmeter1l56() {
+    @hidden action psaexampledpdkmeter1l62() {
         color_in_0 = PSA_MeterColor_t.RED;
     }
-    @hidden table tbl_psaexampledpdkmeter1l56 {
+    @hidden table tbl_psaexampledpdkmeter1l62 {
         actions = {
-            psaexampledpdkmeter1l56();
+            psaexampledpdkmeter1l62();
         }
-        const default_action = psaexampledpdkmeter1l56();
+        const default_action = psaexampledpdkmeter1l62();
     }
     apply {
-        tbl_psaexampledpdkmeter1l56.apply();
+        tbl_psaexampledpdkmeter1l62.apply();
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
         } else {
@@ -106,18 +106,18 @@ control egress(inout headers hdr, inout metadata_t user_meta, in psa_egress_inpu
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampledpdkmeter1l92() {
+    @hidden action psaexampledpdkmeter1l98() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampledpdkmeter1l92 {
+    @hidden table tbl_psaexampledpdkmeter1l98 {
         actions = {
-            psaexampledpdkmeter1l92();
+            psaexampledpdkmeter1l98();
         }
-        const default_action = psaexampledpdkmeter1l92();
+        const default_action = psaexampledpdkmeter1l98();
     }
     apply {
-        tbl_psaexampledpdkmeter1l92.apply();
+        tbl_psaexampledpdkmeter1l98.apply();
     }
 }
 

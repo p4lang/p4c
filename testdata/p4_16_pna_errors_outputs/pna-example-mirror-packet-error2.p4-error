@@ -1,8 +1,8 @@
-pna-example-mirror-packet-error2.p4(83): [--Werror=type-error] error: 'mirror_packet(mirror_slot, mirror_session)'
+pna-example-mirror-packet-error2.p4(89): [--Werror=type-error] error: 'mirror_packet(mirror_slot, mirror_session)'
  mirror_packet(mirror_slot, mirror_session);
  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
-pna-example-mirror-packet-error2.p4(83): mirror_slot: argument used for directionless parameter 'mirror_slot_id' must be a compile-time constant
+pna-example-mirror-packet-error2.p4(89): mirror_slot: argument used for directionless parameter 'mirror_slot_id' must be a compile-time constant
    mirror_packet(mirror_slot, mirror_session);
                  ^^^^^^^^^^^
 pna.p4(574)
@@ -12,14 +12,14 @@ pna.p4(574)
 pna.p4(574): Function type 'mirror_packet' does not match invocation type '<Method call>'
   extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
               ^^^^^^^^^^^^^
-pna-example-mirror-packet-error2.p4(83)
+pna-example-mirror-packet-error2.p4(89)
    mirror_packet(mirror_slot, mirror_session);
    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pna-example-mirror-packet-error2.p4(88): [--Werror=type-error] error: 'mirror_packet(mirror_slot, mirror_session)'
+pna-example-mirror-packet-error2.p4(94): [--Werror=type-error] error: 'mirror_packet(mirror_slot, mirror_session)'
  mirror_packet(mirror_slot, mirror_session);
  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
-pna-example-mirror-packet-error2.p4(88): mirror_slot: argument used for directionless parameter 'mirror_slot_id' must be a compile-time constant
+pna-example-mirror-packet-error2.p4(94): mirror_slot: argument used for directionless parameter 'mirror_slot_id' must be a compile-time constant
    mirror_packet(mirror_slot, mirror_session);
                  ^^^^^^^^^^^
 pna.p4(574)
@@ -29,6 +29,6 @@ pna.p4(574)
 pna.p4(574): Function type 'mirror_packet' does not match invocation type '<Method call>'
   extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
               ^^^^^^^^^^^^^
-pna-example-mirror-packet-error2.p4(88)
+pna-example-mirror-packet-error2.p4(94)
    mirror_packet(mirror_slot, mirror_session);
    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
