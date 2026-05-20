@@ -64,7 +64,7 @@ bool TypeInferenceBase::onlyBitsOrBitStructs(const IR::Type *type) const {
     return false;
 }
 
-const IR::Type *TypeInferenceBase::setTypeType(const IR::Type *type, bool learn) {
+IR::Ptr<IR::Type> TypeInferenceBase::setTypeType(IR::Ptr<IR::Type> type, bool learn) {
     if (done()) return type;
     const IR::Type *typeToCanonicalize;
     if (readOnly)

@@ -19,7 +19,7 @@ namespace P4 {
 
 /// Creates a string that describes the values of current type variables
 class Explain : public Inspector {
-    absl::flat_hash_set<const IR::Type_Var *, Util::Hash> explained;
+    absl::flat_hash_set<IR::Ptr<IR::Type_Var>, Util::Hash> explained;
     const TypeVariableSubstitution *subst;
 
  public:
@@ -49,7 +49,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     static int crtid;
     /// The following are used when reporting errors.
     cstring errFormat;
-    std::vector<const IR::Node *> errArguments;
+    std::vector<IR::Ptr<IR::Node>> errArguments;
 
  private:
     bool reportErrorImpl(const TypeVariableSubstitution *subst, std::string message) const;
@@ -58,13 +58,13 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     /// Constraint which produced this one.  May be nullptr.
     const TypeConstraint *derivedFrom = nullptr;
     /// Place in source code which originated the contraint.  May be nullptr.
-    const IR::Node *origin = nullptr;
+    IR::Ptr<IR::Node> origin = nullptr;
 
     explicit TypeConstraint(const TypeConstraint *derivedFrom)
         : id(crtid++), derivedFrom(derivedFrom) {}
     explicit TypeConstraint(const IR::Node *origin) : id(crtid++), origin(origin) {}
     std::string explain(size_t index, Explain *explainer) const {
-        const auto *node = errArguments.at(index);
+        auto node = errArguments.at(index);
         node->apply(*explainer);
         return explainer->explanation;
     }
@@ -73,7 +73,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
  public:
     void setError(std::string_view format, std::initializer_list<const IR::Node *> nodes) {
         errFormat = cstring(format);
-        errArguments = nodes;
+        for (const auto *n : nodes) errArguments.push_back(n);
     }
     template <typename... Args>
     // Always return false.
@@ -97,8 +97,8 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
 /// Base class for EqualityConstraint and CanBeImplicitlyCastConstraint
 class BinaryConstraint : public TypeConstraint {
  public:
-    const IR::Type *left;
-    const IR::Type *right;
+    IR::Ptr<IR::Type> left;
+    IR::Ptr<IR::Type> right;
 
  protected:
     BinaryConstraint(const IR::Type *left, const IR::Type *right, const TypeConstraint *derivedFrom)
@@ -182,7 +182,7 @@ class TypeConstraints final : public IHasDbPrint {
      * This example should not typecheck: because T cannot be constrained in the invocation of f.
      * While typechecking the f(data) call, T is not a type variable that can be unified.
      */
-    absl::flat_hash_set<const IR::ITypeVar *, Util::Hash> unifiableTypeVariables;
+    absl::flat_hash_set<IR::Ptr<IR::ITypeVar>, Util::Hash> unifiableTypeVariables;
     std::vector<const TypeConstraint *> constraints;
     TypeUnification *unification;
     const TypeVariableSubstitution *definedVariables;

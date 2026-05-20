@@ -438,10 +438,12 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
 
     Declaration_Instance(Util::SourceInfo si, ID id, Vector<Annotation> &&ann, const Type *t, 
                          Vector<Argument> &&args, const BlockStatement *init = nullptr)
-    : Declaration_Instance(si, id, ann, t, new Vector<Argument>(std::move(args)), init) {}
+    : Declaration(si, id), annotations(ann), type(t),
+      arguments(new Vector<Argument>(std::move(args))), initializer(init) {}
     Declaration_Instance(Util::SourceInfo si, ID id, const Type *t, Vector<Argument> &&args,
                          const BlockStatement *init = nullptr)
-    : Declaration_Instance(si, id, t, new Vector<Argument>(std::move(args)), init) {}
+    : Declaration(si, id), type(t), arguments(new Vector<Argument>(std::move(args))),
+      initializer(init) {}
 }
 
 /// Toplevel program representation

@@ -165,7 +165,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
                 ExtractArrayIndices eai(typeMap, *nameGen, tempDecls, tempAssigns);
                 eai.setCalledBy(this);
                 auto argExpr = arg->expression->apply(eai)->to<IR::Expression>();
-                for (auto *d : tempDecls) result->push_back(d);
+                for (const IR::Declaration *d : tempDecls) result->push_back(d);
                 body.append(tempAssigns);
 
                 auto left = new IR::PathExpression(p->name);
