@@ -1,0 +1,5 @@
+<map id="PHV::v2::MinPackTxScore" name="PHV::v2::MinPackTxScore">
+<area shape="rect" id="Node000001" title="MinPackTxScore prefers minimal packing." alt="" coords="5,79,192,104"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_tx_score.html" title="TxScore is the interface of an allocation score." alt="" coords="33,5,165,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,44,101,79,96,79,96,44"/>
+</map>
