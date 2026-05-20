@@ -461,6 +461,10 @@ Optimization: Search order</h2>
 <p>A general optimization for a DFS algorithm is to schedule the search order at each step to form a thinner search tree by leveraging pruning strategies. For example, <code>A*</code> sorts its search frontier according to <code>f(n) = h(n) + g(n)</code>. In our slicing DFS algorithm, the decision at each step is to choose N and X, and split out first N bits from list X. For picking the X, similar to <a href="https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X">Algorithm X</a>, we want to choose the list with most constraints. There is a class called <code>NextSplitTargetMetrics</code> that can sort lists by constraints. For picking the N, the <code>make_choices</code> function will return a sorted list where preferred values of N are at front of the list. </p>
 </div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

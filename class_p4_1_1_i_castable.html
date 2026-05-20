@@ -190,6 +190,10 @@ virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImp
 <div class="textblock"><p>Handy type conversion methods that can be inherited by various base classes. In order to use ICastable one also need to provide intrusive lightweight RTTI metadata for the given class hierarchy. See <code>docs/C++.md</code> for more information, but in short, one need to use DECLARE_TYPEINFO() macro for this. There is no DECLARE_TYPEINFO for ICastable itself as we are not expecting pointers neither to ICastable nor to RTTI::Base to appear within the codebase. As the same time, one should not cast to ICastable as well (via e.g. <code>-&gt;to&lt;ICastable&gt;()</code>. Use DECLARE_TYPEINFO without bases to specify the base class for a given herarchy. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

@@ -146,6 +146,10 @@ virtual const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *
 <div class="textblock"><p>A policy for constant folding that allows customization of the folding. Currently we only have hook for customizing IR::PathExpression, but more can be added. Each hook takes a visitor and a node and is called from the visitor's preorder function on that node. If the hook returns a non-null value, so will the preorder. Otherwise the preorder continues with its normal processing. The hooks can be stateful, they are non-const member functions. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

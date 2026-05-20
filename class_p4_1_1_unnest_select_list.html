@@ -401,6 +401,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <div class="textblock"><p>Remove nested ListExpressions; this must be run after tuples have been eliminated This is complicated because select labels have to be flattened too, and a default expression in a select label can match a whole list. For example, consider this example: transition select(a, b, {c, d}) { default: accept; (0, 0, default): accept; (0, 0, {default, default}): accept; } This is converted to: transition select(a, b, c, d) { default: accept; (0, 0, default, default): accept; (0, 0, default, default): accept; } </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

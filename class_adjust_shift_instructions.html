@@ -400,6 +400,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <p>As we can see, this operation does not make any sense but the compiler does not decode the shift value to adjust the slice so the source and destination slice will always be at the same position regardless of the shift value. This pass will translate such instructions using shrs, set or funnel-shift depending on the situation. The example above will get translated to: instruction:funnel-shift(ingress::my_header.a[7:0], ingress::my_md.a[23:16], ingress::my_md.a[15:8], 1) </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

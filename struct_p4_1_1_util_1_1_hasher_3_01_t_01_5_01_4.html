@@ -146,6 +146,10 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><b>operator()</b> (T *
 struct P4::Util::Hasher&lt; T * &gt;</div><p>In general, pointers are bad hashes: their low 2-3 bits are zero, likewise for the upper bits depending on the ABI. Also, the middle bits might not have enough entropy as addresses come from some common pool. To solve this problem we just use a single iteration of hash_avalanche to improve mixing (see Detail::IntegerHasher). </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

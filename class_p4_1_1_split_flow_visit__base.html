@@ -210,6 +210,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dump</b> (const <a cl
 <div class="textblock"><p>SplitFlowVisit_base is base class for doing coroutine-like processing of of flows in a visitor. A visit_children method (or a preorder override) can instantiate a local SplitFlowVist subclass to record the various children that need to be visited, and the chain of currently in existence SplitFlowVisit objects will be recorded in split_link. When flows need to be joined (to visit a Dag node with mulitple parents), processing of the node can be 'paused' and other children from the SplitFlowVist can be visited, in order to visit all parents before the child is visited. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

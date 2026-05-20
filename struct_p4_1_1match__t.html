@@ -180,6 +180,10 @@ big_int&#160;</td><td class="memItemRight" valign="bottom"><b>word1</b></td></tr
 <div class="textblock"><p>The ternary expression being matched, given as a pair of bitmasks: (word0, word1). The ternary expression cares about the value of an input bit if the corresponding bit is set in exactly one of the bitmasks. If it is set in word0, then the input must have a 0 in that position. Otherwise, if it is set in word1, then the input must have a 1 in that position. More formally, the ternary expression matches when the following expression is true: (input ^ word1) &amp; (word0 ^ word1) == 0 </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
+<!--
+SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+SPDX-License-Identifier: Apache-2.0
+-->
 <!-- HTML footer for doxygen 1.13.2-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
