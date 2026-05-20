@@ -24,31 +24,31 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.local_h") H local_h_0;
-    @hidden action gauntlet_hdr_set_validbmv2l31() {
+    @hidden action gauntlet_hdr_set_validbmv2l37() {
         h.h.c = 16w2;
     }
-    @hidden action gauntlet_hdr_set_validbmv2l29() {
+    @hidden action gauntlet_hdr_set_validbmv2l35() {
         local_h_0.setValid();
         local_h_0.a = 16w0;
         local_h_0.b = 64w0;
         local_h_0.c = 16w0;
     }
-    @hidden table tbl_gauntlet_hdr_set_validbmv2l29 {
+    @hidden table tbl_gauntlet_hdr_set_validbmv2l35 {
         actions = {
-            gauntlet_hdr_set_validbmv2l29();
+            gauntlet_hdr_set_validbmv2l35();
         }
-        const default_action = gauntlet_hdr_set_validbmv2l29();
+        const default_action = gauntlet_hdr_set_validbmv2l35();
     }
-    @hidden table tbl_gauntlet_hdr_set_validbmv2l31 {
+    @hidden table tbl_gauntlet_hdr_set_validbmv2l37 {
         actions = {
-            gauntlet_hdr_set_validbmv2l31();
+            gauntlet_hdr_set_validbmv2l37();
         }
-        const default_action = gauntlet_hdr_set_validbmv2l31();
+        const default_action = gauntlet_hdr_set_validbmv2l37();
     }
     apply {
-        tbl_gauntlet_hdr_set_validbmv2l29.apply();
+        tbl_gauntlet_hdr_set_validbmv2l35.apply();
         if (!local_h_0.isValid() && !h.h.isValid() || local_h_0.isValid() && h.h.isValid() && 16w0 == h.h.a && 64w0 == h.h.b && 16w0 == h.h.c) {
-            tbl_gauntlet_hdr_set_validbmv2l31.apply();
+            tbl_gauntlet_hdr_set_validbmv2l37.apply();
         }
     }
 }

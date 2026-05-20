@@ -43,24 +43,24 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_exit_combination_4bmv2l42() {
+    @hidden action gauntlet_exit_combination_4bmv2l48() {
         h.eth_hdr.eth_type = 16w1;
     }
-    @hidden action gauntlet_exit_combination_4bmv2l33() {
+    @hidden action gauntlet_exit_combination_4bmv2l39() {
         hasExited = false;
         key_0 = 48w100;
     }
-    @hidden table tbl_gauntlet_exit_combination_4bmv2l33 {
+    @hidden table tbl_gauntlet_exit_combination_4bmv2l39 {
         actions = {
-            gauntlet_exit_combination_4bmv2l33();
+            gauntlet_exit_combination_4bmv2l39();
         }
-        const default_action = gauntlet_exit_combination_4bmv2l33();
+        const default_action = gauntlet_exit_combination_4bmv2l39();
     }
-    @hidden table tbl_gauntlet_exit_combination_4bmv2l42 {
+    @hidden table tbl_gauntlet_exit_combination_4bmv2l48 {
         actions = {
-            gauntlet_exit_combination_4bmv2l42();
+            gauntlet_exit_combination_4bmv2l48();
         }
-        const default_action = gauntlet_exit_combination_4bmv2l42();
+        const default_action = gauntlet_exit_combination_4bmv2l48();
     }
     @hidden table tbl_exit_action {
         actions = {
@@ -69,13 +69,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = exit_action_1();
     }
     apply {
-        tbl_gauntlet_exit_combination_4bmv2l33.apply();
+        tbl_gauntlet_exit_combination_4bmv2l39.apply();
         switch (simple_table_0.apply().action_run) {
             exit_action: {
                 if (hasExited) {
                     ;
                 } else {
-                    tbl_gauntlet_exit_combination_4bmv2l42.apply();
+                    tbl_gauntlet_exit_combination_4bmv2l48.apply();
                     tbl_exit_action.apply();
                 }
             }

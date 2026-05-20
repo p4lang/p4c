@@ -1,7 +1,7 @@
-gauntlet_side_effects_in_mux-bmv2.p4(22): [--Wwarn=uninitialized-out-param] warning: out parameter 'hPSe' may be uninitialized when 'reset' terminates
+gauntlet_side_effects_in_mux-bmv2.p4(28): [--Wwarn=uninitialized-out-param] warning: out parameter 'hPSe' may be uninitialized when 'reset' terminates
 bit<16> reset(out bit<8> hPSe) {
                          ^^^^
-gauntlet_side_effects_in_mux-bmv2.p4(22)
+gauntlet_side_effects_in_mux-bmv2.p4(28)
 bit<16> reset(out bit<8> hPSe) {
         ^^^^^
 [--Wwarn=uninitialized-use] warning: hPSe_0 may be uninitialized

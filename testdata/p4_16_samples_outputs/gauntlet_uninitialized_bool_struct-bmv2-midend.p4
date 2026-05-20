@@ -46,30 +46,30 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_uninitialized_bool_structbmv2l49() {
+    @hidden action gauntlet_uninitialized_bool_structbmv2l55() {
         h.eth_hdr.dst_addr = 48w1;
     }
-    @hidden action gauntlet_uninitialized_bool_structbmv2l31() {
+    @hidden action gauntlet_uninitialized_bool_structbmv2l37() {
         tmp_0.is_bool = false;
     }
-    @hidden table tbl_gauntlet_uninitialized_bool_structbmv2l31 {
+    @hidden table tbl_gauntlet_uninitialized_bool_structbmv2l37 {
         actions = {
-            gauntlet_uninitialized_bool_structbmv2l31();
+            gauntlet_uninitialized_bool_structbmv2l37();
         }
-        const default_action = gauntlet_uninitialized_bool_structbmv2l31();
+        const default_action = gauntlet_uninitialized_bool_structbmv2l37();
     }
-    @hidden table tbl_gauntlet_uninitialized_bool_structbmv2l49 {
+    @hidden table tbl_gauntlet_uninitialized_bool_structbmv2l55 {
         actions = {
-            gauntlet_uninitialized_bool_structbmv2l49();
+            gauntlet_uninitialized_bool_structbmv2l55();
         }
-        const default_action = gauntlet_uninitialized_bool_structbmv2l49();
+        const default_action = gauntlet_uninitialized_bool_structbmv2l55();
     }
     apply {
-        tbl_gauntlet_uninitialized_bool_structbmv2l31.apply();
+        tbl_gauntlet_uninitialized_bool_structbmv2l37.apply();
         switch (simple_table_0.apply().action_run) {
             dummy_action: {
                 if (tmp_0.is_bool) {
-                    tbl_gauntlet_uninitialized_bool_structbmv2l49.apply();
+                    tbl_gauntlet_uninitialized_bool_structbmv2l55.apply();
                 }
             }
             default: {

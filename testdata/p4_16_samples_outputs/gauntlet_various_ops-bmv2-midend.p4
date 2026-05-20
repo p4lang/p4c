@@ -94,7 +94,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_various_opsbmv2l100() {
+    @hidden action gauntlet_various_opsbmv2l106() {
         h.overflow.a = 8w255;
         h.overflow.b = 8w3;
         h.underflow.a = 8w0;
@@ -124,14 +124,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.div.c = 8w254;
         h.b.a = true;
     }
-    @hidden table tbl_gauntlet_various_opsbmv2l100 {
+    @hidden table tbl_gauntlet_various_opsbmv2l106 {
         actions = {
-            gauntlet_various_opsbmv2l100();
+            gauntlet_various_opsbmv2l106();
         }
-        const default_action = gauntlet_various_opsbmv2l100();
+        const default_action = gauntlet_various_opsbmv2l106();
     }
     apply {
-        tbl_gauntlet_various_opsbmv2l100.apply();
+        tbl_gauntlet_various_opsbmv2l106.apply();
     }
 }
 

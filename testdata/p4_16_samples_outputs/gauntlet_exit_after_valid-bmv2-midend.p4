@@ -29,18 +29,18 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_exit_after_validbmv2l36() {
+    @hidden action gauntlet_exit_after_validbmv2l42() {
         h.eth_hdr.dst_addr = h.h.a;
     }
-    @hidden table tbl_gauntlet_exit_after_validbmv2l36 {
+    @hidden table tbl_gauntlet_exit_after_validbmv2l42 {
         actions = {
-            gauntlet_exit_after_validbmv2l36();
+            gauntlet_exit_after_validbmv2l42();
         }
-        const default_action = gauntlet_exit_after_validbmv2l36();
+        const default_action = gauntlet_exit_after_validbmv2l42();
     }
     apply {
         if (h.h.isValid()) {
-            tbl_gauntlet_exit_after_validbmv2l36.apply();
+            tbl_gauntlet_exit_after_validbmv2l42.apply();
         }
     }
 }
