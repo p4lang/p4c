@@ -91,7 +91,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
             }
             vec->push_back(new IR::NamedExpression(field->name, value));
         }
-        const IR::Type *resultType = st->getP4Type();
+        IR::Ptr<IR::Type> resultType = st->getP4Type();
         return new IR::StructExpression(srcInfo, resultType, resultType, *vec);
     }
     if (const auto *tf = type->to<IR::Type_Fragment>()) {
@@ -118,7 +118,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
             }
             vec->push_back(value);
         }
-        const IR::Type *resultType = ta->getP4Type();
+        IR::Ptr<IR::Type> resultType = ta->getP4Type();
         return new IR::ArrayExpression(srcInfo, resultType, *vec, resultType);
     }
     if (valueRequired) {
@@ -235,7 +235,7 @@ const IR::Node *inlineBlockImpl(const Transform &t, Stmts &&stmts) {
         // the child of a SwitchCase *must* be a BlockStatement
         // it could also be a declaration, and it that case, we need to wrap it in a block anyway
         if (auto *stmt = (*stmts.begin())->template to<IR::Statement>()) {
-            return stmt;
+            return t.guardReturn(stmt);
         }
     }
     if (t.getParent<IR::BlockStatement>()) {
