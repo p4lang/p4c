@@ -192,7 +192,7 @@ TypeVariableSubstitution *TypeInferenceBase::unifyBase(
 }
 
 template <class Ctor>
-const IR::Type *TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
+IR::Ptr<IR::Type> TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
                                                       Ctor constructor) {
     bool changes = false;
     IR::IndexedVector<IR::StructField> fields;
@@ -217,9 +217,9 @@ const IR::Type *TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike 
  * it can be specialized to
  * void _<int<32>>(int<32> data);
  */
-const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
-                                              const IR::Vector<IR::Type> *arguments,
-                                              const Visitor::Context *ctxt) {
+IR::Ptr<IR::Type> TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
+                                                const IR::Vector<IR::Type> *arguments,
+                                                const Visitor::Context *ctxt) {
     TypeVariableSubstitution *bindings = new TypeVariableSubstitution();
     bool success = bindings->setBindings(type->getNode(), type->getTypeParameters(), arguments);
     if (!success) return nullptr;
@@ -227,7 +227,7 @@ const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
     LOG2("Translation map\n" << bindings);
 
     TypeVariableSubstitutionVisitor tsv(bindings);
-    const IR::Node *result = type->getNode()->apply(tsv, ctxt);
+    IR::Ptr<IR::Node> result = type->getNode()->apply(tsv, ctxt);
     if (result == nullptr) return nullptr;
 
     LOG2("Specialized " << type << "\n\tinto " << result);
@@ -235,7 +235,7 @@ const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
 }
 
 // May return nullptr if a type error occurs.
-const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
+IR::Ptr<IR::Type> TypeInferenceBase::canonicalize(IR::Ptr<IR::Type> type) {
     if (type == nullptr) return nullptr;
 
     auto exists = typeMap->getType(type);
