@@ -392,7 +392,23 @@ class JSONLoader {
 #if !HAVE_LIBGC
     template <typename T>
     void unpack_json(IR::shared_ptr<T> &v) {
-        v = get_node()->to<T>();
+        v = get_node()->checkedTo<T>();
+    }
+
+    template <typename T>
+    void unpack_json(IR::shared_ptr<IR::Vector<T>> &v) {
+        v = get_node(NodeFactoryFn(&IR::Vector<T>::fromJSON))->checkedTo<IR::Vector<T>>();
+    }
+    template <typename T>
+    void unpack_json(IR::shared_ptr<IR::IndexedVector<T>> &v) {
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))
+                ->checkedTo<IR::IndexedVector<T>>();
+    }
+    template <class T, template <class K, class V, class COMP, class ALLOC> class MAP, class COMP,
+              class ALLOC>
+    void unpack_json(IR::shared_ptr<IR::NameMap<T, MAP, COMP, ALLOC>> &m) {
+        m = get_node(NodeFactoryFn(&IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON))
+                ->checkedTo<IR::NameMap<T, MAP, COMP, ALLOC>>();
     }
 #endif /* !HAVE_LIBGC */
 
