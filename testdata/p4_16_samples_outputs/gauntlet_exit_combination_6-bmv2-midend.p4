@@ -23,17 +23,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_exit_combination_6bmv2l30() {
+    @hidden action gauntlet_exit_combination_6bmv2l36() {
         h.eth_hdr.eth_type = 16w1;
     }
-    @hidden table tbl_gauntlet_exit_combination_6bmv2l30 {
+    @hidden table tbl_gauntlet_exit_combination_6bmv2l36 {
         actions = {
-            gauntlet_exit_combination_6bmv2l30();
+            gauntlet_exit_combination_6bmv2l36();
         }
-        const default_action = gauntlet_exit_combination_6bmv2l30();
+        const default_action = gauntlet_exit_combination_6bmv2l36();
     }
     apply {
-        tbl_gauntlet_exit_combination_6bmv2l30.apply();
+        tbl_gauntlet_exit_combination_6bmv2l36.apply();
     }
 }
 

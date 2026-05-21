@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Google LLC
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 
 #include <filesystem>

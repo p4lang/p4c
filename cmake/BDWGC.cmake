@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 macro(p4c_obtain_bdwgc)
   option(
     P4C_USE_PREINSTALLED_BDWGC

@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script for building P4C for continuous integration builds.
 
 set -e  # Exit on error.

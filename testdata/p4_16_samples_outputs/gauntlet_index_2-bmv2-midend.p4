@@ -50,24 +50,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_index_2bmv2l34() {
+    @hidden action gauntlet_index_2bmv2l40() {
         dummy_val_0 = h.h[0].a;
     }
-    @hidden action gauntlet_index_2bmv2l40() {
+    @hidden action gauntlet_index_2bmv2l46() {
         dummy_val_0 = 8w255;
         key_0 = 32w1;
-    }
-    @hidden table tbl_gauntlet_index_2bmv2l34 {
-        actions = {
-            gauntlet_index_2bmv2l34();
-        }
-        const default_action = gauntlet_index_2bmv2l34();
-    }
-    @hidden table tbl_simple_action {
-        actions = {
-            simple_action_1();
-        }
-        const default_action = simple_action_1();
     }
     @hidden table tbl_gauntlet_index_2bmv2l40 {
         actions = {
@@ -75,10 +63,22 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_index_2bmv2l40();
     }
+    @hidden table tbl_simple_action {
+        actions = {
+            simple_action_1();
+        }
+        const default_action = simple_action_1();
+    }
+    @hidden table tbl_gauntlet_index_2bmv2l46 {
+        actions = {
+            gauntlet_index_2bmv2l46();
+        }
+        const default_action = gauntlet_index_2bmv2l46();
+    }
     apply {
-        tbl_gauntlet_index_2bmv2l34.apply();
-        tbl_simple_action.apply();
         tbl_gauntlet_index_2bmv2l40.apply();
+        tbl_simple_action.apply();
+        tbl_gauntlet_index_2bmv2l46.apply();
         simple_table_0.apply();
     }
 }

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>

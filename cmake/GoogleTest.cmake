@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 macro(p4c_obtain_googletest)
   # Print download state while setting up GTest.
   set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})

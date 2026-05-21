@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 # Run this command to always ignore formatting commits in `git blame`
 # git config blame.ignoreRevsFile .git-blame-ignore-revs
 # Source: https://www.stefanjudis.com/today-i-learned/how-to-exclude-commits-from-git-blame/

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 #include <v1model.p4>
 

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/common/lib/util.h"
 
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
