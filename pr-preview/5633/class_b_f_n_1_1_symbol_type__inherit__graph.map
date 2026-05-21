@@ -1,0 +1,5 @@
+<map id="BFN::SymbolType" name="BFN::SymbolType">
+<area shape="rect" id="Node000001" title="Extends P4RuntimeSymbolType for the Tofino extern types." alt="" coords="27,93,163,119"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html" title=" " alt="" coords="5,5,185,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,59,98,93,93,93,93,59"/>
+</map>

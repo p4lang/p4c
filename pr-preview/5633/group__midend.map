@@ -1,0 +1,16 @@
+<map id="Midend" name="Midend">
+<area shape="rect" id="Node000003" href="$group___annotate_with_in_hash.html" title="Set of passes that annotate specific assignment statements with the @in_hash annotation." alt="" coords="331,5,522,31"/>
+<area shape="rect" id="Node000004" href="$group___arch_translation.html" title="Set of passes that normalize variations in the architectures." alt="" coords="348,55,505,80"/>
+<area shape="rect" id="Node000005" href="$group___check_design_pattern.html" title="Set of passes that check for design patterns." alt="" coords="333,104,521,129"/>
+<area shape="rect" id="Node000011" href="$group___desugar_varbit_extract.html" title="Set of passes that rewrite usage of varbit." alt="" coords="347,153,507,179"/>
+<area shape="rect" id="Node000006" href="$group___elim_casts.html" title="Set of passes that simplify the complex expressions with multiple casts into simpler expressions." alt="" coords="365,203,488,228"/>
+<area shape="rect" id="Node000007" href="$group___remove_action_parameters.html" title="Set of passes that specialize the p4c/frontends/RemoveActionParameters class." alt="" coords="313,252,540,277"/>
+<area shape="rect" id="Node000008" href="$group___remove_select_booleans.html" title="Set of passes that convert boolean values in select statements to bit&lt;1&gt; values. The node is also tra..." alt="" coords="321,301,532,327"/>
+<area shape="rect" id="Node000009" href="$group___rewrite_flexible_struct.html" title="Set of passes that moves flexible annotation from structure to its fields." alt="" coords="328,351,525,376"/>
+<area shape="rect" id="Node000010" href="$group___simplify_emit_args.html" title="Set of passes that simplify headers and emits." alt="" coords="342,400,511,425"/>
+<area shape="rect" id="Node000012" href="$group___simplify_if_statement.html" title="Set of passes that simplify if statements." alt="" coords="339,449,515,475"/>
+<area shape="rect" id="Node000013" href="$group___simplify_nested_if.html" title="Set of passes that simplify nested if statements in the deparser control block." alt="" coords="349,499,504,524"/>
+<area shape="rect" id="Node000002" href="$group__alpm.html" title="Set of passes that implement ALPM." alt="" coords="329,548,524,573"/>
+<area shape="rect" id="Node000001" title="Overview of midend passes." alt="" coords="5,301,76,327"/>
+<area shape="rect" id="Node000014" href="$group__parde.html" title="Content related to parser and deparser." alt="" coords="358,619,495,644"/>
+</map>
