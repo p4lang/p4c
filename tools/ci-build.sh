@@ -176,7 +176,8 @@ function build_bmv2() {
                         protobuf-compiler-grpc \
                         libthrift-dev \
                         thrift-compiler \
-                        libxxhash-dev"
+                        libxxhash-dev \
+                        libjsoncpp-dev"
 
     # TODO: Remove this check once 18.04 is deprecated.
     if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then

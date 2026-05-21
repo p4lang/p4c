@@ -38,6 +38,7 @@ sudo dnf install -y -q \
     grpc-plugins \
     iproute \
     iptables-legacy \
+    jsoncpp-devel \
     libevent-devel \
     libfl-devel \
     libpcap-devel \
