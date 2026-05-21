@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4 Compiler Documentation (P4C): Repository Guidelines — bmv2</title>
+<title>P4 Compiler Documentation (P4C): AGENTS</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -100,7 +100,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_a_g_e_n_t_s.html',''); initResizable(true); });
+$(function(){initNavTree('agents.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -126,42 +126,43 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2bmv2_2_a_
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Repository Guidelines — bmv2</div></div>
+  <div class="headertitle"><div class="title">AGENTS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="repository-guidelines--bmv2"></a></p>
-<h1><a class="anchor" id="purpose"></a>
-Purpose</h1>
+<div class="textblock"><h1><a class="anchor" id="repository-guidelines--bmv2"></a>
+Repository Guidelines — bmv2</h1>
+<h2><a class="anchor" id="purpose"></a>
+Purpose</h2>
 <p>The BMv2 backend generates code for the Behavioral Model v2 target and supports P4_14 and P4_16 programs for the <code>v1model.p4</code> architecture.</p>
-<h1><a class="anchor" id="key-entry-points"></a>
-Key Entry Points</h1>
+<h2><a class="anchor" id="key-entry-points"></a>
+Key Entry Points</h2>
 <ul>
 <li><code>backends/bmv2/README.md</code>: backend overview, dependencies, and limitations.</li>
 <li><code>backends/bmv2/CMakeLists.txt</code>: build targets and options.</li>
 <li><code>backends/bmv2/</code>: compiler implementation and helpers.</li>
 </ul>
-<h1><a class="anchor" id="dependencies-6"></a>
-Dependencies</h1>
+<h2><a class="anchor" id="dependencies-6"></a>
+Dependencies</h2>
 <ul>
 <li>BMv2 behavioral model (see <code>backends/bmv2/README.md</code>).</li>
 <li>Python <code>scapy</code> for testing.</li>
 </ul>
-<h1><a class="anchor" id="tests--outputs"></a>
-Tests &amp; Outputs</h1>
+<h2><a class="anchor" id="tests--outputs"></a>
+Tests &amp; Outputs</h2>
 <ul>
 <li>Test targets are backend-specific; see <code>backends/bmv2/CMakeLists.txt</code> and any <code>*.cmake</code> files for custom targets.</li>
 <li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R bmv2</code>.</li>
 <li>Integration inputs and expected outputs live under <code>testdata/</code>.</li>
 </ul>
-<h1><a class="anchor" id="scope--purpose"></a>
-Scope &amp; Purpose</h1>
+<h2><a class="anchor" id="scope--purpose"></a>
+Scope &amp; Purpose</h2>
 <p>This folder implements the BMv2 backend for the P4C compiler. It produces JSON for the BMv2 behavioral model and builds three target-specific compiler binaries:</p><ul>
 <li><code>p4c-bm2-ss</code> for <code>simple_switch</code> (v1model).</li>
 <li><code>p4c-bm2-psa</code> for PSA.</li>
 <li><code>p4c-bm2-pna</code> for PNA NIC.</li>
 </ul>
-<h1><a class="anchor" id="directory-layout"></a>
-Directory Layout</h1>
+<h2><a class="anchor" id="directory-layout"></a>
+Directory Layout</h2>
 <p>Top-level folders and what they own:</p><ul>
 <li><code>common/</code>: shared backend helpers (JSON object model, extern handling, parser/deparser lowering, control flow graph, etc.).</li>
 <li><code>simple_switch/</code>: v1model backend (Simple Switch) entrypoints and midend/backend glue.</li>
@@ -177,8 +178,8 @@ Directory Layout</h1>
 <li><code>run-bmv2-ptf-test.py</code>: PTF-based test runner for gRPC-based simple_switch.</li>
 <li><code>bmv2stf.py</code>: STF execution driver and grammar handling.</li>
 </ul>
-<h1><a class="anchor" id="key-entry-points-1"></a>
-Key Entry Points</h1>
+<h2><a class="anchor" id="key-entry-points-1"></a>
+Key Entry Points</h2>
 <p>All three <code>main.cpp</code> entrypoints follow the same compilation flow:</p><ol type="1">
 <li>Parse options (target-specific options class).</li>
 <li>Run frontend (unless loading from JSON).</li>
@@ -196,29 +197,29 @@ Key Entry Points</h1>
 <li><code>psa_switch/options.h</code></li>
 <li><code>portable_common/options.h</code> (shared by PSA/PNA)</li>
 </ul>
-<h1><a class="anchor" id="build--test-wiring-cmake"></a>
-Build &amp; Test Wiring (CMake)</h1>
+<h2><a class="anchor" id="build--test-wiring-cmake"></a>
+Build &amp; Test Wiring (CMake)</h2>
 <p><code>CMakeLists.txt</code>:</p><ul>
 <li>Builds <code>bmv2backend</code> (shared library) and <code>portable-common</code> (shared PSA/PNA library).</li>
 <li>Builds <code>p4c-bm2-ss</code>, <code>p4c-bm2-psa</code>, and <code>p4c-bm2-pna</code>.</li>
 <li>Adds a <code>linkbmv2</code> target to create symlinks expected by legacy test scripts.</li>
 <li>Defines BMv2 test suites, PSA/PNA variants, PTF suites, and XFAIL lists.</li>
 </ul>
-<h1><a class="anchor" id="test-runners"></a>
-Test Runners</h1>
+<h2><a class="anchor" id="test-runners"></a>
+Test Runners</h2>
 <ul>
 <li><code>run-bmv2-test.py</code>: compiles and executes STF tests; uses <code>bmv2stf.py</code> for STF parsing and runtime.</li>
 <li><code>run-bmv2-ptf-test.py</code>: sets up a namespace environment and runs PTF tests against <code>simple_switch_grpc</code>.</li>
 </ul>
-<h1><a class="anchor" id="generatedderived-artifacts-gotchas"></a>
-Generated/Derived Artifacts (Gotchas)</h1>
+<h2><a class="anchor" id="generatedderived-artifacts-gotchas"></a>
+Generated/Derived Artifacts (Gotchas)</h2>
 <ul>
 <li><code>parsetab.py</code> and <code>parser.out</code> are PLY-generated from the STF grammar. Do not edit manually.</li>
 <li><code>__pycache__/</code> contains runtime bytecode and is not source.</li>
 <li>JSON dump behavior differs subtly between targets; verify the conditions in each <code>main.cpp</code> if you rely on <code>--dump-json</code> behavior.</li>
 </ul>
-<h1><a class="anchor" id="suggested-reading-order"></a>
-Suggested Reading Order</h1>
+<h2><a class="anchor" id="suggested-reading-order"></a>
+Suggested Reading Order</h2>
 <ol type="1">
 <li><code>README.md</code> for capabilities/limitations.</li>
 <li><code>CMakeLists.txt</code> for build/test wiring.</li>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4 Compiler Documentation (P4C): Repository Guidelines — ubpf</title>
+<title>P4 Compiler Documentation (P4C): AGENTS</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -100,7 +100,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_a_g_e_n_t_s.html',''); initResizable(true); });
+$(function(){initNavTree('agents-5.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -126,31 +126,33 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2ubpf_2_a_
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Repository Guidelines — ubpf</div></div>
+  <div class="headertitle"><div class="title">AGENTS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="repository-guidelines--ubpf"></a></p>
-<h1><a class="anchor" id="purpose-9"></a>
-Purpose</h1>
-<p>This folder contains the ubpf backend implementation and supporting code.</p>
-<h1><a class="anchor" id="key-entry-points-10"></a>
-Key Entry Points</h1>
+<div class="textblock"><h1><a class="anchor" id="repository-guidelines--p4test"></a>
+Repository Guidelines — p4test</h1>
+<h2><a class="anchor" id="purpose-5"></a>
+Purpose</h2>
+<p><code>p4test</code> is a backend-agnostic testing tool that exercises the P4 compiler front-end and mid-end. It underpins many test cases in the top-level <code>tests/</code> directory.</p>
+<h2><a class="anchor" id="key-entry-points-6"></a>
+Key Entry Points</h2>
 <ul>
-<li><code>backends/ubpf/</code>: backend sources and local helpers.</li>
-<li><code>backends/ubpf/CMakeLists.txt</code>: build targets and options.</li>
-<li><code>backends/ubpf/README.md</code>: backend-specific usage notes.</li>
+<li><code>backends/p4test/README.md</code>: usage and intent.</li>
+<li><code>backends/p4test/CMakeLists.txt</code>: build targets and test variants.</li>
+<li><code>backends/p4test/</code>: implementation and supporting passes.</li>
 </ul>
-<h1><a class="anchor" id="tests--outputs-7"></a>
-Tests &amp; Outputs</h1>
+<h2><a class="anchor" id="tests--variants"></a>
+Tests &amp; Variants</h2>
 <ul>
-<li>Test targets are backend-specific; see <code>backends/ubpf/CMakeLists.txt</code> and any <code>*.cmake</code> files for custom targets.</li>
-<li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R ubpf</code>.</li>
+<li>Variants and drivers are defined in <code>backends/p4test/CMakeLists.txt</code>.</li>
+<li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R p4test</code>.</li>
+<li>The top-level <code>tests/</code> directory references <code>p4test</code> for many suites.</li>
 <li>Integration inputs and expected outputs live under <code>testdata/</code>.</li>
 </ul>
-<h1><a class="anchor" id="navigation-tips-7"></a>
-Navigation Tips</h1>
+<h2><a class="anchor" id="navigation-tips-4"></a>
+Navigation Tips</h2>
 <ul>
-<li>Start from the backend driver/entrypoint in <code>backends/ubpf/</code> and follow includes from there. </li>
+<li>Start in <code>backends/p4test/</code> and follow variant setup in <code>CMakeLists.txt</code> to see how tests are wired. </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

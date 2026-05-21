@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['line_20options_0',['bfas command line options',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2tofino_2bf-asm_2_options.html',1,'']]]
+  ['intermediate_20representation_20ir_0',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]],
+  ['ir_1',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]]
 ];

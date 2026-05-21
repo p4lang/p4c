@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4 Compiler Documentation (P4C): Repository Guidelines — dpdk</title>
+<title>P4 Compiler Documentation (P4C): AGENTS</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -100,7 +100,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_a_g_e_n_t_s.html',''); initResizable(true); });
+$(function(){initNavTree('agents-1.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -126,29 +126,30 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2dpdk_2_a_
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Repository Guidelines — dpdk</div></div>
+  <div class="headertitle"><div class="title">AGENTS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="repository-guidelines--dpdk"></a></p>
-<h1><a class="anchor" id="purpose-1"></a>
-Purpose</h1>
+<div class="textblock"><h1><a class="anchor" id="repository-guidelines--dpdk"></a>
+Repository Guidelines — dpdk</h1>
+<h2><a class="anchor" id="purpose-1"></a>
+Purpose</h2>
 <p>This folder contains the dpdk backend implementation and supporting code.</p>
-<h1><a class="anchor" id="key-entry-points-2"></a>
-Key Entry Points</h1>
+<h2><a class="anchor" id="key-entry-points-2"></a>
+Key Entry Points</h2>
 <ul>
 <li><code>backends/dpdk/</code>: backend sources and local helpers.</li>
 <li><code>backends/dpdk/CMakeLists.txt</code>: build targets and options.</li>
 <li><code>backends/dpdk/README.md</code>: backend-specific usage notes.</li>
 </ul>
-<h1><a class="anchor" id="tests--outputs-1"></a>
-Tests &amp; Outputs</h1>
+<h2><a class="anchor" id="tests--outputs-1"></a>
+Tests &amp; Outputs</h2>
 <ul>
 <li>Test targets are backend-specific; see <code>backends/dpdk/CMakeLists.txt</code> and any <code>*.cmake</code> files for custom targets.</li>
 <li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R dpdk</code>.</li>
 <li>Integration inputs and expected outputs live under <code>testdata/</code>.</li>
 </ul>
-<h1><a class="anchor" id="navigation-tips"></a>
-Navigation Tips</h1>
+<h2><a class="anchor" id="navigation-tips"></a>
+Navigation Tips</h2>
 <ul>
 <li>Start from the backend driver/entrypoint in <code>backends/dpdk/</code> and follow includes from there. </li>
 </ul>

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4 Compiler Documentation (P4C): Repository Guidelines — tofino</title>
+<title>P4 Compiler Documentation (P4C): AGENTS</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -100,7 +100,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2tofino_2_a_g_e_n_t_s.html',''); initResizable(true); });
+$(function(){initNavTree('agents-7.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -126,43 +126,32 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2tofino_2_
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Repository Guidelines — tofino</div></div>
+  <div class="headertitle"><div class="title">AGENTS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="repository-guidelines--tofino"></a></p>
-<h1><a class="anchor" id="purpose-8"></a>
-Purpose</h1>
-<p>The Tofino backend targets the Tofino 1/2 chip family. It transforms frontend P4 IR into a Tofino-specific pipeline IR and performs resource allocation for the target architecture.</p>
-<h1><a class="anchor" id="key-entry-points-9"></a>
-Key Entry Points</h1>
+<div class="textblock"><h1><a class="anchor" id="repository-guidelines--tc"></a>
+Repository Guidelines — tc</h1>
+<h2><a class="anchor" id="purpose-7"></a>
+Purpose</h2>
+<p>This folder contains the tc backend implementation and supporting code.</p>
+<h2><a class="anchor" id="key-entry-points-8"></a>
+Key Entry Points</h2>
 <ul>
-<li><code>backends/tofino/bf-p4c/README.md</code>: design overview, dependencies, and terminology.</li>
-<li><code>backends/tofino/CMakeLists.txt</code>: build targets and options.</li>
-<li><code>backends/tofino/bf-p4c/</code>: main compiler logic.</li>
-<li><code>backends/tofino/bf-p4c/parde/</code>, <code>mau/</code>, <code>phv/</code>: parser/deparser, match-action, and PHV allocation subsystems.</li>
+<li><code>backends/tc/</code>: backend sources and local helpers.</li>
+<li><code>backends/tc/CMakeLists.txt</code>: build targets and options.</li>
+<li><code>backends/tc/README.md</code>: backend-specific usage notes.</li>
 </ul>
-<h1><a class="anchor" id="architecture-notes"></a>
-Architecture Notes</h1>
+<h2><a class="anchor" id="tests--outputs-5"></a>
+Tests &amp; Outputs</h2>
 <ul>
-<li>Mid-end transforms frontend IR into a Tofino pipeline IR rooted at <code>IR::BFN::Pipe</code>.</li>
-<li>Backend focuses on resource allocation and architecture-specific scheduling across parser/deparser and MAU stages.</li>
-</ul>
-<h1><a class="anchor" id="dependencies-tests"></a>
-Dependencies (Tests)</h1>
-<ul>
-<li>Tests rely on the Tofino assembler and model; see <code>backends/tofino/bf-p4c/README.md</code> for setup and required versions.</li>
-</ul>
-<h1><a class="anchor" id="tests--outputs-6"></a>
-Tests &amp; Outputs</h1>
-<ul>
-<li>Test targets are backend-specific; see <code>backends/tofino/</code> CMake files and <code>bf-p4c/</code> CMake/CMakelists for custom targets.</li>
-<li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R tofino</code>.</li>
+<li>Test targets are backend-specific; see <code>backends/tc/CMakeLists.txt</code> and any <code>*.cmake</code> files for custom targets.</li>
+<li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R tc</code>.</li>
 <li>Integration inputs and expected outputs live under <code>testdata/</code>.</li>
 </ul>
-<h1><a class="anchor" id="navigation-tips-6"></a>
-Navigation Tips</h1>
+<h2><a class="anchor" id="navigation-tips-5"></a>
+Navigation Tips</h2>
 <ul>
-<li>Start in <code>bf-p4c/</code> and follow the pipeline IR (<code>IR::BFN::*</code>) and subsystem directories (<code>parde/</code>, <code>mau/</code>, <code>phv/</code>). </li>
+<li>Start from the backend driver/entrypoint in <code>backends/tc/</code> and follow includes from there. </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->

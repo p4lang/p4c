@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4 Compiler Documentation (P4C): Repository Guidelines — p4tools</title>
+<title>P4 Compiler Documentation (P4C): AGENTS</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -100,7 +100,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2_a_g_e_n_t_s.html',''); initResizable(true); });
+$(function(){initNavTree('agents-6.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -126,18 +126,19 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2p4tools_2
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Repository Guidelines — p4tools</div></div>
+  <div class="headertitle"><div class="title">AGENTS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="repository-guidelines--p4tools"></a></p>
-<h1><a class="anchor" id="purpose-6"></a>
-Purpose</h1>
+<div class="textblock"><h1><a class="anchor" id="repository-guidelines--p4tools"></a>
+Repository Guidelines — p4tools</h1>
+<h2><a class="anchor" id="purpose-6"></a>
+Purpose</h2>
 <p>P4Tools is the P4C subproject that bundles tooling for testing and fuzzing P4 programs. It ships two main tools:</p><ul>
 <li><b>P4Testgen</b>: symbolic-execution-based input/output test generation.</li>
 <li><b>P4Smith</b>: random valid P4 program generation.</li>
 </ul>
-<h1><a class="anchor" id="folder-map-root"></a>
-Folder Map (Root)</h1>
+<h2><a class="anchor" id="folder-map-root"></a>
+Folder Map (Root)</h2>
 <p><code>backends/p4tools/</code> contains:</p><ul>
 <li><code>cmake/</code>: CMake helper modules for building P4Tools and its tests.</li>
 <li><code>common/</code>: shared C++ infrastructure used by all tools.<ul>
@@ -156,15 +157,15 @@ Folder Map (Root)</h1>
 <li><code>CMakeLists.txt</code>: top-level CMake wiring and module discovery.</li>
 <li><code>BUILD.bazel</code>: Bazel build rules (limited scope).</li>
 </ul>
-<h1><a class="anchor" id="core-concepts"></a>
-Core Concepts</h1>
+<h2><a class="anchor" id="core-concepts"></a>
+Core Concepts</h2>
 <ul>
 <li><b>IR Extensions</b>: <code>p4tools.def</code> adds custom IR nodes such as <code>StateVariable</code>, <code>TaintExpression</code>, <code>Extracted_Varbits</code>, and <code>ConcolicVariable</code>. These are compiled into the P4C IR via <code>IR_DEF_FILES</code>.</li>
 <li><b>Shared Infrastructure</b>: <code>common/</code> hosts libraries, solver bindings, and compiler helpers used by both tools.</li>
 <li><b>Modular Targets</b>: Both P4Testgen and P4Smith are extensible via target subdirectories under <code>modules/*/targets/</code>, each providing a <code>register.h</code>.</li>
 </ul>
-<h1><a class="anchor" id="build-system-cmake"></a>
-Build System (CMake)</h1>
+<h2><a class="anchor" id="build-system-cmake"></a>
+Build System (CMake)</h2>
 <p>Top-level CMake behavior:</p><ul>
 <li><code>CMakeLists.txt</code> auto-discovers tool modules under <code>modules/*</code>.</li>
 <li>Each module gets a toggle <code>ENABLE_TOOLS_MODULE_&lt;NAME&gt;</code>.</li>
@@ -183,31 +184,31 @@ Build System (CMake)</h1>
 <li>Configure the parent P4C build with <code>-DENABLE_TEST_TOOLS=ON</code>.</li>
 <li>Z3 is required; supported versions are constrained (see <code>README.md</code>).</li>
 </ul>
-<h1><a class="anchor" id="build-system-bazel"></a>
-Build System (Bazel)</h1>
+<h2><a class="anchor" id="build-system-bazel"></a>
+Build System (Bazel)</h2>
 <p><code>BUILD.bazel</code> provides a limited Bazel build:</p><ul>
 <li>Only <code>p4testgen</code> is wired by default.</li>
 <li><code>TESTGEN_TARGETS</code> currently includes only <code>bmv2</code>.</li>
 <li>Target registration is generated into <code>modules/testgen/register.h</code> via a Bazel <code>genrule</code>. If you add a new Testgen target and need Bazel support, extend <code>TESTGEN_TARGETS</code> and the corresponding <code>filegroup</code>/<code>genrule</code>.</li>
 </ul>
-<h1><a class="anchor" id="extension-points"></a>
-Extension Points</h1>
+<h2><a class="anchor" id="extension-points"></a>
+Extension Points</h2>
 <p>To add a new target:</p><ol type="1">
 <li>Create <code>modules/testgen/targets/&lt;name&gt;/</code> or <code>modules/smith/targets/&lt;name&gt;/</code>.</li>
 <li>Provide a <code>CMakeLists.txt</code> and a <code>register.h</code>.</li>
 <li>Ensure the target registers itself in the generated <code>register.h</code>.</li>
 <li>If Bazel support is required, add it to <code>BUILD.bazel</code> (<code>TESTGEN_TARGETS</code>).</li>
 </ol>
-<h1><a class="anchor" id="tests--benchmarks"></a>
-Tests &amp; Benchmarks</h1>
+<h2><a class="anchor" id="tests--benchmarks"></a>
+Tests &amp; Benchmarks</h2>
 <ul>
 <li><code>testgen-gtest</code> is built when <code>ENABLE_GTESTS=ON</code>.</li>
 <li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R testgen</code> <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R smith</code></li>
 <li>CTest labels are defined per target under <code>modules/testgen/targets/*</code>.</li>
 <li>Benchmarks and plotting scripts live in <code>modules/testgen/benchmarks/</code>.</li>
 </ul>
-<h1><a class="anchor" id="p4testgen-workflow-notes"></a>
-P4Testgen Workflow Notes</h1>
+<h2><a class="anchor" id="p4testgen-workflow-notes"></a>
+P4Testgen Workflow Notes</h2>
 <ul>
 <li><b>Rebuild after code changes</b>: after editing <code>backends/p4tools/modules/testgen/**</code>, rebuild <code>p4testgen</code> explicitly (<code>cmake --build build --target p4testgen -j&lt;N&gt;</code>) before trusting test results.</li>
 <li><b>Targeted eBPF test run</b>: use <code>ctest --test-dir build --output-on-failure -R testgen-p4c-ebpf/&lt;name&gt;.p4</code> for quick iteration.</li>
@@ -215,13 +216,13 @@ P4Testgen Workflow Notes</h1>
 <li><b>Root-required eBPF tests</b>: some eBPF executions require root/network namespace setup; in non-root environments they may be skipped or fail for environment reasons rather than compiler logic.</li>
 <li><b>Prefer non-root BMv2 PTF runs</b>: install <code>pynng</code> in the active environment and run BMv2 PTF tests with nanomsg mode (the testgen runner already passes <code>--use-nanomsg</code>), so <code>uv run ctest ...</code> works without sudo.</li>
 </ul>
-<h1><a class="anchor" id="p4testgen-structure-notes"></a>
-P4Testgen Structure Notes</h1>
+<h2><a class="anchor" id="p4testgen-structure-notes"></a>
+P4Testgen Structure Notes</h2>
 <ul>
 <li><b>Where backend outputs are emitted</b>: each target backend converts <code>TestSpec</code> objects to target-specific artifacts under <code>modules/testgen/targets/&lt;target&gt;/</code> (for example STF, PTF, metadata, or protobuf emitters).</li>
 </ul>
-<h1><a class="anchor" id="key-entry-points-7"></a>
-Key Entry Points</h1>
+<h2><a class="anchor" id="key-entry-points-7"></a>
+Key Entry Points</h2>
 <ul>
 <li><code>README.md</code>: overview, dependencies, and layout.</li>
 <li><code>modules/testgen/README.md</code>: P4Testgen usage, extensions, and limitations.</li>

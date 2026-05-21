@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.13.2"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4 Compiler Documentation (P4C): Repository Guidelines — tc</title>
+<title>P4 Compiler Documentation (P4C): AGENTS</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -100,7 +100,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2tc_2_a_g_e_n_t_s.html',''); initResizable(true); });
+$(function(){initNavTree('agents-3.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -126,31 +126,32 @@ $(function(){initNavTree('md__2home_2runner_2work_2p4c_2p4c_2backends_2tc_2_a_g_
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">Repository Guidelines — tc</div></div>
+  <div class="headertitle"><div class="title">AGENTS</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="repository-guidelines--tc"></a></p>
-<h1><a class="anchor" id="purpose-7"></a>
-Purpose</h1>
-<p>This folder contains the tc backend implementation and supporting code.</p>
-<h1><a class="anchor" id="key-entry-points-8"></a>
-Key Entry Points</h1>
+<div class="textblock"><h1><a class="anchor" id="repository-guidelines--graphs"></a>
+Repository Guidelines — graphs</h1>
+<h2><a class="anchor" id="purpose-3"></a>
+Purpose</h2>
+<p>This folder contains the graphs backend implementation and supporting code.</p>
+<h2><a class="anchor" id="key-entry-points-4"></a>
+Key Entry Points</h2>
 <ul>
-<li><code>backends/tc/</code>: backend sources and local helpers.</li>
-<li><code>backends/tc/CMakeLists.txt</code>: build targets and options.</li>
-<li><code>backends/tc/README.md</code>: backend-specific usage notes.</li>
+<li><code>backends/graphs/</code>: backend sources and local helpers.</li>
+<li><code>backends/graphs/CMakeLists.txt</code>: build targets and options.</li>
+<li><code>backends/graphs/README.md</code>: backend-specific usage notes.</li>
 </ul>
-<h1><a class="anchor" id="tests--outputs-5"></a>
-Tests &amp; Outputs</h1>
+<h2><a class="anchor" id="tests--outputs-3"></a>
+Tests &amp; Outputs</h2>
 <ul>
-<li>Test targets are backend-specific; see <code>backends/tc/CMakeLists.txt</code> and any <code>*.cmake</code> files for custom targets.</li>
-<li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R tc</code>.</li>
+<li>Test targets are backend-specific; see <code>backends/graphs/CMakeLists.txt</code> and any <code>*.cmake</code> files for custom targets.</li>
+<li>Idiomatic filtered runs: <code>ctest --test-dir build -j&lt;N&gt; --output-on-failure -R graphs</code>.</li>
 <li>Integration inputs and expected outputs live under <code>testdata/</code>.</li>
 </ul>
-<h1><a class="anchor" id="navigation-tips-5"></a>
-Navigation Tips</h1>
+<h2><a class="anchor" id="navigation-tips-2"></a>
+Navigation Tips</h2>
 <ul>
-<li>Start from the backend driver/entrypoint in <code>backends/tc/</code> and follow includes from there. </li>
+<li>Start from the backend driver/entrypoint in <code>backends/graphs/</code> and follow includes from there. </li>
 </ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
