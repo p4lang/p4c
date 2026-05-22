@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
-//
-// SPDX-License-Identifier: Apache-2.0
+/**
+ * SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 %{
 #define YY_USER_ACTION                                                          \
