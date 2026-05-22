@@ -220,7 +220,7 @@ Back-end</h3>
 <p>The backend is where most of the resource allocation decisions take place. Resource allocation passes should take extra ‘hints’ inputs to drive decisions based on previous failed attempts that triggered backtracking. This is a potential exponential blowup, so care needs to be taken to avoid attempts that are probably unprofitable &ndash; tuning will be needed.</p>
 <p>To the extent that it does not complicate the code too much, it should be parameterized based on architecture details. The intent is that the code should be reusable for multiple architecture families.</p>
 <p>The code here is organized into <code>parde</code> (parser-deparser), <code>mau</code> (match-action table), and <code>phv</code> (phv allocation and management) directories. To some extent these are independent, but there are interdependecies.</p>
-<h4><a class="anchor" id="ir"></a>
+<h4><a class="anchor" id="ir-1"></a>
 IR</h4>
 <p>There are a variety of Tofino-specific IR classes used to hold information needed to track tofino resource use and manage the allocation of those resources.</p>
 <h6><code>IR::BFN::Pipe</code></h6>

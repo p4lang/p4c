@@ -178,7 +178,9 @@ $(function(){initNavTree('intermediate_representation_ir.html',''); initResizabl
   </li>
 </ul>
 </div>
-<div class="textblock"><h2><a class="anchor" id="introduction"></a>
+<div class="textblock"><p><br  />
+</p>
+<h2><a class="anchor" id="introduction"></a>
 Introduction</h2>
 <p>This document outlines the design of the P4_16 compiler. It lays out the various classes and data structures used for the compiler and describes the general flow of the compilation process. The compiler is designed to operate in the `traditional’ manner, converting the source P4 program to an internal representation, the performing a series of transformational passes on the IR, culminating in an IR representation that maps more or less directly to the target code. Along the way, the set of IR classes present in the code may change, with certain constructs appearing only in the initial IR from the parser, and other constructs being introduced through the compilation process.</p>
 <p>Novel to this design is the ability to always return to an earlier version of the IR (backtracking across passes) or use multiple threads to operate on the IR, allowing different strategies to be tried in the search for a final result. Allowing this forking and backtracking is central to the IR and transformation design. The IR is designed to represent the program as a tree or DAG from a single root node, with each node referring only to its children. Transformations operate by creating new IR nodes that are shallow copies of existing nodes, and then creating new parent nodes to refer to these new nodes, up to the root of the IR. The internal representation is designed in C++ around a single inheritance object hierarchy with an ultimate base Node type used by all subclasses. The base Node class supports the functionality needed for visitor transformations – clone, equality tests, and subclass dispatch.</p>
