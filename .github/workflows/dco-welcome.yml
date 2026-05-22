@@ -8,11 +8,10 @@ on:
   check_run:
     types: [completed]
 
-permissions:
-  contents: read
-  pull-requests: write
-  issues: write
-
 jobs:
   dco-help:
     uses: p4lang/.github/.github/workflows/dco-welcome-reusable.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
