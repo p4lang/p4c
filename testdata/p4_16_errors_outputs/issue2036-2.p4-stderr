@@ -1,33 +1,33 @@
-issue2036-2.p4(7): [--Wwarn=unused] warning: control 'c' is unused
+issue2036-2.p4(13): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-issue2036-2.p4(10): [--Werror=type-error] error: 'f(b)'
+issue2036-2.p4(16): [--Werror=type-error] error: 'f(b)'
         f(b);
         ^^^^
   ---- Actual error:
-issue2036-2.p4(9): Cannot unify type 'tuple<bit<8>>' with type 'struct s'
+issue2036-2.p4(15): Cannot unify type 'tuple<bit<8>>' with type 'struct s'
           tuple<bit<8>> b = { 0 };
           ^^^^^^^^^^^^^
-issue2036-2.p4(1)
+issue2036-2.p4(7)
   struct s {
          ^
   ---- Originating from:
-issue2036-2.p4(10): Type of argument 'b' (tuple<bit<8>>) does not match type of parameter 'sarg' (struct s)
+issue2036-2.p4(16): Type of argument 'b' (tuple<bit<8>>) does not match type of parameter 'sarg' (struct s)
           f(b);
             ^
-issue2036-2.p4(9)
+issue2036-2.p4(15)
           tuple<bit<8>> b = { 0 };
           ^^^^^^^^^^^^^
-issue2036-2.p4(5)
+issue2036-2.p4(11)
   extern void f(out s sarg);
                       ^^^^
-issue2036-2.p4(1)
+issue2036-2.p4(7)
   struct s {
          ^
   ---- Originating from:
-issue2036-2.p4(5): Function type 'f' does not match invocation type '<Method call>'
+issue2036-2.p4(11): Function type 'f' does not match invocation type '<Method call>'
   extern void f(out s sarg);
               ^
-issue2036-2.p4(10)
+issue2036-2.p4(16)
           f(b);
           ^^^^

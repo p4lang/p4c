@@ -12,17 +12,17 @@ extern E {
 
 control c() {
     @name("c.e") E((list<S>){(S){a = 32w2,b = 32w3},(S){a = 32w4,b = 32w5}}) e_0;
-    @hidden action list1l16() {
+    @hidden action list1l22() {
         e_0.run();
     }
-    @hidden table tbl_list1l16 {
+    @hidden table tbl_list1l22 {
         actions = {
-            list1l16();
+            list1l22();
         }
-        const default_action = list1l16();
+        const default_action = list1l22();
     }
     apply {
-        tbl_list1l16.apply();
+        tbl_list1l22.apply();
     }
 }
 

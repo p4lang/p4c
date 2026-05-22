@@ -14,17 +14,17 @@ struct parsed_header_t {
 }
 
 control match_action_unit(inout parsed_header_t hdr) {
-    @hidden action issue2810l21() {
+    @hidden action issue2810l27() {
         HwSplFunc<eth_t, _>(hdr.mac);
     }
-    @hidden table tbl_issue2810l21 {
+    @hidden table tbl_issue2810l27 {
         actions = {
-            issue2810l21();
+            issue2810l27();
         }
-        const default_action = issue2810l21();
+        const default_action = issue2810l27();
     }
     apply {
-        tbl_issue2810l21.apply();
+        tbl_issue2810l27.apply();
     }
 }
 

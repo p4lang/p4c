@@ -30,18 +30,18 @@ struct tuple_0 {
 
 control egress(inout pkt_t pkt, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name("egress.tmp") bit<16> tmp_0;
-    @hidden action issue2657bmv2l37() {
+    @hidden action issue2657bmv2l43() {
         hash<bit<16>, bit<9>, tuple_0, bit<18>>(tmp_0, HashAlgorithm.crc32, 9w0, (tuple_0){tmp1 = pkt.ethernet.etherType}, 18w512);
         pkt.ethernet.etherType = tmp_0;
     }
-    @hidden table tbl_issue2657bmv2l37 {
+    @hidden table tbl_issue2657bmv2l43 {
         actions = {
-            issue2657bmv2l37();
+            issue2657bmv2l43();
         }
-        const default_action = issue2657bmv2l37();
+        const default_action = issue2657bmv2l43();
     }
     apply {
-        tbl_issue2657bmv2l37.apply();
+        tbl_issue2657bmv2l43.apply();
     }
 }
 

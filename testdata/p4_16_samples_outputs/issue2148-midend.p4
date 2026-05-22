@@ -20,33 +20,33 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.do_thing_action") action do_thing_action() {
         not_initialized_0.setInvalid();
     }
-    @hidden action issue2148l21() {
+    @hidden action issue2148l27() {
         new_val_1 = 32w232;
     }
-    @hidden action issue2148l17() {
+    @hidden action issue2148l23() {
         not_initialized_1.setInvalid();
         new_val_1 = 32w1;
     }
-    @hidden action issue2148l30() {
+    @hidden action issue2148l36() {
         h.h.a = (bit<16>)new_val_1;
     }
-    @hidden table tbl_issue2148l17 {
+    @hidden table tbl_issue2148l23 {
         actions = {
-            issue2148l17();
+            issue2148l23();
         }
-        const default_action = issue2148l17();
+        const default_action = issue2148l23();
     }
-    @hidden table tbl_issue2148l21 {
+    @hidden table tbl_issue2148l27 {
         actions = {
-            issue2148l21();
+            issue2148l27();
         }
-        const default_action = issue2148l21();
+        const default_action = issue2148l27();
     }
-    @hidden table tbl_issue2148l30 {
+    @hidden table tbl_issue2148l36 {
         actions = {
-            issue2148l30();
+            issue2148l36();
         }
-        const default_action = issue2148l30();
+        const default_action = issue2148l36();
     }
     @hidden table tbl_do_thing_action {
         actions = {
@@ -55,13 +55,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_thing_action();
     }
     apply {
-        tbl_issue2148l17.apply();
+        tbl_issue2148l23.apply();
         if (not_initialized_1.a < 16w6) {
             ;
         } else {
-            tbl_issue2148l21.apply();
+            tbl_issue2148l27.apply();
         }
-        tbl_issue2148l30.apply();
+        tbl_issue2148l36.apply();
         tbl_do_thing_action.apply();
     }
 }

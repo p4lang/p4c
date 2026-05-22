@@ -7,17 +7,17 @@ extern E {
 
 control c() {
     @name("c.e") E((list<bit<32>>){32w2,32w3,32w4}) e_0;
-    @hidden action list12() {
+    @hidden action list18() {
         e_0.run();
     }
-    @hidden table tbl_list12 {
+    @hidden table tbl_list18 {
         actions = {
-            list12();
+            list18();
         }
-        const default_action = list12();
+        const default_action = list18();
     }
     apply {
-        tbl_list12.apply();
+        tbl_list18.apply();
     }
 }
 

@@ -23,29 +23,29 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @name("ingress.h") H h_0;
-    @hidden action equalityvarbitbmv2l33() {
+    @hidden action equalityvarbitbmv2l39() {
         stdmeta.egress_spec = 9w1;
     }
-    @hidden action equalityvarbitbmv2l29() {
+    @hidden action equalityvarbitbmv2l35() {
         stdmeta.egress_spec = 9w0;
         h_0 = hdr.h;
     }
-    @hidden table tbl_equalityvarbitbmv2l29 {
+    @hidden table tbl_equalityvarbitbmv2l35 {
         actions = {
-            equalityvarbitbmv2l29();
+            equalityvarbitbmv2l35();
         }
-        const default_action = equalityvarbitbmv2l29();
+        const default_action = equalityvarbitbmv2l35();
     }
-    @hidden table tbl_equalityvarbitbmv2l33 {
+    @hidden table tbl_equalityvarbitbmv2l39 {
         actions = {
-            equalityvarbitbmv2l33();
+            equalityvarbitbmv2l39();
         }
-        const default_action = equalityvarbitbmv2l33();
+        const default_action = equalityvarbitbmv2l39();
     }
     apply {
-        tbl_equalityvarbitbmv2l29.apply();
+        tbl_equalityvarbitbmv2l35.apply();
         if (hdr.h.v == h_0.v) {
-            tbl_equalityvarbitbmv2l33.apply();
+            tbl_equalityvarbitbmv2l39.apply();
         }
     }
 }
