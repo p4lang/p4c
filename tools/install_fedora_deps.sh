@@ -23,7 +23,6 @@ sudo dnf install -y -q \
     boost-graph \
     boost-iostreams \
     boost-program-options \
-    boost-system \
     boost-test \
     boost-thread \
     ccache \
@@ -39,6 +38,7 @@ sudo dnf install -y -q \
     grpc-plugins \
     iproute \
     iptables-legacy \
+    jsoncpp-devel \
     libevent-devel \
     libfl-devel \
     libpcap-devel \

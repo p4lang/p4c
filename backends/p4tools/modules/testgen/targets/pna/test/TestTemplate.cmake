@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # This file defines how a test should be written for a particular target. This is used by testutils
 
 # Write the script to validate whether a given protobuf file has a valid format.

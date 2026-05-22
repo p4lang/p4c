@@ -89,17 +89,17 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         }
         default_action = NoAction_1();
     }
-    @hidden action psaexampleoptionalmatch91() {
+    @hidden action psaexampleoptionalmatch97() {
         tmpMask_1 = 16w1;
     }
-    @hidden table tbl_psaexampleoptionalmatch91 {
+    @hidden table tbl_psaexampleoptionalmatch97 {
         actions = {
-            psaexampleoptionalmatch91();
+            psaexampleoptionalmatch97();
         }
-        const default_action = psaexampleoptionalmatch91();
+        const default_action = psaexampleoptionalmatch97();
     }
     apply {
-        tbl_psaexampleoptionalmatch91.apply();
+        tbl_psaexampleoptionalmatch97.apply();
         tbl_0.apply();
     }
 }
@@ -131,36 +131,36 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampleoptionalmatch153() {
+    @hidden action psaexampleoptionalmatch159() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleoptionalmatch153 {
+    @hidden table tbl_psaexampleoptionalmatch159 {
         actions = {
-            psaexampleoptionalmatch153();
+            psaexampleoptionalmatch159();
         }
-        const default_action = psaexampleoptionalmatch153();
+        const default_action = psaexampleoptionalmatch159();
     }
     apply {
-        tbl_psaexampleoptionalmatch153.apply();
+        tbl_psaexampleoptionalmatch159.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaexampleoptionalmatch169() {
+    @hidden action psaexampleoptionalmatch175() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleoptionalmatch169 {
+    @hidden table tbl_psaexampleoptionalmatch175 {
         actions = {
-            psaexampleoptionalmatch169();
+            psaexampleoptionalmatch175();
         }
-        const default_action = psaexampleoptionalmatch169();
+        const default_action = psaexampleoptionalmatch175();
     }
     apply {
-        tbl_psaexampleoptionalmatch169.apply();
+        tbl_psaexampleoptionalmatch175.apply();
     }
 }
 

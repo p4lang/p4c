@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENT_TYPES_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENT_TYPES_H_
 

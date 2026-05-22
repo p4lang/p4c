@@ -1,7 +1,7 @@
-precedence-lt.p4(11): [--Wwarn=unused] warning: control 'C' is unused
+precedence-lt.p4(17): [--Wwarn=unused] warning: control 'C' is unused
 control C(inout data d, inout bit<16> foo, Object o) {
         ^
-precedence-lt.p4(11): [--Winfo=removed] info: removing control 'C'
+precedence-lt.p4(17): [--Winfo=removed] info: removing control 'C'
 control C(inout data d, inout bit<16> foo, Object o) {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

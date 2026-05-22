@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 mc_mgrp_create 1
 mc_node_create 257 6 8
 mc_node_create 258 7 8

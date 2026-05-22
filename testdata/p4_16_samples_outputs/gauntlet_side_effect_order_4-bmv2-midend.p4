@@ -17,26 +17,26 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<16> tmp;
-    @hidden action gauntlet_side_effect_order_4bmv2l17() {
+    @hidden action gauntlet_side_effect_order_4bmv2l23() {
         tmp = 16w0;
     }
-    @hidden action gauntlet_side_effect_order_4bmv2l17_0() {
+    @hidden action gauntlet_side_effect_order_4bmv2l23_0() {
         tmp = 16w3;
     }
     @hidden action act() {
         h.eth_hdr.eth_type = tmp;
     }
-    @hidden table tbl_gauntlet_side_effect_order_4bmv2l17 {
+    @hidden table tbl_gauntlet_side_effect_order_4bmv2l23 {
         actions = {
-            gauntlet_side_effect_order_4bmv2l17();
+            gauntlet_side_effect_order_4bmv2l23();
         }
-        const default_action = gauntlet_side_effect_order_4bmv2l17();
+        const default_action = gauntlet_side_effect_order_4bmv2l23();
     }
-    @hidden table tbl_gauntlet_side_effect_order_4bmv2l17_0 {
+    @hidden table tbl_gauntlet_side_effect_order_4bmv2l23_0 {
         actions = {
-            gauntlet_side_effect_order_4bmv2l17_0();
+            gauntlet_side_effect_order_4bmv2l23_0();
         }
-        const default_action = gauntlet_side_effect_order_4bmv2l17_0();
+        const default_action = gauntlet_side_effect_order_4bmv2l23_0();
     }
     @hidden table tbl_act {
         actions = {
@@ -46,9 +46,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         if (h.eth_hdr.eth_type < 16w6) {
-            tbl_gauntlet_side_effect_order_4bmv2l17.apply();
+            tbl_gauntlet_side_effect_order_4bmv2l23.apply();
         } else {
-            tbl_gauntlet_side_effect_order_4bmv2l17_0.apply();
+            tbl_gauntlet_side_effect_order_4bmv2l23_0.apply();
         }
         tbl_act.apply();
     }

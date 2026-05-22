@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Google LLC
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4runtime_translation.h"
 
 namespace P4 {

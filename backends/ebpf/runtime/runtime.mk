@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2018 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Actual location of the makefile
 ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # If needed, bpf target files can be hardcoded here

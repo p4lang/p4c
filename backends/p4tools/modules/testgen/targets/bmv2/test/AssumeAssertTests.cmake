@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 p4tools_add_test_with_args(
   P4TEST "${CMAKE_CURRENT_LIST_DIR}/p4-programs/assert_assume_tests/bmv2_testgen_assert_1.p4"
   TAG "testgen-p4c-bmv2-assert" ALIAS "bmv2_testgen_assert_1.p4" DRIVER ${P4TESTGEN_DRIVER}

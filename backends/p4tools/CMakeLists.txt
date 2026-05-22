@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # In some cases, the semantic version string is not defined. Try to find it.
 if(NOT DEFINED P4C_SEM_VERSION_STRING)
   # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
