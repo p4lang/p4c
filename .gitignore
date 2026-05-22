@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 frontends/p4/p4-lex.c
 frontends/p4/p4-parse.cpp
 py-compile

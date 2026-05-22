@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # This packet has a crc16 hash value of 0x8208, which should cause the
 # 'else' branch of 'if (meta.mystruct1.hash_drop)' to be executed.
 packet 0 0000 0000 0000 0000 0000 0000 0800 4500 0014 0001 0000 4000 4cce 0c0c 0c0c 1402 0202

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Expect packets to go out port 2, regardless of input port
 
 packet 0 525400123502 080027f87bea 0000

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 struct PortId_t { bit<9> _v; }
 
 const PortId_t PSA_CPU_PORT = {9w192};

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 import sys
 from glob import glob
 from pathlib import Path
