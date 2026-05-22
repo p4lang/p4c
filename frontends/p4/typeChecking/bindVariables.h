@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2016 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
 #define FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
 

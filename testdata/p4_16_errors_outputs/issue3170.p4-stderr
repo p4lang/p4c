@@ -1,6 +1,6 @@
-issue3170.p4(6): [--Wwarn=unused] warning: 'ty' is unused
+issue3170.p4(12): [--Wwarn=unused] warning: 'ty' is unused
 typedef t ty;
           ^^
-issue3170.p4(6): [--Werror=type-error] error: t: no type parameters supplied for generic type
+issue3170.p4(12): [--Werror=type-error] error: t: no type parameters supplied for generic type
 typedef t ty;
         ^

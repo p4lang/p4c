@@ -1,17 +1,17 @@
-issue3345.p4(1): [--Wwarn=unused] warning: parser 'MyParser2' is unused
+issue3345.p4(7): [--Wwarn=unused] warning: parser 'MyParser2' is unused
 parser MyParser2(in bool t) {
        ^^^^^^^^^
-issue3345.p4(3): [--Werror=type-error] error: 'SelectExpression'
+issue3345.p4(9): [--Werror=type-error] error: 'SelectExpression'
     transition select(t) {
                ^
   ---- Actual error:
-issue3345.p4(1): Cannot cast implicitly type 'bit<1>' to type 'bool'
+issue3345.p4(7): Cannot cast implicitly type 'bit<1>' to type 'bool'
   parser MyParser2(in bool t) {
                       ^^^^
   ---- Originating from:
-issue3345.p4(4): 'match' case label '1w1' has type 'bit<1>' which does not match the expected type 'bool'
+issue3345.p4(10): 'match' case label '1w1' has type 'bit<1>' which does not match the expected type 'bool'
        1w1: accept;
        ^^^
-issue3345.p4(1)
+issue3345.p4(7)
   parser MyParser2(in bool t) {
                       ^^^^

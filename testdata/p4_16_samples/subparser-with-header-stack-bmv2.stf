@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2018 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # For any of these input packets, the only change from input packet to
 # output packet should be the value of field h1.h2_valid_bits.  It
 # should have a 1 in bit position i if h2[i] was valid after parsing.

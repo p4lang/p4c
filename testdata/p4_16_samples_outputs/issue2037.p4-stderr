@@ -1,10 +1,10 @@
-issue2037.p4(2): [--Wwarn=unused] warning: control 'c' is unused
+issue2037.p4(8): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-issue2037.p4(3): [--Wwarn=unused] warning: table 't' is unused
+issue2037.p4(9): [--Wwarn=unused] warning: table 't' is unused
     table t {
           ^
-issue2037.p4(2): [--Winfo=removed] info: removing control 'c'
+issue2037.p4(8): [--Winfo=removed] info: removing control 'c'
 control c() {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

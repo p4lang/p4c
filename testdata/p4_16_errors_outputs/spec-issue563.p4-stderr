@@ -1,12 +1,12 @@
-spec-issue563.p4(9): [--Wwarn=unused] warning: control 'B' is unused
+spec-issue563.p4(15): [--Wwarn=unused] warning: control 'B' is unused
 control B()(X x) {
         ^
-spec-issue563.p4(12): [--Wwarn=unused] warning: control 'C' is unused
+spec-issue563.p4(18): [--Wwarn=unused] warning: control 'C' is unused
 control C()(A a) {
         ^
-spec-issue563.p4(12): [--Werror=type-error] error: a: parameter cannot have type control A
+spec-issue563.p4(18): [--Werror=type-error] error: a: parameter cannot have type control A
 control C()(A a) {
               ^
-spec-issue563.p4(5)
+spec-issue563.p4(11)
 control A() {
         ^

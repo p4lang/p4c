@@ -1,7 +1,7 @@
-issue3246-1.p4(8): [--Wwarn=unused] warning: control 'c' is unused
+issue3246-1.p4(13): [--Wwarn=unused] warning: control 'c' is unused
 control c(out bit<8> result) {
         ^
-issue3246-1.p4(8): [--Winfo=removed] info: removing control 'c'
+issue3246-1.p4(13): [--Winfo=removed] info: removing control 'c'
 control c(out bit<8> result) {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

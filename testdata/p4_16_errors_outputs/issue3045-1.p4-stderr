@@ -1,31 +1,31 @@
-issue3045-1.p4(12): [--Wwarn=unused] warning: control 'c' is unused
+issue3045-1.p4(18): [--Wwarn=unused] warning: control 'c' is unused
 control c()() {
         ^
-issue3045-1.p4(16): [--Werror=type-error] error: 'f(r, exact)'
+issue3045-1.p4(22): [--Werror=type-error] error: 'f(r, exact)'
         f(r, exact);
         ^^^^^^^^^^^
   ---- Actual error:
-issue3045-1.p4(13): Cannot cast implicitly type 'bool' to type 'match_kind'
+issue3045-1.p4(19): Cannot cast implicitly type 'bool' to type 'match_kind'
       register<bool>(1) r;
                ^^^^
   ---- Originating from:
-issue3045-1.p4(16): Type of argument 'r' (register<...>) does not match type of parameter 'r' (register<...>)
+issue3045-1.p4(22): Type of argument 'r' (register<...>) does not match type of parameter 'r' (register<...>)
           f(r, exact);
             ^
-issue3045-1.p4(13)
+issue3045-1.p4(19)
       register<bool>(1) r;
       ^^^^^^^^^^^^^^
-issue3045-1.p4(8)
+issue3045-1.p4(14)
   void f<T>(register<T> r, in T t) {
                         ^
-issue3045-1.p4(8)
+issue3045-1.p4(14)
   void f<T>(register<T> r, in T t) {
             ^^^^^^^^^^^
   Where 'T' is bound to 'match_kind'
   ---- Originating from:
-issue3045-1.p4(8): Function type 'f' does not match invocation type '<Method call>'
+issue3045-1.p4(14): Function type 'f' does not match invocation type '<Method call>'
   void f<T>(register<T> r, in T t) {
        ^
-issue3045-1.p4(16)
+issue3045-1.p4(22)
           f(r, exact);
           ^^^^^^^^^^^

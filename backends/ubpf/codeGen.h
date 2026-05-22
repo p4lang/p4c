@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_UBPF_CODEGEN_H_
 #define BACKENDS_UBPF_CODEGEN_H_
 

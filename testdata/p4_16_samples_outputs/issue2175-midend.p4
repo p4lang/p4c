@@ -1,18 +1,18 @@
 control c(inout bit<8> v) {
     @name("c.val_0") bit<8> val;
-    @hidden action issue2175l3() {
+    @hidden action issue2175l9() {
         val = 8w1;
     }
-    @hidden action issue2175l6() {
+    @hidden action issue2175l12() {
         val = 8w2;
     }
     @hidden action act() {
         val = v;
     }
-    @hidden action issue2175l14() {
+    @hidden action issue2175l20() {
         v = 8w1;
     }
-    @hidden action issue2175l17() {
+    @hidden action issue2175l23() {
         v = 8w2;
     }
     @hidden action act_0() {
@@ -24,17 +24,17 @@ control c(inout bit<8> v) {
         }
         const default_action = act();
     }
-    @hidden table tbl_issue2175l3 {
+    @hidden table tbl_issue2175l9 {
         actions = {
-            issue2175l3();
+            issue2175l9();
         }
-        const default_action = issue2175l3();
+        const default_action = issue2175l9();
     }
-    @hidden table tbl_issue2175l6 {
+    @hidden table tbl_issue2175l12 {
         actions = {
-            issue2175l6();
+            issue2175l12();
         }
-        const default_action = issue2175l6();
+        const default_action = issue2175l12();
     }
     @hidden table tbl_act_0 {
         actions = {
@@ -42,30 +42,30 @@ control c(inout bit<8> v) {
         }
         const default_action = act_0();
     }
-    @hidden table tbl_issue2175l14 {
+    @hidden table tbl_issue2175l20 {
         actions = {
-            issue2175l14();
+            issue2175l20();
         }
-        const default_action = issue2175l14();
+        const default_action = issue2175l20();
     }
-    @hidden table tbl_issue2175l17 {
+    @hidden table tbl_issue2175l23 {
         actions = {
-            issue2175l17();
+            issue2175l23();
         }
-        const default_action = issue2175l17();
+        const default_action = issue2175l23();
     }
     apply {
         tbl_act.apply();
         if (v == 8w0) {
-            tbl_issue2175l3.apply();
+            tbl_issue2175l9.apply();
         } else {
-            tbl_issue2175l6.apply();
+            tbl_issue2175l12.apply();
         }
         tbl_act_0.apply();
         if (val == 8w0) {
-            tbl_issue2175l14.apply();
+            tbl_issue2175l20.apply();
         } else {
-            tbl_issue2175l17.apply();
+            tbl_issue2175l23.apply();
         }
     }
 }

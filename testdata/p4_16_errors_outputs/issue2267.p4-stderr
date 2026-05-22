@@ -1,15 +1,15 @@
-issue2267.p4(4): [--Wwarn=shadow] warning: 't' shadows 't'
+issue2267.p4(10): [--Wwarn=shadow] warning: 't' shadows 't'
   table t {
         ^
-issue2267.p4(3)
+issue2267.p4(9)
 control MyC(bit<8> t) {
                    ^
-issue2267.p4(3): [--Wwarn=unused] warning: control 'MyC' is unused
+issue2267.p4(9): [--Wwarn=unused] warning: control 'MyC' is unused
 control MyC(bit<8> t) {
         ^^^
-issue2267.p4(5): [--Werror=type-error] error: t: Cannot refer to the containing table t
+issue2267.p4(11): [--Werror=type-error] error: t: Cannot refer to the containing table t
     key = { t : exact; }
             ^
-issue2267.p4(4)
+issue2267.p4(10)
   table t {
         ^

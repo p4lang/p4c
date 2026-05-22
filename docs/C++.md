@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 C++ (following the C++ 20 standard) is the implementation language for
 the compiler.  This file contains notes on how we use C++ and conventions
 we use for things that C++ does not handle well.

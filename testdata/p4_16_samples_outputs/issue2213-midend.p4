@@ -12,17 +12,17 @@ struct metadata_t {
 }
 
 control ingressImpl(inout metadata_t meta) {
-    @hidden action issue2213l17() {
+    @hidden action issue2213l23() {
         meta.s2.s1.f1 = 16w2;
     }
-    @hidden table tbl_issue2213l17 {
+    @hidden table tbl_issue2213l23 {
         actions = {
-            issue2213l17();
+            issue2213l23();
         }
-        const default_action = issue2213l17();
+        const default_action = issue2213l23();
     }
     apply {
-        tbl_issue2213l17.apply();
+        tbl_issue2213l23.apply();
     }
 }
 
