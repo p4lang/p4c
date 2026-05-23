@@ -234,14 +234,16 @@ Files</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<h1><a class="anchor" id="documentation"></a>
-Documentation</h1>
-<h1><a class="anchor" id="setup"></a>
-Setup</h1>
+<h1><a class="anchor" id="tofino-assembler"></a>
+Tofino Assembler</h1>
+<h2><a class="anchor" id="documentation"></a>
+Documentation</h2>
+<h2><a class="anchor" id="setup"></a>
+Setup</h2>
 <p>The repository contains code for the Barefoot assembler (bfas) and linker (walle). More info on walle can be found in walle/README.md.</p>
 <p>Assembler takes assembly files (.bfa or .tfa) as input to generate output json which is then fed to walle to produce binary for tofino.</p>
-<h1><a class="anchor" id="dependencies-7"></a>
-Dependencies</h1>
+<h2><a class="anchor" id="dependencies-7"></a>
+Dependencies</h2>
 <ul>
 <li>GNU make</li>
 <li>A C++ compiler supporting C++11 (the Makefile uses g++ by defalt)</li>
@@ -249,32 +251,32 @@ Dependencies</h1>
 <li>flex</li>
 </ul>
 <p>Running the test suite requires access to the Glass p4c_tofino compiler. Running stf tests requires access to the simple test harness. The <code>tests/runtests</code> script will look in various places for these tools (see the top of the script)</p>
-<h1><a class="anchor" id="building-assembler"></a>
-Building Assembler</h1>
+<h2><a class="anchor" id="building-assembler"></a>
+Building Assembler</h2>
 <p>The assenbler is built automatically as part of the full bf-p4c-tofino build; there is currently no supported standalone method of building the assembler by itself.</p>
-<h1><a class="anchor" id="address-sanitizer-checks"></a>
-Address Sanitizer checks</h1>
+<h2><a class="anchor" id="address-sanitizer-checks"></a>
+Address Sanitizer checks</h2>
 <p>(obsolete) To enable address sanitizer checks in the assembler use,</p>
 <div class="fragment"><div class="line">user@box$ ./bootstrap.sh --enable-asan-checks</div>
 </div><!-- fragment --><p>Or alternatively,</p>
 <div class="fragment"><div class="line">user@box$ ./configure --enable-asan-checks</div>
 </div><!-- fragment --><p>This configures the Makefile to add -fsanitizer=address &amp; -fsanitizer=undefined. By default the leak sanitizer is also enabled along with the address santizier. You can disable it by setting environment variable ASAN_OPTIONS with "detect\_leaks=0".</p>
-<h1><a class="anchor" id="testing-1"></a>
-Testing</h1>
-<h2><a class="anchor" id="make-targets"></a>
-Make Targets</h2>
+<h2><a class="anchor" id="testing-1"></a>
+Testing</h2>
+<h3><a class="anchor" id="make-targets"></a>
+Make Targets</h3>
 <div class="fragment"><div class="line">user@box$ make check</div>
 </div><!-- fragment --><p>Runs tests/runtests script on all .p4 files in the tests and tests/mau directories and .bfa files in tests/asm directory. This script can run one or more tests specified on the command line, or will run all .p4 files in the current directory if run with no arguments. Stf tests can be run if specified explicitly on the command line; they will not run by default.</p>
 <div class="fragment"><div class="line">user@box$ make check-sanity</div>
 </div><!-- fragment --><p>This is similar to <code>make check</code> but will only run on .p4 files in the tests directory which is a small subset for a quick sanity check.</p>
-<h2><a class="anchor" id="runtests-script"></a>
-Runtests Script</h2>
+<h3><a class="anchor" id="runtests-script"></a>
+Runtests Script</h3>
 <p>The ./tests/runtests script will first run glass compiler (p4c-tofino) on input .p4 file and then run the assembler (bfas) on generated assembly (.tfa) file. Glass also generates output json which is then compared (by the script) to the json generated from assembler.</p>
 <p>To skip running glass use -f option on the runtests script</p>
 <p>Use -j </p>
 <p>to run parallel threads. If invoking through Make targets set MAKEFLAGS to "-j &lt;value&gt;"</p>
-<h2><a class="anchor" id="expected-failures"></a>
-Expected Failures</h2>
+<h3><a class="anchor" id="expected-failures"></a>
+Expected Failures</h3>
 <p>expected_failures.txt files are under tests &amp; tests/mau directory which outline failing tests with cause (compile, bfas, mismatch). These files must be updated to reflect any new or fixed fails.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -286,14 +288,14 @@ Expected Failures</h2>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">mismatch   </td><td class="markdownTableBodyNone">Json output   </td><td class="markdownTableBodyNone">Difference in json outputs for glass and assembler   </td></tr>
 </table>
-<h2><a class="anchor" id="context-json-ignore"></a>
-Context Json Ignore</h2>
+<h3><a class="anchor" id="context-json-ignore"></a>
+Context Json Ignore</h3>
 <p>Context Json output from Glass compiler is verbose and may or may not be consumed entirely by the drivers unlike the assembler Json output. The tests/runtests script ignores the keys placed in the tests/ctxt_json_ignore file while creating json diff to only display relevant mismatches</p>
-<h2><a class="anchor" id="json-diff"></a>
-Json Diff</h2>
+<h3><a class="anchor" id="json-diff"></a>
+Json Diff</h3>
 <p>Each test after running will have its own &lt;testname&gt;.out dir with following items: E.g. TEST = exact_match0.p4 exact_match0.p4.out </p>
-<h4><a class="anchor" id="glass-json-output"></a>
-Glass Json output</h4>
+<h5><a class="anchor" id="glass-json-output"></a>
+Glass Json output</h5>
 <div class="fragment"><div class="line">├── cfg</div>
 <div class="line">│   ├── memories.all.parser.egress.cfg.json.gz</div>
 <div class="line">│   ├── memories.all.parser.ingress.cfg.json.gz</div>
@@ -323,11 +325,11 @@ Glass Json output</h4>
 <div class="line">│   ├── mau.context.json</div>
 <div class="line">│   ├── parser.context.json</div>
 <div class="line">│   └── phv.context.json</div>
-</div><!-- fragment --> <h4><a class="anchor" id="assembler-output-directory"></a>
-Assembler Output Directory</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="assembler-output-directory"></a>
+Assembler Output Directory</h5>
 <div class="fragment"><div class="line">├── exact_match0.out</div>
-</div><!-- fragment --> <h4><a class="anchor" id="assembler-json-output"></a>
-Assembler Json Output</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="assembler-json-output"></a>
+Assembler Json Output</h5>
 <div class="fragment"><div class="line">│   ├── memories.all.parser.egress.cfg.json.gz</div>
 <div class="line">│   ├── memories.all.parser.ingress.cfg.json.gz</div>
 <div class="line">│   ├── memories.pipe.cfg.json.gz</div>
@@ -351,20 +353,20 @@ Assembler Json Output</h4>
 <div class="line">│   ├── regs.match_action_stage.0b.cfg.json.gz</div>
 <div class="line">│   ├── regs.pipe.cfg.json.gz</div>
 <div class="line">│   ├── regs.top.cfg.json.gz</div>
-</div><!-- fragment --> <h4><a class="anchor" id="context-json"></a>
-Context Json</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="context-json"></a>
+Context Json</h5>
 <div class="fragment"><div class="line">│   └── context.json</div>
-</div><!-- fragment --> <h4><a class="anchor" id="symlink-to-glass-assembly-file"></a>
-Symlink to Glass Assembly File</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="symlink-to-glass-assembly-file"></a>
+Symlink to Glass Assembly File</h5>
 <div class="fragment"><div class="line">├── exact_match0.tfa -&gt; out.tfa</div>
-</div><!-- fragment --> <h4><a class="anchor" id="glass-run-log"></a>
-Glass Run Log</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="glass-run-log"></a>
+Glass Run Log</h5>
 <div class="fragment"><div class="line">├── glsc.log</div>
-</div><!-- fragment --> <h4><a class="anchor" id="json-diff-file"></a>
-Json Diff File</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="json-diff-file"></a>
+Json Diff File</h5>
 <div class="fragment"><div class="line">├── json_diff.txt</div>
-</div><!-- fragment --> <h4><a class="anchor" id="glass-output-logs"></a>
-Glass Output Logs</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="glass-output-logs"></a>
+Glass Output Logs</h5>
 <div class="fragment"><div class="line">├── logs</div>
 <div class="line">│   ├── asm.log</div>
 <div class="line">│   ├── mau.characterize.log</div>
@@ -389,15 +391,15 @@ Glass Output Logs</h4>
 <div class="line">│   ├── parser.characterize.log</div>
 <div class="line">│   └── transform.log</div>
 <div class="line">├── name_lookup.c</div>
-</div><!-- fragment --> <h4><a class="anchor" id="glass-output-assembly-file"></a>
-Glass output assembly file</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="glass-output-assembly-file"></a>
+Glass output assembly file</h5>
 <div class="fragment"><div class="line">├── out.tfa</div>
-</div><!-- fragment --> <h4><a class="anchor" id="assembler-run-log"></a>
-Assembler Run Log</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="assembler-run-log"></a>
+Assembler Run Log</h5>
 <div class="fragment"><div class="line">├── bfas.config.log</div>
 <div class="line">├── bfas.log</div>
-</div><!-- fragment --> <h4><a class="anchor" id="test-visualization-htmls"></a>
-Test visualization htmls</h4>
+</div><!-- fragment --> <h5><a class="anchor" id="test-visualization-htmls"></a>
+Test visualization htmls</h5>
 <div class="fragment"><div class="line">└── visualization</div>
 <div class="line">    ├── deparser.html</div>
 <div class="line">    ├── jquery.js</div>
@@ -406,12 +408,12 @@ Test visualization htmls</h4>
 <div class="line">    ├── parser.ingress.html</div>
 <div class="line">    ├── phv_allocation.html</div>
 <div class="line">    └── table_placement.html</div>
-</div><!-- fragment --><h1><a class="anchor" id="backends-tofinojbay"></a>
-Backends (Tofino/JBay)</h1>
+</div><!-- fragment --><h2><a class="anchor" id="backends-tofinojbay"></a>
+Backends (Tofino/JBay)</h2>
 <p>Assembler currently supports Tofino backend but code is generic enough to be ported to a different backend like JBay. Architecture specific constants must be parameterized and placed in the constants.h file</p>
 <p>"tofino" and "jbay" directories hold the chip schema to be used by the assembler. The chip schema contains register information and is a binary (python pickle file) generated from csv file in bfnregs repository.</p>
-<h2><a class="anchor" id="extracting-information-from-hardware-bfnregs-info"></a>
-Extracting information from hardware bfnregs info</h2>
+<h3><a class="anchor" id="extracting-information-from-hardware-bfnregs-info"></a>
+Extracting information from hardware bfnregs info</h3>
 <p>To the greatest extent possible, we automatically generate assembler support code directly from the information provided to use by the hardware team. The main 'source' we get from hardware are the Semfore .csr files and the associated .csv files generated by Semafore from the .csr files. We use walle (walle subdirectory) to read the .csv files and distill them into a chip.schema &ndash; a python pickle file containing the datastructures defined in walle/csr.py that encapsulate the information and structure of all the hardware registers.</p>
 <p>We then use walle to generate C++ code embodying the register structure, defining C++ classes containing the structure of all the registers. The template.yaml file defines various options for the structure of the resulting C++ code &ndash; which registers to use as the 'roots' of class hierarchies, what files to write the code in, which methods to define in each class. Within the templates.yaml file, there's a <code>global:</code> section giving global options for all files, a <code>generate:</code> section listing the files to generate, and an <code>ignore:</code> section listing register subtrees to ignore (no code will be generated for them &ndash; its as if they don't exist).</p>
 <p>Options that can be used include:</p>
@@ -452,8 +454,8 @@ Extracting information from hardware bfnregs info</h2>
 <td class="markdownTableBodyNone">write_dma   </td><td class="markdownTableBodyNone">Generate &lsquo;'B&rsquo;<code>block writes for the specified registers instead of</code>'R'<code>single register writes in</code>emit_binary` methods   </td></tr>
 </table>
 <p>This results in C++ code that can either generate .cfg.json files or binary files for use by the driver/model. When cfg.json files are produced, walle can be used to link them into a binary file. There are also options for generating C++ code to read .cfg.json files for future support of binary disassembly.</p>
-<h2><a class="anchor" id="config-json"></a>
-Config JSON</h2>
+<h3><a class="anchor" id="config-json"></a>
+Config JSON</h3>
 <p>The config json files (with .cfg.json extension) are generated by the assembler which are fed into walle to generate the binary (also called <code>tofino.bin</code>)</p>
 <p>The config json is nothing but json files with a map of all the registers for a backend. In order to limit the json file size assembler disables registers which are not set (with the -C or condense json flag). Some registers are also explicitly disabled or enabled based on what the drive expects to see in the tofino.bin. Below is the status of regs and whether they will appear in the config json. </p><div class="fragment"><div class="line">---------------------------------</div>
 <div class="line">Disabled - (unconditionally)</div>
@@ -489,14 +491,14 @@ Config JSON</h2>
 <div class="line">regs.rams.map_alu.row[row].adrmux.mapram_config[col]</div>
 </div><!-- fragment --><p> Once JBay support is added for all regs, above will be different for both backends.</p>
 <p>Driver dictates which regs are disabled or enabled unconditionally. Other regs which are disabled if zero are to limit file size and driver should automatically fill in the zero values.</p>
-<h3><a class="anchor" id="generating-and-using-chipschema"></a>
-Generating and using chip.schema</h3>
+<h4><a class="anchor" id="generating-and-using-chipschema"></a>
+Generating and using chip.schema</h4>
 <p>chip.schema files are generated by walle from the csv files in the bfnregs repo. To generate a new chip.schema file, use </p><pre class="fragment">walle/walle.py --generate-schema ${BFNREGS_REPO}/modules/${CHIP}_regs
 </pre><p>where <code>${BFNREGS_REPO}</code> is the root of the bfnregs repo, and <code>${CHIP}</code> is the chip to target (<code>tofino</code>, <code>trestles</code>, or <code>jbay</code> at the moment). The newly created chip.schema file should then be moved into the jbay or tofino subdirectory where the build system expects to find it.</p>
 <p>chip.schema is a binary (python pickle) file; you can use <code>walle.py --dump-schema</code> to dump it as (vaguely human readble) yaml. It is basically a DAG of python objects (csr.address_map, csr.address_map_instance, and csr.reg) describing the register tree. The build uses walle to turn this into json files describing various subtrees of the dag. The <code>template_objectss.yaml</code> file describes which subtrees to generate json files for as well as list of subtrees to ignore (elide from the json files). Names in this file are the names of csr.address_map objects (NOT instances), and where the generated files are nested, the containing json will contain a reference to the contained json rather than a copy of the tree. In this way, the generated json files as a group describe the DAG even though json can only describe trees, not DAGs.</p>
 <p>If, when running make, you get a KeyError from walle, that generally means that the template_objects.yaml file contains a refernce to some csr.address_map that does not exist in the chip.schema file &ndash; the register tree has changed in a way that invalidates the json files it is trying to generate. If you have your python setup to drop into pydb automatically on an uncaught exception (highly recommended), at that point you can use <code>pp section</code> to list all the csr.address_map objects that <em>are</em> in the chip.schema. Generally you'll find that it is the 'ignore' names that have changed, so fixing them is trivial.</p>
-<h1><a class="anchor" id="assembly-syntax"></a>
-Assembly Syntax</h1>
+<h2><a class="anchor" id="assembly-syntax"></a>
+Assembly Syntax</h2>
 <p>The assembly syntax is documented in <code>SYNTAX.md</code> file </p>
 </div><!-- contents -->
 </div><!-- doc-content -->

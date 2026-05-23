@@ -129,28 +129,34 @@ $(function(){initNavTree('saturation_elim_8h_source.html',''); initResizable(tru
   <div class="headertitle"><div class="title">saturationElim.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef MIDEND_SATURATIONELIM_H_</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define MIDEND_SATURATIONELIM_H_</span></div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span> </div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span></div>
-<div class="foldopen" id="foldopen00009" data-start="{" data-end="};">
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="class_p4_1_1_p4_tools_1_1_test_1_1_saturation_elim.html">    9</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_saturation_elim.html">SaturationElim</a> {</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="class_p4_1_1_saturation_elim.html#a04a1a853a06cc0182f48d9c0a21be5c1">isSaturationOperation</a>(<span class="keyword">const</span> IR::Expression *expr);</div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">static</span> <span class="keyword">const</span> IR::Mux *<a class="code hl_function" href="class_p4_1_1_saturation_elim.html#a5701ab48d56d48d7c016b84d51d0d201">eliminate</a>(<span class="keyword">const</span> IR::Operation_Binary *binary);</div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>};</div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="comment">/*</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="comment"> * SPDX-FileCopyrightText: 2022 The P4 Language Consortium</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment"> * SPDX-License-Identifier: Apache-2.0</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#ifndef MIDEND_SATURATIONELIM_H_</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#define MIDEND_SATURATIONELIM_H_</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span></div>
+<div class="foldopen" id="foldopen00015" data-start="{" data-end="};">
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="class_p4_1_1_p4_tools_1_1_test_1_1_saturation_elim.html">   15</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_saturation_elim.html">SaturationElim</a> {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="class_p4_1_1_saturation_elim.html#a04a1a853a06cc0182f48d9c0a21be5c1">isSaturationOperation</a>(<span class="keyword">const</span> IR::Expression *expr);</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    <span class="keyword">static</span> <span class="keyword">const</span> IR::Mux *<a class="code hl_function" href="class_p4_1_1_saturation_elim.html#a5701ab48d56d48d7c016b84d51d0d201">eliminate</a>(<span class="keyword">const</span> IR::Operation_Binary *binary);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>};</div>
 </div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_SATURATIONELIM_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_saturation_elim_html"><div class="ttname"><a href="class_p4_1_1_saturation_elim.html">P4::SaturationElim</a></div><div class="ttdoc">Contains utility functions for eliminating saturating arithmetic.</div><div class="ttdef"><b>Definition</b> saturationElim.h:9</div></div>
-<div class="ttc" id="aclass_p4_1_1_saturation_elim_html_a04a1a853a06cc0182f48d9c0a21be5c1"><div class="ttname"><a href="class_p4_1_1_saturation_elim.html#a04a1a853a06cc0182f48d9c0a21be5c1">P4::SaturationElim::isSaturationOperation</a></div><div class="ttdeci">static bool isSaturationOperation(const IR::Expression *expr)</div><div class="ttdef"><b>Definition</b> saturationElim.cpp:9</div></div>
-<div class="ttc" id="aclass_p4_1_1_saturation_elim_html_a5701ab48d56d48d7c016b84d51d0d201"><div class="ttname"><a href="class_p4_1_1_saturation_elim.html#a5701ab48d56d48d7c016b84d51d0d201">P4::SaturationElim::eliminate</a></div><div class="ttdeci">static const IR::Mux * eliminate(const IR::Operation_Binary *binary)</div><div class="ttdef"><b>Definition</b> saturationElim.cpp:14</div></div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_SATURATIONELIM_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1_saturation_elim_html"><div class="ttname"><a href="class_p4_1_1_saturation_elim.html">P4::SaturationElim</a></div><div class="ttdoc">Contains utility functions for eliminating saturating arithmetic.</div><div class="ttdef"><b>Definition</b> saturationElim.h:15</div></div>
+<div class="ttc" id="aclass_p4_1_1_saturation_elim_html_a04a1a853a06cc0182f48d9c0a21be5c1"><div class="ttname"><a href="class_p4_1_1_saturation_elim.html#a04a1a853a06cc0182f48d9c0a21be5c1">P4::SaturationElim::isSaturationOperation</a></div><div class="ttdeci">static bool isSaturationOperation(const IR::Expression *expr)</div><div class="ttdef"><b>Definition</b> saturationElim.cpp:13</div></div>
+<div class="ttc" id="aclass_p4_1_1_saturation_elim_html_a5701ab48d56d48d7c016b84d51d0d201"><div class="ttname"><a href="class_p4_1_1_saturation_elim.html#a5701ab48d56d48d7c016b84d51d0d201">P4::SaturationElim::eliminate</a></div><div class="ttdeci">static const IR::Mux * eliminate(const IR::Operation_Binary *binary)</div><div class="ttdef"><b>Definition</b> saturationElim.cpp:18</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:13</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

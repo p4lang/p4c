@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['formatter_0',['p4fmt (P4 Formatter)',['../p4fmt.html',1,'']]],
-  ['frontend_1',['Frontend',['../frontend.html',1,'']]]
+  ['ebpf_20backend_0',['eBPF Backend',['../ebpf_backend.html',1,'']]]
 ];

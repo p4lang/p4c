@@ -135,22 +135,24 @@ Directory dependency graph for walle:</div>
 <div class="center"><iframe scrolling="no" frameborder="0" src="dir_2417739ea001a185e7209f2a3797be42_dep.svg" width="112" height="104"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h1><a class="anchor" id="walle---json-to-binary-cruncher-tool"></a>
+Walle - JSON-to-binary cruncher tool</h1>
 <p>Walle serves as a layer of abstraction between the Tofino compiler and chip, presenting the chip's memory hierarchy to the compiler as a set of JSON structures that contain register/memory names and their values, while abstracting away the actual addresses of these registers and the methods by which they are programmed (DMA/direct PCIe writes/indirect instruction lists).</p>
 <p>Walle stores the exact structure of the chip's memory hierarchy in a "chip.schema" file, which has to be generated from raw register data whenever the chip registers change, and is then used afterwards to crunch compiler output into a binary config file. It can also be used to generate "template" JSON that looks like compiler output with the hardware's default values for all fields (in most cases, 0). These templates are used by the compiler to enforce the correct structure on its output data, and also in general should be regenerated whenever the chip's registers change.</p>
-<h1><a class="anchor" id="using-walle"></a>
-Using Walle</h1>
-<h2><a class="anchor" id="basic-usage"></a>
-Basic usage</h2>
-<h3><a class="anchor" id="generating-a-schema"></a>
-Generating a schema</h3>
+<h2><a class="anchor" id="using-walle"></a>
+Using Walle</h2>
+<h3><a class="anchor" id="basic-usage"></a>
+Basic usage</h3>
+<h4><a class="anchor" id="generating-a-schema"></a>
+Generating a schema</h4>
 <p>First, generate a chip schema. Invoke Walle with the <code>--generate-schema</code> flag followed by the directory containing raw CSV files output by csrCompiler. If the bfnregs repo is cloned into ~/bfnregs, this would be: </p><pre class="fragment">./walle.py --generate-schema ~/bfnregs/modules/tofino_regs/module/csv/
 </pre><p>This will generate a file named <code>chip.schema</code> in the current working directory, which is where it will look for the chip schema by default. The <code>--schema SCHEMA-FILE</code> flag can be used to point Walle to a different schema, or a different location to output the schema it is generating.</p>
-<h3><a class="anchor" id="crunching-compiler-output"></a>
-Crunching compiler output</h3>
+<h4><a class="anchor" id="crunching-compiler-output"></a>
+Crunching compiler output</h4>
 <p>The most common use case for Walle is taking multiple config JSONs and crunching them into a binary file Tofino's drivers can read. Just invoke Walle with the names of all relevant JSON files, and optionally the name of the file to output: </p><pre class="fragment">./walle.py cfg1.json cfg2.json cfg3.json -o chip_config.bin
 </pre><p>If the compiler was set up to dump all of its config output into an otherwise empty directory, shell wildcards can be used to shorten this command. If that dir is called 'cfgs', this would look like: </p><pre class="fragment">./walle.py cfgs/*.json -o chip_config.bin
-</pre><h3><a class="anchor" id="generating-templates"></a>
-Generating templates</h3>
+</pre><h4><a class="anchor" id="generating-templates"></a>
+Generating templates</h4>
 <p>Walle can be used to generate blank register templates to be filled in by the compiler. These templates are the JSON files that Walle would expect to see given the current chip schema, but with all of the data set to the corresponding hardware register's power-on default (in most cases, 0).</p>
 <p>To do so, Walle must be fed a JSON file enumerating the Semifore addressmap objects it should generate templates for. This file must take this structure:</p>
 <p>{ "generated": { "memories":[ // memory addressmap names ], "regs":[ // register addressmap names ] }, "ignored": { "memories":[ // memory addressmap names ], "regs":[ // register addressmap names ] } }</p>
@@ -160,22 +162,22 @@ Generating templates</h3>
 <p>Use the <code>--generate-templates</code> flag followed by the path to a file of the format just discussed to generate template JSONs in a directory called <code>templates</code> (which will be created in the working directory if it doesn't already exist): </p><pre class="fragment">./walle.py --generate-templates templates_file
 </pre><p>These files can then be copied to the compiler's source tree.</p>
 <p>The templates themselves end in the extension '.cfg.json'. Walle will also generate an identical hierarchy containing the bit-widths of each field, and these files end in the extension '.size.json'.</p>
-<h2><a class="anchor" id="advanced-usage"></a>
-Advanced usage</h2>
-<h3><a class="anchor" id="directing-the-crunch-process"></a>
-Directing the crunch process</h3>
+<h3><a class="anchor" id="advanced-usage"></a>
+Advanced usage</h3>
+<h4><a class="anchor" id="directing-the-crunch-process"></a>
+Directing the crunch process</h4>
 <p>Walle crunches by first loading all provided JSON files and verifying them against its chip schema, and then drilling down from specified "top-level" points in that cloud of JSON data. By default, these points are called <code>memories.top</code> and <code>regs.top</code> and represent the memory and register hierarchies of the chip, respectively.</p>
 <p>The <code>--top NAME</code> flag can be used to manually specify the top-level points to drill down from. Multiple <code>--top NAME</code> flags can be included, and if any are present the default top-level names are not used.</p>
 <p>This is equivalent to the default behavior: </p><pre class="fragment">./walle.py cfgs/*.json --top memories.top --top regs.top -o chip_config.bin
 </pre><p>One of them can be left out to only generate, say, only register configuration: </p><pre class="fragment">./walle.py cfgs/*.json --top regs.top -o chip_config.bin
 </pre><p>Walle calculates addresses relative to the top-level points specified, so it is important that these points only ever refer to actual top-level points in the Semifore register hierarchy. If it is desired to only generate, for example, config data for the MAU or one pipe, the top-level JSON files should be hand-tweaked to disable other parts of the configuration binary. See the specification of the JSON config format for more details.</p>
-<h3><a class="anchor" id="directing-the-template-generation-process"></a>
-Directing the template generation process</h3>
+<h4><a class="anchor" id="directing-the-template-generation-process"></a>
+Directing the template generation process</h4>
 <p>Walle generates a template file for each addressmap type specified in the <code>template_objects</code> file which sits in the same folder as the Walle script. If Walle encounters an instance of these addressmap types during template generation, it leaves that tree of the JSON data unexpanded and replaces it with a string indicating it expects a template to be plugged in to that location.</p>
 <p>The type names of these addressmaps can be found by viewing the Semifore HTML output of the reg and memory hierarchies and checking 'Header File Information' at the top of the page. The 'Type Name' field that then appears within each address map indicates the type which should be passed to Walle for templatization. Semifore incorrectly capitlizes the first letter of the type name - it should be all lowercase when specified to Walle.</p>
 <p>Note that the JSON fed to Walle does <em>not</em> have to follow the same template structure as specified in the <code>template_objects</code> file - this templatization control is just for convenience and reducing the file size of the generated blank templates.</p>
-<h1><a class="anchor" id="configuration-json-format"></a>
-Configuration JSON format</h1>
+<h2><a class="anchor" id="configuration-json-format"></a>
+Configuration JSON format</h2>
 <p>Walle consumes JSON files that specify values to be written registers named in the chip's Semifore specification. The structure of these JSON files directly mirrors the structure found in the chip's Semifore specification.</p>
 <p>Each JSON file contains a dictionary that represents one instance of a Semifore addressmap. Addressmap dictionaries' keys represent the Semifore names of registers and nested addressmaps, while the values are either:</p>
 <ul>
@@ -198,8 +200,8 @@ Configuration JSON format</h1>
 </ul>
 <p>Fields cannot be "disabled with 0s" the way registers and addressmaps can, since the register is the level of granularity at which the drivers write data.</p>
 <p>Config JSON can be hand-tweaked with 0's to produce a binary blob that only writes to specific registers and leaves everything else alone, in order to produce "initial boot" config blobs and then "soft reboot" config blobs.</p>
-<h3><a class="anchor" id="error-checking"></a>
-Error checking</h3>
+<h4><a class="anchor" id="error-checking"></a>
+Error checking</h4>
 <p>Walle will fail to generate output if:</p>
 <ul>
 <li>A field value ever exceeds the field's bit width as specified in the chip schema</li>
@@ -210,8 +212,8 @@ Error checking</h3>
 <p class="startli">In the long run, however, this flag should not be used and schema hashes should be consistent.</p>
 </li>
 </ul>
-<h1><a class="anchor" id="binary-blob-format"></a>
-Binary blob format</h1>
+<h2><a class="anchor" id="binary-blob-format"></a>
+Binary blob format</h2>
 <p>Walle generates a sequence of binary write instructions for the driver which are of the following types:</p>
 <ul>
 <li>Direct register write - For 32 bit registers that can be addressed directly from the PCIe bus, a simple address-data pair of the form: <pre class="fragment">  4 bytes: "\0\0\0R"
