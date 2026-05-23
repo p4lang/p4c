@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 iwyu_mappings := gcc.libc.imp libcxx.imp stl.c.headers.imp stl.c.headers.imp boost-1.75-all.imp gcc.stl.headers.imp gcc.symbols.imp
 
 all:  $(iwyu_mappings)

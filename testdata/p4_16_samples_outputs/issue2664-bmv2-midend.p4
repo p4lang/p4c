@@ -60,17 +60,17 @@ struct tuple_0 {
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("egress.ipv4_checksum") Checksum() ipv4_checksum_0;
-    @hidden action issue2664bmv2l60() {
+    @hidden action issue2664bmv2l66() {
         h.h.result = ipv4_checksum_0.update<tuple_0>((tuple_0){f0 = h.eth_hdr.dst_addr,f1 = h.eth_hdr.src_addr,f2 = h.eth_hdr.eth_type});
     }
-    @hidden table tbl_issue2664bmv2l60 {
+    @hidden table tbl_issue2664bmv2l66 {
         actions = {
-            issue2664bmv2l60();
+            issue2664bmv2l66();
         }
-        const default_action = issue2664bmv2l60();
+        const default_action = issue2664bmv2l66();
     }
     apply {
-        tbl_issue2664bmv2l60.apply();
+        tbl_issue2664bmv2l66.apply();
     }
 }
 

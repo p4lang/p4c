@@ -78,97 +78,97 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
         }
         default_action = NoAction_1();
     }
-    @hidden action psavariableindex108() {
+    @hidden action psavariableindex113() {
         b.ret = (bit<16>)a.vlan_tag[2w0].vid;
     }
-    @hidden action psavariableindex108_0() {
+    @hidden action psavariableindex113_0() {
         b.ret = (bit<16>)a.vlan_tag[2w1].vid;
     }
-    @hidden action psavariableindex108_1() {
+    @hidden action psavariableindex113_1() {
         b.ret = hsVar;
     }
-    @hidden action psavariableindex108_2() {
+    @hidden action psavariableindex113_2() {
         hsiVar = b.depth;
     }
-    @hidden action psavariableindex110() {
+    @hidden action psavariableindex115() {
         b.ret = (bit<16>)a.vlan_tag[2w0].vid + 16w5;
     }
-    @hidden action psavariableindex110_0() {
+    @hidden action psavariableindex115_0() {
         b.ret = (bit<16>)a.vlan_tag[2w1].vid + 16w5;
     }
-    @hidden action psavariableindex110_1() {
+    @hidden action psavariableindex115_1() {
         b.ret = hsVar;
     }
-    @hidden action psavariableindex110_2() {
+    @hidden action psavariableindex115_2() {
         hsiVar = b.depth;
     }
-    @hidden table tbl_psavariableindex108 {
+    @hidden table tbl_psavariableindex113 {
         actions = {
-            psavariableindex108_2();
+            psavariableindex113_2();
         }
-        const default_action = psavariableindex108_2();
+        const default_action = psavariableindex113_2();
     }
-    @hidden table tbl_psavariableindex108_0 {
+    @hidden table tbl_psavariableindex113_0 {
         actions = {
-            psavariableindex108();
+            psavariableindex113();
         }
-        const default_action = psavariableindex108();
+        const default_action = psavariableindex113();
     }
-    @hidden table tbl_psavariableindex108_1 {
+    @hidden table tbl_psavariableindex113_1 {
         actions = {
-            psavariableindex108_0();
+            psavariableindex113_0();
         }
-        const default_action = psavariableindex108_0();
+        const default_action = psavariableindex113_0();
     }
-    @hidden table tbl_psavariableindex108_2 {
+    @hidden table tbl_psavariableindex113_2 {
         actions = {
-            psavariableindex108_1();
+            psavariableindex113_1();
         }
-        const default_action = psavariableindex108_1();
+        const default_action = psavariableindex113_1();
     }
-    @hidden table tbl_psavariableindex110 {
+    @hidden table tbl_psavariableindex115 {
         actions = {
-            psavariableindex110_2();
+            psavariableindex115_2();
         }
-        const default_action = psavariableindex110_2();
+        const default_action = psavariableindex115_2();
     }
-    @hidden table tbl_psavariableindex110_0 {
+    @hidden table tbl_psavariableindex115_0 {
         actions = {
-            psavariableindex110();
+            psavariableindex115();
         }
-        const default_action = psavariableindex110();
+        const default_action = psavariableindex115();
     }
-    @hidden table tbl_psavariableindex110_1 {
+    @hidden table tbl_psavariableindex115_1 {
         actions = {
-            psavariableindex110_0();
+            psavariableindex115_0();
         }
-        const default_action = psavariableindex110_0();
+        const default_action = psavariableindex115_0();
     }
-    @hidden table tbl_psavariableindex110_2 {
+    @hidden table tbl_psavariableindex115_2 {
         actions = {
-            psavariableindex110_1();
+            psavariableindex115_1();
         }
-        const default_action = psavariableindex110_1();
+        const default_action = psavariableindex115_1();
     }
     apply {
-        tbl_psavariableindex108.apply();
+        tbl_psavariableindex113.apply();
         if (hsiVar == 2w0) {
-            tbl_psavariableindex108_0.apply();
+            tbl_psavariableindex113_0.apply();
         } else if (hsiVar == 2w1) {
-            tbl_psavariableindex108_1.apply();
+            tbl_psavariableindex113_1.apply();
         } else if (hsiVar >= 2w1) {
-            tbl_psavariableindex108_2.apply();
+            tbl_psavariableindex113_2.apply();
         }
         if (a.ethernet.isValid()) {
             ;
         } else {
-            tbl_psavariableindex110.apply();
+            tbl_psavariableindex115.apply();
             if (hsiVar == 2w0) {
-                tbl_psavariableindex110_0.apply();
+                tbl_psavariableindex115_0.apply();
             } else if (hsiVar == 2w1) {
-                tbl_psavariableindex110_1.apply();
+                tbl_psavariableindex115_1.apply();
             } else if (hsiVar >= 2w1) {
-                tbl_psavariableindex110_2.apply();
+                tbl_psavariableindex115_2.apply();
             }
             tbl_0.apply();
         }
@@ -181,19 +181,19 @@ control MyEC(inout EMPTY_H a, inout EMPTY_M b, in psa_egress_input_metadata_t c,
 }
 
 control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout header_t d, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
-    @hidden action psavariableindex133() {
+    @hidden action psavariableindex138() {
         buffer.emit<ethernet_t>(d.ethernet);
         buffer.emit<vlan_tag_h>(d.vlan_tag[0]);
         buffer.emit<vlan_tag_h>(d.vlan_tag[1]);
     }
-    @hidden table tbl_psavariableindex133 {
+    @hidden table tbl_psavariableindex138 {
         actions = {
-            psavariableindex133();
+            psavariableindex138();
         }
-        const default_action = psavariableindex133();
+        const default_action = psavariableindex138();
     }
     apply {
-        tbl_psavariableindex133.apply();
+        tbl_psavariableindex138.apply();
     }
 }
 

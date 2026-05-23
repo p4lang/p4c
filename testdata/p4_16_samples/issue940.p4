@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2017 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 @deprecated("Please use verify_checksum/update_checksum instead.")
 extern Checksum16 {
     Checksum16();

@@ -33,42 +33,42 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<16> tmp;
     @name("ingress.hPSe_0") bit<8> hPSe;
     @name("ingress.hPSe_1") bit<8> hPSe_2;
-    @hidden action gauntlet_side_effects_in_muxbmv2l36() {
+    @hidden action gauntlet_side_effects_in_muxbmv2l42() {
         h.h.a = hPSe;
         tmp = 16w2;
     }
-    @hidden action gauntlet_side_effects_in_muxbmv2l36_0() {
+    @hidden action gauntlet_side_effects_in_muxbmv2l42_0() {
         h.h.b = hPSe_2;
         tmp = 16w2;
     }
-    @hidden action gauntlet_side_effects_in_muxbmv2l36_1() {
+    @hidden action gauntlet_side_effects_in_muxbmv2l42_1() {
         h.eth_hdr.eth_type = tmp;
     }
-    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l36 {
+    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l42 {
         actions = {
-            gauntlet_side_effects_in_muxbmv2l36();
+            gauntlet_side_effects_in_muxbmv2l42();
         }
-        const default_action = gauntlet_side_effects_in_muxbmv2l36();
+        const default_action = gauntlet_side_effects_in_muxbmv2l42();
     }
-    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l36_0 {
+    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l42_0 {
         actions = {
-            gauntlet_side_effects_in_muxbmv2l36_0();
+            gauntlet_side_effects_in_muxbmv2l42_0();
         }
-        const default_action = gauntlet_side_effects_in_muxbmv2l36_0();
+        const default_action = gauntlet_side_effects_in_muxbmv2l42_0();
     }
-    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l36_1 {
+    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l42_1 {
         actions = {
-            gauntlet_side_effects_in_muxbmv2l36_1();
+            gauntlet_side_effects_in_muxbmv2l42_1();
         }
-        const default_action = gauntlet_side_effects_in_muxbmv2l36_1();
+        const default_action = gauntlet_side_effects_in_muxbmv2l42_1();
     }
     apply {
         if (h.eth_hdr.src_addr == 48w5) {
-            tbl_gauntlet_side_effects_in_muxbmv2l36.apply();
+            tbl_gauntlet_side_effects_in_muxbmv2l42.apply();
         } else {
-            tbl_gauntlet_side_effects_in_muxbmv2l36_0.apply();
+            tbl_gauntlet_side_effects_in_muxbmv2l42_0.apply();
         }
-        tbl_gauntlet_side_effects_in_muxbmv2l36_1.apply();
+        tbl_gauntlet_side_effects_in_muxbmv2l42_1.apply();
     }
 }
 

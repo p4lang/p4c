@@ -104,36 +104,36 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampleselect_tuple135() {
+    @hidden action psaexampleselect_tuple141() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleselect_tuple135 {
+    @hidden table tbl_psaexampleselect_tuple141 {
         actions = {
-            psaexampleselect_tuple135();
+            psaexampleselect_tuple141();
         }
-        const default_action = psaexampleselect_tuple135();
+        const default_action = psaexampleselect_tuple141();
     }
     apply {
-        tbl_psaexampleselect_tuple135.apply();
+        tbl_psaexampleselect_tuple141.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaexampleselect_tuple151() {
+    @hidden action psaexampleselect_tuple157() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleselect_tuple151 {
+    @hidden table tbl_psaexampleselect_tuple157 {
         actions = {
-            psaexampleselect_tuple151();
+            psaexampleselect_tuple157();
         }
-        const default_action = psaexampleselect_tuple151();
+        const default_action = psaexampleselect_tuple157();
     }
     apply {
-        tbl_psaexampleselect_tuple151.apply();
+        tbl_psaexampleselect_tuple157.apply();
     }
 }
 

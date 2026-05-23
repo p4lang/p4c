@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2020 VMware, Inc.
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <!-- 
 Documentation Inclusion:
 This README is integrated as a subsection of the "uBPF Backend" page in the P4 compiler documentation.

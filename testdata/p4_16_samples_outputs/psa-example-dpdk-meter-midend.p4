@@ -95,18 +95,18 @@ control egress(inout headers hdr, inout metadata_t user_meta, in psa_egress_inpu
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampledpdkmeter92() {
+    @hidden action psaexampledpdkmeter98() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psaexampledpdkmeter92 {
+    @hidden table tbl_psaexampledpdkmeter98 {
         actions = {
-            psaexampledpdkmeter92();
+            psaexampledpdkmeter98();
         }
-        const default_action = psaexampledpdkmeter92();
+        const default_action = psaexampledpdkmeter98();
     }
     apply {
-        tbl_psaexampledpdkmeter92.apply();
+        tbl_psaexampledpdkmeter98.apply();
     }
 }
 

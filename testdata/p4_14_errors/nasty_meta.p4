@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2019 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* -*- P4_14 -*- */
 
 /*************************************************************************

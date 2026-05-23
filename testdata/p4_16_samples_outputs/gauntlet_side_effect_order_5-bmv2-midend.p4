@@ -17,35 +17,35 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.val_2") bit<48> val_1;
-    @hidden action gauntlet_side_effect_order_5bmv2l19() {
+    @hidden action gauntlet_side_effect_order_5bmv2l25() {
         val_1 = 48w3;
     }
-    @hidden action gauntlet_side_effect_order_5bmv2l25() {
+    @hidden action gauntlet_side_effect_order_5bmv2l31() {
         val_1 = 48w1452;
     }
-    @hidden action gauntlet_side_effect_order_5bmv2l22() {
+    @hidden action gauntlet_side_effect_order_5bmv2l28() {
         val_1 = 48w12;
     }
     @hidden action act() {
         h.eth_hdr.src_addr = val_1;
-    }
-    @hidden table tbl_gauntlet_side_effect_order_5bmv2l19 {
-        actions = {
-            gauntlet_side_effect_order_5bmv2l19();
-        }
-        const default_action = gauntlet_side_effect_order_5bmv2l19();
-    }
-    @hidden table tbl_gauntlet_side_effect_order_5bmv2l22 {
-        actions = {
-            gauntlet_side_effect_order_5bmv2l22();
-        }
-        const default_action = gauntlet_side_effect_order_5bmv2l22();
     }
     @hidden table tbl_gauntlet_side_effect_order_5bmv2l25 {
         actions = {
             gauntlet_side_effect_order_5bmv2l25();
         }
         const default_action = gauntlet_side_effect_order_5bmv2l25();
+    }
+    @hidden table tbl_gauntlet_side_effect_order_5bmv2l28 {
+        actions = {
+            gauntlet_side_effect_order_5bmv2l28();
+        }
+        const default_action = gauntlet_side_effect_order_5bmv2l28();
+    }
+    @hidden table tbl_gauntlet_side_effect_order_5bmv2l31 {
+        actions = {
+            gauntlet_side_effect_order_5bmv2l31();
+        }
+        const default_action = gauntlet_side_effect_order_5bmv2l31();
     }
     @hidden table tbl_act {
         actions = {
@@ -56,11 +56,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         if (h.eth_hdr.src_addr <= 48w100) {
             if (h.eth_hdr.src_addr <= 48w50) {
-                tbl_gauntlet_side_effect_order_5bmv2l19.apply();
+                tbl_gauntlet_side_effect_order_5bmv2l25.apply();
             } else {
-                tbl_gauntlet_side_effect_order_5bmv2l22.apply();
+                tbl_gauntlet_side_effect_order_5bmv2l28.apply();
                 if (h.eth_hdr.src_addr <= 48w25) {
-                    tbl_gauntlet_side_effect_order_5bmv2l25.apply();
+                    tbl_gauntlet_side_effect_order_5bmv2l31.apply();
                 }
             }
         }

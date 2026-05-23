@@ -54,17 +54,17 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 }
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    @hidden action issue242l73() {
+    @hidden action issue242l79() {
         standard_meta.egress_spec = 9w0;
     }
-    @hidden table tbl_issue242l73 {
+    @hidden table tbl_issue242l79 {
         actions = {
-            issue242l73();
+            issue242l79();
         }
-        const default_action = issue242l73();
+        const default_action = issue242l79();
     }
     apply {
-        tbl_issue242l73.apply();
+        tbl_issue242l79.apply();
     }
 }
 

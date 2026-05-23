@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # ccache integration for p4c builds.
 
 include_guard(GLOBAL)

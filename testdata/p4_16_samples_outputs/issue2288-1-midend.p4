@@ -9,19 +9,19 @@ struct Headers {
 
 control ingress(inout Headers h) {
     @name("ingress.tmp") bit<8> tmp;
-    @hidden action issue22881l22() {
+    @hidden action issue22881l28() {
         tmp = h.h.a;
         h.h.a = 8w3;
         h.h.b = tmp | 8w1;
     }
-    @hidden table tbl_issue22881l22 {
+    @hidden table tbl_issue22881l28 {
         actions = {
-            issue22881l22();
+            issue22881l28();
         }
-        const default_action = issue22881l22();
+        const default_action = issue22881l28();
     }
     apply {
-        tbl_issue22881l22.apply();
+        tbl_issue22881l28.apply();
     }
 }
 

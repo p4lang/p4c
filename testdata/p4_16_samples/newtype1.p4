@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 typedef bit<9> Narrow_t;
 type Narrow_t Narrow;
 typedef bit<32> Wide_t;

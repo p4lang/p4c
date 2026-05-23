@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_ENV_H_
 

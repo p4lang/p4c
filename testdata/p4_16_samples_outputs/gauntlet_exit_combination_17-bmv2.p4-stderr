@@ -1,12 +1,12 @@
-gauntlet_exit_combination_17-bmv2.p4(30): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+gauntlet_exit_combination_17-bmv2.p4(36): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
             48w1 : exact @name("key") ;
             ^^^^
-gauntlet_exit_combination_17-bmv2.p4(38): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+gauntlet_exit_combination_17-bmv2.p4(44): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
             48w1 : exact @name("key") ;
             ^^^^
-gauntlet_exit_combination_17-bmv2.p4(30): [--Wwarn=mismatch] warning: 48w1: Constant key field
+gauntlet_exit_combination_17-bmv2.p4(36): [--Wwarn=mismatch] warning: 48w1: Constant key field
             48w1 : exact @name("key") ;
             ^^^^
-gauntlet_exit_combination_17-bmv2.p4(38): [--Wwarn=mismatch] warning: 48w1: Constant key field
+gauntlet_exit_combination_17-bmv2.p4(44): [--Wwarn=mismatch] warning: 48w1: Constant key field
             48w1 : exact @name("key") ;
             ^^^^

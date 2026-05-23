@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_
 #define BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_
 

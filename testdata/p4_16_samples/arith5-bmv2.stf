@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # header = { int<32> a; bit<8> b; int<64> c; }
 # In the output C = A >> B
 

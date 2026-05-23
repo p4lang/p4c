@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "parserUnroll.h"
 
 #include "interpreter.h"

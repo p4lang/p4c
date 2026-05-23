@@ -15,20 +15,20 @@ struct Headers {
 
 control ingress(inout Headers h) {
     @name("ingress.x") H x_0;
-    @hidden action issue2890l17() {
+    @hidden action issue2890l23() {
         x_0.setInvalid();
         x_0 = h.h;
         x_0.a = 16w2;
         h.e.e = 16w2;
     }
-    @hidden table tbl_issue2890l17 {
+    @hidden table tbl_issue2890l23 {
         actions = {
-            issue2890l17();
+            issue2890l23();
         }
-        const default_action = issue2890l17();
+        const default_action = issue2890l23();
     }
     apply {
-        tbl_issue2890l17.apply();
+        tbl_issue2890l23.apply();
     }
 }
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add pipe_tbl 0 key.headers_ethernet_etherType:0x0800 pipe_fill_metadata()
 add pipe_meta_based_tbl 0 key.meta_etherType:0x0800 pipe_change_etherType()
 

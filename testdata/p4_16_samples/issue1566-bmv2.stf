@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2018 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Here is a created-by-hand walkthrough of what the P4 program
 # issue1566-bmv2.p4 _should_ do when it receives a packet with an
 # etherType field of 0xcafe:

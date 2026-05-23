@@ -1,15 +1,15 @@
 control c(inout bit<32> x) {
-    @hidden action inlinefunction11() {
+    @hidden action inlinefunction17() {
         x = x + x;
     }
-    @hidden table tbl_inlinefunction11 {
+    @hidden table tbl_inlinefunction17 {
         actions = {
-            inlinefunction11();
+            inlinefunction17();
         }
-        const default_action = inlinefunction11();
+        const default_action = inlinefunction17();
     }
     apply {
-        tbl_inlinefunction11.apply();
+        tbl_inlinefunction17.apply();
     }
 }
 

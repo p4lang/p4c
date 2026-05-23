@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef CONTROL_PLANE_P4INFOAPI_H_
 #define CONTROL_PLANE_P4INFOAPI_H_
 

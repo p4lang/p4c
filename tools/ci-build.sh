@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script for building P4C for continuous integration builds.
 
 set -e  # Exit on error.
@@ -176,7 +180,8 @@ function build_bmv2() {
                         protobuf-compiler-grpc \
                         libthrift-dev \
                         thrift-compiler \
-                        libxxhash-dev"
+                        libxxhash-dev \
+                        libjsoncpp-dev"
 
     # TODO: Remove this check once 18.04 is deprecated.
     if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then

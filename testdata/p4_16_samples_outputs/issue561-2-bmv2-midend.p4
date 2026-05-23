@@ -59,36 +59,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         const default_action = NoAction_1();
     }
-    @hidden action issue5612bmv2l69() {
+    @hidden action issue5612bmv2l75() {
         hdr.u_short.setValid();
         hdr.u_short.data = 16w0xffff;
         hdr.u_byte.setInvalid();
         hdr.u_short.setInvalid();
     }
-    @hidden action issue5612bmv2l73() {
+    @hidden action issue5612bmv2l79() {
         hdr.u_byte.setValid();
         hdr.u_byte.data = 8w0xff;
         hdr.u_short.setInvalid();
         hdr.u_byte.setInvalid();
     }
-    @hidden table tbl_issue5612bmv2l69 {
+    @hidden table tbl_issue5612bmv2l75 {
         actions = {
-            issue5612bmv2l69();
+            issue5612bmv2l75();
         }
-        const default_action = issue5612bmv2l69();
+        const default_action = issue5612bmv2l75();
     }
-    @hidden table tbl_issue5612bmv2l73 {
+    @hidden table tbl_issue5612bmv2l79 {
         actions = {
-            issue5612bmv2l73();
+            issue5612bmv2l79();
         }
-        const default_action = issue5612bmv2l73();
+        const default_action = issue5612bmv2l79();
     }
     apply {
         debug_hdr_0.apply();
         if (hdr.u_short.isValid()) {
-            tbl_issue5612bmv2l69.apply();
+            tbl_issue5612bmv2l75.apply();
         } else if (hdr.u_byte.isValid()) {
-            tbl_issue5612bmv2l73.apply();
+            tbl_issue5612bmv2l79.apply();
         }
     }
 }

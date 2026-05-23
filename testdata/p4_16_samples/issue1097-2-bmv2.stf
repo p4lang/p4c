@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 packet 0 00 17 00
 expect 0 00 17 41
 

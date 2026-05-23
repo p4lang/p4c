@@ -1,6 +1,6 @@
-select-struct.p4(11): [--Werror=type-error] error: Expression '{ h1 }' with a component of type 'struct H' cannot be used in 'select'
+select-struct.p4(17): [--Werror=type-error] error: Expression '{ h1 }' with a component of type 'struct H' cannot be used in 'select'
         transition select (h1) {
                            ^^
-select-struct.p4(3)
+select-struct.p4(9)
 struct H {
        ^

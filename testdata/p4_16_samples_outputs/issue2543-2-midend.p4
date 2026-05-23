@@ -12,21 +12,21 @@ struct Headers {
 
 control ingress(inout Headers h) {
     @name("ingress.tmp") ethernet_t tmp;
-    @hidden action issue25432l17() {
+    @hidden action issue25432l23() {
         tmp.setValid();
         tmp.dst_addr = 48w1;
         tmp.src_addr = 48w1;
         tmp.eth_type = 16w9;
         h.eth_hdr = tmp;
     }
-    @hidden table tbl_issue25432l17 {
+    @hidden table tbl_issue25432l23 {
         actions = {
-            issue25432l17();
+            issue25432l23();
         }
-        const default_action = issue25432l17();
+        const default_action = issue25432l23();
     }
     apply {
-        tbl_issue25432l17.apply();
+        tbl_issue25432l23.apply();
     }
 }
 

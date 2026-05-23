@@ -1,12 +1,12 @@
-issue2289.p4(44): [--Wwarn=unused] warning: 'byaA' is unused
+issue2289.p4(50): [--Wwarn=unused] warning: 'byaA' is unused
     action simple_action(out bit<16> byaA) {
                                      ^^^^
-issue2289.p4(44): [--Wwarn=uninitialized-out-param] warning: out parameter 'byaA' may be uninitialized when 'simple_action' terminates
+issue2289.p4(50): [--Wwarn=uninitialized-out-param] warning: out parameter 'byaA' may be uninitialized when 'simple_action' terminates
     action simple_action(out bit<16> byaA) {
                                      ^^^^
-issue2289.p4(44)
+issue2289.p4(50)
     action simple_action(out bit<16> byaA) {
            ^^^^^^^^^^^^^
-issue2289.p4(44): [--Wwarn=uninitialized-use] warning: byaA may be uninitialized
+issue2289.p4(50): [--Wwarn=uninitialized-use] warning: byaA may be uninitialized
     action simple_action(out bit<16> byaA) {
                                      ^^^^

@@ -11,17 +11,17 @@ struct h_h_bit1 {
 }
 
 control c(out bool x) {
-    @hidden action issue32911l17() {
+    @hidden action issue32911l23() {
         x = true;
     }
-    @hidden table tbl_issue32911l17 {
+    @hidden table tbl_issue32911l23 {
         actions = {
-            issue32911l17();
+            issue32911l23();
         }
-        const default_action = issue32911l17();
+        const default_action = issue32911l23();
     }
     apply {
-        tbl_issue32911l17.apply();
+        tbl_issue32911l23.apply();
     }
 }
 

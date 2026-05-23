@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /**
  * Basic test that assigns a value to <hdr_stack>.next
  */

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2023 Google LLC
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_
 

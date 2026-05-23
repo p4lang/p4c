@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # P4Runtime PTF test for ternary2-bmv2
 # p4testgen seed: 12
 
