@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // The RemoveRedundantParsers pass removes applications of parsers which
 // unconditionally transition to the accept state from the start state.
 // For example:

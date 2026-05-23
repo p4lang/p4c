@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include <gtest/gtest.h>
 
 #include "frontends/common/parseInput.h"

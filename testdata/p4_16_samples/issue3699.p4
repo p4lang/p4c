@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 const bit<4> one = 1;
 const bit<4> max = 0xf;
 const bit<4> value = max |+| one;
