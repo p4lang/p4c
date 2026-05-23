@@ -48,17 +48,17 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action arraycopybmv2l34() {
+    @hidden action arraycopybmv2l40() {
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_arraycopybmv2l34 {
+    @hidden table tbl_arraycopybmv2l40 {
         actions = {
-            arraycopybmv2l34();
+            arraycopybmv2l40();
         }
-        const default_action = arraycopybmv2l34();
+        const default_action = arraycopybmv2l40();
     }
     apply {
-        tbl_arraycopybmv2l34.apply();
+        tbl_arraycopybmv2l40.apply();
     }
 }
 

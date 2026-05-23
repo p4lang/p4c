@@ -37,21 +37,21 @@ control c(out bit<32> size) {
     @name("c.h2") H1 h2_2;
     @name("c.h1_0") H h1_3;
     @name("c.h2_0") H1 h2_3;
-    @hidden action issue1717l50() {
+    @hidden action issue1717l56() {
         h1_2.setInvalid();
         h2_2.setInvalid();
         h1_3 = h1_2;
         h2_3 = h2_2;
         size = h1_3.isValid + (h2_3.minSizeInBits == 8w32 ? 32w117 : 32w162);
     }
-    @hidden table tbl_issue1717l50 {
+    @hidden table tbl_issue1717l56 {
         actions = {
-            issue1717l50();
+            issue1717l56();
         }
-        const default_action = issue1717l50();
+        const default_action = issue1717l56();
     }
     apply {
-        tbl_issue1717l50.apply();
+        tbl_issue1717l56.apply();
     }
 }
 

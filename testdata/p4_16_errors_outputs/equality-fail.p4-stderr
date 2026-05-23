@@ -1,72 +1,72 @@
-equality-fail.p4(13): [--Wwarn=unused] warning: 'b' is unused
+equality-fail.p4(19): [--Wwarn=unused] warning: 'b' is unused
     varbit<32> b;
                ^
-equality-fail.p4(15): [--Wwarn=unused] warning: 'h2' is unused
+equality-fail.p4(21): [--Wwarn=unused] warning: 'h2' is unused
     H h2;
       ^^
-equality-fail.p4(23): [--Werror=type-error] error: 'a' with type 'varbit<32>' cannot be compared to 'h1' with type 'header H'
+equality-fail.p4(29): [--Werror=type-error] error: 'a' with type 'varbit<32>' cannot be compared to 'h1' with type 'header H'
         if (a == h1) {
             ^
-equality-fail.p4(12)
+equality-fail.p4(18)
     varbit<32> a;
     ^^^^^^^^^^
-equality-fail.p4(23)
+equality-fail.p4(29)
         if (a == h1) {
                  ^^
-equality-fail.p4(1)
+equality-fail.p4(7)
 header H {
        ^
-equality-fail.p4(25): [--Werror=type-error] error: 'h1' with type 'header H' cannot be compared to 's2' with type 'struct S'
+equality-fail.p4(31): [--Werror=type-error] error: 'h1' with type 'header H' cannot be compared to 's2' with type 'struct S'
         } else if (h1 == s2) {
                    ^^
-equality-fail.p4(1)
+equality-fail.p4(7)
 header H {
        ^
-equality-fail.p4(25)
+equality-fail.p4(31)
         } else if (h1 == s2) {
                          ^^
-equality-fail.p4(6)
+equality-fail.p4(12)
 struct S {
        ^
-equality-fail.p4(27): [--Werror=type-error] error: 's1' with type 'struct S' cannot be compared to 'a2' with type 'header H[2]'
+equality-fail.p4(33): [--Werror=type-error] error: 's1' with type 'struct S' cannot be compared to 'a2' with type 'header H[2]'
         } else if (s1 == a2) {
                    ^^
-equality-fail.p4(6)
+equality-fail.p4(12)
 struct S {
        ^
-equality-fail.p4(27)
+equality-fail.p4(33)
         } else if (s1 == a2) {
                          ^^
-equality-fail.p4(18)
+equality-fail.p4(24)
     H[2] a1;
     ^^^^
-equality-fail.p4(29): [--Werror=type-error] error: 'a1' with type 'header H[2]' cannot be compared to 'h1.a' with type 'bit<32>'
+equality-fail.p4(35): [--Werror=type-error] error: 'a1' with type 'header H[2]' cannot be compared to 'h1.a' with type 'bit<32>'
         } else if (a1 == h1.a) {
                    ^^
-equality-fail.p4(18)
+equality-fail.p4(24)
     H[2] a1;
     ^^^^
-equality-fail.p4(29)
+equality-fail.p4(35)
         } else if (a1 == h1.a) {
                          ^^^^
-equality-fail.p4(31): [--Werror=type-error] error: 'a' with type 'varbit<32>' cannot be compared to 'h1.a' with type 'bit<32>'
+equality-fail.p4(37): [--Werror=type-error] error: 'a' with type 'varbit<32>' cannot be compared to 'h1.a' with type 'bit<32>'
         } else if (a == h1.a) {
                    ^
-equality-fail.p4(12)
+equality-fail.p4(18)
     varbit<32> a;
     ^^^^^^^^^^
-equality-fail.p4(31)
+equality-fail.p4(37)
         } else if (a == h1.a) {
                         ^^^^
-equality-fail.p4(33): [--Werror=type-error] error: 'a1' with type 'header H[2]' cannot be compared to 'a3' with type 'header H[3]'
+equality-fail.p4(39): [--Werror=type-error] error: 'a1' with type 'header H[2]' cannot be compared to 'a3' with type 'header H[3]'
         } else if (a1 == a3) {
                    ^^
-equality-fail.p4(18)
+equality-fail.p4(24)
     H[2] a1;
     ^^^^
-equality-fail.p4(33)
+equality-fail.p4(39)
         } else if (a1 == a3) {
                          ^^
-equality-fail.p4(20)
+equality-fail.p4(26)
     H[3] a3;
     ^^^^

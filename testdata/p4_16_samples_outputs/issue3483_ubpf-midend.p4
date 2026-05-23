@@ -61,33 +61,33 @@ control pipe(inout Headers_t headers, inout Meta meta, inout standard_metadata u
         }
         default_action = NoAction_1();
     }
-    @hidden action issue3483_ubpf54() {
+    @hidden action issue3483_ubpf60() {
         meta.b = 1w1;
     }
-    @hidden action issue3483_ubpf59() {
+    @hidden action issue3483_ubpf65() {
         meta.b = 1w0;
     }
-    @hidden table tbl_issue3483_ubpf54 {
+    @hidden table tbl_issue3483_ubpf60 {
         actions = {
-            issue3483_ubpf54();
+            issue3483_ubpf60();
         }
-        const default_action = issue3483_ubpf54();
+        const default_action = issue3483_ubpf60();
     }
-    @hidden table tbl_issue3483_ubpf59 {
+    @hidden table tbl_issue3483_ubpf65 {
         actions = {
-            issue3483_ubpf59();
+            issue3483_ubpf65();
         }
-        const default_action = issue3483_ubpf59();
+        const default_action = issue3483_ubpf65();
     }
     apply {
         if (Check_src_ip_0.apply().hit) {
             ;
         } else {
-            tbl_issue3483_ubpf54.apply();
+            tbl_issue3483_ubpf60.apply();
         }
         switch (Check_src_ip_0.apply().action_run) {
             Reject: {
-                tbl_issue3483_ubpf59.apply();
+                tbl_issue3483_ubpf65.apply();
             }
             NoAction_1: {
             }
@@ -96,18 +96,18 @@ control pipe(inout Headers_t headers, inout Meta meta, inout standard_metadata u
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action issue3483_ubpf68() {
+    @hidden action issue3483_ubpf74() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_issue3483_ubpf68 {
+    @hidden table tbl_issue3483_ubpf74 {
         actions = {
-            issue3483_ubpf68();
+            issue3483_ubpf74();
         }
-        const default_action = issue3483_ubpf68();
+        const default_action = issue3483_ubpf74();
     }
     apply {
-        tbl_issue3483_ubpf68.apply();
+        tbl_issue3483_ubpf74.apply();
     }
 }
 

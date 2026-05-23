@@ -1,6 +1,6 @@
-issue2441.p4(22): [--Werror=type-error] error: main: could not infer a type for variable H
+issue2441.p4(28): [--Werror=type-error] error: main: could not infer a type for variable H
  P() main;
      ^^^^
-issue2441.p4(17)
+issue2441.p4(23)
  package P<H, M>(C<H, M> c = nothing<H>());
            ^

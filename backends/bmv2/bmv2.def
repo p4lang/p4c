@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 // Represent a signed integer value using just 'width' bits.
 // Special operation provided by BMv2

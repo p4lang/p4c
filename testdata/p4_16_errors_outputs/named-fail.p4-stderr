@@ -1,12 +1,12 @@
-named-fail.p4(3): [--Wwarn=unused] warning: control 'c' is unused
+named-fail.p4(9): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-named-fail.p4(8): [--Werror=invalid] error: xv: either all or none of the arguments of a call must be named
+named-fail.p4(14): [--Werror=invalid] error: xv: either all or none of the arguments of a call must be named
         f(y = b, xv); // not all arguments named
                  ^^
-named-fail.p4(9): [--Werror=duplicate] error: y = b and y = b: same argument name
+named-fail.p4(15): [--Werror=duplicate] error: y = b and y = b: same argument name
         f(y = b, y = b); // same argument twice
           ^
-named-fail.p4(9)
+named-fail.p4(15)
         f(y = b, y = b); // same argument twice
                  ^

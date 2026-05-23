@@ -1,15 +1,15 @@
 control c(out bool b) {
-    @hidden action newtype1l12() {
+    @hidden action newtype1l18() {
         b = false;
     }
-    @hidden table tbl_newtype1l12 {
+    @hidden table tbl_newtype1l18 {
         actions = {
-            newtype1l12();
+            newtype1l18();
         }
-        const default_action = newtype1l12();
+        const default_action = newtype1l18();
     }
     apply {
-        tbl_newtype1l12.apply();
+        tbl_newtype1l18.apply();
     }
 }
 

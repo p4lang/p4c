@@ -1,12 +1,12 @@
-signed.p4(1): [--Wwarn=unused] warning: control 'c' is unused
+signed.p4(7): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-signed.p4(5): [--Werror=type-error] error: 'signed_int1[7:0] = signed_int2'
+signed.p4(11): [--Werror=type-error] error: 'signed_int1[7:0] = signed_int2'
         signed_int1[7:0] = signed_int2;
                          ^
   ---- Actual error:
   Cannot cast implicitly type 'int<8>' to type 'bit<8>'
   ---- Originating from:
-signed.p4(5): Source expression 'signed_int2' produces a result of type 'int<8>' which cannot be assigned to a left-value with type 'bit<8>'
+signed.p4(11): Source expression 'signed_int2' produces a result of type 'int<8>' which cannot be assigned to a left-value with type 'bit<8>'
           signed_int1[7:0] = signed_int2;
                              ^^^^^^^^^^^

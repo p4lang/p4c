@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #define HDR1_SIZE 2
 header_type hdr1_t {

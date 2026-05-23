@@ -1,15 +1,15 @@
-issue1304.p4(7): [--Wwarn=unused] warning: 'CONST_VAL' is unused
+issue1304.p4(13): [--Wwarn=unused] warning: 'CONST_VAL' is unused
 const bit<8> CONST_VAL = 8w10;
              ^^^^^^^^^
-issue1304.p4(32): [--Wwarn=unused] warning: control 'MyVerifyChecksum' is unused
+issue1304.p4(38): [--Wwarn=unused] warning: control 'MyVerifyChecksum' is unused
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
         ^^^^^^^^^^^^^^^^
-issue1304.p4(54): [--Wwarn=unused] warning: control 'MyComputeChecksum' is unused
+issue1304.p4(60): [--Wwarn=unused] warning: control 'MyComputeChecksum' is unused
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
         ^^^^^^^^^^^^^^^^^
-issue1304.p4(32): [--Winfo=removed] info: removing control 'MyVerifyChecksum'
+issue1304.p4(38): [--Winfo=removed] info: removing control 'MyVerifyChecksum'
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
         ^^^^^^^^^^^^^^^^
-issue1304.p4(54): [--Winfo=removed] info: removing control 'MyComputeChecksum'
+issue1304.p4(60): [--Winfo=removed] info: removing control 'MyComputeChecksum'
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
         ^^^^^^^^^^^^^^^^^

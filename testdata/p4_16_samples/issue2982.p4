@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control ComputeChecksum<H>(inout H hdr);
 
 extern void update_checksum_with_payload<T, O>(in T data, out O ck);

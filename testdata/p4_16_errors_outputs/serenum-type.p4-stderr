@@ -1,34 +1,34 @@
-serenum-type.p4(8): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed; note that type-declared types are not allowed even if they are fixed-size
+serenum-type.p4(14): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed; note that type-declared types are not allowed even if they are fixed-size
 enum EthT EthTypes {
      ^^^^
-serenum-type.p4(34): [--Werror=type-error] error: 'SelectExpression'
+serenum-type.p4(40): [--Werror=type-error] error: 'SelectExpression'
         transition select(e.type) {
                    ^
   ---- Actual error:
-serenum-type.p4(8): Cannot cast implicitly type 'EthTypes' to type 'EthT'
+serenum-type.p4(14): Cannot cast implicitly type 'EthTypes' to type 'EthT'
   enum EthT EthTypes {
             ^^^^^^^^
-serenum-type.p4(6)
+serenum-type.p4(12)
   type Base2_t EthT;
                ^^^^
   ---- Originating from:
-serenum-type.p4(35): 'match' case label 'EthTypes.IPv4' has type 'EthTypes' which does not match the expected type 'EthT'
+serenum-type.p4(41): 'match' case label 'EthTypes.IPv4' has type 'EthTypes' which does not match the expected type 'EthT'
               EthTypes.IPv4: accept;
               ^^^^^^^^^^^^^
-serenum-type.p4(8)
+serenum-type.p4(14)
   enum EthT EthTypes {
             ^^^^^^^^
-serenum-type.p4(6)
+serenum-type.p4(12)
   type Base2_t EthT;
                ^^^^
-serenum-type.p4(49): [--Werror=type-error] error: '(EthTypes)16w0'
+serenum-type.p4(55): [--Werror=type-error] error: '(EthTypes)16w0'
             h.eth.type = (EthTypes)(bit<16>)0;
                          ^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
-serenum-type.p4(8): Cannot unify type 'bit<16>' with type 'EthTypes'
+serenum-type.p4(14): Cannot unify type 'bit<16>' with type 'EthTypes'
   enum EthT EthTypes {
             ^^^^^^^^
   ---- Originating from:
-serenum-type.p4(8): Cannot cast from 'bit<16>' to 'EthTypes'
+serenum-type.p4(14): Cannot cast from 'bit<16>' to 'EthTypes'
   enum EthT EthTypes {
             ^^^^^^^^

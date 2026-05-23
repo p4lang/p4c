@@ -3,17 +3,17 @@ control ingress(inout bit<8> h) {
     @name("ingress.a") action a() {
         h[0:0] = 1w0;
     }
-    @hidden action issue2147l6() {
+    @hidden action issue2147l12() {
         tmp_0 = h[7:1];
     }
-    @hidden action issue2147l8() {
+    @hidden action issue2147l14() {
         h[7:1] = tmp_0;
     }
-    @hidden table tbl_issue2147l6 {
+    @hidden table tbl_issue2147l12 {
         actions = {
-            issue2147l6();
+            issue2147l12();
         }
-        const default_action = issue2147l6();
+        const default_action = issue2147l12();
     }
     @hidden table tbl_a {
         actions = {
@@ -21,16 +21,16 @@ control ingress(inout bit<8> h) {
         }
         const default_action = a();
     }
-    @hidden table tbl_issue2147l8 {
+    @hidden table tbl_issue2147l14 {
         actions = {
-            issue2147l8();
+            issue2147l14();
         }
-        const default_action = issue2147l8();
+        const default_action = issue2147l14();
     }
     apply {
-        tbl_issue2147l6.apply();
+        tbl_issue2147l12.apply();
         tbl_a.apply();
-        tbl_issue2147l8.apply();
+        tbl_issue2147l14.apply();
     }
 }
 

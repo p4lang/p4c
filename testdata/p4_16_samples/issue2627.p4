@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2021 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 struct H3<T> {
     tuple<T> t;
 }

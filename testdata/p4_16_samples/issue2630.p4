@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control C<H>(inout H h);
 package Pipeline<H>(C<H> c);
 package Switch<H0, H1>(Pipeline<H0> p0, @optional Pipeline<H1> p1);

@@ -8,19 +8,19 @@ control c(inout bit<32> b) {
         }
         default_action = a();
     }
-    @hidden action issue15951l12() {
+    @hidden action issue15951l18() {
         b[6:3] = 4w1;
     }
-    @hidden table tbl_issue15951l12 {
+    @hidden table tbl_issue15951l18 {
         actions = {
-            issue15951l12();
+            issue15951l18();
         }
-        const default_action = issue15951l12();
+        const default_action = issue15951l18();
     }
     apply {
         switch (t_0.apply().action_run) {
             a: {
-                tbl_issue15951l12.apply();
+                tbl_issue15951l18.apply();
             }
         }
     }
