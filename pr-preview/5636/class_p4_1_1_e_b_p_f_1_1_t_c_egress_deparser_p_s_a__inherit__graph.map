@@ -1,0 +1,17 @@
+<map id="P4::EBPF::TCEgressDeparserPSA" name="P4::EBPF::TCEgressDeparserPSA">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,519,236,544"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_egress_deparser_p_s_a.html" title=" " alt="" coords="13,445,228,471"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,484,123,519,118,519,118,484"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html" title=" " alt="" coords="19,372,223,397"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="123,411,123,445,118,445,118,411"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_deparser.html" title=" " alt="" coords="31,299,210,324"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="123,338,123,372,118,372,118,338"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control.html" title=" " alt="" coords="37,225,204,251"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="123,264,123,299,118,299,118,264"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="40,152,201,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="123,191,123,225,118,225,118,191"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="67,79,174,104"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="123,118,123,152,118,152,118,118"/>
+<area shape="rect" id="Node000008" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="63,5,178,31"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="123,44,123,79,118,79,118,44"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="BFN::CollectBridgedFields" name="BFN::CollectBridgedFields">
+<area shape="rect" id="Node000001" title=" " alt="" coords="125,152,315,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="5,79,112,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,107,195,149,193,154,96,112"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="176,5,264,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="183,39,86,81,84,76,181,34"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_control_flow_visitor.html" title=" " alt="" coords="137,79,303,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="223,44,223,79,217,79,217,44"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_write_context.html" title=" " alt="" coords="327,79,475,104"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="263,33,373,76,371,81,261,38"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="223,118,223,152,217,152,217,118"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="361,111,251,154,249,149,359,106"/>
+</map>

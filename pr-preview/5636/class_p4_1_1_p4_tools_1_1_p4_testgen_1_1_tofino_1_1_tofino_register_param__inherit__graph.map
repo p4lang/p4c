@@ -1,0 +1,9 @@
+<map id="P4::P4Tools::P4Testgen::Tofino::TofinoRegisterParam" name="P4::P4Tools::P4Testgen::Tofino::TofinoRegisterParam">
+<area shape="rect" id="Node000001" title="Tofino register params have one default value and are read only." alt="" coords="5,240,215,280"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="25,152,195,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,206,113,240,107,240,107,206"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="57,79,163,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="113,118,113,152,107,152,107,118"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="53,5,167,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="113,44,113,79,107,79,107,44"/>
+</map>
