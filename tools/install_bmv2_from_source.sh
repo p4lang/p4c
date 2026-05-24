@@ -149,6 +149,9 @@ if [[ "$WITH_PI" == "ON" ]]; then
   CMAKE_ARGS+=("-DWITH_PI=ON")
 fi
 
+# Ensure that the install RPATH includes the link path to find shared libraries.
+CMAKE_ARGS+=("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE")
+
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX="$PREFIX" "${CMAKE_ARGS[@]}"
 cmake --build build --parallel "$JOBS" "${BUILD_ARGS[@]}"
 run_install "$PREFIX" "${INSTALL_ARGS[@]}"
