@@ -53,7 +53,14 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) 
                 hasDeclarations = true;
                 break;
             }
-        if (!hasDeclarations) return &statement->components;
+        if (!hasDeclarations) {
+#if !HAVE_LIBGC
+            // DANGER -- if !HAVE_LIBGC, can't safely return a pointer to an inlined field
+            return statement->components.clone();
+#else
+            return &statement->components;
+#endif
+        }
     }
 
     if (statement->components.empty()) return new IR::EmptyStatement(statement->srcInfo);

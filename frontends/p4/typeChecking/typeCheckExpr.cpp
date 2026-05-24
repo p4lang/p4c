@@ -670,11 +670,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::StructExpression *express
     }
 
     // This is the type inferred by looking at the fields.
-    const IR::Type *structType =
+    IR::Ptr<IR::Type> structType =
         new IR::Type_UnknownStruct(expression->srcInfo, "unknown struct", std::move(components));
     structType = canonicalize(structType);
 
-    const IR::Expression *result = expression;
+    IR::Ptr<IR::Expression> result = expression;
     if (expression->structType != nullptr) {
         // We know the exact type of the initializer
         auto desired = getTypeType(expression->structType);

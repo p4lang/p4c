@@ -302,11 +302,11 @@ class Substitutions : public SubstituteParameters {
 }  // namespace
 
 template <class T>
-const T *PerInstanceSubstitutions::rename(ReferenceMap *refMap, const IR::Node *node) {
+IR::Ptr<T> PerInstanceSubstitutions::rename(ReferenceMap *refMap, const IR::Node *node) {
     Substitutions rename(refMap, &paramSubst, &tvs, &renameMap);
     auto convert = node->apply(rename);
     CHECK_NULL(convert);
-    auto result = convert->to<T>();
+    IR::Ptr<T> result = convert->to<T>();
     CHECK_NULL(result);
     return result;
 }
@@ -771,7 +771,7 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
         CHECK_NULL(decl);
 
         auto called = workToDo->declToCallee[decl];
-        auto callee = called->to<IR::P4Parser>();
+        IR::Ptr<IR::P4Parser> callee = called->to<IR::P4Parser>();
         // clone the substitution: it may be reused for multiple invocations
         auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
 

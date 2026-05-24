@@ -70,13 +70,13 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     bool isv1;
 
     /// Maps paths in the program to declarations.
-    absl::flat_hash_map<const IR::Path *, const IR::IDeclaration *, Util::Hash> pathToDeclaration;
+    absl::flat_hash_map<IR::Ptr<IR::Path>, IR::Ptr<IR::IDeclaration>, Util::Hash> pathToDeclaration;
 
     /// Set containing all declarations in the program.
-    absl::flat_hash_set<const IR::IDeclaration *, Util::Hash> used;
+    absl::flat_hash_set<IR::Ptr<IR::IDeclaration>, Util::Hash> used;
 
     /// Map from `This` to declarations (an experimental feature).
-    absl::flat_hash_map<const IR::This *, const IR::IDeclaration *, Util::Hash> thisToDeclaration;
+    absl::flat_hash_map<IR::Ptr<IR::This>, IR::Ptr<IR::IDeclaration>, Util::Hash> thisToDeclaration;
 
     /// All names used in the program. Key is a name, value represents how many times
     /// this name was used as a base for newly generated unique names.

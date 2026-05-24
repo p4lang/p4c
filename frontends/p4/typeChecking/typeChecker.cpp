@@ -223,7 +223,7 @@ IR::Ptr<IR::Type> TypeInferenceBase::specialize(const IR::IMayBeGenericType *typ
     LOG2("Translation map\n" << bindings);
 
     TypeVariableSubstitutionVisitor tsv(bindings);
-    const IR::Node *result = type->getNode()->apply(tsv, ctxt);
+    IR::Ptr<IR::Node> result = type->getNode()->apply(tsv, ctxt);
     if (result == nullptr) return nullptr;
 
     LOG2("Specialized " << type << "\n\tinto " << result);

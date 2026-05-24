@@ -88,7 +88,7 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
                                << ",  expansion = " << expansion);
     for (size_t i = 0; i < sz; i++) {
         HSIndexTransform aiRewriter(aiFinder, i);
-        const auto *newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
+        IR::Ptr<IR::Statement> newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
         auto *newIndex = new IR::Constant(aiFinder.arrayIndex->right->type, i);
         auto *newCondition = new IR::Equ(aiFinder.newVariable, newIndex);
         if (curIf != nullptr) {
@@ -179,7 +179,7 @@ class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
 
 IR::Node *HSIndexContretizer::preorder(IR::P4Control *control) {
     DoSimplifyKey keySimplifier(typeMap, new IsNonConstantArrayIndex());
-    const auto *controlKeySimplified =
+    IR::Ptr<IR::P4Control> controlKeySimplified =
         control->apply(keySimplifier, getContext())->to<IR::P4Control>();
     auto *newControl = controlKeySimplified->clone();
     IR::IndexedVector<IR::Declaration> newControlLocals;
@@ -215,7 +215,7 @@ IR::Node *HSIndexContretizer::preorder(IR::BlockStatement *blockStatement) {
     auto *newBlock = blockStatement->clone();
     IR::IndexedVector<IR::StatOrDecl> newComponents;
     for (auto &component : blockStatement->components) {
-        const auto *newComponent = component->apply(hsSimplifier)->to<IR::StatOrDecl>();
+        IR::Ptr<IR::StatOrDecl> newComponent = component->apply(hsSimplifier)->to<IR::StatOrDecl>();
         if (const auto *newComponentBlock = newComponent->to<IR::BlockStatement>()) {
             for (const auto &blockComponent : newComponentBlock->components) {
                 newComponents.push_back(blockComponent);

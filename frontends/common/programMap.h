@@ -27,8 +27,9 @@ namespace P4 {
 // If the program has not changed, the map is up-to-date.
 class ProgramMap : public IHasDbPrint {
  protected:
-    const IR::P4Program *fake = new IR::P4Program();
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> fake = new IR::P4Program();
+    // FIXME -- could be a weak pointer to possibly reduce memory use
+    IR::Ptr<IR::P4Program> program = nullptr;
     cstring mapKind;
     explicit ProgramMap(std::string_view kind) : mapKind(kind) {}
     virtual ~ProgramMap() {}
