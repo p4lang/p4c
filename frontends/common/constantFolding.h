@@ -78,7 +78,7 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     bool warnings;
 
     /// Maps declaration constants to constant expressions
-    std::map<const IR::Declaration_Constant *, const IR::Expression *> constants;
+    std::map<IR::Ptr<IR::Declaration_Constant>, IR::Ptr<IR::Expression>> constants;
     // True if we are processing a left side of an assignment; we should not
     // we substituting constants there.
     bool assignmentTarget;
@@ -88,7 +88,7 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     const IR::Type *resolveType(const IR::Type *t);
 
     /// @returns a constant equivalent to @p expr or `nullptr`
-    const IR::Expression *getConstant(const IR::Expression *expr) const;
+    IR::Ptr<IR::Expression> getConstant(const IR::Expression *expr) const;
 
     /// Statically cast constant @p node to @p type represented in the specified @p base.
     const IR::Constant *cast(const IR::Constant *node, unsigned base, const IR::Type_Bits *type,

@@ -512,6 +512,7 @@ class Transform : public virtual Visitor {
     }
     bool forceClone = false;  // force clone whole tree even if unchanged
 
+ public:
     /* DANGER -- since pre/postorder methods return a raw pointer, when returning a value
      * that might have been held in a temp IR::Ptr, we need to ensure that it doesn't get
      * cleaned up prior to the return.  We do that by holding it temporarily in 'guard_hold'
@@ -521,7 +522,7 @@ class Transform : public virtual Visitor {
      * and have the compiler's covariant return type handling fix it up, as that only works
      * with raw pointers */
     template<class T>
-    const T *guardReturn(IR::Ptr<T> rv) {
+    const T *guardReturn(const T *rv) const {
 #if !HAVE_LIBGC
         guard_hold = rv;
 #endif
@@ -529,8 +530,14 @@ class Transform : public virtual Visitor {
     }
 
 #if !HAVE_LIBGC
+    template<class T>
+    const T *guardReturn(IR::Ptr<T> rv) const {
+        guard_hold = rv;
+        return rv;
+    }
+
  private:
-    IR::Ptr<IR::Node> guard_hold;
+    mutable IR::Ptr<IR::Node> guard_hold;
 #endif
 };
 

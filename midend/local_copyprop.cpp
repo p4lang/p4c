@@ -887,7 +887,7 @@ const IR::P4Parser *DoLocalCopyPropagation::postorder(IR::P4Parser *parser) {
     auto rv = parser->apply(ElimDead(*this), getChildContext());
     working = false;
     available.clear();
-    return rv;
+    return guardReturn(rv);
 }
 
 IR::ParserState *DoLocalCopyPropagation::preorder(IR::ParserState *state) {

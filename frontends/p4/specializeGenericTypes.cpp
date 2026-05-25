@@ -175,7 +175,7 @@ const IR::Node *ReplaceTypeUses::postorder(IR::Type_Specialized *type) {
     if (!t) return type;
     BUG_CHECK(t->replacement, "Missing replacement %1% -> %2%", type, t->name);
     LOG3("RTU Replacing " << dbp(type) << " with " << dbp(t->replacement));
-    return t->replacement->getP4Type();
+    return guardReturn(t->replacement->getP4Type());
 }
 
 const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
