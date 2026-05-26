@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Monthly Release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 12 1 * *" # At 12:17 on day-of-month 1 (avoid top-of-hour load)
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  monthly-release:
+    if: ${{ github.repository == 'p4lang/p4c' }}
+    uses: p4lang/.github/.github/workflows/monthly-release.yml@main
+    with:
+      version_file: Version.txt
+      reviewers: fruffy, jafingerhut, jnfoster
