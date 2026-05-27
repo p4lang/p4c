@@ -607,7 +607,7 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
         // Parsers are inlined in the ParserState processor
         return statement;
 
-    auto callee = called->to<IR::P4Control>();
+    IR::Ptr<IR::P4Control> callee = called->to<IR::P4Control>();
     IR::IndexedVector<IR::StatOrDecl> body;
     // clone the substitution: it may be reused for multiple invocations
     auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);

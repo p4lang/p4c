@@ -253,7 +253,7 @@ bool UnrollLoops::findLoopBounds(IR::ForInStatement *fstmt, loop_bounds_t &bound
     return false;
 }
 
-const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR::Statement *body,
+const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, IR::Ptr<IR::Statement> body,
                                            const IR::IndexedVector<IR::StatOrDecl> *updates) {
     RemoveBreakContinue rbc(nameGen);
     body = body->apply(rbc, getChildContext());
@@ -276,7 +276,7 @@ const IR::Statement *UnrollLoops::doUnroll(const loop_bounds_t &bounds, const IR
         }
         if (updates) {
             for (const IR::StatOrDecl *u : *updates) {
-                auto *n = u->apply(rir)->to<IR::StatOrDecl>();
+                IR::Ptr<IR::StatOrDecl> n = u->apply(rir)->to<IR::StatOrDecl>();
                 BUG_CHECK(n, "unexpected nullptr");
                 blk->append(n);
             }
