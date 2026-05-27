@@ -71,14 +71,17 @@ class TypeMap final : public ProgramMap {
     void dbprint(std::ostream &out) const override;
     void clear();
     bool isLeftValue(const IR::Expression *expression) const {
+#if !HAVE_LIBGC
+        BUG_CHECK(expression->check_referenced(), "checking unreferenced node in typeMap");
+#endif
         return leftValues.count(expression) > 0;
     }
     bool isCompileTimeConstant(const IR::Expression *expression) const;
     size_t size() const { return typeMap.size(); }
 
-    void setLeftValue(const IR::Expression *expression);
+    void setLeftValue(IR::Ptr<IR::Expression> expression);
     void cloneExpressionProperties(const IR::Expression *to, const IR::Expression *from);
-    void setCompileTimeConstant(const IR::Expression *expression);
+    void setCompileTimeConstant(IR::Ptr<IR::Expression> expression);
     void addSubstitutions(const TypeVariableSubstitution *tvs);
     const IR::Type *getSubstitution(const IR::ITypeVar *var) {
         return allTypeVariables.lookup(var);
