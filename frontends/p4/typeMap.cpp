@@ -45,17 +45,20 @@ void TypeMap::dbprint(std::ostream &out) const {
     out << "--------------" << std::endl;
 }
 
-void TypeMap::setLeftValue(const IR::Expression *expression) {
+void TypeMap::setLeftValue(IR::Ptr<IR::Expression> expression) {
     leftValues.insert(expression);
     LOG3("Left value " << dbp(expression));
 }
 
-void TypeMap::setCompileTimeConstant(const IR::Expression *expression) {
+void TypeMap::setCompileTimeConstant(IR::Ptr<IR::Expression> expression) {
     constants.insert(expression);
     LOG3("Constant value " << dbp(expression));
 }
 
 bool TypeMap::isCompileTimeConstant(const IR::Expression *expression) const {
+#if !HAVE_LIBGC
+    BUG_CHECK(expression->check_referenced(), "checking unreferenced node in typeMap");
+#endif
     bool result = constants.find(expression) != constants.end();
     LOG3(dbp(expression) << (result ? " constant" : " not constant"));
     return result;

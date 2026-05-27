@@ -164,7 +164,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
                 IR::IndexedVector<IR::StatOrDecl> tempAssigns;
                 ExtractArrayIndices eai(typeMap, *nameGen, tempDecls, tempAssigns);
                 eai.setCalledBy(this);
-                auto argExpr = arg->expression->apply(eai)->to<IR::Expression>();
+                IR::Ptr<IR::Expression> argExpr = arg->expression->apply(eai)->to<IR::Expression>();
                 for (const IR::Declaration *d : tempDecls) result->push_back(d);
                 body.append(tempAssigns);
 
@@ -192,7 +192,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
 
     InsertBeforeExits ibf(&postamble);
     ibf.setCalledBy(this);
-    auto actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
+    IR::Ptr<IR::BlockStatement> actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
     body.append(actionBody->components);
     body.append(postamble);
 
