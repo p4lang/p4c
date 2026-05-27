@@ -463,8 +463,8 @@ class ParserSymbolicInterpreter {
     /// Executes symbolically the specified statement.
     /// Returns pointer to generated statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
-    const IR::StatOrDecl *executeStatement(ParserStateInfo *state, const IR::StatOrDecl *sord,
-                                           ValueMap *valueMap) {
+    IR::Ptr<IR::StatOrDecl> executeStatement(ParserStateInfo *state, const IR::StatOrDecl *sord,
+                                             ValueMap *valueMap) {
         const IR::StatOrDecl *newSord = nullptr;
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
@@ -514,7 +514,7 @@ class ParserSymbolicInterpreter {
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                      visitedStates);
-        const IR::Node *node = sord->apply(rewriter);
+        auto node = sord->apply(rewriter);
         if (rewriter.checkError()) {
             wasError = true;
             return nullptr;
@@ -528,10 +528,10 @@ class ParserSymbolicInterpreter {
     }
 
     using EvaluationSelectResult =
-        std::pair<std::vector<ParserStateInfo *> *, const IR::Expression *>;
+        std::pair<std::vector<ParserStateInfo *> *, IR::Ptr<IR::Expression>>;
 
     EvaluationSelectResult evaluateSelect(ParserStateInfo *state, ValueMap *valueMap) {
-        const IR::Expression *newSelect = nullptr;
+        IR::Ptr<IR::Expression> newSelect = nullptr;
         auto select = state->state->selectExpression;
         if (select == nullptr) return EvaluationSelectResult(nullptr, nullptr);
 
@@ -543,7 +543,7 @@ class ParserSymbolicInterpreter {
             // update call indexes
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, nullptr,
                                          visitedStates);
-            const IR::Expression *node = select->apply(rewriter);
+            auto node = select->apply(rewriter);
             if (rewriter.isOutOfBound()) {
                 return EvaluationSelectResult(nullptr, nullptr);
             }
@@ -569,7 +569,7 @@ class ParserSymbolicInterpreter {
             }
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                          visitedStates);
-            const IR::Node *node = se->select->apply(rewriter);
+            auto node = se->select->apply(rewriter);
             if (rewriter.isOutOfBound()) {
                 return EvaluationSelectResult(nullptr, nullptr);
             }
@@ -584,7 +584,7 @@ class ParserSymbolicInterpreter {
                 // update call indexes
                 ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, nullptr,
                                              visitedStates);
-                const IR::Node *node = c->apply(rewriter);
+                auto node = c->apply(rewriter);
                 if (rewriter.isOutOfBound()) {
                     return EvaluationSelectResult(nullptr, nullptr);
                 }
@@ -739,7 +739,7 @@ class ParserSymbolicInterpreter {
             newStates.insert(newName);
         }
         for (auto s : state->state->components) {
-            auto *newComponent = executeStatement(state, s, valueMap);
+            auto newComponent = executeStatement(state, s, valueMap);
             if (!newComponent) {
                 return EvaluationStateResult(nullptr, true, components);
             }
