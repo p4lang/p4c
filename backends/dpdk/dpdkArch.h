@@ -823,7 +823,7 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     bool metaCopyNeeded = false;
 
  public:
-    CopyMatchKeysToSingleStruct(P4::TypeMap *typeMap, std::set<const IR::P4Table *> *invokedInKey,
+    CopyMatchKeysToSingleStruct(P4::TypeMap *typeMap, std::set<IR::Ptr<IR::P4Table>> *invokedInKey,
                                 DpdkProgramStructure *structure)
         : P4::KeySideEffect(typeMap, invokedInKey), structure(structure) {
         setName("CopyMatchKeysToSingleStruct");

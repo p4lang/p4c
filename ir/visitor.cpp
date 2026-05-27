@@ -293,8 +293,8 @@ class Visitor::Tracker {
     void finish(const IR::Node *n) {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
-
         it->second.done = true;
+        if (!it->second.visitOnce) visited.erase(it);
     }
 
     /** Determine whether @n is currently being visited and the visitor has not finished

@@ -151,7 +151,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     bool checkAbstractMethods(const IR::Declaration_Instance *inst, const IR::Type_Extern *type);
     void addSubstitutions(const TypeVariableSubstitution *tvs);
 
-    const IR::Expression *constantFold(const IR::Expression *expression);
+    IR::Ptr<IR::Expression> constantFold(const IR::Expression *expression);
 
     /** Converts each type to a canonical representation.
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
@@ -171,8 +171,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *shift(const IR::Operation_Binary *op);
     const IR::Node *typeSet(const IR::Operation_Binary *op);
 
-    const IR::Type *cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type);
-    std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> containerInstantiation(
+    IR::Ptr<IR::Type> cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type);
+    std::pair<IR::Ptr<IR::Type>, IR::Ptr<IR::Vector<IR::Argument>>> containerInstantiation(
         const IR::Node *node, const IR::Vector<IR::Argument> *args,
         const IR::IContainer *container);
     const IR::Expression *actionCall(

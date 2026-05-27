@@ -69,7 +69,7 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
         // check to see whether we already have a substitution for leftTv
         const IR::Type *leftSubst = currentSubstitution->lookup(leftTv);
         if (leftSubst == nullptr) {
-            auto right = constraint->right->apply(replaceVariables)->to<IR::Type>();
+            IR::Ptr<IR::Type> right = constraint->right->apply(replaceVariables)->to<IR::Type>();
             if (leftTv == right->to<IR::ITypeVar>()) return true;
             LOG3("Binding " << leftTv << " => " << right);
             auto error = currentSubstitution->compose(leftTv, right);
@@ -87,7 +87,7 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
         auto rightTv = constraint->right->to<IR::ITypeVar>();
         const IR::Type *rightSubst = currentSubstitution->lookup(rightTv);
         if (rightSubst == nullptr) {
-            auto left = constraint->left->apply(replaceVariables)->to<IR::Type>();
+            IR::Ptr<IR::Type> left = constraint->left->apply(replaceVariables)->to<IR::Type>();
             if (left->to<IR::ITypeVar>() == rightTv) return true;
             LOG3("Binding " << rightTv << " => " << left);
             auto error = currentSubstitution->compose(rightTv, left);

@@ -57,7 +57,7 @@ const IR::Node *SpecializeFunctions::postorder(IR::Function *function) {
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
             tsv.setCalledBy(this);
             LOG3("Substitution " << ts);
-            auto specialized = function->apply(tsv)->to<IR::Function>();
+            IR::Ptr<IR::Function> specialized = function->apply(tsv)->to<IR::Function>();
             auto renamed =
                 new IR::Function(specialized->srcInfo, it.second->name, specialized->annotations,
                                  specialized->type, specialized->body);
