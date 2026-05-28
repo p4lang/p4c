@@ -343,7 +343,7 @@ class Visitor {
     }
 #if !HAVE_LIBGC
     template <class T, class... Args>
-    void warn(const int kind, const char *format, IR::shared_ptr<T> node, Args... args) {
+    void warn(const int kind, const char *format, IR::shared_ptr<const T> node, Args... args) {
         if (warning_enabled(kind)) ::P4::warning(kind, format, node, std::forward<Args>(args)...);
     }
 #endif /* !HAVE_LIBGC */

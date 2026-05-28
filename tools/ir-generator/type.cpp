@@ -154,7 +154,7 @@ cstring TemplateInstantiation::toString() const {
 #if HAVE_LIBGC
             rv += "const ";
 #else  /* !HAVE_LIBGC */
-            rv += "IR::shared_ptr<";
+            rv += "IR::shared_ptr<const ";
 #endif /* !HAVE_LIBGC */
         }
         rv += arg->toString().c_str();

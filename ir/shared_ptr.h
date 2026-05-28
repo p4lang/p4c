@@ -78,7 +78,7 @@ class shared_ptr {
     // FIXME -- static assert fails due to circular uses causing invalid incomplete type errors
     // static_assert(std::is_base_of<shared_ptr_base, T>::value,
     //               "IR::shared_ptr only usable on subclasses of IR::shared_ptr_base");
-    const T *ptr;
+    T *ptr;
     template <class U>
     friend class shared_ptr;
 
@@ -93,12 +93,14 @@ class shared_ptr {
         ptr = a.ptr;
         a.ptr = nullptr;
     }
-    template <class U, typename = typename std::enable_if<std::is_base_of<T, U>::value>::type>
+    template <class U,
+              typename = typename std::enable_if<std::is_convertible<U *, T *>::value>::type>
     shared_ptr(const shared_ptr<U> &a) {
         if ((ptr = a.ptr)) ptr->refcount++;
     }
-    template <class U, typename = typename std::enable_if<std::is_base_of<T, U>::value>::type>
-    shared_ptr(const U *a) {
+    template <class U,
+              typename = typename std::enable_if<std::is_convertible<U *, T *>::value>::type>
+    shared_ptr(U *a) {
         if ((ptr = a)) a->refcount++;
     }  // NOLINT(runtime/explicit)
     shared_ptr<T> &operator=(const shared_ptr<T> &a) {
@@ -108,21 +110,23 @@ class shared_ptr {
         return *this;
     }
     shared_ptr<T> &operator=(shared_ptr<T> &&a) { return swap(a); }
-    template <class U, typename = typename std::enable_if<std::is_base_of<T, U>::value>::type>
+    template <class U,
+              typename = typename std::enable_if<std::is_convertible<U *, T *>::value>::type>
     shared_ptr<T> &operator=(const shared_ptr<U> &a) {
         if (ptr == a.ptr) return *this;
         if (ptr && !ptr->not_on_heap && --ptr->refcount == 0) delete ptr;
         if ((ptr = a.ptr)) ptr->refcount++;
         return *this;
     }
-    shared_ptr<T> &operator=(const T *a) {
+    shared_ptr<T> &operator=(T *a) {
         if (ptr == a) return *this;
         if (ptr && !ptr->not_on_heap && --ptr->refcount == 0) delete ptr;
         if ((ptr = a)) ptr->refcount++;
         return *this;
     }
-    template <class U, typename = typename std::enable_if<std::is_base_of<T, U>::value>::type>
-    shared_ptr<T> &operator=(const U *a) {
+    template <class U,
+              typename = typename std::enable_if<std::is_convertible<U *, T *>::value>::type>
+    shared_ptr<T> &operator=(U *a) {
         if (ptr == a) return *this;
         if (ptr && !ptr->not_on_heap && --ptr->refcount == 0) delete ptr;
         if ((ptr = a)) a->refcount++;
@@ -141,13 +145,13 @@ class shared_ptr {
         std::swap(ptr, a.ptr);
         return *this;
     }
-    const T *get() const { return ptr; }
-    const T *operator->() const { return ptr; }
-    const T &operator*() const { return *ptr; }
-    operator const T *() const { return ptr; }
+    T *get() const { return ptr; }
+    T *operator->() const { return ptr; }
+    T &operator*() const { return *ptr; }
+    operator T *() const { return ptr; }
     template <class U,
               typename = typename std::enable_if<std::is_convertible<T *, U *>::value>::type>
-    operator const U *() const {
+    operator U *() const {
         return ptr;
     }
     bool operator==(nullptr_t) const { return ptr == nullptr; }
@@ -165,7 +169,7 @@ class shared_ptr {
 // it only seems to work if it is in the global scope
 template <class T, class U>
 inline T dynamic_pointer_cast(const P4::IR::shared_ptr<U> &r) noexcept {
-    return T(dynamic_cast<const typename T::element_type *>(r.get()));
+    return T(dynamic_cast<typename T::element_type *>(r.get()));
 }
 
 namespace P4::Util {
