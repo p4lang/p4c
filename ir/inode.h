@@ -44,8 +44,10 @@ inline constexpr bool has_static_type_name_v = has_static_type_name<T>::value;
 
 #if HAVE_LIBGC
 template <class T> using Ptr = const T *;
+template <class T> using MutablePtr = T *;
 #else
-template <class T> using Ptr = shared_ptr<T>;
+template <class T> using Ptr = shared_ptr<const T>;
+template <class T> using MutablePtr = shared_ptr<T>;
 #endif
 
 // node interface
