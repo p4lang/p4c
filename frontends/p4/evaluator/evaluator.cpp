@@ -53,10 +53,10 @@ bool Evaluator::hasValue(const IR::Node *node) const {
     return block->hasValue(node) || toplevelBlock->hasValue(node);
 }
 
-const IR::CompileTimeValue *Evaluator::getValue(const IR::Node *node) const {
+IR::Ptr<IR::CompileTimeValue> Evaluator::getValue(const IR::Node *node) const {
     CHECK_NULL(node);
     auto block = currentBlock();
-    const IR::CompileTimeValue *result = nullptr;
+    IR::Ptr<IR::CompileTimeValue> result = nullptr;
 
     if (block->hasValue(node)) {
         result = block->getValue(node);
@@ -97,12 +97,12 @@ bool Evaluator::preorder(const IR::Declaration_Constant *decl) {
     return false;
 }
 
-std::vector<const IR::CompileTimeValue *> *Evaluator::evaluateArguments(
+std::vector<IR::Ptr<IR::CompileTimeValue>> *Evaluator::evaluateArguments(
     const IR::ParameterList *parameters, const IR::Vector<IR::Argument> *arguments,
     IR::Block *context) {
     LOG2("Evaluating arguments in " << dbp(context));
     P4::DoConstantFolding cf(refMap, nullptr);
-    auto values = new std::vector<const IR::CompileTimeValue *>();
+    auto values = new std::vector<IR::Ptr<IR::CompileTimeValue>>();
     pushBlock(context);
 
     ParameterSubstitution substitution;
@@ -133,7 +133,7 @@ std::vector<const IR::CompileTimeValue *> *Evaluator::evaluateArguments(
     return values;
 }
 
-const IR::Block *Evaluator::processConstructor(
+IR::Ptr<IR::Block> Evaluator::processConstructor(
     const IR::Node *node,  // Node that invokes constructor:
                            // could be a Declaration_Instance or a ConstructorCallExpression.
     const IR::Type *type,  // Type that appears in the program that is instantiated.
@@ -172,7 +172,8 @@ const IR::Block *Evaluator::processConstructor(
         auto constructor = canon->to<IR::Type_Extern>()->lookupConstructor(arguments);
         BUG_CHECK(constructor != nullptr, "Type %1% has no constructor with %2% arguments", exttype,
                   arguments->size());
-        auto block = new IR::ExternBlock(node->srcInfo, node, instanceType, exttype, constructor);
+        IR::MutablePtr<IR::ExternBlock> block =
+            new IR::ExternBlock(node->srcInfo, node, instanceType, exttype, constructor);
         pushBlock(block);
         auto values = evaluateArguments(constructor->type->parameters, arguments, current);
         if (values != nullptr) block->instantiate(values);
@@ -180,7 +181,8 @@ const IR::Block *Evaluator::processConstructor(
         return block;
     } else if (decl->is<IR::P4Control>()) {
         auto cont = decl->to<IR::P4Control>();
-        auto block = new IR::ControlBlock(node->srcInfo, node, instanceType, cont);
+        IR::MutablePtr<IR::ControlBlock> block =
+            new IR::ControlBlock(node->srcInfo, node, instanceType, cont);
         pushBlock(block);
         auto values = evaluateArguments(cont->getConstructorParameters(), arguments, current);
         if (values != nullptr) {
@@ -191,7 +193,8 @@ const IR::Block *Evaluator::processConstructor(
         return block;
     } else if (decl->is<IR::P4Parser>()) {
         auto cont = decl->to<IR::P4Parser>();
-        auto block = new IR::ParserBlock(node->srcInfo, node, instanceType, cont);
+        IR::MutablePtr<IR::ParserBlock> block =
+            new IR::ParserBlock(node->srcInfo, node, instanceType, cont);
         pushBlock(block);
         auto values = evaluateArguments(cont->getConstructorParameters(), arguments, current);
         if (values != nullptr) {
@@ -203,7 +206,8 @@ const IR::Block *Evaluator::processConstructor(
         return block;
     } else if (decl->is<IR::Type_Package>()) {
         auto package = decl->to<IR::Type_Package>();
-        auto block = new IR::PackageBlock(node->srcInfo, node, instanceType, package);
+        IR::MutablePtr<IR::PackageBlock> block =
+            new IR::PackageBlock(node->srcInfo, node, instanceType, package);
         pushBlock(block);
         auto values = evaluateArguments(package->constructorParams, arguments, current);
         if (values != nullptr) block->instantiate(values);

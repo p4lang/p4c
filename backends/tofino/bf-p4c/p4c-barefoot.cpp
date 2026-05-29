@@ -341,7 +341,7 @@ void execute_backend(const IR::BFN::Pipe *maupipe, BFN_Options &options) {
             }
         }
         BFN::Backend &backend;
-        const IR::BFN::Pipe *maupipe;
+        IR::Ptr<IR::BFN::Pipe> maupipe;
     };
     failure_guard guard(backend, maupipe);
 #endif  // BFP4C_CATCH_EXCEPTIONS
