@@ -96,6 +96,7 @@ class IrElement : public Util::IHasSourceInfo {
         Virtual = 1 << 3,
         Static = 1 << 4,
         Const = 1 << 5,
+        Explicit = 1 << 6,
     };
     static inline const char *modifier(int m) {
         if (m & IrElement::NullOK) return "NullOK";
@@ -104,6 +105,7 @@ class IrElement : public Util::IHasSourceInfo {
         if (m & IrElement::Static) return "static";
         if (m & IrElement::Inline) return "inline";
         if (m & IrElement::Const) return "const";
+        if (m & IrElement::Explicit) return "explicit";
         return "";
     }
 };
@@ -129,7 +131,7 @@ class IrMethod : public IrElement {
     std::vector<const IrField *> args;
     cstring body;
     bool inImpl = false, isConst = false, isOverride = false, isStatic = false, isVirtual = false,
-         isUser = false, isFriend = false;
+         isUser = false, isFriend = false, isExplicit = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
         : IrElement(info), name(name), body(body) {}
     IrMethod(Util::SourceInfo info, cstring name) : IrElement(info), name(name) {}

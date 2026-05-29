@@ -359,6 +359,7 @@ void IrMethod::generate_hdr(std::ostream &out) const {
     if (isStatic) out << "static ";
     if (isVirtual) out << "virtual ";
     if (isFriend) out << "friend ";
+    if (isExplicit) out << "explicit ";
     generate_proto(out, false, isUser);
     if (isOverride) out << " override";
     if (inImpl || !body)

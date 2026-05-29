@@ -78,6 +78,7 @@ static std::string      comment_block;
 "delete"        { return DELETE; }
 "enum"          { return ENUM; }
 "inline"        { return INLINE; }
+"explicit"      { return EXPLICIT; }
 "interface"     { return INTERFACE; }
 "namespace"     { return NAMESPACE; }
 "new"           { return NEW; }

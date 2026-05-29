@@ -66,6 +66,7 @@ jobs:
                 "[frontend]":"core",
                 "[midend]":"core",
                 "[parser]":"core",
+                "[generator]":"core",
               };
             } else {
               // PR label mappings (only the ones you want for PRs)
@@ -74,6 +75,7 @@ jobs:
                 "[infra]": "infrastructure",
                 "[midend]":"core",
                 "[parser]":"core",
+                "[generator]":"core",
                 "[dpdk]": "dpdk",  
                 "[p4-spec]": "p4-spec",
                 "[tofino]":"tofino",
