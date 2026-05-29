@@ -99,14 +99,14 @@ class ConverterAllowingRecirculate : public P4V1::Converter {
     }
 };
 
-const IR::P4Program *run_frontend() {
+IR::Ptr<IR::P4Program> run_frontend() {
     // Initialize the Barefoot-specific error types, in case they aren't already initialized.
     BFN::ErrorType::getErrorTypes();
 
     auto &options = BackendOptions();
     auto hook = options.getDebugHook();
 
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
     if (options.arch == "tna" && options.langVersion == CompilerOptions::FrontendVersion::P4_14) {
         program = P4::parseP4File<P4V1::TnaConverter>(options);
     } else {

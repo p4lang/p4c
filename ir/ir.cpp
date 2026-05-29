@@ -211,7 +211,7 @@ void BlockStatement::append(const StatOrDecl *stmt) {
     components.push_back(stmt);
 }
 
-void InstantiatedBlock::instantiate(std::vector<const CompileTimeValue *> *args) {
+void InstantiatedBlock::instantiate(std::vector<IR::Ptr<CompileTimeValue>> *args) {
     CHECK_NULL(args);
     auto it = args->begin();
     for (auto p : *getConstructorParameters()->getEnumerator()) {

@@ -142,8 +142,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
         This may rewrite the sourceExpression, in particular converting InfInt values
         to values with concrete types.
         @returns new sourceExpression. */
-    const IR::Expression *assignment(const IR::Node *errorPosition, const IR::Type *destType,
-                                     const IR::Expression *sourceExpression);
+    IR::Ptr<IR::Expression> assignment(const IR::Node *errorPosition, const IR::Type *destType,
+                                       IR::Ptr<IR::Expression> sourceExpression);
     const IR::SelectCase *matchCase(const IR::SelectExpression *select,
                                     const IR::Type_BaseList *selectType,
                                     const IR::SelectCase *selectCase, const IR::Type *caseType);
@@ -206,8 +206,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     /// Returns expr unchanged if it is not an untyped Invalid, or if destType
     /// is not a header or header union.  Emits a type error if destType is
     /// some other concrete type.
-    const IR::Expression *convertUntypedInvalid(const IR::Expression *expr,
-                                                const IR::Type *destType);
+    IR::Ptr<IR::Expression> convertUntypedInvalid(const IR::Expression *expr,
+                                                  const IR::Type *destType);
 
     //////////////////////////////////////////////////////////////
     // Template, so we can have common code for both IR::Function* and const IR::Function*

@@ -21,6 +21,6 @@
 
 #include "ir/ir.h"
 
-const IR::P4Program *run_frontend();
+IR::Ptr<IR::P4Program> run_frontend();
 
 #endif /* BACKENDS_TOFINO_BF_P4C_FRONTEND_H_ */

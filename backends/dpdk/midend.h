@@ -19,14 +19,14 @@ class DpdkMidEnd : public PassManager {
     /// These will be accurate when the mid-end completes evaluation.
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    const IR::ToplevelBlock *toplevel = nullptr;
+    IR::Ptr<IR::ToplevelBlock> toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
 
     /// If p4c is run with option '--listMidendPasses', outStream is used for
     /// printing passes names.
     explicit DpdkMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 
-    const IR::ToplevelBlock *process(const IR::P4Program *&program) {
+    IR::Ptr<IR::ToplevelBlock> process(IR::Ptr<IR::P4Program> &program) {
         program = program->apply(*this);
         return toplevel;
     }

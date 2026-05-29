@@ -543,8 +543,8 @@ bool TypeInferenceBase::canCastBetween(const IR::Type *dest, const IR::Type *src
     return false;
 }
 
-const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
-                                                               const IR::Type *destType) {
+IR::Ptr<IR::Expression> TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
+                                                                 const IR::Type *destType) {
     // Guard: only act on untyped Invalid literals
     if (!expr->is<IR::Invalid>()) return expr;
     if (!expr->type->is<IR::Type_Unknown>()) return expr;
@@ -577,9 +577,9 @@ const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Express
     return result;
 }
 
-const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPosition,
-                                                    const IR::Type *destType,
-                                                    const IR::Expression *sourceExpression) {
+IR::Ptr<IR::Expression> TypeInferenceBase::assignment(const IR::Node *errorPosition,
+                                                      const IR::Type *destType,
+                                                      IR::Ptr<IR::Expression> sourceExpression) {
     if (destType->is<IR::Type_Unknown>()) BUG("Unknown destination type");
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
     // Convert untyped {#} literals to typed InvalidHeader/InvalidHeaderUnion

@@ -693,7 +693,7 @@ abstract InstantiatedBlock : Block, IDeclaration {
     Type instanceType;  // May be a SpecializedType
 
     virtual ParameterList getConstructorParameters() const = 0;
-    void instantiate(std::vector<const CompileTimeValue *> *args);
+    void instantiate(std::vector<CompileTimeValue> *args);
 
     /// @return the argument that the given parameter was instantiated with.
     /// It's a fatal error if no such parameter exists.
