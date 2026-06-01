@@ -1640,7 +1640,7 @@ TEST_F(P4RuntimePkgInfo, StructuredAnnotationLargeInt) {
 class P4RuntimeDataTypeSpec : public P4Runtime {
  protected:
     const IR::P4Program *getProgram(const std::string &programStr) {
-        const auto *pgm = P4::parseP4String(programStr);
+        auto pgm = P4::parseP4String(programStr);
         if (pgm == nullptr) {
             return nullptr;
         }

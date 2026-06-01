@@ -46,10 +46,10 @@ class MidEnd : public PassManager {
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     P4::ComputeDefUse *defuse;
-    IR::ToplevelBlock *toplevel = nullptr;
+    IR::MutablePtr<IR::ToplevelBlock> toplevel = nullptr;
 
     explicit MidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
-    IR::ToplevelBlock *process(const IR::P4Program *&program);
+    IR::MutablePtr<IR::ToplevelBlock> process(IR::Ptr<IR::P4Program> &program);
 };
 
 }  // namespace P4::Test
