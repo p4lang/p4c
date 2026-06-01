@@ -53,6 +53,14 @@ auto error_helper(boost::format &f, ErrorMessage out, const T *t, Args &&...args
     return error_helper(f, out, *t, std::forward<Args>(args)...);
 }
 
+#if !HAVE_LIBGC
+template <typename T, class... Args>
+auto error_helper(boost::format &f, ErrorMessage out, const IR::shared_ptr<T> &t, Args &&...args) {
+    // To match what the above does for pointers, we also do it for IR::shared_ptr
+    return error_helper(f, out, *t, std::forward<Args>(args)...);
+}
+#endif
+
 template <class... Args>
 ErrorMessage error_helper(boost::format &f, ErrorMessage out, const Util::SourceInfo &info,
                           Args &&...args) {
@@ -82,7 +90,7 @@ auto error_helper(boost::format &f, ErrorMessage out, const T &t,
     return error_helper(f % t.toString(), std::move(out), std::forward<Args>(args)...);
 }
 
-#if !HAVE_LIBGC
+#if !HAVE_LIBGC && 0
 template <typename T, class... Args>
 ErrorMessage error_helper(boost::format &f, ErrorMessage out, const IR::shared_ptr<T> &t,
                           Args... args) {
