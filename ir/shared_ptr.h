@@ -94,12 +94,12 @@ class shared_ptr {
         a.ptr = nullptr;
     }
     template <class U,
-              typename = typename std::enable_if<std::is_convertible<U *, T *>::value>::type>
+              typename = typename std::enable_if<std::is_constructible<T *, U *>::value>::type>
     shared_ptr(const shared_ptr<U> &a) {
         if ((ptr = a.ptr)) ptr->refcount++;
     }
     template <class U,
-              typename = typename std::enable_if<std::is_convertible<U *, T *>::value>::type>
+              typename = typename std::enable_if<std::is_constructible<T *, U *>::value>::type>
     shared_ptr(U *a) {
         if ((ptr = a)) a->refcount++;
     }  // NOLINT(runtime/explicit)
