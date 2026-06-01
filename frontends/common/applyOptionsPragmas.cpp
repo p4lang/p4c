@@ -43,10 +43,10 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tr
     if (pragmaName == "diagnostic") return parseDiagnostic(annotation);
     if (supportCommandLinePragma && pragmaName == "command_line") {
         IOptionPragmaParser::CommandLineOptions options;
-        auto *args = annotation->needsParsing()
+        auto args = annotation->needsParsing()
                          ? P4ParserDriver::parseExpressionList(annotation->srcInfo,
                                                                annotation->getUnparsed())
-                         : &annotation->getExpr();
+                         : IR::Ptr<IR::Vector<IR::Expression>>(&annotation->getExpr());
         for (const IR::Expression *arg : *args) {
             if (auto *a = arg->to<IR::StringLiteral>()) {
                 options.push_back(a->value.c_str());
@@ -67,11 +67,11 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     // Parsing of option pragmas is done early in the compiler, before P4₁₆
     // annotations are parsed, so we are responsible for doing our own parsing
     // here.
-    const IR::Vector<IR::Expression> *pragmaArgs = nullptr;
+    IR::Ptr<IR::Vector<IR::Expression>> pragmaArgs = nullptr;
     if (annotation->needsParsing()) {
         // FIXME: Do we need to error?
-        if (auto *parseResult = P4ParserDriver::parseExpressionList(annotation->srcInfo,
-                                                                    annotation->getUnparsed())) {
+        if (auto parseResult = P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                                   annotation->getUnparsed())) {
             pragmaArgs = parseResult;
         }
     } else {
