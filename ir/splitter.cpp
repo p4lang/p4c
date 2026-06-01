@@ -42,12 +42,12 @@ struct StatementSplitter : Inspector, ResolutionContext {
             visit(bs->components[i], "vector");
             if (result.after) {
                 const auto [before, after, _] = result;  // copy
-                auto *copy = bs->clone();
+                IR::MutablePtr<IR::BlockStatement> copy = bs->clone();
                 copy->components.erase(copy->components.begin() + i, copy->components.end());
                 if (before) {
                     copy->components.push_back(before);
                 }
-                result.before = filterDeclarations(copy);
+                result.before = filterDeclarations(&*copy);
                 copy = bs->clone();
                 copy->components.erase(copy->components.begin(), copy->components.begin() + i);
                 collectNeededDeclarations(copy);
@@ -227,7 +227,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
     }
 
     template <typename T>
-    const T *filterDeclarations(const T *node) {
+    IR::Ptr<T> filterDeclarations(const T *node) {
         struct FilterDecls : Transform {
             FilterDecls(absl::flat_hash_set<P4::cstring, Util::Hash> &needed,
                         std::vector<IR::Ptr<IR::Declaration>> &hoisted)

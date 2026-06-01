@@ -22,7 +22,7 @@ using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
 class P4CParserUnroll : public P4CTest {};
 
-const IR::P4Parser *getParser(const IR::P4Program *program) {
+IR::Ptr<IR::P4Parser> getParser(const IR::P4Program *program) {
     // FIXME: This certainly should be improved, it should be possible to check
     // and cast at the same time
     return program->getDeclarations()
@@ -32,8 +32,8 @@ const IR::P4Parser *getParser(const IR::P4Program *program) {
 }
 
 /// Rewrites parser
-std::pair<const IR::P4Parser *, const IR::P4Parser *> rewriteParser(const IR::P4Program *program,
-                                                                    CompilerOptions &options) {
+std::pair<IR::Ptr<IR::P4Parser>, IR::Ptr<IR::P4Parser>>
+rewriteParser(IR::Ptr<IR::P4Program> program, CompilerOptions &options) {
     P4::FrontEnd frontend;
     program = frontend.run(options, program);
     CHECK_NULL(program);
@@ -48,7 +48,7 @@ std::pair<const IR::P4Parser *, const IR::P4Parser *> rewriteParser(const IR::P4
     auto t1 = high_resolution_clock::now();
 #endif
     MidEnd midEnd(options);
-    const IR::P4Program *res = program;
+    IR::Ptr<IR::P4Program> res = program;
     midEnd.process(res);
 #ifdef PARSER_UNROLL_TIME_CHECKING
     auto t2 = high_resolution_clock::now();
@@ -59,7 +59,7 @@ std::pair<const IR::P4Parser *, const IR::P4Parser *> rewriteParser(const IR::P4
 }
 
 /// Loads example from a file
-const IR::P4Program *load_model(const char *curFile, CompilerOptions &options) {
+IR::Ptr<IR::P4Program> load_model(const char *curFile, CompilerOptions &options) {
     std::string includeDir = std::string(buildPath) + std::string("p4include");
     auto originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
@@ -75,13 +75,13 @@ const IR::P4Program *load_model(const char *curFile, CompilerOptions &options) {
     return program;
 }
 
-std::pair<const IR::P4Parser *, const IR::P4Parser *> loadExample(
+std::pair<IR::Ptr<IR::P4Parser>, IR::Ptr<IR::P4Parser>> loadExample(
     const char *file,
     CompilerOptions::FrontendVersion langVersion = CompilerOptions::FrontendVersion::P4_16) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
     auto &options = P4TestContext::get().options();
     options.langVersion = langVersion;
-    const IR::P4Program *program = load_model(file, options);
+    IR::Ptr<IR::P4Program> program = load_model(file, options);
     if (!program) return std::make_pair(nullptr, nullptr);
     return rewriteParser(program, options);
 }
