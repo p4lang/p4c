@@ -218,14 +218,33 @@ IR::Constant *ExpressionGenerator::genIntLiteral(size_t bit_width) {
     }
     return new IR::Constant(value);
 }
-IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tb) {
-    big_int maxSize = IR::getMaxBvVal(tb->width_bits());
-    big_int value;
-    if (maxSize == 0) {
-        value = 0;
-        return new IR::Constant(tb, value);
+
+IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tp) {
+    const auto *tb = tp->to<IR::Type_Bits>();
+    big_int maxUnsignedVal = IR::getMaxBvVal(tb->width_bits());
+    if (maxUnsignedVal == 0) {
+        return new IR::Constant(tb, 0);
     }
-    return new IR::Constant(tb, Utils::getRandBigInt(P4Scope::req.not_zero ? 1 : 0, maxSize));
+    if (tb->isSigned) {
+        // int<N>
+        big_int half = (maxUnsignedVal + 1) / 2;
+        big_int lo = P4Scope::req.not_negative ? big_int(0) : -half;
+        big_int hi = half - 1;
+        if (P4Scope::req.not_zero) {
+            lo = lo + 1;
+        }
+        big_int res = Utils::getRandBigInt(lo, hi);
+        if (P4Scope::req.not_zero && res == 0) {
+            // When not_zero && !not_negative, lo = -half + 1, so 0 is still in range. Map it to
+            // -half to get the desired uniform range.
+            res = -half;
+        }
+        return new IR::Constant(tb, res);
+    }
+    // bit<N>
+    big_int lo = P4Scope::req.not_zero ? 1 : 0;
+    big_int res = Utils::getRandBigInt(lo, maxUnsignedVal);
+    return new IR::Constant(tb, res);
 }
 
 IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
