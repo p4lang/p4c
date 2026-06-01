@@ -129,7 +129,7 @@ struct FrontendTestCase {
     }
 
     /// The output of the frontend.
-    const IR::P4Program *program;
+    IR::Ptr<IR::P4Program> program;
 };
 
 /// Redirects std::cerr temporarily
