@@ -690,9 +690,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::StructExpression *express
         structType = desired;
     }
     setType(getOriginal(), structType);
-    setType(expression, structType);
+    setType(result, structType);
     if (constant) {
-        setCompileTimeConstant(expression);
+        setCompileTimeConstant(result);
         setCompileTimeConstant(getOriginal<IR::Expression>());
     }
     return result;
@@ -1285,7 +1285,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
         auto tvs = unify(expression, destType, sourceType, "Cannot cast from '%1%' to '%2%'",
                          {sourceType, castType});
         if (tvs == nullptr) return expression;
-        const IR::Expression *rhs = expression->expr;
+        IR::Ptr<IR::Expression> rhs = expression->expr;
         if (!tvs->isIdentity()) {
             ConstantTypeSubstitution cts(tvs, typeMap, this);
             rhs = cts.convert(expression->expr, getChildContext());  // sets type
@@ -1316,7 +1316,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PathExpression *expressio
         typeError("%1%: Cannot resolve declaration", expression);
         return expression;
     }
-    const IR::Type *type = nullptr;
+    IR::Ptr<IR::Type> type = nullptr;
     if (auto tbl = decl->to<IR::P4Table>()) {
         if (auto current = findContext<IR::P4Table>()) {
             if (current->name == tbl->name) {
@@ -1378,7 +1378,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PathExpression *expressio
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Slice *expression) {
     if (done()) return expression;
-    const IR::Type *type = getType(expression->e0);
+    auto type = getType(expression->e0);
     if (type == nullptr) return expression;
 
     if (auto se = type->to<IR::Type_SerEnum>()) type = getTypeType(se->type);

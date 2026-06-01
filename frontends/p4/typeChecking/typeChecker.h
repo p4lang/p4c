@@ -222,8 +222,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
                                         const Visitor::Context *ctxt);
 
     struct Comparison {
-        const IR::Expression *left;
-        const IR::Expression *right;
+        IR::Ptr<IR::Expression> left;
+        IR::Ptr<IR::Expression> right;
     };
 
     // Helper function to handle comparisons
