@@ -640,8 +640,9 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
     }
     P4Scope::prop.depth++;
 
-    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_BIT_BINARY_SLICE,
-                                    Probabilities::get().EXPRESSION_BIT_BINARY_MUX};
+    // Slices are always unsigned, and should not be constructed for int<N> target types
+    int64_t pctSlice = tb->isSigned ? 0 : Probabilities::get().EXPRESSION_BIT_BINARY_SLICE;
+    std::vector<int64_t> percent = {pctSlice, Probabilities::get().EXPRESSION_BIT_BINARY_MUX};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
