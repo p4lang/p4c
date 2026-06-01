@@ -486,20 +486,24 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
             // pick a division that matches the type
             // TODO(fruffy): Make more sophisticated
             // this requires only compile time known values
+            P4Scope::req.not_negative = true;
             IR::Expression *left = genBitLiteral(tb);
             P4Scope::req.not_zero = true;
             IR::Expression *right = genBitLiteral(tb);
             P4Scope::req.not_zero = false;
+            P4Scope::req.not_negative = false;
             expr = new IR::Div(tb, left, right);
         } break;
         case 2: {
             // pick a modulo that matches the type
             // TODO(fruffy): Make more sophisticated
             // this requires only compile time known values
+            P4Scope::req.not_negative = true;
             IR::Expression *left = genBitLiteral(tb);
             P4Scope::req.not_zero = true;
             IR::Expression *right = genBitLiteral(tb);
             P4Scope::req.not_zero = false;
+            P4Scope::req.not_negative = false;
             expr = new IR::Mod(tb, left, right);
         } break;
         case 3: {
