@@ -17,15 +17,15 @@
 namespace P4 {
 
 #ifdef SUPPORT_P4_14
-const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
-                                   const std::string &input,
-                                   CompilerOptions::FrontendVersion version) {
+IR::Ptr<IR::P4Program> parseP4String(const char *sourceFile, unsigned sourceLine,
+                                     const std::string &input,
+                                     CompilerOptions::FrontendVersion version) {
 #else
-const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
-                                   const std::string &input) {
+IR::Ptr<IR::P4Program> parseP4String(const char *sourceFile, unsigned sourceLine,
+                                     const std::string &input) {
 #endif
     std::istringstream stream(input);
-    const IR::P4Program *result = nullptr;
+    IR::Ptr<IR::P4Program> result = nullptr;
 #ifdef SUPPORT_P4_14
     if (version == CompilerOptions::FrontendVersion::P4_14)
         result =
@@ -44,8 +44,8 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
 }
 
 #ifdef SUPPORT_P4_14
-const IR::P4Program *parseP4String(const std::string &input,
-                                   CompilerOptions::FrontendVersion version) {
+IR::Ptr<IR::P4Program> parseP4String(const std::string &input,
+                                     CompilerOptions::FrontendVersion version) {
     return parseP4String("(string)", 1, input, version);
 }
 #else
