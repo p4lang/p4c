@@ -81,7 +81,8 @@ IR::Ptr<IR::Node> PassManager::apply_visitor(const IR::Node *program_, const cha
         }
         try {
             try {
-                LOG1(log_indent << name() << " invoking " << v->name());
+                LOG1(log_indent << name() << " invoking " << v->name() << " on " <<
+                     program->node_type_name() << '[' << program->id << ']');
                 program = program->apply(**it, getChildContext());
                 if (LOGGING(3)) {
                     size_t maxmem, mem = gc_mem_inuse(&maxmem);  // triggers gc
