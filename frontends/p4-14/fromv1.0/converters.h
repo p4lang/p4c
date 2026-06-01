@@ -48,7 +48,7 @@ class ExpressionConverter : public Transform {
     const IR::Node *postorder(IR::GlobalRef *gr) override;
     const IR::Node *postorder(IR::Equ *equ) override;
     const IR::Node *postorder(IR::Neq *neq) override;
-    const IR::Expression *convert(const IR::Node *node) {
+    IR::Ptr<IR::Expression> convert(const IR::Node *node) {
         auto result = node->apply(*this);
         return result->to<IR::Expression>();
     }
@@ -66,7 +66,7 @@ class StatementConverter : public ExpressionConverter {
     const IR::Node *preorder(IR::Apply *apply) override;
     const IR::Node *preorder(IR::Primitive *primitive) override;
     const IR::Node *preorder(IR::If *cond) override;
-    const IR::Statement *convert(const IR::Node *node);
+    IR::Ptr<IR::Statement> convert(const IR::Node *node);
 };
 
 class TypeConverter : public ExpressionConverter {
@@ -82,14 +82,14 @@ class ExternConverter {
     static std::map<cstring, ExternConverter *> *cvtForType;
 
  public:
-    virtual const IR::Type_Extern *convertExternType(ProgramStructure *, const IR::Type_Extern *,
-                                                     cstring);
-    virtual const IR::Declaration_Instance *convertExternInstance(
+    virtual IR::Ptr<IR::Type_Extern> convertExternType(ProgramStructure *, const IR::Type_Extern *,
+                                                       cstring);
+    virtual IR::Ptr<IR::Declaration_Instance> convertExternInstance(
         ProgramStructure *, const IR::Declaration_Instance *, cstring,
         IR::IndexedVector<IR::Declaration> *);
-    virtual const IR::Statement *convertExternCall(ProgramStructure *,
-                                                   const IR::Declaration_Instance *,
-                                                   const IR::Primitive *);
+    virtual IR::Ptr<IR::Statement> convertExternCall(ProgramStructure *,
+                                                     const IR::Declaration_Instance *,
+                                                     const IR::Primitive *);
     virtual bool convertAsGlobal(ProgramStructure *, const IR::Declaration_Instance *) {
         return false;
     }
@@ -104,18 +104,18 @@ class ExternConverter {
     static ExternConverter *get(const IR::Declaration_Instance *ext) {
         return get(ext->type->to<IR::Type_Extern>());
     }
-    static const IR::Type_Extern *cvtExternType(ProgramStructure *s, const IR::Type_Extern *e,
-                                                cstring name) {
+    static IR::Ptr<IR::Type_Extern> cvtExternType(ProgramStructure *s, const IR::Type_Extern *e,
+                                                  cstring name) {
         return get(e)->convertExternType(s, e, name);
     }
-    static const IR::Declaration_Instance *cvtExternInstance(
+    static IR::Ptr<IR::Declaration_Instance> cvtExternInstance(
         ProgramStructure *s, const IR::Declaration_Instance *di, cstring name,
         IR::IndexedVector<IR::Declaration> *scope) {
         return get(di)->convertExternInstance(s, di, name, scope);
     }
-    static const IR::Statement *cvtExternCall(ProgramStructure *s,
-                                              const IR::Declaration_Instance *di,
-                                              const IR::Primitive *p) {
+    static IR::Ptr<IR::Statement> cvtExternCall(ProgramStructure *s,
+                                                const IR::Declaration_Instance *di,
+                                                const IR::Primitive *p) {
         return get(di)->convertExternCall(s, di, p);
     }
     static bool cvtAsGlobal(ProgramStructure *s, const IR::Declaration_Instance *di) {
@@ -133,11 +133,11 @@ class PrimitiveConverter {
     virtual ~PrimitiveConverter();
 
     // helper functions
-    safe_vector<const IR::Expression *> convertArgs(ProgramStructure *, const IR::Primitive *);
+    safe_vector<IR::Ptr<IR::Expression>> convertArgs(ProgramStructure *, const IR::Primitive *);
 
  public:
-    virtual const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) = 0;
-    static const IR::Statement *cvtPrimitive(ProgramStructure *, const IR::Primitive *);
+    virtual IR::Ptr<IR::Statement> convert(ProgramStructure *, const IR::Primitive *) = 0;
+    static IR::Ptr<IR::Statement> cvtPrimitive(ProgramStructure *, const IR::Primitive *);
 };
 
 /** Macro for defining PrimitiveConverter subclass singleton instances.
@@ -148,14 +148,14 @@ class PrimitiveConverter {
  * next highest will be run, etc.  The macro invocation is followed by the body of the
  * converter function.
  */
-#define CONVERT_PRIMITIVE(NAME, ...)                                                      \
-    class PrimitiveConverter_##NAME##_##__VA_ARGS__ : public PrimitiveConverter {         \
-        const IR::Statement *convert(ProgramStructure *, const IR::Primitive *) override; \
-        PrimitiveConverter_##NAME##_##__VA_ARGS__()                                       \
-            : PrimitiveConverter(#NAME, __VA_ARGS__ + 0) {}                               \
-        static PrimitiveConverter_##NAME##_##__VA_ARGS__ singleton;                       \
-    } PrimitiveConverter_##NAME##_##__VA_ARGS__::singleton;                               \
-    const IR::Statement *PrimitiveConverter_##NAME##_##__VA_ARGS__::convert(              \
+#define CONVERT_PRIMITIVE(NAME, ...)                                                        \
+    class PrimitiveConverter_##NAME##_##__VA_ARGS__ : public PrimitiveConverter {           \
+        IR::Ptr<IR::Statement> convert(ProgramStructure *, const IR::Primitive *) override; \
+        PrimitiveConverter_##NAME##_##__VA_ARGS__()                                         \
+            : PrimitiveConverter(#NAME, __VA_ARGS__ + 0) {}                                 \
+        static PrimitiveConverter_##NAME##_##__VA_ARGS__ singleton;                         \
+    } PrimitiveConverter_##NAME##_##__VA_ARGS__::singleton;                                 \
+    IR::Ptr<IR::Statement> PrimitiveConverter_##NAME##_##__VA_ARGS__::convert(              \
         ProgramStructure *structure, const IR::Primitive *primitive)
 
 ///////////////////////////////////////////////////////////////
@@ -446,12 +446,12 @@ class Rewriter : public Transform {
             dump(global);
         }
         prune();
-        auto *rv = structure->create(global->srcInfo);
+        auto rv = structure->create(global->srcInfo);
         if (LOGGING(4)) {
             LOG4("#### Generated P4_16 program");
-            dump(rv);
+            dump(&*rv);
         }
-        return rv;
+        return guardReturn(rv);
     }
 };
 
