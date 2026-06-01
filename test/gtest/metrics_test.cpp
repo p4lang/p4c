@@ -58,11 +58,11 @@ class MetricPassesTest : public P4CTest {
         } else
             opts.selectedMetrics = {"loc"_cs, "cyclomatic"_cs, "header-manipulation"_cs};
 
-        const IR::P4Program *program = parseP4File(opts);
+        IR::Ptr<IR::P4Program> program = parseP4File(opts);
         ASSERT_NE(program, nullptr) << "Parsing failed for " << inputFile;
 
         FrontEnd frontend;
-        const IR::P4Program *result = frontend.run(opts, program, &std::cerr);
+        IR::Ptr<IR::P4Program> result = frontend.run(opts, program, &std::cerr);
         ASSERT_NE(result, nullptr) << "Frontend pipeline failed for " << inputFile;
 
         metricsOutputPath =

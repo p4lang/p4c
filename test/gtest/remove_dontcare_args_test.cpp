@@ -11,8 +11,8 @@ using namespace P4;
 namespace P4::Test {
 
 struct RemoveDontcareArgsTest : P4CTest {
-    const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    IR::Ptr<IR::Node> parseAndProcess(std::string program) {
+        auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
@@ -75,7 +75,7 @@ package top(proto p);
 top(C()) main;
     )");
 
-    const auto *program = parseAndProcess(program_source);
+    auto program = parseAndProcess(program_source);
     ASSERT_TRUE(program);
     ASSERT_EQ(::P4::errorCount(), 0);
 

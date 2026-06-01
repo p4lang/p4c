@@ -16,8 +16,8 @@ namespace P4::Test {
 struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
 
-    const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    IR::Ptr<IR::Node> parseAndProcess(std::string program) {
+        auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
@@ -46,7 +46,7 @@ TEST_F(P4CFrontendEnumValidation, Bit) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -62,7 +62,7 @@ TEST_F(P4CFrontendEnumValidation, BitNeg) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -78,7 +78,7 @@ TEST_F(P4CFrontendEnumValidation, IntPos) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -94,7 +94,7 @@ TEST_F(P4CFrontendEnumValidation, IntNeg) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -114,7 +114,7 @@ TEST_F(P4CFrontendEnumValidation, TypeDef) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 2);
@@ -130,7 +130,7 @@ TEST_F(P4CFrontendEnumValidation, ExplicitCast) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 0);
@@ -143,7 +143,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidUnderlyingUnsized) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -159,7 +159,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidType) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -179,7 +179,7 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
             apply{}
         }
     )");
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 0);
 

@@ -130,7 +130,7 @@ std::string getMultiVisitLoopSource() {
 // This test fails when Visitor::Tracker::try_start does _not_ reset done on a previously-visited
 // node
 TEST_F(P4CVisitor, MultiVisitInspectorLoop) {
-    auto *program =
+    auto program =
         P4::parseP4String(getMultiVisitLoopSource(), CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
 
@@ -141,7 +141,7 @@ TEST_F(P4CVisitor, MultiVisitInspectorLoop) {
 // This test fails when Visitor::ChangeTracker::try_start does _not_ reset visit_in_progress on a
 // previously-visited node
 TEST_F(P4CVisitor, MultiVisitModifierLoop) {
-    auto *program =
+    auto program =
         P4::parseP4String(getMultiVisitLoopSource(), CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
 
