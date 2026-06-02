@@ -44,9 +44,9 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tr
     if (supportCommandLinePragma && pragmaName == "command_line") {
         IOptionPragmaParser::CommandLineOptions options;
         auto args = annotation->needsParsing()
-                         ? P4ParserDriver::parseExpressionList(annotation->srcInfo,
-                                                               annotation->getUnparsed())
-                         : IR::Ptr<IR::Vector<IR::Expression>>(&annotation->getExpr());
+                        ? P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                              annotation->getUnparsed())
+                        : IR::Ptr<IR::Vector<IR::Expression>>(&annotation->getExpr());
         for (const IR::Expression *arg : *args) {
             if (auto *a = arg->to<IR::StringLiteral>()) {
                 options.push_back(a->value.c_str());
