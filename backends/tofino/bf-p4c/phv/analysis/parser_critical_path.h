@@ -91,7 +91,7 @@ class CollectUserSpecifiedCriticalStates : public Inspector {
     bool preorder(const IR::BFN::ParserState *state) override {
         if (state->gress != gress) return false;
 
-        for (const auto *p4State : state->p4States) {
+        for (auto p4State : state->p4States) {
             for (auto annot : p4State->annotations) {
                 if (annot->name.name == "critical") {
                     auto &exprs = annot->getExpr();

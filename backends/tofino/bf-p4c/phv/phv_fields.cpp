@@ -1520,7 +1520,7 @@ struct ComputeFieldAlignments : public Inspector {
     bool preorder(const IR::BFN::Deparser *deparser) override {
         unsigned currentBit = 0;
 
-        for (auto *emitPrimitive : deparser->emits) {
+        for (auto emitPrimitive : deparser->emits) {
             if (auto *checksum = emitPrimitive->to<IR::BFN::EmitChecksum>()) {
                 for (auto source : checksum->sources) {
                     auto f = phv.field(source->field->field);
@@ -1838,7 +1838,7 @@ class CollectPardeConstraints : public Inspector {
     }
 
     void postorder(const IR::BFN::EmitChecksum *checksum) override {
-        for (const auto *flval : checksum->sources) {
+        for (auto flval : checksum->sources) {
             PHV::Field *f = phv.field(flval->field->field);
             BUG_CHECK(f != nullptr, "Field not created in PhvInfo");
             f->set_is_checksummed(true);

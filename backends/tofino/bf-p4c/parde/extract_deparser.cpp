@@ -60,7 +60,7 @@ void ExtractDeparser::generateEmits(const IR::MethodCallExpression *mc) {
     BUG_CHECK(headerType != nullptr, "Emitting header with non-structlike type: %1%", headerType);
 
     auto *povBit = new IR::Member(IR::Type::Bits::get(1), header, "$valid");
-    for (auto *f : headerType->fields) {
+    for (auto f : headerType->fields) {
         auto *field = new IR::Member(f->type, header, f->name);
         auto *emit = new IR::BFN::EmitField(mc->srcInfo, field, povBit);
 
@@ -400,7 +400,7 @@ void ExtractDeparser::generateDigest(IR::BFN::Digest *&digest, cstring name,
     } else if (auto *ref = expr->to<IR::ConcreteHeaderRef>()) {
         // e.g. emit(hdr);
         if (auto *st = expr->type->to<IR::Type_StructLike>()) {
-            for (auto *item : st->fields) {
+            for (auto item : st->fields) {
                 sources.push_back(new IR::BFN::FieldLVal(gen_fieldref(ref->ref, item->name)));
             }
         }
@@ -411,7 +411,7 @@ void ExtractDeparser::generateDigest(IR::BFN::Digest *&digest, cstring name,
         digest->fieldLists.push_back(fieldList);
     } else if (auto *initializer = expr->to<IR::StructExpression>()) {
         // e.g. emit({ ... })
-        for (auto *item : initializer->components) {
+        for (auto item : initializer->components) {
             Pattern::Match<IR::Expression> e1;
             if (item->expression->is<IR::Concat>()) {
                 processConcat(sources, item->expression->to<IR::Concat>());
@@ -445,7 +445,7 @@ void ExtractDeparser::generateDigest(IR::BFN::Digest *&digest, cstring name,
             bool is_mirror_id = true;
             int offset = 0;
             IR::BFN::FieldLVal *prev_pad_lval = nullptr;
-            for (auto *lval : sources) {
+            for (auto lval : sources) {
                 int width = lval->field->type->width_bits();
                 if (lval->field->is<IR::Padding>()) {
                     // Merge with existing padding

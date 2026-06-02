@@ -102,14 +102,14 @@ Visitor::profile_t DarkLiveRange::init_apply(const IR::Node *root) {
 
 bool DarkLiveRange::preorder(const IR::MAU::Table *tbl) {
     uint64_t totalKeySize = 0;
-    for (const auto *key : tbl->match_key) {
+    for (auto key : tbl->match_key) {
         le_bitrange bits;
         const auto *field = phv.field(key->expr, &bits);
         if (!field) continue;
         totalKeySize += bits.size();
     }
     if (!tbl->match_table) return true;
-    const auto *sz = tbl->match_table->getSizeProperty();
+    auto sz = tbl->match_table->getSizeProperty();
     if (!sz) return true;
     if (!sz->fitsUint64()) return true;
     uint64_t tableSize = sz->asUint64();

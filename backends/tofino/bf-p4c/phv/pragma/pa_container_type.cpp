@@ -94,7 +94,7 @@ bool PragmaContainerType::add_constraint(const IR::BFN::Pipe *pipe, const IR::Ex
 
 bool PragmaContainerType::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto *annotation : global_pragmas) {
+    for (auto annotation : global_pragmas) {
         if (annotation->name.name != PragmaContainerType::name) continue;
 
         auto &exprs = annotation->getExpr();

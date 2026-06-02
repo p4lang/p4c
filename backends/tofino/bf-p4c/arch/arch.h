@@ -287,7 +287,7 @@ struct Pipeline {
  private:
     // Inserts global pragmas into this instance. Filters out all pragmas which are applied
     // to a different pipeline.
-    void insertPragmas(const std::vector<const IR::Annotation *> &all_pragmas);
+    void insertPragmas(const std::vector<IR::Ptr<IR::Annotation>> &all_pragmas);
 };
 
 class ProgramPipelines {
