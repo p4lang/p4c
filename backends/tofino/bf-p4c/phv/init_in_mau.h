@@ -147,7 +147,7 @@ class AddInitTable : public Transform {
             seq_gress = tSeq->tables.front()->gress;
             tableName = "__mau_inits_table__" + toString(seq_gress);
             actionName = "__mau_inits_action__" + toString(seq_gress);
-            for (auto *tbl : tSeq->tables) {
+            for (auto tbl : tSeq->tables) {
                 if (tbl->name == tableName) {
                     init_table = tbl;
                     BUG_CHECK(tbl->actions.count(actionName), "Table %1% does not have action %2%?",
