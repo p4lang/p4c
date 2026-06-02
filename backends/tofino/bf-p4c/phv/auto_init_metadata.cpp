@@ -22,7 +22,7 @@
 #include "backends/tofino/bf-p4c/phv/pragma/pa_no_init.h"
 
 bool DisableAutoInitMetadata::auto_init_metadata(const IR::BFN::Pipe *pipe) const {
-    for (auto *anno : pipe->global_pragmas) {
+    for (auto anno : pipe->global_pragmas) {
         if (anno->name.name == PragmaAutoInitMetadata::name) {
             return true;
         }

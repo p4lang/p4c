@@ -403,7 +403,7 @@ void ComputeDarkInitialization::createAlwaysRunTable(PHV::AllocSlice &alloc_sl) 
         BUG_CHECK(ara_tbl->actions.size() == 1, "ARA table has more than 1 actions ...?");
         BUG_CHECK(ara_tbl->actions.begin()->second != nullptr, "ARA has null Action ...?");
 
-        act = const_cast<IR::MAU::Action *>(ara_tbl->actions.begin()->second);
+        act = const_cast<IR::MAU::Action *>(&*ara_tbl->actions.begin()->second);
         act_name = ara_tbl->actions.begin()->first;
 
     } else {
@@ -535,7 +535,7 @@ class AddDarkInitialization : public Transform {
         const IR::MAU::Table *tbl = findContext<IR::MAU::Table>();
         CHECK_NULL(tbl);
         ordered_set<PHV::FieldSlice> dests;
-        for (auto *prim : action->action) {
+        for (auto prim : action->action) {
             le_bitrange range;
             const PHV::Field *f = phv.field(prim->operands[0], &range);
             PHV::FieldSlice slice(f, range);
