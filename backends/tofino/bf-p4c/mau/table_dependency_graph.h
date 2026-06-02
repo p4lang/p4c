@@ -241,11 +241,11 @@ struct DependencyGraph {
         dependency_map;
 
     ordered_map<typename Graph::edge_descriptor,
-                ordered_map<const PHV::Field *, std::pair<ordered_set<const IR::MAU::Action *>,
-                                                          ordered_set<const IR::MAU::Action *>>>>
+                ordered_map<const PHV::Field *, std::pair<ordered_set<IR::Ptr<IR::MAU::Action>>,
+                                                          ordered_set<IR::Ptr<IR::MAU::Action>>>>>
         data_annotations;
 
-    ordered_map<typename Graph::edge_descriptor, const std::vector<const IR::MAU::Action *>>
+    ordered_map<typename Graph::edge_descriptor, const std::vector<IR::Ptr<IR::MAU::Action>>>
         data_annotations_exit;
     ordered_map<typename Graph::edge_descriptor, const PHV::Container> data_annotations_conflicts;
     ordered_map<typename Graph::edge_descriptor, const PHV::FieldSlice *> data_annotations_metadata;
@@ -253,17 +253,17 @@ struct DependencyGraph {
 
     // Note: these maps only make sense if there is a PHV allocation.
     // Map from table to PHV containers written.
-    std::map<const IR::MAU::Table *, std::map<const PHV::Container, bool>> containers_write_ = {};
+    std::map<IR::Ptr<IR::MAU::Table>, std::map<const PHV::Container, bool>> containers_write_ = {};
     // Map from table to PHV containers read at the match input crossbar.
-    std::map<const IR::MAU::Table *, std::map<const PHV::Container, bool>> containers_read_xbar_ =
+    std::map<IR::Ptr<IR::MAU::Table>, std::map<const PHV::Container, bool>> containers_read_xbar_ =
         {};
     // Map from table to PHV containers read at the PHV ALUs.
-    std::map<const IR::MAU::Table *, std::map<const PHV::Container, bool>> containers_read_alu_ =
+    std::map<IR::Ptr<IR::MAU::Table>, std::map<const PHV::Container, bool>> containers_read_alu_ =
         {};
     // Map to memoize results of calls to "find_mau_dependency"
     // This map uses the hardware terminology for MAU stage dependencies,
     // so dependencies_t is not used.
-    std::map<std::pair<const IR::MAU::Table *, const IR::MAU::Table *>,
+    std::map<std::pair<IR::Ptr<IR::MAU::Table>, IR::Ptr<IR::MAU::Table>>,
              DependencyGraph::mau_dependencies_t>
         table_dep_ = {};
 
@@ -276,9 +276,9 @@ struct DependencyGraph {
             dep_stages_dom_frontier;
     };
 
-    ordered_map<const IR::MAU::Table *, StageInfo> stage_info;
+    ordered_map<IR::Ptr<IR::MAU::Table>, StageInfo> stage_info;
 
-    using MinEdgeInfo = std::pair<const IR::MAU::Table *, dependencies_t>;
+    using MinEdgeInfo = std::pair<IR::Ptr<IR::MAU::Table>, dependencies_t>;
     bool display_min_edges = false;
     assoc::hash_map<const IR::MAU::Table *, safe_vector<MinEdgeInfo>> min_stage_edges;
 
@@ -476,8 +476,8 @@ struct DependencyGraph {
             return false;
     }
 
-    std::optional<ordered_map<const PHV::Field *, std::pair<ordered_set<const IR::MAU::Action *>,
-                                                            ordered_set<const IR::MAU::Action *>>>>
+    std::optional<ordered_map<const PHV::Field *, std::pair<ordered_set<IR::Ptr<IR::MAU::Action>>,
+                                                            ordered_set<IR::Ptr<IR::MAU::Action>>>>>
     get_data_dependency_info(typename Graph::edge_descriptor edge) const {
         if (!data_annotations.count(edge)) {
             LOG4("Data dependency edge not found");
@@ -508,7 +508,7 @@ struct DependencyGraph {
     */
     std::optional<ordered_map<
         std::pair<const PHV::Field *, DependencyGraph::dependencies_t>,
-        std::pair<ordered_set<const IR::MAU::Action *>, ordered_set<const IR::MAU::Action *>>>>
+        std::pair<ordered_set<IR::Ptr<IR::MAU::Action>>, ordered_set<IR::Ptr<IR::MAU::Action>>>>>
     get_data_dependency_info(const IR::MAU::Table *upstream,
                              const IR::MAU::Table *downstream) const;
 

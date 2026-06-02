@@ -1010,7 +1010,7 @@ class ConstructSymbolTable : public Inspector {
 
         ERROR_CHECK(mce->typeArguments->size() == 1, "Expected 1 type parameter for %1%",
                     mce->method);
-        auto *typeArg = mce->typeArguments->at(0);
+        auto typeArg = mce->typeArguments->at(0);
         auto *typeName = typeArg->to<IR::Type_Name>();
         ERROR_CHECK(typeName != nullptr, "Expected type T in digest to be a typeName %1%", typeArg);
         auto fieldList = refMap->getDeclaration(typeName->path);
@@ -1237,7 +1237,7 @@ class ConstructSymbolTable : public Inspector {
             // hardware uses to route mirrored packets in the TM.
             ERROR_CHECK(mce->arguments->size() >= 2, "No mirror session id specified: %1%", mce);
             auto *mirrorId = new IR::Member(compilerMetadataPath, "mirror_id");
-            auto *mirrorIdValue = mce->arguments->at(1)->expression;
+            auto mirrorIdValue = mce->arguments->at(1)->expression;
             /// v1model mirror_id is 32bit, cast to bit<10>
             auto *castedMirrorIdValue =
                 new IR::Cast(IR::Type::Bits::get(Device::cloneSessionIdWidth()), mirrorIdValue);

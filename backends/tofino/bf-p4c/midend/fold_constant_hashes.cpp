@@ -331,7 +331,7 @@ const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteOtherH
 const IR::Node *FoldConstantHashes::DoFoldConstantHashes::preorder(IR::MethodCallExpression *mce) {
     auto *method_instance = P4::MethodInstance::resolve(mce, self.refMap, self.typeMap);
     if (!method_instance) return mce;
-    auto *extern_object = method_instance->object;
+    auto extern_object = method_instance->object;
     if (!extern_object) return mce;
     auto *extern_decl = extern_object->to<IR::Declaration_Instance>();
     if (!extern_decl) return mce;

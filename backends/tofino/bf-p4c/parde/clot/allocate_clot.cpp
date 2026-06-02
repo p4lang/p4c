@@ -1304,7 +1304,7 @@ class GreedyClotAllocator : public Visitor {
             auto candidates = find_clot_candidates(field_extract_info->pseudoheaderMap);
             // Identify additional CLOT candidates (using deparser analysis)
             const auto *deparser = pipe->thread[parser->gress].deparser->to<IR::BFN::Deparser>();
-            const auto *mau = pipe->thread[parser->gress].mau;
+            auto mau = pipe->thread[parser->gress].mau;
             HeaderValidityAnalysis hva(phvInfo, {});
             mau->apply(hva);
             auto sequences = find_multiheader_sequences(deparser, field_extract_info->fieldMap,

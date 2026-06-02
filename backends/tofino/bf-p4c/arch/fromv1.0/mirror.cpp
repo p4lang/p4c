@@ -65,7 +65,7 @@ std::optional<MirroredFieldList *> analyzeMirrorStatement(
             }
         }
         auto *finalFieldList = new MirroredFieldList;
-        for (auto *field : fieldList->components) {
+        for (auto field : fieldList->components) {
             LOG2("mirror field list would include field: " << field);
             if (!field->expression->is<IR::Concat>() && !field->expression->is<IR::Cast>() &&
                 !field->expression->is<IR::Constant>() && !field->expression->is<IR::Member>()) {

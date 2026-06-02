@@ -173,7 +173,7 @@ static bool checksumUpdateSanityCheck(const IR::AssignmentStatement *assignment)
         return false;
     }
 
-    for (auto *source : *components) {
+    for (auto source : *components) {
         if (auto *member = source->to<IR::Member>()) {
             if (!member->expr->is<IR::HeaderRef>()) {
                 error("Invalid field in the checksum calculation: %1%", source);
@@ -288,7 +288,7 @@ FieldListInfo *analyzeUpdateChecksumStatement(const IR::AssignmentStatement *ass
     // * Fields of a header should always be byte aligned. This rule is relaxed for metadata.
     // * Sum of all the bits in the checksum list should be equal to a multiple of 8.
 
-    for (auto *source : *getListExprComponents(*(*methodCall->arguments)[0]->expression)) {
+    for (auto source : *getListExprComponents(*(*methodCall->arguments)[0]->expression)) {
         if (source->is<IR::Member>() || source->is<IR::Constant>()) {
             if (auto *constant = source->to<IR::Constant>()) {
                 if (constant->asInt() != 0) {
@@ -406,7 +406,7 @@ static ordered_set<UpdateConditionInfo *> analyzeUpdateChecksumCondition(
     if (!ifstmt->ifTrue || ifstmt->ifFalse) {
         return updateConditions;
     }
-    auto *condition = ifstmt->condition;
+    auto condition = ifstmt->condition;
     while (auto andCondition = condition->to<IR::LAnd>()) {
         updateConditions.insert(getUpdateCondition(andCondition->right));
         if (auto leftEquation = andCondition->left->to<IR::Equ>()) {
@@ -552,7 +552,7 @@ struct SubstituteUpdateChecksums : public Transform {
     IR::BFN::Deparser *preorder(IR::BFN::Deparser *deparser) override {
         IR::Vector<IR::BFN::Emit> newEmits;
 
-        for (auto *p : deparser->emits) {
+        for (auto p : deparser->emits) {
             bool rewrite = false;
 
             auto *emit = p->to<IR::BFN::EmitField>();

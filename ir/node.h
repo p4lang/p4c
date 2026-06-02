@@ -55,6 +55,7 @@ class Vector;  // IWYU pragma: keep
 template <class T>
 class IndexedVector;  // IWYU pragma: keep
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wvirtual-move-assign"
 // Yes the base class may have a non-trivial move assignment -- that's why we have an
 // explicit `= default` here (that and C++11 doesn't create a default move without it)

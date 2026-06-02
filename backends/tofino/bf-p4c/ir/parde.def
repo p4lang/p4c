@@ -157,7 +157,7 @@ abstract ParserPrimitive {
 #emit
     /// Get destination out of a parser write primitive -- either Emit, or
     /// ParserChecksumWritePrimitive. Fails if input is not a write primitive.
-    virtual IR::Ptr<ParserLVal> getWriteDest() const {
+    virtual const ParserLVal* getWriteDest() const {
         BUG("%1%: Write is neither extract nor checksum write", this);
     }
 
@@ -181,7 +181,7 @@ class Extract : ParserPrimitive {
         out << "extract " << source << " to " << dest;
     }
 
-    ParserLVal getWriteDest() const override { return dest; }
+    const ParserLVal *getWriteDest() const override { return dest; }
     IR::BFN::ParserWriteMode getWriteMode() const override { return write_mode; }
 
     /// The location to be written to.
@@ -316,7 +316,7 @@ abstract ParserChecksumPrimitive : ParserPrimitive {
 
 abstract ParserChecksumWritePrimitive : ParserChecksumPrimitive {
     // this is here to declare that all checksum writes return FieldLVal not just ParserLVal
-    ParserLVal getWriteDest() const override {
+    const FieldLVal *getWriteDest() const override {
         BUG("calling getWriteDest from abtract base, this should have beed overwritten");
     }
 
@@ -328,7 +328,7 @@ abstract ParserChecksumWritePrimitive : ParserChecksumPrimitive {
 class ChecksumVerify : ParserChecksumWritePrimitive {
     dbprint { out << "verify checksum " << declName; }
 
-    ParserLVal getWriteDest() const override { return dest; }
+    const FieldLVal *getWriteDest() const override { return dest; }
 
     optional NullOK FieldLVal dest;
 }
@@ -336,7 +336,7 @@ class ChecksumVerify : ParserChecksumWritePrimitive {
 class ChecksumResidualDeposit : ParserChecksumWritePrimitive {
     dbprint { out << "subtract and deposit checksum " << declName; }
 
-    ParserLVal getWriteDest() const override { return dest; }
+    const FieldLVal *getWriteDest() const override { return dest; }
 
     FieldLVal dest;
     // header end position relative to current state's input buffer
@@ -479,7 +479,7 @@ class Select {
 class ParserState : Unit {
     ParserState(IR::ParserState p4State, cstring name, gress_t gr)
         : name(name), gress(gr) { if (p4State) p4States.emplace(p4State); }
-    ParserState(std::set<const IR::ParserState*> p4States, cstring name, gress_t gr)
+    ParserState(std::set<IR::ParserState> p4States, cstring name, gress_t gr)
         : p4States(p4States), name(name), gress(gr) { }
 
     int stage() const override { return -1; }
@@ -495,12 +495,12 @@ class ParserState : Unit {
         return *p4States.begin();
     }
 
-#emit
     /// The original P4 state(s). Empty if this is a generated state that doesn't
     /// correspond to anything in the P4 program. Not visited.
     /// Can contain multiple states due to state merging.
-    std::set<const IR::ParserState*> p4States;
+    std::set<IR::ParserState> p4States = {};
 
+#emit
     /// Debugging information about the P4 state or states that were used to
     /// generate this ParserState.
     ::BFN::DebugInfo debug;

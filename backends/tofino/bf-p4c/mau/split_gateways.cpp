@@ -43,7 +43,7 @@ const IR::Node *SpreadGatewayAcrossSeq::postorder(IR::MAU::Table *t) {
     assert(t->attached.empty());
     auto rv = new IR::Vector<IR::MAU::Table>();
     for (auto it = t->next.rbegin(); it != t->next.rend(); it++) {
-        auto seq = dynamic_cast<const IR::MAU::TableSeq *>(it->second);
+        auto seq = it->second;
         if (!seq) return t;
         bool splitting = true;
         IR::MAU::Table *newtable = nullptr;
