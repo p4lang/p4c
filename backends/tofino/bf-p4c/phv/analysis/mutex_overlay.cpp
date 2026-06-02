@@ -54,7 +54,7 @@ bool ExcludeParserLoopReachableFields::is_loop_reachable(
 }
 
 IR::Ptr<IR::Node> ExcludeParserLoopReachableFields::apply_visitor(const IR::Node *root,
-                                                                const char *) {
+                                                                  const char *) {
     for (auto &kv : fieldToStates.field_to_parser_states) {
         for (auto &xk : fieldToStates.field_to_parser_states) {
             if (kv.first == xk.first || kv.first->gress != xk.first->gress) continue;

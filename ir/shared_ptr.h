@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_SHARED_PTR_H_
-#define _IR_SHARED_PTR_H_
+#ifndef IR_SHARED_PTR_H_
+#define IR_SHARED_PTR_H_
 
 #include <atomic>
 #include <memory>
@@ -100,9 +100,9 @@ class shared_ptr {
     }
     template <class U,
               typename = typename std::enable_if<std::is_constructible<T *, U *>::value>::type>
-    shared_ptr(U *a) {
+    shared_ptr(U *a) {  // NOLINT(runtime/explicit)
         if ((ptr = a)) a->refcount++;
-    }  // NOLINT(runtime/explicit)
+    }
     shared_ptr<T> &operator=(const shared_ptr<T> &a) {
         if (ptr == a.ptr) return *this;
         if (ptr && !ptr->not_on_heap && --ptr->refcount == 0) delete ptr;
@@ -186,4 +186,4 @@ auto toString(const P4::IR::shared_ptr<T> &val) {
 
 }  // namespace P4::Util
 
-#endif /* _IR_SHARED_PTR_H_ */
+#endif /* IR_SHARED_PTR_H_ */
