@@ -442,7 +442,7 @@ int main(int ac, char **av) {
 #if BFP4C_CATCH_EXCEPTIONS
     try {
 #endif  // BFP4C_CATCH_EXCEPTIONS
-        auto *program = run_frontend();
+        auto program = run_frontend();
 
         if (options.num_stages_override) {
             Device::overrideNumStages(options.num_stages_override);
