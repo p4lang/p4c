@@ -399,8 +399,6 @@ int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool
     return -1;
 }
 
-void dump(TypeMap *typeMap) {
-    std::cout <<*typeMap << std::endl;
-}
+void dump(TypeMap *typeMap) { std::cout << *typeMap << std::endl; }
 
 }  // namespace P4
