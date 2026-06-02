@@ -48,7 +48,7 @@ class IsSlice : public P4::KeyIsSimple {
     bool isSimple(const IR::Expression *expr, const Visitor::Context *) override {
         auto slice = expr->to<IR::Slice>();
         if (!slice) return false;
-        auto *e = slice->e0;
+        auto e = slice->e0;
         while (e->is<IR::Member>()) e = e->to<IR::Member>()->expr;
         return e->to<IR::PathExpression>() != nullptr;
     }

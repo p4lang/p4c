@@ -112,7 +112,7 @@ void ExcludePragmaNoOverlayFields::end_apply() {
 bool ExcludeMAUOverlays::preorder(const IR::MAU::Table *tbl) {
     LOG5("\tTable: " << tbl->name);
     ordered_set<PHV::Field *> keyFields;
-    for (auto *key : tbl->match_key) {
+    for (auto key : tbl->match_key) {
         PHV::Field *field = phv.field(key->expr);
         if (!field) continue;
         keyFields.insert(field);

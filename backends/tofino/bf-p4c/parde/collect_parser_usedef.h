@@ -497,7 +497,7 @@ struct CollectParserUseDef : PassManager {
             bool def_invalid = false;
             std::vector<std::pair<const IR::BFN::ParserState *, const IR::BFN::InputBufferRVal *>>
                 new_defs;
-            for (const auto *trans : def_state->transitions) {
+            for (auto trans : def_state->transitions) {
                 if (trans->loop) {
                     def_invalid = true;
                     break;

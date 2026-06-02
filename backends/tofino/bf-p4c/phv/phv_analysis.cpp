@@ -44,7 +44,7 @@
 class PhvInfo;
 
 void applyGlobalPragmas(const PhvSpec &phvspec,
-                        const std::vector<const IR::Annotation *> &global_pragmas) {
+                        const std::vector<IR::Ptr<IR::Annotation>> &global_pragmas) {
     // clear all the cached values
     auto phvCache = phvspec.mutablePhvCache();
     phvCache.physical_containers_i.clear();
@@ -54,12 +54,12 @@ void applyGlobalPragmas(const PhvSpec &phvspec,
     phvCache.tagalong_collections_i.clear();
     phvCache.individually_assigned_containers_i.clear();
     std::set<PHV::Type> typesSeen;
-    for (auto *annot : global_pragmas) {
+    for (auto annot : global_pragmas) {
         if (annot->name != PragmaPhvLimit::name) continue;
         phvspec.physicalContainers();  // create the cache if needed
         PHV::Container startRange, prev;
         bool negate = false;
-        for (auto *tok : annot->getUnparsed()) {
+        for (auto tok : annot->getUnparsed()) {
             PHV::Container c(tok->text.c_str(), false);
             if (startRange) {
                 if (tok->token_type == P4::P4Parser::token_type::TOK_INTEGER)
@@ -137,7 +137,7 @@ class ApplyGlobalPragmas : public Visitor {
         applyGlobalPragmas(Device::phvSpec(), root->global_pragmas);
         // single parser gress pragma
         // Check if pragma pa_parser_group_monogress is contained in the p4 program
-        for (auto *anno : root->global_pragmas) {
+        for (auto anno : root->global_pragmas) {
             if (anno->name.name == PragmaParserGroupMonogress::name) {
                 settings_i.single_gress_parser_group = true;
             }

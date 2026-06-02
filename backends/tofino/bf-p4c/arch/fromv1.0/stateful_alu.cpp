@@ -29,7 +29,7 @@
 
 P4V1::StatefulAluConverter::StatefulAluConverter() { addConverter("stateful_alu"_cs, this); }
 
-const IR::Type_Extern *P4V1::StatefulAluConverter::convertExternType(
+IR::Ptr<IR::Type_Extern> P4V1::StatefulAluConverter::convertExternType(
     P4V1::ProgramStructure *structure, const IR::Type_Extern *, cstring) {
     if (!has_stateful_alu) {
         has_stateful_alu = true;
@@ -880,7 +880,7 @@ P4V1::StatefulAluConverter::reg_info P4V1::StatefulAluConverter::getRegInfo(
                     bool sameTypes = false;
                     if (nfields > 0) rv.utype = st->fields.at(0)->type->to<IR::Type::Bits>();
                     if (nfields > 1) {
-                        auto *secondType = st->fields.at(1)->type;
+                        auto secondType = st->fields.at(1)->type;
                         if (rv.utype && secondType) sameTypes = rv.utype->equiv(*secondType);
                     }
                     if (nfields < 1 || nfields > 2 || !rv.utype || (nfields > 1 && !sameTypes))
@@ -921,7 +921,7 @@ P4V1::StatefulAluConverter::reg_info P4V1::StatefulAluConverter::getRegInfo(
     return rv;
 }
 
-const IR::ActionProfile *P4V1::StatefulAluConverter::getSelectorProfile(
+IR::Ptr<IR::ActionProfile> P4V1::StatefulAluConverter::getSelectorProfile(
     P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext) {
     if (auto sel_bind = ext->properties.get<IR::Property>("selector_binding"_cs)) {
         auto ev = sel_bind->value->to<IR::ExpressionValue>();
@@ -942,7 +942,7 @@ const IR::ActionProfile *P4V1::StatefulAluConverter::getSelectorProfile(
     return nullptr;
 }
 
-const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstance(
+IR::Ptr<IR::Declaration_Instance> P4V1::StatefulAluConverter::convertExternInstance(
     P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
     IR::IndexedVector<IR::Declaration> *scope) {
     auto *et = ext->type->to<IR::Type_Extern>();
@@ -1019,7 +1019,7 @@ const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstanc
     return ExternConverter::convertExternInstance(structure, ext, name, scope);
 }
 
-const IR::Statement *P4V1::StatefulAluConverter::convertExternCall(
+IR::Ptr<IR::Statement> P4V1::StatefulAluConverter::convertExternCall(
     P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext,
     const IR::Primitive *prim) {
     auto *et = ext->type->to<IR::Type_Extern>();
@@ -1051,7 +1051,7 @@ const IR::Statement *P4V1::StatefulAluConverter::convertExternCall(
     if (prim->name == "execute_stateful_alu") {
         BUG_CHECK(prim->operands.size() <= 2, "Wrong number of operands to %s", prim->name);
         if (prim->operands.size() == 2) {
-            auto *idx = conv.convert(prim->operands.at(1));
+            auto idx = conv.convert(prim->operands.at(1));
             if (idx->is<IR::ListExpression>())
                 error("%s%s expects a simple expression, not a %s", prim->operands.at(1)->srcInfo,
                       prim->name, idx);
