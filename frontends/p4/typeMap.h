@@ -63,7 +63,8 @@ class TypeMap final : public ProgramMap {
 #if !HAVE_LIBGC
         BUG_CHECK(element->check_referenced(), "checking unreferenced node in typeMap");
 #endif
-        return typeMap.count(element) != 0; }
+        return typeMap.count(element) != 0;
+    }
     void setType(IR::Ptr<IR::Node> element, const IR::Type *type);
     IR::Ptr<IR::Type> getType(const IR::Node *element, bool notNull = false) const;
     // unwraps a TypeType into its contents

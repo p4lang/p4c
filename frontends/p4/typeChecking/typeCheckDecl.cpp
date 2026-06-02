@@ -432,8 +432,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SerEnumMember *member) {
     ConstantTypeSubstitution cts(tvs, typeMap, this);
     auto newValue = cts.convert(member->value, getChildContext());  // sets type
     IR::Ptr<IR::SerEnumMember> rv = member;
-    if (rv->value != newValue)
-        rv = new IR::SerEnumMember(rv->srcInfo, rv->name, newValue);
+    if (rv->value != newValue) rv = new IR::SerEnumMember(rv->srcInfo, rv->name, newValue);
     if (!typeMap->getType(rv)) setType(rv, getTypeType(serEnum));
     return rv;  // will always be in typeMap, so this won't dangle
 }

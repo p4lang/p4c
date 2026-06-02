@@ -155,7 +155,8 @@ struct InlineSummary : public IHasDbPrint {
         /// For each instance (key) we must apply a bunch of substitutions
         std::map<IR::Ptr<IR::Declaration_Instance>, PerInstanceSubstitutions *> substitutions;
         /// For each invocation (key) call the instance that is invoked.
-        std::map<IR::Ptr<IR::MethodCallStatement>, IR::Ptr<IR::Declaration_Instance>> callToInstance;
+        std::map<IR::Ptr<IR::MethodCallStatement>, IR::Ptr<IR::Declaration_Instance>>
+            callToInstance;
 
         /**
          * For each distinct invocation of the subparser identified by InlinedInvocationInfo

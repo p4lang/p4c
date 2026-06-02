@@ -14,9 +14,9 @@
 #ifndef IR_IR_TRAVERSAL_INTERNAL_H_
 #define IR_IR_TRAVERSAL_INTERNAL_H_
 
+#include "ir/node.h"
 #include "lib/exceptions.h"
 #include "lib/rtti_utils.h"
-#include "ir/node.h"
 
 #ifndef IR_IR_TRAVERSAL_INTERNAL_ENABLE
 #error "This file must not be used directly"

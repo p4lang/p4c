@@ -405,7 +405,7 @@ class JSONLoader {
     }
     template <typename T>
     void unpack_json(IR::shared_ptr<IR::IndexedVector<T>> &v) {
-        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON)) ->as<IR::IndexedVector<T>>();
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))->as<IR::IndexedVector<T>>();
     }
     template <typename T>
     void unpack_json(IR::shared_ptr<const IR::IndexedVector<T>> &v) {

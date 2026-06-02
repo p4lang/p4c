@@ -73,7 +73,8 @@ IR::Ptr<IR::Expression> TypeInferenceBase::constantFold(const IR::Expression *ex
 // Make a clone of the type where all type variables in
 // the type parameters are replaced with fresh ones.
 // This should only be applied to canonical types.
-IR::Ptr<IR::Type> TypeInferenceBase::cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type) {
+IR::Ptr<IR::Type> TypeInferenceBase::cloneWithFreshTypeVariables(
+    const IR::IMayBeGenericType *type) {
     TypeVariableSubstitution tvs;
     for (auto v : type->getTypeParameters()->parameters) {
         auto tv = new IR::Type_Var(v->srcInfo, v->getName());
@@ -189,7 +190,7 @@ TypeVariableSubstitution *TypeInferenceBase::unifyBase(
 
 template <class Ctor>
 IR::Ptr<IR::Type> TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
-                                                      Ctor constructor) {
+                                                        Ctor constructor) {
     bool changes = false;
     IR::IndexedVector<IR::StructField> fields;
     for (auto field : type->fields) {
@@ -969,7 +970,7 @@ TypeInferenceBase::containerInstantiation(
 
     auto returnType = tvs->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
-    return { returnType, newArgs };
+    return {returnType, newArgs};
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Argument *arg) {

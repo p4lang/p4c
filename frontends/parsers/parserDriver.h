@@ -139,16 +139,16 @@ class P4ParserDriver final : public AbstractParserDriver {
 
     // Singletons ////////////////////////////////////////////////////////////
     static IR::Ptr<IR::Expression> parseExpression(const Util::SourceInfo &srcInfo,
-                                                 const IR::Vector<IR::AnnotationToken> &body);
+                                                   const IR::Vector<IR::AnnotationToken> &body);
 
     static IR::Ptr<IR::Constant> parseConstant(const Util::SourceInfo &srcInfo,
-                                             const IR::Vector<IR::AnnotationToken> &body);
+                                               const IR::Vector<IR::AnnotationToken> &body);
 
     static IR::Ptr<IR::Expression> parseConstantOrStringLiteral(
         const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
-    static IR::Ptr<IR::StringLiteral> parseStringLiteral(const Util::SourceInfo &srcInfo,
-                                                       const IR::Vector<IR::AnnotationToken> &body);
+    static IR::Ptr<IR::StringLiteral> parseStringLiteral(
+        const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body);
 
     // Pairs /////////////////////////////////////////////////////////////////
     static IR::Ptr<IR::Vector<IR::Expression>> parseExpressionPair(

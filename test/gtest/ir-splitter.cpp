@@ -68,7 +68,7 @@ struct SplitterTest : public ::testing::Test {
     }
 
     IR::Ptr<IR::IfStatement> ifs(const IR::Expression *cond, const IR::Statement *tr,
-                               const IR::Statement *fls = nullptr) {
+                                 const IR::Statement *fls = nullptr) {
         return new IR::IfStatement(cond, tr, fls);
     }
 

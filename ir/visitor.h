@@ -148,16 +148,16 @@ class Visitor {
 #if !HAVE_LIBGC
     /* additional visit functions needed when using IR::shared_ptr -- we sometimes visit
      * raw pointer copies of an IR::Ptr */
-    void visit(const IR::Node * &n, const char *name = 0) { n = apply_visitor(n, name); }
-    void visit(const IR::Node * const &n, const char *name = 0) {
+    void visit(const IR::Node *&n, const char *name = 0) { n = apply_visitor(n, name); }
+    void visit(const IR::Node *const &n, const char *name = 0) {
         auto t = apply_visitor(n, name);
         if (t != n) visitor_const_error();
     }
-    void visit(const IR::Node * &n, const char *name, int cidx) {
+    void visit(const IR::Node *&n, const char *name, int cidx) {
         ctxt->child_index = cidx;
         n = apply_visitor(n, name);
     }
-    void visit(const IR::Node * const &n, const char *name, int cidx) {
+    void visit(const IR::Node *const &n, const char *name, int cidx) {
         ctxt->child_index = cidx;
         auto t = apply_visitor(n, name);
         if (t != n) visitor_const_error();
@@ -521,7 +521,7 @@ class Transform : public virtual Visitor {
      * of a raw pointer, but then we'd lose the ability to return a subclass where appropriate
      * and have the compiler's covariant return type handling fix it up, as that only works
      * with raw pointers */
-    template<class T>
+    template <class T>
     const T *guardReturn(const T *rv) const {
 #if !HAVE_LIBGC
         guard_hold = rv;
@@ -530,7 +530,7 @@ class Transform : public virtual Visitor {
     }
 
 #if !HAVE_LIBGC
-    template<class T>
+    template <class T>
     const T *guardReturn(IR::Ptr<T> rv) const {
         guard_hold = rv;
         return rv;
