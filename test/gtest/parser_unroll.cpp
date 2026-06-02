@@ -32,8 +32,8 @@ IR::Ptr<IR::P4Parser> getParser(const IR::P4Program *program) {
 }
 
 /// Rewrites parser
-std::pair<IR::Ptr<IR::P4Parser>, IR::Ptr<IR::P4Parser>>
-rewriteParser(IR::Ptr<IR::P4Program> program, CompilerOptions &options) {
+std::pair<IR::Ptr<IR::P4Parser>, IR::Ptr<IR::P4Parser>> rewriteParser(
+    IR::Ptr<IR::P4Program> program, CompilerOptions &options) {
     P4::FrontEnd frontend;
     program = frontend.run(options, program);
     CHECK_NULL(program);
