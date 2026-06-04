@@ -1123,13 +1123,16 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
             return;
         } else {
             BUG_CHECK(name == IR::Type_Header::isValid, "%1%: unexpected method", bim->name);
-            if (auto hv = structVar->to<SymbolicHeader>()) {
-                auto v = hv->valid;
-                set(expression, v);
-                return;
-            } else {
+            SymbolicBool *v = nullptr;
+            if (auto hv = structVar->to<SymbolicHeader>())
+                v = hv->valid;
+            else if (auto hu = structVar->to<SymbolicHeaderUnion>())
+                v = hu->isValid();
+            else
                 BUG("Unexpected expression (%1%) type: %2%", base, base->type);
-            }
+
+            set(expression, v);
+            return;
         }
     }
 
