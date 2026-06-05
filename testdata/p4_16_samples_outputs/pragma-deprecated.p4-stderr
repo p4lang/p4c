@@ -6,7 +6,7 @@ control c() {
         ^
 pragma-deprecated.p4(13): [--Wwarn=unused] warning: 'x' is unused
         bit<6> x = wrong();
-        ^^^^^^^^^^^^^^^^^^
+               ^
 pragma-deprecated.p4(9): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
 Checksum16() instance;
 ^^^^^^^^^^

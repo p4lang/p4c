@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Cisco Systems, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Goals for test cases:
 
 # (1) Include several cases where the current buggy version of the

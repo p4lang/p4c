@@ -21,7 +21,7 @@
 
 /* clang-format off */
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "backends/tofino/bf-p4c/common/alloc.h"
 
 using namespace P4;

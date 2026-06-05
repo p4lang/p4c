@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2016 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
 
 add test1    0 data.f1:0b*******************************1 setb1(port:4, val:0)
 add test1  600 data.f1:0b******************************1* setb1(port:4, val:1)

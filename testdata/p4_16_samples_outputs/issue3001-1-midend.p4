@@ -40,29 +40,29 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.h") H h_0;
     H u_0_h;
     @name("ingressImpl.s") H[1] s_0;
-    @hidden action issue30011l84() {
+    @hidden action issue30011l75() {
         log_msg("hdr.ethernet is valid");
     }
-    @hidden action issue30011l86() {
+    @hidden action issue30011l77() {
         log_msg("hdr.ethernet is invalid");
     }
-    @hidden action issue30011l99() {
+    @hidden action issue30011l90() {
         log_msg("f() returned a valid header");
     }
-    @hidden action issue30011l101() {
+    @hidden action issue30011l92() {
         log_msg("f() returned an invalid header");
     }
-    @hidden action issue30011l40() {
+    @hidden action issue30011l31() {
         h_0.setInvalid();
         tmp = h_0;
     }
-    @hidden action issue30011l104() {
+    @hidden action issue30011l95() {
         log_msg("g() returned a header_union with valid member h");
     }
-    @hidden action issue30011l106() {
+    @hidden action issue30011l97() {
         log_msg("g() returned a header_union with invalid member h");
     }
-    @hidden action issue30011l45() {
+    @hidden action issue30011l36() {
         u_0_h.setInvalid();
         if (u_0_h.isValid()) {
             tmp_1_h.setValid();
@@ -71,105 +71,105 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             tmp_1_h.setInvalid();
         }
     }
-    @hidden action issue30011l109() {
+    @hidden action issue30011l100() {
         log_msg("h() returned a header stack with valid element 0");
     }
-    @hidden action issue30011l111() {
+    @hidden action issue30011l102() {
         log_msg("h() returned a header stack with invalid element 0");
     }
-    @hidden action issue30011l50() {
+    @hidden action issue30011l41() {
         s_0[0].setInvalid();
         tmp_3[0] = s_0[0];
     }
-    @hidden table tbl_issue30011l84 {
+    @hidden table tbl_issue30011l75 {
         actions = {
-            issue30011l84();
+            issue30011l75();
         }
-        const default_action = issue30011l84();
+        const default_action = issue30011l75();
     }
-    @hidden table tbl_issue30011l86 {
+    @hidden table tbl_issue30011l77 {
         actions = {
-            issue30011l86();
+            issue30011l77();
         }
-        const default_action = issue30011l86();
+        const default_action = issue30011l77();
     }
-    @hidden table tbl_issue30011l40 {
+    @hidden table tbl_issue30011l31 {
         actions = {
-            issue30011l40();
+            issue30011l31();
         }
-        const default_action = issue30011l40();
+        const default_action = issue30011l31();
     }
-    @hidden table tbl_issue30011l99 {
+    @hidden table tbl_issue30011l90 {
         actions = {
-            issue30011l99();
+            issue30011l90();
         }
-        const default_action = issue30011l99();
+        const default_action = issue30011l90();
     }
-    @hidden table tbl_issue30011l101 {
+    @hidden table tbl_issue30011l92 {
         actions = {
-            issue30011l101();
+            issue30011l92();
         }
-        const default_action = issue30011l101();
+        const default_action = issue30011l92();
     }
-    @hidden table tbl_issue30011l45 {
+    @hidden table tbl_issue30011l36 {
         actions = {
-            issue30011l45();
+            issue30011l36();
         }
-        const default_action = issue30011l45();
+        const default_action = issue30011l36();
     }
-    @hidden table tbl_issue30011l104 {
+    @hidden table tbl_issue30011l95 {
         actions = {
-            issue30011l104();
+            issue30011l95();
         }
-        const default_action = issue30011l104();
+        const default_action = issue30011l95();
     }
-    @hidden table tbl_issue30011l106 {
+    @hidden table tbl_issue30011l97 {
         actions = {
-            issue30011l106();
+            issue30011l97();
         }
-        const default_action = issue30011l106();
+        const default_action = issue30011l97();
     }
-    @hidden table tbl_issue30011l50 {
+    @hidden table tbl_issue30011l41 {
         actions = {
-            issue30011l50();
+            issue30011l41();
         }
-        const default_action = issue30011l50();
+        const default_action = issue30011l41();
     }
-    @hidden table tbl_issue30011l109 {
+    @hidden table tbl_issue30011l100 {
         actions = {
-            issue30011l109();
+            issue30011l100();
         }
-        const default_action = issue30011l109();
+        const default_action = issue30011l100();
     }
-    @hidden table tbl_issue30011l111 {
+    @hidden table tbl_issue30011l102 {
         actions = {
-            issue30011l111();
+            issue30011l102();
         }
-        const default_action = issue30011l111();
+        const default_action = issue30011l102();
     }
     apply {
         if (hdr.ethernet.isValid()) {
-            tbl_issue30011l84.apply();
+            tbl_issue30011l75.apply();
         } else {
-            tbl_issue30011l86.apply();
+            tbl_issue30011l77.apply();
         }
-        tbl_issue30011l40.apply();
+        tbl_issue30011l31.apply();
         if (tmp.isValid()) {
-            tbl_issue30011l99.apply();
+            tbl_issue30011l90.apply();
         } else {
-            tbl_issue30011l101.apply();
+            tbl_issue30011l92.apply();
         }
-        tbl_issue30011l45.apply();
+        tbl_issue30011l36.apply();
         if (tmp_1_h.isValid()) {
-            tbl_issue30011l104.apply();
+            tbl_issue30011l95.apply();
         } else {
-            tbl_issue30011l106.apply();
+            tbl_issue30011l97.apply();
         }
-        tbl_issue30011l50.apply();
+        tbl_issue30011l41.apply();
         if (tmp_3[0].isValid()) {
-            tbl_issue30011l109.apply();
+            tbl_issue30011l100.apply();
         } else {
-            tbl_issue30011l111.apply();
+            tbl_issue30011l102.apply();
         }
     }
 }

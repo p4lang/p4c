@@ -2,27 +2,17 @@
 #include <type_traits>
 #include <typeinfo>
 
-/*
-Copyright (C) 2023 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions
-and limitations under the License.
-*/
+// Copyright (C) 2023 Intel Corporation
+// SPDX-FileCopyrightText: 2023 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include <filesystem>
 
 #include "backend.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/target.h"
+#include "ebpfCodeGen.h"
 
 namespace P4::TC {
 
@@ -90,6 +80,8 @@ void ScanWidths::expr_common(const IR::Expression *e) {
     if (t->is<IR::Type_Type>()) t = t->to<const IR::Type_Type>()->type;
     if (t->is<IR::Type_Bits>()) {
         add_width(t->width_bits());
+    } else if (t->is<IR::Type_Varbits>()) {
+        add_width(t->max_width_bits());
     }
 }
 
@@ -234,6 +226,21 @@ bool ScanWidths::preorder(const IR::Equ *e) {
     auto lt = e->left->type->to<IR::Type_Bits>();
     if (lt) add_cmp(lt->width_bits(), CMP_EQ);  // isSigned doesn't matter for eq
     return (true);
+}
+
+bool ScanWidths::preorder(const IR::MethodCallExpression *mx) {
+    auto mi = P4::MethodInstance::resolve(mx, refmap, typemap);
+    auto em = mi->to<P4::ExternMethod>();
+    P4::P4CoreLibrary &p4lib = P4::P4CoreLibrary::instance();
+    if (em && (em->method->name.name == p4lib.packetIn.extract.name)) {
+        int nargs = em->expr->arguments->size();
+        const IR::Expression *arg1 = em->expr->arguments->at(0)->expression;
+        auto xt = typemap->getType(arg1);
+        auto slt = xt->to<IR::Type_StructLike>();
+
+        if (nargs == 2 && slt->variable()) add_width(xt->max_width_bits());
+    }
+    return true;
 }
 
 bool ScanWidths::preorder(const IR::Neq *e) {
@@ -1823,7 +1830,7 @@ bool Backend::process() {
     auto typeMapEBPF = typeMap;
     auto hook = options.getDebugHook();
     target = new EBPF::P4TCTarget(options.emitTraceMessages);
-    ScanWidths *sw = new ScanWidths(typeMap, target);
+    ScanWidths *sw = new ScanWidths(typeMap, refMap, target);
     parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
@@ -1904,18 +1911,19 @@ void Backend::serialize() const {
     EBPF::CodeBuilder c(target), p(target), h(target);
     ebpf_program->emit(&c);
     ebpf_program->emitParser(&p);
-    ebpf_program->emitHeader(&h);
+    auto pgm = ebpf_program->checkedTo<const PNAArchTC>();
+    pgm->emitHeaderIncludes(&h);
     if (widths) {
         widths->gen_h(&h);
         widths->gen_c(&c);
     }
+    pgm->emitHeaderDefs(&h);
     if (::P4::errorCount() > 0) {
         return;
     }
     std::filesystem::path outputFile = options.outputFolder / (progName + ".template");
 
-    auto outstream = openFile(outputFile, false);
-    if (outstream != nullptr) {
+    if (auto outstream = openFile(outputFile, false)) {
         *outstream << pipeline->toString();
         outstream->flush();
         std::filesystem::permissions(outputFile.c_str(),

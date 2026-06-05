@@ -1,23 +1,13 @@
 /*
-Copyright (C) 2023 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions
-and limitations under the License.
-*/
+ * Copyright (C) 2023 Intel Corporation
+ * SPDX-FileCopyrightText: 2023 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef BACKENDS_TC_EBPFCODEGEN_H_
 #define BACKENDS_TC_EBPFCODEGEN_H_
 
-// FIXME: these include each other and present file
 #include "backend.h"
 #include "tcExterns.h"
 
@@ -25,15 +15,9 @@ namespace P4::TC {
 
 using namespace P4::literals;
 
-class ConvertToBackendIR;
-class EBPFPnaParser;
-class EBPFRegisterPNA;
-class EBPFHashPNA;
-class EBPFRandomPNA;
-
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 
-class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
+class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator, public ICastable {
  public:
     EBPF::EBPFPipeline *pipeline;
     const ConvertToBackendIR *tcIR;
@@ -56,6 +40,8 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     void emitP4TCFilterFields(EBPF::CodeBuilder *builder) const;
     void emitP4TCActionParam(EBPF::CodeBuilder *builder) const;
     cstring getProgramName() const;
+
+    DECLARE_TYPEINFO(PNAEbpfGenerator);
 };
 
 // Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp
@@ -105,8 +91,12 @@ class PNAArchTC : public PNAEbpfGenerator {
     void emit(EBPF::CodeBuilder *builder) const override;
     void emitParser(EBPF::CodeBuilder *builder) const override;
     void emitHeader(EBPF::CodeBuilder *builder) const override;
+    virtual void emitHeaderIncludes(EBPF::CodeBuilder *builder) const;
+    virtual void emitHeaderDefs(EBPF::CodeBuilder *builder) const;
     void emitInstances(EBPF::CodeBuilder *builder) const override;
     void emitGlobalFunctions(EBPF::CodeBuilder *builder) const;
+
+    DECLARE_TYPEINFO(PNAArchTC);
 };
 
 class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
@@ -130,14 +120,20 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
         : EBPF::PsaStateTranslationVisitor(refMap, typeMap, prsr) {}
 
     bool preorder(const IR::Member *expression) override;
+    mutable bool extractedVarbit = false;
 
  protected:
-    void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
-                             unsigned hdrOffsetBits, EBPF::EBPFType *type) override;
+    unsigned int compileExtractVarbits(const IR::Expression *, const IR::StructField *,
+                                       unsigned int, EBPF::EBPFType *, const char *);
+    unsigned int compileExtractField(const IR::Expression *, const IR::StructField *, unsigned int,
+                                     EBPF::EBPFType *, const char *);
     void compileLookahead(const IR::Expression *destination) override;
     bool preorder(const IR::SelectCase *selectCase) override;
     bool preorder(const IR::SelectExpression *expression) override;
     bool preorder(const IR::AssignmentStatement *statement) override;
+    void processMethod(const P4::ExternMethod *method) override;
+    void compileExtract(const IR::Expression *dest, const IR::Expression *varsize = 0);
+    char *visit_to_string(const IR::Expression *);
 };
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
@@ -473,11 +469,27 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
     const EBPF::EBPFDeparser *deparser;
 
  public:
+    bool in_var = false;
+    mutable bool hasVarbit = false;
     explicit DeparserHdrEmitTranslatorPNA(const EBPF::EBPFDeparser *deparser);
 
     void processMethod(const P4::ExternMethod *method) override;
+    bool preorder(const IR::BlockStatement *s) override;
+    bool preorder(const IR::MethodCallStatement *s) override;
     void emitField(EBPF::CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
                    unsigned alignment, EBPF::EBPFType *type, bool isMAC);
+};
+
+class SizeScanner : public EBPF::DeparserPrepareBufferTranslator {
+ protected:
+    const EBPF::EBPFDeparser *deparser;
+
+ public:
+    explicit SizeScanner(const EBPF::EBPFDeparser *deparser);
+
+    void processMethod(const P4::ExternMethod *method) override;
+    bool preorder(const IR::BlockStatement *s) override;
+    bool preorder(const IR::MethodCallStatement *) override;
 };
 
 class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactoryPSA {

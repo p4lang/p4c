@@ -1,0 +1,13 @@
+noWarn-unknown-diagnostic.p4(11): [--Wwarn=unknown] warning: @noWarn: unknown diagnostic name 'index_size' in @noWarn annotation
+@noWarn("index_size")
+^
+noWarn-unknown-diagnostic.p4(15): [--Wwarn=unknown] warning: @noWarn: unknown diagnostic name 'not-a-real-diagnostic' in @noWarn annotation
+@noWarn("not-a-real-diagnostic")
+^
+noWarn-unknown-diagnostic.p4(12): [--Wwarn=unused] warning: 'invalid_index_size' is unused
+const bit<8> invalid_index_size = 2;
+             ^^^^^^^^^^^^^^^^^^
+noWarn-unknown-diagnostic.p4(16): [--Wwarn=unused] warning: 'invalid_other' is unused
+const bit<8> invalid_other = 3;
+             ^^^^^^^^^^^^^
+[--Wwarn=missing] warning: Program does not contain a `main' module

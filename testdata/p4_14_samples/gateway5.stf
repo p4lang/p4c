@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add test1 data.f1:0x12345678 output(port:2)
 add test2 data.f2:0x12345678 output(port:3)
 

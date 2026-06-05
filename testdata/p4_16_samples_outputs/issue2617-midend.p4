@@ -15,21 +15,21 @@ parser p1(out bit<32> v) {
 }
 
 control c(out bit<32> v) {
-    @hidden action issue2617l66() {
+    @hidden action issue2617l72() {
         v = 32w1;
         v = 32w11;
         v = 32w111;
         v = 32w1111;
         v = 32w11111;
     }
-    @hidden table tbl_issue2617l66 {
+    @hidden table tbl_issue2617l72 {
         actions = {
-            issue2617l66();
+            issue2617l72();
         }
-        const default_action = issue2617l66();
+        const default_action = issue2617l72();
     }
     apply {
-        tbl_issue2617l66.apply();
+        tbl_issue2617l72.apply();
     }
 }
 

@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 struct B8 {
-    bit<(8 * 8)> bits;
+    bit<8 * 8> bits;
 }
 
 struct headers {

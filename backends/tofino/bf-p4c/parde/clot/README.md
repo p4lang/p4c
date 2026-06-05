@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Intel Corporation
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # CLOT allocator and metric {#clot_alloc_and_metric}
 
 This documents the design of the CLOT allocator and the metric associated with

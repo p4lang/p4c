@@ -30,7 +30,7 @@
 #include <vector>
 
 #include "backends/tofino/bf-p4c/common/table_printer.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 struct StateExtractUsage {
     static const std::vector<PHV::Size> extractor_sizes;

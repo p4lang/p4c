@@ -1,18 +1,7 @@
-/*
-Copyright 2024 Marvell Technology, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2024 Marvell Technology, Inc.
+// SPDX-FileCopyrightText: 2024 Marvell Technology, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "portable.h"
 
@@ -114,7 +103,7 @@ void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
     if (structure->scalars.empty() && structure->scalarMetadataFields.empty()) return;
     // We may have items in scalarMetadataFields but not scalars
     auto name = structure->scalars.empty() ? "scalars"_cs : structure->scalars.begin()->first;
-    ctxt->json->add_header("scalars_t"_cs, name);
+    ctxt->json->add_metadata("scalars_t"_cs, name);
     ctxt->json->add_header_type("scalars_t"_cs);
     unsigned max_length = 0;
     auto add_field = [&](cstring name, const P4::IR::Declaration *decl) {

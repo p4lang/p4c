@@ -23,6 +23,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
+    unsigned int adv;
     u32 pkt_len = skb->len;
 
     struct my_ingress_metadata_t *meta;
@@ -73,16 +74,10 @@ bpf_p4tc_ext_csum_crc16_get(&c16_0_state, sizeof(c16_0_state));;
             return TC_ACT_SHOT;
         }
         int outHeaderLength = 0;
-;;;;;;        if (hdr->ethernet.ebpf_valid) {
-            outHeaderLength += 112;
-        }
-;        if (hdr->ipv4.ebpf_valid) {
-            outHeaderLength += 160;
-        }
-;        if (hdr->csum.ebpf_valid) {
-            outHeaderLength += 48;
-        }
-;
+        if (hdr->ethernet.ebpf_valid) outHeaderLength += 112;
+        if (hdr->ipv4.ebpf_valid) outHeaderLength += 160;
+        if (hdr->csum.ebpf_valid) outHeaderLength += 48;
+
         __u16 saved_proto = 0;
         bool have_saved_proto = false;
         // bpf_skb_adjust_room works only when protocol is IPv4 or IPv6
@@ -112,50 +107,52 @@ bpf_p4tc_ext_csum_crc16_get(&c16_0_state, sizeof(c16_0_state));;
         pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
-;;;;;;        if (hdr->ethernet.ebpf_valid) {
+;;;;;;// emitting header ethernet_t
+        if (hdr->ethernet.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 112)) {
                 return TC_ACT_SHOT;
             }
             
             storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (htonll(getPrimitive64(hdr->ethernet.dstAddr, 48) << 16)));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
             storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (htonll(getPrimitive64(hdr->ethernet.srcAddr, 48) << 16)));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[5];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
             hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
-            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
         }
-;        if (hdr->ipv4.ebpf_valid) {
+;// emitting header ipv4_t
+        if (hdr->ipv4.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 160)) {
                 return TC_ACT_SHOT;
             }
@@ -173,17 +170,17 @@ bpf_p4tc_ext_csum_crc16_get(&c16_0_state, sizeof(c16_0_state));;
             ebpf_packetOffsetInBits += 8;
 
             hdr->ipv4.totalLen = bpf_htons(hdr->ipv4.totalLen);
-            ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
             hdr->ipv4.identification = bpf_htons(hdr->ipv4.identification);
-            ebpf_byte = ((char*)(&hdr->ipv4.identification))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.identification))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.identification))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
             ebpf_byte = ((char*)(&hdr->ipv4.flags))[0];
@@ -191,11 +188,11 @@ bpf_p4tc_ext_csum_crc16_get(&c16_0_state, sizeof(c16_0_state));;
             ebpf_packetOffsetInBits += 3;
 
             hdr->ipv4.fragOffset = bpf_htons(hdr->ipv4.fragOffset << 3);
-            ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[1];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 3, 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[0];
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
             ebpf_packetOffsetInBits += 13;
 
             ebpf_byte = ((char*)(&hdr->ipv4.ttl))[0];
@@ -207,56 +204,57 @@ bpf_p4tc_ext_csum_crc16_get(&c16_0_state, sizeof(c16_0_state));;
             ebpf_packetOffsetInBits += 8;
 
             hdr->ipv4.hdrChecksum = bpf_htons(hdr->ipv4.hdrChecksum);
-            ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
             hdr->ipv4.srcAddr = htonl(hdr->ipv4.srcAddr);
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
             hdr->ipv4.dstAddr = htonl(hdr->ipv4.dstAddr);
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
         }
-;        if (hdr->csum.ebpf_valid) {
+;// emitting header csum_t
+        if (hdr->csum.ebpf_valid) {
             if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 48)) {
                 return TC_ACT_SHOT;
             }
             
             hdr->csum.crc16 = bpf_htons(hdr->csum.crc16);
-            ebpf_byte = ((char*)(&hdr->csum.crc16))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->csum.crc16))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->csum.crc16))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
             hdr->csum.crc32 = htonl(hdr->csum.crc32);
-            ebpf_byte = ((char*)(&hdr->csum.crc32))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->csum.crc32))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->csum.crc32))[2];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->csum.crc32))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->csum.crc32))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->csum.crc32))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->csum.crc32))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
         }

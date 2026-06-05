@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 if(ENABLE_TESTING)
   # Include the test subdirectory.
   message("-- Adding p4testgen tofino test suite")
@@ -45,11 +49,6 @@ endif()
 # that. Those transitive dependencies turn out to be most of the compiler!
 set(
 TESTGEN_LIBS
-# tofinobackend
-# bfn_p4runtime
-# p4cgraphs
-# We do not use the target library variable here because top-level testgen will not find it.
-# boost_system
 ${TESTGEN_LIBS}
 PARENT_SCOPE
 )

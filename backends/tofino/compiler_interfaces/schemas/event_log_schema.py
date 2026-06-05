@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """
 event_log_schema.py: Used to emit messages for Event Log
 """

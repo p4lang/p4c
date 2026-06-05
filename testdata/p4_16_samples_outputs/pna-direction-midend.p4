@@ -37,39 +37,39 @@ struct headers_t {
 }
 
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
-    @hidden action pnadirection82() {
+    @hidden action pnadirection73() {
         meta.tmpDir = hdr.ipv4.srcAddr;
     }
-    @hidden action pnadirection84() {
+    @hidden action pnadirection75() {
         meta.tmpDir = hdr.ipv4.dstAddr;
     }
-    @hidden action pnadirection80() {
+    @hidden action pnadirection71() {
         meta.b = istd.direction != PNA_Direction_t.NET_TO_HOST;
     }
-    @hidden table tbl_pnadirection80 {
+    @hidden table tbl_pnadirection71 {
         actions = {
-            pnadirection80();
+            pnadirection71();
         }
-        const default_action = pnadirection80();
+        const default_action = pnadirection71();
     }
-    @hidden table tbl_pnadirection82 {
+    @hidden table tbl_pnadirection73 {
         actions = {
-            pnadirection82();
+            pnadirection73();
         }
-        const default_action = pnadirection82();
+        const default_action = pnadirection73();
     }
-    @hidden table tbl_pnadirection84 {
+    @hidden table tbl_pnadirection75 {
         actions = {
-            pnadirection84();
+            pnadirection75();
         }
-        const default_action = pnadirection84();
+        const default_action = pnadirection75();
     }
     apply {
-        tbl_pnadirection80.apply();
+        tbl_pnadirection71.apply();
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tbl_pnadirection82.apply();
+            tbl_pnadirection73.apply();
         } else {
-            tbl_pnadirection84.apply();
+            tbl_pnadirection75.apply();
         }
     }
 }
@@ -106,29 +106,29 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action pnadirection136() {
+    @hidden action pnadirection127() {
         tmpDir_0 = hdr.ipv4.srcAddr;
     }
-    @hidden action pnadirection138() {
+    @hidden action pnadirection129() {
         tmpDir_0 = hdr.ipv4.dstAddr;
     }
-    @hidden table tbl_pnadirection136 {
+    @hidden table tbl_pnadirection127 {
         actions = {
-            pnadirection136();
+            pnadirection127();
         }
-        const default_action = pnadirection136();
+        const default_action = pnadirection127();
     }
-    @hidden table tbl_pnadirection138 {
+    @hidden table tbl_pnadirection129 {
         actions = {
-            pnadirection138();
+            pnadirection129();
         }
-        const default_action = pnadirection138();
+        const default_action = pnadirection129();
     }
     apply {
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tbl_pnadirection136.apply();
+            tbl_pnadirection127.apply();
         } else {
-            tbl_pnadirection138.apply();
+            tbl_pnadirection129.apply();
         }
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm_0.apply();
@@ -137,18 +137,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadirection153() {
+    @hidden action pnadirection144() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadirection153 {
+    @hidden table tbl_pnadirection144 {
         actions = {
-            pnadirection153();
+            pnadirection144();
         }
-        const default_action = pnadirection153();
+        const default_action = pnadirection144();
     }
     apply {
-        tbl_pnadirection153.apply();
+        tbl_pnadirection144.apply();
     }
 }
 

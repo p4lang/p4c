@@ -1,18 +1,9 @@
 /*
-Copyright 2024 Cisco Systems, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * Copyright 2024 Cisco Systems, Inc.
+ * SPDX-FileCopyrightText: 2024 Cisco Systems, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_
 #define FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_
@@ -40,7 +31,7 @@ namespace P4 {
  * design, that were not created by the P4 developer.  We should not
  * issue an error if that pass creates duplicate hierarchical names.
  */
-class DuplicateActionControlPlaneNameCheck : public Transform {
+class DuplicateActionControlPlaneNameCheck : public Inspector {
     std::vector<cstring> stack;
     /// Used for detection of conflicting control plane names among actions.
     absl::flat_hash_map<cstring, const IR::Node *> actions;
@@ -52,32 +43,27 @@ class DuplicateActionControlPlaneNameCheck : public Transform {
         setName("DuplicateActionControlPlaneNameCheck");
         visitDagOnce = false;
     }
-    const IR::Node *preorder(IR::P4Parser *parser) override {
+    bool preorder(const IR::P4Parser *) override {
         // There cannot be any action definitions inside a parser, so
         // do not traverse through its nodes.
-        prune();
-        return parser;
+        return false;
     }
 
-    const IR::Node *preorder(IR::P4Control *control) override {
+    bool preorder(const IR::P4Control *control) override {
         stack.push_back(getName(control));
-        return control;
+        return true;
     }
-    const IR::Node *postorder(IR::P4Control *control) override {
-        stack.pop_back();
-        return control;
-    }
+    void postorder(const IR::P4Control *) override { stack.pop_back(); }
 
-    const IR::Node *preorder(IR::P4Table *table) override {
+    bool preorder(const IR::P4Table *) override {
         // There cannot be any action definitions inside a table, so
         // do not traverse through its nodes.
-        prune();
-        return table;
+        return false;
     }
 
     void checkForDuplicateName(cstring name, const IR::Node *node);
 
-    const IR::Node *postorder(IR::P4Action *action) override;
+    void postorder(const IR::P4Action *action) override;
 };
 
 }  // namespace P4

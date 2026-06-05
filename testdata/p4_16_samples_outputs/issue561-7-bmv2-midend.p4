@@ -60,36 +60,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         const default_action = NoAction_1();
     }
-    @hidden action issue5617bmv2l65() {
+    @hidden action issue5617bmv2l71() {
         hdr.u[0].short.setValid();
         hdr.u[0].short.data = 16w0xffff;
         hdr.u[0].byte.setInvalid();
         hdr.u[0].short.setInvalid();
     }
-    @hidden action issue5617bmv2l69() {
+    @hidden action issue5617bmv2l75() {
         hdr.u[0].byte.setValid();
         hdr.u[0].byte.data = 8w0xff;
         hdr.u[0].short.setInvalid();
         hdr.u[0].byte.setInvalid();
     }
-    @hidden table tbl_issue5617bmv2l65 {
+    @hidden table tbl_issue5617bmv2l71 {
         actions = {
-            issue5617bmv2l65();
+            issue5617bmv2l71();
         }
-        const default_action = issue5617bmv2l65();
+        const default_action = issue5617bmv2l71();
     }
-    @hidden table tbl_issue5617bmv2l69 {
+    @hidden table tbl_issue5617bmv2l75 {
         actions = {
-            issue5617bmv2l69();
+            issue5617bmv2l75();
         }
-        const default_action = issue5617bmv2l69();
+        const default_action = issue5617bmv2l75();
     }
     apply {
         debug_hdr_0.apply();
         if (hdr.u[0].short.isValid()) {
-            tbl_issue5617bmv2l65.apply();
+            tbl_issue5617bmv2l71.apply();
         } else if (hdr.u[0].byte.isValid()) {
-            tbl_issue5617bmv2l69.apply();
+            tbl_issue5617bmv2l75.apply();
         }
     }
 }

@@ -3,10 +3,10 @@ control I()() {
         ^
 implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Wwarn=unused] warning: 'h' is unused
     H h = { b = 1 };
-    ^^^^^^^^^^^^^^^
+      ^
 implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Werror=type-error] error: 'h'
     H h = { b = 1 };
-    ^^^^^^^^^^^^^^^
+      ^
   ---- Actual error:
 implicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): Number of fields 1 in initializer different than number of fields in structure 0: unknown struct to header H
       H h = { b = 1 };

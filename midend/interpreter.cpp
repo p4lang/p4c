@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "interpreter.h"
 
 #include "frontends/common/constantFolding.h"
@@ -456,12 +460,14 @@ SymbolicArray::SymbolicArray(const IR::Type_Array *type, bool uninitialized,
         if (type->elementType->to<IR::Type_Header>()) {
             auto elem = factory->create(elemType, uninitialized);
             BUG_CHECK(elem->is<SymbolicHeader>(), "%1%: expected a header", elem);
-            values.push_back(elem->to<SymbolicHeader>());
-        }
-        if (auto newElemType = type->elementType->to<IR::Type_HeaderUnion>()) {
+            values.push_back(elem);
+        } else if (auto newElemType = type->elementType->to<IR::Type_HeaderUnion>()) {
             auto elem = factory->create(newElemType, uninitialized);
             BUG_CHECK(elem->is<SymbolicHeaderUnion>(), "%1%: expected a header union", elem);
-            values.push_back(elem->to<SymbolicHeaderUnion>());
+            values.push_back(elem);
+        } else {
+            auto elem = factory->create(type->elementType, uninitialized);
+            values.push_back(elem);
         }
     }
 }
@@ -543,8 +549,7 @@ void SymbolicArray::setAllUnknown() {
 
 SymbolicValue *SymbolicArray::clone() const {
     auto result = new SymbolicArray(type->to<IR::Type_Array>());
-    for (unsigned i = 0; i < values.size(); i++)
-        result->values.push_back(get(nullptr, i)->clone()->to<SymbolicStruct>());
+    for (unsigned i = 0; i < values.size(); i++) result->values.push_back(get(nullptr, i)->clone());
     return result;
 }
 
@@ -1118,13 +1123,16 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
             return;
         } else {
             BUG_CHECK(name == IR::Type_Header::isValid, "%1%: unexpected method", bim->name);
-            if (auto hv = structVar->to<SymbolicHeader>()) {
-                auto v = hv->valid;
-                set(expression, v);
-                return;
-            } else {
+            SymbolicBool *v = nullptr;
+            if (auto hv = structVar->to<SymbolicHeader>())
+                v = hv->valid;
+            else if (auto hu = structVar->to<SymbolicHeaderUnion>())
+                v = hu->isValid();
+            else
                 BUG("Unexpected expression (%1%) type: %2%", base, base->type);
-            }
+
+            set(expression, v);
+            return;
         }
     }
 

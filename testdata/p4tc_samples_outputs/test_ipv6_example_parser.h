@@ -3,9 +3,37 @@
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
+#define BITS(v) (v).bits
+#define SETGUARDS(x) do ; while (0)
+
+struct internal_bit_128 {
+  u8 bits[16];
+};
+
+static __always_inline struct internal_bit_128 loadfrom_128(u8 *in)
+{
+ struct internal_bit_128 rv;
+
+ __builtin_memcpy(&rv.bits[0],in,16);
+ return(rv);
+}
+
+/*
+ * These are here because EBPF quasi-C does not support aggregate
+ * return - but this is a code-generation thing, not a language thing,
+ * so if we force them to be inlined, it works fine. It's easier to
+ * generate them here than into the .c file, plus this way they're
+ * available to everything that includes this file.
+ */
+
+static __always_inline void assign_128(u8 *lhs, struct internal_bit_128 rhs)
+{
+ __builtin_memcpy(lhs,&rhs.bits[0],16);
+}
 
 #define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)
 #define BYTES(w) ((w) / 8)
+#define BYTES_ROUND_UP(w) (((w) + (8) - 1) / (8))
 #define write_partial(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) & ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)
 #define write_byte(base, offset, v) do { *(u8*)((base) + (offset)) = (v); } while (0)
 #define bpf_trace_message(fmt, ...)
@@ -117,30 +145,3 @@ static inline void storePrimitive64(u8 *a, int size, u64 value) {
    }
 }
 
-#define BITS(v) (v).bits
-#define SETGUARDS(x) do ; while (0)
-
-struct internal_bit_128 {
-  u8 bits[16];
-};
-
-static __always_inline struct internal_bit_128 loadfrom_128(u8 *in)
-{
- struct internal_bit_128 rv;
-
- __builtin_memcpy(&rv.bits[0],in,16);
- return(rv);
-}
-
-/*
- * These are here because EBPF quasi-C does not support aggregate
- * return - but this is a code-generation thing, not a language thing,
- * so if we force them to be inlined, it works fine. It's easier to
- * generate them here than into the .c file, plus this way they're
- * available to everything that includes this file.
- */
-
-static __always_inline void assign_128(u8 *lhs, struct internal_bit_128 rhs)
-{
- __builtin_memcpy(lhs,&rhs.bits[0],16);
-}

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_
 
@@ -89,7 +95,8 @@ class TestgenOptions : public AbstractP4cToolOptions {
     bool assertionModeEnabled = false;
 
     /// Specifies general options which IR nodes to track for coverage in the targeted P4 program.
-    /// Multiple options are possible. Currently supported: STATEMENTS, TABLE_ENTRIES.
+    /// Multiple options are possible.
+    /// Currently supported: STATEMENTS, TABLE_ENTRIES, ACTIONS, PARSER_STATES
     P4::Coverage::CoverageOptions coverageOptions;
 
     /// Indicates that coverage tracking is enabled for some coverage criteria. This is used for

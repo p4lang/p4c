@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/modules/testgen/targets/ebpf/backend/stf/stf.h"
 
 #include <filesystem>
@@ -209,7 +213,7 @@ std::string STF::getTestCaseTemplate() {
 ## for table in control_plane.tables
 # Table {{table.table_name}}
 ## for rule in table.rules
-add {{table.table_name}} {% if rule.rules.needs_priority %}{{rule.priority}} {% endif %}{% for r in rule.rules.matches %}{{r.field_name}}:{{r.value}} {% endfor %}{{rule.action_name}}({% for a in rule.rules.act_args %}{{a.param}}:{{a.value}}{% if not loop.is_last %},{% endif %}{% endfor %})
+add "{{table.table_name}}" {% if rule.rules.needs_priority %}{{rule.priority}} {% endif %}{% for r in rule.rules.matches %}"{{r.field_name}}":{{r.value}} {% endfor %}"{{rule.action_name}}"({% for a in rule.rules.act_args %}"{{a.param}}":{{a.value}}{% if not loop.is_last %},{% endif %}{% endfor %})
 ## endfor
 ## endfor
 ## endif

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 add simple_table hdr.h.b:0x55 do_something()
 
 packet 0 11 11 11 11 11 11 22 22 22 22 22 22 33 33 FF EE

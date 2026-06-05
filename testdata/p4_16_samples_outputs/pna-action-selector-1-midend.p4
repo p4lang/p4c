@@ -83,18 +83,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaactionselector1l134() {
+    @hidden action pnaactionselector1l125() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaactionselector1l134 {
+    @hidden table tbl_pnaactionselector1l125 {
         actions = {
-            pnaactionselector1l134();
+            pnaactionselector1l125();
         }
-        const default_action = pnaactionselector1l134();
+        const default_action = pnaactionselector1l125();
     }
     apply {
-        tbl_pnaactionselector1l134.apply();
+        tbl_pnaactionselector1l125.apply();
     }
 }
 

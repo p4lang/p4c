@@ -996,3 +996,21 @@ class WideFieldTableSupport(P4EbpfTest):
             exp_pkt[IPv6].hlim = exp_pkt[IPv6].hlim - t.get("no_table_matches", 2)
             testutils.send_packet(self, PORT0, pkt)
             testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
+
+
+class EmitInIfStatementTest(P4EbpfTest):
+    """Test for issue #5026: emit inside if-statement in deparser."""
+
+    p4_file_path = "p4testdata/conditional-emit.p4"
+
+    def runTest(self):
+        # True branch: dstAddr[7:0] == 1, IPv4 header is emitted.
+        pkt = testutils.simple_ip_packet(eth_dst="00:00:00:00:00:01")
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet(self, pkt, PORT1)
+
+        # False branch: dstAddr[7:0] != 1, IPv4 header is NOT emitted.
+        pkt_in = testutils.simple_ip_packet(eth_dst="00:00:00:00:00:02")
+        exp_pkt = Ether(dst="00:00:00:00:00:02", src=pkt_in[Ether].src, type=0x0800)
+        testutils.send_packet(self, PORT0, pkt_in)
+        testutils.verify_packet(self, exp_pkt, PORT1)

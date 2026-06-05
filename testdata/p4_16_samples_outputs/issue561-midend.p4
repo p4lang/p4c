@@ -17,7 +17,7 @@ control c(out bit<32> x) {
     H1 u_0_h1;
     H2 u_0_h2;
     @name("c.u2") U[2] u2_0;
-    @hidden action issue561l29() {
+    @hidden action issue561l20() {
         u_0_h1.setInvalid();
         u_0_h2.setInvalid();
         u2_0[0].h1.setInvalid();
@@ -40,14 +40,14 @@ control c(out bit<32> x) {
         u2_0[0].h2.setInvalid();
         x = x + u2_0[1].h2.g + 32w2;
     }
-    @hidden table tbl_issue561l29 {
+    @hidden table tbl_issue561l20 {
         actions = {
-            issue561l29();
+            issue561l20();
         }
-        const default_action = issue561l29();
+        const default_action = issue561l20();
     }
     apply {
-        tbl_issue561l29.apply();
+        tbl_issue561l20.apply();
     }
 }
 

@@ -1,21 +1,21 @@
-issue816-1.p4(26): [--Wwarn=unused] warning: 'c2' is unused
+issue816-1.p4(32): [--Wwarn=unused] warning: 'c2' is unused
   C c2 = MyC2(p);
-  ^^^^^^^^^^^^^^
-issue816-1.p4(14): [--Werror=type-error] error: p: parameter cannot be a package
+    ^^
+issue816-1.p4(20): [--Werror=type-error] error: p: parameter cannot be a package
 control MyC1()(P p) {
                  ^
-issue816-1.p4(25): [--Werror=type-error] error: c1: cannot declare variables of type 'control C' (consider using an instantiation)
+issue816-1.p4(31): [--Werror=type-error] error: c1: cannot declare variables of type 'control C' (consider using an instantiation)
   C c1 = MyC1(p);
-  ^^^^^^^^^^^^^^
-issue816-1.p4(4)
+    ^^
+issue816-1.p4(10)
 control C();
         ^
-issue816-1.p4(18): [--Werror=type-error] error: p: parameter cannot be a package
+issue816-1.p4(24): [--Werror=type-error] error: p: parameter cannot be a package
 control MyC2()(P p) {
                  ^
-issue816-1.p4(26): [--Werror=type-error] error: c2: cannot declare variables of type 'control C' (consider using an instantiation)
+issue816-1.p4(32): [--Werror=type-error] error: c2: cannot declare variables of type 'control C' (consider using an instantiation)
   C c2 = MyC2(p);
-  ^^^^^^^^^^^^^^
-issue816-1.p4(4)
+    ^^
+issue816-1.p4(10)
 control C();
         ^

@@ -105,8 +105,8 @@ class PrettyPrint : public Inspector {
     }
     bool preorder(const IR::P4Program *program) override {
         if (!ppfile.empty()) {
-            std::ostream *ppStream = openFile(ppfile, true);
-            P4::ToP4 top4(ppStream, false, inputfile);
+            auto ppStream = openFile(ppfile, true);
+            P4::ToP4 top4(ppStream.get(), false, inputfile);
             (void)program->apply(top4);
         }
         return false;  // prune
@@ -239,7 +239,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TableKeyNames(&typeMap),
         new PassRepeated({
             new ConstantFolding(&typeMap, constantFoldingPolicy),
-            new StrengthReduction(&typeMap, policy->enableSubConstToAddTransform()),
+            new StrengthReduction(&typeMap, policy->getStrengthReductionPolicy()),
             new Reassociation(),
             new UselessCasts(&typeMap),
         }),

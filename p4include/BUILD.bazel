@@ -1,0 +1,7 @@
+exports_files(glob(["**/*.p4"]))
+
+filegroup(
+    name = "p4include",
+    srcs = glob(["**/*.p4"]),
+    visibility = ["//visibility:public"],
+)

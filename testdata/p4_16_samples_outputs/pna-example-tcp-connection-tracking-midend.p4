@@ -149,52 +149,52 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
         idle_timeout_with_auto_delete = true;
         const default_action = ct_tcp_table_miss();
     }
-    @hidden action pnaexampletcpconnectiontracking307() {
+    @hidden action pnaexampletcpconnectiontracking298() {
         do_add_on_miss_0 = false;
         update_expire_time_0 = false;
     }
-    @hidden action pnaexampletcpconnectiontracking254() {
+    @hidden action pnaexampletcpconnectiontracking245() {
         key_0 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
         key_1 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.dstAddr, hdr.ipv4.srcAddr);
         key_3 = SelectByDirection<bit<16>>(istd.direction, hdr.tcp.srcPort, hdr.tcp.dstPort);
         key_4 = SelectByDirection<bit<16>>(istd.direction, hdr.tcp.dstPort, hdr.tcp.srcPort);
     }
-    @hidden table tbl_pnaexampletcpconnectiontracking307 {
+    @hidden table tbl_pnaexampletcpconnectiontracking298 {
         actions = {
-            pnaexampletcpconnectiontracking307();
+            pnaexampletcpconnectiontracking298();
         }
-        const default_action = pnaexampletcpconnectiontracking307();
+        const default_action = pnaexampletcpconnectiontracking298();
     }
-    @hidden table tbl_pnaexampletcpconnectiontracking254 {
+    @hidden table tbl_pnaexampletcpconnectiontracking245 {
         actions = {
-            pnaexampletcpconnectiontracking254();
+            pnaexampletcpconnectiontracking245();
         }
-        const default_action = pnaexampletcpconnectiontracking254();
+        const default_action = pnaexampletcpconnectiontracking245();
     }
     apply {
-        tbl_pnaexampletcpconnectiontracking307.apply();
+        tbl_pnaexampletcpconnectiontracking298.apply();
         if (istd.direction == PNA_Direction_t.HOST_TO_NET && hdr.ipv4.isValid() && hdr.tcp.isValid()) {
             set_ct_options_0.apply();
         }
         if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
-            tbl_pnaexampletcpconnectiontracking254.apply();
+            tbl_pnaexampletcpconnectiontracking245.apply();
             ct_tcp_table_0.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampletcpconnectiontracking329() {
+    @hidden action pnaexampletcpconnectiontracking320() {
         pkt.emit<ethernet_t>(hdr.eth);
     }
-    @hidden table tbl_pnaexampletcpconnectiontracking329 {
+    @hidden table tbl_pnaexampletcpconnectiontracking320 {
         actions = {
-            pnaexampletcpconnectiontracking329();
+            pnaexampletcpconnectiontracking320();
         }
-        const default_action = pnaexampletcpconnectiontracking329();
+        const default_action = pnaexampletcpconnectiontracking320();
     }
     apply {
-        tbl_pnaexampletcpconnectiontracking329.apply();
+        tbl_pnaexampletcpconnectiontracking320.apply();
     }
 }
 

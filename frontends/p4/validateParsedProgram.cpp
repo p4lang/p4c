@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "validateParsedProgram.h"
 
+#include "lib/error_catalog.h"
+
 namespace P4 {
 
 /// Check that the type of a constant is either bit<>, int<> or int
@@ -56,6 +58,16 @@ void ValidateParsedProgram::postorder(const IR::Annotation *annotation) {
     if (!inserted && (it->second || annotation->structured))
         ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation",
                     annotation);
+
+    // Check that @noWarn annotation has a valid diagnostic name
+    if (annotation->name == IR::Annotation::noWarnAnnotation) {
+        auto arg = annotation->getSingleString(false);
+        if (!arg.isNullOrEmpty() && !ErrorCatalog::getCatalog().diagnosticExists(arg)) {
+            ::P4::warning(ErrorType::WARN_UNKNOWN,
+                          "%1%: unknown diagnostic name '%2%' in @noWarn annotation", annotation,
+                          arg);
+        }
+    }
 }
 
 /// Struct field names cannot be underscore

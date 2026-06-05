@@ -23,7 +23,7 @@
 #include "backends/tofino/bf-p4c/arch/fromv1.0/phase0.h"
 #include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/p4-14/fromv1.0/converters.h"
 #include "frontends/p4-14/header_type.h"
 #include "frontends/p4-14/typecheck.h"
@@ -2454,8 +2454,7 @@ void TnaProgramStructure::loadModel() {
 
     // iterate over tna declarations, find the type for intrinsic metadata
     for (auto decl : *declarations) {
-        auto *ann = decl->to<IR::IAnnotated>();
-        if (ann && ann->getAnnotation("__intrinsic_metadata"_cs)) {
+        if (decl->getAnnotation("__intrinsic_metadata"_cs)) {
             auto st = decl->to<IR::Type_StructLike>();
             tna_intr_md_types.emplace(st->name.toString(), st);
         }

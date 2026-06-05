@@ -69,34 +69,34 @@ control egress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_in
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psadropallcorrectedbmv2l120() {
+    @hidden action psadropallcorrectedbmv2l113() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psadropallcorrectedbmv2l120 {
+    @hidden table tbl_psadropallcorrectedbmv2l113 {
         actions = {
-            psadropallcorrectedbmv2l120();
+            psadropallcorrectedbmv2l113();
         }
-        const default_action = psadropallcorrectedbmv2l120();
+        const default_action = psadropallcorrectedbmv2l113();
     }
     apply {
-        tbl_psadropallcorrectedbmv2l120.apply();
+        tbl_psadropallcorrectedbmv2l113.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psadropallcorrectedbmv2l120_0() {
+    @hidden action psadropallcorrectedbmv2l113_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_psadropallcorrectedbmv2l120_0 {
+    @hidden table tbl_psadropallcorrectedbmv2l113_0 {
         actions = {
-            psadropallcorrectedbmv2l120_0();
+            psadropallcorrectedbmv2l113_0();
         }
-        const default_action = psadropallcorrectedbmv2l120_0();
+        const default_action = psadropallcorrectedbmv2l113_0();
     }
     apply {
-        tbl_psadropallcorrectedbmv2l120_0.apply();
+        tbl_psadropallcorrectedbmv2l113_0.apply();
     }
 }
 

@@ -25,7 +25,7 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action array2l32() {
+    @hidden action array2l38() {
         hdr.data.arr[0] = hdr.data.f1[7:0];
         hdr.data.arr[1] = hdr.data.f1[15:8];
         hdr.data.arr[2] = hdr.data.f1[23:16];
@@ -35,14 +35,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.arr[6] = hdr.data.f2[23:16];
         hdr.data.arr[7] = hdr.data.f2[31:24];
     }
-    @hidden table tbl_array2l32 {
+    @hidden table tbl_array2l38 {
         actions = {
-            array2l32();
+            array2l38();
         }
-        const default_action = array2l32();
+        const default_action = array2l38();
     }
     apply {
-        tbl_array2l32.apply();
+        tbl_array2l38.apply();
     }
 }
 

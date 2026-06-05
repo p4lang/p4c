@@ -85,18 +85,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkflattenlocalstructdecl137() {
+    @hidden action pnadpdkflattenlocalstructdecl128() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkflattenlocalstructdecl137 {
+    @hidden table tbl_pnadpdkflattenlocalstructdecl128 {
         actions = {
-            pnadpdkflattenlocalstructdecl137();
+            pnadpdkflattenlocalstructdecl128();
         }
-        const default_action = pnadpdkflattenlocalstructdecl137();
+        const default_action = pnadpdkflattenlocalstructdecl128();
     }
     apply {
-        tbl_pnadpdkflattenlocalstructdecl137.apply();
+        tbl_pnadpdkflattenlocalstructdecl128.apply();
     }
 }
 

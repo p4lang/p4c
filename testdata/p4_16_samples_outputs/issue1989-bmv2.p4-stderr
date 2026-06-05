@@ -1,6 +1,6 @@
-issue1989-bmv2.p4(38): [--Wwarn=unused] warning: control 'ingress_stub' is unused
+issue1989-bmv2.p4(44): [--Wwarn=unused] warning: control 'ingress_stub' is unused
 control ingress_stub(inout headers hdr, inout test_metadata_t meta,
         ^^^^^^^^^^^^
-issue1989-bmv2.p4(38): [--Winfo=removed] info: removing control 'ingress_stub'
+issue1989-bmv2.p4(44): [--Winfo=removed] info: removing control 'ingress_stub'
 control ingress_stub(inout headers hdr, inout test_metadata_t meta,
         ^^^^^^^^^^^^

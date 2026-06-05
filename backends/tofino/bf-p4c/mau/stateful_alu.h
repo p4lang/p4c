@@ -96,30 +96,13 @@
 #include <map>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 #include "mau_visitor.h"
 
 using namespace P4;
-
-struct Device::StatefulAluSpec {
-    bool CmpMask;  // are cmp oprerands maskable?
-    std::vector<cstring> CmpUnits;
-    int MaxSize;
-    int MaxDualSize;
-    int MaxPhvInputWidth;
-    int MaxInstructions;
-    int MaxInstructionConstWidth;
-    int MinInstructionConstValue;
-    int MaxInstructionConstValue;
-    int OutputWords;
-    bool DivModUnit;
-    bool FastClear;
-    int MaxRegfileRows;
-
-    cstring cmpUnit(unsigned idx) const;
-};
 
 /**
  * \ingroup stateful_alu

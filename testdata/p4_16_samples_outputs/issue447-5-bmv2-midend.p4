@@ -37,19 +37,19 @@ control DeparserI(packet_out packet, in Parsed_packet hdr) {
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     @name("ingress.s") varbit<32> s_0;
-    @hidden action issue4475bmv2l41() {
+    @hidden action issue4475bmv2l47() {
         s_0 = hdr.h1.var;
         hdr.h1.var = hdr.h2.var;
         hdr.h2.var = s_0;
     }
-    @hidden table tbl_issue4475bmv2l41 {
+    @hidden table tbl_issue4475bmv2l47 {
         actions = {
-            issue4475bmv2l41();
+            issue4475bmv2l47();
         }
-        const default_action = issue4475bmv2l41();
+        const default_action = issue4475bmv2l47();
     }
     apply {
-        tbl_issue4475bmv2l41.apply();
+        tbl_issue4475bmv2l47.apply();
     }
 }
 

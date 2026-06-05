@@ -21,7 +21,7 @@
  */
 #include "collect_pipelines.h"
 
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace BFN {
 

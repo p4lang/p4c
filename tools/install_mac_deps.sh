@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2020 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script to install P4C dependencies on MacOS.
 
 set -e  # Exit on error.
@@ -39,8 +43,9 @@ HOMEBREW_PREFIX=$(brew --prefix)
 brew update
 
 REQUIRED_PACKAGES=(
-    autoconf automake ccache cmake libtool
+    autoconf automake ccache cmake jsoncpp libtool
     openssl coreutils bison grep ninja virtualenv uv
+    libevent nanomsg thrift xxhash
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
@@ -59,3 +64,12 @@ source ~/.bash_profile
 
 # Set up uv for Python dependency management.
 uv sync
+
+# Install BMv2 from source via the shared CMake-based helper.
+THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
+BMV2_INSTALL_ARGS=(
+)
+if [[ -n "${BMV2_REF:-}" ]]; then
+  BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
+fi
+"${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"

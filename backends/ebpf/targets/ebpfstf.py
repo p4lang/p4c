@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
+
 # Copyright 2018 VMware, Inc.
+# SPDX-FileCopyrightText: 2018 VMware, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 """ Converts the commands in an stf file which populate tables into a C
     program that manipulates ebpf tables. """
 
@@ -50,22 +42,23 @@ def _generate_control_actions(cmds):
     been parsed."""
     generated = ""
     for index, cmd in enumerate(cmds):
-        key_name = "key_%s%d" % (cmd.table, index)
-        value_name = "value_%s%d" % (cmd.table, index)
+        table_name = cmd.table.replace(".", "_")
+        key_name = "key_%s%d" % (table_name, index)
+        value_name = "value_%s%d" % (table_name, index)
         if cmd.a_type == "setdefault":
-            tbl_name = cmd.table + "_defaultAction"
+            tbl_name = table_name + "_defaultAction"
             generated += "u32 %s = 0;\n\t" % (key_name)
         else:
-            generated += "struct %s_key %s = {};\n\t" % (cmd.table, key_name)
-            tbl_name = cmd.table
+            generated += "struct %s_key %s = {};\n\t" % (table_name, key_name)
+            tbl_name = table_name
             for key_num, key_field in enumerate(cmd.match):
-                field = key_field[0].split(".")[1]
+                field = "field%s" % key_num
                 key_field_val = key_field[1]
                 # Support for LPM key
                 if isinstance(key_field_val, tuple):
                     generated += (
                         "%s.prefixlen = (offsetof(struct %s_key, %s) - 4) * 8 + %s;\n\t"
-                        % (key_name, cmd.table, field, key_field_val[1])
+                        % (key_name, table_name, field, key_field_val[1])
                     )
                     key_field_val = key_field_val[0]
                 generated += "%s.%s = %s;\n\t" % (key_name, field, key_field_val)
@@ -74,13 +67,16 @@ def _generate_control_actions(cmds):
             "if (tableFileDescriptor < 0) {fprintf(stderr, \"map %s not loaded\"); exit(1); }\n\t"
             % tbl_name
         )
-        generated += "struct %s_value %s = {\n\t\t" % (cmd.table, value_name)
-        if cmd.action[0] == "_NoAction":
+        generated += "struct %s_value %s = {\n\t\t" % (table_name, value_name)
+        action_name = cmd.action[0]
+        action_c_name = action_name.replace(".", "_")
+        if action_name in ("_NoAction", "NoAction"):
             generated += ".action = 0,\n\t\t"
+            action_c_name = "_NoAction"
         else:
-            action_full_name = "{}_ACT_{}".format(cmd.table.upper(), cmd.action[0].upper())
+            action_full_name = "{}_ACT_{}".format(table_name.upper(), action_c_name.upper())
             generated += ".action = %s,\n\t\t" % action_full_name
-        generated += ".u = {.%s = {" % cmd.action[0]
+        generated += ".u = {.%s = {" % action_c_name
         for val_num, val_field in enumerate(cmd.action[1]):
             generated += "%s," % val_field[1]
         generated += "}},\n\t"

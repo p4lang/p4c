@@ -21,17 +21,17 @@ control ingress(inout Headers h) {
         }
         default_action = NoAction_1();
     }
-    @hidden action issue2542l26() {
+    @hidden action issue2542l32() {
         key_0 = 16w2;
     }
-    @hidden table tbl_issue2542l26 {
+    @hidden table tbl_issue2542l32 {
         actions = {
-            issue2542l26();
+            issue2542l32();
         }
-        const default_action = issue2542l26();
+        const default_action = issue2542l32();
     }
     apply {
-        tbl_issue2542l26.apply();
+        tbl_issue2542l32.apply();
         sub_dummy.apply();
     }
 }

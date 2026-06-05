@@ -29,8 +29,8 @@ control p() {
         d = !d;
         d = d && d;
         d = d || d;
-        d = d == d;
-        d = d != d;
+        d = true;
+        d = false;
     }
 }
 

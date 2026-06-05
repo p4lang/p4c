@@ -36,7 +36,6 @@
 #include "backends/tofino/bf-p4c/common/ir_utils.h"
 #include "backends/tofino/bf-p4c/common/slice.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/resource.h"
@@ -66,6 +65,7 @@
 #include "backends/tofino/bf-p4c/parde/split_parser_state.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/pragma/pa_no_init.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "lib/safe_vector.h"
 #include "lib/stringref.h"
 

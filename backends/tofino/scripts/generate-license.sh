@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Produces LICENSE from LICENSE.in.
 
 set -e

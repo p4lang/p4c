@@ -117,7 +117,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("MyIC.forward") action forward() {
-        b.meta = 32w0x1 << c.ingress_port;
+        b.meta = 32w0x1 << (bit<32>)c.ingress_port;
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
@@ -140,17 +140,17 @@ control MyEC(inout EMPTY_H a, inout metadata b, in psa_egress_input_metadata_t c
 }
 
 control MyID(packet_out buffer, out clone_metadata_t a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout ethernet_t d, in metadata e, in psa_ingress_output_metadata_t f) {
-    @hidden @name("psadpdkheaderuniontypedef125") action psadpdkheaderuniontypedef125_0() {
+    @hidden @name("psadpdkheaderuniontypedef131") action psadpdkheaderuniontypedef131_0() {
         buffer.emit<ethernet_t>(d);
     }
-    @hidden @name("tbl_psadpdkheaderuniontypedef125") table tbl_psadpdkheaderuniontypedef125_0 {
+    @hidden @name("tbl_psadpdkheaderuniontypedef131") table tbl_psadpdkheaderuniontypedef131_0 {
         actions = {
-            psadpdkheaderuniontypedef125_0();
+            psadpdkheaderuniontypedef131_0();
         }
-        const default_action = psadpdkheaderuniontypedef125_0();
+        const default_action = psadpdkheaderuniontypedef131_0();
     }
     apply {
-        tbl_psadpdkheaderuniontypedef125_0.apply();
+        tbl_psadpdkheaderuniontypedef131_0.apply();
     }
 }
 

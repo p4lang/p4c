@@ -1,0 +1,6 @@
+invalid_header_default_action_arg.p4(4): [--Wwarn=unused] warning: 'h' is unused
+    action a(h_t h, hu_t hu) {}
+                 ^
+invalid_header_default_action_arg.p4(4): [--Wwarn=unused] warning: 'hu' is unused
+    action a(h_t h, hu_t hu) {}
+                         ^^

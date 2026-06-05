@@ -22,10 +22,10 @@
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/logging/filelog.h"
 #include "backends/tofino/bf-p4c/parde/create_pov_encoder.h"
 #include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "ir/ir.h"
 #include "ir/pattern.h"
 #include "lib/error.h"

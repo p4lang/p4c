@@ -1,18 +1,7 @@
-/*
-Copyright (C) 2023 Intel Corporation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions
-and limitations under the License.
-*/
+// Copyright (C) 2023 Intel Corporation
+// SPDX-FileCopyrightText: 2023 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "backend.h"
 #include "control-plane/p4RuntimeSerializer.h"
@@ -82,8 +71,10 @@ int main(int argc, char *const argv[]) {
             ::P4::error("Cannot process input file. Program does not contain a 'main' module");
             return 1;
         }
-        if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(toplevel);
+        if (!options.dumpJsonFile.empty()) {
+            auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+            JSONGenerator(*dumpJsonStream).emit(toplevel);
+        }
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
@@ -95,8 +86,7 @@ int main(int argc, char *const argv[]) {
     if (!backend.process()) return 1;
     std::string progName = backend.tcIR->getPipelineName().string();
     std::string introspecFile = options.outputFolder / (progName + ".json");
-    std::ostream *outIntro = openFile(introspecFile, false);
-    if (outIntro != nullptr) {
+    if (auto outIntro = openFile(introspecFile, false)) {
         bool serialized = backend.serializeIntrospectionJson(*outIntro);
         if (!serialized) {
             std::remove(introspecFile.c_str());

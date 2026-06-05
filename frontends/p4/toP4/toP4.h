@@ -195,7 +195,7 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::Invalid *e) override;
     bool preorder(const IR::InvalidHeader *e) override;
     bool preorder(const IR::InvalidHeaderUnion *e) override;
-    bool preorder(const IR::HeaderStackExpression *e) override;
+    bool preorder(const IR::ArrayExpression *e) override;
     bool preorder(const IR::MethodCallExpression *e) override;
     bool preorder(const IR::DefaultExpression *e) override;
     bool preorder(const IR::This *e) override;

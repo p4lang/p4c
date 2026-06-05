@@ -81,7 +81,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     @name("Op1") bit<8> Op1_0 = 8w0x2;
     @name("Op2") bit<16> Op2_0 = 16w0x23;
     @name("forward") action forward_0() {
-        b.meta = 32w0x1 << c.ingress_port;
+        b.meta = 32w0x1 << (PortIdUint_t)c.ingress_port;
     }
     @name("tbl") table tbl_0 {
         key = {

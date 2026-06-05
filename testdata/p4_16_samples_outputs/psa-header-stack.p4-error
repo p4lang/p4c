@@ -1,4 +1,4 @@
-psa-header-stack.p4(81): [--Wwarn=unused] warning: 'forward' is unused
+psa-header-stack.p4(87): [--Wwarn=unused] warning: 'forward' is unused
     action forward() {
            ^^^^^^^
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata

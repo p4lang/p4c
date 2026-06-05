@@ -3,7 +3,7 @@ control C()() {
         ^
 explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Wwarn=unused] warning: 'h8' is unused
     H h8 = (H) { b = 2 };
-    ^^^^^^^^^^^^^^^^^^^^
+      ^^
 explicit-cast-to-header-from-kvlist-expr-with-unmatched-field.p4(6): [--Werror=type-error] error: '{ b = 2 }'
     H h8 = (H) { b = 2 };
                ^^^^^^^^^

@@ -262,14 +262,12 @@ ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifi
     BUG("Should be unreachable");
 }
 
-void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var> *typeVars) {
-    if (typeVars == nullptr) return;
-    for (auto tv : *typeVars) declareType(tv->name);
+void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var> &typeVars) {
+    for (auto tv : typeVars) declareType(tv->name);
 }
 
-void ProgramStructure::declareParameters(const IR::IndexedVector<IR::Parameter> *params) {
-    if (params == nullptr) return;
-    for (auto param : *params) declareObject(param->name, param->type->toString());
+void ProgramStructure::declareParameters(const IR::IndexedVector<IR::Parameter> &params) {
+    for (auto param : params) declareObject(param->name, param->type->toString());
 }
 
 void ProgramStructure::endParse() {

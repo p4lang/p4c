@@ -79,7 +79,7 @@ controller_packet_metadata {
   metadata {
     id: 2
     name: "queue_id"
-    bitwidth: 8
+    bitwidth: 7
   }
   metadata {
     id: 3

@@ -35,7 +35,6 @@ using Parser = P4::P4Parser;
 %}
 
 %option c++
-%option outfile="lex.yy.c"
 %option yyclass="P4::P4Lexer"
 %option prefix="p4"
 %option nodefault noyywrap nounput noinput noyyget_leng
@@ -157,10 +156,10 @@ using Parser = P4::P4Parser;
                   return makeToken(INT); }
 "key"           { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(KEY); }
+"list"          { BEGIN(driver.saveState); driver.template_args = true;
+                  return makeToken(LIST); }
 "match_kind"    { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(MATCH_KIND); }
-"type"          { BEGIN(driver.saveState); driver.template_args = false;
-                  return makeToken(TYPE); }
 "out"           { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(OUT); }
 "parser"        { BEGIN(driver.saveState); driver.template_args = false;
@@ -191,14 +190,14 @@ using Parser = P4::P4Parser;
                   return makeToken(TRUE); }
 "tuple"         { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(TUPLE); }
+"type"          { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(TYPE); }
 "typedef"       { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(TYPEDEF); }
 "varbit"        { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VARBIT); }
 "value_set"     { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VALUESET); }
-"list"          { BEGIN(driver.saveState); driver.template_args = true;
-                  return makeToken(LIST); }
 "void"          { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(VOID); }
 "_"             { BEGIN(driver.saveState); driver.template_args = false;
@@ -323,6 +322,7 @@ using Parser = P4::P4Parser;
 
 "!"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(NOT); }
 ":"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(COLON); }
+"+:"    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS_COLON); }
 ","     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(COMMA); }
 "?"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(QUESTION); }
 "."     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(DOT); }

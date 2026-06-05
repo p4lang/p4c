@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "midend.h"
 
@@ -87,6 +76,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
 
     auto v1controls = new std::set<cstring>();
     auto defUse = new P4::ComputeDefUse;
+    ParserConfig config;
 
     addPasses(
         {new P4::DumpPipe("MidEnd start"),
@@ -170,7 +160,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          new P4::HSIndexSimplifier(&typeMap),
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
-         options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+         options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr,
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),

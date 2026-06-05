@@ -1,19 +1,9 @@
 /*
-Copyright 2022-present Orange
-Copyright 2022-present Open Networking Foundation
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2022 Open Networking Foundation
+ * SPDX-FileCopyrightText: 2022 Orange
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 #ifndef BACKENDS_EBPF_EBPFDEPARSER_H_
 #define BACKENDS_EBPF_EBPFDEPARSER_H_
 
@@ -32,6 +22,7 @@ class DeparserBodyTranslator : public ControlBodyTranslator {
     explicit DeparserBodyTranslator(const EBPFDeparser *deparser);
 
     bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::IfStatement *ifstmt) override;
 };
 
 /// This translator emits buffer preparation (eg. which headers will be emitted)
@@ -44,6 +35,9 @@ class DeparserPrepareBufferTranslator : public ControlBodyTranslator {
 
     void processMethod(const P4::ExternMethod *method) override;
     bool preorder(const IR::BlockStatement *s) override;
+    bool preorder(const IR::IfStatement *ifstmt) override;
+    bool preorder(const IR::AssignmentStatement *) override { return false; }
+    bool preorder(const IR::MethodCallStatement *s) override;
     bool preorder(const IR::MethodCallExpression *expression) override;
 };
 
@@ -55,6 +49,8 @@ class DeparserHdrEmitTranslator : public DeparserPrepareBufferTranslator {
  public:
     explicit DeparserHdrEmitTranslator(const EBPFDeparser *deparser);
 
+    bool preorder(const IR::IfStatement *ifstmt) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
     void processMethod(const P4::ExternMethod *method) override;
     void emitField(CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
                    unsigned alignment, EBPF::EBPFType *type);

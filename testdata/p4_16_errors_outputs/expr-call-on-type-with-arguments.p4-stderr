@@ -1,4 +1,4 @@
-expr-call-on-type-with-arguments.p4(5):syntax error, unexpected TYPE_IDENTIFIER, expecting APPLY
-    c.c
-      ^
+expr-call-on-type-with-arguments.p4(6):syntax error, unexpected }, expecting ;
+  }
+  ^
 [--Werror=overlimit] error: 1 errors encountered, aborting compilation

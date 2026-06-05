@@ -315,7 +315,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Invalid *expression);
     const IR::Node *postorder(const IR::P4ListExpression *expression);
     const IR::Node *postorder(const IR::StructExpression *expression);
-    const IR::Node *postorder(const IR::HeaderStackExpression *expression);
+    const IR::Node *postorder(const IR::ArrayExpression *expression);
     const IR::Node *postorder(const IR::MethodCallStatement *mcs);
     const IR::Node *postorder(const IR::MethodCallExpression *expression);
     const IR::Node *postorder(const IR::ConstructorCallExpression *expression);
@@ -463,7 +463,7 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Invalid *expression) override;
     void postorder(const IR::P4ListExpression *expression) override;
     void postorder(const IR::StructExpression *expression) override;
-    void postorder(const IR::HeaderStackExpression *expression) override;
+    void postorder(const IR::ArrayExpression *expression) override;
     void postorder(const IR::MethodCallStatement *mcs) override;
     void postorder(const IR::MethodCallExpression *expression) override;
     void postorder(const IR::ConstructorCallExpression *expression) override;
@@ -602,7 +602,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Invalid *expression) override;
     const IR::Node *postorder(IR::P4ListExpression *expression) override;
     const IR::Node *postorder(IR::StructExpression *expression) override;
-    const IR::Node *postorder(IR::HeaderStackExpression *expression) override;
+    const IR::Node *postorder(IR::ArrayExpression *expression) override;
     const IR::Node *postorder(IR::MethodCallStatement *mcs) override;
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
     const IR::Node *postorder(IR::ConstructorCallExpression *expression) override;

@@ -440,7 +440,7 @@ class TCInfra:
         It also adds the expected output packets per interface to a global
         dictionary.
         After parsing the necessary information, it sends the packets"""
-        pipe_name, _ = os.path.splitext(os.path.basename(stffile))
+        pipe_name = self.base_template
         rules_file = None
         with open(stffile) as raw_stf:
             input_pkts, cmds, self.expected = parse_stf_file(raw_stf, pipe_name)

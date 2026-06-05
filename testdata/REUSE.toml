@@ -1,0 +1,17 @@
+version = 1
+
+[[annotations]]
+path = [
+    "p4_14_errors_outputs/**",
+    "p4_14_samples_outputs/**",
+    "p4_16_dpdk_errors_outputs/**",
+    "p4_16_ebpf_errors_outputs/**",
+    "p4_16_errors_outputs/**",
+    "p4_16_pna_errors_outputs/**",
+    "p4_16_psa_errors_outputs/**",
+    "p4_16_samples_outputs/**",
+    "p4tc_samples_outputs/**",
+    "p4tc_samples_stf_outputs/**"
+]
+SPDX-FileCopyrightText = "2026 The P4 Language Consortium"
+SPDX-License-Identifier = "Apache-2.0"

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 
 bit<4> func(in bit<4> l)

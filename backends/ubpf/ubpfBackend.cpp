@@ -1,18 +1,7 @@
-/*
-Copyright 2019 Orange
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2019 Orange
+// SPDX-FileCopyrightText: 2019 Orange
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "ubpfBackend.h"
 
@@ -54,13 +43,13 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
 
     if (options.outputFile.empty()) return;
 
-    auto *cstream = openFile(options.outputFile, false);
+    auto cstream = openFile(options.outputFile, false);
     if (cstream == nullptr) return;
 
     std::filesystem::path hfile = options.outputFile;
     hfile.replace_extension(".h");
 
-    auto *hstream = openFile(hfile, false);
+    auto hstream = openFile(hfile, false);
     if (hstream == nullptr) return;
 
     UbpfCodeBuilder c(target);

@@ -9,17 +9,17 @@ struct headers {
 }
 
 control ingress(inout headers hdr) {
-    @hidden action issue2492l13() {
+    @hidden action issue2492l19() {
         hdr.data.h1 = 16w1;
     }
-    @hidden table tbl_issue2492l13 {
+    @hidden table tbl_issue2492l19 {
         actions = {
-            issue2492l13();
+            issue2492l19();
         }
-        const default_action = issue2492l13();
+        const default_action = issue2492l19();
     }
     apply {
-        tbl_issue2492l13.apply();
+        tbl_issue2492l19.apply();
     }
 }
 

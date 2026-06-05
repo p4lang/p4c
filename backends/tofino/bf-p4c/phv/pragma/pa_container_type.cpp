@@ -22,8 +22,8 @@
 #include <string>
 
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/log.h"
 
 namespace {

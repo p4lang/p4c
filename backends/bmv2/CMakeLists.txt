@@ -1,16 +1,6 @@
-# Copyright 2013-present Barefoot Networks, Inc.
+# SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 # Makefile for a backend that generates code for the Behavioral Model version 2 (BMv2)
 # compiling for the simple_switch target.
@@ -147,7 +137,7 @@ add_dependencies(p4c_driver linkbmv2)
 
 # Tests
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
-set(BMV2_PTF_DRIVER "$([[ $EUID = 0 ]] || echo 'sudo -E') ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py")
+set(BMV2_PTF_DRIVER "$([[ $EUID = 0 ]] || echo 'sudo -E') ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py --use-veth")
 
 set (V1_INCLUDE_PATTERNS "include.*v1model.p4")
 set (P4TESTS_FOR_V1MODEL "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")

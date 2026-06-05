@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "ir/irutils.h"
 
 #include <cmath>
@@ -104,18 +108,18 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
         }
         return new IR::ListExpression(srcInfo, *vec);
     }
-    if (const auto *ts = type->to<IR::Type_Array>()) {
+    if (const auto *ta = type->to<IR::Type_Array>()) {
         auto *vec = new IR::Vector<IR::Expression>();
-        const auto *elementType = ts->elementType;
-        for (size_t i = 0; i < ts->getSize(); i++) {
+        const auto *elementType = ta->elementType;
+        for (size_t i = 0; i < ta->getSize(); i++) {
             const IR::Expression *value = getDefaultValue(elementType, srcInfo);
             if (value == nullptr) {
                 return nullptr;
             }
             vec->push_back(value);
         }
-        const auto *resultType = ts->getP4Type();
-        return new IR::HeaderStackExpression(srcInfo, resultType, *vec, resultType);
+        const auto *resultType = ta->getP4Type();
+        return new IR::ArrayExpression(srcInfo, resultType, *vec, resultType);
     }
     if (valueRequired) {
         P4C_UNIMPLEMENTED("%1%: No default value for type %2% (%3%).", srcInfo, type,

@@ -23,14 +23,13 @@ namespace P4::graphs {
 
 void Graph_visitor::writeGraphToFile(const Graph &g, const std::string &name) {
     auto path = graphsDir / (name + ".dot");
-    auto out = openFile(path, false);
-    if (out == nullptr) {
+    if (auto out = openFile(path, false)) {
+        // Custom label writers not supported with subgraphs, so we populate
+        // *_attribute_t properties instead using our GraphAttributeSetter class.
+        boost::write_graphviz(*out, g);
+    } else {
         ::P4::error(ErrorType::ERR_IO, "Failed to open file %1%", path);
-        return;
     }
-    // Custom label writers not supported with subgraphs, so we populate
-    // *_attribute_t properties instead using our GraphAttributeSetter class.
-    boost::write_graphviz(*out, g);
 }
 
 const char *Graph_visitor::getType(const VertexType &v_type) {

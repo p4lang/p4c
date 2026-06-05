@@ -24,43 +24,43 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.n") bit<8> n_0;
-    @hidden action loop3clausetricky2l54() {
+    @hidden action loop3clausetricky2l45() {
         n_0 = hdr.ethernet.srcAddr[15:8];
         n_0 = hdr.ethernet.srcAddr[15:8] + 8w3;
         n_0 = hdr.ethernet.srcAddr[15:8] + 8w3 + 8w6;
         n_0 = hdr.ethernet.srcAddr[15:8] + 8w3 + 8w6 + 8w1;
         n_0 = hdr.ethernet.srcAddr[15:8] + 8w3 + 8w6 + 8w1 + 8w4;
     }
-    @hidden action loop3clausetricky2l48() {
+    @hidden action loop3clausetricky2l39() {
         n_0 = hdr.ethernet.srcAddr[15:8];
     }
-    @hidden action loop3clausetricky2l56() {
+    @hidden action loop3clausetricky2l47() {
         hdr.ethernet.srcAddr[7:0] = 8w7;
         hdr.ethernet.srcAddr[15:8] = n_0;
         stdmeta.egress_spec = 9w1;
     }
-    @hidden table tbl_loop3clausetricky2l48 {
+    @hidden table tbl_loop3clausetricky2l39 {
         actions = {
-            loop3clausetricky2l48();
+            loop3clausetricky2l39();
         }
-        const default_action = loop3clausetricky2l48();
+        const default_action = loop3clausetricky2l39();
     }
-    @hidden table tbl_loop3clausetricky2l54 {
+    @hidden table tbl_loop3clausetricky2l45 {
         actions = {
-            loop3clausetricky2l54();
+            loop3clausetricky2l45();
         }
-        const default_action = loop3clausetricky2l54();
+        const default_action = loop3clausetricky2l45();
     }
-    @hidden table tbl_loop3clausetricky2l56 {
+    @hidden table tbl_loop3clausetricky2l47 {
         actions = {
-            loop3clausetricky2l56();
+            loop3clausetricky2l47();
         }
-        const default_action = loop3clausetricky2l56();
+        const default_action = loop3clausetricky2l47();
     }
     apply {
-        tbl_loop3clausetricky2l48.apply();
-        tbl_loop3clausetricky2l54.apply();
-        tbl_loop3clausetricky2l56.apply();
+        tbl_loop3clausetricky2l39.apply();
+        tbl_loop3clausetricky2l45.apply();
+        tbl_loop3clausetricky2l47.apply();
     }
 }
 

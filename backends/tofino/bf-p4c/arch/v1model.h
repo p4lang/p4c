@@ -32,7 +32,7 @@
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"

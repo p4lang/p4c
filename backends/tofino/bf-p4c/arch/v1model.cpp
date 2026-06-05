@@ -27,9 +27,9 @@
 #include "backends/tofino/bf-p4c/arch/fromv1.0/checksum.h"
 #include "backends/tofino/bf-p4c/arch/fromv1.0/parser_counter.h"
 #include "backends/tofino/bf-p4c/arch/program_structure.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/annotations.h"
 #include "lib/bitops.h"
@@ -1014,9 +1014,7 @@ class ConstructSymbolTable : public Inspector {
         auto *typeName = typeArg->to<IR::Type_Name>();
         ERROR_CHECK(typeName != nullptr, "Expected type T in digest to be a typeName %1%", typeArg);
         auto fieldList = refMap->getDeclaration(typeName->path);
-        const IR::Annotation *declAnno = nullptr;
-        if (const auto *annotated = fieldList->to<IR::IAnnotated>())
-            declAnno = annotated->getAnnotation(IR::Annotation::nameAnnotation);
+        auto *declAnno = fieldList->getAnnotation(IR::Annotation::nameAnnotation);
 
         ERROR_CHECK(typeName != nullptr, "Wrong argument type for %1%", typeArg);
         /*

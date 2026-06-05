@@ -28,37 +28,6 @@
 #include "ir/pattern.h"
 #include "split_gateways.h"
 
-const Device::GatewaySpec &TofinoDevice::getGatewaySpec() const {
-    static const Device::GatewaySpec spec = {
-        /* .PhvBytes = */ 4,
-        /* .HashBits = */ 12,
-        /* .PredicateBits = */ 0,
-        /* .MaxRows = */ 4,
-        /* .SupportXor = */ true,
-        /* .SupportRange = */ true,
-        /* .ExactShifts = */ 1,
-        /* .ByteSwizzle = */ true,
-        /* .PerByteMatch = */ 0,
-        /* .XorByteSlots = */ 0xf0,
-    };
-    return spec;
-}
-const Device::GatewaySpec &JBayDevice::getGatewaySpec() const {
-    static const Device::GatewaySpec spec = {
-        /* .PhvBytes = */ 4,
-        /* .HashBits = */ 12,
-        /* .PredicateBits = */ 0,
-        /* .MaxRows = */ 4,
-        /* .SupportXor = */ true,
-        /* .SupportRange = */ true,
-        /* .ExactShifts = */ 5,
-        /* .ByteSwizzle = */ true,
-        /* .PerByteMatch = */ 0,
-        /* .XorByteSlots = */ 0xf0,
-    };
-    return spec;
-}
-
 class CanonGatewayExpr::NeedNegate : public Inspector {
     bool rv = false;
     bool preorder(const IR::Expression *) override { return !rv; }

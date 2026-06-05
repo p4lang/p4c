@@ -165,4 +165,20 @@ void IR::Node::sourceInfoFromJSON(JSONLoader &json) {
 
 IRNODE_DEFINE_APPLY_OVERLOAD(Node, , )
 
+bool IR::INode::hasAnnotation(cstring name) const {
+    if (auto *a = to<IAnnotated>()) return a->hasAnnotation(name);
+    return false;
+}
+
+const IR::Annotation *IR::INode::getAnnotation(cstring name) const {
+    if (auto *a = to<IAnnotated>()) return a->getAnnotation(name);
+    return nullptr;
+}
+
+const IR::Vector<IR::Annotation> &IR::INode::getAnnotations() const {
+    if (auto *a = to<IAnnotated>()) return a->getAnnotations();
+    static IR::Vector<IR::Annotation> empty;
+    return empty;
+}
+
 }  // namespace P4

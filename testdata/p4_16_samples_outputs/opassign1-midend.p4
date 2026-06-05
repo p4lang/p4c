@@ -17,21 +17,21 @@ struct headers_t {
 }
 
 control c(inout headers_t hdrs) {
-    @hidden action opassign1l23() {
+    @hidden action opassign1l29() {
         hdrs.head.f1 += hdrs.head.f2;
         hdrs.head.f1 *= hdrs.head.f3;
         hdrs.head.f1 %= hdrs.head.f4;
         hdrs.head.f1 <<= hdrs.head.b1;
         hdrs.head.f1 >>= hdrs.head.b2;
     }
-    @hidden table tbl_opassign1l23 {
+    @hidden table tbl_opassign1l29 {
         actions = {
-            opassign1l23();
+            opassign1l29();
         }
-        const default_action = opassign1l23();
+        const default_action = opassign1l29();
     }
     apply {
-        tbl_opassign1l23.apply();
+        tbl_opassign1l29.apply();
     }
 }
 

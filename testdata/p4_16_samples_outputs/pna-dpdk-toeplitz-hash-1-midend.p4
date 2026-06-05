@@ -58,35 +58,35 @@ struct tuple_0 {
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t main_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdktoeplitzhash1l94() {
+    @hidden action pnadpdktoeplitzhash1l85() {
         main_meta.hash = rss0.get_hash<tuple_0>((tuple_0){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr});
         main_meta.hash = main_meta.hash & 32w3;
         main_meta.port = main_meta.hash;
     }
-    @hidden table tbl_pnadpdktoeplitzhash1l94 {
+    @hidden table tbl_pnadpdktoeplitzhash1l85 {
         actions = {
-            pnadpdktoeplitzhash1l94();
+            pnadpdktoeplitzhash1l85();
         }
-        const default_action = pnadpdktoeplitzhash1l94();
+        const default_action = pnadpdktoeplitzhash1l85();
     }
     apply {
-        tbl_pnadpdktoeplitzhash1l94.apply();
+        tbl_pnadpdktoeplitzhash1l85.apply();
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdktoeplitzhash1l107() {
+    @hidden action pnadpdktoeplitzhash1l98() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdktoeplitzhash1l107 {
+    @hidden table tbl_pnadpdktoeplitzhash1l98 {
         actions = {
-            pnadpdktoeplitzhash1l107();
+            pnadpdktoeplitzhash1l98();
         }
-        const default_action = pnadpdktoeplitzhash1l107();
+        const default_action = pnadpdktoeplitzhash1l98();
     }
     apply {
-        tbl_pnadpdktoeplitzhash1l107.apply();
+        tbl_pnadpdktoeplitzhash1l98.apply();
     }
 }
 

@@ -592,16 +592,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::P4ListExpression *express
     return expression;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *expression) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ArrayExpression *expression) {
     if (done()) return expression;
     bool constant = true;
-    auto stackType = getTypeType(expression->headerStackType);
-    if (auto st = stackType->to<IR::Type_Array>()) {
+    auto arrayType = getTypeType(expression->arrayType);
+    if (auto st = arrayType->to<IR::Type_Array>()) {
         auto elementType = st->elementType;
         IR::Vector<IR::Expression> vec;
         bool changed = false;
         if (expression->size() != st->getSize()) {
-            typeError("%1%: number of initializers %2% has to match stack size %3%", expression,
+            typeError("%1%: number of initializers %2% has to match array size %3%", expression,
                       expression->size(), st->getSize());
             return expression;
         }
@@ -610,7 +610,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
             auto type = getType(c);
             if (type == nullptr) return expression;
             auto tvs = unify(expression, elementType, type,
-                             "Stack element type '%1%' does not match expected type '%2%'",
+                             "Array element type '%1%' does not match expected type '%2%'",
                              {type, elementType});
             if (tvs == nullptr) return expression;
             if (!tvs->isIdentity()) {
@@ -623,16 +623,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
             }
             if (changed)
                 expression =
-                    new IR::HeaderStackExpression(expression->srcInfo, std::move(vec), stackType);
+                    new IR::ArrayExpression(expression->srcInfo, std::move(vec), arrayType);
         }
     } else {
-        typeError("%1%: header stack expression has an incorrect type `%2%`", expression,
-                  stackType);
+        typeError("%1%: Array expression has an incorrect type `%2%`", expression, arrayType);
         return expression;
     }
 
-    setType(getOriginal(), stackType);
-    setType(expression, stackType);
+    setType(getOriginal(), arrayType);
+    setType(expression, arrayType);
     if (constant) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
@@ -945,9 +944,19 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
         }
     }
 
-    if (rtype->is<IR::Type_Bits>() && rtype->to<IR::Type_Bits>()->isSigned) {
+    if (const auto *rt = rtype->to<IR::Type_SerEnum>()) {
+        rtype = getTypeType(rt->type);
+    }
+    const auto *rbits = rtype->to<IR::Type_Bits>();
+    if (rbits && rbits->isSigned) {
         typeError("%1%: Shift amount must be an unsigned number", expression->right);
         return expression;
+    }
+    if (!rbits && !(rtype->is<IR::Type_InfInt>() && isCompileTimeConstant(expression->right))) {
+        typeError(
+            "%1%: The right operand of shift must be either an expression of type bit<S> "
+            "or a compile-time known value that is a non-negative integer, but is %2%",
+            expression->right, rtype);
     }
 
     if (!lt && !ltype->is<IR::Type_InfInt>()) {
@@ -1133,7 +1142,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cmpl *expression) {
     BUG_CHECK(type, "Invalid Type_SerEnum/getTypeType");
 
     if (type->is<IR::Type_InfInt>()) {
-        typeError("'%1%' cannot be applied to an operand with an unknown width");
+        typeError("'%1%' operation cannot be applied to an operand '%2%' with an unknown width",
+                  expression->getStringOp(), expression->expr);
     } else if (type->is<IR::Type_Bits>()) {
         setType(getOriginal(), type);
         setType(expression, type);
@@ -1190,11 +1200,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
                 setType(type, new IR::Type_Type(castType));
                 auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
                 setType(result, castType);
+                setCompileTimeConstant(result);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
                 return result;
             } else if (concreteCastType->is<IR::Type_HeaderUnion>()) {
                 setType(type, new IR::Type_Type(castType));
                 auto result = new IR::InvalidHeaderUnion(ih->srcInfo, type, type);
                 setType(result, castType);
+                setCompileTimeConstant(result);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
                 return result;
             } else {
                 typeError("%1%: 'invalid' expression type `%2%` must be a header or header union",
@@ -1233,7 +1247,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
             auto result = assignment(expression, concreteType, expression->expr);
             return result;
         } else {
-            typeError("%1%: casts to header stack not supported", expression);
+            typeError("%1%: casts to array not supported", expression);
             return expression;
         }
     }
@@ -1491,6 +1505,17 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PlusSlice *expression) {
     }
     if (cloned) expression = cloned;
 
+    if (auto lsb = expression->e1->to<IR::Constant>()) {
+        if (lsb->value >= type->width_bits()) {
+            typeError("%1%: lsb offset too large", lsb);
+            return expression;
+        }
+        if (lsb->value < 0) {
+            typeError("%1%: negative lsb offset", lsb);
+            return expression;
+        }
+    }
+
     if (!expression->e2->is<IR::Constant>()) {
         typeError("%1%: slice bit index values must be constants", expression->e2);
         return expression;
@@ -1705,9 +1730,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
         return expression;
     }
 
-    if (auto *stack = type->to<IR::Type_Array>()) {
+    if (auto *array = type->to<IR::Type_Array>()) {
         auto parser = findContext<IR::P4Parser>();
-        auto eltype = stack->elementType;
+        auto eltype = array->elementType;
         if (auto sc = eltype->to<IR::Type_SpecializedCanonical>()) eltype = sc->baseType;
         if (!eltype->is<IR::Type_Header>() && !eltype->is<IR::Type_HeaderUnion>()) {
             typeError("%1%: '%2%' can only be used on header stacks", expression, member);
@@ -1718,8 +1743,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
                           expression);
                 return expression;
             }
-            setType(getOriginal(), stack->elementType);
-            setType(expression, stack->elementType);
+            setType(getOriginal(), array->elementType);
+            setType(expression, array->elementType);
             if (isLeftValue(expression->expr) && member == IR::Type_Array::next) {
                 setLeftValue(expression);
                 setLeftValue(getOriginal<IR::Expression>());
@@ -1810,6 +1835,10 @@ const IR::Expression *TypeInferenceBase::actionCall(bool inActionList,
         return actionCall;
     }
     LOG2("Action type " << baseType);
+    if (method->is<IR::MethodCallExpression>()) {
+        typeError("%1%: Cannot invoke result of an action call", method);
+        return actionCall;
+    }
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
     BUG_CHECK(baseType->returnType == nullptr, "%1%: action with return type?",
               baseType->returnType);

@@ -9,4 +9,4 @@ type-bit-with-non-lctk-width.p4(4): [--Wwarn=unused] warning: 'v' is unused
                                   ^
 type-bit-with-non-lctk-width.p4(4): [--Werror=expected] error: (tuple<>){}: expected a constant
   action a(in bit<((tuple<>) {})> v) {}
-                   ^^^^^^^^^^^^
+                  ^^^^^^^^^^^^^^

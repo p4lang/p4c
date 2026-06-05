@@ -1,7 +1,7 @@
-default-switch.p4(1): [--Wwarn=unused] warning: control 'ctrl' is unused
+default-switch.p4(7): [--Wwarn=unused] warning: control 'ctrl' is unused
 control ctrl() {
         ^^^^
-default-switch.p4(1): [--Winfo=removed] info: removing control 'ctrl'
+default-switch.p4(7): [--Winfo=removed] info: removing control 'ctrl'
 control ctrl() {
         ^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

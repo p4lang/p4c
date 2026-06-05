@@ -18,7 +18,7 @@
 
 #include "eliminate_empty_states.h"
 
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace Parde::Lowered {
 

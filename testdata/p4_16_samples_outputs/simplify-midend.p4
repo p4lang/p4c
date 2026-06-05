@@ -32,7 +32,7 @@ control c(out bool x) {
     @hidden action act_0() {
         tmp = false;
     }
-    @hidden action simplify31() {
+    @hidden action simplify22() {
         x = true;
     }
     @hidden action act_1() {
@@ -41,20 +41,20 @@ control c(out bool x) {
     @hidden action act_2() {
         tmp_1 = false;
     }
-    @hidden action simplify32() {
+    @hidden action simplify23() {
         tmp_0 = tmp_1;
     }
-    @hidden action simplify32_0() {
+    @hidden action simplify23_0() {
         tmp_0 = false;
     }
-    @hidden action simplify33() {
+    @hidden action simplify24() {
         x = false;
     }
-    @hidden table tbl_simplify31 {
+    @hidden table tbl_simplify22 {
         actions = {
-            simplify31();
+            simplify22();
         }
-        const default_action = simplify31();
+        const default_action = simplify22();
     }
     @hidden table tbl_act {
         actions = {
@@ -80,26 +80,26 @@ control c(out bool x) {
         }
         const default_action = act_2();
     }
-    @hidden table tbl_simplify32 {
+    @hidden table tbl_simplify23 {
         actions = {
-            simplify32();
+            simplify23();
         }
-        const default_action = simplify32();
+        const default_action = simplify23();
     }
-    @hidden table tbl_simplify32_0 {
+    @hidden table tbl_simplify23_0 {
         actions = {
-            simplify32_0();
+            simplify23_0();
         }
-        const default_action = simplify32_0();
+        const default_action = simplify23_0();
     }
-    @hidden table tbl_simplify33 {
+    @hidden table tbl_simplify24 {
         actions = {
-            simplify33();
+            simplify24();
         }
-        const default_action = simplify33();
+        const default_action = simplify24();
     }
     apply {
-        tbl_simplify31.apply();
+        tbl_simplify22.apply();
         if (t1_0.apply().hit) {
             tbl_act.apply();
         } else {
@@ -111,12 +111,12 @@ control c(out bool x) {
             } else {
                 tbl_act_2.apply();
             }
-            tbl_simplify32.apply();
+            tbl_simplify23.apply();
         } else {
-            tbl_simplify32_0.apply();
+            tbl_simplify23_0.apply();
         }
         if (tmp_0) {
-            tbl_simplify33.apply();
+            tbl_simplify24.apply();
         }
     }
 }

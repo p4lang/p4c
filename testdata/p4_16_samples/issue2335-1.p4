@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2020 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 control c(inout bit<8> val)(int a) {
     apply {
        val = (bit<8>) a;

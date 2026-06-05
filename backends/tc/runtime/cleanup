@@ -21,9 +21,9 @@ if ! [ -f "$RUNTIME_DIR/setup" ]; then
     exit 1
 fi
 
-rm -rf $EXTRACT_DIR
-rm -f $RUNTIME_DIR/id_rsa
-rm -f $RUNTIME_DIR/id_rsa.pub
+rm -rf "$EXTRACT_DIR"
+rm -f "$RUNTIME_DIR/id_rsa"
+rm -f "$RUNTIME_DIR/id_rsa.pub"
 rm -f linux-image-*.deb
 
 deluser ci --remove-home

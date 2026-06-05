@@ -23,18 +23,18 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue2343bmv2l37() {
+    @hidden action issue2343bmv2l43() {
         h.eth_hdr.dst_addr = 48w1;
         h.eth_hdr.eth_type = 16w32768;
     }
-    @hidden table tbl_issue2343bmv2l37 {
+    @hidden table tbl_issue2343bmv2l43 {
         actions = {
-            issue2343bmv2l37();
+            issue2343bmv2l43();
         }
-        const default_action = issue2343bmv2l37();
+        const default_action = issue2343bmv2l43();
     }
     apply {
-        tbl_issue2343bmv2l37.apply();
+        tbl_issue2343bmv2l43.apply();
     }
 }
 

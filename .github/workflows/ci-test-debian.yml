@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "test-p4c-debian"
 
 on:
@@ -74,6 +78,9 @@ jobs:
         with:
           key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
           max-size: 1000M
+          # act's ubuntu-22 image needs an update, but it's slow, so don't do it
+          # unilaterally.
+          update-package-index: ${{ env.ACT == 'true' }}
 
       - name: Build (Ubuntu 22.04, GCC)
         run: |
@@ -114,6 +121,9 @@ jobs:
         with:
           key: test-${{ runner.os }}-gcc
           max-size: 1000M
+          # act's ubuntu-22 image needs an update, but it's slow, so don't do it
+          # unilaterally.
+          update-package-index: ${{ env.ACT == 'true' }}
 
       - name: Build (Ubuntu 22.04, GCC)
         run: |

@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 #include "p4RuntimeSerializer.h"
 
 #pragma GCC diagnostic push
@@ -1614,12 +1603,11 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file.string(), false);
-            if (!out) {
+            if (auto out = openFile(file.string(), false)) {
+                p4Runtime.serializeP4InfoTo(out.get(), format);
+            } else {
                 ::P4::error(ErrorType::ERR_IO, "Couldn't open P4Runtime API file: %1%", file);
-                continue;
             }
-            p4Runtime.serializeP4InfoTo(out, format);
         }
     }
 
@@ -1636,13 +1624,12 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI &p4Run
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
-            std::ostream *out = openFile(file.string(), false);
-            if (!out) {
+            if (auto out = openFile(file.string(), false)) {
+                p4Runtime.serializeEntriesTo(out.get(), format);
+            } else {
                 ::P4::error(ErrorType::ERR_IO, "Couldn't open P4Runtime static entries file: %1%",
-                            options.p4RuntimeEntriesFile);
-                continue;
+                            file);
             }
-            p4Runtime.serializeEntriesTo(out, format);
         }
     }
 }

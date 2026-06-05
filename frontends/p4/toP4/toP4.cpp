@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "toP4.h"
 
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -51,7 +52,7 @@ std::optional<cstring> ToP4::ifSystemFile(const IR::Node *node) {
         return std::nullopt;
     }
     auto sourceFile = node->srcInfo.getSourceFile();
-    if (isSystemFile(sourceFile)) {
+    if (isSystemFile(std::filesystem::path(sourceFile.c_str()))) {
         return sourceFile;
     }
     return std::nullopt;
@@ -144,7 +145,7 @@ void ToP4::dump(unsigned depth, const IR::Node *node, unsigned adjDepth) {
 }
 
 bool ToP4::preorder(const IR::P4Program *program) {
-    std::set<cstring> includesEmitted;
+    std::set<std::filesystem::path> includesEmitted;
 
     bool first = true;
     dump(2);
@@ -160,14 +161,14 @@ bool ToP4::preorder(const IR::P4Program *program) {
              * allow converting headers independently (is that even possible?).
              * For now we ignore mainFile and don't emit #includes for any
              * non-system header */
-            auto sourceFile = sourceFileOpt.value();
+            std::filesystem::path sourceFile(sourceFileOpt.value().c_str());
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                if (sourceFile.startsWith(p4includePath)) {
-                    const char *p = sourceFile.c_str() + strlen(p4includePath);
-                    if (*p == '/') p++;
+                auto relativePath = std::filesystem::relative(sourceFile, p4includePath);
+                auto relativePathStr = relativePath.generic_string();
+                if (!relativePathStr.empty() && relativePathStr.rfind("..", 0) != 0) {
                     // TODO: This is v1model-specific code. This should be not part of the core
                     // pass.
-                    if (P4V1::V1Model::instance.file.name == p) {
+                    if (P4V1::V1Model::instance.file.name == relativePathStr) {
                         P4V1::GetV1ModelVersion g;
                         program->apply(g);
                         builder.append("#define V1MODEL_VERSION ");
@@ -175,12 +176,12 @@ bool ToP4::preorder(const IR::P4Program *program) {
                         builder.newline();
                     }
                     builder.append("#include <");
-                    builder.append(p);
+                    builder.append(relativePathStr);
                     builder.append(">");
                     builder.newline();
                 } else {
                     builder.append("#include \"");
-                    builder.append(sourceFile);
+                    builder.append(sourceFile.string());
                     builder.append("\"");
                     builder.newline();
                 }
@@ -199,9 +200,12 @@ bool ToP4::preorder(const IR::P4Program *program) {
 
 bool ToP4::preorder(const IR::Type_Bits *t) {
     if (t->expression) {
-        builder.append("bit<(");
+        int prec = expressionPrecedence;
+        builder.append("bit<");
+        expressionPrecedence = P4::DBPrint::Prec_Grt;
         visit(t->expression);
-        builder.append(")>");
+        builder.append(">");
+        expressionPrecedence = prec;
     } else {
         builder.append(t->toString());
     }
@@ -473,9 +477,12 @@ bool ToP4::preorder(const IR::Type_Boolean *) {
 
 bool ToP4::preorder(const IR::Type_Varbits *t) {
     if (t->expression) {
-        builder.append("varbit<(");
+        int prec = expressionPrecedence;
+        builder.append("varbit<");
+        expressionPrecedence = P4::DBPrint::Prec_Grt;
         visit(t->expression);
-        builder.append(")>");
+        builder.append(">");
+        expressionPrecedence = prec;
     } else {
         builder.appendFormat("varbit<%d>", t->size);
     }
@@ -916,11 +923,11 @@ bool ToP4::preorder(const IR::StructExpression *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::HeaderStackExpression *e) {
+bool ToP4::preorder(const IR::ArrayExpression *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
-    if (e->headerStackType != nullptr) {
+    if (e->arrayType != nullptr) {
         builder.append("(");
-        visit(e->headerStackType);
+        visit(e->arrayType);
         builder.append(")");
     }
     builder.append("{");

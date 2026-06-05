@@ -10,7 +10,7 @@ header ethernet_t {
 
 @controller_header("packet_out") header packet_out_t {
     bit<9>  egress_port;
-    bit<8>  queue_id;
+    bit<7>  queue_id;
     bit<48> not_actually_useful;
 }
 

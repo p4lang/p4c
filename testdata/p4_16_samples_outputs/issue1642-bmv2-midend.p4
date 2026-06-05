@@ -38,7 +38,7 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action issue1642bmv2l37() {
+    @hidden action issue1642bmv2l43() {
         local_metadata._s0.setValid();
         local_metadata._s0.f = 32w0;
         local_metadata._row_alt0_valid1 = local_metadata._row_alt1_valid3;
@@ -47,14 +47,14 @@ control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata
         local_metadata._row_alt1_port4 = local_metadata._row_alt1_port4 + 7w1;
         clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
-    @hidden table tbl_issue1642bmv2l37 {
+    @hidden table tbl_issue1642bmv2l43 {
         actions = {
-            issue1642bmv2l37();
+            issue1642bmv2l43();
         }
-        const default_action = issue1642bmv2l37();
+        const default_action = issue1642bmv2l43();
     }
     apply {
-        tbl_issue1642bmv2l37.apply();
+        tbl_issue1642bmv2l43.apply();
     }
 }
 

@@ -1,12 +1,12 @@
-issue2335.p4(1): [--Wwarn=unused] warning: control 'C' is unused
+issue2335.p4(7): [--Wwarn=unused] warning: control 'C' is unused
 control C() {
         ^
-issue2335.p4(4): [--Wwarn=unused] warning: 'y' is unused
+issue2335.p4(10): [--Wwarn=unused] warning: 'y' is unused
     int<8> y = x + 8s1;
-    ^^^^^^^^^^^^^^^^^^
-issue2335.p4(3): [--Werror=type-error] error: x: Cannot declare variables with type int
+           ^
+issue2335.p4(9): [--Werror=type-error] error: x: Cannot declare variables with type int
     int x = 0;
-    ^^^^^^^^^
-issue2335.p4(3)
+        ^
+issue2335.p4(9)
     int x = 0;
     ^^^

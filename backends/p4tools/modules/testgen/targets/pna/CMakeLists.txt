@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 if(ENABLE_TESTING)
   # Include the test subdirectory.
   message("-- Adding p4testgen pna test suite")
@@ -10,6 +14,7 @@ set(
   ${TESTGEN_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/backend/metadata/metadata.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/backend/ptf/ptf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/backend/stf/stf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/cmd_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/expr_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/program_info.cpp

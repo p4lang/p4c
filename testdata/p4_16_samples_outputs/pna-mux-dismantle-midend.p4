@@ -134,17 +134,17 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action2();
     }
-    @hidden action pnamuxdismantle189() {
+    @hidden action pnamuxdismantle180() {
         user_meta.rng_result1 = (bit<1>)(16w100 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w200);
     }
-    @hidden table tbl_pnamuxdismantle189 {
+    @hidden table tbl_pnamuxdismantle180 {
         actions = {
-            pnamuxdismantle189();
+            pnamuxdismantle180();
         }
-        const default_action = pnamuxdismantle189();
+        const default_action = pnamuxdismantle180();
     }
     apply {
-        tbl_pnamuxdismantle189.apply();
+        tbl_pnamuxdismantle180.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_da_0.apply();
             ipv4_da2_0.apply();
@@ -153,18 +153,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnamuxdismantle204() {
+    @hidden action pnamuxdismantle195() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnamuxdismantle204 {
+    @hidden table tbl_pnamuxdismantle195 {
         actions = {
-            pnamuxdismantle204();
+            pnamuxdismantle195();
         }
-        const default_action = pnamuxdismantle204();
+        const default_action = pnamuxdismantle195();
     }
     apply {
-        tbl_pnamuxdismantle204.apply();
+        tbl_pnamuxdismantle195.apply();
     }
 }
 

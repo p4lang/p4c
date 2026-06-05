@@ -1,6 +1,6 @@
-uninit-nowarnings.p4(73): [--Wwarn=uninitialized-out-param] warning: out parameter 'v' may be uninitialized when 'c' terminates
+uninit-nowarnings.p4(64): [--Wwarn=uninitialized-out-param] warning: out parameter 'v' may be uninitialized when 'c' terminates
 control c(out bit<32> v) { // uninitialized
                       ^
-uninit-nowarnings.p4(73)
+uninit-nowarnings.p4(64)
 control c(out bit<32> v) { // uninitialized
         ^

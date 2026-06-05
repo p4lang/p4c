@@ -40,17 +40,17 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     @name("ingress.do_action") action do_action() {
         hdr.h.a[0:0] = 1w0;
     }
-    @hidden action issue2147bmv2l59() {
+    @hidden action issue2147bmv2l50() {
         tmp_0 = hdr.h.a[7:1];
     }
-    @hidden action issue2147bmv2l61() {
+    @hidden action issue2147bmv2l52() {
         hdr.h.a[7:1] = tmp_0;
     }
-    @hidden table tbl_issue2147bmv2l59 {
+    @hidden table tbl_issue2147bmv2l50 {
         actions = {
-            issue2147bmv2l59();
+            issue2147bmv2l50();
         }
-        const default_action = issue2147bmv2l59();
+        const default_action = issue2147bmv2l50();
     }
     @hidden table tbl_do_action {
         actions = {
@@ -58,16 +58,16 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
         }
         const default_action = do_action();
     }
-    @hidden table tbl_issue2147bmv2l61 {
+    @hidden table tbl_issue2147bmv2l52 {
         actions = {
-            issue2147bmv2l61();
+            issue2147bmv2l52();
         }
-        const default_action = issue2147bmv2l61();
+        const default_action = issue2147bmv2l52();
     }
     apply {
-        tbl_issue2147bmv2l59.apply();
+        tbl_issue2147bmv2l50.apply();
         tbl_do_action.apply();
-        tbl_issue2147bmv2l61.apply();
+        tbl_issue2147bmv2l52.apply();
     }
 }
 

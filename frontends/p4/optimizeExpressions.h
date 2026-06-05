@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef FRONTENDS_P4_OPTIMIZEEXPRESSIONS_H_
 #define FRONTENDS_P4_OPTIMIZEEXPRESSIONS_H_
 
@@ -10,7 +16,7 @@ namespace P4 {
 /// Currently, performs constant folding and strength reduction.
 inline const IR::Expression *optimizeExpression(const IR::Expression *node) {
     auto pass = PassRepeated({
-        new P4::StrengthReduction(nullptr, nullptr),
+        new P4::StrengthReduction(nullptr, nullptr, nullptr),
         new P4::ConstantFolding(nullptr, false),
     });
     node = node->apply(pass);

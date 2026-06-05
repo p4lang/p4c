@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2025 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
 
 set(P4TC_COMPILER_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-tc-test.py")
 
@@ -22,7 +25,7 @@ if (NOT SUPPORTS_KERNEL OR NOT SUPPORTS_LIBC)
 endif()
 
 # A specific version of clang is required for the P4TC tests.
-set (P4TC_CLANG "clang-15")
+set (P4TC_CLANG "clang-19")
 find_program(P4TC_CLANG_EXEC ${P4TC_CLANG})
 
 if (NOT P4TC_CLANG_EXEC)
@@ -55,4 +58,8 @@ if (ENABLE_P4TC_STF_TESTS)
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/redirect_l2.p4" "testdata/p4tc_samples_stf/redirect_l2.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/redirect_l2.stf" "")
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/routing_default" "testdata/p4tc_samples_stf/routing.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/routing_default.stf" "")
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/routing.p4" "testdata/p4tc_samples_stf/routing.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/routing.stf" "")
+  p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/ipip_encap" "testdata/p4tc_samples_stf/ipip.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/ipip_encap.stf" "")
+  p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/ipip_decap" "testdata/p4tc_samples_stf/ipip.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/ipip_decap.stf" "")
+  p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/varbit_pop" "testdata/p4tc_samples_stf/varbit_pop.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/varbit_pop.stf" "")
+  p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/varbit_reflect" "testdata/p4tc_samples_stf/varbit_reflect.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/varbit_reflect.stf" "")
 endif()

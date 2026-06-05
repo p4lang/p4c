@@ -1,4 +1,9 @@
-/* Copyright 2017-present Kentaro Ebisawa <ebisawa@jp.toyota-itc.com>
+/*
+ * SPDX-FileCopyrightText: 2017 Kentaro Ebisawa <ebisawa@jp.toyota-itc.com>
+ * Copyright 2017-present Kentaro Ebisawa <ebisawa@jp.toyota-itc.com>
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
  * This is a sample code to reproduce below p4c error using variable lengh fields.
  * Compiler Bug: 48: Unexpected type for constant varbit<0>
  */

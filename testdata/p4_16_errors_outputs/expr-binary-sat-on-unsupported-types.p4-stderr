@@ -6,4 +6,4 @@ const bool a = (X.a |-| X.b);
                 ^^^
 expr-binary-sat-on-unsupported-types.p4(4): [--Werror=type-error] error: X.a | - | X.b: Cannot evaluate initializer to a compile-time constant
 const bool a = (X.a |-| X.b);
-                ^^^^^^^^^^^
+               ^^^^^^^^^^^^^

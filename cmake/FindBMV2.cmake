@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # To find the BMv2 executables in the BMv2 source tree instead of
 # an installed location, set BMV2_SOURCE_DIR to the BMv2 source directory.
 set(BMV2_SIMPLE_SWITCH_SEARCH_PATHS
@@ -80,7 +84,7 @@ endif()
   
 # check for pna_nic
 find_program (PNA_NIC_CLI pna_nic_CLI
-  paths ${BMV2_PNA_NIC_SEARCH_PATHS} )
+  PATHS ${BMV2_PNA_NIC_SEARCH_PATHS} )
 if (PNA_NIC_CLI)
   find_program (PNA_NIC pna_nic
     PATHS ${BMV2_PNA_NIC_SEARCH_PATHS} )
@@ -92,5 +96,5 @@ endif (PNA_NIC_CLI)
 mark_as_advanced(PNA_NIC PNA_NIC_CLI)
 
 find_package_handle_standard_args ("BMV2"
-  "Program 'pna_nic_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_PNA_NIC_SEARCH_PATHS}.\nWill not run PNA PNA BMv2 tests."
+  "Program 'pna_nic_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_PNA_NIC_SEARCH_PATHS}.\nWill not run PNA BMv2 tests."
   PNA_NIC PNA_NIC_CLI)

@@ -16,12 +16,6 @@
 # This is the CMake version supplied by Ubuntu 20.04.
 cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
 
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    MESSAGE(STATUS "Enabling ccache")
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif()
-
 project (P4C)
 
 include(CMakeDependentOption)
@@ -31,6 +25,7 @@ set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set (CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+include(ccache)
 set (P4C_RUNTIME_OUTPUT_DIRECTORY bin)
 set (P4C_LIBRARY_OUTPUT_DIRECTORY lib)
 set (P4C_ARTIFACTS_OUTPUT_DIRECTORY share/p4c)
@@ -71,6 +66,7 @@ OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" ${_ENABLE_LTO_DEFAULT})
 
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
+OPTION (FORMATTING_ONLY "Only configure formatting/linting targets, skip all build dependencies" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 
@@ -201,10 +197,16 @@ if (ENABLE_DUMP_PIPE)
   add_definitions("-DENABLE_DUMP_PIPE=1")
 endif ()
 
+# When FORMATTING_ONLY is set, skip all build dependencies and jump
+# straight to the linter/formatter targets.  This allows running
+# clang-format, cpplint, black, and isort without installing flex,
+# bison, Boost, Protobuf, or any other compile-time dependency.
+if (NOT FORMATTING_ONLY)
+
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
-find_package (BISON 3.1 REQUIRED)
+find_package (BISON 3.3 REQUIRED)
 # If we enable GTest, install GoogleTest with the appropriate options.
 if (ENABLE_GTESTS)
   include(GoogleTest)
@@ -421,6 +423,8 @@ add_subdirectory (ir)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_IR_SOURCES)
+# extra libraries that need to be linked with the generated IR.
+set(EXTENSION_IR_LIBS)
 # extra sources that need to be linked directly into p4test so that
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
@@ -558,7 +562,7 @@ add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
-target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
+target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS} ${EXTENSION_IR_LIBS})
 
 
 ######################################## IR Generation End ########################################
@@ -589,14 +593,24 @@ add_custom_target(update_includes ALL
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
+endif (NOT FORMATTING_ONLY)
+
 ########################################## Linters Begin ##########################################
 include(Linters)
 ########################################### Linters End ###########################################
 
+if (NOT FORMATTING_ONLY)
 
 # tags, etags
-set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
-add_custom_target(tags
+set (CTAGS_DIRS_ALL backends extensions frontends ir lib tools midend)
+set (CTAGS_DIRS "")
+foreach(_dir IN LISTS CTAGS_DIRS_ALL)
+  if(EXISTS "${P4C_SOURCE_DIR}/${_dir}")
+    list(APPEND CTAGS_DIRS ${_dir})
+  endif()
+endforeach()
+
+add_custom_target(ctags
   COMMAND ctags -R --langmap=C++:+.def,Flex:+.l,YACC:+.ypp -I abstract=class -I interface=class ${CTAGS_DIRS}
   COMMAND cd tools/ir-generator && ctags -R --langmap=Flex:+.l,YACC:+.ypp . ../../lib
   WORKING_DIRECTORY ${P4C_SOURCE_DIR}
@@ -665,3 +679,5 @@ SET(CPACK_SOURCE_IGNORE_FILES
    "${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-*;${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}_*;/build/;/.git/;/config.log;/CMakeFiles/;CMakeCache.txt$;.tar.gz$;/_CPack_Packages;/Makefile$;~$;/build-deb;/clean-deb;/filter-empty-entries;/make-symbols;/make-ppa;/make-deb;/debian.conf;/make-rpm;/rpm.conf;${CPACK_SOURCE_IGNORE_FILES}")
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
+
+endif (NOT FORMATTING_ONLY)

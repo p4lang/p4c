@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <streambuf>
 
@@ -46,8 +47,7 @@ typedef onullstream<char> nullstream;
 
 // If nullOnError is 'true', on error a nullstream is returned
 // otherwise a nullptr is returned
-// FIXME: This should return unique_ptr instead to track lifetime
-std::ostream *openFile(const std::filesystem::path &name, bool nullOnError);
+std::unique_ptr<std::ostream> openFile(const std::filesystem::path &name, bool nullOnError);
 
 }  // namespace P4
 

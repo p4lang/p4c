@@ -1,3 +1,3 @@
-issue1107.p4(17): [--Wwarn=unused] warning: 'empty' is unused
+issue1107.p4(23): [--Wwarn=unused] warning: 'empty' is unused
 action empty() { }
        ^^^^^

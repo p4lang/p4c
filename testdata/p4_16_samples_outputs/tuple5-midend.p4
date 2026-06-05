@@ -35,7 +35,7 @@ struct t2 {
 
 control c(inout t2 t) {
     tuple_0 tmp_0_a;
-    @hidden action tuple5l17() {
+    @hidden action tuple5l23() {
         tmp_0_a.f0 = t._x_f1_a_f01;
         tmp_0_a.f1 = t._x_f1_a_f12;
         t._x_f00 = t._x_f00 + t._y_f0_b6;
@@ -45,14 +45,14 @@ control c(inout t2 t) {
         t._y_f0_a_f15 = tmp_0_a.f1;
         t._y_f0_b6 = t._x_f1_b3;
     }
-    @hidden table tbl_tuple5l17 {
+    @hidden table tbl_tuple5l23 {
         actions = {
-            tuple5l17();
+            tuple5l23();
         }
-        const default_action = tuple5l17();
+        const default_action = tuple5l23();
     }
     apply {
-        tbl_tuple5l17.apply();
+        tbl_tuple5l23.apply();
     }
 }
 

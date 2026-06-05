@@ -38,12 +38,12 @@ void emitFilterModel(const EbpfOptions &options, Target *target, const IR::Tople
 
     if (options.outputFile.empty()) return;
 
-    auto *cstream = openFile(options.outputFile, false);
+    auto cstream = openFile(options.outputFile, false);
     if (cstream == nullptr) return;
 
     std::filesystem::path hfile = options.outputFile;
     hfile.replace_extension(".h");
-    auto *hstream = openFile(hfile, false);
+    auto hstream = openFile(hfile, false);
     if (hstream == nullptr) return;
 
     ebpfprog->emitH(&h, hfile);
@@ -94,11 +94,10 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
 
         if (options.outputFile.empty()) return;
 
-        auto cstream = openFile(options.outputFile, false);
-        if (cstream == nullptr) return;
-
-        backend->codegen(*cstream);
-        cstream->flush();
+        if (auto cstream = openFile(options.outputFile, false)) {
+            backend->codegen(*cstream);
+            cstream->flush();
+        }
     } else {
         ::P4::error(ErrorType::ERR_UNKNOWN,
                     "Unknown architecture %s; legal choices are 'filter', and 'psa'", options.arch);

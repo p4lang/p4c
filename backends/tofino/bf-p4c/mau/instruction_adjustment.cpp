@@ -1561,7 +1561,7 @@ bool AdjustStatefulInstructions::verify_on_search_bus(const IR::MAU::StatefulAlu
 
     int initial_offset = 0;
     if (Device::currentDevice() == Device::TOFINO)
-        initial_offset = Tofino::IXBar::TOFINO_METER_ALU_BYTE_OFFSET;
+        initial_offset = TofinoIXBarSpec::TOFINO_METER_ALU_BYTE_OFFSET;
 
     valid_start_positions.insert(initial_offset);
     valid_start_positions.insert(initial_offset + (phv_width / 8));

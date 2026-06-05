@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONCOLIC_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_CONCOLIC_H_
 

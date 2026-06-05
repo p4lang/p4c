@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "p4c-lint"
 
 on:
@@ -18,6 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       IMAGE_TYPE: test
+      CMAKE_FLAGS: "-DFORMATTING_ONLY=ON"
       CMAKE_ONLY: ON
       CTEST_PARALLEL_LEVEL: 4
     steps:

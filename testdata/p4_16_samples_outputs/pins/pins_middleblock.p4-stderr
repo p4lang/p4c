@@ -1,114 +1,114 @@
-pins_middleblock.p4(717): [--Wwarn=unused] warning: 'port' is unused
+pins_middleblock.p4(723): [--Wwarn=unused] warning: 'port' is unused
 ...ction mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t sr...
                                                 ^^^^
-pins_middleblock.p4(717): [--Wwarn=unused] warning: 'src_ip' is unused
+pins_middleblock.p4(723): [--Wwarn=unused] warning: 'src_ip' is unused
 ...t, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t d...
                                                ^^^^^^
-pins_middleblock.p4(717): [--Wwarn=unused] warning: 'dst_ip' is unused
+pins_middleblock.p4(723): [--Wwarn=unused] warning: 'dst_ip' is unused
 ...p, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_...
                                                ^^^^^^
-pins_middleblock.p4(717): [--Wwarn=unused] warning: 'src_mac' is unused
+pins_middleblock.p4(723): [--Wwarn=unused] warning: 'src_mac' is unused
 ...@id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr...
                                                ^^^^^^^
-pins_middleblock.p4(717): [--Wwarn=unused] warning: 'dst_mac' is unused
+pins_middleblock.p4(723): [--Wwarn=unused] warning: 'dst_mac' is unused
 ...mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
                                                     ^^^^^^^
-pins_middleblock.p4(717): [--Wwarn=unused] warning: 'ttl' is unused
+pins_middleblock.p4(723): [--Wwarn=unused] warning: 'ttl' is unused
 ...mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
                                                                            ^^^
-pins_middleblock.p4(717): [--Wwarn=unused] warning: 'tos' is unused
+pins_middleblock.p4(723): [--Wwarn=unused] warning: 'tos' is unused
 ...mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
                                                                                               ^^^
-pins_middleblock.p4(719): [--Wwarn=unused] warning: 'monitor_failover_port' is unused
+pins_middleblock.p4(725): [--Wwarn=unused] warning: 'monitor_failover_port' is unused
 ..._id_t monitor_port, @id(2) port_id_t monitor_failover_port, @id(3) @format(MAC_ADDRESS) ethern...
                                         ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1026): [--Wwarn=unused] warning: 'acl_egress_forward' is unused
+pins_middleblock.p4(1032): [--Wwarn=unused] warning: 'acl_egress_forward' is unused
     @id(0x0100010D) @sai_action(SAI_PACKET_ACTION_FORWARD) action acl_egress_forward() {
                                                                   ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1080): [--Wwarn=unused] warning: table 'acl_egress_dhcp_to_host_table' is unused
+pins_middleblock.p4(1086): [--Wwarn=unused] warning: table 'acl_egress_dhcp_to_host_table' is unused
   ") table acl_egress_dhcp_to_host_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1126): [--Wwarn=unused] warning: 'qos_queue' is unused
+pins_middleblock.p4(1132): [--Wwarn=unused] warning: 'qos_queue' is unused
 ...AI_PACKET_COLOR_RED) action acl_copy(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
                                                                                         ^^^^^^^^^
-pins_middleblock.p4(1146): [--Wwarn=unused] warning: 'qos_queue' is unused
+pins_middleblock.p4(1152): [--Wwarn=unused] warning: 'qos_queue' is unused
 ...eue_and_cancel_copy_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t qos_queue) {
                                                                                         ^^^^^^^^^
-pins_middleblock.p4(1149): [--Wwarn=unused] warning: 'cpu_queue' is unused
+pins_middleblock.p4(1155): [--Wwarn=unused] warning: 'cpu_queue' is unused
 ...) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_Q...
                                               ^^^^^^^^^
-pins_middleblock.p4(1149): [--Wwarn=unused] warning: 'green_multicast_queue' is unused
+pins_middleblock.p4(1155): [--Wwarn=unused] warning: 'green_multicast_queue' is unused
 ... SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST...
                                         ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1149): [--Wwarn=unused] warning: 'red_multicast_queue' is unused
+pins_middleblock.p4(1155): [--Wwarn=unused] warning: 'red_multicast_queue' is unused
 ... @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
                                                                               ^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1152): [--Wwarn=unused] warning: 'cpu_queue' is unused
+pins_middleblock.p4(1158): [--Wwarn=unused] warning: 'cpu_queue' is unused
 ..._cpu_queue_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
                                                                                         ^^^^^^^^^
-pins_middleblock.p4(1155): [--Wwarn=unused] warning: 'cpu_queue' is unused
+pins_middleblock.p4(1161): [--Wwarn=unused] warning: 'cpu_queue' is unused
 ...ACTION_FORWARD) action set_cpu_queue(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
                                                                                         ^^^^^^^^^
-pins_middleblock.p4(1249): [--Wwarn=unused] warning: table 'acl_ingress_qos_table' is unused
+pins_middleblock.p4(1255): [--Wwarn=unused] warning: table 'acl_ingress_qos_table' is unused
   ") table acl_ingress_qos_table {
            ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1284): [--Wwarn=unused] warning: table 'acl_ingress_counting_table' is unused
+pins_middleblock.p4(1290): [--Wwarn=unused] warning: table 'acl_ingress_counting_table' is unused
   ") table acl_ingress_counting_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1483): [--Wwarn=unused] warning: table 'acl_pre_ingress_vlan_table' is unused
+pins_middleblock.p4(1489): [--Wwarn=unused] warning: table 'acl_pre_ingress_vlan_table' is unused
   ") table acl_pre_ingress_vlan_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1512): [--Wwarn=unused] warning: table 'acl_pre_ingress_metadata_table' is unused
+pins_middleblock.p4(1518): [--Wwarn=unused] warning: table 'acl_pre_ingress_metadata_table' is unused
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1574): [--Wwarn=unused] warning: control 'lag_hashing_config' is unused
+pins_middleblock.p4(1580): [--Wwarn=unused] warning: control 'lag_hashing_config' is unused
 control lag_hashing_config(in headers_t headers) {
         ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(615): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
+pins_middleblock.p4(621): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
             @proto_id(1) set_nexthop;
                          ^^^^^^^^^^^
-pins_middleblock.p4(603)
+pins_middleblock.p4(609)
 ...ted("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table...
                                              ^^^^^^^^^^^
-pins_middleblock.p4(846): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+pins_middleblock.p4(852): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
             1w1: ternary @id(1) @name("dummy_match");
             ^^^
-pins_middleblock.p4(1080): [--Winfo=removed] info: removing table 'acl_egress_dhcp_to_host_table'
+pins_middleblock.p4(1086): [--Winfo=removed] info: removing table 'acl_egress_dhcp_to_host_table'
   ") table acl_egress_dhcp_to_host_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1249): [--Winfo=removed] info: removing table 'acl_ingress_qos_table'
+pins_middleblock.p4(1255): [--Winfo=removed] info: removing table 'acl_ingress_qos_table'
   ") table acl_ingress_qos_table {
            ^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1284): [--Winfo=removed] info: removing table 'acl_ingress_counting_table'
+pins_middleblock.p4(1290): [--Winfo=removed] info: removing table 'acl_ingress_counting_table'
   ") table acl_ingress_counting_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1483): [--Winfo=removed] info: removing table 'acl_pre_ingress_vlan_table'
+pins_middleblock.p4(1489): [--Winfo=removed] info: removing table 'acl_pre_ingress_vlan_table'
   ") table acl_pre_ingress_vlan_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1512): [--Winfo=removed] info: removing table 'acl_pre_ingress_metadata_table'
+pins_middleblock.p4(1518): [--Winfo=removed] info: removing table 'acl_pre_ingress_metadata_table'
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1574): [--Winfo=removed] info: removing control 'lag_hashing_config'
+pins_middleblock.p4(1580): [--Winfo=removed] info: removing control 'lag_hashing_config'
 control lag_hashing_config(in headers_t headers) {
         ^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(632): [--Wwarn=uninitialized-use] warning: tunnel_id_value may not be completely initialized
+pins_middleblock.p4(638): [--Wwarn=uninitialized-use] warning: tunnel_id_value may not be completely initialized
             tunnel_id_value: exact @id(1) @name("tunnel_id");
             ^^^^^^^^^^^^^^^
-pins_middleblock.p4(580): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
+pins_middleblock.p4(586): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id");
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(558): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
+pins_middleblock.p4(564): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
             router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(route...
             ^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(559): [--Wwarn=uninitialized-use] warning: neighbor_id_value may be uninitialized
+pins_middleblock.p4(565): [--Wwarn=uninitialized-use] warning: neighbor_id_value may be uninitialized
             neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
             ^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(846): [--Wwarn=mismatch] warning: 1w1: Constant key field
+pins_middleblock.p4(852): [--Wwarn=mismatch] warning: 1w1: Constant key field
             1w1: ternary @id(1) @name("dummy_match");
             ^^^
-pins_middleblock.p4(1558): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
+pins_middleblock.p4(1564): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
 ... local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pins_middleblock.p4(1562): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
+pins_middleblock.p4(1568): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
 ... local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

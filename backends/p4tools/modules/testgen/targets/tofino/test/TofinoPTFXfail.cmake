@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that *temporarily* fail
 # =====================================
 #
@@ -226,7 +230,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
-  "is trying to match on a tainted key set"
+  "exceeded the maximum number of permitted guard violations for this run"
   # lookahead1.p4
   switchml.p4
   # parser_multi_write_checksum_verify_5.p4
@@ -285,7 +289,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "The validity bit of .* is tainted"
-  tna_simple_switch.p4
 )
 
 p4tools_add_xfail_reason(

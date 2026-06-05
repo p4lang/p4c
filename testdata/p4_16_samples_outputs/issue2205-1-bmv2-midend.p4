@@ -24,29 +24,29 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<16> tmp;
-    @hidden action issue22051bmv2l35() {
+    @hidden action issue22051bmv2l41() {
         h.eth_hdr.src_addr = 48w1;
     }
-    @hidden action issue22051bmv2l34() {
+    @hidden action issue22051bmv2l40() {
         tmp = h.eth_hdr.eth_type;
         h.eth_hdr.eth_type = 16w182;
     }
-    @hidden table tbl_issue22051bmv2l34 {
+    @hidden table tbl_issue22051bmv2l40 {
         actions = {
-            issue22051bmv2l34();
+            issue22051bmv2l40();
         }
-        const default_action = issue22051bmv2l34();
+        const default_action = issue22051bmv2l40();
     }
-    @hidden table tbl_issue22051bmv2l35 {
+    @hidden table tbl_issue22051bmv2l41 {
         actions = {
-            issue22051bmv2l35();
+            issue22051bmv2l41();
         }
-        const default_action = issue22051bmv2l35();
+        const default_action = issue22051bmv2l41();
     }
     apply {
-        tbl_issue22051bmv2l34.apply();
+        tbl_issue22051bmv2l40.apply();
         if (tmp == 16w2) {
-            tbl_issue22051bmv2l35.apply();
+            tbl_issue22051bmv2l41.apply();
         }
     }
 }

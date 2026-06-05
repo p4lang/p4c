@@ -60,29 +60,29 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_1();
     }
-    @hidden action stack_ebpf73() {
+    @hidden action stack_ebpf64() {
         pass = false;
     }
-    @hidden action stack_ebpf69() {
+    @hidden action stack_ebpf60() {
         pass = true;
     }
-    @hidden table tbl_stack_ebpf69 {
+    @hidden table tbl_stack_ebpf60 {
         actions = {
-            stack_ebpf69();
+            stack_ebpf60();
         }
-        const default_action = stack_ebpf69();
+        const default_action = stack_ebpf60();
     }
-    @hidden table tbl_stack_ebpf73 {
+    @hidden table tbl_stack_ebpf64 {
         actions = {
-            stack_ebpf73();
+            stack_ebpf64();
         }
-        const default_action = stack_ebpf73();
+        const default_action = stack_ebpf64();
     }
     apply {
-        tbl_stack_ebpf69.apply();
+        tbl_stack_ebpf60.apply();
         switch (Check_src_ip_0.apply().action_run) {
             Reject: {
-                tbl_stack_ebpf73.apply();
+                tbl_stack_ebpf64.apply();
             }
             NoAction_1: {
             }

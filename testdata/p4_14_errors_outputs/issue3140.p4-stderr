@@ -1,24 +1,24 @@
-issue3140.p4(365): [--Wwarn=shadow] warning: 'ipv6_prefix' shadows '.ipv6_prefix'
+issue3140.p4(352): [--Wwarn=shadow] warning: 'ipv6_prefix' shadows '.ipv6_prefix'
 action set_ipv6_prefix_ucast(ipv6_prefix){
                              ^^^^^^^^^^^
-issue3140.p4(473)
+issue3140.p4(460)
 table ipv6_prefix {
 ^
-issue3140.p4(369): [--Wwarn=shadow] warning: 'ipv6_prefix' shadows '.ipv6_prefix'
+issue3140.p4(356): [--Wwarn=shadow] warning: 'ipv6_prefix' shadows '.ipv6_prefix'
 action set_ipv6_prefix_xcast(ipv6_prefix){
                              ^^^^^^^^^^^
-issue3140.p4(473)
+issue3140.p4(460)
 table ipv6_prefix {
 ^
-issue3140.p4(361): [--Wwarn=shadow] warning: 'vrf' shadows '.vrf'
+issue3140.p4(348): [--Wwarn=shadow] warning: 'vrf' shadows '.vrf'
 action set_vrf(vrf) {
                ^^^
-issue3140.p4(442)
+issue3140.p4(429)
 table vrf {
 ^
-issue3140.p4(675): [--Werror=type-error] error: on_hit is not a legal label (action name)
+issue3140.p4(662): [--Werror=type-error] error: on_hit is not a legal label (action name)
                 on_hit {
                 ^^^^^^
-issue3140.p4(679): [--Werror=type-error] error: on_miss is not a legal label (action name)
+issue3140.p4(666): [--Werror=type-error] error: on_miss is not a legal label (action name)
                 on_miss {
                 ^^^^^^^

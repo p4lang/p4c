@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that currently fail. Most of these are temporary.
 # ================================================
 
@@ -90,8 +94,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
-  # Issue with the clone implementation.
-  v1model-special-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -103,6 +105,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  forloop-bmv2.p4
   issue4739.p4
   loop-3-clause-tricky2.p4
 )
@@ -190,7 +193,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
-  custom-type-restricted-fields.p4
   issue3225.p4
 )
 

@@ -120,7 +120,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Type_Bits *type) {
                 type->size = 64;
             }
         } else {
-            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
+            error(ErrorType::ERR_EXPECTED, "%1%: expected a %2%constant", type->expression,
+                  type->expression->is<IR::Literal>() ? "numeric " : "");
         }
     }
     return type;
@@ -133,7 +134,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Type_Varbits *type) {
             type->expression = nullptr;
             if (type->size < 0) ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
-            ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
+            error(ErrorType::ERR_EXPECTED, "%1%: expected a %2%constant", type->expression,
+                  type->expression->is<IR::Literal>() ? "numeric " : "");
         }
     }
     return type;

@@ -1,7 +1,7 @@
-assign.p4(21): [--Wwarn=unused] warning: control 'c' is unused
+assign.p4(12): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-assign.p4(21): [--Winfo=removed] info: removing control 'c'
+assign.p4(12): [--Winfo=removed] info: removing control 'c'
 control c() {
         ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

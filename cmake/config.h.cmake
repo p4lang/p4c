@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* Define to 1 if you have the boost iostreams library */
 #cmakedefine HAVE_LIBBOOST_IOSTREAMS 1
 

@@ -27,7 +27,7 @@
 #include "backends/tofino/bf-p4c/mau/action_analysis.h"
 #include "backends/tofino/bf-p4c/mau/attached_info.h"
 #include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 #include "lib/bitops.h"
 #include "lib/bitvec.h"

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 enum bit<2> e{ t = 1}
 
 e f(in bool c, in bit<2> v0, in bit<2> v1)

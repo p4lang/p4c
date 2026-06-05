@@ -22,11 +22,12 @@
 #include <cstddef>
 #include <map>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/util.h"
+// TOOD: We can only use this pass because it is header-only.
+#include "backends/tofino/bf-p4c/midend/rewrite_egress_intrinsic_metadata_header.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -71,14 +72,14 @@ P4::FrontEnd AbstractTofinoTestgenTarget::mkFrontEnd() const {
 MidEnd AbstractTofinoTestgenTarget::mkMidEnd(const CompilerOptions &options) const {
     // We need to initialize the device to be able to use Tofino compiler passes
     // FIXME: Reenable this?
-    // Device::init(spec.deviceName);
+    Device::init(spec.deviceName, {});
     auto midEnd = CompilerTarget::mkMidEnd(options);
-    // auto *refMap = midEnd.getRefMap();
-    // auto *typeMap = midEnd.getTypeMap();
+    auto *refMap = midEnd.getRefMap();
+    auto *typeMap = midEnd.getTypeMap();
     midEnd.addPasses({
         // Remove all unused fields in the egress intrinsic metadata
         // FIXME: Reenable this.
-        // new BFN::RewriteEgressIntrinsicMetadataHeader(refMap, typeMap),
+        new BFN::RewriteEgressIntrinsicMetadataHeader(refMap, typeMap),
         // Remove trailing '$' in '$valid$' key matches and
         // replace subscript operator in header stack indices
         // with '$'

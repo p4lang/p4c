@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef IR_JSON_LOADER_H_
 #define IR_JSON_LOADER_H_
@@ -31,6 +22,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/ltbitmatrix.h"
 #include "lib/match.h"
+#include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
@@ -119,7 +111,9 @@ class JSONLoader {
                     factory = get(IR::unpacker_table, type);
                 }
                 if (factory) {
-                    node_refs[id] = factory(*this);
+                    auto *node = factory(*this)->to<IR::Node>();
+                    CHECK_NULL(node);
+                    node_refs[id] = node;
                     // Creating JsonObject from source_info read from jsonFile
                     // and setting SourceInfo for each node
                     // when "--fromJSON" flag is used

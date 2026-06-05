@@ -1,6 +1,6 @@
-issue3442.p4(8): [--Wwarn=unused] warning: 'b' is unused
+issue3442.p4(14): [--Wwarn=unused] warning: 'b' is unused
   action b() { }
          ^
-issue3442.p4(9): [--Werror=type-error] error: Entries cannot be specified for a table with no key t
+issue3442.p4(15): [--Werror=type-error] error: Entries cannot be specified for a table with no key t
   table t {
         ^

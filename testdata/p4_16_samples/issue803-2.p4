@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2017 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 
 // Copied from 2017-Jul-17 version of the P4_16 spec .mdk file, in the

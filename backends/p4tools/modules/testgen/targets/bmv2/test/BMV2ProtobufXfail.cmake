@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that *temporarily* fail
 # ================================================
 # Xfails are _temporary_ failures: the tests should work but we haven't fixed p4testgen yet.
@@ -48,6 +52,14 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf"
   "Only registers with bit or int types are currently supported"
   issue907-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-protobuf"
+  "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  forloop-bmv2.p4
+  issue4739.p4
+  loop-3-clause-tricky2.p4
 )
 
 p4tools_add_xfail_reason(

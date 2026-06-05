@@ -61,7 +61,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         }
         default_action = NoAction_1();
     }
-    @hidden action psadpdkbinaryoperations1l79() {
+    @hidden action psadpdkbinaryoperations1l85() {
         b.meta = 32w1 << b.meta2;
         b.meta1 = 32w0x800 >> b.meta2;
         b.meta2 = 16w0xf0 - b.meta2;
@@ -76,15 +76,15 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         a.etherType = b.meta2;
         b.meta = b.meta2 ++ (b.meta2 + 16w0xf0);
     }
-    @hidden table tbl_psadpdkbinaryoperations1l79 {
+    @hidden table tbl_psadpdkbinaryoperations1l85 {
         actions = {
-            psadpdkbinaryoperations1l79();
+            psadpdkbinaryoperations1l85();
         }
-        const default_action = psadpdkbinaryoperations1l79();
+        const default_action = psadpdkbinaryoperations1l85();
     }
     apply {
         tbl_0.apply();
-        tbl_psadpdkbinaryoperations1l79.apply();
+        tbl_psadpdkbinaryoperations1l85.apply();
     }
 }
 

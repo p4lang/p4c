@@ -1,57 +1,57 @@
-issue982.p4(46): [--Wwarn=unused] warning: 'PORT_CPU' is unused
+issue982.p4(37): [--Wwarn=unused] warning: 'PORT_CPU' is unused
 const PortId_t PORT_CPU = 255;
                ^^^^^^^^
-issue982.p4(120): [--Wwarn=unused] warning: 'send_to_port' is unused
+issue982.p4(111): [--Wwarn=unused] warning: 'send_to_port' is unused
 action send_to_port(inout psa_ingress_output_metadata_t meta, in PortId_t egress_port) {
        ^^^^^^^^^^^^
-issue982.p4(125): [--Wwarn=unused] warning: 'multicast' is unused
+issue982.p4(116): [--Wwarn=unused] warning: 'multicast' is unused
 action multicast(inout psa_ingress_output_metadata_t meta, in MulticastGroup_t multicast_group) {
        ^^^^^^^^^
-issue982.p4(129): [--Wwarn=unused] warning: 'ingress_drop' is unused
+issue982.p4(120): [--Wwarn=unused] warning: 'ingress_drop' is unused
 action ingress_drop(inout psa_ingress_output_metadata_t meta) {
        ^^^^^^^^^^^^
-issue982.p4(132): [--Wwarn=unused] warning: 'ingress_truncate' is unused
+issue982.p4(123): [--Wwarn=unused] warning: 'ingress_truncate' is unused
 action ingress_truncate(inout psa_ingress_output_metadata_t meta, in PacketLength_t payload_bytes...
        ^^^^^^^^^^^^^^^^
-issue982.p4(136): [--Wwarn=unused] warning: 'egress_drop' is unused
+issue982.p4(127): [--Wwarn=unused] warning: 'egress_drop' is unused
 action egress_drop(inout psa_egress_output_metadata_t meta) {
        ^^^^^^^^^^^
-issue982.p4(139): [--Wwarn=unused] warning: 'egress_truncate' is unused
+issue982.p4(130): [--Wwarn=unused] warning: 'egress_truncate' is unused
 action egress_truncate(inout psa_ingress_output_metadata_t meta, in PacketLength_t payload_bytes) {
        ^^^^^^^^^^^^^^^
-issue982.p4(198): [--Wwarn=unused] warning: 'W' is unused
+issue982.p4(189): [--Wwarn=unused] warning: 'W' is unused
 extern Counter<W, S> {
                ^
-issue982.p4(203): [--Wwarn=unused] warning: 'W' is unused
+issue982.p4(194): [--Wwarn=unused] warning: 'W' is unused
 extern DirectCounter<W> {
                      ^
-issue982.p4(264): [--Wwarn=unused] warning: 'control Deparser' is unused
+issue982.p4(255): [--Wwarn=unused] warning: 'control Deparser' is unused
 control Deparser<H, M>(packet_out buffer, inout H hdr, in M user_meta);
         ^^^^^^^^
-issue982.p4(343): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'EgressParserImpl' terminates
+issue982.p4(334): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'EgressParserImpl' terminates
 ...a user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
                                                                                              ^^^^
-issue982.p4(343)
+issue982.p4(334)
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in ps...
        ^^^^^^^^^^^^^^^^
-issue982.p4(385): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'IngressParserImpl' terminates
+issue982.p4(376): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'IngressParserImpl' terminates
 ... user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
                                                                                              ^^^^
-issue982.p4(385)
+issue982.p4(376)
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in p...
        ^^^^^^^^^^^^^^^^^
-issue982.p4(420): [--Wwarn=uninitialized-use] warning: clone_md.data may be uninitialized
+issue982.p4(411): [--Wwarn=uninitialized-use] warning: clone_md.data may be uninitialized
             ostd.clone_metadata = clone_md;
                                   ^^^^^^^^
-issue982.p4(414): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'IngressDeparserImpl' terminates
+issue982.p4(405): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'IngressDeparserImpl' terminates
 ...a meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
                                                                                              ^^^^
-issue982.p4(414)
+issue982.p4(405)
 control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingres...
         ^^^^^^^^^^^^^^^^^^^
-issue982.p4(427): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'EgressDeparserImpl' terminates
+issue982.p4(418): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'EgressDeparserImpl' terminates
 ...ata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
                                                                                              ^^^^
-issue982.p4(427)
+issue982.p4(418)
 control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_...
         ^^^^^^^^^^^^^^^^^^

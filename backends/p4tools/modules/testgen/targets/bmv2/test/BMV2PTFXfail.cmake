@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that currently fail. Most of these are temporary.
 # ================================================
 
@@ -32,7 +36,6 @@ p4tools_add_xfail_reason(
   bmv2_hs1.p4
   control-hs-index-test1.p4
   control-hs-index-test2.p4
-  action_selector_shared-bmv2.p4
 
   # terminate called after throwing an instance of 'boost::wrapexcept<std::range_error>'
   issue2726-bmv2.p4
@@ -76,6 +79,11 @@ p4tools_add_xfail_reason(
   v1model-digest-custom-type.p4
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Error encountered when cleaning up action profile group"
+)
+
 ####################################################################################################
 # 2. P4Testgen Issues
 # These are failures in P4Testgen that need to be fixed.
@@ -103,6 +111,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
+  forloop-bmv2.p4
   issue4739.p4
   loop-3-clause-tricky2.p4
 )
@@ -191,7 +200,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
-  custom-type-restricted-fields.p4
   issue3225.p4
 )
 

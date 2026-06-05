@@ -24,13 +24,13 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     h1_t hdr_0_h1;
-    @hidden action issue1127bmv2l53() {
+    @hidden action issue1127bmv2l44() {
         hdr_0_h1.out1 = 8w4;
     }
     @hidden action act() {
         hdr_0_h1 = hdr.h1;
     }
-    @hidden action issue1127bmv2l53_0() {
+    @hidden action issue1127bmv2l44_0() {
         hdr_0_h1.out1 = 8w4;
     }
     @hidden action act_0() {
@@ -45,11 +45,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         const default_action = act();
     }
-    @hidden table tbl_issue1127bmv2l53 {
+    @hidden table tbl_issue1127bmv2l44 {
         actions = {
-            issue1127bmv2l53();
+            issue1127bmv2l44();
         }
-        const default_action = issue1127bmv2l53();
+        const default_action = issue1127bmv2l44();
     }
     @hidden table tbl_act_0 {
         actions = {
@@ -57,11 +57,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         const default_action = act_0();
     }
-    @hidden table tbl_issue1127bmv2l53_0 {
+    @hidden table tbl_issue1127bmv2l44_0 {
         actions = {
-            issue1127bmv2l53_0();
+            issue1127bmv2l44_0();
         }
-        const default_action = issue1127bmv2l53_0();
+        const default_action = issue1127bmv2l44_0();
     }
     @hidden table tbl_act_1 {
         actions = {
@@ -74,13 +74,13 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         if (hdr.h1.op1 == 8w0x0) {
             ;
         } else if (hdr.h1.op1[7:4] == 4w1) {
-            tbl_issue1127bmv2l53.apply();
+            tbl_issue1127bmv2l44.apply();
         }
         tbl_act_0.apply();
         if (hdr.h1.op2 == 8w0x0) {
             ;
         } else if (hdr.h1.op2[7:4] == 4w1) {
-            tbl_issue1127bmv2l53_0.apply();
+            tbl_issue1127bmv2l44_0.apply();
         }
         tbl_act_1.apply();
     }

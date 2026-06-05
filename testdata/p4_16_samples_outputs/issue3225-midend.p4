@@ -23,17 +23,17 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue3225l25() {
+    @hidden action issue3225l31() {
         h.h.b = (bit<1>)h.h.a + (bit<1>)h.h.c;
     }
-    @hidden table tbl_issue3225l25 {
+    @hidden table tbl_issue3225l31 {
         actions = {
-            issue3225l25();
+            issue3225l31();
         }
-        const default_action = issue3225l25();
+        const default_action = issue3225l31();
     }
     apply {
-        tbl_issue3225l25.apply();
+        tbl_issue3225l31.apply();
     }
 }
 

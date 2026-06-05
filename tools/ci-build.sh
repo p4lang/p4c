@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script for building P4C for continuous integration builds.
 
 set -e  # Exit on error.
@@ -43,6 +47,8 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${CMAKE_ONLY:=OFF}"
 # The build generator to use. Defaults to Make.
 : "${BUILD_GENERATOR:="Unix Makefiles"}"
+# Install prefix used for both BMv2 and p4c.
+: "${CMAKE_INSTALL_PREFIX:=/usr/local}"
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 : "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
@@ -114,6 +120,8 @@ sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
 # TODO: Consider using a system-provided package here.
 sudo apt-get install -y python3-venv curl
 curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
+# Ensure uv is in the PATH
+export PATH="${PATH}:$HOME/.local/bin"
 uv sync
 uv tool update-shell
 
@@ -135,45 +143,93 @@ ccache --set-config max_size=1G
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
+  # Install BMv2 - use OBS package on 22.04, source build on other versions
+  if [[ "${DISTRIB_RELEASE}" == "22.04" ]] && [[ -z "${BMV2_REF:-}" ]]; then
+    # Installation instructions documented at
+    # https://software.opensuse.org/download.html?project=home%3Ap4lang&package=p4lang-bmv2
+    echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+    curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
+    sudo apt update
+    # p4lang-bmv2's own dependencies take care of most of the runtime deps. An
+    # exception seems to be python3-dev.
+    P4C_RUNTIME_DEPS="p4lang-bmv2 python3-dev"
+    sudo apt-get install --no-install-recommends -y ${P4C_RUNTIME_DEPS}
+  else
+    P4C_RUNTIME_DEPS="cpp \
+                        autoconf \
+                        automake \
+                        libgc1* \
+                        libgmp-dev \
+                        libtool-bin \
+                        python3-dev \
+                        python3-thrift \
+                        libnanomsg-dev \
+                        libevent-dev \
+                        libssl-dev \
+                        libpcap-dev \
+                        libboost-thread-dev \
+                        libboost-program-options-dev \
+                        libboost-system-dev \
+                        libboost-filesystem-dev \
+                        libgrpc++-dev \
+                        libprotobuf-dev \
+                        protobuf-compiler \
+                        protobuf-compiler-grpc \
+                        libthrift-dev \
+                        thrift-compiler \
+                        libxxhash-dev \
+                        libjsoncpp-dev"
 
-  P4C_RUNTIME_DEPS="cpp \
-                    ${P4C_RUNTIME_DEPS_BOOST} \
-                    libgc1* \
-                    libgmp-dev \
-                    python3-dev \
-                    libnanomsg-dev"
+    # TODO: Remove this check once 18.04 is deprecated.
+    if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+        P4C_RUNTIME_DEPS+=" libboost-graph1.65.1 libboost-iostreams1.65.1 "
+    fi
 
-  # TODO: Remove this check once 18.04 is deprecated.
-  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-    P4C_RUNTIME_DEPS+=" libboost-graph1.65.1 libboost-iostreams1.65.1 "
+    # TODO: Remove this check once 18.04 is deprecated.
+    if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
+        # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
+        sudo apt-get update && sudo apt-get install -y software-properties-common
+        sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
+        P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
+        export CC=gcc-9
+        export CXX=g++-9
+    fi
+
+    sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
+
+    # Install PI from source for BMv2 gRPC target support.
+    tmp_dir=$(mktemp -d -t pi-build-XXXXXXXXXX)
+    pushd "${tmp_dir}"
+    git clone --recurse-submodules --depth=1 https://github.com/p4lang/PI
+    cd PI
+    ./autogen.sh
+    ./configure --with-proto
+    make -j$(( $(nproc) + 1 ))
+    sudo make install
+    popd
+    rm -rf "${tmp_dir}"
+
+    # Install BMv2 from source via the shared CMake-based helper.
+    BMV2_INSTALL_ARGS=(
+        --with-pi
+        --prefix "${CMAKE_INSTALL_PREFIX}"
+    )
+    if [[ -n "${BMV2_REF:-}" ]]; then
+        BMV2_INSTALL_ARGS+=(--ref "${BMV2_REF}")
+    fi
+    "${THIS_DIR}/install_bmv2_from_source.sh" "${BMV2_INSTALL_ARGS[@]}"
   fi
 
-  # TODO: Remove this check once 18.04 is deprecated.
-  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
-    # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
-    sudo apt-get update && sudo apt-get install -y software-properties-common
-    sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
-    P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
-    export CC=gcc-9
-    export CXX=g++-9
-  elif [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
-    echo "Temporarily disabling retrieval of p4lang-bmv2 package until it is working"
-    #sudo apt-get install -y wget ca-certificates
-    ## Add the p4lang opensuse repository.
-    #echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-    #curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
-    #P4C_RUNTIME_DEPS+=" p4lang-bmv2"
-  fi
+  command -v simple_switch
+  command -v simple_switch_CLI
+  command -v simple_switch_grpc
 
-  sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
-
-  if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
-    # To run PTF nanomsg tests. Not available on 18.04.
-    uv pip install nnpy==1.4.2
-  fi
+  uv pip install pynng
 }
 
-if [[ "${ENABLE_BMV2}" == "ON" ]] ; then
+# The docker image has BMv2 preinstalled.
+# Skip installation when CMAKE_ONLY is active (e.g., formatting/linting runs).
+if [[ "${ENABLE_BMV2}" == "ON" ]] && [[ "$IN_DOCKER" != "TRUE" ]] && [[ "${CMAKE_ONLY}" != "ON" ]] ; then
   build_bmv2
 fi
 # ! ------  END BMV2 -----------------------------------------------
@@ -214,7 +270,8 @@ function install_ptf_ebpf_test_deps() (
     popd
 )
 
-if [[ "${ENABLE_EBPF}" == "ON" ]] ; then
+# Skip installation when CMAKE_ONLY is active (e.g., formatting/linting runs).
+if [[ "${ENABLE_EBPF}" == "ON" ]] && [[ "${CMAKE_ONLY}" != "ON" ]] ; then
   build_ebpf
   if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
     install_ptf_ebpf_test_deps
@@ -229,7 +286,7 @@ function install_stf_p4tc_test_deps() (
                              python3-venv \
                              virtme-ng \
                              qemu-kvm \
-                             clang-15 \
+                             clang-19 \
                              python3-scapy \
                              qemu-system-x86"
     sudo apt-get install -y --no-install-recommends ${P4C_STF_P4TC_PACKAGES}
@@ -251,6 +308,9 @@ function build_p4tc() {
              python3 \
              python3-pip \
              wget \
+             lsb-release \
+             software-properties-common \
+             gnupg \
              python3-argcomplete"
 
   sudo apt-get install -y --no-install-recommends ${P4TC_DEPS}
@@ -262,14 +322,15 @@ if [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
   rm llvm.sh
 fi
 
-  git clone https://github.com/libbpf/libbpf/ -b v1.5.0 ${P4C_DIR}/backends/tc/runtime/libbpf
+  git clone https://github.com/libbpf/libbpf/ -b v1.7.0 ${P4C_DIR}/backends/tc/runtime/libbpf
   ${P4C_DIR}/backends/tc/runtime/build-libbpf
 
   if [[ "${INSTALL_STF_P4TC_DEPENDENCIES}" == "ON" ]] ; then
              install_stf_p4tc_test_deps
   fi
 }
-if [[ "${ENABLE_P4TC}" == "ON" ]] ; then
+# Skip installation when CMAKE_ONLY is active (e.g., formatting/linting runs).
+if [[ "${ENABLE_P4TC}" == "ON" ]] && [[ "${CMAKE_ONLY}" != "ON" ]] ; then
   build_p4tc
 fi
 # ! ------  END P4TC -----------------------------------------------
@@ -342,6 +403,7 @@ CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
 # Assemble the enabled back ends as a single CMake variable.
 build_cmake_enabled_backend_string
 CMAKE_FLAGS+="${CMAKE_ENABLE_BACKENDS} "
+CMAKE_FLAGS+="-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} "
 
 if [ "$ENABLE_SANITIZERS" == "ON" ]; then
   CMAKE_FLAGS+="-DENABLE_GC=OFF"
@@ -361,9 +423,12 @@ if [ "$CMAKE_ONLY" == "OFF" ]; then
 fi
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
+  # Keep runtime library required by installed backend executables.
+  sudo apt-get install -y --no-install-recommends libboost-iostreams1.71.0
+
   sudo apt-get purge -y ${P4C_DEPS} git
   sudo apt-get autoremove --purge -y
-  rm -rf ${P4C_DIR} /var/cache/apt/* /var/lib/apt/lists/*
+  rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 
 elif [[ "${IMAGE_TYPE}" == "test" ]] ; then

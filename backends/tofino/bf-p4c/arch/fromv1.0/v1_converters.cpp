@@ -22,7 +22,7 @@
 
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "lib/map.h"
 #include "lib/ordered_map.h"
 #include "v1_program_structure.h"
@@ -695,9 +695,7 @@ const IR::Node *MeterConverter::postorder(IR::MethodCallStatement *node) {
     BUG_CHECK(meter_pe != nullptr, "Cannot find meter %1%", member->expr);
 
     auto args = new IR::Vector<IR::Argument>();
-    auto inst = refMap->getDeclaration(meter_pe->path)->to<IR::IAnnotated>();
-    auto annot = inst ? inst->getAnnotation("pre_color"_cs) : nullptr;
-    if (annot != nullptr) {
+    if (auto annot = refMap->getDeclaration(meter_pe->path)->getAnnotation("pre_color"_cs)) {
         auto size = annot->getExpr(0)->type->width_bits();
         auto expr = annot->getExpr(0);
         auto castedExpr = cast_if_needed(expr, size, 8);

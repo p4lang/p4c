@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "midend/coverage.h"
 
 #include <ostream>
@@ -52,6 +56,13 @@ bool CollectNodes::preorder(const IR::P4Action *act) {
     // Only track actions, which have a valid source position in the P4 program.
     if (coverageOptions.coverActions && act->getSourceInfo().isValid()) {
         coverableNodes.insert(act);
+    }
+    return true;
+}
+
+bool CollectNodes::preorder(const IR::ParserState *state) {
+    if (coverageOptions.coverParserStates && state->getSourceInfo().isValid()) {
+        coverableNodes.insert(state);
     }
     return true;
 }

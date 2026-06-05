@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 setdefault ipv4_fib on_miss()
 setdefault ipv4_fib_lpm on_miss()
 setdefault nexthop on_miss()

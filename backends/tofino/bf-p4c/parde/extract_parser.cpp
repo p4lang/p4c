@@ -26,11 +26,11 @@
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/midend/parser_graph.h"
 #include "backends/tofino/bf-p4c/parde/add_parde_metadata.h"
 #include "backends/tofino/bf-p4c/parde/dump_parser.h"
 #include "backends/tofino/bf-p4c/parde/parser_loops_info.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 

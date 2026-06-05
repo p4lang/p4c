@@ -51,7 +51,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.a1b") h1_t[2] a1b_0;
     @name("ingressImpl.au1") hu1_t[2] au1_0;
     @name("ingressImpl.au1b") hu1_t[2] au1b_0;
-    @hidden action wrongwarning72() {
+    @hidden action wrongwarning63() {
         hu1_0_h1.setInvalid();
         hu1_0_h2.setInvalid();
         hu1b_0_h1.setInvalid();
@@ -69,14 +69,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         au1b_0[1].h1.setInvalid();
         au1b_0[1].h2.setInvalid();
     }
-    @hidden table tbl_wrongwarning72 {
+    @hidden table tbl_wrongwarning63 {
         actions = {
-            wrongwarning72();
+            wrongwarning63();
         }
-        const default_action = wrongwarning72();
+        const default_action = wrongwarning63();
     }
     apply {
-        tbl_wrongwarning72.apply();
+        tbl_wrongwarning63.apply();
     }
 }
 

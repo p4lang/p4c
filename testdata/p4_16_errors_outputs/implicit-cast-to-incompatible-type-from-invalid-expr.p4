@@ -1,1 +1,1 @@
-typedef bit<({#} - "Narrow")> Narrow_t;
+typedef bit<{#} - "Narrow"> Narrow_t;

@@ -27,10 +27,8 @@
 #include <boost/range/join.hpp>
 
 #include "backends/tofino/bf-p4c/common/table_printer.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
 #include "backends/tofino/bf-p4c/phv/action_source_tracker.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/utils/container_equivalence.h"
 #include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
@@ -40,6 +38,8 @@
 #include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
 #include "backends/tofino/bf-p4c/phv/v2/tx_score.h"
 #include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/exceptions.h"
 
 namespace PHV {

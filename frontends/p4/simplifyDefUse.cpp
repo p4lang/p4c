@@ -1,18 +1,7 @@
-/*
-Copyright 2016 VMware, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// Copyright 2016 VMware, Inc.
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "simplifyDefUse.h"
 
@@ -752,7 +741,7 @@ class FindUninitialized : public Inspector {
                 for (const auto *storage : headerDefs->getStorageLocation(dst)) {
                     headerDefs->setValueToStorage(storage, TernaryBool::Yes);
                 }
-            } else if (auto stack_exp = src->to<IR::HeaderStackExpression>()) {
+            } else if (auto stack_exp = src->to<IR::ArrayExpression>()) {
                 for (size_t index = 0; index < st->getSize(); index++) {
                     auto dst_elem = new IR::ArrayIndex(dst, new IR::Constant((uint64_t)index));
                     auto source = stack_exp->components.at(index);
@@ -1455,9 +1444,7 @@ class FindUninitialized : public Inspector {
 
     void postorder(const IR::P4ListExpression *expression) override { otherExpression(expression); }
 
-    void postorder(const IR::HeaderStackExpression *expression) override {
-        otherExpression(expression);
-    }
+    void postorder(const IR::ArrayExpression *expression) override { otherExpression(expression); }
 
     void postorder(const IR::Operation_Unary *expression) override { otherExpression(expression); }
 

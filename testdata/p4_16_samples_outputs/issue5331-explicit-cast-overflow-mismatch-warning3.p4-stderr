@@ -1,3 +1,3 @@
-issue5331-explicit-cast-overflow-mismatch-warning3.p4(4): [--Wwarn=mismatch] warning: 4w72: value does not fit in 4 bits
+issue5331-explicit-cast-overflow-mismatch-warning3.p4(4): [--Wwarn=overflow] warning: 4w72: value does not fit in 4 bits
         __e(72);
             ^^

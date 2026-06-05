@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 message(STATUS "Fetching spdlog")
 
 # Preserve previous FETCHCONTENT_QUIET setting

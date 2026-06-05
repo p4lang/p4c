@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
 
 # Copyright 2019 Orange
+# SPDX-FileCopyrightText: 2019 Orange
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 
 # Dependencies
 sudo apt-get -y install libnuma-dev clang-6.0 libc6-dev-i386 unzip
@@ -158,7 +149,7 @@ if ! type "ptf" > /dev/null; then
  sudo python setup.py install
 fi
 
-# Install nanomsg and nnpy
+# Install nanomsg and pynng
 if [ ! -d "/home/vagrant/nanomsg" ]
 then
  cd /home/vagrant
@@ -174,8 +165,8 @@ then
  sudo cp /home/vagrant/nanomsg/build/*.* /usr/lib
 
  cd /home/vagrant/ptf/ptf_nn
- sudo python -m pip install nnpy
- ./check-nnpy.py
+  sudo python -m pip install pynng
+  ../CI/check-pynng.py
 fi
 
 # Install P4c

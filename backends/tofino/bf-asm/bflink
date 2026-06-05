@@ -164,18 +164,18 @@ if [ -z "$output_dir" ]; then
     output_dir="./"
 fi
 if ! $debug_info; then
-    rm -f $object_files
+    rm -f "$object_files"
 fi
 if [ ! -z "$base_program" ] ; then
     pp=$output_dir/${base_program}.p4i
-    if ! $debug_info && test -e $pp ; then rm -f $pp; fi
+    if ! $debug_info && test -e "$pp" ; then rm -f "$pp"; fi
 fi
-if ! $debug_info && test -e $output_dir/bfas.config.log ; then
-    rm -f $output_dir/bfas.config.log
+if ! $debug_info && test -e "$output_dir/bfas.config.log" ; then
+    rm -f "$output_dir/bfas.config.log"
 fi
 # if we uncompressed, remove the directory
 if [ -d "$tmpdir" ]; then
-    rm -rf $tmpdir
+    rm -rf "$tmpdir"
 fi
 
 # exit with a return code if walle failed

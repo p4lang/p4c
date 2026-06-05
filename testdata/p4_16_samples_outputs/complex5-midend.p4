@@ -1,10 +1,10 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     @name("c.tmp") bit<32> tmp;
-    @hidden action complex5l22() {
+    @hidden action complex5l13() {
         r = 32w1;
     }
-    @hidden action complex5l24() {
+    @hidden action complex5l15() {
         r = 32w2;
     }
     @hidden action act() {
@@ -16,24 +16,24 @@ control c(inout bit<32> r) {
         }
         const default_action = act();
     }
-    @hidden table tbl_complex5l22 {
+    @hidden table tbl_complex5l13 {
         actions = {
-            complex5l22();
+            complex5l13();
         }
-        const default_action = complex5l22();
+        const default_action = complex5l13();
     }
-    @hidden table tbl_complex5l24 {
+    @hidden table tbl_complex5l15 {
         actions = {
-            complex5l24();
+            complex5l15();
         }
-        const default_action = complex5l24();
+        const default_action = complex5l15();
     }
     apply {
         tbl_act.apply();
         if (tmp > 32w0) {
-            tbl_complex5l22.apply();
+            tbl_complex5l13.apply();
         } else {
-            tbl_complex5l24.apply();
+            tbl_complex5l15.apply();
         }
     }
 }

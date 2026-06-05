@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Installs git hooks for p4c.
 
 umask 0022

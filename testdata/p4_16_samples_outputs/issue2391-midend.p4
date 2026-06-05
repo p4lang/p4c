@@ -24,30 +24,30 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h) {
-    @hidden action issue2391l49() {
+    @hidden action issue2391l55() {
         h.eth.setInvalid();
     }
-    @hidden action issue2391l51() {
+    @hidden action issue2391l57() {
         h.eth.type = 16w0;
     }
-    @hidden table tbl_issue2391l49 {
+    @hidden table tbl_issue2391l55 {
         actions = {
-            issue2391l49();
+            issue2391l55();
         }
-        const default_action = issue2391l49();
+        const default_action = issue2391l55();
     }
-    @hidden table tbl_issue2391l51 {
+    @hidden table tbl_issue2391l57 {
         actions = {
-            issue2391l51();
+            issue2391l57();
         }
-        const default_action = issue2391l51();
+        const default_action = issue2391l57();
     }
     apply {
         if (h.eth.isValid()) {
             if (h.eth.type == 16w0x800) {
-                tbl_issue2391l49.apply();
+                tbl_issue2391l55.apply();
             } else {
-                tbl_issue2391l51.apply();
+                tbl_issue2391l57.apply();
             }
         } else {
             ;

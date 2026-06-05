@@ -1,0 +1,6 @@
+issue5441.p4(8): [--Werror=type-error] error: -1: negative lsb offset
+        a = b[-1+:16];
+               ^
+issue5441.p4(9): [--Werror=type-error] error: 4294967293: lsb offset too large
+        a = b[4294967293+:16];
+              ^^^^^^^^^^

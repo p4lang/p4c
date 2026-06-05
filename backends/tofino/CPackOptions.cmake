@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 execute_process (COMMAND uname -m OUTPUT_VARIABLE __machine_arch
   OUTPUT_STRIP_TRAILING_WHITESPACE
   RESULT_VARIABLE rc)

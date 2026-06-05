@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2018 Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header_type user_metadata_t {
     fields {
 	pkt_count: 32;

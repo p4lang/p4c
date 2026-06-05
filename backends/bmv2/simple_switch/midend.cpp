@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "midend.h"
 
@@ -75,6 +64,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
     auto *evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     if (!BMV2::SimpleSwitchContext::get().options().loadIRFromJson) {
         auto *convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits("v1model.p4"_cs));
+        ParserConfig config;
         addPasses(
             {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
              new P4::CheckTableSize(),
@@ -135,7 +125,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              // control plane API, we remove them as well for P4-14 programs.
              {isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr},
              new P4::TypeChecking(&refMap, &typeMap),
-             {options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr},
+             {options.loopsUnrolling ? new P4::ParsersUnroll(config, &refMap, &typeMap) : nullptr},
              evaluator,
              [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
              new P4::MidEndLast()});

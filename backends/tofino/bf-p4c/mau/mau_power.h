@@ -25,10 +25,10 @@
 #include <string>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/unique_id.h"
 #include "backends/tofino/bf-p4c/lib/dyn_vector.h"
 #include "backends/tofino/bf-p4c/logging/power_schema.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "ir/ir.h"
 
 namespace MauPower {

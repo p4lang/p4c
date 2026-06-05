@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 set -e # Exit on error.
 
 # List of known bugs.
@@ -12,6 +16,7 @@ KNOWN_BUGS=(
     "Cannot evaluate initializer for constant"
     "Null expr"
     "error: retval_1: declaration not found"  # V1model failure.
+    "At this point in the compilation typechecking should not infer new types anymore" # See #5560
 )
 
 # Function to check if an error is triggered by a known bug.

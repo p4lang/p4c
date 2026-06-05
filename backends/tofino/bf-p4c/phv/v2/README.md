@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2024 Intel Corporation
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # PHV Allocation V2
 ## Understand a super cluster
 A SuperCluster is a closure of field slices that must be allocated to a container group,

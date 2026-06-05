@@ -19,6 +19,12 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_
 
+#include "ir/pass_manager.h"
+
+using namespace P4;
+
+class PhvInfo;
+
 /**
  * @ingroup LowerParserIR
  * @brief This pass performs the parser match register allocation.

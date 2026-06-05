@@ -6,18 +6,18 @@
 }
 
 control ingress(inout Headers h) {
-    @hidden action annotationlikely13() {
+    @hidden action annotationlikely19() {
         h.a = 8w0;
         h.b = 8w0;
     }
-    @hidden table tbl_annotationlikely13 {
+    @hidden table tbl_annotationlikely19 {
         actions = {
-            annotationlikely13();
+            annotationlikely19();
         }
-        const default_action = annotationlikely13();
+        const default_action = annotationlikely19();
     }
     apply {
-        tbl_annotationlikely13.apply();
+        tbl_annotationlikely19.apply();
     }
 }
 

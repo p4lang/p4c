@@ -24,9 +24,9 @@
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
-#include "backends/tofino/bf-p4c/device.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/stringref.h"
 
 PhvAsmOutput::PhvAsmOutput(const PhvInfo &p, const FieldDefUse &defuse,

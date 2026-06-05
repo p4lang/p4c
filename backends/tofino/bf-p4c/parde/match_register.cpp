@@ -18,36 +18,22 @@
 
 #include "match_register.h"
 
-#include <sstream>
-
-#include "ir/ir.h"
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
+#include "ir/json_parser.h"
+#include "lib/exceptions.h"
 
-int MatchRegister::s_id = 0;
-
-cstring MatchRegister::toString() const {
-    std::stringstream tmp;
-    tmp << *this;
-    return tmp.str();
-}
-
-MatchRegister::MatchRegister() : name(""), size(0), id(0) {}
-
-MatchRegister::MatchRegister(cstring n) : name(n), id(s_id++) {
-    if (name.find("byte"))
-        size = 1;
-    else if (name.find("half"))
-        size = 2;
-    else
-        BUG("Invalid parser match register %s", name);
-}
+namespace P4 {
 
 void MatchRegister::toJSON(JSONGenerator &json) const { json.emit(toString()); }
 
 /* static */
 MatchRegister MatchRegister::fromJSON(JSONLoader &json) {
-    if (json.is<JsonString>()) return MatchRegister(json.as<JsonString>());
+    if (json.is<JsonString>()) {
+        return MatchRegister(json.as<JsonString>());
+    }
     BUG("Couldn't decode JSON value to parser match register");
-    return MatchRegister();
+    return {};
 }
+
+}  // namespace P4

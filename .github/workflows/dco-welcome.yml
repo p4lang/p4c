@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: DCO Assistant for First-Time Contributors
+
+on:
+  check_run:
+    types: [completed]
+
+jobs:
+  dco-help:
+    uses: p4lang/.github/.github/workflows/dco-welcome-reusable.yml@main
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write

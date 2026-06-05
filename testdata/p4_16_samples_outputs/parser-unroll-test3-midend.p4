@@ -67,7 +67,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         packet.extract<srcRoute_t>(hdr.srcRoutes[32w0]);
         transition select(hdr.srcRoutes[32w0].bos) {
             2w1: parse_ipv4;
-            2w2: callMidle;
             default: callMidle;
         }
     }
@@ -75,7 +74,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         packet.extract<srcRoute_t>(hdr.srcRoutes[32w2]);
         transition select(hdr.srcRoutes[32w2].bos) {
             2w1: parse_ipv4;
-            2w2: callMidle1;
             default: callMidle1;
         }
     }

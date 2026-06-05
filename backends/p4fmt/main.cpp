@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <filesystem>
+#include <memory>
 #include <sstream>
 
 #include "lib/nullstream.h"
@@ -22,17 +23,19 @@ int main(int argc, char *const argv[]) {
     };
 
     std::ostream *out = nullptr;
+    std::unique_ptr<std::ostream> outFile;
     // Write to stdout in absence of an output file.
     if (options.outputFile().empty()) {
         out = &std::cout;
     } else {
-        out = openFile(options.outputFile(), false);
-        if ((out == nullptr) || !(*out)) {
+        outFile = openFile(options.outputFile(), false);
+        if ((outFile == nullptr) || !(*outFile)) {
             ::P4::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
                         options.outputFile().string());
             options.usage();
             return EXIT_FAILURE;
         }
+        out = outFile.get();
     }
 
     (*out) << formattedOutput.str();

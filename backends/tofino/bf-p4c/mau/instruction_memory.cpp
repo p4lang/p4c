@@ -22,7 +22,7 @@
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/table_format.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 #include "backends/tofino/bf-p4c/mau/tofino/instruction_memory.h"
 

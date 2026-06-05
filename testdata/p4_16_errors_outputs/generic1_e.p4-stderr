@@ -9,7 +9,7 @@ control p()
         ^
 generic1_e.p4(36): [--Wwarn=unused] warning: 'x' is unused
         h<bit> x; // no type parameter
-        ^^^^^^^^
+               ^
 generic1_e.p4(21): [--Werror=type-error] error: Type parameters needed for x
 control p1(If x) // missing type parameter
               ^

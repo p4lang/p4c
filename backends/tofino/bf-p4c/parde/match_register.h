@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include "backends/tofino/bf-p4c/specs/match_register_spec.h"
 #include "lib/cstring.h"
 
 namespace P4 {
@@ -28,37 +29,16 @@ namespace P4 {
 class JSONGenerator;
 class JSONLoader;
 
-class MatchRegister {
+class MatchRegister : public MatchRegisterSpec {
  public:
-    MatchRegister();
-    explicit MatchRegister(cstring);
-
-    cstring toString() const;
-
-    bool operator==(const MatchRegister &other) const { return name == other.name; }
+    MatchRegister() = default;
+    explicit MatchRegister(cstring n) : MatchRegisterSpec(n) {}
+    explicit MatchRegister(const MatchRegisterSpec &spec) : MatchRegisterSpec(spec) {}
 
     /// JSON serialization/deserialization.
     void toJSON(JSONGenerator &json) const;
     static MatchRegister fromJSON(JSONLoader &json);
-
-    cstring name;
-    size_t size;
-    int id;
-
-    static int s_id;
-
-    bool operator<(const MatchRegister &other) const {
-        if (size < other.size) return true;
-        if (other.size < size) return false;
-        if (id < other.id) return true;
-        if (other.id > id) return false;
-        return false;
-    }
-
-    friend std::ostream &operator<<(std::ostream &out, const MatchRegister &c);
 };
-
-inline std::ostream &operator<<(std::ostream &out, const MatchRegister &c) { return out << c.name; }
 
 }  // namespace P4
 

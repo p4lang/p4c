@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "backends/p4tools/common/lib/trace_event_types.h"
 
 #include <ostream>
@@ -239,6 +243,11 @@ void ExtractSuccess::print(std::ostream &os) const {
 }
 
 int ExtractSuccess::getOffset() const { return offset; }
+
+const std::vector<std::pair<IR::StateVariable, const IR::Expression *>> &ExtractSuccess::getFields()
+    const {
+    return fields;
+}
 
 const IR::Expression *ExtractSuccess::getExtractedHeader() const { return extractedHeader; }
 

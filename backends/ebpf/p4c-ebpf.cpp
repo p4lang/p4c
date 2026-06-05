@@ -83,8 +83,10 @@ void compile(EbpfOptions &options) {
     EBPF::MidEnd midend;
     midend.addDebugHook(hook);
     auto toplevel = midend.run(options, program);
-    if (!options.dumpJsonFile.empty())
-        JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(program);
+    if (!options.dumpJsonFile.empty()) {
+        auto dumpJsonStream = openFile(options.dumpJsonFile, true);
+        JSONGenerator(*dumpJsonStream).emit(program);
+    }
     if (::P4::errorCount() > 0) return;
 
     EBPF::run_ebpf_backend(options, toplevel, &midend.refMap, &midend.typeMap);

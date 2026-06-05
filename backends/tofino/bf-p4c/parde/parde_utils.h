@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_UTILS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_UTILS_H_
 
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 static const IR::BFN::PacketRVal *get_packet_range(const IR::BFN::ParserPrimitive *p) {
     if (auto e = p->to<IR::BFN::Extract>()) {

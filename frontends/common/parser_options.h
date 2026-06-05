@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 /* -*-C++-*- */
 
@@ -36,12 +27,12 @@ class ToP4;
 
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
-// TODO: This should be std::filesystem::path.
-extern const char *p4includePath;
-extern const char *p4_14includePath;
+extern std::filesystem::path p4includePath;
+extern std::filesystem::path p4_14includePath;
 
 /// Try to guess whether a file is a "system" file
 bool isSystemFile(cstring filename);
+bool isSystemFile(const std::filesystem::path &filename);
 
 /// Base class for compiler options.
 /// This class contains the options for the front-ends.
@@ -108,9 +99,9 @@ class ParserOptions : public Util::Options {
     bool isAnnotationDisabled(const IR::Annotation *a) const;
     /// Search and set 'includePathOut' to be the first valid path from the
     /// list of possible relative paths.
-    static bool searchForIncludePath(const char *&includePathOut,
+    static bool searchForIncludePath(std::filesystem::path &includePathOut,
                                      const std::vector<cstring> &userSpecifiedPaths,
-                                     const char *exename);
+                                     const std::filesystem::path &exename);
     /// If true do not generate #include statements.
     /// Used for debugging.
     bool noIncludes = false;

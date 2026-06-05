@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_SPEC_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_SPEC_H_
 
@@ -10,6 +16,7 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
+#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 
@@ -137,7 +144,7 @@ class TableMatch : public TestObject {
     DECLARE_TYPEINFO(TableMatch, TestObject);
 };
 
-using TableMatchMap = std::map<cstring, const TableMatch *>;
+using TableMatchMap = ordered_map<cstring, const TableMatch *>;
 
 class Ternary : public TableMatch {
  private:

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # XFAILS: tests that *temporarily* fail
 # =====================================
 #
@@ -92,8 +96,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
-  "The validity bit of .* is tainted"
-  tna_simple_switch.p4
+  "P4Testgen Bug: Unable to find var .* in the symbolic environment"
 )
 
 p4tools_add_xfail_reason(

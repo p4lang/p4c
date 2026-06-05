@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /// Represents a reference to an object in a P4 program.
 ///
 /// This is a thin wrapper around a 'const Member*' to (1) enforce invariants on which forms of
