@@ -101,7 +101,7 @@ jobs:
             
             if (labelsToAdd.length > 0) {
               if (isIssue) {
-                github.rest.issues.addLabels({
+                await github.rest.issues.addLabels({
                   issue_number: itemNumber,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -109,7 +109,7 @@ jobs:
                 });
               } else {
                 // PRs use the issues API for labels
-                github.rest.issues.addLabels({
+                await github.rest.issues.addLabels({
                   issue_number: itemNumber,
                   owner: context.repo.owner,
                   repo: context.repo.repo,
