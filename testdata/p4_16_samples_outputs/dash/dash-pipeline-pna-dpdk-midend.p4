@@ -4,6 +4,11 @@ error {
     InvalidIPv4Header
 }
 #include <core.p4>
+
+match_kind {
+    list,
+    range_list
+}
 #include <pna.p4>
 
 header ethernet_t {
@@ -310,11 +315,6 @@ control dash_deparser(packet_out packet, in headers_t hdr, in metadata_t meta, i
     apply {
         tbl_dashpipelinepnadpdk323.apply();
     }
-}
-
-match_kind {
-    list,
-    range_list
 }
 
 control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {

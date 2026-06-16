@@ -306,6 +306,15 @@ bool P4ParserDriver::onReadErrorDeclaration(IR::Type_Error *error) {
     return false;
 }
 
+bool P4ParserDriver::onReadMatchKindDeclaration(IR::Declaration_MatchKind *matchKind) {
+    if (allMatchKinds == nullptr) {
+        allMatchKinds = matchKind;
+        return true;
+    }
+    allMatchKinds->members.append(matchKind->members);
+    return false;
+}
+
 }  // namespace P4
 
 namespace P4::V1 {
