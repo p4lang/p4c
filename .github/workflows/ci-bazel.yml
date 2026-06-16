@@ -65,7 +65,7 @@ jobs:
 
       - name: Save bazel cache
         uses: actions/cache/save@v5
-        if: always() && (github.ref_name == 'main' || env.duration > 180)
+        if: always() && (github.ref_name == 'main' || fromJSON(env.duration) > 180)
         with:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-direct-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-${{ github.run_id }}
@@ -104,7 +104,7 @@ jobs:
 
       - name: Save bazel cache
         uses: actions/cache/save@v5
-        if: always() && (github.ref_name == 'main' || env.duration > 180)
+        if: always() && (github.ref_name == 'main' || fromJSON(env.duration) > 180)
         with:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-indirect-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-${{ github.run_id }}
