@@ -16,24 +16,49 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/label-mappings.json
+          sparse-checkout-cone-mode: false
+
       - name: Auto-label Issues and PRs
         uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            // Load label mappings from configuration file
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github', 'label-mappings.json');
+            let config;
+            
+            try {
+              const configContent = fs.readFileSync(configPath, 'utf8');
+              config = JSON.parse(configContent);
+              console.log('Successfully loaded label mappings configuration');
+            } catch (error) {
+              console.error('Failed to load label-mappings.json:', error.message);
+              core.setFailed('Could not load label mappings configuration');
+              return;
+            }
+            
             // Determine if we're processing an issue or PR
-            const isIssue = !!context.payload.issue;
+            // Check PR first as pull_request_target events are more specific
             const isPR = !!context.payload.pull_request;
+            const isIssue = !!context.payload.issue;
             
             let itemToLabel;
             let itemNumber;
             
-            if (isIssue) {
-              itemToLabel = context.payload.issue;
-              itemNumber = context.issue.number;
-            } else if (isPR) {
+            if (isPR) {
               itemToLabel = context.payload.pull_request;
               itemNumber = context.payload.pull_request.number;
+            } else if (isIssue) {
+              itemToLabel = context.payload.issue;
+              itemNumber = context.issue.number;
             } else {
               console.log("Not an issue or PR event, exiting");
               return;
@@ -41,80 +66,38 @@ jobs:
             
             const labelsToAdd = [];
             
-            // Define label mappings based on brackets in title
-            let labelMappings;
+            // Get appropriate label mappings from config based on item type
+            const labelMappings = isPR ? config.mappings.pull_requests : config.mappings.issues;
             
-            if (isIssue) {
-              // Issue label mappings (original set)
-              labelMappings = {
-                "[bug]": "bug",
-                "[infra]": "infrastructure",
-                "[feature]": "enhancement",
-                "[docs]": "documentation",
-                "[dpdk]": "dpdk",              
-                "[bmv2]": "bmv2",              
-                "[P4Testgen]": "p4tools",
-                "[P4Smith]": "p4tools",
-                "[P4tools]": "p4tools",
-                "[Tofino]":"tofino",
-                "[p4tc]": "p4tc",
-                "[p4fmt]": "p4fmt",
-                "[core]":"core",
-                "[p4-spec]": "p4-spec",
-                "[control-plane]": "control-plane",
-                "[P4runtime]":"control-plane",
-                "[frontend]":"core",
-                "[midend]":"core",
-                "[parser]":"core",
-              };
-            } else {
-              // PR label mappings (only the ones you want for PRs)
-              labelMappings = {
-                "[core]":"core",
-                "[infra]": "infrastructure",
-                "[midend]":"core",
-                "[parser]":"core",
-                "[dpdk]": "dpdk",  
-                "[p4-spec]": "p4-spec",
-                "[tofino]":"tofino",
-                "[bmv2]":"bmv2",
-                "[docs]":"documentation",
-                "[documentation]":"documentation",
-                "[P4Testgen]": "p4tools",
-                "[P4Smith]": "p4tools",
-                "[P4tools]": "p4tools",
-                "[control-plane]": "control-plane",
-                "[P4runtime]":"control-plane",
-                "[p4tc]": "p4tc",
-                "[p4fmt]": "p4fmt",
-                // Add any other PR-specific labels here
-              };
+            if (!labelMappings) {
+              console.error(`No label mappings found for ${isIssue ? 'issues' : 'pull_requests'}`);
+              return;
             }
             
-            // Check if title contains bracketed keywords
+            // Check if title contains bracketed keywords (case-insensitive)
             const title = itemToLabel.title.toLowerCase();
+            
             for (const [keyword, label] of Object.entries(labelMappings)) {
               if (title.includes(keyword.toLowerCase())) {
-                labelsToAdd.push(label);
+                if (!labelsToAdd.includes(label)) {
+                  labelsToAdd.push(label);
+                }
+                console.log(`Matched keyword "${keyword}" -> label "${label}"`);
               }
             }
             
             if (labelsToAdd.length > 0) {
-              if (isIssue) {
-                await github.rest.issues.addLabels({
-                  issue_number: itemNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  labels: labelsToAdd
-                });
-              } else {
-                // PRs use the issues API for labels
-                await github.rest.issues.addLabels({
-                  issue_number: itemNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  labels: labelsToAdd
-                });
-              }
+              console.log(`Adding labels: ${labelsToAdd.join(', ')}`);
+              
+              await github.rest.issues.addLabels({
+                issue_number: itemNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: labelsToAdd
+              });
+              
+              console.log(`Successfully added ${labelsToAdd.length} label(s)`);
+            } else {
+              console.log('No matching labels found for this title');
             }
 
