@@ -230,7 +230,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SpecializeGenericFunctions(&typeMap),
         }),
         new CheckCoreMethods(&typeMap),
-        new StaticAssert(&typeMap),
+        new StaticAssert(&typeMap, policy->isStaticAssertFinal()),
     });
     metricsPassManager.addUnusedCode(passes, true);
     passes.addPasses({
