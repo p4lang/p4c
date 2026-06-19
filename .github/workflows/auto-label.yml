@@ -21,9 +21,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // ====================================================================
             // LABEL MAPPINGS DATA
-            // ====================================================================
             // Shared mappings that apply to both issues and pull requests
             // These are component/target labels that have the same meaning in both contexts
             const sharedMappings = {
@@ -66,9 +64,7 @@ jobs:
             // Currently empty as all PR labels are shared with issues
             const prMappings = {};
             
-            // ====================================================================
             // LABELING LOGIC
-            // ====================================================================
             
             // Determine if we're processing an issue or PR
             const isPR = !!context.payload.pull_request;
