@@ -152,10 +152,7 @@ bool ToP4::preorder(const IR::P4Program *program) {
     for (auto a : program->objects) {
         // Check where this declaration originates
         auto sourceFileOpt = ifSystemFile(a);
-        // Errors and match_kinds can be declared across multiple files, so the
-        // merged node carries the source location of the first declaration (often
-        // a system file). Always visit them so any user-defined members are
-        // emitted instead of being hidden behind the #include.
+        // Errors and match_kinds can come from multiple files
         if (!a->is<IR::Type_Error>() && !a->is<IR::Declaration_MatchKind>() &&
             sourceFileOpt.has_value()) {
             /* FIXME -- when including a user header file (sourceFile !=
