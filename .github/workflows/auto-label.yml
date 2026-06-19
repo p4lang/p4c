@@ -16,37 +16,61 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            .github/label-mappings.json
-          sparse-checkout-cone-mode: false
-
       - name: Auto-label Issues and PRs
         uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const path = require('path');
+            // ====================================================================
+            // LABEL MAPPINGS DATA
+            // ====================================================================
+            // Shared mappings that apply to both issues and pull requests
+            // These are component/target labels that have the same meaning in both contexts
+            const sharedMappings = {
+              "[infra]": "infrastructure",
+              "[infrastructure]": "infrastructure",
+              "[docs]": "documentation",
+              "[documentation]": "documentation",
+              "[dpdk]": "dpdk",
+              "[bmv2]": "bmv2",
+              "[ebpf]": "ebpf",
+              "[ubpf]": "ubpf",
+              "[graphs]": "graphs",
+              "[p4testgen]": "p4tools",
+              "[p4smith]": "p4tools",
+              "[p4tools]": "p4tools",
+              "[p4tc]": "p4tc",
+              "[p4fmt]": "p4fmt",
+              "[core]": "core",
+              "[p4-spec]": "p4-spec",
+              "[control-plane]": "control-plane",
+              "[p4runtime]": "control-plane",
+              "[frontend]": "core",
+              "[midend]": "core",
+              "[parser]": "core",
+              "[python]": "python",
+              "[pna-bmv2]": "pna-bmv2",
+              "[psa-bmv2]": "psa-bmv2",
+              "[ebpf-psa]": "ebpf-psa",
+              "[tofino]": "tofino",
+            };
             
-            // Load label mappings from configuration file
-            const configPath = path.join(process.env.GITHUB_WORKSPACE, '.github', 'label-mappings.json');
-            let config;
+            // Issue-specific mappings
+            // These labels are semantically meaningful only for issues
+            const issueMappings = {
+              "[bug]": "bug",
+              "[feature]": "enhancement",
+            };
             
-            try {
-              const configContent = fs.readFileSync(configPath, 'utf8');
-              config = JSON.parse(configContent);
-              console.log('Successfully loaded label mappings configuration');
-            } catch (error) {
-              console.error('Failed to load label-mappings.json:', error.message);
-              core.setFailed('Could not load label mappings configuration');
-              return;
-            }
+            // PR-specific mappings
+            // Currently empty as all PR labels are shared with issues
+            const prMappings = {};
+            
+            // ====================================================================
+            // LABELING LOGIC
+            // ====================================================================
             
             // Determine if we're processing an issue or PR
-            // Check PR first as pull_request_target events are more specific
             const isPR = !!context.payload.pull_request;
             const isIssue = !!context.payload.issue;
             
@@ -64,19 +88,16 @@ jobs:
               return;
             }
             
+            // Combine shared mappings with context-specific mappings
+            const labelMappings = {
+              ...sharedMappings,
+              ...(isPR ? prMappings : issueMappings)
+            };
+            
             const labelsToAdd = [];
-            
-            // Get appropriate label mappings from config based on item type
-            const labelMappings = isPR ? config.mappings.pull_requests : config.mappings.issues;
-            
-            if (!labelMappings) {
-              console.error(`No label mappings found for ${isIssue ? 'issues' : 'pull_requests'}`);
-              return;
-            }
-            
-            // Check if title contains bracketed keywords (case-insensitive)
             const title = itemToLabel.title.toLowerCase();
             
+            // Find matching labels (case-insensitive)
             for (const [keyword, label] of Object.entries(labelMappings)) {
               if (title.includes(keyword.toLowerCase())) {
                 if (!labelsToAdd.includes(label)) {
@@ -86,6 +107,7 @@ jobs:
               }
             }
             
+            // Apply labels if any were found
             if (labelsToAdd.length > 0) {
               console.log(`Adding labels: ${labelsToAdd.join(', ')}`);
               
