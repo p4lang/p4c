@@ -543,11 +543,34 @@ bool TypeInferenceBase::canCastBetween(const IR::Type *dest, const IR::Type *src
     return false;
 }
 
+const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
+                                                               const IR::Type *contextType) {
+    if (!expr->is<IR::Invalid>()) return expr;
+    auto concreteType = contextType;
+    if (auto ts = concreteType->to<IR::Type_SpecializedCanonical>())
+        concreteType = ts->substituted;
+    if (!concreteType->is<IR::Type_Header>() && !concreteType->is<IR::Type_HeaderUnion>())
+        return expr;
+
+    auto type = contextType->getP4Type();
+    setType(type, new IR::Type_Type(contextType));
+    const IR::Expression *result;
+    if (concreteType->is<IR::Type_Header>()) {
+        result = new IR::InvalidHeader(expr->srcInfo, type, type);
+    } else {
+        result = new IR::InvalidHeaderUnion(expr->srcInfo, type, type);
+    }
+    setType(result, contextType);
+    setCompileTimeConstant(result);
+    return result;
+}
+
 const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPosition,
                                                     const IR::Type *destType,
                                                     const IR::Expression *sourceExpression) {
     if (destType->is<IR::Type_Unknown>()) BUG("Unknown destination type");
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
+    sourceExpression = convertUntypedInvalid(sourceExpression, destType);
     const IR::Type *initType = getType(sourceExpression);
     if (initType == nullptr) return sourceExpression;
 

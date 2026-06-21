@@ -144,6 +144,10 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
         @returns new sourceExpression. */
     const IR::Expression *assignment(const IR::Node *errorPosition, const IR::Type *destType,
                                      const IR::Expression *sourceExpression);
+    /** If @expr is an untyped invalid literal {#} and @contextType is a header or
+        header_union, convert it to InvalidHeader/InvalidHeaderUnion. */
+    const IR::Expression *convertUntypedInvalid(const IR::Expression *expr,
+                                                  const IR::Type *contextType);
     const IR::SelectCase *matchCase(const IR::SelectExpression *select,
                                     const IR::Type_BaseList *selectType,
                                     const IR::SelectCase *selectCase, const IR::Type *caseType);

@@ -259,6 +259,23 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Operation_Relation *expre
     }
 
     if (equTest) {
+        auto left = expression->left;
+        auto right = expression->right;
+        if (left->is<IR::Invalid>() && ltype->is<IR::Type_Unknown>() &&
+            (rtype->is<IR::Type_Header>() || rtype->is<IR::Type_HeaderUnion>())) {
+            left = convertUntypedInvalid(left, rtype);
+            ltype = rtype;
+        } else if (right->is<IR::Invalid>() && rtype->is<IR::Type_Unknown>() &&
+                   (ltype->is<IR::Type_Header>() || ltype->is<IR::Type_HeaderUnion>())) {
+            right = convertUntypedInvalid(right, ltype);
+            rtype = ltype;
+        }
+        if (left != expression->left || right != expression->right) {
+            auto e = expression->clone();
+            e->left = left;
+            e->right = right;
+            expression = e;
+        }
         Comparison c;
         c.left = expression->left;
         c.right = expression->right;
