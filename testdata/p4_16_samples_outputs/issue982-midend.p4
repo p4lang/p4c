@@ -1,5 +1,10 @@
 #include <core.p4>
 
+match_kind {
+    range,
+    selector
+}
+
 header clone_0_t {
     bit<16> data;
 }
@@ -80,11 +85,6 @@ struct psa_egress_output_metadata_t {
     bool    recirculate;
     bool    truncate;
     bit<14> truncate_payload_bytes;
-}
-
-match_kind {
-    range,
-    selector
 }
 
 extern PacketReplicationEngine {

@@ -4,6 +4,11 @@ error {
     InvalidIPv4Header
 }
 #include <core.p4>
+
+match_kind {
+    list,
+    range_list
+}
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -456,11 +461,6 @@ action tunnel_decap(inout headers_t hdr, inout metadata_t meta) {
     hdr.u0_udp.setInvalid();
     meta.tunnel_pointer = 16w0;
 }
-match_kind {
-    list,
-    range_list
-}
-
 control acl(inout headers_t hdr, inout metadata_t meta) {
     action permit() {
     }
