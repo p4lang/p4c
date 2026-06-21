@@ -1,7 +1,0 @@
-decl-matchkind-with-duplicate-fields-in-separate-declarations.p4(11): [--Werror=duplicate] error: foo: Duplicates declaration foo
-  foo
-  ^^^
-decl-matchkind-with-duplicate-fields-in-separate-declarations.p4(6)
-  foo,
-  ^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation
