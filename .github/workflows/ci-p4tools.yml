@@ -30,7 +30,7 @@ jobs:
       # This pins BMv2 to current upstream main.
       BMV2_REF: faf7bfe96064d5c6fc7753cad956a9e85445883b
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
