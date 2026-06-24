@@ -1,0 +1,6 @@
+loop4-err.p4(9): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+loop4-err.p4(11): [--Werror=type-error] error: Condition of ForStatement does not evaluate to a bool but bit<8>
+        for (bit<8> a = 15; a; a -= 1) {
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
