@@ -2,14 +2,14 @@ name: Auto Label Issues and PRs
 
 on:
   issues:
-    types: [opened, edited]  # Runs when an issue is created or modified
+    types: [opened, edited] # Runs when an issue is created or modified
   pull_request_target:
-    types: [opened, edited]  # Runs when a PR is created or modified
-  workflow_dispatch:  # Allows manual triggering
+    types: [opened, edited] # Runs when a PR is created or modified
+  workflow_dispatch: # Allows manual triggering
 
 permissions:
-  issues: write  # Ensure the token has write access to issues
-  pull-requests: write  # Ensure the token has write access to PRs
+  issues: write # Ensure the token has write access to issues
+  pull-requests: write # Ensure the token has write access to PRs
   contents: read
 
 jobs:
@@ -21,100 +21,82 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Determine if we're processing an issue or PR
-            const isIssue = !!context.payload.issue;
+            // Label mapping data. Shared keywords apply to both issues and
+            // PRs, so they're defined once instead of being duplicated
+            // (which previously caused drift, e.g. "[Tofino]" vs "[tofino]").
+            const SHARED_MAPPINGS = {
+              "[core]": "core",
+              "[frontend]": "core",
+              "[midend]": "core",
+              "[parser]": "core",
+              "[infra]": "infrastructure",
+              "[infrastructure]": "infrastructure",
+              "[docs]": "documentation",
+              "[documentation]": "documentation",
+              "[dpdk]": "dpdk",
+              "[bmv2]": "bmv2",
+              "[ebpf]": "ebpf",
+              "[p4testgen]": "p4tools",
+              "[p4smith]": "p4tools",
+              "[p4tools]": "p4tools",
+              "[p4tc]": "p4tc",
+              "[p4fmt]": "p4fmt",
+              "[p4-spec]": "p4-spec",
+              "[control-plane]": "control-plane",
+              "[p4runtime]": "control-plane",
+              "[tofino]": "tofino",
+            };
+
+            // Issue-only mappings (kept separate since issue semantics
+            // differ from PR semantics, e.g. "bug" vs "fix").
+            const ISSUE_ONLY_MAPPINGS = {
+              "[bug]": "bug",
+              "[feature]": "enhancement",
+            };
+
+            // PR-only mappings.
+            const PR_ONLY_MAPPINGS = {};
+
+            // pull_request_target events can carry both pull_request and
+            // issue-shaped payload data, so PR is checked first.
             const isPR = !!context.payload.pull_request;
-            
+            const isIssue = !!context.payload.issue;
+
             let itemToLabel;
             let itemNumber;
-            
-            if (isIssue) {
-              itemToLabel = context.payload.issue;
-              itemNumber = context.issue.number;
-            } else if (isPR) {
+
+            if (isPR) {
               itemToLabel = context.payload.pull_request;
               itemNumber = context.payload.pull_request.number;
+            } else if (isIssue) {
+              itemToLabel = context.payload.issue;
+              itemNumber = context.issue.number;
             } else {
               console.log("Not an issue or PR event, exiting");
               return;
             }
-            
-            const labelsToAdd = [];
-            
-            // Define label mappings based on brackets in title
-            let labelMappings;
-            
-            if (isIssue) {
-              // Issue label mappings (original set)
-              labelMappings = {
-                "[bug]": "bug",
-                "[infra]": "infrastructure",
-                "[feature]": "enhancement",
-                "[docs]": "documentation",
-                "[dpdk]": "dpdk",              
-                "[bmv2]": "bmv2",              
-                "[P4Testgen]": "p4tools",
-                "[P4Smith]": "p4tools",
-                "[P4tools]": "p4tools",
-                "[Tofino]":"tofino",
-                "[p4tc]": "p4tc",
-                "[p4fmt]": "p4fmt",
-                "[core]":"core",
-                "[p4-spec]": "p4-spec",
-                "[control-plane]": "control-plane",
-                "[P4runtime]":"control-plane",
-                "[frontend]":"core",
-                "[midend]":"core",
-                "[parser]":"core",
-              };
-            } else {
-              // PR label mappings (only the ones you want for PRs)
-              labelMappings = {
-                "[core]":"core",
-                "[infra]": "infrastructure",
-                "[midend]":"core",
-                "[parser]":"core",
-                "[dpdk]": "dpdk",  
-                "[p4-spec]": "p4-spec",
-                "[tofino]":"tofino",
-                "[bmv2]":"bmv2",
-                "[docs]":"documentation",
-                "[documentation]":"documentation",
-                "[P4Testgen]": "p4tools",
-                "[P4Smith]": "p4tools",
-                "[P4tools]": "p4tools",
-                "[control-plane]": "control-plane",
-                "[P4runtime]":"control-plane",
-                "[p4tc]": "p4tc",
-                "[p4fmt]": "p4fmt",
-                // Add any other PR-specific labels here
-              };
-            }
-            
-            // Check if title contains bracketed keywords
+
+            const labelMappings = {
+              ...SHARED_MAPPINGS,
+              ...(isPR ? PR_ONLY_MAPPINGS : ISSUE_ONLY_MAPPINGS),
+            };
+
             const title = itemToLabel.title.toLowerCase();
+            const labelsToAdd = new Set();
+
             for (const [keyword, label] of Object.entries(labelMappings)) {
               if (title.includes(keyword.toLowerCase())) {
-                labelsToAdd.push(label);
-              }
-            }
-            
-            if (labelsToAdd.length > 0) {
-              if (isIssue) {
-                await github.rest.issues.addLabels({
-                  issue_number: itemNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  labels: labelsToAdd
-                });
-              } else {
-                // PRs use the issues API for labels
-                await github.rest.issues.addLabels({
-                  issue_number: itemNumber,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  labels: labelsToAdd
-                });
+                labelsToAdd.add(label);
               }
             }
 
+            if (labelsToAdd.size > 0) {
+              const labels = [...labelsToAdd];
+              await github.rest.issues.addLabels({
+                issue_number: itemNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels,
+              });
+              console.log(`Added labels to #${itemNumber}: ${labels.join(", ")}`);
+            }
