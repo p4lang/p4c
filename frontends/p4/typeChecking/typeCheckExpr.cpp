@@ -258,6 +258,21 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Operation_Relation *expre
         expression = e;
     }
 
+    // Infer type for untyped {#} on either side of == or !=
+    if (equTest) {
+        auto left = convertUntypedInvalid(expression->left, rtype);
+        auto right = convertUntypedInvalid(expression->right, ltype);
+
+        if (left != expression->left || right != expression->right) {
+            auto e = expression->clone();
+            e->left = left;
+            e->right = right;
+            expression = e;
+            ltype = getType(left);
+            rtype = getType(right);
+        }
+    }
+
     if (equTest) {
         Comparison c;
         c.left = expression->left;
@@ -1191,30 +1206,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
         } else if (expression->expr->is<IR::ListExpression>()) {
             auto result = assignment(expression, st, expression->expr);
             return result;
-        } else if (auto ih = expression->expr->to<IR::Invalid>()) {
-            auto type = castType->getP4Type();
-            auto concreteCastType = castType;
-            if (auto ts = castType->to<IR::Type_SpecializedCanonical>())
-                concreteCastType = ts->substituted;
-            if (concreteCastType->is<IR::Type_Header>()) {
-                setType(type, new IR::Type_Type(castType));
-                auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
-                setType(result, castType);
-                setCompileTimeConstant(result);
+        } else if (expression->expr->is<IR::Invalid>()) {
+            // Use convertUntypedInvalid to handle {#} cast to header/header_union
+            auto result = convertUntypedInvalid(expression->expr, castType);
+            if (result != expression->expr) {
+                // Successfully converted; mark original as compile-time constant
                 setCompileTimeConstant(getOriginal<IR::Expression>());
-                return result;
-            } else if (concreteCastType->is<IR::Type_HeaderUnion>()) {
-                setType(type, new IR::Type_Type(castType));
-                auto result = new IR::InvalidHeaderUnion(ih->srcInfo, type, type);
-                setType(result, castType);
-                setCompileTimeConstant(result);
-                setCompileTimeConstant(getOriginal<IR::Expression>());
-                return result;
-            } else {
-                typeError("%1%: 'invalid' expression type `%2%` must be a header or header union",
-                          expression, castType);
-                return expression;
             }
+            return result;
         }
     }
     if (auto lt = concreteType->to<IR::Type_P4List>()) {

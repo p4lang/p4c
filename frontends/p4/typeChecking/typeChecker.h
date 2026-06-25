@@ -200,6 +200,14 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     /// @returns the resolved type, or nullptr if the type is invalid
     const IR::Type_Bits *checkUnderlyingEnumType(const IR::Type *enumType);
 
+    /// Converts an IR::Invalid expression ({#}) with Type_Unknown to a typed
+    /// IR::InvalidHeader or IR::InvalidHeaderUnion, inferred from destType.
+    /// Returns expr unchanged if it is not an untyped Invalid, or if destType
+    /// is not a header or header union.  Emits a type error if destType is
+    /// some other concrete type.
+    const IR::Expression *convertUntypedInvalid(const IR::Expression *expr,
+                                                const IR::Type *destType);
+
     //////////////////////////////////////////////////////////////
     // Template, so we can have common code for both IR::Function* and const IR::Function*
     template <class Node>
