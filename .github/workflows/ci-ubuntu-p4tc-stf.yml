@@ -21,7 +21,6 @@ concurrency:
 jobs:
   # Run p4tc stf tests
   test-ubuntu-p4tc-stf:
-    # Only run on pull requests with the "p4tc" label.
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'p4tc') }}
     runs-on: ubuntu-24.04
     env:
@@ -35,17 +34,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-${{ runner.os }}-gcc
-          max-size: 1000M
-
-      - name: Build (Ubuntu 24.04, GCC)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test"
 
       - name: Run tests (Ubuntu 24.04)
-        # Need to use sudo for the eBPF kernel tests.
         run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random -R "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build

@@ -18,7 +18,6 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # Build and test p4tools on Ubuntu 22.04.
   build-and-test-tools:
     runs-on: ubuntu-22.04
     env:
@@ -27,24 +26,17 @@ jobs:
       CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
-      # This pins BMv2 to current upstream main.
       BMV2_REF: faf7bfe96064d5c6fc7753cad956a9e85445883b
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-tools-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 22.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test-tools"
 
       - name: Run tests (Ubuntu 22.04)
-        # Need to use sudo for the eBPF kernel tests.
         run: sudo -E env PATH="$PATH" uv run ctest -R "testgen|smith" --output-on-failure --schedule-random
         working-directory: ./build

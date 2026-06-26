@@ -18,7 +18,6 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-
   # Build with GCC and test P4C on Ubuntu 24.04.
   test-ubuntu24:
     runs-on: ubuntu-24.04
@@ -32,15 +31,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-${{ runner.os }}-gcc
-          max-size: 1000M
-
-      - name: Build (Ubuntu 24.04, GCC)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test"
 
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
@@ -73,18 +67,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
-          max-size: 1000M
-          # act's ubuntu-22 image needs an update, but it's slow, so don't do it
-          # unilaterally.
-          update-package-index: ${{ env.ACT == 'true' }}
-
-      - name: Build (Ubuntu 22.04, GCC)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test-${{ matrix.unity }}"
 
       - name: Run tests (Ubuntu 22.04)
         run: |
@@ -116,18 +102,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-${{ runner.os }}-gcc
-          max-size: 1000M
-          # act's ubuntu-22 image needs an update, but it's slow, so don't do it
-          # unilaterally.
-          update-package-index: ${{ env.ACT == 'true' }}
-
-      - name: Build (Ubuntu 22.04, GCC)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test"
 
       - name: Run tests (Ubuntu 22.04)
         run: uv run ctest --output-on-failure --schedule-random -R tofino

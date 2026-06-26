@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium & Devansh Singh <devansh.jay.singh@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: "Setup and Build p4c"
+description: "Handles ccache configuration and runs the initial CI build script."
+
+inputs:
+  ccache-key:
+    description: "The unique key string prefix to use for ccache"
+    required: true
+  custom-build-command:
+    description: "Optional custom compilation commands instead of running ci-build.sh"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Configure ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: ${{ inputs.ccache-key }}-${{ runner.os }}
+        max-size: 1000M
+
+    - name: Run baseline CI build
+      shell: bash
+      env:
+        CUSTOM_CMD: ${{ inputs.custom-build-command }}
+      run: |
+        if [ -n "$CUSTOM_CMD" ]; then
+          echo "$CUSTOM_CMD" > custom_build.sh
+          chmod +x custom_build.sh
+          ./custom_build.sh
+          rm custom_build.sh
+        else
+          tools/ci-build.sh
+        fi
