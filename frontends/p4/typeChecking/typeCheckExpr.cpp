@@ -1169,6 +1169,18 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
     auto concreteType = castType;
     if (auto tsc = castType->to<IR::Type_SpecializedCanonical>()) concreteType = tsc->substituted;
     if (auto st = concreteType->to<IR::Type_StructLike>()) {
+        // An explicit cast of an expression to its own type is a no-op and is
+        // permitted (P4 spec 8.12.1), even though casts between struct-like
+        // types are otherwise not supported.
+        if (typeMap->equivalent(sourceType, castType)) {
+            setType(getOriginal(), castType);
+            setType(expression, castType);
+            if (isCompileTimeConstant(expression->expr)) {
+                setCompileTimeConstant(expression);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
+            return expression;
+        }
         if (auto se = expression->expr->to<IR::StructExpression>()) {
             // Interpret (S) { kvpairs } as a struct initializer expression
             // instead of a cast to a struct.
