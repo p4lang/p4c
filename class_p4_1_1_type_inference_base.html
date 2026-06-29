@@ -779,6 +779,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>containsActionEnum</b
 <tr class="memitem:a1f521cf4c5710f810d369abf33d5d0b0" id="r_a1f521cf4c5710f810d369abf33d5d0b0"><td class="memItemLeft" align="right" valign="top"><a id="a1f521cf4c5710f810d369abf33d5d0b0" name="a1f521cf4c5710f810d369abf33d5d0b0"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>containsHeader</b> (const IR::Type *canonType)</td></tr>
 <tr class="separator:a1f521cf4c5710f810d369abf33d5d0b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2121a04aea5c71818f98b0dcf76c625e" id="r_a2121a04aea5c71818f98b0dcf76c625e"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2121a04aea5c71818f98b0dcf76c625e">convertUntypedInvalid</a> (const IR::Expression *expr, const IR::Type *destType)</td></tr>
+<tr class="separator:a2121a04aea5c71818f98b0dcf76c625e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac88e17611f580fb46712ef9e196ad964" id="r_ac88e17611f580fb46712ef9e196ad964"><td class="memItemLeft" align="right" valign="top"><a id="ac88e17611f580fb46712ef9e196ad964" name="ac88e17611f580fb46712ef9e196ad964"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>done</b> () const</td></tr>
 <tr class="separator:ac88e17611f580fb46712ef9e196ad964"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1082,6 +1084,36 @@ right</td>
 </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>: A pair containing the type returned by the constructor and the new arguments (which may change due to insertion of casts). </dd></dl>
+
+</div>
+</div>
+<a id="a2121a04aea5c71818f98b0dcf76c625e" name="a2121a04aea5c71818f98b0dcf76c625e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2121a04aea5c71818f98b0dcf76c625e">&#9670;&#160;</a></span>convertUntypedInvalid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Expression * P4::TypeInferenceBase::convertUntypedInvalid </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Expression *</td>          <td class="paramname"><span class="paramname"><em>expr</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Type *</td>          <td class="paramname"><span class="paramname"><em>destType</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Converts an IR::Invalid expression ({#}) with Type_Unknown to a typed IR::InvalidHeader or IR::InvalidHeaderUnion, inferred from destType. Returns expr unchanged if it is not an untyped Invalid, or if destType is not a header or header union. Emits a type error if destType is some other concrete type. </p>
 
 </div>
 </div>
