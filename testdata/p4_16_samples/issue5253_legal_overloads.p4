@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2026 aeron-gh
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // All of the overloaded extern methods and constructors below share a name with
 // another declaration, but none of them is a duplicate: every pair can still be
 // told apart at a call site, either by the number of arguments or by the

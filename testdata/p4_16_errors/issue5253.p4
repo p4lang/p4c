@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2026 aeron-gh
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Methods and constructors in an extern may only share a name when a call can
 // be disambiguated by the number of arguments or by argument names. Two
 // declarations with the same name, parameter count, and parameter names can

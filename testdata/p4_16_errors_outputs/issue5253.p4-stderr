@@ -1,12 +1,12 @@
-issue5253.p4(10): [--Werror=duplicate] error: Duplicate declaration of E: previous declaration at 
+issue5253.p4(16): [--Werror=duplicate] error: Duplicate declaration of E: previous declaration at 
     E(bit<8> x);
     ^
-issue5253.p4(9)
+issue5253.p4(15)
     E(bit<8> x);
     ^
-issue5253.p4(12): [--Werror=duplicate] error: Duplicate declaration of f: previous declaration at 
+issue5253.p4(18): [--Werror=duplicate] error: Duplicate declaration of f: previous declaration at 
     void f(bit<8> a);
          ^
-issue5253.p4(11)
+issue5253.p4(17)
     void f(bit<8> a);
          ^
