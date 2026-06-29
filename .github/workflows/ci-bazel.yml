@@ -42,7 +42,7 @@ jobs:
           submodules: recursive
 
       - name: Mount bazel cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-direct-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
@@ -64,7 +64,7 @@ jobs:
         run: rm -rf $(bazel info repository_cache)
 
       - name: Save bazel cache
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         if: always() && (github.ref_name == 'main' || fromJSON(env.duration) > 180)
         with:
           path: ~/.cache/bazel
@@ -79,7 +79,7 @@ jobs:
           submodules: recursive
 
       - name: Mount bazel cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: ~/.cache/bazel
           key: ${{ runner.os }}-bazel-indirect-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}
@@ -103,7 +103,7 @@ jobs:
         run: rm -rf $(bazel info repository_cache)
 
       - name: Save bazel cache
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         if: always() && (github.ref_name == 'main' || fromJSON(env.duration) > 180)
         with:
           path: ~/.cache/bazel
