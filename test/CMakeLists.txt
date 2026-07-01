@@ -51,6 +51,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/nethash.cpp
   gtest/visitor.cpp
   gtest/metrics_test.cpp
+  gtest/validate_string_annotations.cpp
 )
 
 if (ENABLE_CONTROL_PLANE)

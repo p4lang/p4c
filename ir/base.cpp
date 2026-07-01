@@ -24,6 +24,30 @@ cstring Annotation::getName() const {
 }
 
 cstring Annotation::getSingleString(bool error) const {
+    // getExpr() only works when the annotation body was successfully parsed into a plain
+    // (unstructured) expression list. Annotations written using the structured syntax
+    // (@foo[...] or @foo[k=v]) or whose body failed to parse do not carry an expression
+    // list at all, so calling getExpr() on them would trigger an internal BUG. Since this
+    // helper is reached from many places (getName(), externalName(), controlPlaneName(),
+    // and warning suppression checks) that run throughout the frontend -- including before
+    // annotation bodies are fully validated -- it must handle these cases gracefully rather
+    // than assuming annotationKind() == Kind::Unstructured.
+    switch (annotationKind()) {
+        case Kind::Unparsed:
+            // The annotation body has not been parsed yet, or failed to parse; in the
+            // latter case an error has already been reported elsewhere, so avoid a
+            // duplicate diagnostic here.
+            return cstring::empty;
+        case Kind::StructuredKVList:
+        case Kind::StructuredExpressionList:
+            if (error)
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "%1%: annotation cannot be written using structured annotation syntax",
+                            this);
+            return cstring::empty;
+        case Kind::Unstructured:
+            break;
+    }
     const auto &expr = getExpr();
     if (expr.size() != 1) {
         if (error) ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
