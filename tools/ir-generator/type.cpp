@@ -162,7 +162,7 @@ cstring TemplateInstantiation::toString() const {
 cstring ReferenceType::toString() const {
     std::string rv = base->toString().c_str();
     if (isConst) rv += " const";
-    rv += " &";
+    rv += isRValue ? " &&" : " &";
     return rv;
 }
 
