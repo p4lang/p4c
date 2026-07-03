@@ -243,6 +243,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::KeyElement *elem) {
     if (type != nullptr && type != IR::Type_MatchKind::get())
         typeError("%1% must be a %2% value", elem->matchType,
                   IR::Type_MatchKind::get()->toString());
+    // A ternary/lpm/range match treats the key as a numeric value or range, which is
+    // meaningless for a non-numeric 'error' key. See https://github.com/p4lang/p4c/issues/5637
+    if (ktype->is<IR::Type_Error>()) {
+        cstring matchKind = elem->matchType->path->name.name;
+        if (matchKind == "ternary" || matchKind == "lpm" || matchKind == "range")
+            typeError(
+                "match kind '%1%' cannot be used with a key of type %2%; "
+                "use 'exact' or 'optional' instead",
+                elem->matchType, ktype->toString());
+    }
     if (isCompileTimeConstant(elem->expression) && !readOnly)
         warn(ErrorType::WARN_IGNORE_PROPERTY, "%1%: constant key element", elem);
     return elem;
