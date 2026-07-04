@@ -327,7 +327,7 @@ def del_dir(directory: Path) -> None:
     """Delete a directory and all its children.
     TODO: Convert to Path input."""
     try:
-        shutil.rmtree(directory, ignore_errors=True)
+        shutil.rmtree(directory)
     except OSError as exception:
         log.error(
             "Could not delete directory, reason:\n%s - %s.",
