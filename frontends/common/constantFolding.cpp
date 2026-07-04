@@ -52,6 +52,19 @@ class CloneConstants : public Transform {
     }
 };
 
+const IR::Type *DoConstantFolding::resolveType(const IR::Type *type) {
+    type = ResolutionContext::resolveType(type);
+    while (auto *tdef = type->to<IR::Type_Typedef>())
+        type = ResolutionContext::resolveType(tdef->type);
+    // DANGER -- because ResolutionContext::resolve methods on a Modifier or Transform always
+    // return the original node (as it existed at the start of the pass), we use visit here to
+    // get any updated type -- specifically a Type_Bits with the size expression constant-folded
+    // into the type.  It would be nice if resolve methods could return the updated node, at
+    // least as an option
+    visit(type);
+    return type;
+}
+
 const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
     if (expr->is<IR::Constant>()) return expr;
@@ -103,6 +116,7 @@ const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
                 // type checking; maybe it's wrong.
                 return e;
         }
+        LOG4("cfold path " << e->path << " -> " << cst);
         return CloneConstants::clone(cst, this);
     }
     return e;
@@ -113,6 +127,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Type_Bits *type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
+            LOG4("cfold type " << getOriginal<IR::Type_Bits>() << " -> " << type);
             if (type->width_bits() < 0 || (type->width_bits() == 0 && type->isSigned)) {
                 ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
                 // Convert it to something legal so we don't get
@@ -155,13 +170,14 @@ const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
         // casts, but if we run this before typechecking we have to be
         // more conservative.
         if (auto cst = init->to<IR::Constant>()) {
-            if (auto dtype = d->type->to<IR::Type_Bits>()) {
+            auto dtype = resolveType(d->type);
+            if (auto bittype = dtype->to<IR::Type_Bits>()) {
                 auto cstBits = cst->type->to<IR::Type_Bits>();
-                if (cstBits && !(*dtype == *cstBits))
+                if (cstBits && !(*bittype == *cstBits))
                     ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: initializer has wrong type %2%", d,
                                 cst->type);
                 else if (cst->type->is<IR::Type_InfInt>())
-                    init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
+                    init = new IR::Constant(init->srcInfo, bittype, cst->value, cst->base);
             } else if (!d->type->is<IR::Type_InfInt>()) {
                 // Don't fold this yet, we can't evaluate the cast.
                 return d;
@@ -914,10 +930,17 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
     if (expr == nullptr) return e;
 
     const IR::Type *etype;
-    if (typesKnown)
+    if (typesKnown) {
         etype = typeMap->getType(getOriginal(), true);
-    else
-        etype = e->destType;
+    } else {
+        etype = resolveType(e->destType);
+        if (etype->is<IR::Type_StructLike>()) {
+            // FIXME -- can't fold this if a Type_Name gets resolved to this, as the cast will
+            // get lost and typechecking will get messed up.  Not clear why, as it seems like
+            // it should work
+            etype = e->destType;
+        }
+    }
 
     if (etype->is<IR::Type_Bits>()) {
         auto type = etype->to<IR::Type_Bits>();

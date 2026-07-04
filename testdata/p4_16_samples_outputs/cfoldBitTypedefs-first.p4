@@ -1,0 +1,10 @@
+typedef bit<8> t1_t;
+const bit<8> v1 = 8w15;
+const t1_t v2 = 8w16;
+typedef bit<15> t2_t;
+typedef bit<16> t3_t;
+typedef t1_t t4_t;
+const t4_t v3 = 8w17;
+typedef bit<17> t5_t;
+const t5_t v4 = 17w18;
+typedef bit<3> t6_t;
