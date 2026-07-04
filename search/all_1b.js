@@ -253,7 +253,7 @@ var searchData=
   ['resolvereferences_250',['ResolveReferences',['../class_p4_1_1_resolve_references.html',1,'P4']]],
   ['resolvesizeofoperator_251',['ResolveSizeOfOperator',['../class_b_f_n_1_1_resolve_size_of_operator.html',1,'BFN']]],
   ['resolvetablekeys_252',['resolveTableKeys',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper.html#ac331cb02e88f041160e32b82dfc15757',1,'P4::P4Tools::P4Testgen::TableStepper']]],
-  ['resolvetype_253',['resolveType',['../class_p4_1_1_resolution_context.html#a97def7f21070f742509dd15ce1c07a37',1,'P4::ResolutionContext::resolveType()'],['../class_p4_1_1_p4_tools_1_1_abstract_execution_state.html#aac8e77c622812d437a9da092a736c905',1,'P4::P4Tools::AbstractExecutionState::resolveType()']]],
+  ['resolvetype_253',['resolveType',['../class_p4_1_1_do_constant_folding.html#aa174f4319686246b541aa8c6d0750a68',1,'P4::DoConstantFolding::resolveType()'],['../class_p4_1_1_resolution_context.html#a97def7f21070f742509dd15ce1c07a37',1,'P4::ResolutionContext::resolveType()'],['../class_p4_1_1_p4_tools_1_1_abstract_execution_state.html#aac8e77c622812d437a9da092a736c905',1,'P4::P4Tools::AbstractExecutionState::resolveType()']]],
   ['resolveunique_254',['resolveUnique',['../class_p4_1_1_resolution_context.html#aa12b9915f218ea60f322e45d67b52ddd',1,'P4::ResolutionContext']]],
   ['resource_20allocation_255',['MAU/PPU resource allocation',['../group__mau__resource__allocation.html',1,'']]],
   ['resource_20usage_256',['Balance between dependencies and resource usage',['../table__placement_8cpp.html#balance-between-dependencies-and-resource-usage',1,'']]],

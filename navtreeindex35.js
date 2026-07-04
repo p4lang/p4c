@@ -1,5 +1,7 @@
 var NAVTREEINDEX35 =
 {
+"struct_b_f_n_1_1_p_s_a_1_1_move_assignment.html":[13,0,4,1,46],
+"struct_b_f_n_1_1_p_s_a_1_1_packet_path.html":[13,0,4,1,47],
 "struct_b_f_n_1_1_p_s_a_1_1_packet_path_type___model.html":[13,0,4,1,50],
 "struct_b_f_n_1_1_p_s_a_1_1_pipeline.html":[13,0,4,1,53],
 "struct_b_f_n_1_1_p_s_a_1_1_program_structure.html":[13,0,4,1,54],
@@ -247,7 +249,5 @@ var NAVTREEINDEX35 =
 "struct_i_x_bar_1_1_use_1_1_group_info.html":[13,0,393,5,1],
 "struct_i_x_bar_1_1_use_1_1_total_info.html":[13,0,393,5,2],
 "struct_i_x_bar_1_1_use_1_1_way.html":[13,0,393,5,3],
-"struct_i_x_bar_1_1failure.html":[13,0,393,0],
-"struct_i_x_bar_random.html":[13,0,398],
-"struct_infer_write_mode.html":[13,0,368]
+"struct_i_x_bar_1_1failure.html":[13,0,393,0]
 };

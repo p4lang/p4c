@@ -9,6 +9,7 @@ var class_p4_1_1_do_constant_folding =
     [ "cast", "class_p4_1_1_do_constant_folding.html#aa71ba657327abc6049c8090dcd2c7d01", null ],
     [ "compare", "class_p4_1_1_do_constant_folding.html#af128dd44c8dc8177f7a16c5762fbaf56", null ],
     [ "getConstant", "class_p4_1_1_do_constant_folding.html#aca5b04b93f3560d362da4b1a62acdfa9", null ],
+    [ "resolveType", "class_p4_1_1_do_constant_folding.html#aa174f4319686246b541aa8c6d0750a68", null ],
     [ "setContains", "class_p4_1_1_do_constant_folding.html#a92320f78791dd5ec5ad5f47be63a62db", null ],
     [ "shift", "class_p4_1_1_do_constant_folding.html#a459b29cbeb3a5438d30f093ac296f971", null ],
     [ "constants", "class_p4_1_1_do_constant_folding.html#a4c3e1735b06cb02e7c8d60eb4c8fc9a9", null ],
