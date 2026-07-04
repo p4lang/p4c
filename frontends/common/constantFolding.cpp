@@ -967,7 +967,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             const auto *ctype = constant->type;
             if (!ctype->is<IR::Type_Bits>() && !ctype->is<IR::Type_InfInt>()) {
                 ::P4::error(ErrorType::ERR_INVALID,
-                            "%1%: Cannot cast %1% to arbitrary presion integer", ctype);
+                            "%1%: Cannot cast %1% to arbitrary precision integer", ctype);
                 return e;
             }
             return new IR::Constant(e->srcInfo, etype, constant->value, constant->base);
