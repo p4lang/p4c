@@ -46,11 +46,11 @@ class NS:
         self.port_mapping = (self.port0_pair, self.port1_pair)
         self.virtme = virtme
 
-    def ns_init_cmd(self) -> int:
+    def ns_init_cmd(self) -> str:
         """Initialize the namespace."""
         return f"{self.mnt_dir}/build-simple-p4 {self.ns_name} {self.port0} {self.port0_pair} {self.port1} {self.port1_pair} {self.block_num}"
 
-    def ns_del_cmd(self) -> int:
+    def ns_del_cmd(self) -> str:
         """Initialize the namespace."""
 
         return f"ip netns del {self.ns_name}"
