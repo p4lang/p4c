@@ -34,7 +34,7 @@ jobs:
       - name: Install git
         run: dnf install -y -q git
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 

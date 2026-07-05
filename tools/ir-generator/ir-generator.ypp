@@ -80,6 +80,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
     }                           emit;
 }
 
+%token ANDAND
 %token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE ENUM INLINE INTERFACE NAMESPACE
                 NEW NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VARIANT VIRTUAL
 %token<str>     BLOCK COMMENTBLOCK IDENTIFIER INCLUDE INTEGER NO STRING ZERO
@@ -374,6 +375,9 @@ type: nonRefType
     | type '&'                          { $$ = new ReferenceType($1); }
     | type CONST '&'                    { $$ = new ReferenceType($1, true); }
     | CONST nonRefType '&'              { $$ = new ReferenceType($2, true); }
+    | type ANDAND                       { $$ = new ReferenceType($1, false, true); }
+    | type CONST ANDAND                 { $$ = new ReferenceType($1, true, true); }
+    | CONST nonRefType ANDAND           { $$ = new ReferenceType($2, true, true); }
     | type '*'                          { $$ = new PointerType($1); }
     | type CONST '*'                    { $$ = new PointerType($1, true); }
     | CONST nonRefType '*'              { $$ = new PointerType($2, true); }

@@ -83,6 +83,10 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     // we substituting constants there.
     bool assignmentTarget;
 
+    /// @returns a concrete type from a Type_Typedef by resolving it and also getting
+    /// any updated type from ConstantFolding an expression size into a Type_Bits
+    const IR::Type *resolveType(const IR::Type *t);
+
     /// @returns a constant equivalent to @p expr or `nullptr`
     const IR::Expression *getConstant(const IR::Expression *expr) const;
 

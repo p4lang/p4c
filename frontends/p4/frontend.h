@@ -58,6 +58,11 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
     /// @returns Defaults to true
     virtual bool foldInlinedFrom() const { return true; }
 
+    /// Returns whether static_assert() should be fully evaluated in the frontend.
+    /// If false, evaluation may be deferred to a later pass.
+    /// @returns Defaults to true
+    virtual bool isStaticAssertFinal() const { return true; }
+
     /// Indicates whether the frontend should run some optimizations (inlining, action localization,
     /// etc.).
     /// @returns default to enabled optimizations unless -O0 was given in the options (i.e. enabled

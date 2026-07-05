@@ -26,9 +26,10 @@ const cstring staticAssertMethodName = "static_assert"_cs;
 class DoStaticAssert : public Transform, public ResolutionContext {
     TypeMap *typeMap;
     bool removeStatement = false;
+    bool isFinal = true;
 
  public:
-    explicit DoStaticAssert(TypeMap *typeMap) : typeMap(typeMap) {
+    explicit DoStaticAssert(TypeMap *typeMap, bool isFinal) : typeMap(typeMap), isFinal(isFinal) {
         CHECK_NULL(typeMap);
         setName("DoStaticAssert");
     }
@@ -67,6 +68,8 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                         return method;
                     }
                     return new IR::BoolLiteral(method->srcInfo, true);
+                } else if (!isFinal) {
+                    return method;
                 } else {
                     ::P4::error(ErrorType::ERR_UNEXPECTED,
                                 "Could not evaluate static_assert to a constant: %1%", arg);
@@ -88,9 +91,9 @@ class DoStaticAssert : public Transform, public ResolutionContext {
 
 class StaticAssert : public PassManager {
  public:
-    explicit StaticAssert(TypeMap *typeMap) {
+    explicit StaticAssert(TypeMap *typeMap, bool isFinal = true) {
         passes.push_back(new ReadOnlyTypeInference(typeMap));
-        passes.push_back(new DoStaticAssert(typeMap));
+        passes.push_back(new DoStaticAssert(typeMap, isFinal));
         setName("StaticAssert");
     }
 };

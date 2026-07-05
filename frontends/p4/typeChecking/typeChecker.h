@@ -200,6 +200,14 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     /// @returns the resolved type, or nullptr if the type is invalid
     const IR::Type_Bits *checkUnderlyingEnumType(const IR::Type *enumType);
 
+    /// Converts an IR::Invalid expression ({#}) with Type_Unknown to a typed
+    /// IR::InvalidHeader or IR::InvalidHeaderUnion, inferred from destType.
+    /// Returns expr unchanged if it is not an untyped Invalid, or if destType
+    /// is not a header or header union.  Emits a type error if destType is
+    /// some other concrete type.
+    const IR::Expression *convertUntypedInvalid(const IR::Expression *expr,
+                                                const IR::Type *destType);
+
     //////////////////////////////////////////////////////////////
     // Template, so we can have common code for both IR::Function* and const IR::Function*
     template <class Node>
@@ -326,6 +334,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::ActionList *al);
 
     const IR::Node *postorder(const IR::ReturnStatement *stat);
+    const IR::Node *postorder(const IR::ForStatement *stat);
     const IR::Node *postorder(const IR::IfStatement *stat);
     const IR::Node *postorder(const IR::SwitchStatement *stat);
     const IR::Node *common_assign(const IR::BaseAssignmentStatement *stat, const IR::Type *);
@@ -474,6 +483,7 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::ActionList *al) override;
 
     void postorder(const IR::ReturnStatement *stat) override;
+    void postorder(const IR::ForStatement *stat) override;
     void postorder(const IR::IfStatement *stat) override;
     void postorder(const IR::SwitchStatement *stat) override;
     void postorder(const IR::AssignmentStatement *stat) override;
@@ -613,6 +623,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::ActionList *al) override;
 
     const IR::Node *postorder(IR::ReturnStatement *stat) override;
+    const IR::Node *postorder(IR::ForStatement *stat) override;
     const IR::Node *postorder(IR::IfStatement *stat) override;
     const IR::Node *postorder(IR::SwitchStatement *stat) override;
     const IR::Node *postorder(IR::AssignmentStatement *stat) override;

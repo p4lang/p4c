@@ -4,6 +4,11 @@ error {
     InvalidIPv4Header
 }
 #include <core.p4>
+
+match_kind {
+    list,
+    range_list
+}
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -302,11 +307,6 @@ control dash_deparser(packet_out packet, in headers_t hdr) {
         packet.emit<tcp_t>(hdr.customer_tcp);
         packet.emit<udp_t>(hdr.customer_udp);
     }
-}
-
-match_kind {
-    list,
-    range_list
 }
 
 control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {

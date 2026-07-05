@@ -315,8 +315,9 @@ using namespace P4;
                               parserDeclaration controlDeclaration enumDeclaration
                               typedefDeclaration packageTypeDeclaration typeDeclaration
 %type<IR::Type_Error*>      errorDeclaration
+%type<IR::Declaration_MatchKind*>  matchKindDeclaration
 %type<IR::Node*>            fragment
-%type<IR::Node*>            declaration externDeclaration matchKindDeclaration
+%type<IR::Node*>            declaration externDeclaration
 %type<IR::Type_Parser*>     parserTypeDeclaration
 %type<IR::Type_Control*>    controlTypeDeclaration
 %type<IR::IndexedVector<IR::Declaration>>  parserLocalElements controlLocalDeclarations
@@ -493,7 +494,7 @@ declaration
     | controlDeclaration      { $$ = $1; }
     | instantiation           { $$ = $1; }
     | errorDeclaration        { $$ = driver.onReadErrorDeclaration($1) ? $1 : nullptr; }
-    | matchKindDeclaration    { $$ = $1; }
+    | matchKindDeclaration    { $$ = driver.onReadMatchKindDeclaration($1) ? $1 : nullptr; }
     | functionDeclaration     { $$ = $1; }
     ;
 

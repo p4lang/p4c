@@ -18,6 +18,15 @@ limitations under the License.
 
 namespace P4 {
 
+const IR::Node *TypeInferenceBase::postorder(const IR::ForStatement *stmt) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto type = getType(stmt->condition);
+    if (type == nullptr) return stmt;
+    if (!type->is<IR::Type_Boolean>())
+        typeError("Condition of %1% does not evaluate to a bool but %2%", stmt, type->toString());
+    return stmt;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::IfStatement *conditional) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(conditional->condition);

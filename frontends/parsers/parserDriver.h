@@ -183,6 +183,11 @@ class P4ParserDriver final : public AbstractParserDriver {
     //          been combined into a previous one (and should be elided)
     bool onReadErrorDeclaration(IR::Type_Error *error);
 
+    /// Notify that the parser parsed a P4 `match_kind` declaration.
+    //  @return true if this is the first match_kind declaration, false if it has
+    //          been combined into a previous one (and should be elided)
+    bool onReadMatchKindDeclaration(IR::Declaration_MatchKind *matchKind);
+
     ////////////////////////////////////////////////////////////////////////////
     // Shared state manipulated directly by the lexer and parser.
     ////////////////////////////////////////////////////////////////////////////
@@ -217,6 +222,11 @@ class P4ParserDriver final : public AbstractParserDriver {
     /// lazily created the first time we see an `error` declaration. (This node
     /// is present in @declarations as well.)
     IR::Type_Error *allErrors = nullptr;
+
+    /// All P4 `match_kind` declarations are merged together in the node, which
+    /// is lazily created the first time we see a `match_kind` declaration. (This
+    /// node is present in @declarations as well.)
+    IR::Declaration_MatchKind *allMatchKinds = nullptr;
 };
 
 }  // namespace P4
