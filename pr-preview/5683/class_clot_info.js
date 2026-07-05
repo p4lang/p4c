@@ -1,0 +1,28 @@
+var class_clot_info =
+[
+    [ "adjust_clots", "class_clot_info.html#acfb51401831f3117c24842acbdb813fc", null ],
+    [ "allocated_slices", "class_clot_info.html#ac86aaa161635352dd248916c968d6384", null ],
+    [ "allocated_slices", "class_clot_info.html#a0ee6a6376249b5439a1aac9f0d53e3d7", null ],
+    [ "allocated_unmodified_undigested", "class_clot_info.html#a38fa25613073428236463da4f0fb5612", null ],
+    [ "clot_covers_slice", "class_clot_info.html#a06aa990a7f407be41f46eed654de3863", null ],
+    [ "clot_eligible_fields", "class_clot_info.html#a324d477730030bcbaf467a40b49abf2e", null ],
+    [ "fully_allocated", "class_clot_info.html#a80b47d78018049d5d25b4fd12266af7e", null ],
+    [ "fully_allocated", "class_clot_info.html#a2707ce91e626a050f2626b054df26a8d", null ],
+    [ "fully_allocated", "class_clot_info.html#a4c29ec08fe82218e195c25a9a0653629", null ],
+    [ "get_csum_fields", "class_clot_info.html#aa648cc52c496fd477544e289dacf7414", null ],
+    [ "get_overwrite_containers", "class_clot_info.html#a9a746be1819cde05dc430d7fc8513e27", null ],
+    [ "is_added_by_mau", "class_clot_info.html#a1c79a4b8aa49999d50b83515a61aeda1", null ],
+    [ "is_checksum", "class_clot_info.html#a99efda1bc7f732ce43b41ecc4664dd95", null ],
+    [ "is_modified", "class_clot_info.html#a80b51a9767a74886e4b52bd24b20affc", null ],
+    [ "is_readonly", "class_clot_info.html#a9c13d6f43b003c2298fcd51a51080a4d", null ],
+    [ "is_slice_below_min_offset", "class_clot_info.html#a19f7a06b95b8365d260384e49864bda0", null ],
+    [ "is_unused", "class_clot_info.html#aee67f11ff2c4094f9f7ee190c5d18c02", null ],
+    [ "merge_parser_states", "class_clot_info.html#aff7c5c4691c34a0819b19814966c0c66", null ],
+    [ "sanitize_state_name", "class_clot_info.html#a664f9dcec92224dce45aa8b035361efb", null ],
+    [ "slice_clots", "class_clot_info.html#afc3bafadb16d898417a7dd538dd90215", null ],
+    [ "slice_clots", "class_clot_info.html#a2a8c5d7eee0e1e1b7009ae37c713fd4e", null ],
+    [ "slice_overwritten", "class_clot_info.html#a81a2d17b5473f5ae12f006ad54f2bbbc", null ],
+    [ "slice_overwritten_by_phv", "class_clot_info.html#a8e3d0ea55c06f8119ff04b27fd283d1b", null ],
+    [ "whole_field_clot", "class_clot_info.html#adc611d9d53f6c5fb1075f6bda45c31d6", null ],
+    [ "pov_extracted_without_fields", "class_clot_info.html#ac79a7bebefc177824d41ab3daa309d61", null ]
+];

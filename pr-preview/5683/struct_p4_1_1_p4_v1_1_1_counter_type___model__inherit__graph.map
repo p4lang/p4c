@@ -1,0 +1,9 @@
+<map id="P4::P4V1::CounterType_Model" name="P4::P4V1::CounterType_Model">
+<area shape="rect" id="Node000001" title=" " alt="" coords="11,225,179,265"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_model_1_1_enum___model.html" title="Enum_Model : Type_Model." alt="" coords="5,152,184,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,191,97,225,92,225,92,191"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_model_1_1_type___model.html" title=" " alt="" coords="9,79,180,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,118,97,152,92,152,92,118"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_model_1_1_elem.html" title=" " alt="" coords="31,5,158,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="97,44,97,79,92,79,92,44"/>
+</map>

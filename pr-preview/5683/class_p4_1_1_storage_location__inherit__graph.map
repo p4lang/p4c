@@ -1,0 +1,21 @@
+<map id="P4::StorageLocation" name="P4::StorageLocation">
+<area shape="rect" id="Node000001" title="Abstraction for something that is has a left value (variable, parameter)" alt="" coords="163,152,314,177"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_base_location.html" title=" " alt="" coords="5,225,139,251"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="200,185,100,228,98,223,198,180"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_indexed_location.html" title="Interface for locations that support an index operation." alt="" coords="163,225,315,251"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="241,191,241,225,236,225,236,191"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_with_fields_location.html" title="Base class for location sets that contain fields." alt="" coords="339,225,509,251"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="282,180,395,223,393,228,280,185"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_i_has_db_print.html" title=" " alt="" coords="108,79,231,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,112,229,150,226,154,188,116"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="255,79,361,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="289,116,252,154,248,150,285,112"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="251,5,365,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="311,44,311,79,305,79,305,44"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_array_location.html" title=" " alt="" coords="23,299,159,324"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="204,259,116,301,114,296,202,254"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_tuple_location.html" title=" " alt="" coords="183,299,318,324"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="246,264,251,298,246,299,240,265"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_struct_location.html" title=" " alt="" coords="355,299,493,324"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="427,264,427,299,421,299,421,264"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="P4::ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface" name="P4::ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,223,232,277"/>
+<area shape="rect" id="Node000002" href="$struct_b_f_n_1_1_p_s_a_arch_handler_builder.html" title="The architecture handler builder implementation for PSA." alt="" coords="292,5,501,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="137,209,160,168,192,122,232,77,279,40,302,28,305,33,281,44,236,81,196,125,165,171,142,212"/>
+<area shape="rect" id="Node000003" href="$struct_b_f_n_1_1_tofino_arch_handler_builder.html" title="The architecture handler builder implementation for Tofino." alt="" coords="286,55,507,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="146,210,203,147,239,115,279,89,306,78,308,83,281,94,242,119,206,150,150,213"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder.html" title="The architecture handler builder implementation for PNA." alt="" coords="295,104,498,159"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="181,214,279,168,308,156,310,161,281,172,184,219"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_n_a_arch_handler_builder_for_d_p_d_k.html" title="The architecture handler builder implementation for PNA." alt="" coords="295,183,498,237"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="245,229,295,222,296,227,246,234"/>
+<area shape="rect" id="Node000006" href="$struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html" title="The architecture handler builder implementation for PSA." alt="" coords="295,261,498,316"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="246,265,296,272,295,277,245,270"/>
+<area shape="rect" id="Node000007" href="$struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html" title="The architecture handler builder implementation for PSA." alt="" coords="295,340,498,395"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="186,281,281,325,313,337,311,342,279,330,183,286"/>
+<area shape="rect" id="Node000008" href="$struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html" title="The architecture handler builder implementation for UBPF." alt="" coords="292,419,501,473"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="152,286,209,346,244,377,281,404,305,416,302,421,279,408,240,381,205,350,148,290"/>
+<area shape="rect" id="Node000009" href="$struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_v1_model_arch_handler_builder.html" title="The architecture handler builder implementation for v1model." alt="" coords="280,497,513,552"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="140,289,163,333,194,385,234,438,282,483,301,495,298,499,278,487,230,441,190,388,158,336,135,291"/>
+</map>
