@@ -1,0 +1,4 @@
+issue5685-parser-default.p4(7): [--Werror=type-error] error: x: parser type declarations cannot have parameters with default values
+parser P<H>(in H h, in bit<8> x = 0);
+                              ^
+[--Werror=type-error] error: Error while analyzing top
