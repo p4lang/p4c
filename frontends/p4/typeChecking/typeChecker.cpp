@@ -911,7 +911,7 @@ TypeInferenceBase::containerInstantiation(
             if (auto v = param->type->to<IR::Type_InfInt>()) {
                 auto tv = IR::Type_InfInt::get(param->type->srcInfo);
                 bool b = tvs.setBinding(v, tv);
-                BUG_CHECK(b, "failed replacing %2% with %3%", v, tv);
+                BUG_CHECK(b, "failed replacing %1% with %2%", v, tv);
             }
         }
         TypeVariableSubstitutionVisitor sv(&tvs, true);
