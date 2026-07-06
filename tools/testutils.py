@@ -116,7 +116,7 @@ def compare_pkt(expected: str, received: bytes) -> int:
                 idx,
                 val,
                 received[idx],
-                )
+	)
             log.error("Expected packet\n %s", expected)
             return FAILURE
     return SUCCESS
