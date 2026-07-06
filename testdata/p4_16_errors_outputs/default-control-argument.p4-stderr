@@ -1,0 +1,4 @@
+default-control-argument.p4(17): [--Werror=type-error] error: intr_md: control type declarations cannot have parameters with default values
+    in intrinsic_metadata_t intr_md = {0, 0});
+                            ^^^^^^^
+[--Werror=type-error] error: Error while analyzing P
