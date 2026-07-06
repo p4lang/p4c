@@ -128,7 +128,8 @@ void assign_input_bug_check(const ordered_map<ContainerID, ContainerSpec> &specs
                   assign.dst.container, i, assign);
     }
 
-    BUG_CHECK(!assign.dst.is_ad_or_const, "destination cannot be const or action data: %1%");
+    BUG_CHECK(!assign.dst.is_ad_or_const, "destination cannot be const or action data: %1%",
+              assign);
     if (!assign.src.is_ad_or_const) {
         BUG_CHECK(assign.dst.range.size() == assign.src.range.size(),
                   "assignment range mismatch: %1%", assign);
