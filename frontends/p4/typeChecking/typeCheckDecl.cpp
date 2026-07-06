@@ -62,9 +62,10 @@ bool TypeInferenceBase::checkParameters(const IR::ParameterList *paramList, bool
         if (applyType != nullptr) {
             for (auto param : applyType->getApplyParameters()->parameters) {
                 if (param->defaultValue != nullptr) {
-                    typeError("%1%: %2% type declarations cannot have parameters "
-                              "with default values",
-                              param, kindName);
+                    typeError(
+                        "%1%: %2% type declarations cannot have parameters "
+                        "with default values",
+                        param, kindName);
                     return false;
                 }
             }
