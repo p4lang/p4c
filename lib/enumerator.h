@@ -32,7 +32,7 @@ limitations under the License.
 #include "config.h"
 #include "iterator_range.h"
 
-#if !HAVE_LIBGC
+#if defined(HAVE_LIBGC) && !HAVE_LIBGC
 #include "ir/shared_ptr.h"  // for dynamic_pointer_cast
 #endif
 
@@ -397,7 +397,7 @@ class AsEnumerator final : public Enumerator<S> {
     template <typename U = S>
     typename std::enable_if_t<!Detail::can_be_casted<T, S>, U> getCurrentImpl() const {
         T current = input->getCurrent();
-#if HAVE_LIBGC
+#if !defined(HAVE_LIBGC) || HAVE_LIBGC
         return dynamic_cast<S>(current);
 #else /* !HAVE_LIBC */
         return dynamic_pointer_cast<S>(current);
