@@ -143,11 +143,13 @@ class TemplateInstantiation : public Type {
 class ReferenceType : public Type {
     const Type *base;
     bool isConst;
+    bool isRValue;
 
  public:
-    explicit ReferenceType(const Type *t, bool c = false) : base(t), isConst(c) {}
-    ReferenceType(Util::SourceInfo si, const Type *t, bool c = false)
-        : Type(si), base(t), isConst(c) {}
+    explicit ReferenceType(const Type *t, bool c = false, bool rv = false)
+        : base(t), isConst(c), isRValue(rv) {}
+    ReferenceType(Util::SourceInfo si, const Type *t, bool c = false, bool rv = false)
+        : Type(si), base(t), isConst(c), isRValue(rv) {}
     bool isResolved() const override { return false; }
     const IrClass *resolve(const IrNamespace *ns) const override {
         base->resolve(ns);
@@ -156,7 +158,7 @@ class ReferenceType : public Type {
     cstring toString() const override;
     bool operator==(const Type &t) const override { return t == *this; }
     bool operator==(const ReferenceType &t) const override {
-        return isConst == t.isConst && *base == *t.base;
+        return isConst == t.isConst && isRValue == t.isRValue && *base == *t.base;
     }
     static ReferenceType OstreamRef, VisitorRef;
 };

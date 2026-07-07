@@ -543,11 +543,47 @@ bool TypeInferenceBase::canCastBetween(const IR::Type *dest, const IR::Type *src
     return false;
 }
 
+const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
+                                                               const IR::Type *destType) {
+    // Guard: only act on untyped Invalid literals
+    if (!expr->is<IR::Invalid>()) return expr;
+    if (!expr->type->is<IR::Type_Unknown>()) return expr;
+
+    // Resolve the destination type fully (unwrap Type_Name, typedefs, etc.)
+    auto concreteType = typeMap->getTypeType(destType, true);
+    if (concreteType == nullptr) return expr;
+
+    // Handle specialized canonical types
+    if (auto tsc = concreteType->to<IR::Type_SpecializedCanonical>())
+        concreteType = tsc->substituted;
+
+    // Set common type information before creating result
+    auto type = destType->getP4Type();
+    setType(type, new IR::Type_Type(destType));
+
+    IR::Expression *result = nullptr;
+    if (concreteType->is<IR::Type_Header>()) {
+        result = new IR::InvalidHeader(expr->srcInfo, type, type);
+    } else if (concreteType->is<IR::Type_HeaderUnion>()) {
+        result = new IR::InvalidHeaderUnion(expr->srcInfo, type, type);
+    } else {
+        // destType is not a header/header_union — leave expr untyped for normal error handling
+        return expr;
+    }
+
+    // Set common properties after creating result
+    setType(result, destType);
+    setCompileTimeConstant(result);
+    return result;
+}
+
 const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPosition,
                                                     const IR::Type *destType,
                                                     const IR::Expression *sourceExpression) {
     if (destType->is<IR::Type_Unknown>()) BUG("Unknown destination type");
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
+    // Convert untyped {#} literals to typed InvalidHeader/InvalidHeaderUnion
+    sourceExpression = convertUntypedInvalid(sourceExpression, destType);
     const IR::Type *initType = getType(sourceExpression);
     if (initType == nullptr) return sourceExpression;
 

@@ -41,6 +41,24 @@ Tests often have corresponding expected output files in directories suffixed wit
 Similarly, for other error output files, you can check:
 - `testdata/p4_16_pattern_errors_outputs/`
 
+#### What Gets Generated
+Running the compiler on a test writes reference files into the matching `_outputs` directory. The set of files depends on the test type.
+
+A positive test in `testdata/p4_16_samples/foo.p4` produces five files in `testdata/p4_16_samples_outputs/`:
+- `foo.p4`: the program after parsing, printed back to P4.
+- `foo-first.p4`: the program near the start of the frontend (the `FrontEndDump` pass).
+- `foo-frontend.p4`: the program after the frontend finishes (the `FrontEndLast` pass).
+- `foo-midend.p4`: the program after the midend finishes (the `MidEndLast` pass).
+- `foo.p4-stderr`: anything the compiler wrote to stderr, such as warnings.
+
+A negative test in `testdata/p4_16_errors/foo.p4` produces two files in `testdata/p4_16_errors_outputs/`. Compilation stops at the error, so the frontend and midend dumps are not written:
+- `foo.p4`: the program after parsing, printed back to P4.
+- `foo.p4-stderr`: the expected error and warning messages.
+
+A test targeting BMv2 (file name ending in `-bmv2.p4`) also generates `foo.p4info.txtpb` and `foo.entries.txtpb` when the program produces P4Runtime information.
+
+Commit every generated file along with the test source. All of them are compared on each run, and any mismatch fails the test.
+
 ### XFAIL Tests
 XFAIL tests are used when a test is currently failing due to a known compiler issue. For example, a positive test may fail due to an unexpected compile-time error, or a negative test may not detect an intended error. These tests are temporarily marked as XFAIL to track the issue while preventing the test suite from failing. Once the bug is resolved, the XFAIL status should be removed.
 
@@ -81,6 +99,8 @@ You can run tests using `ctest`, which is the recommended approach moving forwar
      `../backends/p4test/run-p4-sample.py . -f ../testdata/p4_16_samples/some_name.p4`
    - For BMv2 tests:  
      `../backends/bmv2/run-bmv2-test.py`
+
+   The `-f` flag writes the reference files from the current compiler output, creating them the first time and overwriting them afterward. Run the same command without `-f` to only compare against the checked-in files. Setting `P4TEST_REPLACE=True` in the environment does the same thing as `-f`, which is handy when regenerating many tests at once, for example `P4TEST_REPLACE=True make check`.
 
 4. Commit the test and reference output files.
 
