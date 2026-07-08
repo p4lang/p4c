@@ -348,13 +348,13 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout local_metadata_t l
 
 control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
     @name("PreQosPipe.hasReturned_0") bool hasReturned_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
     @name("PreQosPipe.pre_qos_counter") counter<counter_index_t>(32w1024, CounterType.packets_and_bytes) pre_qos_counter_0;
     @name("PreQosPipe.app_meter") meter<app_meter_idx_t>(32w1024, MeterType.bytes) app_meter_0;

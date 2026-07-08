@@ -61,7 +61,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 }
 
 control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {

@@ -38,7 +38,7 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.set_data") action set_data() {
     }

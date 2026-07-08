@@ -196,7 +196,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.set_mcast_grp") action set_mcast_grp(@name("mcast_grp") bit<16> mcast_grp_1, @name("port") bit<9> port) {
         standard_metadata.mcast_grp = mcast_grp_1;
@@ -220,7 +220,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
 }
 
 control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("egress.set_out_bd") action set_out_bd(@name("bd") bit<24> bd) {
         meta.fwd.out_bd = bd;

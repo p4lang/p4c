@@ -87,7 +87,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
@@ -123,13 +123,13 @@ struct tuple_0 {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
     @name("._drop") action _drop_2() {
         mark_to_drop(standard_metadata);

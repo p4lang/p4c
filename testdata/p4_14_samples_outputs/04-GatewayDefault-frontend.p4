@@ -35,7 +35,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".nop") action nop() {
     }
@@ -55,13 +55,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
     @name(".nop") action nop_2() {
     }

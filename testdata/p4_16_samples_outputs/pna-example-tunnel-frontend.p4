@@ -83,9 +83,9 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     @name("main_control.istd_0") pna_main_input_metadata_t istd_1;
     @name("main_control.retval") bool retval;
     @name("main_control.inlinedRetval") bool inlinedRetval_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("main_control.tunnel_decap.decap_outer_ipv4") action tunnel_decap_decap_outer_ipv4_0(@name("tunnel_id") tunnel_id_t tunnel_id) {
         local_metadata.tunnel.id = tunnel_id;

@@ -41,6 +41,7 @@ const cstring IR::Annotation::disableOptimizationAnnotation = "disable_optimizat
 const cstring IR::Annotation::inlinedFromAnnotation = "inlinedFrom"_cs;
 const cstring IR::Annotation::likelyAnnotation = "likely"_cs;
 const cstring IR::Annotation::unlikelyAnnotation = "unlikely"_cs;
+const cstring IR::Annotation::corelibAnnotation = "corelib"_cs;
 
 namespace Annotations {
 void addIfNew(Vector<Annotation> &annotations, cstring name, const Expression *expr,

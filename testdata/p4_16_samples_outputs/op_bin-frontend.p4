@@ -37,7 +37,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool xout) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.set_flowlabel") action set_flowlabel(@name("label") bit<20> label) {
         headers.ipv6.ip_version_traffic_class_and_flow_label[31:12] = label;

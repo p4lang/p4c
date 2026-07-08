@@ -22,7 +22,7 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
 }
 
 control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.a1") action a1() {
         hdr.payload.x = 8w0xaa;

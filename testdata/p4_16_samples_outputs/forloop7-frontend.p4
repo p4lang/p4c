@@ -17,7 +17,7 @@ control c(inout headers_t hdrs) {
     @name("c.b") bit<16> b_0;
     @name("c.tmp") bool tmp;
     @name("c.hasReturned") bool hasReturned;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a0") action a0(@name("m") bit<8> m_1) {
         hasReturned = false;

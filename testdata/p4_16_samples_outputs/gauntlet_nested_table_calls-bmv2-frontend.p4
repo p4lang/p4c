@@ -29,7 +29,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.input_value_0") bit<16> input_value;
     @name("ingress.retval") bit<16> retval;
     @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.exit_action") action exit_action() {
         exit;

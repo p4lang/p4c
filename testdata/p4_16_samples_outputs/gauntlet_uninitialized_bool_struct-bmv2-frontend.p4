@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bool_struct tmp_0;
     @name("ingress.dummy_bit") bit<16> dummy_bit_0;
     @name("ingress.dummy_struct") bool_struct dummy_struct_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.dummy_action") action dummy_action() {
         h.eth_hdr.eth_type = dummy_bit_0;

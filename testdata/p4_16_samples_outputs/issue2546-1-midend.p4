@@ -20,9 +20,9 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     @name("ingress.tmp") bool tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {

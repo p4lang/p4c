@@ -76,7 +76,7 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
     @name("MyIC.vid_0") bit<12> vid_1;
     @name("MyIC.retval") bit<16> retval;
     @name("MyIC.inlinedRetval") bit<16> inlinedRetval_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {

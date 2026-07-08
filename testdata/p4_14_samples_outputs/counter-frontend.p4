@@ -44,7 +44,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 @name(".my_indirect_counter") counter<bit<14>>(32w16384, CounterType.packets) my_indirect_counter;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter_0;
     @name(".m_action") action m_action_0(@name("idx") bit<14> idx) {

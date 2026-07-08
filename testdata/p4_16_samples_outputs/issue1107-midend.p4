@@ -17,7 +17,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("IngressI.myc.set_eg") action myc_set_eg_0(@name("eg") bit<9> eg_1) {
         smeta.egress_spec = eg_1;

@@ -80,9 +80,9 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("MainControlImpl.a1") action a1(@name("param") bit<48> param) {
         hdr.ethernet.dstAddr = param;

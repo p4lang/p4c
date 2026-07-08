@@ -30,9 +30,9 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.tmp1") bit<8> tmp1_0;
     @name("ingressImpl.tmp2") bit<8> tmp2_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".foo1") action foo1_0() {
     }

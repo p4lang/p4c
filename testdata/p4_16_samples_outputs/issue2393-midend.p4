@@ -11,7 +11,7 @@ struct Headers {
 control ingress(inout Headers h) {
     @name(".do_global_action") action do_global_action_0() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
     }

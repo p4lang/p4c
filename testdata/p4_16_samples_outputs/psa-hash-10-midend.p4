@@ -53,7 +53,7 @@ struct tuple_0 {
 }
 
 control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.h") Hash<bit<16>>(PSA_HashAlgorithm_t.CRC16) h_0;
     @name("MyIC.a1") action a1() {

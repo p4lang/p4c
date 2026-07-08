@@ -33,7 +33,7 @@ parser p(packet_in pkt, out Headers h, inout Meta m, inout standard_metadata_t s
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<32> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.c.a") action c_a_0() {
         h.h.b = h.h.a;

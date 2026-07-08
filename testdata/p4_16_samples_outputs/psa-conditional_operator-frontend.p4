@@ -37,7 +37,7 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     @name("MyIC.tmp1") bit<16> tmp1_0;
     @name("MyIC.tmp") bit<16> tmp_0;
     @name("MyIC.tmp_1") bit<16> tmp_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.execute") action execute_1() {
         if (b.data != 16w0) {

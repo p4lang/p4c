@@ -244,7 +244,7 @@ struct local_metadata_t {
 
 control ingress(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @name("ingress.acl_wbb_ingress.ttl") bit<8> acl_wbb_ingress_ttl;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @id(0x15000101) @name("ingress.acl_wbb_ingress.acl_wbb_ingress_meter") direct_meter<MeterColor_t>(MeterType.bytes) acl_wbb_ingress_acl_wbb_ingress_meter;
     @id(0x13000103) @name("ingress.acl_wbb_ingress.acl_wbb_ingress_counter") direct_counter(CounterType.packets_and_bytes) acl_wbb_ingress_acl_wbb_ingress_counter;

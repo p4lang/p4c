@@ -87,9 +87,9 @@ control PreControlImpl(in headers_t hdr, inout local_metadata_t meta, in pna_pre
 }
 
 control main_control(inout headers_t hdr, inout local_metadata_t local_metadata, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("main_control.tunnel_decap.decap_outer_ipv4") action tunnel_decap_decap_outer_ipv4_0(@name("tunnel_id") bit<24> tunnel_id) {
         local_metadata._tunnel_id1 = tunnel_id;

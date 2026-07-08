@@ -5,11 +5,11 @@ control ingress(inout bit<32> b) {
     @name("ingress.tmp_0") bit<8> tmp_0;
     @name("ingress.tmp_1") bool tmp_1;
     @name("ingress.tmp_2") bit<8> tmp_2;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("ingress.t0") table t0_0 {
         key = {

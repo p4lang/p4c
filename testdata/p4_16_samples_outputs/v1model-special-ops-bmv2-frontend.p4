@@ -146,7 +146,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
 
 control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name("egress.smeta") standard_metadata_t smeta_4;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".my_drop") action my_drop_4() {
         smeta_4 = standard_metadata;

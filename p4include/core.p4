@@ -31,6 +31,7 @@ error {
                            /// not supported by the implementation.
 }
 
+@corelib
 extern packet_in {
     /// Read a header from the packet into a fixed-sized header @hdr and advance the cursor.
     /// May trigger error PacketTooShort or StackOutOfBounds.
@@ -53,6 +54,7 @@ extern packet_in {
     bit<32> length();
 }
 
+@corelib
 extern packet_out {
     /// Write @hdr into the output packet, advancing cursor.
     /// @T can be a header type, a header stack, a header_union, or a struct
@@ -63,10 +65,11 @@ extern packet_out {
 // TODO: remove from this file, convert to built-in
 /// Check a predicate @check in the parser; if the predicate is true do nothing,
 /// otherwise set the parser error to @toSignal, and transition to the `reject` state.
+@corelib
 extern void verify(in bool check, in error toSignal);
 
 /// Built-in action that does nothing.
-@noWarn("unused")
+@corelib @noWarn("unused")
 action NoAction() {}
 
 /// Standard match kinds for table key fields.
@@ -87,9 +90,11 @@ match_kind {
 /// The function returns a boolean, so that it can be used
 /// as a global constant value in a program, e.g.:
 /// const bool _check = static_assert(V1MODEL_VERSION > 20180000, "Expected a v1 model version >= 20180000");
+@corelib
 extern bool static_assert(bool check, string message);
 
 /// Like the above but using a default message.
+@corelib
 extern bool static_assert(bool check);
 
 #endif  /* _CORE_P4_ */

@@ -15,7 +15,7 @@ struct my_meta_t {
 }
 
 control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.hit") action hit(@name("p") bit<16> p) {
         hdr.h.f1 = p;

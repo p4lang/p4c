@@ -10,7 +10,7 @@ struct Headers {
 
 control ingress(inout Headers h) {
     bit<16> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.sub.dummy") table sub_dummy {
         key = {

@@ -91,7 +91,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
@@ -119,15 +119,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name(".flowlet_id") register<bit<16>, bit<13>>(32w8192) flowlet_id;
 @name(".flowlet_lasttime") register<bit<32>, bit<13>>(32w8192) flowlet_lasttime;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
     @name("._drop") action _drop_2() {
         mark_to_drop(standard_metadata);

@@ -34,7 +34,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 @name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".set_index") action set_index(@name("index") bit<16> index_1, @name("port") bit<9> port) {
         meta.counter_metadata.counter_index = index_1;

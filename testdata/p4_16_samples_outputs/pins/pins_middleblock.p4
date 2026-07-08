@@ -1237,7 +1237,7 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
     // Only allow icmp_type matches for ICMP packets
     icmpv6_type::mask != 0 -> ip_protocol == 58;
-# 369 " .. / .. / .. / .. / pins - infra / sai_p4 / instantiations / google / acl_ingress . p4 "
+ # 369 " .. / .. / .. / .. / pins - infra / sai_p4 / instantiations / google / acl_ingress . p4 "
   ") table acl_ingress_qos_table {
         key = {
             headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);

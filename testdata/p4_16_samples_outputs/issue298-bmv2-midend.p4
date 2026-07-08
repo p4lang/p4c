@@ -125,7 +125,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("egress._drop") action _drop() {
         mark_to_drop(standard_metadata);

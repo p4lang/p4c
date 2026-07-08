@@ -46,7 +46,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, in pna
 }
 
 control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {

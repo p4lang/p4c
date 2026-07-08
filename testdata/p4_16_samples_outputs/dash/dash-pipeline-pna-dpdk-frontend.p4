@@ -456,21 +456,21 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     @name("dash_ingress.underlay_dip") IPv4Address underlay_dip_20;
     @name("dash_ingress.underlay_sip") IPv4Address underlay_sip_18;
     @name("dash_ingress.tunnel_key") bit<24> tunnel_key_12;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_8() {
     }
     @name(".tunnel_decap") action tunnel_decap_1() {
         hdr_0 = hdr;

@@ -24,7 +24,7 @@ control caller(inout headers hdr) {
     @name("caller.result") bit<32> result_9;
     @name("caller.result") bit<32> result_10;
     @name("caller.result") bit<32> result_11;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("caller.operation_add") action operation_add() {
         result_0 = hdr.p4calc.operand_a;

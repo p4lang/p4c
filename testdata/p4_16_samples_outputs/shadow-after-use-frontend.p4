@@ -1,7 +1,7 @@
 #include <core.p4>
 
 control c(inout bit<16> x) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.incx") action incx() {
         x = x + 16w1;

@@ -85,7 +85,7 @@ parser EgressParserImpl(packet_in buffer, out headers hdr, inout metadata user_m
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     bit<8> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @corelib @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("egress.execute") action execute_1() {
         user_meta.data = 16w1;
