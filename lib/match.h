@@ -40,7 +40,7 @@ struct match_t {
     explicit operator bool() const { return (word0 | word1) != 0; }
     bool operator==(const match_t &a) const { return word0 == a.word0 && word1 == a.word1; }
     bool operator!=(const match_t &a) const { return word0 != a.word0 || word1 != a.word1; }
-    bool matches(big_int v) const {
+    [[nodiscard]] bool matches(big_int v) const {
         return (v | word1) == word1 && ((~v & word1) | word0) == word0;
     }
     void setwidth(int bits) {
@@ -54,7 +54,10 @@ struct match_t {
     match_t(int size, big_int val, big_int mask) : word0(~val & mask), word1(val & mask) {
         setwidth(size);
     }
-    static match_t dont_care(int size) { return match_t(size, 0, 0); }
+    static match_t dont_care(int size) { return {size, 0, 0}; }
+    bool operator<(const match_t &a) const {
+        return word0 < a.word0 || (word0 == a.word0 && word1 < a.word1);
+    }
 };
 
 std::ostream &operator<<(std::ostream &, const match_t &);
