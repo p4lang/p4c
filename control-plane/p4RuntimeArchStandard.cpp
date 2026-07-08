@@ -107,7 +107,8 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         auto *typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not "
-                  "be converted to P4Info P4DataTypeSpec");
+                  "be converted to P4Info P4DataTypeSpec",
+                  typeArg);
         return Digest{controlPlaneName, typeSpec, nullptr};
     }
 

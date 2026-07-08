@@ -940,7 +940,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation *expression) {
 
     auto clone = expression->clone();
     if (l->is<SymbolicInteger>()) {
-        BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger");
+        BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected a SymbolicInteger", r);
         clone->left = l->to<SymbolicInteger>()->constant;
         clone->right = r->to<SymbolicInteger>()->constant;
         DoConstantFolding cf(refMap, typeMap);
@@ -950,7 +950,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation *expression) {
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
     } else if (l->is<SymbolicBool>()) {
-        BUG_CHECK(r->is<SymbolicBool>(), "%1%: expected an SymbolicBool");
+        BUG_CHECK(r->is<SymbolicBool>(), "%1%: expected a SymbolicBool", r);
         clone->left = new IR::BoolLiteral(l->to<SymbolicBool>()->value);
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
         DoConstantFolding cf(refMap, typeMap);
