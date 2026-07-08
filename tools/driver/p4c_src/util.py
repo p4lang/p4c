@@ -23,10 +23,9 @@ def get_script_dir(follow_symlinks=True):
 # recursive find, good for developer
 def rec_find_bin(cwd, exe):
     found = None
-    for root, dirs, files in os.walk(cwd):
-        for f in files:
-            if f == exe:
-                return os.path.join(root, f)
+    candidate = os.path.join(cwd, exe)
+    if os.path.isfile(candidate):
+        return candidate
     cwd = os.path.abspath(os.path.join(cwd, os.pardir))
     if cwd != "/":
         found = rec_find_bin(cwd, exe)
