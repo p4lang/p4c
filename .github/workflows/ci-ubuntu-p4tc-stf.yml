@@ -35,15 +35,10 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-${{ runner.os }}-gcc
-          max-size: 1000M
-
-      - name: Build (Ubuntu 24.04, GCC)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test-p4tc-stf"
 
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
