@@ -13,7 +13,11 @@ from typing import Optional
 def get_script_dir(follow_symlinks: bool = True) -> Path:
     # py2exe, PyInstaller, cx_Freeze
     if getattr(sys, "frozen", False):
-        path = Path(sys.executable).resolve() if follow_symlinks else Path(sys.executable)
+        path = (
+            Path(sys.executable).resolve()
+            if follow_symlinks
+            else Path(sys.executable)
+        )
     else:
         path = Path(inspect.getabsfile(get_script_dir))
         if follow_symlinks:
@@ -63,6 +67,7 @@ def find_file(directory: str, filename: str, binary: bool = True) -> Path:
     If directory is an absolute path, just check for the file.
     If binary == true, then check permissions that the file is executable
     """
+
     def check_file(f: Path) -> bool:
         if f.is_file():
             if binary:
