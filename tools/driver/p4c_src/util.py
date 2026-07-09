@@ -13,11 +13,7 @@ from typing import Optional
 def get_script_dir(follow_symlinks: bool = True) -> Path:
     # py2exe, PyInstaller, cx_Freeze
     if getattr(sys, "frozen", False):
-        path = (
-            Path(sys.executable).resolve()
-            if follow_symlinks
-            else Path(sys.executable)
-        )
+        path = Path(sys.executable).resolve() if follow_symlinks else Path(sys.executable)
     else:
         path = Path(inspect.getabsfile(get_script_dir))
         if follow_symlinks:
