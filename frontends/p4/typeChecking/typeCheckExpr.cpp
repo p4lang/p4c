@@ -120,6 +120,11 @@ bool TypeInferenceBase::compare(const IR::Node *errorPosition, const IR::Type *l
         typeError("%1% and %2%: externs cannot be compared", compare->left, compare->right);
         return false;
     }
+    if (ltype->is<IR::Type_Var>() || rtype->is<IR::Type_Var>()) {
+        typeError("%1% and %2%: values of a type variable cannot be compared", compare->left,
+                  compare->right);
+        return false;
+    }
     if (containsActionEnum(ltype) || containsActionEnum(rtype)) {
         typeError("%1% and %2%: table application results cannot be compared", compare->left,
                   compare->right);
