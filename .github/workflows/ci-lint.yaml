@@ -29,13 +29,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           submodules: recursive
+      - uses: actions/setup-python@v6
 
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
           ccache-key: "apply-linters"
-
-      - uses: actions/setup-python@v6
 
       - name: Run cpplint on C/C++ files.
         run: uv run cmake --build build --target cpplint

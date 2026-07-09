@@ -20,6 +20,7 @@ concurrency:
 jobs:
   # Build and test p4c on Fedora.
   test-fedora-linux:
+    # This job runs in Fedora container that runs in Ubuntu VM.
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:latest
@@ -29,6 +30,7 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
+      # We need to install git here because it is not provided out of the box in Fedora container.
       - name: Install git
         run: dnf install -y -q git
 

@@ -50,7 +50,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test"
+          ccache-key: "test-macOS"
           custom-build-command: |
             source ~/.bash_profile
             ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=Release \
