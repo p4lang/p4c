@@ -261,12 +261,12 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
                 ::P4::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
             if (auto mem = e->left->to<IR::Member>()) {
                 auto uName = stackMap[mem->member.name];
-                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
+                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1%", e);
                 auto member = new IR::Member(stack->elementType, mem->expr, IR::ID(uName[cst]));
                 return member;
             } else if (auto path = e->left->to<IR::PathExpression>()) {
                 auto uName = stackMap[path->path->name.name];
-                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
+                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1%", e);
                 auto path1 =
                     new IR::PathExpression(stack->elementType, new IR::Path(IR::ID(uName[cst])));
                 return path1;
