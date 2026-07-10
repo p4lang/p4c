@@ -21,29 +21,6 @@ def get_script_dir(follow_symlinks: bool = True) -> Path:
     return path.parent
 
 
-# recursive find, good for developer
-def rec_find_bin(cwd: Path, exe: str) -> Optional[Path]:
-    candidate = cwd / exe
-    if candidate.is_file():
-        return candidate
-    parent = cwd.resolve().parent
-    if parent != cwd and parent != Path(parent.root):
-        return rec_find_bin(parent, exe)
-    return None
-
-
-def use_rec_find(exe: str) -> Optional[Path]:
-    cwd = Path.cwd()
-    return rec_find_bin(cwd, exe)
-
-
-def getLocalCfg(config: str) -> Optional[Path]:
-    """
-    Search bottom-up for p4c.site.cfg
-    """
-    return use_rec_find(config)
-
-
 # top-down find, good for deployment
 def find_bin(exe: str) -> Optional[Path]:
     for pp in os.environ["PATH"].split(":"):
