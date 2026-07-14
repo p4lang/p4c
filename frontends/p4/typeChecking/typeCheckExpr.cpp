@@ -1456,7 +1456,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Slice *expression) {
         return expression;
     }
     if (l >= bst->size) {
-        typeError("Bit index %1% greater than width %2%", msb, bst->size);
+        typeError("Bit index %1% greater than width %2%", lsb, bst->size);
         return expression;
     }
     if (l > m) {
@@ -1523,11 +1523,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PlusSlice *expression) {
 
     if (auto lsb = expression->e1->to<IR::Constant>()) {
         if (lsb->value >= type->width_bits()) {
-            typeError("%1%: lsb offset too large", lsb);
+            typeError("Bit index %1% greater than width %2%", lsb, type->width_bits());
             return expression;
         }
         if (lsb->value < 0) {
-            typeError("%1%: negative lsb offset", lsb);
+            typeError("%1%: negative bit index %2%", expression, lsb);
             return expression;
         }
     }
