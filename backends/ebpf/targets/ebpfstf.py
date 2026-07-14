@@ -4,8 +4,8 @@
 # SPDX-FileCopyrightText: 2018 VMware, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
-""" Converts the commands in an stf file which populate tables into a C
-    program that manipulates ebpf tables. """
+"""Converts the commands in an stf file which populate tables into a C
+program that manipulates ebpf tables."""
 
 import sys
 from pathlib import Path

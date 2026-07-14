@@ -883,16 +883,11 @@ _BLOCK_ASM = 3  # The whole block is an inline assembly block
 
 # Match start of assembly blocks
 _MATCH_ASM = re.compile(
-    r"^\s*(?:asm|_asm|__asm|__asm__)"
-    r"(?:\s+(volatile|__volatile__))?"
-    r"\s*[{(]"
+    r"^\s*(?:asm|_asm|__asm|__asm__)" r"(?:\s+(volatile|__volatile__))?" r"\s*[{(]"
 )
 
 # Match strings that indicate we're working on a C (not C++) file.
-_SEARCH_C_FILE = re.compile(
-    r"\b(?:LINT_C_FILE|"
-    r"vim?:\s*.*(\s*|:)filetype=c(\s*|:|$))"
-)
+_SEARCH_C_FILE = re.compile(r"\b(?:LINT_C_FILE|" r"vim?:\s*.*(\s*|:)filetype=c(\s*|:|$))")
 
 # Match string that indicates we're working on a Linux Kernel file.
 _SEARCH_KERNEL_FILE = re.compile(r"\b(?:LINT_KERNEL_FILE)")
@@ -1088,6 +1083,7 @@ def ParseNolintSuppressions(filename, raw_line, linenum, error):
 
             def ProcessCategory(category):
                 _error_suppressions.AddLineSuppression(category, linenum + 1)
+
         elif no_lint_type == "BEGIN":
             if _error_suppressions.HasOpenBlock():
                 error(
@@ -1103,6 +1099,7 @@ def ParseNolintSuppressions(filename, raw_line, linenum, error):
 
             def ProcessCategory(category):
                 _error_suppressions.StartBlockSuppression(category, linenum)
+
         elif no_lint_type == "END":
             if not _error_suppressions.HasOpenBlock():
                 error(filename, linenum, "readability/nolint", 5, "Not in a NOLINT block")
@@ -1117,6 +1114,7 @@ def ParseNolintSuppressions(filename, raw_line, linenum, error):
                         f"NOLINT categories not supported in block END: {category}",
                     )
                 _error_suppressions.EndBlockSuppression(linenum)
+
         else:
 
             def ProcessCategory(category):
@@ -2276,7 +2274,7 @@ def CloseExpression(clean_lines, linenum, pos):
         return (line, clean_lines.NumLines(), -1)
 
     # Check first line
-    (end_pos, stack) = FindEndOfExpressionInLine(line, pos, [])
+    end_pos, stack = FindEndOfExpressionInLine(line, pos, [])
     if end_pos > -1:
         return (line, linenum, end_pos)
 
@@ -2284,7 +2282,7 @@ def CloseExpression(clean_lines, linenum, pos):
     while stack and linenum < clean_lines.NumLines() - 1:
         linenum += 1
         line = clean_lines.elided[linenum]
-        (end_pos, stack) = FindEndOfExpressionInLine(line, 0, stack)
+        end_pos, stack = FindEndOfExpressionInLine(line, 0, stack)
         if end_pos > -1:
             return (line, linenum, end_pos)
 
@@ -2394,7 +2392,7 @@ def ReverseCloseExpression(clean_lines, linenum, pos):
         return (line, 0, -1)
 
     # Check last line
-    (start_pos, stack) = FindStartOfExpressionInLine(line, pos, [])
+    start_pos, stack = FindStartOfExpressionInLine(line, pos, [])
     if start_pos > -1:
         return (line, linenum, start_pos)
 
@@ -2402,7 +2400,7 @@ def ReverseCloseExpression(clean_lines, linenum, pos):
     while stack and linenum > 0:
         linenum -= 1
         line = clean_lines.elided[linenum]
-        (start_pos, stack) = FindStartOfExpressionInLine(line, len(line) - 1, stack)
+        start_pos, stack = FindStartOfExpressionInLine(line, len(line) - 1, stack)
         if start_pos > -1:
             return (line, linenum, start_pos)
 
@@ -2454,7 +2452,7 @@ def PathSplitToList(path):
     """
     lst = []
     while True:
-        (head, tail) = os.path.split(path)
+        head, tail = os.path.split(path)
         if head == path:  # absolute paths end
             lst.append(head)
             break
@@ -3311,7 +3309,7 @@ class NestingState:
 
             # We can't be sure if we just find a single '<', and need to
             # find the matching '>'.
-            (_, end_line, end_pos) = CloseExpression(clean_lines, linenum, pos - 1)
+            _, end_line, end_pos = CloseExpression(clean_lines, linenum, pos - 1)
             if end_pos < 0:
                 # Not sure if template argument list or syntax error in file
                 return False
@@ -3522,8 +3520,7 @@ class NestingState:
                 classinfo: _ClassInfo = self.stack[-1]
                 # Update access control
                 if access_match := re.match(
-                    r"^(.*)\b(public|private|protected|signals)(\s+(?:slots\s*)?)?"
-                    r":([^:].*|$)",
+                    r"^(.*)\b(public|private|protected|signals)(\s+(?:slots\s*)?)?" r":([^:].*|$)",
                     line,
                 ):
                     classinfo.access = access_match.group(2)
@@ -3801,10 +3798,7 @@ def CheckForNonStandardConstructs(filename, clean_lines, linenum, nesting_state,
             (len(constructor_args) == 1 and constructor_args[0].strip() == "void")
         )
         onearg_constructor = (
-            (
-                len(constructor_args) == 1  # exactly one arg
-                and not noarg_constructor
-            )
+            (len(constructor_args) == 1 and not noarg_constructor)  # exactly one arg
             or
             # all but at most one arg defaulted
             (
@@ -4323,7 +4317,7 @@ def CheckOperatorSpacing(filename, clean_lines, linenum, error):
         # space.  This is done to avoid some false positives with shifts.
         match = re.match(r"^(.*[^\s<])<[^\s=<,]", line)
         if match:
-            (_, _, end_pos) = CloseExpression(clean_lines, linenum, len(match.group(1)))
+            _, _, end_pos = CloseExpression(clean_lines, linenum, len(match.group(1)))
             if end_pos <= -1:
                 error(filename, linenum, "whitespace/operators", 3, "Missing spaces around <")
 
@@ -4332,7 +4326,7 @@ def CheckOperatorSpacing(filename, clean_lines, linenum, error):
         # false positives with shifts.
         match = re.match(r"^(.*[^-\s>])>[^\s=>,]", line)
         if match:
-            (_, _, start_pos) = ReverseCloseExpression(clean_lines, linenum, len(match.group(1)))
+            _, _, start_pos = ReverseCloseExpression(clean_lines, linenum, len(match.group(1)))
             if start_pos <= -1:
                 error(filename, linenum, "whitespace/operators", 3, "Missing spaces around >")
 
@@ -4401,8 +4395,7 @@ def CheckParenthesisSpacing(filename, clean_lines, linenum, error):
     # We don't want: "if ( foo)" or "if ( foo   )".
     # Exception: "for ( ; foo; bar)" and "for (foo; bar; )" are allowed.
     match = re.search(
-        r"\b(if|for|while|switch)\s*"
-        r"\(([ ]*)(.).*[^ ]+([ ]*)\)\s*{\s*$",
+        r"\b(if|for|while|switch)\s*" r"\(([ ]*)(.).*[^ ]+([ ]*)\)\s*{\s*$",
         line,
     )
     if match:
@@ -4576,7 +4569,7 @@ def CheckBracesSpacing(filename, clean_lines, linenum, nesting_state, error):
         # spurious semicolons, e.g. "if (cond){};", but we will catch the
         # spurious semicolon with a separate check.
         leading_text = match.group(1)
-        (endline, endlinenum, endpos) = CloseExpression(clean_lines, linenum, len(match.group(1)))
+        endline, endlinenum, endpos = CloseExpression(clean_lines, linenum, len(match.group(1)))
         trailing_text = ""
         if endpos > -1:
             trailing_text = endline[endpos:]
@@ -4634,7 +4627,7 @@ def IsDecltype(clean_lines, linenum, column):
     Returns:
       True if this token is decltype() expression, False otherwise.
     """
-    (text, _, start_col) = ReverseCloseExpression(clean_lines, linenum, column)
+    text, _, start_col = ReverseCloseExpression(clean_lines, linenum, column)
     if start_col < 0:
         return False
     return bool(re.search(r"\bdecltype\s*$", text[0:start_col]))
@@ -4785,7 +4778,7 @@ def CheckBraces(filename, clean_lines, linenum, error):
         pos = line.find("else if")
         pos = line.find("(", pos)
         if pos > 0:
-            (endline, _, endpos) = CloseExpression(clean_lines, linenum, pos)
+            endline, _, endpos = CloseExpression(clean_lines, linenum, pos)
             brace_on_right = endline[endpos:].find("{") != -1
             if brace_on_left != brace_on_right:  # must be brace after if
                 error(
@@ -4850,7 +4843,7 @@ def CheckBraces(filename, clean_lines, linenum, error):
         if if_match:
             # This could be a multiline if condition, so find the end first.
             pos = if_match.end() - 1
-            (endline, endlinenum, endpos) = CloseExpression(clean_lines, linenum, pos)
+            endline, endlinenum, endpos = CloseExpression(clean_lines, linenum, pos)
         # Check for an opening brace, either directly after the if or on the next
         # line. If found, this isn't a single-statement conditional.
         if not re.match(r"\s*(?:\[\[(?:un)?likely\]\]\s*)?{", endline[endpos:]) and not (
@@ -5047,7 +5040,7 @@ def CheckTrailingSemicolon(filename, clean_lines, linenum, error):
 
     # Check matching closing brace
     if match:
-        (endline, endlinenum, endpos) = CloseExpression(clean_lines, linenum, len(match.group(1)))
+        endline, endlinenum, endpos = CloseExpression(clean_lines, linenum, len(match.group(1)))
         if endpos > -1 and re.match(r"^\s*;", endline[endpos:]):
             # Current {} pair is eligible for semicolon check, and we have found
             # the redundant semicolon, output warning here.
@@ -5084,7 +5077,7 @@ def CheckEmptyBlockBody(filename, clean_lines, linenum, error):
     line = clean_lines.elided[linenum]
     if matched := re.match(r"\s*(for|while|if)\s*\(", line):
         # Find the end of the conditional expression.
-        (end_line, end_linenum, end_pos) = CloseExpression(clean_lines, linenum, line.find("("))
+        end_line, end_linenum, end_pos = CloseExpression(clean_lines, linenum, line.find("("))
 
         # Output warning if what follows the condition expression is a semicolon.
         # No warning for all other cases, including whitespace or newline, since we
@@ -5132,7 +5125,7 @@ def CheckEmptyBlockBody(filename, clean_lines, linenum, error):
             if opening_linenum == end_linenum:
                 # We need to make opening_pos relative to the start of the entire line.
                 opening_pos += end_pos
-            (closing_line, closing_linenum, closing_pos) = CloseExpression(
+            closing_line, closing_linenum, closing_pos = CloseExpression(
                 clean_lines, opening_linenum, opening_pos
             )
             if closing_pos < 0:
@@ -5219,12 +5212,12 @@ def CheckCheck(filename, clean_lines, linenum, error):
 
     # Decide the set of replacement macros that should be suggested
     lines = clean_lines.elided
-    (check_macro, start_pos) = FindCheckMacro(lines[linenum])
+    check_macro, start_pos = FindCheckMacro(lines[linenum])
     if not check_macro:
         return
 
     # Find end of the boolean expression by matching parentheses
-    (last_line, end_line, end_pos) = CloseExpression(clean_lines, linenum, start_pos)
+    last_line, end_line, end_pos = CloseExpression(clean_lines, linenum, start_pos)
     if end_pos < 0:
         return
 
@@ -5250,8 +5243,7 @@ def CheckCheck(filename, clean_lines, linenum, error):
     operator = None
     while expression:
         matched = re.match(
-            r"^\s*(<<|<<=|>>|>>=|->\*|->|&&|\|\||"
-            r"==|!=|>=|>|<=|<|\()(.*)$",
+            r"^\s*(<<|<<=|>>|>>=|->\*|->|&&|\|\||" r"==|!=|>=|>|<=|<|\()(.*)$",
             expression,
         )
         if matched:
@@ -5259,7 +5251,7 @@ def CheckCheck(filename, clean_lines, linenum, error):
             if token == "(":
                 # Parenthesized operand
                 expression = matched.group(2)
-                (end, _) = FindEndOfExpressionInLine(expression, 0, ["("])
+                end, _ = FindEndOfExpressionInLine(expression, 0, ["("])
                 if end < 0:
                     return  # Unmatched parenthesis
                 lhs += "(" + expression[0:end]
@@ -5818,9 +5810,9 @@ def _GetTextInside(text, start_pattern):
     start_position = match.end(0)
 
     assert start_position > 0, "start_pattern must ends with an opening punctuation."
-    assert text[start_position - 1] in matching_punctuation, (
-        "start_pattern must ends with an opening punctuation."
-    )
+    assert (
+        text[start_position - 1] in matching_punctuation
+    ), "start_pattern must ends with an opening punctuation."
     # Stack of closing punctuation we expect to have in text after position.
     punctuation_stack = [matching_punctuation[text[start_position - 1]]]
     position = start_position
@@ -6113,8 +6105,7 @@ def CheckGlobalStatic(filename, clean_lines, linenum, error):
     # TODO(google): Generalize this to also find static unique_ptr instances.
     # TODO(google): File bugs for clang-tidy to find these.
     match = re.match(
-        r"((?:|static +)(?:|const +))(?::*std::)?string( +const)? +"
-        r"([a-zA-Z0-9_:]+)\b(.*)",
+        r"((?:|static +)(?:|const +))(?::*std::)?string( +const)? +" r"([a-zA-Z0-9_:]+)\b(.*)",
         line,
     )
 
@@ -6351,7 +6342,7 @@ def CheckForNonConstReference(filename, clean_lines, linenum, nesting_state, err
             # Check for templated parameter that is split across multiple lines
             endpos = line.rfind(">")
             if endpos > -1:
-                (_, startline, startpos) = ReverseCloseExpression(clean_lines, linenum, endpos)
+                _, startline, startpos = ReverseCloseExpression(clean_lines, linenum, endpos)
                 if startpos > -1 and startline < linenum:
                     # Found the matching < on an earlier line, collect all
                     # pieces up to current line.
@@ -6402,10 +6393,7 @@ def CheckForNonConstReference(filename, clean_lines, linenum, nesting_state, err
     # We also accept & in static_assert, which looks like a function but
     # it's actually a declaration expression.
     allowed_functions = (
-        r"(?:[sS]wap(?:<\w:+>)?|"
-        r"operator\s*[<>][<>]|"
-        r"static_assert|COMPILE_ASSERT"
-        r")\s*\("
+        r"(?:[sS]wap(?:<\w:+>)?|" r"operator\s*[<>][<>]|" r"static_assert|COMPILE_ASSERT" r")\s*\("
     )
     if re.search(allowed_functions, line):
         return
@@ -6538,8 +6526,7 @@ def CheckCasts(filename, clean_lines, linenum, error):
     # This is not a cast:
     #   reference_type&(int* function_param);
     match = re.search(
-        r"(?:[^\w]&\(([^)*][^)]*)\)[\w(])|"
-        r"(?:[^\w]&(static|dynamic|down|reinterpret)_cast\b)",
+        r"(?:[^\w]&\(([^)*][^)]*)\)[\w(])|" r"(?:[^\w]&(static|dynamic|down|reinterpret)_cast\b)",
         line,
     )
     if match:
@@ -7082,7 +7069,7 @@ def CheckRedundantVirtual(filename, clean_lines, linenum, error):
         parameter_list = re.match(r"^([^(]*)\(", line)
         if parameter_list:
             # Match parentheses to find the end of the parameter list
-            (_, end_line, end_col) = CloseExpression(
+            _, end_line, end_col = CloseExpression(
                 clean_lines, start_line, start_col + len(parameter_list.group(1))
             )
             break
@@ -7640,7 +7627,7 @@ def ParseArguments(args):
       The list of filenames to lint.
     """
     try:
-        (opts, filenames) = getopt.getopt(
+        opts, filenames = getopt.getopt(
             args,
             "",
             [
