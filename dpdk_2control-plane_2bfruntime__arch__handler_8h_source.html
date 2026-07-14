@@ -437,7 +437,7 @@ $(function(){initNavTree('dpdk_2control-plane_2bfruntime__arch__handler_8h_sourc
 <div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>        <span class="keyword">auto</span> typeSpec =</div>
 <div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>            <a class="code hl_function" href="class_p4_1_1_control_plane_a_p_i_1_1_type_spec_converter.html#a988bec5306f75566d0cc97eb2632b586">TypeSpecConverter::convert</a>(this-&gt;refMap, this-&gt;typeMap, typeArg, p4RtTypeInfo);</div>
 <div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>        BUG_CHECK(typeSpec != <span class="keyword">nullptr</span>,</div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>                  <span class="stringliteral">&quot;P4 type %1% could not be converted to P4Info P4DataTypeSpec&quot;</span>);</div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>                  <span class="stringliteral">&quot;P4 type %1% could not be converted to P4Info P4DataTypeSpec&quot;</span>, typeArg);</div>
 <div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span> </div>
 <div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>        <span class="keywordflow">return</span> <a class="code hl_struct" href="namespace_p4_1_1_control_plane_a_p_i_1_1_standard.html#struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_digest">Digest</a>{decl-&gt;controlPlaneName(), typeSpec, decl-&gt;to&lt;IR::IAnnotated&gt;()};</div>
 <div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    }</div>

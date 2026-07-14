@@ -1180,7 +1180,7 @@ $(function(){initNavTree('tofino_2bf-p4c_2control-plane_2bfruntime__arch__handle
 <div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span>        <span class="keyword">auto</span> typeSpec =</div>
 <div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span>            <a class="code hl_function" href="class_p4_1_1_control_plane_a_p_i_1_1_type_spec_converter.html#a988bec5306f75566d0cc97eb2632b586">P4::ControlPlaneAPI::TypeSpecConverter::convert</a>(refMap, typeMap, typeArg, p4RtTypeInfo);</div>
 <div class="line"><a id="l01063" name="l01063"></a><span class="lineno"> 1063</span>        BUG_CHECK(typeSpec != <span class="keyword">nullptr</span>,</div>
-<div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span>                  <span class="stringliteral">&quot;P4 type %1% could not be converted to P4Info P4DataTypeSpec&quot;</span>);</div>
+<div class="line"><a id="l01064" name="l01064"></a><span class="lineno"> 1064</span>                  <span class="stringliteral">&quot;P4 type %1% could not be converted to P4Info P4DataTypeSpec&quot;</span>, typeArg);</div>
 <div class="line"><a id="l01065" name="l01065"></a><span class="lineno"> 1065</span>        <span class="keywordflow">return</span> Digest{decl-&gt;controlPlaneName(), typeSpec, decl-&gt;to&lt;IR::IAnnotated&gt;()};</div>
 <div class="line"><a id="l01066" name="l01066"></a><span class="lineno"> 1066</span>    }</div>
 <div class="line"><a id="l01067" name="l01067"></a><span class="lineno"> 1067</span> </div>
@@ -1232,7 +1232,7 @@ $(function(){initNavTree('tofino_2bf-p4c_2control-plane_2bfruntime__arch__handle
 <div class="line"><a id="l01113" name="l01113"></a><span class="lineno"> 1113</span>            <span class="keyword">auto</span> typeSpec = <a class="code hl_function" href="class_p4_1_1_control_plane_a_p_i_1_1_type_spec_converter.html#a988bec5306f75566d0cc97eb2632b586">P4::ControlPlaneAPI::TypeSpecConverter::convert</a>(refMap, typeMap,</div>
 <div class="line"><a id="l01114" name="l01114"></a><span class="lineno"> 1114</span>                                                                            typeList, p4RtTypeInfo);</div>
 <div class="line"><a id="l01115" name="l01115"></a><span class="lineno"> 1115</span>            BUG_CHECK(typeSpec != <span class="keyword">nullptr</span>,</div>
-<div class="line"><a id="l01116" name="l01116"></a><span class="lineno"> 1116</span>                      <span class="stringliteral">&quot;P4 type %1% could not be converted to P4Info P4DataTypeSpec&quot;</span>);</div>
+<div class="line"><a id="l01116" name="l01116"></a><span class="lineno"> 1116</span>                      <span class="stringliteral">&quot;P4 type %1% could not be converted to P4Info P4DataTypeSpec&quot;</span>, typeList);</div>
 <div class="line"><a id="l01117" name="l01117"></a><span class="lineno"> 1117</span>            <span class="keywordflow">return</span> DynHash{decl-&gt;controlPlaneName(), typeSpec, decl-&gt;to&lt;IR::IAnnotated&gt;(),</div>
 <div class="line"><a id="l01118" name="l01118"></a><span class="lineno"> 1118</span>                           hashFieldInfo, hashWidth};</div>
 <div class="line"><a id="l01119" name="l01119"></a><span class="lineno"> 1119</span>        }</div>

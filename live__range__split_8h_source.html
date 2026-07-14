@@ -174,7 +174,7 @@ $(function(){initNavTree('live__range__split_8h_source.html',''); initResizable(
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>          maxStage(maxStage),</div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>          vec((maxStage - minStage + 1) * 2),</div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>          containerWidth(containerWidth) {</div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        BUG_CHECK(minStage &gt;= -1, <span class="stringliteral">&quot;ContainerOccupancy minStage (%1%) must be &gt;= -1&quot;</span>);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        BUG_CHECK(minStage &gt;= -1, <span class="stringliteral">&quot;ContainerOccupancy minStage (%1%) must be &gt;= -1&quot;</span>, minStage);</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        BUG_CHECK(maxStage &gt;= minStage, <span class="stringliteral">&quot;Invalid ContainerOccupancy stage range (%1% &gt; %2%)&quot;</span>,</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                  minStage, maxStage);</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    }</div>
