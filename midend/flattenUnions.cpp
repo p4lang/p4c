@@ -180,6 +180,55 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Control *control) {
     return control;
 }
 
+const IR::Node *DoExpandHeaderUnionStackPushPop::postorder(IR::MethodCallStatement *mcs) {
+    auto mem = mcs->methodCall->method->to<IR::Member>();
+    if (!mem) return mcs;
+    bool push = mem->member == IR::Type_Array::push_front;
+    if (!push && mem->member != IR::Type_Array::pop_front) return mcs;
+    auto stack = typeMap->getType(mem->expr, true)->to<IR::Type_Array>();
+    if (!stack) return mcs;
+    auto hu = stack->elementType->to<IR::Type_HeaderUnion>();
+    if (!hu) return mcs;  // regular header stacks are lowered by the backend
+    auto cst = mcs->methodCall->arguments->at(0)->expression->to<IR::Constant>();
+    if (!cst || !cst->fitsInt()) return mcs;
+
+    int n = cst->asInt();
+    int size = stack->getSize();
+    auto srcInfo = mcs->srcInfo;
+    if (n <= 0) return new IR::BlockStatement(srcInfo);
+
+    IR::IndexedVector<IR::StatOrDecl> block;
+    auto elem = [&](int i) {
+        return new IR::ArrayIndex(srcInfo, mem->expr->clone(), new IR::Constant(i));
+    };
+    // Copy element by element. A whole-union assignment would need CopyStructures, which
+    // has already run; HandleValidityHeaderUnion lowers each copy and keeps validity right.
+    auto copy = [&](int dst, int src) {
+        for (auto f : hu->fields)
+            block.push_back(
+                new IR::AssignmentStatement(srcInfo, new IR::Member(srcInfo, elem(dst), f->name),
+                                            new IR::Member(srcInfo, elem(src), f->name)));
+    };
+    auto invalidate = [&](int i) {
+        for (auto f : hu->fields) {
+            auto method = new IR::Member(srcInfo, new IR::Member(srcInfo, elem(i), f->name),
+                                         IR::ID(IR::Type_Header::setInvalid));
+            block.push_back(new IR::MethodCallStatement(
+                srcInfo,
+                new IR::MethodCallExpression(srcInfo, method, new IR::Vector<IR::Argument>())));
+        }
+    };
+
+    if (push) {  // shift up, invalidate the new front elements
+        for (int t = size - 1; t >= n; t--) copy(t, t - n);
+        for (int i = 0; i < n && i < size; i++) invalidate(i);
+    } else {  // shift down, invalidate the new back elements
+        for (int t = 0; t + n < size; t++) copy(t, t + n);
+        for (int i = (size - n > 0 ? size - n : 0); i < size; i++) invalidate(i);
+    }
+    return new IR::BlockStatement(srcInfo, std::move(block));
+}
+
 bool DoFlattenHeaderUnionStack::hasHeaderUnionStackField(IR::Type_Struct *s) {
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
