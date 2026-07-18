@@ -3,6 +3,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+if (P4C_USE_PREINSTALLED_BOOST)
+  find_package(Boost REQUIRED COMPONENTS graph)
+  set(HAVE_LIBBOOST_GRAPH 1)
+endif()
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
 
@@ -21,7 +26,10 @@ set (GRAPHS_HDRS
 )
 
 add_library(p4cgraphs STATIC ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
-target_link_libraries(p4cgraphs ir-generated frontend)
+target_link_libraries(p4cgraphs
+  PRIVATE ir-generated frontend
+  PUBLIC Boost::graph
+)
 
 add_executable(p4c-graphs p4c-graphs.cpp)
 target_link_libraries (p4c-graphs p4cgraphs ir-generated frontend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})

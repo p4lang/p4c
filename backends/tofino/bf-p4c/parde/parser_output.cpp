@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include <boost/optional/optional_io.hpp>
+#include <boost/format.hpp>
 
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/autoindent.h"
