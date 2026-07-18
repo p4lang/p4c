@@ -1209,7 +1209,7 @@ void MergeInstructions::build_actiondata_source(ActionAnalysis::ContainerAction 
                 if (read.is_conditional) continue;
 
                 src1_writebits = adi.alignment.write_bits();
-                BUG_CHECK(!read_bits.getrange(read.range().lo, read.range().size()),
+                BUG_CHECK(read_bits.getslice(read.range().lo, read.range().size()).empty(),
                           "Overlapping AD read params ...?");
                 read_bits.setrange(read.range().lo, read.range().size());
                 *src1_p = read.expr;
