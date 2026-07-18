@@ -1047,6 +1047,13 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex *expression) {
             set(expression, result);
             return;
         }
+        if (lv->elemType == nullptr) {
+            // AnyElement can't model header union stack elements (null elemType)
+            auto result = new SymbolicStaticError(
+                expression, "Non-constant index into a header union stack is not supported");
+            set(expression, result);
+            return;
+        }
         auto v0 = new AnyElement(lv);
         if (!evaluatingLeftValue)
             set(expression, v0->collapse());
