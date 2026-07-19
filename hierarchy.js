@@ -3537,6 +3537,7 @@ var hierarchy =
         [ "P4::DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", null ],
         [ "P4::DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
         [ "P4::DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
+        [ "P4::DoExpandHeaderUnionStackPushPop", "class_p4_1_1_do_expand_header_union_stack_push_pop.html", null ],
         [ "P4::DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
         [ "P4::DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", [
           [ "P4::DoFlattenHeaderUnionStack", "class_p4_1_1_do_flatten_header_union_stack.html", null ]

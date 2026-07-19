@@ -212,67 +212,88 @@ $(function(){initNavTree('flatten_unions_8h_source.html',''); initResizable(true
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>                                  <a class="code hl_class" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector&lt;IR::StatOrDecl&gt;</a> &amp;code_block);</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>};</div>
 </div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
-<div class="foldopen" id="foldopen00158" data-start="{" data-end="};">
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno"><a class="line" href="class_p4_1_1_remove_unused_h_u_declarations.html">  158</a></span><span class="keyword">class </span>RemoveUnusedHUDeclarations : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;used;</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    <span class="keyword">explicit</span> RemoveUnusedHUDeclarations(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;used) : used(used) {}</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span> </div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *preorder(IR::Type_HeaderUnion *type)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <span class="keywordflow">if</span> (!used.isUsed(getOriginal&lt;IR::IDeclaration&gt;())) <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        <span class="keywordflow">return</span> type;</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    }</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>};</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span></div>
+<div class="foldopen" id="foldopen00163" data-start="{" data-end="};">
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="class_p4_1_1_do_expand_header_union_stack_push_pop.html">  163</a></span><span class="keyword">class </span>DoExpandHeaderUnionStackPushPop : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap;</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span> </div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    <span class="keyword">explicit</span> DoExpandHeaderUnionStackPushPop(<a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap) : typeMap(typeMap) {</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        setName(<span class="stringliteral">&quot;DoExpandHeaderUnionStackPushPop&quot;</span>);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    }</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::MethodCallStatement *mcs) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>};</div>
 </div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
-<div class="foldopen" id="foldopen00170" data-start="{" data-end="};">
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="class_p4_1_1_remove_all_unused_h_u_d_declarations.html">  170</a></span><span class="keyword">class </span>RemoveAllUnusedHUDDeclarations : <span class="keyword">public</span> PassManager {</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    <a class="code hl_class" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> used;</div>
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span> </div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    RemoveAllUnusedHUDDeclarations()</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        : PassManager({</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>              <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_collect_used_declarations.html">CollectUsedDeclarations</a>(used),</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>              <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_unused_h_u_declarations.html">RemoveUnusedHUDeclarations</a>(used),</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>          }) {</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        setName(<span class="stringliteral">&quot;RemoveAllUnusedHUDDeclarations&quot;</span>);</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        setStopOnError(<span class="keyword">true</span>);</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    }</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>};</div>
+<div class="foldopen" id="foldopen00173" data-start="{" data-end="};">
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="class_p4_1_1_remove_unused_h_u_declarations.html">  173</a></span><span class="keyword">class </span>RemoveUnusedHUDeclarations : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;used;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    <span class="keyword">explicit</span> RemoveUnusedHUDeclarations(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;used) : used(used) {}</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *preorder(IR::Type_HeaderUnion *type)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        <span class="keywordflow">if</span> (!used.isUsed(getOriginal&lt;IR::IDeclaration&gt;())) <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        <span class="keywordflow">return</span> type;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    }</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>};</div>
 </div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span></div>
-<div class="foldopen" id="foldopen00190" data-start="{" data-end="};">
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="class_p4_1_1_flatten_header_union.html">  190</a></span><span class="keyword">class </span>FlattenHeaderUnion : <span class="keyword">public</span> PassManager {</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    FlattenHeaderUnion(<a class="code hl_class" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, <span class="keywordtype">bool</span> loopsUnroll = <span class="keyword">true</span>) {</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">P4::TypeChecking</a>(refMap, typeMap));</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_handle_validity_header_union.html">HandleValidityHeaderUnion</a>(refMap, typeMap));</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="comment">// Stack flattening is only applicable if parser loops are unrolled and</span></div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        <span class="comment">// header union stack elements are accessed using [] notation. This pass does not handle</span></div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        <span class="comment">// .next .last etc accessors for stack elements.</span></div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>        <span class="keywordflow">if</span> (loopsUnroll) {</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_flatten_header_union_stack.html">DoFlattenHeaderUnionStack</a>(refMap, typeMap));</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_all_unused_declarations.html">P4::RemoveAllUnusedDeclarations</a>(<a class="code hl_class" href="class_p4_1_1_remove_unused_policy.html">RemoveUnusedPolicy</a>()));</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        }</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a>(typeMap));</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_inference.html">P4::TypeInference</a>(typeMap, <span class="keyword">false</span>));</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">P4::TypeChecking</a>(refMap, typeMap));</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_flatten_header_union.html">DoFlattenHeaderUnion</a>(refMap, typeMap));</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_all_unused_declarations.html">P4::RemoveAllUnusedDeclarations</a>(<a class="code hl_class" href="class_p4_1_1_remove_unused_policy.html">RemoveUnusedPolicy</a>()));</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_all_unused_h_u_d_declarations.html">P4::RemoveAllUnusedHUDDeclarations</a>());</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a>(typeMap));</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">P4::TypeChecking</a>(<span class="keyword">nullptr</span>, typeMap));</div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_parser_ifs.html">P4::RemoveParserIfs</a>(typeMap));</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    }</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>};</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
+<div class="foldopen" id="foldopen00185" data-start="{" data-end="};">
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="class_p4_1_1_remove_all_unused_h_u_d_declarations.html">  185</a></span><span class="keyword">class </span>RemoveAllUnusedHUDDeclarations : <span class="keyword">public</span> PassManager {</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <a class="code hl_class" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> used;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    RemoveAllUnusedHUDDeclarations()</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        : PassManager({</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>              <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_collect_used_declarations.html">CollectUsedDeclarations</a>(used),</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>              <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_unused_h_u_declarations.html">RemoveUnusedHUDeclarations</a>(used),</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>          }) {</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        setName(<span class="stringliteral">&quot;RemoveAllUnusedHUDDeclarations&quot;</span>);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        setStopOnError(<span class="keyword">true</span>);</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    }</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>};</div>
 </div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_FLATTENUNIONS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span></div>
+<div class="foldopen" id="foldopen00205" data-start="{" data-end="};">
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno"><a class="line" href="class_p4_1_1_flatten_header_union.html">  205</a></span><span class="keyword">class </span>FlattenHeaderUnion : <span class="keyword">public</span> PassManager {</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    FlattenHeaderUnion(<a class="code hl_class" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, <span class="keywordtype">bool</span> loopsUnroll = <span class="keyword">true</span>) {</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">P4::TypeChecking</a>(refMap, typeMap));</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        <span class="comment">// Lower push_front/pop_front on header union stacks first; the new nodes need</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        <span class="comment">// types before HandleValidityHeaderUnion.</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        <span class="keywordflow">if</span> (loopsUnroll) {</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_expand_header_union_stack_push_pop.html">DoExpandHeaderUnionStackPushPop</a>(typeMap));</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a>(typeMap));</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_inference.html">P4::TypeInference</a>(typeMap, <span class="keyword">false</span>));</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">P4::TypeChecking</a>(refMap, typeMap));</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        }</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_handle_validity_header_union.html">HandleValidityHeaderUnion</a>(refMap, typeMap));</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        <span class="comment">// Stack flattening is only applicable if parser loops are unrolled and</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        <span class="comment">// header union stack elements are accessed using [] notation. This pass does not handle</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>        <span class="comment">// .next .last etc accessors for stack elements.</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        <span class="keywordflow">if</span> (loopsUnroll) {</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_flatten_header_union_stack.html">DoFlattenHeaderUnionStack</a>(refMap, typeMap));</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>            passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_all_unused_declarations.html">P4::RemoveAllUnusedDeclarations</a>(<a class="code hl_class" href="class_p4_1_1_remove_unused_policy.html">RemoveUnusedPolicy</a>()));</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>        }</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a>(typeMap));</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_inference.html">P4::TypeInference</a>(typeMap, <span class="keyword">false</span>));</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">P4::TypeChecking</a>(refMap, typeMap));</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_flatten_header_union.html">DoFlattenHeaderUnion</a>(refMap, typeMap));</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_all_unused_declarations.html">P4::RemoveAllUnusedDeclarations</a>(<a class="code hl_class" href="class_p4_1_1_remove_unused_policy.html">RemoveUnusedPolicy</a>()));</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_all_unused_h_u_d_declarations.html">P4::RemoveAllUnusedHUDDeclarations</a>());</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a>(typeMap));</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">P4::TypeChecking</a>(<span class="keyword">nullptr</span>, typeMap));</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_remove_parser_ifs.html">P4::RemoveParserIfs</a>(typeMap));</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    }</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>};</div>
+</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_FLATTENUNIONS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_clear_type_map_html"><div class="ttname"><a href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:32</div></div>
 <div class="ttc" id="aclass_p4_1_1_collect_used_declarations_html"><div class="ttname"><a href="class_p4_1_1_collect_used_declarations.html">P4::CollectUsedDeclarations</a></div><div class="ttdoc">Collects all used declarations into @used set.</div><div class="ttdef"><b>Definition</b> unusedDeclarations.h:59</div></div>
+<div class="ttc" id="aclass_p4_1_1_do_expand_header_union_stack_push_pop_html"><div class="ttname"><a href="class_p4_1_1_do_expand_header_union_stack_push_pop.html">P4::DoExpandHeaderUnionStackPushPop</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:163</div></div>
 <div class="ttc" id="aclass_p4_1_1_do_flatten_header_union_html"><div class="ttname"><a href="class_p4_1_1_do_flatten_header_union.html">P4::DoFlattenHeaderUnion</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:39</div></div>
 <div class="ttc" id="aclass_p4_1_1_do_flatten_header_union_stack_html"><div class="ttname"><a href="class_p4_1_1_do_flatten_header_union_stack.html">P4::DoFlattenHeaderUnionStack</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:85</div></div>
 <div class="ttc" id="aclass_p4_1_1_handle_validity_header_union_html"><div class="ttname"><a href="class_p4_1_1_handle_validity_header_union.html">P4::HandleValidityHeaderUnion</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:131</div></div>
@@ -280,9 +301,9 @@ $(function(){initNavTree('flatten_unions_8h_source.html',''); initResizable(true
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:53</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:67</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_all_unused_declarations_html"><div class="ttname"><a href="class_p4_1_1_remove_all_unused_declarations.html">P4::RemoveAllUnusedDeclarations</a></div><div class="ttdoc">Iterates UnusedDeclarations until convergence.</div><div class="ttdef"><b>Definition</b> unusedDeclarations.h:196</div></div>
-<div class="ttc" id="aclass_p4_1_1_remove_all_unused_h_u_d_declarations_html"><div class="ttname"><a href="class_p4_1_1_remove_all_unused_h_u_d_declarations.html">P4::RemoveAllUnusedHUDDeclarations</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:170</div></div>
+<div class="ttc" id="aclass_p4_1_1_remove_all_unused_h_u_d_declarations_html"><div class="ttname"><a href="class_p4_1_1_remove_all_unused_h_u_d_declarations.html">P4::RemoveAllUnusedHUDDeclarations</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:185</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_parser_ifs_html"><div class="ttname"><a href="class_p4_1_1_remove_parser_ifs.html">P4::RemoveParserIfs</a></div><div class="ttdef"><b>Definition</b> parserControlFlow.h:105</div></div>
-<div class="ttc" id="aclass_p4_1_1_remove_unused_h_u_declarations_html"><div class="ttname"><a href="class_p4_1_1_remove_unused_h_u_declarations.html">P4::RemoveUnusedHUDeclarations</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:158</div></div>
+<div class="ttc" id="aclass_p4_1_1_remove_unused_h_u_declarations_html"><div class="ttname"><a href="class_p4_1_1_remove_unused_h_u_declarations.html">P4::RemoveUnusedHUDeclarations</a></div><div class="ttdef"><b>Definition</b> flattenUnions.h:173</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_unused_policy_html"><div class="ttname"><a href="class_p4_1_1_remove_unused_policy.html">P4::RemoveUnusedPolicy</a></div><div class="ttdef"><b>Definition</b> unusedDeclarations.h:48</div></div>
 <div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:442</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_checking_html"><div class="ttname"><a href="class_p4_1_1_type_checking.html">P4::TypeChecking</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:55</div></div>
