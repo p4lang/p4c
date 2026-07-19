@@ -18,6 +18,8 @@
 
 #include "backends/tofino/bf-p4c/phv/analysis/meta_live_range.h"
 
+#include <boost/format.hpp>
+
 cstring MetadataLiveRange::printAccess(int access) {
     switch (access) {
         case 1:

@@ -19,6 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_PHV_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_PHV_H_
 
+#include <boost/functional/hash.hpp>
+
 #include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/json_generator.h"
 

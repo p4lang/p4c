@@ -22,6 +22,7 @@
 #include <sstream>
 #include <tuple>
 
+#include <boost/format.hpp>
 #include <boost/optional/optional_io.hpp>
 
 #include "backends/tofino/bf-p4c/common/asm_output.h"

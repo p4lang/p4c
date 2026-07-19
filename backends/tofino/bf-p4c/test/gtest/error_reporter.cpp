@@ -76,9 +76,8 @@ class ErrorReporterTest : public ::testing::Test {
 };
 
 TEST_F(ErrorReporterTest, ErrorHelperPlainFormatsCorrectly) {
-    boost::format fmt("Str: %1%, Dec: %2%");
-
-    EXPECT_EQ(::error_helper(fmt, "hello", 10).toString(), "Str: hello, Dec: 10\n");
+    EXPECT_EQ(::error_helper("Str: %1%, Dec: %2%", "hello", 10).toString(),
+              "Str: hello, Dec: 10\n");
 }
 
 TEST_F(ErrorReporterTest, WarningsConformToExpectedFormat) {
