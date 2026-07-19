@@ -123,6 +123,21 @@ cstring toString(const void *value);
 
 char DigitToChar(int digit);
 
+/// Convert a string to lower case. Using non-ASCII strings might lead to unexpected results..
+/// Performs the lowering operation in place.
+void lowerInPlace(std::string &s);
+
+/// Convert a string to lower case. Using non-ASCII strings might lead to unexpected results..
+/// Returns a copy of the string.
+std::string toLower(std::string_view s);
+
+/// Convert a string to upper case. Using non-ASCII strings might lead to unexpected results..
+/// Performs the up operation in place.
+void upperInPlace(std::string &s);
+
+/// Convert a string to upper case. Using non-ASCII strings might lead to unexpected results..
+std::string toUpper(std::string_view s);
+
 }  // namespace Util
 }  // namespace P4
 
