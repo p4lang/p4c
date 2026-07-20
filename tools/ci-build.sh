@@ -108,6 +108,7 @@ P4C_DEPS="bison \
           libfl-dev \
           pkg-config \
           python3 \
+          python3-dev \
           python3-pip \
           python3-setuptools \
           tcpdump"
@@ -427,7 +428,8 @@ fi
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
   # Keep runtime library required by installed backend executables.
-  sudo apt-get install -y --no-install-recommends libboost-iostreams1.71.0
+  # FIXME: This should be provided by the BMv2 image.
+  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev
 
   sudo apt-get purge -y ${P4C_DEPS} git
   sudo apt-get autoremove --purge -y
@@ -435,6 +437,8 @@ if [[ "${IMAGE_TYPE}" == "build" ]] ; then
   echo 'Build image ready'
 
 elif [[ "${IMAGE_TYPE}" == "test" ]] ; then
+  # FIXME: This should be provided by the BMv2 image.
+  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev libboost-filesystem-dev libboost-thread-dev libgmp-dev
   echo 'Test image ready'
 
 fi
