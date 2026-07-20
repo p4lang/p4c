@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_SYMBOLIC_VARIABLES_H_
-#define BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_SYMBOLIC_VARIABLES_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_VARIABLES_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_VARIABLES_H_
 
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -70,4 +70,4 @@ std::pair<const IR::SymbolicVariable *, const IR::SymbolicVariable *> getTableRa
 
 }  // namespace P4::P4Tools
 
-#endif /* BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_SYMBOLIC_VARIABLES_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_SYMBOLIC_VARIABLES_H_ */
