@@ -15,102 +15,103 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <errno.h>
 #include "vector.h"
 
+#include <cerrno>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+
 struct raw_vector {
-    int         capacity, size;
-    void        *data;
+    int capacity, size;
+    void *data;
 };
 
-int init_raw_vector(void *vec, size_t elsize, int mincap)
-{
+int init_raw_vector(void *vec, size_t elsize, int mincap) {
     struct raw_vector *v = (struct raw_vector *)vec;
     v->size = 0;
     v->capacity = 32 / elsize;
     if (v->capacity < 4) v->capacity = 4;
     if (v->capacity < mincap) v->capacity = mincap;
-    if (!(v->data = malloc(elsize * v->capacity)))
-	v->capacity = 0;
+    if (!(v->data = malloc(elsize * v->capacity))) v->capacity = 0;
     return v->data ? 0 : -1;
 }
 
-int erase_raw_vector(void *vec, size_t elsize, int i, unsigned cnt)
-{
+int erase_raw_vector(void *vec, size_t elsize, int i, unsigned cnt) {
     struct raw_vector *v = (struct raw_vector *)vec;
     if (i < 0 && i >= v->size) return -1;
     if (cnt == 0) cnt = 1;
     if (i + cnt >= (unsigned)v->size) {
-	v->size = i;
+        v->size = i;
     } else {
-	char *p = (char *)v->data + i*elsize;
-	memmove(p, p + elsize*cnt, elsize * (v->size - i - cnt));
-	v->size -= cnt; }
+        char *p = (char *)v->data + i * elsize;
+        memmove(p, p + elsize * cnt, elsize * (v->size - i - cnt));
+        v->size -= cnt;
+    }
     return 0;
 }
 
-int expand_raw_vector(void *vec, size_t elsize)
-{
+int expand_raw_vector(void *vec, size_t elsize) {
     struct raw_vector *v = (struct raw_vector *)vec;
     size_t ncap = v->capacity * 2U;
     void *n;
     if (ncap == 0) {
-	ncap = 32 / elsize;
-	if (ncap < 4) ncap = 4; }
+        ncap = 32 / elsize;
+        if (ncap < 4) ncap = 4;
+    }
     if (ncap > (size_t)INT_MAX && (int)(ncap = INT_MAX) == v->capacity) {
-	errno = ERANGE;
-	return -1; }
+        errno = ERANGE;
+        return -1;
+    }
     if (!(n = realloc(v->data, elsize * ncap))) return -1;
     v->capacity = ncap;
     v->data = n;
     return 0;
 }
 
-int insert_raw_vector(void *vec, size_t elsize, int i, unsigned cnt)
-{
+int insert_raw_vector(void *vec, size_t elsize, int i, unsigned cnt) {
     struct raw_vector *v = (struct raw_vector *)vec;
     if (i < 0 && i > v->size) return -1;
     if (cnt == 0) cnt = 1;
     if (v->size + cnt > (unsigned)INT_MAX) {
-	errno = ERANGE;
-	return -1; }
+        errno = ERANGE;
+        return -1;
+    }
     if ((int)(v->size + cnt) > v->capacity) {
-	int newsz = v->size + cnt;
-	void *n;
-	if (newsz < v->capacity * 2) newsz = v->capacity * 2;
-	if (!(n = realloc(v->data, elsize * newsz))) return -1;
-	v->capacity = newsz;
-	v->data = n; }
+        int newsz = v->size + cnt;
+        void *n;
+        if (newsz < v->capacity * 2) newsz = v->capacity * 2;
+        if (!(n = realloc(v->data, elsize * newsz))) return -1;
+        v->capacity = newsz;
+        v->data = n;
+    }
     if (i < v->size) {
-	char *p = (char *)v->data + i*elsize;
-	memmove(p + cnt*elsize, p, elsize * (v->size - i)); }
+        char *p = (char *)v->data + i * elsize;
+        memmove(p + cnt * elsize, p, elsize * (v->size - i));
+    }
     v->size += cnt;
     return 0;
 }
 
-int reserve_raw_vector(void *vec, size_t elsize, int size, int shrink)
-{
+int reserve_raw_vector(void *vec, size_t elsize, int size, int shrink) {
     struct raw_vector *v = (struct raw_vector *)vec;
     void *n;
     if (v->capacity < size || (shrink && v->capacity > size)) {
-	if (!(n = realloc(v->data, elsize * size))) return -1;
-	v->capacity = size;
-	if (size < v->size)
-	    v->size = size;
-	v->data = n; }
+        if (!(n = realloc(v->data, elsize * size))) return -1;
+        v->capacity = size;
+        if (size < v->size) v->size = size;
+        v->data = n;
+    }
     return 0;
 }
 
-int shrink_raw_vector(void *vec, size_t elsize)
-{
+int shrink_raw_vector(void *vec, size_t elsize) {
     struct raw_vector *v = (struct raw_vector *)vec;
     void *n;
     if (v->size < v->capacity) {
-	if (!(n = realloc(v->data, elsize * v->size))) return -1;
-	v->capacity = v->size;
-	v->data = n; }
+        if (!(n = realloc(v->data, elsize * v->size))) return -1;
+        v->capacity = v->size;
+        v->data = n;
+    }
     return 0;
 }
