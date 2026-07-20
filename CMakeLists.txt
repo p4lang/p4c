@@ -69,11 +69,9 @@ OPTION (FORMATTING_ONLY "Only configure formatting/linting targets, skip all bui
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 # Support compilation for the legacy P4-14 language.
-OPTION (SUPPORT_P4_14 "Support the deprecated P4_14 version of the language" OFF)
-# Tofino requires P4-14 support.
-if (ENABLE_TOFINO)
-  set (SUPPORT_P4_14 ON)
-endif()
+# The Tofino backend requires P4-14 support, in which case the option is forced ON.
+CMAKE_DEPENDENT_OPTION (SUPPORT_P4_14 "Support the deprecated P4_14 version of the language" OFF
+                        "NOT ENABLE_TOFINO" ON)
 
 # Enable DumpPipe pass output
 OPTION(ENABLE_DUMP_PIPE "Enable DumpPipe pass output" ON)

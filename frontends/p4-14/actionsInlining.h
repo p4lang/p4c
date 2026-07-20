@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef FRONTENDS_P4_ACTIONSINLINING_P4_14_H_
-#define FRONTENDS_P4_ACTIONSINLINING_P4_14_H_
+#ifndef FRONTENDS_P4_14_ACTIONSINLINING_H_
+#define FRONTENDS_P4_14_ACTIONSINLINING_H_
 
 #include "ir/ir.h"
 
@@ -52,4 +52,4 @@ class InlineActions : public Transform {
 
 }  // namespace P4::P4_14
 
-#endif /* FRONTENDS_P4_ACTIONSINLINING_P4_14_H_ */
+#endif /* FRONTENDS_P4_14_ACTIONSINLINING_H_ */

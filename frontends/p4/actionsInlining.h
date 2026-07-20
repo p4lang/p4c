@@ -69,7 +69,7 @@ class InlineActions : public PassManager {
 }  // namespace P4
 
 #ifdef SUPPORT_P4_14
-#include "actionsInlining_p4_14.h"
+#include "frontends/p4-14/actionsInlining.h"
 #endif
 
 #endif /* FRONTENDS_P4_ACTIONSINLINING_H_ */

@@ -105,20 +105,39 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
 }
 
 /**
- * Parse P4 source from the string @input, interpreting it as having language
- * version @version. The source is not preprocessed before being parsed; the
- * initial source location is derived from @sourceFile and @sourceLine. If the
- * language version is not P4-16, then the program is converted to P4-16 before
- * being returned.
+ * Parse P4 source from the string @input. The source is not preprocessed
+ * before being parsed; the initial source location is derived from
+ * @sourceFile and @sourceLine.
+ * When P4-14 support is enabled, @version specifies the language version of
+ * the source; if it is not P4-16, then the program is converted to P4-16
+ * before being returned.
  *
  * @return a P4-16 IR tree representing the contents of the given string, or
  * null on failure. If failure occurs, an error will also be reported.
  */
+#ifdef SUPPORT_P4_14
+const IR::P4Program *parseP4String(
+    const char *sourceFile, unsigned sourceLine, const std::string &input,
+    CompilerOptions::FrontendVersion version = CompilerOptions::FrontendVersion::P4_16);
+const IR::P4Program *parseP4String(
+    const std::string &input,
+    CompilerOptions::FrontendVersion version = CompilerOptions::FrontendVersion::P4_16);
+#else
+[[deprecated(
+    "P4-14 support is disabled, this function will always parse P4-16. Use the overload without "
+    "the version argument.")]]
 const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
                                    const std::string &input,
                                    CompilerOptions::FrontendVersion version);
+[[deprecated(
+    "P4-14 support is disabled, this function will always parse P4-16. Use the overload without "
+    "the version argument.")]]
 const IR::P4Program *parseP4String(const std::string &input,
                                    CompilerOptions::FrontendVersion version);
+const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
+                                   const std::string &input);
+const IR::P4Program *parseP4String(const std::string &input);
+#endif
 
 }  // namespace P4
 

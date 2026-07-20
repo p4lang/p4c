@@ -21,7 +21,7 @@ struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
 
     const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+        const auto *pgm = P4::parseP4String(program);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
