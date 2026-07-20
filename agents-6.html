@@ -199,6 +199,7 @@ Extension Points</h2>
 <li>Ensure the target registers itself in the generated <code>register.h</code>.</li>
 <li>If Bazel support is required, add it to <code>BUILD.bazel</code> (<code>TESTGEN_TARGETS</code>).</li>
 </ol>
+<p>A testgen target with unmet build requirements (e.g., <code>ENABLE_CONTROL_PLANE</code>) must skip itself early in its <code>CMakeLists.txt</code> by setting <code>set(TESTGEN_TARGET_DISABLED ON PARENT_SCOPE)</code> followed by <code>return()</code>. The module then omits the target from <code>register.h</code>. The BMv2 testgen target is the canonical example: it requires the control-plane library for P4Runtime.</p>
 <h2><a class="anchor" id="tests--benchmarks"></a>
 Tests &amp; Benchmarks</h2>
 <ul>
