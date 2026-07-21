@@ -7,7 +7,7 @@ issue1557-bmv2.p4(23): [--Wwarn=unused] warning: 'drop' is unused
 issue1557-bmv2.p4(23): [--Werror=type-error] error: Field drop is not a member of structure struct standard_metadata
     action drop() { smeta.drop = 1; }
                           ^^^^
-v1model.p4(64)
+v1model.p4(55)
 struct standard_metadata_t {
        ^^^^^^^^^^^^^^^^^^^
 issue1557-bmv2.p4(25): [--Werror=type-error] error: idx: parameter should be assigned in call rewrite()
