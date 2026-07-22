@@ -42,7 +42,7 @@ CMAKE_DEPENDENT_OPTION (ENABLE_TOFINO "Build the TOFINO backend (required for th
 CMAKE_DEPENDENT_OPTION (ENABLE_P4TC "Build the P4TC backend" ON ENABLE_CONTROL_PLANE OFF)
 OPTION (ENABLE_P4FMT "Build the P4FMT backend" ON)
 CMAKE_DEPENDENT_OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
-CMAKE_DEPENDENT_OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF ENABLE_CONTROL_PLANE OFF)
+OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_GC "Compile with the Boehm-Demers-Weiser garbage collector." ON)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
@@ -83,7 +83,8 @@ endif()
 
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
   # Allow the version to be set from outside
-  set (P4C_VERSION $ENV{P4C_VERSION})
+  set (P4C_SEM_VERSION_STRING $ENV{P4C_VERSION})
+  set (P4C_VERSION ${P4C_SEM_VERSION_STRING})
 else()
   # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
   # Examples: 0.5.1, 1.0.0-rc1, 1.0.1-alpha
@@ -92,12 +93,6 @@ else()
     OUTPUT_STRIP_TRAILING_WHITESPACE
     RESULT_VARIABLE rc
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-  string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
-    __p4c_version ${P4C_SEM_VERSION_STRING})
-  set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
-  set (P4C_VERSION_MINOR ${CMAKE_MATCH_2})
-  set (P4C_VERSION_PATCH ${CMAKE_MATCH_3})
-  set (P4C_VERSION_RC ${CMAKE_MATCH_4})
   execute_process (COMMAND git rev-parse --short HEAD
     OUTPUT_VARIABLE P4C_GIT_SHA
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -105,6 +100,12 @@ else()
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
+string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
+  __p4c_version ${P4C_SEM_VERSION_STRING})
+set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
+set (P4C_VERSION_MINOR ${CMAKE_MATCH_2})
+set (P4C_VERSION_PATCH ${CMAKE_MATCH_3})
+set (P4C_VERSION_RC ${CMAKE_MATCH_4})
 
 # P4 General Utilities
 include(P4CUtils)
@@ -116,7 +117,6 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 include(CheckFunctionExists)
 include(FindPythonModule)
-include(CPack)
 # TODO: Remove this deprecated include eventually.
 include(UnifiedBuild)
 
@@ -667,7 +667,7 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
     DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
 endif()
 
-# Packaging:
+######################################## Packaging BEGIN ########################################
 SET(CPACK_SOURCE_GENERATOR "TXZ")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME
    "p4c-${P4C_SEM_VERSION_STRING}")
@@ -676,4 +676,35 @@ SET(CPACK_SOURCE_IGNORE_FILES
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
 
+set (CPACK_RESOURCE_FILE_LICENSE "${P4C_SOURCE_DIR}/LICENSES/Apache-2.0.txt")
+
+set (CPACK_GENERATOR "TBZ2")
+set (CPACK_PACKAGE_NAME "p4c")
+set (CPACK_PACKAGE_VERSION_MAJOR ${P4C_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${P4C_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${P4C_VERSION_PATCH})
+set (CPACK_PACKAGE_VERSION "${P4C_SEM_VERSION_STRING}")
+set (CPACK_PACKAGE_CONTACT "P4 Language Organization <info@p4.org>")
+set (CPACK_PACKAGE_VENDOR "P4 Language Organization")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "P4C compilers for P4_14 and P4_16")
+set (CPACK_PACKAGE_DESCRIPTION "p4c is a reference compiler for the P4 programming language.
+ It supports both P4-14 and P4-16; you can find more information about P4
+ and the specifications for both versions of the language at http://p4.org.
+
+ p4c is modular; it provides a standard frontend and midend which can be
+ combined with a target-specific backend to create a complete P4 compiler.
+ The goal is to make adding new backends easy.")
+set (CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/p4lang/p4c")
+set (CPACK_PROJECT_CONFIG_FILE "${P4C_SOURCE_DIR}/cmake/CPackOptions.cmake")
+# Match the package name used by the debian/ packaging.
+set (CPACK_DEBIAN_PACKAGE_NAME "p4lang-p4c")
+set (CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/p4lang/p4c")
+# The p4c driver is a Python script, which SHLIBDEPS cannot detect.
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "python3")
+set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set (CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+set (CPACK_STRIP_FILES TRUE)
+
+include (CPack)
+######################################## Packaging End ########################################
 endif (NOT FORMATTING_ONLY)

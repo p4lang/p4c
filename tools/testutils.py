@@ -17,7 +17,7 @@ import socket
 import subprocess
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Union
+from typing import Any, Callable, Dict, List, NamedTuple, Optional, Union
 
 # Set up logging.
 log = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ def compare_pkt(expected: str, received: bytes) -> int:
     # If the expected packet string ends with a '$' it means that the packets are only equal,
     # if they are the exact same length.
     strict_length_check = False
-    if expected[-1] == '$':
+    if expected[-1] == "$":
         strict_length_check = True
         expected = expected[:-1]
 
@@ -253,9 +253,9 @@ def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResul
         log.error("Timed out when executing %s.", " ".join(args))
     finally:
         if "capture_output" not in extra_args:
-            if outpipe:
+            if "outpipe" in locals() and outpipe:
                 outpipe.close()
-            if errpipe:
+            if "errpipe" in locals() and errpipe:
                 errpipe.close()
     return ProcessResult(out, returncode)
 
@@ -271,27 +271,42 @@ def check_root() -> bool:
     return os.getuid() == 0
 
 
-def check_if_file(input_path_str: str) -> Optional[Path]:
-    """Checks if a path is a file and converts the input
-    to an absolute path"""
-    if not input_path_str:
+def _check_input_path_present(input_path: Union[Path, str, None]) -> bool:
+    """Shared guard used by the check_if_* helpers below: logs an error
+    if the given input path is falsy (None or empty string)."""
+    if not input_path:
         log.error("input_path is None")
+        return False
+    return True
+
+
+def _check_path_type(
+    input_path_str: str, is_expected_type: Callable[[Path], bool], type_name: str
+) -> Optional[Path]:
+    """Shared helper for check_if_file and check_if_dir:
+    verifies the input is present, exists, and matches the expected type."""
+    if not _check_input_path_present(input_path_str):
         return None
     input_path = Path(input_path_str)
     if not input_path.exists():
         log.error("%s does not exist", input_path)
         return None
-    if not input_path.is_file():
-        log.error("%s is not a file", input_path)
+    if not is_expected_type(input_path):
+        log.error("%s is not a %s", input_path, type_name)
         return None
     return Path(input_path.absolute())
+
+
+def check_if_file(input_path_str: str) -> Optional[Path]:
+    """Checks if a path is a file and converts the input
+    to an absolute path"""
+    return _check_path_type(input_path_str, Path.is_file, "file")
 
 
 def check_if_binary(input_path: Union[Path, str]) -> Optional[Path]:
     """Checks if a path is an executable binary and converts the input
     to an absolute path"""
-    if not input_path:
-        log.error("input_path is None")
+    if not _check_input_path_present(input_path):
         return None
     binary_path = shutil.which(str(input_path))
     if not binary_path:
@@ -303,17 +318,7 @@ def check_if_binary(input_path: Union[Path, str]) -> Optional[Path]:
 def check_if_dir(input_path_str: str) -> Optional[Path]:
     """Checks if a path is an actual directory and converts the input
     to an absolute path"""
-    if not input_path_str:
-        log.error("input_path is None")
-        return None
-    input_path = Path(input_path_str)
-    if not input_path.exists():
-        log.error("%s does not exist", input_path)
-        return None
-    if not input_path.is_dir():
-        log.error("%s is not a directory", input_path)
-        return None
-    return Path(input_path.absolute())
+    return _check_path_type(input_path_str, Path.is_dir, "directory")
 
 
 def check_and_create_dir(directory: Path) -> None:

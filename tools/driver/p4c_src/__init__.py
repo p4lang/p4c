@@ -2,7 +2,7 @@
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
-""" 'p4c' compiler driver """
+"""'p4c' compiler driver"""
 
 __author__ = "Barefoot Networks"
 __email__ = "p4c@barefootnetworks.com"

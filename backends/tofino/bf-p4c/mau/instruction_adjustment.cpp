@@ -782,7 +782,8 @@ const IR::MAU::Instruction *ExpressionsToHash::preorder(IR::MAU::Instruction *in
             auto alu_parameter = action_format.find_param_alloc(expr_lookup, nullptr);
             BUG_CHECK(alu_parameter != nullptr,
                       "%1% Constant in instruction has not correctly "
-                      "been converted to hash");
+                      "been converted to hash",
+                      con);
             auto *hge = new IR::MAU::HashGenExpression(con->srcInfo, con->type, con,
                                                        IR::MAU::HashFunction::identity());
             auto *hd = new IR::MAU::HashDist(hge->srcInfo, hge->type, hge);
@@ -1208,7 +1209,7 @@ void MergeInstructions::build_actiondata_source(ActionAnalysis::ContainerAction 
                 if (read.is_conditional) continue;
 
                 src1_writebits = adi.alignment.write_bits();
-                BUG_CHECK(!read_bits.getrange(read.range().lo, read.range().size()),
+                BUG_CHECK(read_bits.getslice(read.range().lo, read.range().size()).empty(),
                           "Overlapping AD read params ...?");
                 read_bits.setrange(read.range().lo, read.range().size());
                 *src1_p = read.expr;

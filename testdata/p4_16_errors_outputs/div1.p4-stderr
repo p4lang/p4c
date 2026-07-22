@@ -1,15 +1,15 @@
-div1.p4(16): [--Wwarn=unused] warning: 'act' is unused
+div1.p4(7): [--Wwarn=unused] warning: 'act' is unused
 action act() {
        ^^^
-div1.p4(18): [--Werror=type-error] error: a / -1: not defined on negative numbers
+div1.p4(9): [--Werror=type-error] error: a / -1: not defined on negative numbers
     a = a / -1; // not defined for negative numbers
         ^^^^^^
-div1.p4(19): [--Werror=type-error] error: -5 / a: not defined on negative numbers
+div1.p4(10): [--Werror=type-error] error: -5 / a: not defined on negative numbers
     a = -5 / a;
         ^^^^^^
-div1.p4(20): [--Werror=type-error] error: a % -1: not defined on negative numbers
+div1.p4(11): [--Werror=type-error] error: a % -1: not defined on negative numbers
     a = a % -1;
         ^^^^^^
-div1.p4(21): [--Werror=type-error] error: -5 % a: not defined on negative numbers
+div1.p4(12): [--Werror=type-error] error: -5 % a: not defined on negative numbers
     a = -5 % a;
         ^^^^^^

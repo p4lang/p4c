@@ -1,12 +1,12 @@
-call1_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+call1_e.p4(9): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
-call1_e.p4(20): [--Wwarn=unused] warning: 's' is unused
+call1_e.p4(11): [--Wwarn=unused] warning: 's' is unused
     S() s; // structs have no constructors
         ^
-call1_e.p4(20): [--Werror=type-error] error: s: cannot allocate objects of type struct S
+call1_e.p4(11): [--Werror=type-error] error: s: cannot allocate objects of type struct S
     S() s; // structs have no constructors
         ^
-call1_e.p4(16)
+call1_e.p4(7)
 struct S { }
        ^

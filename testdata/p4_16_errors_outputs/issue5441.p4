@@ -1,5 +1,6 @@
 #include <core.p4>
 
+
 control MAPipe(out bit<16> a, in bit<32> b);
 package SimpleArch(MAPipe p);
 control MyMAPipe(out bit<16> a, in bit<32> b) {

@@ -312,7 +312,8 @@ void BuildP4HashFunction::OutsideHashGenExpr::postorder(const IR::Slice *sl) {
 
     BUG_CHECK(self._func->hash_bits.contains(slice_bits),
               "%s: Slice over hash function is "
-              "not able to be resolved");
+              "not able to be resolved",
+              sl);
     self._func->hash_bits = slice_bits;
 }
 

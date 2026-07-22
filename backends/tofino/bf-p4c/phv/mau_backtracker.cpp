@@ -109,7 +109,7 @@ ordered_set<int> MauBacktracker::inSameStage(
     const ordered_set<int> &t1Stages = tableMap.at(TableSummary::getTableName(t1));
     const ordered_set<int> &t2Stages = tableMap.at(TableSummary::getTableName(t2));
     BUG_CHECK(t1Stages.size() > 0, "No allocation for table %1%", t1->name);
-    BUG_CHECK(t2Stages.size() > 0, "No allocation for table %2%", t2->name);
+    BUG_CHECK(t2Stages.size() > 0, "No allocation for table %1%", t2->name);
     for (int a : t1Stages) {
         for (int b : t2Stages) {
             int stage_a = a / NUM_LOGICAL_TABLES_PER_STAGE;

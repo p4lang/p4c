@@ -1229,7 +1229,7 @@ class GreedyClotAllocator : public Visitor {
             for (auto &[stack, index_map] : pseudoheader_stacks) {
                 ordered_set<unsigned> indices_to_remove;
                 BUG_CHECK(header_stack_map.count(stack),
-                          "Header stack %1% missing from CLOT header stack map");
+                          "Header stack %1% missing from CLOT header stack map", stack);
                 for (auto &[index, pseudoheader] : index_map) {
                     bool failed = false;
                     for (auto &[_, state_indices] : header_stack_map.at(stack)) {

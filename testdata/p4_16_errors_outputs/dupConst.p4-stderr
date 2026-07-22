@@ -1,6 +1,6 @@
-dupConst.p4(17): [--Werror=duplicate] error: a duplicates a.
+dupConst.p4(8): [--Werror=duplicate] error: a duplicates a.
 const bit<4> a = 2;
              ^
-dupConst.p4(16)
+dupConst.p4(7)
 const bit<4> a = 1;
              ^

@@ -58,6 +58,7 @@ expanding a JSON config to contain data instead of references to other JSON
 files, Walle will alter the addresses calculated for the _included_ JSON
 to be relative to the addresses in the _including_ JSON.
 """
+
 import argparse
 import copy
 import json

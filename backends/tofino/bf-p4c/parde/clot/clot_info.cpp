@@ -167,7 +167,7 @@ std::map<int, const PHV::Field *> ClotInfo::get_csum_fields(const Clot *clot) co
                 BUG_CHECK(
                     checksum_field == other_field,
                     "CLOT %d has more than one checksum field at overwrite offset %d: %s and %s",
-                    checksum_field->name, other_field->name);
+                    clot->tag, offset, checksum_field->name, other_field->name);
             }
 
             checksum_fields[offset] = checksum_field;

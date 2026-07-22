@@ -1,15 +1,15 @@
-mux_e.p4(16): [--Wwarn=unused] warning: control 'p' is unused
+mux_e.p4(7): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
 [--Werror=type-error] error: Selector of ?: must be bool, not bit<1>
-mux_e.p4(25): [--Werror=type-error] error: '?:'
+mux_e.p4(16): [--Werror=type-error] error: '?:'
         d = d ? a : d; // wrong types a <-> d
             ^^^^^^^^^
   ---- Actual error:
-mux_e.p4(22): Cannot unify type 'bool' with type 'bit<1>'
+mux_e.p4(13): Cannot unify type 'bool' with type 'bit<1>'
           bool d;
           ^^^^
   ---- Originating from:
-mux_e.p4(22): The expressions in a ?: conditional have different types 'bit<1>' and 'bool'
+mux_e.p4(13): The expressions in a ?: conditional have different types 'bit<1>' and 'bool'
           bool d;
           ^^^^

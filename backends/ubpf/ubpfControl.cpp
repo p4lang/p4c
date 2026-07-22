@@ -509,7 +509,7 @@ bool UBPFControlBodyTranslator::comparison(const IR::Operation_Relation *b) {
         builder->append(")");
     } else {
         if (!et->is<EBPF::IHasWidth>())
-            BUG("%1%: Comparisons for type %2% not yet implemented", type);
+            BUG("%1%: Comparisons for type %2% not yet implemented", b, type);
         unsigned width = et->to<EBPF::IHasWidth>()->implementationWidthInBits();
         builder->append("memcmp(&");
         visit(b->left);

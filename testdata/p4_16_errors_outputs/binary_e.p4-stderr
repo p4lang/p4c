@@ -1,18 +1,18 @@
-binary_e.p4(19): [--Wwarn=unused] warning: control 'p' is unused
+binary_e.p4(10): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
-binary_e.p4(32): [--Werror=type-error] error: Indexing a[2] applied to non-array and non-tuple type int<2>
+binary_e.p4(23): [--Werror=type-error] error: Indexing a[2] applied to non-array and non-tuple type int<2>
         c = a[2]; // not an array
             ^^^^
-binary_e.p4(33): [--Werror=type-error] error: Array index d must be an integer, but it has type bool
+binary_e.p4(24): [--Werror=type-error] error: Array index d must be an integer, but it has type bool
         c = stack[d]; // indexing with bool
                   ^
-binary_e.p4(35): [--Werror=type-error] error: e & f: Cannot operate on values with different widths 2 and 4
+binary_e.p4(26): [--Werror=type-error] error: e & f: Cannot operate on values with different widths 2 and 4
         f = e & f; // different width
             ^^^^^
-binary_e.p4(38): [--Werror=type-error] error: d < d: not defined on bool and bool
+binary_e.p4(29): [--Werror=type-error] error: d < d: not defined on bool and bool
         d = d < d; // not defined on bool
             ^^^^^
-binary_e.p4(39): [--Werror=type-error] error: a > c: not defined on int<2> and int<4>
+binary_e.p4(30): [--Werror=type-error] error: a > c: not defined on int<2> and int<4>
         d = a > c; // different width
             ^^^^^

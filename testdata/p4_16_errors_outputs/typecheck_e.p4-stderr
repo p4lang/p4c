@@ -1,27 +1,27 @@
-typecheck_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+typecheck_e.p4(9): [--Wwarn=unused] warning: control 'p' is unused
 control p<T>(in T x)
         ^
-typecheck_e.p4(21): [--Werror=type-error] error: 'f(x)'
+typecheck_e.p4(12): [--Werror=type-error] error: 'f(x)'
         f(x);
         ^^^^
   ---- Actual error:
-typecheck_e.p4(18): Cannot cast implicitly type 'T' to type 'int<32>'
+typecheck_e.p4(9): Cannot cast implicitly type 'T' to type 'int<32>'
   control p<T>(in T x)
             ^
   ---- Originating from:
-typecheck_e.p4(21): Type of argument 'x' (T) does not match type of parameter 'd' (int<32>)
+typecheck_e.p4(12): Type of argument 'x' (T) does not match type of parameter 'd' (int<32>)
           f(x);
             ^
-typecheck_e.p4(18)
+typecheck_e.p4(9)
   control p<T>(in T x)
             ^
-typecheck_e.p4(16)
+typecheck_e.p4(7)
   extern void f(in int<32> d);
                            ^
   ---- Originating from:
-typecheck_e.p4(16): Function type 'f' does not match invocation type '<Method call>'
+typecheck_e.p4(7): Function type 'f' does not match invocation type '<Method call>'
   extern void f(in int<32> d);
               ^
-typecheck_e.p4(21)
+typecheck_e.p4(12)
           f(x);
           ^^^^

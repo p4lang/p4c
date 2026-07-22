@@ -173,7 +173,7 @@ int IdleTimePerWord(const IR::MAU::IdleTime *idletime) {
         case 6:
             return 1;
         default:
-            BUG("%s: Invalid idletime precision %s", idletime->precision);
+            BUG("%s: Invalid idletime precision %s", idletime, idletime->precision);
     }
 }
 

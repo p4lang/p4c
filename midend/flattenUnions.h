@@ -155,6 +155,21 @@ class HandleValidityHeaderUnion : public Transform {
                                   IR::IndexedVector<IR::StatOrDecl> &code_block);
 };
 
+/** Lower push_front/pop_front on a header union stack into member-wise element
+ * copies plus setInvalid on the vacated elements. Runs before
+ * HandleValidityHeaderUnion (so the copies get validity handling) and before
+ * DoFlattenHeaderUnionStack (which only rewrites [] index accesses).
+ */
+class DoExpandHeaderUnionStackPushPop : public Transform {
+    P4::TypeMap *typeMap;
+
+ public:
+    explicit DoExpandHeaderUnionStackPushPop(P4::TypeMap *typeMap) : typeMap(typeMap) {
+        setName("DoExpandHeaderUnionStackPushPop");
+    }
+    const IR::Node *postorder(IR::MethodCallStatement *mcs) override;
+};
+
 class RemoveUnusedHUDeclarations : public Transform {
     const UsedDeclSet &used;
 
@@ -191,6 +206,14 @@ class FlattenHeaderUnion : public PassManager {
  public:
     FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, bool loopsUnroll = true) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        // Lower push_front/pop_front on header union stacks first; the new nodes need
+        // types before HandleValidityHeaderUnion.
+        if (loopsUnroll) {
+            passes.push_back(new DoExpandHeaderUnionStackPushPop(typeMap));
+            passes.push_back(new P4::ClearTypeMap(typeMap));
+            passes.push_back(new P4::TypeInference(typeMap, false));
+            passes.push_back(new P4::TypeChecking(refMap, typeMap));
+        }
         passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap));
         // Stack flattening is only applicable if parser loops are unrolled and
         // header union stack elements are accessed using [] notation. This pass does not handle

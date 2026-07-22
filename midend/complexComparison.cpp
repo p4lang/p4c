@@ -110,7 +110,7 @@ const IR::Expression *RemoveComplexComparisons::explode(Util::SourceInfo srcInfo
     } else if (auto at = leftType->to<IR::Type_Array>()) {
         auto size = at->getSize();
         const IR::Expression *result = new IR::BoolLiteral(true);
-        BUG_CHECK(rightType->is<IR::Type_Array>(), "%1%: comparing stack with %1%", left,
+        BUG_CHECK(rightType->is<IR::Type_Array>(), "%1%: comparing stack with %2%", left,
                   rightType);
         for (unsigned i = 0; i < size; i++) {
             auto index = new IR::Constant(i);

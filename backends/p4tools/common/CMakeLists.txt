@@ -34,6 +34,7 @@ set(
   lib/model.cpp
   lib/namespace_context.cpp
   lib/symbolic_env.cpp
+  lib/symbolic_variables.cpp
   lib/table_utils.cpp
   lib/taint.cpp
   lib/trace_event.cpp
@@ -59,5 +60,6 @@ target_include_directories(
   SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
 )
 
-# Add control-plane-specific extensions.
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)
+if(ENABLE_CONTROL_PLANE)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)
+endif()

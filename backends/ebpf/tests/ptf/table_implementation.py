@@ -195,7 +195,7 @@ class SimpleActionSelectorPSATest(ActionSelectorTest):
         output_ports = self.default_group_ports
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        (port, _) = testutils.verify_packet_any_port(self, pkt, output_ports)
+        port, _ = testutils.verify_packet_any_port(self, pkt, output_ports)
         # send again, output port should be the same
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, output_ports[port])
@@ -297,7 +297,7 @@ class ActionSelectorMultipleSelectorsPSATest(ActionSelectorTest):
         allowed_ports = self.default_group_ports
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        (port, _) = testutils.verify_packet_any_port(self, pkt, allowed_ports)
+        port, _ = testutils.verify_packet_any_port(self, pkt, allowed_ports)
         allowed_ports.pop(port)
 
         # change separately every selector key and test if output port has been changed
@@ -334,7 +334,7 @@ class ActionSelectorMultipleSelectorsTwoTablesPSATest(ActionSelectorTest):
 
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        (port, _) = testutils.verify_packet_any_port(self, pkt, self.default_group_ports)
+        port, _ = testutils.verify_packet_any_port(self, pkt, self.default_group_ports)
         # Match second table, same selectors set, so output port should be the same
         pkt[Ether].src = "AA:BB:CC:DD:EE:FF"
         testutils.send_packet(self, PORT0, pkt)

@@ -34,15 +34,10 @@ jobs:
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-tools-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 22.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test-tools"
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.

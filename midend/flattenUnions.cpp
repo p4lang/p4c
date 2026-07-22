@@ -180,6 +180,55 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Control *control) {
     return control;
 }
 
+const IR::Node *DoExpandHeaderUnionStackPushPop::postorder(IR::MethodCallStatement *mcs) {
+    auto mem = mcs->methodCall->method->to<IR::Member>();
+    if (!mem) return mcs;
+    bool push = mem->member == IR::Type_Array::push_front;
+    if (!push && mem->member != IR::Type_Array::pop_front) return mcs;
+    auto stack = typeMap->getType(mem->expr, true)->to<IR::Type_Array>();
+    if (!stack) return mcs;
+    auto hu = stack->elementType->to<IR::Type_HeaderUnion>();
+    if (!hu) return mcs;  // regular header stacks are lowered by the backend
+    auto cst = mcs->methodCall->arguments->at(0)->expression->to<IR::Constant>();
+    if (!cst || !cst->fitsInt()) return mcs;
+
+    int n = cst->asInt();
+    int size = stack->getSize();
+    auto srcInfo = mcs->srcInfo;
+    if (n <= 0) return new IR::BlockStatement(srcInfo);
+
+    IR::IndexedVector<IR::StatOrDecl> block;
+    auto elem = [&](int i) {
+        return new IR::ArrayIndex(srcInfo, mem->expr->clone(), new IR::Constant(i));
+    };
+    // Copy element by element. A whole-union assignment would need CopyStructures, which
+    // has already run; HandleValidityHeaderUnion lowers each copy and keeps validity right.
+    auto copy = [&](int dst, int src) {
+        for (auto f : hu->fields)
+            block.push_back(
+                new IR::AssignmentStatement(srcInfo, new IR::Member(srcInfo, elem(dst), f->name),
+                                            new IR::Member(srcInfo, elem(src), f->name)));
+    };
+    auto invalidate = [&](int i) {
+        for (auto f : hu->fields) {
+            auto method = new IR::Member(srcInfo, new IR::Member(srcInfo, elem(i), f->name),
+                                         IR::ID(IR::Type_Header::setInvalid));
+            block.push_back(new IR::MethodCallStatement(
+                srcInfo,
+                new IR::MethodCallExpression(srcInfo, method, new IR::Vector<IR::Argument>())));
+        }
+    };
+
+    if (push) {  // shift up, invalidate the new front elements
+        for (int t = size - 1; t >= n; t--) copy(t, t - n);
+        for (int i = 0; i < n && i < size; i++) invalidate(i);
+    } else {  // shift down, invalidate the new back elements
+        for (int t = 0; t + n < size; t++) copy(t, t + n);
+        for (int i = (size - n > 0 ? size - n : 0); i < size; i++) invalidate(i);
+    }
+    return new IR::BlockStatement(srcInfo, std::move(block));
+}
+
 bool DoFlattenHeaderUnionStack::hasHeaderUnionStackField(IR::Type_Struct *s) {
     for (auto sf : s->fields) {
         auto ftype = typeMap->getType(sf, true);
@@ -250,23 +299,25 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
     if (auto stack = ftype->to<IR::Type_Array>()) {
         unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
         if (stack->elementType->is<IR::Type_HeaderUnion>()) {
-            if (!e->right->is<IR::Constant>())
+            if (!e->right->is<IR::Constant>()) {
                 ::P4::error(
                     ErrorType::ERR_INVALID,
                     "Target expects constant array indices for accessing header union stack "
                     "elements, %1% is not a constant",
                     e->right);
+                return e;
+            }
             unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
             if (cst >= stackSize)
                 ::P4::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
             if (auto mem = e->left->to<IR::Member>()) {
                 auto uName = stackMap[mem->member.name];
-                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
+                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1%", e);
                 auto member = new IR::Member(stack->elementType, mem->expr, IR::ID(uName[cst]));
                 return member;
             } else if (auto path = e->left->to<IR::PathExpression>()) {
                 auto uName = stackMap[path->path->name.name];
-                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
+                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1%", e);
                 auto path1 =
                     new IR::PathExpression(stack->elementType, new IR::Path(IR::ID(uName[cst])));
                 return path1;

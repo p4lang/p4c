@@ -55,7 +55,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
                 typeError("%1%: 'switch' label must be an action name or 'default'", c->label);
             }
         }
-    } else {
+    } else if (type->is<IR::Type::Bits>() || type->is<IR::Type_InfInt>() ||
+               type->is<IR::Type_Enum>() || type->is<IR::Type_SerEnum>()) {
         // switch (expression)
         Comparison comp;
         comp.left = stat->expression;
@@ -88,6 +89,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
             }
         }
         if (changed) stat = sclone;
+    } else {
+        typeError("%1%: 'switch' type can't be %2%", stat->expression, type);
     }
     return stat;
 }

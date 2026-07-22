@@ -1,9 +1,9 @@
-functors3_e.p4(18): [--Wwarn=unused] warning: 's1' is unused
+functors3_e.p4(9): [--Wwarn=unused] warning: 's1' is unused
 s() s1;
     ^^
-functors3_e.p4(18): [--Werror=type-error] error: s1: cannot allocate objects of type struct s
+functors3_e.p4(9): [--Werror=type-error] error: s1: cannot allocate objects of type struct s
 s() s1;
     ^^
-functors3_e.p4(16)
+functors3_e.p4(7)
 struct s {}
        ^

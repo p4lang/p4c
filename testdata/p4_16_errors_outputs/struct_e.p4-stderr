@@ -1,15 +1,15 @@
-struct_e.p4(18): [--Wwarn=unused] warning: control 'p' is unused
+struct_e.p4(9): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
-struct_e.p4(24): [--Werror=type-error] error: Field data is not a member of structure struct s
+struct_e.p4(15): [--Werror=type-error] error: Field data is not a member of structure struct s
         v.data = 1w0; // no such field
           ^^^^
-struct_e.p4(16)
+struct_e.p4(7)
 struct s {}
        ^
-struct_e.p4(25): [--Werror=type-error] error: Cannot extract field data from b which has type bit<1>
+struct_e.p4(16): [--Werror=type-error] error: Cannot extract field data from b which has type bit<1>
         b.data = 5; // no such field
           ^^^^
-struct_e.p4(25)
+struct_e.p4(16)
         b.data = 5; // no such field
         ^

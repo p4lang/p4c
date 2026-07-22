@@ -31,15 +31,10 @@ jobs:
           submodules: recursive
       - uses: actions/setup-python@v6
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: apply-linters-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 24.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "apply-linters"
 
       - name: Run cpplint on C/C++ files.
         run: uv run cmake --build build --target cpplint

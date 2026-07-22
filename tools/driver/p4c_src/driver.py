@@ -93,9 +93,9 @@ class BackendDriver:
                 "Programmer error - config_warning_modifiers does not support option " + option
             )
 
-        all = len(arguments) == 1 and arguments[0] == ""
+        apply_to_all = len(arguments) == 1 and arguments[0] == ""
 
-        if all:
+        if apply_to_all:
             self.add_command_option('compiler', '--W{}'.format(option))
         else:
             for diag in arguments:
@@ -296,7 +296,7 @@ class BackendDriver:
         args = shlex.split(" ".join(cmd))
         try:
             p = subprocess.Popen(args)
-        except:
+        except Exception:
             print("error invoking {}".format(" ".join(cmd)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return 1
@@ -317,11 +317,11 @@ class BackendDriver:
                     break  # done waiting, process ended
                 except KeyboardInterrupt:
                     p.send_signal(signal.SIGINT)
-        except:
+        except Exception:
             p.terminate()  # don't leave process possibly running
             try:
                 p.communicate(timeout=0.1)
-            except:  # on timeout or other error
+            except Exception:  # on timeout or other error
                 p.kill()
             print("error running {}".format(" ".join(cmd)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
@@ -352,10 +352,10 @@ class BackendDriver:
         cmds = self._postCmds[cmd_name]
         rc = 0
         for c in cmds:
-            rc += self.runCmd(cmd_name, c)
-            # we will continue to run post commands even if some fail
-            # so that we do all the cleanup
-        return rc  # \TODO should we fail on this or not?
+            # Run all cleanup commands even if one fails; use `or` (not sum)
+            # to track failure, since summed codes aren't valid exit codes.
+            rc = rc or self.runCmd(cmd_name, c)
+        return rc  # \TODO should we fail the whole run() on cleanup failure?
 
     def run(self):
         """

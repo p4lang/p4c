@@ -18,6 +18,7 @@
 """
 TODO: document this file
 """
+
 import struct
 from copy import copy
 

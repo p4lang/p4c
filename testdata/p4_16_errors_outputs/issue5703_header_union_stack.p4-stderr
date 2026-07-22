@@ -1,0 +1,6 @@
+issue5703_header_union_stack.p4(24): [--Wwarn=ignore-prop] warning: Result of 'pkt.extract(hdrs.hus[m.idx].x)' is not defined: Error: Non-constant index into a header union stack is not supported
+        pkt.extract(hdrs.hus[m.idx].x);
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=invalid] warning: Uninitialized value prevents loop unrolling:
+m.idx
+[--Werror=invalid] error: Target expects constant array indices for accessing header union stack elements, m.idx is not a constant

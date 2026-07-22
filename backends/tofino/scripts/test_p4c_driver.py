@@ -102,7 +102,7 @@ class Test:
 
         if self._verbose:
             print('running {}'.format(' '.join(args)))
-        (outlog, errlog) = p.communicate()  # now wait
+        outlog, errlog = p.communicate()  # now wait
         if self._verbose:
             print("Output log:", outlog.decode())
             print("Error log:", errlog.decode())

@@ -549,7 +549,7 @@ class RandomPSATest(P4EbpfTest):
         sequence = [[], [], []]
         for _ in range(10):
             testutils.send_packet(self, PORT0, pkt)
-            (_, recv_pkt) = testutils.verify_packet_any_port(self, mask, PTF_PORTS)
+            _, recv_pkt = testutils.verify_packet_any_port(self, mask, PTF_PORTS)
             recv_pkt = Ether(recv_pkt)
             self.verify_range(
                 value=recv_pkt[self.RandomHeader].f1,

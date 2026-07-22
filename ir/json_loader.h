@@ -16,6 +16,7 @@
 #include <utility>
 #include <variant>
 
+#include "absl/container/flat_hash_set.h"
 #include "ir.h"
 #include "json_parser.h"
 #include "lib/bitvec.h"
@@ -50,6 +51,7 @@ class JSONLoader {
     std::unique_ptr<JsonData> json_root;
     const JsonData *json = nullptr;
     JsonData::LocationInfo *locinfo = nullptr;
+    std::unique_ptr<absl::flat_hash_set<P4::cstring, Util::Hash>> decoded;
     bool (*errfn)(const JSONLoader &, std::string_view msg) = nullptr;
 
     JSONLoader(const JsonData *json, std::unordered_map<int, IR::Node *> &refs,
@@ -68,6 +70,7 @@ class JSONLoader {
         if (!unpacker) return;
         if (auto *obj = unpacker.json->to<JsonObject>()) {
             if (auto it = obj->find(field); it != obj->end()) {
+                if (unpacker.decoded) unpacker.decoded->emplace(field);
                 json = it->second.get();
             }
         }
@@ -82,6 +85,10 @@ class JSONLoader {
     [[nodiscard]] const T &as() const {
         return json->as<T>();
     }
+    template <typename T>
+    [[nodiscard]] const T *to() const {
+        return json ? json->to<T>() : nullptr;
+    }
 
     std::string locdesc(const JsonData &d) const {
         if (!locinfo) return "";
@@ -91,21 +98,44 @@ class JSONLoader {
         if (!json) return "";
         return locdesc(*json);
     }
+    std::string locdesc(std::string_view field) const {
+        if (!locinfo || !json) return "";
+        if (auto *obj = json->to<JsonObject>())
+            if (auto it = obj->find(field); it != obj->end()) return locinfo->desc(*it->second);
+        return locdesc();
+    }
+
     bool error(std::string_view msg) const {
         if ((!errfn || errfn(*this, msg)) && JsonData::strict) throw JsonData::error(msg, json);
         return false;
     }
 
+    void track_decode() {
+        BUG_CHECK(json && json->is<JsonObject>(), "JSONLoader::track_decode on non-JsonObject");
+        if (!decoded) decoded = std::make_unique<absl::flat_hash_set<P4::cstring, Util::Hash>>();
+    }
+
+    template <typename FN>
+    void undecoded(FN fn) {
+        BUG_CHECK(decoded, "Called JSONLoader::undecoded without track_decode");
+        for (auto &el : *json->to<JsonObject>())
+            if (!decoded->count(el.first)) fn(*this, el.first, *el.second);
+    }
+
  private:
     const IR::Node *get_node(NodeFactoryFn factory = nullptr) {
-        if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
+        if (!json || !json->is<JsonObject>()) {
+            error("node is not a JsonObject");
+            return nullptr;
+        }
+        track_decode();
         int id;
         auto success = load("Node_ID", id) || error("missing field Node_ID");
         if (!success) return nullptr;
         if (id >= 0) {
             if (node_refs.find(id) == node_refs.end()) {
+                cstring type;
                 if (!factory) {
-                    cstring type;
                     auto success = load("Node_Type", type) || error("missing field Node_Type");
                     if (!success) return nullptr;
                     factory = get(IR::unpacker_table, type);
@@ -119,12 +149,14 @@ class JSONLoader {
                     // when "--fromJSON" flag is used
                     node_refs[id]->sourceInfoFromJSON(*this);
                 } else {
+                    error("no Node factory for " + type);
                     return nullptr;
-                }  // invalid json exception?
+                }
             }
             return node_refs[id];
         }
-        return nullptr;  // invalid json exception?
+        error("invalid Node_ID " + std::to_string(id));
+        return nullptr;
     }
 
     template <typename T>

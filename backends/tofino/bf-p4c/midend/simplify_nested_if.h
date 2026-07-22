@@ -145,7 +145,8 @@ class UniqueAndValidDest : public SimplifyComplexConditionPolicy {
             if (!valid_fields->count(mem->member.name)) {
                 error(
                     "Invalid field name %1%, the valid fields to use are "
-                    "digest_type, resubmit_type and mirror_type");
+                    "digest_type, resubmit_type and mirror_type",
+                    mem);
             }
         }
 
