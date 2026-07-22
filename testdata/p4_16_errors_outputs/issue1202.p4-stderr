@@ -1,4 +1,4 @@
-issue1202.p4(1):syntax error, unexpected BIT
+issue1202.p4(7):syntax error, unexpected BIT
 const bit<32> x = bit
                   ^^^
 [--Werror=overlimit] error: 1 errors encountered, aborting compilation

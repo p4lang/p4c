@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2022 VMware, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 //#include "third_party/p4lang_p4c/p4include/core.p4"
 //#include "third_party/p4lang_p4c/p4include/v1model.p4"
 #include "core.p4"

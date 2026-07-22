@@ -120,6 +120,11 @@ bool TypeInferenceBase::compare(const IR::Node *errorPosition, const IR::Type *l
         typeError("%1% and %2%: externs cannot be compared", compare->left, compare->right);
         return false;
     }
+    if (ltype->is<IR::Type_Var>() || rtype->is<IR::Type_Var>()) {
+        typeError("%1% and %2%: values of a type variable cannot be compared", compare->left,
+                  compare->right);
+        return false;
+    }
     if (containsActionEnum(ltype) || containsActionEnum(rtype)) {
         typeError("%1% and %2%: table application results cannot be compared", compare->left,
                   compare->right);
@@ -256,6 +261,21 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Operation_Relation *expre
         setType(e->right, ltype);
         rtype = ltype;
         expression = e;
+    }
+
+    // Infer type for untyped {#} on either side of == or !=
+    if (equTest) {
+        auto left = convertUntypedInvalid(expression->left, rtype);
+        auto right = convertUntypedInvalid(expression->right, ltype);
+
+        if (left != expression->left || right != expression->right) {
+            auto e = expression->clone();
+            e->left = left;
+            e->right = right;
+            expression = e;
+            ltype = getType(left);
+            rtype = getType(right);
+        }
     }
 
     if (equTest) {
@@ -1169,6 +1189,18 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
     auto concreteType = castType;
     if (auto tsc = castType->to<IR::Type_SpecializedCanonical>()) concreteType = tsc->substituted;
     if (auto st = concreteType->to<IR::Type_StructLike>()) {
+        // An explicit cast of an expression to its own type is a no-op and is
+        // permitted (P4 spec 8.12.1), even though casts between struct-like
+        // types are otherwise not supported.
+        if (typeMap->equivalent(sourceType, castType)) {
+            setType(getOriginal(), castType);
+            setType(expression, castType);
+            if (isCompileTimeConstant(expression->expr)) {
+                setCompileTimeConstant(expression);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
+            return expression;
+        }
         if (auto se = expression->expr->to<IR::StructExpression>()) {
             // Interpret (S) { kvpairs } as a struct initializer expression
             // instead of a cast to a struct.
@@ -1191,30 +1223,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Cast *expression) {
         } else if (expression->expr->is<IR::ListExpression>()) {
             auto result = assignment(expression, st, expression->expr);
             return result;
-        } else if (auto ih = expression->expr->to<IR::Invalid>()) {
-            auto type = castType->getP4Type();
-            auto concreteCastType = castType;
-            if (auto ts = castType->to<IR::Type_SpecializedCanonical>())
-                concreteCastType = ts->substituted;
-            if (concreteCastType->is<IR::Type_Header>()) {
-                setType(type, new IR::Type_Type(castType));
-                auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
-                setType(result, castType);
-                setCompileTimeConstant(result);
+        } else if (expression->expr->is<IR::Invalid>()) {
+            // Use convertUntypedInvalid to handle {#} cast to header/header_union
+            auto result = convertUntypedInvalid(expression->expr, castType);
+            if (result != expression->expr) {
+                // Successfully converted; mark original as compile-time constant
                 setCompileTimeConstant(getOriginal<IR::Expression>());
-                return result;
-            } else if (concreteCastType->is<IR::Type_HeaderUnion>()) {
-                setType(type, new IR::Type_Type(castType));
-                auto result = new IR::InvalidHeaderUnion(ih->srcInfo, type, type);
-                setType(result, castType);
-                setCompileTimeConstant(result);
-                setCompileTimeConstant(getOriginal<IR::Expression>());
-                return result;
-            } else {
-                typeError("%1%: 'invalid' expression type `%2%` must be a header or header union",
-                          expression, castType);
-                return expression;
             }
+            return result;
         }
     }
     if (auto lt = concreteType->to<IR::Type_P4List>()) {
@@ -1440,7 +1456,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Slice *expression) {
         return expression;
     }
     if (l >= bst->size) {
-        typeError("Bit index %1% greater than width %2%", msb, bst->size);
+        typeError("Bit index %1% greater than width %2%", lsb, bst->size);
         return expression;
     }
     if (l > m) {
@@ -1507,11 +1523,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PlusSlice *expression) {
 
     if (auto lsb = expression->e1->to<IR::Constant>()) {
         if (lsb->value >= type->width_bits()) {
-            typeError("%1%: lsb offset too large", lsb);
+            typeError("Bit index %1% greater than width %2%", lsb, type->width_bits());
             return expression;
         }
         if (lsb->value < 0) {
-            typeError("%1%: negative lsb offset", lsb);
+            typeError("%1%: negative bit index %2%", expression, lsb);
             return expression;
         }
     }

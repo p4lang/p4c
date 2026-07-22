@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_EXPRESSIONS_H_
 #define BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_EXPRESSIONS_H_
 
@@ -66,7 +72,7 @@ class ExpressionGenerator : public Generator {
 
     static IR::Constant *genIntLiteral(size_t bit_width = INTEGER_WIDTH);
 
-    static IR::Constant *genBitLiteral(const IR::Type *tb);
+    static IR::Constant *genBitLiteral(const IR::Type *tp);
 
     [[nodiscard]] virtual std::vector<int> availableBitWidths() const {
         return {4, 8, 16, 32, 64, 128};

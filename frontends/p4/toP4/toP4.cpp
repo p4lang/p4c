@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "toP4.h"
 
@@ -152,8 +141,9 @@ bool ToP4::preorder(const IR::P4Program *program) {
     for (auto a : program->objects) {
         // Check where this declaration originates
         auto sourceFileOpt = ifSystemFile(a);
-        // Errors can come from multiple files
-        if (!a->is<IR::Type_Error>() && sourceFileOpt.has_value()) {
+        // Errors and match_kinds can come from multiple files
+        if (!a->is<IR::Type_Error>() && !a->is<IR::Declaration_MatchKind>() &&
+            sourceFileOpt.has_value()) {
             /* FIXME -- when including a user header file (sourceFile !=
              * mainFile), do we want to emit an #include of it or not?  Probably
              * not when translating from P4-14, as that would create a P4-16
@@ -692,10 +682,19 @@ bool ToP4::preorder(const IR::Type_Error *d) {
 
 bool ToP4::preorder(const IR::Declaration_MatchKind *d) {
     dump(1);
+
+    const auto userMatchKinds = d->getDeclarations()
+                                    ->where([this](const IR::IDeclaration *e) {
+                                        // only print if not from a system file
+                                        return !ifSystemFile(e->getNode()).has_value();
+                                    })
+                                    ->toVector();
+    if (userMatchKinds.empty()) return false;
+
     builder.append("match_kind ");
     builder.blockStart();
     bool first = true;
-    for (auto a : *d->getDeclarations()) {
+    for (auto a : userMatchKinds) {
         if (!first) builder.append(",\n");
         dump(1, a->getNode(), 1);
         first = false;

@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 VMware, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "interpreter.h"
 
 #include "frontends/common/constantFolding.h"
@@ -936,7 +940,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation *expression) {
 
     auto clone = expression->clone();
     if (l->is<SymbolicInteger>()) {
-        BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger");
+        BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected a SymbolicInteger", r);
         clone->left = l->to<SymbolicInteger>()->constant;
         clone->right = r->to<SymbolicInteger>()->constant;
         DoConstantFolding cf(refMap, typeMap);
@@ -946,7 +950,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation *expression) {
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()));
         return;
     } else if (l->is<SymbolicBool>()) {
-        BUG_CHECK(r->is<SymbolicBool>(), "%1%: expected an SymbolicBool");
+        BUG_CHECK(r->is<SymbolicBool>(), "%1%: expected a SymbolicBool", r);
         clone->left = new IR::BoolLiteral(l->to<SymbolicBool>()->value);
         clone->right = new IR::BoolLiteral(r->to<SymbolicBool>()->value);
         DoConstantFolding cf(refMap, typeMap);
@@ -1043,6 +1047,13 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex *expression) {
             set(expression, result);
             return;
         }
+        if (lv->elemType == nullptr) {
+            // AnyElement can't model header union stack elements (null elemType)
+            auto result = new SymbolicStaticError(
+                expression, "Non-constant index into a header union stack is not supported");
+            set(expression, result);
+            return;
+        }
         auto v0 = new AnyElement(lv);
         if (!evaluatingLeftValue)
             set(expression, v0->collapse());
@@ -1119,13 +1130,16 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
             return;
         } else {
             BUG_CHECK(name == IR::Type_Header::isValid, "%1%: unexpected method", bim->name);
-            if (auto hv = structVar->to<SymbolicHeader>()) {
-                auto v = hv->valid;
-                set(expression, v);
-                return;
-            } else {
+            SymbolicBool *v = nullptr;
+            if (auto hv = structVar->to<SymbolicHeader>())
+                v = hv->valid;
+            else if (auto hu = structVar->to<SymbolicHeaderUnion>())
+                v = hu->isValid();
+            else
                 BUG("Unexpected expression (%1%) type: %2%", base, base->type);
-            }
+
+            set(expression, v);
+            return;
         }
     }
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Handle the Z3 installation with this macro. Users have the option to supply their own Z3.
 include(${P4C_SOURCE_DIR}/cmake/Z3.cmake)
 obtain_z3()
@@ -30,6 +34,7 @@ set(
   lib/model.cpp
   lib/namespace_context.cpp
   lib/symbolic_env.cpp
+  lib/symbolic_variables.cpp
   lib/table_utils.cpp
   lib/taint.cpp
   lib/trace_event.cpp
@@ -55,5 +60,6 @@ target_include_directories(
   SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
 )
 
-# Add control-plane-specific extensions.
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)
+if(ENABLE_CONTROL_PLANE)
+  add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)
+endif()

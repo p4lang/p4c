@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Repository Guidelines — p4tools
 
 ## Purpose
@@ -65,6 +71,12 @@ To add a new target:
 2. Provide a `CMakeLists.txt` and a `register.h`.
 3. Ensure the target registers itself in the generated `register.h`.
 4. If Bazel support is required, add it to `BUILD.bazel` (`TESTGEN_TARGETS`).
+
+A testgen target with unmet build requirements (e.g., `ENABLE_CONTROL_PLANE`)
+must skip itself early in its `CMakeLists.txt` by setting
+`set(TESTGEN_TARGET_DISABLED ON PARENT_SCOPE)` followed by `return()`. The
+module then omits the target from `register.h`. The BMv2 testgen target is the
+canonical example: it requires the control-plane library for P4Runtime.
 
 ## Tests & Benchmarks
 - `testgen-gtest` is built when `ENABLE_GTESTS=ON`.

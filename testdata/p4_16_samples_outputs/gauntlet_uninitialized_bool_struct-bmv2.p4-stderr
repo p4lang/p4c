@@ -1,24 +1,24 @@
-gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=unused] warning: 'dummy_bit' is unused
+gauntlet_uninitialized_bool_struct-bmv2.p4(39): [--Wwarn=unused] warning: 'dummy_bit' is unused
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
                                     ^^^^^^^^^
-gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=unused] warning: 'dummy_struct' is unused
+gauntlet_uninitialized_bool_struct-bmv2.p4(39): [--Wwarn=unused] warning: 'dummy_struct' is unused
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
                                                                ^^^^^^^^^^^^
-gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=uninitialized-out-param] warning: out parameter 'dummy_bit' may be uninitialized when 'dummy_action' terminates
+gauntlet_uninitialized_bool_struct-bmv2.p4(39): [--Wwarn=uninitialized-out-param] warning: out parameter 'dummy_bit' may be uninitialized when 'dummy_action' terminates
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
                                     ^^^^^^^^^
-gauntlet_uninitialized_bool_struct-bmv2.p4(33)
+gauntlet_uninitialized_bool_struct-bmv2.p4(39)
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
            ^^^^^^^^^^^^
-gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=uninitialized-out-param] warning: out parameter 'dummy_struct' may be uninitialized when 'dummy_action' terminates
+gauntlet_uninitialized_bool_struct-bmv2.p4(39): [--Wwarn=uninitialized-out-param] warning: out parameter 'dummy_struct' may be uninitialized when 'dummy_action' terminates
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
                                                                ^^^^^^^^^^^^
-gauntlet_uninitialized_bool_struct-bmv2.p4(33)
+gauntlet_uninitialized_bool_struct-bmv2.p4(39)
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
            ^^^^^^^^^^^^
-gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=uninitialized-use] warning: dummy_bit may be uninitialized
+gauntlet_uninitialized_bool_struct-bmv2.p4(39): [--Wwarn=uninitialized-use] warning: dummy_bit may be uninitialized
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
                                     ^^^^^^^^^
-gauntlet_uninitialized_bool_struct-bmv2.p4(33): [--Wwarn=uninitialized-use] warning: dummy_struct.is_bool may be uninitialized
+gauntlet_uninitialized_bool_struct-bmv2.p4(39): [--Wwarn=uninitialized-use] warning: dummy_struct.is_bool may be uninitialized
     action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
                                                                ^^^^^^^^^^^^

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef FRONTENDS_P4_GETV1MODELVERSION_H_
 #define FRONTENDS_P4_GETV1MODELVERSION_H_
 

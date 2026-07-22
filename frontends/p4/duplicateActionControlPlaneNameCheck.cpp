@@ -24,7 +24,7 @@ void DuplicateActionControlPlaneNameCheck::checkForDuplicateName(cstring name,
     }
 }
 
-const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *action) {
+void DuplicateActionControlPlaneNameCheck::postorder(const IR::P4Action *action) {
     bool topLevel = stack.empty();
     auto nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation);
     if (!nameAnno && topLevel) {
@@ -54,7 +54,6 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
         }
         checkForDuplicateName(name, action);
     }
-    return action;
 }
 
 }  // namespace P4

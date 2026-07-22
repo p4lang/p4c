@@ -19,7 +19,7 @@ macro(p4c_obtain_abseil)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
     endif()
   else()
-    set(P4C_ABSEIL_VERSION "20240116.1")
+    set(P4C_ABSEIL_VERSION "20240722.1")
     message(STATUS "Fetching Abseil version ${P4C_ABSEIL_VERSION} for P4C...")
 
     # Unity builds do not work for Abseil...
@@ -40,7 +40,7 @@ macro(p4c_obtain_abseil)
     FetchContent_Declare(
       abseil
       URL https://github.com/abseil/abseil-cpp/releases/download/${P4C_ABSEIL_VERSION}/abseil-cpp-${P4C_ABSEIL_VERSION}.tar.gz
-      URL_HASH SHA256=3c743204df78366ad2eaf236d6631d83f6bc928d1705dd0000b872e53b73dc6a
+      URL_HASH SHA256=40cee67604060a7c8794d931538cb55f4d444073e556980c88b6c49bb9b19bb7
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
       DOWNLOAD_EXTRACT_TIMESTAMP TRUE
@@ -54,20 +54,10 @@ macro(p4c_obtain_abseil)
         # Do not suppress warnings for Abseil library targets that are aliased.
         get_target_property(target_type ${target} TYPE)
         if (NOT ${target_type} STREQUAL "INTERFACE_LIBRARY")
-          # We need this workaround because of https://github.com/abseil/abseil-cpp/issues/1664.
-          # TODO: Remove once the Abseil compilation issue is fixed.
-          if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 14)
-            target_compile_options(${target} PUBLIC "-mbmi")
-          endif()
           target_compile_options(${target} PRIVATE "-Wno-error" "-w")
         endif()
       endif()
     endforeach()
-    # TODO: Remove once the Abseil compilation issue is fixed.
-    if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 14)
-      message(WARNING "Compiling with GCC > 14. Adding -mbmi to Abseil targets, this may cause incompatibility with old CPUs.")
-    endif()
-
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})

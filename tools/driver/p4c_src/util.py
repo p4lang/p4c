@@ -2,60 +2,38 @@
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
-
 import inspect
 import os
 import sys
+from pathlib import Path
+from typing import Optional
 
 
 # get the directory the python program is running from
-def get_script_dir(follow_symlinks=True):
+def get_script_dir(follow_symlinks: bool = True) -> Path:
     # py2exe, PyInstaller, cx_Freeze
     if getattr(sys, "frozen", False):
-        path = os.path.abspath(sys.executable)
+        path = Path(sys.executable).resolve() if follow_symlinks else Path(sys.executable)
     else:
-        path = inspect.getabsfile(get_script_dir)
-    if follow_symlinks:
-        path = os.path.realpath(path)
-    return os.path.dirname(path)
-
-
-# recursive find, good for developer
-def rec_find_bin(cwd, exe):
-    found = None
-    for root, dirs, files in os.walk(cwd):
-        for f in files:
-            if f == exe:
-                return os.path.join(root, f)
-    cwd = os.path.abspath(os.path.join(cwd, os.pardir))
-    if cwd != "/":
-        found = rec_find_bin(cwd, exe)
-    return found
-
-
-def use_rec_find(exe):
-    cwd = os.getcwd()
-    return rec_find_bin(cwd, exe)
-
-
-def getLocalCfg(config):
-    """
-    Search bottom-up for p4c.site.cfg
-    """
-    return use_rec_find(config)
+        path = Path(inspect.getabsfile(get_script_dir))
+        if follow_symlinks:
+            path = path.resolve()
+    return path.parent
 
 
 # top-down find, good for deployment
-def find_bin(exe):
+def find_bin(exe: str) -> Optional[Path]:
     for pp in os.environ["PATH"].split(":"):
-        for root, dirs, files in os.walk(pp):
-            for ff in files:
-                if ff == exe:
-                    return os.path.join(pp, ff)
+        pp_path = Path(pp)
+        if not pp_path.is_dir():
+            continue
+        for root, dirs, files in os.walk(pp_path):
+            if exe in files:
+                return Path(root) / exe
     return None
 
 
-def find_file(directory, filename, binary=True):
+def find_file(directory: str, filename: str, binary: bool = True) -> Path:
     """
     Searches up the directory hierarchy for filename with prefix directory
     starting from the current working directory.
@@ -63,35 +41,36 @@ def find_file(directory, filename, binary=True):
     If binary == true, then check permissions that the file is executable
     """
 
-    def check_file(f):
-        if os.path.isfile(f):
+    def check_file(f: Path) -> bool:
+        if f.is_file():
             if binary:
-                if os.access(f, os.X_OK):
-                    return True
-            else:
-                return True
+                return os.access(f, os.X_OK)
+            return True
         return False
 
-    executable = ""
-    if directory.startswith("/"):
-        executable = os.path.normpath(os.path.join(directory, filename))
+    directory_path = Path(directory)
+    filename_path = Path(filename)
+
+    if directory_path.is_absolute():
+        executable = (directory_path / filename_path).resolve()
         if check_file(executable):
             return executable
 
     # find the file up the hierarchy
-    dir = os.path.abspath(get_script_dir())
-    if os.path.basename(filename) != filename:
-        directory = os.path.join(directory, os.path.dirname(filename))
-        filename = os.path.basename(filename)
-    while dir != "/":
-        path_to_file = os.path.join(dir, directory)
-        if os.path.isdir(path_to_file):
+    dir = get_script_dir().resolve()
+    if filename_path.name != str(filename_path):
+        directory_path = directory_path / filename_path.parent
+        filename_path = Path(filename_path.name)
+
+    while dir != Path(dir.root):
+        path_to_file = dir / directory_path
+        if path_to_file.is_dir():
             files = os.listdir(path_to_file)
-            if filename in files:
-                executable = os.path.join(path_to_file, filename)
+            if filename_path.name in files:
+                executable = path_to_file / filename_path.name
                 if check_file(executable):
                     return executable
+        dir = dir.parent
 
-        dir = os.path.dirname(dir)
-    print("File {} not found".format(filename))
+    print(f"File {filename_path} not found")
     sys.exit(1)

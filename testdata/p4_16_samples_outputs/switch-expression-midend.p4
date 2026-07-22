@@ -24,43 +24,43 @@ control c(inout bit<32> b) {
                         const 32w92 : switch_0_case_1();
         }
     }
-    @hidden action switchexpression7() {
+    @hidden action switchexpression13() {
         b = 32w1;
     }
-    @hidden action switchexpression8() {
+    @hidden action switchexpression14() {
         b = 32w2;
     }
-    @hidden action switchexpression10() {
+    @hidden action switchexpression16() {
         b = 32w3;
     }
-    @hidden table tbl_switchexpression7 {
+    @hidden table tbl_switchexpression13 {
         actions = {
-            switchexpression7();
+            switchexpression13();
         }
-        const default_action = switchexpression7();
+        const default_action = switchexpression13();
     }
-    @hidden table tbl_switchexpression8 {
+    @hidden table tbl_switchexpression14 {
         actions = {
-            switchexpression8();
+            switchexpression14();
         }
-        const default_action = switchexpression8();
+        const default_action = switchexpression14();
     }
-    @hidden table tbl_switchexpression10 {
+    @hidden table tbl_switchexpression16 {
         actions = {
-            switchexpression10();
+            switchexpression16();
         }
-        const default_action = switchexpression10();
+        const default_action = switchexpression16();
     }
     apply {
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
-                tbl_switchexpression7.apply();
+                tbl_switchexpression13.apply();
             }
             switch_0_case_0: {
-                tbl_switchexpression8.apply();
+                tbl_switchexpression14.apply();
             }
             switch_0_case_1: {
-                tbl_switchexpression10.apply();
+                tbl_switchexpression16.apply();
             }
         }
     }

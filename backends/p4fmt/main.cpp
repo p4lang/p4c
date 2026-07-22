@@ -30,7 +30,7 @@ int main(int argc, char *const argv[]) {
     } else {
         outFile = openFile(options.outputFile(), false);
         if ((outFile == nullptr) || !(*outFile)) {
-            ::P4::error(ErrorType::ERR_NOT_FOUND, "%2%: No such file or directory.",
+            ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.",
                         options.outputFile().string());
             options.usage();
             return EXIT_FAILURE;

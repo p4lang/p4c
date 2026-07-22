@@ -18,6 +18,15 @@ limitations under the License.
 
 namespace P4 {
 
+const IR::Node *TypeInferenceBase::postorder(const IR::ForStatement *stmt) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto type = getType(stmt->condition);
+    if (type == nullptr) return stmt;
+    if (!type->is<IR::Type_Boolean>())
+        typeError("Condition of %1% does not evaluate to a bool but %2%", stmt, type->toString());
+    return stmt;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::IfStatement *conditional) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(conditional->condition);
@@ -46,7 +55,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
                 typeError("%1%: 'switch' label must be an action name or 'default'", c->label);
             }
         }
-    } else {
+    } else if (type->is<IR::Type::Bits>() || type->is<IR::Type_InfInt>() ||
+               type->is<IR::Type_Enum>() || type->is<IR::Type_SerEnum>()) {
         // switch (expression)
         Comparison comp;
         comp.left = stat->expression;
@@ -79,6 +89,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
             }
         }
         if (changed) stat = sclone;
+    } else {
+        typeError("%1%: 'switch' type can't be %2%", stat->expression, type);
     }
     return stat;
 }

@@ -1,3 +1,13 @@
+# SPDX-FileCopyrightText: 2022 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# The BMv2 testgen target requires the control-plane library for P4Runtime.
+if(NOT ENABLE_CONTROL_PLANE)
+  set(TESTGEN_TARGET_DISABLED ON PARENT_SCOPE)
+  return()
+endif()
+
 if(ENABLE_TESTING)
   # Include the test subdirectory.
   message("-- Adding p4testgen bmv2 test suite")
@@ -50,12 +60,13 @@ set(TESTGEN_GTEST_SOURCES
   PARENT_SCOPE
 )
 
-
 # Link the run-bmv2-test binary
 execute_process(COMMAND ln -sfn ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-test.py ${CMAKE_BINARY_DIR}/run-bmv2-test.py)
 
 set(
   TESTGEN_LIBS ${TESTGEN_LIBS}
+  PRIVATE p4tools-control-plane
+  # For Protobuf includes.
+  PRIVATE controlplane
   PARENT_SCOPE
 )
-

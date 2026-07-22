@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* -*-C++-*- */
 /* This file contains the IR classes for all expressions.
    The base classes are in base.def */
@@ -575,6 +579,7 @@ class MethodCallExpression : Expression {
                          Vector<Argument> args)
     : MethodCallExpression(si, m, new Vector<Type>(std::move(ta)),
                            new Vector<Argument>(std::move(args))) {}
+
     MethodCallExpression(Util::SourceInfo si, const Expression *m, Vector<Argument> args)
     : MethodCallExpression(si, m, new Vector<Argument>(std::move(args))) {}
 #end
@@ -588,11 +593,8 @@ class ConstructorCallExpression : Expression {
                         constructedType->is<Type_Specialized>(),
                         "%1%: unexpected type", constructedType);
         arguments->check_null(); }
-#emit
-    // FIXME -- should not need #emit here, but ir-generator does not understand rvalue refs
     ConstructorCallExpression(Util::SourceInfo si, const IR::Type *t, Vector<Argument> &&args)
     : ConstructorCallExpression(si, t, new Vector<Argument>(std::move(args))) {}
-#end
 }
 
 class BaseListExpression : Expression {

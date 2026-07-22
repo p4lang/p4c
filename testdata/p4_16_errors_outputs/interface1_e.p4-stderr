@@ -1,9 +1,9 @@
-interface1_e.p4(20): [--Wwarn=unused] warning: control 'p' is unused
+interface1_e.p4(11): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
-interface1_e.p4(25): [--Werror=type-error] error: x.f: extern X does not have method matching this call
+interface1_e.p4(16): [--Werror=type-error] error: x.f: extern X does not have method matching this call
         x.f();
         ^^^
-interface1_e.p4(16)
+interface1_e.p4(7)
 extern X {
        ^

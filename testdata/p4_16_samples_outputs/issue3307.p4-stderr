@@ -1,10 +1,10 @@
-issue3307.p4(6): [--Wwarn=unused] warning: parser 'MyParser' is unused
+issue3307.p4(12): [--Wwarn=unused] warning: parser 'MyParser' is unused
 parser MyParser(t tt) {
        ^^^^^^^^
-issue3307.p4(7): [--Wwarn=unused] warning: 'ee' is unused
+issue3307.p4(13): [--Wwarn=unused] warning: 'ee' is unused
     e() ee = {
         ^^
-issue3307.p4(6): [--Winfo=removed] info: removing parser 'MyParser'
+issue3307.p4(12): [--Winfo=removed] info: removing parser 'MyParser'
 parser MyParser(t tt) {
        ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

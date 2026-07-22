@@ -1,2 +1,6 @@
+# SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 packet 0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 expect 0 00 00 00 00 00 00 00 00 00 00 00 00 00 00 03

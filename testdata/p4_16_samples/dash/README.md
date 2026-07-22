@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # DASH P4 Programs
 The Disaggregated API for SONiC Hosts (DASH) defines a behavioral model for conformance testing of network devices. The P4 programs contained here model various network architecture scenarios related to the DASH project.
 

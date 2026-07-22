@@ -15,17 +15,17 @@ extern E {
 
 control c() {
     @name("c.e") E((list<S_bit32>){(S_bit32){t = 32w10},(S_bit32){t = 32w5}}) e_0;
-    @hidden action list9l15() {
+    @hidden action list9l21() {
         e_0.run();
     }
-    @hidden table tbl_list9l15 {
+    @hidden table tbl_list9l21 {
         actions = {
-            list9l15();
+            list9l21();
         }
-        const default_action = list9l15();
+        const default_action = list9l21();
     }
     apply {
-        tbl_list9l15.apply();
+        tbl_list9l21.apply();
     }
 }
 

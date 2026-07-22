@@ -34,7 +34,6 @@ def copy_directories_and_files(source, dest):
         'LICENSE',
         'README',
         'bootstrap_bfn_env.sh',
-        'CPackOptions.cmake',
         'LICENSE.in',
         'README.md',
         'bootstrap_bfn_compilers.sh',

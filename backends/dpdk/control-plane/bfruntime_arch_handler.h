@@ -303,7 +303,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         auto typeSpec =
             TypeSpecConverter::convert(this->refMap, this->typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
-                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec", typeArg);
 
         return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
     }

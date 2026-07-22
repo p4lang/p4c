@@ -1,12 +1,12 @@
-issue3623-2.p4(5): [--Wwarn=unused] warning: control 'c' is unused
+issue3623-2.p4(11): [--Wwarn=unused] warning: control 'c' is unused
 control c(in e v)
         ^
-issue3623-2.p4(8): [--Werror=type-error] error: 'v' with type 'e' cannot be compared to '4w1' with type 'bit<4>'
+issue3623-2.p4(14): [--Werror=type-error] error: 'v' with type 'e' cannot be compared to '4w1' with type 'bit<4>'
     switch(v) {
            ^
-issue3623-2.p4(1)
+issue3623-2.p4(7)
 enum bit<4> e
             ^
-issue3623-2.p4(9)
+issue3623-2.p4(15)
       4w1:
       ^^^

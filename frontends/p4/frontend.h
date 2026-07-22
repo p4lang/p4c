@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_P4_FRONTEND_H_
 #define FRONTENDS_P4_FRONTEND_H_
@@ -57,6 +48,11 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
     /// Indicates whether control flow should fold blocks marked with @inlinedFrom annotation
     /// @returns Defaults to true
     virtual bool foldInlinedFrom() const { return true; }
+
+    /// Returns whether static_assert() should be fully evaluated in the frontend.
+    /// If false, evaluation may be deferred to a later pass.
+    /// @returns Defaults to true
+    virtual bool isStaticAssertFinal() const { return true; }
 
     /// Indicates whether the frontend should run some optimizations (inlining, action localization,
     /// etc.).

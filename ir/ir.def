@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* -*-C++-*- */
 
 
@@ -426,22 +430,18 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
     inline NameMap<Property> properties = {};  // P4_14 externs only, at the moment
     optional NullOK BlockStatement initializer = nullptr;
         // experimental only; contains just declarations, no code
-
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     Type getType() const override { return type; }
     ID Name() const override { return name; }
     validate{ arguments->check_null(); }
-#emit
-    // FIXME -- should not need #emit here, but ir-generator does not understand rvalue refs
-    // see FIXME notes in expression.def
+
     Declaration_Instance(Util::SourceInfo si, ID id, Vector<Annotation> &&ann, const Type *t, 
                          Vector<Argument> &&args, const BlockStatement *init = nullptr)
     : Declaration_Instance(si, id, ann, t, new Vector<Argument>(std::move(args)), init) {}
     Declaration_Instance(Util::SourceInfo si, ID id, const Type *t, Vector<Argument> &&args,
                          const BlockStatement *init = nullptr)
     : Declaration_Instance(si, id, t, new Vector<Argument>(std::move(args)), init) {}
-#end
 }
 
 /// Toplevel program representation

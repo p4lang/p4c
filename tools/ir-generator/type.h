@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef TOOLS_IR_GENERATOR_TYPE_H_
 #define TOOLS_IR_GENERATOR_TYPE_H_
@@ -143,11 +134,13 @@ class TemplateInstantiation : public Type {
 class ReferenceType : public Type {
     const Type *base;
     bool isConst;
+    bool isRValue;
 
  public:
-    explicit ReferenceType(const Type *t, bool c = false) : base(t), isConst(c) {}
-    ReferenceType(Util::SourceInfo si, const Type *t, bool c = false)
-        : Type(si), base(t), isConst(c) {}
+    explicit ReferenceType(const Type *t, bool c = false, bool rv = false)
+        : base(t), isConst(c), isRValue(rv) {}
+    ReferenceType(Util::SourceInfo si, const Type *t, bool c = false, bool rv = false)
+        : Type(si), base(t), isConst(c), isRValue(rv) {}
     bool isResolved() const override { return false; }
     const IrClass *resolve(const IrNamespace *ns) const override {
         base->resolve(ns);
@@ -156,7 +149,7 @@ class ReferenceType : public Type {
     cstring toString() const override;
     bool operator==(const Type &t) const override { return t == *this; }
     bool operator==(const ReferenceType &t) const override {
-        return isConst == t.isConst && *base == *t.base;
+        return isConst == t.isConst && isRValue == t.isRValue && *base == *t.base;
     }
     static ReferenceType OstreamRef, VisitorRef;
 };

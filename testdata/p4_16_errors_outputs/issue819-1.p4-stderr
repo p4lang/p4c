@@ -1,13 +1,13 @@
-issue819-1.p4(14): [--Werror=type-error] error: Type parameters needed for wc
+issue819-1.p4(20): [--Werror=type-error] error: Type parameters needed for wc
 control MyC1(WrapControls wc) {
                           ^^
-issue819-1.p4(19): [--Werror=type-error] error: Type parameters needed for wc
+issue819-1.p4(25): [--Werror=type-error] error: Type parameters needed for wc
 control MyC2(WrapControls wc) {
                           ^^
-issue819-1.p4(27): [--Werror=type-error] error: WrapControls: contains self 'WrapControls' as type argument
+issue819-1.p4(33): [--Werror=type-error] error: WrapControls: contains self 'WrapControls' as type argument
   WrapControls<MyC1,MyC2>(c1,c2) wc;
   ^^^^^^^^^^^^
-issue819-1.p4(7)
+issue819-1.p4(13)
 extern WrapControls<T1,T2> {
        ^^^^^^^^^^^^
 Compilation cannot continue due to type errors

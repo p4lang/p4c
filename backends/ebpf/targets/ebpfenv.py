@@ -4,9 +4,9 @@
 # SPDX-FileCopyrightText: 2018 VMware, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
-""" Virtual environment which models a simple bridge with n attached
-    interfaces. The bridge runs in a completely isolated namespace.
-    Allows the loading and testing of eBPF programs. """
+"""Virtual environment which models a simple bridge with n attached
+interfaces. The bridge runs in a completely isolated namespace.
+Allows the loading and testing of eBPF programs."""
 
 import logging
 import subprocess

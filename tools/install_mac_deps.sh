@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2020 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script to install P4C dependencies on MacOS.
 
 set -e  # Exit on error.
@@ -11,7 +15,7 @@ brew_install() {
     if brew list $1 &>/dev/null; then
         echo "${1} is already installed"
     else
-        brew install --ignore-dependencies $1 && echo "$1 is installed"
+        brew install $1 && echo "$1 is installed"
     fi
 }
 
@@ -40,7 +44,7 @@ brew update
 
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
-    autoconf automake ccache cmake libtool
+    autoconf automake ccache cmake jsoncpp libtool
     openssl coreutils bison grep ninja virtualenv uv
     libevent nanomsg thrift xxhash
     ${BOOST_LIB}

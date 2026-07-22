@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 The P4 Language Consortium
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #ifndef BACKENDS_TOFINO_BF_ASM_ALLOC_H_
 #define BACKENDS_TOFINO_BF_ASM_ALLOC_H_
 

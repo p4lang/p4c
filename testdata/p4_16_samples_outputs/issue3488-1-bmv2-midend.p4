@@ -125,15 +125,15 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         default_action = NoAction_2();
     }
-    @hidden action issue34881bmv2l158() {
+    @hidden action issue34881bmv2l164() {
         meta.dropped = false;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @hidden table tbl_issue34881bmv2l158 {
+    @hidden table tbl_issue34881bmv2l164 {
         actions = {
-            issue34881bmv2l158();
+            issue34881bmv2l164();
         }
-        const default_action = issue34881bmv2l158();
+        const default_action = issue34881bmv2l164();
     }
     @hidden table tbl_drop_action {
         actions = {
@@ -142,7 +142,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         const default_action = drop_action();
     }
     apply {
-        tbl_issue34881bmv2l158.apply();
+        tbl_issue34881bmv2l164.apply();
         switch (pre_tbl1_0.apply().action_run) {
             action1: 
             action2: {

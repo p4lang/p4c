@@ -44,10 +44,10 @@ control ingress(inout bit<32> b) {
     @hidden action act_0() {
         tmp_1 = false;
     }
-    @hidden action issue25462l13() {
+    @hidden action issue25462l19() {
         tmp_2 = 8w1;
     }
-    @hidden action issue25462l13_0() {
+    @hidden action issue25462l19_0() {
         tmp_2 = 8w2;
     }
     @hidden action act_1() {
@@ -56,13 +56,13 @@ control ingress(inout bit<32> b) {
     @hidden action act_2() {
         tmp = false;
     }
-    @hidden action issue25462l20() {
+    @hidden action issue25462l26() {
         tmp_0 = 8w3;
     }
-    @hidden action issue25462l20_0() {
+    @hidden action issue25462l26_0() {
         tmp_0 = 8w4;
     }
-    @hidden action issue25462l27() {
+    @hidden action issue25462l33() {
         b = 32w1;
     }
     @hidden table tbl_act {
@@ -77,17 +77,17 @@ control ingress(inout bit<32> b) {
         }
         const default_action = act_0();
     }
-    @hidden table tbl_issue25462l13 {
+    @hidden table tbl_issue25462l19 {
         actions = {
-            issue25462l13();
+            issue25462l19();
         }
-        const default_action = issue25462l13();
+        const default_action = issue25462l19();
     }
-    @hidden table tbl_issue25462l13_0 {
+    @hidden table tbl_issue25462l19_0 {
         actions = {
-            issue25462l13_0();
+            issue25462l19_0();
         }
-        const default_action = issue25462l13_0();
+        const default_action = issue25462l19_0();
     }
     @hidden table tbl_act_1 {
         actions = {
@@ -101,23 +101,23 @@ control ingress(inout bit<32> b) {
         }
         const default_action = act_2();
     }
-    @hidden table tbl_issue25462l20 {
+    @hidden table tbl_issue25462l26 {
         actions = {
-            issue25462l20();
+            issue25462l26();
         }
-        const default_action = issue25462l20();
+        const default_action = issue25462l26();
     }
-    @hidden table tbl_issue25462l20_0 {
+    @hidden table tbl_issue25462l26_0 {
         actions = {
-            issue25462l20_0();
+            issue25462l26_0();
         }
-        const default_action = issue25462l20_0();
+        const default_action = issue25462l26_0();
     }
-    @hidden table tbl_issue25462l27 {
+    @hidden table tbl_issue25462l33 {
         actions = {
-            issue25462l27();
+            issue25462l33();
         }
-        const default_action = issue25462l27();
+        const default_action = issue25462l33();
     }
     apply {
         if (t0_0.apply().hit) {
@@ -126,9 +126,9 @@ control ingress(inout bit<32> b) {
             tbl_act_0.apply();
         }
         if (tmp_1) {
-            tbl_issue25462l13.apply();
+            tbl_issue25462l19.apply();
         } else {
-            tbl_issue25462l13_0.apply();
+            tbl_issue25462l19_0.apply();
         }
         if (t1_0.apply().hit) {
             tbl_act_1.apply();
@@ -136,12 +136,12 @@ control ingress(inout bit<32> b) {
             tbl_act_2.apply();
         }
         if (tmp) {
-            tbl_issue25462l20.apply();
+            tbl_issue25462l26.apply();
         } else {
-            tbl_issue25462l20_0.apply();
+            tbl_issue25462l26_0.apply();
         }
         if (t2_0.apply().hit) {
-            tbl_issue25462l27.apply();
+            tbl_issue25462l33.apply();
         }
     }
 }

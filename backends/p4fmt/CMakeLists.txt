@@ -19,6 +19,9 @@ add_executable(p4fmt ${FMT_SRCS})
 target_link_libraries(p4fmt ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4fmt frontend)
 
+install (TARGETS p4fmt
+  RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+
 add_custom_target(p4formatter
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4fmt ${P4C_BINARY_DIR}/p4fmt
 )

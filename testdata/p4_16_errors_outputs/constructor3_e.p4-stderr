@@ -1,25 +1,25 @@
-constructor3_e.p4(21): [--Wwarn=unused] warning: control 'c' is unused
+constructor3_e.p4(12): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-constructor3_e.p4(22): [--Wwarn=unused] warning: 'e' is unused
+constructor3_e.p4(13): [--Wwarn=unused] warning: 'e' is unused
     E(true) e;
             ^
-constructor3_e.p4(22): [--Werror=type-error] error: 'e'
+constructor3_e.p4(13): [--Werror=type-error] error: 'e'
     E(true) e;
             ^
   ---- Actual error:
   Cannot cast implicitly type 'bool' to type 'bit<1>'
   ---- Originating from:
-constructor3_e.p4(22): Type of argument 'true' (bool) does not match type of parameter 'x' (bit<1>)
+constructor3_e.p4(13): Type of argument 'true' (bool) does not match type of parameter 'x' (bit<1>)
       E(true) e;
         ^^^^
-constructor3_e.p4(18)
+constructor3_e.p4(9)
       E(bit x);
             ^
   ---- Originating from:
-constructor3_e.p4(22): Constructor invocation <Method call> does not match constructor declaration E
+constructor3_e.p4(13): Constructor invocation <Method call> does not match constructor declaration E
       E(true) e;
               ^
-constructor3_e.p4(18)
+constructor3_e.p4(9)
       E(bit x);
       ^

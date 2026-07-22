@@ -81,7 +81,7 @@ control c(out bit<1> x) {
     @name("c.s") GH_S[3] s_0;
     X z_0_xu;
     GH_bit32 z_0_h3u;
-    @hidden action genericstruct90() {
+    @hidden action genericstruct96() {
         gh_0.setInvalid();
         s_0[0].setInvalid();
         s_0[1].setInvalid();
@@ -90,14 +90,14 @@ control c(out bit<1> x) {
         z_0_h3u.setInvalid();
         x = 1w0;
     }
-    @hidden table tbl_genericstruct90 {
+    @hidden table tbl_genericstruct96 {
         actions = {
-            genericstruct90();
+            genericstruct96();
         }
-        const default_action = genericstruct90();
+        const default_action = genericstruct96();
     }
     apply {
-        tbl_genericstruct90.apply();
+        tbl_genericstruct96.apply();
     }
 }
 

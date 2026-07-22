@@ -1,12 +1,12 @@
-issue803-1.p4(3): [--Wwarn=unused] warning: 'IH' is unused
+issue803-1.p4(9): [--Wwarn=unused] warning: 'IH' is unused
 package Ingress<IH>();
                 ^^
-issue803-1.p4(3): [--Werror=type-error] error: 'package Ingress'
+issue803-1.p4(9): [--Werror=type-error] error: 'package Ingress'
 package Ingress<IH>();
         ^^^^^^^
   ---- Actual error:
   Ingress: 1 arguments supplied while 0 are expected
   ---- Originating from:
-issue803-1.p4(14): Constructor invocation '<Method call>' does not match declaration 'Ingress'
+issue803-1.p4(20): Constructor invocation '<Method call>' does not match declaration 'Ingress'
   Ingress<H>(ing_parse()) ig1;
                           ^^^

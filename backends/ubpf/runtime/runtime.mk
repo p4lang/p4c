@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2020 VMware, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # If needed, bpf target files can be hardcoded here
 # This can be any file with the extension ".c"
 BPFOBJ=

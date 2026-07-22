@@ -632,6 +632,7 @@ void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpressi
                 }
             } else if (mem->expr->type->is<IR::Type_Header>() ||
                        mem->expr->type->is<IR::Type_HeaderUnion>()) {
+                if (mem->member == "isValid") return;
                 BUG_CHECK(mem->member == "setValid" || mem->member == "setInvalid",
                           "Unexpected header method %s", mem->member);
                 LOG3("loop prepass header method call " << mc->method << " writes to " << obj);

@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Install BMv2 from source using CMake.
 
 set -euo pipefail
@@ -144,6 +148,9 @@ echo "Building BMv2 from $REPO_URL @ $BMV2_SHA"
 if [[ "$WITH_PI" == "ON" ]]; then
   CMAKE_ARGS+=("-DWITH_PI=ON")
 fi
+
+# Ensure that the install RPATH includes the link path to find shared libraries.
+CMAKE_ARGS+=("-DCMAKE_INSTALL_RPATH_USE_LINK_PATH=TRUE")
 
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX="$PREFIX" "${CMAKE_ARGS[@]}"
 cmake --build build --parallel "$JOBS" "${BUILD_ARGS[@]}"

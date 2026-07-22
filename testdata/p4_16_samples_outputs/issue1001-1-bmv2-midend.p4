@@ -18,17 +18,17 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue10011bmv2l24() {
+    @hidden action issue10011bmv2l30() {
         clone_preserving_field_list(CloneType.I2E, 32w64, 8w1);
     }
-    @hidden table tbl_issue10011bmv2l24 {
+    @hidden table tbl_issue10011bmv2l30 {
         actions = {
-            issue10011bmv2l24();
+            issue10011bmv2l30();
         }
-        const default_action = issue10011bmv2l24();
+        const default_action = issue10011bmv2l30();
     }
     apply {
-        tbl_issue10011bmv2l24.apply();
+        tbl_issue10011bmv2l30.apply();
     }
 }
 

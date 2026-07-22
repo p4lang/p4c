@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: "validate-p4c"
 
 on:
@@ -27,21 +31,16 @@ jobs:
       VALIDATION: ON
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: validation-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 22.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "validation"
 
       - name: Validate
         run: |
-          uv run ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
+          uv run ctest -R toz3-validate-p4c --output-on-failure --schedule-random
         working-directory: ./build
