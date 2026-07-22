@@ -152,6 +152,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae2f8eb05332dffdbfff3326c3afa12bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac749c0cd3b5ddba81db6eb7f3bf760f7" id="r_ac749c0cd3b5ddba81db6eb7f3bf760f7"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_strength_reduction_policy.html">StrengthReductionPolicy</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac749c0cd3b5ddba81db6eb7f3bf760f7">getStrengthReductionPolicy</a> () const</td></tr>
 <tr class="separator:ac749c0cd3b5ddba81db6eb7f3bf760f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7257ebdf8234bf536df008d97ccf0c0f" id="r_a7257ebdf8234bf536df008d97ccf0c0f"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7257ebdf8234bf536df008d97ccf0c0f">isStaticAssertFinal</a> () const</td></tr>
+<tr class="separator:a7257ebdf8234bf536df008d97ccf0c0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af373947a553e5ba14e0dc59c8cb41c00" id="r_af373947a553e5ba14e0dc59c8cb41c00"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af373947a553e5ba14e0dc59c8cb41c00">optimize</a> (const <a class="el" href="class_p4_1_1_compiler_options.html">CompilerOptions</a> &amp;options) const</td></tr>
 <tr class="separator:af373947a553e5ba14e0dc59c8cb41c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0c6f0ffbcf40b0905f28d9f161ecc71" id="r_ad0c6f0ffbcf40b0905f28d9f161ecc71"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad0c6f0ffbcf40b0905f28d9f161ecc71">removeOpAssign</a> () const</td></tr>
@@ -296,6 +298,32 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Get policy for the strength reduction pass. </p><dl class="section see"><dt>See also</dt><dd>StrengthReductionPolicy </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>Defaults to nullptr, which causes strength reduction to use the default policy, which does not modify the pass defaults in any way. </dd></dl>
+
+</div>
+</div>
+<a id="a7257ebdf8234bf536df008d97ccf0c0f" name="a7257ebdf8234bf536df008d97ccf0c0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7257ebdf8234bf536df008d97ccf0c0f">&#9670;&#160;</a></span>isStaticAssertFinal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool P4::FrontEndPolicy::isStaticAssertFinal </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Returns whether static_assert() should be fully evaluated in the frontend. If false, evaluation may be deferred to a later pass. </p><dl class="section return"><dt>Returns</dt><dd>Defaults to true </dd></dl>
 
 </div>
 </div>

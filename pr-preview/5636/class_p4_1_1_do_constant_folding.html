@@ -518,6 +518,8 @@ const IR::Constant *&#160;</td><td class="memItemRight" valign="bottom"><b>cast<
 <tr class="separator:af128dd44c8dc8177f7a16c5762fbaf56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aca5b04b93f3560d362da4b1a62acdfa9" id="r_aca5b04b93f3560d362da4b1a62acdfa9"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aca5b04b93f3560d362da4b1a62acdfa9">getConstant</a> (const IR::Expression *expr) const</td></tr>
 <tr class="separator:aca5b04b93f3560d362da4b1a62acdfa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa174f4319686246b541aa8c6d0750a68" id="r_aa174f4319686246b541aa8c6d0750a68"><td class="memItemLeft" align="right" valign="top">const IR::Type *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa174f4319686246b541aa8c6d0750a68">resolveType</a> (const IR::Type *t)</td></tr>
+<tr class="separator:aa174f4319686246b541aa8c6d0750a68"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92320f78791dd5ec5ad5f47be63a62db" id="r_a92320f78791dd5ec5ad5f47be63a62db"><td class="memItemLeft" align="right" valign="top"><a class="el" href="#a2342289cbde2a320fa9887e509f4a30a">Result</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a92320f78791dd5ec5ad5f47be63a62db">setContains</a> (const IR::Expression *keySet, const IR::Expression *constant) const</td></tr>
 <tr class="separator:a92320f78791dd5ec5ad5f47be63a62db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a459b29cbeb3a5438d30f093ac296f971" id="r_a459b29cbeb3a5438d30f093ac296f971"><td class="memItemLeft" align="right" valign="top"><a id="a459b29cbeb3a5438d30f093ac296f971" name="a459b29cbeb3a5438d30f093ac296f971"></a>
@@ -683,6 +685,32 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>a constant equivalent to <code class="param">expr</code> or <code>nullptr</code> </dd></dl>
+
+</div>
+</div>
+<a id="aa174f4319686246b541aa8c6d0750a68" name="aa174f4319686246b541aa8c6d0750a68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa174f4319686246b541aa8c6d0750a68">&#9670;&#160;</a></span>resolveType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const IR::Type * P4::DoConstantFolding::resolveType </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Type *</td>          <td class="paramname"><span class="paramname"><em>t</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>a concrete type from a Type_Typedef by resolving it and also getting any updated type from ConstantFolding an expression size into a Type_Bits </dd></dl>
 
 </div>
 </div>

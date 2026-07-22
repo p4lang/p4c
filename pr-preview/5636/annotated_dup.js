@@ -1695,6 +1695,7 @@ var annotated_dup =
       [ "DoEliminateSerEnums", "class_p4_1_1_do_eliminate_ser_enums.html", "class_p4_1_1_do_eliminate_ser_enums" ],
       [ "DoEliminateSwitch", "class_p4_1_1_do_eliminate_switch.html", null ],
       [ "DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
+      [ "DoExpandHeaderUnionStackPushPop", "class_p4_1_1_do_expand_header_union_stack_push_pop.html", null ],
       [ "DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
       [ "DoFlattenHeaderUnion", "class_p4_1_1_do_flatten_header_union.html", null ],
       [ "DoFlattenHeaderUnionStack", "class_p4_1_1_do_flatten_header_union_stack.html", null ],

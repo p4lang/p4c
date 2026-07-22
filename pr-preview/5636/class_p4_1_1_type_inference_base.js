@@ -5,6 +5,7 @@ var class_p4_1_1_type_inference_base =
     [ "canonicalize", "class_p4_1_1_type_inference_base.html#a3f425335797d3710a4df71a91a0443c3", null ],
     [ "checkUnderlyingEnumType", "class_p4_1_1_type_inference_base.html#a03922ba779252bab1f977c4a09157a0f", null ],
     [ "containerInstantiation", "class_p4_1_1_type_inference_base.html#ac4c5ff04c9f3f405066b49ed7801def2", null ],
+    [ "convertUntypedInvalid", "class_p4_1_1_type_inference_base.html#a2121a04aea5c71818f98b0dcf76c625e", null ],
     [ "postorder", "class_p4_1_1_type_inference_base.html#a61d3290e539d511326b6bf932ca6ee27", null ],
     [ "postorder", "class_p4_1_1_type_inference_base.html#aa6bf5c08871f7043156ca58e8b904117", null ],
     [ "preorder", "class_p4_1_1_type_inference_base.html#a8474397735e2b40d050ad6a66545b396", null ],
