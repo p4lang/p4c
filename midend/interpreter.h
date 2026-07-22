@@ -312,7 +312,7 @@ class SymbolicBool final : public ScalarValue {
 
 class SymbolicInteger final : public ScalarValue {
  public:
-    const IR::Constant *constant;
+    IR::Ptr<IR::Constant> constant;
     explicit SymbolicInteger(const IR::Type_Bits *type)
         : ScalarValue(ScalarValue::ValueState::Uninitialized, type), constant(nullptr) {}
     SymbolicInteger(ScalarValue::ValueState state, const IR::Type_Bits *type)
@@ -341,7 +341,7 @@ class SymbolicInteger final : public ScalarValue {
 
 class SymbolicString final : public ScalarValue {
  public:
-    const IR::StringLiteral *string;
+    IR::Ptr<IR::StringLiteral> string;
     explicit SymbolicString(const IR::Type_String *type)
         : ScalarValue(ScalarValue::ValueState::Uninitialized, type), string(nullptr) {}
     SymbolicString(ScalarValue::ValueState state, const IR::Type_String *type)
@@ -484,7 +484,7 @@ class SymbolicArray final : public SymbolicValue {
 
  public:
     const size_t size;
-    const IR::Type_Header *elemType;
+    IR::Ptr<IR::Type_Header> elemType;
     SymbolicArray(const IR::Type_Array *stack, bool uninitialized,
                   const SymbolicValueFactory *factory);
     SymbolicValue *get(const IR::Node *node, size_t index) const {

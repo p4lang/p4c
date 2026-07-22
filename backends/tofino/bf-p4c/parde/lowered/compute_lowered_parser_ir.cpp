@@ -272,7 +272,7 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState *state) {
     /// Convert multiple select into one.
     auto *loweredSelect = new IR::BFN::LoweredSelect();
 
-    for (const auto *select : state->selects) {
+    for (auto select : state->selects) {
         if (const auto *ctr = select->source->to<IR::BFN::ParserCounterRVal>())
             loweredSelect->counters.push_back(ctr);
 
@@ -283,7 +283,7 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState *state) {
 
     loweredState->select = loweredSelect;
 
-    for (auto *transition : state->transitions) {
+    for (auto transition : state->transitions) {
         BUG_CHECK(int(transition->shift) <= Device::pardeSpec().byteInputBufferSize(),
                   "State %1% has shift %2% more than buffer size?", state->name, transition->shift);
         BUG_CHECK(loweredStates.find(transition->next) != loweredStates.end(),
@@ -293,7 +293,7 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState *state) {
         std::optional<bool> partial_hdr_err_proc_saves = std::nullopt;
         IR::Vector<IR::BFN::LoweredSave> saves;
 
-        for (const auto *save : transition->saves) {
+        for (auto save : transition->saves) {
             auto range = save->source->range.toUnit<RangeUnit::Byte>();
 
             IR::BFN::LoweredInputBufferRVal *source = nullptr;

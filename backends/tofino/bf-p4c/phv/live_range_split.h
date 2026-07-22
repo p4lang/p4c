@@ -203,7 +203,7 @@ class LiveRangeSplitOrFail : public Visitor {
     const DarkLiveRangeMap &liveRangeMap;
     const NonMochaDarkFields &nonMochaDark;
 
-    const IR::Node *apply_visitor(const IR::Node *root, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *name = 0) override;
 
  public:
     LiveRangeSplitOrFail(std::function<const ConcreteAllocation *()> getAllocFn,

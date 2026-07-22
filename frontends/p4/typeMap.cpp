@@ -45,17 +45,20 @@ void TypeMap::dbprint(std::ostream &out) const {
     out << "--------------" << std::endl;
 }
 
-void TypeMap::setLeftValue(const IR::Expression *expression) {
+void TypeMap::setLeftValue(IR::Ptr<IR::Expression> expression) {
     leftValues.insert(expression);
     LOG3("Left value " << dbp(expression));
 }
 
-void TypeMap::setCompileTimeConstant(const IR::Expression *expression) {
+void TypeMap::setCompileTimeConstant(IR::Ptr<IR::Expression> expression) {
     constants.insert(expression);
     LOG3("Constant value " << dbp(expression));
 }
 
 bool TypeMap::isCompileTimeConstant(const IR::Expression *expression) const {
+#if !HAVE_LIBGC
+    BUG_CHECK(expression->check_referenced(), "checking unreferenced node in typeMap");
+#endif
     bool result = constants.find(expression) != constants.end();
     LOG3(dbp(expression) << (result ? " constant" : " not constant"));
     return result;
@@ -86,7 +89,7 @@ void TypeMap::checkPrecondition(const IR::Node *element, const IR::Type *type) c
         BUG("Element %1% maps to a Type_Name %2%", dbp(element), dbp(type));
 }
 
-void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
+void TypeMap::setType(IR::Ptr<IR::Node> element, const IR::Type *type) {
     checkPrecondition(element, type);
     auto [it, inserted] = typeMap.emplace(element, type);
     if (!inserted) {
@@ -99,9 +102,12 @@ void TypeMap::setType(const IR::Node *element, const IR::Type *type) {
     LOG3("setType " << dbp(element) << " => " << dbp(type));
 }
 
-const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
+IR::Ptr<IR::Type> TypeMap::getType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
-    const auto *result = get(typeMap, element);
+#if !HAVE_LIBGC
+    BUG_CHECK(element->check_referenced(), "checking unreferenced node in typeMap");
+#endif
+    IR::Ptr<IR::Type> result = get(typeMap, element);
     LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
     if (notNull && result == nullptr)
         BUG_CHECK(errorCount() > 0, "Could not find type for %1%", dbp(element));
@@ -109,9 +115,12 @@ const IR::Type *TypeMap::getType(const IR::Node *element, bool notNull) const {
     return result;
 }
 
-const IR::Type *TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
+IR::Ptr<IR::Type> TypeMap::getTypeType(const IR::Node *element, bool notNull) const {
     CHECK_NULL(element);
-    auto result = getType(element, notNull);
+#if !HAVE_LIBGC
+    BUG_CHECK(element->check_referenced(), "checking unreferenced node in typeMap");
+#endif
+    const IR::Type *result = getType(element, notNull);
     if (!result) return result;
     auto typeType = result->to<IR::Type_Type>();
     BUG_CHECK(typeType, "%1%: expected a TypeType", result);
@@ -324,7 +333,7 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type *from, const IR::Type *to) 
 // Used for tuples, stacks and lists only
 const IR::Type *TypeMap::getCanonical(const IR::Type *type) {
     // Currently a linear search; hopefully this won't be too expensive in practice
-    std::vector<const IR::Type *> *searchIn;
+    std::vector<IR::Ptr<IR::Type>> *searchIn;
     if (type->is<IR::Type_Array>())
         searchIn = &canonicalStacks;
     else if (type->is<IR::Type_Tuple>())
@@ -389,5 +398,7 @@ int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool
                 errorPosition, t);
     return -1;
 }
+
+void dump(TypeMap *typeMap) { std::cout << *typeMap << std::endl; }
 
 }  // namespace P4

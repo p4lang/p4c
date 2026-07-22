@@ -34,7 +34,8 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     // mt can be Type_Method or Type_Action
     if (mce->method->is<IR::Member>()) {
         auto mem = mce->method->to<IR::Member>();
-        auto basetype = typeMap ? typeMap->getType(mem->expr) : mem->expr->type;
+        const IR::Type *basetype = mem->expr->type;
+        if (typeMap) basetype = typeMap->getType(mem->expr);
         if (basetype == nullptr) {
             if (useExpressionType)
                 basetype = mem->expr->type;
@@ -64,7 +65,8 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
                 decl = refMap->getDeclaration(th, true);
             } else if (auto pe = receiver->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
-                type = typeMap ? typeMap->getType(decl->getNode(), true) : pe->type;
+                type = pe->type;
+                if (typeMap) type = typeMap->getType(decl->getNode(), true);
             } else if (auto mc = receiver->to<IR::MethodCallExpression>()) {
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
@@ -72,7 +74,8 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
             } else if (auto cce = receiver->to<IR::ConstructorCallExpression>()) {
                 auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
                 decl = cc->to<ExternConstructorCall>()->type;
-                type = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
+                type = cce->type;
+                if (typeMap) type = typeMap->getTypeType(cce->constructedType, true);
             } else {
                 BUG("unexpected expression %1% resolving method instance", receiver);
             }
@@ -123,7 +126,8 @@ const IR::P4Action *ActionCall::specialize(const DeclarationLookup *refMap) cons
 
 ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *cce,
                                           const DeclarationLookup *refMap, TypeMap *typeMap) {
-    auto ct = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
+    const IR::Type *ct = cce->type;
+    if (typeMap) ct = typeMap->getTypeType(cce->constructedType, true);
     ConstructorCall *result;
     const IR::Vector<IR::Type> *typeArguments;
     const IR::Type_Name *type;
@@ -163,7 +167,7 @@ ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *c
 
 Instantiation *Instantiation::resolve(const IR::Declaration_Instance *instance, DeclarationLookup *,
                                       TypeMap *typeMap) {
-    auto type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
+    const IR::Type *type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
     const IR::Vector<IR::Type> *typeArguments;
 
     while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
@@ -193,7 +197,7 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
     auto *di = object->to<IR::Declaration_Instance>();
     if (!di || !di->initializer) {
         rv.push_back(method);
-    } else if (auto *em_decl =
+    } else if (const IR::IDeclaration *em_decl =
                    di->initializer->components.getDeclaration<IR::IDeclaration>(method->name)) {
         rv.push_back(em_decl);
     } else {
@@ -203,7 +207,7 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
             for (auto m : sync->getExpr()) {
                 auto mname = m->to<IR::PathExpression>();
                 if (!mname || method->name != mname->path->name) continue;
-                if (auto *am =
+                if (const IR::IDeclaration *am =
                         di->initializer->components.getDeclaration<IR::IDeclaration>(meth->name)) {
                     rv.push_back(am);
                 } else if (!meth->hasAnnotation(IR::Annotation::optionalAnnotation)) {

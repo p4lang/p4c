@@ -35,7 +35,7 @@ Visitor::profile_t PragmaDeparserZero::init_apply(const IR::Node *root) {
 
 bool PragmaDeparserZero::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto *annotation : global_pragmas) {
+    for (auto annotation : global_pragmas) {
         std::string pragma_name = annotation->name.name.string();
 
         if (std::find(supported_pragmas->begin(), supported_pragmas->end(), pragma_name) ==

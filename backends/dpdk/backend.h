@@ -32,7 +32,7 @@ class DpdkBackend {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     const p4configv1::P4Info &p4info;
-    const IR::DpdkAsmProgram *dpdk_program = nullptr;
+    IR::Ptr<IR::DpdkAsmProgram> dpdk_program = nullptr;
 
  public:
     void convert(const IR::ToplevelBlock *tlb);

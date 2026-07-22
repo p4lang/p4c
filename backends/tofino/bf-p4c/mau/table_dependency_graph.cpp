@@ -617,7 +617,7 @@ void DependencyGraph::to_json(Util::JsonObject *dgsJson, const FlowGraph &fg, cs
         LOG5(src_name.c_str() << " --- " << dep_types(edge.label) << " --> " << dst_name.c_str());
         if (edge.label == DependencyGraph::ANTI_EXIT) {
             if (data_annotations_exit.count(*edges)) {
-                for (const auto act : data_annotations_exit.at(*edges)) {
+                for (auto act : data_annotations_exit.at(*edges)) {
                     edge.exit_action_name = act->name;
                     add_json_edge(edge, edge_id, gress);
                 }
@@ -1380,7 +1380,7 @@ bool DependencyGraph::is_edge_critical(typename Graph::edge_descriptor e) const 
 
 std::optional<ordered_map<
     std::pair<const PHV::Field *, DependencyGraph::dependencies_t>,
-    std::pair<ordered_set<const IR::MAU::Action *>, ordered_set<const IR::MAU::Action *>>>>
+    std::pair<ordered_set<IR::Ptr<IR::MAU::Action>>, ordered_set<IR::Ptr<IR::MAU::Action>>>>>
 DependencyGraph::get_data_dependency_info(const IR::MAU::Table *upstream,
                                           const IR::MAU::Table *downstream) const {
     if (!labelToVertex.count(upstream)) {
@@ -1395,7 +1395,7 @@ DependencyGraph::get_data_dependency_info(const IR::MAU::Table *upstream,
     typename Graph::out_edge_iterator out, end;
     ordered_map<
         std::pair<const PHV::Field *, DependencyGraph::dependencies_t>,
-        std::pair<ordered_set<const IR::MAU::Action *>, ordered_set<const IR::MAU::Action *>>>
+        std::pair<ordered_set<IR::Ptr<IR::MAU::Action>>, ordered_set<IR::Ptr<IR::MAU::Action>>>>
         gathered_data;
     bool found_downstream = false;
     for (boost::tie(out, end) = boost::out_edges(upstream_v, g); out != end; ++out) {
@@ -2641,16 +2641,16 @@ void PrintDependencyGraph::reverse_dfs(
 }
 
 void PrintDependencyGraph::print_critical_chains(const DependencyGraph &dg) {
-    std::list<std::vector<const IR::MAU::Table *>> chains;
+    std::list<std::vector<IR::Ptr<IR::MAU::Table>>> chains;
     std::vector<std::vector<const IR::MAU::Table *>> crit_chains;
-    std::map<int, std::vector<const IR::MAU::Table *>> tablesPerMinStage;
+    std::map<int, std::vector<IR::Ptr<IR::MAU::Table>>> tablesPerMinStage;
     std::map<const IR::MAU::Table *, bool> visited_tbls;
     LOG6("Looking for Table dependency chains wih minimum length of " << min_path_len
                                                                       << Log::indent);
 
     // First map tables to their min stages
     for (const auto &kv : dg.stage_info) {
-        auto *tbl = kv.first;
+        auto tbl = kv.first;
         auto info = kv.second;
         tablesPerMinStage[info.min_stage].push_back(tbl);
         LOG7("Map table " << tbl->name << " to stage " << info.min_stage);
@@ -2667,7 +2667,7 @@ void PrintDependencyGraph::print_critical_chains(const DependencyGraph &dg) {
     for (auto rItr = tablesPerMinStage.rbegin(); rItr != tablesPerMinStage.rend(); ++rItr) {
         if (stop_search) break;
         // Iterate over the tables in stage stg
-        for (auto *tbl : rItr->second) {
+        for (auto tbl : rItr->second) {
             BUG_CHECK(dg.stage_info.count(tbl), "B. No stage_info for %1%", tbl->name);
 
             auto info = dg.stage_info.at(tbl);
@@ -2699,7 +2699,7 @@ void PrintDependencyGraph::print_critical_chains(const DependencyGraph &dg) {
         std::stringstream ss;
         int t_num = 0;
         gress_t gress = GHOST;
-        for (const auto *t : vec) {
+        for (const auto t : vec) {
             if (t_num) {
                 ss << " -> ";
                 BUG_CHECK(gress == t->gress, "Formed critical chain with different-gress tables?");

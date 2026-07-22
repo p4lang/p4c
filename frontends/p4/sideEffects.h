@@ -139,13 +139,13 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     MinimalNameGenerator nameGen;
     TypeMap *typeMap;
     // Expressions holding temporaries that are already added.
-    std::set<const IR::Expression *> *added;
+    std::set<IR::Ptr<IR::Expression>> *added;
 
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
     IR::IndexedVector<IR::StatOrDecl> statements;
     /// Set of temporaries introduced for method call results during
     /// this pass.
-    std::set<const IR::Expression *> temporaries;
+    std::set<IR::Ptr<IR::Expression>> temporaries;
 
     cstring createTemporary(const IR::Type *type);
     const IR::Expression *addAssignment(Util::SourceInfo srcInfo, cstring varName,
@@ -155,7 +155,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     bool containsHeaderType(const IR::Type *type);
 
  public:
-    DoSimplifyExpressions(TypeMap *typeMap, std::set<const IR::Expression *> *added)
+    DoSimplifyExpressions(TypeMap *typeMap, std::set<IR::Ptr<IR::Expression>> *added)
         : typeMap(typeMap), added(added) {
         CHECK_NULL(typeMap);
         setName("DoSimplifyExpressions");
@@ -208,8 +208,8 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
 
 class TableInsertions {
  public:
-    std::vector<const IR::Declaration_Variable *> declarations;
-    std::vector<const IR::BaseAssignmentStatement *> statements;
+    std::vector<IR::Ptr<IR::Declaration_Variable>> declarations;
+    std::vector<IR::Ptr<IR::BaseAssignmentStatement>> statements;
 };
 
 /**
@@ -254,11 +254,11 @@ class KeySideEffect : public Transform, public ResolutionContext {
  protected:
     MinimalNameGenerator nameGen;
     TypeMap *typeMap;
-    std::map<const IR::P4Table *, TableInsertions *> toInsert;
-    std::set<const IR::P4Table *> *invokedInKey;
+    std::map<IR::Ptr<IR::P4Table>, TableInsertions *> toInsert;
+    std::set<IR::Ptr<IR::P4Table>> *invokedInKey;
 
  public:
-    KeySideEffect(TypeMap *typeMap, std::set<const IR::P4Table *> *invokedInKey)
+    KeySideEffect(TypeMap *typeMap, std::set<IR::Ptr<IR::P4Table>> *invokedInKey)
         : typeMap(typeMap), invokedInKey(invokedInKey) {
         CHECK_NULL(typeMap);
         CHECK_NULL(invokedInKey);
@@ -299,10 +299,10 @@ class KeySideEffect : public Transform, public ResolutionContext {
 /// This inserts Y into the map invokedInKey;
 class TablesInKeys : public Inspector {
     TypeMap *typeMap;
-    std::set<const IR::P4Table *> *invokedInKey;
+    std::set<IR::Ptr<IR::P4Table>> *invokedInKey;
 
  public:
-    TablesInKeys(TypeMap *typeMap, std::set<const IR::P4Table *> *invokedInKey)
+    TablesInKeys(TypeMap *typeMap, std::set<IR::Ptr<IR::P4Table>> *invokedInKey)
         : typeMap(typeMap), invokedInKey(invokedInKey) {
         CHECK_NULL(invokedInKey);
         setName("TableInKeys");
@@ -351,9 +351,9 @@ class SideEffectOrdering : public PassRepeated {
     // computations for other tables.  The keys for these
     // inner tables cannot be expanded until the keys of
     // the caller tables have been expanded.
-    std::set<const IR::P4Table *> invokedInKey;
+    std::set<IR::Ptr<IR::P4Table>> invokedInKey;
     // Temporaries that were added
-    std::set<const IR::Expression *> added;
+    std::set<IR::Ptr<IR::Expression>> added;
 
  public:
     SideEffectOrdering(TypeMap *typeMap, bool skipSideEffectOrdering,

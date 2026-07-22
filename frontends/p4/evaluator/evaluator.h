@@ -24,8 +24,8 @@ class IHasBlock {
 class Evaluator final : public Inspector, public IHasBlock {
     const ReferenceMap *refMap;
     const TypeMap *typeMap;
-    std::vector<IR::Block *> blockStack;
-    IR::ToplevelBlock *toplevelBlock;
+    std::vector<IR::MutablePtr<IR::Block>> blockStack;
+    IR::MutablePtr<IR::ToplevelBlock> toplevelBlock;
 
  protected:
     void pushBlock(IR::Block *block);
@@ -48,11 +48,11 @@ class Evaluator final : public Inspector, public IHasBlock {
     /// True if the node is mapped to a value, even if the value is
     /// nullptr.
     bool hasValue(const IR::Node *node) const;
-    const IR::CompileTimeValue *getValue(const IR::Node *node) const;
+    IR::Ptr<IR::CompileTimeValue> getValue(const IR::Node *node) const;
 
     /// Evaluates the arguments and returns a vector of parameter values
     /// ordered in the parameter order.
-    std::vector<const IR::CompileTimeValue *> *evaluateArguments(
+    std::vector<IR::Ptr<IR::CompileTimeValue>> *evaluateArguments(
         const IR::ParameterList *parameters, const IR::Vector<IR::Argument> *arguments,
         IR::Block *context);
 
@@ -96,9 +96,9 @@ class Evaluator final : public Inspector, public IHasBlock {
         return false;
     }
 
-    const IR::Block *processConstructor(const IR::Node *node, const IR::Type *type,
-                                        const IR::Type *instanceType,
-                                        const IR::Vector<IR::Argument> *arguments);
+    IR::Ptr<IR::Block> processConstructor(const IR::Node *node, const IR::Type *type,
+                                          const IR::Type *instanceType,
+                                          const IR::Vector<IR::Argument> *arguments);
 };
 
 /// A pass which "evaluates" the program, creating Blocks for all

@@ -247,7 +247,7 @@ struct DelayDefs : public ParserModifier {
             // Identify how much is being shifted
             bool seen = false;
             unsigned shift = 0;
-            for (auto *trans : state->transitions) {
+            for (auto trans : state->transitions) {
                 if (!trans->next || trans->next != next_state) continue;
 
                 BUG_CHECK(!seen || shift == trans->shift,
@@ -261,7 +261,7 @@ struct DelayDefs : public ParserModifier {
             // Calculate the amount to delay the shift in the transition out of the state and how
             // much additional shift to add to the following state
             delay_amount[transition] = std::max(0, static_cast<int>(shift) - amt / 8);
-            for (auto *trans : state->transitions) {
+            for (auto trans : state->transitions) {
                 if (!trans->next || trans->next != next_state) continue;
                 extra_shift[trans->next] =
                     std::max(delay_amount[transition], extra_shift[trans->next]);
@@ -711,7 +711,7 @@ class MatcherAllocator : public Visitor {
         return Visitor::init_apply(root);
     }
 
-    const IR::Node *apply_visitor(const IR::Node *root, const char *) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *) override {
         for (auto &kv : parser_use_def) allocate_all(kv.first, kv.second);
         return root;
     }
@@ -1823,7 +1823,7 @@ class MatchLayout {
  public:
     explicit MatchLayout(const IR::BFN::ParserState *state, const IR::BFN::Transition *transition)
         : total_size(0) {
-        for (const auto *select : state->selects) {
+        for (auto select : state->selects) {
             if (auto saved = select->source->to<IR::BFN::SavedRVal>()) {
                 for (const auto &rs : saved->reg_slices) {
                     auto reg = rs.first;
@@ -1861,7 +1861,7 @@ class MatchLayout {
         };
 
         std::map<const IR::BFN::Select *, match_t> select_values;
-        for (const auto *select : boost::adaptors::reverse(state->selects)) {
+        for (auto select : boost::adaptors::reverse(state->selects)) {
             int value_size = 0;
             if (auto saved = select->source->to<IR::BFN::SavedRVal>()) {
                 for (auto rs : saved->reg_slices) {
@@ -1874,7 +1874,7 @@ class MatchLayout {
             }
         }
 
-        for (const auto *select : state->selects) {
+        for (auto select : state->selects) {
             if (select->source->is<IR::BFN::SavedRVal>() ||
                 select->source->is<IR::BFN::ParserCounterRVal>())
                 writeValue(select, select_values[select]);
@@ -1921,7 +1921,7 @@ struct AdjustMatchValue : public ParserModifier {
         auto *old_value = transition->value->to<IR::BFN::ParserPvsMatchValue>();
         auto *adjusted = new IR::BFN::ParserPvsMatchValue(old_value->name, old_value->size);
 
-        for (const auto *select : state->selects) {
+        for (auto select : state->selects) {
             const IR::Expression *source = select->p4Source;
             if (auto sl = select->p4Source->to<IR::Slice>()) source = sl->e0;
 

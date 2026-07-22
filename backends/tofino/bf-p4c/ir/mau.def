@@ -568,7 +568,7 @@ class Counter : Synth2Port {
 
     const char *kind() const override { return "stats"; }
 #nodbprint
-    const Type *getType() const override { return Type_Counter::get(); }
+    Type getType() const override { return Type_Counter::get(); }
     UniqueAttachedId::type_t get_id_type() const override { return UniqueAttachedId::COUNTER; }
     cstring externType() const override { return direct ? "DirectCounter"_cs : "Counter"_cs; }
     bool usesStatsBus() const override { return true; }
@@ -597,7 +597,7 @@ class Meter : MeterBus2Port {
     unsigned           possible_mapram_address = 0;
 
     const char *kind() const override { return "meter"; }
-    const Type *getType() const override { return Type_Meter::get(); }
+    Type getType() const override { return Type_Meter::get(); }
     UniqueAttachedId::type_t get_id_type() const override { return UniqueAttachedId::METER; }
     bool alu_output() const { return implementation.name == "lpf"
                                || implementation.name == "wred"; }
@@ -665,12 +665,12 @@ class StatefulAlu : MeterBus2Port {
     MathUnit            math = MathUnit();
 
     const char *kind() const override { return "stateful"; }
-    const Type *getType() const override { return Type_Register::get(); }
+    Type getType() const override { return Type_Register::get(); }
     UniqueAttachedId::type_t get_id_type() const override { return UniqueAttachedId::STATEFUL_ALU; }
     bool alu_output() const;   // has output to VLIW alus via action data bus
     SaluAction calledAction(Table tbl, Action act) const;
     bool for_dleft() const {
-        for (auto *act : Values(instruction))
+        for (const SaluAction *act : Values(instruction))
             if (act->learn_action) return true;
         return false; }
 
@@ -743,7 +743,7 @@ class IdleTime : AttachedMemory {
 // deps(i,j) is true iff tables[i] is dependent on tables[j]
 // (so must have j < i) */
 class TableSeq {
-    static int                  uid_ctr;
+    static int                  uid_ctr = 0;
     inline Vector<Table>        tables;
     LTBitMatrix                 deps;
     int                         seq_uid;  // try to track TableSeq across transforms
@@ -1065,7 +1065,7 @@ class HashGenExpression : Expression {
      * comparisons and tracking.  With each statc HashGeneExpression created, the nextId
      * increases
      */
-    static int nextId;
+    static int nextId = 0;
 }
 
 /** Hash Distribution Unit, used to bring PHV information directly into Match Central for
@@ -1236,7 +1236,7 @@ class RangeMatch : Operation_Unary {
 #emit
 // defined down here to resolve order of declaration issues
 template<class T> inline const T *IR::MAU::Table::get_attached() const {
-    for (auto *at : attached)
+    for (const IR::MAU::BackendAttached *at : attached)
         if (auto rv = at->attached->to<T>())
             return rv;
     return nullptr; }

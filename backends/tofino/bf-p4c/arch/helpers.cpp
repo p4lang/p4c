@@ -28,7 +28,7 @@ namespace BFN {
  */
 const IR::Declaration_Instance *getDeclInst(const P4::ReferenceMap *refMap,
                                             const IR::PathExpression *path) {
-    auto *decl = refMap->getDeclaration(path->path);
+    auto decl = refMap->getDeclaration(path->path);
     if (!decl) return nullptr;
     auto *decl_inst = decl->to<IR::Declaration_Instance>();
     return decl_inst;

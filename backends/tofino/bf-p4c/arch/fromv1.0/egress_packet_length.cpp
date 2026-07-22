@@ -57,7 +57,7 @@ class PacketLengthEgressUseEval : public Inspector {
     bool preorder(const IR::Member *member) {
         if (!member->expr->is<IR::PathExpression>() || member->member.name != "pkt_length")
             return false;
-        auto *decl = refMap->getDeclaration(member->expr->to<IR::PathExpression>()->path);
+        auto decl = refMap->getDeclaration(member->expr->to<IR::PathExpression>()->path);
         auto *control = findContext<IR::BFN::TnaControl>();
         if (decl && control && decl->getName().name == control->tnaParams.at("eg_intr_md"_cs)) {
             egressUsesPacketLength = true;
@@ -100,7 +100,7 @@ class EgressPacketLengthAdjust : public Transform {
 
         // Find extracted mirror header and assign "egress_pkt_len_adjust"
         auto *newEgressMirrorParserState = state->clone();
-        for (auto *component : state->components) {
+        for (auto component : state->components) {
             // Ignore non-extract statements
             auto *methodCallStatement = component->to<IR::MethodCallStatement>();
             if (!methodCallStatement || methodCallStatement->methodCall->arguments->size() < 1)
@@ -111,7 +111,7 @@ class EgressPacketLengthAdjust : public Transform {
             if (!pathExpr || pathExpr->path->name.name != parser->tnaParams.at("pkt"_cs)) continue;
 
             // Extracted mirror header
-            auto *argument = methodCallStatement->methodCall->arguments->at(0)->expression;
+            auto argument = methodCallStatement->methodCall->arguments->at(0)->expression;
             // Add "egress_pkt_len_adjust" assignment to parse state
             auto &compGenMeta = parser->tnaParams.at("__bfp4c_compiler_generated_meta"_cs);
             auto *egPktLenAdjust = new IR::Member(new IR::PathExpression(compGenMeta),

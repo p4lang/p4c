@@ -62,7 +62,7 @@ bool ParseAnnotations::parseEmpty(IR::Annotation *annotation) {
 }
 
 bool ParseAnnotations::parseExpressionList(IR::Annotation *annotation) {
-    const IR::Vector<IR::Expression> *parsed =
+    IR::Ptr<IR::Vector<IR::Expression>> parsed =
         P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, annotation->getUnparsed());
     if (parsed != nullptr) {
         annotation->body = *parsed;
@@ -72,7 +72,7 @@ bool ParseAnnotations::parseExpressionList(IR::Annotation *annotation) {
 }
 
 bool ParseAnnotations::parseKvList(IR::Annotation *annotation) {
-    const IR::IndexedVector<IR::NamedExpression> *parsed =
+    IR::Ptr<IR::IndexedVector<IR::NamedExpression>> parsed =
         P4::P4ParserDriver::parseKvList(annotation->srcInfo, annotation->getUnparsed());
     if (parsed != nullptr) {
         annotation->body = *parsed;
@@ -82,7 +82,7 @@ bool ParseAnnotations::parseKvList(IR::Annotation *annotation) {
 }
 
 bool ParseAnnotations::parseConstantList(IR::Annotation *annotation) {
-    const IR::Vector<IR::Expression> *parsed =
+    IR::Ptr<IR::Vector<IR::Expression>> parsed =
         P4::P4ParserDriver::parseConstantList(annotation->srcInfo, annotation->getUnparsed());
     if (parsed != nullptr) {
         annotation->body = *parsed;
@@ -92,8 +92,9 @@ bool ParseAnnotations::parseConstantList(IR::Annotation *annotation) {
 }
 
 bool ParseAnnotations::parseConstantOrStringLiteralList(IR::Annotation *annotation) {
-    const IR::Vector<IR::Expression> *parsed = P4::P4ParserDriver::parseConstantOrStringLiteralList(
-        annotation->srcInfo, annotation->getUnparsed());
+    IR::Ptr<IR::Vector<IR::Expression>> parsed =
+        P4::P4ParserDriver::parseConstantOrStringLiteralList(annotation->srcInfo,
+                                                             annotation->getUnparsed());
     if (parsed != nullptr) {
         annotation->body = *parsed;
     }
@@ -102,7 +103,7 @@ bool ParseAnnotations::parseConstantOrStringLiteralList(IR::Annotation *annotati
 }
 
 bool ParseAnnotations::parseStringLiteralList(IR::Annotation *annotation) {
-    const IR::Vector<IR::Expression> *parsed =
+    IR::Ptr<IR::Vector<IR::Expression>> parsed =
         P4::P4ParserDriver::parseStringLiteralList(annotation->srcInfo, annotation->getUnparsed());
     if (parsed != nullptr) {
         annotation->body = *parsed;
@@ -112,7 +113,7 @@ bool ParseAnnotations::parseStringLiteralList(IR::Annotation *annotation) {
 }
 
 bool ParseAnnotations::parseP4rtTranslationAnnotation(IR::Annotation *annotation) {
-    const IR::Vector<IR::Expression> *parsed = P4::P4ParserDriver::parseP4rtTranslationAnnotation(
+    IR::Ptr<IR::Vector<IR::Expression>> parsed = P4::P4ParserDriver::parseP4rtTranslationAnnotation(
         annotation->srcInfo, annotation->getUnparsed());
     if (parsed != nullptr) {
         annotation->body = *parsed;

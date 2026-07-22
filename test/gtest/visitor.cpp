@@ -24,7 +24,7 @@ struct MultiVisitInspector : public Inspector, virtual public P4::ResolutionCont
     void loop_revisit(const IR::ParserState *) override {}
 
     void visit_def(const IR::PathExpression *pe) {
-        auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+        auto d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
         if (auto *ps = d->to<IR::ParserState>()) {
             visit(ps, "transition");
@@ -54,7 +54,7 @@ struct MultiVisitModifier : public Modifier,
     void loop_revisit(const IR::ParserState *) override {}
 
     void visit_def(const IR::PathExpression *pe) {
-        auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+        auto d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
         if (auto *ps = d->to<IR::ParserState>()) {
             visit(ps, "transition");
@@ -130,7 +130,7 @@ std::string getMultiVisitLoopSource() {
 // This test fails when Visitor::Tracker::try_start does _not_ reset done on a previously-visited
 // node
 TEST_F(P4CVisitor, MultiVisitInspectorLoop) {
-    auto *program =
+    auto program =
         P4::parseP4String(getMultiVisitLoopSource(), CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
 
@@ -141,7 +141,7 @@ TEST_F(P4CVisitor, MultiVisitInspectorLoop) {
 // This test fails when Visitor::ChangeTracker::try_start does _not_ reset visit_in_progress on a
 // previously-visited node
 TEST_F(P4CVisitor, MultiVisitModifierLoop) {
-    auto *program =
+    auto program =
         P4::parseP4String(getMultiVisitLoopSource(), CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(program != nullptr);
 

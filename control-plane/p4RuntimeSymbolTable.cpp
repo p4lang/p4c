@@ -26,7 +26,7 @@ bool isHidden(const IR::IAnnotated *node) {
 }
 
 std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
-    if (const auto *idAnn = node->getAnnotation(idAnnotation)) {
+    if (const IR::Annotation *idAnn = node->getAnnotation(idAnnotation)) {
         const auto *idConstant = idAnn->getExpr(0)->to<IR::Constant>();
         CHECK_NULL(idConstant);
         if (!idConstant->fitsUint()) {
@@ -76,7 +76,7 @@ void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIf
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
 
-    const auto *control = controlBlock->container;
+    const IR::P4Control *control = controlBlock->container;
     CHECK_NULL(control);
 
     forAllMatching<IR::P4Action>(&control->controlLocals, [&](const IR::P4Action *action) {
@@ -130,10 +130,10 @@ void collectTableSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIfac
 void collectParserSymbols(P4RuntimeSymbolTable &symbols, const IR::ParserBlock *parserBlock) {
     CHECK_NULL(parserBlock);
 
-    const auto *parser = parserBlock->container;
+    const IR::P4Parser *parser = parserBlock->container;
     CHECK_NULL(parser);
 
-    for (const auto *s : parser->parserLocals) {
+    for (const IR::Declaration *s : parser->parserLocals) {
         if (const auto *inst = s->to<IR::P4ValueSet>()) {
             symbols.add(P4RuntimeSymbolType::P4RT_VALUE_SET(), inst);
         }

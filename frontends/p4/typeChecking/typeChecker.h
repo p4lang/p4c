@@ -91,8 +91,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     bool checkArrays = true;
     bool errorOnNullDecls = false;
     const IR::Node *getInitialNode() const { return initialNode; }
-    const IR::Type *getType(const IR::Node *element) const;
-    const IR::Type *getTypeType(const IR::Node *element) const;
+    IR::Ptr<IR::Type> getType(const IR::Node *element) const;
+    IR::Ptr<IR::Type> getTypeType(const IR::Node *element) const;
     void setType(const IR::Node *element, const IR::Type *type);
     void setLeftValue(const IR::Expression *expression) { typeMap->setLeftValue(expression); }
     bool isLeftValue(const IR::Expression *expression) const {
@@ -133,8 +133,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
         This may rewrite the sourceExpression, in particular converting InfInt values
         to values with concrete types.
         @returns new sourceExpression. */
-    const IR::Expression *assignment(const IR::Node *errorPosition, const IR::Type *destType,
-                                     const IR::Expression *sourceExpression);
+    IR::Ptr<IR::Expression> assignment(const IR::Node *errorPosition, const IR::Type *destType,
+                                       IR::Ptr<IR::Expression> sourceExpression);
     const IR::SelectCase *matchCase(const IR::SelectExpression *select,
                                     const IR::Type_BaseList *selectType,
                                     const IR::SelectCase *selectCase, const IR::Type *caseType);
@@ -142,15 +142,15 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     bool checkAbstractMethods(const IR::Declaration_Instance *inst, const IR::Type_Extern *type);
     void addSubstitutions(const TypeVariableSubstitution *tvs);
 
-    const IR::Expression *constantFold(const IR::Expression *expression);
+    IR::Ptr<IR::Expression> constantFold(const IR::Expression *expression);
 
     /** Converts each type to a canonical representation.
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
      */
-    virtual const IR::Type *canonicalize(const IR::Type *type);
+    virtual IR::Ptr<IR::Type> canonicalize(IR::Ptr<IR::Type> type);
     template <class Ctor>
-    const IR::Type *canonicalizeFields(const IR::Type_StructLike *type, Ctor constructor);
-    virtual const IR::ParameterList *canonicalizeParameters(const IR::ParameterList *params);
+    IR::Ptr<IR::Type> canonicalizeFields(const IR::Type_StructLike *type, Ctor constructor);
+    virtual IR::Ptr<IR::ParameterList> canonicalizeParameters(const IR::ParameterList *params);
 
     // various helpers
     bool onlyBitsOrBitStructs(const IR::Type *type) const;
@@ -162,8 +162,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *shift(const IR::Operation_Binary *op);
     const IR::Node *typeSet(const IR::Operation_Binary *op);
 
-    const IR::Type *cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type);
-    std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> containerInstantiation(
+    IR::Ptr<IR::Type> cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type);
+    std::pair<IR::Ptr<IR::Type>, IR::Ptr<IR::Vector<IR::Argument>>> containerInstantiation(
         const IR::Node *node, const IR::Vector<IR::Argument> *args,
         const IR::IContainer *container);
     const IR::Expression *actionCall(
@@ -177,10 +177,11 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     static constexpr bool forbidPackages = true;
     bool checkParameters(const IR::ParameterList *paramList, bool forbidModules = false,
                          bool forbidPackage = false) const;
-    virtual const IR::Type *setTypeType(const IR::Type *type, bool learn = true);
+    // CTD -- why is this virtual? it does not appear to need to be; never overridden
+    virtual IR::Ptr<IR::Type> setTypeType(IR::Ptr<IR::Type> type, bool learn = true);
 
     /// Action list of the current table.
-    const IR::ActionList *currentActionList;
+    IR::Ptr<IR::ActionList> currentActionList;
     /// This is used to validate the initializer for the default_action
     /// or for actions in the entries list.  Returns the action list element
     /// on success.
@@ -196,8 +197,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     /// Returns expr unchanged if it is not an untyped Invalid, or if destType
     /// is not a header or header union.  Emits a type error if destType is
     /// some other concrete type.
-    const IR::Expression *convertUntypedInvalid(const IR::Expression *expr,
-                                                const IR::Type *destType);
+    IR::Ptr<IR::Expression> convertUntypedInvalid(const IR::Expression *expr,
+                                                  const IR::Type *destType);
 
     //////////////////////////////////////////////////////////////
     // Template, so we can have common code for both IR::Function* and const IR::Function*
@@ -207,13 +208,13 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     PreorderResult preorderDeclarationInstanceImpl(Node *decl);
 
  public:
-    static const IR::Type *specialize(const IR::IMayBeGenericType *type,
-                                      const IR::Vector<IR::Type> *arguments,
-                                      const Visitor::Context *ctxt);
+    static IR::Ptr<IR::Type> specialize(const IR::IMayBeGenericType *type,
+                                        const IR::Vector<IR::Type> *arguments,
+                                        const Visitor::Context *ctxt);
 
     struct Comparison {
-        const IR::Expression *left;
-        const IR::Expression *right;
+        IR::Ptr<IR::Expression> left;
+        IR::Ptr<IR::Expression> right;
     };
 
     // Helper function to handle comparisons
@@ -499,7 +500,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
         : TypeInferenceBase(typeMap, readOnly, checkArrays, errorOnNullDecls) {}
 
     Visitor::profile_t init_apply(const IR::Node *node) override;
-    const IR::Node *apply_visitor(const IR::Node *, const char *name = nullptr) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char *name = nullptr) override;
     void end_apply(const IR::Node *Node) override;
 
     const IR::Node *pruneIfDone(const IR::Node *node) {
