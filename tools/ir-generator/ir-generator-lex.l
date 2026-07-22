@@ -70,6 +70,7 @@ static std::string      comment_block;
 
 "//".*           { yylval.str = cstring(yytext); return COMMENTBLOCK; }
 
+"&&"            { return ANDAND; }
 "::"            { return DBLCOL; }
 "abstract"      { return ABSTRACT; }
 "class"         { return CLASS; }

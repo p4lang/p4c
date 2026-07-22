@@ -49,7 +49,7 @@ const std::map<PHV::Size, std::set<PHV::Type>> PhvSpec::groupsToTypes() const {
 unsigned PhvSpec::numContainerTypes() const { return definedTypes.size(); }
 
 PHV::Type PhvSpec::idToContainerType(unsigned id) const {
-    BUG_CHECK(id < definedTypes.size(), "Container type id %1% is out of range");
+    BUG_CHECK(id < definedTypes.size(), "Container type id %1% is out of range", id);
     return definedTypes[id];
 }
 

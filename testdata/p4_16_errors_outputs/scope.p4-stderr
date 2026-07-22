@@ -1,15 +1,15 @@
-scope.p4(19): [--Wwarn=unused] warning: 'x' is unused
+scope.p4(10): [--Wwarn=unused] warning: 'x' is unused
     X() x;
         ^
-scope.p4(23): [--Wwarn=unused] warning: control 'r' is unused
+scope.p4(14): [--Wwarn=unused] warning: control 'r' is unused
 control r() {
         ^
-scope.p4(25): [--Wwarn=unused] warning: 'y' is unused
+scope.p4(16): [--Wwarn=unused] warning: 'y' is unused
         bit<8> y = .q.x.get(); // should be unreachable
                ^
-scope.p4(25): [--Werror=type-error] error: Cannot extract field x from q which has type Type(control q)
+scope.p4(16): [--Werror=type-error] error: Cannot extract field x from q which has type Type(control q)
         bit<8> y = .q.x.get(); // should be unreachable
                       ^
-scope.p4(25)
+scope.p4(16)
         bit<8> y = .q.x.get(); // should be unreachable
                    ^^

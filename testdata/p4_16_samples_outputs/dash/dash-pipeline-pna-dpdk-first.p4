@@ -4,6 +4,11 @@ error {
     InvalidIPv4Header
 }
 #include <core.p4>
+
+match_kind {
+    list,
+    range_list
+}
 #include <pna.p4>
 
 typedef bit<48> EthernetAddress;
@@ -483,11 +488,6 @@ action tunnel_decap(inout headers_t hdr, inout metadata_t meta) {
     hdr.u0_udp.setInvalid();
     meta.tunnel_pointer = 16w0;
 }
-match_kind {
-    list,
-    range_list
-}
-
 control acl(inout headers_t hdr, inout metadata_t meta) {
     action permit() {
     }

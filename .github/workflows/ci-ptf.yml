@@ -28,19 +28,14 @@ jobs:
       INSTALL_PTF_EBPF_DEPENDENCIES: ON
       BUILD_GENERATOR: Ninja
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-ptf-${{ runner.os }}
-          max-size: 1000M
-
-      - name: Build (Ubuntu 22.04)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test-ptf"
 
       - name: Run PTF tests for eBPF backend (Ubuntu 22.04)
         run: sudo -E env PATH="$PATH" uv run ./test.sh

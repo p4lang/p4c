@@ -216,7 +216,7 @@ bool InstructionMemory::shared_instr(const IR::MAU::Table *tbl, Use &alloc, bool
         BUG_CHECK(instr_pos != cached_use->all_instrs.end(),
                   "%s: Error when programming action "
                   "%s on shared action profile %s and table %s",
-                  ad_use->srcInfo, ad_use->name, tbl->name);
+                  ad_use->srcInfo, action->name, ad_use->name, tbl->name);
 
         Use::VLIW_Instruction single_instr = instr_pos->second;
         single_instr.mem_code = -1;

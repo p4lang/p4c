@@ -1,6 +1,9 @@
-issue5441.p4(8): [--Werror=type-error] error: -1: negative lsb offset
+issue5441.p4(8): [--Werror=type-error] error: b[-1+:16]: negative bit index -1
+        a = b[-1+:16];
+            ^^^^^^^^^
+issue5441.p4(8)
         a = b[-1+:16];
                ^
-issue5441.p4(9): [--Werror=type-error] error: 4294967293: lsb offset too large
+issue5441.p4(9): [--Werror=type-error] error: Bit index 4294967293 greater than width 32
         a = b[4294967293+:16];
               ^^^^^^^^^^

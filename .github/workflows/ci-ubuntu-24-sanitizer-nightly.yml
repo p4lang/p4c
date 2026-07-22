@@ -33,19 +33,14 @@ jobs:
       UBSAN_OPTIONS: print_stacktrace=1
       ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-${{ runner.os }}-clang
-          max-size: 1000M
-
-      - name: Build (Ubuntu 24.04, Clang, Sanitizers)
-        run: |
-          tools/ci-build.sh
+          ccache-key: "test-clang"
 
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.

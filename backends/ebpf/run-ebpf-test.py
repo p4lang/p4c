@@ -4,13 +4,13 @@
 # SPDX-FileCopyrightText: 2018 VMware, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
-""" Contains different eBPF models and specifies their individual behavior
-    Currently five phases are defined:
-   1. Invokes the specified compiler on a provided p4 file.
-   2. Parses an stf file and generates an pcap output.
-   3. Loads the generated template or compiles it to a runnable binary.
-   4. Feeds the generated pcap test packets into the P4 "filter"
-   5. Evaluates the output with the expected result from the .stf file
+"""Contains different eBPF models and specifies their individual behavior
+ Currently five phases are defined:
+1. Invokes the specified compiler on a provided p4 file.
+2. Parses an stf file and generates an pcap output.
+3. Loads the generated template or compiles it to a runnable binary.
+4. Feeds the generated pcap test packets into the P4 "filter"
+5. Evaluates the output with the expected result from the .stf file
 """
 
 import argparse

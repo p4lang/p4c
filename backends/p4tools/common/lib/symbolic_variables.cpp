@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "backends/p4tools/common/control_plane/symbolic_variables.h"
+#include "backends/p4tools/common/lib/symbolic_variables.h"
 
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"

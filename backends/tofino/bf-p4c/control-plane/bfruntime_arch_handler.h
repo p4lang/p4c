@@ -1061,7 +1061,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
         auto typeSpec =
             P4::ControlPlaneAPI::TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
-                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec", typeArg);
         return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
     }
 
@@ -1113,7 +1113,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
             auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(refMap, typeMap,
                                                                             typeList, p4RtTypeInfo);
             BUG_CHECK(typeSpec != nullptr,
-                      "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+                      "P4 type %1% could not be converted to P4Info P4DataTypeSpec", typeList);
             return DynHash{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>(),
                            hashFieldInfo, hashWidth};
         }

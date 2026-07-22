@@ -375,7 +375,13 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       FACTORY + IN_IMPL + CONCRETE_ONLY + INCL_NESTED,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
-          buf << "{ return new " << cl->name << "(json); }";
+          buf << "{\n"
+              << cl->indent << "json.track_decode();\n"
+              << cl->indent << "auto *rv = new " << cl->name << "(json);\n"
+              << cl->indent
+              << "json.undecoded([](JSONLoader &json, cstring key, const JsonData &) {\n"
+              << cl->indent << cl->indent << "json.error(\"unused field \" + key); });\n"
+              << cl->indent << "return rv;\n}";
           return {buf};
       }}},
     {"toString"_cs,

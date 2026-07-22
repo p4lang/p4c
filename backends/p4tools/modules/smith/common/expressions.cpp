@@ -218,14 +218,33 @@ IR::Constant *ExpressionGenerator::genIntLiteral(size_t bit_width) {
     }
     return new IR::Constant(value);
 }
-IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tb) {
-    big_int maxSize = IR::getMaxBvVal(tb->width_bits());
-    big_int value;
-    if (maxSize == 0) {
-        value = 0;
-        return new IR::Constant(tb, value);
+
+IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tp) {
+    const auto *tb = tp->to<IR::Type_Bits>();
+    big_int maxUnsignedVal = IR::getMaxBvVal(tb->width_bits());
+    if (maxUnsignedVal == 0) {
+        return new IR::Constant(tb, 0);
     }
-    return new IR::Constant(tb, Utils::getRandBigInt(P4Scope::req.not_zero ? 1 : 0, maxSize));
+    if (tb->isSigned) {
+        // int<N>
+        big_int half = (maxUnsignedVal + 1) / 2;
+        big_int lo = P4Scope::req.not_negative ? big_int(0) : -half;
+        big_int hi = half - 1;
+        if (P4Scope::req.not_zero) {
+            lo = lo + 1;
+        }
+        big_int res = Utils::getRandBigInt(lo, hi);
+        if (P4Scope::req.not_zero && res == 0) {
+            // When not_zero && !not_negative, lo = -half + 1, so 0 is still in range. Map it to
+            // -half to get the desired uniform range.
+            res = -half;
+        }
+        return new IR::Constant(tb, res);
+    }
+    // bit<N>
+    big_int lo = P4Scope::req.not_zero ? 1 : 0;
+    big_int res = Utils::getRandBigInt(lo, maxUnsignedVal);
+    return new IR::Constant(tb, res);
 }
 
 IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
@@ -467,20 +486,26 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
             // pick a division that matches the type
             // TODO(fruffy): Make more sophisticated
             // this requires only compile time known values
+            bool savedNotNegative = P4Scope::req.not_negative;
+            P4Scope::req.not_negative = true;
             IR::Expression *left = genBitLiteral(tb);
             P4Scope::req.not_zero = true;
             IR::Expression *right = genBitLiteral(tb);
             P4Scope::req.not_zero = false;
+            P4Scope::req.not_negative = savedNotNegative;
             expr = new IR::Div(tb, left, right);
         } break;
         case 2: {
             // pick a modulo that matches the type
             // TODO(fruffy): Make more sophisticated
             // this requires only compile time known values
+            bool savedNotNegative = P4Scope::req.not_negative;
+            P4Scope::req.not_negative = true;
             IR::Expression *left = genBitLiteral(tb);
             P4Scope::req.not_zero = true;
             IR::Expression *right = genBitLiteral(tb);
             P4Scope::req.not_zero = false;
+            P4Scope::req.not_negative = savedNotNegative;
             expr = new IR::Mod(tb, left, right);
         } break;
         case 3: {
@@ -531,9 +556,10 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
                 P4Scope::prop.width_unknown = false;
             }
             // TODO(fruffy): Make this more sophisticated,
+            bool savedNotNegative = P4Scope::req.not_negative;
             P4Scope::req.not_negative = true;
             IR::Expression *right = constructBitExpr(tb);
-            P4Scope::req.not_negative = false;
+            P4Scope::req.not_negative = savedNotNegative;
             // TODO(fruffy): Make this more sophisticated
             // shifts are limited to 8 bits
             if (P4Scope::constraints.const_lshift_count) {
@@ -553,9 +579,10 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
             }
 
             // TODO(fruffy): Make this more sophisticated,
+            bool savedNotNegative = P4Scope::req.not_negative;
             P4Scope::req.not_negative = true;
             IR::Expression *right = constructBitExpr(tb);
-            P4Scope::req.not_negative = false;
+            P4Scope::req.not_negative = savedNotNegative;
             // shifts are limited to 8 bits
             right = new IR::Cast(IR::Type_Bits::get(8, false), right);
             // pick a right-shift that matches the type
@@ -613,8 +640,9 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
     }
     P4Scope::prop.depth++;
 
-    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_BIT_BINARY_SLICE,
-                                    Probabilities::get().EXPRESSION_BIT_BINARY_MUX};
+    // Slices are always unsigned, and should not be constructed for int<N> target types
+    int64_t pctSlice = tb->isSigned ? 0 : Probabilities::get().EXPRESSION_BIT_BINARY_SLICE;
+    std::vector<int64_t> percent = {pctSlice, Probabilities::get().EXPRESSION_BIT_BINARY_MUX};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -930,23 +958,25 @@ IR::Expression *ExpressionGenerator::constructBinaryIntExpr() {
         case 1: {
             // pick a division that matches the type
             // TODO(fruffy): Make more sophisticated
+            bool savedNotNegative = P4Scope::req.not_negative;
             P4Scope::req.not_negative = true;
             IR::Expression *left = genIntLiteral();
             P4Scope::req.not_zero = true;
             IR::Expression *right = genIntLiteral();
             P4Scope::req.not_zero = false;
-            P4Scope::req.not_negative = false;
+            P4Scope::req.not_negative = savedNotNegative;
             expr = new IR::Div(tp, left, right);
         } break;
         case 2: {
             // pick a modulo that matches the type
             // TODO(fruffy): Make more sophisticated
+            bool savedNotNegative = P4Scope::req.not_negative;
             P4Scope::req.not_negative = true;
             IR::Expression *left = genIntLiteral();
             P4Scope::req.not_zero = true;
             IR::Expression *right = genIntLiteral();
             P4Scope::req.not_zero = false;
-            P4Scope::req.not_negative = false;
+            P4Scope::req.not_negative = savedNotNegative;
             expr = new IR::Mod(tp, left, right);
         } break;
         case 3: {
@@ -965,22 +995,24 @@ IR::Expression *ExpressionGenerator::constructBinaryIntExpr() {
             // width must be known so we cast
             IR::Expression *left = constructIntExpr();
             // TODO(fruffy): Make this more sophisticated,
+            bool savedNotNegative = P4Scope::req.not_negative;
             P4Scope::req.not_negative = true;
             IR::Expression *right = constructIntExpr();
             // shifts are limited to 8 bits
             right = new IR::Cast(IR::Type_Bits::get(8, false), right);
-            P4Scope::req.not_negative = false;
+            P4Scope::req.not_negative = savedNotNegative;
             expr = new IR::Shl(tp, left, right);
         } break;
         case 6: {
             // width must be known so we cast
             IR::Expression *left = constructIntExpr();
             // TODO(fruffy): Make this more sophisticated,
+            bool savedNotNegative = P4Scope::req.not_negative;
             P4Scope::req.not_negative = true;
             IR::Expression *right = constructIntExpr();
             // shifts are limited to 8 bits
             right = new IR::Cast(IR::Type_Bits::get(8, false), right);
-            P4Scope::req.not_negative = false;
+            P4Scope::req.not_negative = savedNotNegative;
             expr = new IR::Shr(tp, left, right);
         } break;
         case 7: {

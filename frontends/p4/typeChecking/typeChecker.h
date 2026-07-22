@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_P4_TYPECHECKING_TYPECHECKER_H_
 #define FRONTENDS_P4_TYPECHECKING_TYPECHECKER_H_
@@ -200,6 +191,14 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     /// @returns the resolved type, or nullptr if the type is invalid
     const IR::Type_Bits *checkUnderlyingEnumType(const IR::Type *enumType);
 
+    /// Converts an IR::Invalid expression ({#}) with Type_Unknown to a typed
+    /// IR::InvalidHeader or IR::InvalidHeaderUnion, inferred from destType.
+    /// Returns expr unchanged if it is not an untyped Invalid, or if destType
+    /// is not a header or header union.  Emits a type error if destType is
+    /// some other concrete type.
+    const IR::Expression *convertUntypedInvalid(const IR::Expression *expr,
+                                                const IR::Type *destType);
+
     //////////////////////////////////////////////////////////////
     // Template, so we can have common code for both IR::Function* and const IR::Function*
     template <class Node>
@@ -326,6 +325,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::ActionList *al);
 
     const IR::Node *postorder(const IR::ReturnStatement *stat);
+    const IR::Node *postorder(const IR::ForStatement *stat);
     const IR::Node *postorder(const IR::IfStatement *stat);
     const IR::Node *postorder(const IR::SwitchStatement *stat);
     const IR::Node *common_assign(const IR::BaseAssignmentStatement *stat, const IR::Type *);
@@ -474,6 +474,7 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::ActionList *al) override;
 
     void postorder(const IR::ReturnStatement *stat) override;
+    void postorder(const IR::ForStatement *stat) override;
     void postorder(const IR::IfStatement *stat) override;
     void postorder(const IR::SwitchStatement *stat) override;
     void postorder(const IR::AssignmentStatement *stat) override;
@@ -613,6 +614,7 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::ActionList *al) override;
 
     const IR::Node *postorder(IR::ReturnStatement *stat) override;
+    const IR::Node *postorder(IR::ForStatement *stat) override;
     const IR::Node *postorder(IR::IfStatement *stat) override;
     const IR::Node *postorder(IR::SwitchStatement *stat) override;
     const IR::Node *postorder(IR::AssignmentStatement *stat) override;

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
 name: "static-build-test-p4c"
 
 on:
@@ -25,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dynamic: [{glibc: ON, stdlib: OFF}, {glibc: OFF, stdlib: ON}]
+        dynamic: [{ glibc: ON, stdlib: OFF }, { glibc: OFF, stdlib: ON }]
     runs-on: ubuntu-22.04
     env:
       IMAGE_TYPE: test
@@ -35,19 +38,17 @@ jobs:
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Setup and baseline build
+        uses: ./.github/actions/setup-p4c-build
         with:
-          key: test-static-${{ runner.os }}
-          max-size: 1000M
+          ccache-key: "test-static"
 
       - shell: bash
-        name: Build (Ubuntu 22.04)
+        name: Post-build static verification tests
         run: |
-          tools/ci-build.sh
           ./tools/ci-check-static.sh ./build/p4c-bm2-ss ./build/p4c-dpdk ./build/p4c-ebpf \
               ./build/p4c-pna-p4tc ./build/p4c-ubpf ./build/p4test ./build/p4testgen

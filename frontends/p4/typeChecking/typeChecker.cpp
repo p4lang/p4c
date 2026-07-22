@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "typeChecker.h"
 
@@ -543,11 +532,47 @@ bool TypeInferenceBase::canCastBetween(const IR::Type *dest, const IR::Type *src
     return false;
 }
 
+const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
+                                                               const IR::Type *destType) {
+    // Guard: only act on untyped Invalid literals
+    if (!expr->is<IR::Invalid>()) return expr;
+    if (!expr->type->is<IR::Type_Unknown>()) return expr;
+
+    // Resolve the destination type fully (unwrap Type_Name, typedefs, etc.)
+    auto concreteType = typeMap->getTypeType(destType, true);
+    if (concreteType == nullptr) return expr;
+
+    // Handle specialized canonical types
+    if (auto tsc = concreteType->to<IR::Type_SpecializedCanonical>())
+        concreteType = tsc->substituted;
+
+    // Set common type information before creating result
+    auto type = destType->getP4Type();
+    setType(type, new IR::Type_Type(destType));
+
+    IR::Expression *result = nullptr;
+    if (concreteType->is<IR::Type_Header>()) {
+        result = new IR::InvalidHeader(expr->srcInfo, type, type);
+    } else if (concreteType->is<IR::Type_HeaderUnion>()) {
+        result = new IR::InvalidHeaderUnion(expr->srcInfo, type, type);
+    } else {
+        // destType is not a header/header_union — leave expr untyped for normal error handling
+        return expr;
+    }
+
+    // Set common properties after creating result
+    setType(result, destType);
+    setCompileTimeConstant(result);
+    return result;
+}
+
 const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPosition,
                                                     const IR::Type *destType,
                                                     const IR::Expression *sourceExpression) {
     if (destType->is<IR::Type_Unknown>()) BUG("Unknown destination type");
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
+    // Convert untyped {#} literals to typed InvalidHeader/InvalidHeaderUnion
+    sourceExpression = convertUntypedInvalid(sourceExpression, destType);
     const IR::Type *initType = getType(sourceExpression);
     if (initType == nullptr) return sourceExpression;
 
@@ -875,7 +900,7 @@ TypeInferenceBase::containerInstantiation(
             if (auto v = param->type->to<IR::Type_InfInt>()) {
                 auto tv = IR::Type_InfInt::get(param->type->srcInfo);
                 bool b = tvs.setBinding(v, tv);
-                BUG_CHECK(b, "failed replacing %2% with %3%", v, tv);
+                BUG_CHECK(b, "failed replacing %1% with %2%", v, tv);
             }
         }
         TypeVariableSubstitutionVisitor sv(&tvs, true);

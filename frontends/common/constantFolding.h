@@ -1,18 +1,9 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+ * SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+ * Copyright 2013-present Barefoot Networks, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 #ifndef FRONTENDS_COMMON_CONSTANTFOLDING_H_
 #define FRONTENDS_COMMON_CONSTANTFOLDING_H_
@@ -82,6 +73,10 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     // True if we are processing a left side of an assignment; we should not
     // we substituting constants there.
     bool assignmentTarget;
+
+    /// @returns a concrete type from a Type_Typedef by resolving it and also getting
+    /// any updated type from ConstantFolding an expression size into a Type_Bits
+    const IR::Type *resolveType(const IR::Type *t);
 
     /// @returns a constant equivalent to @p expr or `nullptr`
     const IR::Expression *getConstant(const IR::Expression *expr) const;

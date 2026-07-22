@@ -1,9 +1,9 @@
-neg.p4(16): [--Wwarn=unused] warning: 'act' is unused
+neg.p4(7): [--Wwarn=unused] warning: 'act' is unused
 action act() {
        ^^^
-neg.p4(21): [--Werror=type-error] error: a / b: Cannot operate on signed values
+neg.p4(12): [--Werror=type-error] error: a / b: Cannot operate on signed values
     c = a / b; // not defined for signed values
         ^^^^^
-neg.p4(22): [--Werror=type-error] error: a % b: Cannot operate on signed values
+neg.p4(13): [--Werror=type-error] error: a % b: Cannot operate on signed values
     c = a % b;
         ^^^^^

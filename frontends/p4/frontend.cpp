@@ -1,18 +1,7 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 #include "frontend.h"
 
@@ -175,6 +164,53 @@ class ValidateSwitchStatements : public Inspector {
     }
 };
 
+/**
+ * Rejects duplicate method or constructor declarations within an extern.
+ * Overloaded methods may share a name only when a call can be disambiguated by
+ * the number of arguments or by argument names; two declarations with the same
+ * name, parameter count, and parameter names can never be told apart, so they
+ * are duplicates rather than overloads. The existing checks only fire when such
+ * a method is actually called, so a never-instantiated extern slips through.
+ * See also #5096 for the same rule on functions.
+ */
+class ValidateOverloadedMethods : public Inspector {
+    // Two same-named methods are indistinguishable when they have the same
+    // number of parameters and the same parameter names (argument types are
+    // not used to disambiguate overloads).
+    static bool sameSignature(const IR::Method *a, const IR::Method *b) {
+        auto aParams = a->getParameters()->parameters;
+        auto bParams = b->getParameters()->parameters;
+        if (aParams.size() != bParams.size()) return false;
+        for (const auto *ap : aParams) {
+            bool found = false;
+            for (const auto *bp : bParams) {
+                if (ap->name.name == bp->name.name) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+        return true;
+    }
+
+ public:
+    bool preorder(const IR::Type_Extern *ext) override {
+        for (size_t i = 0; i < ext->methods.size(); i++) {
+            const auto *m = ext->methods.at(i);
+            for (size_t j = i + 1; j < ext->methods.size(); j++) {
+                const auto *other = ext->methods.at(j);
+                if (m->name == other->name && sameSignature(m, other)) {
+                    P4::error(P4::ErrorType::ERR_DUPLICATE,
+                              "Duplicate declaration of %1%: previous declaration at %2%",
+                              other->name, m->srcInfo);
+                }
+            }
+        }
+        return true;
+    }
+};
+
 }  // namespace
 
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
@@ -204,6 +240,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
         new ValidateSwitchStatements(),
+        new ValidateOverloadedMethods(),
         // Validate @name/@deprecated/@noWarn. Should run after constant folding.
         new ValidateStringAnnotations(),
         // Desugars direct parser and control applications
@@ -230,7 +267,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SpecializeGenericFunctions(&typeMap),
         }),
         new CheckCoreMethods(&typeMap),
-        new StaticAssert(&typeMap),
+        new StaticAssert(&typeMap, policy->isStaticAssertFinal()),
     });
     metricsPassManager.addUnusedCode(passes, true);
     passes.addPasses({
