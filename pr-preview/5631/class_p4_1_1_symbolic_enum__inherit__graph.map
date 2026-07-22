@@ -1,0 +1,13 @@
+<map id="P4::SymbolicEnum" name="P4::SymbolicEnum">
+<area shape="rect" id="Node000001" title=" " alt="" coords="65,299,207,324"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_scalar_value.html" title=" " alt="" coords="75,225,197,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,264,139,299,133,299,133,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_symbolic_value.html" title=" " alt="" coords="65,152,207,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,191,139,225,133,225,133,191"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_i_has_db_print.html" title=" " alt="" coords="5,79,128,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="89,112,127,150,123,154,86,116"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="152,79,259,104"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="186,116,149,154,145,150,183,112"/>
+<area shape="rect" id="Node000006" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="148,5,263,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="208,44,208,79,203,79,203,44"/>
+</map>
