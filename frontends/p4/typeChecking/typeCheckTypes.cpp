@@ -126,10 +126,13 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_ArchBlock *decl) {
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Parser *type) {
     auto canon = setTypeType(type);
     if (canon != nullptr) {
-        // Parser type declarations must not have default parameter values
-        for (auto p : type->applyParams->parameters) {
-            if (p->defaultValue != nullptr) {
-                typeError("%1%: parser type declaration parameters cannot have default values", p);
+        // Reject defaults only for standalone parser type declarations.
+        if (findOrigCtxt<IR::P4Parser>() == nullptr) {
+            for (auto p : type->applyParams->parameters) {
+                if (p->defaultValue != nullptr) {
+                    typeError("%1%: parser type declaration parameters cannot have default values",
+                              p);
+                }
             }
         }
     }
@@ -139,10 +142,13 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Parser *type) {
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Control *type) {
     auto canon = setTypeType(type);
     if (canon != nullptr) {
-        // Control type declarations must not have default parameter values
-        for (auto p : type->applyParams->parameters) {
-            if (p->defaultValue != nullptr) {
-                typeError("%1%: control type declaration parameters cannot have default values", p);
+        // Reject defaults only for standalone control type declarations.
+        if (findOrigCtxt<IR::P4Control>() == nullptr) {
+            for (auto p : type->applyParams->parameters) {
+                if (p->defaultValue != nullptr) {
+                    typeError("%1%: control type declaration parameters cannot have default values",
+                              p);
+                }
             }
         }
     }
