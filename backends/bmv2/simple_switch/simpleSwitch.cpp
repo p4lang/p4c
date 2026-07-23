@@ -12,7 +12,6 @@
 
 #include "backends/bmv2/common/annotations.h"
 #include "backends/bmv2/simple_switch/options.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "lib/json.h"
 #include "midend/flattenLogMsg.h"

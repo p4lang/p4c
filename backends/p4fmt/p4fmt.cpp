@@ -19,10 +19,12 @@ std::optional<std::pair<const IR::P4Program *, const Util::InputSources *>> pars
         ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file found.", options.file);
         return std::nullopt;
     }
+#ifdef SUPPORT_P4_14
     if (options.isv1()) {
         ::P4::error(ErrorType::ERR_UNKNOWN, "p4fmt cannot deal with p4-14 programs.");
         return std::nullopt;
     }
+#endif
     auto preprocessorResult = options.preprocess();
     auto result =
         P4ParserDriver::parseProgramSources(preprocessorResult.value().get(), options.file.c_str());

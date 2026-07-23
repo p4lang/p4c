@@ -109,6 +109,7 @@ TEST_F(P4CParserUnroll, test3) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 4);
 }
 
+#ifdef SUPPORT_P4_14
 TEST_F(P4CParserUnroll, switch_20160512) {
     auto parsers = loadExample("../p4_14_samples/switch_20160512/switch.p4",
                                CompilerOptions::FrontendVersion::P4_14);
@@ -116,6 +117,7 @@ TEST_F(P4CParserUnroll, switch_20160512) {
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() - 22 - 4 - 2);
 }
+#endif
 
 TEST_F(P4CParserUnroll, header_stack_access_remover) {
     auto parsers = loadExample("parser-unroll-test4.p4");

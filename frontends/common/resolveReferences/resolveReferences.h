@@ -169,7 +169,9 @@ class CheckShadowing : public PassManager {
 
  public:
     CheckShadowing() {
+#ifdef SUPPORT_P4_14
         refMap.setIsV1(P4CContext::get().options().isv1());
+#endif
 
         addPasses({new ResolveReferences(&refMap, /* checkShadow */ true)});
         setName("CheckShadowing");

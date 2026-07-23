@@ -18,6 +18,7 @@ namespace P4 {
 using namespace DBPrint;
 using namespace IndentCtl;
 
+#ifdef SUPPORT_P4_14
 void IR::HeaderStackItemRef::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Postfix) << *base_ << "[" << setprec(Prec_Low) << *index_ << "]"
@@ -48,6 +49,7 @@ void IR::CalculatedField::dbprint(std::ostream &out) const {
     }
     out << unindent;
 }
+
 void IR::CaseEntry::dbprint(std::ostream &out) const {
     const char *sep = "";
     int prec = getprec(out);
@@ -67,6 +69,7 @@ void IR::CaseEntry::dbprint(std::ostream &out) const {
     }
     out << ':' << setprec(prec) << " " << action;
 }
+
 void IR::V1Parser::dbprint(std::ostream &out) const {
     out << "parser " << name << " {" << indent;
     for (auto &stmt : stmts) out << Log::endl << *stmt;
@@ -88,25 +91,8 @@ void IR::V1Parser::dbprint(std::ostream &out) const {
     if (drop) out << Log::endl << "drop;";
     out << " }" << unindent;
 }
+
 void IR::ParserException::dbprint(std::ostream &out) const { out << "IR::ParserException"; }
-void IR::ParserState::dbprint(std::ostream &out) const {
-    out << "state " << name;
-    if (dbgetflags(out) & Brief) return;
-    out << " " << annotations << "{" << indent;
-    for (auto s : components) out << Log::endl << s;
-    if (selectExpression) out << Log::endl << selectExpression;
-    out << " }" << unindent;
-}
-void IR::P4Parser::dbprint(std::ostream &out) const {
-    out << "parser " << name;
-    if (type->typeParameters && !type->typeParameters->empty()) out << type->typeParameters;
-    out << '(' << type->applyParams << ')';
-    if (constructorParams) out << '(' << constructorParams << ')';
-    out << " " << type->annotations << "{" << indent;
-    for (auto d : parserLocals) out << Log::endl << d;
-    for (auto s : states) out << Log::endl << s;
-    out << " }" << unindent;
-}
 
 void IR::Counter::dbprint(std::ostream &out) const { IR::Attached::dbprint(out); }
 void IR::Meter::dbprint(std::ostream &out) const { IR::Attached::dbprint(out); }
@@ -124,6 +110,44 @@ void IR::ActionFunction::dbprint(std::ostream &out) const {
     out << ") {" << indent;
     for (auto &p : action) out << Log::endl << p;
     out << unindent << " }";
+}
+
+void IR::ActionProfile::dbprint(std::ostream &out) const { out << "IR::ActionProfile"; }
+void IR::ActionSelector::dbprint(std::ostream &out) const { out << "IR::ActionSelector"; }
+void IR::V1Table::dbprint(std::ostream &out) const { out << "IR::V1Table " << name; }
+
+void IR::V1Program::dbprint(std::ostream &out) const {
+    for (const auto &obj : Values(scope)) out << obj << Log::endl;
+}
+
+void IR::V1Control::dbprint(std::ostream &out) const {
+    out << "control " << name << " {" << indent << code << unindent << " }";
+}
+
+#endif
+
+void IR::P4ValueSet::dbprint(std::ostream &out) const {
+    out << "value_set<" << elementType << "> " << name;
+    out << " " << annotations << "(" << size << ")";
+}
+
+void IR::ParserState::dbprint(std::ostream &out) const {
+    out << "state " << name;
+    if (dbgetflags(out) & Brief) return;
+    out << " " << annotations << "{" << indent;
+    for (auto s : components) out << Log::endl << s;
+    if (selectExpression) out << Log::endl << selectExpression;
+    out << " }" << unindent;
+}
+void IR::P4Parser::dbprint(std::ostream &out) const {
+    out << "parser " << name;
+    if (type->typeParameters && !type->typeParameters->empty()) out << type->typeParameters;
+    out << '(' << type->applyParams << ')';
+    if (constructorParams) out << '(' << constructorParams << ')';
+    out << " " << type->annotations << "{" << indent;
+    for (auto d : parserLocals) out << Log::endl << d;
+    for (auto s : states) out << Log::endl << s;
+    out << " }" << unindent;
 }
 
 void IR::P4Action::dbprint(std::ostream &out) const {
@@ -152,10 +176,6 @@ void IR::BlockStatement::dbprint(std::ostream &out) const {
     }
     out << unindent << " }";
 }
-
-void IR::ActionProfile::dbprint(std::ostream &out) const { out << "IR::ActionProfile"; }
-void IR::ActionSelector::dbprint(std::ostream &out) const { out << "IR::ActionSelector"; }
-void IR::V1Table::dbprint(std::ostream &out) const { out << "IR::V1Table " << name; }
 
 void IR::ActionList::dbprint(std::ostream &out) const {
     out << "{" << indent;
@@ -193,14 +213,6 @@ void IR::P4Table::dbprint(std::ostream &out) const {
     out << " }" << unindent;
 }
 
-void IR::P4ValueSet::dbprint(std::ostream &out) const {
-    out << "value_set<" << elementType << "> " << name;
-    out << " " << annotations << "(" << size << ")";
-}
-
-void IR::V1Control::dbprint(std::ostream &out) const {
-    out << "control " << name << " {" << indent << code << unindent << " }";
-}
 void IR::P4Control::dbprint(std::ostream &out) const {
     out << "control " << name;
     if (type->typeParameters && !type->typeParameters->empty()) out << type->typeParameters;
@@ -211,10 +223,6 @@ void IR::P4Control::dbprint(std::ostream &out) const {
     out << Log::endl << "apply {" << indent;
     for (auto s : body->components) out << Log::endl << s;
     out << " } }" << unindent << unindent;
-}
-
-void IR::V1Program::dbprint(std::ostream &out) const {
-    for (const auto &obj : Values(scope)) out << obj << Log::endl;
 }
 
 void IR::P4Program::dbprint(std::ostream &out) const {

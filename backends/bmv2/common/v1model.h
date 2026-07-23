@@ -5,8 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_
-#define FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_
+#ifndef BACKENDS_BMV2_COMMON_V1MODEL_H_
+#define BACKENDS_BMV2_COMMON_V1MODEL_H_
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
@@ -336,12 +336,16 @@ class V1Model : public Model::Model {
     const DirectMeter_Model directMeter;
     const DirectCounter_Model directCounter;
 
-    static V1Model instance;
     // The following match constants appearing in v1model.p4
-    static const char *versionInitial;  // 20180101
-    static const char *versionCurrent;  // 20200408
+    static constexpr const char *versionInitial = "20180101";
+    static constexpr const char *versionCurrent = "20200408";
+
+    static const V1Model &instance() {
+        static V1Model INSTANCE;
+        return INSTANCE;
+    }
 };
 
 }  // namespace P4::P4V1
 
-#endif /* FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_ */
+#endif /* BACKENDS_BMV2_COMMON_V1MODEL_H_ */

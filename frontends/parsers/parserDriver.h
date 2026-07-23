@@ -231,6 +231,7 @@ class P4ParserDriver final : public AbstractParserDriver {
 
 }  // namespace P4
 
+#ifdef SUPPORT_P4_14
 namespace P4::V1 {
 
 class V1Lexer;
@@ -252,6 +253,7 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
      *                    set the initial source location.
      * @returns a V1Program object if parsing was successful, or null otherwise.
      */
+
     static const IR::V1Program *parse(std::istream &in, std::string_view sourceFile,
                                       unsigned sourceLine = 1);
     static const IR::V1Program *parse(FILE *in, std::string_view sourceFile,
@@ -299,5 +301,6 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
 };
 
 }  // namespace P4::V1
+#endif
 
 #endif /* FRONTENDS_PARSERS_PARSERDRIVER_H_ */
