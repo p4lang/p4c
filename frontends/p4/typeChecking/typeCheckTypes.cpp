@@ -123,6 +123,38 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_ArchBlock *decl) {
     return decl;
 }
 
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Parser *type) {
+    auto canon = setTypeType(type);
+    if (canon != nullptr) {
+        // Reject defaults only for standalone parser type declarations.
+        if (findOrigCtxt<IR::P4Parser>() == nullptr) {
+            for (auto p : type->applyParams->parameters) {
+                if (p->defaultValue != nullptr) {
+                    typeError("%1%: parser type declaration parameters cannot have default values",
+                              p);
+                }
+            }
+        }
+    }
+    return type;
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Control *type) {
+    auto canon = setTypeType(type);
+    if (canon != nullptr) {
+        // Reject defaults only for standalone control type declarations.
+        if (findOrigCtxt<IR::P4Control>() == nullptr) {
+            for (auto p : type->applyParams->parameters) {
+                if (p->defaultValue != nullptr) {
+                    typeError("%1%: control type declaration parameters cannot have default values",
+                              p);
+                }
+            }
+        }
+    }
+    return type;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Package *decl) {
     auto canon = setTypeType(decl);
     if (canon != nullptr) {

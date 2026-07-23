@@ -262,6 +262,8 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::Type_List *type);
     const IR::Node *postorder(const IR::Type_Set *type);
     const IR::Node *postorder(const IR::Type_ArchBlock *type);
+    const IR::Node *postorder(const IR::Type_Parser *type);
+    const IR::Node *postorder(const IR::Type_Control *type);
     const IR::Node *postorder(const IR::Type_Newtype *type);
     const IR::Node *postorder(const IR::Type_Package *type);
     const IR::Node *postorder(const IR::Type_ActionEnum *type);
@@ -411,6 +413,8 @@ class ReadOnlyTypeInference : public virtual Inspector, public TypeInferenceBase
     void postorder(const IR::Type_List *type) override;
     void postorder(const IR::Type_Set *type) override;
     void postorder(const IR::Type_ArchBlock *type) override;
+    void postorder(const IR::Type_Parser *type) override;
+    void postorder(const IR::Type_Control *type) override;
     void postorder(const IR::Type_Newtype *type) override;
     void postorder(const IR::Type_Package *type) override;
     void postorder(const IR::Type_ActionEnum *type) override;
@@ -551,6 +555,8 @@ class TypeInference : public virtual Transform, public TypeInferenceBase {
     const IR::Node *postorder(IR::Type_List *type) override;
     const IR::Node *postorder(IR::Type_Set *type) override;
     const IR::Node *postorder(IR::Type_ArchBlock *type) override;
+    const IR::Node *postorder(IR::Type_Parser *type) override;
+    const IR::Node *postorder(IR::Type_Control *type) override;
     const IR::Node *postorder(IR::Type_Newtype *type) override;
     const IR::Node *postorder(IR::Type_Package *type) override;
     const IR::Node *postorder(IR::Type_ActionEnum *type) override;
