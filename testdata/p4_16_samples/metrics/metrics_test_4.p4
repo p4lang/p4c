@@ -186,7 +186,7 @@ control ingress(
             meta.flag            : exact;
             meta.ser_enum_field  : lpm;
             meta.enum_field      : exact;
-            meta.err_field       : ternary;
+            meta.err_field       : optional;
         }
         actions = {
             set_output;
