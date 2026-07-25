@@ -65,7 +65,7 @@ P4Testgen depends on the P4Tools framework and is automatically installed with P
 P4Testgen is available as part of the [official P4C docker image](https://hub.docker.com/r/p4lang/p4c/). On Debian-based systems, it is also possible to install a P4Testgen binary by following [these](https://github.com/p4lang/p4c#installing-packaged-versions-of-p4c) instructions.
 
 ### Dependencies
-In addition to [P4Tools'](../README.md#dependencies) own dependencies P4Testgen depends on the following external software:
+In addition to [P4Tools'](../../README.md#dependencies) own dependencies P4Testgen depends on the following external software:
   * [inja](https://github.com/pantor/inja) template engine for testcase generation.
 
 These dependencies are automatically installed via CMakelist's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module.
