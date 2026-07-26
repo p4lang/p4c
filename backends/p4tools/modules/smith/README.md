@@ -34,7 +34,6 @@ Refer to the full page here: [P4Smith](https://p4lang.github.io/p4c/p4smith.html
 - [Installation](#installation)
 - [Extensions](#extensions)
 - [Usage](#usage)
-- [Limitations](#limitations)
 - [Further Reading](#further-reading)
 - [Contributing](#contributing)
 - [License](#license)
