@@ -354,7 +354,8 @@ class BackendDriver:
         for c in cmds:
             # Run all cleanup commands even if one fails; use `or` (not sum)
             # to track failure, since summed codes aren't valid exit codes.
-            rc = rc or self.runCmd(cmd_name, c)
+            tmp = self.runCmd(cmd_name, c)
+            rc = rc or tmp
         return rc  # \TODO should we fail the whole run() on cleanup failure?
 
     def run(self):
