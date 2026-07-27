@@ -67,4 +67,5 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
           tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # A cache write must not fail the build.
+          cache-to: type=gha,mode=max,ignore-error=true
