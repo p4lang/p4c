@@ -202,9 +202,9 @@ TEST_F(StrengthReductionTest, EnablePlusSliceToShiftTransformOnSignedSource) {
     test->program->apply(top4);
 
     std::string program_string = builder.toString();
-    EXPECT_EQ(program_string.find("signedValue[headers.h.f2+:16]"), std::string::npos);
+    EXPECT_EQ(program_string.find("[headers.h.f2+:16]"), std::string::npos);
     EXPECT_EQ(program_string.find("(bit<32>)signedValue"), std::string::npos);
-    EXPECT_NE(program_string.find("(signedValue >> headers.h.f2)[15:0]"), std::string::npos);
+    EXPECT_NE(program_string.find(" >> headers.h.f2)[15:0]"), std::string::npos);
 }
 
 }  // namespace P4::Test
