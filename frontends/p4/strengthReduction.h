@@ -22,9 +22,11 @@ class StrengthReductionPolicy {
  public:
     StrengthReductionPolicy() {}
     StrengthReductionPolicy(bool enableSubConstToAddTransform,
-                            bool enableNarrowingCastToSliceTransform)
+                            bool enableNarrowingCastToSliceTransform,
+                            bool enablePlusSliceToShiftTransform = false)
         : enableSubConstToAddTransform(enableSubConstToAddTransform),
-          enableNarrowingCastToSliceTransform(enableNarrowingCastToSliceTransform) {}
+          enableNarrowingCastToSliceTransform(enableNarrowingCastToSliceTransform),
+          enablePlusSliceToShiftTransform(enablePlusSliceToShiftTransform) {}
 
     /// Enable the subtract constant to add negative constant transform.
     /// Replaces `a - constant` with `a + (-constant)`.
@@ -33,6 +35,10 @@ class StrengthReductionPolicy {
     /// Replace narrowing casts with slices.
     /// i.e. replaces (bit<n>)(expr) with expr[n-1:0] when n is smaller than the width of expr.
     bool enableNarrowingCastToSliceTransform = false;
+
+    /// Replace slices with a variable offset with a shift followed by a constant slice.
+    /// i.e. replaces expr[offset+:width] with (expr >> offset)[width-1:0].
+    bool enablePlusSliceToShiftTransform = false;
 };
 
 /** Implements a pass that replaces expensive arithmetic and boolean
@@ -52,7 +58,7 @@ class StrengthReductionPolicy {
  *   - division and modulus by `0`
  *
  */
-class DoStrengthReduction final : public Transform {
+class DoStrengthReduction final : public Transform, P4WriteContext {
  protected:
     TypeMap *typeMap = nullptr;
     StrengthReductionPolicy *policy;
