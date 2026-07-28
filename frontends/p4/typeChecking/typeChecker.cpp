@@ -17,6 +17,23 @@
 
 namespace P4 {
 
+namespace {
+/// True if the type contains any type variables (Type_Var, Type_InfInt or Type_Any).
+class HasTypeVariables : public Inspector {
+    bool found = false;
+    void postorder(const IR::Type_Var *) override { found = true; }
+    void postorder(const IR::Type_InfInt *) override { found = true; }
+    void postorder(const IR::Type_Any *) override { found = true; }
+
+ public:
+    static bool find(const IR::Type *type) {
+        HasTypeVariables htv;
+        type->apply(htv);
+        return htv.found;
+    }
+};
+}  // namespace
+
 #if DEBUG_TYPES
 TypeChecking::TypeChecking(ReferenceMap *refMap, TypeMap *typeMap, bool updateExpressions) {
     addPasses({new P4::TypeInference(typeMap, /* readOnly */ true, /* checkArrays */ true,
@@ -872,8 +889,39 @@ TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const I
         if (!named) ++paramIt;
     }
     if (changed) arguments = newArgs;
-    auto objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
-                                          freshExtern->methods);
+    const IR::Type *objectType = nullptr;
+    if (!methodType->typeParameters->empty()) {
+        // The extern type is generic.  If all of its type parameters have been
+        // inferred from the constructor arguments, then the type of the
+        // constructed object is the extern type specialized with the inferred
+        // type arguments -- exactly as if the type arguments had been supplied
+        // explicitly in the program.
+        auto typeArgs = new IR::Vector<IR::Type>();
+        bool allInferred = true;
+        for (auto tv : methodType->typeParameters->parameters) {
+            const IR::Type *arg = tvs->lookup(tv);
+            if (arg != nullptr) {
+                // The binding may itself contain type variables.
+                arg = arg->apply(substVisitor, getChildContext())->to<IR::Type>();
+            }
+            if (arg == nullptr || HasTypeVariables::find(arg)) {
+                allInferred = false;
+                break;
+            }
+            typeArgs->push_back(arg);
+        }
+        if (allInferred) {
+            auto specialized = specialize(ext, typeArgs, getChildContext());
+            if (specialized == nullptr) return none;
+            objectType = new IR::Type_SpecializedCanonical(ext->srcInfo, ext, typeArgs, specialized);
+        }
+    }
+    if (objectType == nullptr)
+        // Some type parameters could not be inferred; they are preserved as
+        // free type variables in the type, so that they can be bound (or
+        // diagnosed) later.
+        objectType = new IR::Type_Extern(ext->srcInfo, ext->name, methodType->typeParameters,
+                                         freshExtern->methods);
     learn(objectType, this, getChildContext());
     return {objectType, arguments};
 }

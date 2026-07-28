@@ -2243,6 +2243,12 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ConstructorCallExpression
     if (auto *e = simpleType->to<IR::Type_Extern>()) {
         auto [contType, newArgs] = checkExternConstructor(expression, e, expression->arguments);
         if (newArgs == nullptr) return expression;
+        if (auto *st = type->to<IR::Type_SpecializedCanonical>()) {
+            // Preserve the explicit specialization of the constructed type.
+            contType = new IR::Type_SpecializedCanonical(type->srcInfo, st->baseType, st->arguments,
+                                                         contType);
+            learn(contType, this, getChildContext());
+        }
         if (expression->arguments != newArgs)
             expression = new IR::ConstructorCallExpression(expression->srcInfo,
                                                            expression->constructedType, newArgs);

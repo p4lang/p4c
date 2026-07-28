@@ -41,6 +41,22 @@ class HasInfInt : public Inspector {
     }
 };
 
+/// Given the declared type of an instantiation (a type name, possibly wrapped
+/// in array types), specialize the element type name with the given type
+/// arguments.  Returns nullptr if the declared type has an unexpected shape.
+static const IR::Type *addTypeArguments(const IR::Type *declaredType,
+                                        const IR::Vector<IR::Type> *typeArgs) {
+    if (auto at = declaredType->to<IR::Type_Array>()) {
+        auto elementType = addTypeArguments(at->elementType, typeArgs);
+        if (elementType == nullptr) return nullptr;
+        return new IR::Type_Array(at->srcInfo, elementType, at->size);
+    }
+    if (declaredType->is<IR::Type_Specialized>()) return declaredType;  // already specialized
+    if (auto tn = declaredType->to<IR::Type_Name>())
+        return new IR::Type_Specialized(declaredType->srcInfo, tn, typeArgs);
+    return nullptr;
+}
+
 }  // namespace
 
 /// Validate the type of a type variable.  The type must not contain
@@ -84,7 +100,22 @@ const IR::Node *DoBindTypeVariables::postorder(IR::Declaration_Instance *decl) {
     if (decl->type->is<IR::Type_Specialized>()) return decl;
     auto type = typeMap->getType(getOriginal(), true);
     while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
-    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) type = tsc->substituted;
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) {
+        // The declaration did not supply explicit type arguments, but they
+        // have all been inferred: make them explicit in the program, just as
+        // if they had been written in the first place.
+        auto typeArgs = new IR::Vector<IR::Type>();
+        for (auto a : *tsc->arguments) {
+            auto at = a->getP4Type();
+            if (at == nullptr) return decl;
+            typeArgs->push_back(at);
+        }
+        if (auto newType = addTypeArguments(decl->type, typeArgs)) {
+            decl->type = newType;
+            return decl;
+        }
+        type = tsc->substituted;
+    }
     BUG_CHECK(type->is<IR::IMayBeGenericType>(), "%1%: unexpected type %2% for declaration", decl,
               type);
     auto mt = type->to<IR::IMayBeGenericType>();
@@ -124,6 +155,20 @@ const IR::Node *DoBindTypeVariables::postorder(IR::MethodCallExpression *express
 const IR::Node *DoBindTypeVariables::postorder(IR::ConstructorCallExpression *expression) {
     if (expression->constructedType->is<IR::Type_Specialized>()) return expression;
     auto type = typeMap->getType(getOriginal(), true);
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) {
+        // The type arguments of the generic extern type have been inferred:
+        // make them explicit in the program.
+        auto typeArgs = new IR::Vector<IR::Type>();
+        for (auto a : *tsc->arguments) {
+            auto at = a->getP4Type();
+            if (at == nullptr) return expression;
+            typeArgs->push_back(at);
+        }
+        expression->constructedType =
+            new IR::Type_Specialized(expression->constructedType->srcInfo,
+                                     expression->constructedType->to<IR::Type_Name>(), typeArgs);
+        return expression;
+    }
     BUG_CHECK(type->is<IR::IMayBeGenericType>(), "%1%: unexpected type %2% for expression",
               expression, type);
     auto mt = type->to<IR::IMayBeGenericType>();
