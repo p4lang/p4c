@@ -427,17 +427,18 @@ if [ "$CMAKE_ONLY" == "OFF" ]; then
 fi
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
-  # Keep runtime library required by installed backend executables.
-  # FIXME: This should be provided by the BMv2 image.
-  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev
-
   sudo apt-get purge -y ${P4C_DEPS} git
   sudo apt-get autoremove --purge -y
+
+  # Reinstall the runtime libraries required by the installed P4C executables. This must happen AFTER the purge/autoremove above:
+  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev
+
   rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 
 elif [[ "${IMAGE_TYPE}" == "test" ]] ; then
-  # FIXME: This should be provided by the BMv2 image.
+  # libboost-iostreams is not provided by the BMv2 base image (BMv2 does
+  # not use Boost.Iostreams), but p4c executables link against it.
   sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev libboost-filesystem-dev libboost-thread-dev libgmp-dev
   echo 'Test image ready'
 
