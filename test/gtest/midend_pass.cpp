@@ -135,7 +135,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     toplevel = evaluator->getToplevelBlock();
 }
 
-IR::ToplevelBlock *MidEnd::process(const IR::P4Program *&program) {
+IR::MutablePtr<IR::ToplevelBlock> MidEnd::process(IR::Ptr<IR::P4Program> &program) {
     program = program->apply(*this);
     return toplevel;
 }

@@ -158,7 +158,7 @@ namespace P4::Test {
     if (policy == nullptr) {
         policy = new P4::FrontEndPolicy();
     }
-    auto *program = P4::parseP4String(source, langVersion);
+    auto program = P4::parseP4String(source, langVersion);
     if (program == nullptr) {
         std::cerr << "Couldn't parse test case source" << std::endl;
         return std::nullopt;

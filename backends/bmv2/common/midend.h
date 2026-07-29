@@ -51,7 +51,7 @@ class MidEnd : public PassManager {
         isv1 = options.isv1();
         refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     }
-    const IR::ToplevelBlock *process(const IR::P4Program *&program) {
+    IR::Ptr<IR::ToplevelBlock> process(IR::Ptr<IR::P4Program> &program) {
         program = program->apply(*this);
         return toplevel;
     }

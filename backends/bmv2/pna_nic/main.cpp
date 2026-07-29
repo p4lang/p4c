@@ -46,8 +46,8 @@ int main(int argc, char *const argv[]) {
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
 
-    const IR::P4Program *program = nullptr;
-    const IR::ToplevelBlock *toplevel = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
+    IR::Ptr<IR::ToplevelBlock> toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);

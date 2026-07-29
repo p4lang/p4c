@@ -324,6 +324,13 @@ class JSONGenerator {
         end_object(t);
     }
 
+#if !HAVE_LIBGC
+    template <typename T>
+    void generate(const IR::shared_ptr<T> &v) {
+        generate(v.get());
+    }
+#endif
+
     // This should more naturally be `generate(const T *v)`, but the extra `const &` is needed
     // to avoid ambiguous overload failures between this and the array generate below
     template <typename T>

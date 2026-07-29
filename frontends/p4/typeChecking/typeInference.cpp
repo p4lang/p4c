@@ -158,8 +158,8 @@ void TypeInference::end_apply(const IR::Node *node) {
     Transform::end_apply(node);
 }
 
-const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *name) {
-    const auto *transformed = Transform::apply_visitor(orig, name);
+IR::Ptr<IR::Node> TypeInference::apply_visitor(const IR::Node *orig, const char *name) {
+    auto transformed = Transform::apply_visitor(orig, name);
     BUG_CHECK(!readOnly || orig == transformed,
               "At this point in the compilation typechecking should not infer new types anymore, "
               "but it did: node %1% changed to %2%",

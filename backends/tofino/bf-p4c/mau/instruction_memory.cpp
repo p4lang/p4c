@@ -46,7 +46,7 @@ void GenerateVLIWInstructions::generate_for_action(const IR::MAU::Action *act) {
     BUG_CHECK(act_to_visit, "Somehow have a nullptr action for %1%", format_type);
 
     LOG4("\tSplit action found " << act_to_visit);
-    for (auto *prim : act_to_visit->action) {
+    for (const IR::MAU::Primitive *prim : act_to_visit->action) {
         auto instr = prim->to<IR::MAU::Instruction>();
         BUG_CHECK(instr, "Unexpected IR::Primitive, expected IR::MAU::Instruction");
         auto output = instr->getOutput();

@@ -139,7 +139,7 @@ struct StructTypeReplacement : public IHasDbPrint {
             }
             vec.push_back(new IR::NamedExpression(f->name, expr));
         }
-        auto type = fieldType->getP4Type()->template to<IR::Type_Name>();
+        IR::Ptr<IR::Type_Name> type = fieldType->getP4Type()->template to<IR::Type_Name>();
         return new IR::StructExpression(root->srcInfo, type, type, std::move(vec));
     }
 };

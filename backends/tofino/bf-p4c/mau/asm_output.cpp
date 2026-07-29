@@ -1357,7 +1357,7 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
     bool preorder(const IR::MAU::Action *act) override {
         LOG5("EmitAction preorder Action : " << act->name);
         for (auto call : act->stateful_calls) {
-            auto *at = call->attached_callee;
+            auto at = call->attached_callee;
             if (call->index == nullptr) continue;
             if (auto aa = call->index->to<IR::MAU::ActionArg>()) {
                 alias[aa->name.toString()] = self.indirect_address(at);
@@ -1397,12 +1397,12 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         // the meter type is dumped first, followed by the address location.  This is
         // required to generate override_full_.*_addr information
         for (auto call : act->stateful_calls) {
-            auto *at = call->attached_callee;
+            auto at = call->attached_callee;
             for (auto id : self.find_attached_ids(table, at)) {
                 out << indent << "- " << id.build_name() << '(';
                 sep = "";
                 auto *salu = at->to<IR::MAU::StatefulAlu>();
-                if (auto *salu_act = salu ? salu->calledAction(table, act) : nullptr) {
+                if (auto salu_act = salu ? salu->calledAction(table, act) : nullptr) {
                     out << canon_name(salu_act->name);
                     sep = ", ";
                 } else if (act->meter_types.count(at->unique_id()) > 0) {

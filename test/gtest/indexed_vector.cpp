@@ -29,7 +29,7 @@ TEST(IndexedVector, basics) {
     EXPECT_EQ(vec[1]->name.name, "bar");
 
     cstring check = "foo"_cs;
-    for (const auto *dec : vec) {
+    for (const IR::StructField *dec : vec) {
         EXPECT_EQ(dec->name.name, check);
         check = "bar"_cs;
     }

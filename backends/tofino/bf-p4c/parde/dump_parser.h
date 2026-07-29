@@ -295,7 +295,7 @@ class DumpParser : public Visitor, public DotDumper {
         : DotDumper(filename, color_groups, detail || LOGGING(4)), log(to_log) {}
 
  private:
-    const IR::Node *apply_visitor(const IR::Node *n, const char *) override { return n; }
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char *) override { return n; }
 
     Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Visitor::init_apply(root);

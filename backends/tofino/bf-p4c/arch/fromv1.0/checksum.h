@@ -242,7 +242,7 @@ class InsertParserChecksums : public Inspector {
         ExtractToState &extractToState;
 
         void postorder(const IR::MethodCallStatement *statement) override {
-            auto *call = statement->methodCall;
+            auto call = statement->methodCall;
             CHECK_NULL(call);
             auto *method = call->method->to<IR::Member>();
             auto *state = findContext<IR::ParserState>();
@@ -398,7 +398,7 @@ class InsertParserChecksums : public Inspector {
             }
         }
 
-        auto *destfieldAdj = destfield;
+        auto destfieldAdj = destfield;
         if (const auto *member = destfield->to<IR::Member>()) {
             destfieldAdj = replaceSrcInfo(member, state->srcInfo);
         }

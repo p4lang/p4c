@@ -135,9 +135,9 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
     return true;
 }
 
-/* static */ const IR::P4Program *P4ParserDriver::parse(std::istream &in,
-                                                        std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::P4Program> P4ParserDriver::parse(std::istream &in,
+                                                          std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     LOG1("Parsing P4-16 program " << sourceFile);
 
     P4ParserDriver driver;
@@ -148,8 +148,8 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
     return rv;
 }
 
-/* static */ const IR::P4Program *P4ParserDriver::parse(FILE *in, std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::P4Program> P4ParserDriver::parse(FILE *in, std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
     return parse(inputStream.get(), sourceFile, sourceLine);
 }
@@ -178,8 +178,8 @@ P4ParserDriver::parseProgramSources(FILE *in, std::string_view sourceFile,
 }
 
 template <typename T>
-const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceInfo &srcInfo,
-                               const IR::Vector<IR::AnnotationToken> &body) {
+IR::Ptr<T> P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceInfo &srcInfo,
+                                 const IR::Vector<IR::AnnotationToken> &body) {
     LOG3("Parsing P4-16 annotation " << srcInfo);
 
     P4AnnotationLexer lexer(type, srcInfo, body);
@@ -190,107 +190,107 @@ const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceI
     return result->to<T>();
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseExpressionList(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseExpressionList(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::EXPRESSION_LIST, srcInfo,
                                                     body);
 }
 
-/* static */ const IR::IndexedVector<IR::NamedExpression> *P4ParserDriver::parseKvList(
+/* static */ IR::Ptr<IR::IndexedVector<IR::NamedExpression>> P4ParserDriver::parseKvList(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::IndexedVector<IR::NamedExpression>>(P4AnnotationLexer::KV_LIST, srcInfo,
                                                                 body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseConstantList(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseConstantList(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::INTEGER_LIST, srcInfo, body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseConstantOrStringLiteralList(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseConstantOrStringLiteralList(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(
         P4AnnotationLexer::INTEGER_OR_STRING_LITERAL_LIST, srcInfo, body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseStringLiteralList(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseStringLiteralList(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::STRING_LITERAL_LIST, srcInfo,
                                                     body);
 }
 
-/* static */ const IR::Expression *P4ParserDriver::parseExpression(
+/* static */ IR::Ptr<IR::Expression> P4ParserDriver::parseExpression(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Expression>(P4AnnotationLexer::EXPRESSION, srcInfo, body);
 }
 
-/* static */ const IR::Constant *P4ParserDriver::parseConstant(
+/* static */ IR::Ptr<IR::Constant> P4ParserDriver::parseConstant(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Constant>(P4AnnotationLexer::INTEGER, srcInfo, body);
 }
 
-/* static */ const IR::Expression *P4ParserDriver::parseConstantOrStringLiteral(
+/* static */ IR::Ptr<IR::Expression> P4ParserDriver::parseConstantOrStringLiteral(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Expression>(P4AnnotationLexer::INTEGER_OR_STRING_LITERAL, srcInfo,
                                         body);
 }
 
-/* static */ const IR::StringLiteral *P4ParserDriver::parseStringLiteral(
+/* static */ IR::Ptr<IR::StringLiteral> P4ParserDriver::parseStringLiteral(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::StringLiteral>(P4AnnotationLexer::STRING_LITERAL, srcInfo, body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseExpressionPair(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseExpressionPair(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::EXPRESSION_PAIR, srcInfo,
                                                     body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseConstantPair(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseConstantPair(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::INTEGER_PAIR, srcInfo, body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseStringLiteralPair(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseStringLiteralPair(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::STRING_LITERAL_PAIR, srcInfo,
                                                     body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseExpressionTriple(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseExpressionTriple(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::EXPRESSION_TRIPLE, srcInfo,
                                                     body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseConstantTriple(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseConstantTriple(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::INTEGER_TRIPLE, srcInfo,
                                                     body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseStringLiteralTriple(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseStringLiteralTriple(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::STRING_LITERAL_TRIPLE,
                                                     srcInfo, body);
 }
 
-/* static */ const IR::Vector<IR::Expression> *P4ParserDriver::parseP4rtTranslationAnnotation(
+/* static */ IR::Ptr<IR::Vector<IR::Expression>> P4ParserDriver::parseP4rtTranslationAnnotation(
     const Util::SourceInfo &srcInfo, const IR::Vector<IR::AnnotationToken> &body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(P4AnnotationLexer::P4RT_TRANSLATION_ANNOTATION,
@@ -321,9 +321,9 @@ namespace P4::V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(std::istream &in,
-                                                        std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::V1Program> V1ParserDriver::parse(std::istream &in,
+                                                          std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     LOG1("Parsing P4-14 program " << sourceFile);
 
     // Create and configure the parser and lexer.
@@ -343,8 +343,8 @@ V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
     return driver.global;
 }
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::V1Program> V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
     return parse(inputStream.get(), sourceFile, sourceLine);
 }

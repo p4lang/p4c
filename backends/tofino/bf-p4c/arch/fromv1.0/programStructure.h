@@ -51,14 +51,15 @@ static const cstring COMPILER_META = "__bfp4c_compiler_generated_meta"_cs;
 // to be removed
 // ** BEGIN **
 class TNA_ProgramStructure : public ProgramStructure {
-    const IR::Expression *convertHashAlgorithm(Util::SourceInfo srcInfo, IR::ID algorithm) override;
+    IR::Ptr<IR::Expression> convertHashAlgorithm(Util::SourceInfo srcInfo,
+                                                 IR::ID algorithm) override;
 
-    const IR::P4Table *convertTable(const IR::V1Table *table, cstring newName,
-                                    IR::IndexedVector<IR::Declaration> &stateful,
-                                    std::map<cstring, cstring> &) override;
+    IR::Ptr<IR::P4Table> convertTable(const IR::V1Table *table, cstring newName,
+                                      IR::IndexedVector<IR::Declaration> &stateful,
+                                      std::map<cstring, cstring> &) override;
 
-    const IR::Declaration_Instance *convertActionProfile(const IR::ActionProfile *action_profile,
-                                                         cstring newName) override;
+    IR::Ptr<IR::Declaration_Instance> convertActionProfile(const IR::ActionProfile *action_profile,
+                                                           cstring newName) override;
 
  public:
     static ProgramStructure *create() { return new TNA_ProgramStructure(); }
@@ -109,60 +110,63 @@ class ConvertConcreteHeaderRefToPathExpression : public Transform {
  */
 class TnaProgramStructure : public ProgramStructure {
     // hash
-    const IR::Expression *convertHashAlgorithm(Util::SourceInfo srcInfo, IR::ID algorithm) override;
-    IR::ConstructorCallExpression *createHashExtern(const IR::Expression *, const IR::Type *);
+    IR::Ptr<IR::Expression> convertHashAlgorithm(Util::SourceInfo srcInfo,
+                                                 IR::ID algorithm) override;
+    IR::MutablePtr<IR::ConstructorCallExpression> createHashExtern(const IR::Expression *,
+                                                                   const IR::Type *);
 
     // table
-    const IR::P4Table *convertTable(const IR::V1Table *table, cstring newName,
-                                    IR::IndexedVector<IR::Declaration> &stateful,
-                                    std::map<cstring, cstring> &) override;
+    IR::Ptr<IR::P4Table> convertTable(const IR::V1Table *table, cstring newName,
+                                      IR::IndexedVector<IR::Declaration> &stateful,
+                                      std::map<cstring, cstring> &) override;
 
     // action profile
-    const IR::Declaration_Instance *convertActionProfile(const IR::ActionProfile *action_profile,
-                                                         cstring newName) override;
+    IR::Ptr<IR::Declaration_Instance> convertActionProfile(const IR::ActionProfile *action_profile,
+                                                           cstring newName) override;
 
     // counter and meter
-    const IR::Declaration_Instance *convertDirectCounter(const IR::Counter *c,
+    IR::Ptr<IR::Declaration_Instance> convertDirectCounter(const IR::Counter *c,
+                                                           cstring newName) override;
+    IR::Ptr<IR::Declaration_Instance> convertDirectMeter(const IR::Meter *c,
                                                          cstring newName) override;
-    const IR::Declaration_Instance *convertDirectMeter(const IR::Meter *c,
-                                                       cstring newName) override;
-    const IR::Statement *convertMeterCall(const IR::Meter *m) override;
-    const IR::Statement *convertCounterCall(cstring c) override;
+    IR::Ptr<IR::Statement> convertMeterCall(const IR::Meter *m) override;
+    IR::Ptr<IR::Statement> convertCounterCall(cstring c) override;
     const IR::Expression *counterType(const IR::CounterOrMeter *cm) override;
-    const IR::Declaration_Instance *convert(const IR::Register *reg, cstring newName,
-                                            const IR::Type *regElementType) override;
+    IR::Ptr<IR::Declaration_Instance> convert(const IR::Register *reg, cstring newName,
+                                              const IR::Type *regElementType) override;
 
     // control
-    IR::Vector<IR::Argument> *createApplyArguments(cstring n) override;
-    const IR::P4Control *convertControl(const IR::V1Control *control, cstring newName) override;
-    const IR::ParserState *convertParser(const IR::V1Parser *control,
-                                         IR::IndexedVector<IR::Declaration> *) override;
-    const IR::Declaration_Instance *convert(const IR::CounterOrMeter *cm, cstring newName) override;
-    const IR::Type_Control *controlType(IR::ID name) override;
+    IR::Ptr<IR::Vector<IR::Argument>> createApplyArguments(cstring n) override;
+    IR::Ptr<IR::P4Control> convertControl(const IR::V1Control *control, cstring newName) override;
+    IR::Ptr<IR::ParserState> convertParser(const IR::V1Parser *control,
+                                           IR::IndexedVector<IR::Declaration> *) override;
+    IR::Ptr<IR::Declaration_Instance> convert(const IR::CounterOrMeter *cm,
+                                              cstring newName) override;
+    IR::Ptr<IR::Type_Control> controlType(IR::ID name) override;
 
     void addIngressParams(IR::ParameterList *param);
     void addEgressParams(IR::ParameterList *param);
     void setupControlArguments();
 
     // metadata
-    const IR::Expression *stdMetaReference(const IR::Parameter *param);
+    IR::Ptr<IR::Expression> stdMetaReference(const IR::Parameter *param);
     void checkHeaderType(const IR::Type_StructLike *hdr, bool toStruct) override;
 
     // action
     std::vector<cstring> findActionInTables(const IR::V1Control *control);
 
     // parsers
-    IR::IndexedVector<IR::ParserState> *createIngressParserStates();
-    IR::IndexedVector<IR::ParserState> *createEgressParserStates();
-    const IR::ParserState *createEmptyMirrorState(cstring nextState);
-    const IR::ParserState *createMirrorState(gress_t, unsigned, const IR::Expression *, cstring,
-                                             cstring);
-    const IR::ParserState *createResubmitState(gress_t, unsigned, const IR::Expression *, cstring,
+    IR::MutablePtr<IR::IndexedVector<IR::ParserState>> createIngressParserStates();
+    IR::MutablePtr<IR::IndexedVector<IR::ParserState>> createEgressParserStates();
+    IR::Ptr<IR::ParserState> createEmptyMirrorState(cstring nextState);
+    IR::Ptr<IR::ParserState> createMirrorState(gress_t, unsigned, const IR::Expression *, cstring,
                                                cstring);
-    const IR::SelectCase *createSelectCase(gress_t gress, unsigned digestId,
-                                           const IR::ParserState *newState);
-    IR::IndexedVector<IR::ParserState> *createMirrorStates();
-    IR::IndexedVector<IR::ParserState> *createResubmitStates();
+    IR::Ptr<IR::ParserState> createResubmitState(gress_t, unsigned, const IR::Expression *, cstring,
+                                                 cstring);
+    IR::Ptr<IR::SelectCase> createSelectCase(gress_t gress, unsigned digestId,
+                                             const IR::ParserState *newState);
+    IR::MutablePtr<IR::IndexedVector<IR::ParserState>> createMirrorStates();
+    IR::MutablePtr<IR::IndexedVector<IR::ParserState>> createResubmitStates();
 
     // types
     void removeType(cstring typeName, cstring headerName);
@@ -207,7 +211,7 @@ class TnaProgramStructure : public ProgramStructure {
     void createDeparser() override;
     void createPipeline();
     void createMain() override;
-    const IR::P4Program *create(Util::SourceInfo info) override;
+    IR::Ptr<IR::P4Program> create(Util::SourceInfo info) override;
 
  public:
     // used to indicate which gress the current control block being
@@ -444,7 +448,7 @@ class CollectDigestFields : public Inspector {
     gress_t gress;
     DigestFieldList &digestFieldLists;
 
-    IR::Expression *flatten(const IR::ListExpression *);
+    IR::Ptr<IR::Expression> flatten(const IR::ListExpression *);
     void convertFieldList(const IR::Primitive *prim, size_t fieldListIndex,
                           std::map<unsigned long, unsigned> &indexHashes, bool);
 

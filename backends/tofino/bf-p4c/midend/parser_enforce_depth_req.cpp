@@ -247,7 +247,7 @@ class IdentifyPadRequirements : public Inspector {
             BUG_CHECK(tp, "Type_Parser not found in parser %s", prsr->externalName());
             BUG_CHECK(tp->getApplyParameters() && tp->getApplyParameters()->parameters.size() > 2,
                       "Couldn't find header paremeter for parser %s", prsr->externalName());
-            auto *hdr_param = tp->getApplyParameters()->parameters[1];
+            const IR::Parameter *hdr_param = tp->getApplyParameters()->parameters[1];
             auto *tn = hdr_param->type->to<IR::Type_Name>();
             BUG_CHECK(tn, "Couldn't convert type to Type_Struct");
             cstring header = tn->path->name;
@@ -336,7 +336,7 @@ class IdentifyPadRequirements : public Inspector {
         //   - is_zero     (counter; in select in state)
         if (auto *member = mce->method->to<IR::Member>()) {
             if (member->member == "extract") {
-                auto *type = mce->typeArguments->front();
+                const IR::Type *type = mce->typeArguments->front();
                 if (auto *typeName = type->to<IR::Type_Name>()) {
                     auto name = typeName->path->name;
                     currStateSize += typeWidth[name];
@@ -350,7 +350,7 @@ class IdentifyPadRequirements : public Inspector {
                                        << typeWidth[name] << "b");
                 }
             } else if (member->member == "advance") {
-                auto *arg = mce->arguments->front();
+                const IR::Argument *arg = mce->arguments->front();
                 BUG_CHECK(arg, "\"advance\" call missing argument in %1%", mce);
                 if (auto *c = arg->expression->to<IR::Constant>()) {
                     LOG3("Advance in state " << state->externalName() << ": " << c->asInt() << "b");
@@ -559,7 +559,7 @@ class AddParserPad : public Modifier {
     void identifyNonStructParsers() {
         for (const auto *prsr : Keys(padReq)) {
             // Gather information from the parser parameters
-            auto *tp = prsr->type;
+            const IR::Type_Parser *tp = prsr->type;
             BUG_CHECK(tp->applyParams->parameters.size() > 2,
                       "Missing header information in parser %1%", prsr->externalName());
 
@@ -703,7 +703,7 @@ class AddParserPad : public Modifier {
         minDepthAllowed = Device::pardeSpec().minParseDepth(allParsers.at(orig));
 
         // Gather information from the parser parameters
-        auto *tp = prsr->type;
+        const IR::Type_Parser *tp = prsr->type;
         BUG_CHECK(tp->applyParams->parameters.size() > 2,
                   "Missing header information in parser %1%", prsr->externalName());
 
@@ -850,7 +850,7 @@ class AddParserPad : public Modifier {
                 cstring pipeName = di->name;
 
                 for (auto &p : argsToCheck) {
-                    const auto *prsrArg = di->arguments->at(p.first);
+                    const IR::Argument *prsrArg = di->arguments->at(p.first);
                     if (const auto *cce =
                             prsrArg->expression->to<IR::ConstructorCallExpression>()) {
                         const auto *prsr_tn = cce->constructedType->to<IR::Type_Name>();

@@ -37,7 +37,7 @@ const char *PragmaNoPack::help =
 bool PragmaNoPack::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
 
-    for (const auto *annotation : global_pragmas) {
+    for (auto annotation : global_pragmas) {
         if (annotation->name.name != PragmaNoPack::name) continue;
 
         auto &exprs = annotation->getExpr();

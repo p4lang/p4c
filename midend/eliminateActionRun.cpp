@@ -37,7 +37,7 @@ void ElimActionRun::ActionTableUse::postorder(const IR::Member *mem) {
     }
     auto *info = &it->second;
     IR::IndexedVector<IR::Declaration_ID> tags;
-    for (auto *ale : tbl->getActionList()->actionList) {
+    for (const IR::ActionListElement *ale : tbl->getActionList()->actionList) {
         cstring name = ale->getName();
         BUG_CHECK(!self.actionsToModify.count(name),
                   "action %s used in multiple tables (%s and %s) -- LocalizeActions must be run "

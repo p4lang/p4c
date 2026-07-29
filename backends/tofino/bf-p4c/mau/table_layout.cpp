@@ -123,7 +123,7 @@ void LayoutChoices::add_payload_gw_layout(const IR::MAU::Table *tbl,
 bool LayoutChoices::need_meter(const IR::MAU::Table *tbl,
                                ActionData::FormatType_t format_type) const {
     unsigned idx = 0;
-    for (auto *ba : tbl->attached) {
+    for (auto ba : tbl->attached) {
         bool uses_meter = ba->attached->is<IR::MAU::MeterBus2Port>();
         if (ba->attached->direct) {
             if (uses_meter && format_type.matchThisStage()) return true;
@@ -1241,7 +1241,10 @@ bool DoTableLayout::preorder(IR::MAU::Selector *sel) {
     auto hge = new IR::MAU::HashGenExpression(
         sel->srcInfo, IR::Type::Bits::get(SelectorHashModBits(sel)), field_list, sel->algorithm);
     auto *hd = new IR::MAU::HashDist(sel->srcInfo, hge->type, hge);
+#if HAVE_LIBGC
+    // FIXME -- should be letting the GC do this
     if (sel->hash_mod != nullptr) delete sel->hash_mod;
+#endif
     sel->hash_mod = hd;
     return false;
 }

@@ -58,12 +58,12 @@ bool P4::CheckTableEntries::ternary_covers(const IR::Expression *k1, const IR::E
 }
 
 bool P4::CheckTableEntries::preorder(const IR::P4Table *tbl) {
-    auto *entries = tbl->getEntries();
+    const IR::EntriesList *entries = tbl->getEntries();
     if (!entries || entries->entries.empty()) return false;
-    auto *key = tbl->getKey();
+    const IR::Key *key = tbl->getKey();
     BUG_CHECK(key, "%1% table has entries and no key", tbl);
     std::vector<bool> ternary_keys;
-    for (auto *key_el : key->keyElements) {
+    for (const IR::KeyElement *key_el : key->keyElements) {
         cstring matchKind = key_el->matchType->path->name.name;
         ternary_keys.push_back(matchKind == "ternary"_cs || matchKind == "optional"_cs);
     }
@@ -73,7 +73,7 @@ bool P4::CheckTableEntries::preorder(const IR::P4Table *tbl) {
     // look at all of them -- O(n^2) in the number of entries
     std::vector<const IR::ListExpression *> prev_keys;
 
-    for (auto *entry : entries->entries) {
+    for (const IR::Entry *entry : entries->entries) {
         BUG_CHECK(entry->keys->size() == ternary_keys.size(), "%1% key size mismatch", entry);
 
         for (auto *prev : prev_keys) {

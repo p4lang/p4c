@@ -90,7 +90,7 @@ bool ParserHeaderSequences::preorder(const IR::BFN::Extract *extract) {
     size_t size = 0;
     if (member && member->expr) {
         if (const auto *hdr_ref = member->expr->to<IR::HeaderRef>()) {
-            const auto *base_ref = hdr_ref->baseRef();
+            auto base_ref = hdr_ref->baseRef();
             if (base_ref && base_ref->type) size = base_ref->type->width_bits();
         }
     }

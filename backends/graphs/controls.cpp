@@ -117,7 +117,7 @@ bool ControlGraphs::preorder(const IR::P4Control *cont) {
 }
 
 bool ControlGraphs::preorder(const IR::BlockStatement *statement) {
-    for (const auto component : statement->components) visit(component);
+    statement->components.visit_children(*this, "components");
     merge_other_statements_into_vertex();
 
     return false;

@@ -50,7 +50,7 @@ bool TypeInferenceBase::learn(const IR::Node *node, Visitor *caller, const Visit
     return result;
 }
 
-const IR::Expression *TypeInferenceBase::constantFold(const IR::Expression *expression) {
+IR::Ptr<IR::Expression> TypeInferenceBase::constantFold(const IR::Expression *expression) {
     if (readOnly) return expression;
     DoConstantFolding cf(this, typeMap, false);
     auto result = expression->apply(cf, getChildContext());
@@ -62,7 +62,8 @@ const IR::Expression *TypeInferenceBase::constantFold(const IR::Expression *expr
 // Make a clone of the type where all type variables in
 // the type parameters are replaced with fresh ones.
 // This should only be applied to canonical types.
-const IR::Type *TypeInferenceBase::cloneWithFreshTypeVariables(const IR::IMayBeGenericType *type) {
+IR::Ptr<IR::Type> TypeInferenceBase::cloneWithFreshTypeVariables(
+    const IR::IMayBeGenericType *type) {
     TypeVariableSubstitution tvs;
     for (auto v : type->getTypeParameters()->parameters) {
         auto tv = new IR::Type_Var(v->srcInfo, v->getName());
@@ -124,8 +125,8 @@ bool TypeInferenceBase::done() const {
     return done;
 }
 
-const IR::Type *TypeInferenceBase::getType(const IR::Node *element) const {
-    const IR::Type *result = typeMap->getType(element);
+IR::Ptr<IR::Type> TypeInferenceBase::getType(const IR::Node *element) const {
+    IR::Ptr<IR::Type> result = typeMap->getType(element);
     // This should be happening only when type-checking already failed
     // for some node; we are now just trying to typecheck a parent node.
     // So an error should have already been signalled.
@@ -134,8 +135,8 @@ const IR::Type *TypeInferenceBase::getType(const IR::Node *element) const {
     return result;
 }
 
-const IR::Type *TypeInferenceBase::getTypeType(const IR::Node *element) const {
-    const IR::Type *result = typeMap->getType(element);
+IR::Ptr<IR::Type> TypeInferenceBase::getTypeType(const IR::Node *element) const {
+    IR::Ptr<IR::Type> result = typeMap->getType(element);
     // See comment in getType() above.
     if (result == nullptr) {
         if (auto *us = element->to<IR::Type_UnknownStruct>())
@@ -177,8 +178,8 @@ TypeVariableSubstitution *TypeInferenceBase::unifyBase(
 }
 
 template <class Ctor>
-const IR::Type *TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
-                                                      Ctor constructor) {
+IR::Ptr<IR::Type> TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
+                                                        Ctor constructor) {
     bool changes = false;
     IR::IndexedVector<IR::StructField> fields;
     for (auto field : type->fields) {
@@ -202,9 +203,9 @@ const IR::Type *TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike 
  * it can be specialized to
  * void _<int<32>>(int<32> data);
  */
-const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
-                                              const IR::Vector<IR::Type> *arguments,
-                                              const Visitor::Context *ctxt) {
+IR::Ptr<IR::Type> TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
+                                                const IR::Vector<IR::Type> *arguments,
+                                                const Visitor::Context *ctxt) {
     TypeVariableSubstitution *bindings = new TypeVariableSubstitution();
     bool success = bindings->setBindings(type->getNode(), type->getTypeParameters(), arguments);
     if (!success) return nullptr;
@@ -212,7 +213,7 @@ const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
     LOG2("Translation map\n" << bindings);
 
     TypeVariableSubstitutionVisitor tsv(bindings);
-    const IR::Node *result = type->getNode()->apply(tsv, ctxt);
+    IR::Ptr<IR::Node> result = type->getNode()->apply(tsv, ctxt);
     if (result == nullptr) return nullptr;
 
     LOG2("Specialized " << type << "\n\tinto " << result);
@@ -220,7 +221,7 @@ const IR::Type *TypeInferenceBase::specialize(const IR::IMayBeGenericType *type,
 }
 
 // May return nullptr if a type error occurs.
-const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
+IR::Ptr<IR::Type> TypeInferenceBase::canonicalize(IR::Ptr<IR::Type> type) {
     if (type == nullptr) return nullptr;
 
     auto exists = typeMap->getType(type);
@@ -253,12 +254,12 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         if (et->is<IR::Type_Array>() || et->is<IR::Type_Set>() || et->is<IR::Type_HeaderUnion>())
             ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: Sets of %2% are not supported", type, et);
         if (et == set->elementType) return type;
-        const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
+        IR::Ptr<IR::Type> canon = new IR::Type_Set(type->srcInfo, et);
         return canon;
     } else if (auto stack = type->to<IR::Type_Array>()) {
         auto et = canonicalize(stack->elementType);
         if (et == nullptr) return nullptr;
-        const IR::Type *canon;
+        IR::Ptr<IR::Type> canon;
         if (et == stack->elementType)
             canon = type;
         else
@@ -268,7 +269,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
     } else if (auto vec = type->to<IR::Type_P4List>()) {
         auto et = canonicalize(vec->elementType);
         if (et == nullptr) return nullptr;
-        const IR::Type *canon;
+        IR::Ptr<IR::Type> canon;
         if (et == vec->elementType)
             canon = type;
         else
@@ -291,7 +292,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
             if (t1 == nullptr) return nullptr;
             fields.push_back(t1);
         }
-        const IR::Type *canon;
+        IR::Ptr<IR::Type> canon;
         if (anySet)
             canon = new IR::Type_Tuple(type->srcInfo, std::move(fields));
         else if (anyChange)
@@ -310,7 +311,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
             if (t1 == nullptr) return nullptr;
             fields.push_back(t1);
         }
-        const IR::Type *canon;
+        IR::Ptr<IR::Type> canon;
         if (anyChange)
             canon = new IR::Type_Tuple(type->srcInfo, std::move(fields));
         else
@@ -378,13 +379,13 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         }
         auto tps = te->typeParameters;
         if (tps == nullptr) return nullptr;
-        const IR::Type *resultType = type;
+        IR::Ptr<IR::Type> resultType = type;
         if (changes || tps != te->typeParameters)
             resultType = new IR::Type_Extern(te->srcInfo, te->name, tps, std::move(methods),
                                              te->annotations);
         return resultType;
     } else if (auto mt = type->to<IR::Type_Method>()) {
-        const IR::Type *res = nullptr;
+        IR::Ptr<IR::Type> res = nullptr;
         if (mt->returnType != nullptr) {
             res = canonicalize(mt->returnType);
             if (res == nullptr) return nullptr;
@@ -395,7 +396,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         if (pl == nullptr) return nullptr;
         if (!checkParameters(pl)) return nullptr;
         changes = changes || pl != mt->parameters || tps != mt->typeParameters;
-        const IR::Type *resultType = mt;
+        IR::Ptr<IR::Type> resultType = mt;
         if (changes) resultType = new IR::Type_Method(mt->getSourceInfo(), tps, res, pl, mt->name);
         return resultType;
     } else if (auto hdr = type->to<IR::Type_Header>()) {
@@ -532,8 +533,8 @@ bool TypeInferenceBase::canCastBetween(const IR::Type *dest, const IR::Type *src
     return false;
 }
 
-const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
-                                                               const IR::Type *destType) {
+IR::Ptr<IR::Expression> TypeInferenceBase::convertUntypedInvalid(const IR::Expression *expr,
+                                                                 const IR::Type *destType) {
     // Guard: only act on untyped Invalid literals
     if (!expr->is<IR::Invalid>()) return expr;
     if (!expr->type->is<IR::Type_Unknown>()) return expr;
@@ -566,9 +567,9 @@ const IR::Expression *TypeInferenceBase::convertUntypedInvalid(const IR::Express
     return result;
 }
 
-const IR::Expression *TypeInferenceBase::assignment(const IR::Node *errorPosition,
-                                                    const IR::Type *destType,
-                                                    const IR::Expression *sourceExpression) {
+IR::Ptr<IR::Expression> TypeInferenceBase::assignment(const IR::Node *errorPosition,
+                                                      const IR::Type *destType,
+                                                      IR::Ptr<IR::Expression> sourceExpression) {
     if (destType->is<IR::Type_Unknown>()) BUG("Unknown destination type");
     if (destType->is<IR::Type_Dontcare>()) return sourceExpression;
     // Convert untyped {#} literals to typed InvalidHeader/InvalidHeaderUnion
@@ -746,9 +747,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Annotation *annotation) {
             [&](const auto &body) {
                 using T = std::decay_t<decltype(body)>;
                 if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
-                    for (const auto *e : body) checkAnnotation(e);
+                    for (const IR::Expression *e : body) checkAnnotation(e);
                 } else if constexpr (std::is_same_v<T, IR::IndexedVector<IR::NamedExpression>>) {
-                    for (const auto *e : body) checkAnnotation(e->expression);
+                    for (const IR::NamedExpression *e : body) checkAnnotation(e->expression);
                 } else {
                     BUG("Unexpected variant field");
                 }
@@ -764,7 +765,7 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>
 TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const IR::Type_Extern *ext,
                                           const IR::Vector<IR::Argument> *arguments) {
     auto none = std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(nullptr, nullptr);
-    auto freshExtern = cloneWithFreshTypeVariables(ext)->to<IR::Type_Extern>();
+    IR::Ptr<IR::Type_Extern> freshExtern = cloneWithFreshTypeVariables(ext)->to<IR::Type_Extern>();
     auto constructor = freshExtern->lookupConstructor(arguments);
     if (constructor == nullptr) {
         typeError("%1%: type %2% has no matching constructor", errorPosition, ext);
@@ -880,7 +881,7 @@ TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const I
 
 /// @returns: A pair containing the type returned by the constructor and the new arguments
 ///           (which may change due to insertion of casts).
-std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>
+std::pair<IR::Ptr<IR::Type>, IR::Ptr<IR::Vector<IR::Argument>>>
 TypeInferenceBase::containerInstantiation(
     const IR::Node *node,  // can be Declaration_Instance or ConstructorCallExpression
     const IR::Vector<IR::Argument> *constructorArguments, const IR::IContainer *container) {
@@ -924,8 +925,7 @@ TypeInferenceBase::containerInstantiation(
         if (!isCompileTimeConstant(arg))
             typeError("%1%: cannot evaluate to a compile-time constant", arg);
         auto argType = getType(arg);
-        if (argType == nullptr)
-            return std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(nullptr, nullptr);
+        if (argType == nullptr) return {};
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg);
         args->push_back(argInfo);
     }
@@ -939,8 +939,7 @@ TypeInferenceBase::containerInstantiation(
                      "Constructor invocation '%1%' does not match declaration '%2%'",
                      {callType, constructor});
     BUG_CHECK(tvs != nullptr || ::P4::errorCount(), "Null substitution");
-    if (tvs == nullptr)
-        return std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(nullptr, nullptr);
+    if (tvs == nullptr) return {};
 
     // Infer Dont_Care for type vars used only in not-present optional params
     auto dontCares = new TypeVariableSubstitution();
@@ -960,7 +959,7 @@ TypeInferenceBase::containerInstantiation(
 
     auto returnType = tvs->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
-    return std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(returnType, newArgs);
+    return {returnType, newArgs};
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Argument *arg) {

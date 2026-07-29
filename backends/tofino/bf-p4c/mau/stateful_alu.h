@@ -142,19 +142,19 @@ using namespace P4;
  * via | operation.
  */
 class CreateSaluInstruction : public Inspector {
-    IR::MAU::StatefulAlu *salu;
-    const IR::Type *regtype;
-    const IR::Declaration_Instance *reg_action = nullptr;
+    IR::MutablePtr<IR::MAU::StatefulAlu> salu;
+    IR::Ptr<IR::Type> regtype;
+    IR::Ptr<IR::Declaration_Instance> reg_action = nullptr;
     cstring action_type_name;
     enum class param_t { VALUE, OUTPUT, HASH, LEARN, MATCH };
     const std::vector<param_t> *param_types = nullptr;
-    IR::MAU::SaluAction *action = nullptr;
-    const IR::ParameterList *params = nullptr;
+    IR::MutablePtr<IR::MAU::SaluAction> action = nullptr;
+    IR::Ptr<IR::ParameterList> params = nullptr;
 
     struct LocalVar {
         cstring name;
         bool pair;
-        const IR::MAU::SaluRegfileRow *regfile = nullptr;
+        IR::Ptr<IR::MAU::SaluRegfileRow> regfile = nullptr;
         enum use_t { NONE, ALUHI, MEMLO, MEMHI, MEMALL, REGFILE } use = NONE;
         LocalVar(cstring name, bool pair, use_t use = NONE,
                  const IR::MAU::SaluRegfileRow *regfile = nullptr)
@@ -181,39 +181,39 @@ class CreateSaluInstruction : public Inspector {
     cstring opcode;
     IR::Vector<IR::Expression> operands, pred_operands;
     int output_index = -1;
-    std::vector<const IR::MAU::SaluInstruction *> cmp_instr;
-    const IR::MAU::SaluInstruction *divmod_instr = nullptr, *minmax_instr = nullptr;
+    std::vector<IR::Ptr<IR::MAU::SaluInstruction>> cmp_instr;
+    IR::Ptr<IR::MAU::SaluInstruction> divmod_instr = nullptr, minmax_instr = nullptr;
     int minmax_width = -1;  // 0 = min/max8, 1 = min/max16
-    const IR::Expression *predicate = nullptr;
-    const IR::MAU::SaluInstruction *onebit = nullptr;  // the single 1-bit alu op
-    bool onebit_cmpl = false;                          // 1-bit op needs cmpl
+    IR::Ptr<IR::Expression> predicate = nullptr;
+    IR::Ptr<IR::MAU::SaluInstruction> onebit = nullptr;  // the single 1-bit alu op
+    bool onebit_cmpl = false;                            // 1-bit op needs cmpl
     int address_subword = 0;
-    std::vector<IR::MAU::SaluInstruction *> outputs;  // add to end of action body
-    std::map<int, const IR::Expression *> output_address_subword_predicate;
+    std::vector<IR::MutablePtr<IR::MAU::SaluInstruction>> outputs;  // add to end of action body
+    std::map<int, IR::Ptr<IR::Expression>> output_address_subword_predicate;
     IR::MAU::StatefulAlu::MathUnit math;
-    IR::MAU::SaluFunction *math_function = nullptr;
+    IR::MutablePtr<IR::MAU::SaluFunction> math_function = nullptr;
     bool assignDone = false;
     int comb_pred_width = 0;
     IR::MAU::SaluAction::ReturnEnumEncoding *return_encoding = nullptr;
     int return_enum_word = -1;
     bool split_ifs = false;
-    std::map<int, const IR::Expression *> output_param_operands;
-    std::map<int, const IR::Expression *> output_predicates;
-    std::set<const IR::Expression *> or_targets;
+    std::map<int, IR::Ptr<IR::Expression>> output_param_operands;
+    std::map<int, IR::Ptr<IR::Expression>> output_predicates;
+    std::set<IR::Ptr<IR::Expression>> or_targets;
 
     // Map for detection of WAW data hazards
     // * Key is the lvalue
     // * Value is the set of predicates for a given expression and source code position
     // of given assignment
     struct AssignmentProperties {
-        const IR::Expression *predicate;
+        IR::Ptr<IR::Expression> predicate;
         const Util::SourceInfo &srcInfo;
         explicit AssignmentProperties(const IR::Expression *pred, const Util::SourceInfo &src)
             : predicate(pred), srcInfo(src) {}
     };
     std::map<cstring, std::vector<AssignmentProperties>> written_dest;
-    const IR::AssignmentStatement *assig_st = nullptr;
-    const IR::Expression *assig_pred = nullptr;
+    IR::Ptr<IR::AssignmentStatement> assig_st = nullptr;
+    IR::Ptr<IR::Expression> assig_pred = nullptr;
     void captureAssigstateProps();
     void checkWriteAfterWrite();
 
@@ -230,13 +230,13 @@ class CreateSaluInstruction : public Inspector {
     void insert_instruction(const IR::MAU::SaluInstruction *si);
 
     void clearFuncState();
-    const IR::MAU::SaluInstruction *createInstruction();
+    IR::Ptr<IR::MAU::SaluInstruction> createInstruction();
     bool applyArg(const IR::PathExpression *, cstring);
-    const IR::Expression *reuseCmp(const IR::MAU::SaluInstruction *cmp, int idx);
+    IR::Ptr<IR::Expression> reuseCmp(const IR::MAU::SaluInstruction *cmp, int idx);
     void setupCmp(cstring op);
     void splitWideInstructions();
     void assignOutputAlus();
-    const IR::MAU::SaluInstruction *setup_output();
+    IR::Ptr<IR::MAU::SaluInstruction> setup_output();
     bool outputEnumAsPredicate(const IR::Member *);
     bool canBeIXBarExpr(const IR::Expression *);
     bool outputAluHi();

@@ -34,7 +34,8 @@ class CloneConstants : public Transform {
         }
         return new IR::Constant(constant->srcInfo, type, constant->value, constant->base);
     }
-    static const IR::Expression *clone(const IR::Expression *expression, const Visitor *calledBy) {
+    static IR::Ptr<IR::Expression> clone(const IR::Expression *expression,
+                                         const Visitor *calledBy) {
         CloneConstants cc;
         cc.setCalledBy(calledBy);
         return expression->apply(cc)->to<IR::Expression>();
@@ -54,7 +55,7 @@ const IR::Type *DoConstantFolding::resolveType(const IR::Type *type) {
     return type;
 }
 
-const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr) const {
+IR::Ptr<IR::Expression> DoConstantFolding::getConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
     if (expr->is<IR::Constant>()) return expr;
     if (expr->is<IR::BoolLiteral>()) return expr;
@@ -106,7 +107,7 @@ const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
                 return e;
         }
         LOG4("cfold path " << e->path << " -> " << cst);
-        return CloneConstants::clone(cst, this);
+        return guardReturn(CloneConstants::clone(cst, this));
     }
     return e;
 }
@@ -241,7 +242,8 @@ const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
                     ::P4::error(ErrorType::ERR_INVALID, "Tuple index %1% out of bounds", e->right);
                     return e;
                 }
-                return CloneConstants::clone(list->components.at(static_cast<size_t>(index)), this);
+                return guardReturn(
+                    CloneConstants::clone(list->components.at(static_cast<size_t>(index)), this));
             }
         }
     }
@@ -264,7 +266,7 @@ bool isActionRun(const IR::Expression *e, const DeclarationLookup *refMap) {
 
     const auto *tablePathExpr = applyMceMem->expr->to<IR::PathExpression>();
     if (!tablePathExpr) return false;
-    const auto *tableDecl = refMap->getDeclaration(tablePathExpr->path);
+    const IR::IDeclaration *tableDecl = refMap->getDeclaration(tablePathExpr->path);
     if (!tableDecl) return false;
 
     return tableDecl->is<IR::P4Table>();
@@ -438,8 +440,8 @@ const IR::Node *DoConstantFolding::postorder(IR::Shr *e) { return shift(e); }
 const IR::Node *DoConstantFolding::postorder(IR::Shl *e) { return shift(e); }
 
 const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
-    const auto *eleft = getConstant(e->left);
-    const auto *eright = getConstant(e->right);
+    auto eleft = getConstant(e->left);
+    auto eright = getConstant(e->right);
     if (eleft == nullptr || eright == nullptr) {
         return e;
     }
@@ -686,9 +688,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Slice *e) {
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::PlusSlice *e) {
-    auto *e0 = getConstant(e->e0);
-    auto *lsb = getConstant(e->e1);
-    auto *width = getConstant(e->e2);
+    auto e0 = getConstant(e->e0);
+    auto lsb = getConstant(e->e1);
+    auto width = getConstant(e->e2);
     if (!width) {
         if (typesKnown)
             error(ErrorType::ERR_EXPECTED, "%1%: slice indexes must be compile-time constants",
@@ -767,7 +769,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Member *e) {
         if (type->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid) return e;
         auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
         BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
-        return CloneConstants::clone(ne->expression, this);
+        return guardReturn(CloneConstants::clone(ne->expression, this));
     }
 
     if (expr->is<IR::InvalidHeader>() && e->member.name == IR::Type_Header::isValid) return e;
@@ -953,7 +955,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         }
     } else if (etype->is<IR::Type_InfInt>()) {
         if (const auto *constant = expr->to<IR::Constant>()) {
-            const auto *ctype = constant->type;
+            const IR::Type *ctype = constant->type;
             if (!ctype->is<IR::Type_Bits>() && !ctype->is<IR::Type_InfInt>()) {
                 ::P4::error(ErrorType::ERR_INVALID,
                             "%1%: Cannot cast %1% to arbitrary precision integer", ctype);
@@ -991,7 +993,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), v == 1);
         }
     } else if (etype->is<IR::Type_StructLike>()) {
-        return CloneConstants::clone(expr, this);
+        return guardReturn(CloneConstants::clone(expr, this));
     }
     return e;
 }
@@ -1097,7 +1099,7 @@ const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
     bool someUnknown = false;
     bool changes = false;
     bool finished = false;
-    const IR::Expression *result = expression;
+    IR::Ptr<IR::Expression> result = expression;
 
     for (auto c : expression->selectCases) {
         if (finished) {
@@ -1130,7 +1132,7 @@ const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
             warn(ErrorType::WARN_PARSER_TRANSITION, "%1%: no case matches", expression);
         expression->selectCases = std::move(cases);
     }
-    return result;
+    return guardReturn(result);
 }
 
 class FilterLikelyAnnot : public Transform {
@@ -1163,7 +1165,7 @@ const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
                     warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on never taken statement",
                             annot);
             }
-            return ifstmt->ifTrue->apply(FilterLikelyAnnot());
+            return guardReturn(ifstmt->ifTrue->apply(FilterLikelyAnnot()));
         } else {
             if (auto blk = ifstmt->ifTrue->to<IR::BlockStatement>()) {
                 if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
@@ -1173,7 +1175,7 @@ const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
             if (ifstmt->ifFalse == nullptr) {
                 return new IR::EmptyStatement(ifstmt->srcInfo);
             } else {
-                return ifstmt->ifFalse->apply(FilterLikelyAnnot());
+                return guardReturn(ifstmt->ifFalse->apply(FilterLikelyAnnot()));
             }
         }
     }

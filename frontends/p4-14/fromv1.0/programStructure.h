@@ -23,9 +23,9 @@ namespace P4::P4V1 {
 class ConversionContext {
  public:
     virtual ~ConversionContext() = default;
-    const IR::Expression *header = nullptr;
-    const IR::Expression *userMetadata = nullptr;
-    const IR::Expression *standardMetadata = nullptr;
+    IR::Ptr<IR::Expression> header = nullptr;
+    IR::Ptr<IR::Expression> userMetadata = nullptr;
+    IR::Ptr<IR::Expression> standardMetadata = nullptr;
     virtual void clear() {
         header = nullptr;
         userMetadata = nullptr;
@@ -44,18 +44,18 @@ class ProgramStructure {
         // Key is a name, value represents how many times this name was used as a base
         // for newly generated unique names.
         std::unordered_map<cstring, int> *allNames;
-        std::map<cstring, T> nameToObject;
-        std::map<T, cstring> objectToNewName;
+        std::map<cstring, IR::Ptr<T>> nameToObject;
+        std::map<IR::Ptr<T>, cstring> objectToNewName;
 
-        // Iterate in order of name, but return pair<T, newname>
+        // Iterate in order of name, but return pair<IR::Ptr<T>, newname>
         class iterator {
             friend class NamedObjectInfo;
 
          private:
-            typename std::map<cstring, T>::iterator it;
-            typename std::map<T, cstring> &objToName;
-            iterator(typename std::map<cstring, T>::iterator it,
-                     typename std::map<T, cstring> &objToName)
+            typename std::map<cstring, IR::Ptr<T>>::iterator it;
+            typename std::map<IR::Ptr<T>, cstring> &objToName;
+            iterator(typename std::map<cstring, IR::Ptr<T>>::iterator it,
+                     typename std::map<IR::Ptr<T>, cstring> &objToName)
                 : it(it), objToName(objToName) {}
 
          public:
@@ -64,14 +64,14 @@ class ProgramStructure {
                 return *this;
             }
             bool operator!=(const iterator &other) const { return it != other.it; }
-            std::pair<T, cstring> operator*() const {
-                return std::pair<T, cstring>(it->second, objToName[it->second]);
+            std::pair<IR::Ptr<T>, cstring> operator*() const {
+                return std::pair<IR::Ptr<T>, cstring>(it->second, objToName[it->second]);
             }
         };
 
      public:
         explicit NamedObjectInfo(std::unordered_map<cstring, int> *allNames) : allNames(allNames) {}
-        void emplace(T obj) {
+        void emplace(const T *obj) {
             if (objectToNewName.find(obj) != objectToNewName.end()) {
                 // Already done
                 LOG3(" already emplaced obj " << obj);
@@ -91,9 +91,9 @@ class ProgramStructure {
             objectToNewName.emplace(obj, newName);
         }
         /// Lookup using the original name
-        T get(cstring name) const { return ::P4::get(nameToObject, name); }
+        IR::Ptr<T> get(cstring name) const { return ::P4::get(nameToObject, name); }
         /// Get the new name
-        cstring get(T object) const {
+        cstring get(const T *object) const {
             return ::P4::get(objectToNewName, object, object->name.name);
         }
         /// Get the new name from the old name
@@ -119,25 +119,25 @@ class ProgramStructure {
     P4::P4CoreLibrary &p4lib;
 
     std::unordered_map<cstring, int> allNames;
-    NamedObjectInfo<const IR::Type_StructLike *> types;
-    NamedObjectInfo<const IR::HeaderOrMetadata *> metadata;
-    NamedObjectInfo<const IR::Header *> headers;
-    NamedObjectInfo<const IR::HeaderStack *> stacks;
-    NamedObjectInfo<const IR::V1Control *> controls;
-    NamedObjectInfo<const IR::V1Parser *> parserStates;
-    NamedObjectInfo<const IR::V1Table *> tables;
-    NamedObjectInfo<const IR::ActionFunction *> actions;
-    NamedObjectInfo<const IR::Counter *> counters;
-    NamedObjectInfo<const IR::Register *> registers;
-    NamedObjectInfo<const IR::Meter *> meters;
-    NamedObjectInfo<const IR::ActionProfile *> action_profiles;
-    NamedObjectInfo<const IR::FieldList *> field_lists;
-    NamedObjectInfo<const IR::FieldListCalculation *> field_list_calculations;
-    NamedObjectInfo<const IR::ActionSelector *> action_selectors;
-    NamedObjectInfo<const IR::Type_Extern *> extern_types;
+    NamedObjectInfo<IR::Type_StructLike> types;
+    NamedObjectInfo<IR::HeaderOrMetadata> metadata;
+    NamedObjectInfo<IR::Header> headers;
+    NamedObjectInfo<IR::HeaderStack> stacks;
+    NamedObjectInfo<IR::V1Control> controls;
+    NamedObjectInfo<IR::V1Parser> parserStates;
+    NamedObjectInfo<IR::V1Table> tables;
+    NamedObjectInfo<IR::ActionFunction> actions;
+    NamedObjectInfo<IR::Counter> counters;
+    NamedObjectInfo<IR::Register> registers;
+    NamedObjectInfo<IR::Meter> meters;
+    NamedObjectInfo<IR::ActionProfile> action_profiles;
+    NamedObjectInfo<IR::FieldList> field_lists;
+    NamedObjectInfo<IR::FieldListCalculation> field_list_calculations;
+    NamedObjectInfo<IR::ActionSelector> action_selectors;
+    NamedObjectInfo<IR::Type_Extern> extern_types;
     std::map<const IR::Type_Extern *, const IR::Type_Extern *> extern_remap;
-    NamedObjectInfo<const IR::Declaration_Instance *> externs;
-    NamedObjectInfo<const IR::ParserValueSet *> value_sets;
+    NamedObjectInfo<IR::Declaration_Instance> externs;
+    NamedObjectInfo<IR::ParserValueSet> value_sets;
     std::set<cstring> value_sets_implemented;
     std::vector<const IR::CalculatedField *> calculated_fields;
     std::map<const IR::Node *, const IR::Declaration_Instance *> globalInstances;
@@ -204,7 +204,7 @@ class ProgramStructure {
     IR::Vector<IR::Node> *declarations;
 
  protected:
-    virtual const IR::Statement *convertPrimitive(const IR::Primitive *primitive);
+    virtual IR::Ptr<IR::Statement> convertPrimitive(const IR::Primitive *primitive);
     virtual void checkHeaderType(const IR::Type_StructLike *hrd, bool toStruct);
 
     /**
@@ -215,25 +215,27 @@ class ProgramStructure {
     static IR::Vector<IR::Annotation> addGlobalNameAnnotation(
         cstring name, const IR::Vector<IR::Annotation> &annos);
 
-    virtual const IR::ParserState *convertParser(const IR::V1Parser *,
-                                                 IR::IndexedVector<IR::Declaration> *);
-    virtual const IR::Statement *convertParserStatement(const IR::Expression *expr);
-    virtual const IR::P4Control *convertControl(const IR::V1Control *control, cstring newName);
-    virtual const IR::Declaration_Instance *convertDirectMeter(const IR::Meter *m, cstring newName);
-    virtual const IR::Declaration_Instance *convertDirectCounter(const IR::Counter *c,
+    virtual IR::Ptr<IR::ParserState> convertParser(const IR::V1Parser *,
+                                                   IR::IndexedVector<IR::Declaration> *);
+    virtual IR::Ptr<IR::Statement> convertParserStatement(const IR::Expression *expr);
+    virtual IR::Ptr<IR::P4Control> convertControl(const IR::V1Control *control, cstring newName);
+    virtual IR::Ptr<IR::Declaration_Instance> convertDirectMeter(const IR::Meter *m,
                                                                  cstring newName);
-    virtual const IR::Declaration_Instance *convert(const IR::CounterOrMeter *cm, cstring newName);
-    virtual const IR::Declaration_Instance *convertActionProfile(const IR::ActionProfile *,
-                                                                 cstring newName);
-    virtual const IR::P4Table *convertTable(const IR::V1Table *table, cstring newName,
-                                            IR::IndexedVector<IR::Declaration> &stateful,
-                                            std::map<cstring, cstring> &);
-    virtual const IR::P4Action *convertAction(const IR::ActionFunction *action, cstring newName,
-                                              const IR::Meter *meterToAccess,
-                                              cstring counterToAccess);
-    virtual const IR::Statement *convertMeterCall(const IR::Meter *meterToAccess);
-    virtual const IR::Statement *convertCounterCall(cstring counterToAccess);
-    virtual const IR::Type_Control *controlType(IR::ID name);
+    virtual IR::Ptr<IR::Declaration_Instance> convertDirectCounter(const IR::Counter *c,
+                                                                   cstring newName);
+    virtual IR::Ptr<IR::Declaration_Instance> convert(const IR::CounterOrMeter *cm,
+                                                      cstring newName);
+    virtual IR::Ptr<IR::Declaration_Instance> convertActionProfile(const IR::ActionProfile *,
+                                                                   cstring newName);
+    virtual IR::Ptr<IR::P4Table> convertTable(const IR::V1Table *table, cstring newName,
+                                              IR::IndexedVector<IR::Declaration> &stateful,
+                                              std::map<cstring, cstring> &);
+    virtual IR::Ptr<IR::P4Action> convertAction(const IR::ActionFunction *action, cstring newName,
+                                                const IR::Meter *meterToAccess,
+                                                cstring counterToAccess);
+    virtual IR::Ptr<IR::Statement> convertMeterCall(const IR::Meter *meterToAccess);
+    virtual IR::Ptr<IR::Statement> convertCounterCall(cstring counterToAccess);
+    virtual IR::Ptr<IR::Type_Control> controlType(IR::ID name);
     const IR::PathExpression *getState(IR::ID dest);
     virtual const IR::Expression *counterType(const IR::CounterOrMeter *cm);
     virtual void createChecksumVerifications();
@@ -255,19 +257,20 @@ class ProgramStructure {
     /// This inserts the names of the identifiers used in the output P4-16 programs
     /// into allNames, forcing P4-14 names that clash to be renamed.
     void populateOutputNames();
-    const IR::AssignmentStatement *assign(Util::SourceInfo srcInfo, const IR::Expression *left,
-                                          const IR::Expression *right, const IR::Type *type);
-    virtual const IR::Expression *convertFieldList(const IR::Expression *expression);
-    virtual const IR::Expression *convertHashAlgorithm(Util::SourceInfo srcInfo, IR::ID algorithm);
-    virtual const IR::Expression *convertHashAlgorithms(const IR::NameList *algorithm);
-    virtual const IR::Declaration_Instance *convert(const IR::Register *reg, cstring newName,
-                                                    const IR::Type *regElementType = nullptr);
-    virtual const IR::Type_Struct *createFieldListType(const IR::Expression *expression);
-    virtual const IR::FieldListCalculation *getFieldListCalculation(const IR::Expression *);
-    virtual const IR::FieldList *getFieldLists(const IR::FieldListCalculation *flc);
-    virtual const IR::Expression *paramReference(const IR::Parameter *param);
-    const IR::Statement *sliceAssign(const IR::Primitive *prim, const IR::Expression *left,
-                                     const IR::Expression *right, const IR::Expression *mask);
+    IR::Ptr<IR::AssignmentStatement> assign(Util::SourceInfo srcInfo, const IR::Expression *left,
+                                            const IR::Expression *right, const IR::Type *type);
+    virtual IR::Ptr<IR::Expression> convertFieldList(const IR::Expression *expression);
+    virtual IR::Ptr<IR::Expression> convertHashAlgorithm(Util::SourceInfo srcInfo,
+                                                         IR::ID algorithm);
+    virtual IR::Ptr<IR::Expression> convertHashAlgorithms(const IR::NameList *algorithm);
+    virtual IR::Ptr<IR::Declaration_Instance> convert(const IR::Register *reg, cstring newName,
+                                                      const IR::Type *regElementType = nullptr);
+    virtual IR::Ptr<IR::Type_Struct> createFieldListType(const IR::Expression *expression);
+    virtual IR::Ptr<IR::FieldListCalculation> getFieldListCalculation(const IR::Expression *);
+    virtual IR::Ptr<IR::FieldList> getFieldLists(const IR::FieldListCalculation *flc);
+    virtual IR::Ptr<IR::Expression> paramReference(const IR::Parameter *param);
+    IR::Ptr<IR::Statement> sliceAssign(const IR::Primitive *prim, const IR::Expression *left,
+                                       const IR::Expression *right, const IR::Expression *mask);
     void tablesReferred(const IR::V1Control *control, std::vector<const IR::V1Table *> &out);
     bool isHeader(const IR::ConcreteHeaderRef *nhr) const;
     cstring makeUniqueName(cstring base);
@@ -277,28 +280,28 @@ class ProgramStructure {
     virtual const IR::Vector<IR::Expression> *listIndexes(cstring type, cstring field) const;
     /// Given an expression which is supposed to be a field list
     /// return a constant representing its value in the fieldListsEnum.
-    const IR::Expression *listIndex(const IR::Expression *fl) const;
+    IR::Ptr<IR::Expression> listIndex(const IR::Expression *fl) const;
 
-    const IR::Type *explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes);
-    const IR::Expression *explodeLabel(const IR::Constant *value, const IR::Constant *mask,
-                                       const std::vector<const IR::Type::Bits *> &fieldTypes);
+    IR::Ptr<IR::Type> explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes);
+    IR::Ptr<IR::Expression> explodeLabel(const IR::Constant *value, const IR::Constant *mask,
+                                         const std::vector<const IR::Type::Bits *> &fieldTypes);
 
-    virtual IR::Vector<IR::Argument> *createApplyArguments(cstring n);
+    virtual IR::Ptr<IR::Vector<IR::Argument>> createApplyArguments(cstring n);
 
-    const IR::V1Control *ingress;
+    IR::Ptr<IR::V1Control> ingress;
     IR::ID ingressReference;
 
-    const IR::P4Control *verifyChecksums;
-    const IR::P4Control *updateChecksums;
-    const IR::P4Control *deparser;
+    IR::Ptr<IR::P4Control> verifyChecksums;
+    IR::Ptr<IR::P4Control> updateChecksums;
+    IR::Ptr<IR::P4Control> deparser;
     /// Represents 'latest' P4-14 construct.
-    const IR::Expression *latest;
+    IR::Ptr<IR::Expression> latest;
     const int defaultRegisterWidth = 32;
 
     virtual void loadModel();
     void createExterns();
     void createTypes();
-    virtual const IR::P4Program *create(Util::SourceInfo info);
+    virtual IR::Ptr<IR::P4Program> create(Util::SourceInfo info);
 };
 
 }  // namespace P4::P4V1

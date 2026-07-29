@@ -48,8 +48,9 @@ void PassManager::listPasses(std::ostream &out, cstring sep) const {
     }
 }
 
-const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
-    safe_vector<std::pair<safe_vector<Visitor *>::iterator, const IR::Node *>> backup;
+IR::Ptr<IR::Node> PassManager::apply_visitor(const IR::Node *program_, const char *) {
+    IR::Ptr<IR::Node> program = program_;
+    safe_vector<std::pair<safe_vector<Visitor *>::iterator, IR::Ptr<IR::Node>>> backup;
     static indent_t log_indent(-1);
     struct indent_nesting {
         indent_t &indent;
@@ -69,7 +70,8 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
         }
         try {
             try {
-                LOG1(log_indent << name() << " invoking " << v->name());
+                LOG1(log_indent << name() << " invoking " << v->name() << " on "
+                                << program->node_type_name() << '[' << program->id << ']');
                 program = program->apply(**it, getChildContext());
                 if (LOGGING(3)) {
                     size_t maxmem, mem = gc_mem_inuse(&maxmem);  // triggers gc
@@ -135,7 +137,8 @@ void PassManager::runDebugHooks(const char *visitorName, const IR::Node *program
     for (auto h : debugHooks) h(name(), seqNo, visitorName, program);
 }
 
-const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char *name) {
+IR::Ptr<IR::Node> PassRepeated::apply_visitor(const IR::Node *program_, const char *name) {
+    IR::Ptr<IR::Node> program = program_;
     bool done = false;
     unsigned iterations = 0;
     unsigned initial_error_count = ::P4::errorCount();
@@ -152,7 +155,8 @@ const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char 
     return program;
 }
 
-const IR::Node *PassRepeatUntil::apply_visitor(const IR::Node *program, const char *name) {
+IR::Ptr<IR::Node> PassRepeatUntil::apply_visitor(const IR::Node *program_, const char *name) {
+    IR::Ptr<IR::Node> program = program_;
     do {
         running = true;
         program = PassManager::apply_visitor(program, name);
@@ -160,10 +164,10 @@ const IR::Node *PassRepeatUntil::apply_visitor(const IR::Node *program, const ch
     return program;
 }
 
-const IR::Node *PassIf::apply_visitor(const IR::Node *program, const char *name) {
+IR::Ptr<IR::Node> PassIf::apply_visitor(const IR::Node *program, const char *name) {
     if (cond()) {
         running = true;
-        program = PassManager::apply_visitor(program, name);
+        return PassManager::apply_visitor(program, name);
     }
     return program;
 }

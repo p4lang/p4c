@@ -43,7 +43,7 @@ class FindSharedStateful : public MauInspector {
         LOG2("FindSharedStateful Adding salu " << salu->name << " on thread : " << thread);
         if (auto *tbl = findContext<IR::MAU::Table>()) {
             if (auto *act = findContext<IR::MAU::Action>()) {
-                if (auto *sact = salu->calledAction(tbl, act)) {
+                if (auto sact = salu->calledAction(tbl, act)) {
                     all_salus.at(salu).action_thread[sact->name] = thread;
                     LOG3("  Adding salu action " << sact->name << "on thread : " << thread);
                 }
@@ -184,7 +184,7 @@ struct CreateThreadLocalMetadata : public Modifier {
         IR::NameMap<IR::HeaderOrMetadata> instancedMetadata;
         for (auto &item : pipe->metadata) {
             cstring name = item.first;
-            auto *metadata = item.second;
+            auto metadata = item.second;
             for (auto gress : {INGRESS, EGRESS, GHOST}) {
                 auto gressName = createThreadName(gress, name);
                 auto &gressMetadata = localMetadata[gress];

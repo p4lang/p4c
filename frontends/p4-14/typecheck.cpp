@@ -28,7 +28,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
     const IR::V1Program *global = nullptr;
 
     template <typename NodeType, typename TypeType>
-    void setType(NodeType *currentNode, const TypeType *type) {
+    void setType(NodeType *currentNode, TypeType type) {
         BUG_CHECK(currentNode == getCurrentNode<NodeType>(),
                   "Expected to be called on the visitor's current node");
         currentNode->type = type;
@@ -68,7 +68,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
 
     const IR::Node *preorder(IR::Metadata *m) override {
         if (!global) return m;
-        if (auto ht = global->get<IR::v1HeaderType>(m->type_name))
+        if (const IR::v1HeaderType *ht = global->get<IR::v1HeaderType>(m->type_name))
             setType(m, ht->as_metadata);
         else
             error(ErrorType::ERR_TYPE_ERROR, "%s: No header type %s defined", m->srcInfo,
@@ -83,7 +83,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
 
     const IR::Node *preorder(IR::HeaderOrMetadata *hm) override {
         if (!global) return hm;
-        if (auto ht = global->get<IR::v1HeaderType>(hm->type_name))
+        if (const IR::v1HeaderType *ht = global->get<IR::v1HeaderType>(hm->type_name))
             setType(hm, ht->as_header);
         else
             error(ErrorType::ERR_TYPE_ERROR, "%s: No header type %s defined", hm->srcInfo,
@@ -346,8 +346,9 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
             }
         }
     }
-    void logic_operand(const IR::Expression *&op) {
-        if (auto *bit = op->type->to<IR::Type::Bits>()) {
+    template <class ExprType>
+    void logic_operand(ExprType &op) {
+        if (auto *bit = op->type->template to<IR::Type::Bits>()) {
             LOG3("Inserted bool conversion for " << op);
             op = new IR::Neq(IR::Type::Boolean::get(), op, new IR::Constant(bit, 0));
         }
@@ -596,9 +597,9 @@ TypeCheck::TypeCheck()
     setName("TypeCheck");
 }
 
-const IR::Node *TypeCheck::apply_visitor(const IR::Node *n, const char *name) {
+IR::Ptr<IR::Node> TypeCheck::apply_visitor(const IR::Node *n, const char *name) {
     LOG5("Before Typecheck:\n" << dumpToString(n));
-    auto *rv = PassManager::apply_visitor(n, name);
+    auto rv = PassManager::apply_visitor(n, name);
     LOG5("After Typecheck:\n" << dumpToString(rv));
     return rv;
 }

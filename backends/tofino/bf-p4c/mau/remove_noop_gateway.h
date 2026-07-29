@@ -30,7 +30,7 @@ using namespace P4;
 class RemoveNoopGateway : public MauTransform {
     const IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *seq) override {
         if (seq->size() < 1) return seq;
-        auto *last = seq->back();
+        auto last = seq->back();
         if (!last->conditional_gateway_only() || last->gateway_rows.size() != 1 ||
             last->next.size() != 1) {
             // not a noop gateway
@@ -40,7 +40,7 @@ class RemoveNoopGateway : public MauTransform {
             // drop the noop gateway, going directly to the target TableSeq
             return last->next.begin()->second;
         }
-        auto *prev = seq->tables.at(seq->size() - 2);
+        auto prev = seq->tables.at(seq->size() - 2);
         if (!prev->next.empty()) {
             // can't move the dependent tables to the previous table
             return seq;

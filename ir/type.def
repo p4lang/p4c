@@ -69,6 +69,8 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 
 }  // namespace P4
 
+
+
 #end
 
 /// This represents a type that can unify with any other type.
@@ -79,6 +81,7 @@ class Type_Any : Type, ITypeVar {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -86,6 +89,7 @@ class Type_Any : Type, ITypeVar {
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
 #end
+ protected:
     static long nextId;
  public:
     long declid = nextId++;
@@ -96,7 +100,7 @@ class Type_Any : Type, ITypeVar {
     operator== { return declid == a.declid; }
     static Type_Any get();
     static Type_Any get(const Util::SourceInfo &si);
-    const Type* getP4Type() const override { return nullptr; }
+    Type getP4Type() const override { return nullptr; }
     equiv {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
@@ -118,7 +122,7 @@ class Type_Fragment : Type {
     Type type;
     dbprint { out << "FRAGMENT(" << type << ")"; }
     toString { return absl::StrCat("FRAGMENT(", type, ")"); }
-    const Type* getP4Type() const override { return nullptr; }
+    Type getP4Type() const override { return nullptr; }
 }
 
 /// Represents the type of a type.
@@ -132,7 +136,7 @@ class Type_Type : Type {
     Type type;
     toString { return absl::StrCat("Type(", type, ")"); }
     dbprint { out << "Type(" << type << ")"; }
-    const Type* getP4Type() const override { return type; }
+    Type getP4Type() const override { return type; }
     validate { BUG_CHECK(!type->is<IR::Type_Type>(), "%1%: nested Type_Type", type); }
 }
 
@@ -140,6 +144,7 @@ class Type_Boolean : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -164,6 +169,7 @@ class Type_State : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -183,6 +189,7 @@ class Type_Bits : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -209,6 +216,7 @@ class Type_Varbits : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -218,7 +226,7 @@ class Type_Varbits : Type_Base {
 #end
  public:
     optional int         size = 0;   // if zero it means "unknown"
-    NullOK optional Expression  expression = nullptr;  // only used temporarily
+    NullOK optional Expression  expression;  // only used temporarily
     static Type_Varbits get(const Util::SourceInfo &si, Expression expr);
     static Type_Varbits get(const Util::SourceInfo &si, int size);
     static Type_Varbits get(int size);
@@ -270,7 +278,7 @@ class ParameterList : ISimpleNamespace {
     inline void push_back(const Parameter *p) { parameters.push_back(p); }
     toString {
         return absl::StrJoin(parameters, ", ",
-                             [](std::string *out, const auto *p) {
+                             [](std::string *out, const IR::Parameter *p) {
                                  absl::StrAppend(out, p);
                              });
     }
@@ -296,6 +304,7 @@ class Type_InfInt : Type, ITypeVar {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -303,9 +312,10 @@ class Type_InfInt : Type, ITypeVar {
     void operator delete(void *p) { return ::operator delete(p); }
 #endif
 #end
+ protected:
     long declid = nextId++;
  private:
-    static long nextId;
+    static long nextId = 0;
  public:
     cstring getVarName() const override { return absl::StrCat("int_", declid); }
     int getDeclId() const override { return declid; }
@@ -318,7 +328,7 @@ class Type_InfInt : Type, ITypeVar {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
     }
-    const Type* getP4Type() const override { return this; }
+    Type getP4Type() const override { return this; }
     int width_bits() const override { return 0; }
     int min_width_bits() const override { BUG("min_width_bits() on unsized type: %1%", this); }
     int max_width_bits() const override { BUG("max_width_bits() on unsized type: %1%", this); }
@@ -328,6 +338,7 @@ class Type_Dontcare : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -346,6 +357,7 @@ class Type_Void : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -364,6 +376,7 @@ class Type_MatchKind : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -395,7 +408,7 @@ class TypeParameters : ISimpleNamespace {
             return cstring::empty;
         return absl::StrCat("<",
                             absl::StrJoin(parameters, ", ",
-                                          [](std::string *out, const auto *p) {
+                                          [](std::string *out, const IR::Type_Var *p) {
                                               absl::StrAppend(out, p);
                                           }),
                             ">");
@@ -413,7 +426,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
     optional inline Vector<Annotation> annotations;
     optional TypeParameters typeParameters = new TypeParameters();
     optional inline IndexedVector<StructField>  fields;
-    TypeParameters getTypeParameters() const override { return typeParameters; }
+    const TypeParameters *getTypeParameters() const override { return typeParameters; }
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
@@ -533,9 +546,9 @@ class Type_HeaderUnion : Type_StructLike {
 }
 
 class Type_Header : Type_StructLike {
-    static const cstring setValid;
-    static const cstring setInvalid;
-    static const cstring isValid;
+    static const cstring setValid = "setValid"_cs;
+    static const cstring setInvalid = "setInvalid"_cs;
+    static const cstring isValid = "isValid"_cs;
 #nodbprint
     toString{ return "header "_cs + externalName(); }
 }
@@ -544,7 +557,7 @@ class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
     toString { return absl::StrCat("set<", elementType, ">"); }
-    const Type* getP4Type() const override { return nullptr; }
+    Type getP4Type() const override { return nullptr; }
     int width_bits() const override {
         /// returning the width of the set elements, not the set itself, which doesn't
         /// really have a sensible size
@@ -592,7 +605,7 @@ abstract Type_BaseList : Type, Type_Indexed {
             absl::StrCat(name,
                          "<",
                          absl::StrJoin(components, ", ",
-                                       [](std::string *out, const auto *t) {
+                                       [](std::string *out, const IR::Type *t) {
                                            absl::StrAppend(out, t);
                                        }),
                          ">");
@@ -604,7 +617,7 @@ abstract Type_BaseList : Type, Type_Indexed {
 
 /// The type of an expressionList; can be unified with both Type_Tuple and Type_Struct
 class Type_List : Type_BaseList {
-    const Type* getP4Type() const override;
+    Type getP4Type() const override;
     // shown as a tuple
     toString{
         return asString("tuple");
@@ -613,7 +626,7 @@ class Type_List : Type_BaseList {
 
 /// The type of a tuple.
 class Type_Tuple : Type_BaseList {
-    const Type* getP4Type() const override;
+    Type getP4Type() const override;
     toString{
         return asString("tuple");
     }
@@ -622,7 +635,7 @@ class Type_Tuple : Type_BaseList {
 /// The type of a P4ListExpression.
 class Type_P4List : Type {
     Type elementType;
-    const Type* getP4Type() const override;
+    Type getP4Type() const override;
     toString{
         return absl::StrCat("list<", elementType, ">");
     }
@@ -635,7 +648,7 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
     optional TypeParameters typeParameters = new TypeParameters;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    TypeParameters getTypeParameters() const override { return typeParameters; }
+    const TypeParameters *getTypeParameters() const override { return typeParameters; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
@@ -682,7 +695,7 @@ class Type_Name : Type {
     Type_Name(IR::ID id) : Type(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->name; }
     dbprint{ out << path->toString(); }
-    const Type* getP4Type() const override { return this; }
+    Type getP4Type() const override { return this; }
     int width_bits() const override {
         BUG("Type_Name is not a canonical type, use getTypeType()?");
         return 0;
@@ -709,14 +722,14 @@ class Type_Array : Type_Indexed, Type {
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
     size_t getSize() const override;
-    Type at(size_t index) const override;
-    static const cstring next;
-    static const cstring last;
-    static const cstring arraySize;
-    static const cstring lastIndex;
-    static const cstring push_front;
-    static const cstring pop_front;
-    const Type* getP4Type() const override
+    Type at(size_t index) const override { (void)index; return elementType; }
+    static const cstring next = "next"_cs;
+    static const cstring last = "last"_cs;
+    static const cstring arraySize = "size"_cs;
+    static const cstring lastIndex = "lastIndex"_cs;
+    static const cstring push_front = "push_front"_cs;
+    static const cstring pop_front = "pop_front"_cs;
+    Type getP4Type() const override
     { return new IR::Type_Array(srcInfo, elementType->getP4Type(), size); }
     int width_bits() const override { return getSize() * elementType->width_bits(); }
     int min_width_bits() const override { BUG("min_width_bits on a stack: %1%",this); }
@@ -732,13 +745,13 @@ class Type_Specialized : Type {
     Type_Name    baseType;
     Vector<Type> arguments;
     validate{ arguments->check_null(); }
-    const Type* getP4Type() const override;
+    Type getP4Type() const override;
     toString{
         return
             absl::StrCat(baseType,
                          "<",
                          absl::StrJoin(*arguments, ", ",
-                                       [](std::string *out, const auto *t) {
+                                       [](std::string *out, const IR::Type *t) {
                                            absl::StrAppend(out, t);
                                        }),
                          ">");
@@ -746,7 +759,7 @@ class Type_Specialized : Type {
     Type_Specialized(cstring bt, std::initializer_list<Type> args)
     : baseType(new Type_Name(bt)), arguments(new Vector<Type>(args)) {}
     Type_Specialized(Util::SourceInfo si, const Type_Name *bt, Vector<Type> &&args)
-    : Type_Specialized(si, bt, new Vector<Type>(std::move(args))) {}
+    : Type(si), baseType(bt), arguments(new Vector<Type>(std::move(args))) {}
 }
 
 /** Canonical representation of a Type_Specialized;
@@ -763,7 +776,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
-    const Type* getP4Type() const override;
+    Type getP4Type() const override;
     toString{ return baseType->toString() + "<...>"_cs; }
 }
 
@@ -778,6 +791,7 @@ class Type_String : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+ public:
 // FIXME: Remove this #ifdefine check once we switch to C++20
 #if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
@@ -839,10 +853,10 @@ class Type_Table : Type, IApply {
     ParameterList getApplyParameters() const override { return new ParameterList(); }
     /// names for the fields of the struct returned
     /// by applying a table
-    static const ID hit;
-    static const ID miss;
-    static const ID action_run;
-    const IR::Type* getP4Type() const override { return nullptr; }
+    static const ID hit = "hit"_cs;
+    static const ID miss = "miss"_cs;
+    static const ID action_run = "action_run"_cs;
+    Type getP4Type() const override { return nullptr; }
     dbprint { out << table->name; }
 }
 
@@ -852,13 +866,13 @@ class Type_Table : Type, IApply {
 class Type_ActionEnum : Type {
     ActionList actionList;
     bool contains(cstring name) const;
-    const IR::Type* getP4Type() const override { return nullptr; }
+    Type getP4Type() const override { return nullptr; }
 }
 
 abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     // we generally want type parameters visited first
     optional TypeParameters typeParameters = new TypeParameters();
-    optional NullOK Type returnType = nullptr;
+    optional NullOK Type returnType;
     // nullptr for constructors or functors; nullptr is not void
     ParameterList parameters;
 
@@ -869,10 +883,10 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
             if (!p->isOptional()) ++rv;
         return rv;
     }
-    TypeParameters getTypeParameters() const override { return typeParameters; }
+    virtual const TypeParameters *getTypeParameters() const override { return typeParameters; }
     void dbprint(std::ostream& out) const override;
     toString { return "<Method>"_cs; }
-    const IR::Type* getP4Type() const override { return nullptr; }
+    Type getP4Type() const override { return nullptr; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(parameters->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
@@ -912,7 +926,7 @@ class Type_MethodCall : Type {
     Type_Var             returnType;
     Vector<ArgumentInfo> arguments;
     validate{ typeArguments->check_null(); arguments->check_null(); }
-    const Type* getP4Type() const override { return nullptr; }
+    Type getP4Type() const override { return nullptr; }
     toString { return "<Method call>"_cs; }
 }
 
@@ -979,16 +993,16 @@ class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
 
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return attributes.valueEnumerator()->as<const IDeclaration*>()
-            ->concat(methods.getEnumerator()->as<const IDeclaration*>()); }
-    TypeParameters getTypeParameters() const override { return typeParameters; }
+        return attributes.valueEnumerator()->as<IR::Ptr<IDeclaration>>()
+            ->concat(methods.getEnumerator()->as<IR::Ptr<IDeclaration>>()); }
+    const TypeParameters *getTypeParameters() const override { return typeParameters; }
     validate{ methods.check_null(); }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     /// Returns the method that matches the specified arguments.
     /// Returns nullptr if no method or more than one method match.
     /// In the latter case it also reports an error.
-    Method lookupMethod(IR::ID name, Vector<Argument> arguments) const;
+    Method lookupMethod(IR::ID name, const Vector<Argument> *arguments) const;
     /// Returns the constructor that matches the specified arguments.
     /// Returns nullptr if no constructor or more than one constructor matches.
     /// In the latter case it also reports an error.

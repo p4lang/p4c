@@ -105,7 +105,7 @@ class UBPFModel : public ::P4::Model::Model {
         bool preorder(const IR::Declaration *) override { return false; }
     };
 
-    const IR::P4Program *run(const IR::P4Program *program) {
+    IR::Ptr<IR::P4Program> run(const IR::P4Program *program) {
         if (program == nullptr) return nullptr;
 
         PassManager passes({
@@ -114,7 +114,7 @@ class UBPFModel : public ::P4::Model::Model {
 
         passes.setName("UBPFFrontEnd");
         passes.setStopOnError(true);
-        const IR::P4Program *result = program->apply(passes);
+        IR::Ptr<IR::P4Program> result = program->apply(passes);
         return result;
     }
 };

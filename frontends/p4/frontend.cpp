@@ -144,7 +144,7 @@ class ValidateSwitchStatements : public Inspector {
     bool preorder(const IR::SwitchStatement *stat) override {
         const IR::Node *foundDefault = nullptr;
         for (unsigned i = 0; i < stat->cases.size(); i++) {
-            const auto *c = stat->cases.at(i);
+            const IR::SwitchCase *c = stat->cases.at(i);
             if (c->label->is<IR::DefaultExpression>()) {
                 if (foundDefault)
                     P4::error(P4::ErrorType::ERR_INVALID, "%1%: multiple 'default' labels %2%",
@@ -153,7 +153,7 @@ class ValidateSwitchStatements : public Inspector {
                 continue;
             }
             for (unsigned j = i + 1; j < stat->cases.size(); j++) {
-                auto *other = stat->cases.at(j);
+                const IR::SwitchCase *other = stat->cases.at(j);
                 if (other->label->equiv(*c->label)) {
                     P4::error(P4::ErrorType::ERR_INVALID, "%1%: duplicate case label %2%",
                               other->label, c->label);
@@ -213,8 +213,8 @@ class ValidateOverloadedMethods : public Inspector {
 
 }  // namespace
 
-const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
-                                   std::ostream *outStream) {
+IR::Ptr<IR::P4Program> FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
+                                     std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     TypeMap typeMap;
@@ -369,7 +369,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
     passes.addDebugHooks(hooks, true);
-    const IR::P4Program *result = program->apply(passes);
+    IR::Ptr<IR::P4Program> result = program->apply(passes);
     return result;
 }
 

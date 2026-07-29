@@ -39,7 +39,7 @@ void DuplicateActionControlPlaneNameCheck::postorder(const IR::P4Action *action)
         cstring name = absl::StrCat(".", action->name);
         checkForDuplicateName(name, action);
     } else {
-        const auto *e0 = nameAnno->getExpr(0);
+        const IR::Expression *e0 = nameAnno->getExpr(0);
         cstring name = e0->to<IR::StringLiteral>()->value;
         if (!name.startsWith(".")) {
             // Create an absolute hierarchical name (one beginning

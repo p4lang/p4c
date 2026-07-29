@@ -46,8 +46,8 @@ class HasInfInt : public Inspector {
 /// Validate the type of a type variable.  The type must not contain
 /// Type_InfInt inside.
 /// Return nullptr if the type is not suitable to assign to a type variable.
-static const IR::Type *validateType(const IR::Type *type, const TypeMap *typeMap,
-                                    const IR::Node *errorPosition, const Visitor *calledBy) {
+static IR::Ptr<IR::Type> validateType(const IR::Type *type, const TypeMap *typeMap,
+                                      const IR::Node *errorPosition, const Visitor *calledBy) {
     auto repl = type ? type->getP4Type() : nullptr;
     if (type == nullptr || repl == nullptr || HasInfInt::find(type, calledBy)) {
         auto eoi = new ErrorOnInfInt(typeMap);
@@ -59,8 +59,8 @@ static const IR::Type *validateType(const IR::Type *type, const TypeMap *typeMap
 }
 
 /// Lookup a type variable
-const IR::Type *DoBindTypeVariables::getVarValue(const IR::Type_Var *var,
-                                                 const IR::Node *errorPosition) const {
+IR::Ptr<IR::Type> DoBindTypeVariables::getVarValue(const IR::Type_Var *var,
+                                                   const IR::Node *errorPosition) const {
     auto type = typeMap->getSubstitution(var);
     if (type == nullptr) {
         ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a type for variable %2%",

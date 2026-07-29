@@ -14,12 +14,12 @@
 
 namespace P4 {
 
-const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
-                                   const std::string &input,
-                                   CompilerOptions::FrontendVersion version) {
+IR::Ptr<IR::P4Program> parseP4String(const char *sourceFile, unsigned sourceLine,
+                                     const std::string &input,
+                                     CompilerOptions::FrontendVersion version) {
     std::istringstream stream(input);
-    const auto *result =
-        version == CompilerOptions::FrontendVersion::P4_14
+    auto result =
+        (version == CompilerOptions::FrontendVersion::P4_14)
             ? parseV1Program<std::istringstream &, P4V1::Converter>(stream, sourceFile, sourceLine)
             : P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
@@ -32,8 +32,8 @@ const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
     return result;
 }
 
-const IR::P4Program *parseP4String(const std::string &input,
-                                   CompilerOptions::FrontendVersion version) {
+IR::Ptr<IR::P4Program> parseP4String(const std::string &input,
+                                     CompilerOptions::FrontendVersion version) {
     return parseP4String("(string)", 1, input, version);
 }
 

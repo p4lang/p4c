@@ -175,7 +175,7 @@ bool P4Formatter::preorder(const IR::Argument *arg) {
 bool P4Formatter::printAnnotations(const IR::IAnnotated *ann) {
     if (!ann->hasAnnotations()) return false;
 
-    visitCollection(ann->getAnnotations(), " ", [&](const auto *anno) { visit(anno); });
+    visitCollection(ann->getAnnotations(), " ", [&](const IR::Annotation *anno) { visit(anno); });
 
     return true;
 }
@@ -202,7 +202,7 @@ bool P4Formatter::preorder(const IR::Type_Newtype *t) {
 
 bool P4Formatter::preorder(const IR::Type_BaseList *t) {
     builder.append("tuple<");
-    visitCollection(t->components, ", ", [&](const auto *a) {
+    visitCollection(t->components, ", ", [&](const IR::Type *a) {
         auto p4type = a->getP4Type();
         CHECK_NULL(p4type);
         visit(p4type);
@@ -266,7 +266,7 @@ bool P4Formatter::preorder(const IR::TypeParameters *t) {
         builder.append("<");
         bool decl = isDeclaration;
         isDeclaration = false;
-        visitCollection(t->parameters, ", ", [&](const auto *a) { visit(a); });
+        visitCollection(t->parameters, ", ", [&](const IR::Type_Var *a) { visit(a); });
         isDeclaration = decl;
         builder.append(">");
     }
@@ -1013,14 +1013,14 @@ bool P4Formatter::preorder(const IR::IfStatement *s) {
 bool P4Formatter::preorder(const IR::ForStatement *s) {
     if (printAnnotations(s)) builder.spc();
     builder.append("for (");
-    visitCollection(s->init, ", ", [&](auto *d) {
+    visitCollection(s->init, ", ", [&](const IR::StatOrDecl *d) {
         builder.supressStatementSemi();
         visit(d, "init");
     });
     builder.append("; ");
     visit(s->condition, "condition");
     builder.append("; ");
-    visitCollection(s->updates, ", ", [&](auto *e) {
+    visitCollection(s->updates, ", ", [&](const IR::StatOrDecl *e) {
         if (!e->template is<IR::EmptyStatement>()) {
             builder.supressStatementSemi();
             visit(e, "updates");
@@ -1050,7 +1050,7 @@ bool P4Formatter::preorder(const IR::ForInStatement *s) {
         builder.supressStatementSemi();
         visit(s->decl, "decl");
     } else {
-        auto *decl = resolveUnique(s->ref->path->name, P4::ResolutionType::Any);
+        const IR::IDeclaration *decl = resolveUnique(s->ref->path->name, P4::ResolutionType::Any);
         if (auto *di = decl->to<IR::Declaration_Variable>()) {
             builder.supressStatementSemi();
             visit(di, "decl");

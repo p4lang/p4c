@@ -80,12 +80,12 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         // be able to annotate the digest method call with a @name annotation in the
         // P4 but annotations are not supported on expressions.
         cstring controlPlaneName;
-        auto *typeArg = call->typeArguments->at(0);
+        const IR::Type *typeArg = call->typeArguments->at(0);
         if (typeArg->is<IR::Type_StructLike>()) {
             auto structType = typeArg->to<IR::Type_StructLike>();
             controlPlaneName = structType->controlPlaneName();
         } else if (auto *typeName = typeArg->to<IR::Type_Name>()) {
-            auto *referencedType = refMap->getDeclaration(typeName->path, true);
+            const IR::IDeclaration *referencedType = refMap->getDeclaration(typeName->path, true);
             CHECK_NULL(referencedType);
             controlPlaneName = referencedType->controlPlaneName();
         } else {

@@ -633,7 +633,7 @@ static IR::MethodCallStatement *create_add_statement(const IR::Member *method,
                                                      const IR::Type_Header *header) {
     auto listVec = IR::Vector<IR::Expression>();
     auto headerName = create_instance_name(header->name);
-    for (const auto *f : header->fields) {
+    for (const IR::StructField *f : header->fields) {
         listVec.push_back(new IR::Member(f->type, new IR::Member(path, headerName), f->name));
     }
     auto args = new IR::Vector<IR::Argument>({new IR::Argument(new IR::ListExpression(listVec))});

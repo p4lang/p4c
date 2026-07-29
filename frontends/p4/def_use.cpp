@@ -53,7 +53,7 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
         // Tuple and List
         auto *result = construct<TupleLocation>(type, name);
         size_t index = 0;
-        for (const auto *t : bl->components) {
+        for (const IR::Type *t : bl->components) {
             cstring fieldName = absl::StrCat(name, "[", index, "]");
             auto *sl = create(t, fieldName);
             result->createElement(index, sl);
@@ -646,7 +646,7 @@ bool ComputeWriteSet::preorder(const IR::SelectExpression *expression) {
     visit(&expression->selectCases);
     auto l = getWrites(expression->select);
     const loc_t *selectCasesLoc = getLoc(&expression->selectCases, getChildContext());
-    for (auto *c : expression->selectCases) {
+    for (const IR::SelectCase *c : expression->selectCases) {
         const loc_t *selectCaseLoc = getLoc(c, selectCasesLoc);
         auto s = getWrites(c->keyset, selectCaseLoc);
         l = l->join(s);

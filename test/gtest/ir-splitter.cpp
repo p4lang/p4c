@@ -23,13 +23,13 @@ struct SplitterTest : public ::testing::Test {
         return splitStatementBefore(stat, predicate, nameGen, &typeMap);
     }
 
-    const IR::Statement *parse(std::string_view code, std::string_view decs = "") {
+    IR::Ptr<IR::Statement> parse(std::string_view code, std::string_view decs = "") {
         const auto program = absl::StrCat(
             "extern void fn(); extern void f1(); extern void f2(); extern void f3(); ",
             "extern void f4(); extern void f5(); extern void f6(); extern void bar(); ",
             "control c() { bit<4> a; bit<4> b; bit<4> c; bit<4> d; bool bvar; ", decs, "apply {",
             code, "} }");
-        const auto *prog = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+        auto prog = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
         CHECK_NULL(prog);
         P4::TypeInference ti(&typeMap, false, false, false);
         prog = prog->apply(ti);
@@ -63,12 +63,12 @@ struct SplitterTest : public ::testing::Test {
         return new IR::MethodCallStatement(new IR::MethodCallExpression(pe(fn)));
     }
 
-    const IR::BlockStatement *blk(IR::IndexedVector<IR::StatOrDecl> stmts) {
+    IR::Ptr<IR::BlockStatement> blk(IR::IndexedVector<IR::StatOrDecl> stmts) {
         return new IR::BlockStatement(std::move(stmts));
     }
 
-    const IR::IfStatement *ifs(const IR::Expression *cond, const IR::Statement *tr,
-                               const IR::Statement *fls = nullptr) {
+    IR::Ptr<IR::IfStatement> ifs(const IR::Expression *cond, const IR::Statement *tr,
+                                 const IR::Statement *fls = nullptr) {
         return new IR::IfStatement(cond, tr, fls);
     }
 
@@ -87,7 +87,7 @@ bool predIs(const IR::Statement *stmt, const P4::Visitor::Context *) {
 }
 
 TEST_F(SplitterTest, SplitBsEmpty) {
-    const auto *bs = blk({});
+    auto bs = blk({});
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
     const auto *bbs = before->to<IR::BlockStatement>();
@@ -98,7 +98,7 @@ TEST_F(SplitterTest, SplitBsEmpty) {
 }
 
 TEST_F(SplitterTest, SplitBsSimple1) {
-    const auto *bs = blk({asgn("a", "b")});
+    auto bs = blk({asgn("a", "b")});
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
@@ -115,7 +115,7 @@ TEST_F(SplitterTest, SplitBsSimple1) {
 }
 
 TEST_F(SplitterTest, SplitBsSimple2) {
-    const auto *bs = blk({call("fn"), asgn("a", "b")});
+    auto bs = blk({call("fn"), asgn("a", "b")});
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
@@ -133,7 +133,7 @@ TEST_F(SplitterTest, SplitBsSimple2) {
 }
 
 TEST_F(SplitterTest, SplitBsIfSingleBranch) {
-    const auto *bs = ifs(eq("a", "b"), blk({call("fn"), asgn("a", "b")}));
+    auto bs = ifs(eq("a", "b"), blk({call("fn"), asgn("a", "b")}));
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
@@ -161,7 +161,7 @@ TEST_F(SplitterTest, SplitBsIfSingleBranch) {
 }
 
 TEST_F(SplitterTest, SplitBsIfTwoBranches) {
-    const auto *bs = ifs(eq("a", "b"), blk({call("fn"), asgn("a", "b")}), blk({asgn("c", "d")}));
+    auto bs = ifs(eq("a", "b"), blk({call("fn"), asgn("a", "b")}), blk({asgn("c", "d")}));
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
@@ -176,7 +176,7 @@ TEST_F(SplitterTest, SplitBsIfTwoBranches) {
 }
 
 TEST_F(SplitterTest, SplitBsIfNested) {
-    const auto *bs = parse(R"(
+    auto bs = parse(R"(
 if (a == b) {
     fn();
     if (bvar) {
@@ -241,7 +241,7 @@ if (cond_0) {
 }
 
 TEST_F(SplitterTest, IfSwitchNested) {
-    const auto *bs = parse(R"(
+    auto bs = parse(R"(
 if (a == b) {
     fn();
     switch (a) {
@@ -310,7 +310,7 @@ if (cond_0) {
 }
 
 TEST_F(SplitterTest, HoistVarIf) {
-    const auto *bs = parse(R"(
+    auto bs = parse(R"(
 if (a == b) {
     bit<4> x;
     bit<4> y;
@@ -350,7 +350,7 @@ if (cond) {
 }
 
 TEST_F(SplitterTest, HoistVarSwitch) {
-    const auto *bs = parse(R"(
+    auto bs = parse(R"(
 switch (a) {
     0: {
         bit<4> x;

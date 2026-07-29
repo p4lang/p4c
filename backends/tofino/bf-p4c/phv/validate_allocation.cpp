@@ -336,7 +336,7 @@ bool ValidateAllocation::preorder(const IR::BFN::Pipe *pipe) {
             // allocated, and collect all of the allocations used in this
             // computed checksum.
             std::map<PHV::Container, std::vector<PHV::AllocSlice>> checksumAllocations;
-            for (auto *source : emitChecksum->sources) {
+            for (auto source : emitChecksum->sources) {
                 le_bitrange sourceFieldBits;
                 auto *sourceField = phv.field(source->field->field, &sourceFieldBits);
                 if (!sourceField) {

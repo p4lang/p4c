@@ -21,9 +21,9 @@ class P4Program;
 namespace P4 {
 
 template <typename Input, typename C = P4V1::Converter>
-static const IR::P4Program *parseV1Program(Input stream, std::string_view sourceFile,
-                                           unsigned sourceLine,
-                                           std::optional<DebugHook> debugHook = std::nullopt) {
+static IR::Ptr<IR::P4Program> parseV1Program(Input stream, std::string_view sourceFile,
+                                             unsigned sourceLine,
+                                             std::optional<DebugHook> debugHook = std::nullopt) {
     // We load the model before parsing the input file, so that the SourceInfo
     // in the model comes first.
     C converter;
@@ -31,7 +31,7 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
     converter.loadModel();
 
     // Parse.
-    const IR::Node *v1 = V1::V1ParserDriver::parse(stream, sourceFile, sourceLine);
+    IR::Ptr<IR::Node> v1 = V1::V1ParserDriver::parse(stream, sourceFile, sourceLine);
     if (::P4::errorCount() > 0 || v1 == nullptr) return nullptr;
 
     // Convert to P4-16.
@@ -51,12 +51,12 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
  * on failure. If failure occurs, an error will also be reported.
  */
 template <typename C = P4V1::Converter>
-const IR::P4Program *parseP4File(const ParserOptions &options) {
+IR::Ptr<IR::P4Program> parseP4File(const ParserOptions &options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
               "compiler context");
 
-    const IR::P4Program *result = nullptr;
+    IR::Ptr<IR::P4Program> result = nullptr;
     if (options.doNotPreprocess) {
         auto *file = fopen(options.file.c_str(), "r");
         if (file == nullptr) {
@@ -99,11 +99,11 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
  * @return a P4-16 IR tree representing the contents of the given string, or
  * null on failure. If failure occurs, an error will also be reported.
  */
-const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
-                                   const std::string &input,
-                                   CompilerOptions::FrontendVersion version);
-const IR::P4Program *parseP4String(const std::string &input,
-                                   CompilerOptions::FrontendVersion version);
+IR::Ptr<IR::P4Program> parseP4String(const char *sourceFile, unsigned sourceLine,
+                                     const std::string &input,
+                                     CompilerOptions::FrontendVersion version);
+IR::Ptr<IR::P4Program> parseP4String(const std::string &input,
+                                     CompilerOptions::FrontendVersion version);
 
 }  // namespace P4
 

@@ -27,7 +27,7 @@ P4::ComputeDefUse *computeDefUse(std::string source, CompilerOptions::FrontendVe
                                                          CompilerOptions::FrontendVersion::P4_16) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
 
-    auto *program = P4::parseP4String(source, langVersion);
+    auto program = P4::parseP4String(source, langVersion);
     CHECK_NULL(program);
     BUG_CHECK(::P4::errorCount() == 0, "Unexpected errors");
 
@@ -39,7 +39,7 @@ P4::ComputeDefUse *computeDefUse(std::string source, CompilerOptions::FrontendVe
     CHECK_NULL(program);
 
     MidEnd midEnd(options);
-    const IR::P4Program *res = program;
+    IR::Ptr<IR::P4Program> res = program;
     midEnd.process(res);
 
     return midEnd.defuse;

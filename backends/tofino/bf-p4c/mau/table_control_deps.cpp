@@ -32,7 +32,7 @@ void TableControlDeps::postorder(const IR::MAU::Table *tbl) {
     info_t &info = this->info[tbl];
     info.parents = parents();
     ordered_set<const IR::MAU::TableSeq *> next;
-    for (auto *seq : Values(tbl->next)) next.insert(seq);
+    for (auto seq : Values(tbl->next)) next.insert(seq);
     info.dependent_paths = next.size();
 }
 

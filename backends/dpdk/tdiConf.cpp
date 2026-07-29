@@ -15,8 +15,8 @@ using namespace P4::literals;
 
 std::vector<cstring> TdiBfrtConf::getPipeNames(const IR::Declaration_Instance *main) {
     std::vector<cstring> pipeNames;
-    for (const auto *arg : *main->arguments) {
-        const auto *expr = arg->expression;
+    for (const IR::Argument *arg : *main->arguments) {
+        const IR::Expression *expr = arg->expression;
 
         if (const auto *ctorCall = expr->to<IR::ConstructorCallExpression>()) {
             const auto *constructedTypeName = ctorCall->constructedType->checkedTo<IR::Type_Name>();
@@ -40,7 +40,7 @@ std::optional<cstring> TdiBfrtConf::findPipeName(const IR::P4Program *prog,
         // We try to infer the pipename by looking up the "main" declaration.
         auto *decls = prog->getDeclsByName("main"_cs);
         const IR::Declaration_Instance *main = nullptr;
-        for (const auto *decl : *decls) {
+        for (const IR::IDeclaration *decl : *decls) {
             main = decl->checkedTo<IR::Declaration_Instance>();
         }
         if (main == nullptr) {

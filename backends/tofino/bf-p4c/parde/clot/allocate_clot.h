@@ -45,7 +45,7 @@ class ClotAdjuster : public Visitor {
     ClotAdjuster(ClotInfo &clotInfo, const PhvInfo &phv) : clotInfo(clotInfo), phv(phv) {}
 
     Visitor::profile_t init_apply(const IR::Node *root) override;
-    const IR::Node *apply_visitor(const IR::Node *root, const char *) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *) override;
     void end_apply(const IR::Node *root) override;
 };
 

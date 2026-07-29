@@ -75,13 +75,16 @@ class Pattern {
  public:
     template <class T>
     class Match : public Base {
-        const T *m;
+        IR::Ptr<T> m;
 
      public:
         bool match(const IR::Node *n) override { return (m = n->to<T>()); }
         Match() : m(nullptr) {}
         const T *operator->() const { return m; }
+        operator IR::Ptr<T>() const { return m; }  // NOLINT(runtime/explicit)
+#if !HAVE_LIBGC
         operator const T *() const { return m; }  // NOLINT(runtime/explicit)
+#endif
         Pattern operator*(const Pattern &a) { return Pattern(*this) * a; }
         Pattern operator/(const Pattern &a) { return Pattern(*this) / a; }
         Pattern operator%(const Pattern &a) { return Pattern(*this) % a; }
