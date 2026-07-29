@@ -1,0 +1,21 @@
+generic-extern-inference_e.p4(15): [--Wwarn=unused] warning: control 'c1' is unused
+control c1() {
+        ^^
+generic-extern-inference_e.p4(17): [--Wwarn=unused] warning: 'notInferable' is unused
+    TwoParameters(16w1) notInferable;
+                        ^^^^^^^^^^^^
+generic-extern-inference_e.p4(21): [--Wwarn=unused] warning: control 'c2' is unused
+control c2() {
+        ^^
+generic-extern-inference_e.p4(23): [--Wwarn=unused] warning: 'noWidth' is unused
+    Parametrized(1) noWidth;
+                    ^^^^^^^
+generic-extern-inference_e.p4(17): [--Werror=type-error] error: notInferable: could not infer a type for variable B
+    TwoParameters(16w1) notInferable;
+                        ^^^^^^^^^^^^
+generic-extern-inference_e.p4(10)
+extern TwoParameters<A, B> {
+                        ^
+generic-extern-inference_e.p4(23): [--Werror=type-error] error: 1: could not infer a width
+    Parametrized(1) noWidth;
+                 ^
