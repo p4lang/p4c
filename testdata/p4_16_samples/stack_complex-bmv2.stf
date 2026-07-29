@@ -1,2 +1,6 @@
+# SPDX-FileCopyrightText: 2017 Barefoot Networks, Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 packet 0 00000001 00000002
 expect 4 00000001 00000002

@@ -1,3 +1,3 @@
-same_name_for_table_and_action.p4(13): [--Wwarn=unused] warning: 'empty' is unused
+same_name_for_table_and_action.p4(19): [--Wwarn=unused] warning: 'empty' is unused
 action empty() { }
        ^^^^^
