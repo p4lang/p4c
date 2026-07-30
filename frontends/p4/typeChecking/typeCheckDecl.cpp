@@ -322,12 +322,13 @@ template <class Node>
 TypeInferenceBase::PreorderResult TypeInferenceBase::preorderFunctionImpl(Node *function) {
     if (done()) return {function, false};
 
-    visit(function->type);
+    visit(function->annotations, "annotations");
+    visit(function->type, "type");
     auto type = getTypeType(function->type);
     if (type == nullptr) return {function, false};
     setType(getOriginal(), type);
     setType(function, type);
-    visit(function->body);
+    visit(function->body, "body");
 
     return {function, true};
 }
