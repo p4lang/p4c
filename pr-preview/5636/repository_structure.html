@@ -402,7 +402,7 @@ Coding conventions</h2>
 <ul>
 <li>Coding style is guided by the following rules.</li>
 <li>We generally follow the <a href="https://google.github.io/styleguide/cppguide.html">Google C++ Style Guide</a>. This is partially enforced by <code>cpplint</code> and <code>clang-format</code> and their respective configuration files. We have customized Google's <code>cpplint.py</code> tool for our purposes. The tool can be invoked with <code>make cpplint</code>. To be able to run <code>clang-format</code> on Ubuntu 20.04, install it with <code>pip3 install --user clang-format</code>. Do not use the Debian package. Both tools run in a git hook and as part of CI.</li>
-<li>Commenting Style is guided by the following rules.</li>
+<li>Commenting Style is guided by the <a class="el" href="#cc-documentation-comments-style-guide">following rules</a>.</li>
 <li>Watch out for <code>const</code>; it is very important.</li>
 <li>Use <code>override</code> whenever possible (new GCC versions enforce this).</li>
 <li>Never use <code>const_cast</code> and <code>reinterpret_cast</code>.</li>
