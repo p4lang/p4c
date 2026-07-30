@@ -36,7 +36,7 @@ We welcome and appreciate new contributions. Check out [git usage](docs/README.m
 * Writing unit test code [Guidelines](docs/README.md#adding-new-test-data).
 * Write documentation [Guidelines](docs/README.md#writing-documentation).
 * [Coding conventions](docs/README.md#coding-conventions).
-* Opening pull requests and writing commit messages [Guidelines](docs/CodingStandardPhilosophy.md#Git-commits-and-pull-requests).
+* Opening pull requests and writing commit messages [Guidelines](docs/CodingStandardPhilosophy.md#git-commits-and-pull-requests).
 * Code has to be reviewed before it is merged.
 * Make sure all tests pass when you send a pull request.
 * Participate in the code review process and address any feedback or comments.
