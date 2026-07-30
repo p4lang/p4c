@@ -37,6 +37,8 @@ jobs:
         run: |
           sudo -E docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c-test \
             uv run ctest --output-on-failure --schedule-random
+      - name: Free disk space
+        run: docker rmi p4c-test || true
       - name: Determine Docker image tag
         id: get-tag
         shell: bash
@@ -60,11 +62,55 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image to registry
+      - name: Build production Docker image
         uses: docker/build-push-action@v7
         with:
           context: .
-          push: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+          load: true
           tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: |
+            type=gha
+            type=registry,ref=p4lang/p4c:buildcache
+          # A cache write must not fail the build.
+          cache-to: type=gha,mode=max,ignore-error=true
+
+      - name: Smoke test production image
+        run: |
+          IMAGE=p4lang/p4c:${{ steps.get-tag.outputs.tag }}
+          docker run --rm $IMAGE p4test --version
+          cat > /tmp/smoke.p4 <<'EOF'
+          #include <core.p4>
+          #include <v1model.p4>
+
+          struct metadata {}
+          struct headers {}
+
+          parser MyParser(packet_in packet, out headers hdr, inout metadata meta,
+                          inout standard_metadata_t standard_metadata) {
+              state start { transition accept; }
+          }
+          control MyVerifyChecksum(inout headers hdr, inout metadata meta) { apply {} }
+          control MyIngress(inout headers hdr, inout metadata meta,
+                            inout standard_metadata_t standard_metadata) { apply {} }
+          control MyEgress(inout headers hdr, inout metadata meta,
+                           inout standard_metadata_t standard_metadata) { apply {} }
+          control MyComputeChecksum(inout headers hdr, inout metadata meta) { apply {} }
+          control MyDeparser(packet_out packet, in headers hdr) { apply {} }
+
+          V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(),
+                   MyComputeChecksum(), MyDeparser()) main;
+          EOF
+          docker run --rm -v /tmp/smoke.p4:/tmp/smoke.p4:ro $IMAGE p4test /tmp/smoke.p4
+
+      - name: Push Docker image to registry
+        if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
+          cache-from: |
+            type=gha
+            type=registry,ref=p4lang/p4c:buildcache
+          # A cache write must not fail the build.
+          cache-to: type=registry,ref=p4lang/p4c:buildcache,mode=max,ignore-error=true
