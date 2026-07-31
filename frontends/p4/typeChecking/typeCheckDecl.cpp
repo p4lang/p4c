@@ -258,6 +258,13 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
         // Otherwise, we use the type received from checkExternConstructor, which
         // has substituted the type variables with fresh ones.
         if (type->template is<IR::Type_Extern>()) type = newType;
+        // If the type arguments of a generic extern were inferred from the constructor arguments,
+        // the abstract methods have to be checked against the extern type specialized with them,
+        // and not against the generic declaration.
+        if (auto *sc = type->template to<IR::Type_SpecializedCanonical>()) {
+            if (auto *specialized = sc->substituted->template to<IR::Type_Extern>())
+                et = specialized;
+        }
         if (arrayType) type = relayerArrayType(type, arrayType);
         setType(orig, type);
         setType(decl, type);

@@ -2243,6 +2243,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ConstructorCallExpression
     if (auto *e = simpleType->to<IR::Type_Extern>()) {
         auto [contType, newArgs] = checkExternConstructor(expression, e, expression->arguments);
         if (newArgs == nullptr) return expression;
+        // If the type arguments were supplied explicitly, the type of the constructed object is
+        // the specialized type; otherwise it is the type inferred by checkExternConstructor.
+        if (type->is<IR::Type_SpecializedCanonical>()) contType = type;
         if (expression->arguments != newArgs)
             expression = new IR::ConstructorCallExpression(expression->srcInfo,
                                                            expression->constructedType, newArgs);
