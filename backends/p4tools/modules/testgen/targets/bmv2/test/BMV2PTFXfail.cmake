@@ -47,7 +47,6 @@ p4tools_add_xfail_reason(
   "Exception in thread"
   # The error here is unclear. It looks like a segmentation fault.
   extract_for_header_union.p4
-  header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
