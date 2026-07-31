@@ -74,6 +74,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
   "Cast failed"
   # push front can not handle tainted header validity.
+  header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
