@@ -1,0 +1,9538 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 35269139
+    name: "rmac"
+    alias: "rmac"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.rmac_group"
+    bitwidth: 10
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.lkp_mac_da"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22750453
+  }
+  action_refs {
+    id: 30964672
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45137609
+    name: "ingress_port_mapping"
+    alias: "ingress_port_mapping"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21651262
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 288
+}
+tables {
+  preamble {
+    id: 37820997
+    name: "ingress_port_properties"
+    alias: "ingress_port_properties"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25837353
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 288
+}
+tables {
+  preamble {
+    id: 46448234
+    name: "validate_outer_ethernet"
+    alias: "validate_outer_ethernet"
+  }
+  match_fields {
+    id: 1
+    name: "ethernet.srcAddr"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ethernet.dstAddr"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "vlan_tag_[0].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "vlan_tag_[1].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24158186
+  }
+  action_refs {
+    id: 18058436
+  }
+  action_refs {
+    id: 23838154
+  }
+  action_refs {
+    id: 20681161
+  }
+  action_refs {
+    id: 25194127
+  }
+  action_refs {
+    id: 22589859
+  }
+  action_refs {
+    id: 18866304
+  }
+  action_refs {
+    id: 21094556
+  }
+  action_refs {
+    id: 16999942
+  }
+  action_refs {
+    id: 32459618
+  }
+  action_refs {
+    id: 23668099
+  }
+  action_refs {
+    id: 19271622
+  }
+  action_refs {
+    id: 26877136
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 35821098
+    name: "validate_outer_ipv4_packet"
+    alias: "validate_outer_ipv4_packet"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.version"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ipv4.ttl"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv4.srcAddr"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 31659489
+  }
+  action_refs {
+    id: 32053722
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 38984075
+    name: "validate_outer_ipv6_packet"
+    alias: "validate_outer_ipv6_packet"
+  }
+  match_fields {
+    id: 1
+    name: "ipv6.version"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.hopLimit"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv6.srcAddr"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 19738979
+  }
+  action_refs {
+    id: 21122802
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 35405440
+    name: "validate_mpls_packet"
+    alias: "validate_mpls_packet"
+  }
+  match_fields {
+    id: 1
+    name: "mpls[0].label"
+    bitwidth: 20
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "mpls[0].bos"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "mpls[0].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "mpls[1].label"
+    bitwidth: 20
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "mpls[1].bos"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "mpls[1].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 7
+    name: "mpls[2].label"
+    bitwidth: 20
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "mpls[2].bos"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "mpls[2].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19677850
+  }
+  action_refs {
+    id: 24735540
+  }
+  action_refs {
+    id: 28212127
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 49019729
+    name: "switch_config_params"
+    alias: "switch_config_params"
+  }
+  action_refs {
+    id: 33143159
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1
+}
+tables {
+  preamble {
+    id: 41259296
+    name: "port_vlan_mapping"
+    alias: "port_vlan_mapping"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.ifindex"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "vlan_tag_[0].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "vlan_tag_[0].vid"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "vlan_tag_[1].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "vlan_tag_[1].vid"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22017120
+  }
+  action_refs {
+    id: 29041226
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  implementation_id: 294046256
+  size: 4096
+}
+tables {
+  preamble {
+    id: 48902463
+    name: "spanning_tree"
+    alias: "spanning_tree"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.ifindex"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.stp_group"
+    bitwidth: 10
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28929159
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34631296
+    name: "ipsg"
+    alias: "ipsg"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.ifindex"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "l2_metadata.lkp_mac_sa"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19864622
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42372896
+    name: "ipsg_permit_special"
+    alias: "ipsg_permit_special"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.lkp_ip_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "l3_metadata.lkp_l4_dport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 32375263
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 43718534
+    name: "int_sink_update_outer"
+    alias: "int_sink_update_outer"
+  }
+  match_fields {
+    id: 1
+    name: "vxlan_gpe_int_header.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "int_metadata_i2e.sink"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17279442
+  }
+  action_refs {
+    id: 31931594
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 2
+}
+tables {
+  preamble {
+    id: 37252615
+    name: "int_source"
+    alias: "int_source"
+  }
+  match_fields {
+    id: 1
+    name: "int_header.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "inner_ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 6
+    name: "inner_ipv4.dstAddr"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "inner_ipv4.srcAddr"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 19619341
+  }
+  action_refs {
+    id: 21001751
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 256
+}
+tables {
+  preamble {
+    id: 36125942
+    name: "int_terminate"
+    alias: "int_terminate"
+  }
+  match_fields {
+    id: 1
+    name: "int_header.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "vxlan_gpe_int_header.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "inner_ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 6
+    name: "inner_ipv4.dstAddr"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 21803764
+  }
+  action_refs {
+    id: 24342599
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 256
+}
+tables {
+  preamble {
+    id: 42303617
+    name: "outer_rmac"
+    alias: "outer_rmac"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.rmac_group"
+    bitwidth: 10
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 29711992
+  }
+  action_refs {
+    id: 28991583
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 48504506
+    name: "tunnel"
+    alias: "tunnel"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.tunnel_vni"
+    bitwidth: 24
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "tunnel_metadata.ingress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "inner_ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "inner_ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18898796
+  }
+  action_refs {
+    id: 24672475
+  }
+  action_refs {
+    id: 23211395
+  }
+  action_refs {
+    id: 23526149
+  }
+  action_refs {
+    id: 18522936
+  }
+  action_refs {
+    id: 32715294
+  }
+  action_refs {
+    id: 20111209
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49172403
+    name: "tunnel_lookup_miss"
+    alias: "tunnel_lookup_miss"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24422464
+  }
+  action_refs {
+    id: 28387461
+  }
+  action_refs {
+    id: 31440109
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 40604096
+    name: "tunnel_miss"
+    alias: "tunnel_miss"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24422464
+  }
+  action_refs {
+    id: 28387461
+  }
+  action_refs {
+    id: 31440109
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 37871573
+    name: "fabric_ingress_dst_lkp"
+    alias: "fabric_ingress_dst_lkp"
+  }
+  match_fields {
+    id: 1
+    name: "fabric_header.dstDevice"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27084838
+  }
+  action_refs {
+    id: 22005008
+  }
+  action_refs {
+    id: 22839968
+  }
+  action_refs {
+    id: 18506852
+  }
+  action_refs {
+    id: 31902455
+  }
+  action_refs {
+    id: 18460561
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 48925495
+    name: "fabric_ingress_src_lkp"
+    alias: "fabric_ingress_src_lkp"
+  }
+  match_fields {
+    id: 1
+    name: "fabric_header_multicast.ingressIfindex"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27084838
+  }
+  action_refs {
+    id: 23765326
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33574130
+    name: "native_packet_over_fabric"
+    alias: "native_packet_over_fabric"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24318970
+  }
+  action_refs {
+    id: 23432228
+  }
+  action_refs {
+    id: 23871111
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39378248
+    name: "outer_ipv4_multicast"
+    alias: "outer_ipv4_multicast"
+  }
+  match_fields {
+    id: 1
+    name: "multicast_metadata.ipv4_mcast_key_type"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "multicast_metadata.ipv4_mcast_key"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4.srcAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "ipv4.dstAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32259460
+  }
+  action_refs {
+    id: 23546635
+  }
+  action_refs {
+    id: 31609603
+  }
+  action_refs {
+    id: 30591697
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45349970
+    name: "outer_ipv4_multicast_star_g"
+    alias: "outer_ipv4_multicast_star_g"
+  }
+  match_fields {
+    id: 1
+    name: "multicast_metadata.ipv4_mcast_key_type"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "multicast_metadata.ipv4_mcast_key"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4.dstAddr"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 32259460
+  }
+  action_refs {
+    id: 24876054
+  }
+  action_refs {
+    id: 27911208
+  }
+  action_refs {
+    id: 27512720
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 40866239
+    name: "outer_ipv6_multicast"
+    alias: "outer_ipv6_multicast"
+  }
+  match_fields {
+    id: 1
+    name: "multicast_metadata.ipv6_mcast_key_type"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "multicast_metadata.ipv6_mcast_key"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv6.srcAddr"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "ipv6.dstAddr"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21349752
+  }
+  action_refs {
+    id: 32292236
+  }
+  action_refs {
+    id: 27301347
+  }
+  action_refs {
+    id: 17490289
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49726981
+    name: "outer_ipv6_multicast_star_g"
+    alias: "outer_ipv6_multicast_star_g"
+  }
+  match_fields {
+    id: 1
+    name: "multicast_metadata.ipv6_mcast_key_type"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "multicast_metadata.ipv6_mcast_key"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv6.dstAddr"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 21349752
+  }
+  action_refs {
+    id: 30581794
+  }
+  action_refs {
+    id: 25007526
+  }
+  action_refs {
+    id: 31047255
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 49682272
+    name: "ipv4_dest_vtep"
+    alias: "ipv4_dest_vtep"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4.dstAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "tunnel_metadata.ingress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19016590
+  }
+  action_refs {
+    id: 31006027
+  }
+  action_refs {
+    id: 23366223
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41016400
+    name: "ipv4_src_vtep"
+    alias: "ipv4_src_vtep"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4.srcAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "tunnel_metadata.ingress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28405894
+  }
+  action_refs {
+    id: 32475207
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35379918
+    name: "ipv6_dest_vtep"
+    alias: "ipv6_dest_vtep"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.dstAddr"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "tunnel_metadata.ingress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21014138
+  }
+  action_refs {
+    id: 22005284
+  }
+  action_refs {
+    id: 20650129
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 40406325
+    name: "ipv6_src_vtep"
+    alias: "ipv6_src_vtep"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.srcAddr"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "tunnel_metadata.ingress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27984459
+  }
+  action_refs {
+    id: 32425009
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34776118
+    name: "mpls"
+    alias: "mpls"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.mpls_label"
+    bitwidth: 20
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "inner_ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "inner_ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 30543761
+  }
+  action_refs {
+    id: 31950977
+  }
+  action_refs {
+    id: 33002058
+  }
+  action_refs {
+    id: 27925902
+  }
+  action_refs {
+    id: 17012616
+  }
+  action_refs {
+    id: 30146383
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39690474
+    name: "sflow_ing_take_sample"
+    alias: "sflow_ing_take_sample"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.sflow_take_sample"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "sflow_metadata.sflow_session_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24076177
+  }
+  action_refs {
+    id: 17728634
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 329536454
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41586812
+    name: "sflow_ingress"
+    alias: "sflow_ingress"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.ifindex"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "sflow.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18023811
+  }
+  action_refs {
+    id: 32308659
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 42506855
+    name: "storm_control"
+    alias: "storm_control"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.lkp_pkt_type"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 20064305
+  }
+  action_refs {
+    id: 28092460
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 39492092
+    name: "validate_packet"
+    alias: "validate_packet"
+  }
+  match_fields {
+    id: 1
+    name: "l2_metadata.lkp_mac_sa"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.lkp_mac_da"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "l3_metadata.lkp_ip_type"
+    bitwidth: 2
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "l3_metadata.lkp_ip_ttl"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l3_metadata.lkp_ip_version"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "ipv6_metadata.lkp_ipv6_sa"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 22596660
+  }
+  action_refs {
+    id: 33090078
+  }
+  action_refs {
+    id: 31579497
+  }
+  action_refs {
+    id: 20389093
+  }
+  action_refs {
+    id: 24790754
+  }
+  action_refs {
+    id: 23632964
+  }
+  action_refs {
+    id: 31827807
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 37018274
+    name: "dmac"
+    alias: "dmac"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.lkp_mac_da"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 20843312
+  }
+  action_refs {
+    id: 28636382
+  }
+  action_refs {
+    id: 26825571
+  }
+  action_refs {
+    id: 17035899
+  }
+  action_refs {
+    id: 17676061
+  }
+  action_refs {
+    id: 25708383
+  }
+  action_refs {
+    id: 21196761
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+tables {
+  preamble {
+    id: 34426950
+    name: "smac"
+    alias: "smac"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.lkp_mac_sa"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 20843312
+  }
+  action_refs {
+    id: 32116865
+  }
+  action_refs {
+    id: 29714262
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 37614439
+    name: "mac_acl"
+    alias: "mac_acl"
+  }
+  match_fields {
+    id: 1
+    name: "acl_metadata.if_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "acl_metadata.bd_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "l2_metadata.lkp_mac_sa"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "l2_metadata.lkp_mac_da"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l2_metadata.lkp_mac_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 19661619
+  }
+  action_refs {
+    id: 29832062
+  }
+  action_refs {
+    id: 31672487
+  }
+  action_refs {
+    id: 31291018
+  }
+  action_refs {
+    id: 23354860
+  }
+  action_refs {
+    id: 19482584
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 46358072
+    name: "ip_acl"
+    alias: "ip_acl"
+  }
+  match_fields {
+    id: 1
+    name: "acl_metadata.if_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "acl_metadata.bd_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l3_metadata.lkp_ip_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "l3_metadata.lkp_l4_sport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "l3_metadata.lkp_l4_dport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "tcp.flags"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "l3_metadata.lkp_ip_ttl"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 21469574
+  }
+  action_refs {
+    id: 16882986
+  }
+  action_refs {
+    id: 18679243
+  }
+  action_refs {
+    id: 31503642
+  }
+  action_refs {
+    id: 33214426
+  }
+  action_refs {
+    id: 23655829
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 39741088
+    name: "ipv6_acl"
+    alias: "ipv6_acl"
+  }
+  match_fields {
+    id: 1
+    name: "acl_metadata.if_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "acl_metadata.bd_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv6_metadata.lkp_ipv6_sa"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l3_metadata.lkp_ip_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "l3_metadata.lkp_l4_sport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "l3_metadata.lkp_l4_dport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "tcp.flags"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "l3_metadata.lkp_ip_ttl"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 21469574
+  }
+  action_refs {
+    id: 16882986
+  }
+  action_refs {
+    id: 18679243
+  }
+  action_refs {
+    id: 31503642
+  }
+  action_refs {
+    id: 33214426
+  }
+  action_refs {
+    id: 23655829
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 33610309
+    name: "qos"
+    alias: "qos"
+  }
+  match_fields {
+    id: 1
+    name: "acl_metadata.if_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "l3_metadata.lkp_ip_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l3_metadata.lkp_ip_tc"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "tunnel_metadata.mpls_exp"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "qos_metadata.outer_dscp"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 24132248
+  }
+  action_refs {
+    id: 20289283
+  }
+  action_refs {
+    id: 17815210
+  }
+  action_refs {
+    id: 25333645
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 37734657
+    name: "ipv4_multicast_bridge"
+    alias: "ipv4_multicast_bridge"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32951744
+  }
+  action_refs {
+    id: 22392983
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43156007
+    name: "ipv4_multicast_bridge_star_g"
+    alias: "ipv4_multicast_bridge_star_g"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26636518
+  }
+  action_refs {
+    id: 32567036
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33753925
+    name: "ipv4_multicast_route"
+    alias: "ipv4_multicast_route"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27901704
+  }
+  action_refs {
+    id: 18672239
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 325625044
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45227473
+    name: "ipv4_multicast_route_star_g"
+    alias: "ipv4_multicast_route_star_g"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18382607
+  }
+  action_refs {
+    id: 22881515
+  }
+  action_refs {
+    id: 26925750
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 334762335
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42718885
+    name: "ipv6_multicast_bridge"
+    alias: "ipv6_multicast_bridge"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_sa"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21831302
+  }
+  action_refs {
+    id: 16968482
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42837982
+    name: "ipv6_multicast_bridge_star_g"
+    alias: "ipv6_multicast_bridge_star_g"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22617804
+  }
+  action_refs {
+    id: 31460681
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41794846
+    name: "ipv6_multicast_route"
+    alias: "ipv6_multicast_route"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_sa"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27868772
+  }
+  action_refs {
+    id: 19495550
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 327278089
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43802673
+    name: "ipv6_multicast_route_star_g"
+    alias: "ipv6_multicast_route_star_g"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17623212
+  }
+  action_refs {
+    id: 29242413
+  }
+  action_refs {
+    id: 21636917
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 330716124
+  size: 1024
+}
+tables {
+  preamble {
+    id: 38177981
+    name: "ipv4_racl"
+    alias: "ipv4_racl"
+  }
+  match_fields {
+    id: 1
+    name: "acl_metadata.bd_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "l3_metadata.lkp_ip_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l3_metadata.lkp_l4_sport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "l3_metadata.lkp_l4_dport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 23020886
+  }
+  action_refs {
+    id: 17324596
+  }
+  action_refs {
+    id: 23904743
+  }
+  action_refs {
+    id: 19870712
+  }
+  action_refs {
+    id: 30301194
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 46881968
+    name: "ipv4_urpf"
+    alias: "ipv4_urpf"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 29021353
+  }
+  action_refs {
+    id: 24117923
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 47318777
+    name: "ipv4_urpf_lpm"
+    alias: "ipv4_urpf_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_sa"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 24117923
+  }
+  action_refs {
+    id: 19173129
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 45153808
+    name: "ipv4_fib"
+    alias: "ipv4_fib"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19369381
+  }
+  action_refs {
+    id: 22250449
+  }
+  action_refs {
+    id: 20714683
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45846823
+    name: "ipv4_fib_lpm"
+    alias: "ipv4_fib_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_metadata.lkp_ipv4_da"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 19369381
+  }
+  action_refs {
+    id: 22250449
+  }
+  action_refs {
+    id: 20714683
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 46746743
+    name: "ipv6_racl"
+    alias: "ipv6_racl"
+  }
+  match_fields {
+    id: 1
+    name: "acl_metadata.bd_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_sa"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "l3_metadata.lkp_ip_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l3_metadata.lkp_l4_sport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "l3_metadata.lkp_l4_dport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 19202626
+  }
+  action_refs {
+    id: 22653749
+  }
+  action_refs {
+    id: 22108072
+  }
+  action_refs {
+    id: 22033917
+  }
+  action_refs {
+    id: 26202673
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 48568816
+    name: "ipv6_urpf"
+    alias: "ipv6_urpf"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_sa"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 33532084
+  }
+  action_refs {
+    id: 30875552
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34899392
+    name: "ipv6_urpf_lpm"
+    alias: "ipv6_urpf_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_sa"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 30875552
+  }
+  action_refs {
+    id: 24330304
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 34003242
+    name: "ipv6_fib"
+    alias: "ipv6_fib"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23085876
+  }
+  action_refs {
+    id: 24244023
+  }
+  action_refs {
+    id: 26074845
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39945691
+    name: "ipv6_fib_lpm"
+    alias: "ipv6_fib_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.vrf"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6_metadata.lkp_ipv6_da"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 23085876
+  }
+  action_refs {
+    id: 24244023
+  }
+  action_refs {
+    id: 26074845
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 42076696
+    name: "urpf_bd"
+    alias: "urpf_bd"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.urpf_bd_group"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32064785
+  }
+  action_refs {
+    id: 30904346
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43755749
+    name: "meter_index"
+    alias: "meter_index"
+  }
+  match_fields {
+    id: 1
+    name: "meter_metadata.meter_index"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22558474
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 362522853
+  size: 1024
+}
+tables {
+  preamble {
+    id: 44394787
+    name: "compute_ipv4_hashes"
+    alias: "compute_ipv4_hashes"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.drop_flag"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32621822
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49291859
+    name: "compute_ipv6_hashes"
+    alias: "compute_ipv6_hashes"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.drop_flag"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22832502
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41387945
+    name: "compute_non_ip_hashes"
+    alias: "compute_non_ip_hashes"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.drop_flag"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24849986
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43675111
+    name: "compute_other_hashes"
+    alias: "compute_other_hashes"
+  }
+  match_fields {
+    id: 1
+    name: "hash_metadata.hash1"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17777123
+  }
+  action_refs {
+    id: 29059294
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 37395571
+    name: "meter_action"
+    alias: "meter_action"
+  }
+  match_fields {
+    id: 1
+    name: "meter_metadata.meter_color"
+    bitwidth: 2
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "meter_metadata.meter_index"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23449258
+  }
+  action_refs {
+    id: 18319227
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 328880782
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45847248
+    name: "ingress_bd_stats"
+    alias: "ingress_bd_stats"
+  }
+  action_refs {
+    id: 22439752
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33991319
+    name: "acl_stats"
+    alias: "acl_stats"
+  }
+  action_refs {
+    id: 22920417
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39000192
+    name: "storm_control_stats"
+    alias: "storm_control_stats"
+  }
+  match_fields {
+    id: 1
+    name: "meter_metadata.meter_color"
+    bitwidth: 2
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22604419
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 324212864
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35081746
+    name: "fwd_result"
+    alias: "fwd_result"
+  }
+  match_fields {
+    id: 1
+    name: "l2_metadata.l2_redirect"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "acl_metadata.acl_redirect"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "acl_metadata.racl_redirect"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "l3_metadata.rmac_hit"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l3_metadata.fib_hit"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "l2_metadata.lkp_pkt_type"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "l3_metadata.lkp_ip_type"
+    bitwidth: 2
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "multicast_metadata.igmp_snooping_enabled"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "multicast_metadata.mld_snooping_enabled"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 10
+    name: "multicast_metadata.mcast_route_hit"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 11
+    name: "multicast_metadata.mcast_bridge_hit"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 12
+    name: "multicast_metadata.mcast_rpf_group"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 13
+    name: "multicast_metadata.mcast_mode"
+    bitwidth: 2
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 16804848
+  }
+  action_refs {
+    id: 17002596
+  }
+  action_refs {
+    id: 32139265
+  }
+  action_refs {
+    id: 21445098
+  }
+  action_refs {
+    id: 18475473
+  }
+  action_refs {
+    id: 17492614
+  }
+  action_refs {
+    id: 22605342
+  }
+  action_refs {
+    id: 20020886
+  }
+  action_refs {
+    id: 17448174
+  }
+  action_refs {
+    id: 30784012
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 37801575
+    name: "ecmp_group"
+    alias: "ecmp_group"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.nexthop_index"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21821898
+  }
+  action_refs {
+    id: 23407940
+  }
+  action_refs {
+    id: 21031053
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  implementation_id: 297500867
+  size: 1024
+}
+tables {
+  preamble {
+    id: 46720761
+    name: "nexthop"
+    alias: "nexthop"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.nexthop_index"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21821898
+  }
+  action_refs {
+    id: 21867633
+  }
+  action_refs {
+    id: 31926291
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41026090
+    name: "bd_flood"
+    alias: "bd_flood"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.lkp_pkt_type"
+    bitwidth: 3
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21091506
+  }
+  action_refs {
+    id: 28003351
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39929658
+    name: "lag_group"
+    alias: "lag_group"
+  }
+  match_fields {
+    id: 1
+    name: "ingress_metadata.egress_ifindex"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17136543
+  }
+  action_refs {
+    id: 26583734
+  }
+  action_refs {
+    id: 17749532
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  implementation_id: 301351402
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42035756
+    name: "learn_notify"
+    alias: "learn_notify"
+  }
+  match_fields {
+    id: 1
+    name: "l2_metadata.l2_src_miss"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.l2_src_move"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "l2_metadata.stp_state"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25859160
+  }
+  action_refs {
+    id: 23905849
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 49655016
+    name: "fabric_lag"
+    alias: "fabric_lag"
+  }
+  match_fields {
+    id: 1
+    name: "fabric_metadata.dst_device"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 31087776
+  }
+  action_refs {
+    id: 20535052
+  }
+  action_refs {
+    id: 26581760
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  implementation_id: 298941036
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34622126
+    name: "drop_stats"
+    alias: "drop_stats"
+  }
+  action_refs {
+    id: 25605858
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41037284
+    name: "system_acl"
+    alias: "system_acl"
+  }
+  match_fields {
+    id: 1
+    name: "acl_metadata.if_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "acl_metadata.bd_label"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "l2_metadata.lkp_mac_sa"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "l2_metadata.lkp_mac_da"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "l2_metadata.lkp_mac_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "ingress_metadata.ifindex"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "l2_metadata.port_vlan_mapping_miss"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "security_metadata.ipsg_check_fail"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "security_metadata.storm_control_color"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 10
+    name: "acl_metadata.acl_deny"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 11
+    name: "acl_metadata.racl_deny"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 12
+    name: "l3_metadata.urpf_check_fail"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 13
+    name: "ingress_metadata.drop_flag"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 14
+    name: "acl_metadata.acl_copy"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 15
+    name: "l3_metadata.l3_copy"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 16
+    name: "l3_metadata.rmac_hit"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 17
+    name: "l3_metadata.routed"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 18
+    name: "ipv6_metadata.ipv6_src_is_link_local"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 19
+    name: "l2_metadata.same_if_check"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 20
+    name: "tunnel_metadata.tunnel_if_check"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 21
+    name: "l3_metadata.same_bd_check"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 22
+    name: "l3_metadata.lkp_ip_ttl"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 23
+    name: "l2_metadata.stp_state"
+    bitwidth: 3
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 24
+    name: "ingress_metadata.control_frame"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 25
+    name: "ipv4_metadata.ipv4_unicast_enabled"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 26
+    name: "ipv6_metadata.ipv6_unicast_enabled"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 27
+    name: "ingress_metadata.egress_ifindex"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 30951662
+  }
+  action_refs {
+    id: 29730527
+  }
+  action_refs {
+    id: 18002712
+  }
+  action_refs {
+    id: 26836234
+  }
+  action_refs {
+    id: 19384363
+  }
+  action_refs {
+    id: 21945631
+  }
+  action_refs {
+    id: 17559966
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 39446660
+    name: "egress_port_mapping"
+    alias: "egress_port_mapping"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.egress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26603359
+  }
+  action_refs {
+    id: 28945045
+  }
+  action_refs {
+    id: 30096172
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 288
+}
+tables {
+  preamble {
+    id: 39859235
+    name: "mirror"
+    alias: "mirror"
+  }
+  match_fields {
+    id: 1
+    name: "i2e_metadata.mirror_session_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25692703
+  }
+  action_refs {
+    id: 27128095
+  }
+  action_refs {
+    id: 28364382
+  }
+  action_refs {
+    id: 24517251
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 48573872
+    name: "replica_type"
+    alias: "replica_type"
+  }
+  match_fields {
+    id: 1
+    name: "multicast_metadata.replica"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "egress_metadata.same_bd_check"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 33114731
+  }
+  action_refs {
+    id: 32648356
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 42274517
+    name: "rid"
+    alias: "rid"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.egress_rid"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 33114731
+  }
+  action_refs {
+    id: 17928584
+  }
+  action_refs {
+    id: 27400339
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 44905886
+    name: "vlan_decap"
+    alias: "vlan_decap"
+  }
+  match_fields {
+    id: 1
+    name: "vlan_tag_[0].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "vlan_tag_[1].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24051746
+  }
+  action_refs {
+    id: 18645134
+  }
+  action_refs {
+    id: 24210138
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35270252
+    name: "tunnel_decap_process_inner"
+    alias: "tunnel_decap_process_inner"
+  }
+  match_fields {
+    id: 1
+    name: "inner_tcp.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "inner_udp.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "inner_icmp.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18743292
+  }
+  action_refs {
+    id: 26630855
+  }
+  action_refs {
+    id: 29295160
+  }
+  action_refs {
+    id: 28715521
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49983332
+    name: "tunnel_decap_process_outer"
+    alias: "tunnel_decap_process_outer"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.ingress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "inner_ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "inner_ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17768838
+  }
+  action_refs {
+    id: 28048063
+  }
+  action_refs {
+    id: 24553741
+  }
+  action_refs {
+    id: 24262097
+  }
+  action_refs {
+    id: 32575184
+  }
+  action_refs {
+    id: 20772090
+  }
+  action_refs {
+    id: 30471945
+  }
+  action_refs {
+    id: 28525261
+  }
+  action_refs {
+    id: 20211497
+  }
+  action_refs {
+    id: 20138720
+  }
+  action_refs {
+    id: 23326534
+  }
+  action_refs {
+    id: 28031461
+  }
+  action_refs {
+    id: 22180437
+  }
+  action_refs {
+    id: 28785442
+  }
+  action_refs {
+    id: 24377716
+  }
+  action_refs {
+    id: 19988268
+  }
+  action_refs {
+    id: 31512019
+  }
+  action_refs {
+    id: 23147554
+  }
+  action_refs {
+    id: 32879799
+  }
+  action_refs {
+    id: 24177007
+  }
+  action_refs {
+    id: 21926248
+  }
+  action_refs {
+    id: 24083695
+  }
+  action_refs {
+    id: 26267777
+  }
+  action_refs {
+    id: 24959429
+  }
+  action_refs {
+    id: 21148947
+  }
+  action_refs {
+    id: 28587059
+  }
+  action_refs {
+    id: 33232904
+  }
+  action_refs {
+    id: 29258460
+  }
+  action_refs {
+    id: 21921128
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34821388
+    name: "rewrite"
+    alias: "rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.nexthop_index"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 29889416
+  }
+  action_refs {
+    id: 20836470
+  }
+  action_refs {
+    id: 20985643
+  }
+  action_refs {
+    id: 32028714
+  }
+  action_refs {
+    id: 20456020
+  }
+  action_refs {
+    id: 18070213
+  }
+  action_refs {
+    id: 29931909
+  }
+  action_refs {
+    id: 23741811
+  }
+  action_refs {
+    id: 16881143
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42423456
+    name: "rewrite_multicast"
+    alias: "rewrite_multicast"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv4.dstAddr"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "ipv6.dstAddr"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 29889416
+  }
+  action_refs {
+    id: 29525111
+  }
+  action_refs {
+    id: 22371099
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45947985
+    name: "egress_bd_map"
+    alias: "egress_bd_map"
+  }
+  match_fields {
+    id: 1
+    name: "egress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17174709
+  }
+  action_refs {
+    id: 27472973
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35585248
+    name: "l3_rewrite"
+    alias: "l3_rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "mpls[0].$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "ipv4.dstAddr"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "ipv6.dstAddr"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 31144289
+  }
+  action_refs {
+    id: 17709619
+  }
+  action_refs {
+    id: 24899669
+  }
+  action_refs {
+    id: 32319601
+  }
+  action_refs {
+    id: 22422486
+  }
+  action_refs {
+    id: 25682421
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42713323
+    name: "smac_rewrite"
+    alias: "smac_rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "egress_metadata.smac_idx"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 19760197
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 40484047
+    name: "mtu"
+    alias: "mtu"
+  }
+  match_fields {
+    id: 1
+    name: "l3_metadata.mtu_index"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17753646
+  }
+  action_refs {
+    id: 18299046
+  }
+  action_refs {
+    id: 17842211
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41904683
+    name: "int_bos"
+    alias: "int_bos"
+  }
+  match_fields {
+    id: 1
+    name: "int_header.total_hop_cnt"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "int_header.instruction_mask_0003"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "int_header.instruction_mask_0407"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "int_header.instruction_mask_0811"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "int_header.instruction_mask_1215"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 23094047
+  }
+  action_refs {
+    id: 33173909
+  }
+  action_refs {
+    id: 22301520
+  }
+  action_refs {
+    id: 19288675
+  }
+  action_refs {
+    id: 17432508
+  }
+  action_refs {
+    id: 31106134
+  }
+  action_refs {
+    id: 30747137
+  }
+  action_refs {
+    id: 22733351
+  }
+  action_refs {
+    id: 22920701
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 17
+}
+tables {
+  preamble {
+    id: 49400589
+    name: "int_insert"
+    alias: "int_insert"
+  }
+  match_fields {
+    id: 1
+    name: "int_metadata_i2e.source"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "int_metadata_i2e.sink"
+    bitwidth: 1
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "int_header.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32129728
+  }
+  action_refs {
+    id: 30253665
+  }
+  action_refs {
+    id: 31721162
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 3
+}
+tables {
+  preamble {
+    id: 41278214
+    name: "int_inst_0003"
+    alias: "int_inst_0003"
+  }
+  match_fields {
+    id: 1
+    name: "int_header.instruction_mask_0003"
+    bitwidth: 4
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32954241
+  }
+  action_refs {
+    id: 23275607
+  }
+  action_refs {
+    id: 27102412
+  }
+  action_refs {
+    id: 19654120
+  }
+  action_refs {
+    id: 33241480
+  }
+  action_refs {
+    id: 21600805
+  }
+  action_refs {
+    id: 17232287
+  }
+  action_refs {
+    id: 25861291
+  }
+  action_refs {
+    id: 18608589
+  }
+  action_refs {
+    id: 33380240
+  }
+  action_refs {
+    id: 26461414
+  }
+  action_refs {
+    id: 22833659
+  }
+  action_refs {
+    id: 24557103
+  }
+  action_refs {
+    id: 27791506
+  }
+  action_refs {
+    id: 33127732
+  }
+  action_refs {
+    id: 22273001
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 17
+}
+tables {
+  preamble {
+    id: 38121347
+    name: "int_inst_0407"
+    alias: "int_inst_0407"
+  }
+  match_fields {
+    id: 1
+    name: "int_header.instruction_mask_0407"
+    bitwidth: 4
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32620806
+  }
+  action_refs {
+    id: 22767065
+  }
+  action_refs {
+    id: 25397293
+  }
+  action_refs {
+    id: 17416507
+  }
+  action_refs {
+    id: 21456310
+  }
+  action_refs {
+    id: 31754480
+  }
+  action_refs {
+    id: 19256178
+  }
+  action_refs {
+    id: 17553212
+  }
+  action_refs {
+    id: 28210305
+  }
+  action_refs {
+    id: 25663543
+  }
+  action_refs {
+    id: 24312477
+  }
+  action_refs {
+    id: 18804214
+  }
+  action_refs {
+    id: 31441272
+  }
+  action_refs {
+    id: 20594206
+  }
+  action_refs {
+    id: 18158548
+  }
+  action_refs {
+    id: 32114559
+  }
+  action_refs {
+    id: 22920701
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 17
+}
+tables {
+  preamble {
+    id: 39263322
+    name: "int_inst_0811"
+    alias: "int_inst_0811"
+  }
+  match_fields {
+    id: 1
+    name: "int_header.instruction_mask_0811"
+    bitwidth: 4
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22920701
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 16
+}
+tables {
+  preamble {
+    id: 43158992
+    name: "int_inst_1215"
+    alias: "int_inst_1215"
+  }
+  match_fields {
+    id: 1
+    name: "int_header.instruction_mask_1215"
+    bitwidth: 4
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22920701
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 17
+}
+tables {
+  preamble {
+    id: 45150684
+    name: "int_meta_header_update"
+    alias: "int_meta_header_update"
+  }
+  match_fields {
+    id: 1
+    name: "int_metadata.insert_cnt"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 19665188
+  }
+  action_refs {
+    id: 26727289
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 2
+}
+tables {
+  preamble {
+    id: 44032150
+    name: "egress_bd_stats"
+    alias: "egress_bd_stats"
+  }
+  match_fields {
+    id: 1
+    name: "egress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "l2_metadata.lkp_pkt_type"
+    bitwidth: 3
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26379098
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  direct_resource_ids: 329244822
+  size: 1024
+}
+tables {
+  preamble {
+    id: 37327412
+    name: "egress_vni"
+    alias: "egress_vni"
+  }
+  match_fields {
+    id: 1
+    name: "egress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "tunnel_metadata.egress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26010426
+  }
+  action_refs {
+    id: 17672696
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 36990184
+    name: "tunnel_dmac_rewrite"
+    alias: "tunnel_dmac_rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.tunnel_dmac_index"
+    bitwidth: 14
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26010426
+  }
+  action_refs {
+    id: 31137876
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 47714865
+    name: "tunnel_dst_rewrite"
+    alias: "tunnel_dst_rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.tunnel_dst_index"
+    bitwidth: 14
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26010426
+  }
+  action_refs {
+    id: 31188157
+  }
+  action_refs {
+    id: 26316217
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35868587
+    name: "tunnel_encap_process_inner"
+    alias: "tunnel_encap_process_inner"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv6.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "tcp.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "udp.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "icmp.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22012831
+  }
+  action_refs {
+    id: 32489680
+  }
+  action_refs {
+    id: 18677479
+  }
+  action_refs {
+    id: 27242308
+  }
+  action_refs {
+    id: 18850099
+  }
+  action_refs {
+    id: 25639607
+  }
+  action_refs {
+    id: 19613422
+  }
+  action_refs {
+    id: 30542777
+  }
+  action_refs {
+    id: 24131522
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49020003
+    name: "tunnel_encap_process_outer"
+    alias: "tunnel_encap_process_outer"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.egress_tunnel_type"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "tunnel_metadata.egress_header_count"
+    bitwidth: 4
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "multicast_metadata.replica"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26010426
+  }
+  action_refs {
+    id: 20103093
+  }
+  action_refs {
+    id: 19046026
+  }
+  action_refs {
+    id: 25961605
+  }
+  action_refs {
+    id: 23176024
+  }
+  action_refs {
+    id: 32138848
+  }
+  action_refs {
+    id: 32256671
+  }
+  action_refs {
+    id: 20523098
+  }
+  action_refs {
+    id: 18288010
+  }
+  action_refs {
+    id: 26867995
+  }
+  action_refs {
+    id: 32157079
+  }
+  action_refs {
+    id: 31421314
+  }
+  action_refs {
+    id: 21179245
+  }
+  action_refs {
+    id: 25235855
+  }
+  action_refs {
+    id: 23444864
+  }
+  action_refs {
+    id: 20797182
+  }
+  action_refs {
+    id: 24407457
+  }
+  action_refs {
+    id: 20185303
+  }
+  action_refs {
+    id: 32853703
+  }
+  action_refs {
+    id: 25002800
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42237704
+    name: "tunnel_mtu"
+    alias: "tunnel_mtu"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.tunnel_index"
+    bitwidth: 14
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21075337
+  }
+  action_refs {
+    id: 32323556
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39011605
+    name: "tunnel_rewrite"
+    alias: "tunnel_rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.tunnel_index"
+    bitwidth: 14
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26010426
+  }
+  action_refs {
+    id: 19600568
+  }
+  action_refs {
+    id: 25019307
+  }
+  action_refs {
+    id: 32131701
+  }
+  action_refs {
+    id: 18296528
+  }
+  action_refs {
+    id: 19608310
+  }
+  action_refs {
+    id: 23356140
+  }
+  action_refs {
+    id: 28769719
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 36355689
+    name: "tunnel_smac_rewrite"
+    alias: "tunnel_smac_rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.tunnel_smac_index"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26010426
+  }
+  action_refs {
+    id: 21832280
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 45323855
+    name: "tunnel_src_rewrite"
+    alias: "tunnel_src_rewrite"
+  }
+  match_fields {
+    id: 1
+    name: "tunnel_metadata.tunnel_src_index"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26010426
+  }
+  action_refs {
+    id: 26252648
+  }
+  action_refs {
+    id: 17291318
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43497430
+    name: "int_outer_encap"
+    alias: "int_outer_encap"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "vxlan_gpe.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "int_metadata_i2e.source"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "tunnel_metadata.egress_tunnel_type"
+    bitwidth: 5
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 17270234
+  }
+  action_refs {
+    id: 28075883
+  }
+  action_refs {
+    id: 22421955
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 8
+}
+tables {
+  preamble {
+    id: 38010437
+    name: "egress_vlan_xlate"
+    alias: "egress_vlan_xlate"
+  }
+  match_fields {
+    id: 1
+    name: "egress_metadata.ifindex"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "egress_metadata.bd"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25117848
+  }
+  action_refs {
+    id: 17087433
+  }
+  action_refs {
+    id: 25310390
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41497774
+    name: "egress_filter"
+    alias: "egress_filter"
+  }
+  action_refs {
+    id: 28243510
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 44507649
+    name: "egress_filter_drop"
+    alias: "egress_filter_drop"
+  }
+  action_refs {
+    id: 20968920
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 40332640
+    name: "egress_acl"
+    alias: "egress_acl"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.egress_port"
+    bitwidth: 9
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "l3_metadata.l3_mtu_check"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 23035377
+  }
+  action_refs {
+    id: 17820530
+  }
+  action_refs {
+    id: 30057387
+  }
+  action_refs {
+    id: 29764557
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 22750453
+    name: "ingress.rmac_hit"
+    alias: "rmac_hit"
+  }
+}
+actions {
+  preamble {
+    id: 30964672
+    name: "ingress.rmac_miss"
+    alias: "rmac_miss"
+  }
+}
+actions {
+  preamble {
+    id: 21651262
+    name: "process_ingress_port_mapping.set_ifindex"
+    alias: "set_ifindex"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "port_type"
+    bitwidth: 2
+  }
+}
+actions {
+  preamble {
+    id: 25837353
+    name: "process_ingress_port_mapping.set_ingress_port_properties"
+    alias: "set_ingress_port_properties"
+  }
+  params {
+    id: 1
+    name: "if_label"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 24158186
+    name: "process_validate_outer_header.malformed_outer_ethernet_packet"
+    alias: "malformed_outer_ethernet_packet"
+  }
+  params {
+    id: 1
+    name: "drop_reason"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 18058436
+    name: "process_validate_outer_header.set_valid_outer_unicast_packet_untagged"
+    alias: "set_valid_outer_unicast_packet_untagged"
+  }
+}
+actions {
+  preamble {
+    id: 23838154
+    name: "process_validate_outer_header.set_valid_outer_unicast_packet_single_tagged"
+    alias: "set_valid_outer_unicast_packet_single_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 20681161
+    name: "process_validate_outer_header.set_valid_outer_unicast_packet_double_tagged"
+    alias: "set_valid_outer_unicast_packet_double_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 25194127
+    name: "process_validate_outer_header.set_valid_outer_unicast_packet_qinq_tagged"
+    alias: "set_valid_outer_unicast_packet_qinq_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 22589859
+    name: "process_validate_outer_header.set_valid_outer_multicast_packet_untagged"
+    alias: "set_valid_outer_multicast_packet_untagged"
+  }
+}
+actions {
+  preamble {
+    id: 18866304
+    name: "process_validate_outer_header.set_valid_outer_multicast_packet_single_tagged"
+    alias: "set_valid_outer_multicast_packet_single_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 21094556
+    name: "process_validate_outer_header.set_valid_outer_multicast_packet_double_tagged"
+    alias: "set_valid_outer_multicast_packet_double_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 16999942
+    name: "process_validate_outer_header.set_valid_outer_multicast_packet_qinq_tagged"
+    alias: "set_valid_outer_multicast_packet_qinq_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 32459618
+    name: "process_validate_outer_header.set_valid_outer_broadcast_packet_untagged"
+    alias: "set_valid_outer_broadcast_packet_untagged"
+  }
+}
+actions {
+  preamble {
+    id: 23668099
+    name: "process_validate_outer_header.set_valid_outer_broadcast_packet_single_tagged"
+    alias: "set_valid_outer_broadcast_packet_single_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 19271622
+    name: "process_validate_outer_header.set_valid_outer_broadcast_packet_double_tagged"
+    alias: "set_valid_outer_broadcast_packet_double_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 26877136
+    name: "process_validate_outer_header.set_valid_outer_broadcast_packet_qinq_tagged"
+    alias: "set_valid_outer_broadcast_packet_qinq_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 31659489
+    name: "validate_outer_ipv4_header.set_valid_outer_ipv4_packet"
+    alias: "set_valid_outer_ipv4_packet"
+  }
+}
+actions {
+  preamble {
+    id: 32053722
+    name: "validate_outer_ipv4_header.set_malformed_outer_ipv4_packet"
+    alias: "set_malformed_outer_ipv4_packet"
+  }
+  params {
+    id: 1
+    name: "drop_reason"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 19738979
+    name: "validate_outer_ipv6_header.set_valid_outer_ipv6_packet"
+    alias: "set_valid_outer_ipv6_packet"
+  }
+}
+actions {
+  preamble {
+    id: 21122802
+    name: "validate_outer_ipv6_header.set_malformed_outer_ipv6_packet"
+    alias: "set_malformed_outer_ipv6_packet"
+  }
+  params {
+    id: 1
+    name: "drop_reason"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 19677850
+    name: "validate_mpls_header.set_valid_mpls_label1"
+    alias: "set_valid_mpls_label1"
+  }
+}
+actions {
+  preamble {
+    id: 24735540
+    name: "validate_mpls_header.set_valid_mpls_label2"
+    alias: "set_valid_mpls_label2"
+  }
+}
+actions {
+  preamble {
+    id: 28212127
+    name: "validate_mpls_header.set_valid_mpls_label3"
+    alias: "set_valid_mpls_label3"
+  }
+}
+actions {
+  preamble {
+    id: 33143159
+    name: "process_global_params.set_config_parameters"
+    alias: "set_config_parameters"
+  }
+  params {
+    id: 1
+    name: "enable_dod"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 22017120
+    name: "process_port_vlan_mapping.set_bd_properties"
+    alias: "set_bd_properties"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "vrf"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "stp_group"
+    bitwidth: 10
+  }
+  params {
+    id: 4
+    name: "learning_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 5
+    name: "bd_label"
+    bitwidth: 16
+  }
+  params {
+    id: 6
+    name: "stats_idx"
+    bitwidth: 16
+  }
+  params {
+    id: 7
+    name: "rmac_group"
+    bitwidth: 10
+  }
+  params {
+    id: 8
+    name: "ipv4_unicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 9
+    name: "ipv6_unicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 10
+    name: "ipv4_urpf_mode"
+    bitwidth: 2
+  }
+  params {
+    id: 11
+    name: "ipv6_urpf_mode"
+    bitwidth: 2
+  }
+  params {
+    id: 12
+    name: "igmp_snooping_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 13
+    name: "mld_snooping_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 14
+    name: "ipv4_multicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 15
+    name: "ipv6_multicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 16
+    name: "mrpf_group"
+    bitwidth: 16
+  }
+  params {
+    id: 17
+    name: "ipv4_mcast_key"
+    bitwidth: 16
+  }
+  params {
+    id: 18
+    name: "ipv4_mcast_key_type"
+    bitwidth: 1
+  }
+  params {
+    id: 19
+    name: "ipv6_mcast_key"
+    bitwidth: 16
+  }
+  params {
+    id: 20
+    name: "ipv6_mcast_key_type"
+    bitwidth: 1
+  }
+}
+actions {
+  preamble {
+    id: 29041226
+    name: "process_port_vlan_mapping.port_vlan_mapping_miss"
+    alias: "port_vlan_mapping_miss"
+  }
+}
+actions {
+  preamble {
+    id: 28929159
+    name: "process_spanning_tree.set_stp_state"
+    alias: "set_stp_state"
+  }
+  params {
+    id: 1
+    name: "stp_state"
+    bitwidth: 3
+  }
+}
+actions {
+  preamble {
+    id: 19864622
+    name: "process_ip_sourceguard.on_miss"
+    alias: "process_ip_sourceguard.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 32375263
+    name: "process_ip_sourceguard.ipsg_miss"
+    alias: "ipsg_miss"
+  }
+}
+actions {
+  preamble {
+    id: 17279442
+    name: "process_int_endpoint.int_sink_update_vxlan_gpe_v4"
+    alias: "int_sink_update_vxlan_gpe_v4"
+  }
+}
+actions {
+  preamble {
+    id: 31931594
+    name: "process_int_endpoint.nop"
+    alias: "process_int_endpoint.nop"
+  }
+}
+actions {
+  preamble {
+    id: 19619341
+    name: "process_int_endpoint.int_set_src"
+    alias: "int_set_src"
+  }
+}
+actions {
+  preamble {
+    id: 21001751
+    name: "process_int_endpoint.int_set_no_src"
+    alias: "int_set_no_src"
+  }
+}
+actions {
+  preamble {
+    id: 21803764
+    name: "process_int_endpoint.int_sink_gpe"
+    alias: "int_sink_gpe"
+  }
+  params {
+    id: 1
+    name: "mirror_id"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 24342599
+    name: "process_int_endpoint.int_no_sink"
+    alias: "int_no_sink"
+  }
+}
+actions {
+  preamble {
+    id: 29711992
+    name: "process_tunnel.on_miss"
+    alias: "process_tunnel.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 28991583
+    name: "process_tunnel.outer_rmac_hit"
+    alias: "outer_rmac_hit"
+  }
+}
+actions {
+  preamble {
+    id: 18898796
+    name: "process_tunnel.nop"
+    alias: "process_tunnel.nop"
+  }
+}
+actions {
+  preamble {
+    id: 24672475
+    name: "process_tunnel.tunnel_lookup_miss"
+    alias: "process_tunnel.tunnel_lookup_miss"
+  }
+}
+actions {
+  preamble {
+    id: 23211395
+    name: "process_tunnel.terminate_tunnel_inner_non_ip"
+    alias: "terminate_tunnel_inner_non_ip"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "bd_label"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "stats_idx"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 23526149
+    name: "process_tunnel.terminate_tunnel_inner_ethernet_ipv4"
+    alias: "terminate_tunnel_inner_ethernet_ipv4"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "vrf"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "rmac_group"
+    bitwidth: 10
+  }
+  params {
+    id: 4
+    name: "bd_label"
+    bitwidth: 16
+  }
+  params {
+    id: 5
+    name: "ipv4_unicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 6
+    name: "ipv4_urpf_mode"
+    bitwidth: 2
+  }
+  params {
+    id: 7
+    name: "igmp_snooping_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 8
+    name: "stats_idx"
+    bitwidth: 16
+  }
+  params {
+    id: 9
+    name: "ipv4_multicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 10
+    name: "mrpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 18522936
+    name: "process_tunnel.terminate_tunnel_inner_ipv4"
+    alias: "terminate_tunnel_inner_ipv4"
+  }
+  params {
+    id: 1
+    name: "vrf"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "rmac_group"
+    bitwidth: 10
+  }
+  params {
+    id: 3
+    name: "ipv4_urpf_mode"
+    bitwidth: 2
+  }
+  params {
+    id: 4
+    name: "ipv4_unicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 5
+    name: "ipv4_multicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 6
+    name: "mrpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 32715294
+    name: "process_tunnel.terminate_tunnel_inner_ethernet_ipv6"
+    alias: "terminate_tunnel_inner_ethernet_ipv6"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "vrf"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "rmac_group"
+    bitwidth: 10
+  }
+  params {
+    id: 4
+    name: "bd_label"
+    bitwidth: 16
+  }
+  params {
+    id: 5
+    name: "ipv6_unicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 6
+    name: "ipv6_urpf_mode"
+    bitwidth: 2
+  }
+  params {
+    id: 7
+    name: "mld_snooping_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 8
+    name: "stats_idx"
+    bitwidth: 16
+  }
+  params {
+    id: 9
+    name: "ipv6_multicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 10
+    name: "mrpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 20111209
+    name: "process_tunnel.terminate_tunnel_inner_ipv6"
+    alias: "terminate_tunnel_inner_ipv6"
+  }
+  params {
+    id: 1
+    name: "vrf"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "rmac_group"
+    bitwidth: 10
+  }
+  params {
+    id: 3
+    name: "ipv6_unicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "ipv6_urpf_mode"
+    bitwidth: 2
+  }
+  params {
+    id: 5
+    name: "ipv6_multicast_enabled"
+    bitwidth: 1
+  }
+  params {
+    id: 6
+    name: "mrpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 24422464
+    name: "process_tunnel.non_ip_tunnel_lookup_miss"
+    alias: "non_ip_tunnel_lookup_miss"
+  }
+}
+actions {
+  preamble {
+    id: 28387461
+    name: "process_tunnel.ipv4_tunnel_lookup_miss"
+    alias: "ipv4_tunnel_lookup_miss"
+  }
+}
+actions {
+  preamble {
+    id: 31440109
+    name: "process_tunnel.ipv6_tunnel_lookup_miss"
+    alias: "ipv6_tunnel_lookup_miss"
+  }
+}
+actions {
+  preamble {
+    id: 27084838
+    name: "process_ingress_fabric.nop"
+    alias: "process_ingress_fabric.nop"
+  }
+}
+actions {
+  preamble {
+    id: 22005008
+    name: "process_ingress_fabric.terminate_cpu_packet"
+    alias: "terminate_cpu_packet"
+  }
+}
+actions {
+  preamble {
+    id: 22839968
+    name: "process_ingress_fabric.switch_fabric_unicast_packet"
+    alias: "switch_fabric_unicast_packet"
+  }
+}
+actions {
+  preamble {
+    id: 18506852
+    name: "process_ingress_fabric.terminate_fabric_unicast_packet"
+    alias: "terminate_fabric_unicast_packet"
+  }
+}
+actions {
+  preamble {
+    id: 31902455
+    name: "process_ingress_fabric.switch_fabric_multicast_packet"
+    alias: "switch_fabric_multicast_packet"
+  }
+}
+actions {
+  preamble {
+    id: 18460561
+    name: "process_ingress_fabric.terminate_fabric_multicast_packet"
+    alias: "terminate_fabric_multicast_packet"
+  }
+}
+actions {
+  preamble {
+    id: 23765326
+    name: "process_ingress_fabric.set_ingress_ifindex_properties"
+    alias: "set_ingress_ifindex_properties"
+  }
+}
+actions {
+  preamble {
+    id: 24318970
+    name: "process_ingress_fabric.non_ip_over_fabric"
+    alias: "non_ip_over_fabric"
+  }
+}
+actions {
+  preamble {
+    id: 23432228
+    name: "process_ingress_fabric.ipv4_over_fabric"
+    alias: "ipv4_over_fabric"
+  }
+}
+actions {
+  preamble {
+    id: 23871111
+    name: "process_ingress_fabric.ipv6_over_fabric"
+    alias: "ipv6_over_fabric"
+  }
+}
+actions {
+  preamble {
+    id: 32259460
+    name: "process_outer_ipv4_multicast.nop"
+    alias: "process_outer_ipv4_multicast.nop"
+  }
+}
+actions {
+  preamble {
+    id: 23546635
+    name: "process_outer_ipv4_multicast.on_miss"
+    alias: "process_outer_ipv4_multicast.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 31609603
+    name: "process_outer_ipv4_multicast.outer_multicast_route_s_g_hit"
+    alias: "process_outer_ipv4_multicast.outer_multicast_route_s_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 30591697
+    name: "process_outer_ipv4_multicast.outer_multicast_bridge_s_g_hit"
+    alias: "process_outer_ipv4_multicast.outer_multicast_bridge_s_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 24876054
+    name: "process_outer_ipv4_multicast.outer_multicast_route_sm_star_g_hit"
+    alias: "process_outer_ipv4_multicast.outer_multicast_route_sm_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 27911208
+    name: "process_outer_ipv4_multicast.outer_multicast_route_bidir_star_g_hit"
+    alias: "process_outer_ipv4_multicast.outer_multicast_route_bidir_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 27512720
+    name: "process_outer_ipv4_multicast.outer_multicast_bridge_star_g_hit"
+    alias: "process_outer_ipv4_multicast.outer_multicast_bridge_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21349752
+    name: "process_outer_ipv6_multicast.nop"
+    alias: "process_outer_ipv6_multicast.nop"
+  }
+}
+actions {
+  preamble {
+    id: 32292236
+    name: "process_outer_ipv6_multicast.on_miss"
+    alias: "process_outer_ipv6_multicast.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 27301347
+    name: "process_outer_ipv6_multicast.outer_multicast_route_s_g_hit"
+    alias: "process_outer_ipv6_multicast.outer_multicast_route_s_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 17490289
+    name: "process_outer_ipv6_multicast.outer_multicast_bridge_s_g_hit"
+    alias: "process_outer_ipv6_multicast.outer_multicast_bridge_s_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 30581794
+    name: "process_outer_ipv6_multicast.outer_multicast_route_sm_star_g_hit"
+    alias: "process_outer_ipv6_multicast.outer_multicast_route_sm_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 25007526
+    name: "process_outer_ipv6_multicast.outer_multicast_route_bidir_star_g_hit"
+    alias: "process_outer_ipv6_multicast.outer_multicast_route_bidir_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 31047255
+    name: "process_outer_ipv6_multicast.outer_multicast_bridge_star_g_hit"
+    alias: "process_outer_ipv6_multicast.outer_multicast_bridge_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 19016590
+    name: "process_ipv4_vtep.nop"
+    alias: "process_ipv4_vtep.nop"
+  }
+}
+actions {
+  preamble {
+    id: 31006027
+    name: "process_ipv4_vtep.set_tunnel_termination_flag"
+    alias: "process_ipv4_vtep.set_tunnel_termination_flag"
+  }
+}
+actions {
+  preamble {
+    id: 23366223
+    name: "process_ipv4_vtep.set_tunnel_vni_and_termination_flag"
+    alias: "process_ipv4_vtep.set_tunnel_vni_and_termination_flag"
+  }
+  params {
+    id: 1
+    name: "tunnel_vni"
+    bitwidth: 24
+  }
+}
+actions {
+  preamble {
+    id: 28405894
+    name: "process_ipv4_vtep.on_miss"
+    alias: "process_ipv4_vtep.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 32475207
+    name: "process_ipv4_vtep.src_vtep_hit"
+    alias: "process_ipv4_vtep.src_vtep_hit"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21014138
+    name: "process_ipv6_vtep.nop"
+    alias: "process_ipv6_vtep.nop"
+  }
+}
+actions {
+  preamble {
+    id: 22005284
+    name: "process_ipv6_vtep.set_tunnel_termination_flag"
+    alias: "process_ipv6_vtep.set_tunnel_termination_flag"
+  }
+}
+actions {
+  preamble {
+    id: 20650129
+    name: "process_ipv6_vtep.set_tunnel_vni_and_termination_flag"
+    alias: "process_ipv6_vtep.set_tunnel_vni_and_termination_flag"
+  }
+  params {
+    id: 1
+    name: "tunnel_vni"
+    bitwidth: 24
+  }
+}
+actions {
+  preamble {
+    id: 27984459
+    name: "process_ipv6_vtep.on_miss"
+    alias: "process_ipv6_vtep.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 32425009
+    name: "process_ipv6_vtep.src_vtep_hit"
+    alias: "process_ipv6_vtep.src_vtep_hit"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 30543761
+    name: "process_mpls.terminate_eompls"
+    alias: "terminate_eompls"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+}
+actions {
+  preamble {
+    id: 31950977
+    name: "process_mpls.terminate_vpls"
+    alias: "terminate_vpls"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+}
+actions {
+  preamble {
+    id: 33002058
+    name: "process_mpls.terminate_ipv4_over_mpls"
+    alias: "terminate_ipv4_over_mpls"
+  }
+  params {
+    id: 1
+    name: "vrf"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+}
+actions {
+  preamble {
+    id: 27925902
+    name: "process_mpls.terminate_ipv6_over_mpls"
+    alias: "terminate_ipv6_over_mpls"
+  }
+  params {
+    id: 1
+    name: "vrf"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+}
+actions {
+  preamble {
+    id: 17012616
+    name: "process_mpls.terminate_pw"
+    alias: "terminate_pw"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 30146383
+    name: "process_mpls.forward_mpls"
+    alias: "forward_mpls"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 18023811
+    name: "process_ingress_sflow.nop"
+    alias: "process_ingress_sflow.nop"
+  }
+}
+actions {
+  preamble {
+    id: 32308659
+    name: "process_ingress_sflow.sflow_ing_session_enable"
+    alias: "sflow_ing_session_enable"
+  }
+  params {
+    id: 1
+    name: "rate_thr"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "session_id"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 24076177
+    name: "process_ingress_sflow.nop_1"
+    alias: "nop_1"
+  }
+}
+actions {
+  preamble {
+    id: 17728634
+    name: "process_ingress_sflow.sflow_ing_pkt_to_cpu_0"
+    alias: "sflow_ing_pkt_to_cpu_0"
+  }
+  params {
+    id: 1
+    name: "sflow_i2e_mirror_id"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "reason_code"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 20064305
+    name: "process_storm_control.nop"
+    alias: "process_storm_control.nop"
+  }
+}
+actions {
+  preamble {
+    id: 28092460
+    name: "process_storm_control.set_storm_control_meter"
+    alias: "set_storm_control_meter"
+  }
+  params {
+    id: 1
+    name: "meter_idx"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 22596660
+    name: "process_validate_packet.nop"
+    alias: "process_validate_packet.nop"
+  }
+}
+actions {
+  preamble {
+    id: 33090078
+    name: "process_validate_packet.set_unicast"
+    alias: "set_unicast"
+  }
+}
+actions {
+  preamble {
+    id: 31579497
+    name: "process_validate_packet.set_unicast_and_ipv6_src_is_link_local"
+    alias: "set_unicast_and_ipv6_src_is_link_local"
+  }
+}
+actions {
+  preamble {
+    id: 20389093
+    name: "process_validate_packet.set_multicast"
+    alias: "set_multicast"
+  }
+}
+actions {
+  preamble {
+    id: 24790754
+    name: "process_validate_packet.set_multicast_and_ipv6_src_is_link_local"
+    alias: "set_multicast_and_ipv6_src_is_link_local"
+  }
+}
+actions {
+  preamble {
+    id: 23632964
+    name: "process_validate_packet.set_broadcast"
+    alias: "set_broadcast"
+  }
+}
+actions {
+  preamble {
+    id: 31827807
+    name: "process_validate_packet.set_malformed_packet"
+    alias: "set_malformed_packet"
+  }
+  params {
+    id: 1
+    name: "drop_reason"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 20843312
+    name: "process_mac.nop"
+    alias: "process_mac.nop"
+  }
+}
+actions {
+  preamble {
+    id: 28636382
+    name: "process_mac.dmac_hit"
+    alias: "dmac_hit"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 26825571
+    name: "process_mac.dmac_multicast_hit"
+    alias: "dmac_multicast_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 17035899
+    name: "process_mac.dmac_miss"
+    alias: "dmac_miss"
+  }
+}
+actions {
+  preamble {
+    id: 17676061
+    name: "process_mac.dmac_redirect_nexthop"
+    alias: "dmac_redirect_nexthop"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 25708383
+    name: "process_mac.dmac_redirect_ecmp"
+    alias: "dmac_redirect_ecmp"
+  }
+  params {
+    id: 1
+    name: "ecmp_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21196761
+    name: "process_mac.dmac_drop"
+    alias: "dmac_drop"
+  }
+}
+actions {
+  preamble {
+    id: 32116865
+    name: "process_mac.smac_miss"
+    alias: "smac_miss"
+  }
+}
+actions {
+  preamble {
+    id: 29714262
+    name: "process_mac.smac_hit"
+    alias: "smac_hit"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 19661619
+    name: "process_mac_acl.nop"
+    alias: "process_mac_acl.nop"
+  }
+}
+actions {
+  preamble {
+    id: 29832062
+    name: "process_mac_acl.acl_deny"
+    alias: "process_mac_acl.acl_deny"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 31672487
+    name: "process_mac_acl.acl_permit"
+    alias: "process_mac_acl.acl_permit"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 31291018
+    name: "process_mac_acl.acl_mirror"
+    alias: "process_mac_acl.acl_mirror"
+  }
+  params {
+    id: 1
+    name: "session_id"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 23354860
+    name: "process_mac_acl.acl_redirect_nexthop"
+    alias: "process_mac_acl.acl_redirect_nexthop"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 4
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 5
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 19482584
+    name: "process_mac_acl.acl_redirect_ecmp"
+    alias: "process_mac_acl.acl_redirect_ecmp"
+  }
+  params {
+    id: 1
+    name: "ecmp_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 4
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 5
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21469574
+    name: "process_ip_acl.nop"
+    alias: "process_ip_acl.nop"
+  }
+}
+actions {
+  preamble {
+    id: 16882986
+    name: "process_ip_acl.acl_deny"
+    alias: "process_ip_acl.acl_deny"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 18679243
+    name: "process_ip_acl.acl_permit"
+    alias: "process_ip_acl.acl_permit"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 31503642
+    name: "process_ip_acl.acl_mirror"
+    alias: "process_ip_acl.acl_mirror"
+  }
+  params {
+    id: 1
+    name: "session_id"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 33214426
+    name: "process_ip_acl.acl_redirect_nexthop"
+    alias: "process_ip_acl.acl_redirect_nexthop"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 4
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 5
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 23655829
+    name: "process_ip_acl.acl_redirect_ecmp"
+    alias: "process_ip_acl.acl_redirect_ecmp"
+  }
+  params {
+    id: 1
+    name: "ecmp_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_meter_index"
+    bitwidth: 16
+  }
+  params {
+    id: 4
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 5
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 24132248
+    name: "process_qos.nop"
+    alias: "process_qos.nop"
+  }
+}
+actions {
+  preamble {
+    id: 20289283
+    name: "process_qos.apply_cos_marking"
+    alias: "apply_cos_marking"
+  }
+  params {
+    id: 1
+    name: "cos"
+    bitwidth: 3
+  }
+}
+actions {
+  preamble {
+    id: 17815210
+    name: "process_qos.apply_dscp_marking"
+    alias: "apply_dscp_marking"
+  }
+  params {
+    id: 1
+    name: "dscp"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 25333645
+    name: "process_qos.apply_tc_marking"
+    alias: "apply_tc_marking"
+  }
+  params {
+    id: 1
+    name: "tc"
+    bitwidth: 3
+  }
+}
+actions {
+  preamble {
+    id: 32951744
+    name: "process_ipv4_multicast.on_miss"
+    alias: "process_ipv4_multicast.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 22392983
+    name: "process_ipv4_multicast.multicast_bridge_s_g_hit"
+    alias: "process_ipv4_multicast.multicast_bridge_s_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 26636518
+    name: "process_ipv4_multicast.nop"
+    alias: "process_ipv4_multicast.nop"
+  }
+}
+actions {
+  preamble {
+    id: 32567036
+    name: "process_ipv4_multicast.multicast_bridge_star_g_hit"
+    alias: "process_ipv4_multicast.multicast_bridge_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 27901704
+    name: "process_ipv4_multicast.on_miss_0"
+    alias: "on_miss_0"
+  }
+}
+actions {
+  preamble {
+    id: 18672239
+    name: "process_ipv4_multicast.multicast_route_s_g_hit_0"
+    alias: "multicast_route_s_g_hit_0"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 18382607
+    name: "process_ipv4_multicast.multicast_route_star_g_miss_0"
+    alias: "multicast_route_star_g_miss_0"
+  }
+}
+actions {
+  preamble {
+    id: 22881515
+    name: "process_ipv4_multicast.multicast_route_sm_star_g_hit_0"
+    alias: "multicast_route_sm_star_g_hit_0"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 26925750
+    name: "process_ipv4_multicast.multicast_route_bidir_star_g_hit_0"
+    alias: "multicast_route_bidir_star_g_hit_0"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21831302
+    name: "process_ipv6_multicast.on_miss"
+    alias: "process_ipv6_multicast.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 16968482
+    name: "process_ipv6_multicast.multicast_bridge_s_g_hit"
+    alias: "process_ipv6_multicast.multicast_bridge_s_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 22617804
+    name: "process_ipv6_multicast.nop"
+    alias: "process_ipv6_multicast.nop"
+  }
+}
+actions {
+  preamble {
+    id: 31460681
+    name: "process_ipv6_multicast.multicast_bridge_star_g_hit"
+    alias: "process_ipv6_multicast.multicast_bridge_star_g_hit"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 27868772
+    name: "process_ipv6_multicast.on_miss_1"
+    alias: "on_miss_1"
+  }
+}
+actions {
+  preamble {
+    id: 19495550
+    name: "process_ipv6_multicast.multicast_route_s_g_hit_1"
+    alias: "multicast_route_s_g_hit_1"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 17623212
+    name: "process_ipv6_multicast.multicast_route_star_g_miss_1"
+    alias: "multicast_route_star_g_miss_1"
+  }
+}
+actions {
+  preamble {
+    id: 29242413
+    name: "process_ipv6_multicast.multicast_route_sm_star_g_hit_1"
+    alias: "multicast_route_sm_star_g_hit_1"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21636917
+    name: "process_ipv6_multicast.multicast_route_bidir_star_g_hit_1"
+    alias: "multicast_route_bidir_star_g_hit_1"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mcast_rpf_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 23020886
+    name: "process_ipv4_racl.nop"
+    alias: "process_ipv4_racl.nop"
+  }
+}
+actions {
+  preamble {
+    id: 17324596
+    name: "process_ipv4_racl.racl_deny"
+    alias: "process_ipv4_racl.racl_deny"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 3
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 23904743
+    name: "process_ipv4_racl.racl_permit"
+    alias: "process_ipv4_racl.racl_permit"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 3
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 19870712
+    name: "process_ipv4_racl.racl_redirect_nexthop"
+    alias: "process_ipv4_racl.racl_redirect_nexthop"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 30301194
+    name: "process_ipv4_racl.racl_redirect_ecmp"
+    alias: "process_ipv4_racl.racl_redirect_ecmp"
+  }
+  params {
+    id: 1
+    name: "ecmp_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 29021353
+    name: "process_ipv4_urpf.on_miss"
+    alias: "process_ipv4_urpf.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 24117923
+    name: "process_ipv4_urpf.ipv4_urpf_hit"
+    alias: "ipv4_urpf_hit"
+  }
+  params {
+    id: 1
+    name: "urpf_bd_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 19173129
+    name: "process_ipv4_urpf.urpf_miss"
+    alias: "process_ipv4_urpf.urpf_miss"
+  }
+}
+actions {
+  preamble {
+    id: 19369381
+    name: "process_ipv4_fib.on_miss"
+    alias: "process_ipv4_fib.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 22250449
+    name: "process_ipv4_fib.fib_hit_nexthop"
+    alias: "process_ipv4_fib.fib_hit_nexthop"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 20714683
+    name: "process_ipv4_fib.fib_hit_ecmp"
+    alias: "process_ipv4_fib.fib_hit_ecmp"
+  }
+  params {
+    id: 1
+    name: "ecmp_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 19202626
+    name: "process_ipv6_racl.nop"
+    alias: "process_ipv6_racl.nop"
+  }
+}
+actions {
+  preamble {
+    id: 22653749
+    name: "process_ipv6_racl.racl_deny"
+    alias: "process_ipv6_racl.racl_deny"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 3
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 22108072
+    name: "process_ipv6_racl.racl_permit"
+    alias: "process_ipv6_racl.racl_permit"
+  }
+  params {
+    id: 1
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 3
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 22033917
+    name: "process_ipv6_racl.racl_redirect_nexthop"
+    alias: "process_ipv6_racl.racl_redirect_nexthop"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 26202673
+    name: "process_ipv6_racl.racl_redirect_ecmp"
+    alias: "process_ipv6_racl.racl_redirect_ecmp"
+  }
+  params {
+    id: 1
+    name: "ecmp_index"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "acl_stats_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "acl_copy"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "acl_copy_reason"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 33532084
+    name: "process_ipv6_urpf.on_miss"
+    alias: "process_ipv6_urpf.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 30875552
+    name: "process_ipv6_urpf.ipv6_urpf_hit"
+    alias: "ipv6_urpf_hit"
+  }
+  params {
+    id: 1
+    name: "urpf_bd_group"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 24330304
+    name: "process_ipv6_urpf.urpf_miss"
+    alias: "process_ipv6_urpf.urpf_miss"
+  }
+}
+actions {
+  preamble {
+    id: 23085876
+    name: "process_ipv6_fib.on_miss"
+    alias: "process_ipv6_fib.on_miss"
+  }
+}
+actions {
+  preamble {
+    id: 24244023
+    name: "process_ipv6_fib.fib_hit_nexthop"
+    alias: "process_ipv6_fib.fib_hit_nexthop"
+  }
+  params {
+    id: 1
+    name: "nexthop_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 26074845
+    name: "process_ipv6_fib.fib_hit_ecmp"
+    alias: "process_ipv6_fib.fib_hit_ecmp"
+  }
+  params {
+    id: 1
+    name: "ecmp_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 32064785
+    name: "process_urpf_bd.nop"
+    alias: "process_urpf_bd.nop"
+  }
+}
+actions {
+  preamble {
+    id: 30904346
+    name: "process_urpf_bd.urpf_bd_miss"
+    alias: "urpf_bd_miss"
+  }
+}
+actions {
+  preamble {
+    id: 22558474
+    name: "process_meter_index.nop_2"
+    alias: "nop_2"
+  }
+}
+actions {
+  preamble {
+    id: 32621822
+    name: "process_hashes.compute_lkp_ipv4_hash"
+    alias: "compute_lkp_ipv4_hash"
+  }
+}
+actions {
+  preamble {
+    id: 22832502
+    name: "process_hashes.compute_lkp_ipv6_hash"
+    alias: "compute_lkp_ipv6_hash"
+  }
+}
+actions {
+  preamble {
+    id: 24849986
+    name: "process_hashes.compute_lkp_non_ip_hash"
+    alias: "compute_lkp_non_ip_hash"
+  }
+}
+actions {
+  preamble {
+    id: 17777123
+    name: "process_hashes.computed_two_hashes"
+    alias: "computed_two_hashes"
+  }
+}
+actions {
+  preamble {
+    id: 29059294
+    name: "process_hashes.computed_one_hash"
+    alias: "computed_one_hash"
+  }
+}
+actions {
+  preamble {
+    id: 23449258
+    name: "process_meter_action.meter_permit_0"
+    alias: "meter_permit_0"
+  }
+}
+actions {
+  preamble {
+    id: 18319227
+    name: "process_meter_action.meter_deny_0"
+    alias: "meter_deny_0"
+  }
+}
+actions {
+  preamble {
+    id: 22439752
+    name: "process_ingress_bd_stats.update_ingress_bd_stats"
+    alias: "update_ingress_bd_stats"
+  }
+}
+actions {
+  preamble {
+    id: 22920417
+    name: "process_ingress_acl_stats.acl_stats_update"
+    alias: "acl_stats_update"
+  }
+}
+actions {
+  preamble {
+    id: 22604419
+    name: "process_storm_control_stats.nop_3"
+    alias: "nop_3"
+  }
+}
+actions {
+  preamble {
+    id: 16804848
+    name: "process_fwd_results.nop"
+    alias: "process_fwd_results.nop"
+  }
+}
+actions {
+  preamble {
+    id: 17002596
+    name: "process_fwd_results.set_l2_redirect_action"
+    alias: "set_l2_redirect_action"
+  }
+}
+actions {
+  preamble {
+    id: 32139265
+    name: "process_fwd_results.set_fib_redirect_action"
+    alias: "set_fib_redirect_action"
+  }
+}
+actions {
+  preamble {
+    id: 21445098
+    name: "process_fwd_results.set_cpu_redirect_action"
+    alias: "set_cpu_redirect_action"
+  }
+}
+actions {
+  preamble {
+    id: 18475473
+    name: "process_fwd_results.set_acl_redirect_action"
+    alias: "set_acl_redirect_action"
+  }
+}
+actions {
+  preamble {
+    id: 17492614
+    name: "process_fwd_results.set_racl_redirect_action"
+    alias: "set_racl_redirect_action"
+  }
+}
+actions {
+  preamble {
+    id: 22605342
+    name: "process_fwd_results.set_multicast_route_action"
+    alias: "set_multicast_route_action"
+  }
+}
+actions {
+  preamble {
+    id: 20020886
+    name: "process_fwd_results.set_multicast_bridge_action"
+    alias: "set_multicast_bridge_action"
+  }
+}
+actions {
+  preamble {
+    id: 17448174
+    name: "process_fwd_results.set_multicast_flood"
+    alias: "set_multicast_flood"
+  }
+}
+actions {
+  preamble {
+    id: 30784012
+    name: "process_fwd_results.set_multicast_drop"
+    alias: "set_multicast_drop"
+  }
+}
+actions {
+  preamble {
+    id: 21821898
+    name: "process_nexthop.nop"
+    alias: "process_nexthop.nop"
+  }
+}
+actions {
+  preamble {
+    id: 23407940
+    name: "process_nexthop.set_ecmp_nexthop_details"
+    alias: "set_ecmp_nexthop_details"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "nhop_index"
+    bitwidth: 16
+  }
+  params {
+    id: 4
+    name: "tunnel"
+    bitwidth: 1
+  }
+}
+actions {
+  preamble {
+    id: 21031053
+    name: "process_nexthop.set_ecmp_nexthop_details_for_post_routed_flood"
+    alias: "set_ecmp_nexthop_details_for_post_routed_flood"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "uuc_mc_index"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "nhop_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21867633
+    name: "process_nexthop.set_nexthop_details"
+    alias: "set_nexthop_details"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 3
+    name: "tunnel"
+    bitwidth: 1
+  }
+}
+actions {
+  preamble {
+    id: 31926291
+    name: "process_nexthop.set_nexthop_details_for_post_routed_flood"
+    alias: "set_nexthop_details_for_post_routed_flood"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "uuc_mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21091506
+    name: "process_multicast_flooding.nop"
+    alias: "process_multicast_flooding.nop"
+  }
+}
+actions {
+  preamble {
+    id: 28003351
+    name: "process_multicast_flooding.set_bd_flood_mc_index"
+    alias: "set_bd_flood_mc_index"
+  }
+  params {
+    id: 1
+    name: "mc_index"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 17136543
+    name: "process_lag.set_lag_miss"
+    alias: "set_lag_miss"
+  }
+}
+actions {
+  preamble {
+    id: 26583734
+    name: "process_lag.set_lag_port"
+    alias: "set_lag_port"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 17749532
+    name: "process_lag.set_lag_remote_port"
+    alias: "set_lag_remote_port"
+  }
+  params {
+    id: 1
+    name: "device"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 25859160
+    name: "process_mac_learning.nop"
+    alias: "process_mac_learning.nop"
+  }
+}
+actions {
+  preamble {
+    id: 23905849
+    name: "process_mac_learning.generate_learn_notify"
+    alias: "generate_learn_notify"
+  }
+}
+actions {
+  preamble {
+    id: 31087776
+    name: "process_fabric_lag.nop"
+    alias: "process_fabric_lag.nop"
+  }
+}
+actions {
+  preamble {
+    id: 20535052
+    name: "process_fabric_lag.set_fabric_lag_port"
+    alias: "set_fabric_lag_port"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 26581760
+    name: "process_fabric_lag.set_fabric_multicast"
+    alias: "set_fabric_multicast"
+  }
+  params {
+    id: 1
+    name: "fabric_mgid"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 25605858
+    name: "process_system_acl.drop_stats_update"
+    alias: "drop_stats_update"
+  }
+}
+actions {
+  preamble {
+    id: 30951662
+    name: "process_system_acl.nop"
+    alias: "process_system_acl.nop"
+  }
+}
+actions {
+  preamble {
+    id: 18002712
+    name: "process_system_acl.copy_to_cpu_with_reason"
+    alias: "copy_to_cpu_with_reason"
+  }
+  params {
+    id: 1
+    name: "reason_code"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 29730527
+    name: "process_system_acl.redirect_to_cpu"
+    alias: "redirect_to_cpu"
+  }
+  params {
+    id: 1
+    name: "reason_code"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 26836234
+    name: "process_system_acl.copy_to_cpu"
+    alias: "copy_to_cpu"
+  }
+}
+actions {
+  preamble {
+    id: 19384363
+    name: "process_system_acl.drop_packet"
+    alias: "drop_packet"
+  }
+}
+actions {
+  preamble {
+    id: 21945631
+    name: "process_system_acl.drop_packet_with_reason"
+    alias: "drop_packet_with_reason"
+  }
+  params {
+    id: 1
+    name: "drop_reason"
+    bitwidth: 10
+  }
+}
+actions {
+  preamble {
+    id: 17559966
+    name: "process_system_acl.negative_mirror"
+    alias: "negative_mirror"
+  }
+  params {
+    id: 1
+    name: "session_id"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 26603359
+    name: "egress.egress_port_type_normal"
+    alias: "egress_port_type_normal"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 28945045
+    name: "egress.egress_port_type_fabric"
+    alias: "egress_port_type_fabric"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 30096172
+    name: "egress.egress_port_type_cpu"
+    alias: "egress_port_type_cpu"
+  }
+  params {
+    id: 1
+    name: "ifindex"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 25692703
+    name: "egress.nop"
+    alias: "egress.nop"
+  }
+}
+actions {
+  preamble {
+    id: 27128095
+    name: "egress.set_mirror_nhop"
+    alias: "set_mirror_nhop"
+  }
+  params {
+    id: 1
+    name: "nhop_idx"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 28364382
+    name: "egress.set_mirror_bd"
+    alias: "set_mirror_bd"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 24517251
+    name: "egress.sflow_pkt_to_cpu"
+    alias: "sflow_pkt_to_cpu"
+  }
+}
+actions {
+  preamble {
+    id: 33114731
+    name: "process_replication.nop"
+    alias: "process_replication.nop"
+  }
+}
+actions {
+  preamble {
+    id: 32648356
+    name: "process_replication.set_replica_copy_bridged"
+    alias: "set_replica_copy_bridged"
+  }
+}
+actions {
+  preamble {
+    id: 17928584
+    name: "process_replication.outer_replica_from_rid"
+    alias: "outer_replica_from_rid"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+  params {
+    id: 4
+    name: "header_count"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 27400339
+    name: "process_replication.inner_replica_from_rid"
+    alias: "inner_replica_from_rid"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+  params {
+    id: 4
+    name: "header_count"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 24051746
+    name: "process_vlan_decap.nop"
+    alias: "process_vlan_decap.nop"
+  }
+}
+actions {
+  preamble {
+    id: 18645134
+    name: "process_vlan_decap.remove_vlan_single_tagged"
+    alias: "remove_vlan_single_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 24210138
+    name: "process_vlan_decap.remove_vlan_double_tagged"
+    alias: "remove_vlan_double_tagged"
+  }
+}
+actions {
+  preamble {
+    id: 18743292
+    name: "process_tunnel_decap.decap_inner_udp"
+    alias: "decap_inner_udp"
+  }
+}
+actions {
+  preamble {
+    id: 26630855
+    name: "process_tunnel_decap.decap_inner_tcp"
+    alias: "decap_inner_tcp"
+  }
+}
+actions {
+  preamble {
+    id: 29295160
+    name: "process_tunnel_decap.decap_inner_icmp"
+    alias: "decap_inner_icmp"
+  }
+}
+actions {
+  preamble {
+    id: 28715521
+    name: "process_tunnel_decap.decap_inner_unknown"
+    alias: "decap_inner_unknown"
+  }
+}
+actions {
+  preamble {
+    id: 17768838
+    name: "process_tunnel_decap.decap_vxlan_inner_ipv4"
+    alias: "decap_vxlan_inner_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 28048063
+    name: "process_tunnel_decap.decap_vxlan_inner_ipv6"
+    alias: "decap_vxlan_inner_ipv6"
+  }
+}
+actions {
+  preamble {
+    id: 24553741
+    name: "process_tunnel_decap.decap_vxlan_inner_non_ip"
+    alias: "decap_vxlan_inner_non_ip"
+  }
+}
+actions {
+  preamble {
+    id: 24262097
+    name: "process_tunnel_decap.decap_genv_inner_ipv4"
+    alias: "decap_genv_inner_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 32575184
+    name: "process_tunnel_decap.decap_genv_inner_ipv6"
+    alias: "decap_genv_inner_ipv6"
+  }
+}
+actions {
+  preamble {
+    id: 20772090
+    name: "process_tunnel_decap.decap_genv_inner_non_ip"
+    alias: "decap_genv_inner_non_ip"
+  }
+}
+actions {
+  preamble {
+    id: 30471945
+    name: "process_tunnel_decap.decap_nvgre_inner_ipv4"
+    alias: "decap_nvgre_inner_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 28525261
+    name: "process_tunnel_decap.decap_nvgre_inner_ipv6"
+    alias: "decap_nvgre_inner_ipv6"
+  }
+}
+actions {
+  preamble {
+    id: 20211497
+    name: "process_tunnel_decap.decap_nvgre_inner_non_ip"
+    alias: "decap_nvgre_inner_non_ip"
+  }
+}
+actions {
+  preamble {
+    id: 20138720
+    name: "process_tunnel_decap.decap_gre_inner_ipv4"
+    alias: "decap_gre_inner_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 23326534
+    name: "process_tunnel_decap.decap_gre_inner_ipv6"
+    alias: "decap_gre_inner_ipv6"
+  }
+}
+actions {
+  preamble {
+    id: 28031461
+    name: "process_tunnel_decap.decap_gre_inner_non_ip"
+    alias: "decap_gre_inner_non_ip"
+  }
+}
+actions {
+  preamble {
+    id: 22180437
+    name: "process_tunnel_decap.decap_ip_inner_ipv4"
+    alias: "decap_ip_inner_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 28785442
+    name: "process_tunnel_decap.decap_ip_inner_ipv6"
+    alias: "decap_ip_inner_ipv6"
+  }
+}
+actions {
+  preamble {
+    id: 24377716
+    name: "process_tunnel_decap.decap_mpls_inner_ipv4_pop1"
+    alias: "decap_mpls_inner_ipv4_pop1"
+  }
+}
+actions {
+  preamble {
+    id: 19988268
+    name: "process_tunnel_decap.decap_mpls_inner_ipv6_pop1"
+    alias: "decap_mpls_inner_ipv6_pop1"
+  }
+}
+actions {
+  preamble {
+    id: 31512019
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_ipv4_pop1"
+    alias: "decap_mpls_inner_ethernet_ipv4_pop1"
+  }
+}
+actions {
+  preamble {
+    id: 23147554
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_ipv6_pop1"
+    alias: "decap_mpls_inner_ethernet_ipv6_pop1"
+  }
+}
+actions {
+  preamble {
+    id: 32879799
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_non_ip_pop1"
+    alias: "decap_mpls_inner_ethernet_non_ip_pop1"
+  }
+}
+actions {
+  preamble {
+    id: 24177007
+    name: "process_tunnel_decap.decap_mpls_inner_ipv4_pop2"
+    alias: "decap_mpls_inner_ipv4_pop2"
+  }
+}
+actions {
+  preamble {
+    id: 21926248
+    name: "process_tunnel_decap.decap_mpls_inner_ipv6_pop2"
+    alias: "decap_mpls_inner_ipv6_pop2"
+  }
+}
+actions {
+  preamble {
+    id: 24083695
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_ipv4_pop2"
+    alias: "decap_mpls_inner_ethernet_ipv4_pop2"
+  }
+}
+actions {
+  preamble {
+    id: 26267777
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_ipv6_pop2"
+    alias: "decap_mpls_inner_ethernet_ipv6_pop2"
+  }
+}
+actions {
+  preamble {
+    id: 24959429
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_non_ip_pop2"
+    alias: "decap_mpls_inner_ethernet_non_ip_pop2"
+  }
+}
+actions {
+  preamble {
+    id: 21148947
+    name: "process_tunnel_decap.decap_mpls_inner_ipv4_pop3"
+    alias: "decap_mpls_inner_ipv4_pop3"
+  }
+}
+actions {
+  preamble {
+    id: 28587059
+    name: "process_tunnel_decap.decap_mpls_inner_ipv6_pop3"
+    alias: "decap_mpls_inner_ipv6_pop3"
+  }
+}
+actions {
+  preamble {
+    id: 33232904
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_ipv4_pop3"
+    alias: "decap_mpls_inner_ethernet_ipv4_pop3"
+  }
+}
+actions {
+  preamble {
+    id: 29258460
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_ipv6_pop3"
+    alias: "decap_mpls_inner_ethernet_ipv6_pop3"
+  }
+}
+actions {
+  preamble {
+    id: 21921128
+    name: "process_tunnel_decap.decap_mpls_inner_ethernet_non_ip_pop3"
+    alias: "decap_mpls_inner_ethernet_non_ip_pop3"
+  }
+}
+actions {
+  preamble {
+    id: 29889416
+    name: "process_rewrite.nop"
+    alias: "process_rewrite.nop"
+  }
+}
+actions {
+  preamble {
+    id: 20836470
+    name: "process_rewrite.set_l2_rewrite"
+    alias: "set_l2_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 20985643
+    name: "process_rewrite.set_l2_rewrite_with_tunnel"
+    alias: "set_l2_rewrite_with_tunnel"
+  }
+  params {
+    id: 1
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+}
+actions {
+  preamble {
+    id: 32028714
+    name: "process_rewrite.set_l3_rewrite"
+    alias: "set_l3_rewrite"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "mtu_index"
+    bitwidth: 8
+  }
+  params {
+    id: 3
+    name: "dmac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 20456020
+    name: "process_rewrite.set_l3_rewrite_with_tunnel"
+    alias: "set_l3_rewrite_with_tunnel"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 4
+    name: "tunnel_type"
+    bitwidth: 5
+  }
+}
+actions {
+  preamble {
+    id: 18070213
+    name: "process_rewrite.set_mpls_swap_push_rewrite_l2"
+    alias: "set_mpls_swap_push_rewrite_l2"
+  }
+  params {
+    id: 1
+    name: "label"
+    bitwidth: 20
+  }
+  params {
+    id: 2
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 3
+    name: "header_count"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 29931909
+    name: "process_rewrite.set_mpls_push_rewrite_l2"
+    alias: "set_mpls_push_rewrite_l2"
+  }
+  params {
+    id: 1
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 2
+    name: "header_count"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 23741811
+    name: "process_rewrite.set_mpls_swap_push_rewrite_l3"
+    alias: "set_mpls_swap_push_rewrite_l3"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "label"
+    bitwidth: 20
+  }
+  params {
+    id: 4
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 5
+    name: "header_count"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 16881143
+    name: "process_rewrite.set_mpls_push_rewrite_l3"
+    alias: "set_mpls_push_rewrite_l3"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+  params {
+    id: 4
+    name: "header_count"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 29525111
+    name: "process_rewrite.rewrite_ipv4_multicast"
+    alias: "rewrite_ipv4_multicast"
+  }
+}
+actions {
+  preamble {
+    id: 22371099
+    name: "process_rewrite.rewrite_ipv6_multicast"
+    alias: "rewrite_ipv6_multicast"
+  }
+}
+actions {
+  preamble {
+    id: 17174709
+    name: "process_egress_bd.nop"
+    alias: "process_egress_bd.nop"
+  }
+}
+actions {
+  preamble {
+    id: 27472973
+    name: "process_egress_bd.set_egress_bd_properties"
+    alias: "set_egress_bd_properties"
+  }
+  params {
+    id: 1
+    name: "smac_idx"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 31144289
+    name: "process_mac_rewrite.nop"
+    alias: "process_mac_rewrite.nop"
+  }
+}
+actions {
+  preamble {
+    id: 17709619
+    name: "process_mac_rewrite.ipv4_unicast_rewrite"
+    alias: "ipv4_unicast_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 24899669
+    name: "process_mac_rewrite.ipv4_multicast_rewrite"
+    alias: "ipv4_multicast_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 32319601
+    name: "process_mac_rewrite.ipv6_unicast_rewrite"
+    alias: "ipv6_unicast_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 22422486
+    name: "process_mac_rewrite.ipv6_multicast_rewrite"
+    alias: "ipv6_multicast_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 25682421
+    name: "process_mac_rewrite.mpls_rewrite"
+    alias: "mpls_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 19760197
+    name: "process_mac_rewrite.rewrite_smac"
+    alias: "rewrite_smac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 17753646
+    name: "process_mtu.mtu_miss"
+    alias: "mtu_miss"
+  }
+}
+actions {
+  preamble {
+    id: 18299046
+    name: "process_mtu.ipv4_mtu_check"
+    alias: "ipv4_mtu_check"
+  }
+  params {
+    id: 1
+    name: "l3_mtu"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 17842211
+    name: "process_mtu.ipv6_mtu_check"
+    alias: "ipv6_mtu_check"
+  }
+  params {
+    id: 1
+    name: "l3_mtu"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 23094047
+    name: "process_int_insertion.int_set_header_0_bos"
+    alias: "int_set_header_0_bos"
+  }
+}
+actions {
+  preamble {
+    id: 33173909
+    name: "process_int_insertion.int_set_header_1_bos"
+    alias: "int_set_header_1_bos"
+  }
+}
+actions {
+  preamble {
+    id: 22301520
+    name: "process_int_insertion.int_set_header_2_bos"
+    alias: "int_set_header_2_bos"
+  }
+}
+actions {
+  preamble {
+    id: 19288675
+    name: "process_int_insertion.int_set_header_3_bos"
+    alias: "int_set_header_3_bos"
+  }
+}
+actions {
+  preamble {
+    id: 17432508
+    name: "process_int_insertion.int_set_header_4_bos"
+    alias: "int_set_header_4_bos"
+  }
+}
+actions {
+  preamble {
+    id: 31106134
+    name: "process_int_insertion.int_set_header_5_bos"
+    alias: "int_set_header_5_bos"
+  }
+}
+actions {
+  preamble {
+    id: 30747137
+    name: "process_int_insertion.int_set_header_6_bos"
+    alias: "int_set_header_6_bos"
+  }
+}
+actions {
+  preamble {
+    id: 22733351
+    name: "process_int_insertion.int_set_header_7_bos"
+    alias: "int_set_header_7_bos"
+  }
+}
+actions {
+  preamble {
+    id: 22920701
+    name: "process_int_insertion.nop"
+    alias: "process_int_insertion.nop"
+  }
+}
+actions {
+  preamble {
+    id: 32129728
+    name: "process_int_insertion.int_transit"
+    alias: "int_transit"
+  }
+  params {
+    id: 1
+    name: "switch_id"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 30253665
+    name: "process_int_insertion.int_src"
+    alias: "int_src"
+  }
+  params {
+    id: 1
+    name: "switch_id"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "hop_cnt"
+    bitwidth: 8
+  }
+  params {
+    id: 3
+    name: "ins_cnt"
+    bitwidth: 5
+  }
+  params {
+    id: 4
+    name: "ins_mask0003"
+    bitwidth: 4
+  }
+  params {
+    id: 5
+    name: "ins_mask0407"
+    bitwidth: 4
+  }
+  params {
+    id: 6
+    name: "ins_byte_cnt"
+    bitwidth: 16
+  }
+  params {
+    id: 7
+    name: "total_words"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 31721162
+    name: "process_int_insertion.int_reset"
+    alias: "int_reset"
+  }
+}
+actions {
+  preamble {
+    id: 32954241
+    name: "process_int_insertion.int_set_header_0003_i0"
+    alias: "int_set_header_0003_i0"
+  }
+}
+actions {
+  preamble {
+    id: 23275607
+    name: "process_int_insertion.int_set_header_0003_i1"
+    alias: "int_set_header_0003_i1"
+  }
+}
+actions {
+  preamble {
+    id: 27102412
+    name: "process_int_insertion.int_set_header_0003_i2"
+    alias: "int_set_header_0003_i2"
+  }
+}
+actions {
+  preamble {
+    id: 19654120
+    name: "process_int_insertion.int_set_header_0003_i3"
+    alias: "int_set_header_0003_i3"
+  }
+}
+actions {
+  preamble {
+    id: 33241480
+    name: "process_int_insertion.int_set_header_0003_i4"
+    alias: "int_set_header_0003_i4"
+  }
+}
+actions {
+  preamble {
+    id: 21600805
+    name: "process_int_insertion.int_set_header_0003_i5"
+    alias: "int_set_header_0003_i5"
+  }
+}
+actions {
+  preamble {
+    id: 17232287
+    name: "process_int_insertion.int_set_header_0003_i6"
+    alias: "int_set_header_0003_i6"
+  }
+}
+actions {
+  preamble {
+    id: 25861291
+    name: "process_int_insertion.int_set_header_0003_i7"
+    alias: "int_set_header_0003_i7"
+  }
+}
+actions {
+  preamble {
+    id: 18608589
+    name: "process_int_insertion.int_set_header_0003_i8"
+    alias: "int_set_header_0003_i8"
+  }
+}
+actions {
+  preamble {
+    id: 33380240
+    name: "process_int_insertion.int_set_header_0003_i9"
+    alias: "int_set_header_0003_i9"
+  }
+}
+actions {
+  preamble {
+    id: 26461414
+    name: "process_int_insertion.int_set_header_0003_i10"
+    alias: "int_set_header_0003_i10"
+  }
+}
+actions {
+  preamble {
+    id: 22833659
+    name: "process_int_insertion.int_set_header_0003_i11"
+    alias: "int_set_header_0003_i11"
+  }
+}
+actions {
+  preamble {
+    id: 24557103
+    name: "process_int_insertion.int_set_header_0003_i12"
+    alias: "int_set_header_0003_i12"
+  }
+}
+actions {
+  preamble {
+    id: 27791506
+    name: "process_int_insertion.int_set_header_0003_i13"
+    alias: "int_set_header_0003_i13"
+  }
+}
+actions {
+  preamble {
+    id: 33127732
+    name: "process_int_insertion.int_set_header_0003_i14"
+    alias: "int_set_header_0003_i14"
+  }
+}
+actions {
+  preamble {
+    id: 22273001
+    name: "process_int_insertion.int_set_header_0003_i15"
+    alias: "int_set_header_0003_i15"
+  }
+}
+actions {
+  preamble {
+    id: 32620806
+    name: "process_int_insertion.int_set_header_0407_i0"
+    alias: "int_set_header_0407_i0"
+  }
+}
+actions {
+  preamble {
+    id: 22767065
+    name: "process_int_insertion.int_set_header_0407_i1"
+    alias: "int_set_header_0407_i1"
+  }
+}
+actions {
+  preamble {
+    id: 25397293
+    name: "process_int_insertion.int_set_header_0407_i2"
+    alias: "int_set_header_0407_i2"
+  }
+}
+actions {
+  preamble {
+    id: 17416507
+    name: "process_int_insertion.int_set_header_0407_i3"
+    alias: "int_set_header_0407_i3"
+  }
+}
+actions {
+  preamble {
+    id: 21456310
+    name: "process_int_insertion.int_set_header_0407_i4"
+    alias: "int_set_header_0407_i4"
+  }
+}
+actions {
+  preamble {
+    id: 31754480
+    name: "process_int_insertion.int_set_header_0407_i5"
+    alias: "int_set_header_0407_i5"
+  }
+}
+actions {
+  preamble {
+    id: 19256178
+    name: "process_int_insertion.int_set_header_0407_i6"
+    alias: "int_set_header_0407_i6"
+  }
+}
+actions {
+  preamble {
+    id: 17553212
+    name: "process_int_insertion.int_set_header_0407_i7"
+    alias: "int_set_header_0407_i7"
+  }
+}
+actions {
+  preamble {
+    id: 28210305
+    name: "process_int_insertion.int_set_header_0407_i8"
+    alias: "int_set_header_0407_i8"
+  }
+}
+actions {
+  preamble {
+    id: 25663543
+    name: "process_int_insertion.int_set_header_0407_i9"
+    alias: "int_set_header_0407_i9"
+  }
+}
+actions {
+  preamble {
+    id: 24312477
+    name: "process_int_insertion.int_set_header_0407_i10"
+    alias: "int_set_header_0407_i10"
+  }
+}
+actions {
+  preamble {
+    id: 18804214
+    name: "process_int_insertion.int_set_header_0407_i11"
+    alias: "int_set_header_0407_i11"
+  }
+}
+actions {
+  preamble {
+    id: 31441272
+    name: "process_int_insertion.int_set_header_0407_i12"
+    alias: "int_set_header_0407_i12"
+  }
+}
+actions {
+  preamble {
+    id: 20594206
+    name: "process_int_insertion.int_set_header_0407_i13"
+    alias: "int_set_header_0407_i13"
+  }
+}
+actions {
+  preamble {
+    id: 18158548
+    name: "process_int_insertion.int_set_header_0407_i14"
+    alias: "int_set_header_0407_i14"
+  }
+}
+actions {
+  preamble {
+    id: 32114559
+    name: "process_int_insertion.int_set_header_0407_i15"
+    alias: "int_set_header_0407_i15"
+  }
+}
+actions {
+  preamble {
+    id: 19665188
+    name: "process_int_insertion.int_set_e_bit"
+    alias: "int_set_e_bit"
+  }
+}
+actions {
+  preamble {
+    id: 26727289
+    name: "process_int_insertion.int_update_total_hop_cnt"
+    alias: "int_update_total_hop_cnt"
+  }
+}
+actions {
+  preamble {
+    id: 26379098
+    name: "process_egress_bd_stats.nop_0"
+    alias: "nop_0"
+  }
+}
+actions {
+  preamble {
+    id: 26010426
+    name: "process_tunnel_encap.nop"
+    alias: "process_tunnel_encap.nop"
+  }
+}
+actions {
+  preamble {
+    id: 17672696
+    name: "process_tunnel_encap.set_egress_tunnel_vni"
+    alias: "set_egress_tunnel_vni"
+  }
+  params {
+    id: 1
+    name: "vnid"
+    bitwidth: 24
+  }
+}
+actions {
+  preamble {
+    id: 31137876
+    name: "process_tunnel_encap.rewrite_tunnel_dmac"
+    alias: "rewrite_tunnel_dmac"
+  }
+  params {
+    id: 1
+    name: "dmac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 31188157
+    name: "process_tunnel_encap.rewrite_tunnel_ipv4_dst"
+    alias: "rewrite_tunnel_ipv4_dst"
+  }
+  params {
+    id: 1
+    name: "ip"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 26316217
+    name: "process_tunnel_encap.rewrite_tunnel_ipv6_dst"
+    alias: "rewrite_tunnel_ipv6_dst"
+  }
+  params {
+    id: 1
+    name: "ip"
+    bitwidth: 128
+  }
+}
+actions {
+  preamble {
+    id: 22012831
+    name: "process_tunnel_encap.inner_ipv4_udp_rewrite"
+    alias: "inner_ipv4_udp_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 32489680
+    name: "process_tunnel_encap.inner_ipv4_tcp_rewrite"
+    alias: "inner_ipv4_tcp_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 18677479
+    name: "process_tunnel_encap.inner_ipv4_icmp_rewrite"
+    alias: "inner_ipv4_icmp_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 27242308
+    name: "process_tunnel_encap.inner_ipv4_unknown_rewrite"
+    alias: "inner_ipv4_unknown_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 18850099
+    name: "process_tunnel_encap.inner_ipv6_udp_rewrite"
+    alias: "inner_ipv6_udp_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 25639607
+    name: "process_tunnel_encap.inner_ipv6_tcp_rewrite"
+    alias: "inner_ipv6_tcp_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 19613422
+    name: "process_tunnel_encap.inner_ipv6_icmp_rewrite"
+    alias: "inner_ipv6_icmp_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 30542777
+    name: "process_tunnel_encap.inner_ipv6_unknown_rewrite"
+    alias: "inner_ipv6_unknown_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 24131522
+    name: "process_tunnel_encap.inner_non_ip_rewrite"
+    alias: "inner_non_ip_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 20103093
+    name: "process_tunnel_encap.ipv4_vxlan_rewrite"
+    alias: "ipv4_vxlan_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 19046026
+    name: "process_tunnel_encap.ipv4_genv_rewrite"
+    alias: "ipv4_genv_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 25961605
+    name: "process_tunnel_encap.ipv4_nvgre_rewrite"
+    alias: "ipv4_nvgre_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 23176024
+    name: "process_tunnel_encap.ipv4_gre_rewrite"
+    alias: "ipv4_gre_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 32138848
+    name: "process_tunnel_encap.ipv4_ip_rewrite"
+    alias: "ipv4_ip_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 32256671
+    name: "process_tunnel_encap.ipv4_erspan_t3_rewrite"
+    alias: "ipv4_erspan_t3_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 20523098
+    name: "process_tunnel_encap.ipv6_gre_rewrite"
+    alias: "ipv6_gre_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 18288010
+    name: "process_tunnel_encap.ipv6_ip_rewrite"
+    alias: "ipv6_ip_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 26867995
+    name: "process_tunnel_encap.ipv6_nvgre_rewrite"
+    alias: "ipv6_nvgre_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 32157079
+    name: "process_tunnel_encap.ipv6_vxlan_rewrite"
+    alias: "ipv6_vxlan_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 31421314
+    name: "process_tunnel_encap.ipv6_genv_rewrite"
+    alias: "ipv6_genv_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 21179245
+    name: "process_tunnel_encap.ipv6_erspan_t3_rewrite"
+    alias: "ipv6_erspan_t3_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 25235855
+    name: "process_tunnel_encap.mpls_ethernet_push1_rewrite"
+    alias: "mpls_ethernet_push1_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 23444864
+    name: "process_tunnel_encap.mpls_ip_push1_rewrite"
+    alias: "mpls_ip_push1_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 20797182
+    name: "process_tunnel_encap.mpls_ethernet_push2_rewrite"
+    alias: "mpls_ethernet_push2_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 24407457
+    name: "process_tunnel_encap.mpls_ip_push2_rewrite"
+    alias: "mpls_ip_push2_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 20185303
+    name: "process_tunnel_encap.mpls_ethernet_push3_rewrite"
+    alias: "mpls_ethernet_push3_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 32853703
+    name: "process_tunnel_encap.mpls_ip_push3_rewrite"
+    alias: "mpls_ip_push3_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 25002800
+    name: "process_tunnel_encap.fabric_rewrite"
+    alias: "fabric_rewrite"
+  }
+  params {
+    id: 1
+    name: "tunnel_index"
+    bitwidth: 14
+  }
+}
+actions {
+  preamble {
+    id: 21075337
+    name: "process_tunnel_encap.tunnel_mtu_check"
+    alias: "tunnel_mtu_check"
+  }
+  params {
+    id: 1
+    name: "l3_mtu"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 32323556
+    name: "process_tunnel_encap.tunnel_mtu_miss"
+    alias: "tunnel_mtu_miss"
+  }
+}
+actions {
+  preamble {
+    id: 19600568
+    name: "process_tunnel_encap.set_tunnel_rewrite_details"
+    alias: "set_tunnel_rewrite_details"
+  }
+  params {
+    id: 1
+    name: "outer_bd"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "smac_idx"
+    bitwidth: 9
+  }
+  params {
+    id: 3
+    name: "dmac_idx"
+    bitwidth: 14
+  }
+  params {
+    id: 4
+    name: "sip_index"
+    bitwidth: 9
+  }
+  params {
+    id: 5
+    name: "dip_index"
+    bitwidth: 14
+  }
+}
+actions {
+  preamble {
+    id: 25019307
+    name: "process_tunnel_encap.set_mpls_rewrite_push1"
+    alias: "set_mpls_rewrite_push1"
+  }
+  params {
+    id: 1
+    name: "label1"
+    bitwidth: 20
+  }
+  params {
+    id: 2
+    name: "exp1"
+    bitwidth: 3
+  }
+  params {
+    id: 3
+    name: "ttl1"
+    bitwidth: 8
+  }
+  params {
+    id: 4
+    name: "smac_idx"
+    bitwidth: 9
+  }
+  params {
+    id: 5
+    name: "dmac_idx"
+    bitwidth: 14
+  }
+}
+actions {
+  preamble {
+    id: 32131701
+    name: "process_tunnel_encap.set_mpls_rewrite_push2"
+    alias: "set_mpls_rewrite_push2"
+  }
+  params {
+    id: 1
+    name: "label1"
+    bitwidth: 20
+  }
+  params {
+    id: 2
+    name: "exp1"
+    bitwidth: 3
+  }
+  params {
+    id: 3
+    name: "ttl1"
+    bitwidth: 8
+  }
+  params {
+    id: 4
+    name: "label2"
+    bitwidth: 20
+  }
+  params {
+    id: 5
+    name: "exp2"
+    bitwidth: 3
+  }
+  params {
+    id: 6
+    name: "ttl2"
+    bitwidth: 8
+  }
+  params {
+    id: 7
+    name: "smac_idx"
+    bitwidth: 9
+  }
+  params {
+    id: 8
+    name: "dmac_idx"
+    bitwidth: 14
+  }
+}
+actions {
+  preamble {
+    id: 18296528
+    name: "process_tunnel_encap.set_mpls_rewrite_push3"
+    alias: "set_mpls_rewrite_push3"
+  }
+  params {
+    id: 1
+    name: "label1"
+    bitwidth: 20
+  }
+  params {
+    id: 2
+    name: "exp1"
+    bitwidth: 3
+  }
+  params {
+    id: 3
+    name: "ttl1"
+    bitwidth: 8
+  }
+  params {
+    id: 4
+    name: "label2"
+    bitwidth: 20
+  }
+  params {
+    id: 5
+    name: "exp2"
+    bitwidth: 3
+  }
+  params {
+    id: 6
+    name: "ttl2"
+    bitwidth: 8
+  }
+  params {
+    id: 7
+    name: "label3"
+    bitwidth: 20
+  }
+  params {
+    id: 8
+    name: "exp3"
+    bitwidth: 3
+  }
+  params {
+    id: 9
+    name: "ttl3"
+    bitwidth: 8
+  }
+  params {
+    id: 10
+    name: "smac_idx"
+    bitwidth: 9
+  }
+  params {
+    id: 11
+    name: "dmac_idx"
+    bitwidth: 14
+  }
+}
+actions {
+  preamble {
+    id: 19608310
+    name: "process_tunnel_encap.cpu_rx_rewrite"
+    alias: "cpu_rx_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 23356140
+    name: "process_tunnel_encap.fabric_unicast_rewrite"
+    alias: "fabric_unicast_rewrite"
+  }
+}
+actions {
+  preamble {
+    id: 28769719
+    name: "process_tunnel_encap.fabric_multicast_rewrite"
+    alias: "fabric_multicast_rewrite"
+  }
+  params {
+    id: 1
+    name: "fabric_mgid"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 21832280
+    name: "process_tunnel_encap.rewrite_tunnel_smac"
+    alias: "rewrite_tunnel_smac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 26252648
+    name: "process_tunnel_encap.rewrite_tunnel_ipv4_src"
+    alias: "rewrite_tunnel_ipv4_src"
+  }
+  params {
+    id: 1
+    name: "ip"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 17291318
+    name: "process_tunnel_encap.rewrite_tunnel_ipv6_src"
+    alias: "rewrite_tunnel_ipv6_src"
+  }
+  params {
+    id: 1
+    name: "ip"
+    bitwidth: 128
+  }
+}
+actions {
+  preamble {
+    id: 17270234
+    name: "process_int_outer_encap.int_update_vxlan_gpe_ipv4"
+    alias: "int_update_vxlan_gpe_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 28075883
+    name: "process_int_outer_encap.int_add_update_vxlan_gpe_ipv4"
+    alias: "int_add_update_vxlan_gpe_ipv4"
+  }
+}
+actions {
+  preamble {
+    id: 22421955
+    name: "process_int_outer_encap.nop"
+    alias: "process_int_outer_encap.nop"
+  }
+}
+actions {
+  preamble {
+    id: 25117848
+    name: "process_vlan_xlate.set_egress_packet_vlan_untagged"
+    alias: "set_egress_packet_vlan_untagged"
+  }
+}
+actions {
+  preamble {
+    id: 17087433
+    name: "process_vlan_xlate.set_egress_packet_vlan_tagged"
+    alias: "set_egress_packet_vlan_tagged"
+  }
+  params {
+    id: 1
+    name: "vlan_id"
+    bitwidth: 12
+  }
+}
+actions {
+  preamble {
+    id: 25310390
+    name: "process_vlan_xlate.set_egress_packet_vlan_double_tagged"
+    alias: "set_egress_packet_vlan_double_tagged"
+  }
+  params {
+    id: 1
+    name: "s_tag"
+    bitwidth: 12
+  }
+  params {
+    id: 2
+    name: "c_tag"
+    bitwidth: 12
+  }
+}
+actions {
+  preamble {
+    id: 28243510
+    name: "process_egress_filter.egress_filter_check"
+    alias: "egress_filter_check"
+  }
+}
+actions {
+  preamble {
+    id: 20968920
+    name: "process_egress_filter.set_egress_filter_drop"
+    alias: "set_egress_filter_drop"
+  }
+}
+actions {
+  preamble {
+    id: 23035377
+    name: "process_egress_acl.nop"
+    alias: "process_egress_acl.nop"
+  }
+}
+actions {
+  preamble {
+    id: 17820530
+    name: "process_egress_acl.egress_mirror"
+    alias: "egress_mirror"
+  }
+  params {
+    id: 1
+    name: "session_id"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 30057387
+    name: "process_egress_acl.egress_mirror_drop"
+    alias: "egress_mirror_drop"
+  }
+  params {
+    id: 1
+    name: "session_id"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 29764557
+    name: "process_egress_acl.egress_redirect_to_cpu"
+    alias: "egress_redirect_to_cpu"
+  }
+  params {
+    id: 1
+    name: "reason_code"
+    bitwidth: 16
+  }
+}
+action_profiles {
+  preamble {
+    id: 294046256
+    name: "bd_action_profile"
+    alias: "bd_action_profile"
+  }
+  table_ids: 41259296
+  size: 1024
+}
+action_profiles {
+  preamble {
+    id: 297500867
+    name: "ecmp_action_profile"
+    alias: "ecmp_action_profile"
+    annotations: "@mode(\"fair\")"
+  }
+  table_ids: 37801575
+  with_selector: true
+  size: 1024
+}
+action_profiles {
+  preamble {
+    id: 298941036
+    name: "fabric_lag_action_profile"
+    alias: "fabric_lag_action_profile"
+    annotations: "@mode(\"fair\")"
+  }
+  table_ids: 49655016
+  with_selector: true
+  size: 1024
+}
+action_profiles {
+  preamble {
+    id: 301351402
+    name: "lag_action_profile"
+    alias: "lag_action_profile"
+    annotations: "@mode(\"fair\")"
+  }
+  table_ids: 39929658
+  with_selector: true
+  size: 1024
+}
+counters {
+  preamble {
+    id: 318219319
+    name: "ingress_bd_stats_count"
+    alias: "ingress_bd_stats_count"
+    annotations: "@min_width(32)"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 305659160
+    name: "acl_stats_count"
+    alias: "acl_stats_count"
+    annotations: "@min_width(16)"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 303057582
+    name: "drop_stats"
+    alias: "drop_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 314084312
+    name: "drop_stats_2"
+    alias: "drop_stats_2"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+direct_counters {
+  preamble {
+    id: 329536454
+    name: "sflow_ingress_session_pkt_counter"
+    alias: "sflow_ingress_session_pkt_counter"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 39690474
+}
+direct_counters {
+  preamble {
+    id: 325625044
+    name: "ipv4_multicast_route_s_g_stats"
+    alias: "ipv4_multicast_route_s_g_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 33753925
+}
+direct_counters {
+  preamble {
+    id: 334762335
+    name: "ipv4_multicast_route_star_g_stats"
+    alias: "ipv4_multicast_route_star_g_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 45227473
+}
+direct_counters {
+  preamble {
+    id: 327278089
+    name: "ipv6_multicast_route_s_g_stats"
+    alias: "ipv6_multicast_route_s_g_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 41794846
+}
+direct_counters {
+  preamble {
+    id: 330716124
+    name: "ipv6_multicast_route_star_g_stats"
+    alias: "ipv6_multicast_route_star_g_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 43802673
+}
+direct_counters {
+  preamble {
+    id: 328880782
+    name: "meter_stats"
+    alias: "meter_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 37395571
+}
+direct_counters {
+  preamble {
+    id: 324212864
+    name: "storm_control_stats"
+    alias: "storm_control_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 39000192
+}
+direct_counters {
+  preamble {
+    id: 329244822
+    name: "egress_bd_stats"
+    alias: "egress_bd_stats"
+    annotations: "@min_width(32)"
+  }
+  spec {
+    unit: BOTH
+  }
+  direct_table_id: 44032150
+}
+meters {
+  preamble {
+    id: 346099050
+    name: "storm_control_meter"
+    alias: "storm_control_meter"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 1024
+}
+direct_meters {
+  preamble {
+    id: 362522853
+    name: "meter_index"
+    alias: "meter_index"
+  }
+  spec {
+    unit: BYTES
+  }
+  direct_table_id: 43755749
+}
+digests {
+  preamble {
+    id: 401035839
+    name: "mac_learn_digest"
+    alias: "mac_learn_digest"
+  }
+  type_spec {
+    struct {
+      name: "mac_learn_digest"
+    }
+  }
+}
+type_info {
+  structs {
+    key: "mac_learn_digest"
+    value {
+      members {
+        name: "bd"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 16
+            }
+          }
+        }
+      }
+      members {
+        name: "lkp_mac_sa"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 48
+            }
+          }
+        }
+      }
+      members {
+        name: "ifindex"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 16
+            }
+          }
+        }
+      }
+    }
+  }
+}
