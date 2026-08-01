@@ -31,7 +31,11 @@ CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options
 CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
                                                   std::string_view toolName,
                                                   const std::string &source) {
+#ifdef SUPPORT_P4_14
     const auto *program = parseP4String(source, options.langVersion);
+#else
+    const auto *program = parseP4String(source);
+#endif
     if (program == nullptr) {
         return std::nullopt;
     }

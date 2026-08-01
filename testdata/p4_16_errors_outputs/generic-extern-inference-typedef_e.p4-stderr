@@ -1,0 +1,12 @@
+generic-extern-inference-typedef_e.p4(12): [--Wwarn=unused] warning: control 'c' is unused
+control c() {
+        ^
+generic-extern-inference-typedef_e.p4(13): [--Wwarn=unused] warning: 'alreadySpecialized' is unused
+    Parametrized16<bit<16>>(16w1) alreadySpecialized;
+                                  ^^^^^^^^^^^^^^^^^^
+generic-extern-inference-typedef_e.p4(13): [--Werror=type-error] error: Parametrized16<bit<16>>: Type Parametrized<...> is not generic and thus it cannot be specialized using type arguments
+    Parametrized16<bit<16>>(16w1) alreadySpecialized;
+    ^^^^^^^^^^^^^^^^^^^^^^^
+generic-extern-inference-typedef_e.p4(10)
+typedef Parametrized<bit<16>> Parametrized16;
+        ^^^^^^^^^^^^^^^^^^^^^
