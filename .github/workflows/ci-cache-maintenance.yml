@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+name: Cache maintenance
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+concurrency:
+  group: cache-maintenance
+  cancel-in-progress: false
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+      - name: Keep main caches and clean up PR caches
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/cache_retention.py --apply

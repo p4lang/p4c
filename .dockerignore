@@ -6,3 +6,6 @@
 
 build
 docs
+
+# PR additions are already applied to .ccache before the Docker build.
+.ccache-pr
