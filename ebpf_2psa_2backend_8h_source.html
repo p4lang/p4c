@@ -160,23 +160,21 @@ $(function(){initNavTree('ebpf_2psa_2backend_8h_source.html',''); initResizable(
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>          refMap(refMap),</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>          typeMap(typeMap),</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>          corelib(P4::P4CoreLibrary::instance()),</div>
-<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>          target(target) {</div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        refMap-&gt;setIsV1(options.isv1());</div>
-<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    }</div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
-<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    <span class="keywordtype">void</span> convert(<span class="keyword">const</span> IR::ToplevelBlock *tlb);</div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <span class="keywordtype">void</span> codegen(std::ostream &amp;cstream)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <a class="code hl_class" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> c(target);</div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="comment">// Instead of generating two files, put all the code in a single file.</span></div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        ebpf_program-&gt;emit(&amp;c);</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        cstream &lt;&lt; c.toString();</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>    }</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>};</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>          target(target) {}</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    <span class="keywordtype">void</span> convert(<span class="keyword">const</span> IR::ToplevelBlock *tlb);</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keywordtype">void</span> codegen(std::ostream &amp;cstream)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        <a class="code hl_class" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> c(target);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>        <span class="comment">// Instead of generating two files, put all the code in a single file.</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        ebpf_program-&gt;emit(&amp;c);</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        cstream &lt;&lt; c.toString();</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>    }</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>};</div>
 </div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}  <span class="comment">// namespace P4::EBPF</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>}  <span class="comment">// namespace P4::EBPF</span></div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_EBPF_PSA_BACKEND_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_EBPF_PSA_BACKEND_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_e_b_p_f_1_1_code_builder_html"><div class="ttname"><a href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">P4::EBPF::CodeBuilder</a></div><div class="ttdef"><b>Definition</b> ebpf/codeGen.h:24</div></div>
 <div class="ttc" id="aclass_p4_1_1_e_b_p_f_1_1_p_s_a_ebpf_generator_html"><div class="ttname"><a href="class_p4_1_1_e_b_p_f_1_1_p_s_a_ebpf_generator.html">P4::EBPF::PSAEbpfGenerator</a></div><div class="ttdef"><b>Definition</b> ebpfPsaGen.h:37</div></div>
 <div class="ttc" id="aclass_p4_1_1_e_b_p_f_1_1_target_html"><div class="ttname"><a href="class_p4_1_1_e_b_p_f_1_1_target.html">P4::EBPF::Target</a></div><div class="ttdef"><b>Definition</b> ebpf/target.h:35</div></div>

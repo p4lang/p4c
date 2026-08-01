@@ -157,14 +157,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr
 <tr class="separator:a0a58eede0ad392922fdd7cc1c9d90021"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2f1886078ad29023c8df71d9dd8aaf7" id="r_af2f1886078ad29023c8df71d9dd8aaf7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2f1886078ad29023c8df71d9dd8aaf7">isUsed</a> (const IR::IDeclaration *decl) const</td></tr>
 <tr class="separator:af2f1886078ad29023c8df71d9dd8aaf7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe67a5819292e5200fa0dc98c38cf410" id="r_afe67a5819292e5200fa0dc98c38cf410"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afe67a5819292e5200fa0dc98c38cf410">isV1</a> () const</td></tr>
-<tr class="separator:afe67a5819292e5200fa0dc98c38cf410"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa639a830cb3228fac58e8e49c660ac25" id="r_aa639a830cb3228fac58e8e49c660ac25"><td class="memItemLeft" align="right" valign="top">cstring&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa639a830cb3228fac58e8e49c660ac25">newName</a> (std::string_view base) override</td></tr>
 <tr class="memdesc:aa639a830cb3228fac58e8e49c660ac25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate a name from <code class="param">base</code> that fresh for the program.  <br /></td></tr>
 <tr class="separator:aa639a830cb3228fac58e8e49c660ac25"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9987144ede28e7bdeb9e90eeaab207f8" id="r_a9987144ede28e7bdeb9e90eeaab207f8"><td class="memItemLeft" align="right" valign="top"><a id="a9987144ede28e7bdeb9e90eeaab207f8" name="a9987144ede28e7bdeb9e90eeaab207f8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setAnyOrder</b> (bool anyOrder)</td></tr>
-<tr class="separator:a9987144ede28e7bdeb9e90eeaab207f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a47a00034ce3af258007cee4f25d8fec9" id="r_a47a00034ce3af258007cee4f25d8fec9"><td class="memItemLeft" align="right" valign="top"><a id="a47a00034ce3af258007cee4f25d8fec9" name="a47a00034ce3af258007cee4f25d8fec9"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setDeclaration</b> (const IR::Path *path, const IR::IDeclaration *decl)</td></tr>
 <tr class="memdesc:a47a00034ce3af258007cee4f25d8fec9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets declaration for <code class="param">path</code> to <code class="param">decl</code>. <br /></td></tr>
@@ -173,10 +168,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setDeclaration</b> (c
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setDeclaration</b> (const IR::This *pointer, const IR::IDeclaration *decl)</td></tr>
 <tr class="memdesc:ae82be9d1a6dc5b149a216717b6a1e6de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets declaration for <code class="param">pointer</code> to <code class="param">decl</code>. <br /></td></tr>
 <tr class="separator:ae82be9d1a6dc5b149a216717b6a1e6de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae48573b255e54df9be1cfd19df1608ed" id="r_ae48573b255e54df9be1cfd19df1608ed"><td class="memItemLeft" align="right" valign="top"><a id="ae48573b255e54df9be1cfd19df1608ed" name="ae48573b255e54df9be1cfd19df1608ed"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setIsV1</b> (bool isv1)</td></tr>
-<tr class="memdesc:ae48573b255e54df9be1cfd19df1608ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set boolean indicating whether map is for a P4_14 program to <code class="param">isV1</code>. <br /></td></tr>
-<tr class="separator:ae48573b255e54df9be1cfd19df1608ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79c9be4e360d6d7094cfb34a428f4aba" id="r_a79c9be4e360d6d7094cfb34a428f4aba"><td class="memItemLeft" align="right" valign="top"><a id="a79c9be4e360d6d7094cfb34a428f4aba" name="a79c9be4e360d6d7094cfb34a428f4aba"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>usedName</b> (cstring name)</td></tr>
 <tr class="memdesc:a79c9be4e360d6d7094cfb34a428f4aba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicate that <code class="param">name</code> is used in the program. <br /></td></tr>
@@ -333,32 +324,6 @@ const IR::P4Program *&#160;</td><td class="memItemRight" valign="bottom"><b>prog
 </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>@true if <code class="param">decl</code> is used in the program. </dd></dl>
-
-</div>
-</div>
-<a id="afe67a5819292e5200fa0dc98c38cf410" name="afe67a5819292e5200fa0dc98c38cf410"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afe67a5819292e5200fa0dc98c38cf410">&#9670;&#160;</a></span>isV1()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool P4::ReferenceMap::isV1 </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>@true if this map is for a P4_14 program </dd></dl>
 
 </div>
 </div>

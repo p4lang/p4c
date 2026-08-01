@@ -217,29 +217,30 @@ $(function(){initNavTree('simplify_def_use_8h_source.html',''); initResizable(tr
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="class_p4_1_1_simplify_def_use.html">SimplifyDefUse</a>(<a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a> *typeChecking = <span class="keyword">nullptr</span>) {</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        CHECK_NULL(typeMap);</div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#ifdef SUPPORT_P4_14</span></div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        refMap.setIsV1(<a class="code hl_function" href="class_p4_1_1_p4_c_context.html#a8afb6336f0cb4e29238dab48eb24e4a1">P4CContext::get</a>().options().isv1());</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        <span class="comment">// SimplifyDefUse needs the expression tree *not* to be a DAG,</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <span class="comment">// because it keeps state in hash-maps indexed with PathExpressions.</span></div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="comment">// This is achieved by Cloner.</span></div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        passes.push_back(<span class="keyword">new</span> Cloner());</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keywordflow">if</span> (!typeChecking) typeChecking = <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(&amp;refMap, typeMap);</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_pass_repeated.html">PassRepeated</a>({typeChecking, <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_simplify_def_use.html">DoSimplifyDefUse</a>(&amp;refMap, typeMap)}));</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        passes.push_back(<span class="keyword">new</span> RemoveHidden());</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        setName(<span class="stringliteral">&quot;SimplifyDefUse&quot;</span>);</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    }</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>};</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <span class="comment">// SimplifyDefUse needs the expression tree *not* to be a DAG,</span></div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="comment">// because it keeps state in hash-maps indexed with PathExpressions.</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <span class="comment">// This is achieved by Cloner.</span></div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        passes.push_back(<span class="keyword">new</span> Cloner());</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">if</span> (!typeChecking) typeChecking = <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(&amp;refMap, typeMap);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_pass_repeated.html">PassRepeated</a>({typeChecking, <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_simplify_def_use.html">DoSimplifyDefUse</a>(&amp;refMap, typeMap)}));</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>        passes.push_back(<span class="keyword">new</span> RemoveHidden());</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        setName(<span class="stringliteral">&quot;SimplifyDefUse&quot;</span>);</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    }</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>};</div>
 </div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_SIMPLIFYDEFUSE_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_SIMPLIFYDEFUSE_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_clone_expressions_html"><div class="ttname"><a href="class_p4_1_1_clone_expressions.html">P4::CloneExpressions</a></div><div class="ttdef"><b>Definition</b> cloner.h:17</div></div>
 <div class="ttc" id="aclass_p4_1_1_do_simplify_def_use_html"><div class="ttname"><a href="class_p4_1_1_do_simplify_def_use.html">P4::DoSimplifyDefUse</a></div><div class="ttdef"><b>Definition</b> simplifyDefUse.h:18</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:44</div></div>
-<div class="ttc" id="aclass_p4_1_1_p4_c_context_html_a8afb6336f0cb4e29238dab48eb24e4a1"><div class="ttname"><a href="class_p4_1_1_p4_c_context.html#a8afb6336f0cb4e29238dab48eb24e4a1">P4::P4CContext::get</a></div><div class="ttdeci">static P4CContext &amp; get()</div><div class="ttdef"><b>Definition</b> parser_options.cpp:523</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_c_context_html_a8afb6336f0cb4e29238dab48eb24e4a1"><div class="ttname"><a href="class_p4_1_1_p4_c_context.html#a8afb6336f0cb4e29238dab48eb24e4a1">P4::P4CContext::get</a></div><div class="ttdeci">static P4CContext &amp; get()</div><div class="ttdef"><b>Definition</b> parser_options.cpp:540</div></div>
 <div class="ttc" id="aclass_p4_1_1_pass_repeated_html"><div class="ttname"><a href="class_p4_1_1_pass_repeated.html">P4::PassRepeated</a></div><div class="ttdef"><b>Definition</b> ir/pass_manager.h:137</div></div>
 <div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:58</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_hidden_html"><div class="ttname"><a href="class_p4_1_1_remove_hidden.html">P4::RemoveHidden</a></div><div class="ttdef"><b>Definition</b> simplifyDefUse.h:44</div></div>

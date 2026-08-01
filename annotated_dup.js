@@ -1590,9 +1590,6 @@ var annotated_dup =
         [ "SourcePosition", "class_p4_1_1_util_1_1_source_position.html", "class_p4_1_1_util_1_1_source_position" ],
         [ "TimerEntry", "struct_p4_1_1_util_1_1_timer_entry.html", "struct_p4_1_1_util_1_1_timer_entry" ]
       ] ],
-      [ "V1", null, [
-        [ "V1ParserDriver", "class_p4_1_1_v1_1_1_v1_parser_driver.html", "class_p4_1_1_v1_1_1_v1_parser_driver" ]
-      ] ],
       [ "AbstractInliner", "class_p4_1_1_abstract_inliner.html", null ],
       [ "AbstractParserDriver", "class_p4_1_1_abstract_parser_driver.html", "class_p4_1_1_abstract_parser_driver" ],
       [ "AbstractSolver", "class_p4_1_1_abstract_solver.html", "class_p4_1_1_abstract_solver" ],
