@@ -5,8 +5,12 @@ name: "Setup and Build p4c"
 description: "Handles ccache configuration and runs the initial CI build script."
 inputs:
   ccache-key:
-    description: "The unique key string prefix to use for ccache"
+    description: "Cache key for this job. Jobs that build the same toolchain and global build flags should pass the same key to reuse each other's objects."
     required: true
+  max-size:
+    description: "Max size of the ccache for this key domain."
+    required: false
+    default: "1000M"
   custom-build-command:
     description: "Optional custom compilation commands instead of running ci-build.sh"
     required: false
@@ -17,8 +21,8 @@ runs:
     - name: Configure ccache
       uses: hendrikmuhs/ccache-action@v1
       with:
-        key: ${{ inputs.ccache-key }}-${{ runner.os }}
-        max-size: 1000M
+        key: ${{ inputs.ccache-key }}
+        max-size: ${{ inputs.max-size }}
         # act's ubuntu-22 image needs an update, but it's slow, so don't do it
         # unilaterally.
         update-package-index: ${{ env.ACT == 'true' }}

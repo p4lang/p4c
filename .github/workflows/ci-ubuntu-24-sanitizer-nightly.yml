@@ -40,7 +40,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-clang"
+          ccache-key: "ubuntu-24.04-clang-unity-sanitizer"
 
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
