@@ -43,7 +43,10 @@ CMAKE_DEPENDENT_OPTION (ENABLE_P4TC "Build the P4TC backend" ON ENABLE_CONTROL_P
 OPTION (ENABLE_P4FMT "Build the P4FMT backend" ON)
 CMAKE_DEPENDENT_OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON ENABLE_CONTROL_PLANE OFF)
 CMAKE_DEPENDENT_OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF ENABLE_CONTROL_PLANE OFF)
-OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
+OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" OFF)
+if (ENABLE_TOFINO)
+  set(ENABLE_P4C_GRAPHS ON)
+endif()
 OPTION (ENABLE_GC "Compile with the Boehm-Demers-Weiser garbage collector." ON)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
@@ -54,7 +57,7 @@ likely depend on the standard libary anyway. If you have some non-static C++ dep
 STATIC_BUILD_WITH_DYNAMIC_STDLIB." OFF)
 OPTION (STATIC_BUILD_WITH_DYNAMIC_STDLIB "Build a (mostly) statically linked release binary. \
 Glibc and C++ standard library is linked dynamically." OFF)
-set(ADDITIONAL_P4C_BOOST_MODULES "" CACHE STRING "Build and make these additional boost modules available. Modules are separated with semicolons.")
+set(ADDITIONAL_P4C_BOOST_MODULES "" CACHE STRING "Additional Boost modules to build, e.g. for custom backends. Modules are separated with semicolons.")
 
 if (STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     # We want to optimize the binary size for a static release binary by default.
@@ -172,11 +175,6 @@ if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
   add_definitions("-DP4C_STATIC_BUILD")
 endif()
 
-# Enable P4C_GRAPHS if TOFINO is enabled.
-if (ENABLE_TOFINO)
-  set(ENABLE_P4C_GRAPHS ON)
-endif()
-
 # Ensure we enable sanitizers before fetching dependencies so the correct flags
 # are propagated below
 if (ENABLE_SANITIZERS)
@@ -225,19 +223,38 @@ if (ENABLE_GTESTS)
 endif ()
 include(Abseil)
 p4c_obtain_abseil()
-# The boost graph module is optional and only required by the graphs back end.
-if(ENABLE_P4C_GRAPHS AND NOT P4C_USE_PREINSTALLED_BOOST)
-  list(APPEND ADDITIONAL_P4C_BOOST_MODULES graph)
-  list(APPEND P4C_BOOST_LIBRARIES Boost::graph)
-endif()
-if (ENABLE_TOFINO AND NOT P4C_USE_PREINSTALLED_BOOST)
-    # Tofino core.
-    list(APPEND ADDITIONAL_P4C_BOOST_MODULES algorithm uuid)
-    list(APPEND P4C_BOOST_LIBRARIES Boost::algorithm Boost::uuid)
-    # BF-ASM.
-    # list(APPEND ADDITIONAL_P4C_BOOST_MODULES)
-endif()
+
+# Collect Boost module requirements before the Boost module is set up. To make this
+# work we need to look ahead. Backends and extensions declare their requirements
+# in a small boost.cmake file; extensions are discovered automatically.
+# FIXME: This is a bit of a hack, but only required because the boost cmake module is
+# a monolithic block, just like the framework...
+set(P4C_BOOST_MODULES ${ADDITIONAL_P4C_BOOST_MODULES})
 include(Boost)
+if (ENABLE_P4C_GRAPHS)
+  include(backends/graphs/boost.cmake)
+endif()
+if (ENABLE_TOFINO)
+  include(backends/tofino/boost.cmake)
+endif()
+file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
+MESSAGE ("-- Available extensions ${p4c_extensions}")
+set (P4C_ENABLED_EXTENSIONS)
+foreach (ext ${p4c_extensions})
+  if (EXISTS ${P4C_SOURCE_DIR}/extensions/${ext}/CMakeLists.txt)
+    # Generate an option that makes it possible to disable this extension.
+    string(MAKE_C_IDENTIFIER ${ext} EXT_AS_IDENTIFIER)
+    string(TOUPPER ${EXT_AS_IDENTIFIER} EXT_AS_OPTION_NAME)
+    string(CONCAT ENABLE_EXT_OPTION "ENABLE_" ${EXT_AS_OPTION_NAME})
+    OPTION (${ENABLE_EXT_OPTION} "Build the ${ext} backend" ON)
+    if (${ENABLE_EXT_OPTION})
+      list (APPEND P4C_ENABLED_EXTENSIONS ${ext})
+      if (EXISTS ${P4C_SOURCE_DIR}/extensions/${ext}/boost.cmake)
+        include (${P4C_SOURCE_DIR}/extensions/${ext}/boost.cmake)
+      endif()
+    endif()
+  endif()
+endforeach(ext)
 p4c_obtain_boost()
 
 # We require -pthread to make std::call_once work, even if we're not using threads...
@@ -471,21 +488,8 @@ if (ENABLE_CONTROL_PLANE)
     add_subdirectory (control-plane)
 endif()
 
-file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
-MESSAGE ("-- Available extensions ${p4c_extensions}")
-foreach (ext ${p4c_extensions})
-  if (EXISTS ${P4C_SOURCE_DIR}/extensions/${ext}/CMakeLists.txt)
-    # Generate an option that makes it possible to disable this extension.
-    string(MAKE_C_IDENTIFIER ${ext} EXT_AS_IDENTIFIER)
-    string(TOUPPER ${EXT_AS_IDENTIFIER} EXT_AS_OPTION_NAME)
-    string(CONCAT ENABLE_EXT_OPTION "ENABLE_" ${EXT_AS_OPTION_NAME})
-    string(CONCAT EXT_HELP_TEXT "Build the " ${ext} " backend")
-    OPTION (${ENABLE_EXT_OPTION} ${EXT_HELP_TEXT} ON)
-
-    if (${ENABLE_EXT_OPTION})
-        add_subdirectory (extensions/${ext})
-    endif()
-  endif()
+foreach (ext IN LISTS P4C_ENABLED_EXTENSIONS)
+  add_subdirectory (extensions/${ext})
 endforeach(ext)
 
 # With the current implementation of ir-generator, all targets share the

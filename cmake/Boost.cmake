@@ -1,3 +1,9 @@
+# Registers additional Boost modules required by a backend or extension.
+# Called from a backend's boost.cmake before p4c_obtain_boost() runs.
+macro(p4c_require_boost)
+  list(APPEND P4C_BOOST_MODULES ${ARGN})
+endmacro()
+
 macro(p4c_obtain_boost)
   option(
     P4C_USE_PREINSTALLED_BOOST
@@ -29,12 +35,8 @@ macro(p4c_obtain_boost)
     # Add boost modules.
     # format, multiprecision, and iostreams are needed by P4C core.
     set(BOOST_INCLUDE_LIBRARIES format multiprecision iostreams)
-    list(APPEND BOOST_INCLUDE_LIBRARIES ${ADDITIONAL_P4C_BOOST_MODULES})
+    list(APPEND BOOST_INCLUDE_LIBRARIES ${P4C_BOOST_MODULES})
     set(BOOST_ENABLE_CMAKE ON)
-
-    # Always link local Boost statically.
-    set(Boost_USE_STATIC_LIBS ON)
-    set(Boost_USE_STATIC_RUNTIME OFF)
 
     # Download and extract Boost from GitHub.
     message(STATUS "Downloading and extracting boost library sources. This may take some time...")
@@ -43,14 +45,12 @@ macro(p4c_obtain_boost)
         URL https://github.com/boostorg/boost/releases/download/boost-${P4C_BOOST_VERSION}/boost-${P4C_BOOST_VERSION}-cmake.tar.xz
         URL_HASH SHA256=${P4C_BOOST_HASH}
         USES_TERMINAL_DOWNLOAD TRUE
-        GIT_PROGRESS TRUE
     )
     FetchContent_MakeAvailable(Boost)
 
     # Suppress warnings for all Boost targets.
     get_all_targets(BOOST_BUILD_TARGETS ${Boost_SOURCE_DIR})
-    set(boost_target_includes "")
-    foreach(target in ${BOOST_BUILD_TARGETS})
+    foreach(target IN LISTS BOOST_BUILD_TARGETS)
       if(target MATCHES "boost_*")
         # Do not suppress warnings for Boost library targets that are aliased.
         get_target_property(target_type ${target} TYPE)
@@ -67,10 +67,13 @@ macro(p4c_obtain_boost)
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-    list(APPEND P4C_BOOST_LIBRARIES Boost::iostreams Boost::format Boost::multiprecision)
+    # Map every requested module to its Boost:: target.
+    list(APPEND P4C_BOOST_LIBRARIES Boost::format Boost::multiprecision Boost::iostreams)
+    foreach(module IN LISTS P4C_BOOST_MODULES)
+      list(APPEND P4C_BOOST_LIBRARIES Boost::${module})
+    endforeach()
   endif()
 
-  include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
   set(HAVE_LIBBOOST_IOSTREAMS TRUE)
   list(APPEND P4C_LIB_DEPS ${P4C_BOOST_LIBRARIES})
 
