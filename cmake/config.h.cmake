@@ -7,9 +7,6 @@
 /* Define to 1 if you have the boost iostreams library */
 #cmakedefine HAVE_LIBBOOST_IOSTREAMS 1
 
-/* Define to 1 if you have the boost graph headers */
-#cmakedefine HAVE_LIBBOOST_GRAPH 1
-
 /* Define to 1 if you have libbacktrace */
 #cmakedefine HAVE_LIBBACKTRACE 1
 
