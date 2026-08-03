@@ -200,7 +200,7 @@ sudo dpkg -i /path/to/package.deb
     ```
 
 2.  Install [dependencies](#dependencies). You can find specific instructions
-    for Ubuntu 22.04 [here](#ubuntu-dependencies) and for macOS 11
+    for Ubuntu [here](#ubuntu-dependencies) and for macOS
     [here](#macos-dependencies).  You can also look at the
     [CI installation script](https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh).
 
@@ -267,11 +267,11 @@ If you plan to contribute to P4C, you'll find more useful information
 
 ## Dependencies
 
-Ubuntu 22.04 is the officially supported platform for P4C. There's also
-unofficial support for macOS 11. Other platforms are untested; you can try to
-use them, but YMMV.
+Ubuntu 22.04 and Ubuntu 24.04 are the officially supported platforms for P4C.
+There's also unofficial support for macOS, including Apple Silicon. Other
+platforms are untested; you can try to use them, but YMMV.
 
-- A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.
+- A C++20 compiler. P4C is built with `CMAKE_CXX_STANDARD 20`.
 
 - `git` for version control
 
@@ -348,10 +348,10 @@ Please note that while all Protobuf versions newer than 3.0 should work for
 P4C itself, you may run into trouble with Abseil, some extensions and other p4lang
 projects unless you install version 3.25.3.
 
-P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240116.1 at the moment).
+P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240722.1 at the moment).
 
 #### CMake
-P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.
+P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`, but there is no guarantee that this will lead to a successful build.
 
 ### Fedora dependencies
 
