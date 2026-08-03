@@ -50,6 +50,6 @@ add_custom_target(genLogging
 
 add_executable(test_phv_logging test_phv.cpp ${BFN_P4C_SOURCE_DIR}/bf-p4c/common/run_id.cpp)
 add_dependencies(test_phv_logging genLogging)
-target_link_libraries(test_phv_logging PRIVATE absl::strings)
+target_link_libraries(test_phv_logging PRIVATE absl::strings ${P4C_BOOST_LIBRARIES})
 
 add_test(NAME test_phv_logging COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_phv_logging)

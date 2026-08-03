@@ -22,8 +22,6 @@
 
 #include <string>
 
-#include <boost/filesystem.hpp>
-
 #include "ir/ir.h"
 #include "ir/solver.h"
 
