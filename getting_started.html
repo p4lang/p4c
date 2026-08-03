@@ -353,7 +353,7 @@ Debian</h4>
 Installing P4C from source</h3>
 <ol type="1">
 <li>Clone the repository. <code> git clone <a href="https://github.com/p4lang/p4c.git">https://github.com/p4lang/p4c.git</a> </code></li>
-<li>Install <a class="el" href="#dependencies">dependencies</a>. You can find specific instructions for Ubuntu 22.04 <a class="el" href="#ubuntu-dependencies">here</a> and for macOS 11 <a class="el" href="#macos-dependencies">here</a>. You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh">CI installation script</a>.</li>
+<li>Install <a class="el" href="#dependencies">dependencies</a>. You can find specific instructions for Ubuntu <a class="el" href="#ubuntu-dependencies">here</a> and for macOS <a class="el" href="#macos-dependencies">here</a>. You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh">CI installation script</a>.</li>
 <li><p class="startli">Build. Building should also take place in a subdirectory named <code>build</code>. <code> mkdir -p build cmake -B build &lt;optional arguments&gt; cmake --build build cmake --build build --target check </code> The cmake command takes the following optional arguments to further customize the build (see file <code>CMakeLists.txt</code> for the full list):</p><ul>
 <li><code>-DCMAKE_BUILD_TYPE=Release|Debug</code> &ndash; set CMAKE_BUILD_TYPE to Release or Debug to build with optimizations or with debug symbols to run in gdb. Default is Release.</li>
 <li><code>-DCMAKE_INSTALL_PREFIX=&lt;path&gt;</code> &ndash; set the directory where <code>cmake --build build --target install</code> installs the compiler. Defaults to /usr/local.</li>
@@ -388,9 +388,9 @@ Installing P4C from source</h3>
 <p>If you plan to contribute to P4C, you'll find more useful information <a class="el" href="#development-tools">here</a>.</p>
 <h2><a class="anchor" id="dependencies"></a>
 Dependencies</h2>
-<p>Ubuntu 22.04 is the officially supported platform for P4C. There's also unofficial support for macOS 11. Other platforms are untested; you can try to use them, but YMMV.</p>
+<p>Ubuntu 22.04 and Ubuntu 24.04 are the officially supported platforms for P4C. There's also unofficial support for macOS, including Apple Silicon. Other platforms are untested; you can try to use them, but YMMV.</p>
 <ul>
-<li>A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.</li>
+<li>A C++20 compiler. P4C is built with <code>CMAKE_CXX_STANDARD 20</code>.</li>
 <li><code>git</code> for version control</li>
 <li>CMake 3.16.3 or higher</li>
 <li>Boehm-Weiser garbage-collector C++ library</li>
@@ -430,10 +430,10 @@ Ubuntu dependencies</h3>
 <p><code>P4C</code> also depends on Google Protocol Buffers (Protobuf). <code>P4C</code> requires version 3.0 or higher, so the packaged version provided in Ubuntu 22.04 <b>should</b> work. However, P4C typically installs its own version of Protobuf using CMake's <code>FetchContent</code> module (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions <a href="https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md">here</a>. After cloning Protobuf and before you build, check-out version 3.25.3:</p>
 <p><code>git checkout v3.25.3</code></p>
 <p>Please note that while all Protobuf versions newer than 3.0 should work for P4C itself, you may run into trouble with Abseil, some extensions and other p4lang projects unless you install version 3.25.3.</p>
-<p>P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's <code>FetchContent</code> module (Abseil LTS 20240116.1 at the moment).</p>
+<p>P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's <code>FetchContent</code> module (Abseil LTS 20240722.1 at the moment).</p>
 <h4><a class="anchor" id="cmake"></a>
 CMake</h4>
-<p>P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using <code>pip3 install --user cmake==3.16.3</code>. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.</p>
+<p>P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using <code>pip3 install --user cmake==3.16.3</code>, but there is no guarantee that this will lead to a successful build.</p>
 <h3><a class="anchor" id="fedora-dependencies"></a>
 Fedora dependencies</h3>
 <div class="fragment"><div class="line">sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \</div>
