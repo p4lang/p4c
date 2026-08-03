@@ -1,0 +1,9 @@
+<map id="P4::graphs::EdgeTypeIface" name="P4::graphs::EdgeTypeIface">
+<area shape="rect" id="Node000001" title=" " alt="" coords="159,5,351,31"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1graphs_1_1_edge_if.html" title=" " alt="" coords="5,79,144,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,38,105,81,103,76,212,33"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1graphs_1_1_edge_switch.html" title=" " alt="" coords="168,79,341,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="257,44,257,79,252,79,252,44"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1graphs_1_1_edge_unconditional.html" title=" " alt="" coords="366,79,586,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="304,32,441,76,439,81,302,37"/>
+</map>

@@ -1,0 +1,20 @@
+<map id="P4::CheckExternInvocationCommon" name="P4::CheckExternInvocationCommon">
+<area shape="rect" id="Node000001" title="Base class which can be used to prepare classes for checking constraints for invocations of externs (..." alt="" coords="435,88,631,128"/>
+<area shape="rect" id="Node000006" href="$class_b_f_n_1_1_check_extern_invocation_common.html" title=" " alt="" coords="697,5,903,45"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="600,81,678,55,719,43,720,48,679,60,602,86"/>
+<area shape="rect" id="Node000007" href="$class_b_f_n_1_1_check_t2_n_a_extern_invocation.html" title=" " alt="" coords="679,70,921,95"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="644,95,678,92,679,97,645,100"/>
+<area shape="rect" id="Node000008" href="$class_b_f_n_1_1_check_t_n_a_extern_invocation.html" title=" " alt="" coords="683,119,917,145"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="644,115,683,119,682,124,644,121"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_d_p_d_k_1_1_check_p_n_a_extern_invocation.html" title="Class for checking constraints for invocations of PNA architecture extern methods and functions." alt="" coords="700,169,900,209"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="604,130,679,155,721,167,720,172,678,160,602,135"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="250,70,357,95"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="370,87,435,95,434,100,370,93"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="45,70,133,95"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="147,80,250,80,250,85,147,85"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="220,119,387,145"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="147,93,248,117,247,122,146,98"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="400,119,434,116,435,121,401,124"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="5,119,172,145"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="186,129,220,129,220,135,186,135"/>
+</map>

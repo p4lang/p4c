@@ -1,0 +1,5 @@
+<map id="PHV::v2::GreedyTxScore" name="PHV::v2::GreedyTxScore">
+<area shape="rect" id="Node000001" title="GreedyTxScore is the default allocation heuristics." alt="" coords="5,79,184,104"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_tx_score.html" title="TxScore is the interface of an allocation score." alt="" coords="29,5,161,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,44,97,79,92,79,92,44"/>
+</map>

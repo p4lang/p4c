@@ -1,0 +1,5 @@
+<map id="P4::ControlPlaneAPI::Standard::UBPFArchHandlerBuilder" name="P4::ControlPlaneAPI::Standard::UBPFArchHandlerBuilder">
+<area shape="rect" id="Node000001" title="The architecture handler builder implementation for UBPF." alt="" coords="14,108,223,163"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_builder_iface.html" title=" " alt="" coords="5,5,232,60"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,74,121,108,116,108,116,74"/>
+</map>

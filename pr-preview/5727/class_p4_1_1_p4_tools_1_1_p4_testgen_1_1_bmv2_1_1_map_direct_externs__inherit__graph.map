@@ -1,0 +1,7 @@
+<map id="P4::P4Tools::P4Testgen::Bmv2::MapDirectExterns" name="P4::P4Tools::P4Testgen::Bmv2::MapDirectExterns">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,197,192"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="48,79,155,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,118,104,152,99,152,99,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="57,5,145,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,44,104,79,99,79,99,44"/>
+</map>

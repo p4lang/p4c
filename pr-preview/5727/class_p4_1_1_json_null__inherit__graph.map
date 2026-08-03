@@ -1,0 +1,9 @@
+<map id="P4::JsonNull" name="P4::JsonNull">
+<area shape="rect" id="Node000001" title=" " alt="" coords="13,225,112,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_json_data.html" title=" " alt="" coords="11,152,115,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="65,191,65,225,60,225,60,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="9,79,116,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="65,118,65,152,60,152,60,118"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,5,120,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="65,44,65,79,60,79,60,44"/>
+</map>

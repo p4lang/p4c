@@ -1,0 +1,48 @@
+.flow {
+  stroke-dasharray: 5;
+  animation: flow-animation 0.75s linear infinite;
+}
+@keyframes flow-animation {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+#toggle {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  z-index: 999;
+  padding: 25px 70px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  opacity: 0; /* Make the button invisible */
+}
+
+/* Style for diagram container */
+.diagram-container {
+  float: right; /* Float right for larger screens */
+  width: 100%;
+  max-width: 600px;
+  margin-left: 20px; /* Space to the left of the diagram */
+}
+
+.diagram-container .mxgraph {
+  width: 100%; /* Ensure the diagram fills its container */
+  height: auto; /* Allow the height to adjust proportionally */
+}
+
+@media (max-width: 700px) {
+  .diagram-container {
+    float: none; /* Remove float on small screens */
+    clear: both; /* Clear floats */
+    width: 100%; /* Full width on small screens */
+    max-width: 100%; /* Ensure it stretches to the maximum width available */
+  }
+   .diagram-container iframe {
+        height: 230px; 
+    }
+}

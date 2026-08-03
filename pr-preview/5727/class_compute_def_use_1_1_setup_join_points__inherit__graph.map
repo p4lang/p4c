@@ -1,0 +1,11 @@
+<map id="ComputeDefUse::SetupJoinPoints" name="ComputeDefUse::SetupJoinPoints">
+<area shape="rect" id="Node000001" title=" " alt="" coords="67,167,265,207"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,148,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,127,148,165,144,168,105,130"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="172,86,339,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="235,123,188,168,184,165,232,119"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="135,5,223,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="202,39,246,84,242,88,198,42"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="248,5,415,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="313,42,269,88,265,84,309,39"/>
+</map>

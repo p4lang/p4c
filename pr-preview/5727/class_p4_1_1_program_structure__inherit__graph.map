@@ -1,0 +1,17 @@
+<map id="P4::ProgramStructure" name="P4::ProgramStructure">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,165,129"/>
+<area shape="rect" id="Node000002" href="$struct_b_f_n_1_1_p_s_a_1_1_program_structure.html" title=" " alt="" coords="222,5,427,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,94,159,66,212,40,249,28,250,33,214,44,162,70,117,98"/>
+<area shape="rect" id="Node000003" href="$struct_b_f_n_1_1_v1_1_1_program_structure.html" title=" " alt="" coords="227,55,423,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="160,99,262,77,263,83,161,104"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_b_m_v2_1_1_v1_program_structure.html" title=" " alt="" coords="213,104,436,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="179,114,213,114,213,119,179,119"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_portable_program_structure.html" title=" " alt="" coords="217,153,432,179"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="161,130,263,151,262,156,160,135"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_t_c_1_1_pna_program_structure.html" title=" " alt="" coords="221,203,429,228"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="117,135,162,162,214,188,255,200,253,205,212,192,159,167,114,139"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_b_m_v2_1_1_pna_program_structure.html" title=" " alt="" coords="484,129,715,155"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="446,153,483,149,484,155,446,158"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_psa_program_structure.html" title=" " alt="" coords="508,179,691,204"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="446,175,508,180,507,186,446,180"/>
+</map>

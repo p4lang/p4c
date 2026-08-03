@@ -1,0 +1,13 @@
+<map id="Parser &amp; deparser" name="Parser &amp; deparser">
+<area shape="rect" id="Node000010" href="$group___asm_output.html" title="Generate assembly output." alt="" coords="414,31,546,57"/>
+<area shape="rect" id="Node000002" href="$group___deparser_copy_opt.html" title="decaf : a deparser optimization of copy assigned fields" alt="" coords="411,81,549,106"/>
+<area shape="rect" id="Node000003" href="$group___desugar_varbit_extract.html" title="Set of passes that rewrite usage of varbit." alt="" coords="400,130,560,155"/>
+<area shape="rect" id="Node000004" href="$group___extract_checksum.html" title="Extracts checksum from translated checksum extern." alt="" coords="412,179,548,205"/>
+<area shape="rect" id="Node000005" href="$group___lower_parser.html" title="Replace field&#45;based parser and deparser IR with container&#45;based parser and deparser IR." alt="" coords="429,229,531,254"/>
+<area shape="rect" id="Node000007" href="$group___parser_copy_prop.html" title="PassManager that governs parser copy propagation." alt="" coords="418,278,542,303"/>
+<area shape="rect" id="Node000008" href="$group___reset_invalidated_checksum_headers.html" title="Reset fields that are used in deparser checksum operations and were invalidated." alt="" coords="380,328,580,368"/>
+<area shape="rect" id="Node000006" href="$group___simplify_nested_if.html" title="Set of passes that simplify nested if statements in the deparser control block." alt="" coords="403,393,557,418"/>
+<area shape="rect" id="Node000011" href="$group__bridged__packing.html" title="Overview of passes that adjust packing of bridged headers." alt="" coords="394,443,566,483"/>
+<area shape="rect" id="Node000009" href="$group__midend.html" title="Overview of midend passes." alt="" coords="445,527,515,553"/>
+<area shape="rect" id="Node000001" title="Content related to parser and deparser." alt="" coords="5,254,143,279"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="P4::DoRemoveExits" name="P4::DoRemoveExits">
+<area shape="rect" id="Node000001" title=" " alt="" coords="74,225,225,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_do_remove_returns.html" title=" " alt="" coords="5,152,173,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,186,142,223,138,227,106,190"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_transform.html" title=" " alt="" coords="14,79,125,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,117,89,151,84,153,74,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="31,5,119,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="75,45,73,79,68,78,70,44"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="149,79,315,104"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="114,34,207,76,205,81,111,39"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="222,118,188,179,159,226,154,224,183,176,217,115"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="149,5,315,31"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="235,44,235,79,229,79,229,44"/>
+</map>

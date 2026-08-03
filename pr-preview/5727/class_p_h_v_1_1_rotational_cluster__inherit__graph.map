@@ -1,0 +1,5 @@
+<map id="PHV::RotationalCluster" name="PHV::RotationalCluster">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,175,104"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1_cluster_stats.html" title="An interface for gathering statistics common across each kind of cluster." alt="" coords="23,5,157,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,44,93,79,87,79,87,44"/>
+</map>

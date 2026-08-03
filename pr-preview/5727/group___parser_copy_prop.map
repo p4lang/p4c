@@ -1,0 +1,5 @@
+<map id="ParserCopyProp" name="ParserCopyProp">
+<area shape="rect" id="Node000003" href="$group___lower_parser_i_r.html" title="Generates a lowered version of the parser IR in this program and swaps it in for the existing represe..." alt="" coords="17,5,131,31"/>
+<area shape="rect" id="Node000001" title="PassManager that governs parser copy propagation." alt="" coords="191,31,315,56"/>
+<area shape="rect" id="Node000002" href="$group__parde.html" title="Content related to parser and deparser." alt="" coords="5,55,143,80"/>
+</map>

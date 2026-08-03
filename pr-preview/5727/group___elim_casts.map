@@ -1,0 +1,4 @@
+<map id="BFN::ElimCasts" name="BFN::ElimCasts">
+<area shape="rect" id="Node000001" title="Set of passes that simplify the complex expressions with multiple casts into simpler expressions." alt="" coords="124,5,247,31"/>
+<area shape="rect" id="Node000002" href="$group__midend.html" title="Overview of midend passes." alt="" coords="5,5,76,31"/>
+</map>

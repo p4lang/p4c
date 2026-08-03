@@ -1,0 +1,13 @@
+<map id="P4::P4Tools::TraceEvents::Generic" name="P4::P4Tools::TraceEvents::Generic">
+<area shape="rect" id="Node000001" title="A generic event that only takes in a string as label." alt="" coords="108,225,289,265"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_expression.html" title="A simple event that stores the provided expression." alt="" coords="5,313,187,353"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="167,276,120,315,117,311,164,272"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_trace_events_1_1_generic_description.html" title=" " alt="" coords="211,313,392,353"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="234,272,280,311,277,315,230,276"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_trace_event.html" title="An event in a trace of the execution of a P4 program." alt="" coords="111,152,286,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="201,191,201,225,196,225,196,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="145,79,252,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="201,118,201,152,196,152,196,118"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="141,5,256,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="201,44,201,79,196,79,196,44"/>
+</map>

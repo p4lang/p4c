@@ -1,0 +1,5 @@
+<map id="PHV::v2::MinPackTxScoreMaker" name="PHV::v2::MinPackTxScoreMaker">
+<area shape="rect" id="Node000001" title="factory class for MinPackTxScore." alt="" coords="5,79,232,104"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_tx_score_maker.html" title="TxScoreMaker is the interface of the factory class of TxScore." alt="" coords="33,5,205,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,44,121,79,116,79,116,44"/>
+</map>

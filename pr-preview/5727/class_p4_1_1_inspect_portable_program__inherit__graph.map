@@ -1,0 +1,11 @@
+<map id="P4::InspectPortableProgram" name="P4::InspectPortableProgram">
+<area shape="rect" id="Node000001" title=" " alt="" coords="123,152,325,177"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_b_m_v2_1_1_inspect_pna_program.html" title=" " alt="" coords="5,225,224,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="196,187,134,227,131,223,194,183"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_inspect_psa_program.html" title=" " alt="" coords="248,225,419,251"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="254,183,317,223,314,227,252,187"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="171,79,277,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="227,118,227,152,221,152,221,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="180,5,268,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="227,44,227,79,221,79,221,44"/>
+</map>

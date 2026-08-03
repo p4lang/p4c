@@ -1,0 +1,17 @@
+<map id="P4::Instantiation" name="P4::Instantiation">
+<area shape="rect" id="Node000001" title="Used to resolve a Declaration_Instance." alt="" coords="504,80,632,105"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_control_instantiation.html" title=" " alt="" coords="683,5,858,31"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="605,71,679,39,715,28,717,33,681,45,607,76"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_extern_instantiation.html" title=" " alt="" coords="685,55,856,80"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="645,80,685,75,686,81,646,86"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_package_instantiation.html" title=" " alt="" coords="680,104,861,129"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="646,99,680,103,679,109,645,104"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_parser_instantiation.html" title=" " alt="" coords="687,153,855,179"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="608,109,681,139,717,151,716,156,679,145,606,114"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_instance_base.html" title=" " alt="" coords="323,80,456,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="470,90,504,90,504,95,470,95"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="168,80,275,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="288,90,323,90,323,95,288,95"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,80,120,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="134,90,168,90,168,95,134,95"/>
+</map>

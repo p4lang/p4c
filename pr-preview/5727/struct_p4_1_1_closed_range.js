@@ -1,0 +1,25 @@
+var struct_p4_1_1_closed_range =
+[
+    [ "contains", "struct_p4_1_1_closed_range.html#a08c27dd5d2daa66796574867c0ffa94e", null ],
+    [ "contains", "struct_p4_1_1_closed_range.html#ae80fee0bd120850dc62a9b26d4d38ce9", null ],
+    [ "formatAsSlice", "struct_p4_1_1_closed_range.html#ab133f7d3ad1baac78613d392a854575d", null ],
+    [ "hiByte", "struct_p4_1_1_closed_range.html#a95fd0cf25fc91c8ce28dd1f35544bb34", null ],
+    [ "intersectWith", "struct_p4_1_1_closed_range.html#aa877eb085174f204f6557af559fc580f", null ],
+    [ "isHiAligned", "struct_p4_1_1_closed_range.html#a07a4a517816a5ca741b16438fbd51e5c", null ],
+    [ "isLoAligned", "struct_p4_1_1_closed_range.html#a90c6591d83a99b1b36f8785244646cd3", null ],
+    [ "loByte", "struct_p4_1_1_closed_range.html#a6b1a7da907132affec2f4e2f0d574e8a", null ],
+    [ "nextByte", "struct_p4_1_1_closed_range.html#aedb8dd7a58f279d566a2390ece5ff4b8", null ],
+    [ "operator<", "struct_p4_1_1_closed_range.html#adea032c8076c619d3f7c15cee08d7c57", null ],
+    [ "overlaps", "struct_p4_1_1_closed_range.html#a27e93e2aca5a79e2c3236a8e2226cf0a", null ],
+    [ "resizedToBits", "struct_p4_1_1_closed_range.html#ab0afbbd883b2e782de938c2db6dc385b", null ],
+    [ "resizedToBytes", "struct_p4_1_1_closed_range.html#a797e6deff0e4be8754c5accf28ff53d4", null ],
+    [ "shiftedByBits", "struct_p4_1_1_closed_range.html#aaae551b27f4c93ae8a879baacebd5191", null ],
+    [ "shiftedByBytes", "struct_p4_1_1_closed_range.html#ac05e70ee244aa1f94505e74a2125aebb", null ],
+    [ "size", "struct_p4_1_1_closed_range.html#ac8fa1d0ca690e1d84fd7b9b76cd1b73b", null ],
+    [ "toJSON", "struct_p4_1_1_closed_range.html#aa888f3ac85819877caf93154efdf813e", null ],
+    [ "toOrder", "struct_p4_1_1_closed_range.html#a6077cc9781ca281322fc4e19fd0504bd", null ],
+    [ "toUnit", "struct_p4_1_1_closed_range.html#a13ce1195119479038ec6705535d25836", null ],
+    [ "unionWith", "struct_p4_1_1_closed_range.html#aeb8b8e1ac10975128be036956bcb3133", null ],
+    [ "hi", "struct_p4_1_1_closed_range.html#ae2cfcb5e2f49dfe5fc37e540bafda81e", null ],
+    [ "lo", "struct_p4_1_1_closed_range.html#ac5d9635f8942d705945acf033addda3e", null ]
+];

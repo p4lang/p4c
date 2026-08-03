@@ -1,0 +1,9 @@
+<map id="ParserDominatorBuilder" name="ParserDominatorBuilder">
+<area shape="rect" id="Node000001" title="Builds parser graphs and determines the dominators and post&#45;dominators of all parser states...." alt="" coords="30,152,207,177"/>
+<area shape="rect" id="Node000004" href="$group__parde.html#class_find_parser_header_encounter_info" title="Based on dominators and post&#45;dominators of parser states, determines which other headers have also su..." alt="" coords="5,225,232,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="121,191,121,225,116,225,116,191"/>
+<area shape="rect" id="Node000002" href="$group__parde.html#class_parde_inspector" title=" " alt="" coords="59,79,178,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,118,121,152,116,152,116,118"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="77,5,160,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,44,121,79,116,79,116,44"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="ConstrainedSlice" name="ConstrainedSlice">
+<area shape="rect" id="Node000001" title="Class representing FieldSlice with constraints, which has handle for constraint logging...." alt="" coords="90,167,221,192"/>
+<area shape="rect" id="Node000002" href="$class_loggable_entity.html" title="Class with handle for logging constraints." alt="" coords="5,86,124,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,118,144,164,140,168,87,122"/>
+<area shape="rect" id="Node000003" href="$class_lift_compare.html" title=" " alt="" coords="149,79,343,119"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,130,171,168,167,164,212,126"/>
+<area shape="rect" id="Node000004" href="$class_lift_equal.html" title=" " alt="" coords="17,5,235,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="157,36,219,76,216,81,154,41"/>
+<area shape="rect" id="Node000005" href="$class_lift_less.html" title=" " alt="" coords="259,5,470,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="337,41,276,81,273,76,334,36"/>
+</map>
