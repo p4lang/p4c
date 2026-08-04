@@ -120,14 +120,15 @@ class ParseAnnotations : public Modifier {
     typedef std::unordered_map<cstring, Handler> HandlerMap;
 
     /// Produces a pass that rewrites the spec-defined annotations.
-    explicit ParseAnnotations(bool warn = false) : warnUnknown(warn), handlers(standardHandlers()) {
+    explicit ParseAnnotations(bool warn = false, bool errStruct = false)
+        : warnUnknown(warn), errorRequireParse(errStruct), handlers(standardHandlers()) {
         setName("ParseAnnotations");
     }
 
     /// Produces a pass that rewrites a custom set of annotations.
     ParseAnnotations(const char *targetName, bool includeStandard, HandlerMap handlers,
-                     bool warn = false)
-        : warnUnknown(warn) {
+                     bool warn = false, bool errStruct = false)
+        : warnUnknown(warn), errorRequireParse(errStruct) {
         std::string buf = targetName;
         buf += "__ParseAnnotations";
         setName(buf.c_str());
@@ -159,6 +160,10 @@ class ParseAnnotations : public Modifier {
  private:
     /// Whether to warn about unknown annotations.
     const bool warnUnknown;
+
+    /// Whether to error about structured annotation that have the same name as
+    /// a normal annotation that requires parsing
+    const bool errorRequireParse;
 
     /// The set of unknown annotations for which warnings have already been
     /// made.
