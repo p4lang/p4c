@@ -18,7 +18,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "error_catalog.h"
-#include "error_message.h"
+#include "error_helper.h"
 #include "exceptions.h"
 #include "lib/boost_format_helper.h"
 #include "lib/source_file.h"
@@ -32,45 +32,6 @@ enum class DiagnosticAction {
     Warn,    /// Print a warning and continue compilation.
     Error    /// Print an error and signal that compilation should be aborted.
 };
-
-namespace detail {
-// Base case
-inline void collectSourceInfo(ErrorMessage & /*msg*/) {}
-// Recursive step
-template <typename T, typename... Rest>
-void collectSourceInfo(ErrorMessage &msg, T &&arg, Rest &&...rest) {
-    using ArgType = std::decay_t<T>;
-    if constexpr (Util::has_SourceInfo_v<ArgType>) {
-        if constexpr (std::is_convertible_v<ArgType, Util::SourceInfo>) {
-            Util::SourceInfo info(arg);
-            if (info.isValid()) {
-                msg.locations.push_back(info);
-            }
-        } else {
-            auto info = arg.getSourceInfo();
-            if (info.isValid()) {
-                msg.locations.push_back(info);
-            }
-        }
-    } else if constexpr (std::is_pointer_v<ArgType>) {
-        using PointeeType = std::remove_pointer_t<ArgType>;
-        if constexpr (Util::has_SourceInfo_v<PointeeType>) {
-            if (arg != nullptr) {
-                auto info = arg->getSourceInfo();
-                if (info.isValid()) {
-                    msg.locations.push_back(info);
-                }
-            }
-        }
-    } else if constexpr (std::is_same_v<ArgType, P4::Util::SourceInfo>) {
-        if (arg.isValid()) {
-            msg.locations.push_back(arg);
-        }
-    }
-
-    collectSourceInfo(msg, std::forward<Rest>(rest)...);
-}
-}  // namespace detail
 
 // Keeps track of compilation errors.
 // Errors are specified using the error() and warning() methods.
@@ -132,15 +93,16 @@ class ErrorReporter {
         std::string positionStr;
         std::string tailStr;
         extractBugSourceInfo(argTuple, positionStr, tailStr);
-        const std::string formattedCore = P4::createFormattedMessageFromTuple(format, argTuple);
+        const std::string formattedCore = P4::createFormattedMessageFromTuple<true>(format, argTuple);
         return absl::StrCat(positionStr, positionStr.empty() ? "" : ": ", formattedCore, "\n",
                             tailStr);
     }
 
-    // Formats a message string directly. Does not attach SourceInfo metadata.
+    // Formats a message string directly, preserving the legacy behavior of
+    // appending a trailing newline and attaching SourceInfo metadata.
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
-        return P4::createFormattedMessage(format, std::forward<Args>(args)...);
+        return ::P4::error_helper(format, std::forward<Args>(args)...).toString();
     }
 
     template <class T, typename = decltype(std::declval<T>()->getSourceInfo()), typename... Args>
@@ -193,7 +155,7 @@ class ErrorReporter {
         }
 
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
-        detail::collectSourceInfo(msg, std::forward<Args>(args)...);
+        priv::collectSourceInfo(msg, std::forward<Args>(args)...);
         msg.message = P4::createFormattedMessage(format, std::forward<Args>(args)...);
         emit_message(msg);
 

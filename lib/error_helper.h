@@ -22,23 +22,16 @@ inline void collectSourceInfo(ErrorMessage & /*msg*/) {}
 
 template <typename T, typename... Rest>
 void collectSourceInfo(ErrorMessage &msg, T &&arg, Rest &&...rest) {
-    using RawType = std::remove_reference_t<T>;
     using ArgType = std::decay_t<T>;
-    if constexpr (Util::has_SourceInfo_v<ArgType>) {
-        if constexpr (std::is_convertible_v<ArgType, Util::SourceInfo>) {
-            Util::SourceInfo info(arg);
-            if (info.isValid()) {
-                msg.locations.push_back(info);
-            }
-        } else {
-            auto info = arg.getSourceInfo();
-            if (info.isValid()) {
-                msg.locations.push_back(info);
-            }
+    if constexpr (std::is_same_v<ArgType, P4::Util::SourceInfo>) {
+        if (arg.isValid()) {
+            msg.locations.push_back(arg);
         }
-    } else if constexpr (std::is_array_v<RawType> &&
-                         std::is_same_v<std::remove_cv_t<std::remove_extent_t<RawType>>, char>) {
-        // String literal or char array: not a nullable pointer source.
+    } else if constexpr (Util::has_SourceInfo_v<ArgType>) {
+        auto info = arg.getSourceInfo();
+        if (info.isValid()) {
+            msg.locations.push_back(info);
+        }
     } else if constexpr (std::is_pointer_v<ArgType>) {
         using PointeeType = std::remove_pointer_t<ArgType>;
         if constexpr (Util::has_SourceInfo_v<PointeeType>) {
@@ -48,10 +41,6 @@ void collectSourceInfo(ErrorMessage &msg, T &&arg, Rest &&...rest) {
                     msg.locations.push_back(info);
                 }
             }
-        }
-    } else if constexpr (std::is_same_v<ArgType, P4::Util::SourceInfo>) {
-        if (arg.isValid()) {
-            msg.locations.push_back(arg);
         }
     }
     collectSourceInfo(msg, std::forward<Rest>(rest)...);

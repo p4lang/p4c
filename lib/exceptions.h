@@ -73,8 +73,9 @@ class P4CExceptionBase : public std::exception {
         std::string positionStr;
         std::string tailStr;
         extractBugSourceInfo(argTuple, positionStr, tailStr);
-        // Format the core message.
-        std::string formattedCore = P4::createFormattedMessageFromTuple(format, argTuple);
+        // Format the core message. Prefer dbprint for bug reports to emulate the old bug_helper
+        // behavior.
+        std::string formattedCore = P4::createFormattedMessageFromTuple<true>(format, argTuple);
         // Assemble the final message string.
         message = absl::StrCat(positionStr, positionStr.empty() ? "" : ": ", formattedCore, "\n",
                                tailStr);

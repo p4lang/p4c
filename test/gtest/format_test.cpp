@@ -13,13 +13,13 @@ namespace P4::Util {
 TEST(Util, Format) {
     auto &context = BaseCompileContext::get();
     cstring message = context.errorReporter().format_message("%1%", 5u);
-    EXPECT_EQ("5", message);
+    EXPECT_EQ("5\n", message);
 
     message = context.errorReporter().format_message("Number=%1%", 5);
-    EXPECT_EQ("Number=5", message);
+    EXPECT_EQ("Number=5\n", message);
 
     message = context.errorReporter().format_message("Double=%1% String=%2%", 2.3, "short");
-    EXPECT_EQ("Double=2.3 String=short", message);
+    EXPECT_EQ("Double=2.3 String=short\n", message);
 
     struct NiceFormat {
         int a, b, c;
@@ -32,15 +32,15 @@ TEST(Util, Format) {
 
     NiceFormat nf{1, 2, 3};
     message = context.errorReporter().format_message("Nice=%1%", nf);
-    EXPECT_EQ("Nice=(1,2,3)", message);
+    EXPECT_EQ("Nice=(1,2,3)\n", message);
 
     cstring x = "x"_cs;
     cstring y = "y"_cs;
     message = context.errorReporter().format_message("%1% %2%", x, y);
-    EXPECT_EQ("x y", message);
+    EXPECT_EQ("x y\n", message);
 
     message = context.errorReporter().format_message("%1% %2%", x, 5);
-    EXPECT_EQ("x 5", message);
+    EXPECT_EQ("x 5\n", message);
 }
 
 }  // namespace P4::Util

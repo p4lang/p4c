@@ -3,6 +3,7 @@
 
 #include <cctype>
 #include <charconv>
+#include <iostream>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
@@ -24,14 +25,18 @@
 namespace P4 {
 
 namespace detail {
-// Formatter adapter for legacy boost::format placeholders (%N%) and
+// Formatter adapter for previous legacy boost::format placeholders (%N%) and
 // printf/absl::StrFormat placeholders (%s, %d, ...).
 // The style is auto-detected; mixed styles are rejected.
 
 template <typename T>
 constexpr bool is_char_pointer_v = std::is_same_v<T, char *> || std::is_same_v<T, const char *>;
 
-template <typename T>
+// Stream an argument. When PreferDbprint is set (used for bug reports), types
+// that implement dbprint are rendered with it, mirroring the previous boost bug_helper
+// behavior; otherwise toString()/operator<< are used, matching the previous boost
+// error_helper behavior.
+template <bool PreferDbprint = false, typename T>
 void streamArgument(std::ostream &os, const T &arg) {
     // Use decay_t to handle potential references correctly in type checks
     using ArgType = std::decay_t<T>;
@@ -46,11 +51,13 @@ void streamArgument(std::ostream &os, const T &arg) {
             if constexpr (is_char_pointer_v<ArgType>) {
                 os << arg;
             } else {
-                streamArgument(os, *arg);
+                streamArgument<PreferDbprint>(os, *arg);
             }
         } else {
             os << "<nullptr>";
         }
+    } else if constexpr (PreferDbprint && has_dbprint_v<ArgType>) {
+        arg.dbprint(os);
     } else if constexpr (Util::has_toString_v<ArgType>) {
         os << arg.toString();
     } else if constexpr (requires { os << arg; }) {
@@ -62,10 +69,11 @@ void streamArgument(std::ostream &os, const T &arg) {
 }
 
 // Modify streamNthImpl to call the smart helper
-template <typename Tuple, std::size_t... Is>
+template <bool PreferDbprint, typename Tuple, std::size_t... Is>
 void streamNthImpl(std::ostream &os, std::size_t index, const Tuple &tup,
                    std::index_sequence<Is...>) {
-    bool found = ((index == Is && (streamArgument(os, std::get<Is>(tup)), true)) || ...);
+    bool found = ((index == Is && (streamArgument<PreferDbprint>(os, std::get<Is>(tup)), true)) ||
+                  ...);
     if (!found) {
         throw std::runtime_error(absl::StrCat(
             "Internal error: Invalid argument index requested in streamNthImpl: ", index));
@@ -73,9 +81,10 @@ void streamNthImpl(std::ostream &os, std::size_t index, const Tuple &tup,
 }
 
 // streamNth wrapper remains the same
-template <typename Tuple>
+template <bool PreferDbprint, typename Tuple>
 void streamNth(std::ostream &os, std::size_t index, const Tuple &tup) {
-    streamNthImpl(os, index, tup, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    streamNthImpl<PreferDbprint>(os, index, tup,
+                                 std::make_index_sequence<std::tuple_size_v<Tuple>>{});
 }
 
 // Replicates the logic from the original getPositionTail, modifying args by reference
@@ -192,7 +201,7 @@ inline constexpr FormatStyle detectFormatStyle(std::string_view fmt) {
     return FormatStyle::Literal;
 }
 
-template <typename Tuple>
+template <bool PreferDbprint, typename Tuple>
 std::string formatBoostStyle(std::string_view formatSv, const Tuple &argTuple) {
     std::stringstream ss;
     constexpr std::size_t numArgs = std::tuple_size_v<Tuple>;
@@ -227,7 +236,8 @@ std::string formatBoostStyle(std::string_view formatSv, const Tuple &argTuple) {
                 auto result =
                     std::from_chars(numSv.data(), numSv.data() + numSv.size(), argIndexBoost);
                 if (result.ec == std::errc() && argIndexBoost > 0 && argIndexBoost <= numArgs) {
-                    detail::streamNth(ss, static_cast<std::size_t>(argIndexBoost - 1), argTuple);
+                    detail::streamNth<PreferDbprint>(
+                        ss, static_cast<std::size_t>(argIndexBoost - 1), argTuple);
                     currentPos = j + 1;
                 } else {
                     ss << '%';
@@ -247,7 +257,7 @@ std::string formatBoostStyle(std::string_view formatSv, const Tuple &argTuple) {
     return ss.str();
 }
 
-template <typename Tuple, std::size_t... Is>  // Is is the pack 0, 1, 2...
+template <bool PreferDbprint, typename Tuple, std::size_t... Is>  // Is is the pack 0, 1, 2...
 void populateSelectiveAbseilArgsImpl(const Tuple &tup, std::vector<std::string> &argStrings,
                                      std::vector<absl::FormatArg> &abslArgs,
                                      std::index_sequence<Is...>) {
@@ -267,7 +277,7 @@ void populateSelectiveAbseilArgsImpl(const Tuple &tup, std::vector<std::string> 
                 } else {
                     // Convert other types to string.
                     std::stringstream tempSs;
-                    detail::streamArgument(tempSs, element);
+                    detail::streamArgument<PreferDbprint>(tempSs, element);
                     argStrings.push_back(tempSs.str());
                     abslArgs.push_back(absl::FormatArg(argStrings.back()));
                 }
@@ -277,19 +287,19 @@ void populateSelectiveAbseilArgsImpl(const Tuple &tup, std::vector<std::string> 
 }
 
 // Wrapper to generate the index sequence
-template <typename Tuple>
+template <bool PreferDbprint, typename Tuple>
 void populateSelectiveAbseilArgs(const Tuple &tup, std::vector<std::string> &argStrings,
                                  std::vector<absl::FormatArg> &abslArgs) {
-    populateSelectiveAbseilArgsImpl(tup, argStrings, abslArgs,
-                                    std::make_index_sequence<std::tuple_size_v<Tuple>>{});
+    populateSelectiveAbseilArgsImpl<PreferDbprint>(
+        tup, argStrings, abslArgs, std::make_index_sequence<std::tuple_size_v<Tuple>>{});
 }
 
-template <typename Tuple>
+template <bool PreferDbprint, typename Tuple>
 std::string formatAbslStyle(std::string_view formatSv, const Tuple &argTuple) {
     // 1. Populate abslArgs vector: integrals passed directly, others as strings
     std::vector<std::string> argStrings;
     std::vector<absl::FormatArg> abslArgs;
-    populateSelectiveAbseilArgs(argTuple, argStrings, abslArgs);
+    populateSelectiveAbseilArgs<PreferDbprint>(argTuple, argStrings, abslArgs);
 
     // 2. Call Abseil Format
     std::string result;
@@ -312,7 +322,7 @@ void extractBugSourceInfo(const Tuple &tup, std::string &position, std::string &
                                      std::make_index_sequence<std::tuple_size_v<Tuple>>{});
 }
 
-template <typename Tuple>
+template <bool PreferDbprint = false, typename Tuple>
 std::string createFormattedMessageFromTuple(const char *format, const Tuple &argTuple) {
     std::string_view formatSv(format);
     detail::FormatStyle style = detail::detectFormatStyle(formatSv);
@@ -320,10 +330,10 @@ std::string createFormattedMessageFromTuple(const char *format, const Tuple &arg
     try {
         switch (style) {
             case detail::FormatStyle::Boost:
-                return detail::formatBoostStyle(formatSv, argTuple);
+                return detail::formatBoostStyle<PreferDbprint>(formatSv, argTuple);
             case detail::FormatStyle::Abseil:
                 // Pass the original tuple to the Abseil formatter.
-                return detail::formatAbslStyle(formatSv, argTuple);
+                return detail::formatAbslStyle<PreferDbprint>(formatSv, argTuple);
             case detail::FormatStyle::Literal:
                 return std::string(formatSv);
             // Mixed or invalid style
@@ -332,16 +342,22 @@ std::string createFormattedMessageFromTuple(const char *format, const Tuple &arg
                 throw std::runtime_error("Can not determine appropriate format.");
         }
     } catch (const std::exception &e) {
+        // Formatting failures should never be silently swallowed: surface the
+        // underlying problem on stderr so that broken format strings are not
+        // hidden behind a placeholder in the diagnostic output.
+        std::cerr << "Internal formatting error: " << e.what() << "\n"
+                  << "Format: " << format << "\n";
         return absl::StrCat("<<Internal Formatting Error: ", e.what(), " | Format: ", format, ">>");
     } catch (...) {
+        std::cerr << "Unknown internal formatting error\nFormat: " << format << "\n";
         return absl::StrCat("<<Unknown Internal Formatting Error", " | Format: ", format, ">>");
     }
 }
 
-template <typename... Args>
+template <bool PreferDbprint = false, typename... Args>
 std::string createFormattedMessage(const char *format, Args &&...args) {
     auto argTuple = std::make_tuple(std::forward<Args>(args)...);
-    return createFormattedMessageFromTuple(format, argTuple);
+    return createFormattedMessageFromTuple<PreferDbprint>(format, argTuple);
 }
 
 }  // namespace P4

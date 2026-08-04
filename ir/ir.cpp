@@ -270,7 +270,7 @@ const IR::PackageBlock *ToplevelBlock::getMain() const {
     }
     auto main = mainDecls[0];
     if (mainDecls.size() > 1) {
-        ::P4::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%s' instances: %1%, %2%",
+        ::P4::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%1%' instances: %2%, %3%",
                     IR::P4Program::main, main->getNode(), mainDecls[1]->getNode());
         return nullptr;
     }
