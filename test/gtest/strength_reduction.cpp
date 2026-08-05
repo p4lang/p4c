@@ -76,9 +76,11 @@ struct GTestStrengthReductionPolicy : public P4::FrontEndPolicy {
     P4::StrengthReductionPolicy *getStrengthReductionPolicy() const override { return policy_; }
 
     GTestStrengthReductionPolicy(bool enableSubConstToAddTransform = true,
-                                 bool enableCastToSliceTransform = false) {
+                                 bool enableCastToSliceTransform = false,
+                                 bool enablePlusSliceToShiftTransform = false) {
         policy_ = new P4::StrengthReductionPolicy(enableSubConstToAddTransform,
-                                                  enableCastToSliceTransform);
+                                                  enableCastToSliceTransform,
+                                                  enablePlusSliceToShiftTransform);
     }
 
  private:
@@ -144,6 +146,65 @@ TEST_F(StrengthReductionTest, EnableNarrowingCastToSliceTransform) {
     std::string value2 = "headers.h.f4 = headers.h.f1[15:0]";
     EXPECT_TRUE(program_string.find(value1) == std::string::npos);
     EXPECT_FALSE(program_string.find(value2) == std::string::npos);
+}
+
+TEST_F(StrengthReductionTest, DefaultDisablePlusSliceToShiftTransform) {
+    auto test = createStrengthReductionTestCase(
+        P4_SOURCE(R"(headers.h.f4 = headers.h.f1[headers.h.f2+:16];)"));
+
+    Util::SourceCodeBuilder builder;
+    ToP4 top4(builder, false);
+    test->program->apply(top4);
+
+    std::string program_string = builder.toString();
+    EXPECT_NE(program_string.find("headers.h.f1[headers.h.f2+:16]"), std::string::npos);
+    EXPECT_EQ(program_string.find("(headers.h.f1 >> headers.h.f2)[15:0]"), std::string::npos);
+}
+
+TEST_F(StrengthReductionTest, EnablePlusSliceToShiftTransform) {
+    GTestStrengthReductionPolicy policy(true, false, true);
+    auto test = createStrengthReductionTestCase(
+        P4_SOURCE(R"(headers.h.f4 = headers.h.f1[headers.h.f2+:16];)"), &policy);
+
+    Util::SourceCodeBuilder builder;
+    ToP4 top4(builder, false);
+    test->program->apply(top4);
+
+    std::string program_string = builder.toString();
+    EXPECT_EQ(program_string.find("headers.h.f1[headers.h.f2+:16]"), std::string::npos);
+    EXPECT_NE(program_string.find("(headers.h.f1 >> headers.h.f2)[15:0]"), std::string::npos);
+}
+
+TEST_F(StrengthReductionTest, PreservePlusSliceToShiftTransformOnWrite) {
+    GTestStrengthReductionPolicy policy(true, false, true);
+    auto test = createStrengthReductionTestCase(
+        P4_SOURCE(R"(headers.h.f1[headers.h.f2+:16] = headers.h.f4;)"), &policy);
+
+    Util::SourceCodeBuilder builder;
+    ToP4 top4(builder, false);
+    test->program->apply(top4);
+
+    std::string program_string = builder.toString();
+    EXPECT_NE(program_string.find("headers.h.f1[headers.h.f2+:16] = headers.h.f4"),
+              std::string::npos);
+}
+
+TEST_F(StrengthReductionTest, EnablePlusSliceToShiftTransformOnSignedSource) {
+    GTestStrengthReductionPolicy policy(true, false, true);
+    auto test = createStrengthReductionTestCase(P4_SOURCE(R"(
+            int<32> signedValue = -1;
+            headers.h.f4 = signedValue[headers.h.f2+:16];
+        )"),
+                                                &policy);
+
+    Util::SourceCodeBuilder builder;
+    ToP4 top4(builder, false);
+    test->program->apply(top4);
+
+    std::string program_string = builder.toString();
+    EXPECT_EQ(program_string.find("[headers.h.f2+:16]"), std::string::npos);
+    EXPECT_EQ(program_string.find("(bit<32>)signedValue"), std::string::npos);
+    EXPECT_NE(program_string.find(" >> headers.h.f2)[15:0]"), std::string::npos);
 }
 
 }  // namespace P4::Test
