@@ -30,6 +30,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: "container-image-${{ runner.os }}"
+          max-size: 1000M
+
       - name: Build Docker test image
         run: |
           docker build --network host -t p4c-test --build-arg IMAGE_TYPE=test .
@@ -37,6 +43,8 @@ jobs:
         run: |
           sudo -E docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c-test \
             uv run ctest --output-on-failure --schedule-random
+      - name: Export ccache
+        run: ./tools/export_ccache.sh p4c-test
       - name: Free disk space
         run: docker rmi p4c-test || true
       - name: Determine Docker image tag
@@ -68,9 +76,7 @@ jobs:
           context: .
           load: true
           tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
-          cache-from: |
-            type=gha
-            type=registry,ref=p4lang/p4c:buildcache
+          cache-from: type=gha
           # A cache write must not fail the build.
           cache-to: type=gha,mode=max,ignore-error=true
 
@@ -101,16 +107,7 @@ jobs:
                    MyComputeChecksum(), MyDeparser()) main;
           EOF
           docker run --rm -v /tmp/smoke.p4:/tmp/smoke.p4:ro $IMAGE p4test /tmp/smoke.p4
-
       - name: Push Docker image to registry
         if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: true
-          tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
-          cache-from: |
-            type=gha
-            type=registry,ref=p4lang/p4c:buildcache
-          # A cache write must not fail the build.
-          cache-to: type=registry,ref=p4lang/p4c:buildcache,mode=max,ignore-error=true
+        run: |
+          docker push p4lang/p4c:${{ steps.get-tag.outputs.tag }}

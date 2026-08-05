@@ -23,6 +23,8 @@ unified-compilation.am
 *.json.p4
 *p4.json
 build/
+# ccache directory
+.ccache
 *.pyc
 # testing may generate packet observation logs
 *.obs
