@@ -252,7 +252,7 @@ struct DelayDefs : public ParserModifier {
 
                 BUG_CHECK(!seen || shift == trans->shift,
                           "Multiple transitions seen from %1% to %2% with different shift amounts: "
-                          "%1% %2%",
+                          "%3% %4%",
                           state->name, trans->next->name, shift, trans->shift);
                 shift = trans->shift;
                 seen = true;

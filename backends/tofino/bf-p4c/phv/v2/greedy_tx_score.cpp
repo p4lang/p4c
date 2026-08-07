@@ -61,7 +61,7 @@ ContGress from(const gress_t &t) {
             return ContGress::ingress;
         }
         default:
-            BUG("unknown gress: ", t);
+            BUG("unknown gress: %1%", t);
     }
 }
 

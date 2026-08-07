@@ -341,7 +341,7 @@ void RegisterReadWrite::AnalyzeActionWithRegisterCalls::createRegisterExecute(
 
 void RegisterReadWrite::AnalyzeActionWithRegisterCalls::createRegisterAction(
     RegActionInfo &info, const IR::Statement *reg_stmt, const IR::Declaration *act) {
-    BUG_CHECK(reg_stmt, "No register call statment present to analyze in action - ", act);
+    BUG_CHECK(reg_stmt, "No register call statment present to analyze in action - %1%", act);
 
     auto [call, assign_lhs] = extractRegisterReadWrite(reg_stmt);
     if (!call) return;
@@ -460,7 +460,7 @@ bool RegisterReadWrite::AnalyzeActionWithRegisterCalls::preorder(const IR::Decla
     LOG1("RegisterReadWrite: analysing action: " << act << indent);
 
     auto control = findContext<IR::P4Control>();
-    BUG_CHECK(control, "No control found for P4 Action ", act);
+    BUG_CHECK(control, "No control found for P4 Action %1%", act);
 
     for (auto reg : self.action_register_calls[act]) {
         RegActionInfo info;
