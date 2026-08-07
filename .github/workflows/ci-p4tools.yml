@@ -28,7 +28,7 @@ jobs:
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
       # This pins BMv2 to current upstream main.
-      BMV2_REF: faf7bfe96064d5c6fc7753cad956a9e85445883b
+      BMV2_REF: 883d4eae360de7b6ad0aaf52ba6d30a2401cd0e0
     steps:
       - uses: actions/checkout@v7
         with:

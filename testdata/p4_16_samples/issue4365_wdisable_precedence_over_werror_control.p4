@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Control testcase to ensure that this program actually emits warnings
 // that can be disabled with --Wdisable=uninitialized-use and --Wdisable=invalid-header.
 header h_t {

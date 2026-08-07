@@ -40,10 +40,10 @@ control c() {
                         const 8w4 : switch_0_case_0();
         }
     }
-    @hidden action issue4656_const_fold_generic_switch_label_expr14() {
+    @hidden action issue4656_const_fold_generic_switch_label_expr20() {
         foo();
     }
-    @hidden action issue4656_const_fold_generic_switch_label_expr15() {
+    @hidden action issue4656_const_fold_generic_switch_label_expr21() {
         bar();
     }
     @hidden action act() {
@@ -55,26 +55,26 @@ control c() {
         }
         const default_action = act();
     }
-    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr14 {
+    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr20 {
         actions = {
-            issue4656_const_fold_generic_switch_label_expr14();
+            issue4656_const_fold_generic_switch_label_expr20();
         }
-        const default_action = issue4656_const_fold_generic_switch_label_expr14();
+        const default_action = issue4656_const_fold_generic_switch_label_expr20();
     }
-    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr15 {
+    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr21 {
         actions = {
-            issue4656_const_fold_generic_switch_label_expr15();
+            issue4656_const_fold_generic_switch_label_expr21();
         }
-        const default_action = issue4656_const_fold_generic_switch_label_expr15();
+        const default_action = issue4656_const_fold_generic_switch_label_expr21();
     }
     apply {
         tbl_act.apply();
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
-                tbl_issue4656_const_fold_generic_switch_label_expr14.apply();
+                tbl_issue4656_const_fold_generic_switch_label_expr20.apply();
             }
             switch_0_case_0: {
-                tbl_issue4656_const_fold_generic_switch_label_expr15.apply();
+                tbl_issue4656_const_fold_generic_switch_label_expr21.apply();
             }
             switch_0_case_1: {
             }

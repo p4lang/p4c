@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include <gtest/gtest.h>
 
 #include "frontends/common/parseInput.h"
@@ -12,7 +16,7 @@ namespace P4::Test {
 
 struct RemoveDontcareArgsTest : P4CTest {
     const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+        const auto *pgm = P4::parseP4String(program);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {

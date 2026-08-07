@@ -119,8 +119,14 @@ void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
             max_length += 1;
             field->append(1);
             field->append(false);
+        } else if (ftype->is<IR::Type_Error>()) {
+            // Treat as bit<32>, the same as the program structure pass and the v1model back end.
+            field->append(name);
+            max_length += 32;
+            field->append(32);
+            field->append(false);
         } else {
-            BUG_CHECK(decl, "%1 is not of Type_Bits or Type_Boolean");
+            BUG("%1%: unexpected type %2% for scalar field", decl, ftype);
         }
         ctxt->json->add_header_field("scalars_t"_cs, field);
     };

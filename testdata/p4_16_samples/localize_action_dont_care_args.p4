@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 struct S {
     bit<64> f;
 }

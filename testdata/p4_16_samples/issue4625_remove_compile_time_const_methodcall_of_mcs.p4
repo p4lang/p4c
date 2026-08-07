@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header h_t {
     bit<8> f;
 }
