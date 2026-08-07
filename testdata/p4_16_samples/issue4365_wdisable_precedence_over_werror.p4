@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // Expect no errors, as --Wdisable should take precedence over --Werror for warnings.
 @command_line("--Werror", "--Wdisable=uninitialized-use", "--Wdisable=invalid-header")
 header h_t {
