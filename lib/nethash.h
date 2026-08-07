@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef LIB_NETHASH_H_
 #define LIB_NETHASH_H_
 
