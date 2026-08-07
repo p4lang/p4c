@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Google Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 module(
     name = "p4c",
     version = "head",  # Fill in concrete versions only on release branches/in the BCR.
