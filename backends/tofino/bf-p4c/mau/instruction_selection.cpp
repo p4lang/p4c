@@ -431,8 +431,8 @@ const IR::Node *Synth2PortSetup::postorder(IR::MAU::Primitive *prim) {
             return new IR::MAU::StatefulCounter(prim->srcInfo, t, salu);
         }
         auto *salu_inst = salu->calledAction(tbl, act);
-        BUG_CHECK(salu_inst != nullptr, "%s: Could not find called action for stateful memory in ",
-                  prim->srcInfo, salu->name);
+        BUG_CHECK(salu_inst != nullptr,
+                  "%1%: could not find called action for stateful memory in %2%", prim, salu->name);
         auto salu_index = salu_inst->inst_code;
         if (salu_index < 0) {
             // FIXME -- should be allocating/setting this
@@ -1054,7 +1054,7 @@ const IR::Expression *DoInstructionSelection::postorder(IR::Operation_Relation *
         } else if (e->is<IR::Geq>()) {
             opName = isSigned ? "gteqs" : "gtequ";
         } else {
-            error("%1%: Unknown relational operator", e, e->node_type_name());
+            error("%1%: unknown relational operator %2%", e, e->node_type_name());
         }
         return new IR::MAU::Instruction(e->srcInfo, cstring(opName), new IR::TempVar(e->type),
                                         e->left, e->right);

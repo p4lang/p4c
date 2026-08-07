@@ -54,7 +54,7 @@ const IR::Node *ElimCallExprInIfCond::postorder(IR::MethodCallExpression *method
         // may need to modify to support function();
         return methodCall;
     } else {
-        BUG("Unexpected method call", methodCall);
+        BUG("%1%: unexpected method call", methodCall);
     }
     auto &path = *linearizer.linearPath;
     auto tempVar = refMap->newName(path.to_cstring().string_view());

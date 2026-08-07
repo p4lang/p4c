@@ -41,7 +41,7 @@ class FillFromBlockMap : public Transform {
             else
                 BUG("Type_Name %1% maps to %2% rather than a type decl", type, decl);
         } else {
-            BUG("Type_Name %1% doesn't map to a declaration", type, decl);
+            BUG("Type_Name %1% doesn't map to a declaration", type);
         }
     }
 

@@ -2008,7 +2008,7 @@ class ConstructSymbolTable : public Inspector {
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");
             else if (mode->value != "fair" && mode->value != "non_resilient")
-                BUG("Selector mode provided for the selector is not supported", node);
+                BUG("%1%: selector mode provided for the selector is not supported", node);
         } else {
             LOG1("WARNING: No mode specified for the selector %s. Assuming fair" << node);
         }
