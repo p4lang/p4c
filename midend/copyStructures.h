@@ -8,6 +8,7 @@
 #ifndef MIDEND_COPYSTRUCTURES_H_
 #define MIDEND_COPYSTRUCTURES_H_
 
+#include "frontends/p4/alias.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -95,6 +96,7 @@ class DoCopyStructures : public Transform {
 class RemoveAliases : public Transform {
     MinimalNameGenerator nameGen;
     TypeMap *typeMap;
+    ReadsWrites readsWrites;
 
     IR::IndexedVector<IR::Declaration> declarations;
 
@@ -113,6 +115,7 @@ class RemoveAliases : public Transform {
     const IR::Node *postorder(IR::AssignmentStatement *statement) override;
     const IR::Node *postorder(IR::P4Parser *parser) override;
     const IR::Node *postorder(IR::P4Control *control) override;
+    void end_apply(const IR::Node *) override { readsWrites.clear(); }
 };
 
 class CopyStructures : public PassRepeated {
