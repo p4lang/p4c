@@ -6,7 +6,6 @@
 #include <gtest/gtest.h>
 
 #include "lib/cstring.h"
-#include "lib/error.h"
 #include "lib/stringify.h"
 
 namespace P4::Util {

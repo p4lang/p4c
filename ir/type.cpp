@@ -76,7 +76,7 @@ const Type_Bits *Type_Bits::get(const Util::SourceInfo &si, const IR::Expression
     if (auto *k = expression->to<IR::Constant>()) {
         if (!k->fitsInt())
             error(ErrorType::ERR_OVERLIMIT,
-                  "%1$x: this implementation does not support bitstrings this large", k);
+                  "%s: this implementation does not support bitstrings this large", k);
         else
             return get(si, k->asInt(), isSigned);
     }
@@ -120,7 +120,7 @@ const Type_Varbits *Type_Varbits::get(const Util::SourceInfo &si, const IR::Expr
     if (auto *k = expr->to<IR::Constant>()) {
         if (!k->fitsInt())
             error(ErrorType::ERR_OVERLIMIT,
-                  "%1$x: this implementation does not support bitstrings this large", k);
+                  "%s: this implementation does not support bitstrings this large", k);
         else
             return get(si, k->asInt());
     }
