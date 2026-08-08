@@ -126,7 +126,7 @@ class AttachTables : public PassManager {
         ordered_map<const IR::Declaration_Instance *,
                     IR::MAU::StatefulAlu *>
             param_salus;  // RegisterParam -> StatefulAlu
-        bool preorder(const IR::MAU::Primitive *prim) override;
+        bool preorder(const IR::MAU::MauPrimitive *prim) override;
         void end_apply() override;
 
      public:

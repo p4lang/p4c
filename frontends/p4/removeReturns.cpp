@@ -9,7 +9,7 @@
 
 namespace P4 {
 
-bool MoveToElseAfterBranch::preorder(IR::BlockStatement *block) {
+bool MoveToElseAfterBranch::preorder(IR::COWptr<IR::BlockStatement> block) {
     movedToIfBranch = false;
     for (auto it = block->components.begin(); it != block->components.end();) {
         if (movedToIfBranch)
@@ -21,7 +21,8 @@ bool MoveToElseAfterBranch::preorder(IR::BlockStatement *block) {
     return false;
 }
 
-bool MoveToElseAfterBranch::moveFromParentTo(const IR::Statement *&child) {
+template <class T>
+bool MoveToElseAfterBranch::moveFromParentTo(T &child) {
     auto parent = getParent<IR::BlockStatement>();
     size_t next = getContext()->child_index + 1;
     if (!parent || next >= parent->components.size()) {
@@ -32,9 +33,9 @@ bool MoveToElseAfterBranch::moveFromParentTo(const IR::Statement *&child) {
     IR::BlockStatement *modified = nullptr;
     if (!child)
         modified = new IR::BlockStatement;
-    else if (auto *t = child->to<IR::BlockStatement>())
+    else if (auto *t = child->template to<IR::BlockStatement>())
         modified = t->clone();
-    else if (child->is<IR::EmptyStatement>())
+    else if (child->template is<IR::EmptyStatement>())
         modified = new IR::BlockStatement;
     else
         modified = new IR::BlockStatement({child});
@@ -44,7 +45,7 @@ bool MoveToElseAfterBranch::moveFromParentTo(const IR::Statement *&child) {
     return true;
 }
 
-bool MoveToElseAfterBranch::preorder(IR::IfStatement *ifStmt) {
+bool MoveToElseAfterBranch::preorder(IR::COWptr<IR::IfStatement> ifStmt) {
     hasJumped = false;
     bool movedCode = false;
     visit(ifStmt->ifTrue, "ifTrue", 1);
@@ -63,11 +64,11 @@ bool MoveToElseAfterBranch::preorder(IR::IfStatement *ifStmt) {
     return false;
 }
 
-bool MoveToElseAfterBranch::preorder(IR::SwitchStatement *swch) {
+bool MoveToElseAfterBranch::preorder(IR::COWptr<IR::SwitchStatement> swch) {
     // TBD: if there is exactly one case that falls through (all others end with a branch)
     // then we could move subsequent code into that case, as it done with 'if'
     bool canFallThrough = false;
-    for (auto &c : swch->cases) {
+    for (auto c : swch->cases) {
         hasJumped = false;
         visit(c, "cases");
         canFallThrough |= !hasJumped;
@@ -76,7 +77,7 @@ bool MoveToElseAfterBranch::preorder(IR::SwitchStatement *swch) {
     return false;
 }
 
-void MoveToElseAfterBranch::postorder(IR::LoopStatement *) {
+void MoveToElseAfterBranch::postorder(IR::COWptr<IR::LoopStatement>) {
     // after a loop body is never unreachable
     hasJumped = false;
 }

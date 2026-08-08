@@ -334,11 +334,11 @@ class ExcludeMAUNotMutexHeaders : public MauInspector,
     }
 
     bool is_header(const PHV::Field *field) { return field && field->header() && !field->metadata; }
-    bool is_set(const IR::MAU::Primitive *primitive);
-    bool is_set_header_pov(const IR::MAU::Primitive *primitive);
-    bool is_set_header_valid(const IR::MAU::Primitive *primitive);
-    bool is_set_header_invalid(const IR::MAU::Primitive *primitive);
-    bool is_set_header_pov_to_other_header_pov(const IR::MAU::Primitive *primitive);
+    bool is_set(const IR::MAU::MauPrimitive *primitive);
+    bool is_set_header_pov(const IR::MAU::MauPrimitive *primitive);
+    bool is_set_header_valid(const IR::MAU::MauPrimitive *primitive);
+    bool is_set_header_invalid(const IR::MAU::MauPrimitive *primitive);
+    bool is_set_header_pov_to_other_header_pov(const IR::MAU::MauPrimitive *primitive);
     void init_active_headers();
     void init_extracted_headers();
     void init_not_extracted_headers();

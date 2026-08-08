@@ -989,7 +989,7 @@ static double (*fn[2][3])(double) = {{sqrt, mul, sqr}, {rsqrt, div, rsqr}};
 static double fn_max[2][3] = {{1.36930639376291528364, 1.875, 3.515625},
                               {1.41421356237309504880, 1.0, 1.0}};
 
-bool CreateSaluInstruction::preorder(const IR::MAU::Primitive *prim) {
+bool CreateSaluInstruction::preorder(const IR::MAU::MauPrimitive *prim) {
     cstring method;
     if (const char *p = prim->name.find('.')) {
         method = cstring(p + 1);
@@ -2386,7 +2386,7 @@ bool CheckStatefulAlu::preorder(IR::MAU::StatefulAlu *salu) {
         }
         // Validate that each operand are not larger than the stateful ALU can support based on
         // the register size selected.
-        for (const IR::MAU::Primitive *act_prim : salu_action->action) {
+        for (const IR::MAU::MauPrimitive *act_prim : salu_action->action) {
             // Min and Max instruction can operate on 128 bit input even if the stateful ALU
             // operate in 8 or 16 bit mode. Just ignore this corner case for now in this
             // preemptive error reporting.
@@ -2426,7 +2426,7 @@ void CheckStatefulAlu::postorder(IR::MAU::SaluInstruction *si) {
     }
 }
 
-bool CheckStatefulAlu::preorder(IR::MAU::Primitive *prim) {
+bool CheckStatefulAlu::preorder(IR::MAU::MauPrimitive *prim) {
     if (!findContext<IR::MAU::SaluAction>()) {
         return true;
     }
@@ -2625,10 +2625,10 @@ const IR::Expression *FixupStatefulAlu::UpdateEncodings::preorder(IR::Member *ex
     if (!enum_type || !self.encodings.count(enum_type)) return exp;
     if (!exp->expr->is<IR::TypeNameExpression>()) return exp;
     auto encoding = self.encodings.at(enum_type).encoding;
-    const IR::MAU::Primitive *prim;
+    const IR::MAU::MauPrimitive *prim;
     if (getParent<IR::AssignmentStatement>() || getParent<IR::BFN::SavedRVal>()) {
         // ok
-    } else if ((prim = getParent<IR::MAU::Primitive>()) && prim->name == "modify_field") {
+    } else if ((prim = getParent<IR::MAU::MauPrimitive>()) && prim->name == "modify_field") {
         // ok
     } else {
         error(ErrorType::ERR_UNSUPPORTED, "%1%: unexpected enum reference", exp);
