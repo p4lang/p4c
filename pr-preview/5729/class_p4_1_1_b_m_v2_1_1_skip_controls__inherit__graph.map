@@ -1,0 +1,5 @@
+<map id="P4::BMV2::SkipControls" name="P4::BMV2::SkipControls">
+<area shape="rect" id="Node000001" title="This class implements a policy suitable for the SynthesizeActions pass." alt="" coords="13,79,187,104"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_action_synthesis_policy.html" title=" " alt="" coords="5,5,195,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,44,103,79,97,79,97,44"/>
+</map>

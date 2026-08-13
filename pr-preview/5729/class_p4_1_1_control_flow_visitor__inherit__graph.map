@@ -1,0 +1,39 @@
+<map id="P4::ControlFlowVisitor" name="P4::ControlFlowVisitor">
+<area shape="rect" id="Node000001" title=" " alt="" coords="141,301,308,327"/>
+<area shape="rect" id="Node000003" href="$struct_b_f_n_1_1_collect_bridged_fields.html" title=" " alt="" coords="366,5,557,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="228,287,242,235,265,168,302,100,326,68,354,41,376,28,379,33,358,45,330,72,307,102,270,170,247,236,233,288"/>
+<area shape="rect" id="Node000004" href="$class_b_f_n_1_1_control_flow_visitor.html" title=" " alt="" coords="373,55,550,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="231,287,247,244,273,190,308,136,330,112,354,90,377,78,380,83,358,95,334,116,312,140,277,193,252,246,236,289"/>
+<area shape="rect" id="Node000005" href="$class_b_f_n_1_1_gateway_control_flow.html" title=" " alt="" coords="365,104,558,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="236,288,254,254,281,214,314,174,355,140,381,127,383,132,357,144,318,177,285,217,259,257,240,290"/>
+<area shape="rect" id="Node000007" href="$class_build_mutex.html" title=" " alt="" coords="413,153,509,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="242,289,289,238,321,211,355,189,383,177,412,170,414,175,385,182,357,194,324,216,293,242,246,292"/>
+<area shape="rect" id="Node000011" href="$group___deparser_copy_opt.html#class_collect_weak_fields" title=" " alt="" coords="391,203,532,228"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="255,291,301,264,355,238,395,225,397,231,357,243,304,269,258,296"/>
+<area shape="rect" id="Node000012" href="$class_default_next.html" title=" " alt="" coords="411,252,512,277"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="299,296,410,272,411,278,300,301"/>
+<area shape="rect" id="Node000013" href="$group__parde.html#class_field_def_use" title=" " alt="" coords="411,301,512,327"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="322,311,411,311,411,317,322,317"/>
+<area shape="rect" id="Node000014" href="$class_find_data_dependency_graph.html" title=" " alt="" coords="361,351,561,376"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="300,327,400,348,399,353,299,332"/>
+<area shape="rect" id="Node000015" href="$class_mau_power_1_1_build_power_graph.html" title=" " alt="" coords="356,400,567,425"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="257,332,303,360,357,386,392,397,391,402,355,391,300,365,254,336"/>
+<area shape="rect" id="Node000016" href="$class_p4_1_1_compute_def_use.html" title="Compute defuse info within P4Parser and P4Control blocks in the midend." alt="" coords="385,449,538,475"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="246,336,293,387,323,413,357,436,385,447,383,452,355,440,320,418,289,391,242,339"/>
+<area shape="rect" id="Node000017" href="$class_p4_1_1_do_local_copy_propagation.html" title=" " alt="" coords="357,499,566,524"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="240,338,258,372,285,412,318,452,357,485,380,496,378,501,355,490,314,456,280,415,254,375,235,341"/>
+<area shape="rect" id="Node000018" href="$class_parser_critical_path.html" title=" " alt="" coords="393,548,529,573"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="236,339,252,382,277,436,312,489,333,514,358,534,375,544,394,551,392,556,373,549,354,539,330,517,308,493,272,438,247,384,231,341"/>
+<area shape="rect" id="Node000019" href="$class_parser_header_sequences.html" title="Identify parsed header sequences." alt="" coords="372,597,551,623"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="233,339,246,392,270,458,306,527,330,557,358,584,376,595,373,600,354,588,326,561,302,529,265,460,241,393,228,341"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,301,93,327"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,311,141,311,141,317,107,317"/>
+<area shape="rect" id="Node000006" href="$class_exclude_m_a_u_not_mutex_headers.html" title="Walk through MAU in control flow order and find header level mutually exclusivity in the parser that ..." alt="" coords="615,68,837,93"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="568,99,632,91,633,96,569,105"/>
+<area shape="rect" id="Node000008" href="$class_add_parser_headers_to_header_mutex_matrix.html" title="Collect every header encountered in the parser and insert them into HeaderInfo. Addtionally,..." alt="" coords="625,118,827,158"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="523,157,624,146,625,151,523,162"/>
+<area shape="rect" id="Node000009" href="$class_build_metadata_overlay.html" title=" " alt="" coords="642,183,810,208"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="523,170,642,183,641,189,523,175"/>
+<area shape="rect" id="Node000010" href="$class_build_parser_overlay.html" title=" " alt="" coords="653,232,799,257"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="524,175,568,189,592,204,616,218,653,230,652,235,614,223,589,208,566,194,522,180"/>
+</map>

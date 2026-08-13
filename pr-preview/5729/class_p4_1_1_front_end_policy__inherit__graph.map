@@ -1,0 +1,9 @@
+<map id="P4::FrontEndPolicy" name="P4::FrontEndPolicy">
+<area shape="rect" id="Node000001" title=" " alt="" coords="87,79,229,104"/>
+<area shape="rect" id="Node000003" href="$struct_b_f_n_1_1_front_end_policy.html" title=" " alt="" coords="5,152,159,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="138,115,96,154,93,150,134,111"/>
+<area shape="rect" id="Node000004" href="$class_test_f_e_policy.html" title=" " alt="" coords="183,152,285,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="182,111,223,150,220,154,178,115"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_remove_unused_policy.html" title=" " alt="" coords="64,5,252,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="161,44,161,79,155,79,155,44"/>
+</map>

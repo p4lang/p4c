@@ -1,0 +1,11 @@
+<map id="P4::ParsePortableArchitecture" name="P4::ParsePortableArchitecture">
+<area shape="rect" id="Node000001" title=" " alt="" coords="128,152,343,177"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_b_m_v2_1_1_parse_pna_architecture.html" title=" " alt="" coords="5,225,236,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="207,187,141,227,138,223,204,182"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_parse_psa_architecture.html" title=" " alt="" coords="260,225,443,251"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="267,182,334,223,331,227,264,187"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="182,79,289,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,118,238,152,233,152,233,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="191,5,279,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="238,44,238,79,233,79,233,44"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="BFN::ElimParserValidZeroWrites" name="BFN::ElimParserValidZeroWrites">
+<area shape="rect" id="Node000001" title="Eliminate unnecessary parser zero&#45;writes to validity bits." alt="" coords="5,152,193,192"/>
+<area shape="rect" id="Node000002" href="$group__parde.html#class_parser_transform" title=" " alt="" coords="36,79,163,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="102,118,102,152,97,152,97,118"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="56,5,143,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="102,44,102,79,97,79,97,44"/>
+</map>

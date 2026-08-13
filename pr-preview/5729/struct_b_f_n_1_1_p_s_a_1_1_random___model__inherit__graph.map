@@ -1,0 +1,9 @@
+<map id="BFN::PSA::Random_Model" name="BFN::PSA::Random_Model">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,197,251"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_model_1_1_extern___model.html" title="Extern_Model : Type_Model." alt="" coords="10,152,193,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,191,104,225,99,225,99,191"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_model_1_1_type___model.html" title=" " alt="" coords="16,79,187,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,118,104,152,99,152,99,118"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_model_1_1_elem.html" title=" " alt="" coords="38,5,165,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="104,44,104,79,99,79,99,44"/>
+</map>

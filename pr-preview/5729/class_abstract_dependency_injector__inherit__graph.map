@@ -1,0 +1,17 @@
+<map id="AbstractDependencyInjector" name="AbstractDependencyInjector">
+<area shape="rect" id="Node000001" title="Common functionality for injecting dependencies into a DependencyGraph." alt="" coords="455,80,661,105"/>
+<area shape="rect" id="Node000005" href="$class_inject_action_exit_anti_dependencies.html" title=" " alt="" coords="717,5,960,31"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="605,73,709,39,759,28,760,33,710,45,606,78"/>
+<area shape="rect" id="Node000006" href="$class_inject_control_exit_dependencies.html" title=" " alt="" coords="727,55,950,80"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="675,79,727,75,728,80,676,85"/>
+<area shape="rect" id="Node000007" href="$class_inject_dark_anti_dependencies.html" title=" " alt="" coords="735,104,942,129"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="676,100,735,105,735,111,675,105"/>
+<area shape="rect" id="Node000008" href="$class_inject_metadata_control_dependencies.html" title=" " alt="" coords="709,153,968,179"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="607,107,710,139,761,151,760,156,709,145,605,112"/>
+<area shape="rect" id="Node000002" href="$class_mau_inspector.html" title=" " alt="" coords="296,80,407,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="420,90,455,90,455,95,420,95"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="141,80,248,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,90,296,90,296,95,262,95"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,80,93,105"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="107,90,141,90,141,95,107,95"/>
+</map>
