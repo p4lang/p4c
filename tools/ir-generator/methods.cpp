@@ -114,8 +114,9 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                                   buf << "return variant.equiv(std::get<" << type->toString()
                                       << ">(a." << f->name << ")); ";
                               } else {
-                                  buf << "return variant.equiv(std::get<" << type->toString()
-                                      << ">(a." << f->name << ")); ";
+                                  // Not an IR type, so it has no equiv()
+                                  buf << "return variant == std::get<" << type->toString() << ">(a."
+                                      << f->name << "); ";
                               }
                               buf << "}\n";
                               first = false;
