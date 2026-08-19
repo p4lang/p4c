@@ -1,0 +1,9 @@
+<map id="P4::ControlPlaneAPI::Standard::P4RuntimeArchHandlerPSA" name="P4::ControlPlaneAPI::Standard::P4RuntimeArchHandlerPSA">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,299,279,339"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_p_s_a_p_n_a.html" title=" " alt="" coords="19,196,265,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,264,145,299,139,299,139,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p4_runtime_arch_handler_common.html" title=" " alt="" coords="19,93,265,148"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,162,145,196,139,196,139,162"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_iface.html" title=" " alt="" coords="35,5,249,45"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="145,59,145,93,139,93,139,59"/>
+</map>

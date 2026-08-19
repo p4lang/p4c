@@ -1,0 +1,9 @@
+<map id="ElimUnused::Tables" name="ElimUnused::Tables">
+<area shape="rect" id="Node000001" title="Removes no&#45;op tables that have the @hidden annotation." alt="" coords="5,225,155,251"/>
+<area shape="rect" id="Node000002" href="$class_mau_transform.html" title=" " alt="" coords="23,152,137,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,191,83,225,77,225,77,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_transform.html" title=" " alt="" coords="25,79,135,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,118,83,152,77,152,77,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="36,5,124,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="83,44,83,79,77,79,77,44"/>
+</map>

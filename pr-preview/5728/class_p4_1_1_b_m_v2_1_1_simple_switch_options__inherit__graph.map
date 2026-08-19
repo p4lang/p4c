@@ -1,0 +1,11 @@
+<map id="P4::BMV2::SimpleSwitchOptions" name="P4::BMV2::SimpleSwitchOptions">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,299,236,324"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_b_m_v2_1_1_b_m_v2_options.html" title=" " alt="" coords="31,225,211,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,264,123,299,118,299,118,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_compiler_options.html" title=" " alt="" coords="43,152,198,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="123,191,123,225,118,225,118,191"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_parser_options.html" title=" " alt="" coords="53,79,189,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="123,118,123,152,118,152,118,118"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_util_1_1_options.html" title=" " alt="" coords="57,5,184,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="123,44,123,79,118,79,118,44"/>
+</map>

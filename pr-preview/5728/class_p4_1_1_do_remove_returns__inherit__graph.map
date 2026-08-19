@@ -1,0 +1,9 @@
+<map id="P4::DoRemoveReturns" name="P4::DoRemoveReturns">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,152,173,177"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_do_remove_exits.html" title=" " alt="" coords="14,225,165,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="92,191,92,225,87,225,87,191"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="34,79,145,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,118,92,152,87,152,87,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="45,5,133,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,44,92,79,87,79,87,44"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="BFN::RewriteCastToReinterpretCast" name="BFN::RewriteCastToReinterpretCast">
+<area shape="rect" id="Node000001" title="Pass that converts some of the IR::Casts to ReinterpretCasts." alt="" coords="5,225,257,251"/>
+<area shape="rect" id="Node000002" href="$group___elim_casts.html#class_b_f_n_1_1_ignore_key_element_transform" title="Auxiliary transformer to avoid processing IR::KeyElement nodes." alt="" coords="11,152,252,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,191,134,225,129,225,129,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_transform.html" title=" " alt="" coords="76,79,187,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="134,118,134,152,129,152,129,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="87,5,175,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="134,44,134,79,129,79,129,44"/>
+</map>

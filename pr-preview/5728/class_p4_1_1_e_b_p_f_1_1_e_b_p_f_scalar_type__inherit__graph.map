@@ -1,0 +1,20 @@
+<map id="P4::EBPF::EBPFScalarType" name="P4::EBPF::EBPFScalarType">
+<area shape="rect" id="Node000001" title=" " alt="" coords="248,299,436,324"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_scalar_type_p_n_a.html" title=" " alt="" coords="5,372,220,397"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="293,331,151,374,149,369,291,326"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_u_b_p_f_1_1_u_b_p_f_extern_type.html" title=" " alt="" coords="245,372,439,397"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="345,338,345,372,339,372,339,338"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_u_b_p_f_1_1_u_b_p_f_scalar_type.html" title=" " alt="" coords="463,372,655,397"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="391,326,525,369,523,374,389,331"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_type.html" title="Base class for EBPF types." alt="" coords="181,225,329,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="281,257,330,296,326,301,278,261"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="203,152,364,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="276,191,262,226,257,224,271,189"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="289,79,395,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="326,116,295,154,291,150,322,113"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_e_b_p_f_1_1_i_has_width.html" title=" " alt="" coords="353,225,507,251"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="358,115,425,224,421,227,354,117"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="285,5,399,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="345,44,345,79,339,79,339,44"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="407,261,358,301,355,296,404,257"/>
+</map>

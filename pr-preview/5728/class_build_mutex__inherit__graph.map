@@ -1,0 +1,16 @@
+<map id="BuildMutex" name="BuildMutex">
+<area shape="rect" id="Node000001" title=" " alt="" coords="268,152,364,177"/>
+<area shape="rect" id="Node000005" href="$class_add_parser_headers_to_header_mutex_matrix.html" title="Collect every header encountered in the parser and insert them into HeaderInfo. Addtionally,..." alt="" coords="5,225,208,265"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="274,185,158,228,156,223,272,180"/>
+<area shape="rect" id="Node000006" href="$class_build_metadata_overlay.html" title=" " alt="" coords="232,233,400,258"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="319,191,319,232,313,232,313,191"/>
+<area shape="rect" id="Node000007" href="$class_build_parser_overlay.html" title=" " alt="" coords="424,233,571,258"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="356,180,472,230,470,235,354,185"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_control_flow_visitor.html" title=" " alt="" coords="153,79,319,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="261,111,305,150,301,154,257,115"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="272,5,360,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="295,42,251,80,247,76,291,38"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="344,79,451,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="341,38,386,76,382,80,338,42"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="376,115,331,154,328,150,372,111"/>
+</map>

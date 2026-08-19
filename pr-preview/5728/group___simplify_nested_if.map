@@ -1,0 +1,5 @@
+<map id="P4::SimplifyNestedIf" name="P4::SimplifyNestedIf">
+<area shape="rect" id="Node000001" title="Set of passes that simplify nested if statements in the deparser control block." alt="" coords="191,31,345,56"/>
+<area shape="rect" id="Node000002" href="$group__midend.html" title="Overview of midend passes." alt="" coords="39,5,109,31"/>
+<area shape="rect" id="Node000003" href="$group__parde.html" title="Content related to parser and deparser." alt="" coords="5,55,143,80"/>
+</map>

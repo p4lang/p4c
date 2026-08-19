@@ -1,0 +1,21 @@
+<map id="P4::EBPF::EBPFTablePSA" name="P4::EBPF::EBPFTablePSA">
+<area shape="rect" id="Node000001" title=" " alt="" coords="278,372,457,397"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_implementation_p_s_a.html" title="Base class for ActionProfile and ActionSelector." alt="" coords="103,445,386,471"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="337,406,266,447,263,443,335,402"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a.html" title=" " alt="" coords="410,445,573,471"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="400,402,472,443,470,447,398,406"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table.html" title=" " alt="" coords="291,299,443,324"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="370,338,370,372,365,372,365,338"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_base.html" title="Also used to represent counters." alt="" coords="275,225,459,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="370,264,370,299,365,299,365,264"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="287,152,448,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="370,191,370,225,365,225,365,191"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="314,79,421,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="370,118,370,152,365,152,365,118"/>
+<area shape="rect" id="Node000006" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="310,5,425,31"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="370,44,370,79,365,79,365,44"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_action_profile_p_s_a.html" title=" " alt="" coords="5,519,231,544"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="214,480,140,521,137,516,211,475"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_action_selector_p_s_a.html" title=" " alt="" coords="254,519,491,544"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="279,475,353,516,350,521,276,480"/>
+</map>

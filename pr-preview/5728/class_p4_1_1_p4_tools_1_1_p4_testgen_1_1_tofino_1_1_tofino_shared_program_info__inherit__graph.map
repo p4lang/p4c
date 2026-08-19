@@ -1,0 +1,13 @@
+<map id="P4::P4Tools::P4Testgen::Tofino::TofinoSharedProgramInfo" name="P4::P4Tools::P4Testgen::Tofino::TofinoSharedProgramInfo">
+<area shape="rect" id="Node000001" title=" " alt="" coords="540,37,779,77"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_program_info.html" title=" " alt="" coords="831,5,1017,45"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="792,39,831,34,831,39,793,44"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_program_info.html" title=" " alt="" coords="827,69,1021,109"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="793,71,827,75,826,80,792,76"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_program_info.html" title="Stores target&#45;specific information about a P4 program." alt="" coords="323,37,492,77"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="506,55,540,55,540,60,506,60"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="168,45,275,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="288,55,323,55,323,60,288,60"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,45,120,70"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="134,55,168,55,168,60,134,60"/>
+</map>

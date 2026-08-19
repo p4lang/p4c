@@ -1,0 +1,10 @@
+<map id="BFN::SimplifyEmitArgs" name="BFN::SimplifyEmitArgs">
+<area shape="rect" id="Node000001" title="Top level PassManager that governs simplification of headers and emits." alt="" coords="5,225,175,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="24,152,156,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,191,93,225,87,225,87,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="46,5,134,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="81,44,72,73,71,104,87,151,82,153,66,104,67,72,76,42"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="81,79,192,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="107,41,131,77,127,80,103,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="124,117,100,153,95,150,119,114"/>
+</map>
