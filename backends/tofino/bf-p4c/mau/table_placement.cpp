@@ -2788,7 +2788,7 @@ TablePlacement::Placed *TablePlacement::try_place_table(Placed *rv, const StageU
     LOG4("    furthest stage: " << furthest_stage
                                 << ", initial # of attached entries: " << initial_attached_entries);
 
-    if (rv->stage >= 100) ::fatal_error("too many stages: %1", rv->stage);
+    if (rv->stage >= 100) ::fatal_error("too many stages: %1%", rv->stage);
 
     auto *min_placed = new Placed(*rv);
     if (min_placed->entries > 1) min_placed->entries = 1;

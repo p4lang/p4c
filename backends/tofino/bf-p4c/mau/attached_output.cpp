@@ -136,7 +136,7 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
                      read.speciality != ActionAnalysis::ActionParam::METER_ALU) ||
                     read.type == ActionAnalysis::ActionParam::CONSTANT) {
                     BUG("Illegal instruction with both meter alu action data and non meter alu "
-                        "data 1% : %2%",
+                        "data %1% : %2%",
                         container.toString(), cont_action.to_string());
                 }
                 create_meter_alu(*alu, read, container_bits);

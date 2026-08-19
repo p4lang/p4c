@@ -529,7 +529,7 @@ BFN_Options::BFN_Options() {
         [this](const char *arg) {
             int temp = std::atoi(arg);
             if ((!temp && (*arg != '0')) || (temp <= 0) || (temp > 100)) {
-                ::error("Invalid traffic limit % value %s. Valid arguments: {1..100}", arg);
+                ::error("Invalid traffic limit %% value %s. Valid arguments: {1..100}", arg);
                 return false;
             }
             traffic_limit = temp;

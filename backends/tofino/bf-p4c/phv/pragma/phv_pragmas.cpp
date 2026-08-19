@@ -166,7 +166,7 @@ void PHV::Pragmas::reportNoMatchingPHV(const IR::BFN::Pipe *pipe, const IR::Expr
         if (pipe && pipe->canon_name()) {
             // If the pipe is named
             warning(ErrorType::WARN_INVALID,
-                    "No matching PHV field `%1' in the pipe `%2%'. Ignoring pragma.", field_name,
+                    "No matching PHV field `%1%' in the pipe `%2%'. Ignoring pragma.", field_name,
                     pipe->canon_name());
         } else {
             warning(ErrorType::WARN_INVALID, "No matching PHV field `%1%'. Ignoring pragma.",
