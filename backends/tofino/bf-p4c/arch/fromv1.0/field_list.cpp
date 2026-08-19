@@ -37,16 +37,18 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
     for (auto anno : fl->annotations) {
         if (anno->name == pragma_string) {
             if (anno->getExpr().size() != 3)
-                error("Invalid pragma specification -- ", pragma_string);
+                error("Invalid pragma specification -- %1%", pragma_string);
 
             if (!anno->getExpr(0)->is<IR::StringLiteral>())
-                error("Invalid field in pragma specification -- ", anno->getExpr(0));
+                error("Invalid field in pragma specification -- %1%", anno->getExpr(0));
 
             auto field = anno->getExpr(0)->to<IR::StringLiteral>()->value;
             if (!anno->getExpr()[1]->is<IR::Constant>() || !anno->getExpr()[2]->is<IR::Constant>())
-                error("Invalid slice bit position(s) in pragma specification -- ", pragma_string);
+                error("Invalid slice bit position(s) in pragma specification -- %1%",
+                      pragma_string);
 
-            if (sliced_fields.count(field)) error("Duplicate slice definition for field ", field);
+            if (sliced_fields.count(field))
+                error("Duplicate slice definition for field %1%", field);
             sliced_fields.insert(field);
 
             auto msb = anno->getExpr()[1]->to<IR::Constant>()->asInt();

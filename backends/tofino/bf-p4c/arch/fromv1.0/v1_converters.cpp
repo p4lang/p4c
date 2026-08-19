@@ -547,7 +547,7 @@ const IR::Node *TypeNameExpressionConverter::postorder(IR::Type_Name *node) {
     auto path = node->path->to<IR::Path>();
     if (auto newName = P4::get(enumsToTranslate, path->name)) {
         if (!structure->enums.count(newName)) {
-            BUG("Cannot translation for type ", node);
+            BUG("Cannot translation for type %1%", node);
             return node;
         }
         return new IR::Type_Name(IR::ID(node->srcInfo, newName));

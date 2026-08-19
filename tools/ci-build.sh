@@ -139,9 +139,13 @@ fi
 
 # ! ------  END CORE -----------------------------------------------
 
-  # TODO: Remove this check once 18.04 is deprecated.
+if [[ "$IN_DOCKER" == "TRUE" ]] ; then
+  # Use an absolute path for the cache directory.
+  ccache --set-config cache_dir=${P4C_DIR}/.ccache
+fi
+
+# TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-  ccache --set-config cache_dir=.ccache
   # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
   uv pip install cmake==3.16.3
 fi

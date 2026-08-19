@@ -1475,7 +1475,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
         auto impl = getTableImplementationProperty(table);
         if (impl == nullptr) return std::nullopt;
         if (!impl->value->template is<IR::ExpressionValue>()) {
-            error("Expected %1% property value for table %2% to be an expression: %2%",
+            error("Expected %1% property value for table %2% to be an expression: %3%",
                   implementationString, table->controlPlaneName(), impl);
             return std::nullopt;
         }
