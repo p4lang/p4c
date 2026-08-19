@@ -1598,7 +1598,7 @@ $(function(){initNavTree('tofino_2bf-p4c_2control-plane_2bfruntime__arch__handle
 <div class="line"><a id="l01475" name="l01475"></a><span class="lineno"> 1475</span>        <span class="keyword">auto</span> impl = getTableImplementationProperty(table);</div>
 <div class="line"><a id="l01476" name="l01476"></a><span class="lineno"> 1476</span>        <span class="keywordflow">if</span> (impl == <span class="keyword">nullptr</span>) <span class="keywordflow">return</span> std::nullopt;</div>
 <div class="line"><a id="l01477" name="l01477"></a><span class="lineno"> 1477</span>        <span class="keywordflow">if</span> (!impl-&gt;value-&gt;template is&lt;IR::ExpressionValue&gt;()) {</div>
-<div class="line"><a id="l01478" name="l01478"></a><span class="lineno"> 1478</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(<span class="stringliteral">&quot;Expected %1% property value for table %2% to be an expression: %2%&quot;</span>,</div>
+<div class="line"><a id="l01478" name="l01478"></a><span class="lineno"> 1478</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(<span class="stringliteral">&quot;Expected %1% property value for table %2% to be an expression: %3%&quot;</span>,</div>
 <div class="line"><a id="l01479" name="l01479"></a><span class="lineno"> 1479</span>                  implementationString, table-&gt;controlPlaneName(), impl);</div>
 <div class="line"><a id="l01480" name="l01480"></a><span class="lineno"> 1480</span>            <span class="keywordflow">return</span> std::nullopt;</div>
 <div class="line"><a id="l01481" name="l01481"></a><span class="lineno"> 1481</span>        }</div>
