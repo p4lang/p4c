@@ -1,5 +1,6 @@
 #include <core.p4>
 
+
 extern void log(string msg);
 control c() {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
