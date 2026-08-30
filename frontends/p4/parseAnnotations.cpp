@@ -121,7 +121,11 @@ bool ParseAnnotations::parseP4rtTranslationAnnotation(IR::Annotation *annotation
 }
 
 void ParseAnnotations::postorder(IR::Annotation *annotation) {
-    if (!annotation->needsParsing()) return;
+    if (!annotation->needsParsing()) {
+        if (errorRequireParse && annotation->structured && handlers.count(annotation->name.name))
+            error(ErrorType::ERR_UNEXPECTED, "Expected a normal annotation: %1%", annotation);
+        return;
+    }
 
     cstring name = annotation->name.name;
     auto handler = handlers.find(name);

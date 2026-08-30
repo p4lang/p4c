@@ -128,6 +128,16 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         }
         return act;
     }
+    IR::ForStatement *postorder(IR::ForStatement *fstmt) override {
+        if (!fstmt->body)
+            fstmt->body = new IR::EmptyStatement(getOriginal<IR::ForStatement>()->body->srcInfo);
+        return fstmt;
+    }
+    IR::ForInStatement *postorder(IR::ForInStatement *fstmt) override {
+        if (!fstmt->body)
+            fstmt->body = new IR::EmptyStatement(getOriginal<IR::ForInStatement>()->body->srcInfo);
+        return fstmt;
+    }
 
  public:
     explicit ElimDead(DoLocalCopyPropagation &self) : self(self) { setCalledBy(&self); }

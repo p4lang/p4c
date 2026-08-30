@@ -697,14 +697,14 @@ const IR::Expression *getConstant(const ScalarValue *constant) {
 
 void ExpressionEvaluator::checkResult(const IR::Expression *expression,
                                       const IR::Expression *result) {
-    if (result->is<IR::Constant>()) {
-        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
+    if (auto k = result->to<IR::Constant>()) {
+        set(expression, new SymbolicInteger(k));
         return;
-    } else if (result->is<IR::BoolLiteral>()) {
-        set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()->value));
+    } else if (auto b = result->to<IR::BoolLiteral>()) {
+        set(expression, new SymbolicBool(b->value));
         return;
-    } else if (result->is<IR::StringLiteral>()) {
-        set(expression, new SymbolicString(result->to<IR::StringLiteral>()));
+    } else if (auto s = result->to<IR::StringLiteral>()) {
+        set(expression, new SymbolicString(s));
         return;
     }
     BUG("%1% : expected a constant/bool/string literal", result);
