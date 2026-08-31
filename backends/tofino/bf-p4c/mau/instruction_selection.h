@@ -34,7 +34,7 @@ using namespace P4;
  * calls.  Eventually someone has to write a pass to do this conversion.
  */
 class UnimplementedRegisterMethodCalls : public MauInspector {
-    bool preorder(const IR::MAU::Primitive *prim) override;
+    bool preorder(const IR::MAU::MauPrimitive *prim) override;
 
  public:
     UnimplementedRegisterMethodCalls() {}
@@ -90,8 +90,8 @@ class HashGenSetup : public PassManager {
         bool preorder(const IR::Concat *) override;
         bool preorder(const IR::Expression *) override;
         bool preorder(const IR::Constant *) override;
-        bool preorder(const IR::MAU::Primitive *) override;
-        void postorder(const IR::MAU::Primitive *) override;
+        bool preorder(const IR::MAU::MauPrimitive *) override;
+        void postorder(const IR::MAU::MauPrimitive *) override;
 
         void check_for_symmetric(const IR::Declaration_Instance *decl, const IR::ListExpression *le,
                                  IR::MAU::HashFunction hf, LTBitMatrix *sym_keys);
@@ -140,14 +140,14 @@ class HashGenSetup : public PassManager {
  *  IR node could be necessary.
  */
 class Synth2PortSetup : public MauTransform {
-    safe_vector<const IR::MAU::Primitive *> stateful;
+    safe_vector<const IR::MAU::MauPrimitive *> stateful;
     std::set<UniqueAttachedId> per_flow_enables;
     std::map<UniqueAttachedId, IR::MAU::MeterType> meter_types;
 
     safe_vector<IR::MAU::Instruction *> created_instrs;
 
     const IR::MAU::Action *preorder(IR::MAU::Action *) override;
-    const IR::Node *postorder(IR::MAU::Primitive *) override;
+    const IR::Node *postorder(IR::MAU::MauPrimitive *) override;
     const IR::MAU::Action *postorder(IR::MAU::Action *) override;
 
     void clear_action() {
@@ -214,7 +214,7 @@ class DoInstructionSelection : public MauTransform, TofinoWriteContext {
     const IR::Expression *postorder(IR::Mux *) override;
     const IR::Slice *postorder(IR::Slice *) override;
     const IR::Expression *postorder(IR::BoolLiteral *) override;
-    const IR::Node *postorder(IR::MAU::Primitive *) override;
+    const IR::Node *postorder(IR::MAU::MauPrimitive *) override;
     const IR::MAU::Instruction *postorder(IR::MAU::Instruction *i) override { return i; }
 
     bool checkPHV(const IR::Expression *);
@@ -278,7 +278,7 @@ class StatefulAttachmentSetup : public PassManager {
         bool preorder(const IR::TempVar *) override;
         bool preorder(const IR::MAU::HashDist *) override;
         void postorder(const IR::MAU::Instruction *) override;
-        void postorder(const IR::MAU::Primitive *) override;
+        void postorder(const IR::MAU::MauPrimitive *) override;
         void postorder(const IR::MAU::Table *) override;
         void setup_index_operand(const IR::Expression *index_expr,
                                  const IR::MAU::Synth2Port *synth2port, const IR::MAU::Table *tbl,
@@ -302,8 +302,8 @@ class StatefulAttachmentSetup : public PassManager {
     };
 
     const IR::MAU::HashDist *find_hash_dist(const IR::Expression *expr,
-                                            const IR::MAU::Primitive *prim);
-    IR::MAU::HashDist *create_hash_dist(const IR::Expression *e, const IR::MAU::Primitive *prim);
+                                            const IR::MAU::MauPrimitive *prim);
+    IR::MAU::HashDist *create_hash_dist(const IR::Expression *e, const IR::MAU::MauPrimitive *prim);
 
  public:
     explicit StatefulAttachmentSetup(const PhvInfo &p) : phv(p) {
@@ -333,7 +333,7 @@ class BackendCopyPropagation : public MauTransform, TofinoWriteContext {
     };
     ordered_map<const PHV::Field *, safe_vector<FieldImpact>> copy_propagation_replacements;
     bool elem_copy_propagated = false;
-    IR::Vector<IR::MAU::Primitive> *split_set = nullptr;
+    IR::Vector<IR::MAU::MauPrimitive> *split_set = nullptr;
 
     const IR::Node *preorder(IR::Node *n) override {
         visitOnce();
@@ -576,12 +576,12 @@ class MeterSetup : public PassManager {
 
     class Scan : public MauInspector {
         MeterSetup &self;
-        void find_input(const IR::MAU::Primitive *);
-        void find_pre_color(const IR::MAU::Primitive *);
+        void find_input(const IR::MAU::MauPrimitive *);
+        void find_pre_color(const IR::MAU::MauPrimitive *);
         const IR::Expression *convert_cast_to_slice(const IR::Expression *);
         profile_t init_apply(const IR::Node *root) override;
         bool preorder(const IR::MAU::Instruction *) override;
-        bool preorder(const IR::MAU::Primitive *) override;
+        bool preorder(const IR::MAU::MauPrimitive *) override;
 
      public:
         explicit Scan(MeterSetup &self) : self(self) {}

@@ -21,7 +21,7 @@
 #include "lib/error_reporter.h"
 
 std::optional<const IR::Operation_Binary *> CheckOperations::getSrcBinop(
-    const IR::MAU::Primitive *prim) const {
+    const IR::MAU::MauPrimitive *prim) const {
     prim = prim->apply(RemoveCasts());
     if (prim->name != "modify_field") return std::nullopt;
     if (prim->operands.size() < 2) return std::nullopt;
@@ -29,7 +29,7 @@ std::optional<const IR::Operation_Binary *> CheckOperations::getSrcBinop(
     return std::nullopt;
 }
 
-bool CheckOperations::isModBitMask(const IR::MAU::Primitive *prim) const {
+bool CheckOperations::isModBitMask(const IR::MAU::MauPrimitive *prim) const {
     auto *binop = getSrcBinop(prim).value_or(nullptr);
     if (!binop || binop->getStringOp() != "|") return false;
     auto leftBinop = binop->left->to<IR::Operation_Binary>();
@@ -38,7 +38,7 @@ bool CheckOperations::isModBitMask(const IR::MAU::Primitive *prim) const {
     return leftBinop->getStringOp() == "&" && rightBinop->getStringOp() == "&";
 }
 
-bool CheckOperations::preorder(const IR::MAU::Primitive *prim) {
+bool CheckOperations::preorder(const IR::MAU::MauPrimitive *prim) {
     if (isModBitMask(prim))
         error("The following operation is not yet supported: %1%", prim->srcInfo);
     return true;

@@ -155,7 +155,7 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
     bool preorder(const IR::BFN::LoweredParser *p) override;
     bool preorder(const IR::MAU::Table *t) override;
     void postorder(const IR::MAU::Table *t) override;
-    bool preorder(const IR::MAU::Primitive *prim) override;
+    bool preorder(const IR::MAU::MauPrimitive *prim) override;
     bool preorder(const IR::MAU::Action *p) override;
     bool preorder(const IR::MAU::StatefulAlu *prim) override;
     bool preorder(const IR::Expression *e) override;

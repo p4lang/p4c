@@ -218,7 +218,7 @@ bool FindPovAndParserErrorInMau::is_original_parser_err_field(const PHV::Field *
 }
 
 const PHV::Field *FindPovAndParserErrorInMau::get_assigned_field() {
-    const auto *primitive = findContext<IR::MAU::Primitive>();
+    const auto *primitive = findContext<IR::MAU::MauPrimitive>();
     if (!primitive) return nullptr;
 
     const PHV::Field *field = get_phv_field(primitive->operands[0]);
@@ -761,30 +761,30 @@ Visitor::profile_t ExcludeMAUNotMutexHeaders::init_apply(const IR::Node *root) {
     return rv;
 }
 
-bool ExcludeMAUNotMutexHeaders::is_set(const IR::MAU::Primitive *primitive) {
+bool ExcludeMAUNotMutexHeaders::is_set(const IR::MAU::MauPrimitive *primitive) {
     return (primitive->name == "set" && primitive->operands.size() > 1);
 }
 
-bool ExcludeMAUNotMutexHeaders::is_set_header_pov(const IR::MAU::Primitive *primitive) {
+bool ExcludeMAUNotMutexHeaders::is_set_header_pov(const IR::MAU::MauPrimitive *primitive) {
     if (!is_set(primitive)) return false;
     const PHV::Field *field = get_phv_field(primitive->operands[0]);
     return (field && field->header() && field->pov);
 }
 
-bool ExcludeMAUNotMutexHeaders::is_set_header_valid(const IR::MAU::Primitive *primitive) {
+bool ExcludeMAUNotMutexHeaders::is_set_header_valid(const IR::MAU::MauPrimitive *primitive) {
     const IR::Constant *constant =
         (is_set_header_pov(primitive)) ? primitive->operands[1]->to<IR::Constant>() : nullptr;
     return (constant && constant->value == 1);
 }
 
-bool ExcludeMAUNotMutexHeaders::is_set_header_invalid(const IR::MAU::Primitive *primitive) {
+bool ExcludeMAUNotMutexHeaders::is_set_header_invalid(const IR::MAU::MauPrimitive *primitive) {
     const IR::Constant *constant =
         (is_set_header_pov(primitive)) ? primitive->operands[1]->to<IR::Constant>() : nullptr;
     return (constant && constant->value == 0);
 }
 
 bool ExcludeMAUNotMutexHeaders::is_set_header_pov_to_other_header_pov(
-    const IR::MAU::Primitive *primitive) {
+    const IR::MAU::MauPrimitive *primitive) {
     const PHV::Field *field =
         (is_set_header_pov(primitive)) ? get_phv_field(primitive->operands[1]) : nullptr;
     return (field && field->header() && field->pov);
