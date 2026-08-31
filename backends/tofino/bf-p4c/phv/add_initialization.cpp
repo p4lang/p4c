@@ -18,7 +18,7 @@
 
 #include "backends/tofino/bf-p4c/phv/add_initialization.h"
 
-#include "boost/optional/optional_io.hpp"
+#include <boost/format.hpp>
 
 bool MapFieldToExpr::preorder(const IR::Expression *expr) {
     if (expr->is<IR::Cast>() || expr->is<IR::Slice>() || expr->is<IR::Neg>()) return true;

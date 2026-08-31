@@ -22,9 +22,6 @@
 
 #include <optional>
 
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
-
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
 #include "backends/tofino/bf-p4c/arch/helpers.h"
 #include "backends/tofino/bf-p4c/common/bridged_packing.h"

@@ -22,7 +22,7 @@ MESSAGE("-- Adding bf-asm")
 
 OPTION(ASAN_ENABLED "Enable ASAN checks" OFF)
 
-set (BFASM_LIB_DEPS p4ctoolkit ${P4C_LIB_DEPS})
+set (BFASM_LIB_DEPS p4ctoolkit ${P4C_LIB_DEPS} ${P4C_BOOST_LIBRARIES})
 set (BFASM_GEN_DIR ${BFASM_BINARY_DIR}/gen)
 
 # other required libraries

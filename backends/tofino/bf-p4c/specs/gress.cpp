@@ -21,7 +21,7 @@
 #include <lib/cstring.h>
 #include <lib/exceptions.h>
 
-#include <boost/optional/optional_io.hpp>
+#include <boost/format.hpp>
 
 using namespace P4::literals;
 

@@ -19,7 +19,7 @@
 /* clang-format off */
 
 #include "backends/tofino/bf-p4c/midend/fold_constant_hashes.h"
-#include <boost/optional/optional_io.hpp>
+#include <boost/format.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
