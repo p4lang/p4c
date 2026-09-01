@@ -13,7 +13,7 @@
 #include <tuple>
 #include <utility>
 
-namespace BFN {
+namespace P4::BFN {
 
 template <class T>
 class Alloc1Dbase {
@@ -231,6 +231,6 @@ class Alloc3D : public Alloc3Dbase<T> {
     Alloc3Dbase<T> &base() { return *this; }
 };
 
-}  // namespace BFN
+}  // namespace P4::BFN
 
 #endif /* BACKENDS_TOFINO_BF_ASM_ALLOC_H_ */
