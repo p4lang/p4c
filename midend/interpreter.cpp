@@ -473,6 +473,13 @@ SymbolicArray::SymbolicArray(const IR::Type_Array *type, bool uninitialized,
 }
 
 void SymbolicArray::shift(int amount) {
+    // Clamp shift amount to prevent integer underflow in loop bounds.
+    // If the shift magnitude exceeds the array size, the entire stack
+    // becomes invalid, so the sign no longer matters.
+    if (static_cast<size_t>(std::abs(amount)) > values.size()) {
+        amount = static_cast<int>(values.size());
+    }
+
     if (amount < 0) {
         for (unsigned i = 0; i < values.size() + amount; i++) values[i] = values[i - amount];
         for (unsigned i = values.size() + amount; i < values.size(); i++) {
