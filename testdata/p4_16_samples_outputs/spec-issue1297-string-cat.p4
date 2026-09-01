@@ -1,5 +1,6 @@
 #include <core.p4>
 
+
 @deprecated("function " ++ "depr" ++ " is deprecated") void depr(int<4> x) {
 }
 extern void log(string msg);

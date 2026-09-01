@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2024 Intel Corporation
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Script for checking semi-static build results.
 
 # No set -e. Do not exit on error, errors are handled explictly.

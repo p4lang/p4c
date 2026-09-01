@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Altera Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 void test<T>(in T val) {}
 
 struct S2<T> {

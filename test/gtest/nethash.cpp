@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2024 Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "lib/nethash.h"
 
 #include <gtest/gtest.h>
