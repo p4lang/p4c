@@ -24,6 +24,8 @@
 #include <set>
 #include <vector>
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/run_id.h"
 #include "backends/tofino/bf-p4c/ir/unique_id.h"

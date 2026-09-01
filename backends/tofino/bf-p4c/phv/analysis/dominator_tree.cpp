@@ -18,6 +18,7 @@
 
 #include "backends/tofino/bf-p4c/phv/analysis/dominator_tree.h"
 
+#include <boost/format.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dominator_tree.hpp>
 
