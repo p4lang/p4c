@@ -40,6 +40,7 @@
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
+#include "midend/noMatch.h"
 #include "midend/orderArguments.h"
 #include "midend/parserUnroll.h"
 #include "midend/removeAssertAssume.h"
@@ -87,6 +88,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
              new P4::ExpandLookahead(&typeMap),
              new P4::ExpandEmit(&typeMap),
+             new P4::HandleNoMatch(),
              new P4::SimplifyParsers(),
              new P4::StrengthReduction(&typeMap),
              new P4::EliminateTuples(&typeMap),
