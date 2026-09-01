@@ -19,7 +19,7 @@ dependencies = [
     "googleapis-common-protos==1.53.0",
     "grpcio<=1.75.1,>=1.67.0; python_version > '3.6'",
     "grpcio==1.48.2 ; python_version <= '3.6'",
-    "thrift==0.21.0",
+    "thrift==0.24.0",
     "protobuf==3.20.2 ; python_version > '3.6'",
     "protobuf==3.19.2 ; python_version <= '3.6'",
     "clang-format==18.1.8",
