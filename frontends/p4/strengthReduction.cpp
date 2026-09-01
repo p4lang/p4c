@@ -503,6 +503,17 @@ const IR::Node *DoStrengthReduction::postorder(IR::PlusSlice *expr) {
         auto *rv = new IR::Slice(expr->srcInfo, expr->e0, expr->getH(), expr->getL());
         return postorder(rv);
     }
+    if (policy->enablePlusSliceToShiftTransform) {
+        if (isWrite()) return expr;
+
+        auto *width = expr->e2->checkedTo<IR::Constant>();
+        if (width->value == 0) return expr;
+
+        const IR::Expression *source = expr->e0;
+        if (!source->type->is<IR::Type_Bits>()) return expr;
+        auto *shift = new IR::Shr(expr->srcInfo, source->type, source, expr->e1);
+        return new IR::Slice(expr->srcInfo, shift, width->asInt() - 1, 0);
+    }
     if (auto sh = expr->e0->to<IR::Shr>()) {
         if (!sh->left->type->is<IR::Type_Bits>()) return expr;
         if (sh->left->type->to<IR::Type_Bits>()->isSigned) return expr;

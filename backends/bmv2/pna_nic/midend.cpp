@@ -85,6 +85,8 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
     : PortableMidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&typeMap, new PnaEnumOn32Bits("pna.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    auto *strengthReductionPolicy = new P4::StrengthReductionPolicy();
+    strengthReductionPolicy->enablePlusSliceToShiftTransform = true;
     P4::LocalCopyPropPolicyCallbackFn policy = [=](const Context *, const IR::Expression *e,
                                                    const DeclarationLookup *refMap) -> bool {
         auto mce = e->to<IR::MethodCallExpression>();
@@ -116,12 +118,12 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             new P4::SimplifyKey(&typeMap,
                                 new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
             new P4::ConstantFolding(&typeMap),
-            new P4::StrengthReduction(&typeMap),
+            new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
             new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
             new P4::ExpandLookahead(&typeMap),
             new P4::ExpandEmit(&typeMap),
             new P4::SimplifyParsers(),
-            new P4::StrengthReduction(&typeMap),
+            new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
             new P4::EliminateTuples(&typeMap),
             new P4::SimplifyComparisons(&typeMap),
             new P4::CopyStructures(&typeMap),
@@ -135,8 +137,8 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&typeMap),
             new P4::LocalCopyPropagation(&typeMap, nullptr, policy),
-            new PassRepeated(
-                {new P4::ConstantFolding(&typeMap), new P4::StrengthReduction(&typeMap)}),
+            new PassRepeated({new P4::ConstantFolding(&typeMap),
+                              new P4::StrengthReduction(&typeMap, strengthReductionPolicy)}),
             new P4::MoveDeclarations(),
             new P4::ValidateTableProperties({"pna_implementation"_cs, "pna_direct_counter"_cs,
                                              "pna_direct_meter"_cs, "pna_idle_timeout"_cs,
