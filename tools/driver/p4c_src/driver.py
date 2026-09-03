@@ -54,7 +54,7 @@ class BackendDriver:
         if cmd_name in self._commands:
             print("Warning: overwriting command", cmd_name, file=sys.stderr)
         self._commands[cmd_name] = []
-        self._commands[cmd_name].append(cmd)
+        self._commands[cmd_name].append(os.fspath(cmd))
 
     def add_command_option(self, cmd_name, option):
         """Add an option to a command"""
