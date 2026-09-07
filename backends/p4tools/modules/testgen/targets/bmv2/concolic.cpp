@@ -161,7 +161,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          for (const auto &variable : resolvedExpressions) {
              const auto *varName = variable.first;
              const auto *varExpr = variable.second;
-             (*resolvedConcolicVariables)[varName] = varExpr;
+             (*resolvedConcolicVariables)[*varName] = varExpr;
          }
      }},
     /* ======================================================================================
@@ -214,7 +214,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          for (const auto &variable : resolvedExpressions) {
              const auto *varName = variable.first;
              const auto *varExpr = variable.second;
-             (*resolvedConcolicVariables)[varName] = varExpr;
+             (*resolvedConcolicVariables)[*varName] = varExpr;
          }
      }},
 
@@ -269,7 +269,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          for (const auto &variable : resolvedExpressions) {
              const auto *varName = variable.first;
              const auto *varExpr = variable.second;
-             (*resolvedConcolicVariables)[varName] = varExpr;
+             (*resolvedConcolicVariables)[*varName] = varExpr;
          }
      }},
 };

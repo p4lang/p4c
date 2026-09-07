@@ -84,6 +84,10 @@ struct TableResourceAlloc {
     int findBytesOnIxbar(const PHV::FieldSlice &) const;
 
     ::IXBar::Use *find_ixbar(IXBar::Use::type_t type) const;
+    bool operator==(const TableResourceAlloc &) const;
+    bool operator!=(const TableResourceAlloc &) const;
+    bool operator<(const TableResourceAlloc &) const;
+
 };
 
 std::ostream &operator<<(std::ostream &, const TableResourceAlloc &);
