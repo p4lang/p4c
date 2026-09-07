@@ -42,6 +42,16 @@ const IR::Node *Predication::EmptyStatementRemover::postorder(IR::BlockStatement
     return statement;
 }
 
+const IR::Node *Predication::EmptyStatementRemover::postorder(IR::ForStatement *statement) {
+    if (!statement->body) statement->body = new IR::EmptyStatement(statement->srcInfo);
+    return statement;
+}
+
+const IR::Node *Predication::EmptyStatementRemover::postorder(IR::ForInStatement *statement) {
+    if (!statement->body) statement->body = new IR::EmptyStatement(statement->srcInfo);
+    return statement;
+}
+
 /// Allows nesting of Mux expressions
 const IR::Mux *Predication::ExpressionReplacer::preorder(IR::Mux *mux) {
     ++currentNestingLevel;
