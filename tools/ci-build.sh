@@ -69,7 +69,7 @@ ENABLE_BACKENDS=("BMV2" "EBPF" "UBPF" "DPDK"
                  "P4TC" "P4FMT" "P4TEST" "P4C_GRAPHS"
                  "TEST_TOOLS"
 )
-if [ ${UNAME_MACHINE} != "aarch64" ]; then
+if [ ${UNAME_MACHINE} == "x86_64" ]; then
   ENABLE_BACKENDS+=("TOFINO")
 fi
 function build_cmake_enabled_backend_string() {
@@ -87,7 +87,6 @@ function build_cmake_enabled_backend_string() {
 pushd ${P4C_DIR}
 
 . /etc/lsb-release
-. /etc/os-release
 if [ "$IN_DOCKER" = "TRUE" ]; then
   # uv is already installed and a venv created.  Set this variable to
   # enable `uv sync` and other commands to use that venv.
@@ -118,10 +117,6 @@ P4C_DEPS="bison \
           libboost-iostreams-dev \
           libfl-dev \
           pkg-config \
-          python3 \
-          python3-dev \
-          python3-pip \
-          python3-setuptools \
           tcpdump"
 
 # TODO: Remove this check once 18.04 is deprecated.
@@ -131,7 +126,7 @@ fi
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-sudo apt-get install -y python3-venv curl
+sudo apt-get install -y curl
 if [ "$IN_DOCKER" != "TRUE" ]; then
   # Set up uv for Python dependency management.
   sudo apt-get install -y python3-venv curl
