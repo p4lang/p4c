@@ -234,6 +234,13 @@ static void dumpregs(mcontext_t *mctxt) {
                  << " r13=" << hex(mctxt->REGNAME(r13), 16, '0')
                  << " r14=" << hex(mctxt->REGNAME(r14), 16, '0'));
     LOG1(" r15=" << hex(mctxt->REGNAME(r15), 16, '0'));
+#elif defined(__aarch64__)
+    // TODO: Add printing of a more complete set of aarch64 register
+    // here.
+    LOG1("  x0=" << hex(mctxt->regs[0], 16, '0')
+         << "  x1=" << hex(mctxt->regs[1], 16, '0')
+         << "  x2=" << hex(mctxt->regs[2], 16, '0')
+         << "  x3=" << hex(mctxt->regs[3], 16, '0'));
 #else
 #warning "unknown machine type"
 #endif
