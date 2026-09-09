@@ -285,11 +285,11 @@ cstring cstring::escapeJson() const {
                 o << "\\t";
                 break;
             default: {
-#if defined(__aarch64__)
-                if (c <= '\x1f')
-#else
+//#if defined(__aarch64__)
+//                if (c <= '\x1f')
+//#else
                 if ('\x00' <= c && c <= '\x1f')
-#endif
+//#endif
                 {
                     o << "\\u" << std::hex << std::setw(4) << std::setfill('0')
                       << static_cast<int>(c);
