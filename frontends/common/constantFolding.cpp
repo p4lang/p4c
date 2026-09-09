@@ -923,12 +923,6 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         etype = typeMap->getType(getOriginal(), true);
     } else {
         etype = resolveType(e->destType);
-        if (etype->is<IR::Type_StructLike>()) {
-            // FIXME -- can't fold this if a Type_Name gets resolved to this, as the cast will
-            // get lost and typechecking will get messed up.  Not clear why, as it seems like
-            // it should work
-            etype = e->destType;
-        }
     }
 
     if (etype->is<IR::Type_Bits>()) {
@@ -991,6 +985,12 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
             return new IR::BoolLiteral(e->srcInfo, IR::Type_Boolean::get(), v == 1);
         }
     } else if (etype->is<IR::Type_StructLike>()) {
+        if (!typesKnown) {
+            if (auto structExpr = expr->to<IR::StructExpression>())
+                return new IR::StructExpression(structExpr->srcInfo, e->destType,
+                                                structExpr->components);
+            return e;
+        }
         return CloneConstants::clone(expr, this);
     }
     return e;
