@@ -25,6 +25,12 @@ using namespace P4::literals;
 namespace P4::Test {
 namespace fs = std::filesystem;
 
+/// testdata lives in the source tree, which is not necessarily the parent of the
+/// build directory, so build the paths from sourcePath instead of a relative one.
+static std::string srcPath(const std::string &relPath) {
+    return (fs::path(sourcePath) / relPath).string();
+}
+
 class MetricPassesTest : public P4CTest {
  protected:
     std::string inputFile;
@@ -65,8 +71,8 @@ class MetricPassesTest : public P4CTest {
         const IR::P4Program *result = frontend.run(opts, program, &std::cerr);
         ASSERT_NE(result, nullptr) << "Frontend pipeline failed for " << inputFile;
 
-        metricsOutputPath =
-            "../testdata/p4_16_samples/metrics/" + fs::path(inputFile).stem().string();
+        // ExportMetricsPass writes next to the input file, with the extension stripped.
+        metricsOutputPath = fs::path(inputFile).replace_extension();
         txtMetricsOutputPath = jsonMetricsOutputPath = metricsOutputPath;
         txtMetricsOutputPath += "_metrics.txt";
         jsonMetricsOutputPath += "_metrics.json";
@@ -88,12 +94,12 @@ class MetricPassesTest : public P4CTest {
         return buf.str();
     }
 
-    void compareWithExpectedOutput(const std::string &expectedRelPath) {
+    void compareWithExpectedOutput(const std::string &expectedPath) {
         std::string actual = readFileContent(jsonMetricsOutputPath);
-        std::string expected = readFileContent(expectedRelPath);
+        std::string expected = readFileContent(expectedPath);
 
         ASSERT_NE(actual, "") << "Cannot open file: " << jsonMetricsOutputPath << std::endl;
-        ASSERT_NE(expected, "") << "Cannot open file: " << expectedRelPath << std::endl;
+        ASSERT_NE(expected, "") << "Cannot open file: " << expectedPath << std::endl;
         EXPECT_EQ(actual, expected);
     }
 
@@ -103,12 +109,12 @@ class MetricPassesTest : public P4CTest {
     }
 };
 
-#define DEFINE_METRIC_TEST(N)                                                                  \
-    TEST_F(MetricPassesTest, MetricsTest##N) {                                                 \
-        inputFile = "../testdata/p4_16_samples/metrics/metrics_test_" #N ".p4";                \
-        SetUpFrontend(true);                                                                   \
-        compareWithExpectedOutput("../testdata/p4_16_samples_outputs/metrics/metrics_test_" #N \
-                                  "_metrics.json");                                            \
+#define DEFINE_METRIC_TEST(N)                                                                    \
+    TEST_F(MetricPassesTest, MetricsTest##N) {                                                   \
+        inputFile = srcPath("testdata/p4_16_samples/metrics/metrics_test_" #N ".p4");            \
+        SetUpFrontend(true);                                                                     \
+        compareWithExpectedOutput(                                                               \
+            srcPath("testdata/p4_16_samples_outputs/metrics/metrics_test_" #N "_metrics.json")); \
     }
 
 DEFINE_METRIC_TEST(1)
@@ -121,14 +127,14 @@ DEFINE_METRIC_TEST(7)
 DEFINE_METRIC_TEST(8)
 
 TEST_F(MetricPassesTest, MetricsTest9) {
-    inputFile = "../testdata/p4_16_samples/metrics/metrics_test_8.p4";
+    inputFile = srcPath("testdata/p4_16_samples/metrics/metrics_test_8.p4");
     SetUpFrontend(false);
     compareWithExpectedOutput(
-        "../testdata/p4_16_samples_outputs/metrics/metrics_test_9_metrics.json");
+        srcPath("testdata/p4_16_samples_outputs/metrics/metrics_test_9_metrics.json"));
 }
 
 TEST_F(MetricPassesTest, MetricsTest10) {
-    inputFile = "../testdata/p4_16_samples/metrics/metrics_test_8.p4";
+    inputFile = srcPath("testdata/p4_16_samples/metrics/metrics_test_8.p4");
     SetUpFrontend(true);
 
     // Check if the metric values got written to compiler context.
