@@ -128,12 +128,14 @@ fi
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
 sudo apt-get install -y curl
-if [ "$IN_DOCKER" != "TRUE" ]; then
+if ! command -v uv &> /dev/null; then
   # Set up uv for Python dependency management.
   sudo apt-get install -y python3-venv curl
   curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
   # Ensure uv is in the PATH
   export PATH="${PATH}:$HOME/.local/bin"
+  export VIRTUAL_ENV=$HOME/p4-python-venv
+  uv venv --seed $VIRTUAL_ENV
 fi
 uv sync
 uv tool update-shell
