@@ -124,7 +124,7 @@ sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
 if ! command -v uv &> /dev/null; then
   # Set up uv for Python dependency management.
-  sudo apt-get install -y python3-dev curl
+  sudo apt-get install -y python3-dev curl ca-certificates
   curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
   # Ensure uv is in the PATH
   export PATH="${PATH}:$HOME/.local/bin"
