@@ -87,11 +87,6 @@ function build_cmake_enabled_backend_string() {
 pushd ${P4C_DIR}
 
 . /etc/lsb-release
-if [ "$IN_DOCKER" = "TRUE" ]; then
-  # uv is already installed and a venv created.  Set this variable to
-  # enable `uv sync` and other commands to use that venv.
-  export UV_PROJECT_ENVIRONMENT="${VIRTUAL_ENV}"
-fi
 
 # In Docker builds, sudo is not available. So make it a noop.
 if [ "$IN_DOCKER" = "TRUE" ]; then
@@ -137,6 +132,9 @@ if ! command -v uv &> /dev/null; then
   export VIRTUAL_ENV=$HOME/p4-python-venv
   uv venv --seed $VIRTUAL_ENV
 fi
+# Set this variable to enable `uv sync` and other commands to use the
+# venv.
+export UV_PROJECT_ENVIRONMENT="${VIRTUAL_ENV}"
 uv sync
 uv tool update-shell
 
