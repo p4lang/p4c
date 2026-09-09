@@ -122,7 +122,6 @@ fi
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-sudo apt-get install -y curl
 if ! command -v uv &> /dev/null; then
   # Set up uv for Python dependency management.
   sudo apt-get install -y python3-venv curl
