@@ -427,12 +427,12 @@ class BarefootBackend(BackendDriver):
         """
         # Add assembler options.
         if os.environ['P4C_BUILD_TYPE'] == "DEVELOPER":
-            bfas = find_file('.', 'bfas')
+            bfas = str(find_file('.', 'bfas'))
         else:
-            bfas = find_file(os.environ['P4C_BIN_DIR'], 'bfas')
+            bfas = str(find_file(os.environ['P4C_BIN_DIR'], 'bfas'))
 
-        bfrt_schema = find_file(os.environ['P4C_BIN_DIR'], 'bfrt_schema.py')
-        p4c_gen_conf = find_file(os.environ['P4C_BIN_DIR'], 'p4c-gen-conf')
+        bfrt_schema = str(find_file(os.environ['P4C_BIN_DIR'], 'bfrt_schema.py'))
+        p4c_gen_conf = str(find_file(os.environ['P4C_BIN_DIR'], 'p4c-gen-conf'))
         self.add_command('assembler', bfas)
         self.add_command('bf-rt-verifier', bfrt_schema)
         self.add_command('p4c-gen-conf', p4c_gen_conf)
