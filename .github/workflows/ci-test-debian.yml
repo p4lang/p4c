@@ -37,7 +37,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-ubuntu24"
+          ccache-key: "ubuntu-24.04-gcc-unity-p4-14"
 
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
@@ -73,7 +73,8 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-${{ matrix.unity }}"
+          ccache-key: ${{ matrix.unity == 'ON' && 'ubuntu-22.04-gcc-unity' || 'ubuntu-22.04-gcc-nounity' }}
+          max-size: ${{ matrix.unity == 'ON' && '2000M' || '1000M' }}
 
       - name: Run tests (Ubuntu 22.04)
         run: |
@@ -108,7 +109,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-tofino"
+          ccache-key: "ubuntu-22.04-gcc-unity-tofino"
 
       - name: Run tests (Ubuntu 22.04)
         run: uv run ctest --output-on-failure --schedule-random -R tofino
