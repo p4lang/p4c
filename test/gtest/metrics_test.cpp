@@ -25,15 +25,11 @@ using namespace P4::literals;
 namespace P4::Test {
 namespace fs = std::filesystem;
 
-/// testdata lives in the source tree, which is not necessarily the parent of the
-/// build directory, so build the paths from sourcePath instead of a relative one.
-static std::string srcPath(const std::string &relPath) {
-    return (fs::path(sourcePath) / relPath).string();
-}
+static fs::path srcPath(const fs::path &relPath) { return fs::path(sourcePath) / relPath; }
 
 class MetricPassesTest : public P4CTest {
  protected:
-    std::string inputFile;
+    fs::path inputFile;
     std::string programName;
     fs::path metricsOutputPath;
     fs::path txtMetricsOutputPath;
@@ -71,8 +67,7 @@ class MetricPassesTest : public P4CTest {
         const IR::P4Program *result = frontend.run(opts, program, &std::cerr);
         ASSERT_NE(result, nullptr) << "Frontend pipeline failed for " << inputFile;
 
-        // ExportMetricsPass writes next to the input file, with the extension stripped.
-        metricsOutputPath = fs::path(inputFile).replace_extension();
+        metricsOutputPath = inputFile.parent_path() / inputFile.stem();
         txtMetricsOutputPath = jsonMetricsOutputPath = metricsOutputPath;
         txtMetricsOutputPath += "_metrics.txt";
         jsonMetricsOutputPath += "_metrics.json";
@@ -94,7 +89,7 @@ class MetricPassesTest : public P4CTest {
         return buf.str();
     }
 
-    void compareWithExpectedOutput(const std::string &expectedPath) {
+    void compareWithExpectedOutput(const fs::path &expectedPath) {
         std::string actual = readFileContent(jsonMetricsOutputPath);
         std::string expected = readFileContent(expectedPath);
 
