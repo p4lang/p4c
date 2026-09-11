@@ -53,8 +53,8 @@ bool ExcludeParserLoopReachableFields::is_loop_reachable(
     return false;
 }
 
-const IR::Node *ExcludeParserLoopReachableFields::apply_visitor(const IR::Node *root,
-                                                                const char *) {
+IR::Ptr<IR::Node> ExcludeParserLoopReachableFields::apply_visitor(const IR::Node *root,
+                                                                  const char *) {
     for (auto &kv : fieldToStates.field_to_parser_states) {
         for (auto &xk : fieldToStates.field_to_parser_states) {
             if (kv.first == xk.first || kv.first->gress != xk.first->gress) continue;
@@ -112,7 +112,7 @@ void ExcludePragmaNoOverlayFields::end_apply() {
 bool ExcludeMAUOverlays::preorder(const IR::MAU::Table *tbl) {
     LOG5("\tTable: " << tbl->name);
     ordered_set<PHV::Field *> keyFields;
-    for (auto *key : tbl->match_key) {
+    for (auto key : tbl->match_key) {
         PHV::Field *field = phv.field(key->expr);
         if (!field) continue;
         keyFields.insert(field);

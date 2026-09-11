@@ -12,7 +12,7 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     P4::PsaProgramStructure structure(refMap, typeMap);
     auto *parsePsaArch = new P4::ParsePsaArchitecture(&structure);
-    const auto *main = tlb->getMain();
+    auto main = tlb->getMain();
     if (main == nullptr) {
         return;
     }
@@ -27,7 +27,7 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
     main->apply(*parsePsaArch);
     auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
-    const auto *program = tlb->getProgram();
+    auto program = tlb->getProgram();
 
     PassManager rewriteToEBPF = {
         evaluator,

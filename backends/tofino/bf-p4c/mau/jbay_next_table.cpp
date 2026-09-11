@@ -334,7 +334,7 @@ class JbayNextTable::FindNextTableUse : public MauTableInspector {
     std::vector<const IR::MAU::Table *> tables;
 
     int first_id(const IR::MAU::TableSeq *seq) {
-        for (auto *t : seq->tables) {
+        for (const IR::MAU::Table *t : seq->tables) {
             if (t->always_run != IR::MAU::AlwaysRun::ACTION) return *t->global_id();
         }
         return -1;
@@ -368,7 +368,7 @@ class JbayNextTable::FindNextTableUse : public MauTableInspector {
         for (auto *t : tables) {
             std::pair<int, int> range;
             range.first = range.second = *t->global_id();
-            for (auto *seq : Values(t->next)) {
+            for (const IR::MAU::TableSeq *seq : Values(t->next)) {
                 range.second = std::max(range.second, first_id(seq));
             }
             if (stage_diff(range) < 2 && self.control_dep.paths(t) <= 8) {

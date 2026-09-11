@@ -84,7 +84,7 @@ const IR::Node *DoReplaceTuples::postorder(IR::Type_BaseList *bl) {
         if (targ->is<IR::Type_Var>()) return bl;
     }
     auto st = repl.getReplacement(type)->getP4Type();
-    return st;
+    return guardReturn(st);
 }
 
 const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {

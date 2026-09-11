@@ -89,13 +89,13 @@ const IR::Node *MoveDeclarations::postorder(IR::Declaration_Constant *decl) {
 // Returns true iff the given state is _directly_ reachable from any of the given
 // set of states.
 bool isReachable(cstring stateName, const IR::IndexedVector<IR::ParserState> &states) {
-    for (const auto *state : states) {
-        const auto *selectExpr = state->selectExpression;
+    for (const IR::ParserState *state : states) {
+        const IR::Expression *selectExpr = state->selectExpression;
         if (selectExpr == nullptr) continue;  // implicit reject transition
 
         if (const auto *sel = selectExpr->to<IR::SelectExpression>()) {
             // select expression
-            for (const auto *selectCase : sel->selectCases)
+            for (const IR::SelectCase *selectCase : sel->selectCases)
                 if (selectCase->state->path->name == stateName) return true;
         } else if (const auto *pathExpr = selectExpr->to<IR::PathExpression>()) {
             // direct transition

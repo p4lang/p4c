@@ -62,7 +62,7 @@ const char *PragmaNoInit::help =
 
 bool PragmaNoInit::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto *annotation : global_pragmas) {
+    for (auto annotation : global_pragmas) {
         if (annotation->name.name != PragmaNoInit::name) continue;
 
         auto &exprs = annotation->getExpr();

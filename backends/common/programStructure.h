@@ -83,7 +83,7 @@ class BuildResourceMap : public Inspector {
             resourceMap->emplace(cv.first, cv.second);
         }
 
-        for (const auto *c : control->container->controlLocals) {
+        for (const IR::Declaration *c : control->container->controlLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, control->getValue(c));
             }
@@ -100,7 +100,7 @@ class BuildResourceMap : public Inspector {
             }
         }
 
-        for (const auto *c : parser->container->parserLocals) {
+        for (const IR::Declaration *c : parser->container->parserLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, parser->getValue(c));
             }
@@ -129,7 +129,7 @@ class BuildResourceMap : public Inspector {
     }
 
     bool preorder(const IR::ToplevelBlock *tlb) override {
-        const auto *package = tlb->getMain();
+        const IR::PackageBlock *package = tlb->getMain();
         visit(package);
         return false;
     }

@@ -148,13 +148,13 @@ static unsigned computeDigestIndex(TnaProgramStructure *structure, const IR::Pri
 /*
  * FIXME: duplicate with helper function in CollectDigestFields
  */
-static IR::Expression *flatten(const IR::ListExpression *args) {
+static IR::Ptr<IR::Expression> flatten(const IR::ListExpression *args) {
     IR::Vector<IR::Expression> components;
-    for (const auto *expr : args->components) {
+    for (auto expr : args->components) {
         if (const auto *list_arg = expr->to<IR::ListExpression>()) {
-            auto *flattened = flatten(list_arg);
+            auto flattened = flatten(list_arg);
             BUG_CHECK(flattened->is<IR::ListExpression>(), "flatten must return ListExpression");
-            for (const auto *comp : flattened->to<IR::ListExpression>()->components)
+            for (auto comp : flattened->to<IR::ListExpression>()->components)
                 components.push_back(comp);
         } else {
             components.push_back(expr);
@@ -173,7 +173,7 @@ static const IR::Statement *convertClone(ProgramStructure *structure,
     auto *deparserMetadataPath = new IR::PathExpression(
         (gress == INGRESS) ? "ig_intr_md_for_dprsr" : "eg_intr_md_for_dprsr");
 
-    const IR::Expression *list = nullptr;
+    IR::Ptr<IR::Expression> list = nullptr;
     if (primitive->operands.size() == 2) {
         list = structure->convertFieldList(primitive->operands.at(1));
         // flatten nested field_list in p4-14 to one-level list expression in P4-16
@@ -193,7 +193,7 @@ static const IR::Statement *convertClone(ProgramStructure *structure,
 
     auto *compilerMetadataPath = new IR::Member(new IR::PathExpression("meta"), COMPILER_META);
     auto *mirrorId = new IR::Member(compilerMetadataPath, "mirror_id");
-    auto *mirrorIdValue = conv.convert(primitive->operands.at(0));
+    auto mirrorIdValue = conv.convert(primitive->operands.at(0));
     /// p4-14 mirror_id is 32bit, cast to bit<10>
     auto *castedMirrorIdValue =
         new IR::Cast(IR::Type::Bits::get(Device::cloneSessionIdWidth()), mirrorIdValue);

@@ -74,7 +74,7 @@ const IR::BaseAssignmentStatement *RemoveSetMetadata::preorder(
     }
 
     // Don't remove writes to intrinsic metadata or compiler-generated metadata.
-    auto *paramType = typeMap->getType(param);
+    auto paramType = typeMap->getType(param);
     BUG_CHECK(paramType, "No type for param: %1%", param);
 
     // "egress_intrinsic_metadata_t" is generated in egress packet buffer, it doesn't

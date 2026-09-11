@@ -34,7 +34,7 @@ cstring keyComponentNameForMember(const IR::Member *expression, const P4::TypeMa
 
     // Without type information, we can't do any deeper analysis.
     if (!typeMap) return fname;
-    auto *type = typeMap->getType(expression->expr, true);
+    const IR::Type *type = typeMap->getType(expression->expr, true);
 
     // Use `$valid$` to represent `isValid()` calls on headers and header
     // unions; this is what P4Runtime expects.
@@ -47,7 +47,7 @@ cstring keyComponentNameForMember(const IR::Member *expression, const P4::TypeMa
     // If this Member represents a field which has an @name annotation, use it.
     if (type->is<IR::Type_StructLike>()) {
         auto *st = type->to<IR::Type_StructLike>();
-        auto *field = st->getField(expression->member);
+        const IR::StructField *field = st->getField(expression->member);
         if (field != nullptr) return field->externalName();
     }
 

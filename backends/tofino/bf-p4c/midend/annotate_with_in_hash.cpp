@@ -43,11 +43,12 @@ namespace BFN {
  */
 bool DoAnnotateWithInHash::checkKeyDefaultAction(const IR::P4Control &control,
                                                  const IR::P4Action &action) const {
-    for (const auto *decl : control.getDeclarations()->toVector()) {
+    for (const IR::IDeclaration *decl : control.getDeclarations()->toVector()) {
         if (const auto *table = decl->to<IR::P4Table>()) {
-            const auto *actionList = table->getActionList();
+            const IR::ActionList *actionList = table->getActionList();
             if (actionList == nullptr) continue;  // The table has no actions
-            const auto *actionListElement = actionList->getDeclaration(action.getName());
+            const IR::ActionListElement *actionListElement =
+                actionList->getDeclaration(action.getName());
             if (!actionListElement) continue;  // The table does not call the action
             const IR::Expression *defaultAction = table->getDefaultAction();
             cstring defaultActionName;

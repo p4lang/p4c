@@ -922,7 +922,7 @@ BFNOptionPragmaParser::parseCompilerOption(const IR::Annotation *annotation) {
     CHECK_NULL(args);
 
     bool first = true;
-    for (const auto *arg : *args) {
+    for (auto arg : *args) {
         // Try to convert the parsed expression to a valid option string
         cstring optionString = ""_cs;
         if (const auto *argString = arg->to<IR::StringLiteral>()) {

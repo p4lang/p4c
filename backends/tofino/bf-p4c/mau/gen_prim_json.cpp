@@ -99,7 +99,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl, const IR:
             }
         }
         auto _primitive = new Util::JsonObject();
-        auto *at = call->attached_callee;
+        const IR::MAU::AttachedMemory *at = call->attached_callee;
         auto *salu = at->to<IR::MAU::StatefulAlu>();
         if (salu) {
             if (auto ci = call->index) {
@@ -119,7 +119,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl, const IR:
                 _primitive->emplace("name"_cs, "ExecuteStatefulAluPrimitive");
                 add_op_json(_primitive, "dst", "stateful", canon_name(salu->name));
             }
-            if (auto *sact = salu->calledAction(tbl, act)) {
+            if (const IR::MAU::SaluAction *sact = salu->calledAction(tbl, act)) {
                 auto *salu_details = new Util::JsonObject();
                 salu_details->emplace("name"_cs, canon_name(sact->name));
                 auto single_bit_mode = salu->source_width() == 1 ? true : false;

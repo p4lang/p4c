@@ -61,9 +61,9 @@ void AddT2naMeta::postorder(IR::Type_StructLike *typeStructLike) {
         }
     } else if (typeStructLikeName == "egress_intrinsic_metadata_t") {
         const IR::StructField *lastStructField = nullptr;
-        for (const auto *structField : typeStructLike->fields) {
+        for (auto structField : typeStructLike->fields) {
             lastStructField = structField;
-        };
+        }
         if (lastStructField && lastStructField->getAnnotation("padding"_cs)) {
             LOG3("AddT2naMeta : " << typeStructLikeName << " already complete");
             return;

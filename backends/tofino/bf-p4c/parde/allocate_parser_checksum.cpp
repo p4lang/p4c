@@ -160,7 +160,7 @@ struct ParserChecksumAllocator : public Visitor {
     const CollectParserInfo &parser_info;
     const CollectParserChecksums &checksum_info;
 
-    const IR::Node *apply_visitor(const IR::Node *n, const char *) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char *) override {
         for (auto &kv : checksum_info.parser_to_decl_names) allocate(kv.first);
 
         return n;

@@ -31,11 +31,12 @@ class ParamCloner : public CloneExpressions {
 
 const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (!isInContext<IR::P4Control>()) {
-        if (const auto *nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation)) {
+        if (const IR::Annotation *nameAnno =
+                action->getAnnotation(IR::Annotation::nameAnnotation)) {
             // If the value of the existing name annotation does not
             // begin with ".", prepend "." so that the name remains
             // global if control plane APIs are generated later.
-            const auto *e0 = nameAnno->getExpr(0);
+            const IR::Expression *e0 = nameAnno->getExpr(0);
             auto nameString = e0->to<IR::StringLiteral>()->value;
             if (!nameString.startsWith(".")) {
                 nameString = "."_cs + nameString;

@@ -44,11 +44,11 @@ class StackVariable {
     bool operator==(const StackVariable &other) const;
 
  private:
-    const IR::Expression *variable;
+    IR::Ptr<IR::Expression> variable;
 
  public:
     /// Implicitly converts IR::Expression* to a StackVariable.
-    StackVariable(const IR::Expression *expr);  // NOLINT(runtime/explicit)
+    StackVariable(IR::Ptr<IR::Expression> expr);  // NOLINT(runtime/explicit)
 };
 
 /// Class with hash function for @a StackVariable.

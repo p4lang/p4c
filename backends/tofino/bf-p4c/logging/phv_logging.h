@@ -158,7 +158,7 @@ class PhvLogging : public MauInspector {
         /// Defuse information for PHV fields.
         const FieldDefUse &defuse;
 
-        const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
+        IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char *name = 0) override;
 
      public:
         void replace_parser_state_name(cstring old_name, cstring new_name);

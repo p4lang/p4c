@@ -11,7 +11,7 @@ using namespace P4;
 using namespace P4::literals;
 
 TEST(IR, Equiv) {
-    auto *t = IR::Type::Bits::get(16);
+    const IR::Type *t = IR::Type::Bits::get(16);
     auto *a1 = new IR::Constant(t, 10);
     auto *a2 = new IR::Constant(t, 10);
     auto *b = new IR::Constant(IR::Type::Bits::get(10), 10);

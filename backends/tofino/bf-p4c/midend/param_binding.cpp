@@ -21,7 +21,7 @@
 #include "frontends/p4/typeMap.h"
 
 void ParamBinding::bind(const IR::Parameter *param) {
-    auto *type = typeMap->getType(param);
+    const IR::Type *type = typeMap->getType(param);
     if (!type->is<IR::Type_StructLike>()) {
         return;
     }

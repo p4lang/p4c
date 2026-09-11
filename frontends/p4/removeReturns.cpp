@@ -21,7 +21,7 @@ bool MoveToElseAfterBranch::preorder(IR::BlockStatement *block) {
     return false;
 }
 
-bool MoveToElseAfterBranch::moveFromParentTo(const IR::Statement *&child) {
+bool MoveToElseAfterBranch::moveFromParentTo(IR::Ptr<IR::Statement> &child) {
     auto parent = getParent<IR::BlockStatement>();
     size_t next = getContext()->child_index + 1;
     if (!parent || next >= parent->components.size()) {

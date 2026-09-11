@@ -63,7 +63,7 @@ class ExcludeParserLoopReachableFields : public Visitor {
     const CollectParserInfo &parserInfo;
 
  private:
-    const IR::Node *apply_visitor(const IR::Node *root, const char *) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *) override;
 
     bool is_loop_reachable(const ordered_set<const IR::BFN::ParserState *> &k,
                            const ordered_set<const IR::BFN::ParserState *> &v);

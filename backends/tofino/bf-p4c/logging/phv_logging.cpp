@@ -125,7 +125,7 @@ bool CollectPhvLoggingInfo::preorder(const IR::MAU::TableKey *read) {
     return true;
 }
 
-const IR::Node *PhvLogging::CollectDefUseInfo::apply_visitor(const IR::Node *n, const char *) {
+IR::Ptr<IR::Node> PhvLogging::CollectDefUseInfo::apply_visitor(const IR::Node *n, const char *) {
     parser_defs.clear();
     deparser_uses.clear();
     for (auto &[field_id, defs] : defuse.getAllDefs()) {

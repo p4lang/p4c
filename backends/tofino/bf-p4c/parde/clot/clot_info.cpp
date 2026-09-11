@@ -1240,7 +1240,7 @@ bool CollectClotInfo::preorder(const IR::BFN::ParserZeroInit *zero_init) {
 bool CollectClotInfo::preorder(const IR::HeaderStackItemRef *hsir) {
     auto state = findContext<IR::BFN::ParserState>();
     if (state) {
-        const auto *base = hsir->baseRef();
+        auto base = hsir->baseRef();
         if (!base) return true;
         bool in_loopback = clotInfo.parserInfo.graph(state).is_loopback_state(state->name);
         if (!in_loopback) {

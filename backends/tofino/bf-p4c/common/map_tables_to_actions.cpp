@@ -57,7 +57,7 @@ std::optional<const IR::MAU::Table *> MapTablesToActions::getTableForAction(
 
 bool MapTablesToActions::preorder(const IR::MAU::Table *t) {
     for (auto kv : t->actions) {
-        const auto *action = kv.second;
+        const IR::MAU::Action *action = kv.second;
         tableToActionsMap[t].insert(action);
         actionMap[action] = t;
         LOG6("\tAdd action " << action->name << " in table " << t->name);

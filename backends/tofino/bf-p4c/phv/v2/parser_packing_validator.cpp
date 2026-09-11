@@ -56,12 +56,12 @@ ParserPackingValidator::StatePrimitiveMap ParserPackingValidator::get_primitives
         auto [it, inserted] = state_extracts_cache.try_emplace({state, expr});
         if (inserted) {  // not cached, need to calculate
             // defuse does not track extracts directly so we need to find it in the state
-            for (auto *stmt : state->statements) {
+            for (auto stmt : state->statements) {
                 if (auto *extract = stmt->to<IR::BFN::Extract>()) {
-                    state_extracts_cache[{state, extract->dest->field}].push_back(extract);
+                    state_extracts_cache[{state, &*extract->dest->field}].push_back(extract);
                 } else if (auto *checksum = stmt->to<IR::BFN::ParserChecksumWritePrimitive>()) {
                     if (auto *dest = checksum->getWriteDest())
-                        state_extracts_cache[{state, dest->field}].push_back(checksum);
+                        state_extracts_cache[{state, &*dest->field}].push_back(checksum);
                 }
             }
         }

@@ -54,13 +54,13 @@ bool FoldConstantHashes::DoFoldConstantHashes::checkConstantInput(const IR::Expr
     if (expr->is<IR::Constant>()) {
         return true;
     } else if (auto *list = expr->to<IR::ListExpression>()) {
-        for (auto *comp : list->components) {
+        for (const IR::Expression *comp : list->components) {
             auto *comp_expr = comp->to<IR::Expression>();
             if (!comp_expr || !checkConstantInput(comp_expr)) return false;
         }
         return true;
     } else if (auto *list = expr->to<IR::StructExpression>()) {
-        for (auto *comp : list->components) {
+        for (const IR::NamedExpression *comp : list->components) {
             auto *comp_expr = comp->expression->to<IR::Expression>();
             if (!comp_expr || !checkConstantInput(comp_expr)) return false;
         }
@@ -79,7 +79,7 @@ bool FoldConstantHashes::DoFoldConstantHashes::checkConstantInput(const IR::Expr
  */
 void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(uint64_t &value, size_t &shift,
         const IR::ListExpression *list) {
-    for (auto *comp : boost::adaptors::reverse(list->components)) {
+    for (const IR::Expression *comp : boost::adaptors::reverse(list->components)) {
         if (auto *constant = comp->to<IR::Constant>()) {
             value |= constant->asUint64() << shift;
             shift += constant->type->width_bits();
@@ -102,7 +102,7 @@ void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(uint64_t &valu
  */
 void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(
     uint64_t &value, size_t &shift, const IR::StructExpression *list) {
-    for (auto *comp : boost::adaptors::reverse(list->components)) {
+    for (const IR::NamedExpression *comp : boost::adaptors::reverse(list->components)) {
         if (auto *constant = comp->expression->to<IR::Constant>()) {
             value |= constant->asUint64() << shift;
             shift += constant->type->width_bits();
@@ -162,7 +162,7 @@ hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
     int total_input_bits = 0;
 
     safe_vector<ixbar_input_t> hash_inputs;
-    for (auto *comp : boost::adaptors::reverse(hash_list->components)) {
+    for (const IR::Expression *comp : boost::adaptors::reverse(hash_list->components)) {
         const auto *comp_expr = comp->to<IR::Constant>();
         ixbar_input_t hash_input;
         hash_input.type = ixbar_input_type::tCONST;
@@ -208,7 +208,7 @@ hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
     int total_input_bits = 0;
 
     safe_vector<ixbar_input_t> hash_inputs;
-    for (auto *comp : boost::adaptors::reverse(hash_list->components)) {
+    for (const IR::NamedExpression *comp : boost::adaptors::reverse(hash_list->components)) {
         const auto *comp_expr = comp->expression->to<IR::Constant>();
         ixbar_input_t hash_input;
         hash_input.type = ixbar_input_type::tCONST;
@@ -331,7 +331,7 @@ const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteOtherH
 const IR::Node *FoldConstantHashes::DoFoldConstantHashes::preorder(IR::MethodCallExpression *mce) {
     auto *method_instance = P4::MethodInstance::resolve(mce, self.refMap, self.typeMap);
     if (!method_instance) return mce;
-    auto *extern_object = method_instance->object;
+    auto extern_object = method_instance->object;
     if (!extern_object) return mce;
     auto *extern_decl = extern_object->to<IR::Declaration_Instance>();
     if (!extern_decl) return mce;

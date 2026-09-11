@@ -246,7 +246,7 @@ IR::MAU::Table *FindPayloadCandidates::convert_to_gateway(const IR::MAU::Table *
         gw_tbl->gateway_rows.push_back(std::make_pair(gw_expr, entry_name));
         cstring action_name;
 
-        std::pair<cstring, std::vector<const IR::Constant *>> payload_row;
+        std::pair<cstring, std::vector<IR::Ptr<IR::Constant>>> payload_row;
         payload_row.second = convert_entry_to_payload_args(tbl, entry, &action_name);
         payload_row.first = action_name;
         gw_tbl->gateway_payload.emplace(entry_name, payload_row);
@@ -328,7 +328,7 @@ IR::MAU::Table *FindPayloadCandidates::convert_to_gateway(const IR::MAU::Table *
  */
 FindPayloadCandidates::PayloadArguments FindPayloadCandidates::convert_entry_to_payload_args(
     const IR::MAU::Table *tbl, const IR::Entry *entry, cstring *act_name) {
-    std::vector<const IR::Constant *> rv;
+    std::vector<IR::Ptr<IR::Constant>> rv;
     auto mc = entry->action->to<IR::MethodCallExpression>();
     auto pe = mc->method->to<IR::PathExpression>();
     if (act_name) {
@@ -489,7 +489,7 @@ bitvec FindPayloadCandidates::determine_meter_type_payload(const IR::MAU::Action
  */
 bitvec FindPayloadCandidates::determine_match_group_payload(
     const IR::MAU::Table *tbl, const TableResourceAlloc *alloc, const IR::MAU::Action *act,
-    std::vector<const IR::Constant *> arguments, int entry_idx) {
+    std::vector<IR::Ptr<IR::Constant>> arguments, int entry_idx) {
     bitvec rv;
     const IR::MAU::AttachedMemory *stats_alu_user = nullptr;
     const IR::MAU::AttachedMemory *meter_alu_user = nullptr;
@@ -598,7 +598,7 @@ bitvec FindPayloadCandidates::determine_payload(const IR::MAU::Table *tbl,
         BUG_CHECK(tf.match_groups.size() == 1 && tbl->hit_actions() == 1,
                   "Not a no match hit "
                   "table");
-        std::vector<const IR::Constant *> payload_args;
+        std::vector<IR::Ptr<IR::Constant>> payload_args;
         const IR::MAU::Action *hit_act = nullptr;
         for (auto act : Values(tbl->actions)) {
             if (act->miss_only()) continue;

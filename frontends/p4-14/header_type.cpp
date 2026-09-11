@@ -10,10 +10,10 @@ namespace P4 {
 using namespace P4::literals;
 
 bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
-    auto *max_length = hdr_type->getAnnotation(IR::Annotation::maxLengthAnnotation);
+    const IR::Annotation *max_length = hdr_type->getAnnotation(IR::Annotation::maxLengthAnnotation);
     if (!max_length) {
         unsigned len = 0;
-        for (auto field : hdr_type->fields) len += field->type->width_bits();
+        for (const IR::StructField *field : hdr_type->fields) len += field->type->width_bits();
         max_length = new IR::Annotation(IR::Annotation::maxLengthAnnotation, len);
         hdr_type->addAnnotation(max_length);
     }

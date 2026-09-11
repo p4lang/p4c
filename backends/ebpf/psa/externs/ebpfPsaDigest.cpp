@@ -69,7 +69,7 @@ class EBPFDigestPSAValueVisitor : public CodeGenInspector {
         valueType->declare(builder, tmpVar, false);
         builder->endOfStatement(true);
 
-        for (const auto *f : se->components) {
+        for (const IR::NamedExpression *f : se->components) {
             auto type = typeMap->getType(f->expression);
             cstring path = absl::StrFormat("%v.%v", tmpVar, f->name);
             codegen->emitAssignStatement(type, nullptr, path, f->expression);

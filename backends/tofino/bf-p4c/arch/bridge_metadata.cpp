@@ -51,7 +51,7 @@ struct CollectSpecialPrimitives : public Inspector {
     void postorder(const IR::ExitStatement *e) override { exit.insert(e); }
 
     void postorder(const IR::MethodCallStatement *node) override {
-        auto *call = node->methodCall;
+        auto call = node->methodCall;
         auto *pa = call->method->to<IR::PathExpression>();
         if (!pa) return;
         if (pa->path->name == "bypass_egress")
@@ -112,7 +112,7 @@ struct BridgeIngressToEgress : public Transform {
         if (structFields.size() > 0) {
             if (LOGGING(3)) {
                 LOG3("\tNumber of fields to bridge: " << fieldsToBridge.size());
-                for (auto *f : structFields) LOG3("\t  Bridged field: " << f->name);
+                for (auto f : structFields) LOG3("\t  Bridged field: " << f->name);
             }
             auto bridgedMetaType = new IR::Type_Struct(
                 "fields", {new IR::Annotation(IR::ID("flexible"), {})}, structFields);
@@ -131,10 +131,10 @@ struct BridgeIngressToEgress : public Transform {
         forAllMatching<IR::BFN::TnaControl>(root, [&](const IR::BFN::TnaControl *control) {
             if (!metaStructName.isNullOrEmpty()) return;
             cstring p4ParamName = control->tnaParams.at("md"_cs);
-            auto *params = control->type->getApplyParameters();
-            auto *param = params->getParameter(p4ParamName);
+            auto params = control->type->getApplyParameters();
+            auto param = params->getParameter(p4ParamName);
             BUG_CHECK(param, "Couldn't find param %1% on control: %2%", p4ParamName, control);
-            auto *paramType = typeMap->getType(param);
+            auto paramType = typeMap->getType(param);
             BUG_CHECK(paramType, "Couldn't find type for: %1%", param);
             BUG_CHECK(paramType->is<IR::Type_StructLike>(),
                       "User metadata parameter type isn't structlike %2%: %1%", paramType,
@@ -335,7 +335,7 @@ struct BridgeIngressToEgress : public Transform {
     }
 
     IR::Node *preorder(IR::MethodCallStatement *node) override {
-        auto *call = node->methodCall;
+        auto call = node->methodCall;
         auto *pa = call->method->to<IR::PathExpression>();
         if (!pa) return node;
         if (pa->path->name != "bypass_egress") return node;

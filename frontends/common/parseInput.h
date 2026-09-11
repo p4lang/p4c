@@ -24,9 +24,9 @@ namespace P4 {
 
 #ifdef SUPPORT_P4_14
 template <typename Input, typename C = P4V1::Converter>
-static const IR::P4Program *parseV1Program(Input stream, std::string_view sourceFile,
-                                           unsigned sourceLine,
-                                           std::optional<DebugHook> debugHook = std::nullopt) {
+static IR::Ptr<IR::P4Program> parseV1Program(Input stream, std::string_view sourceFile,
+                                             unsigned sourceLine,
+                                             std::optional<DebugHook> debugHook = std::nullopt) {
     // We load the model before parsing the input file, so that the SourceInfo
     // in the model comes first.
     C converter;
@@ -34,7 +34,7 @@ static const IR::P4Program *parseV1Program(Input stream, std::string_view source
     converter.loadModel();
 
     // Parse.
-    const IR::Node *v1 = V1::V1ParserDriver::parse(stream, sourceFile, sourceLine);
+    IR::Ptr<IR::Node> v1 = V1::V1ParserDriver::parse(stream, sourceFile, sourceLine);
     if (::P4::errorCount() > 0 || v1 == nullptr) return nullptr;
 
     // Convert to P4-16.
@@ -58,12 +58,12 @@ template <typename C = P4V1::Converter>
 #else
 inline
 #endif
-const IR::P4Program *parseP4File(const ParserOptions &options) {
+IR::Ptr<IR::P4Program> parseP4File(const ParserOptions &options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
               "compiler context");
 
-    const IR::P4Program *result = nullptr;
+    IR::Ptr<IR::P4Program> result = nullptr;
     if (options.doNotPreprocess) {
         auto *file = fopen(options.file.c_str(), "r");
         if (file == nullptr) {
@@ -116,27 +116,27 @@ const IR::P4Program *parseP4File(const ParserOptions &options) {
  * null on failure. If failure occurs, an error will also be reported.
  */
 #ifdef SUPPORT_P4_14
-const IR::P4Program *parseP4String(
+IR::Ptr<IR::P4Program> parseP4String(
     const char *sourceFile, unsigned sourceLine, const std::string &input,
     CompilerOptions::FrontendVersion version = CompilerOptions::FrontendVersion::P4_16);
-const IR::P4Program *parseP4String(
+IR::Ptr<IR::P4Program> parseP4String(
     const std::string &input,
     CompilerOptions::FrontendVersion version = CompilerOptions::FrontendVersion::P4_16);
 #else
 [[deprecated(
     "P4-14 support is disabled, this function will always parse P4-16. Use the overload without "
     "the version argument.")]]
-const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
-                                   const std::string &input,
-                                   CompilerOptions::FrontendVersion version);
+IR::Ptr<IR::P4Program> parseP4String(const char *sourceFile, unsigned sourceLine,
+                                     const std::string &input,
+                                     CompilerOptions::FrontendVersion version);
 [[deprecated(
     "P4-14 support is disabled, this function will always parse P4-16. Use the overload without "
     "the version argument.")]]
-const IR::P4Program *parseP4String(const std::string &input,
-                                   CompilerOptions::FrontendVersion version);
-const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
-                                   const std::string &input);
-const IR::P4Program *parseP4String(const std::string &input);
+IR::Ptr<IR::P4Program> parseP4String(const std::string &input,
+                                     CompilerOptions::FrontendVersion version);
+IR::Ptr<IR::P4Program> parseP4String(const char *sourceFile, unsigned sourceLine,
+                                     const std::string &input);
+IR::Ptr<IR::P4Program> parseP4String(const std::string &input);
 #endif
 
 }  // namespace P4

@@ -121,7 +121,7 @@ bool AddAlwaysRun::PrepareToAdd::preorder(const IR::MAU::TableSeq *tableSeq) {
     // Ensure we re-visit this table sequence if we encounter it again elsewhere in the IR.
     visitAgain();
 
-    const auto *savedSubsequentTable = subsequentTable;
+    auto savedSubsequentTable = subsequentTable;
 
     for (unsigned i = 0; i < tableSeq->tables.size(); ++i) {
         // subsequentTable is the next table in the sequence.
@@ -140,7 +140,7 @@ bool AddAlwaysRun::PrepareToAdd::preorder(const IR::MAU::Table *table) {
     // Ensure we re-visit this table if we encounter it again elsewhere in the IR.
     visitAgain();
 
-    auto *curMin = P4::get(minSubsequentTables, table);
+    auto curMin = P4::get(minSubsequentTables, table);
     if (self.compare(subsequentTable, curMin) < 0) curMin = subsequentTable;
     minSubsequentTables[table] = curMin;
 
@@ -152,8 +152,8 @@ void AddAlwaysRun::PrepareToAdd::end_apply(const IR::Node *root) {
 
     // Convert minSubsequentTables into self.subsequentTables.
     for (auto &entry : minSubsequentTables) {
-        auto *table = entry.first;
-        auto *subsequentTable = entry.second;
+        auto table = entry.first;
+        auto subsequentTable = entry.second;
 
         self.subsequentTables[table->get_uid()] =
             subsequentTable ? std::optional<UniqueId>(subsequentTable->get_uid()) : std::nullopt;
@@ -165,15 +165,12 @@ const IR::BFN::Pipe *AddAlwaysRun::AddTables::preorder(IR::BFN::Pipe *pipe) {
     // gress.
     prune();
 
-    std::initializer_list<std::pair<const IR::MAU::TableSeq *&, gress_t>> threads = {
+    std::initializer_list<std::pair<IR::Ptr<IR::MAU::TableSeq> &, gress_t>> threads = {
         {pipe->thread[0].mau, INGRESS},
         {pipe->thread[1].mau, EGRESS},
         {pipe->ghost_thread.ghost_mau, GHOST},
     };
-    for (auto &mau_gress : threads) {
-        auto *&mau = mau_gress.first;
-        auto gress = mau_gress.second;
-
+    for (auto &[mau, gress] : threads) {
         // Skip this gress if nothing to add.
         if (!self.globalOrderings.count(gress)) continue;
 
@@ -211,7 +208,7 @@ const IR::Node *AddAlwaysRun::AddTables::preorder(IR::MAU::TableSeq *tableSeq) {
     IR::Vector<IR::MAU::Table> result;
 
     for (unsigned i = 0; i < tableSeq->tables.size(); ++i) {
-        auto *curTable = tableSeq->tables[i];
+        const IR::MAU::Table *curTable = tableSeq->tables[i];
 
         // subsequentTable is the current table's minimum subsequent table.
         // If we're at the last table, then it's the one that we saved above.
@@ -226,25 +223,27 @@ const IR::Node *AddAlwaysRun::AddTables::preorder(IR::MAU::TableSeq *tableSeq) {
         }
 
         // Visit the current table. This mirrors the functionality in IR::Vector::visit_children.
-        auto *rewritten = apply_visitor(curTable);
+        auto rewritten = apply_visitor(curTable);
         if (!rewritten && curTable) {
             continue;
         } else if (rewritten == curTable) {
             result.push_back(curTable);
-        } else if (auto l = dynamic_cast<const IR::Vector<IR::MAU::Table> *>(rewritten)) {
+        } else if (!rewritten) {
+            BUG("visitor returned invalid nullptr for Vector<IR::MAU::Table>");
+        } else if (auto l = rewritten->to<IR::Vector<IR::MAU::Table>>()) {
             result.append(*l);
-        } else if (auto v = dynamic_cast<const IR::VectorBase *>(rewritten)) {
+        } else if (auto v = rewritten->to<IR::VectorBase>()) {
             if (v->empty()) continue;
 
             for (auto elt : *v) {
-                if (auto e = dynamic_cast<const IR::MAU::Table *>(elt)) {
+                if (auto e = elt->to<IR::MAU::Table>()) {
                     result.push_back(e);
                 } else {
                     BUG("visitor returned invalid type %s for Vector<IR::MAU::Table>",
                         elt->node_type_name());
                 }
             }
-        } else if (auto e = dynamic_cast<const IR::MAU::Table *>(rewritten)) {
+        } else if (auto e = rewritten->to<IR::MAU::Table>()) {
             result.push_back(e);
         } else {
             BUG("visitor returned invalid type %s for Vector<IR::MAU::Table>",
