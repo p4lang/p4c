@@ -74,4 +74,28 @@ TEST(Util, Json) {
               obj->toString());
 }
 
+TEST(Util, JsonStringEscaping) {
+    // Quotes must be escaped inside JSON strings.
+    EXPECT_EQ("\"hello \\\"world\\\"\"", JsonValue("hello \"world\"").toString());
+
+    // Backslashes must be escaped inside JSON strings.
+    EXPECT_EQ("\"backslash \\\\ test\"", JsonValue("backslash \\ test").toString());
+
+    // Newlines must be represented as the JSON escape sequence \\n.
+    EXPECT_EQ("\"line1\\nline2\"", JsonValue("line1\nline2").toString());
+
+    // Tabs must be represented as the JSON escape sequence \\t.
+    EXPECT_EQ("\"column1\\tcolumn2\"", JsonValue("column1\tcolumn2").toString());
+
+    // Other control characters must use the JSON Unicode escape form.
+    std::string controlCharacter(1, '\x01');
+    EXPECT_EQ("\"\\u0001\"", JsonValue(controlCharacter).toString());
+
+    // Escaping must also work when the string is serialized as a
+    // JsonValue contained inside a JsonObject.
+    auto obj = new JsonObject();
+    obj->emplace("message", "hello \"world\"\n");
+    EXPECT_EQ("{\n  \"message\" : \"hello \\\"world\\\"\\n\"\n}", obj->toString());
+}
+
 }  // namespace P4::Util

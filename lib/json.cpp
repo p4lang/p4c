@@ -31,7 +31,7 @@ JsonValue::JsonValue(unsigned long long v) : tag(Kind::Integer), intValue(v) {}
 void JsonValue::serialize(std::ostream &out) const {
     switch (tag) {
         case Kind::String:
-            out << "\"" << str << "\"";
+            out << "\"" << str.escapeJson() << "\"";
             break;
         case Kind::Integer:
             out << intValue;
