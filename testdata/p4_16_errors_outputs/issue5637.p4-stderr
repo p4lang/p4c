@@ -1,0 +1,9 @@
+issue5637.p4(30): [--Werror=type-error] error: match kind 'ternary' cannot be used with a key of type error; use 'exact' or 'optional' instead
+        key = { m.e1 : ternary; }
+                       ^^^^^^^
+issue5637.p4(34): [--Werror=type-error] error: match kind 'lpm' cannot be used with a key of type error; use 'exact' or 'optional' instead
+        key = { m.e2 : lpm; }
+                       ^^^
+issue5637.p4(38): [--Werror=type-error] error: match kind 'range' cannot be used with a key of type error; use 'exact' or 'optional' instead
+        key = { m.e3 : range; }
+                       ^^^^^
