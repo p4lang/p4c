@@ -253,8 +253,12 @@ Util::IJson *ExternConverter_hash::convertExternFunction(ConversionContext *ctxt
     auto base = ctxt->conv->convert(mc->arguments->at(2)->expression);
     parameters->append(base);
     auto calculation = new Util::JsonObject();
-    auto ei = P4::EnumInstance::resolve(mc->arguments->at(1)->expression, ctxt->typeMap);
-    CHECK_NULL(ei);
+    auto algoExpr = mc->arguments->at(1)->expression;
+    auto ei = P4::EnumInstance::resolve(algoExpr, ctxt->typeMap);
+    if (ei == nullptr) {
+        modelError("%1%: expected a HashAlgorithm member", algoExpr);
+        return nullptr;
+    }
     if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end()) {
         ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: unexpected algorithm", ei->name);
         return nullptr;
@@ -957,9 +961,13 @@ void SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block,
                         modelError("%1%: Expected 4 arguments", mc);
                         return;
                     }
+                    auto algoExpr = mi->expr->arguments->at(3)->expression;
+                    auto ei = P4::EnumInstance::resolve(algoExpr, typeMap);
+                    if (ei == nullptr) {
+                        modelError("%1%: expected a HashAlgorithm member", algoExpr);
+                        return;
+                    }
                     auto cksum = new Util::JsonObject();
-                    auto ei =
-                        P4::EnumInstance::resolve(mi->expr->arguments->at(3)->expression, typeMap);
                     cstring algo = ExternConverter::convertHashAlgorithm(ei->name);
                     auto calcExpr = mi->expr->arguments->at(1)->expression;
                     EnsureExpressionIsSimple eeis(verify ? v1model.verify_checksum.name
