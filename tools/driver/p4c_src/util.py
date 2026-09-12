@@ -21,15 +21,11 @@ def get_script_dir(follow_symlinks: bool = True) -> Path:
     return path.parent
 
 
-# top-down find, good for deployment
 def find_bin(exe: str) -> Optional[Path]:
-    for pp in os.environ["PATH"].split(":"):
-        pp_path = Path(pp)
-        if not pp_path.is_dir():
-            continue
-        for root, dirs, files in os.walk(pp_path):
-            if exe in files:
-                return Path(root) / exe
+    for path_dir in os.environ.get("PATH", "").split(os.pathsep):
+        candidate = Path(path_dir) / exe
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return candidate
     return None
 
 

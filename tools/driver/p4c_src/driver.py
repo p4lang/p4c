@@ -93,15 +93,15 @@ class BackendDriver:
                 "Programmer error - config_warning_modifiers does not support option " + option
             )
 
-        apply_to_all = len(arguments) == 1 and arguments[0] == ""
+        apply_to_all = "" in arguments
 
         if apply_to_all:
-            self.add_command_option('compiler', '--W{}'.format(option))
+            self.add_command_option("compiler", "--W{}".format(option))
         else:
             for diag in arguments:
-                subdiags = diag.split(',')
+                subdiags = diag.split(",")
                 for sd in subdiags:
-                    self.add_command_option('compiler', '--W{}={}'.format(option, sd))
+                    self.add_command_option("compiler", "--W{}={}".format(option, sd))
 
     def process_command_line_options(self, opts):
         """Process all command line options"""
@@ -224,15 +224,15 @@ class BackendDriver:
                 self.exitWithError("Cannot use more than one debugger at a time.")
             if opts.gdb or opts.cgdb or opts.lldb:
                 # XXX breaks abstraction
-                old_command = self._commands['compiler']
+                old_command = self._commands["compiler"]
                 if opts.lldb:
-                    self.add_command('compiler', 'lldb')
-                    self.add_command_option('compiler', '--')
+                    self.add_command("compiler", "lldb")
+                    self.add_command_option("compiler", "--")
                 else:
-                    self.add_command('compiler', 'gdb' if opts.gdb else 'cgdb')
-                    self.add_command_option('compiler', '--args')
+                    self.add_command("compiler", "gdb" if opts.gdb else "cgdb")
+                    self.add_command_option("compiler", "--args")
                 for arg in old_command:
-                    self.add_command_option('compiler', arg)
+                    self.add_command_option("compiler", arg)
 
         if (
             (os.environ["P4C_BUILD_TYPE"] == "DEVELOPER")
