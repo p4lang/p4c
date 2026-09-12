@@ -50,6 +50,26 @@ bool TypeInferenceBase::checkParameters(const IR::ParameterList *paramList, bool
             typeError("%1%: parameter cannot have type %2%", p, type);
             return false;
         }
+        const IR::IApply *applyType = nullptr;
+        const char *kindName = nullptr;
+        if (auto parserType = type->to<IR::Type_Parser>()) {
+            applyType = parserType;
+            kindName = "parser";
+        } else if (auto controlType = type->to<IR::Type_Control>()) {
+            applyType = controlType;
+            kindName = "control";
+        }
+        if (applyType != nullptr) {
+            for (auto param : applyType->getApplyParameters()->parameters) {
+                if (param->defaultValue != nullptr) {
+                    typeError(
+                        "%1%: %2% type declarations cannot have parameters "
+                        "with default values",
+                        param, kindName);
+                    return false;
+                }
+            }
+        }
     }
     return true;
 }
