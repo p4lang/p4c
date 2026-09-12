@@ -4,12 +4,15 @@ import argparse
 import logging
 import os
 import random
+import shlex
 import sys
 import tempfile
 import time
 import uuid
 from datetime import datetime
 from pathlib import Path
+
+from ptf import runner as ptf_runner
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -253,28 +256,65 @@ class PTFTestEnv:
         return testutils.SUCCESS
 
     def run_ptf(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> int:
-        """Run the PTF test."""
+        """Run the PTF test. PTF is called into as a Python module
+        (ptf.runner); since the tests must run inside the network namespace
+        of this environment, the library is invoked in a child process
+        inside that namespace, using a serialized PtfConfig."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the tools PTF folder to the python path, it contains the base test.
-        pypath = TOOLS_PATH.joinpath("ptf")
-        # Show list of the tests
-        testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
-        returncode = self.bridge.ns_exec(testListCmd)
+        # Show the list of the tests first.
+        list_config = self.make_ptf_config(list_mode=True)
+        returncode = self.exec_ptf_in_ns(list_config)
         if returncode != testutils.SUCCESS:
             return returncode
-        taps: str = ""
-        for index in range(self.options.num_taps):
-            taps += f" -i {index}@TAP{index}"
-        test_params = (
-            f"grpcaddr='{PTF_ADDR}:{P4RUNTIME_PORT}';p4info='{info_name}';config='{conf_bin}';"
+        run_config = self.make_ptf_config(
+            list_mode=False,
+            P4RUNTIME_PORT=P4RUNTIME_PORT,
+            info_name=info_name,
+            conf_bin=conf_bin,
         )
-        test_params += "device_id=1"
-        run_ptf_cmd = (
-            f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
-            f"--test-params={test_params} --test-dir {self.options.testdir}"
+        return self.exec_ptf_in_ns(run_config)
+
+    def make_ptf_config(
+        self, list_mode: bool, P4RUNTIME_PORT: int = None, info_name=None, conf_bin=None
+    ) -> ptf_runner.PtfConfig:
+        """Construct the configuration of the PTF test run. In list mode,
+        only the list of available tests is printed. The TAP interfaces of
+        the namespace are used as PTF ports."""
+        # Add the tools PTF folder to the python path, it contains the base test.
+        pypath = TOOLS_PATH.joinpath("ptf")
+        config = ptf_runner.PtfConfig(
+            pypath=[str(pypath)],
+            list_tests=list_mode,
+            test_selection=ptf_runner.TestSelectionOptions(test_dir=str(self.options.testdir)),
+            platform=ptf_runner.PlatformOptions(
+                interfaces=[
+                    # Use TAP<n> as port n.
+                    ptf_runner.Interface(device=0, port=index, interface=f"TAP{index}")
+                    for index in range(self.options.num_taps)
+                ]
+            ),
+            logging=ptf_runner.LoggingOptions(
+                log_file=str(self.options.testdir.joinpath("ptf.log"))
+            ),
         )
-        returncode = self.bridge.ns_exec(run_ptf_cmd)
-        return returncode
+        if not list_mode:
+            config.test_behavior.test_params = {
+                "grpcaddr": f"{PTF_ADDR}:{P4RUNTIME_PORT}",
+                "p4info": str(info_name),
+                "config": str(conf_bin),
+                "device_id": 1,
+            }
+        return config
+
+    def exec_ptf_in_ns(self, config: ptf_runner.PtfConfig) -> int:
+        """Execute a PTF test run inside the network namespace of this
+        environment by invoking the PTF library API in a child process."""
+        config_path = self.options.testdir.joinpath(
+            "ptf_config_list.json" if config.list_tests else "ptf_config_run.json"
+        )
+        config_path.write_text(config.to_json())
+        run_ptf_cmd = " ".join([sys.executable, "-m", "ptf.runner", shlex.quote(str(config_path))])
+        return self.bridge.ns_exec(run_ptf_cmd)
 
 
 def run_test(options: Options) -> int:
