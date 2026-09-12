@@ -721,17 +721,32 @@ void ExpressionConverter::postorder(const IR::Slice *expression) {
     auto expr = expression->e0;
     int h = expression->getH();
     int l = expression->getL();
-    auto mask = Util::maskFromSlice(h, l);
+    auto bitwidth = expression->type->width_bits();
+    BUG_CHECK(bitwidth == h - l + 1, "%1%: unexpected slice width", expression);
+    auto le = get(expr);
+    if (!le) return;
+    // Shift non-zero slices down to bit 0 so the result is right-aligned
+    // to the target width before masking off upper bits.
+    if (l != 0) {
+        auto shifted = new Util::JsonObject();
+        shifted->emplace("type", "expression");
+        auto shr = new Util::JsonObject();
+        shifted->emplace("value", shr);
+        shr->emplace("op", ">>");
+        shr->emplace("left"_cs, le);
+        auto amount = new Util::JsonObject();
+        amount->emplace("type", "hexstr");
+        amount->emplace("value", stringRepr(l));
+        shr->emplace("right"_cs, amount);
+        le = shifted;
+    }
     result->emplace("type", "expression");
     auto band = new Util::JsonObject();
     result->emplace("value", band);
     band->emplace("op", "&");
     auto right = new Util::JsonObject();
-    auto bitwidth = expression->type->width_bits();
     right->emplace("type", "hexstr");
-    right->emplace("value", stringRepr(mask, ROUNDUP(bitwidth, 8)));
-    auto le = get(expr);
-    if (!le) return;
+    right->emplace("value", stringRepr(Util::mask(bitwidth), ROUNDUP(bitwidth, 8)));
     band->emplace("left"_cs, le);
     band->emplace("right"_cs, right);
     mapExpression(expression, result);
