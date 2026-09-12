@@ -28,8 +28,9 @@ class CheckTableEntries : public Inspector {
     bool preorder(const IR::P4Table *);
     bool preorder(const IR::P4Parser *) { return false; }
     bool preorder(const IR::Statement *) { return false; }
-    void get_mask_val(const IR::Expression *, big_int &mask, big_int &val);
-    bool ternary_covers(const IR::Expression *k1, const IR::Expression *k2);
+    bool get_mask_val(const IR::Expression *, int width, big_int &mask, big_int &val);
+    bool keys_equal(const IR::Expression *k1, const IR::Expression *k2, int width);
+    bool ternary_covers(const IR::Expression *k1, const IR::Expression *k2, int width);
 
  public:
     explicit CheckTableEntries(bool err = false) : genError(err) {}
