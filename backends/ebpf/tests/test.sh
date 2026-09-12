@@ -166,12 +166,15 @@ fi
 TEST_CASE=$@
 for xdp_enabled in "${XDP[@]}" ; do
   for xdp2tc_mode in "${XDP2TC_MODE[@]}" ; do
-    TEST_PARAMS='interfaces="'"$interface_list"'";namespace="switch";trace="'"$TRACE_LOGS"'"'
-    TEST_PARAMS+=";xdp='$xdp_enabled';xdp2tc='$xdp2tc_mode'"
-    # Start tests
-    ptf \
+    # Start tests. Run PTF as a Python module (ptf.runner) through the
+    # run_ptf.py helper, which builds the equivalent PtfConfig.
+    python3 run_ptf.py \
       --test-dir ptf/ \
-      --test-params="$TEST_PARAMS" \
+      --switch-interfaces "$interface_list" \
+      --namespace switch \
+      --trace "$TRACE_LOGS" \
+      --xdp "$xdp_enabled" \
+      --xdp2tc "$xdp2tc_mode" \
       --interface 0@s1-eth0 --interface 1@s1-eth1 --interface 2@s1-eth2 --interface 3@s1-eth3 \
       --interface 4@s1-eth4 --interface 5@s1-eth5 $TEST_CASE
     exit_on_error

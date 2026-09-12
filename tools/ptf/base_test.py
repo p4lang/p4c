@@ -336,7 +336,11 @@ class P4RuntimeTest(BaseTest):
         self.stream = self.stub.StreamChannel(stream_req_iterator())
         self.stream_recv_thread = threading.Thread(target=stream_recv, args=(self.stream,))
         self.stream_recv_thread.start()
-
+        # Also tear the stream down when setUp fails part-way through:
+        # unittest skips tearDown in that case, but registered cleanups
+        # always run. Otherwise the stream threads outlive the test and
+        # keep the switch's gRPC server from shutting down.
+        self.addCleanup(self.tear_down_stream)
         self.handshake()
 
     def handshake(self):
@@ -359,6 +363,11 @@ class P4RuntimeTest(BaseTest):
         BaseTest.tearDown(self)
 
     def tear_down_stream(self):
+        # Idempotent: tear_down_stream may run twice (registered cleanup
+        # and tearDown) and must be a no-op after the first run.
+        if getattr(self, "_stream_torn_down", False):
+            return
+        self._stream_torn_down = True
         self.stream_out_q.put(None)
         self.stream_recv_thread.join()
 
