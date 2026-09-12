@@ -499,6 +499,16 @@ const IR::Node *DoStrengthReduction::postorder(IR::Slice *expr) {
 }
 
 const IR::Node *DoStrengthReduction::postorder(IR::PlusSlice *expr) {
+    if (auto width = expr->e2->to<IR::Constant>()) {
+        if (width->value == 0) {
+            // A zero width slice is the single value of type bit<0>. Slice cannot
+            // represent it: getH() would be one below getL().
+            if (!hasSideEffects(expr))
+                return new IR::Constant(expr->srcInfo, IR::Type_Bits::get(0), 0);
+            // Side effect ordering hoists the calls, a later pass folds it.
+            return expr;
+        }
+    }
     if (expr->e1->is<IR::Constant>() && expr->e2->is<IR::Constant>()) {
         auto *rv = new IR::Slice(expr->srcInfo, expr->e0, expr->getH(), expr->getL());
         return postorder(rv);
