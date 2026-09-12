@@ -45,6 +45,22 @@ bool isSystemFile(const std::filesystem::path &file) {
 
 bool isSystemFile(cstring file) { return isSystemFile(std::filesystem::path(file.c_str())); }
 
+/// Sets the diagnostic action for a comma-separated list of diagnostic names.
+/// Returns false if any named diagnostic is a registered error.
+bool applyDiagnosticAction(const char *diagnostic, DiagnosticAction action) {
+    auto copy = strdup(diagnostic);
+    bool success = true;
+    while (auto name = strsep(&copy, ",")) {
+        if (ErrorCatalog::getCatalog().isError(name)) {
+            ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", name);
+            success = false;
+            continue;
+        }
+        P4CContext::get().setDiagnosticAction(name, action);
+    }
+    return success;
+}
+
 void ParserOptions::closeFile(FILE *file) {
     if (file == nullptr) {
         return;
@@ -221,64 +237,55 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         "--Wdisable", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
-                    return false;
-                }
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Ignore);
+                return applyDiagnosticAction(diagnostic, DiagnosticAction::Ignore);
             } else {
                 auto action = DiagnosticAction::Ignore;
                 P4CContext::get().setDefaultWarningDiagnosticAction(action);
             }
             return true;
         },
-        "Disable a compiler diagnostic, or disable all warnings if no "
-        "diagnostic is specified.",
+        "Disable a compiler diagnostic or comma-separated list of diagnostics. "
+        "Disables all warnings if omitted.",
         OptionFlags::OptionalArgument);
     registerOption(
         "--Winfo", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
-                    return false;
-                }
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Info);
+                return applyDiagnosticAction(diagnostic, DiagnosticAction::Info);
             }
             return true;
         },
-        "Report an info message for a compiler diagnostic.", OptionFlags::OptionalArgument);
+        "Report an info message for a diagnostic or comma-separated list of diagnostics.",
+        OptionFlags::OptionalArgument);
     registerOption(
         "--Wwarn", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
-                    return false;
-                }
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Warn);
+                return applyDiagnosticAction(diagnostic, DiagnosticAction::Warn);
             } else {
                 auto action = DiagnosticAction::Warn;
                 P4CContext::get().setDefaultInfoDiagnosticAction(action);
             }
             return true;
         },
-        "Report a warning for a compiler diagnostic, or treat all info messages as "
-        "warnings if no diagnostic is specified.",
+        "Report a warning for a diagnostic or comma-separated list of diagnostics. "
+        "Promotes all info messages to warnings if omitted. ",
         OptionFlags::OptionalArgument);
     registerOption(
         "--Werror", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Error);
+                auto copy = strdup(diagnostic);
+                while (auto name = strsep(&copy, ","))
+                    P4CContext::get().setDiagnosticAction(name, DiagnosticAction::Error);
             } else {
                 auto action = DiagnosticAction::Error;
                 P4CContext::get().setDefaultWarningDiagnosticAction(action);
             }
             return true;
         },
-        "Report an error for a compiler diagnostic, or treat all warnings as "
-        "errors if no diagnostic is specified.",
+        "Report an error for a diagnostic or comma-separated list of diagnostics. "
+        "Promotes all warnings to errors if omitted. ",
         OptionFlags::OptionalArgument);
     registerOption(
         "--maxErrorCount", "errorCount",
