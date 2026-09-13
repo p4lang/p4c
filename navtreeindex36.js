@@ -1,5 +1,6 @@
 var NAVTREEINDEX36 =
 {
+"struct_insert_parser_counter_stall.html":[13,0,380],
 "struct_instruction.html":[13,0,383],
 "struct_instruction_1_1_decode.html":[13,0,383,0],
 "struct_instruction_memory.html":[13,0,385],
@@ -248,6 +249,5 @@ var NAVTREEINDEX36 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l_01_4.html":[13,0,12,3,1,32],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html":[12,0,14,1,1,36],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html":[13,0,12,3,1,36],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html#a37738c93f3dd2ceb168438126308ac5b":[12,0,14,1,1,36,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html#a37738c93f3dd2ceb168438126308ac5b":[13,0,12,3,1,36,0]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_u_b_p_f_arch_handler_builder.html#a37738c93f3dd2ceb168438126308ac5b":[12,0,14,1,1,36,0]
 };

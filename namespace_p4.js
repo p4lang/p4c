@@ -599,6 +599,7 @@ var namespace_p4 =
       [ "Type", "namespace_p4.html#ab6405cbcaf5ac60cc9104a38b3e9073faa1fa27779242b4902f7ae3bdd5c6d508", null ],
       [ "TypeVariable", "namespace_p4.html#ab6405cbcaf5ac60cc9104a38b3e9073fab70c3dc04aa415f6a0bbe9a34f3e2074", null ]
     ] ],
+    [ "applyDiagnosticAction", "namespace_p4.html#ab79762a7cf91c1364bebe0979c7dae97", null ],
     [ "convert", "namespace_p4.html#a4336d46d8a0b70f02b3d97d662ff4da6", null ],
     [ "diagnosticCount", "namespace_p4.html#a61e4c327119249aa7fb8cdf771f2dc74", null ],
     [ "error", "namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58", null ],

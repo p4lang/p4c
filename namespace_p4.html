@@ -1525,6 +1525,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>add_space</b> (std::o
 <tr class="memitem:a382ca49d1cd608972298240760e44f61" id="r_a382ca49d1cd608972298240760e44f61"><td class="memItemLeft" align="right" valign="top"><a id="a382ca49d1cd608972298240760e44f61" name="a382ca49d1cd608972298240760e44f61"></a>
 const char *&#160;</td><td class="memItemRight" valign="bottom"><b>addr2line</b> (void *addr, const char *text)</td></tr>
 <tr class="separator:a382ca49d1cd608972298240760e44f61"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab79762a7cf91c1364bebe0979c7dae97" id="r_ab79762a7cf91c1364bebe0979c7dae97"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab79762a7cf91c1364bebe0979c7dae97">applyDiagnosticAction</a> (const char *diagnostic, <a class="el" href="#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a> action)</td></tr>
+<tr class="separator:ab79762a7cf91c1364bebe0979c7dae97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af229cb4bdad2398093ea9c1c4882b348" id="r_af229cb4bdad2398093ea9c1c4882b348"><td class="memItemLeft" align="right" valign="top"><a id="af229cb4bdad2398093ea9c1c4882b348" name="af229cb4bdad2398093ea9c1c4882b348"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>backtrace_fill_stacktrace</b> (std::string &amp;msg, void *const *backtrace, int size)</td></tr>
 <tr class="separator:af229cb4bdad2398093ea9c1c4882b348"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -3259,6 +3261,28 @@ interPassCounts</td>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ab79762a7cf91c1364bebe0979c7dae97" name="ab79762a7cf91c1364bebe0979c7dae97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab79762a7cf91c1364bebe0979c7dae97">&#9670;&#160;</a></span>applyDiagnosticAction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4::applyDiagnosticAction </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>diagnostic</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a></td>          <td class="paramname"><span class="paramname"><em>action</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Sets the diagnostic action for a comma-separated list of diagnostic names. Returns false if any named diagnostic is a registered error. </p>
+
+</div>
+</div>
 <a id="a4336d46d8a0b70f02b3d97d662ff4da6" name="a4336d46d8a0b70f02b3d97d662ff4da6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4336d46d8a0b70f02b3d97d662ff4da6">&#9670;&#160;</a></span>convert()</h2>
 

@@ -1,5 +1,6 @@
 var NAVTREEINDEX40 =
 {
+"struct_stateful_alu_1_1_min_max_1_1_decode.html":[12,0,20,4,0],
 "struct_stateful_alu_1_1_min_max_1_1_decode.html":[13,0,18,4,0],
 "struct_stateful_alu_1_1_out_o_p.html":[12,0,20,6],
 "struct_stateful_alu_1_1_out_o_p.html":[13,0,18,6],
