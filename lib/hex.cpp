@@ -14,9 +14,8 @@ std::ostream &operator<<(std::ostream &os, const hexvec &h) {
     auto save = os.flags();
     auto save_fill = os.fill();
     char *p = reinterpret_cast<char *>(h.data);
-    os << '[';
     for (size_t i = 0; i < h.len; i++, p += h.elsize) {
-        if (i) os << ' ';
+        os << (i ? ' ' : '[');
         uintmax_t val;
         switch (h.elsize) {
             case 1:
