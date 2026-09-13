@@ -1,0 +1,6 @@
+expr-bitslice-width-negative.p4(10): [--Wwarn=unused] warning: 'tmp' is unused
+const bool tmp = (1 != 8w2[0 +: -1]);
+           ^^^
+expr-bitslice-width-negative.p4(10): [--Werror=expected] error: -1: expected slice width to be non-negative
+const bool tmp = (1 != 8w2[0 +: -1]);
+                                 ^

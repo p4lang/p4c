@@ -716,6 +716,10 @@ const IR::Node *DoConstantFolding::postorder(IR::PlusSlice *e) {
 
     int w = cwidth->asInt();
     int l = clsb->asInt();
+    if (w < 0) {
+        ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected slice width to be non-negative", e->e2);
+        return e;
+    }
     if (l < 0) {
         ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected slice indexes to be non-negative",
                     e->e2);
