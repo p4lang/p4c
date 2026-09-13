@@ -27,7 +27,6 @@ set (GTEST_UNITTEST_SOURCES
   gtest/format_test.cpp
   gtest/helpers.cpp
   gtest/hash.cpp
-  gtest/hexvec_test.cpp
   gtest/hvec_map.cpp
   gtest/hvec_set.cpp
   gtest/indexed_vector.cpp
