@@ -34,7 +34,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "apply-linters"
+          ccache-key: "ubuntu-24.04-gcc-unity-lint"
 
       - name: Run cpplint on C/C++ files.
         run: uv run cmake --build build --target cpplint
