@@ -297,6 +297,6 @@ if (ENABLE_GTESTS)
   target_compile_options(gtestasm PUBLIC "-Wno-error")
 
   # Add to CTests - but this is in the BFASM project viz build/bf-asm, not build/p4c
-  add_test (NAME gtestasm COMMAND gtestasm WORKING_DIRECTORY ${P4C_BINARY_DIR})
-  set_tests_properties (gtestasm PROPERTIES LABELS "gtest")
+  add_test (NAME tofino-gtestasm COMMAND gtestasm WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  set_tests_properties (tofino-gtestasm PROPERTIES LABELS "gtest")
 endif ()
