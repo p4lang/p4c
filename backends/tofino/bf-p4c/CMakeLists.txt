@@ -805,12 +805,12 @@ add_custom_target(set_p4c_default_target ALL
 
 # On internal builds, symlink bf-p4c to p4c.
 if (ENABLE_BAREFOOT_INTERNAL)
-  add_custom_command(OUTPUT ${P4C_BINARY_DIR}/p4c
-    COMMAND ${CMAKE_COMMAND} -E create_symlink bf-p4c ${P4C_BINARY_DIR}/p4c
+  add_custom_command(OUTPUT ${P4C_BINARY_DIR}/bf-p4c
+    COMMAND ${CMAKE_COMMAND} -E create_symlink p4c ${P4C_BINARY_DIR}/bf-p4c
     DEPENDS p4c_driver
   )
-  add_custom_target(bf-p4c_symlink ALL DEPENDS ${P4C_BINARY_DIR}/p4c)
-  install (PROGRAMS ${P4C_BINARY_DIR}/p4c DESTINATION bin)
+  add_custom_target(bf-p4c_symlink ALL DEPENDS ${P4C_BINARY_DIR}/bf-p4c)
+  install (PROGRAMS ${P4C_BINARY_DIR}/bf-p4c DESTINATION bin)
 endif()
 
 install (FILES ${P4C_BINARY_DIR}/p4c_src/main.py
