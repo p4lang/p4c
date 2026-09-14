@@ -272,6 +272,7 @@ if (ENABLE_GTESTS)
   add_library (bfas_lib ${BFAS_SOURCES})
   target_compile_definitions(bfas_lib PRIVATE BUILDING_FOR_GTEST)  # removes main()
   target_link_libraries (bfas_lib PRIVATE ${BFASM_LIBS} ${BFASM_LIB_DEPS})
+  add_dependencies(bfas_lib bfasm_yaml)
 
   set(BFAS_GTEST_SOURCES
     gtest/gtestasm.cpp
