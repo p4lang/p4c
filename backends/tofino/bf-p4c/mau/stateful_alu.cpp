@@ -979,11 +979,11 @@ bool CreateSaluInstruction::preorder(const IR::Slice *sl) {
 
 static double mul(double x) { return x; }
 static double sqr(double x) { return x * x; }
-static double rsqrt(double x) { return 1.0 / sqrt(x); }
+static double recip_sqrt(double x) { return 1.0 / sqrt(x); }
 static double div(double x) { return 1.0 / x; }
 static double rsqr(double x) { return 1.0 / x * x; }
 
-static double (*fn[2][3])(double) = {{sqrt, mul, sqr}, {rsqrt, div, rsqr}};
+static double (*fn[2][3])(double) = {{sqrt, mul, sqr}, {recip_sqrt, div, rsqr}};
 // fn_max is max(fn(x)) for the x value range we need ([4/8, 15/8] for shift == -1,
 // [8/8, 15/8] for shift >= 0)
 static double fn_max[2][3] = {{1.36930639376291528364, 1.875, 3.515625},
