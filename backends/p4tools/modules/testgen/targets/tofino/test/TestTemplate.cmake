@@ -96,7 +96,7 @@ macro(p4tools_add_test_with_args)
   # Compile the p4 file.
   file(APPEND ${__testfile} "\techo \"Compiling ${p4test}...\"\n")
   file(
-    APPEND ${__testfile} "${CMAKE_BINARY_DIR}/p4c-barefoot --target ${target} --arch ${arch} "
+    APPEND ${__testfile} "${CMAKE_BINARY_DIR}/p4c --target ${target} --arch ${arch} "
     "--std p4-16 ${p4test} -I${CMAKE_SOURCE_DIR}/p4-tests/p4_16/includes "
     "-o ${__testfolder} ${ctest_p4c_args} || (echo Compiler failed && false)\n"
   )
