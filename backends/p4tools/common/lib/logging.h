@@ -9,23 +9,37 @@
 
 #include <filesystem>
 #include <optional>
+#include <ostream>
 #include <string>
+#include <type_traits>
 #include <utility>
 
-#include <boost/format.hpp>
-
+#include "lib/format.h"
 #include "lib/log.h"
 
 namespace P4::P4Tools {
 
-/// Helper function for @printFeature
-inline std::string logHelper(boost::format &f) { return f.str(); }
+namespace detail {
 
-/// Helper function for @printFeature
-template <class T, class... Args>
-std::string logHelper(boost::format &f, T &&t, Args &&...args) {
-    return logHelper(f % std::forward<T>(t), std::forward<Args>(args)...);
+// Logging uses operator<<, including overloads for trace events and pointers.
+// Keep that behavior instead of the diagnostic helpers' toString/dbprint dispatch.
+template <typename T>
+struct LogArgument {
+    const T &value;
+    friend std::ostream &operator<<(std::ostream &out, const LogArgument &arg) {
+        return out << arg.value;
+    }
+};
+
+template <typename T>
+decltype(auto) logArgument(const T &arg) {
+    if constexpr (std::is_arithmetic_v<T>)
+        return (arg);
+    else
+        return LogArgument<T>{arg};
 }
+
+}  // namespace detail
 
 /// A helper function that allows us to configure logging for a particular feature. This code is
 /// taken from
@@ -38,8 +52,8 @@ void printFeature(const std::string &label, int level, const std::string &fmt,
         return;
     }
 
-    boost::format f(fmt);
-    LOG_FEATURE(label.c_str(), level, logHelper(f, std::forward<Arguments>(args)...));
+    LOG_FEATURE(label.c_str(), level,
+                createFormattedMessage(fmt.c_str(), detail::logArgument(args)...));
 }
 
 /// Helper functions that prints strings associated with basic tool information.

@@ -1,0 +1,4 @@
+diagnostic-format-compatibility.p4(9): [--Werror=overlimit] error: 4294967296: this implementation does not support bitstrings this large
+const bit<4294967296>
+          ^^^^^^^^^^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

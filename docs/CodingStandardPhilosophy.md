@@ -139,10 +139,30 @@ codes and formats are defined in `lib/error_catalog.[h,cpp]`. Backends
 can extend the codes and formats as needed (and they are encouraged to
 do so).
 
-Most of the errors as of Dec 2018 are written in free form: they use
-the `boost::format` for the format argument, which has some
-compatibility for `printf` arguments.  These functions handle IR and
-SourceInfo objects smartly.  Here is an example:
+Diagnostic messages use the Abseil-based adapter in `lib/format.h`.
+It accepts legacy `%1%` placeholders, positional conversions such as
+`%1$x` and `%|1$8x|`, and printf-style conversions. Numbered and
+unnumbered arguments cannot be mixed, but `%1%` and `%2$x` can appear
+in the same message. Write `%%` for a literal percent sign.
+
+`%N%` and `%s` preserve the legacy stream representation, including
+`toString()` for user-facing messages and `dbprint()` for bug reports.
+Explicit conversions of built-in numbers use Abseil's rules: `%d`
+requires an integer, `%f` formats a floating-point value, and `%c`
+interprets an integer as a character code. This differs from Boost's
+permissive treatment of mismatched types. Boost's tabulation and
+centering extensions are not supported. Invalid formats or argument
+counts throw `std::invalid_argument`.
+
+Runtime format strings remain supported because diagnostics such as type
+constraint explanations construct their formats dynamically. The adapter
+therefore validates formats at runtime. Code that formats native values
+with a fixed printf-style format can use `absl::StrFormat` directly for
+compile-time format checking.
+
+The diagnostic helpers collect source locations from IR and SourceInfo
+objects. A SourceInfo argument occupies a placeholder but renders no
+text. Here is an example:
 
 ```C++
 IR::NamedRef *ref;
