@@ -60,10 +60,9 @@ add_custom_command(OUTPUT ${P4C_DRIVER_DST}
 add_custom_target(p4c_driver ALL DEPENDS ${P4C_DRIVER_DST})
 
 
-
 add_test(NAME driver_inputs_test_1 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_1 ${P4C_DRIVER_PATH})
 add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_2 ${P4C_DRIVER_PATH})
 add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_3 ${P4C_DRIVER_PATH})
 add_test(NAME driver_inputs_test_4 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_4 ${P4C_DRIVER_PATH})
-
-
+add_test(NAME driver_find_bin_test COMMAND ${PYTHON_EXECUTABLE} ${P4C_SOURCE_DIR}/tools/driver/test_scripts/find_bin_test.py)
+add_test(NAME driver_config_warning_modifiers_test COMMAND ${PYTHON_EXECUTABLE} ${P4C_SOURCE_DIR}/tools/driver/test_scripts/config_warning_modifiers_test.py)
