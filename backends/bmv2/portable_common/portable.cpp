@@ -162,9 +162,9 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
         ctxt->json->add_metadata(type->controlPlaneName(), kv.second->name);
     }
     /* TODO */
-    // for (auto kv : header_stacks) {
-    //     json->add_header_stack(stack_type, stack_name, stack_size, ids);
-    // }
+    for (auto kv : header_stacks) {
+        json->add_header_stack(stack_type, stack_name, stack_size, ids);
+    }
     for (auto kv : structure->header_unions) {
         auto header_name = kv.first;
         auto header_type = kv.second->to<IR::Type_StructLike>()->controlPlaneName();
