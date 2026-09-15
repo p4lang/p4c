@@ -10,6 +10,7 @@
 
 #include "backends/ebpf/ebpfOptions.h"
 #include "frontends/common/options.h"
+#include "lib/error.h"
 
 namespace P4::TC {
 
@@ -55,6 +56,12 @@ class TCOptions : public CompilerOptions {
                     xdp2tcMode = XDP2TC_HEAD;
                 } else if (!strcmp(arg, "cpumap")) {
                     xdp2tcMode = XDP2TC_CPUMAP;
+                } else {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "Unknown --xdp2tc mode '%1%'; expected one of: meta, head, "
+                                "cpumap",
+                                arg);
+                    return false;
                 }
                 return true;
             },
@@ -63,7 +70,14 @@ class TCOptions : public CompilerOptions {
         registerOption(
             "--num-timer-profiles", "profiles",
             [this](const char *arg) {
-                timerProfiles = std::atoi(arg);
+                char *end = nullptr;
+                long value = strtol(arg, &end, 10);
+                if (*end != 0 || value <= 0) {
+                    ::P4::error(ErrorType::ERR_INVALID,
+                                "--num-timer-profiles expects a positive integer, got '%1%'", arg);
+                    return false;
+                }
+                timerProfiles = static_cast<unsigned>(value);
                 return true;
             },
             "Defines the number of timer profiles. Default is 4.");
@@ -74,4 +88,4 @@ using TCContext = P4CContextWithOptions<TCOptions>;
 
 }  // namespace P4::TC
 
-#endif /* BACKENDS_TC_OPTIONS_H_ */
+#endif  // BACKENDS_TC_OPTIONS_H_
