@@ -153,6 +153,31 @@ void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
 
 void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
                                           P4::PortableProgramStructure *structure) {
+    /* Moved header stack creation to before singular header creation */
+    for (auto kv : structure->header_stacks) {
+        auto declaration = kv.second;
+        auto stack = structure->typeMap->getType(declaration, true)->to<IR::Type_Array>();
+        CHECK_NULL(stack);
+
+        auto element_type =
+        structure->typeMap->getTypeType(stack->elementType, true)->to<IR::Type_Header>();
+        CHECK_NULL(element_type);
+
+        const auto stack_name = declaration->controlPlaneName();
+        const auto header_type = element_type->controlPlaneName();
+
+        std::vector<unsigned> ids;
+        ids.reserve(stack->getSize());
+
+        for (unsigned index = 0; index < stack->getSize(); ++index) {
+            cstring element_name =
+                stack_name + "[" + Util::toString(index) + "]";
+
+            ids.push_back(ctxt->json->add_header(header_type, element_name));
+        }
+
+        ctxt->json->add_header_stack(header_type, stack_name, stack->getSize(), ids);
+    }
     for (auto kv : structure->headers) {
         auto type = kv.second->type->to<IR::Type_StructLike>();
         ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
@@ -160,10 +185,6 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
     for (auto kv : structure->metadata) {
         auto type = kv.second->type->to<IR::Type_StructLike>();
         ctxt->json->add_metadata(type->controlPlaneName(), kv.second->name);
-    }
-    /* TODO */
-    for (auto kv : header_stacks) {
-        json->add_header_stack(stack_type, stack_name, stack_size, ids);
     }
     for (auto kv : structure->header_unions) {
         auto header_name = kv.first;

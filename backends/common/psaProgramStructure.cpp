@@ -104,6 +104,9 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
             auto ht = type->to<IR::Type_Header>();
             addHeaderType(ht);
             auto stack_type = stack->elementType->to<IR::Type_Header>();
+            auto stack_decl = new IR::Declaration_Variable(f->controlPlaneName(), stack);
+            typeMap->setType(stack_decl, stack);
+            pinfo->header_stacks.emplace(f->controlPlaneName(), stack_decl);
             std::vector<unsigned> ids;
             for (unsigned i = 0; i < stack_size; i++) {
                 cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";

@@ -90,6 +90,7 @@ class InspectPsaProgram : public InspectPortableProgram {
     void addTypesAndInstances(const IR::Type_StructLike *type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
+    // void addHeaderStackInstance(const IR::Type_Header *ht, cstring name, unsigned size);
     bool preorder(const IR::Declaration_Variable *dv) override;
     bool preorder(const IR::Parameter *parameter) override;
 };
