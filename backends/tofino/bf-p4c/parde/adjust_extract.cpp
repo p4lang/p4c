@@ -32,7 +32,7 @@ void AdjustExtract::postorder(IR::BFN::ParserState *state) {
     // the i-th position, so the the original data on i-th, is now as (i + x)th. It is used
     // to calculate the aggregated bit shifting.
     std::map<int, int> more_bits;
-    for (const auto *prim : state->statements) {
+    for (auto prim : state->statements) {
         if (const auto *extract = prim->to<IR::BFN::Extract>()) {
             if (extract->marshaled_from) {
                 auto &marshaled_from = *extract->marshaled_from;
@@ -67,17 +67,17 @@ void AdjustExtract::postorder(IR::BFN::ParserState *state) {
 
     // calculate the largest bit.
     int largest_bit = 0;
-    for (const auto *prim : state->statements) {
+    for (auto prim : state->statements) {
         if (const auto *extract = prim->to<IR::BFN::Extract>()) {
-            if (auto *buf = extract->source->to<IR::BFN::PacketRVal>()) {
+            if (const auto *buf = extract->source->to<IR::BFN::PacketRVal>()) {
                 largest_bit = std::max(largest_bit, buf->range.hi + 1);
             }
         }
     }
 
-    for (const auto *transition : state->transitions) {
-        for (const auto *save : transition->saves) {
-            if (auto *buf = save->source->to<IR::BFN::PacketRVal>()) {
+    for (auto transition : state->transitions) {
+        for (auto save : transition->saves) {
+            if (const auto *buf = save->source->to<IR::BFN::PacketRVal>()) {
                 largest_bit = std::max(largest_bit, buf->range.hi + 1);
             }
         }
@@ -96,7 +96,7 @@ void AdjustExtract::postorder(IR::BFN::ParserState *state) {
     // Recreate this state by shifting all extract and saves by sum of more_bits
     // `before or equal` it's position
     IR::Vector<IR::BFN::ParserPrimitive> adjusted_stmts;
-    for (const auto *prim : state->statements) {
+    for (auto prim : state->statements) {
         if (const auto *extract = prim->to<IR::BFN::Extract>()) {
             auto *old_source = extract->source->to<IR::BFN::PacketRVal>();
             if (!old_source) {
@@ -126,14 +126,14 @@ void AdjustExtract::postorder(IR::BFN::ParserState *state) {
 
     // adjust saves and shifts.
     IR::Vector<IR::BFN::Transition> adjusted_transitions;
-    for (const auto *transition : state->transitions) {
+    for (auto transition : state->transitions) {
         auto *adjusted_transition = transition->clone();
         BUG_CHECK(aggregated.back() % 8 == 0, "newly added padding is not byte-sized? %1%",
                   aggregated.back());
         adjusted_transition->shift = transition->shift + (aggregated.back() / 8);
 
         IR::Vector<IR::BFN::SaveToRegister> adjusted_saves;
-        for (const auto *save : transition->saves) {
+        for (auto save : transition->saves) {
             auto *adjusted_save = save->clone();
             if (auto *buf = save->source->to<IR::BFN::PacketRVal>()) {
                 nw_bitrange old_source_range = buf->range;

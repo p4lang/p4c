@@ -186,7 +186,7 @@ std::pair<IR::Vector<IR::BFN::ContainerRef>, std::vector<Clot *>> lowerFields(
     // Perform a left fold over the field sequence and merge contiguous fields
     // which have been placed in the same container into a single container
     // reference.
-    for (auto *fieldRef : fields) {
+    for (auto fieldRef : fields) {
         auto field = phv.field(fieldRef->field);
         assoc::map<const PHV::FieldSlice *, Clot *, PHV::FieldSlice::Greater> *slice_clots =
             nullptr;
@@ -318,7 +318,7 @@ const safe_vector<IR::BFN::DigestField> *computeControlPlaneFormat(
     // Walk over the field sequence in network order and construct a
     // FieldPacking that reflects its structure, with padding added where
     // necessary to reflect gaps between the fields.
-    for (auto *fieldRef : fields) {
+    for (auto fieldRef : fields) {
         LOG5("Computing digest packing for field : " << fieldRef);
         PHV::FieldUse use(PHV::FieldUse::READ);
         std::vector<PHV::AllocSlice> slices =

@@ -32,7 +32,7 @@ Visitor::profile_t CollectMochaCandidates::init_apply(const IR::Node *root) {
     const auto *root_ = root->to<IR::BFN::Pipe>();
     applyGlobalPragmas(Device::phvSpec(), root_->global_pragmas);
 
-    for (auto *anno : root_->global_pragmas) {
+    for (auto anno : root_->global_pragmas) {
         if (anno->name.name == PragmaAllowPOVonMocha::name) {
             pov_on_mocha = true;
             LOG1(" ---  ALLOWING POV ON MOCHA  ---");

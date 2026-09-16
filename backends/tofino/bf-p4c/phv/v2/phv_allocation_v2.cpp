@@ -27,11 +27,11 @@
 namespace PHV {
 namespace v2 {
 
-const IR::Node *PhvAllocation::apply_visitor(const IR::Node *root_, const char *) {
+IR::Ptr<IR::Node> PhvAllocation::apply_visitor(const IR::Node *root_, const char *) {
     Log::TempIndent indent;
     LOG1("Starting PHV V2 Allocation" << indent);
     BUG_CHECK(root_->is<IR::BFN::Pipe>(), "IR root is not a BFN::Pipe: %s", root_);
-    const auto *root = root_->to<IR::BFN::Pipe>();
+    auto root = root_->to<IR::BFN::Pipe>();
     pipe_id_i = root->canon_id();
 
     // clear allocation result to create an empty concrete allocation.

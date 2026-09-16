@@ -217,7 +217,7 @@ bool PragmaAlias::addAlias(const PHV::Field *f1, const PHV::Field *f2, bool supp
 
 void PragmaAlias::postorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto *annotation : global_pragmas) {
+    for (auto annotation : global_pragmas) {
         if (annotation->name.name != PragmaAlias::name) continue;
         LOG3("Annotation: " << annotation);
 

@@ -33,7 +33,7 @@ class ConvertToDpdkProgram : public Transform {
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     DpdkOptions &options;
-    const IR::DpdkAsmProgram *dpdk_program;
+    IR::Ptr<IR::DpdkAsmProgram> dpdk_program;
 
  public:
     ConvertToDpdkProgram(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -46,7 +46,7 @@ class ConvertToDpdkProgram : public Transform {
     IR::IndexedVector<IR::DpdkAsmStatement> create_pna_postamble();
     IR::IndexedVector<IR::DpdkAsmStatement> create_psa_postamble();
     const IR::Node *preorder(IR::P4Program *p) override;
-    const IR::DpdkAsmProgram *getDpdkProgram() { return dpdk_program; }
+    IR::Ptr<IR::DpdkAsmProgram> getDpdkProgram() { return dpdk_program; }
     IR::IndexedVector<IR::DpdkStructType> UpdateHeaderMetadata(IR::P4Program *prog,
                                                                IR::Type_Struct *metadata);
 };
@@ -56,7 +56,7 @@ class ConvertToDpdkParser : public Inspector {
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
     DpdkProgramStructure *structure;
-    IR::Type_Struct *metadataStruct;
+    IR::MutablePtr<IR::Type_Struct> metadataStruct;
 
  public:
     ConvertToDpdkParser(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -79,7 +79,7 @@ class ConvertToDpdkControl : public Inspector {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
-    IR::Type_Struct *metadataStruct;
+    IR::MutablePtr<IR::Type_Struct> metadataStruct;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
     IR::IndexedVector<IR::DpdkSelector> selectors;

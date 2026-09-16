@@ -22,6 +22,10 @@
 
 namespace P4 {
 
+#if !HAVE_LIBGC
+void *IR::shared_ptr_base::last_alloc = nullptr;
+#endif
+
 void IR::Node::traceVisit(const char *visitor) const {
     LOG3("Visiting " << visitor << " " << id << ":" << node_type_name());
 }
@@ -33,8 +37,10 @@ void IR::Node::traceCreation() const {
     if (id == 279493)
         raise(SIGINT);
     */
-    LOG5("Created node " << id);
+    LOG5("Created node " << id << '(' << clone_id << ')' << dbheap());
 }
+
+IR::Node::~Node() { LOG5("Destroy node " << id << '(' << clone_id << ')' << dbheap()); }
 
 int IR::Node::currentId = 0;
 

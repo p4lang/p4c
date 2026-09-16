@@ -65,8 +65,8 @@ int main(int argc, char *const argv[]) {
 
     auto hook = options.getDebugHook();
 
-    const IR::P4Program *program = nullptr;
-    const IR::ToplevelBlock *toplevel = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
+    IR::Ptr<IR::ToplevelBlock> toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);

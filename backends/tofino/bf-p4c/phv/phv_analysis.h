@@ -60,7 +60,7 @@
 #include "backends/tofino/bf-p4c/phv/v2/table_replay_friendly_constraints.h"
 
 void applyGlobalPragmas(const PhvSpec &phvspec,
-                        const std::vector<const IR::Annotation *> &global_pragmas);
+                        const std::vector<IR::Ptr<IR::Annotation>> &global_pragmas);
 
 /** This is the main PHV allocation pass manager.
  */

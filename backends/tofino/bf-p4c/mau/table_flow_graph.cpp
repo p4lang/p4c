@@ -183,7 +183,7 @@ bool FindFlowGraph::preorder(const IR::MAU::TableSeq *table_seq) {
 
     bool first_iter = true;
     const IR::MAU::Table *cur_table = nullptr;
-    for (const auto *next_table : table_seq->tables) {
+    for (auto next_table : table_seq->tables) {
         if (!first_iter) {
             // Visit cur_table with the new next_table.
             this->next_table = next_table;

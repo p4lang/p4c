@@ -564,7 +564,7 @@ bool ToP4::preorder(const IR::Type_Control *t) {
 ///////////////////////
 
 bool ToP4::preorder(const IR::Constant *c) {
-    const IR::Type_Bits *tb = c->type->to<IR::Type_Bits>();
+    const IR::Type_Bits *tb = c->type ? c->type->to<IR::Type_Bits>() : nullptr;
     unsigned width;
     bool sign;
     if (tb == nullptr) {
@@ -1199,7 +1199,7 @@ bool ToP4::preorder(const IR::ForStatement *s) {
     if (printAnnotations(s)) builder.spc();
     builder.append("for (");
     bool first = true;
-    for (auto *d : s->init) {
+    for (const IR::StatOrDecl *d : s->init) {
         if (!first) builder.append(", ");
         builder.supressStatementSemi();
         visit(d, "init");
@@ -1209,7 +1209,7 @@ bool ToP4::preorder(const IR::ForStatement *s) {
     visit(s->condition, "condition");
     builder.append("; ");
     first = true;
-    for (auto *e : s->updates) {
+    for (const IR::StatOrDecl *e : s->updates) {
         if (e->is<IR::EmptyStatement>()) continue;
         if (!first) builder.append(", ");
         builder.supressStatementSemi();
@@ -1241,7 +1241,7 @@ bool ToP4::preorder(const IR::ForInStatement *s) {
         builder.supressStatementSemi();
         visit(s->decl, "decl");
     } else {
-        auto *decl = resolveUnique(s->ref->path->name, ResolutionType::Any);
+        const IR::IDeclaration *decl = resolveUnique(s->ref->path->name, ResolutionType::Any);
         if (auto *di = decl->to<IR::Declaration_Variable>()) {
             builder.supressStatementSemi();
             visit(di, "decl");

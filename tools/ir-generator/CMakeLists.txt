@@ -19,7 +19,16 @@ set (IRGENERATOR_HDRS
   type.h
   )
 
-BISON_TARGET(IRgenParser ir-generator.ypp ${CMAKE_CURRENT_BINARY_DIR}/ir-generator.cpp)
+# Versions of CMake before 3.7.2 require a filename argument to BISON_TARGET's
+# VERBOSE option. Later versions "support" it, but they generate a file with
+# the same name automatically anyway, and then issue a warning because the
+# file gets overwritten, so we need this code to avoid warning spew during
+# compilation.
+if (CMAKE_VERSION VERSION_LESS "3.7.2")
+  BISON_TARGET(IRgenParser ir-generator.ypp ${CMAKE_CURRENT_BINARY_DIR}/ir-generator.cpp VERBOSE ${CMAKE_CURRENT_BINARY_DIR}//ir-generator.output)
+else ()
+  BISON_TARGET(IRgenParser ir-generator.ypp ${CMAKE_CURRENT_BINARY_DIR}/ir-generator.cpp VERBOSE COMPILE_FLAGS "-Werror=conflicts-sr -Werror=conflicts-rr")
+endif ()
 FLEX_TARGET(IRgenLexer ir-generator-lex.l  ${CMAKE_CURRENT_BINARY_DIR}/ir-generator-lex.c)
 ADD_FLEX_BISON_DEPENDENCY(IRgenLexer IRgenParser)
 

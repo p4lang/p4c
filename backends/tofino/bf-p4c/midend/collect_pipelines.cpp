@@ -109,7 +109,7 @@ bool CollectPipelines::preorder(const IR::Declaration_Instance *di) {
     if (name == "Pipeline") {
         unsigned i = 0;
         Pipe pipe;
-        for (auto *argument : *di->arguments) {
+        for (const IR::Argument *argument : *di->arguments) {
             auto *call = argument->expression->to<IR::ConstructorCallExpression>();
             BUG_CHECK(call, "Cannot handle pipelines with non-call expression %1% (in %2%)",
                       argument->expression, di);
@@ -118,7 +118,7 @@ bool CollectPipelines::preorder(const IR::Declaration_Instance *di) {
             auto *type = call->constructedType->to<IR::Type_Name>();
             BUG_CHECK(type, "Cannot extract type from type name in expression %1% (in %2%)", call,
                       di);
-            auto *dec = refMap->getDeclaration(type->path);
+            const IR::IDeclaration *dec = refMap->getDeclaration(type->path);
             pipe.set(di->arguments->size(), i, dec);
             ++i;
         }
