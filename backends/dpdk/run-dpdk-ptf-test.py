@@ -4,12 +4,15 @@ import argparse
 import logging
 import os
 import random
+import shlex
 import sys
 import tempfile
 import time
 import uuid
 from datetime import datetime
 from pathlib import Path
+
+from ptf import runner as ptf_runner
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -253,28 +256,53 @@ class PTFTestEnv:
         return testutils.SUCCESS
 
     def run_ptf(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> int:
-        """Run the PTF test."""
+        """Run the PTF test.
+
+        The TAP interfaces only exist in this environment's network namespace,
+        so its existing child process executes the serialized PtfConfig."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the tools PTF folder to the python path, it contains the base test.
+        config = self.make_ptf_config(
+            P4RUNTIME_PORT=P4RUNTIME_PORT,
+            info_name=info_name,
+            conf_bin=conf_bin,
+        )
+        return self.exec_ptf_in_ns(config)
+
+    def make_ptf_config(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> ptf_runner.PtfConfig:
+        """Construct the PTF configuration for the namespace's TAP ports."""
+        # Add the tools PTF folder to the python path. The folder contains
+        # the base test.
         pypath = TOOLS_PATH.joinpath("ptf")
-        # Show list of the tests
-        testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
-        returncode = self.bridge.ns_exec(testListCmd)
-        if returncode != testutils.SUCCESS:
-            return returncode
-        taps: str = ""
-        for index in range(self.options.num_taps):
-            taps += f" -i {index}@TAP{index}"
-        test_params = (
-            f"grpcaddr='{PTF_ADDR}:{P4RUNTIME_PORT}';p4info='{info_name}';config='{conf_bin}';"
+        config = ptf_runner.PtfConfig(
+            pypath=[str(pypath)],
+            test_selection=ptf_runner.TestSelectionOptions(test_dir=str(self.options.testdir)),
+            platform=ptf_runner.PlatformOptions(
+                interfaces=[
+                    # Use TAP<n> as port n.
+                    ptf_runner.Interface(device=0, port=index, interface=f"TAP{index}")
+                    for index in range(self.options.num_taps)
+                ]
+            ),
+            logging=ptf_runner.LoggingOptions(
+                log_file=str(self.options.testdir.joinpath("ptf.log"))
+            ),
+            test_behavior=ptf_runner.TestBehaviorOptions(
+                test_params={
+                    "grpcaddr": f"{PTF_ADDR}:{P4RUNTIME_PORT}",
+                    "p4info": str(info_name),
+                    "config": str(conf_bin),
+                    "device_id": 1,
+                }
+            ),
         )
-        test_params += "device_id=1"
-        run_ptf_cmd = (
-            f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
-            f"--test-params={test_params} --test-dir {self.options.testdir}"
-        )
-        returncode = self.bridge.ns_exec(run_ptf_cmd)
-        return returncode
+        return config
+
+    def exec_ptf_in_ns(self, config: ptf_runner.PtfConfig) -> int:
+        """Execute a PTF run inside the network namespace of this
+        environment. A child process in the namespace calls the PTF library
+        API (ptf.runner)."""
+        run_ptf_cmd = shlex.join([sys.executable, "-m", "ptf.runner", "-"])
+        return self.bridge.ns_exec(run_ptf_cmd, input=config.to_json())
 
 
 def run_test(options: Options) -> int:
