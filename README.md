@@ -586,11 +586,39 @@ add_black_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 
 The P4C CMakeLists.txt will use that name to figure the full path of the files to lint.
 
-clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command:
+The precise version of the formatting tools is specified in `pyproject.toml`, use `uv run` to run the tools with the correct version:
+
+```sh
+uv run cmake -S . -B build
 ```
-uv pip install "clang-format==18.1.8" "black==24.3.0" "isort==5.13.2"
+
+Check C++ and Python formatting:
+
+```sh
+uv run cmake --build build --target clang-format black isort
 ```
-clang-format can be checked using `cmake --build build --target clang-format`. Complaints can be fixed by running `cmake --build build --target clang-format-fix-errors`. black and isort can be checked using `cmake --build build --target black` or `cmake --build build --target isort` respectively. Complaints can be fixed by running `cmake --build build --target black-fix-errors` or `cmake --build build --target isort-fix-errors`.
+
+Apply formatting fixes:
+
+```sh
+uv run cmake --build build --target \
+  clang-format-fix-errors black-fix-errors isort-fix-errors
+```
+
+To run just one formatter, specify only its target.
+
+<details>
+<summary>If an existing build still uses a system-installed formatter</summary>
+
+CMake caches the paths to formatter executables when you first configure a build.
+If you configured before installing the tools above, the build may still use a
+system-installed formatter with a different version. Use this command to clear the cached paths and reconfigure the build:
+
+```sh
+uv run cmake -S . -B build -U CLANG_FORMAT_CMD -U BLACK_CMD -U ISORT_CMD
+```
+
+</details>
 
 cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
 ```
