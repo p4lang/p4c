@@ -299,6 +299,7 @@ if(SIMPLE_SWITCH OR PSA_SWITCH OR PNA_NIC)
 endif()
 # enable CTest
 enable_testing ()
+add_subdirectory(test/cmake)
 
 
 # if we want to manage versions in CMake ...
