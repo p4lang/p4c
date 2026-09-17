@@ -50,6 +50,13 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
         pinfo->header_unions.emplace(name, inst);
 }
 
+void InspectPsaProgram::addHeaderStackInstance(const IR::StructField *field, const IR::Type_Array *stack) {
+    // Add the stack to the header_stacks map in pinfo
+    auto stack_decl = new IR::Declaration_Variable(field->controlPlaneName(), stack);
+    typeMap->setType(stack_decl, stack);
+    pinfo->header_stacks.emplace(field->controlPlaneName(), stack_decl);
+}
+
 void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
@@ -104,9 +111,9 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
             auto ht = type->to<IR::Type_Header>();
             addHeaderType(ht);
             auto stack_type = stack->elementType->to<IR::Type_Header>();
-            auto stack_decl = new IR::Declaration_Variable(f->controlPlaneName(), stack);
-            typeMap->setType(stack_decl, stack);
-            pinfo->header_stacks.emplace(f->controlPlaneName(), stack_decl);
+
+            addHeaderStackInstance(f, stack);
+
             std::vector<unsigned> ids;
             for (unsigned i = 0; i < stack_size; i++) {
                 cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
