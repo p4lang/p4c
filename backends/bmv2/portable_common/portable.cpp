@@ -153,7 +153,14 @@ void PortableCodeGenerator::createScalars(ConversionContext *ctxt,
 
 void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
                                           P4::PortableProgramStructure *structure) {
-    /* Moved header stack json generator to before singular header creation */
+    for (auto kv : structure->headers) {
+        auto type = kv.second->type->to<IR::Type_StructLike>();
+        ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
+    }
+    for (auto kv : structure->metadata) {
+        auto type = kv.second->type->to<IR::Type_StructLike>();
+        ctxt->json->add_metadata(type->controlPlaneName(), kv.second->name);
+    }
     for (auto kv : structure->header_stacks) {
         auto stack_decl = kv.second;
         auto stack = structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
@@ -178,18 +185,6 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
 
         ctxt->json->add_header_stack(header_type, stack_name, stack->getSize(), ids);
     }
-    for (auto kv : structure->headers) {
-        auto type = kv.second->type->to<IR::Type_StructLike>();
-        ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
-    }
-    for (auto kv : structure->metadata) {
-        auto type = kv.second->type->to<IR::Type_StructLike>();
-        ctxt->json->add_metadata(type->controlPlaneName(), kv.second->name);
-    }
-    /*
-    Somehow, putting the header stack generation code here
-    causes the generated json to repeats the element headers once more
-    */
     for (auto kv : structure->header_unions) {
         auto header_name = kv.first;
         auto header_type = kv.second->to<IR::Type_StructLike>()->controlPlaneName();
