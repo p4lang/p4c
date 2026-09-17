@@ -494,7 +494,7 @@ void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstri
 }
 
 void CodeGenInspector::emitTCLarge(const IR::Operation_Binary *b, unsigned int width) {
-    ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Don't yet handle %s on %u-bit values",
+    ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Don't yet handle %1% on %2%-bit values",
                 b->getStringOp(), width);
 }
 
