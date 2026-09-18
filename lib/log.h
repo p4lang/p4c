@@ -172,6 +172,10 @@ std::ostream &format_container(std::ostream &out, const Cont &container, char lb
             }
             out << Log::unindent;
         }
+    } else if (elems.empty()) {
+        // Keep empty containers consistent with the padded format used for
+        // non-empty containers.
+        out << lbrace << ' ' << rbrace;
     } else {
         const char *sep = " ";
         out << lbrace;
