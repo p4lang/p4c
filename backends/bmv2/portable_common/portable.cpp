@@ -163,11 +163,12 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
     }
     for (auto kv : structure->header_stacks) {
         auto stack_decl = kv.second;
-        auto stack = structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
+        auto stack =
+            structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
         CHECK_NULL(stack);
 
         auto element_type =
-        structure->typeMap->getTypeType(stack->elementType, true)->to<IR::Type_Header>();
+            structure->typeMap->getTypeType(stack->elementType, true)->to<IR::Type_Header>();
         CHECK_NULL(element_type);
 
         const auto stack_name = stack_decl->controlPlaneName();

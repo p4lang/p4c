@@ -50,18 +50,15 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
         pinfo->header_unions.emplace(name, inst);
 }
 
-void InspectPsaProgram::addHeaderStackInstance(
-    const IR::StructField *field, const IR::Type_Array *stack
-) {
+void InspectPsaProgram::addHeaderStackInstance(const IR::StructField *field,
+                                                const IR::Type_Array *stack) {
     // Add the stack to the header_stacks map in pinfo
     auto stack_decl = new IR::Declaration_Variable(field->controlPlaneName(), stack);
     typeMap->setType(stack_decl, stack);
     pinfo->header_stacks.emplace(field->controlPlaneName(), stack_decl);
 }
 
-void InspectPsaProgram::addTypesAndInstances(
-    const IR::Type_StructLike *type, bool isHeader
-) {
+void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
         LOG5("Iterating through field " << f->toString());
