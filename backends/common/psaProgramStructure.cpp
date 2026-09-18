@@ -51,7 +51,7 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
 }
 
 void InspectPsaProgram::addHeaderStackInstance(const IR::StructField *field,
-                                                const IR::Type_Array *stack) {
+                                               const IR::Type_Array *stack) {
     // Add the stack to the header_stacks map in pinfo
     auto stack_decl = new IR::Declaration_Variable(field->controlPlaneName(), stack);
     typeMap->setType(stack_decl, stack);

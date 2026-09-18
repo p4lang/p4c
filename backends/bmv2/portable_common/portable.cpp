@@ -163,8 +163,7 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
     }
     for (auto kv : structure->header_stacks) {
         auto stack_decl = kv.second;
-        auto stack =
-            structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
+        auto stack = structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
         CHECK_NULL(stack);
 
         auto element_type =
@@ -178,8 +177,7 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
         ids.reserve(stack->getSize());
 
         for (unsigned index = 0; index < stack->getSize(); ++index) {
-            cstring element_name =
-                stack_name + "[" + Util::toString(index) + "]";
+            cstring element_name = stack_name + "[" + Util::toString(index) + "]";
 
             ids.push_back(ctxt->json->add_header(header_type, element_name));
         }
