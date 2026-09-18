@@ -35,9 +35,23 @@ header vlan_tag_h {
     ether_type_t  ether_type;
 }
 
+header test_a_t {
+    bit<4> field1;
+}
+
+header test_b_t {
+    bit<8> field2;
+}
+
+header_union test_union_t {
+    test_a_t test_a;
+    test_b_t test_b;
+}
+
 struct header_t {
     ethernet_t ethernet;
     vlan_tag_h[2]      vlan_tag;
+    test_union_t[3]    test_union;
 }
 
 parser MyIP(
