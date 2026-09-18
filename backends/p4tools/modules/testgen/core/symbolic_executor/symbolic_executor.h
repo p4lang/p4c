@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "ir/solver.h"
+#include "lib/ordered_map.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -63,6 +64,13 @@ class SymbolicExecutor {
     /// Update the set of visited nodes. Returns true if there was an update.
     [[nodiscard]] bool updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes);
 
+    /// Records a path the executor has skipped because the target does not model something.
+    /// @p message describes the feature.
+    void recordSkippedPath(cstring message);
+
+    /// @returns the number of paths the executor skipped, one entry per message.
+    [[nodiscard]] const ordered_map<cstring, size_t> &getSkippedPaths() const;
+
  protected:
     /// Target-specific information about the P4 program.
     const ProgramInfo &programInfo;
@@ -75,6 +83,9 @@ class SymbolicExecutor {
 
     /// Set of all nodes executed in any testcase that has been outputted.
     P4::Coverage::CoverageSet visitedNodes;
+
+    /// The paths the executor has skipped, one entry per exception.
+    ordered_map<cstring, size_t> skippedPaths;
 
     /// Handles processing at the end of a P4 program.
     ///

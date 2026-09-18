@@ -15,6 +15,7 @@
 #include "ir/ir.h"
 #include "ir/solver.h"
 #include "lib/error.h"
+#include "lib/ordered_map.h"
 #include "lib/timer.h"
 #include "midend/coverage.h"
 
@@ -113,6 +114,12 @@ bool SymbolicExecutor::updateVisitedNodes(const P4::Coverage::CoverageSet &newNo
 }
 
 const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedNodes() { return visitedNodes; }
+
+void SymbolicExecutor::recordSkippedPath(cstring message) { ++skippedPaths[message]; }
+
+const ordered_map<cstring, size_t> &SymbolicExecutor::getSkippedPaths() const {
+    return skippedPaths;
+}
 
 void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out,
                                                     const ExecutionState &executionState) {
