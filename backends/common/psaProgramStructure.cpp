@@ -105,12 +105,12 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
             LOG5("Field is Type_Array " << ft->toString());
             auto stack = ft->to<IR::Type_Array>();
             // auto stack_name = f->controlPlaneName();
-            auto stack_size = stack->getSize();
+            // auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             addHeaderType(ht);
-            auto stack_type = stack->elementType->to<IR::Type_Header>();
+            // auto stack_type = stack->elementType->to<IR::Type_Header>();
 
             // I have yet to consider Union Stacks. As of this commit, it's causing
             // a segmentation fault during compilation whenever a Union Stack instance
