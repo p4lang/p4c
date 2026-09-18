@@ -113,8 +113,8 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
             addHeaderType(ht);
             // auto stack_type = stack->elementType->to<IR::Type_Header>();
 
-            // I have yet to consider Union Stacks. As of this commit, it's causing
-            // a segmentation fault during compilation whenever a Union Stack instance
+            // I have yet to consider Union Stacks. As of this commit, a bug check
+            // will reject a Union Stack as it's not a header instance whenever
             // is declared in the P4 code.
             addHeaderStackInstance(f, stack);
 
