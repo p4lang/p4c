@@ -303,33 +303,37 @@ $(function(){initNavTree('log_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>            }</div>
 <div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            out &lt;&lt; Log::unindent;</div>
 <div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        }</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <span class="keyword">const</span> <span class="keywordtype">char</span> *sep = <span class="stringliteral">&quot; &quot;</span>;</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        out &lt;&lt; lbrace;</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;el : elems) {</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>            out &lt;&lt; sep &lt;&lt; el;</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>            sep = <span class="stringliteral">&quot;, &quot;</span>;</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        }</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        out &lt;&lt; (sep + 1) &lt;&lt; rbrace;</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    }</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    <span class="keywordflow">return</span> out;</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>}</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (elems.empty()) {</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>        <span class="comment">// Keep empty containers consistent with the padded format used for</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <span class="comment">// non-empty containers.</span></div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        out &lt;&lt; lbrace &lt;&lt; <span class="charliteral">&#39; &#39;</span> &lt;&lt; rbrace;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        <span class="keyword">const</span> <span class="keywordtype">char</span> *sep = <span class="stringliteral">&quot; &quot;</span>;</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        out &lt;&lt; lbrace;</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;el : elems) {</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>            out &lt;&lt; sep &lt;&lt; el;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>            sep = <span class="stringliteral">&quot;, &quot;</span>;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        }</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        out &lt;&lt; (sep + 1) &lt;&lt; rbrace;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    }</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span> </div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="keywordflow">return</span> out;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>}</div>
 </div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> std::vector&lt;T&gt; &amp;vec) {</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespace_p4.html#a9207bd35983aaf9261884ad20c31ea74">format_container</a>(out, vec, <span class="charliteral">&#39;[&#39;</span>, <span class="charliteral">&#39;]&#39;</span>);</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>}</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span> </div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> std::set&lt;T&gt; &amp;set) {</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespace_p4.html#a9207bd35983aaf9261884ad20c31ea74">format_container</a>(out, set, <span class="charliteral">&#39;(&#39;</span>, <span class="charliteral">&#39;)&#39;</span>);</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>}</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span> </div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_LOG_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> std::vector&lt;T&gt; &amp;vec) {</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespace_p4.html#a9207bd35983aaf9261884ad20c31ea74">format_container</a>(out, vec, <span class="charliteral">&#39;[&#39;</span>, <span class="charliteral">&#39;]&#39;</span>);</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>}</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> std::set&lt;T&gt; &amp;set) {</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="namespace_p4.html#a9207bd35983aaf9261884ad20c31ea74">format_container</a>(out, set, <span class="charliteral">&#39;(&#39;</span>, <span class="charliteral">&#39;)&#39;</span>);</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>}</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_LOG_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_indent_ctl_1_1_temp_indent_html"><div class="ttname"><a href="class_p4_1_1_indent_ctl_1_1_temp_indent.html">P4::IndentCtl::TempIndent</a></div><div class="ttdef"><b>Definition</b> indent.h:82</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:13</div></div>
 <div class="ttc" id="anamespace_p4_html_a9207bd35983aaf9261884ad20c31ea74"><div class="ttname"><a href="namespace_p4.html#a9207bd35983aaf9261884ad20c31ea74">P4::format_container</a></div><div class="ttdeci">std::ostream &amp; format_container(std::ostream &amp;out, const Cont &amp;container, char lbrace, char rbrace)</div><div class="ttdef"><b>Definition</b> log.h:155</div></div>
