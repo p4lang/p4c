@@ -64,16 +64,16 @@ class MethodInstance : public InstanceBase {
     }
 
  public:
-    const IR::MethodCallExpression *expr;
+    IR::Ptr<IR::MethodCallExpression> expr;
     /** Declaration of object that method is applied to.
         May be null for plain functions. */
-    const IR::IDeclaration *object;
+    IR::Ptr<IR::IDeclaration> object;
     /** The type of the *original* called method,
         without instantiated type parameters. */
-    const IR::Type_MethodBase *originalMethodType;
+    IR::Ptr<IR::Type_MethodBase> originalMethodType;
     /** Type of called method,
         with instantiated type parameters. */
-    const IR::Type_MethodBase *actualMethodType;
+    IR::Ptr<IR::Type_MethodBase> actualMethodType;
     virtual bool isApply() const { return false; }
 
     /** @param useExpressionType If true, the typeMap can be nullptr,
@@ -150,7 +150,7 @@ class ExternCall : public MethodInstance {
     }
 
  public:
-    const IR::Method *method;
+    IR::Ptr<IR::Method> method;
 
     DECLARE_TYPEINFO(ExternCall, MethodInstance);
 };
@@ -234,7 +234,7 @@ class FunctionCall final : public MethodInstance {
     friend class MethodInstance;
 
  public:
-    const IR::Function *function;
+    IR::Ptr<IR::Function> function;
 
     DECLARE_TYPEINFO(FunctionCall, MethodInstance);
 };
@@ -259,7 +259,7 @@ class BuiltInMethod final : public MethodInstance {
 
  public:
     const IR::ID name;
-    const IR::Expression *appliedTo;  // object is an expression
+    IR::Ptr<IR::Expression> appliedTo;  // object is an expression
 
     DECLARE_TYPEINFO(BuiltInMethod, MethodInstance);
 };
@@ -339,11 +339,11 @@ class Instantiation : public InstanceBase {
         constructorArguments = instance->arguments;
     }
 
-    const IR::Declaration_Instance *instance;
-    const IR::Vector<IR::Type> *typeArguments;
-    const IR::Vector<IR::Argument> *constructorArguments;
-    const IR::ParameterList *constructorParameters = nullptr;
-    const IR::TypeParameters *typeParameters = nullptr;
+    IR::Ptr<IR::Declaration_Instance> instance;
+    IR::Ptr<IR::Vector<IR::Type>> typeArguments;
+    IR::Ptr<IR::Vector<IR::Argument>> constructorArguments;
+    IR::Ptr<IR::ParameterList> constructorParameters;
+    IR::Ptr<IR::TypeParameters> typeParameters;
 
     static Instantiation *resolve(const IR::Declaration_Instance *instance,
                                   DeclarationLookup *refMap, TypeMap *typeMap);
@@ -362,7 +362,7 @@ class ExternInstantiation : public Instantiation {
         typeParameters = type->typeParameters;
         substitute();
     }
-    const IR::Type_Extern *type;
+    IR::Ptr<IR::Type_Extern> type;
 
     DECLARE_TYPEINFO(ExternInstantiation, Instantiation);
 };
@@ -376,7 +376,7 @@ class PackageInstantiation : public Instantiation {
         typeParameters = package->typeParameters;
         substitute();
     }
-    const IR::Type_Package *package;
+    IR::Ptr<IR::Type_Package> package;
 
     DECLARE_TYPEINFO(PackageInstantiation, Instantiation);
 };
@@ -390,7 +390,7 @@ class ParserInstantiation : public Instantiation {
         constructorParameters = parser->getConstructorParameters();
         substitute();
     }
-    const IR::P4Parser *parser;
+    IR::Ptr<IR::P4Parser> parser;
 
     DECLARE_TYPEINFO(ParserInstantiation, Instantiation);
 };
@@ -404,7 +404,7 @@ class ControlInstantiation : public Instantiation {
         constructorParameters = control->getConstructorParameters();
         substitute();
     }
-    const IR::P4Control *control;
+    IR::Ptr<IR::P4Control> control;
 
     DECLARE_TYPEINFO(ControlInstantiation, Instantiation);
 };

@@ -20,17 +20,17 @@ struct TypeSpecialization : public IHasDbPrint {
     /// Name to use for specialized type.
     cstring name;
     /// Type that is being specialized
-    const IR::Type_Specialized *specialized;
+    IR::Ptr<IR::Type_Specialized> specialized;
     /// Declaration of specialized type, which will be replaced
-    const IR::Type_Declaration *declaration;
+    IR::Ptr<IR::Type_Declaration> declaration;
     /// New synthesized type (created later)
-    const IR::Type_StructLike *replacement;
+    IR::Ptr<IR::Type_StructLike> replacement;
     /// Insertion point, the specialization will be inserted after all the top-level nodes in this
     /// set.
     InsertionSet insertion;
     /// Save here the canonical types of the type arguments of 'specialized'.
     /// The typeMap will be cleared, so we cannot look them up later.
-    const IR::Vector<IR::Type> *argumentTypes;
+    IR::Ptr<IR::Vector<IR::Type>> argumentTypes;
     /// was this specialization already inserted?
     bool inserted = false;
 

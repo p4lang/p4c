@@ -23,13 +23,13 @@
 
 P4V1::MeterConverter::MeterConverter() { addConverter("meter"_cs, this); }
 
-const IR::Type_Extern *P4V1::MeterConverter::convertExternType(P4V1::ProgramStructure *structure,
-                                                               const IR::Type_Extern *, cstring) {
+IR::Ptr<IR::Type_Extern> P4V1::MeterConverter::convertExternType(P4V1::ProgramStructure *structure,
+                                                                 const IR::Type_Extern *, cstring) {
     if (use_v1model()) structure->include("tofino/meter.p4"_cs);
     return nullptr;
 }
 
-const IR::Declaration_Instance *P4V1::MeterConverter::convertExternInstance(
+IR::Ptr<IR::Declaration_Instance> P4V1::MeterConverter::convertExternInstance(
     P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
     IR::IndexedVector<IR::Declaration> *) {
     auto *et = ext->type->to<IR::Type_Extern>();
@@ -105,9 +105,9 @@ const IR::Declaration_Instance *P4V1::MeterConverter::convertExternInstance(
     }
 }
 
-const IR::Statement *P4V1::MeterConverter::convertExternCall(P4V1::ProgramStructure *structure,
-                                                             const IR::Declaration_Instance *ext,
-                                                             const IR::Primitive *prim) {
+IR::Ptr<IR::Statement> P4V1::MeterConverter::convertExternCall(P4V1::ProgramStructure *structure,
+                                                               const IR::Declaration_Instance *ext,
+                                                               const IR::Primitive *prim) {
     auto *et = ext->type->to<IR::Type_Extern>();
     BUG_CHECK(et && et->name == "meter", "Extern %s is not meter type, but %s", ext, ext->type);
     ExpressionConverter conv(structure);

@@ -20,7 +20,7 @@ namespace P4 {
 template <class T>
 class TypeSubstitution : public IHasDbPrint {
  protected:
-    ordered_map<T, const IR::Type *> binding;
+    ordered_map<T, IR::Ptr<IR::Type>> binding;
 
  public:
     TypeSubstitution() = default;
@@ -29,8 +29,8 @@ class TypeSubstitution : public IHasDbPrint {
 
     /** True if this is the empty substitution, which does not replace anything. */
     bool isIdentity() const { return binding.size() == 0; }
-    const IR::Type *lookup(T t) const { return ::P4::get(binding, t); }
-    const IR::Type *get(T t) const { return ::P4::get(binding, t); }
+    IR::Ptr<IR::Type> lookup(T t) const { return ::P4::get(binding, t); }
+    IR::Ptr<IR::Type> get(T t) const { return ::P4::get(binding, t); }
 
     bool containsKey(T key) const { return binding.find(key) != binding.end(); }
 
@@ -61,7 +61,7 @@ class TypeSubstitution : public IHasDbPrint {
     void clear() { binding.clear(); }
 };
 
-class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVar *> {
+class TypeVariableSubstitution final : public TypeSubstitution<IR::Ptr<IR::ITypeVar>> {
  public:
     TypeVariableSubstitution() = default;
     TypeVariableSubstitution(const TypeVariableSubstitution &other) = default;
@@ -75,7 +75,7 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     // assigned to are disjoint from all variables already in 'this'.
     void simpleCompose(const TypeVariableSubstitution *other);
     void debugValidate();
-    bool setBinding(const IR::ITypeVar *id, const IR::Type *type) override {
+    bool setBinding(IR::Ptr<IR::ITypeVar> id, const IR::Type *type) override {
         auto result = TypeSubstitution::setBinding(id, type);
         debugValidate();
         return result;

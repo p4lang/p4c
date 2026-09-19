@@ -37,7 +37,7 @@ const IR::Node *ControlConverter::postorder(IR::BFN::TnaControl *node) {
     std::unordered_set<cstring> varsToRemove;
     // Create new TnaControl controlLocals
     IR::IndexedVector<IR::Declaration> newTnaControlLocals;
-    for (const auto *decl : node->controlLocals) {
+    for (auto decl : node->controlLocals) {
         // Check all Declaration_Variable and P4Action nodes in TnaControl
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
             // Save names of standard_metadata_t variables and skip/remove their declarations
@@ -50,7 +50,7 @@ const IR::Node *ControlConverter::postorder(IR::BFN::TnaControl *node) {
         } else if (const auto *action = decl->to<IR::P4Action>()) {
             // Create new P4Action body components
             IR::IndexedVector<IR::StatOrDecl> newP4ActionBodyComponents;
-            for (const auto *stmt : action->body->components) {
+            for (auto stmt : action->body->components) {
                 // Check all AssignmentStatement nodes in P4Action
                 if (const auto *asgnStmt = stmt->to<IR::AssignmentStatement>()) {
                     // Skip/remove all assignments using variables with saved names
@@ -93,11 +93,11 @@ const IR::Node *IngressControlConverter::preorder(IR::P4Control *node) {
     auto *paramList = new IR::ParameterList;
     ordered_map<cstring, cstring> tnaParams;
 
-    auto *headers = params->parameters.at(0);
+    auto headers = params->parameters.at(0);
     tnaParams.emplace("hdr"_cs, headers->name);
     paramList->push_back(headers);
 
-    auto *meta = params->parameters.at(1);
+    auto meta = params->parameters.at(1);
     tnaParams.emplace("md"_cs, meta->name);
     paramList->push_back(meta);
 
@@ -155,11 +155,11 @@ const IR::Node *EgressControlConverter::preorder(IR::P4Control *node) {
     auto *paramList = new IR::ParameterList;
     ordered_map<cstring, cstring> tnaParams;
 
-    auto *headers = params->parameters.at(0);
+    auto headers = params->parameters.at(0);
     tnaParams.emplace("hdr"_cs, headers->name);
     paramList->push_back(headers);
 
-    auto *meta = params->parameters.at(1);
+    auto meta = params->parameters.at(1);
     tnaParams.emplace("md"_cs, meta->name);
     paramList->push_back(meta);
 
@@ -246,7 +246,7 @@ const IR::Node *IngressDeparserConverter::preorder(IR::P4Control *node) {
     auto *paramList = new IR::ParameterList;
     ordered_map<cstring, cstring> tnaParams;
 
-    auto *packetOut = params->parameters.at(0);
+    auto packetOut = params->parameters.at(0);
     tnaParams.emplace("pkt"_cs, packetOut->name);
     paramList->push_back(packetOut);
 
@@ -315,7 +315,7 @@ const IR::Node *EgressDeparserConverter::preorder(IR::P4Control *node) {
     auto *paramList = new IR::ParameterList;
     ordered_map<cstring, cstring> tnaParams;
 
-    auto *packetOut = params->parameters.at(0);
+    auto packetOut = params->parameters.at(0);
     tnaParams.emplace("pkt"_cs, packetOut->name);
     paramList->push_back(packetOut);
 
@@ -399,15 +399,15 @@ const IR::Node *IngressParserConverter::postorder(IR::P4Parser *node) {
     auto *paramList = new IR::ParameterList;
     ordered_map<cstring, cstring> tnaParams;
 
-    auto *packetIn = params->parameters.at(0);
+    auto packetIn = params->parameters.at(0);
     tnaParams.emplace("pkt"_cs, packetIn->name);
     paramList->push_back(packetIn);
 
-    auto *headers = params->parameters.at(1);
+    auto headers = params->parameters.at(1);
     tnaParams.emplace("hdr"_cs, headers->name);
     paramList->push_back(headers);
 
-    auto *meta = parser->getApplyParameters()->parameters.at(2);
+    auto meta = parser->getApplyParameters()->parameters.at(2);
     auto *param = new IR::Parameter(meta->name, meta->annotations, IR::Direction::Out, meta->type);
     tnaParams.emplace("md"_cs, meta->name);
     paramList->push_back(param);
@@ -446,10 +446,10 @@ const IR::Node *IngressParserConverter::postorder(IR::P4Parser *node) {
     parserLocals->append(structure->ingressParserDeclarations);
     parserLocals->append(node->parserLocals);
 
-    for (auto *state : parser->states) {
+    for (auto state : parser->states) {
         auto it = structure->ingressParserStatements.find(state->name);
         if (it != structure->ingressParserStatements.end()) {
-            auto *s = const_cast<IR::ParserState *>(state);
+            auto *s = const_cast<IR::ParserState *>(&*state);
             for (auto *stmt : it->second) s->components.push_back(stmt);
         }
     }
@@ -474,15 +474,15 @@ const IR::Node *EgressParserConverter::postorder(IR::P4Parser *node) {
     auto *paramList = new IR::ParameterList;
     ordered_map<cstring, cstring> tnaParams;
 
-    auto *packetIn = params->parameters.at(0);
+    auto packetIn = params->parameters.at(0);
     tnaParams.emplace("pkt"_cs, packetIn->name);
     paramList->push_back(packetIn);
 
-    auto *headers = params->parameters.at(1);
+    auto headers = params->parameters.at(1);
     tnaParams.emplace("hdr"_cs, headers->name);
     paramList->push_back(headers);
 
-    auto *meta = params->parameters.at(2);
+    auto meta = params->parameters.at(2);
     auto *param = new IR::Parameter(meta->name, meta->annotations, IR::Direction::Out, meta->type);
     tnaParams.emplace("md"_cs, meta->name);
     paramList->push_back(param);
@@ -526,10 +526,10 @@ const IR::Node *EgressParserConverter::postorder(IR::P4Parser *node) {
     parserLocals.append(structure->egressParserDeclarations);
     parserLocals.append(node->parserLocals);
 
-    for (auto *state : parser->states) {
+    for (auto state : parser->states) {
         auto it = structure->egressParserStatements.find(state->name);
         if (it != structure->egressParserStatements.end()) {
-            auto *s = const_cast<IR::ParserState *>(state);
+            auto *s = const_cast<IR::ParserState *>(&*state);
             for (auto *stmt : it->second) s->components.push_back(stmt);
         }
     }

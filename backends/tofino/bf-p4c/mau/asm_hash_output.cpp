@@ -77,7 +77,7 @@ bool EmitHashExpression::preorder(const IR::MAU::HashGenExpression *hge) {
     BUG_CHECK(fl, "HashGenExpression not a field list: %s", hge);
     if (hge->algorithm.type == IR::MAU::HashFunction::IDENTITY) {
         // For identity, just output each field individually
-        for (auto *el : boost::adaptors::reverse(fl->components)) {
+        for (const IR::Expression *el : boost::adaptors::reverse(fl->components)) {
             visit(el, "component");
             bit += el->type->width_bits();
         }

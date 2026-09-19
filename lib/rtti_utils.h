@@ -61,13 +61,8 @@ namespace Detail {
 
 template <typename To, typename = enable_if_has_rtti_t<To>>
 struct ToType {
-    template <typename From, typename = enable_if_has_rtti_t<From>>
-    To *operator()(From *obj) const {
-        return obj ? obj->template to<To>() : nullptr;
-    }
-
-    template <typename From, typename = enable_if_has_rtti_t<From>>
-    const To *operator()(const From *obj) const {
+    template <typename From>
+    auto operator()(From obj) const -> decltype(obj->template to<To>()) {
         return obj ? obj->template to<To>() : nullptr;
     }
 };

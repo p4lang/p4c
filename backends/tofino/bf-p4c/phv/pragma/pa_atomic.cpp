@@ -77,7 +77,7 @@ bool PragmaAtomic::add_constraint(const IR::BFN::Pipe *pipe, const IR::Expressio
 
 bool PragmaAtomic::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto *annotation : global_pragmas) {
+    for (auto annotation : global_pragmas) {
         if (annotation->name.name != PragmaAtomic::name) continue;
 
         auto &exprs = annotation->getExpr();
