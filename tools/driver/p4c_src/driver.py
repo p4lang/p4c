@@ -46,7 +46,7 @@ class BackendDriver:
     def __str__(self):
         return self._backend
 
-    def add_command(self, cmd_name, cmd):
+    def add_command(self, cmd_name: str, cmd: str) -> None:
         """Add a command
 
         If the command was previously set, it is overwritten
@@ -54,7 +54,7 @@ class BackendDriver:
         if cmd_name in self._commands:
             print("Warning: overwriting command", cmd_name, file=sys.stderr)
         self._commands[cmd_name] = []
-        self._commands[cmd_name].append(os.fspath(cmd))
+        self._commands[cmd_name].append(cmd)
 
     def add_command_option(self, cmd_name, option):
         """Add an option to a command"""

@@ -272,6 +272,7 @@ if (ENABLE_GTESTS)
   add_library (bfas_lib ${BFAS_SOURCES})
   target_compile_definitions(bfas_lib PRIVATE BUILDING_FOR_GTEST)  # removes main()
   target_link_libraries (bfas_lib PRIVATE ${BFASM_LIBS} ${BFASM_LIB_DEPS})
+  add_dependencies(bfas_lib bfasm_yaml)
 
   set(BFAS_GTEST_SOURCES
     gtest/gtestasm.cpp
@@ -296,6 +297,6 @@ if (ENABLE_GTESTS)
   target_compile_options(gtestasm PUBLIC "-Wno-error")
 
   # Add to CTests - but this is in the BFASM project viz build/bf-asm, not build/p4c
-  add_test (NAME gtestasm COMMAND gtestasm WORKING_DIRECTORY ${P4C_BINARY_DIR})
-  set_tests_properties (gtestasm PROPERTIES LABELS "gtest")
+  add_test (NAME tofino-gtestasm COMMAND gtestasm WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  set_tests_properties (tofino-gtestasm PROPERTIES LABELS "gtest")
 endif ()

@@ -167,7 +167,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *as
 const IR::Node *TypeInferenceBase::shiftAssign(const IR::OpAssignmentStatement *assign) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(assign->left);
-    auto rtype = getType(assign->left);
+    auto rtype = getType(assign->right);
     if (!ltype) return assign;
     if (!isLeftValue(assign->left)) {
         typeError("Expression %1% cannot be the target of an assignment", assign->left);

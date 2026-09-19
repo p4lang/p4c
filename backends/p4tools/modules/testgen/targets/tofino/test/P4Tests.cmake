@@ -171,7 +171,7 @@ endif()
 p4tools_add_tests(
   TESTS "${P4TOOLS_TESTGEN_TOFINO_TNA}"
   TAG "testgen-tofino" DRIVER ${P4TESTGEN_DRIVER}
-  TARGET "tofino" ARCH "tna" CTEST_P4C_ARGS "${P416INCLUDES} --disable-power-check --disable-parse-depth-limit" RUN_STF TEST_ARGS "-D__TARGET_TOFINO__=1 --test-backend STF --port-ranges 0:63 ${EXTRA_OPTS}"
+  TARGET "tofino" ARCH "tna" CTEST_P4C_ARGS "${P416INCLUDES} -Xp4c=--disable-power-check -Xp4c=--disable-parse-depth-limit" RUN_STF TEST_ARGS "-D__TARGET_TOFINO__=1 --test-backend STF --port-ranges 0:63 ${EXTRA_OPTS}"
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/TofinoXfail.cmake)
@@ -183,7 +183,7 @@ list(REMOVE_ITEM P4TOOLS_TESTGEN_TOFINO_T2NA_STF
 p4tools_add_tests(
   TESTS "${P4TOOLS_TESTGEN_TOFINO_T2NA_STF}"
   TAG "testgen-tofino2" DRIVER ${P4TESTGEN_DRIVER}
-  TARGET "tofino2" ARCH "t2na" CTEST_P4C_ARGS "${P416INCLUDES} --disable-power-check --disable-parse-depth-limit" RUN_STF TEST_ARGS "-D__TARGET_TOFINO__=2 --test-backend STF --port-ranges 8:71 ${EXTRA_OPTS}"
+  TARGET "tofino2" ARCH "t2na" CTEST_P4C_ARGS "${P416INCLUDES} -Xp4c=--disable-power-check -Xp4c=--disable-parse-depth-limit" RUN_STF TEST_ARGS "-D__TARGET_TOFINO__=2 --test-backend STF --port-ranges 8:71 ${EXTRA_OPTS}"
 )
 include(${CMAKE_CURRENT_LIST_DIR}/Tofino2Xfail.cmake)
 
@@ -194,14 +194,14 @@ include(${CMAKE_CURRENT_LIST_DIR}/Tofino2Xfail.cmake)
 p4tools_add_tests(
   TESTS "${P4TOOLS_TESTGEN_TOFINO_TNA}"
   TAG "testgen-tofino-ptf" DRIVER ${P4TESTGEN_DRIVER}
-  TARGET "tofino" ARCH "tna" CTEST_P4C_ARGS "${P416INCLUDES} --disable-power-check --disable-parse-depth-limit" RUN_PTF TEST_ARGS "-D__TARGET_TOFINO__=1 -I${P4C_SOURCE_DIR}/p4_16/includes  --test-backend PTF --port-ranges 0:15 ${EXTRA_OPTS}"
+  TARGET "tofino" ARCH "tna" CTEST_P4C_ARGS "${P416INCLUDES} -Xp4c=--disable-power-check -Xp4c=--disable-parse-depth-limit" RUN_PTF TEST_ARGS "-D__TARGET_TOFINO__=1 -I${P4C_SOURCE_DIR}/p4_16/includes  --test-backend PTF --port-ranges 0:15 ${EXTRA_OPTS}"
 )
 include(${CMAKE_CURRENT_LIST_DIR}/TofinoPTFXfail.cmake)
 
 p4tools_add_tests(
   TESTS "${P4TOOLS_TESTGEN_TOFINO_T2NA}"
   TAG "testgen-tofino2-ptf" DRIVER ${P4TESTGEN_DRIVER}
-  TARGET "tofino2" ARCH "t2na" CTEST_P4C_ARGS "${P416INCLUDES} --disable-power-check --disable-parse-depth-limit" RUN_PTF TEST_ARGS "-D__TARGET_TOFINO__=2 --test-backend PTF --port-ranges 8:15 ${EXTRA_OPTS}"
+  TARGET "tofino2" ARCH "t2na" CTEST_P4C_ARGS "${P416INCLUDES} -Xp4c=--disable-power-check -Xp4c=--disable-parse-depth-limit" RUN_PTF TEST_ARGS "-D__TARGET_TOFINO__=2 --test-backend PTF --port-ranges 8:15 ${EXTRA_OPTS}"
 )
 include(${CMAKE_CURRENT_LIST_DIR}/Tofino2PTFXfail.cmake)
 

@@ -52,4 +52,4 @@ add_executable(test_phv_logging test_phv.cpp ${BFN_P4C_SOURCE_DIR}/bf-p4c/common
 add_dependencies(test_phv_logging genLogging)
 target_link_libraries(test_phv_logging PRIVATE absl::strings)
 
-add_test(NAME test_phv_logging COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_phv_logging)
+add_test(NAME tofino-test_phv_logging COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_phv_logging)
