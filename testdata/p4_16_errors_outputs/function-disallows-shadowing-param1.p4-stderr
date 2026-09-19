@@ -1,0 +1,12 @@
+function-disallows-shadowing-param1.p4(25): [--Wwarn=shadow] warning: 'i' shadows 'i'
+bit<8> foofunc(in bit<8> i, // line 2 - shadows line 1, p4c warns
+                         ^
+function-disallows-shadowing-param1.p4(23)
+const bit<8> i = 5; // line 1 - p4c warns this is unused
+             ^
+function-disallows-shadowing-param1.p4(28): [--Werror=shadow] error: declaration of 'i' shadows a parameter 'i'
+    bit<8> i = 5; // line 3 - p4c errors because shadows i in line 2
+           ^
+function-disallows-shadowing-param1.p4(25)
+bit<8> foofunc(in bit<8> i, // line 2 - shadows line 1, p4c warns
+                         ^
