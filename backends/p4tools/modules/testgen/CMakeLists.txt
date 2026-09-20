@@ -55,6 +55,7 @@ set(
   test/gtest_utils.cpp
   test/lib/format_int.cpp
   test/lib/taint.cpp
+  test/lib/structural_compare.cpp
   test/small-step/util.cpp
   test/z3-solver/constraints.cpp
 )

@@ -86,6 +86,9 @@ class BFN::Pipe {
             return parsers == a.parsers && mau == a.mau && deparser == a.deparser &&
                 hw_constrained_fields == a.hw_constrained_fields;
         }
+#emit
+    std::weak_ordering structuralCompare(const thread_t &a) const;
+#end
     }
     thread_t[2] thread = {};
 
@@ -99,11 +102,12 @@ class BFN::Pipe {
         dbprint { out << "ghost_mau=" << ghost_mau << " "
                       << "ghost_parser=" << ghost_parser; }
 #emit
-        friend std::ostream &operator<<(std::ostream &out, const ghost_thread_t &gt) {
-            out << "ghost_mau=" << gt.ghost_mau << " "
-                << "ghost_parser=" << gt.ghost_parser;
-            return out;
-        }
+    friend std::ostream &operator<<(std::ostream &out, const ghost_thread_t &gt) {
+        out << "ghost_mau=" << gt.ghost_mau << " "
+            << "ghost_parser=" << gt.ghost_parser;
+        return out;
+    }
+    std::weak_ordering structuralCompare(const ghost_thread_t &a) const;
 #end
     }
     ghost_thread_t ghost_thread;
@@ -455,6 +459,7 @@ class BFN::AliasMember : IR::Member {
     /// do not use the auto-generated equiv function.
     /// do not compare the 'source' field of the AliasMember.
     equiv { return Member::equiv(a_); }
+    structuralCompare { return Member::structuralCompare(a_); }
 
 #emit
     /// A convenience method to construct an AliasMember with source info from

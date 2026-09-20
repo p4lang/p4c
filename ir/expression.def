@@ -368,6 +368,13 @@ class Constant : Literal {
         return Util::toString(value, width, sign, base);
     }
     visit_children { (void)n; v.visit(type, "type"); }
+    structuralCompare {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (typeId() != a_.typeId()) return typeId() <=> a_.typeId();
+        if (auto cmp = Literal::structuralCompare(a_); cmp != 0) return cmp;
+        auto &a = static_cast<const Constant &>(a_);
+        return IR::structuralCompare(value, a.value); /* ignore base */
+    }
 }
 
 class BoolLiteral : Literal {
@@ -750,6 +757,13 @@ class SymbolicVariable : Expression {
     /// Implements comparisons so that SymbolicVariables can be used as map keys.
     inline bool operator<(const SymbolicVariable &other) const {
         return label < other.label;
+    }
+
+    structuralCompare {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (typeId() !=  a_.typeId()) return typeId() <=> a_.typeId();
+        auto &a = static_cast<const SymbolicVariable &>(a_);
+        return IR::structuralCompare(label, a.label); /* ignore type */
     }
 
     toString { return absl::StrCat("|", label, "(", type, ")|"); }

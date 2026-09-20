@@ -11,6 +11,7 @@
 #include <map>
 
 #include "ir/node.h"
+#include "ir/structural_compare.h"
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "lib/error.h"
@@ -134,6 +135,12 @@ class NameMap : public Node {
         for (auto &el : *this)
             if (el.first != it->first || !el.second->equiv(*(it++)->second)) return false;
         return true;
+    }
+    std::weak_ordering structuralCompare(const Node &a_) const override {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (this->typeId() != a_.typeId()) return this->typeId() <=> a_.typeId();
+        auto &a = static_cast<const NameMap<T, MAP, COMP, ALLOC> &>(a_);
+        return IR::structuralCompare(symbols, a.symbols);
     }
     cstring node_type_name() const override { return "NameMap<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "NameMap<" + T::static_type_name() + ">"; }

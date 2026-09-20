@@ -8,6 +8,7 @@
 #ifndef IR_NODE_H_
 #define IR_NODE_H_
 
+#include <compare>
 #include <iosfwd>
 
 #include "ir/gen-tree-macro.h"
@@ -105,7 +106,15 @@ class Node : public virtual INode {
     virtual bool operator==(const Node &a) const { return this->typeId() == a.typeId(); }
     /* 'equiv' does a deep-equals comparison, comparing all non-pointer fields and recursing
      * though all Node subclass pointers to compare them with 'equiv' as well. */
-    virtual bool equiv(const Node &a) const { return this->typeId() == a.typeId(); }
+    [[nodiscard]] virtual bool equiv(const Node &a) const { return this->typeId() == a.typeId(); }
+    /// Three-way structural ordering, recursively comparing selected value fields.
+    /// Ignores source locations and node identity; custom nodes may ignore other metadata
+    /// (e.g. a constant's display base or a symbolic variable's type). This does not prove
+    /// that different expression trees compute the same result. Do not mutate keys while
+    /// they are stored in an ordered container using this comparison. See docs/IR.md.
+    [[nodiscard]] virtual std::weak_ordering structuralCompare(const Node &a) const {
+        return this->typeId() <=> a.typeId();
+    }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)

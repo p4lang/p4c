@@ -25,6 +25,7 @@
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "gateway_control_flow.h"
 #include "ir/ir.h"
+#include "ir/structural_compare.h"
 
 // FIXME -- This is gcc specific, but allows p4test to link without breaking p4c-barefoot
 Device *Device::instance_ __attribute__((weak)) = nullptr;
@@ -470,6 +471,130 @@ IR::MAU::Table::Layout &IR::MAU::Table::Layout::operator+=(const IR::MAU::Table:
     sets_per_word += a.sets_per_word;
     return *this;
 }
+
+std::weak_ordering IR::MAU::Table::Layout::structuralCompare(
+    const IR::MAU::Table::Layout &a) const {
+    if (auto cmp = IR::structuralCompare(entries, a.entries); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(pre_classifier, a.pre_classifier); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(gateway, a.gateway); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(exact, a.exact); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(ternary, a.ternary); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(hash_action, a.hash_action); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(gateway_match, a.gateway_match); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(atcam, a.atcam); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(alpm, a.alpm); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(has_range, a.has_range); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(proxy_hash, a.proxy_hash); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(requires_versioning, a.requires_versioning); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(is_lamb, a.is_lamb); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(is_direct, a.is_direct); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(is_local_tind, a.is_local_tind); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(entries_per_set, a.entries_per_set); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(sets_per_word, a.sets_per_word); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(ixbar_bytes, a.ixbar_bytes); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(match_bytes, a.match_bytes); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(ixbar_width_bits, a.ixbar_width_bits); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(match_width_bits, a.match_width_bits); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(ghost_bytes, a.ghost_bytes); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(action_data_bytes, a.action_data_bytes); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(action_data_bytes_in_table, a.action_data_bytes_in_table);
+        cmp != 0)
+        return cmp;
+    if (auto cmp =
+            IR::structuralCompare(pre_classifer_number_entries, a.pre_classifer_number_entries);
+        cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(overhead_bits, a.overhead_bits); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(immediate_bits, a.immediate_bits); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(valid_bits, a.valid_bits); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(partition_bits, a.partition_bits); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(partition_count, a.partition_count); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(subtrees_per_partition, a.subtrees_per_partition);
+        cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(atcam_subset_width, a.atcam_subset_width); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(shift_granularity, a.shift_granularity); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(total_actions, a.total_actions); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(sel_len_bits, a.sel_len_bits); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(proxy_hash_width, a.proxy_hash_width); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(proxy_hash_algorithm, a.proxy_hash_algorithm); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(meter_addr, a.meter_addr); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(stats_addr, a.stats_addr); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(action_addr, a.action_addr); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(excluded_field_msb_bits, a.excluded_field_msb_bits);
+        cmp != 0)
+        return cmp;
+    return std::weak_ordering::equivalent;
+}
+
+std::weak_ordering IR::MAU::Table::structuralCompare(IR::Node const &a_) const {
+    if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+    if (typeId() != a_.typeId()) return typeId() <=> a_.typeId();
+    if (auto cmp = BFN::Unit::structuralCompare(a_); cmp != 0) return cmp;
+    auto &a = static_cast<const Table &>(a_);
+    if (auto cmp = IR::structuralCompare(name, a.name); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(gress, a.gress); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(gateway_name, a.gateway_name); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(gateway_cond, a.gateway_cond); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(gateway_result_tag, a.gateway_result_tag); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(stage_, a.stage_); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(logical_id, a.logical_id); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(stage_split, a.stage_split); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(logical_split, a.logical_split); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(logical_tables_in_stage, a.logical_tables_in_stage);
+        cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(atcam_entries_in_stage, a.atcam_entries_in_stage);
+        cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(gateway_rows, a.gateway_rows); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(gateway_payload, a.gateway_payload); cmp != 0) return cmp;
+    if (auto cmp =
+            IR::structuralCompare(gateway_constant_entries_key, a.gateway_constant_entries_key);
+        cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(match_table, a.match_table); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(attached, a.attached); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(actions, a.actions); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(next, a.next); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(match_key, a.match_key); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(sel_symmetric_keys, a.sel_symmetric_keys); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(random_seed, a.random_seed); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(dynamic_key_masks, a.dynamic_key_masks); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(entries_list, a.entries_list); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(first_entry_list_priority, a.first_entry_list_priority);
+        cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(created_during_tp, a.created_during_tp); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(is_compiler_generated, a.is_compiler_generated); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(has_dark_init, a.has_dark_init); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(always_run, a.always_run); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(suppress_context_json, a.suppress_context_json); cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(run_before_exit, a.run_before_exit); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(is_detached_attached_tbl, a.is_detached_attached_tbl);
+        cmp != 0)
+        return cmp;
+    if (auto cmp = IR::structuralCompare(layout, a.layout); cmp != 0) return cmp;
+    if (auto cmp = IR::structuralCompare(ways, a.ways); cmp != 0) return cmp;
+    // Physical resource allocation is metadata, not part of the table's semantics.
+    // TODO: Determine whether resource allocation contents need semantic comparison.
+    return std::weak_ordering::equivalent;
+}
+
 /*
 std::ostream &operator<<(std::ostream &out, IR::MAU::Table::Layout &layout) {
     Log::TempIndent indent;

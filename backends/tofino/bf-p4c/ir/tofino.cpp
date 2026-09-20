@@ -17,6 +17,7 @@
  */
 
 #include "ir/ir.h"
+#include "ir/structural_compare.h"
 
 /* static */ size_t IR::BFN::ContainerRef::nextId = 0;
 
@@ -85,4 +86,16 @@ bool IR::BFN::Pipe::has_pragma(const char *name) const {
         if (annotation->name.name == name) return true;
     }
     return false;
+}
+
+std::weak_ordering IR::BFN::Pipe::thread_t::structuralCompare(
+    const IR::BFN::Pipe::thread_t &a) const {
+    return IR::structuralCompare(std::tie(parsers, mau, deparser, hw_constrained_fields),
+                                 std::tie(a.parsers, a.mau, a.deparser, a.hw_constrained_fields));
+}
+
+std::weak_ordering IR::BFN::Pipe::ghost_thread_t::structuralCompare(
+    const IR::BFN::Pipe::ghost_thread_t &a) const {
+    return IR::structuralCompare(std::tie(ghost_mau, ghost_parser),
+                                 std::tie(a.ghost_mau, a.ghost_parser));
 }
