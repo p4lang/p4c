@@ -147,8 +147,8 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     /// this pass.
     std::set<const IR::Expression *> temporaries;
 
-    cstring createTemporary(Util::SourceInfo srcInfo, const IR::Type *type);
-    const IR::Expression *addAssignment(Util::SourceInfo srcInfo, cstring varName,
+    IR::ID createTemporary(Util::SourceInfo srcInfo, const IR::Type *type);
+    const IR::Expression *addAssignment(Util::SourceInfo srcInfo, IR::ID varName,
                                         const IR::Expression *expression,
                                         Util::SourceInfo resultSrcInfo = {});
     bool mayAlias(const IR::Expression *left, const IR::Expression *right,

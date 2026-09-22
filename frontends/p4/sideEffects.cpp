@@ -15,11 +15,11 @@
 
 namespace P4 {
 
-cstring DoSimplifyExpressions::createTemporary(Util::SourceInfo srcInfo, const IR::Type *type) {
+IR::ID DoSimplifyExpressions::createTemporary(Util::SourceInfo srcInfo, const IR::Type *type) {
     type = type->getP4Type();
     BUG_CHECK(type && !type->is<IR::Type_Dontcare>(), "Can't create don't-care temps");
-    auto tmp = nameGen.newName("tmp");
-    auto decl = new IR::Declaration_Variable(srcInfo, IR::ID(srcInfo, tmp, nullptr), type);
+    auto tmp = IR::ID(srcInfo, nameGen.newName("tmp"), nullptr);
+    auto decl = new IR::Declaration_Variable(srcInfo, tmp, type);
     toInsert.push_back(decl);
     return tmp;
 }
@@ -30,20 +30,16 @@ cstring DoSimplifyExpressions::createTemporary(Util::SourceInfo srcInfo, const I
  * assignment uses the branch's location; the returned reference uses the whole expression's
  * location.
  */
-const IR::Expression *DoSimplifyExpressions::addAssignment(Util::SourceInfo srcInfo,
-                                                           cstring varName,
+const IR::Expression *DoSimplifyExpressions::addAssignment(Util::SourceInfo srcInfo, IR::ID varName,
                                                            const IR::Expression *expression,
                                                            Util::SourceInfo resultSrcInfo) {
-    const IR::PathExpression *left;
     if (auto pe = expression->to<IR::PathExpression>())
-        left = new IR::PathExpression(IR::ID(srcInfo, varName, pe->path->name.originalName));
-    else
-        left = new IR::PathExpression(IR::ID(srcInfo, varName, nullptr));
+        varName.originalName = pe->path->name.originalName;
+    auto left = new IR::PathExpression(srcInfo, new IR::Path(varName));
     auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
     statements.push_back(stat);
     if (!resultSrcInfo.isValid()) resultSrcInfo = srcInfo;
-    auto result =
-        new IR::PathExpression(IR::ID(resultSrcInfo, varName, left->path->name.originalName));
+    auto result = new IR::PathExpression(resultSrcInfo, new IR::Path(varName));
     added->emplace(result);
     return result;
 }
@@ -117,7 +113,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Member *expression) {
             } else {
                 BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
                 auto tmp = createTemporary(expression->srcInfo, type);
-                auto path = new IR::PathExpression(IR::ID(expression->srcInfo, tmp, nullptr));
+                auto path = new IR::PathExpression(tmp);
                 auto stat = new IR::AssignmentStatement(expression->srcInfo, path, expression);
                 statements.push_back(stat);
                 typeMap->setType(expression, type);
@@ -255,9 +251,8 @@ const IR::Node *DoSimplifyExpressions::shortCircuit(IR::Operation_Binary *expres
         bool land = expression->is<IR::LAnd>();
         auto constant = new IR::BoolLiteral(original->left->srcInfo, !land);
         auto tmp = createTemporary(expression->srcInfo, type);
-        auto ifTrue = new IR::AssignmentStatement(
-            expression->srcInfo, new IR::PathExpression(IR::ID(expression->srcInfo, tmp, nullptr)),
-            constant);
+        auto ifTrue =
+            new IR::AssignmentStatement(expression->srcInfo, new IR::PathExpression(tmp), constant);
 
         auto save = statements;
         statements.clear();
@@ -510,7 +505,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
                 auto paramtype = typeMap->getType(p, true);
                 if (paramtype->is<IR::Type_Dontcare>()) paramtype = typeMap->getType(arg, true);
                 auto tmp = createTemporary(expressionSrcInfo, paramtype);
-                argValue = new IR::PathExpression(IR::ID(expressionSrcInfo, tmp, nullptr));
+                argValue = new IR::PathExpression(tmp);
                 typeMap->setType(argValue, paramtype);
                 typeMap->setLeftValue(argValue);
                 if (p->direction != IR::Direction::Out) {
@@ -569,7 +564,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         rv = mce;
     } else {
         auto tmp = createTemporary(mce->srcInfo, type);
-        auto left = new IR::PathExpression(IR::ID(mce->srcInfo, tmp, nullptr));
+        auto left = new IR::PathExpression(tmp);
         auto stat = new IR::AssignmentStatement(mce->srcInfo, left, mce);
         statements.push_back(stat);
         rv = left->clone();
