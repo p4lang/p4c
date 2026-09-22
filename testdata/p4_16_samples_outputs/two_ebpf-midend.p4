@@ -60,15 +60,15 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_1();
     }
-    @hidden action act() {
+    @hidden action two_ebpf64() {
         address_0 = headers.ipv4.srcAddr;
         pass_0 = true;
     }
-    @hidden action act_0() {
+    @hidden action two_ebpf64_0() {
         pass = pass_0;
         address_0 = headers.ipv4.dstAddr;
     }
-    @hidden action act_1() {
+    @hidden action two_ebpf65() {
         pass = pass_0;
     }
     @hidden action two_ebpf60() {
@@ -83,23 +83,23 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = two_ebpf57();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_two_ebpf64 {
         actions = {
-            act();
+            two_ebpf64();
         }
-        const default_action = act();
+        const default_action = two_ebpf64();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_two_ebpf64_0 {
         actions = {
-            act_0();
+            two_ebpf64_0();
         }
-        const default_action = act_0();
+        const default_action = two_ebpf64_0();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_two_ebpf65 {
         actions = {
-            act_1();
+            two_ebpf65();
         }
-        const default_action = act_1();
+        const default_action = two_ebpf65();
     }
     @hidden table tbl_two_ebpf60 {
         actions = {
@@ -110,11 +110,11 @@ control pipe(inout Headers_t headers, out bool pass) {
     apply {
         tbl_two_ebpf57.apply();
         if (headers.ipv4.isValid()) {
-            tbl_act.apply();
+            tbl_two_ebpf64.apply();
             c1_Check_ip.apply();
-            tbl_act_0.apply();
+            tbl_two_ebpf64_0.apply();
             c1_Check_ip.apply();
-            tbl_act_1.apply();
+            tbl_two_ebpf65.apply();
         } else {
             tbl_two_ebpf60.apply();
         }

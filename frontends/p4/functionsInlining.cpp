@@ -256,12 +256,13 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     substitution.populate(callee->type->parameters, mce->arguments);
 
     // parameters that need copyout
-    std::vector<std::pair<cstring, const IR::Argument *>> needCopyout;
+    std::vector<std::pair<IR::ID, const IR::Argument *>> needCopyout;
 
     // evaluate in and inout parameters in order
     for (auto param : callee->type->parameters->parameters) {
         auto argument = substitution.lookup(param);
-        cstring newName = nameGen->newName(param->name.name.string_view());
+        // Use the declaration's location, not a potentially earlier folded constant.
+        auto newName = IR::ID(argument->srcInfo, nameGen->newName(param->name.name.string_view()));
         if ((param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) &&
             isLocalExpression(argument->expression, getChildContext())) {
             // If the actual parameter is local to the caller, we can just rewrite the callee
@@ -272,10 +273,11 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
                                                         param->annotations, param->type);
             body.push_back(vardecl);
-            auto copyin =
-                new IR::AssignmentStatement(new IR::PathExpression(newName), argument->expression);
+            auto copyin = new IR::AssignmentStatement(
+                argument->srcInfo, new IR::PathExpression(newName), argument->expression);
             body.push_back(copyin);
-            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
+            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
+                                              new IR::PathExpression(newName)));
             if (param->direction == IR::Direction::InOut)
                 needCopyout.emplace_back(newName, argument);
         } else if (param->direction == IR::Direction::None) {
@@ -286,7 +288,8 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             // uninitialized variable
             auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
                                                         param->annotations, param->type);
-            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
+            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
+                                              new IR::PathExpression(newName)));
             body.push_back(vardecl);
             needCopyout.emplace_back(newName, argument);
         }
@@ -308,7 +311,7 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     // copy out and inout parameters
     for (auto [newName, argument] : needCopyout) {
         auto right = new IR::PathExpression(newName);
-        auto copyout = new IR::AssignmentStatement(argument->expression, right);
+        auto copyout = new IR::AssignmentStatement(argument->srcInfo, argument->expression, right);
         body.push_back(copyout);
     }
 
@@ -323,10 +326,11 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     //    }
     // }
     if (retExpr) {
-        cstring newName = nameGen->newName("inlinedRetval");
-        body.push_back(new IR::Declaration_Variable(newName, funclone->type->returnType));
-        auto right = new IR::PathExpression(newName);
-        body.push_back(new IR::AssignmentStatement(right, retExpr));
+        auto name = IR::ID(mce->srcInfo, nameGen->newName("inlinedRetval"));
+        body.push_back(
+            new IR::Declaration_Variable(mce->srcInfo, name, funclone->type->returnType));
+        auto right = new IR::PathExpression(name);
+        body.push_back(new IR::AssignmentStatement(mce->srcInfo, right, retExpr));
         retExpr = right;
     }
 

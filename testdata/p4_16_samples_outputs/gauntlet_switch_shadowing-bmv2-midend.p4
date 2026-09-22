@@ -43,7 +43,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action act() {
+    @hidden action gauntlet_switch_shadowingbmv2l59() {
         sm.instance_type = val;
     }
     @hidden table tbl_action {
@@ -52,11 +52,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = action_2();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_gauntlet_switch_shadowingbmv2l59 {
         actions = {
-            act();
+            gauntlet_switch_shadowingbmv2l59();
         }
-        const default_action = act();
+        const default_action = gauntlet_switch_shadowingbmv2l59();
     }
     apply {
         switch (simple_table_0.apply().action_run) {
@@ -68,7 +68,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             default: {
             }
         }
-        tbl_act.apply();
+        tbl_gauntlet_switch_shadowingbmv2l59.apply();
     }
 }
 

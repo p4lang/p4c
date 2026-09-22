@@ -630,7 +630,8 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
         auto arg = mi->substitution.lookup(param);
         if ((param->direction == IR::Direction::In || param->direction == IR::Direction::InOut)) {
             if (!initializer->expression->equiv(*arg->expression)) {
-                auto stat = new IR::AssignmentStatement(initializer->expression, arg->expression);
+                auto stat = new IR::AssignmentStatement(arg->srcInfo, initializer->expression,
+                                                        arg->expression);
                 body.push_back(stat);
             }
         } else if (param->direction == IR::Direction::Out) {
@@ -663,8 +664,8 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
             auto left = mi->substitution.lookup(param);
             auto arg = substs->paramSubst.lookupByName(param->name);
             if (!left->expression->equiv(*arg->expression)) {
-                auto copyout =
-                    new IR::AssignmentStatement(left->expression, arg->expression->clone());
+                auto copyout = new IR::AssignmentStatement(left->srcInfo, left->expression,
+                                                           arg->expression->clone());
                 body.push_back(copyout);
             }
         }
@@ -794,8 +795,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
             if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
                 if (!arg->expression->equiv(*initializer->expression)) {
-                    auto stat =
-                        new IR::AssignmentStatement(arg->expression, initializer->expression);
+                    auto stat = new IR::AssignmentStatement(initializer->srcInfo, arg->expression,
+                                                            initializer->expression);
                     current.push_back(stat);
                 }
             } else if (param->direction == IR::Direction::Out) {
@@ -891,7 +892,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
                 param->direction == IR::Direction::Out) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
                 if (!left->equiv(*arg->expression)) {
-                    auto copyout = new IR::AssignmentStatement(left, arg->expression->clone());
+                    auto copyout =
+                        new IR::AssignmentStatement(left->srcInfo, left, arg->expression->clone());
                     current.push_back(copyout);
                 }
             }
