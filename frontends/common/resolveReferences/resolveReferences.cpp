@@ -358,15 +358,6 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 continue;
 #endif
 
-            // parameter shadowing
-            if (node->is<IR::Declaration>() && !node->is<IR::Parameter>()) {
-                const auto *decl_node = node->to<IR::Declaration>();
-                if (const auto *param = pnode->to<IR::Parameter>())
-                    if (decl_node->name.name == param->name.name)
-                        ::P4::error(ErrorType::WARN_SHADOWING,
-                                    "declaration of '%1%' shadows a parameter '%2%'", node, pnode);
-            }
-
             ::P4::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
         }
     }
