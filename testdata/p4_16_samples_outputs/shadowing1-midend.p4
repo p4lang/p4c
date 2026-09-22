@@ -42,7 +42,7 @@ struct tuple_1 {
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @hidden action shadowing1l110() {
         log_msg<tuple_0>("i={} out1={} out2={} out3={} out4={}", (tuple_0){f0 = hdr.eth.srcAddr[7:0],f1 = hdr.eth.srcAddr[7:0],f2 = hdr.eth.srcAddr[7:0] + 8w1,f3 = hdr.eth.srcAddr[7:0] + 8w1 + 8w2,f4 = hdr.eth.srcAddr[7:0] + 8w1});
-        log_msg<tuple_1>("i={} out1={} out2={} out3={}", (tuple_1){f0 = hdr.eth.srcAddr[7:0],f1 = hdr.eth.srcAddr[7:0],f2 = 8w8,f3 = 8w6});
+        log_msg<tuple_1>("i={} out1={} out2={} out3={}", (tuple_1){f0 = hdr.eth.srcAddr[7:0],f1 = hdr.eth.srcAddr[7:0],f2 = hdr.eth.srcAddr[7:0] + 8w1 + 8w2,f3 = hdr.eth.srcAddr[7:0] + 8w1});
     }
     @hidden table tbl_shadowing1l110 {
         actions = {

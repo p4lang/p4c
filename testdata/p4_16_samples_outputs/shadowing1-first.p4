@@ -17,9 +17,9 @@ struct metadata_t {
 }
 
 const bit<8> i = 8w5;
-bit<8> foofunc(in bit<8> j, out bit<8> out1, out bit<8> out2) {
-    bit<8> tmp = j;
-    bit<8> i = 8w6;
+bit<8> foofunc(in bit<8> i, out bit<8> out1, out bit<8> out2) {
+    bit<8> tmp = i;
+    bit<8> i = i + 8w1;
     {
         out1 = tmp;
         bit<8> i = i + 8w2;

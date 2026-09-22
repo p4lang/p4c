@@ -22,18 +22,18 @@ struct metadata_t {
 
 const bit<8> i = 5;        // line 1 - p4c warns this is unused
 
-bit<8> foofunc(in bit<8> j,
+bit<8> foofunc(in bit<8> i,   // line 2 - shadows line 1 i, p4c warns
                out bit<8> out1,
                out bit<8> out2)
 {
-    bit<8> tmp = j;
-    bit<8> i = i + 1;      // line 2 - shadows line 1 i, p4c warns
+    bit<8> tmp = i;
+    bit<8> i = i + 1;      // line 3 - shadows line 2 i, p4c warns
     {
-        out1 = tmp;        // line 3
-        bit<8> i = i + 2;  // line 4 - shadows line 2 i, p4c warns
-        out2 = i;          // line 5
+        out1 = tmp;        // line 4
+        bit<8> i = i + 2;  // line 5 - shadows line 3 i, p4c warns
+        out2 = i;          // line 6
     }
-    return i;              // line 6
+    return i;              // line 7
 }
 
 parser fooparser(inout bit<8> i,   // line 10 - shadows line 1 i, p4c warns
