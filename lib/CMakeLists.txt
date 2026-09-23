@@ -14,6 +14,7 @@ set(LIBP4CTOOLKIT_SRCS
     error_catalog.cpp
     error_message.cpp
     exename.cpp
+    format.cpp
     gc.cpp
     big_int_util.cpp
     hash.cpp
@@ -49,6 +50,7 @@ set(LIBP4CTOOLKIT_HDRS
     error_reporter.h
     exceptions.h
     exename.h
+    format.h
     gc.h
     big_int_util.h
     hash.h
@@ -90,5 +92,6 @@ target_link_libraries(p4ctoolkit
   # These libraries are exposed by a header.
   PUBLIC absl::bits
   PUBLIC absl::strings
+  PUBLIC absl::str_format
   PUBLIC ${LIBGC_LIBRARIES}
 )
