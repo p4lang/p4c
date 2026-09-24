@@ -31,17 +31,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.dummy_0") H dummy_2;
-    @hidden action act() {
+    @hidden action gauntlet_invalid_hdr_short_circuitbmv2l48() {
         h.h = dummy_2;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_gauntlet_invalid_hdr_short_circuitbmv2l48 {
         actions = {
-            act();
+            gauntlet_invalid_hdr_short_circuitbmv2l48();
         }
-        const default_action = act();
+        const default_action = gauntlet_invalid_hdr_short_circuitbmv2l48();
     }
     apply {
-        tbl_act.apply();
+        tbl_gauntlet_invalid_hdr_short_circuitbmv2l48.apply();
     }
 }
 
