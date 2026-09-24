@@ -42,7 +42,9 @@ class DoFlattenHeaderUnion : public Transform {
     P4::TypeMap *typeMap;
     std::map<cstring, std::map<cstring, cstring>> replacementMap;
     // Replacement map needed to add element-wise header declaration in right context
-    std::map<IR::Declaration_Variable *, IR::IndexedVector<IR::Declaration>> replaceDVMap;
+    // FIXME -- doesn't really need to be indexed on the pointer, could just be the name,
+    // since we just call getDeclByName with that to get the real decl.
+    std::map<IR::Ptr<IR::Declaration_Variable>, IR::IndexedVector<IR::Declaration>> replaceDVMap;
 
  public:
     DoFlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)

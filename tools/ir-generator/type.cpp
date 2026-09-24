@@ -139,9 +139,21 @@ cstring TemplateInstantiation::toString() const {
     const char *sep = "";
     for (const auto *arg : args) {
         rv += sep;
-        if (arg->isResolved() && !base->isResolved()) rv += "const ";
+        if (arg->isResolved() && !base->isResolved()) {
+#if HAVE_LIBGC
+            rv += "const ";
+#else  /* !HAVE_LIBGC */
+            rv += "IR::shared_ptr<const ";
+#endif /* !HAVE_LIBGC */
+        }
         rv += arg->toString().c_str();
-        if (arg->isResolved() && !base->isResolved()) rv += " *";
+        if (arg->isResolved() && !base->isResolved()) {
+#if HAVE_LIBGC
+            rv += " *";
+#else  /* !HAVE_LIBGC */
+            rv += ">";
+#endif /* !HAVE_LIBGC */
+        }
         sep = ", ";
     }
     rv += '>';

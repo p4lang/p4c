@@ -82,7 +82,7 @@ struct GetHeaderStackIndex : public Inspector {
     }
 
     void postorder(const IR::MethodCallStatement *statement) override {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         if (auto *method = call->method->to<IR::Member>()) {
             if (method->member == "extract") {
                 auto dest = (*call->arguments)[0]->expression;
@@ -367,7 +367,7 @@ struct ResolveHeaderStackIndex : public Transform {
     }
 
     IR::Node *postorder(IR::MethodCallStatement *statement) override {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         if (auto *method = call->method->to<IR::Member>()) {
             if (method->member == "extract") {
                 auto dest = (*call->arguments)[0]->expression;
@@ -470,7 +470,7 @@ const IR::BFN::Parser *GetBackendParser::createBackendParser() {
             backendState->stride = true;
             LOG3("mark " << state->name << " as strided");
         }
-        for (const auto *annotation : state->getAnnotations()) {
+        for (auto annotation : state->getAnnotations()) {
             if (annotation->name == "dontmerge") {
                 // If the annotation has a thread or "gress" argument, check whether the gress
                 // matches this parser's thread and only then set dontMerge to true.
@@ -798,7 +798,7 @@ struct RewriteParserStatements : public Transform {
         BUG_CHECK(currentBit % 8 == 0, "A non-byte-aligned header type reached the backend");
 
         // Generate an extract operation for the POV bit.
-        auto *type = IR::Type::Bits::get(1);
+        auto type = IR::Type::Bits::get(1);
         auto *validBit = new IR::Member(type, hdr, "$valid");
 
         auto *extractValidBit =
@@ -821,7 +821,7 @@ struct RewriteParserStatements : public Transform {
     }
 
     const IR::Vector<IR::BFN::ParserPrimitive> *rewriteAdvance(IR::MethodCallStatement *statement) {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
 
         auto bits = (*call->arguments)[0]->expression;
 
@@ -851,10 +851,10 @@ struct RewriteParserStatements : public Transform {
 
     IR::BFN::ParserPrimitive *rewriteParserCounterSet(IR::MethodCallStatement *statement,
                                                       bool push_stack = false) {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         auto *method = call->method->to<IR::Member>();
 
-        auto *path = method->expr->to<IR::PathExpression>()->path;
+        auto path = method->expr->to<IR::PathExpression>()->path;
         cstring declName = path->name;
 
         if ((*call->arguments).size() == 1 || (push_stack && (*call->arguments).size() == 2)) {
@@ -943,10 +943,10 @@ struct RewriteParserStatements : public Transform {
 
     const IR::Vector<IR::BFN::ParserPrimitive> *rewriteParserCounterCall(
         IR::MethodCallStatement *statement) {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         auto *method = call->method->to<IR::Member>();
 
-        auto *path = method->expr->to<IR::PathExpression>()->path;
+        auto path = method->expr->to<IR::PathExpression>()->path;
         cstring declName = path->name;
 
         auto *rv = new IR::Vector<IR::BFN::ParserPrimitive>;
@@ -989,7 +989,7 @@ struct RewriteParserStatements : public Transform {
 
     const IR::Vector<IR::BFN::ParserPrimitive> *rewriteParserPriorityCall(
         IR::MethodCallStatement *statement) {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         auto *method = call->method->to<IR::Member>();
 
         auto *rv = new IR::Vector<IR::BFN::ParserPrimitive>;
@@ -1004,7 +1004,7 @@ struct RewriteParserStatements : public Transform {
 
     const IR::Vector<IR::BFN::ParserPrimitive> *preorder(
         IR::MethodCallStatement *statement) override {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         if (auto *method = call->method->to<IR::Member>()) {
             if (isExtern(method, "Checksum")) {
                 // checksums are rewritten in RewriteParserChecksums, we save the bit offset for
@@ -1253,7 +1253,7 @@ struct RewriteParserChecksums : public Transform {
     const IR::Vector<IR::BFN::ParserPrimitive> *rewriteChecksumAddOrSubtract(
         const IR::MethodCallExpression *call) {
         auto *method = call->method->to<IR::Member>();
-        auto *path = method->expr->to<IR::PathExpression>()->path;
+        auto path = method->expr->to<IR::PathExpression>()->path;
         cstring declName = path->name;
 
         auto &totalOffset = declNameToOffset[stateName][declName];
@@ -1356,7 +1356,7 @@ struct RewriteParserChecksums : public Transform {
     const IR::Vector<IR::BFN::ParserPrimitive> *rewriteChecksumVerify(
         const IR::MethodCallExpression *call) {
         auto *method = call->method->to<IR::Member>();
-        auto *path = method->expr->to<IR::PathExpression>()->path;
+        auto path = method->expr->to<IR::PathExpression>()->path;
         cstring declName = path->name;
 
         auto *rv = new IR::Vector<IR::BFN::ParserPrimitive>;
@@ -1367,7 +1367,7 @@ struct RewriteParserChecksums : public Transform {
     const IR::Vector<IR::BFN::ParserPrimitive> *rewriteSubtractAllAndDeposit(
         const IR::MethodCallExpression *call) {
         auto *method = call->method->to<IR::Member>();
-        auto *path = method->expr->to<IR::PathExpression>()->path;
+        auto path = method->expr->to<IR::PathExpression>()->path;
         cstring declName = path->name;
         auto *rv = new IR::Vector<IR::BFN::ParserPrimitive>;
         auto deposit = (*call->arguments)[0]->expression;
@@ -1386,7 +1386,7 @@ struct RewriteParserChecksums : public Transform {
 
     const IR::Vector<IR::BFN::ParserPrimitive> *rewriteChecksumCall(
         IR::MethodCallStatement *statement) {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         auto *method = call->method->to<IR::Member>();
 
         if (method->member == "add" || method->member == "subtract") {
@@ -1404,7 +1404,7 @@ struct RewriteParserChecksums : public Transform {
 
     const IR::Vector<IR::BFN::ParserPrimitive> *preorder(
         IR::MethodCallStatement *statement) override {
-        auto *call = statement->methodCall;
+        auto call = statement->methodCall;
         if (auto *method = call->method->to<IR::Member>()) {
             if (isExtern(method, "Checksum")) {
                 return rewriteChecksumCall(statement);
@@ -1419,7 +1419,7 @@ struct RewriteParserChecksums : public Transform {
         auto *method = mc->method->to<IR::Member>();
         if (!method || !isExtern(method, "Checksum")) return nullptr;
 
-        auto *path = method->expr->to<IR::PathExpression>()->path;
+        auto path = method->expr->to<IR::PathExpression>()->path;
         cstring declName = path->name;
 
         if (method->member == "verify") {
@@ -1578,7 +1578,7 @@ const IR::Node *GetBackendParser::rewriteSelectExpr(const IR::Expression *select
         if (auto *call = cast->expr->to<IR::MethodCallExpression>()) {
             if (auto *method = call->method->to<IR::Member>()) {
                 if (isExtern(method, "ParserCounter")) {
-                    auto *path = method->expr->to<IR::PathExpression>()->path;
+                    auto path = method->expr->to<IR::PathExpression>()->path;
                     cstring declName = path->name;
 
                     if (method->member == "is_zero") {
@@ -1746,7 +1746,7 @@ IR::BFN::ParserState *GetBackendParser::convertBody(IR::BFN::ParserState *state)
 
     int matchSize = 0;
 
-    for (auto *selectExpr : selectExprs) {
+    for (auto selectExpr : selectExprs) {
         nw_bitrange bitrange;
         state->selects.pushBackOrAppend(rewriteSelectExpr(selectExpr, bitShift, bitrange));
         matchSize += selectExpr->type->width_bits();
@@ -1771,10 +1771,10 @@ IR::BFN::ParserState *GetBackendParser::convertBody(IR::BFN::ParserState *state)
 }
 
 void GetBackendParser::applyRewrite(IR::BFN::ParserState *state, Transform &rewrite) {
-    for (auto *statement : state->p4State()->components) {
+    for (auto statement : state->p4State()->components) {
         // Checksum add might have added a BlockStatement
         if (auto *bs = statement->to<IR::BlockStatement>()) {
-            for (auto *s : bs->components) {
+            for (auto s : bs->components) {
                 state->statements.pushBackOrAppend(s->apply(rewrite));
             }
         } else {

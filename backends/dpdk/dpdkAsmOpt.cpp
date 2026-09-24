@@ -103,7 +103,7 @@ const IR::IndexedVector<IR::DpdkAsmStatement> *ThreadJumps::threadJumps(
         if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             auto res = label_map.find(jmp->label);
             if (res != label_map.end()) {
-                ((IR::DpdkJmpStatement *)stmt)->label = res->second;
+                const_cast<IR::DpdkJmpStatement *>(jmp)->label = res->second;
                 new_l->push_back(stmt);
             } else {
                 new_l->push_back(stmt);
@@ -138,7 +138,7 @@ const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveLabelAfterLabel::removeLabe
         if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             auto res = label_map.find(jmp->label);
             if (res != label_map.end()) {
-                ((IR::DpdkJmpStatement *)stmt)->label = res->second;
+                const_cast<IR::DpdkJmpStatement *>(jmp)->label = res->second;
                 new_l->push_back(stmt);
             } else {
                 new_l->push_back(stmt);

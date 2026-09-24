@@ -40,8 +40,8 @@ namespace P4V1 {
 // to be removed
 // ** BEGIN **
 
-const IR::Expression *P4V1::TNA_ProgramStructure::convertHashAlgorithm(Util::SourceInfo srcInfo,
-                                                                       IR::ID algorithm) {
+IR::Ptr<IR::Expression> P4V1::TNA_ProgramStructure::convertHashAlgorithm(Util::SourceInfo srcInfo,
+                                                                         IR::ID algorithm) {
     include("tofino/p4_14_prim.p4"_cs, "-D_TRANSLATE_TO_V1MODEL"_cs);
     return IR::MAU::HashFunction::convertHashAlgorithmBFN(srcInfo, algorithm);
 }
@@ -52,7 +52,7 @@ const IR::Expression *P4V1::TNA_ProgramStructure::convertHashAlgorithm(Util::Sou
 // which is used by PD Generation.
 // For future use, this can be expanded to include other info used by backend
 // which is not extracted from the frontend function call.
-const IR::P4Table *P4V1::TNA_ProgramStructure::convertTable(
+IR::Ptr<IR::P4Table> P4V1::TNA_ProgramStructure::convertTable(
     const IR::V1Table *table, cstring newName, IR::IndexedVector<IR::Declaration> &stateful,
     std::map<cstring, cstring> &mapNames) {
     // Generate p4Table from frontend call
@@ -61,8 +61,8 @@ const IR::P4Table *P4V1::TNA_ProgramStructure::convertTable(
     // Check for action selector and generate a new IR::P4Table with additional
     // annotations for hash info required for PD Generation
     cstring profile = table->action_profile.name;
-    auto *action_profile = action_profiles.get(profile);
-    auto *action_selector =
+    auto action_profile = action_profiles.get(profile);
+    auto action_selector =
         action_profile ? action_selectors.get(action_profile->selector.name) : nullptr;
 
     if (action_selector) {
@@ -87,7 +87,7 @@ const IR::P4Table *P4V1::TNA_ProgramStructure::convertTable(
     return p4Table;
 }
 
-const IR::Declaration_Instance *P4V1::TNA_ProgramStructure::convertActionProfile(
+IR::Ptr<IR::Declaration_Instance> P4V1::TNA_ProgramStructure::convertActionProfile(
     const IR::ActionProfile *action_profile, cstring newName) {
     // Generate decl from frontend call
     auto decl = ProgramStructure::convertActionProfile(action_profile, newName);
@@ -139,8 +139,8 @@ const std::vector<std::tuple<cstring, cstring, IR::Direction>> intrinsic_metadat
                     IR::Direction::InOut),
 };
 
-const IR::Expression *TnaProgramStructure::convertHashAlgorithm(Util::SourceInfo srcInfo,
-                                                                IR::ID algorithm) {
+IR::Ptr<IR::Expression> TnaProgramStructure::convertHashAlgorithm(Util::SourceInfo srcInfo,
+                                                                  IR::ID algorithm) {
     auto algo = IR::MAU::HashFunction::convertHashAlgorithmBFN(srcInfo, algorithm);
 
     auto mce = algo->to<IR::MethodCallExpression>();
@@ -190,8 +190,8 @@ void TnaProgramStructure::checkHeaderType(const IR::Type_StructLike *hdr, bool m
     }
 }
 
-const IR::Declaration_Instance *TnaProgramStructure::convertDirectCounter(const IR::Counter *c,
-                                                                          cstring newName) {
+IR::Ptr<IR::Declaration_Instance> TnaProgramStructure::convertDirectCounter(const IR::Counter *c,
+                                                                            cstring newName) {
     LOG3("Synthesizing " << c);
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     auto typeArgs = new IR::Vector<IR::Type>();
@@ -216,8 +216,8 @@ const IR::Declaration_Instance *TnaProgramStructure::convertDirectCounter(const 
     return new IR::Declaration_Instance(newName, annos, specializedType, args);
 }
 
-const IR::Declaration_Instance *TnaProgramStructure::convertDirectMeter(const IR::Meter *c,
-                                                                        cstring newName) {
+IR::Ptr<IR::Declaration_Instance> TnaProgramStructure::convertDirectMeter(const IR::Meter *c,
+                                                                          cstring newName) {
     LOG3("Synthesizing " << c);
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     auto args = new IR::Vector<IR::Argument>();
@@ -227,7 +227,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convertDirectMeter(const IR
     return new IR::Declaration_Instance(newName, annos, meterType, args);
 }
 
-const IR::Statement *TnaProgramStructure::convertMeterCall(const IR::Meter *meterToAccess) {
+IR::Ptr<IR::Statement> TnaProgramStructure::convertMeterCall(const IR::Meter *meterToAccess) {
     ExpressionConverter conv(this);
     // add a writeback to the meter field
     auto decl = get(meterMap, meterToAccess);
@@ -244,7 +244,7 @@ const IR::Statement *TnaProgramStructure::convertMeterCall(const IR::Meter *mete
     return stat;
 }
 
-const IR::Statement *TnaProgramStructure::convertCounterCall(cstring counterToAccess) {
+IR::Ptr<IR::Statement> TnaProgramStructure::convertCounterCall(cstring counterToAccess) {
     ExpressionConverter conv(this);
     auto decl = get(counterMap, counterToAccess);
     CHECK_NULL(decl);
@@ -255,9 +255,9 @@ const IR::Statement *TnaProgramStructure::convertCounterCall(cstring counterToAc
     return stat;
 }
 
-const IR::Declaration_Instance *TnaProgramStructure::convert(const IR::Register *reg,
-                                                             cstring newName,
-                                                             const IR::Type *regElementType) {
+IR::Ptr<IR::Declaration_Instance> TnaProgramStructure::convert(const IR::Register *reg,
+                                                               cstring newName,
+                                                               const IR::Type *regElementType) {
     LOG3("Synthesizing " << reg);
     if (regElementType) {
         if (auto str = regElementType->to<IR::Type_StructLike>())
@@ -472,17 +472,17 @@ IR::BlockStatement *generate_hash_block_statement(P4V1::ProgramStructure *struct
 // which is used by PD Generation.
 // For future use, this can be expanded to include other info used by backend
 // which is not extracted from the frontend function call.
-const IR::P4Table *TnaProgramStructure::convertTable(const IR::V1Table *table, cstring newName,
-                                                     IR::IndexedVector<IR::Declaration> &stateful,
-                                                     std::map<cstring, cstring> &mapNames) {
+IR::Ptr<IR::P4Table> TnaProgramStructure::convertTable(const IR::V1Table *table, cstring newName,
+                                                       IR::IndexedVector<IR::Declaration> &stateful,
+                                                       std::map<cstring, cstring> &mapNames) {
     // Generate p4Table from frontend call
     auto p4Table = ProgramStructure::convertTable(table, newName, stateful, mapNames);
 
     // Check for action selector and generate a new IR::P4Table with additional
     // annotations for hash info required for PD Generation
     cstring profile = table->action_profile.name;
-    auto *action_profile = action_profiles.get(profile);
-    auto *action_selector =
+    auto action_profile = action_profiles.get(profile);
+    auto action_selector =
         action_profile ? action_selectors.get(action_profile->selector.name) : nullptr;
 
     if (action_selector) {
@@ -509,8 +509,8 @@ const IR::P4Table *TnaProgramStructure::convertTable(const IR::V1Table *table, c
     return p4Table;
 }
 
-IR::ConstructorCallExpression *TnaProgramStructure::createHashExtern(const IR::Expression *expr,
-                                                                     const IR::Type *ttype) {
+IR::MutablePtr<IR::ConstructorCallExpression> TnaProgramStructure::createHashExtern(
+    const IR::Expression *expr, const IR::Type *ttype) {
     if (auto cce = expr->to<IR::ConstructorCallExpression>()) {
         auto declArgs = new IR::Vector<IR::Argument>();
         auto path = cce->constructedType->to<IR::Type_Specialized>();
@@ -532,9 +532,9 @@ IR::ConstructorCallExpression *TnaProgramStructure::createHashExtern(const IR::E
     }
 }
 
-const IR::Declaration_Instance *TnaProgramStructure::convertActionProfile(
+IR::Ptr<IR::Declaration_Instance> TnaProgramStructure::convertActionProfile(
     const IR::ActionProfile *action_profile, cstring newName) {
-    auto *action_selector = action_selectors.get(action_profile->selector.name);
+    auto action_selector = action_selectors.get(action_profile->selector.name);
     if (!action_profile->selector.name.isNullOrEmpty() && !action_selector)
         error("Cannot locate action selector %1%", action_profile->selector);
     const IR::Type *type = nullptr;
@@ -643,14 +643,14 @@ void TnaProgramStructure::addEgressParams(IR::ParameterList *paramList) {
 
 // Reference to P4-14 standard metadata is converted to reference to
 // meta.standard_metadata in tna.
-const IR::Expression *TnaProgramStructure::stdMetaReference(const IR::Parameter *param) {
+IR::Ptr<IR::Expression> TnaProgramStructure::stdMetaReference(const IR::Parameter *param) {
     auto result = new IR::Member(new IR::PathExpression(param->name), IR::ID("standard_metadata"));
     auto type = types.get("standard_metadata_t"_cs);
     if (type != nullptr) result->type = type;
     return result;
 }
 
-const IR::Type_Control *TnaProgramStructure::controlType(IR::ID name) {
+IR::Ptr<IR::Type_Control> TnaProgramStructure::controlType(IR::ID name) {
     /// look up the map build for control type
     auto params = new IR::ParameterList;
 
@@ -717,8 +717,8 @@ const IR::Expression *TnaProgramStructure::counterType(const IR::CounterOrMeter 
     return new IR::Member(cm->srcInfo, enumref, kind);
 }
 
-const IR::Declaration_Instance *TnaProgramStructure::convert(const IR::CounterOrMeter *cm,
-                                                             cstring newName) {
+IR::Ptr<IR::Declaration_Instance> TnaProgramStructure::convert(const IR::CounterOrMeter *cm,
+                                                               cstring newName) {
     LOG3("Synthesizing " << cm);
     IR::ID ext;
     if (cm->is<IR::Counter>())
@@ -841,10 +841,10 @@ class FindHeaderReference : public Inspector {
 
         // selector key could also refer to intrinsic metadata
         cstring profile = tbl->action_profile.name;
-        auto *action_profile = structure->action_profiles.get(profile);
-        auto *action_selector = action_profile
-                                    ? structure->action_selectors.get(action_profile->selector.name)
-                                    : nullptr;
+        auto action_profile = structure->action_profiles.get(profile);
+        auto action_selector = action_profile
+                                   ? structure->action_selectors.get(action_profile->selector.name)
+                                   : nullptr;
 
         if (action_selector != nullptr) {
             auto flc = structure->field_list_calculations.get(action_selector->key.name);
@@ -892,7 +892,7 @@ const IR::Node *FixApplyStatement::postorder(IR::MethodCallExpression *mce) {
     return mce;
 }
 
-IR::Vector<IR::Argument> *TnaProgramStructure::createApplyArguments(cstring name) {
+IR::Ptr<IR::Vector<IR::Argument>> TnaProgramStructure::createApplyArguments(cstring name) {
     auto args = new IR::Vector<IR::Argument>();
     args->push_back(new IR::Argument(conversionContext->header->clone()));
     args->push_back(new IR::Argument(conversionContext->userMetadata->clone()));
@@ -970,8 +970,8 @@ gress_t TnaProgramStructure::getGress(cstring name) {
     return currentGress;
 }
 
-const IR::P4Control *TnaProgramStructure::convertControl(const IR::V1Control *control,
-                                                         cstring newName) {
+IR::Ptr<IR::P4Control> TnaProgramStructure::convertControl(const IR::V1Control *control,
+                                                           cstring newName) {
     LOG3("Converting backend " << control->name);
     collectHeaderReference(control);
     auto ctrl = ProgramStructure::convertControl(control, newName);
@@ -1005,7 +1005,7 @@ const IR::P4Control *TnaProgramStructure::convertControl(const IR::V1Control *co
                 auto *member = new IR::Member(
                     new IR::Member(new IR::PathExpression("meta"), IR::ID("bridged_header")),
                     IR::ID(fn));
-                auto *bridgedMember = info.components.back()->apply(cloner);
+                auto bridgedMember = info.components.back()->apply(cloner);
                 bridgedMember = bridgedMember->apply(ConvertConcreteHeaderRefToPathExpression());
                 auto *assignment = new IR::AssignmentStatement(member, bridgedMember);
                 body->components.push_back(assignment);
@@ -1019,7 +1019,7 @@ const IR::P4Control *TnaProgramStructure::convertControl(const IR::V1Control *co
 // Adapted from frontend with changes on how name annotation is generated.
 // Specifically, this function generates local name annotation for pvs and
 // parser state instead of global name annotation.
-const IR::ParserState *TnaProgramStructure::convertParser(
+IR::Ptr<IR::ParserState> TnaProgramStructure::convertParser(
     const IR::V1Parser *parser, IR::IndexedVector<IR::Declaration> *stateful) {
     ExpressionConverter conv(this);
 
@@ -1300,7 +1300,8 @@ void TnaProgramStructure::createEgressParser() {
         error("No transition from a parser to ingress pipeline found");
 }
 
-IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createIngressParserStates() {
+IR::MutablePtr<IR::IndexedVector<IR::ParserState>>
+TnaProgramStructure::createIngressParserStates() {
     auto states = new IR::IndexedVector<IR::ParserState>();
     // Add a state that skips over any padding between the phase 0 data and the
     // beginning of the packet.
@@ -1354,7 +1355,7 @@ IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createIngressParserStat
     return states;
 }
 
-const IR::ParserState *TnaProgramStructure::createEmptyMirrorState(cstring nextState) {
+IR::Ptr<IR::ParserState> TnaProgramStructure::createEmptyMirrorState(cstring nextState) {
     // Add a state that skips over compiler generated byte
     auto *skipToPacketState =
         BFN::createGeneratedParserState("mirrored"_cs, {BFN::createAdvanceCall("pkt"_cs, 8)},
@@ -1362,10 +1363,10 @@ const IR::ParserState *TnaProgramStructure::createEmptyMirrorState(cstring nextS
     return skipToPacketState;
 }
 
-const IR::ParserState *TnaProgramStructure::createMirrorState(gress_t gress, unsigned index,
-                                                              const IR::Expression *expr,
-                                                              cstring headerType,
-                                                              cstring nextState) {
+IR::Ptr<IR::ParserState> TnaProgramStructure::createMirrorState(gress_t gress, unsigned index,
+                                                                const IR::Expression *expr,
+                                                                cstring headerType,
+                                                                cstring nextState) {
     auto statements = new IR::IndexedVector<IR::StatOrDecl>();
     auto tmp = cstring::to_cstring(gress) + "_mirror_" + std::to_string(index);
     auto decl = new IR::Declaration_Variable(IR::ID(tmp), new IR::Type_Name(headerType));
@@ -1430,8 +1431,8 @@ const IR::ParserState *TnaProgramStructure::createMirrorState(gress_t gress, uns
     return newState;
 }
 
-const IR::SelectCase *TnaProgramStructure::createSelectCase(gress_t gress, unsigned digestId,
-                                                            const IR::ParserState *newState) {
+IR::Ptr<IR::SelectCase> TnaProgramStructure::createSelectCase(gress_t gress, unsigned digestId,
+                                                              const IR::ParserState *newState) {
     unsigned source = 1 << 0;
     if (gress == EGRESS) source |= 1 << 1;
 
@@ -1440,7 +1441,7 @@ const IR::SelectCase *TnaProgramStructure::createSelectCase(gress_t gress, unsig
     return selectCase;
 }
 
-IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createMirrorStates() {
+IR::MutablePtr<IR::IndexedVector<IR::ParserState>> TnaProgramStructure::createMirrorStates() {
     auto states = new IR::IndexedVector<IR::ParserState>();
     auto selectCases = new IR::Vector<IR::SelectCase>();
 
@@ -1476,10 +1477,10 @@ IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createMirrorStates() {
     return states;
 }
 
-const IR::ParserState *TnaProgramStructure::createResubmitState(gress_t gress, unsigned index,
-                                                                const IR::Expression *expr,
-                                                                cstring headerType,
-                                                                cstring nextState) {
+IR::Ptr<IR::ParserState> TnaProgramStructure::createResubmitState(gress_t gress, unsigned index,
+                                                                  const IR::Expression *expr,
+                                                                  cstring headerType,
+                                                                  cstring nextState) {
     auto statements = new IR::IndexedVector<IR::StatOrDecl>();
     auto tmp = cstring::to_cstring(gress) + "_resubmit_" + std::to_string(index);
     auto decl = new IR::Declaration_Variable(IR::ID(tmp), new IR::Type_Name(headerType));
@@ -1524,7 +1525,7 @@ const IR::ParserState *TnaProgramStructure::createResubmitState(gress_t gress, u
     return newState;
 }
 
-IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createResubmitStates() {
+IR::MutablePtr<IR::IndexedVector<IR::ParserState>> TnaProgramStructure::createResubmitStates() {
     auto states = new IR::IndexedVector<IR::ParserState>();
     auto selectCases = new IR::Vector<IR::SelectCase>();
 
@@ -1551,7 +1552,7 @@ IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createResubmitStates() 
     return states;
 }
 
-IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createEgressParserStates() {
+IR::MutablePtr<IR::IndexedVector<IR::ParserState>> TnaProgramStructure::createEgressParserStates() {
     auto states = new IR::IndexedVector<IR::ParserState>();
     P4::CloneExpressions cloner;
 
@@ -1568,7 +1569,7 @@ IR::IndexedVector<IR::ParserState> *TnaProgramStructure::createEgressParserState
             auto *member = new IR::Member(
                 new IR::Member(new IR::PathExpression("meta"), IR::ID("bridged_header")),
                 IR::ID(fn));
-            auto *bridgedMember = info.components.back()->apply(cloner);
+            auto bridgedMember = info.components.back()->apply(cloner);
             bridgedMember = bridgedMember->apply(ConvertConcreteHeaderRefToPathExpression());
             auto *assignment = new IR::AssignmentStatement(bridgedMember, member);
             bridgeStateStmts.push_back(assignment);
@@ -2551,13 +2552,13 @@ unsigned long computeHashOverFieldList(const IR::Expression *expr,
     return hashIndexMap[fieldsStringHash];
 }
 
-IR::Expression *CollectDigestFields::flatten(const IR::ListExpression *args) {
+IR::Ptr<IR::Expression> CollectDigestFields::flatten(const IR::ListExpression *args) {
     IR::Vector<IR::Expression> components;
-    for (const auto *expr : args->components) {
+    for (auto expr : args->components) {
         if (const auto *list_arg = expr->to<IR::ListExpression>()) {
-            auto *flattened = flatten(list_arg);
+            auto flattened = flatten(list_arg);
             BUG_CHECK(flattened->is<IR::ListExpression>(), "flatten must return ListExpression");
-            for (const auto *comp : flattened->to<IR::ListExpression>()->components)
+            for (auto comp : flattened->to<IR::ListExpression>()->components)
                 components.push_back(comp);
         } else {
             components.push_back(expr);
@@ -2625,7 +2626,7 @@ IR::Node *FixParserPriority::preorder(IR::BaseAssignmentStatement *assign) {
     return assign;
 }
 
-const IR::P4Program *TnaProgramStructure::create(Util::SourceInfo info) {
+IR::Ptr<IR::P4Program> TnaProgramStructure::create(Util::SourceInfo info) {
     ////////////////////////////////////////////////////////////////////
     // the collect* passes has side-effect on 'declarations' due to the use of
     // convertControl functions. This is an undesirable behavior. We will make

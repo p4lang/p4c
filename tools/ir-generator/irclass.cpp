@@ -200,10 +200,20 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     }
     out << "}  // namespace P4" << std::endl;
 
+#if !HAVE_LIBGC
+    out << "#pragma GCC diagnostic ignored \"-Wvirtual-move-assign\"\n";
+    // FIXME -- Not sure why the node class declarations sometimes (but not always)
+    // trigger this warning.
+#endif
+
     for (auto e : elements) {
         e->generate_hdr(out);
         e->generate_impl(impl);
     }
+
+#if !HAVE_LIBGC
+    out << "#pragma GCC diagnostic pop\n";
+#endif
 
     out << "#endif /* " << macroname << " */" << std::endl;
 
@@ -326,9 +336,13 @@ void EmitBlock::generate_impl(std::ostream &out) const {
 
 void IrMethod::generate_proto(std::ostream &out, bool fullname, bool defaults) const {
     if (rtype) {
-        if (rtype->isResolved()) out << "const ";
+        if (rtype->isResolved()) {
+            out << "IR::Ptr<";
+        }
         out << rtype->toString() << " ";
-        if (rtype->isResolved()) out << "*";
+        if (rtype->isResolved()) {
+            out << "> ";
+        }
     }
     if (fullname && !isFriend) out << "IR::" << clss->containedIn << clss->name << "::";
     out << name << "(";
@@ -622,7 +636,7 @@ void IrEnumType::generate_hdr(std::ostream &out) const {
 
 void IrField::resolve() { resolveType(type); }
 
-void IrField::resolveType(const Type *type) {
+void IrField::resolveType(const Type *type) const {
     auto tmpl = dynamic_cast<const TemplateInstantiation *>(type);
     const IrClass *cls = type->resolve(clss ? clss->containedIn : nullptr);
     if (cls) {
@@ -655,6 +669,11 @@ void IrField::resolveType(const Type *type) {
     }
 }
 
+const IrClass *IrField::typeClass() const {
+    resolveType(type);
+    return type->resolve(clss ? clss->containedIn : nullptr);
+}
+
 void IrField::generate(std::ostream &out, bool asField) const {
     if (asField) {
         out << IrClass::indent;
@@ -663,25 +682,58 @@ void IrField::generate(std::ostream &out, bool asField) const {
     }
 
     const IrClass *cls = type->resolve(clss ? clss->containedIn : nullptr);
-    if (cls != nullptr && !isInline) out << "const ";
+    if (cls != nullptr && !isInline) {
+        if (asField)
+            out << "IR::Ptr<";
+        else
+            out << "const ";
+    }
     out << type->toString();
-    if (cls != nullptr && !isInline) out << "*";
+    if (cls != nullptr && !isInline) {
+        if (asField)
+            out << ">";
+        else
+            out << "*";
+    }
     out << " " << name << type->declSuffix();
     if (asField) {
         if (!isStatic) {
-            if (!initializer.isNullOrEmpty())
+            if (!initializer.isNullOrEmpty()) {
                 out << " = " << initializer;
-            else if (cls != nullptr && !isInline)
+            } else if (cls != nullptr && !isInline) {
                 out << " = nullptr";
+            }
         }
         out << ";";
         out << std::endl;
     }
 }
 
-void IrField::generate_impl(std::ostream &) const {
+void IrField::generate_impl(std::ostream &out) const {
     if (!isStatic) return;
-    // FIXME -- for now statics are manually generated elsewhere
+
+    out << LineDirective(srcInfo);
+    if (isConst) out << "const ";
+
+    const IrClass *cls = typeClass();
+
+    if (cls != nullptr && !isInline) {
+        out << "IR::Ptr<";
+    }
+    out << type->toString();
+    if (cls != nullptr && !isInline) {
+        out << ">";
+    }
+    out << " IR::" << clss->containedIn << clss->name << "::" << name << type->declSuffix();
+
+    if (!initializer.isNullOrEmpty()) {
+        out << " = " << initializer;
+    } else if (cls != nullptr && !isInline) {
+        out << " = nullptr";
+    }
+    out << ";";
+    out << std::endl;
+    if (!srcInfo.isValid()) out << LineDirective();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

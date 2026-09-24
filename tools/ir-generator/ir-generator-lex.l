@@ -99,6 +99,7 @@ static std::string      comment_block;
 
 [A-Za-z_][A-Za-z0-9_]*  { yylval.str = cstring(yytext); return IDENTIFIER; }
 \"(\\.|[^\\"])*\"       { yylval.str = cstring(yytext); return STRING; }
+\"(\\.|[^\\"])*\"_cs    { yylval.str = cstring(yytext); return STRING; }
 <PARSE_BRACKET>"{"      { BEGIN(NORMAL); return *yytext; }
 
 "{"                     { block_buffer = yytext;

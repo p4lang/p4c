@@ -31,7 +31,7 @@ TEST_F(P4C_IR, Transform) {
 
     auto c = new IR::Constant(2);
     IR::Expression *e = new IR::Add(Util::SourceInfo(), c, c);
-    auto *n = e->apply(TestTrans(c));
+    auto n = e->apply(TestTrans(c));
     EXPECT_EQ(e, n);
 }
 
@@ -58,7 +58,7 @@ TEST_F(P4C_IR, InlineBlock) {
                             }))),
     }));
 
-    const auto *n = stmt->apply(TestTrans(c4));
+    auto n = stmt->apply(TestTrans(c4));
     ASSERT_TRUE(n);
     const auto *bl0 = n->to<IR::BlockStatement>();
     ASSERT_TRUE(bl0);

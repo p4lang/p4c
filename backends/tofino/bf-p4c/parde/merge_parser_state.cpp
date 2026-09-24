@@ -32,8 +32,8 @@ struct CollectStateUses : public ParserInspector {
     bool preorder(const IR::BFN::ParserState *state) {
         if (!n_transition_to.count(state)) n_transition_to[state] = 0;
 
-        for (const auto *transition : state->transitions) {
-            auto *next_state = transition->next;
+        for (auto transition : state->transitions) {
+            auto next_state = transition->next;
             if (!next_state) continue;
 
             n_transition_to[next_state]++;
@@ -91,8 +91,8 @@ class ComputeMergeableState : public ParserInspector {
         // Termination State
         if (state->transitions.size() == 0) return;
 
-        auto *transition = *state->transitions.begin();
-        auto *next_state = transition->next;
+        auto transition = *state->transitions.begin();
+        auto next_state = transition->next;
         if (!next_state) return;
 
         // Dont merge loop header with its previous state
@@ -151,13 +151,13 @@ class ComputeMergeableState : public ParserInspector {
             auto &st = *itr;
             BUG_CHECK(st->transitions.size() == 1 || itr == states.rend() - 1,
                       "branching state can not be merged, unless the last");
-            auto *transition = *st->transitions.begin();
+            auto transition = *st->transitions.begin();
 
-            for (const auto *stmt : st->statements) {
+            for (auto stmt : st->statements) {
                 auto s = stmt->apply(RightShiftPacketRVal(shifted));
                 extractions.push_back(s->to<IR::BFN::ParserPrimitive>());
             }
-            for (const auto *save : transition->saves) {
+            for (auto save : transition->saves) {
                 saves.push_back(
                     (save->apply(RightShiftPacketRVal(shifted)))->to<IR::BFN::SaveToRegister>());
             }
@@ -170,7 +170,7 @@ class ComputeMergeableState : public ParserInspector {
                 is_first = false;
             }
             if (itr != states.rend() - 1) {
-                for (const auto *save : transition->saves) {
+                for (auto save : transition->saves) {
                     saves.push_back((save->apply(RightShiftPacketRVal(shifted)))
                                         ->to<IR::BFN::SaveToRegister>());
                 }
@@ -181,14 +181,14 @@ class ComputeMergeableState : public ParserInspector {
         }
 
         IR::Vector<IR::BFN::Select> selects;
-        for (const auto *select : tail->selects)
+        for (auto select : tail->selects)
             selects.push_back(
                 (select->apply(RightShiftPacketRVal(shifted, true)))->to<IR::BFN::Select>());
 
         auto *merged_state = new IR::BFN::ParserState(nullptr, name, tail->gress);
         merged_state->selects = selects;
         merged_state->statements = extractions;
-        for (const auto *transition : tail->transitions) {
+        for (auto transition : tail->transitions) {
             auto *new_transition = createMergedTransition(shifted, transition, saves);
             merged_state->transitions.push_back(new_transition);
         }
@@ -204,7 +204,7 @@ class ComputeMergeableState : public ParserInspector {
         int shifted, const IR::BFN::Transition *prev_transition,
         const IR::Vector<IR::BFN::SaveToRegister> &prev_saves) {
         IR::Vector<IR::BFN::SaveToRegister> saves = prev_saves;
-        for (const auto *save : prev_transition->saves) {
+        for (auto save : prev_transition->saves) {
             saves.push_back(
                 (save->apply(RightShiftPacketRVal(shifted)))->to<IR::BFN::SaveToRegister>());
         }
@@ -260,7 +260,7 @@ struct WriteBackMergedState : public ParserModifier {
 
     bool preorder(IR::BFN::Transition *transition) override {
         auto *original_transition = getOriginal<IR::BFN::Transition>();
-        auto *next = original_transition->next;
+        auto next = original_transition->next;
         if (replace_map.count(next)) {
             LOG4("Replacing " << transition->next->name << " with " << replace_map.at(next)->name);
             transition->next = replace_map.at(next);

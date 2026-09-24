@@ -302,11 +302,11 @@ class Substitutions : public SubstituteParameters {
 }  // namespace
 
 template <class T>
-const T *PerInstanceSubstitutions::rename(ReferenceMap *refMap, const IR::Node *node) {
+IR::Ptr<T> PerInstanceSubstitutions::rename(ReferenceMap *refMap, const IR::Node *node) {
     Substitutions rename(refMap, &paramSubst, &tvs, &renameMap);
     auto convert = node->apply(rename);
     CHECK_NULL(convert);
-    auto result = convert->to<T>();
+    IR::Ptr<T> result = convert->to<T>();
     CHECK_NULL(result);
     return result;
 }
@@ -443,10 +443,10 @@ Visitor::profile_t GeneralInliner::init_apply(const IR::Node *node) {
 template <class P4Block, class P4BlockType>
 void GeneralInliner::inline_subst(P4Block *caller,
                                   IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
-                                  const P4BlockType *P4Block::*blockType) {
+                                  P4BlockType P4Block::*blockType) {
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
-    P4BlockType *type = (caller->*blockType)->clone();
+    auto *type = (caller->*blockType)->clone();
     IR::Vector<IR::Annotation> annos = type->annotations;
     for (auto s : caller->*blockLocals) {
         /* Even if we inline the block, the declaration may still be needed.
@@ -470,7 +470,7 @@ void GeneralInliner::inline_subst(P4Block *caller,
             workToDo->substitutions[inst] = substs;
 
             // Propagate annotations
-            for (const auto *ann : (callee->*blockType)->annotations) {
+            for (const IR::Annotation *ann : (callee->*blockType)->annotations) {
                 if (Inline::isAnnotationNoPropagate(ann->name)) continue;
                 IR::Annotations::addIfNew(annos, ann);
             }
@@ -607,7 +607,7 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
         // Parsers are inlined in the ParserState processor
         return statement;
 
-    auto callee = called->to<IR::P4Control>();
+    IR::Ptr<IR::P4Control> callee = called->to<IR::P4Control>();
     IR::IndexedVector<IR::StatOrDecl> body;
     // clone the substitution: it may be reused for multiple invocations
     auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
@@ -771,7 +771,7 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
         CHECK_NULL(decl);
 
         auto called = workToDo->declToCallee[decl];
-        auto callee = called->to<IR::P4Parser>();
+        IR::Ptr<IR::P4Parser> callee = called->to<IR::P4Parser>();
         // clone the substitution: it may be reused for multiple invocations
         auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
 

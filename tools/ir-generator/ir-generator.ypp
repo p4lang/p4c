@@ -413,6 +413,7 @@ expression
     | expression '(' ')'                { $$ = $1 + "()"; }
     | expression '+' '+'                { $$ = $1 + "++"; }
     | NEW name                          { $$ = "new " + $2; }
+    | '&' name                          { $$ = "&" + $2; }
     ;
 
 name: IDENTIFIER

@@ -116,7 +116,7 @@ Obj *modify(Obj *obj, Selectors &&...selectors) {
 /// @brief Similar to modify, but accepts constant argument which is cloned. Therefore, the result
 /// is a different object then @p obj. @sa `Traversal::modify`.
 template <typename Obj, typename... Selectors>
-Obj *apply(const Obj *obj, Selectors &&...selectors) {
+Obj *apply(IR::Ptr<Obj> obj, Selectors &&...selectors) {
     return Detail::Traverse::modify(obj->clone(), std::forward<Selectors>(selectors)...);
 }
 

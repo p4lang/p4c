@@ -9,11 +9,11 @@ namespace P4 {
 
 void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Node *errorNode) {
     if (annotated == nullptr) return;
-    const auto *anno = annotated->getAnnotation(IR::Annotation::deprecatedAnnotation);
+    const IR::Annotation *anno = annotated->getAnnotation(IR::Annotation::deprecatedAnnotation);
     if (anno == nullptr) return;
 
     std::string message;
-    for (const auto *a : anno->getExpr()) {
+    for (const IR::Expression *a : anno->getExpr()) {
         if (const auto *str = a->to<IR::StringLiteral>()) message += str->value;
     }
     ::P4::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,

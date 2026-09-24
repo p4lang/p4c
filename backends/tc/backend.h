@@ -348,7 +348,7 @@ class ConvertToBackendIR : public Inspector {
     ordered_map<unsigned, cstring> tableIDList;
     ordered_map<unsigned, cstring> actionIDList;
     ordered_map<unsigned, unsigned> tableKeysizeList;
-    safe_vector<const IR::P4Table *> add_on_miss_tables;
+    safe_vector<IR::Ptr<IR::P4Table>> add_on_miss_tables;
     ordered_map<cstring, std::pair<cstring, cstring> *> tablePermissions;
     ordered_map<cstring, const IR::Type_Struct *> ControlStructPerExtern;
     ordered_map<cstring, struct ExternBlock *> externsInfo;
@@ -365,12 +365,12 @@ class ConvertToBackendIR : public Inspector {
     void postorder(const IR::P4Program *p) override;
     void postorder(const IR::Declaration_Instance *d) override;
     void postorder(const IR::Type_Struct *ts) override;
-    safe_vector<const IR::TCKey *> processExternConstructor(const IR::Type_Extern *extn,
-                                                            const IR::Declaration_Instance *decl,
-                                                            struct ExternInstance *instance);
-    safe_vector<const IR::TCKey *> processExternControlPath(const IR::Type_Extern *extn,
-                                                            const IR::Declaration_Instance *decl,
-                                                            cstring eName);
+    safe_vector<IR::Ptr<IR::TCKey>> processExternConstructor(const IR::Type_Extern *extn,
+                                                             const IR::Declaration_Instance *decl,
+                                                             struct ExternInstance *instance);
+    safe_vector<IR::Ptr<IR::TCKey>> processExternControlPath(const IR::Type_Extern *extn,
+                                                             const IR::Declaration_Instance *decl,
+                                                             cstring eName);
     cstring getControlPathKeyAnnotation(const IR::StructField *field);
     unsigned GetAccessNumericValue(std::string_view access);
     bool isDuplicateAction(const IR::P4Action *action);
@@ -402,11 +402,11 @@ class ConvertToBackendIR : public Inspector {
     bool hasExecuteMethod(const IR::Type_Extern *extn);
     void addExternTypeInstance(const IR::Declaration_Instance *decl,
                                IR::TCExternInstance *tcExternInstance, cstring eName);
-    safe_vector<const IR::TCKey *> HandleTypeNameStructField(const IR::StructField *field,
-                                                             const IR::Type_Extern *extn,
-                                                             const IR::Declaration_Instance *decl,
-                                                             int &kId, cstring annoName);
-    safe_vector<const IR::TCKey *> processCounterControlPathKeys(
+    safe_vector<IR::Ptr<IR::TCKey>> HandleTypeNameStructField(const IR::StructField *field,
+                                                              const IR::Type_Extern *extn,
+                                                              const IR::Declaration_Instance *decl,
+                                                              int &kId, cstring annoName);
+    safe_vector<IR::Ptr<IR::TCKey>> processCounterControlPathKeys(
         const IR::Type_Struct *extern_control_path, const IR::Type_Extern *extn,
         const IR::Declaration_Instance *decl);
     CounterType toCounterType(const int type);
