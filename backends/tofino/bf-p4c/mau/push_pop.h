@@ -123,44 +123,44 @@ class HeaderPushPop : public MauTransform {
         return pipe;
     }
 
-    void copy_hdr(IR::Vector<IR::MAU::Primitive> *rv, const IR::Type_StructLike *hdr,
+    void copy_hdr(IR::Vector<IR::MAU::MauPrimitive> *rv, const IR::Type_StructLike *hdr,
                   const IR::HeaderRef *to, const IR::HeaderRef *from) {
         for (auto field : hdr->fields) {
             auto dst = new IR::Member(field->type, to, field->name);
             auto src = new IR::Member(field->type, from, field->name);
-            rv->push_back(new IR::MAU::Primitive("modify_field"_cs, dst, src));
+            rv->push_back(new IR::MAU::MauPrimitive("modify_field"_cs, dst, src));
         }
     }
     IR::Node *do_push(const IR::HeaderRef *stack, int count) {
         auto &info = stacks->at(stack->toString());
-        auto *rv = new IR::Vector<IR::MAU::Primitive>;
+        auto *rv = new IR::Vector<IR::MAU::MauPrimitive>;
         for (int i = info.size - 1; i >= count; --i)
             copy_hdr(rv, stack->baseRef()->type,
                      new IR::HeaderStackItemRef(stack, new IR::Constant(i)),
                      new IR::HeaderStackItemRef(stack, new IR::Constant(i - count)));
         auto *valid = new IR::Member(IR::Type::Bits::get(info.size + info.maxpop + info.maxpush),
                                      stack, "$stkvalid");
-        rv->push_back(new IR::MAU::Primitive(
+        rv->push_back(new IR::MAU::MauPrimitive(
             "modify_field"_cs, MakeSlice(valid, info.maxpop, info.maxpop + info.size - 1),
             MakeSlice(valid, info.maxpop + count, info.maxpop + info.size + count - 1)));
         return rv;
     }
     IR::Node *do_pop(const IR::HeaderRef *stack, int count) {
         auto &info = stacks->at(stack->toString());
-        auto *rv = new IR::Vector<IR::MAU::Primitive>;
+        auto *rv = new IR::Vector<IR::MAU::MauPrimitive>;
         for (int i = count; i < info.size; ++i)
             copy_hdr(rv, stack->baseRef()->type,
                      new IR::HeaderStackItemRef(stack, new IR::Constant(i - count)),
                      new IR::HeaderStackItemRef(stack, new IR::Constant(i)));
         auto *valid = new IR::Member(IR::Type::Bits::get(info.size + info.maxpop + info.maxpush),
                                      stack, "$stkvalid");
-        rv->push_back(new IR::MAU::Primitive(
+        rv->push_back(new IR::MAU::MauPrimitive(
             "modify_field"_cs, MakeSlice(valid, info.maxpop, info.maxpop + info.size - 1),
             MakeSlice(valid, info.maxpop - count, info.maxpop + info.size - count - 1)));
         return rv;
     }
 
-    IR::Node *preorder(IR::MAU::Primitive *prim) override {
+    IR::Node *preorder(IR::MAU::MauPrimitive *prim) override {
         BUG_CHECK(stacks != nullptr,
                   "No HeaderStackInfo; was HeaderPushPop "
                   "applied to a non-Pipe node?");

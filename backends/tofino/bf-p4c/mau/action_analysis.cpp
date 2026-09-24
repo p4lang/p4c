@@ -455,7 +455,7 @@ bool ActionAnalysis::preorder(const IR::Cast *) {
     BUG("No casts should ever reach this point in the Tofino backend");
 }
 
-bool ActionAnalysis::preorder(const IR::MAU::Primitive *prim) {
+bool ActionAnalysis::preorder(const IR::MAU::MauPrimitive *prim) {
     LOG4("ActionAnalysis preorder on Primitive : " << *prim);
     BUG("%s: Primitive %s was not correctly converted in Instruction Selection", prim->srcInfo,
         prim);
