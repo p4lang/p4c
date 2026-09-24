@@ -429,6 +429,22 @@ class FindUninitialized : public Inspector {
             }
     }
 
+    // Local headers start invalid, including temporaries created after ResetHeaders.
+    void initHeaderLocal(const IR::Declaration_Variable *variable) {
+        if (auto storage = definitions->getStorage(variable))
+            headerDefs->setValueToStorage(storage, TernaryBool::No);
+    }
+
+    void initHeaderLocals(const IR::IndexedVector<IR::Declaration> &locals) {
+        for (auto local : locals)
+            if (auto variable = local->to<IR::Declaration_Variable>()) initHeaderLocal(variable);
+    }
+
+    bool preorder(const IR::Declaration_Variable *variable) override {
+        initHeaderLocal(variable);
+        return false;
+    }
+
     void checkOutParameters(const IR::IDeclaration *block, const IR::ParameterList *parameters,
                             Definitions *defs) {
         LOG2("Checking output parameters of " << block << "; definitions are " << IndentCtl::endl
@@ -460,6 +476,7 @@ class FindUninitialized : public Inspector {
         currentPoint.assign(control);
         headerDefs->clear();
         initHeaderParams(control->getApplyMethodType()->parameters);
+        initHeaderLocals(control->controlLocals);
         visitVirtualMethods(control->controlLocals);
         unreachable = false;
         visit(control->body);
@@ -531,6 +548,7 @@ class FindUninitialized : public Inspector {
         currentPoint.assign(parser);
         headerDefs->clear();
         initHeaderParams(parser->getApplyMethodType()->parameters);
+        initHeaderLocals(parser->parserLocals);
         visitVirtualMethods(parser->parserLocals);
         unreachable = false;
 
@@ -988,6 +1006,43 @@ class FindUninitialized : public Inspector {
         return true;
     }
 
+    // For whole-header copies, ignore uninitialized fields on control-flow
+    // paths where the source header is invalid: the destination stays invalid.
+    // On paths where the source is valid, its fields must be initialized;
+    // setValid() alone does not initialize them.
+    // Check field definitions at validity updates, before control-flow joins
+    // lose the relationship between validity and field initialization.
+    bool hasUninitializedFields(const StorageLocation *storage, const Definitions *defs) {
+        if (!defs->getPoints(LocationSet(storage))->containsBeforeStart()) return false;
+        if (auto structure = storage->to<StructLocation>()) {
+            if (structure->isHeader()) {
+                if (headerDefs->find(storage) == TernaryBool::No) return false;
+                auto validPoints = defs->getPoints(storage->getValidBits());
+                for (const auto &point : *validPoints) {
+                    if (point.isBeforeStart()) return true;
+                    if (auto call = point.last()->to<IR::MethodCallStatement>()) {
+                        auto method = MethodInstance::resolve(call, refMap, typeMap);
+                        if (auto builtin = method->to<BuiltInMethod>())
+                            if (builtin->name == IR::Type_Header::setInvalid) continue;
+                    }
+                    auto validDefs = definitions->getDefinitions(point);
+                    if (validDefs->getPoints(LocationSet(storage))->containsBeforeStart())
+                        return true;
+                }
+                return false;
+            }
+            for (auto field : structure->fields())
+                if (hasUninitializedFields(field, defs)) return true;
+            return false;
+        }
+        if (auto array = storage->to<ArrayLocation>()) {
+            for (auto element : *array)
+                if (hasUninitializedFields(element, defs)) return true;
+            return false;
+        }
+        return true;
+    }
+
     // Keeps track of which expression producers have uses in the given expression
     void registerUses(const IR::Expression *expression, bool reportUninitialized = true) {
         LOG3("FU Registering uses for '" << expression << "'");
@@ -1011,17 +1066,24 @@ class FindUninitialized : public Inspector {
 
         auto points = currentDefinitions->getPoints(*read);
 
-        if (reportUninitialized && !lhs && points->containsBeforeStart() &&
+        // Copying a whole invalid header leaves the destination invalid. Its fields need not
+        // be initialized, including when copying back an unwritten out header parameter.
+        // Still register its uses below, and still diagnose explicit reads of its fields.
+        auto type = typeMap->getType(expression, true);
+        bool invalidHeader =
+            type->is<IR::Type_Header>() && headerDefs->find(expression) == TernaryBool::No;
+        if (reportUninitialized && !lhs && !invalidHeader && points->containsBeforeStart() &&
             hasUninitializedHeaderUnion(expression, currentDefinitions, read)) {
             // Do not report uninitialized values on the LHS.
             // This could happen if we are writing to an array element
             // with an unknown index.
-            auto type = typeMap->getType(expression, true);
             if (auto structType = type->to<IR::Type_StructLike>()) {
                 for (auto field : structType->fields) {
                     auto fieldLoc = read->getField(field->name);
-                    auto fieldPoints = currentDefinitions->getPoints(*fieldLoc);
-                    if (fieldPoints->containsBeforeStart()) {
+                    bool uninitialized = false;
+                    for (auto storage : *fieldLoc)
+                        uninitialized |= hasUninitializedFields(storage, currentDefinitions);
+                    if (uninitialized) {
                         warn(ErrorType::WARN_UNINITIALIZED_USE, "%1%.%2% may be uninitialized",
                              expression, field->name.toString());
                     }

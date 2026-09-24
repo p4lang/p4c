@@ -1,3 +1,0 @@
-issue3001.p4(14): [--Wwarn=uninitialized-use] warning: h.x may be uninitialized
-    return h;
-           ^

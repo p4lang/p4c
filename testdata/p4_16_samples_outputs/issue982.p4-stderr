@@ -40,9 +40,6 @@ issue982.p4(376): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd
 issue982.p4(376)
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in p...
        ^^^^^^^^^^^^^^^^^
-issue982.p4(411): [--Wwarn=uninitialized-use] warning: clone_md.data may be uninitialized
-            ostd.clone_metadata = clone_md;
-                                  ^^^^^^^^
 issue982.p4(405): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'IngressDeparserImpl' terminates
 ...a meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
                                                                                              ^^^^

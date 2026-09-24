@@ -505,6 +505,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
                 auto paramtype = typeMap->getType(p, true);
                 if (paramtype->is<IR::Type_Dontcare>()) paramtype = typeMap->getType(arg, true);
                 auto tmp = createTemporary(expressionSrcInfo, paramtype);
+                tmp.originalName = argex->toString();
                 argValue = new IR::PathExpression(tmp);
                 typeMap->setType(argValue, paramtype);
                 typeMap->setLeftValue(argValue);
