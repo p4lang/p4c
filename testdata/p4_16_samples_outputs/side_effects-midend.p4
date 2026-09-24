@@ -34,13 +34,13 @@ control my(inout H[2] s) {
         tmp_1 = f(tmp, tmp_0);
         a_0 = tmp_1;
     }
-    @hidden action act() {
+    @hidden action side_effects21_2() {
         s[1w0].z = tmp_3;
     }
-    @hidden action act_0() {
+    @hidden action side_effects21_3() {
         s[1w1].z = tmp_3;
     }
-    @hidden action act_1() {
+    @hidden action side_effects21_4() {
         tmp_4 = g(a_0);
         tmp_5 = f(tmp_3, tmp_4);
     }
@@ -53,17 +53,17 @@ control my(inout H[2] s) {
     @hidden action side_effects22_1() {
         tmp_8 = hsVar;
     }
-    @hidden action side_effects21_2() {
+    @hidden action side_effects21_5() {
         a_0 = tmp_5;
         tmp_6 = g(a_0);
     }
-    @hidden action act_2() {
+    @hidden action side_effects22_2() {
         s[1w0].z = tmp_8;
     }
-    @hidden action act_3() {
+    @hidden action side_effects22_3() {
         s[1w1].z = tmp_8;
     }
-    @hidden action act_4() {
+    @hidden action side_effects22_4() {
         tmp_10 = f(tmp_8, a_0);
     }
     @hidden action side_effects25() {
@@ -72,7 +72,7 @@ control my(inout H[2] s) {
     @hidden action side_effects25_0() {
         s[1w1].z = g(a_0);
     }
-    @hidden action side_effects22_2() {
+    @hidden action side_effects22_5() {
         a_0 = tmp_10;
         a_0 = g(a_0);
         a_0 = g(a_0);
@@ -101,29 +101,29 @@ control my(inout H[2] s) {
         }
         const default_action = side_effects21_1();
     }
-    @hidden table tbl_act {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_act_1 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     @hidden table tbl_side_effects21_2 {
+        actions = {
+            side_effects21_4();
+        }
+        const default_action = side_effects21_4();
+    }
+    @hidden table tbl_side_effects21_3 {
         actions = {
             side_effects21_2();
         }
         const default_action = side_effects21_2();
+    }
+    @hidden table tbl_side_effects21_4 {
+        actions = {
+            side_effects21_3();
+        }
+        const default_action = side_effects21_3();
+    }
+    @hidden table tbl_side_effects21_5 {
+        actions = {
+            side_effects21_5();
+        }
+        const default_action = side_effects21_5();
     }
     @hidden table tbl_side_effects22 {
         actions = {
@@ -143,29 +143,29 @@ control my(inout H[2] s) {
         }
         const default_action = side_effects22_1();
     }
-    @hidden table tbl_act_2 {
-        actions = {
-            act_4();
-        }
-        const default_action = act_4();
-    }
-    @hidden table tbl_act_3 {
-        actions = {
-            act_2();
-        }
-        const default_action = act_2();
-    }
-    @hidden table tbl_act_4 {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
-    }
     @hidden table tbl_side_effects22_2 {
+        actions = {
+            side_effects22_4();
+        }
+        const default_action = side_effects22_4();
+    }
+    @hidden table tbl_side_effects22_3 {
         actions = {
             side_effects22_2();
         }
         const default_action = side_effects22_2();
+    }
+    @hidden table tbl_side_effects22_4 {
+        actions = {
+            side_effects22_3();
+        }
+        const default_action = side_effects22_3();
+    }
+    @hidden table tbl_side_effects22_5 {
+        actions = {
+            side_effects22_5();
+        }
+        const default_action = side_effects22_5();
     }
     @hidden table tbl_side_effects25 {
         actions = {
@@ -188,13 +188,13 @@ control my(inout H[2] s) {
         } else if (tmp_1 >= 1w1) {
             tbl_side_effects21_1.apply();
         }
-        tbl_act.apply();
-        if (tmp_1 == 1w0) {
-            tbl_act_0.apply();
-        } else if (tmp_1 == 1w1) {
-            tbl_act_1.apply();
-        }
         tbl_side_effects21_2.apply();
+        if (tmp_1 == 1w0) {
+            tbl_side_effects21_3.apply();
+        } else if (tmp_1 == 1w1) {
+            tbl_side_effects21_4.apply();
+        }
+        tbl_side_effects21_5.apply();
         if (tmp_6 == 1w0) {
             tbl_side_effects22.apply();
         } else if (tmp_6 == 1w1) {
@@ -202,13 +202,13 @@ control my(inout H[2] s) {
         } else if (tmp_6 >= 1w1) {
             tbl_side_effects22_1.apply();
         }
-        tbl_act_2.apply();
-        if (tmp_6 == 1w0) {
-            tbl_act_3.apply();
-        } else if (tmp_6 == 1w1) {
-            tbl_act_4.apply();
-        }
         tbl_side_effects22_2.apply();
+        if (tmp_6 == 1w0) {
+            tbl_side_effects22_3.apply();
+        } else if (tmp_6 == 1w1) {
+            tbl_side_effects22_4.apply();
+        }
+        tbl_side_effects22_5.apply();
         if (a_0 == 1w0) {
             tbl_side_effects25.apply();
         } else if (a_0 == 1w1) {

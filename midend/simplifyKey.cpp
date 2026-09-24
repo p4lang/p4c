@@ -44,14 +44,16 @@ const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
 
     auto tmp = nameGen.newName("key");
     auto type = typeMap->getType(element->expression, true);
-    auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
+    auto srcInfo = element->expression->srcInfo;
+    auto name = IR::ID(srcInfo, tmp);
+    auto decl = new IR::Declaration_Variable(srcInfo, name, type, nullptr);
     insertions->declarations.push_back(decl);
-    auto left = new IR::PathExpression(type, new IR::Path(tmp));
+    auto left = new IR::PathExpression(type, new IR::Path(name));
     auto right = element->expression;
     auto assign = new IR::AssignmentStatement(element->expression->srcInfo, left, right);
     insertions->statements.push_back(assign);
 
-    auto path = new IR::PathExpression(type, new IR::Path(tmp));
+    auto path = new IR::PathExpression(type, new IR::Path(name));
     // This preserves annotations on the key
     element->expression = path;
     LOG2("Created new key expression " << element);
@@ -81,7 +83,7 @@ const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
     IR::IndexedVector<IR::StatOrDecl> result;
     for (auto assign : insertions->statements) result.push_back(assign);
     result.push_back(statement);
-    return new IR::BlockStatement(std::move(result));
+    return new IR::BlockStatement(statement->srcInfo, std::move(result));
 }
 
 }  // namespace P4
