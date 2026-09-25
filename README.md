@@ -585,11 +585,40 @@ add_black_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 
 The P4C CMakeLists.txt will use that name to figure the full path of the files to lint.
 
-clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command:
+Install the formatting tools specified by `pyproject.toml` and `uv.lock`, then configure the build:
+
+```sh
+uv sync --frozen
+uv run --frozen cmake -S . -B build
 ```
-uv pip install "clang-format==18.1.8" "black==24.3.0" "isort==5.13.2"
+
+Check C++ and Python formatting:
+
+```sh
+uv run --frozen cmake --build build --target clang-format black isort
 ```
-clang-format can be checked using `cmake --build build --target clang-format`. Complaints can be fixed by running `cmake --build build --target clang-format-fix-errors`. black and isort can be checked using `cmake --build build --target black` or `cmake --build build --target isort` respectively. Complaints can be fixed by running `cmake --build build --target black-fix-errors` or `cmake --build build --target isort-fix-errors`.
+
+Apply formatting fixes:
+
+```sh
+uv run --frozen cmake --build build --target \
+  clang-format-fix-errors black-fix-errors isort-fix-errors
+```
+
+To run just one formatter, name only its target.
+
+<details>
+<summary>If an existing build uses the wrong formatter version</summary>
+
+CMake remembers tool locations. Run this once to make it find the tools installed above:
+
+```sh
+uv run --frozen cmake -S . -B build -U CLANG_FORMAT_CMD -U BLACK_CMD -U ISORT_CMD
+```
+
+</details>
+
+Lint targets generate their file lists when they run, picking up added or removed source files without reconfiguring. They merge discovered files with extension registrations from `add_*_files`; the complete lists are available at lint time.
 
 cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
 ```
