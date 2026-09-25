@@ -455,14 +455,29 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         }
 
         IR::Vector<IR::Type> *args = new IR::Vector<IR::Type>();
+        const bool specializingPackage = baseCanon->is<IR::Type_Package>();
         for (const IR::Type *a : *st->arguments) {
             auto atype = getTypeType(a);
             if (atype == nullptr) return nullptr;
+            // Control/parser implementations are IContainers used for instantiation; as type
+            // arguments they denote their signatures (Type_Control / Type_Parser).
+            if (auto *ctrl = atype->to<IR::P4Control>())
+                atype = ctrl->type;
+            else if (auto *parser = atype->to<IR::P4Parser>())
+                atype = parser->type;
             auto checkType = atype;
             if (auto tsc = atype->to<IR::Type_SpecializedCanonical>()) checkType = tsc->baseType;
-            if (checkType->is<IR::Type_Control>() || checkType->is<IR::Type_Parser>() ||
+            // Packages may take control/parser/package types as type arguments; other generics
+            // may not.
+            const bool archTypeArg =
+                checkType->is<IR::Type_Control>() || checkType->is<IR::Type_Parser>() ||
                 checkType->is<IR::Type_Package>() || checkType->is<IR::P4Parser>() ||
-                checkType->is<IR::P4Control>()) {
+                checkType->is<IR::P4Control>();
+            const bool allowedForPackage =
+                specializingPackage &&
+                (checkType->is<IR::Type_Control>() || checkType->is<IR::Type_Parser>() ||
+                 checkType->is<IR::Type_Package>());
+            if (archTypeArg && !allowedForPackage) {
                 typeError("%1%: Cannot use %2% as a type parameter", type, checkType);
                 return nullptr;
             }
@@ -1005,7 +1020,39 @@ TypeInferenceBase::containerInstantiation(
 
     auto returnType = tvs->lookup(rettype);
     BUG_CHECK(returnType != nullptr, "Cannot infer constructor result type %1%", node);
-    return std::pair<const IR::Type *, const IR::Vector<IR::Argument> *>(returnType, newArgs);
+
+    // The package is generic.  If all of its type parameters have been inferred from the
+    // constructor arguments, then the type of the constructed object is the package type
+    // specialized with the inferred type arguments -- exactly as if those arguments had been
+    // supplied explicitly in the program.
+    if (const auto *package = container->to<IR::Type_Package>()) {
+        if (!constructor->typeParameters->empty()) {
+            auto typeArgs = new IR::Vector<IR::Type>();
+            bool allInferred = true;
+            TypeVariableSubstitutionVisitor substVisitor(tvs);
+            substVisitor.setCalledBy(this);
+            for (auto tv : constructor->typeParameters->parameters) {
+                const IR::Type *arg = tvs->lookup(tv);
+                if (arg != nullptr) {
+                    // The binding may itself contain type variables.
+                    arg = arg->apply(substVisitor, getChildContext())->to<IR::Type>();
+                }
+                if (arg == nullptr || HasTypeVariables::find(arg)) {
+                    allInferred = false;
+                    break;
+                }
+                typeArgs->push_back(arg);
+            }
+            if (allInferred) {
+                auto specialized = specialize(package, typeArgs, getChildContext());
+                if (specialized == nullptr) return {nullptr, nullptr};
+                returnType = new IR::Type_SpecializedCanonical(package->srcInfo, package, typeArgs,
+                                                               specialized);
+            }
+        }
+    }
+
+    return {returnType, newArgs};
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Argument *arg) {
