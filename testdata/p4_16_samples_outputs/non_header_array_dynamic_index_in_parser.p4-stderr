@@ -1,0 +1,10 @@
+non_header_array_dynamic_index_in_parser.p4(25): [--Wwarn=uninitialized-use] warning: metadata.array[idx].f2 may be uninitialized
+        bit<8> val = metadata.array[idx].f2;
+                     ^^^^^^^^^^^^^^^^^^^^^^
+non_header_array_dynamic_index_in_parser.p4(24): [--Wwarn=ignore-prop] warning: Result of 'metadata.array[idx].f1 = 8w1' is not defined: Error: Unknown array index
+        metadata.array[idx].f1 = 8w1;
+                               ^
+non_header_array_dynamic_index_in_parser.p4(24): [--Wwarn=invalid] warning: Uninitialized value prevents loop unrolling:
+idx
+        metadata.array[idx].f1 = 8w1;
+                       ^^^
