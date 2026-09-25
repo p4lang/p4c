@@ -50,6 +50,14 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
         pinfo->header_unions.emplace(name, inst);
 }
 
+void InspectPsaProgram::addHeaderStackInstance(const IR::StructField *field,
+                                               const IR::Type_Array *stack) {
+    // Add the stack to the header_stacks map in pinfo
+    auto stack_decl = new IR::Declaration_Variable(field->controlPlaneName(), stack);
+    typeMap->setType(stack_decl, stack);
+    pinfo->header_stacks.emplace(field->controlPlaneName(), stack_decl);
+}
+
 void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
@@ -98,21 +106,32 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
             LOG5("Field is Type_Array " << ft->toString());
             auto stack = ft->to<IR::Type_Array>();
             // auto stack_name = f->controlPlaneName();
-            auto stack_size = stack->getSize();
+            // auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
             auto ht = type->to<IR::Type_Header>();
             addHeaderType(ht);
-            auto stack_type = stack->elementType->to<IR::Type_Header>();
-            std::vector<unsigned> ids;
-            for (unsigned i = 0; i < stack_size; i++) {
-                cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
-                /* TODO */
-                // auto id = json->add_header(stack_type, hdrName);
-                addHeaderInstance(stack_type, hdrName);
-                // ids.push_back(id);
-            }
-            // addHeaderStackInstance();
+            // auto stack_type = stack->elementType->to<IR::Type_Header>();
+
+            // I have yet to consider Union Stacks. As of this commit, a bug check
+            // will reject a Union Stack as it's not a header instance whenever
+            // is declared in the P4 code.
+            addHeaderStackInstance(f, stack);
+
+            // Dunno why addHeaderInstance is called heare for each element of the stack.
+            // As far as I can figure out, the code block from line 83 to 103 should add
+            // those stack element into the JSON file as singular headers.
+            // With addHeaderStackInstance implemented, these elements are exported TWICE !
+            // For now, by commenting the following code block, the JSON file is correct.
+
+            // std::vector<unsigned> ids;
+            // for (unsigned i = 0; i < stack_size; i++) {
+            //     cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
+            //     /* TODO */
+            //     // auto id = json->add_header(stack_type, hdrName);
+            //     addHeaderInstance(stack_type, hdrName);
+            //     // ids.push_back(id);
+            // }
         } else {
             // Treat this field like a scalar local variable
             cstring newName = refMap->newName(type->getName() + "." + f->name);
