@@ -1,10 +1,10 @@
-issue5268.p4(28): [--Wwarn=unused] warning: 'b5' is unused
+issue5268.p4(34): [--Wwarn=unused] warning: 'b5' is unused
         bool b5 = (S) { a = 1, b = 2 } == { a = 1, bb = 2 };
              ^^
-issue5268.p4(29): [--Wwarn=unused] warning: 'b5_' is unused
+issue5268.p4(35): [--Wwarn=unused] warning: 'b5_' is unused
         bool b5_ = { a = 1, b = 2 } == (S) { a = 363, b = 2147483650 };
              ^^^
-issue5268.p4(28): [--Werror=type-error] error: '{
+issue5268.p4(34): [--Werror=type-error] error: '{
   a:1;
   b:2; } == {
   a:1;
@@ -12,6 +12,6 @@ issue5268.p4(28): [--Werror=type-error] error: '{
         bool b5 = (S) { a = 1, b = 2 } == { a = 1, bb = 2 };
                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
-issue5268.p4(18): No initializer for field b
+issue5268.p4(24): No initializer for field b
       bit<32> b;
               ^

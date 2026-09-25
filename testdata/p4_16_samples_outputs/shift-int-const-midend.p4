@@ -3,17 +3,17 @@ header hdr_t {
 }
 
 control c(inout hdr_t hdr) {
-    @hidden action shiftintconst9() {
+    @hidden action shiftintconst15() {
         hdr.v = 8w1;
     }
-    @hidden table tbl_shiftintconst9 {
+    @hidden table tbl_shiftintconst15 {
         actions = {
-            shiftintconst9();
+            shiftintconst15();
         }
-        const default_action = shiftintconst9();
+        const default_action = shiftintconst15();
     }
     apply {
-        tbl_shiftintconst9.apply();
+        tbl_shiftintconst15.apply();
     }
 }
 

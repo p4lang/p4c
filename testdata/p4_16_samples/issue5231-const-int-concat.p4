@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Altera Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include <core.p4>
 
 void positive() {
