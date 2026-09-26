@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+#include <streambuf>
 #include <string_view>
 
 #include "absl/strings/str_format.h"
@@ -14,20 +15,32 @@
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "lib/error.h"
 
-#ifdef HAVE_LIBBOOST_IOSTREAMS
-
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-
 namespace {
 
-/// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
-/// is the efficient implementation for users with boost::iostreams installed.
+/// Buffered, non-owning input from a stdio FILE*, including preprocessor pipes.
+class StdioInputBuffer : public std::streambuf {
+    FILE *input;
+    char buffer[4096];
+
+ protected:
+    int_type underflow() override {
+        if (gptr() != egptr()) return traits_type::to_int_type(*gptr());
+        const auto count = std::fread(buffer, 1, sizeof(buffer), input);
+        if (count == 0) {
+            if (std::ferror(input)) throw std::ios_base::failure("Error reading compiler input");
+            return traits_type::eof();
+        }
+        setg(buffer, buffer, buffer + count);
+        return traits_type::to_int_type(*gptr());
+    }
+
+ public:
+    explicit StdioInputBuffer(FILE *input) : input(input) {}
+};
+
+/// An istream wrapper that leaves ownership of the FILE* with its caller.
 struct AutoStdioInputStream {
-    explicit AutoStdioInputStream(FILE *in)
-        : source(fileno(in), boost::iostreams::never_close_handle),
-          buffer(source),
-          stream(&buffer) {}
+    explicit AutoStdioInputStream(FILE *in) : buffer(in), stream(&buffer) {}
 
     std::istream &get() { return stream; }
 
@@ -35,34 +48,11 @@ struct AutoStdioInputStream {
     AutoStdioInputStream(const AutoStdioInputStream &) = delete;
     AutoStdioInputStream(AutoStdioInputStream &&) = delete;
 
-    boost::iostreams::file_descriptor_source source;
-    boost::iostreams::stream_buffer<boost::iostreams::file_descriptor_source> buffer;
+    StdioInputBuffer buffer;
     std::istream stream;
 };
 
 }  // namespace
-
-#else
-
-namespace {
-
-/// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
-/// is an inefficient fallback implementation.
-struct AutoStdioInputStream {
-    explicit AutoStdioInputStream(FILE *in) {
-        char buffer[512];
-        while (fgets(buffer, sizeof(buffer), in)) stream << buffer;
-    }
-
-    std::istream &get() { return stream; }
-
- private:
-    std::stringstream stream;
-};
-
-}  // namespace
-
-#endif
 
 namespace P4 {
 
