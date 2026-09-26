@@ -230,6 +230,15 @@ cc_library(
 )
 
 cc_test(
+    name = "p4tools_random_test",
+    srcs = ["modules/testgen/test/lib/random.cpp"],
+    deps = [
+        ":common",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
     name = "p4testgen_api_test",
     srcs = [
         "modules/testgen/targets/bmv2/test/testgen_api/api_test.cpp",
