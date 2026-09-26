@@ -88,6 +88,15 @@ pushd ${P4C_DIR}
 
 . /etc/lsb-release
 
+# Ubuntu 22.04's Boost predates standalone Multiprecision. Use its matching
+# Multiprecision headers when building against the distro's backend dependencies.
+# FIXME: Remove this override once all Ubuntu 22.04 CI builds migrate to Ubuntu 24.04.
+if [[ "${DISTRIB_RELEASE}" == "22.04" ]]; then
+  : "${P4C_USE_PREINSTALLED_MULTIPRECISION:=ON}"
+else
+  : "${P4C_USE_PREINSTALLED_MULTIPRECISION:=OFF}"
+fi
+
 # In Docker builds, sudo is not available. So make it a noop.
 if [ "$IN_DOCKER" = "TRUE" ]; then
   echo "Executing within docker container."
@@ -108,12 +117,14 @@ P4C_DEPS="bison \
           g++ \
           git \
           lld \
-          libboost-dev \
-          libboost-graph-dev \
-          libboost-iostreams-dev \
           libfl-dev \
           pkg-config \
           tcpdump"
+
+if [[ "${ENABLE_P4C_GRAPHS:-ON}" == "ON" || "${ENABLE_TOFINO:-OFF}" == "ON" ||
+      "${P4C_USE_PREINSTALLED_MULTIPRECISION}" == "ON" ]]; then
+  P4C_DEPS+=" libboost-dev"
+fi
 
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
@@ -194,11 +205,6 @@ function build_bmv2() {
                         thrift-compiler \
                         libxxhash-dev \
                         libjsoncpp-dev"
-
-    # TODO: Remove this check once 18.04 is deprecated.
-    if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-        P4C_RUNTIME_DEPS+=" libboost-graph1.65.1 libboost-iostreams1.65.1 "
-    fi
 
     # TODO: Remove this check once 18.04 is deprecated.
     if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
@@ -406,6 +412,7 @@ fi
 export CXXFLAGS="${CXXFLAGS} -O3"
 # Toggle unity compilation.
 CMAKE_FLAGS+="-DCMAKE_UNITY_BUILD=${CMAKE_UNITY_BUILD} "
+CMAKE_FLAGS+="-DP4C_USE_PREINSTALLED_MULTIPRECISION=${P4C_USE_PREINSTALLED_MULTIPRECISION} "
 # Toggle static builds.
 CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_GLIBC=${STATIC_BUILD_WITH_DYNAMIC_GLIBC} "
 CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_STDLIB=${STATIC_BUILD_WITH_DYNAMIC_STDLIB} "
@@ -448,15 +455,14 @@ if [[ "${IMAGE_TYPE}" == "build" ]] ; then
   sudo apt-get autoremove --purge -y
 
   # Reinstall the runtime libraries required by the installed P4C executables. This must happen AFTER the purge/autoremove above:
-  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev
+  sudo apt-get install -y --no-install-recommends libboost-program-options-dev
 
   rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 
 elif [[ "${IMAGE_TYPE}" == "test" ]] ; then
-  # libboost-iostreams is not provided by the BMv2 base image (BMv2 does
-  # not use Boost.Iostreams), but p4c executables link against it.
-  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev libboost-filesystem-dev libboost-thread-dev libgmp-dev
+  # Keep the runtime libraries needed by BMv2 and its test tools.
+  sudo apt-get install -y --no-install-recommends libboost-program-options-dev libboost-filesystem-dev libboost-thread-dev libgmp-dev
   echo 'Test image ready'
 
 fi
