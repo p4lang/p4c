@@ -35,10 +35,6 @@ if (ENABLE_STATIC_LIBS)
   # Force linking libstdc++ statically. Note that dependencies may bring in
   # dynamic versions of it, so that's why we look above for .a
   set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-z,muldefs")
-
-  # Link Boost statically
-  set(Boost_USE_STATIC_LIBS ON)
-  set(Boost_USE_STATIC_RUNTIME OFF)
 endif()
 
 
@@ -54,8 +50,30 @@ if (ENABLE_TESTING)
   enable_testing()
 endif()
 
-set(BOOST_MIN_VERSION "1.58.0")
-find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
+if (P4C_USE_PREINSTALLED_MULTIPRECISION)
+  set(BOOST_MIN_VERSION 1.58)
+else ()
+  # Older Boost.Graph headers conflict with standalone Multiprecision.
+  set(BOOST_MIN_VERSION 1.83)
+endif ()
+find_package(Boost ${BOOST_MIN_VERSION} QUIET)
+if (NOT Boost_FOUND)
+  if (NOT P4C_USE_PREINSTALLED_MULTIPRECISION)
+    message(FATAL_ERROR
+      "The Tofino backend requires Boost ${BOOST_MIN_VERSION} or newer headers. "
+      "Older Boost.Graph headers conflict with fetched standalone Multiprecision. "
+      "Install a compatible Boost version (set BOOST_ROOT for a custom installation), "
+      "or configure with -DP4C_USE_PREINSTALLED_MULTIPRECISION=ON to use matching "
+      "installed Multiprecision and Boost headers. To disable this backend, set "
+      "-DENABLE_TOFINO=OFF.")
+  else ()
+    message(FATAL_ERROR
+      "The Tofino backend requires Boost ${BOOST_MIN_VERSION} or newer headers. "
+      "Install them or set BOOST_ROOT to a compatible installation. "
+      "To disable this backend, set -DENABLE_TOFINO=OFF.")
+  endif ()
+endif ()
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 set(INTERFACES_DIR ${BFN_P4C_SOURCE_DIR}/compiler_interfaces)
 
