@@ -4,9 +4,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* Define to 1 if you have the boost iostreams library */
-#cmakedefine HAVE_LIBBOOST_IOSTREAMS 1
-
 /* Define to 1 if you have the boost graph headers */
 #cmakedefine HAVE_LIBBOOST_GRAPH 1
 

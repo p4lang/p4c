@@ -228,14 +228,16 @@ p4c_obtain_abseil()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-# The boost graph headers are optional and only required by the graphs back end.
-find_package (Boost QUIET COMPONENTS graph)
-if (Boost_FOUND)
-  set (HAVE_LIBBOOST_GRAPH 1)
-else ()
-  message (WARNING "Boost graph headers not found, will not build 'graphs' backend")
+include(Multiprecision)
+p4c_obtain_multiprecision()
+
+# Additional Boost dependencies are confined to these optional backends.
+set(HAVE_LIBBOOST_GRAPH 0)
+if (ENABLE_P4C_GRAPHS OR ENABLE_TOFINO)
+  include(BoostBackend)
+  p4c_obtain_backend_boost()
+  set(HAVE_LIBBOOST_GRAPH 1)
 endif ()
-find_package (Boost REQUIRED COMPONENTS iostreams)
 
 # Compile with the Boehm garbage collector (https://github.com/ivmai/bdwgc), if requested.
 # One can disable the GC, e.g., to run under Valgrind, by editing config.h.
@@ -247,9 +249,6 @@ if (ENABLE_MULTITHREAD)
   add_definitions("-DMULTITHREAD")
 endif()
 list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-set (HAVE_LIBBOOST_IOSTREAMS 1)
-list (APPEND P4C_LIB_DEPS ${Boost_LIBRARIES})
 if (ENABLE_GC)
   list (APPEND P4C_LIB_DEPS ${LIBGC_LIBRARIES})
 endif ()

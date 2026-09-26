@@ -54,8 +54,7 @@ if (ENABLE_TESTING)
   enable_testing()
 endif()
 
-set(BOOST_MIN_VERSION "1.58.0")
-find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
+include_directories(SYSTEM $<TARGET_PROPERTY:p4c_backend_boost_headers,INTERFACE_INCLUDE_DIRECTORIES>)
 
 set(INTERFACES_DIR ${BFN_P4C_SOURCE_DIR}/compiler_interfaces)
 

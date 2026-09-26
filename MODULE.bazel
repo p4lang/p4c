@@ -5,13 +5,8 @@ module(
 
 bazel_dep(name = "abseil-cpp", version = "20260107.1")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
-bazel_dep(name = "boost.algorithm", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.functional", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.graph", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.iostreams", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.multi_index", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.multiprecision", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.serialization", version = "1.90.0.bcr.1")
 bazel_dep(name = "googleapis", version = "0.0.0-20260223-edfe7983")
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2")
 bazel_dep(name = "nlohmann_json", version = "3.12.0.bcr.1")
