@@ -5,6 +5,8 @@
 
 #include "ebpfBackend.h"
 
+#include <memory>
+
 #include "ebpfProgram.h"
 #include "ebpfType.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -22,7 +24,8 @@ void emitFilterModel(const EbpfOptions &options, Target *target, const IR::Tople
     CodeBuilder h(target);
 
     EBPFTypeFactory::createFactory(typeMap, false);
-    auto ebpfprog = new EBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
+    auto ebpfprog =
+        std::make_unique<EBPFProgram>(options, toplevel->getProgram(), refMap, typeMap, toplevel);
     if (!ebpfprog->build()) return;
 
     if (options.outputFile.empty()) return;
@@ -58,16 +61,16 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     // We don't require --xdp option to be used if we can auto-detect it.
     bool mainIsXdp = (main->type->name == "xdp");
 
-    Target *target;
+    std::unique_ptr<Target> target;
     if (options.target.isNullOrEmpty() || options.target == "kernel") {
         if (!options.generateToXDP && !mainIsXdp)
-            target = new KernelSamplesTarget(options.emitTraceMessages);
+            target = std::make_unique<KernelSamplesTarget>(options.emitTraceMessages);
         else
-            target = new XdpTarget(options.emitTraceMessages);
+            target = std::make_unique<XdpTarget>(options.emitTraceMessages);
     } else if (options.target == "bcc") {
-        target = new BccTarget();
+        target = std::make_unique<BccTarget>();
     } else if (options.target == "test") {
-        target = new TestTarget();
+        target = std::make_unique<TestTarget>();
     } else {
         ::P4::error(ErrorType::ERR_UNKNOWN,
                     "Unknown target %s; legal choices are 'bcc', 'kernel', and test",
@@ -76,9 +79,10 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     }
 
     if (options.arch.isNullOrEmpty() || options.arch == "filter") {
-        emitFilterModel(options, target, toplevel, refMap, typeMap);
+        emitFilterModel(options, target.get(), toplevel, refMap, typeMap);
     } else if (options.arch == "psa") {
-        auto backend = new EBPF::PSASwitchBackend(options, target, refMap, typeMap);
+        auto backend =
+            std::make_unique<EBPF::PSASwitchBackend>(options, target.get(), refMap, typeMap);
         backend->convert(toplevel);
 
         if (options.outputFile.empty()) return;
