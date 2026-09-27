@@ -1021,7 +1021,7 @@ TEST_F(P4Runtime, StaticTableEntries) {
     // as 0x0001 &&& 0xF to conform to the P4Runtime spec)
     EXPECT_EQ(1U, ::P4::diagnosticCount());
 
-    const auto *entries = test->entries;
+    const auto &entries = test->entries;
     const auto &updates = entries->updates();
     ASSERT_EQ(6, updates.size());
 
@@ -1637,7 +1637,7 @@ TEST_F(P4RuntimePkgInfo, StructuredAnnotationLargeInt) {
 class P4RuntimeDataTypeSpec : public P4Runtime {
  protected:
     const IR::P4Program *getProgram(const std::string &programStr) {
-        const auto *pgm = P4::parseP4String(programStr);
+        auto pgm = P4::parseP4String(programStr);
         if (pgm == nullptr) {
             return nullptr;
         }
@@ -1674,8 +1674,8 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
 TEST_F(P4RuntimeDataTypeSpec, Bits) {
     int size(9);
     bool isSigned(true);
-    auto *type = IR::Type_Bits::get(size, isSigned);
-    const auto *typeSpec =
+    auto type = IR::Type_Bits::get(size, isSigned);
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_bitstring());
     const auto &bitstringTypeSpec = typeSpec->bitstring();
@@ -1685,8 +1685,8 @@ TEST_F(P4RuntimeDataTypeSpec, Bits) {
 
 TEST_F(P4RuntimeDataTypeSpec, Varbits) {
     int size(64);
-    auto *type = IR::Type_Varbits::get(size);
-    const auto *typeSpec =
+    auto type = IR::Type_Varbits::get(size);
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_bitstring());
     const auto &bitstringTypeSpec = typeSpec->bitstring();
@@ -1695,30 +1695,30 @@ TEST_F(P4RuntimeDataTypeSpec, Varbits) {
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Boolean) {
-    auto *type = IR::Type_Boolean::get();
-    const auto *typeSpec =
+    auto type = IR::Type_Boolean::get();
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     EXPECT_TRUE(typeSpec->has_bool_());
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Tuple) {
-    auto *typeMember1 = IR::Type_Bits::get(1, false);
-    auto *typeMember2 = IR::Type_Bits::get(2, false);
+    auto typeMember1 = IR::Type_Bits::get(1, false);
+    auto typeMember2 = IR::Type_Bits::get(2, false);
     IR::Vector<IR::Type> components = {typeMember1, typeMember2};
     auto *type = new IR::Type_Tuple(std::move(components));
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_tuple());
     const auto &tupleTypeSpec = typeSpec->tuple();
     ASSERT_EQ(2, tupleTypeSpec.members_size());
     {
-        const auto *typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
-            &refMap, &typeMap, typeMember1, nullptr);
+        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap,
+                                                                        typeMember1, nullptr);
         EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(0)));
     }
     {
-        const auto *typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
-            &refMap, &typeMap, typeMember2, nullptr);
+        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap,
+                                                                        typeMember2, nullptr);
         EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(1)));
     }
 }
@@ -1734,7 +1734,7 @@ TEST_F(P4RuntimeDataTypeSpec, Struct) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_struct_());
     EXPECT_EQ("my_struct", typeSpec->struct_().name());
@@ -1760,7 +1760,7 @@ TEST_F(P4RuntimeDataTypeSpec, Header) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header());
     EXPECT_EQ("my_header", typeSpec->header().name());
@@ -1786,7 +1786,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderWithFlattening) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header());
     EXPECT_EQ("my_header", typeSpec->header().name());
@@ -1815,7 +1815,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderUnion) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header_union());
     EXPECT_EQ("my_header_union", typeSpec->header_union().name());
@@ -1845,7 +1845,7 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderStack) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Array>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header_stack());
     EXPECT_EQ("my_header", typeSpec->header_stack().header().name());
@@ -1889,7 +1889,7 @@ TEST_F(P4RuntimeDataTypeSpec, Enum) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_enum_());
     EXPECT_EQ("my_enum", typeSpec->enum_().name());
@@ -1912,7 +1912,7 @@ TEST_F(P4RuntimeDataTypeSpec, SerEnum) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_serializable_enum());
     EXPECT_EQ("my_enum", typeSpec->serializable_enum().name());
@@ -1937,7 +1937,7 @@ TEST_F(P4RuntimeDataTypeSpec, Error) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_error());
 
@@ -1959,7 +1959,7 @@ TEST_F(P4RuntimeDataTypeSpec, StructWithTypedef) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_struct_());
     EXPECT_EQ("my_struct", typeSpec->struct_().name());
@@ -1992,7 +1992,7 @@ TEST_F(P4RuntimeDataTypeSpec, NewType) {
 
     const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t"_cs);
     ASSERT_TRUE(type != nullptr);
-    const auto *typeSpec =
+    auto typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_struct_());
     EXPECT_EQ("my_struct", typeSpec->struct_().name());
