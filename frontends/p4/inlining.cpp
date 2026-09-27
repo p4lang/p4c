@@ -24,23 +24,22 @@ using namespace literals;
 namespace {
 
 class FindLocationSets : public Inspector {
-    StorageMap *storageMap;
-    std::map<const IR::Expression *, const LocationSet *> loc;
+    StorageMap storageMap;
+    std::map<const IR::Expression *, std::shared_ptr<const LocationSet>> loc;
 
-    const LocationSet *get(const IR::Expression *expression) const {
+    std::shared_ptr<const LocationSet> get(const IR::Expression *expression) const {
         auto result = ::P4::get(loc, expression);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
-    void set(const IR::Expression *expression, const LocationSet *ls) {
+    void set(const IR::Expression *expression, std::shared_ptr<const LocationSet> ls) {
         CHECK_NULL(expression);
         CHECK_NULL(ls);
         loc.emplace(expression, ls);
     }
 
  public:
-    FindLocationSets(ReferenceMap *refMap, TypeMap *typeMap)
-        : storageMap(new StorageMap(refMap, typeMap)) {}
+    FindLocationSets(ReferenceMap *refMap, TypeMap *typeMap) : storageMap(refMap, typeMap) {}
 
     // default behavior
     bool preorder(const IR::Expression *expression) {
@@ -61,11 +60,11 @@ class FindLocationSets : public Inspector {
     }
 
     bool preorder(const IR::PathExpression *expression) {
-        auto decl = storageMap->refMap->getDeclaration(expression->path, true);
-        auto storage = storageMap->getStorage(decl);
-        const LocationSet *result;
+        auto decl = storageMap.refMap->getDeclaration(expression->path, true);
+        auto storage = storageMap.getStorage(decl);
+        std::shared_ptr<const LocationSet> result;
         if (storage != nullptr)
-            result = new LocationSet(storage);
+            result = std::make_shared<LocationSet>(storage);
         else
             result = LocationSet::empty;
         set(expression, result);
@@ -74,11 +73,11 @@ class FindLocationSets : public Inspector {
 
     bool preorder(const IR::Member *expression) {
         visit(expression->expr);
-        auto type = storageMap->typeMap->getType(expression, true);
+        auto type = storageMap.typeMap->getType(expression, true);
         if (type->is<IR::Type_Method>()) return false;
         auto storage = get(expression->expr);
 
-        auto basetype = storageMap->typeMap->getType(expression->expr, true);
+        auto basetype = storageMap.typeMap->getType(expression->expr, true);
         if (basetype->is<IR::Type_Array>()) {
             if (expression->member.name == IR::Type_Array::next ||
                 expression->member.name == IR::Type_Array::last) {
@@ -147,7 +146,7 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    const LocationSet *locations(const IR::Expression *expression) {
+    std::shared_ptr<const LocationSet> locations(const IR::Expression *expression) {
         (void)expression->apply(*this);
         auto ls = get(expression);
         if (ls != nullptr) return ls->canonicalize();
@@ -302,11 +301,11 @@ class Substitutions : public SubstituteParameters {
 }  // namespace
 
 template <class T>
-const T *PerInstanceSubstitutions::rename(ReferenceMap *refMap, const IR::Node *node) {
+IR::Ptr<T> PerInstanceSubstitutions::rename(ReferenceMap *refMap, const IR::Node *node) {
     Substitutions rename(refMap, &paramSubst, &tvs, &renameMap);
     auto convert = node->apply(rename);
     CHECK_NULL(convert);
-    auto result = convert->to<T>();
+    IR::Ptr<T> result = convert->to<T>();
     CHECK_NULL(result);
     return result;
 }
@@ -341,16 +340,16 @@ void InlineList::analyze() {
         // This is quadratic, but hopefully the call graph is not too large
         for (auto m : inlineMap) {
             auto inl = m.second;
-            if (inl->caller == c) toInline.push_back(inl);
+            if (inl->caller == c) toInline.push_back(inl.get());
         }
     }
 
     std::reverse(toInline.begin(), toInline.end());
 }
 
-InlineSummary *InlineList::next() {
+std::shared_ptr<InlineSummary> InlineList::next() {
     if (toInline.size() == 0) return nullptr;
-    auto result = new InlineSummary();
+    auto result = std::make_shared<InlineSummary>();
     std::set<const IR::IContainer *> processing;
     while (!toInline.empty()) {
         auto toadd = toInline.back();
@@ -443,10 +442,10 @@ Visitor::profile_t GeneralInliner::init_apply(const IR::Node *node) {
 template <class P4Block, class P4BlockType>
 void GeneralInliner::inline_subst(P4Block *caller,
                                   IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
-                                  const P4BlockType *P4Block::*blockType) {
+                                  P4BlockType P4Block::*blockType) {
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
-    P4BlockType *type = (caller->*blockType)->clone();
+    auto *type = (caller->*blockType)->clone();
     IR::Vector<IR::Annotation> annos = type->annotations;
     for (auto s : caller->*blockLocals) {
         /* Even if we inline the block, the declaration may still be needed.
@@ -466,11 +465,11 @@ void GeneralInliner::inline_subst(P4Block *caller,
         } else {
             auto callee = workToDo->declToCallee[inst]->to<P4Block>();
             CHECK_NULL(callee);
-            auto substs = new PerInstanceSubstitutions();
+            auto substs = std::make_shared<PerInstanceSubstitutions>();
             workToDo->substitutions[inst] = substs;
 
             // Propagate annotations
-            for (const auto *ann : (callee->*blockType)->annotations) {
+            for (const IR::Annotation *ann : (callee->*blockType)->annotations) {
                 if (Inline::isAnnotationNoPropagate(ann->name)) continue;
                 IR::Annotations::addIfNew(annos, ann);
             }
@@ -504,12 +503,12 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 }
             }
             CHECK_NULL(firstCall);
-            MethodInstance *mi = MethodInstance::resolve(firstCall, refMap, typeMap);
+            auto mi = MethodInstance::resolve(firstCall, refMap, typeMap);
             if (call != nullptr) {
                 // All call sites are the same (call is one of them), so we use the
                 // same arguments in all cases.  So we can avoid copies if args do
                 // not alias
-                std::map<const IR::Parameter *, const LocationSet *> locationSets;
+                std::map<const IR::Parameter *, std::shared_ptr<const LocationSet>> locationSets;
                 FindLocationSets fls(refMap, typeMap);
 
                 for (auto param : mi->substitution.getParametersInArgumentOrder()) {
@@ -607,10 +606,10 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
         // Parsers are inlined in the ParserState processor
         return statement;
 
-    auto callee = called->to<IR::P4Control>();
+    IR::Ptr<IR::P4Control> callee = called->to<IR::P4Control>();
     IR::IndexedVector<IR::StatOrDecl> body;
     // clone the substitution: it may be reused for multiple invocations
-    auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
+    auto substs = std::make_unique<PerInstanceSubstitutions>(*workToDo->substitutions[decl]);
 
     auto mi = MethodInstance::resolve(statement->methodCall, refMap, typeMap);
     for (auto param : mi->substitution.getParametersInArgumentOrder()) {
@@ -771,9 +770,9 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
         CHECK_NULL(decl);
 
         auto called = workToDo->declToCallee[decl];
-        auto callee = called->to<IR::P4Parser>();
+        IR::Ptr<IR::P4Parser> callee = called->to<IR::P4Parser>();
         // clone the substitution: it may be reused for multiple invocations
-        auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
+        auto substs = std::make_unique<PerInstanceSubstitutions>(*workToDo->substitutions[decl]);
 
         auto mi = MethodInstance::resolve(call->methodCall, refMap, typeMap);
         // Evaluate in and inout parameters in order.

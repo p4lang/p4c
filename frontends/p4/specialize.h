@@ -23,17 +23,17 @@ struct SpecializationInfo {
     /// Name to use for specialized object.
     cstring name;
     /// Actual parser or control that is being specialized.
-    const IR::IContainer *specialized;
+    IR::Ptr<IR::IContainer> specialized;
     /// Values to substitute for type arguments.
-    const IR::Vector<IR::Type> *typeArguments;
+    IR::Ptr<IR::Vector<IR::Type>> typeArguments;
     /// Values to substitute for constructor arguments.
-    IR::Vector<IR::Argument> *constructorArguments;
+    IR::MutablePtr<IR::Vector<IR::Argument>> constructorArguments;
     /// Declarations to insert in the list of locals.
     IR::IndexedVector<IR::Declaration> declarations;
     /// Invocation which causes this specialization.
-    const IR::Node *invocation;
+    IR::Ptr<IR::Node> invocation;
     /// Where in the program should the specialization be inserted.
-    const IR::Node *insertBefore;
+    IR::Ptr<IR::Node> insertBefore;
 
     SpecializationInfo(const IR::Node *invocation, const IR::IContainer *cont,
                        const IR::Node *insertion)
@@ -52,7 +52,7 @@ struct SpecializationInfo {
 /// Maintains a map from invocation to a SpecializationInfo object.
 class SpecializationMap {
     /// Maps invocation to specialization info.
-    ordered_map<const IR::Node *, SpecializationInfo *> specializations;
+    ordered_map<IR::Ptr<IR::Node>, std::shared_ptr<SpecializationInfo>> specializations;
 
  public:
     TypeMap *typeMap = nullptr;

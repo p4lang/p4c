@@ -17,7 +17,7 @@
 
 namespace P4 {
 
-const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
+IR::Ptr<IR::Expression> IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {
         auto rv = ((*k >> lo) & IR::Constant((1U << (hi - lo + 1)) - 1)).clone();
         rv->type = IR::Type::Bits::get(hi - lo + 1);
@@ -35,7 +35,7 @@ const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsi
         e = sl->e0;
     }
     if (auto sl = e->to<IR::PlusSlice>()) {
-        auto *e2 = sl->e2;
+        const IR::Expression *e2 = sl->e2;
         if (lo > 0) e2 = new IR::Add(e2, new IR::Constant(lo));
         return new IR::PlusSlice(sl->e1, e2, hi - lo + 1);
     }
@@ -150,9 +150,9 @@ const IR::Constant *IR::Constant::get(const IR::Type *t, big_int v, Util::Source
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
     using key_t = std::tuple<int, RTTI::TypeId, bool, big_int>;
-    static absl::flat_hash_map<key_t, const Constant *, Util::Hash> CONSTANTS;
+    static absl::flat_hash_map<key_t, IR::Ptr<Constant>, Util::Hash> CONSTANTS;
 
-    auto *&result = CONSTANTS[{tb->width_bits(), t->typeId(), tb->isSigned, v}];
+    auto &result = CONSTANTS[{tb->width_bits(), t->typeId(), tb->isSigned, v}];
     if (result == nullptr) {
         result = new Constant(si, tb, v);
     }
@@ -179,9 +179,9 @@ const IR::StringLiteral *IR::StringLiteral::get(cstring value, const IR::Type *t
     }
     // String literals are interned.
     using key_t = std::pair<cstring, const IR::Type *>;
-    static absl::flat_hash_map<key_t, const IR::StringLiteral *, Util::Hash> STRINGS;
+    static absl::flat_hash_map<key_t, IR::Ptr<IR::StringLiteral>, Util::Hash> STRINGS;
 
-    auto *&result = STRINGS[{value, t}];
+    auto &result = STRINGS[{value, t}];
     if (result == nullptr) {
         result = new IR::StringLiteral(si, t, value);
     }

@@ -65,7 +65,7 @@ class HasUses {
 
  public:
     HasUses() = default;
-    void add(const ProgramPoints *points) {
+    void add(std::shared_ptr<const ProgramPoints> points) {
         for (auto e : *points) {
             // skips overwritten slice statements
             if (tracker.overwrites(e)) continue;
@@ -274,7 +274,9 @@ class HeaderDefinitions : public IHasDbPrint {
 
     void clear() { defs.clear(); }
 
-    HeaderDefinitions *clone() const { return new HeaderDefinitions(*this); }
+    std::shared_ptr<HeaderDefinitions> clone() const {
+        return std::make_shared<HeaderDefinitions>(*this);
+    }
 
     bool operator==(const HeaderDefinitions &other) const {
         return defs == other.defs && notReport == other.notReport;
@@ -282,8 +284,10 @@ class HeaderDefinitions : public IHasDbPrint {
 
     bool operator!=(const HeaderDefinitions &other) const { return !(*this == other); }
 
-    HeaderDefinitions *intersect(const HeaderDefinitions *other) const {
-        HeaderDefinitions *result = new HeaderDefinitions(refMap, typeMap, definitions);
+    std::shared_ptr<HeaderDefinitions> intersect(
+        std::shared_ptr<const HeaderDefinitions> other) const {
+        std::shared_ptr<HeaderDefinitions> result =
+            std::make_shared<HeaderDefinitions>(refMap, typeMap, definitions);
         for (const auto &def : defs) {
             auto valid = ::P4::get(other->defs, def.first, TernaryBool::Maybe);
             result->defs.emplace(def.first, valid == def.second ? valid : TernaryBool::Maybe);
@@ -306,7 +310,9 @@ class HeaderDefinitions : public IHasDbPrint {
         addToNotReport(getStorageLocation(expr));
     }
 
-    void setNotReport(const HeaderDefinitions *other) { notReport = other->notReport; }
+    void setNotReport(std::shared_ptr<const HeaderDefinitions> other) {
+        notReport = other->notReport;
+    }
 };
 
 // Run for each parser and control separately
@@ -323,7 +329,8 @@ class FindUninitialized : public Inspector {
     ProgramPoint currentPoint;  // context of the current expression/statement
     /// For some simple expresssions keep here the read location sets.
     /// This does not include location sets read by subexpressions.
-    absl::flat_hash_map<const IR::Expression *, const LocationSet *, Util::Hash> readLocations;
+    absl::flat_hash_map<const IR::Expression *, std::shared_ptr<const LocationSet>, Util::Hash>
+        readLocations;
     /// Stores the temporary expressions so they can be reused
     absl::flat_hash_map<const IR::Declaration *, const IR::PathExpression *, Util::Hash> paths;
     HasUses &hasUses;  // output
@@ -331,16 +338,17 @@ class FindUninitialized : public Inspector {
     bool unreachable = false;
     bool virtualMethod = false;
 
-    HeaderDefinitions *headerDefs;
+    std::shared_ptr<HeaderDefinitions> headerDefs;
     bool reportInvalidHeaders = true;
 
-    const LocationSet *getReads(const IR::Expression *expression, bool nonNull = false) const {
-        const auto *result = ::P4::get(readLocations, expression);
+    std::shared_ptr<const LocationSet> getReads(const IR::Expression *expression,
+                                                bool nonNull = false) const {
+        auto result = ::P4::get(readLocations, expression);
         if (nonNull) BUG_CHECK(result != nullptr, "no locations known for %1%", dbp(expression));
         return result;
     }
     /// 'expression' is reading the 'loc' location set
-    void reads(const IR::Expression *expression, const LocationSet *loc) {
+    void reads(const IR::Expression *expression, std::shared_ptr<const LocationSet> loc) {
         BUG_CHECK(!unreachable, "reached an unreachable expression %1% in FindUninitialized",
                   expression);
         LOG3(expression << " reads " << loc);
@@ -391,7 +399,7 @@ class FindUninitialized : public Inspector {
           definitions(definitions),
           currentPoint(),
           hasUses(hasUses),
-          headerDefs(new HeaderDefinitions(refMap, typeMap, definitions)) {
+          headerDefs(std::make_shared<HeaderDefinitions>(refMap, typeMap, definitions)) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         CHECK_NULL(definitions);
@@ -411,7 +419,7 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    Definitions *getCurrentDefinitions() const {
+    std::shared_ptr<Definitions> getCurrentDefinitions() const {
         auto defs = definitions->getDefinitions(currentPoint, true);
         LOG3("FU Current point is (after) " << currentPoint << " definitions are " << Log::endl
                                             << defs);
@@ -430,7 +438,7 @@ class FindUninitialized : public Inspector {
     }
 
     void checkOutParameters(const IR::IDeclaration *block, const IR::ParameterList *parameters,
-                            Definitions *defs) {
+                            std::shared_ptr<Definitions> defs) {
         LOG2("Checking output parameters of " << block << "; definitions are " << IndentCtl::endl
                                               << defs);
         for (auto p : parameters->parameters) {
@@ -439,7 +447,7 @@ class FindUninitialized : public Inspector {
                 LOG3("Checking parameter: " << p);
                 if (storage == nullptr) continue;
 
-                const auto *points = defs->getPoints(LocationSet(storage));
+                auto points = defs->getPoints(LocationSet(storage));
                 hasUses.add(points);
                 if (typeMap->typeIsEmpty(storage->type)) continue;
                 // Check uninitialized non-headers (headers can be invalid).
@@ -470,7 +478,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function *func) override {
-        HeaderDefinitions *saveHeaderDefs = nullptr;
+        std::shared_ptr<HeaderDefinitions> saveHeaderDefs = nullptr;
         if (virtualMethod) {
             LOG3("Virtual method");
             context = ProgramPoint::beforeStart;
@@ -543,7 +551,7 @@ class FindUninitialized : public Inspector {
 
         (void)parser->apply(pcg, getChildContext());
         ordered_set<const IR::ParserState *> toRun;  // worklist
-        ordered_map<const IR::ParserState *, HeaderDefinitions *> inputHeaderDefs;
+        ordered_map<const IR::ParserState *, std::shared_ptr<HeaderDefinitions>> inputHeaderDefs;
 
         toRun.emplace(startState);
         inputHeaderDefs.emplace(startState, headerDefs);
@@ -581,7 +589,8 @@ class FindUninitialized : public Inspector {
         reportInvalidHeaders = true;
         for (auto state : parser->states) {
             if (inputHeaderDefs.find(state) == inputHeaderDefs.end()) {
-                inputHeaderDefs.emplace(state, new HeaderDefinitions(refMap, typeMap, definitions));
+                inputHeaderDefs.emplace(
+                    state, std::make_shared<HeaderDefinitions>(refMap, typeMap, definitions));
             }
             headerDefs = inputHeaderDefs[state];
             visit(state);
@@ -613,9 +622,9 @@ class FindUninitialized : public Inspector {
     // The function will recurse the structure of expr until it finds
     // a header and will mark the header valid bit as read.
     // It returns the LocationSet of parent.
-    const LocationSet *checkHeaderFieldWrite(const IR::Expression *expr,
-                                             const IR::Expression *parent) {
-        const LocationSet *loc;
+    std::shared_ptr<const LocationSet> checkHeaderFieldWrite(const IR::Expression *expr,
+                                                             const IR::Expression *parent) {
+        std::shared_ptr<const LocationSet> loc;
         if (auto mem = parent->to<IR::Member>()) {
             loc = checkHeaderFieldWrite(expr, mem->expr);
             loc = loc->getField(mem->member);
@@ -630,7 +639,7 @@ class FindUninitialized : public Inspector {
             auto decl = refMap->getDeclaration(pe->path, true);
             auto storage = definitions->getStorage(decl);
             if (storage != nullptr)
-                loc = new LocationSet(storage);
+                loc = std::make_shared<LocationSet>(storage);
             else
                 loc = LocationSet::empty;
         } else if (auto slice = parent->to<IR::AbstractSlice>()) {
@@ -881,7 +890,7 @@ class FindUninitialized : public Inspector {
             auto saveHeaderDefsBeforeExpr = headerDefs->clone();
             visit(statement->expression);
             auto saveHeaderDefsAfterExpr = headerDefs->clone();
-            HeaderDefinitions *finalHeaderDefs = nullptr;
+            std::shared_ptr<HeaderDefinitions> finalHeaderDefs = nullptr;
             currentPoint.assign(context, statement->expression);
             auto saveCurrent = currentPoint;
             auto saveUnreachable = unreachable;
@@ -1002,7 +1011,7 @@ class FindUninitialized : public Inspector {
             return;
         }
 
-        const LocationSet *read = getReads(expression);
+        std::shared_ptr<const LocationSet> read = getReads(expression);
         if (read == nullptr || read->isEmpty()) {
             LOG3("No LocationSet for '" << expression << "'. Returning...");
             return;
@@ -1043,8 +1052,8 @@ class FindUninitialized : public Inspector {
     // Returns true if header union is uninitialized, or if the type is not,
     // or does not contain a header union.
     bool hasUninitializedHeaderUnion(const IR::Expression *expression,
-                                     const P4::Definitions *currentDefinitions,
-                                     const LocationSet *read) {
+                                     std::shared_ptr<const P4::Definitions> currentDefinitions,
+                                     std::shared_ptr<const LocationSet> read) {
         auto type = typeMap->getType(expression, true);
 
         if (type->is<IR::Type_HeaderUnion>()) {
@@ -1065,8 +1074,9 @@ class FindUninitialized : public Inspector {
     }
 
     // Checks if a header union is uninitialized
-    bool isHeaderUnionUninitialized(const IR::Type *type, const P4::Definitions *currentDefinitions,
-                                    const LocationSet *read) {
+    bool isHeaderUnionUninitialized(const IR::Type *type,
+                                    std::shared_ptr<const P4::Definitions> currentDefinitions,
+                                    std::shared_ptr<const LocationSet> read) {
         auto huType = type->to<IR::Type_HeaderUnion>();
         for (auto header : huType->fields) {
             auto headerLoc = read->getField(header->name);
@@ -1080,8 +1090,8 @@ class FindUninitialized : public Inspector {
 
     // Checks if a header union stack is uninitialized
     bool isHeaderUnionStackUninitialized(const IR::Type *type,
-                                         const P4::Definitions *currentDefinitions,
-                                         const LocationSet *read) {
+                                         std::shared_ptr<const P4::Definitions> currentDefinitions,
+                                         std::shared_ptr<const LocationSet> read) {
         auto sType = type->to<IR::Type_Array>();
         for (unsigned int i = 0; i < sType->getSize(); i++) {
             if (sType->at(i)->is<IR::Type_HeaderUnion>()) {
@@ -1109,9 +1119,9 @@ class FindUninitialized : public Inspector {
                                       << decl << Log::unindent);
 
         auto storage = definitions->getStorage(decl);
-        const LocationSet *result;
+        std::shared_ptr<const LocationSet> result;
         if (storage != nullptr)
-            result = new LocationSet(storage);
+            result = std::make_shared<LocationSet>(storage);
         else
             result = LocationSet::empty;
 
@@ -1142,7 +1152,7 @@ class FindUninitialized : public Inspector {
         auto key = table->getKey();
         visit(key);
         auto saveHeaderDefsAfterKey = headerDefs->clone();
-        HeaderDefinitions *finalHeaderDefs = nullptr;
+        std::shared_ptr<HeaderDefinitions> finalHeaderDefs = nullptr;
         auto actions = table->getActionList();
         for (auto ale : actions->actionList) {
             BUG_CHECK(ale->expression->is<IR::MethodCallExpression>(),
@@ -1518,7 +1528,7 @@ const IR::Node *DoSimplifyDefUse::process(const IR::Node *node) {
     ProcessDefUse process(refMap, typeMap);
     process.setCalledBy(this);
     LOG5("ProcessDefUse of:" << Log::endl << node);
-    return node->apply(process, getChildContext());
+    return guardReturn(node->apply(process, getChildContext()));
 }
 
 }  // namespace P4

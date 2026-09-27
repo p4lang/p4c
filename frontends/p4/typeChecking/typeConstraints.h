@@ -8,6 +8,8 @@
 #ifndef FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
 #define FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
 
+#include <memory>
+
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/error_helper.h"
@@ -19,7 +21,7 @@ namespace P4 {
 
 /// Creates a string that describes the values of current type variables
 class Explain : public Inspector {
-    absl::flat_hash_set<const IR::Type_Var *, Util::Hash> explained;
+    absl::flat_hash_set<IR::Ptr<IR::Type_Var>, Util::Hash> explained;
     const TypeVariableSubstitution *subst;
 
  public:
@@ -49,7 +51,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     static int crtid;
     /// The following are used when reporting errors.
     cstring errFormat;
-    std::vector<const IR::Node *> errArguments;
+    std::vector<IR::Ptr<IR::Node>> errArguments;
 
  private:
     bool reportErrorImpl(const TypeVariableSubstitution *subst, std::string message) const;
@@ -58,22 +60,24 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     /// Constraint which produced this one.  May be nullptr.
     const TypeConstraint *derivedFrom = nullptr;
     /// Place in source code which originated the contraint.  May be nullptr.
-    const IR::Node *origin = nullptr;
+    IR::Ptr<IR::Node> origin = nullptr;
 
     explicit TypeConstraint(const TypeConstraint *derivedFrom)
         : id(crtid++), derivedFrom(derivedFrom) {}
     explicit TypeConstraint(const IR::Node *origin) : id(crtid++), origin(origin) {}
     std::string explain(size_t index, Explain *explainer) const {
-        const auto *node = errArguments.at(index);
+        auto node = errArguments.at(index);
         node->apply(*explainer);
         return explainer->explanation;
     }
     std::string localError(Explain *explainer) const;
 
  public:
+    virtual ~TypeConstraint() = default;
+
     void setError(std::string_view format, std::initializer_list<const IR::Node *> nodes) {
         errFormat = cstring(format);
-        errArguments = nodes;
+        for (const auto *n : nodes) errArguments.push_back(n);
     }
     template <typename... Args>
     // Always return false.
@@ -97,8 +101,8 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
 /// Base class for EqualityConstraint and CanBeImplicitlyCastConstraint
 class BinaryConstraint : public TypeConstraint {
  public:
-    const IR::Type *left;
-    const IR::Type *right;
+    IR::Ptr<IR::Type> left;
+    IR::Ptr<IR::Type> right;
 
  protected:
     BinaryConstraint(const IR::Type *left, const IR::Type *right, const TypeConstraint *derivedFrom)
@@ -182,20 +186,23 @@ class TypeConstraints final : public IHasDbPrint {
      * This example should not typecheck: because T cannot be constrained in the invocation of f.
      * While typechecking the f(data) call, T is not a type variable that can be unified.
      */
-    absl::flat_hash_set<const IR::ITypeVar *, Util::Hash> unifiableTypeVariables;
+    absl::flat_hash_set<IR::Ptr<IR::ITypeVar>, Util::Hash> unifiableTypeVariables;
     std::vector<const TypeConstraint *> constraints;
-    TypeUnification *unification;
+    // Derived constraints borrow their ancestors for error reporting. Keep every
+    // constraint alive until this entire unification has finished.
+    std::vector<std::unique_ptr<const TypeConstraint>> ownedConstraints;
+    TypeUnification unification;
     const TypeVariableSubstitution *definedVariables;
     /// Keeps track of the values of all variables.
-    TypeVariableSubstitution *currentSubstitution;
+    std::unique_ptr<TypeVariableSubstitution> currentSubstitution;
 
  public:
     TypeVariableSubstitutionVisitor replaceVariables;
 
     TypeConstraints(const TypeVariableSubstitution *definedVariables, const P4::TypeMap *typeMap)
-        : unification(new TypeUnification(this, typeMap)),
+        : unification(this, typeMap),
           definedVariables(definedVariables),
-          currentSubstitution(new TypeVariableSubstitution()),
+          currentSubstitution(nullptr),
           replaceVariables(definedVariables) {}
     // Mark this variable as being free.
     void addUnifiableTypeVariable(const IR::ITypeVar *typeVariable) {
@@ -207,9 +214,14 @@ class TypeConstraints final : public IHasDbPrint {
     /// A variable is unifiable if it is marked so and it not already
     /// part of definedVariables.
     bool isUnifiableTypeVariable(const IR::Type *type);
+    template <class Constraint>
+    Constraint *retain(Constraint *constraint) {
+        ownedConstraints.emplace_back(constraint);
+        return constraint;
+    }
     void add(const TypeConstraint *constraint) {
         LOG3("Adding constraint " << constraint);
-        constraints.push_back(constraint);
+        constraints.push_back(retain(constraint));
     }
     void addEqualityConstraint(const IR::Node *source, const IR::Type *left, const IR::Type *right);
     void addImplicitCastConstraint(const IR::Node *source, const IR::Type *left,
@@ -221,9 +233,11 @@ class TypeConstraints final : public IHasDbPrint {
      * @return           True on success.  Does not report error on failure.
      */
     bool solve(const BinaryConstraint *constraint);
-    TypeVariableSubstitution *solve();
+    std::unique_ptr<TypeVariableSubstitution> solve();
     void dbprint(std::ostream &out) const;
-    const TypeVariableSubstitution *getCurrentSubstitution() const { return currentSubstitution; }
+    const TypeVariableSubstitution *getCurrentSubstitution() const {
+        return currentSubstitution.get();
+    }
 };
 }  // namespace P4
 

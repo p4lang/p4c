@@ -25,7 +25,7 @@ using namespace P4::BitRange::Detail;
 /// A GTest fixture base class for backend targets.
 class BitrangeTestBase : public ::testing::Test {
  protected:
-    BitrangeTestBase() : autoBFNContext(new GTestContext()) {}
+    BitrangeTestBase() : autoBFNContext(std::make_unique<GTestContext>()) {}
 
     AutoCompileContext autoBFNContext;
 };

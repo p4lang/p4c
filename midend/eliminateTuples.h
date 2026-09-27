@@ -19,8 +19,8 @@ namespace P4 {
  * corresponding struct replacement.
  */
 class ReplacementMap {
-    ordered_map<const IR::Type *, const IR::Type_Struct *> replacement;
-    std::set<const IR::Type_Struct *> inserted;
+    ordered_map<IR::Ptr<IR::Type>, IR::Ptr<IR::Type_Struct>> replacement;
+    std::set<IR::Ptr<IR::Type_Struct>> inserted;
     const IR::Type *convertType(const IR::Type *type);
 
  public:
@@ -31,7 +31,7 @@ class ReplacementMap {
         CHECK_NULL(typeMap);
     }
     const IR::Type_Struct *getReplacement(const IR::Type_BaseList *tt);
-    IR::IndexedVector<IR::Node> *getNewReplacements();
+    IR::MutablePtr<IR::IndexedVector<IR::Node>> getNewReplacements();
 };
 
 /**

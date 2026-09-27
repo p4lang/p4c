@@ -50,9 +50,10 @@ class Visitor::ChangeTracker {
         // `result` saving 8 bytes per record
         bool visit_in_progress;
         bool visitOnce;
-        const IR::Node *result;
+        int id;  // sanity check
+        IR::Ptr<IR::Node> result;
     };
-    using visited_t = absl::flat_hash_map<const IR::Node *, visit_info_t, Util::Hash>;
+    using visited_t = absl::flat_hash_map<IR::Ptr<IR::Node>, visit_info_t, Util::Hash>;
     bool forceClone;
     visited_t visited;
 
@@ -72,8 +73,9 @@ class Visitor::ChangeTracker {
      */
     [[nodiscard]] VisitStatus try_start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
-        auto [it, inserted] = visited.emplace(n, visit_info_t{true, defaultVisitOnce, n});
+        auto [it, inserted] = visited.emplace(n, visit_info_t{true, defaultVisitOnce, n->id, n});
 
+        BUG_CHECK(it->second.id == n->id, "node id mismatch in Visitor::ChangeTracker");
         if (!inserted) {  // We already seen this node, determine its status
             if (it->second.visit_in_progress) return VisitStatus::Busy;
             if (it->second.visitOnce) return VisitStatus::Done;
@@ -102,13 +104,15 @@ class Visitor::ChangeTracker {
         if (it == visited.end()) BUG("visitor state tracker corrupted");
 
         visit_info_t *orig_visit_info = &(it->second);
+        BUG_CHECK(orig_visit_info->id == orig->id, "node id mismatch in Visitor::ChangeTracker");
         orig_visit_info->visit_in_progress = false;
         if (!final) {
             orig_visit_info->result = final;
             return true;
         } else if (forceClone || (final != orig && *final != *orig)) {
             orig_visit_info->result = final;
-            visited.emplace(final, visit_info_t{false, orig_visit_info->visitOnce, final});
+            visited.emplace(final,
+                            visit_info_t{false, orig_visit_info->visitOnce, final->id, final});
             return true;
         } else if (visited.count(final)) {
             // coalescing with some previously visited node, so we don't want to undo
@@ -127,6 +131,7 @@ class Visitor::ChangeTracker {
     [[nodiscard]] bool shouldVisitOnce(const IR::Node *n) const {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
+        BUG_CHECK(it->second.id == n->id, "node id mismatch in Visitor::ChangeTracker");
         return it->second.visitOnce;
     }
 
@@ -150,6 +155,8 @@ class Visitor::ChangeTracker {
      */
     [[nodiscard]] bool busy(const IR::Node *n) const {
         auto it = visited.find(n);
+        BUG_CHECK(it == visited.end() || it->second.id == n->id,
+                  "node id mismatch in Visitor::ChangeTracker");
         return it != visited.end() && it->second.visit_in_progress;
     }
 
@@ -162,6 +169,8 @@ class Visitor::ChangeTracker {
      */
     [[nodiscard]] bool done(const IR::Node *n) const {
         auto it = visited.find(n);
+        BUG_CHECK(it == visited.end() || it->second.id == n->id,
+                  "node id mismatch in Visitor::ChangeTracker");
         return it != visited.end() && !it->second.visit_in_progress && it->second.visitOnce;
     }
 
@@ -171,7 +180,7 @@ class Visitor::ChangeTracker {
      * visiting @n if `start(@n)` has been invoked but not `finish(@n)`, or @n
      * if `start(@n)` has not been invoked.
      */
-    const IR::Node *result(const IR::Node *n) const {
+    IR::Ptr<IR::Node> result(const IR::Node *n) const {
         auto it = visited.find(n);
         if (it == visited.end()) return n;
         return it->second.result;
@@ -212,6 +221,7 @@ class Visitor::Tracker {
     // FIXME: We can squeeze these into low 2 bits of key, eliminating the value entirely
     struct info_t {
         bool done, visitOnce;
+        int id;
     };
     using visited_t = absl::flat_hash_map<const IR::Node *, info_t, Util::Hash>;
     visited_t visited;
@@ -245,8 +255,9 @@ class Visitor::Tracker {
      */
     [[nodiscard]] VisitStatus try_start(const IR::Node *n, bool defaultVisitOnce) {
         // Initialization
-        auto [it, inserted] = visited.emplace(n, info_t{false, defaultVisitOnce});
+        auto [it, inserted] = visited.emplace(n, info_t{false, defaultVisitOnce, n->id});
 
+        BUG_CHECK(it->second.id == n->id, "node id mismatch in Visitor::Tracker");
         if (!inserted) {  // We already seen this node, determine its status
             if (!it->second.done) return VisitStatus::Busy;
             if (it->second.visitOnce) return VisitStatus::Done;
@@ -271,8 +282,8 @@ class Visitor::Tracker {
     void finish(const IR::Node *n) {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
-
         it->second.done = true;
+        if (!it->second.visitOnce) visited.erase(it);
     }
 
     /** Determine whether @n is currently being visited and the visitor has not finished
@@ -313,6 +324,7 @@ class Visitor::Tracker {
     void visitAgain(const IR::Node *n) {
         auto it = visited.find(n);
         if (it == visited.end()) BUG("visitor state tracker corrupted");
+        BUG_CHECK(it->second.id == n->id, "node id mismatch in Visitor::Tracker");
         it->second.visitOnce = false;
     }
 };
@@ -323,7 +335,7 @@ bool Visitor::warning_enabled(const Visitor *visitor, int warning_kind) {
     while (visitor != nullptr) {
         auto crt = visitor->ctxt;
         while (crt != nullptr) {
-            for (auto *a : crt->node->getAnnotations()) {
+            for (const IR::Annotation *a : crt->node->getAnnotations()) {
                 if (a->name != IR::Annotation::noWarnAnnotation) continue;
 
                 auto arg = a->getSingleString();
@@ -444,8 +456,8 @@ struct PushContext {
 namespace {
 class ForwardChildren : public Visitor {
     const ChangeTracker &visited;
-    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) {
-        if (const auto *result = visited.finalResult(n)) return result;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char * = 0) {
+        if (auto result = visited.finalResult(n)) return result;
         return n;
     }
 
@@ -454,7 +466,7 @@ class ForwardChildren : public Visitor {
 };
 }  // namespace
 
-const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
+IR::Ptr<IR::Node> Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
@@ -470,6 +482,10 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
                 break;
             default: {  // New or Revisit
                 IR::Node *copy = n->clone();
+#if !HAVE_LIBGC
+                // keep the copy alive while it is in scope
+                IR::Ptr<IR::Node> copy_refcnt = copy;
+#endif
                 local.current.node = copy;
                 if (!dontForwardChildrenBeforePreorder) {
                     ForwardChildren forward_children(*visited);
@@ -488,14 +504,17 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
             }
         }
     }
-    if (ctxt)
+    if (ctxt) {
         ctxt->child_index++;
-    else
+        return n;
+    } else {
+        IR::Ptr<IR::Node> rv = n;
         visited.reset();
-    return n;
+        return rv;
+    }
 }
 
-const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
+IR::Ptr<IR::Node> Inspector::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n && !join_flows(n)) {
         PushContext local(ctxt, n);
@@ -515,15 +534,18 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
         }
         post_join_flows(n, n);
     }
-    if (ctxt)
+    if (ctxt) {
         ctxt->child_index++;
-    else {
+        return n;
+    } else {
+        IR::Ptr<IR::Node> rv = n;
         visited.reset();
+        return rv;
     }
     return n;
 }
 
-const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
+IR::Ptr<IR::Node> Transform::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
     if (n) {
         PushContext local(ctxt, n);
@@ -538,7 +560,7 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 n = visited->result(n);
                 break;
             default: {  // New or Revisit
-                auto *copy = n->clone();
+                IR::MutablePtr<IR::Node> copy = n->clone();
                 local.current.node = copy;
                 if (!dontForwardChildrenBeforePreorder) {
                     ForwardChildren forward_children(*visited);
@@ -547,9 +569,9 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 bool save_prune_flag = prune_flag;
                 prune_flag = false;
                 bool extra_clone = false;
-                const IR::Node *preorder_result = copy->apply_visitor_preorder(*this);
+                IR::Ptr<IR::Node> preorder_result = copy->apply_visitor_preorder(*this);
                 assert(preorder_result != n);  // should never happen
-                const IR::Node *final_result = preorder_result;
+                IR::Ptr<IR::Node> final_result = preorder_result;
                 if (preorder_result != copy) {
                     // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
                     // if (copy->id == IR::Node::currentId - 1)
@@ -587,11 +609,17 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             }
         }
     }
-    if (ctxt)
+    if (ctxt) {
         ctxt->child_index++;
-    else
+        return n;
+    } else {
+        IR::Ptr<IR::Node> rv = n;
         visited.reset();
-    return n;
+#if !HAVE_LIBGC
+        guard_hold = nullptr;
+#endif
+        return rv;
+    }
 }
 
 void Inspector::revisit_visited() { visited->revisit_visited(); }
@@ -639,8 +667,10 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
         BUG("joinFlows only works for Inspector passes currently, not Modifier or Transform");
     if (flow_join_points)
         flow_join_points->clear();
-    else
-        flow_join_points = new std::remove_reference<decltype(*flow_join_points)>::type;
+    else {
+        joinPointsOwner = std::make_shared<flow_join_points_t>();
+        flow_join_points = joinPointsOwner.get();
+    }
     applySetupJoinPoints(root);
 #if DEBUG_FLOW_JOIN
     erase_if(*flow_join_points,
@@ -686,7 +716,7 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
         // Otherwise, this is the first time this node has been visited.
         // Clone this visitor and store it as the initial accumulator
         // value.
-        status.vclone = clone();
+        status.vclone = &flow_clone();
     }
     if (BackwardsCompatibleBroken) {
         // We've reached a join point and not all parents have been visited.  Old behavior
@@ -737,11 +767,37 @@ bool Transform::check_clone(const Visitor *v) {
 ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
     auto *rv = clone();
     BUG_CHECK(rv->check_clone(this), "Clone failed to copy visitor type");
+    rv->globalsOwner.reset();
+    rv->joinPointsOwner.reset();
     return *rv;
 }
 
 IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
 
+#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                        \
+    void Visitor::visit(IR::Ptr<IR::CLASS> &n, const char *name) {                 \
+        auto t = apply_visitor(n, name);                                           \
+        n = (t ? t->to<IR::CLASS>() : nullptr);                                    \
+        if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);          \
+    }                                                                              \
+    void Visitor::visit(IR::Ptr<IR::CLASS> const &n, const char *name) {           \
+        /* This function needed solely due to order of declaration issues */       \
+        visit(static_cast<const IR::Node *const &>(n), name);                      \
+    }                                                                              \
+    void Visitor::visit(IR::Ptr<IR::CLASS> &n, const char *name, int cidx) {       \
+        if (ctxt) ctxt->child_index = cidx;                                        \
+        auto t = apply_visitor(n, name);                                           \
+        n = (t ? t->to<IR::CLASS>() : nullptr);                                    \
+        if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);          \
+    }                                                                              \
+    void Visitor::visit(IR::Ptr<IR::CLASS> const &n, const char *name, int cidx) { \
+        /* This function needed solely due to order of declaration issues */       \
+        visit(static_cast<const IR::Node *const &>(n), name, cidx);                \
+    }
+IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
+#undef DEFINE_VISIT_FUNCTIONS
+
+#if !HAVE_LIBGC
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                      \
     void Visitor::visit(const IR::CLASS *&n, const char *name) {                 \
         auto t = apply_visitor(n, name);                                         \
@@ -753,7 +809,7 @@ IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
         visit(static_cast<const IR::Node *const &>(n), name);                    \
     }                                                                            \
     void Visitor::visit(const IR::CLASS *&n, const char *name, int cidx) {       \
-        if (ctxt) ctxt->child_index = cidx;                                      \
+        ctxt->child_index = cidx;                                                \
         auto t = apply_visitor(n, name);                                         \
         n = (t ? t->to<IR::CLASS>() : nullptr);                                  \
         if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);        \
@@ -764,6 +820,7 @@ IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
     }
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
+#endif /* !HAVE_LIBGC */
 
 // Everything after this is for debugging or cleaner logging
 
@@ -838,7 +895,8 @@ std::ostream &operator<<(std::ostream &out, const SplitFlowVisit_base &split) {
 }
 
 std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_info_t &info) {
-    if (info.vclone) out << Visitor::demangle(typeid(*info.vclone).name()) << " ";
+    if (const ControlFlowVisitor *clone = info.vclone)
+        out << Visitor::demangle(typeid(*clone).name()) << " ";
     out << "count=" << info.count << "  done=" << info.done;
 #if DEBUG_FLOW_JOIN
     using namespace P4::DBPrint;

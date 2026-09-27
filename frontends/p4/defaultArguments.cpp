@@ -27,22 +27,24 @@ class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     const IR::Node *preorder(IR::Type_Name *tn) override {
         auto t = typeMap->getTypeType(getOriginal<IR::Type>(), true);
         if (auto tv = t->to<IR::ITypeVar>())
-            return replacement(tv, tn)->to<IR::Type>()->getP4Type();
+            return guardReturn(replacement(tv, tn)->to<IR::Type>()->getP4Type());
         return tn;
     }
     // When cloning the value of an argument we want to make a fresh
     // copy for each new InfInt type, and not share the same one.
-    const IR::Node *postorder(IR::Type_InfInt *) override { return IR::Type_InfInt::get(); }
+    const IR::Node *postorder(IR::Type_InfInt *) override {
+        return guardReturn(IR::Type_InfInt::get());
+    }
 };
 }  // namespace
 
 /// Scans a parameter substitution and returns the new arguments to use if some
 /// parameters have default values.
 /// Returns nullptr if no arguments need to be changed.
-static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
-                                                    const ParameterSubstitution *subst,
-                                                    const TypeVariableSubstitution *tsv) {
-    auto args = new IR::Vector<IR::Argument>();
+static IR::Ptr<IR::Vector<IR::Argument>> fillDefaults(const TypeMap *typeMap,
+                                                      const ParameterSubstitution *subst,
+                                                      const TypeVariableSubstitution *tsv) {
+    IR::MutablePtr<IR::Vector<IR::Argument>> args = new IR::Vector<IR::Argument>();
     bool changed = false;
     for (auto param : subst->getParametersInOrder()) {
         auto arg = subst->lookup(param);
@@ -53,7 +55,7 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
                 arg = new IR::Argument(arg->srcInfo, param->name, arg->expression);
         } else if (param->defaultValue != nullptr) {
             // Parameter with default value: add a corresponding argument
-            const IR::Expression *value = param->defaultValue;
+            auto value = param->defaultValue;
             TypeNameSubstitutionVisitor tsvv(tsv, typeMap);
             value = param->defaultValue->apply(tsvv);
             arg = new IR::Argument(param->srcInfo, param->name, value);

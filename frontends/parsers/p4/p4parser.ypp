@@ -77,11 +77,11 @@ inline std::ostream& operator<<(std::ostream& out, const OptionalConst& oc) {
 // naive and it always prepends 'const' to the type. This is problematic when
 // the symbol type we want is itself const, since duplicate const qualifiers are
 // forbidden in C++. We avoid the problem using a typedef.
-typedef const IR::Type ConstType;
+using ConstType = IR::Ptr<IR::Type>;
 
 struct NameTypePair {
     IR::ID name;
-    const IR::Type *type;
+    IR::Ptr<IR::Type> type;
 };
 
 inline std::ostream &operator<<(std::ostream &out, const NameTypePair &nt) {
@@ -103,7 +103,7 @@ class Token {
  public:
     int type;
     cstring text;
-    UnparsedConstant* unparsedConstant;
+    std::shared_ptr<UnparsedConstant> unparsedConstant;
 
     Token() : Token(0, cstring::empty, nullptr) { }
     Token(int type, cstring text) : Token(type, text, nullptr) { }
@@ -142,8 +142,8 @@ using namespace P4;
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                                        \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                                     \
-        : YYRHSLOC(Rhs, 0) ?  Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd())  \
-                 : Util::SourceInfo(driver.sources, driver.sources->getCurrentPosition()))
+        : YYRHSLOC(Rhs, 0) ?  Util::SourceInfo(driver.sources.get(), YYRHSLOC(Rhs, 0).getEnd())  \
+                 : Util::SourceInfo(driver.sources.get(), driver.sources->getCurrentPosition()))
 #undef yylex
 #define yylex lexer.yylex
 
@@ -263,23 +263,23 @@ using namespace P4;
 %type<IR::ID>               name dot_name nonTypeName nonTableKwName annotationName
 %type<NameTypePair>         declarator
 %type<IR::Direction>        direction
-%type<IR::Path*>            prefixedNonTypeName prefixedType
-%type<IR::TypeParameters*>  optTypeParameters typeParameters typeParameterList
-%type<IR::Expression*>      expression lvalue keysetExpression selectExpression
+%type<IR::MutablePtr<IR::Path>>            prefixedNonTypeName prefixedType
+%type<IR::MutablePtr<IR::TypeParameters>>  optTypeParameters typeParameters typeParameterList
+%type<IR::MutablePtr<IR::Expression>>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
                             p4rtControllerType reducedSimpleKeysetExpression entryPriority
                             nonBraceExpression nonGrtExpression forCollectionExpr
-%type<ConstType*>           baseType typeOrVoid specializedType arrayType
+%type<ConstType>           baseType typeOrVoid specializedType arrayType
                             typeRef tupleType typeArg realTypeArg namedType p4listType
                             derivedTypeDeclarationAsType
-%type<IR::Type_Name*>       typeName
-%type<IR::Argument*>        argument
+%type<IR::MutablePtr<IR::Type_Name>>       typeName
+%type<IR::MutablePtr<IR::Argument>>        argument
 %type<IR::Vector<IR::Argument>> argumentList nonEmptyArgList
-%type<IR::Parameter*>       parameter
+%type<IR::MutablePtr<IR::Parameter>>       parameter
 %type<OptionalConst>        optCONST
 %type<IR::Vector<IR::Annotation>> optAnnotations annotations
-%type<IR::Annotation*>      annotation
+%type<IR::MutablePtr<IR::Annotation>>      annotation
 %type<IR::Vector<IR::AnnotationToken>> annotationBody
 %type<Token>                annotationToken
 %type<IR::IndexedVector<IR::Parameter>>   parameterList nonEmptyParameterList
@@ -287,61 +287,61 @@ using namespace P4;
 %type<IR::Vector<IR::Expression>>         expressionList
                                           simpleExpressionList tupleKeysetExpression
 %type<IR::IndexedVector<IR::Declaration_ID>> identifierList
-%type<IR::SelectCase*>      selectCase
+%type<IR::MutablePtr<IR::SelectCase>>      selectCase
 %type<IR::Vector<IR::SelectCase>> selectCaseList
-%type<IR::Statement*>       statement emptyStatement returnStatement
+%type<IR::MutablePtr<IR::Statement>>       statement emptyStatement returnStatement
                             switchStatement exitStatement
                             assignmentOrMethodCallStatement conditionalStatement
                             assignmentOrMethodCallStatementWithoutSemicolon
                             forStatement breakStatement continueStatement
-%type<IR::BlockStatement*>  blockStatement parserBlockStatement controlBody
+%type<IR::MutablePtr<IR::BlockStatement>>  blockStatement parserBlockStatement controlBody
                             optObjInitializer
-%type<IR::StatOrDecl*>      statementOrDeclaration parserStatement
+%type<IR::MutablePtr<IR::StatOrDecl>>      statementOrDeclaration parserStatement
                             declOrAssignmentOrMethodCallStatement
 %type<IR::IndexedVector<IR::StatOrDecl>>  objDeclarations statOrDeclList parserStatements
                             forInitStatements forInitStatementsNonEmpty
                             forUpdateStatements forUpdateStatementsNonEmpty
-%type<IR::SwitchCase*>      switchCase
+%type<IR::MutablePtr<IR::SwitchCase>>      switchCase
 %type<IR::Vector<IR::SwitchCase>> switchCases
 %type<IR::Vector<IR::Type>> typeArgumentList realTypeArgumentList
-%type<IR::ParserState*>     parserState
+%type<IR::MutablePtr<IR::ParserState>>     parserState
 %type<IR::IndexedVector<IR::ParserState>> parserStates
-%type<IR::Declaration*>     constantDeclaration actionDeclaration
+%type<IR::MutablePtr<IR::Declaration>>     constantDeclaration actionDeclaration
                             variableDeclaration variableDeclarationWithoutSemicolon instantiation functionDeclaration
                             objDeclaration tableDeclaration controlLocalDeclaration
                             parserLocalElement valueSetDeclaration
-%type<IR::Type_Declaration*>  headerTypeDeclaration structTypeDeclaration
+%type<IR::MutablePtr<IR::Type_Declaration>>  headerTypeDeclaration structTypeDeclaration
                               headerUnionDeclaration derivedTypeDeclaration
                               parserDeclaration controlDeclaration enumDeclaration
                               typedefDeclaration packageTypeDeclaration typeDeclaration
-%type<IR::Type_Error*>      errorDeclaration
-%type<IR::Declaration_MatchKind*>  matchKindDeclaration
-%type<IR::Node*>            fragment
-%type<IR::Node*>            declaration externDeclaration
-%type<IR::Type_Parser*>     parserTypeDeclaration
-%type<IR::Type_Control*>    controlTypeDeclaration
+%type<IR::MutablePtr<IR::Type_Error>>      errorDeclaration
+%type<IR::MutablePtr<IR::Declaration_MatchKind>>  matchKindDeclaration
+%type<IR::MutablePtr<IR::Node>>            fragment
+%type<IR::MutablePtr<IR::Node>>            declaration externDeclaration
+%type<IR::MutablePtr<IR::Type_Parser>>     parserTypeDeclaration
+%type<IR::MutablePtr<IR::Type_Control>>    controlTypeDeclaration
 %type<IR::IndexedVector<IR::Declaration>>  parserLocalElements controlLocalDeclarations
-%type<IR::StructField*>     structField
+%type<IR::MutablePtr<IR::StructField>>     structField
 %type<IR::IndexedVector<IR::StructField>>  structFieldList
 %type<IR::IndexedVector<IR::SerEnumMember>> specifiedIdentifierList
-%type<IR::SerEnumMember*>   specifiedIdentifier
-%type<IR::Method*>          methodPrototype functionPrototype
+%type<IR::MutablePtr<IR::SerEnumMember>>   specifiedIdentifier
+%type<IR::MutablePtr<IR::Method>>          methodPrototype functionPrototype
 %type<IR::Vector<IR::Method>> methodPrototypes
-%type<IR::Property*>        tableProperty
-%type<IR::TableProperties*> tablePropertyList
-%type<IR::KeyElement*>      keyElement
+%type<IR::MutablePtr<IR::Property>>        tableProperty
+%type<IR::MutablePtr<IR::TableProperties>> tablePropertyList
+%type<IR::MutablePtr<IR::KeyElement>>      keyElement
 %type<IR::Vector<IR::KeyElement>> keyElementList
-%type<IR::Expression*>  actionRef
+%type<IR::MutablePtr<IR::Expression>>  actionRef
 %type<IR::IndexedVector<IR::ActionListElement>> actionList
-%type<IR::Entry*>           entry
+%type<IR::MutablePtr<IR::Entry>>           entry
 %type<IR::Vector<IR::Entry>> entriesList
 %type<IR::IndexedVector<IR::NamedExpression>> kvList
-%type<IR::NamedExpression*> kvPair
+%type<IR::MutablePtr<IR::NamedExpression>> kvPair
 %type<IR::Vector<IR::Expression>> intList
 %type<IR::Vector<IR::Expression>> intOrStrList
 %type<IR::Vector<IR::Expression>> strList
-%type<IR::Expression*>      intOrStr
-%type<IR::P4Program*>       input
+%type<IR::MutablePtr<IR::Expression>>      intOrStr
+%type<IR::MutablePtr<IR::P4Program>>       input
 
 // %precedence COMMA
 %precedence QUESTION
@@ -785,10 +785,10 @@ packageTypeDeclaration
     ;
 
 instantiation
-      : annotations typeRef "(" argumentList ")" <ConstType*>{ $$ = $2; } declarator optObjInitializer ";"
+      : annotations typeRef "(" argumentList ")" <ConstType>{ $$ = $2; } declarator optObjInitializer ";"
                      { $$ = new IR::Declaration_Instance(@7, $7.name, std::move($1), $7.type, std::move($4), $8);
                        driver.structure->declareObject($7.name, $2->toString()); }
-      | typeRef "(" argumentList ")" <ConstType*>{ $$ = $1; } declarator optObjInitializer ";"
+      | typeRef "(" argumentList ")" <ConstType>{ $$ = $1; } declarator optObjInitializer ";"
                      { $$ = new IR::Declaration_Instance(@6, $6.name, $6.type, std::move($3), $7);
                        driver.structure->declareObject($6.name, $1->toString()); }
     ;
@@ -1548,7 +1548,7 @@ constantDeclaration
     ;
 
 declarator
-    : name                { $$.name = $1; $$.type = $<ConstType *>0; }
+    : name                { $$.name = $1; $$.type = $<ConstType>0; }
     | declarator "[" expression "]"
                           { $$ = $1; $$.type = new IR::Type_Array(@2+@4, $1.type, $3); }
     ;

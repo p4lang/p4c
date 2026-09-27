@@ -46,6 +46,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/parser_unroll.cpp
   gtest/remove_dontcare_args_test.cpp
   gtest/source_file_test.cpp
+  gtest/shared_ptr.cpp
   gtest/strength_reduction.cpp
   gtest/string_map.cpp
   gtest/transforms.cpp

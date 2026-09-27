@@ -54,7 +54,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     setName("MidEnd");
 
     ParserConfig config;
-    auto v1controls = new std::set<cstring>();
+    auto v1controls = std::make_shared<std::set<cstring>>();
     defuse = new P4::ComputeDefUse;
 
     addPasses(
@@ -138,7 +138,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     toplevel = evaluator->getToplevelBlock();
 }
 
-IR::ToplevelBlock *MidEnd::process(const IR::P4Program *&program) {
+IR::MutablePtr<IR::ToplevelBlock> MidEnd::process(IR::Ptr<IR::P4Program> &program) {
     program = program->apply(*this);
     return toplevel;
 }

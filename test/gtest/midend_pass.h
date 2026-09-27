@@ -30,10 +30,12 @@ class CompilerOptions;
 namespace P4::Test {
 
 class SkipControls : public P4::ActionSynthesisPolicy {
-    const std::set<cstring> *skip;
+    std::shared_ptr<const std::set<cstring>> skip;
 
  public:
-    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    explicit SkipControls(std::shared_ptr<const std::set<cstring>> skip) : skip(skip) {
+        CHECK_NULL(skip);
+    }
     bool convert(const Visitor::Context *, const IR::P4Control *control) override {
         if (skip->find(control->name) != skip->end()) return false;
         return true;
@@ -46,10 +48,10 @@ class MidEnd : public PassManager {
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
     P4::ComputeDefUse *defuse;
-    IR::ToplevelBlock *toplevel = nullptr;
+    IR::MutablePtr<IR::ToplevelBlock> toplevel = nullptr;
 
     explicit MidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
-    IR::ToplevelBlock *process(const IR::P4Program *&program);
+    IR::MutablePtr<IR::ToplevelBlock> process(IR::Ptr<IR::P4Program> &program);
 };
 
 }  // namespace P4::Test

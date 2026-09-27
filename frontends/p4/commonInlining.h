@@ -34,10 +34,10 @@ class SimpleCallInfo : public IHasDbPrint {
     using CallNode = CallNodeT;
     using CallExpression = CallExpressionT;
 
-    const Callable *caller;  // object that performs the call
-    const Callable *callee;  // object that is called
-    const CallNode *call;
-    const CallExpression *callExpr;
+    IR::Ptr<Callable> caller;  // object that performs the call
+    IR::Ptr<Callable> callee;  // object that is called
+    IR::Ptr<CallNode> call;
+    IR::Ptr<CallExpression> callExpr;
 
     SimpleCallInfo(const Callable *caller, const Callable *callee, const CallNode *call,
                    const CallExpression *expr)
@@ -81,8 +81,8 @@ class SimpleInlineWorkList : public IHasDbPrint {
 
 template <class Callable, class CallInfo, class InlineWorkList>
 class SimpleInlineList {
-    std::vector<CallInfo *> toInline;     // initial data
-    std::vector<CallInfo *> inlineOrder;  // sorted in inlining order
+    std::vector<std::shared_ptr<CallInfo>> toInline;  // initial data
+    std::vector<CallInfo *> inlineOrder;              // sorted in inlining order
 
  public:
     // generate the inlining order
@@ -97,7 +97,7 @@ class SimpleInlineList {
         for (auto c : order) {
             // This is quadratic, but hopefully the call graph is not too large
             for (auto ci : toInline) {
-                if (ci->caller == c) inlineOrder.push_back(ci);
+                if (ci->caller == c) inlineOrder.push_back(ci.get());
             }
         }
 
@@ -111,11 +111,11 @@ class SimpleInlineList {
     }
 
     /// Get next batch of objects to inline
-    InlineWorkList *next() {
+    std::shared_ptr<InlineWorkList> next() {
         if (inlineOrder.size() == 0) return nullptr;
 
         std::set<const Callable *> callers;
-        auto result = new InlineWorkList();
+        auto result = std::make_shared<InlineWorkList>();
 
         // Find callables that can be inlined simultaneously.
         // This traversal is in topological order starting from leaf callees.
@@ -132,7 +132,7 @@ class SimpleInlineList {
         return result;
     }
 
-    void add(CallInfo *aci) { toInline.push_back(aci); }
+    void add(CallInfo *aci) { toInline.emplace_back(aci); }
 
     void replace(const Callable *container, const Callable *replacement) {
         LOG2("Substituting " << container << " with " << replacement);
@@ -148,15 +148,15 @@ template <class InlineList, class InlineWorkList>
 class AbstractInliner : public Transform, public ResolutionContext {
  protected:
     InlineList *list;
-    InlineWorkList *toInline;
+    std::shared_ptr<InlineWorkList> toInline;
     AbstractInliner() : list(nullptr), toInline(nullptr) {}
 
  public:
-    void prepare(InlineList *list, InlineWorkList *toInline) {
+    void prepare(InlineList *list, std::shared_ptr<InlineWorkList> toInline) {
         CHECK_NULL(list);
         CHECK_NULL(toInline);
         this->list = list;
-        this->toInline = toInline;
+        this->toInline = std::move(toInline);
     }
     Visitor::profile_t init_apply(const IR::Node *node) {
         LOG2("AbstractInliner " << toInline);
@@ -168,7 +168,7 @@ class AbstractInliner : public Transform, public ResolutionContext {
 template <class InlineList, class InlineWorkList>
 class InlineDriver : public Visitor {
     InlineList *toInline;
-    AbstractInliner<InlineList, InlineWorkList> *inliner;
+    IR::MutablePtr<AbstractInliner<InlineList, InlineWorkList>> inliner;
 
  public:
     InlineDriver(InlineList *toInline, AbstractInliner<InlineList, InlineWorkList> *inliner)
@@ -177,7 +177,8 @@ class InlineDriver : public Visitor {
         CHECK_NULL(inliner);
         setName(("InlineDriver_"_cs + cstring(inliner->name())).c_str());
     }
-    const IR::Node *apply_visitor(const IR::Node *program, const char * = 0) override {
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *program_, const char * = 0) override {
+        IR::Ptr<IR::Node> program = program_;
         LOG2("InlineDriver");
         toInline->analyze();
         LOG3("InlineList size " << toInline->size());

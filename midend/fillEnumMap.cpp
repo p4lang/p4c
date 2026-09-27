@@ -13,7 +13,7 @@ const IR::Node *FillEnumMap::preorder(IR::Type_Enum *type) {
     if (type->srcInfo.filename.find("v1model") == nullptr) {
         unsigned long long count = type->members.size();
         unsigned long long width = policy->enumSize(count);
-        auto r = new EnumRepresentation(type->srcInfo, width);
+        auto r = std::make_shared<EnumRepresentation>(type->srcInfo, width);
         auto canontype = typeMap->getTypeType(getOriginal(), true);
         BUG_CHECK(canontype->is<IR::Type_Enum>(), "canon type of enum %s is non enum %s?", type,
                   canontype);

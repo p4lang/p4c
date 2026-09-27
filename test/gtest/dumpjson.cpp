@@ -16,7 +16,7 @@ using namespace P4::literals;
 
 TEST(IR, DumpJSON) {
     auto c = new IR::Constant(2);
-    IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c, c);
+    IR::MutablePtr<IR::Expression> e1 = new IR::Add(Util::SourceInfo(), c, c);
 
     std::stringstream ss, ss2;
     JSONGenerator(ss).emit(e1);
@@ -25,7 +25,7 @@ TEST(IR, DumpJSON) {
     JSONLoader loader(ss);
     std::cout << loader.as<JsonData>();
 
-    const IR::Node *e2 = nullptr;
+    IR::Ptr<IR::Node> e2 = nullptr;
     loader >> e2;
     JSONGenerator(std::cout).emit(e2);
 }
@@ -86,4 +86,43 @@ TEST(JSON, variant) {
     for (size_t i = 0; i < data.size() && i < copy.size(); ++i) {
         EXPECT_EQ(data[i], copy[i]);
     }
+}
+
+TEST(JSON, SharedAnnotationConstant) {
+    auto value = std::make_shared<UnparsedConstant>(UnparsedConstant{"8w42"_cs, 0, 10, true});
+    std::weak_ptr<UnparsedConstant> lifetime = value;
+    std::stringstream encoded;
+    {
+        IR::Ptr<IR::AnnotationToken> token = new IR::AnnotationToken(1, "8w42"_cs, value);
+        value.reset();
+        JSONGenerator(encoded).emit(token);
+    }
+#if !HAVE_LIBGC
+    EXPECT_TRUE(lifetime.expired());
+#endif
+    IR::Ptr<IR::AnnotationToken> decoded;
+    JSONLoader loader(encoded);
+    loader >> decoded;
+    ASSERT_NE(decoded, nullptr);
+    ASSERT_NE(decoded->constInfo, nullptr);
+    EXPECT_EQ(decoded->constInfo->text, "8w42");
+    EXPECT_EQ(decoded->constInfo->base, 10U);
+    EXPECT_TRUE(decoded->constInfo->hasWidth);
+}
+
+TEST(JSON, DecodedGraphOutlivesLoader) {
+    std::stringstream encoded;
+    {
+        IR::Ptr<IR::Constant> value = new IR::Constant(42);
+        IR::Ptr<IR::Add> expression = new IR::Add(value, value);
+        JSONGenerator(encoded).emit(expression);
+    }
+    IR::Ptr<IR::Add> decoded;
+    {
+        JSONLoader loader(encoded);
+        loader >> decoded;
+    }
+    ASSERT_NE(decoded, nullptr);
+    EXPECT_EQ(decoded->left, decoded->right);
+    EXPECT_EQ(decoded->left->checkedTo<IR::Constant>()->value, 42);
 }

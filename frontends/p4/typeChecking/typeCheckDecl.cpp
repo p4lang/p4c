@@ -54,7 +54,7 @@ bool TypeInferenceBase::checkParameters(const IR::ParameterList *paramList, bool
     return true;
 }
 
-const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
+IR::Ptr<IR::ParameterList> TypeInferenceBase::canonicalizeParameters(
     const IR::ParameterList *params) {
     if (params == nullptr) return params;
 
@@ -208,7 +208,7 @@ bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *ins
                       {func, methtype});
             if (tvs == nullptr) return false;
             BUG_CHECK(errorCount() > 0 || tvs->isIdentity(), "%1%: expected no type variables",
-                      tvs);
+                      tvs.get());
         }
     }
     bool rv = true;
@@ -428,21 +428,21 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SerEnumMember *member) {
     if (!type || !checkEnumValueInitializer(type, member->value, serEnum, member)) {
         return member;
     }
-    const auto *exprType = getType(member->value);
-    auto *tvs = unifyCast(member, type, exprType,
-                          "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
-                          {member, exprType, type});
+    const IR::Type *exprType = getType(member->value);
+    auto tvs = unifyCast(member, type, exprType,
+                         "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
+                         {member, exprType, type});
     if (tvs == nullptr)
         // error already signalled
         return member;
     if (tvs->isIdentity()) return member;
 
-    ConstantTypeSubstitution cts(tvs, typeMap, this);
-    auto *newValue = cts.convert(member->value, getChildContext());  // sets type
-    if (member->value != newValue)
-        member = new IR::SerEnumMember(member->srcInfo, member->name, newValue);
-    if (!typeMap->getType(member)) setType(member, getTypeType(serEnum));
-    return member;
+    ConstantTypeSubstitution cts(tvs.get(), typeMap, this);
+    auto newValue = cts.convert(member->value, getChildContext());  // sets type
+    IR::Ptr<IR::SerEnumMember> rv = member;
+    if (rv->value != newValue) rv = new IR::SerEnumMember(rv->srcInfo, rv->name, newValue);
+    if (!typeMap->getType(rv)) setType(rv, getTypeType(serEnum));
+    return rv;  // will always be in typeMap, so this won't dangle
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::P4ValueSet *decl) {

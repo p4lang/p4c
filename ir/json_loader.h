@@ -48,7 +48,7 @@ class JSONLoader {
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
-    using NodeReferences = std::unordered_map<int, IR::Node *>;
+    using NodeReferences = std::unordered_map<int, IR::MutablePtr<IR::Node>>;
     std::shared_ptr<NodeReferences> node_refs;
     std::unique_ptr<JsonData> json_root;
     const JsonData *json = nullptr;
@@ -414,6 +414,17 @@ class JSONLoader {
         v = get_node()->checkedTo<T>();
     }
 
+    template <typename T>
+    std::enable_if_t<!std::is_base_of_v<IR::INode, T>> unpack_json(std::shared_ptr<T> &v) {
+        if (is<JsonNull>()) {
+            v.reset();
+            return;
+        }
+        T *value = nullptr;
+        unpack_json(value);
+        v.reset(value);
+    }
+
     template <typename T, size_t N>
     void unpack_json(T (&v)[N]) {
         if (auto *j = json->to<JsonVector>()) {
@@ -422,6 +433,43 @@ class JSONLoader {
             }
         }
     }
+
+#if !HAVE_LIBGC
+    template <typename T>
+    void unpack_json(IR::shared_ptr<T> &v) {
+        v = get_node()->checkedTo<T>();
+    }
+
+    template <typename T>
+    void unpack_json(IR::shared_ptr<IR::Vector<T>> &v) {
+        v = get_node(NodeFactoryFn(&IR::Vector<T>::fromJSON))->as<IR::Vector<T>>();
+    }
+    template <typename T>
+    void unpack_json(IR::shared_ptr<const IR::Vector<T>> &v) {
+        v = get_node(NodeFactoryFn(&IR::Vector<T>::fromJSON))->checkedTo<IR::Vector<T>>();
+    }
+    template <typename T>
+    void unpack_json(IR::shared_ptr<IR::IndexedVector<T>> &v) {
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))->as<IR::IndexedVector<T>>();
+    }
+    template <typename T>
+    void unpack_json(IR::shared_ptr<const IR::IndexedVector<T>> &v) {
+        v = get_node(NodeFactoryFn(&IR::IndexedVector<T>::fromJSON))
+                ->checkedTo<IR::IndexedVector<T>>();
+    }
+    template <class T, template <class K, class V, class COMP, class ALLOC> class MAP, class COMP,
+              class ALLOC>
+    void unpack_json(IR::shared_ptr<IR::NameMap<T, MAP, COMP, ALLOC>> &m) {
+        m = get_node(NodeFactoryFn(&IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON))
+                ->as<IR::NameMap<T, MAP, COMP, ALLOC>>();
+    }
+    template <class T, template <class K, class V, class COMP, class ALLOC> class MAP, class COMP,
+              class ALLOC>
+    void unpack_json(IR::shared_ptr<const IR::NameMap<T, MAP, COMP, ALLOC>> &m) {
+        m = get_node(NodeFactoryFn(&IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON))
+                ->checkedTo<IR::NameMap<T, MAP, COMP, ALLOC>>();
+    }
+#endif /* !HAVE_LIBGC */
 
  public:
     template <typename T>

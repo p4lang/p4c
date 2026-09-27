@@ -13,8 +13,9 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
     // but this may be wrong for something like @atomic
 
     // Set of newly created states
-    auto states = new IR::IndexedVector<IR::ParserState>();
-    IR::ParserState *currentState = state;
+    IR::MutablePtr<IR::IndexedVector<IR::ParserState>> states =
+        new IR::IndexedVector<IR::ParserState>();
+    IR::MutablePtr<IR::ParserState> currentState = state;
     // components of the currentState
     IR::IndexedVector<IR::StatOrDecl> currentComponents;
     auto origComponents = state->components;
@@ -64,7 +65,7 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
 
     if (states->empty()) return state;
     states->push_back(currentState);
-    return states;
+    return guardReturn(IR::Ptr<IR::Node>(states));
 }
 
 Visitor::profile_t DoRemoveParserControlFlow::init_apply(const IR::Node *node) {

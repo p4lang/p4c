@@ -230,6 +230,8 @@ sudo dpkg -i /path/to/package.deb
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
        library. Default is ON.
+     - `-DDISABLE_GC=ON|OFF`. Use reference-counted IR ownership without BDWGC.
+       Default is OFF. When ON, overrides `ENABLE_GC`.
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
      - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
@@ -453,14 +455,16 @@ Installing on macOS:
 
 ### Garbage collector
 
-P4c relies on [BDW garbage collector](https://github.com/ivmai/bdwgc)
-to manage its memory.  By default, the P4C executables are linked with
-the garbage collector library.  When the GC causes problems, this can
-be disabled by setting `ENABLE_GC` cmake option to `OFF`.  However,
-this will dramatically increase the memory usage by the compiler, and
-may become impractical for compiling large programs.  **Do not disable
-the GC**, unless you really have to.  We have noticed that this may be
-a problem on MacOS.
+P4c uses the [BDW garbage collector](https://github.com/ivmai/bdwgc)
+by default. Configure with `-DDISABLE_GC=ON` (or `-DENABLE_GC=OFF`)
+to build without it. In this mode, IR references use intrusive reference
+counting, and supporting objects use scoped or shared ownership.
+See the [ownership guide](docs/ownership.md) when modifying these lifetimes.
+
+The no-GC ownership migration is still in progress. Passing compiler tests
+does not establish that a backend is leak-free. The
+[Testgen memory benchmark](backends/p4tools/modules/testgen/benchmarks/README.md)
+describes measuring memory growth and checking allocations with Valgrind.
 
 ### Crash dumps
 

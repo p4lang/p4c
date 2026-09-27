@@ -67,6 +67,34 @@ cloning the entire IR graph, as modifying a leaf involves cloning the
 object containing the leaf, and then any object referring to that
 object, recursively.
 
+## Ownership without garbage collection
+
+With `DISABLE_GC=ON`, `IR::Ptr<T>` retains a const IR node and
+`IR::MutablePtr<T>` retains a mutable node. Use these types for stored IR
+references, including map keys and values, and for results that must survive
+another visitor application. A raw pointer borrows a node; it does not extend
+the node's lifetime. In particular, converting a temporary `IR::Ptr` to a raw
+pointer and keeping that pointer can leave it dangling at the end of the
+expression.
+
+IR ownership must remain acyclic. Keep back references borrowed and ensure
+their owner outlives the borrower. Stack nodes and nodes embedded in other
+objects are not deleted by `IR::Ptr`; references to them must not outlive the
+containing scope or object. Use scoped values, `std::unique_ptr`, or
+`std::shared_ptr` for supporting objects that are not IR nodes.
+
+Enumerator factories return `Util::EnumeratorPtr<T>`, which owns the
+enumerator and any input enumerators in its chain. Iterate over that handle
+directly: `for (auto decl : node->getDeclarations())`. Dereferencing a
+temporary handle in a range expression can destroy the enumerator before
+iteration begins.
+
+Pass managers retain their heap-allocated visitors, and copied managers share
+those visitors. A pass passed by pointer from the stack remains borrowed and
+must outlive every manager that contains it. Removing a pass releases that
+manager's reference. A visitor retained by a manager must not also be owned
+by a separate `std::unique_ptr`.
+
 ## Visitors and Transforms
 
 The compiler is organized as a series of `Visitor` and `Transform`

@@ -21,8 +21,8 @@
 namespace P4 {
 
 #define SINGLETON_TYPE(NAME)                                               \
-    const IR::Type_##NAME *IR::Type_##NAME::get() {                        \
-        static const Type_##NAME *singleton;                               \
+    IR::Ptr<IR::Type_##NAME> IR::Type_##NAME::get() {                      \
+        static IR::Ptr<Type_##NAME> singleton;                             \
         if (!singleton) singleton = (new Type_##NAME(Util::SourceInfo())); \
         return singleton;                                                  \
     }

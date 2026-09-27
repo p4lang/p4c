@@ -20,11 +20,17 @@ concurrency:
 jobs:
   # Build and test p4tools on Ubuntu 22.04.
   build-and-test-tools:
+    name: test-tools (DISABLE_GC=${{ matrix.disable_gc }})
+    strategy:
+      fail-fast: false
+      matrix:
+        disable_gc: ["OFF", "ON"]
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
+      CMAKE_FLAGS: "-DDISABLE_GC=${{ matrix.disable_gc }} "
       ENABLE_TEST_TOOLS: ON
       BUILD_GENERATOR: Ninja
       # This pins BMv2 to current upstream main.
@@ -37,9 +43,50 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-tools"
+          ccache-key: "test-tools-no-gc-${{ matrix.disable_gc }}"
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.
         run: sudo -E env PATH="$PATH" uv run ctest -R "testgen|smith" --output-on-failure --schedule-random
         working-directory: ./build
+
+      - name: Run compiler tests without GC
+        if: matrix.disable_gc == 'ON'
+        run: uv run ctest -R "^(p4/|err/|p14_to_16/|gtestp4c)" --output-on-failure
+        working-directory: ./build
+
+      - name: Measure Testgen memory without GC
+        if: matrix.disable_gc == 'ON'
+        run: |
+          python3 backends/p4tools/modules/testgen/benchmarks/memory.py \
+            --binary build/p4testgen \
+            --program testdata/p4_16_samples/pins/pins_middleblock.p4 \
+            --counts 100 1000 10000 --max-peak-rss-mib 1024 \
+            --out-dir build/testgen-memory
+
+      - name: Check allocation lifetimes without GC
+        if: matrix.disable_gc == 'ON'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+          mkdir -p build/testgen-memory
+          valgrind --vgdb=no --leak-check=full --show-leak-kinds=definite,indirect \
+            --errors-for-leak-kinds=definite,indirect --error-exitcode=1 \
+            --log-file=build/testgen-memory/compiler-valgrind.log \
+            build/p4test --testJson testdata/p4_16_samples/action-synth.p4
+          valgrind --vgdb=no --leak-check=full --show-leak-kinds=definite,indirect \
+            --errors-for-leak-kinds=definite,indirect --error-exitcode=1 \
+            --log-file=build/testgen-memory/testgen-valgrind.log \
+            build/p4testgen --target bmv2 --arch v1model --test-backend STF \
+            --seed 1000 --max-tests 10 --out-dir build/testgen-memory/valgrind-tests \
+            testdata/p4_16_samples/pins/pins_middleblock.p4
+
+      - name: Upload Testgen memory measurements
+        if: always() && matrix.disable_gc == 'ON'
+        uses: actions/upload-artifact@v4
+        with:
+          name: testgen-no-gc-memory
+          path: |
+            build/testgen-memory/*.json*
+            build/testgen-memory/*.log
+          if-no-files-found: ignore
