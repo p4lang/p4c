@@ -15,10 +15,11 @@ namespace P4 {
 /// Applies expression optimizations to the input node.
 /// Currently, performs constant folding and strength reduction.
 inline const IR::Expression *optimizeExpression(const IR::Expression *node) {
-    auto pass = PassRepeated({
-        new P4::StrengthReduction(nullptr, nullptr, nullptr),
-        new P4::ConstantFolding(nullptr, false),
-    });
+    P4::StrengthReductionPolicy strengthReductionPolicy;
+    P4::ConstantFoldingPolicy constantFoldingPolicy;
+    P4::DoStrengthReduction strengthReduction(nullptr, &strengthReductionPolicy);
+    P4::DoConstantFolding constantFolding(nullptr, false, &constantFoldingPolicy);
+    auto pass = PassRepeated({&strengthReduction, &constantFolding});
     node = node->apply(pass);
     BUG_CHECK(::P4::errorCount() == 0, "Encountered errors while trying to optimize expressions.");
     return node;
