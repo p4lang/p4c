@@ -873,11 +873,11 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
 
     const IR::Annotation *stage_annot = nullptr;
     {
-        auto *stage_annotations = match_table->getAnnotations().where(
+        auto stage_annotations = match_table->getAnnotations().where(
             [](const IR::Annotation *annot) { return annot->name == "stage"; });
         if (!stage_annotations) return -1;
 
-        for (auto *annot : *stage_annotations) {
+        for (const auto *annot : stage_annotations) {
             if (!checkPragma(annot)) return -1;
 
             int curr_stage = annot->getExpr(0)->to<IR::Constant>()->asInt();
