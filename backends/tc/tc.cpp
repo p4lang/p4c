@@ -3,6 +3,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <memory>
+
 #include "backend.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/applyOptionsPragmas.h"
@@ -22,7 +24,7 @@ using namespace P4;
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
-    AutoCompileContext autoTCContext(new TC::TCContext);
+    AutoCompileContext autoTCContext(std::make_unique<TC::TCContext>());
     auto &options = TC::TCContext::get().options();
     options.langVersion = TC::TCOptions::FrontendVersion::P4_16;
     options.compilerVersion = version_string();
@@ -39,7 +41,7 @@ int main(int argc, char *const argv[]) {
         return 1;
     }
 
-    const IR::P4Program *program = chkprogram;
+    IR::Ptr<IR::P4Program> program = chkprogram;
     if (program == nullptr || ::P4::errorCount() > 0) {
         return 1;
     }
@@ -59,7 +61,7 @@ int main(int argc, char *const argv[]) {
 
     P4::serializeP4RuntimeIfRequired(program, options);
 
-    IR::ToplevelBlock *toplevel = nullptr;
+    IR::MutablePtr<IR::ToplevelBlock> toplevel = nullptr;
     TC::MidEnd midEnd;
     midEnd.addDebugHook(hook);
     try {
