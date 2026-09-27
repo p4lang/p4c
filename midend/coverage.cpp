@@ -72,7 +72,7 @@ void printCoverageReport(const CoverageSet &all, const CoverageSet &visited) {
         return;
     }
     LOG_FEATURE("coverage", 4, "Not covered program nodes:");
-    for (const auto *node : all) {
+    for (const auto &node : all) {
         if (visited.count(node) == 0) {
             const auto &srcInfo = node->getSourceInfo();
             auto sourceLine = srcInfo.toPosition().sourceLine;
@@ -82,17 +82,17 @@ void printCoverageReport(const CoverageSet &all, const CoverageSet &visited) {
     }
     // Do not really need to know which program nodes we have covered. Increase the log level here.
     LOG_FEATURE("coverage", 5, "Covered program nodes:");
-    for (const auto *node : visited) {
+    for (const auto &node : visited) {
         auto sourceLine = node->getSourceInfo().toPosition().sourceLine;
         LOG_FEATURE("coverage", 5, '\t' << sourceLine << ": " << *node);
     }
 }
 
 void logCoverage(const CoverageSet &all, const CoverageSet &visited, const CoverageSet &new_) {
-    for (const auto *node : new_) {
+    for (const auto &node : new_) {
         if (visited.count(node) == 0) {
             // Search for the original statement - `node` might have been transformed.
-            const auto *originalNode = *all.find(node);
+            const auto &originalNode = *all.find(node);
             LOG_FEATURE("coverage", 4,
                         "============ Covered new node " << originalNode << "============");
         }

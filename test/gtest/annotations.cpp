@@ -20,7 +20,7 @@ TEST(Annotations, EmptyLists) {
     state.addOrReplaceAnnotation("replace"_cs, {});
 
     ASSERT_EQ(state.getAnnotations().size(), 3U);
-    for (const auto *annotation : state.getAnnotations()) {
+    for (const auto &annotation : state.getAnnotations()) {
         EXPECT_FALSE(annotation->needsParsing());
         EXPECT_FALSE(annotation->structured);
         EXPECT_TRUE(annotation->getExpr().empty());
@@ -36,7 +36,7 @@ TEST(Annotations, ExpressionLists) {
     state.addOrReplaceAnnotation("replace"_cs, {first, second}, true);
 
     ASSERT_EQ(state.getAnnotations().size(), 3U);
-    for (const auto *annotation : state.getAnnotations()) {
+    for (const auto &annotation : state.getAnnotations()) {
         EXPECT_TRUE(annotation->structured);
         ASSERT_EQ(annotation->getExpr().size(), 2U);
         EXPECT_EQ(annotation->getExpr(0), first);
@@ -45,7 +45,7 @@ TEST(Annotations, ExpressionLists) {
 }
 
 TEST(Annotations, SingleExpressions) {
-    auto *expr = new IR::Constant(1);
+    IR::Ptr<IR::Expression> expr = new IR::Constant(1);
     IR::ParserState state("start"_cs, nullptr);
     state.addAnnotation("add"_cs, expr);
     state.addAnnotationIfNew("ifnew"_cs, expr);
@@ -53,28 +53,28 @@ TEST(Annotations, SingleExpressions) {
     state.addAnnotation("list"_cs, {expr});
 
     ASSERT_EQ(state.getAnnotations().size(), 4U);
-    for (const auto *annotation : state.getAnnotations()) {
+    for (const auto &annotation : state.getAnnotations()) {
         ASSERT_EQ(annotation->getExpr().size(), 1U);
         EXPECT_EQ(annotation->getExpr(0), expr);
     }
 }
 
 TEST(Annotations, PreserveAndReplace) {
-    auto *expr = new IR::Constant(1);
+    IR::Ptr<IR::Expression> expr = new IR::Constant(1);
     IR::ParserState state("start"_cs, nullptr);
     state.addAnnotation("tag"_cs, expr);
-    const auto *original = state.getAnnotation("tag"_cs);
+    const auto original = state.getAnnotation("tag"_cs);
     state.addAnnotationIfNew("tag"_cs, {}, true);
     ASSERT_EQ(state.getAnnotations().size(), 1U);
     EXPECT_EQ(state.getAnnotation("tag"_cs), original);
 
     state.addAnnotation("tag"_cs, {expr});
     state.addAnnotation("other"_cs, {});
-    const auto *other = state.getAnnotation("other"_cs);
+    const auto other = state.getAnnotation("other"_cs);
     state.addOrReplaceAnnotation("tag"_cs, {}, true);
     ASSERT_EQ(state.getAnnotations().size(), 2U);
     EXPECT_EQ(state.getAnnotation("other"_cs), other);
-    const auto *replacement = state.getAnnotation("tag"_cs);
+    const auto replacement = state.getAnnotation("tag"_cs);
     ASSERT_NE(replacement, nullptr);
     EXPECT_TRUE(replacement->structured);
     EXPECT_TRUE(replacement->getExpr().empty());
@@ -85,8 +85,8 @@ TEST(Annotations, VectorHelpers) {
     IR::Annotations::addIfNew(annotations, "tag"_cs, {});
     ASSERT_EQ(annotations.size(), 1U);
     EXPECT_TRUE(annotations.front()->getExpr().empty());
-    const auto *original = annotations.front();
-    auto *expr = new IR::Constant(1);
+    const auto original = annotations.front();
+    IR::Ptr<IR::Expression> expr = new IR::Constant(1);
     IR::Annotations::addIfNew(annotations, "tag"_cs, {expr}, true);
     ASSERT_EQ(annotations.size(), 1U);
     EXPECT_EQ(annotations.front(), original);

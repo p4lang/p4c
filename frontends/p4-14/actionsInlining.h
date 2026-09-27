@@ -44,7 +44,7 @@ class InlineActions : public Transform {
         if (auto af = global->get<IR::ActionFunction>(p->name)) {
             SubstActionArgs saa(af, p);
             saa.setCalledBy(this);
-            return af->action.clone()->apply(saa);
+            return guardReturn(af->action.clone()->apply(saa));
         }
         return p;
     }

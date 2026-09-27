@@ -77,7 +77,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
 
     // Evaluate in and inout parameters in order. Directionless action parameters behave like
     // `in` parameters when their values are supplied by an explicit action call.
-    for (const auto *param : callee->parameters->parameters) {
+    for (const IR::Parameter *param : callee->parameters->parameters) {
         const auto *argument = substitution.lookup(param);
         cstring newName = nameGen->newName(param->name.name.string_view());
         IR::ID parameterName(newName, param->name.originalName);
@@ -138,7 +138,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
         });
     annotations.push_back(new IR::Annotation(statement->srcInfo,
                                              IR::Annotation::inlinedFromAnnotation,
-                                             {new IR::StringLiteral(callee->name.originalName)}));
+                                             new IR::StringLiteral(callee->name.originalName)));
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << orig << " with " << result);
     return result;

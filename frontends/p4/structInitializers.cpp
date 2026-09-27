@@ -26,7 +26,7 @@ const IR::Expression *convert(const IR::Expression *expression, const IR::Type *
                 si.push_back(ne);
                 index++;
             }
-            auto type = st->getP4Type()->to<IR::Type_Name>();
+            IR::Ptr<IR::Type_Name> type = st->getP4Type()->to<IR::Type_Name>();
             return new IR::StructExpression(expression->srcInfo, type, type, std::move(si));
         } else if (auto sli = expression->to<IR::StructExpression>()) {
             for (auto f : st->fields) {
@@ -38,7 +38,7 @@ const IR::Expression *convert(const IR::Expression *expression, const IR::Type *
                 si.push_back(ne);
             }
             if (modified || sli->type->is<IR::Type_Unknown>()) {
-                auto type = st->getP4Type()->to<IR::Type_Name>();
+                IR::Ptr<IR::Type_Name> type = st->getP4Type()->to<IR::Type_Name>();
                 return new IR::StructExpression(expression->srcInfo, type, type, std::move(si));
             }
         } else if (auto mux = expression->to<IR::Mux>()) {
@@ -96,7 +96,7 @@ const IR::Node *CreateStructInitializers::postorder(IR::Declaration_Variable *de
 const IR::Node *CreateStructInitializers::postorder(IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, this, typeMap);
     auto result = expression;
-    auto convertedArgs = new IR::Vector<IR::Argument>();
+    IR::MutablePtr<IR::Vector<IR::Argument>> convertedArgs = new IR::Vector<IR::Argument>();
     bool modified = false;
     for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);

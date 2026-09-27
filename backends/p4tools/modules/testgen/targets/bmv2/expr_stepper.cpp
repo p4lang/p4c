@@ -508,7 +508,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
 
              const auto *declInstance =
                  stepper.state.findDecl(new IR::PathExpression(externInfo.methodName));
-             IR::IndexedVector<IR::Node> decls({declInstance->checkedTo<IR::Declaration>()});
+             IR::IndexedVector<IR::Node> decls{declInstance->checkedTo<IR::Declaration>()};
 
              // TODO: Find a better way to classify identifiers.
              // We should be using a new IR type instead.

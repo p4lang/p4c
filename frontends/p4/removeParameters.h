@@ -21,11 +21,11 @@ namespace P4 {
  * this is done by LocalizeActions.
  */
 class ActionInvocation {
-    std::map<const IR::P4Action *, const IR::MethodCallExpression *> invocations;
-    std::set<const IR::P4Action *> all;  // for these actions remove all parameters
-    std::set<const IR::MethodCallExpression *> calls;
+    std::map<IR::Ptr<IR::P4Action>, IR::Ptr<IR::MethodCallExpression>> invocations;
+    std::set<IR::Ptr<IR::P4Action>> all;  // for these actions remove all parameters
+    std::set<IR::Ptr<IR::MethodCallExpression>> calls;
     /// how many arguments to remove from each default action
-    std::map<const IR::MethodCallExpression *, unsigned> defaultActions;
+    std::map<IR::Ptr<IR::MethodCallExpression>, unsigned> defaultActions;
 
  public:
     void bind(const IR::P4Action *action, const IR::MethodCallExpression *invocation,
@@ -125,6 +125,8 @@ class DoRemoveActionParameters : public Transform {
 };
 
 class RemoveActionParameters : public PassManager {
+    std::shared_ptr<ActionInvocation> invocationsOwner;
+
  public:
     explicit RemoveActionParameters(TypeMap *typeMap, TypeChecking *typeChecking = nullptr);
 };

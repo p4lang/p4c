@@ -142,7 +142,7 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Variable *decl) {
 /// Instance names cannot be don't care
 /// Do not declare instances in apply {} blocks, parser states or actions
 void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
-    auto *type = decl->type;
+    const IR::Type *type = decl->type;
     while (auto *at = type->to<IR::Type_Array>()) type = at->elementType;
     if (!type->is<IR::Type_Name>() && !type->is<IR::Type_Specialized>() &&
         !type->is<IR::Type_Extern>())  // P4_14 only?

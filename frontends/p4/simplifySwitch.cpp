@@ -12,12 +12,12 @@ namespace P4 {
 bool DoSimplifySwitch::matches(const IR::Expression *left, const IR::Expression *right) const {
     // We know that left and right have matching types
     if (left->is<IR::DefaultExpression>()) return true;
-    if (auto *rei = EnumInstance::resolve(right, typeMap)) {
-        if (auto *lei = EnumInstance::resolve(left, typeMap)) return rei->equals(lei);
+    if (auto rei = EnumInstance::resolve(right, typeMap)) {
+        if (auto lei = EnumInstance::resolve(left, typeMap)) return rei->equals(lei.get());
         if (auto *se = rei->to<SerEnumInstance>()) return matches(left, se->value);
     } else if (auto cr = right->to<IR::Constant>()) {
         if (auto cl = left->to<IR::Constant>()) return cr->value == cl->value;
-        if (auto *lei = EnumInstance::resolve(left, typeMap))
+        if (auto lei = EnumInstance::resolve(left, typeMap))
             if (auto *se = lei->to<SerEnumInstance>()) return matches(se->value, right);
     } else if (auto br = right->to<IR::BoolLiteral>()) {
         if (auto bl = left->to<IR::BoolLiteral>()) return bl->value == br->value;

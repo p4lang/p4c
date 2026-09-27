@@ -75,7 +75,7 @@ void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression *i
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode()) << " "
                             << cont->getNode() << " inserted after " << insertion);
 
-    auto spec = new SpecializationInfo(invocation, cont, insertion);
+    auto spec = std::make_shared<SpecializationInfo>(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
     spec->name = nameGen->newName(declaration->getName().name.string_view());
@@ -86,7 +86,7 @@ void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression *i
     for (auto ca : *invocation->arguments) {
         auto param = cc->substitution.findParameter(ca);
         CHECK_NULL(param);
-        auto arg = convertArgument(ca, spec, param, nameGen);
+        auto arg = convertArgument(ca, spec.get(), param, nameGen);
         spec->constructorArguments->push_back(arg);
     }
     spec->typeArguments = ccc->typeArguments;
@@ -99,7 +99,7 @@ void SpecializationMap::addSpecialization(const IR::Declaration_Instance *invoca
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode())
                             << " inserted after " << insertion);
 
-    auto spec = new SpecializationInfo(invocation, cont, insertion);
+    auto spec = std::make_shared<SpecializationInfo>(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
     spec->name = nameGen->newName(declaration->getName().name.string_view());
@@ -113,14 +113,14 @@ void SpecializationMap::addSpecialization(const IR::Declaration_Instance *invoca
         type = invocation->type->to<IR::Type_Name>();
         typeArgs = new IR::Vector<IR::Type>();
     }
-    Instantiation *inst = Instantiation::resolve(invocation, declLookup, typeMap);
+    auto inst = Instantiation::resolve(invocation, declLookup, typeMap);
 
     spec->typeArguments = typeArgs;
     CHECK_NULL(type);
     for (auto ca : *invocation->arguments) {
         auto param = inst->substitution.findParameter(ca);
         CHECK_NULL(param);
-        auto arg = convertArgument(ca, spec, param, nameGen);
+        auto arg = convertArgument(ca, spec.get(), param, nameGen);
         spec->constructorArguments->push_back(arg);
     }
     specializations.emplace(invocation, spec);

@@ -18,14 +18,14 @@ class SymbolicArrayTest : public P4CTest {};
 
 TEST_F(SymbolicArrayTest, Shift) {
     TypeMap typeMap;
-    const auto *bits = IR::Type_Bits::get(8);
+    auto bits = IR::Type_Bits::get(8);
     auto *header = new IR::Type_Header("H", {new IR::StructField("field", bits)});
     typeMap.setType(bits, new IR::Type_Type(bits));
     typeMap.setType(header, new IR::Type_Type(header));
     SymbolicValueFactory factory(&typeMap);
 
     for (int size : {3, 1, 0}) {
-        auto *type = new IR::Type_Array(header, new IR::Constant(size));
+        IR::Ptr<IR::Type_Array> type = new IR::Type_Array(header, new IR::Constant(size));
         // Exercise every initial validity pattern, including invalid moved headers.
         for (int mask = 0; mask < (1 << size); mask++) {
             for (int amount : {-4, -3, -2, -1, 0, 1, 2, 3, 4, INT_MIN, INT_MAX}) {

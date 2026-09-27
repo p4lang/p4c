@@ -62,28 +62,30 @@ Visitor::profile_t FindParameters::init_apply(const IR::Node *node) {
 UniqueNames::UniqueNames() : renameMap(new RenameMap) {
     setName("UniqueNames");
     visitDagOnce = false;
-    passes.emplace_back(new FindSymbols(renameMap));
-    passes.emplace_back(new RenameSymbols(renameMap));
+    passes.emplace_back(new FindSymbols(renameMap.get()));
+    passes.emplace_back(new RenameSymbols(renameMap.get()));
 }
 
 UniqueParameters::UniqueParameters(TypeMap *typeMap) : renameMap(new RenameMap) {
     setName("UniqueParameters");
     CHECK_NULL(typeMap);
     passes.emplace_back(new TypeChecking(nullptr, typeMap));
-    passes.emplace_back(new FindActionCalls(typeMap, renameMap));
-    passes.emplace_back(new FindParameters(renameMap));
-    passes.emplace_back(new RenameSymbols(renameMap));
+    passes.emplace_back(new FindActionCalls(typeMap, renameMap.get()));
+    passes.emplace_back(new FindParameters(renameMap.get()));
+    passes.emplace_back(new RenameSymbols(renameMap.get()));
     passes.emplace_back(new ClearTypeMap(typeMap));
 }
 
 /**************************************************************************/
 
-IR::ID *RenameSymbols::getName() const { return getName(getOriginal<IR::IDeclaration>()); }
+std::optional<IR::ID> RenameSymbols::getName() const {
+    return getName(getOriginal<IR::IDeclaration>());
+}
 
-IR::ID *RenameSymbols::getName(const IR::IDeclaration *decl) const {
+std::optional<IR::ID> RenameSymbols::getName(const IR::IDeclaration *decl) const {
     auto newName = renameMap->get(decl);
-    if (!newName.has_value()) return nullptr;
-    auto name = new IR::ID(decl->getName().srcInfo, *newName, decl->getName().originalName);
+    if (!newName.has_value()) return std::nullopt;
+    auto name = IR::ID(decl->getName().srcInfo, *newName, decl->getName().originalName);
     return name;
 }
 
@@ -93,7 +95,7 @@ const IR::Node *RenameSymbols::postorder(IR::Declaration_Variable *decl) {
 
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Constant *decl) {
     auto name = getName();
-    if (name != nullptr && *name != decl->name) decl->name = *name;
+    if (name && *name != decl->name) decl->name = *name;
     return decl;
 }
 

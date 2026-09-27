@@ -22,7 +22,8 @@ class GlobalActionReplacements {
  public:
     // For each control that uses an action and for each each global action
     // we create a replacement.
-    std::map<const IR::P4Control *, ordered_map<const IR::P4Action *, const IR::P4Action *> *> repl;
+    using Replacements = ordered_map<IR::Ptr<IR::P4Action>, IR::Ptr<IR::P4Action>>;
+    std::map<IR::Ptr<IR::P4Control>, std::shared_ptr<Replacements>> repl;
 
     const IR::P4Action *getReplacement(const IR::P4Action *action,
                                        const IR::P4Control *control) const {
@@ -35,8 +36,7 @@ class GlobalActionReplacements {
                         const IR::P4Action *replacement) {
         LOG1("Cloning global " << dbp(action) << " into " << dbp(replacement) << " for "
                                << dbp(control));
-        if (repl.find(control) == repl.end())
-            repl[control] = new ordered_map<const IR::P4Action *, const IR::P4Action *>();
+        if (repl.find(control) == repl.end()) repl[control] = std::make_shared<Replacements>();
         (*repl[control])[action] = replacement;
     }
 };
@@ -76,8 +76,9 @@ class ActionReplacement {
  public:
     // For each action and each user the replacement action to use.
     // Node is either a P4Table or MethodCallExpression.
-    std::map<const IR::P4Action *, ordered_map<const IR::Node *, const IR::P4Action *> *> toInsert;
-    std::map<const IR::PathExpression *, const IR::P4Action *> repl;
+    using Replacements = ordered_map<IR::Ptr<IR::Node>, IR::Ptr<IR::P4Action>>;
+    std::map<IR::Ptr<IR::P4Action>, std::shared_ptr<Replacements>> toInsert;
+    std::map<IR::Ptr<IR::PathExpression>, IR::Ptr<IR::P4Action>> repl;
     // For each action all replacements to insert
 
     const IR::P4Action *getActionUser(const IR::P4Action *action, const IR::Node *user) {
@@ -91,7 +92,7 @@ class ActionReplacement {
                            const IR::P4Action *replacement) {
         auto map = toInsert[original];
         if (map == nullptr) {
-            map = new ordered_map<const IR::Node *, const IR::P4Action *>();
+            map = std::make_shared<Replacements>();
             toInsert[original] = map;
         }
         (*map)[user] = replacement;

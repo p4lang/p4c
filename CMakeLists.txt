@@ -45,6 +45,10 @@ CMAKE_DEPENDENT_OPTION (ENABLE_P4TEST "Build the P4Test backend (required for th
 OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_GC "Compile with the Boehm-Demers-Weiser garbage collector." ON)
+OPTION (DISABLE_GC "Use reference-counted ownership instead of the Boehm garbage collector." OFF)
+if (DISABLE_GC)
+  set (ENABLE_GC OFF)
+endif ()
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (STATIC_BUILD_WITH_DYNAMIC_GLIBC "Build a (mostly) statically linked release binary. \

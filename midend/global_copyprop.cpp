@@ -34,7 +34,7 @@ bool names_overlap(cstring name1, cstring name2) {
 }
 
 // Removes outdated values for variables.
-void removeVarsContaining(std::map<cstring, const IR::Expression *> *vars, cstring name) {
+void removeVarsContaining(GlobalCopyPropValues *vars, cstring name) {
     LOG6("removeVarsContaining(" << name << ")");
     for (auto &var : *vars) {
         LOG7("  checking entry: " << var.first << " = " << var.second);
@@ -47,8 +47,7 @@ void removeVarsContaining(std::map<cstring, const IR::Expression *> *vars, cstri
 }
 
 // Removes values if they have changed
-void compareValuesInMaps(std::map<cstring, const IR::Expression *> *oldValues,
-                         std::map<cstring, const IR::Expression *> *newValues) {
+void compareValuesInMaps(GlobalCopyPropValues *oldValues, GlobalCopyPropValues *newValues) {
     for (auto it : *newValues) {
         auto oldValue = (*oldValues)[it.first];
         if (((it.second == nullptr) ^ (oldValue == nullptr)) ||
@@ -58,8 +57,7 @@ void compareValuesInMaps(std::map<cstring, const IR::Expression *> *oldValues,
 }
 
 // Removes values if they are used as Out/InOut parameter
-void checkParametersForMap(const MethodInstance *mi,
-                           std::map<cstring, const IR::Expression *> *vars) {
+void checkParametersForMap(const MethodInstance *mi, GlobalCopyPropValues *vars) {
     for (auto param : mi->substitution.getParametersInArgumentOrder()) {
         if (param->hasOut()) {
             auto arg = mi->substitution.lookup(param);
@@ -93,7 +91,7 @@ bool FindVariableValues::preorder(const IR::P4Table *) { return false; }
 // the state of the map before those blocks, and all variables that are possibly changed
 // in these blocks are removed from the original map.
 bool FindVariableValues::preorder(const IR::IfStatement *stat) {
-    std::map<cstring, const IR::Expression *> copyOfVars(vars);
+    GlobalCopyPropValues copyOfVars(vars);
     LOG3("Working on 'IfStatement->ifTrue' block: " << stat->ifTrue);
     visit(stat->ifTrue);
     // Check if some variables had their values changed when visiting 'ifTrue' block.
@@ -115,7 +113,7 @@ bool FindVariableValues::preorder(const IR::IfStatement *stat) {
 // Switch statement is equivalent to a series of If stataments
 // That's why implementation for visiting SwitchStatement is the same as for visiting IfStatement
 bool FindVariableValues::preorder(const IR::SwitchStatement *stat) {
-    std::map<cstring, const IR::Expression *> copyOfVars(vars);
+    GlobalCopyPropValues copyOfVars(vars);
     for (auto caseStatement : stat->cases) {
         LOG3("Working on case: " << caseStatement->label->toString()
                                  << " block: " << caseStatement->statement);
@@ -132,7 +130,7 @@ bool FindVariableValues::preorder(const IR::SwitchStatement *stat) {
 // Loops are treated like ifs, as the body may run multiple times or may not run
 bool FindVariableValues::preorder(const IR::ForStatement *stat) {
     visit(stat->init, "init");
-    std::map<cstring, const IR::Expression *> copyOfVars(vars);
+    GlobalCopyPropValues copyOfVars(vars);
     visit(stat->condition, "condition");
     visit(stat->body, "body");
     compareValuesInMaps(&copyOfVars, &vars);
@@ -143,7 +141,7 @@ bool FindVariableValues::preorder(const IR::ForStatement *stat) {
     return false;
 }
 bool FindVariableValues::preorder(const IR::ForInStatement *stat) {
-    std::map<cstring, const IR::Expression *> copyOfVars(vars);
+    GlobalCopyPropValues copyOfVars(vars);
     removeVarsContaining(&vars, stat->ref->path->name);
     visit(stat->body, "body");
     compareValuesInMaps(&copyOfVars, &vars);
@@ -197,7 +195,7 @@ void FindVariableValues::postorder(const IR::MethodCallExpression *mc) {
     if (!working) return;
 
     LOG5("Working on 'MethodCallexpression': " << mc);
-    auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+    auto mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     // Remove entries in the 'vars' map for variables that are used as 'Out' or 'InOut' parameters.
     if (auto aCall = mi->to<ActionCall>()) {
         // Check to see if an entry already exists for this action, this should not happen
@@ -205,13 +203,13 @@ void FindVariableValues::postorder(const IR::MethodCallExpression *mc) {
         if (actions->find(aCall->action) == actions->end()) {
             // Add an entry in the 'actions' map for the action being called.
             LOG6("  Is 'ActionCall'. Adding entry for action: " << aCall->action);
-            (*actions)[aCall->action] = new std::map<cstring, const IR::Expression *>(vars);
+            (*actions)[aCall->action] = vars;
             visit(aCall->action->body);
         } else {
             LOG6("  Is 'ActionCall'. Entry already exists for this action: " << aCall->action);
         }
     }
-    checkParametersForMap(mi, &vars);
+    checkParametersForMap(mi.get(), &vars);
     LOG5("Finished 'MethodCallExpression': " << mc);
 }
 
@@ -256,7 +254,7 @@ const IR::Expression *DoGlobalCopyPropagation::preorder(IR::ArrayIndex *arr) {
 const IR::P4Action *DoGlobalCopyPropagation::preorder(IR::P4Action *act) {
     if (actions->find(getOriginal()) != actions->end()) {
         performRewrite = true;
-        vars = actions->find(getOriginal())->second;
+        vars = &actions->find(getOriginal())->second;
         LOG2("DoGlobalCopyPropagation working on action: " << act->name);
     } else {
         performRewrite = false;
@@ -274,19 +272,19 @@ const IR::P4Action *DoGlobalCopyPropagation::postorder(IR::P4Action *act) {
 IR::MethodCallExpression *DoGlobalCopyPropagation::preorder(IR::MethodCallExpression *mc) {
     if (!performRewrite) return mc;
 
-    auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+    auto mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     LOG5("Working on 'MethodCallExpression' : " << mc);
     visit(mc->method);
     visit(mc->typeArguments);
-    auto *args = new IR::Vector<IR::Argument>();
+    IR::MutablePtr<IR::Vector<IR::Argument>> args = new IR::Vector<IR::Argument>();
     for (auto param : mi->substitution.getParametersInArgumentOrder()) {
-        auto arg = mi->substitution.lookup(param);
+        IR::Ptr<IR::Argument> arg = mi->substitution.lookup(param);
         if (!param->hasOut()) visit(arg);
         args->push_back(arg);
     }
     mc->arguments = args;
     // Copy-out invalidation must follow all copy-in argument visits.
-    checkParametersForMap(mi, vars);
+    checkParametersForMap(mi.get(), vars);
     LOG5("Finished 'MethodCallExpression' : " << mc);
 
     prune();
@@ -301,7 +299,7 @@ IR::MethodCallExpression *DoGlobalCopyPropagation::preorder(IR::MethodCallExpres
 IR::IfStatement *DoGlobalCopyPropagation::preorder(IR::IfStatement *stat) {
     if (!performRewrite) return stat;
 
-    std::map<cstring, const IR::Expression *> copyOfVars(*vars);
+    GlobalCopyPropValues copyOfVars(*vars);
     LOG3("Working on 'IfStatement->ifTrue' block: " << stat->ifTrue);
     visit(stat->ifTrue);
     // Check if some variables had their values changed when visiting 'ifTrue' block.
@@ -326,7 +324,7 @@ IR::IfStatement *DoGlobalCopyPropagation::preorder(IR::IfStatement *stat) {
 class RemoveModifiedValues : public Inspector {
     ReferenceMap *refMap;
     TypeMap *typeMap;
-    std::map<cstring, const IR::Expression *> *vars;
+    GlobalCopyPropValues *vars;
 
     bool preorder(const IR::BaseAssignmentStatement *stat) override {
         if ((*vars)[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
@@ -335,14 +333,13 @@ class RemoveModifiedValues : public Inspector {
         return true;
     }
     bool preorder(const IR::MethodCallExpression *mc) override {
-        auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
-        checkParametersForMap(mi, vars);
+        auto mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+        checkParametersForMap(mi.get(), vars);
         return true;
     }
 
  public:
-    RemoveModifiedValues(ReferenceMap *rM, TypeMap *tM,
-                         std::map<cstring, const IR::Expression *> *v)
+    RemoveModifiedValues(ReferenceMap *rM, TypeMap *tM, GlobalCopyPropValues *v)
         : refMap(rM), typeMap(tM), vars(v) {}
 };
 

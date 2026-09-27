@@ -75,7 +75,7 @@ std::vector<const IR::Mask *> *ReplaceSelectRange::rangeToMasks(const IR::Range 
         return masks;
     }
 
-    auto inType = r->left->type->to<IR::Type_Bits>();
+    IR::Ptr<IR::Type_Bits> inType = r->left->type->to<IR::Type_Bits>();
     BUG_CHECK(inType != nullptr, "Range type %1% is not fixed-width integer", r->left->type);
     bool isSigned = inType->isSigned;
     auto maskType = isSigned ? IR::Type_Bits::get(inType->srcInfo, inType->size, false) : inType;
@@ -130,7 +130,7 @@ const IR::Node *ReplaceSelectRange::postorder(IR::SelectExpression *e) {
     if (!signedIndicesToReplace.empty()) {
         IR::Vector<IR::Expression> newSelectList;
         size_t idx = 0;
-        for (auto *expr : e->select->components) {
+        for (const IR::Expression *expr : e->select->components) {
             if (signedIndicesToReplace.count(idx)) {
                 auto eType = expr->type->to<IR::Type_Bits>();
                 BUG_CHECK(eType,
@@ -156,7 +156,7 @@ const IR::Node *ReplaceSelectRange::postorder(IR::SelectExpression *e) {
 const IR::Node *ReplaceSelectRange::postorder(IR::SelectCase *sc) {
     BUG_CHECK(isInContext<IR::SelectExpression>(), "A lone select case not inside select: %1%", sc);
 
-    auto newCases = new IR::Vector<IR::SelectCase>();
+    IR::MutablePtr<IR::Vector<IR::SelectCase>> newCases = new IR::Vector<IR::SelectCase>();
     auto keySet = sc->keyset;
 
     if (auto r = keySet->to<IR::Range>()) {
@@ -168,7 +168,7 @@ const IR::Node *ReplaceSelectRange::postorder(IR::SelectCase *sc) {
             newCases->push_back(c);
         }
 
-        return newCases;
+        return guardReturn(IR::Ptr<IR::Node>(newCases));
     } else if (auto oldList = keySet->to<IR::ListExpression>()) {
         std::vector<IR::Vector<IR::Expression>> newVectors;
         IR::Vector<IR::Expression> first;
@@ -201,7 +201,7 @@ const IR::Node *ReplaceSelectRange::postorder(IR::SelectCase *sc) {
                  sc, newCases->size());
         }
 
-        return newCases;
+        return guardReturn(IR::Ptr<IR::Node>(newCases));
     }
 
     return sc;

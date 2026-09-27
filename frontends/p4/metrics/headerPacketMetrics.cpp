@@ -3,9 +3,9 @@
 namespace P4 {
 
 cstring ParserAnalyzer::getPacketType(const IR::ParserState *state) const {
-    for (const auto *stmt : state->components) {
+    for (const IR::StatOrDecl *stmt : state->components) {
         if (const auto *methodCall = stmt->to<IR::MethodCallStatement>()) {
-            const auto *method = methodCall->methodCall;
+            const IR::MethodCallExpression *method = methodCall->methodCall;
             if (const auto *member = method->method->to<IR::Member>()) {
                 if (member->member.name == "extract"_cs && !method->arguments->empty()) {
                     if (const auto *arg = method->arguments->at(0)->expression->to<IR::Member>()) {
@@ -46,7 +46,7 @@ bool ParserAnalyzer::preorder(const IR::P4Parser *parser) {
     ComputeParserCG buildGraph(&parserCallGraph);
     parser->apply(buildGraph, getChildContext());
 
-    if (auto *start = parser->getDeclByName(IR::ParserState::start)) {
+    if (const IR::IDeclaration *start = parser->getDeclByName(IR::ParserState::start)) {
         std::unordered_map<const IR::ParserState *, cstring> types;
         std::unordered_set<const IR::ParserState *> currentPath;
         dfsCumulativeTypes(start->to<IR::ParserState>(), parserCallGraph, ""_cs, types,

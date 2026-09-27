@@ -25,7 +25,7 @@ class MidEnd : public PassManager {
 
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     explicit MidEnd(P4TestOptions &options, std::ostream *outStream = nullptr);
-    IR::ToplevelBlock *process(const IR::P4Program *&program) {
+    IR::ToplevelBlock *process(IR::Ptr<IR::P4Program> &program) {
         addDebugHooks(hooks, true);
         program = program->apply(*this);
         return toplevel;

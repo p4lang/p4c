@@ -241,7 +241,7 @@ class CountedTranslationVariable : public IR::SymbolicVariable {
 
 TEST(Z3Translator, TranslatesSharedDagOncePerInvocation) {
     unsigned visits = 0;
-    const IR::Expression *expression = new CountedTranslationVariable(visits);
+    IR::Ptr<IR::Expression> expression = new CountedTranslationVariable(visits);
     for (unsigned depth = 0; depth < 14; ++depth) {
         expression = new IR::LOr(expression, expression);
     }
@@ -261,11 +261,11 @@ TEST(Z3Translator, TranslatesSharedDagOncePerInvocation) {
 }
 
 TEST(Z3Translator, KeepsDistinctSymbolTypesSeparate) {
-    const auto *bits8 = IR::Type_Bits::get(8);
-    const auto *bits16 = IR::Type_Bits::get(16);
+    auto bits8 = IR::Type_Bits::get(8);
+    auto bits16 = IR::Type_Bits::get(16);
     const auto *small = new IR::SymbolicVariable(bits8, "same_label"_cs);
     const auto *large = new IR::SymbolicVariable(bits16, "same_label"_cs);
-    const auto *expression = new IR::Equ(new IR::Cast(bits16, small), large);
+    IR::Ptr<IR::Expression> expression = new IR::Equ(new IR::Cast(bits16, small), large);
     Z3Solver solver;
     Z3Translator translator(solver);
     const auto translated = translator.translate(expression);

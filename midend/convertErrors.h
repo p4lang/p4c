@@ -9,6 +9,7 @@
 #define MIDEND_CONVERTERRORS_H_
 
 #include <map>
+#include <memory>
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
@@ -50,7 +51,7 @@ class ChooseErrorRepresentation {
 class DoConvertErrors : public Transform {
     friend class ConvertErrors;
 
-    std::map<cstring, P4::EnumRepresentation *> repr;
+    std::map<cstring, std::shared_ptr<P4::EnumRepresentation>> repr;
     ChooseErrorRepresentation *policy;
     P4::TypeMap *typeMap;
 

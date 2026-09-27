@@ -58,8 +58,8 @@ class TypeVariableSubstitutionVisitor : public Transform {
         return replacement(getOriginal<IR::Type_Var>(), tv);
     }
     const IR::Node *preorder(IR::Type_InfInt *ti) override {
-        const auto *n = cloneInfInt ? IR::Type_InfInt::get() : ti;
-        return replacement(getOriginal<IR::Type_InfInt>(), n);
+        IR::Ptr<IR::Type> n = cloneInfInt ? IR::Type_InfInt::get() : ti;
+        return guardReturn(replacement(getOriginal<IR::Type_InfInt>(), n));
     }
 };
 

@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+# SPDX-License-Identifier: Apache-2.0
+
+packet 4 000000000001 000000000000 0800
+expect 1 000000000001 000000000002 0800 $
+
+packet 4 000000000001 000000000000 86dd
+expect 1 000000000001 000000000003 86dd $

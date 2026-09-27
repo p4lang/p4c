@@ -8,6 +8,8 @@
 #ifndef MIDEND_CONVERTENUMS_H_
 #define MIDEND_CONVERTENUMS_H_
 
+#include <memory>
+
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -36,7 +38,7 @@ class EnumRepresentation {
     string_map<unsigned> repr;
 
  public:
-    const IR::Type_Bits *type;
+    IR::Ptr<IR::Type_Bits> type;
 
     EnumRepresentation(Util::SourceInfo srcInfo, unsigned width) {
         type = IR::Type_Bits::get(srcInfo, width, false);
@@ -84,7 +86,7 @@ class EnumRepresentation {
 class DoConvertEnums : public Transform {
     friend class ConvertEnums;
 
-    ordered_map<const IR::Type_Enum *, EnumRepresentation *> repr;
+    ordered_map<IR::Ptr<IR::Type_Enum>, std::shared_ptr<EnumRepresentation>> repr;
     ChooseEnumRepresentation *policy;
     TypeMap *typeMap;
 

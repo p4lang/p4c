@@ -6,6 +6,8 @@
 #include "ir/ir.h"
 
 namespace P4 {
+using GlobalCopyPropValues = std::map<cstring, IR::Ptr<IR::Expression>>;
+using GlobalCopyPropActions = std::map<IR::Ptr<IR::Node>, GlobalCopyPropValues>;
 /**
 Global copy propagation, currently only operationg on control blocks where it optimizes the bodies
 of actions by propagating literal values for variables used in those actions. Pass is limited
@@ -66,13 +68,13 @@ class FindVariableValues final : public Inspector {
     // Container for storing constant values for variables, is used as a representation of
     // the current state of the variables in the program. Keys are variable names and values
     // are pointers to 'Expression' nodes that represent a literal value for that variable.
-    std::map<cstring, const IR::Expression *> &vars;
+    GlobalCopyPropValues vars;
     // Container used to store information needed for later propagating by the Transformer pass.
     // Keys for outer map are pointers to action nodes whose bodies need to be rewritten by the
     // Transformer pass and values are maps that store literal values for variables.
     // This inner map uses the name of the variable as a key and the pointer to the 'Expression'
     // node, that represents a literal, as a value.
-    std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *actions;
+    std::shared_ptr<GlobalCopyPropActions> actions;
     // Flag for controlling which IR nodes this pass operates on
     bool working = false;
 
@@ -89,13 +91,9 @@ class FindVariableValues final : public Inspector {
     void postorder(const IR::MethodCallExpression *) override;
 
  public:
-    FindVariableValues(
-        ReferenceMap *refMap, TypeMap *typeMap,
-        std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *acts)
-        : refMap(refMap),
-          typeMap(typeMap),
-          vars(*new std::map<cstring, const IR::Expression *>),
-          actions(acts) {}
+    FindVariableValues(ReferenceMap *refMap, TypeMap *typeMap,
+                       std::shared_ptr<GlobalCopyPropActions> acts)
+        : refMap(refMap), typeMap(typeMap), actions(acts) {}
 };
 
 /**
@@ -109,20 +107,19 @@ class DoGlobalCopyPropagation final : public Transform {
     // Container for storing constant values for variables, used as a representation of
     // the current state of the variables in the program. Keys are variable names and values
     // are pointers to 'Expression' nodes that represent a literal value for that variable.
-    std::map<cstring, const IR::Expression *> *vars = nullptr;
+    GlobalCopyPropValues *vars = nullptr;
     // Container used to store information needed for propagating.
     // Keys for outer map are pointers to action nodes whose bodies need to be rewritten by this
     // pass and values represent maps that store literal values for variables. This inner map uses
     // the name of the variable as a key and the pointer to the 'Expression' node, that represents a
     // literal, as a value.
-    std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *actions;
+    std::shared_ptr<GlobalCopyPropActions> actions;
     // Flag for controlling which IR nodes this pass operates on
     bool performRewrite = false;
 
  public:
-    explicit DoGlobalCopyPropagation(
-        ReferenceMap *rM, TypeMap *tM,
-        std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *acts)
+    explicit DoGlobalCopyPropagation(ReferenceMap *rM, TypeMap *tM,
+                                     std::shared_ptr<GlobalCopyPropActions> acts)
         : refMap(rM), typeMap(tM), actions(acts) {}
 
     // Returns the stored value for the used variable
@@ -145,7 +142,7 @@ class GlobalCopyPropagation : public PassManager {
  public:
     GlobalCopyPropagation(ReferenceMap *rM, TypeMap *tM) {
         passes.push_back(new TypeChecking(rM, tM, true));
-        auto acts = new std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *>;
+        auto acts = std::make_shared<GlobalCopyPropActions>();
         passes.push_back(new FindVariableValues(rM, tM, acts));
         passes.push_back(new DoGlobalCopyPropagation(rM, tM, acts));
         setName("GlobalCopyPropagation");

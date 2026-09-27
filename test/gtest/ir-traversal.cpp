@@ -14,14 +14,14 @@ namespace P4::Test {
 struct TraversalTest : public ::testing::Test {};
 
 TEST_F(TraversalTest, SimpleIRApply) {
-    const auto *v = new IR::Constant(42);
-    const auto *m = IR::Traversal::apply(v, &IR::Constant::value, IR::Traversal::Assign(4));
+    IR::Ptr<IR::Constant> v = new IR::Constant(42);
+    auto m = IR::Traversal::apply(v, &IR::Constant::value, IR::Traversal::Assign(4));
     EXPECT_NE(v, m);
     EXPECT_EQ(v->value, 42);
     EXPECT_EQ(m->value, 4);
 
-    const auto *t = IR::Type_Bits::get(4);
-    const auto *m2 = IR::Traversal::apply(v, &IR::Constant::type, IR::Traversal::Assign(t));
+    auto t = IR::Type_Bits::get(4);
+    auto m2 = IR::Traversal::apply(v, &IR::Constant::type, IR::Traversal::Assign(t));
     EXPECT_NE(v, m2);
     EXPECT_EQ(v->value, 42);
     EXPECT_EQ(m2->value, 42);
@@ -29,12 +29,13 @@ TEST_F(TraversalTest, SimpleIRApply) {
 }
 
 TEST_F(TraversalTest, SimpleIRModify) {
-    auto *v = new IR::Constant(42);
+    IR::Constant constant(42);
+    auto *v = &constant;
     auto *m = IR::Traversal::modify(v, &IR::Constant::value, IR::Traversal::Assign(4));
     EXPECT_EQ(v, m);
     EXPECT_EQ(v->value, 4);
 
-    const auto *t = IR::Type_Bits::get(4);
+    auto t = IR::Type_Bits::get(4);
     const auto *m2 = IR::Traversal::modify(v, &IR::Constant::type, IR::Traversal::Assign(t));
     EXPECT_EQ(v, m2);
     EXPECT_EQ(v->value, 4);
@@ -42,10 +43,11 @@ TEST_F(TraversalTest, SimpleIRModify) {
 }
 
 TEST_F(TraversalTest, ComplexIRModify) {
-    const auto *path = new IR::Path("foo");
-    const auto *pe = new IR::PathExpression(path);
-    const auto *add = new IR::Add(pe, new IR::Constant(42));
-    auto *asgn = new IR::AssignmentStatement(pe, add);
+    IR::Ptr<IR::Path> path = new IR::Path("foo");
+    IR::Ptr<IR::PathExpression> pe = new IR::PathExpression(path);
+    IR::Ptr<IR::Add> add = new IR::Add(pe, new IR::Constant(42));
+    IR::AssignmentStatement assignment(pe, add);
+    auto *asgn = &assignment;
     IR::StatOrDecl *stmt = asgn;
 
     modify(stmt, RTTI::to<IR::AssignmentStatement>, &IR::AssignmentStatement::right,
@@ -80,5 +82,41 @@ TEST_F(TraversalTest, SimpleNonIRModify) {
     });
     EXPECT_EQ(s1.s0.v0, 1);
 }
+
+#if !HAVE_LIBGC
+namespace {
+class TrackedTraversalConstant final : public IR::Constant {
+    int &live;
+
+ public:
+    TrackedTraversalConstant(int &live, int value) : IR::Constant(value), live(live) { ++live; }
+    TrackedTraversalConstant(const TrackedTraversalConstant &other)
+        : IR::Constant(other), live(other.live) {
+        ++live;
+    }
+    ~TrackedTraversalConstant() override { --live; }
+    TrackedTraversalConstant *clone() const override { return new TrackedTraversalConstant(*this); }
+};
+}  // namespace
+
+TEST_F(TraversalTest, ReplacementReleasesDiscardedClones) {
+    int live = 0;
+    {
+        IR::Ptr<IR::Constant> original = new TrackedTraversalConstant(live, 1);
+        IR::Ptr<IR::Constant> replacement = new TrackedTraversalConstant(live, 2);
+        auto result = IR::Traversal::apply(original, IR::Traversal::Assign(replacement));
+        EXPECT_EQ(result, replacement);
+        EXPECT_EQ(live, 2);
+        IR::Ptr<IR::Add> sum = new IR::Add(original, original);
+        auto changed =
+            IR::Traversal::apply(sum, &IR::Add::left, IR::Traversal::Assign(replacement));
+        EXPECT_EQ(changed->left, replacement);
+        EXPECT_EQ(changed->right, original);
+        EXPECT_EQ(sum->left, original);
+        EXPECT_EQ(live, 2);
+    }
+    EXPECT_EQ(live, 0);
+}
+#endif
 
 }  // namespace P4::Test
