@@ -21,7 +21,7 @@
 #include "lib/error.h"
 
 bool BFN::CheckExternValidity::preorder(const IR::MethodCallExpression *expr) {
-    auto *mi = P4::MethodInstance::resolve(expr, refMap, typeMap, true);
+    auto mi = P4::MethodInstance::resolve(expr, refMap, typeMap, true);
 
     std::set<cstring> externsToCheck = {"Hash"_cs};
     std::set<cstring> methodToCheck = {"get"_cs};
@@ -105,7 +105,7 @@ const std::map<cstring, cstring> BFN_CheckDiResIn::externsToProperties = {
     {"DirectWred"_cs, "filters"_cs}};
 
 bool BFN::FindDirectExterns::preorder(const IR::MethodCallExpression *expr) {
-    auto *mi = P4::MethodInstance::resolve(expr, refMap, typeMap, true);
+    auto mi = P4::MethodInstance::resolve(expr, refMap, typeMap, true);
     if (auto *em = mi->to<P4::ExternMethod>()) {
         auto externName = em->actualExternType->name;
         // skip if wrong extern
