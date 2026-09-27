@@ -31,7 +31,7 @@ class Z3SolverAccessor {
     }
 
     /// Gets all P4 assertions. Used by GTests only.
-    safe_vector<const Constraint *> getP4Assertions() { return solver.p4Assertions; }
+    safe_vector<IR::Ptr<Constraint>> getP4Assertions() { return solver.p4Assertions; }
 
     /// Get Z3 context. Used by GTests only.
     const z3::context &getContext() { return solver.getZ3Ctx(); }

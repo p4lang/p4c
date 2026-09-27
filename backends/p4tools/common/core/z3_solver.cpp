@@ -87,7 +87,7 @@ void Z3Solver::reset() {
     z3Assertions.resize(0);
 }
 
-safe_vector<const Constraint *> Z3Solver::getAssertions() const { return p4Assertions; }
+safe_vector<IR::Ptr<Constraint>> Z3Solver::getAssertions() const { return p4Assertions; }
 
 void Z3Solver::clearMemory() {
     auto p4AssertionsBuf = p4Assertions;
@@ -193,7 +193,7 @@ std::optional<bool> Z3Solver::checkSat(const z3::expr_vector &asserts) {
     return interpretSolverResult(z3solver.check(asserts));
 }
 
-std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &asserts) {
+std::optional<bool> Z3Solver::checkSat(const std::vector<IR::Ptr<Constraint>> &asserts) {
     Util::ScopedTimer ctZ3("z3");
     if (isIncremental) {
         // Find common prefix with the previous invocation's list of assertions
@@ -362,7 +362,7 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     JSONLoader solverAssertions(loader, "assertions");
     BUG_CHECK(solverAssertions.is<JsonVector>(),
               "Z3 solver loading: can't find list of assertions");
-    safe_vector<const Constraint *> assertions;
+    safe_vector<IR::Ptr<Constraint>> assertions;
     solverAssertions >> assertions;
     size_t chkIndex = 0;
     for (size_t i = 0; i < assertions.size(); i++) {
@@ -382,7 +382,7 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
     Z3Translator tCast(solver);
     cast->expr->apply(tCast);
     uint64_t exprSize = 0;
-    const auto *const castExtrType = cast->expr->type;
+    auto castExtrType = cast->expr->type;
     auto castExpr = tCast.result;
     if (const auto *tb = cast->destType->to<IR::Type_Bits>()) {
         uint64_t destSize = tb->width_bits();
