@@ -84,12 +84,12 @@ TypeSpecConverter::TypeSpecConverter(const P4::ReferenceMap *refMap, P4::TypeMap
 
 bool TypeSpecConverter::preorder(const IR::Type *type) {
     ::P4::error(ErrorType::ERR_UNEXPECTED, "Unexpected type %1%", type);
-    map.emplace(type, new P4DataTypeSpec());
+    map.emplace(type, std::make_shared<P4DataTypeSpec>());
     return false;
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Bits *type) {
-    auto typeSpec = new P4DataTypeSpec();
+    auto typeSpec = std::make_shared<P4DataTypeSpec>();
     auto bitTypeSpec = typeSpec->mutable_bitstring();
     auto bw = type->width_bits();
     if (type->isSigned)
@@ -101,7 +101,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Bits *type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Varbits *type) {
-    auto typeSpec = new P4DataTypeSpec();
+    auto typeSpec = std::make_shared<P4DataTypeSpec>();
     auto bitTypeSpec = typeSpec->mutable_bitstring();
     bitTypeSpec->mutable_varbit()->set_max_bitwidth(type->size);
     map.emplace(type, typeSpec);
@@ -109,7 +109,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Varbits *type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Boolean *type) {
-    auto typeSpec = new P4DataTypeSpec();
+    auto typeSpec = std::make_shared<P4DataTypeSpec>();
     // enable "bool" field in P4DataTypeSpec's type_spec oneof
     (void)typeSpec->mutable_bool_();
     map.emplace(type, typeSpec);
@@ -117,7 +117,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Boolean *type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Name *type) {
-    auto typeSpec = new P4DataTypeSpec();
+    auto typeSpec = std::make_shared<P4DataTypeSpec>();
     auto decl = refMap->getDeclaration(type->path, true);
     auto name = decl->controlPlaneName();
     if (decl->is<IR::Type_Struct>()) {
@@ -158,7 +158,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
         auto name = std::string(type->controlPlaneName());
         auto types = p4RtTypeInfo->mutable_new_types();
         if (types->find(name) == types->end()) {
-            auto newTypeSpec = new p4configv1::P4NewTypeSpec();
+            auto newTypeSpec = std::make_unique<p4configv1::P4NewTypeSpec>();
 
             // walk the chain of new types
             const IR::Type *underlyingType = type;
@@ -183,7 +183,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
 
             // the @p4runtime_translation annotation will set the
             // translated_type so we ignore when handling the annotations.
-            Helpers::addAnnotations(newTypeSpec, type,
+            Helpers::addAnnotations(newTypeSpec.get(), type,
                                     [](cstring name) { return name == "p4runtime_translation"; });
 
             if (isTranslatedType) {
@@ -207,7 +207,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_BaseList *type) {
-    auto typeSpec = new P4DataTypeSpec();
+    auto typeSpec = std::make_shared<P4DataTypeSpec>();
     auto tupleTypeSpec = typeSpec->mutable_tuple();
     for (auto cType : type->components) {
         visit(cType);
@@ -221,7 +221,7 @@ bool TypeSpecConverter::preorder(const IR::Type_BaseList *type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Array *type) {
-    auto typeSpec = new P4DataTypeSpec();
+    auto typeSpec = std::make_shared<P4DataTypeSpec>();
     if (!type->elementType->is<IR::Type_Name>()) {
         BUG("Unexpected stack element type %1%", type->elementType);
     }
@@ -374,9 +374,10 @@ bool TypeSpecConverter::preorder(const IR::Type_Error *type) {
     return false;
 }
 
-const P4DataTypeSpec *TypeSpecConverter::convert(const P4::ReferenceMap *refMap,
-                                                 P4::TypeMap *typeMap, const IR::Type *type,
-                                                 P4TypeInfo *typeInfo) {
+std::shared_ptr<const P4DataTypeSpec> TypeSpecConverter::convert(const P4::ReferenceMap *refMap,
+                                                                 P4::TypeMap *typeMap,
+                                                                 const IR::Type *type,
+                                                                 P4TypeInfo *typeInfo) {
     TypeSpecConverter typeSpecConverter(refMap, typeMap, typeInfo);
     type->apply(typeSpecConverter);
     return typeSpecConverter.map.at(type);
