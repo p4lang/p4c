@@ -17,13 +17,22 @@
 namespace P4::P4Tools {
 
 /// An event in a trace of the execution of a P4 program.
-class TraceEvent : public ICastable {
+class TraceEvent : public ICastable
+#if !HAVE_LIBGC
+    ,
+                   public IR::shared_ptr_base
+#endif
+{
  private:
     friend std::ostream &operator<<(std::ostream &os, const TraceEvent &event);
 
  public:
     virtual ~TraceEvent() = default;
     TraceEvent();
+    cstring toString() const;
+    friend std::ostream &operator<<(std::ostream &os, const TraceEvent *event) {
+        return os << *event;
+    }
 
     /// Substitutes state variables in the body of this trace event for their symbolic value in the
     /// given symbolic environment. Variables that are unbound by the given environment are left

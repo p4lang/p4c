@@ -56,7 +56,7 @@ class ExprStepper : public AbstractStepper {
                                        const IR::Vector<IR::Argument> &args) const {
             // We have to check the extern type here. We may receive a specialized canonical type,
             // which we need to unpack.
-            const IR::Type_Extern *externType = nullptr;
+            IR::Ptr<IR::Type_Extern> externType = nullptr;
             if (const auto *type = externObjectRef.type->to<IR::Type_Extern>()) {
                 externType = type;
             } else if (const auto *specType =
@@ -181,13 +181,13 @@ class ExprStepper : public AbstractStepper {
         int advanceSize;
 
         /// The condition that needs to be satisfied to successfully advance the parser cursor.
-        const IR::Expression *advanceCond;
+        IR::Ptr<IR::Expression> advanceCond;
 
         /// Specifies at what point the parser cursor advancement will fail.
         int advanceFailSize;
 
         /// The condition that needs to be satisfied for the advance/extract to be rejected.
-        const IR::Expression *advanceFailCond;
+        IR::Ptr<IR::Expression> advanceFailCond;
     };
 
     /// Calculates the conditions that need to be satisfied for a successful parser advance.
@@ -206,7 +206,7 @@ class ExprStepper : public AbstractStepper {
     /// Iterate over the fields in @param flatFields and set the corresponding values in
     /// @param nextState. If there is a varbit, assign the @param varbitFieldSize as size to
     /// it. @returns the list of members and their assigned values.
-    static std::vector<std::pair<IR::StateVariable, const IR::Expression *>> setFields(
+    static std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> setFields(
         ExecutionState &nextState, const std::vector<IR::StateVariable> &flatFields,
         int varBitFieldSize);
     /// This function call is used in member expressions to cleanly resolve hit, miss, and action

@@ -4,6 +4,8 @@
 
 #include "backends/p4tools/common/lib/trace_event.h"
 
+#include <sstream>
+
 namespace P4::P4Tools {
 
 std::ostream &operator<<(std::ostream &os, const TraceEvent &event) {
@@ -12,6 +14,12 @@ std::ostream &operator<<(std::ostream &os, const TraceEvent &event) {
 }
 
 TraceEvent::TraceEvent() = default;
+
+cstring TraceEvent::toString() const {
+    std::ostringstream out;
+    print(out);
+    return out.str();
+}
 
 const TraceEvent *TraceEvent::subst(const SymbolicEnv & /*env*/) const { return this; }
 

@@ -29,10 +29,10 @@ namespace P4::P4Tools::P4Testgen::Pna {
 class PnaDpdkRegisterCondition : public TestObject {
  public:
     /// The register index.
-    const IR::Expression *index;
+    IR::Ptr<IR::Expression> index;
 
     /// The register value.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
     explicit PnaDpdkRegisterCondition(const IR::Expression *index, const IR::Expression *value);
 
@@ -64,7 +64,7 @@ class PnaDpdkRegisterValue : public TestObject {
  private:
     /// A new PnaDpdkRegisterValue always requires an initial value. This can be a constant or
     /// taint.
-    const IR::Expression *initialValue;
+    IR::Ptr<IR::Expression> initialValue;
 
     /// Each element is an API name paired with a match rule.
     std::vector<PnaDpdkRegisterCondition> registerConditions;
@@ -103,7 +103,7 @@ class PnaDpdkActionProfile : public TestObject {
     std::vector<std::pair<cstring, std::vector<ActionArg>>> actions;
 
     /// The associated action profile declaration.
-    const IR::IDeclaration *profileDecl;
+    IR::Ptr<IR::IDeclaration> profileDecl;
 
  public:
     explicit PnaDpdkActionProfile(const IR::IDeclaration *profileDecl);
@@ -134,10 +134,10 @@ class PnaDpdkActionProfile : public TestObject {
 class PnaDpdkActionSelector : public TestObject {
  private:
     /// The associated action selector declaration.
-    const IR::IDeclaration *selectorDecl;
+    IR::Ptr<IR::IDeclaration> selectorDecl;
 
     /// The associated action profile.
-    const PnaDpdkActionProfile *actionProfile;
+    IR::Ptr<PnaDpdkActionProfile> actionProfile;
 
  public:
     explicit PnaDpdkActionSelector(const IR::IDeclaration *selectorDecl,
@@ -162,7 +162,7 @@ class PnaDpdkActionSelector : public TestObject {
  * ========================================================================================= */
 class MetadataCollection : public TestObject {
  private:
-    std::map<cstring, const IR::Literal *> metadataFields;
+    std::map<cstring, IR::Ptr<IR::Literal>> metadataFields;
 
  public:
     MetadataCollection();
@@ -173,7 +173,7 @@ class MetadataCollection : public TestObject {
                                                      bool doComplete) const override;
 
     /// @returns the clone port expression.
-    [[nodiscard]] const std::map<cstring, const IR::Literal *> &getMetadataFields() const;
+    [[nodiscard]] const std::map<cstring, IR::Ptr<IR::Literal>> &getMetadataFields() const;
 
     void addMetaDataField(cstring name, const IR::Literal *metadataField);
 
@@ -189,7 +189,7 @@ class MetadataCollection : public TestObject {
 class Optional : public TableMatch {
  private:
     /// The value the key is matched with.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
     /// Whether to add this optional match as an exact match.
     bool addMatch;
@@ -214,10 +214,10 @@ class Optional : public TableMatch {
 class Range : public TableMatch {
  private:
     /// The inclusive start of the range.
-    const IR::Expression *low;
+    IR::Ptr<IR::Expression> low;
 
     /// The inclusive end of the range.
-    const IR::Expression *high;
+    IR::Ptr<IR::Expression> high;
 
  public:
     explicit Range(const IR::KeyElement *key, const IR::Expression *low,

@@ -36,10 +36,10 @@ namespace P4::P4Tools::P4Testgen::Bmv2 {
 class IndexExpression : public TestObject {
  private:
     /// The index of the expression.
-    const IR::Expression *index;
+    IR::Ptr<IR::Expression> index;
 
     /// The value of the expression.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
  public:
     explicit IndexExpression(const IR::Expression *index, const IR::Expression *value);
@@ -73,7 +73,7 @@ class IndexExpression : public TestObject {
 class IndexMap : public TestObject {
  protected:
     /// A new IndexMap always requires an initial value. This can be a constant or taint.
-    const IR::Expression *initialValue;
+    IR::Ptr<IR::Expression> initialValue;
 
     /// Each element is an API name paired with a match rule.
     std::vector<IndexExpression> indexConditions;
@@ -156,7 +156,7 @@ class Bmv2V1ModelActionProfile : public TestObject {
     std::vector<std::pair<cstring, std::vector<ActionArg>>> actions;
 
     /// The associated action profile declaration.
-    const IR::IDeclaration *profileDecl;
+    IR::Ptr<IR::IDeclaration> profileDecl;
 
  public:
     explicit Bmv2V1ModelActionProfile(const IR::IDeclaration *profileDecl);
@@ -187,10 +187,10 @@ class Bmv2V1ModelActionProfile : public TestObject {
 class Bmv2V1ModelActionSelector : public TestObject {
  private:
     /// The associated action selector declaration.
-    const IR::IDeclaration *selectorDecl;
+    IR::Ptr<IR::IDeclaration> selectorDecl;
 
     /// The associated action profile.
-    const Bmv2V1ModelActionProfile *actionProfile;
+    IR::Ptr<Bmv2V1ModelActionProfile> actionProfile;
 
  public:
     explicit Bmv2V1ModelActionSelector(const IR::IDeclaration *selectorDecl,
@@ -216,13 +216,13 @@ class Bmv2V1ModelActionSelector : public TestObject {
 class Bmv2V1ModelCloneInfo : public TestObject {
  private:
     /// The session ID associated with this clone information.
-    const IR::Expression *sessionId;
+    IR::Ptr<IR::Expression> sessionId;
 
     /// The type of clone associated with this object.
     BMv2Constants::CloneType cloneType;
 
     /// The state at the point of time time this object was created.
-    std::reference_wrapper<const ExecutionState> clonedState;
+    IR::Ptr<ExecutionState> clonedState;
 
     /// Whether to preserve a particular field list of metadata. This is optional.
     std::optional<int> preserveIndex;
@@ -259,10 +259,10 @@ class Bmv2V1ModelCloneInfo : public TestObject {
 class Bmv2V1ModelCloneSpec : public TestObject {
  private:
     /// The session ID associated with this clone information.
-    const IR::Expression *sessionId;
+    IR::Ptr<IR::Expression> sessionId;
 
     /// The cloned packet will be emitted on this port.
-    const IR::Expression *clonePort;
+    IR::Ptr<IR::Expression> clonePort;
 
     /// Whether this clone information is associated with the cloned packet (true) or the
     /// regular packet (false).
@@ -304,7 +304,7 @@ class Bmv2V1ModelCloneSpec : public TestObject {
 class MetadataCollection : public TestObject {
  private:
     /// A list of metadata fields (must be literals).
-    std::map<cstring, const IR::Literal *> metadataFields;
+    std::map<cstring, IR::Ptr<IR::Literal>> metadataFields;
 
  public:
     MetadataCollection();
@@ -315,7 +315,7 @@ class MetadataCollection : public TestObject {
                                                      bool doComplete) const override;
 
     /// @returns the list of metadata fields.
-    [[nodiscard]] const std::map<cstring, const IR::Literal *> &getMetadataFields() const;
+    [[nodiscard]] const std::map<cstring, IR::Ptr<IR::Literal>> &getMetadataFields() const;
 
     /// Add a metadata field to the collection.
     void addMetaDataField(cstring name, const IR::Literal *metadataField);
@@ -333,7 +333,7 @@ class MetadataCollection : public TestObject {
 class Optional : public TableMatch {
  private:
     /// The value the key is matched with.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
     /// Whether to add this optional match as an exact match.
     bool addMatch;
@@ -358,10 +358,10 @@ class Optional : public TableMatch {
 class Range : public TableMatch {
  private:
     /// The inclusive start of the range.
-    const IR::Expression *low;
+    IR::Ptr<IR::Expression> low;
 
     /// The inclusive end of the range.
-    const IR::Expression *high;
+    IR::Ptr<IR::Expression> high;
 
  public:
     explicit Range(const IR::KeyElement *key, const IR::Expression *low,

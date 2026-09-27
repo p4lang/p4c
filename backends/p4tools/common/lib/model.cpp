@@ -41,13 +41,13 @@ const IR::Literal *Model::SubstVisitor::preorder(IR::TaintExpression *var) {
     return IR::getDefaultValue(var->type, var->getSourceInfo())->checkedTo<IR::Literal>();
 }
 
-const IR::StructExpression *Model::evaluateStructExpr(const IR::StructExpression *structExpr,
-                                                      bool doComplete,
-                                                      ExpressionMap *resolvedExpressions) const {
-    auto *resolvedStructExpr = structExpr->clone();
+IR::Ptr<IR::StructExpression> Model::evaluateStructExpr(const IR::StructExpression *structExpr,
+                                                        bool doComplete,
+                                                        ExpressionMap *resolvedExpressions) const {
+    IR::MutablePtr<IR::StructExpression> resolvedStructExpr = structExpr->clone();
     resolvedStructExpr->components.clear();
-    for (const auto *namedExpr : structExpr->components) {
-        const IR::Expression *resolvedExpr = nullptr;
+    for (auto namedExpr : structExpr->components) {
+        IR::Ptr<IR::Expression> resolvedExpr = nullptr;
         if (const auto *subStructExpr = namedExpr->expression->to<IR::StructExpression>()) {
             resolvedExpr = evaluateStructExpr(subStructExpr, doComplete, resolvedExpressions);
         } else if (const auto *subListExpr = namedExpr->expression->to<IR::BaseListExpression>()) {
@@ -64,12 +64,13 @@ const IR::StructExpression *Model::evaluateStructExpr(const IR::StructExpression
     return resolvedStructExpr;
 }
 
-const IR::BaseListExpression *Model::evaluateListExpr(const IR::BaseListExpression *listExpr,
-                                                      bool doComplete,
-                                                      ExpressionMap *resolvedExpressions) const {
-    auto *resolvedListExpr = new IR::BaseListExpression(listExpr->srcInfo, listExpr->type, {});
-    for (const auto *expr : listExpr->components) {
-        const IR::Expression *resolvedExpr = nullptr;
+IR::Ptr<IR::BaseListExpression> Model::evaluateListExpr(const IR::BaseListExpression *listExpr,
+                                                        bool doComplete,
+                                                        ExpressionMap *resolvedExpressions) const {
+    IR::MutablePtr<IR::BaseListExpression> resolvedListExpr =
+        new IR::BaseListExpression(listExpr->srcInfo, listExpr->type, {});
+    for (auto expr : listExpr->components) {
+        IR::Ptr<IR::Expression> resolvedExpr = nullptr;
         if (const auto *subListExpr = expr->to<IR::BaseListExpression>()) {
             resolvedExpr = evaluateListExpr(subListExpr, doComplete, resolvedExpressions);
         } else if (const auto *subStructExpr = expr->to<IR::StructExpression>()) {
@@ -82,10 +83,10 @@ const IR::BaseListExpression *Model::evaluateListExpr(const IR::BaseListExpressi
     return resolvedListExpr;
 }
 
-const IR::Literal *Model::evaluate(const IR::Expression *expr, bool doComplete,
-                                   ExpressionMap *resolvedExpressions) const {
-    const auto *substituted = expr->apply(SubstVisitor(*this, doComplete));
-    const auto *evaluated = P4::optimizeExpression(substituted);
+IR::Ptr<IR::Literal> Model::evaluate(IR::Ptr<IR::Expression> expr, bool doComplete,
+                                     ExpressionMap *resolvedExpressions) const {
+    auto substituted = expr->apply(SubstVisitor(*this, doComplete));
+    auto evaluated = P4::optimizeExpression(substituted);
     const auto *literal = evaluated->checkedTo<IR::Literal>();
     // Add the variable to the resolvedExpressions list, if the list is not null.
     if (resolvedExpressions != nullptr) {

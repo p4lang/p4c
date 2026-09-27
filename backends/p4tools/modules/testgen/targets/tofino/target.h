@@ -64,7 +64,7 @@ class AbstractTofinoTestgenTarget : public TestgenTarget {
     [[nodiscard]] P4::FrontEnd mkFrontEnd() const override;
 
     CompilerResultOrError runCompilerImpl(const CompilerOptions &options,
-                                          const IR::P4Program *program) const override;
+                                          IR::Ptr<IR::P4Program> program) const override;
 };
 
 class Tofino_TnaTestgenTarget : public AbstractTofinoTestgenTarget {

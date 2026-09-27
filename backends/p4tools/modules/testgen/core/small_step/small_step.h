@@ -32,7 +32,7 @@ class SmallStepEvaluator {
     /// A branch is an execution state paired with an optional path constraint representing the
     /// choice made to take the branch.
     struct Branch {
-        const Constraint *constraint;
+        IR::Ptr<Constraint> constraint;
 
         ExecutionStateReference nextState;
 
@@ -52,7 +52,7 @@ class SmallStepEvaluator {
                ExecutionState &nextState, P4::Coverage::CoverageSet potentialNodes);
     };
 
-    using Result = std::vector<Branch> *;
+    using Result = std::shared_ptr<std::vector<Branch>>;
 
     /// Specifies how many times a guard can be violated in the interpreter until it throws an
     /// error.
@@ -71,10 +71,12 @@ class SmallStepEvaluator {
     /// Reachability engine.
     ReachabilityEngine *reachabilityEngine = nullptr;
 
-    using REngineType = std::pair<ReachabilityResult, std::vector<SmallStepEvaluator::Branch> *>;
+    using REngineType =
+        std::pair<ReachabilityResult, std::shared_ptr<std::vector<SmallStepEvaluator::Branch>>>;
 
-    static void renginePostprocessing(ReachabilityResult &result,
-                                      std::vector<SmallStepEvaluator::Branch> *branches);
+    static void renginePostprocessing(
+        ReachabilityResult &result,
+        std::shared_ptr<std::vector<SmallStepEvaluator::Branch>> branches);
 
     REngineType renginePreprocessing(SmallStepEvaluator &stepper, const ExecutionState &nextState,
                                      const IR::Node *node);

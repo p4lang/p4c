@@ -48,7 +48,7 @@ bool ConcolicMethodImpls::exec(cstring concolicMethodName, const IR::ConcolicVar
         return false;
     }
 
-    const auto *args = var->arguments;
+    auto args = var->arguments;
 
     const auto &submap = impls.at(concolicMethodName);
     if (submap.count(args->size()) == 0) {

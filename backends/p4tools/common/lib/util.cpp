@@ -110,7 +110,7 @@ big_int Utils::getRandBigInt(const big_int &min, const big_int &max) {
 const IR::Constant *Utils::getRandConstantForWidth(int bitWidth) {
     auto maxVal = IR::getMaxBvVal(bitWidth);
     auto randInt = Utils::getRandBigInt(maxVal);
-    const auto *constType = IR::Type_Bits::get(bitWidth);
+    auto constType = IR::Type_Bits::get(bitWidth);
     return IR::Constant::get(constType, randInt);
 }
 
@@ -142,8 +142,8 @@ const IR::MethodCallExpression *Utils::generateInternalMethodCall(
 std::vector<const IR::Type_Declaration *> argumentsToTypeDeclarations(
     const IR::IGeneralNamespace *ns, const IR::Vector<IR::Argument> *inputArgs) {
     std::vector<const IR::Type_Declaration *> resultDecls;
-    for (const auto *arg : *inputArgs) {
-        const auto *expr = arg->expression;
+    for (auto arg : *inputArgs) {
+        auto expr = arg->expression;
 
         const IR::Type_Declaration *declType = nullptr;
 
@@ -179,7 +179,7 @@ std::vector<const IR::Type_Declaration *> argumentsToTypeDeclarations(
 
 const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns, const IR::Path *path) {
     auto name = path->name.name;
-    const auto *decl = ns->getDeclsByName(name)->singleOrDefault();
+    auto decl = ns->getDeclsByName(name)->singleOrDefault();
     if (decl != nullptr) {
         return decl;
     }
@@ -193,7 +193,7 @@ const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns,
 
 const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
                                                const IR::Type_Name *type) {
-    const auto *path = type->path;
+    auto path = type->path;
     const auto *decl = findProgramDecl(ns, path)->to<IR::Type_Declaration>();
     BUG_CHECK(decl, "Not a type: %1%", path);
     return decl;

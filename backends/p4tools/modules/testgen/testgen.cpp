@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <exception>
 #include <filesystem>
+#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
@@ -85,15 +86,16 @@ std::optional<AbstractTestList> generateAndCollectAbstractTests(
                                                       testgenOptions.seed};
     // Need to declare the solver here to ensure its lifetime.
     Z3Solver solver;
-    auto *symbolicExecutor = pickExecutionEngine(testgenOptions, programInfo, solver);
+    std::unique_ptr<SymbolicExecutor> symbolicExecutor(
+        pickExecutionEngine(testgenOptions, programInfo, solver));
 
     // Each test back end has a different run function.
-    auto *testBackend =
-        TestgenTarget::getTestBackend(programInfo, testBackendConfiguration, *symbolicExecutor);
+    std::unique_ptr<TestBackEnd> testBackend(
+        TestgenTarget::getTestBackend(programInfo, testBackendConfiguration, *symbolicExecutor));
 
     // Define how to handle the final state for each test. This is target defined.
     // We delegate execution to the symbolic executor.
-    symbolicExecutor->run([testBackend](auto &&finalState) {
+    symbolicExecutor->run([&testBackend](auto &&finalState) {
         return testBackend->run(std::forward<decltype(finalState)>(finalState));
     });
     auto result = postProcess(testgenOptions, *testBackend);
@@ -133,15 +135,16 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
 
     // Need to declare the solver here to ensure its lifetime.
     Z3Solver solver;
-    auto *symbolicExecutor = pickExecutionEngine(testgenOptions, programInfo, solver);
+    std::unique_ptr<SymbolicExecutor> symbolicExecutor(
+        pickExecutionEngine(testgenOptions, programInfo, solver));
 
     // Each test back end has a different run function.
-    auto *testBackend =
-        TestgenTarget::getTestBackend(programInfo, testBackendConfiguration, *symbolicExecutor);
+    std::unique_ptr<TestBackEnd> testBackend(
+        TestgenTarget::getTestBackend(programInfo, testBackendConfiguration, *symbolicExecutor));
 
     // Define how to handle the final state for each test. This is target defined.
     // We delegate execution to the symbolic executor.
-    symbolicExecutor->run([testBackend](auto &&finalState) {
+    symbolicExecutor->run([&testBackend](auto &&finalState) {
         return testBackend->run(std::forward<decltype(finalState)>(finalState));
     });
     return postProcess(testgenOptions, *testBackend);
@@ -172,8 +175,9 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
     }
 
     const auto *testgenCompilerResult =
-        compilerResultOpt.value().get().checkedTo<TestgenCompilerResult>();
-    const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
+        compilerResultOpt.value()->checkedTo<TestgenCompilerResult>();
+    std::unique_ptr<const ProgramInfo> programInfo(
+        TestgenTarget::produceProgramInfo(*testgenCompilerResult));
     if (programInfo == nullptr || errorCount() > 0) {
         error("P4Testgen encountered errors during preprocessing.");
         return std::nullopt;
@@ -201,7 +205,8 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
     // Make sure the input result corresponds to the result we expect.
     const auto *testgenCompilerResult = compilerResult.checkedTo<TestgenCompilerResult>();
 
-    const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
+    std::unique_ptr<const ProgramInfo> programInfo(
+        TestgenTarget::produceProgramInfo(*testgenCompilerResult));
     if (programInfo == nullptr || errorCount() > 0) {
         error("P4Testgen encountered errors during preprocessing.");
         return EXIT_FAILURE;

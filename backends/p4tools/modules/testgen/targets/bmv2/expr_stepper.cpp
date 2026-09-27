@@ -51,7 +51,7 @@ std::string Bmv2V1ModelExprStepper::getClassName() { return "Bmv2V1ModelExprStep
 bool Bmv2V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
                                                uint64_t recirculateIndex) {
     // Check whether the field has a "field_list" annotation associated with it.
-    if (const auto *annotation = field->getAnnotation("field_list"_cs)) {
+    if (auto annotation = field->getAnnotation("field_list"_cs)) {
         // Grab the index of the annotation.
         auto annoExprs = annotation->getExpr();
         auto annoExprSize = annoExprs.size();
@@ -67,10 +67,10 @@ bool Bmv2V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
 }
 
 void Bmv2V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState,
-                                                      const IR::PathExpression *ref,
+                                                      IR::Ptr<IR::PathExpression> ref,
                                                       uint64_t recirculateIndex) const {
     const auto *ts = ref->type->checkedTo<IR::Type_StructLike>();
-    for (const auto *field : ts->fields) {
+    for (auto field : ts->fields) {
         // Check whether the field has a "field_list" annotation associated with it.
         if (isPartOfFieldList(field, recirculateIndex)) {
             continue;
@@ -106,7 +106,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     // TODO: What about programs where we can not satisfy this restriction? Do we not generate
     // tests?
     // TODO: Circle back to this once we have modifiable state in extern steppers.
-    const Constraint *cond = new IR::Neq(egressPortVar, clonePortVar);
+    IR::Ptr<Constraint> cond = new IR::Neq(egressPortVar, clonePortVar);
     // PTF has a couple more restrictions because it uses P4Runtime. The session ID must be within
     // a specific range. Otherwise no clone call can be produced.
     if (TestgenOptions::get().testBackend == "PTF") {
@@ -139,7 +139,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     std::vector<Continuation::Command> cmds;
 
     // We need to set the instance type once we recirculate.
-    const auto *instanceBitType = IR::Type_Bits::get(32);
+    auto instanceBitType = IR::Type_Bits::get(32);
     const auto *instanceTypeVar = new IR::Member(
         instanceBitType, new IR::PathExpression("*standard_metadata"), "instance_type");
 
@@ -162,11 +162,11 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         const auto *programmableBlocks = progInfo->getProgrammableBlocks();
         const auto *typeDecl = programmableBlocks->at("Ingress"_cs);
         const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
-        const auto *params = applyBlock->getApplyParameters();
+        auto params = applyBlock->getApplyParameters();
         auto blockIndex = 2;
         const auto *archMember = progInfo->getArchSpec().getArchMember(blockIndex);
         for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-            const auto *param = params->getParameter(paramIdx);
+            auto param = params->getParameter(paramIdx);
             const auto &archRef = archMember->blockParams.at(paramIdx);
             // If there is a preservation index present skip the second parameter (metadata) and do
             // not reset it using copyIn.
@@ -176,7 +176,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
                 // field_list annotation and the appropriate index will not be
                 // reset. The user metadata is the second parameter of the ingress
                 // control.
-                const auto *paramType = param->type;
+                auto paramType = param->type;
                 if (const auto *tn = paramType->to<IR::Type_Name>()) {
                     paramType = cloneState->resolveType(tn);
                 }
@@ -208,10 +208,10 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         size_t egressDelim = 0;
         for (; egressDelim < topLevelBlocks->size(); ++egressDelim) {
             auto block = topLevelBlocks->at(egressDelim);
-            if (!std::holds_alternative<const IR::Node *>(block)) {
+            if (!std::holds_alternative<IR::Ptr<IR::Node>>(block)) {
                 continue;
             }
-            const auto *p4Node = std::get<const IR::Node *>(block);
+            auto p4Node = std::get<IR::Ptr<IR::Node>>(block);
             if (const auto *ctrl = p4Node->to<IR::P4Control>()) {
                 if (progInfo->getGress(ctrl) == BMV2_EGRESS) {
                     break;
@@ -274,7 +274,7 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
     }
 
     // Update the metadata variable to the correct instance type as provided by recirculation.
-    const auto *bitType = IR::Type_Bits::get(32);
+    auto bitType = IR::Type_Bits::get(32);
     const auto *instanceTypeVar =
         new IR::Member(bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
     recState.set(instanceTypeVar, IR::Constant::get(bitType, instanceType));
@@ -296,7 +296,7 @@ Bmv2V1ModelExprStepper::Bmv2V1ModelExprStepper(ExecutionState &state, AbstractSo
 const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>::MethodImpl
     Bmv2V1ModelExprStepper::ASSERT_ASSUME_EXECUTE = [](const ExternInfo &externInfo,
                                                        Bmv2V1ModelExprStepper &stepper) {
-        const auto *cond = externInfo.externArguments.at(0)->expression;
+        auto cond = externInfo.externArguments.at(0)->expression;
 
         // If the assert/assume condition is tainted, we do not know whether we abort.
         if (Taint::hasTaint(cond)) {
@@ -338,7 +338,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
          {"standard_metadata"_cs},
          [](const ExternInfo &externInfo, Bmv2V1ModelExprStepper &stepper) {
              auto &nextState = stepper.state.clone();
-             const auto *nineBitType = IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH);
+             auto nineBitType = IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH);
              const auto *metadataLabel =
                  externInfo.externArguments.at(0)->expression->checkedTo<IR::InOutReference>();
              // Use an assignment to set egress_spec to true.
@@ -367,7 +367,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              BUG_CHECK(lo->value <= hi->value,
                        "Low value ( %1% ) must be less than high value ( %2% ).", lo, hi);
              auto &nextState = stepper.state.clone();
-             const auto *resultField = externInfo.externArguments.at(0)->expression;
+             auto resultField = externInfo.externArguments.at(0)->expression;
              const auto &fieldRef = ToolsVariables::convertReference(resultField);
 
              // If the range is limited to only one value, return that value.
@@ -456,7 +456,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              auto msg = externInfo.externArguments.at(0)
                             ->expression->checkedTo<IR::StringLiteral>()
                             ->value;
-             const auto *value = externInfo.externArguments.at(1)->expression;
+             auto value = externInfo.externArguments.at(1)->expression;
              std::stringstream assignStream;
              assignStream << msg << ": ";
 
@@ -501,10 +501,10 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 1; idx < externInfo.externArguments.size(); ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
+                 auto arg = externInfo.externArguments.at(idx);
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
-             const auto *hashOutput = externInfo.externArguments.at(0)->expression;
+             auto hashOutput = externInfo.externArguments.at(0)->expression;
 
              const auto *declInstance =
                  stepper.state.findDecl(new IR::PathExpression(externInfo.methodName));
@@ -556,8 +556,8 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
         {"register.read"_cs,
          {"result"_cs, "index"_cs},
          [](const ExternInfo &externInfo, Bmv2V1ModelExprStepper &stepper) {
-             const auto *readOutput = externInfo.externArguments.at(0)->expression;
-             const auto *index = externInfo.externArguments.at(1)->expression;
+             auto readOutput = externInfo.externArguments.at(0)->expression;
+             auto index = externInfo.externArguments.at(1)->expression;
              auto &nextState = stepper.state.clone();
 
              std::vector<Continuation::Command> replacements;
@@ -629,8 +629,8 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
         {"register.write"_cs,
          {"index"_cs, "value"_cs},
          [](const ExternInfo &externInfo, Bmv2V1ModelExprStepper &stepper) {
-             const auto *index = externInfo.externArguments.at(0)->expression;
-             const auto *inputValue = externInfo.externArguments.at(1)->expression;
+             auto index = externInfo.externArguments.at(0)->expression;
+             auto inputValue = externInfo.externArguments.at(1)->expression;
              if (!(inputValue->type->is<IR::Type_InfInt>() ||
                    inputValue->type->is<IR::Type_Bits>())) {
                  TESTGEN_UNIMPLEMENTED(
@@ -793,7 +793,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              auto &nextState = stepper.state.clone();
              std::vector<Continuation::Command> replacements;
 
-             const auto *index = externInfo.externArguments.at(0)->expression;
+             auto index = externInfo.externArguments.at(0)->expression;
              const auto *receiverPath = externInfo.externObjectRef.checkedTo<IR::PathExpression>();
              const auto &externInstance = nextState.findDecl(receiverPath);
 
@@ -1040,7 +1040,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              auto cloneType = externInfo.externArguments.at(0)
                                   ->expression->checkedTo<IR::Constant>()
                                   ->asUint64();
-             const auto *sessionIdExpr = externInfo.externArguments.at(1)->expression;
+             auto sessionIdExpr = externInfo.externArguments.at(1)->expression;
              auto preserveIndex =
                  externInfo.externArguments.at(2)->expression->checkedTo<IR::Constant>()->asInt();
              // This is the clone state. Clone the state and save it.
@@ -1216,7 +1216,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              }
              bool argsAreTainted = false;
              for (size_t idx = 0; idx < externInfo.externArguments.size(); ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
+                 auto arg = externInfo.externArguments.at(idx);
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
@@ -1231,7 +1231,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              auto cloneType = externInfo.externArguments.at(0)
                                   ->expression->checkedTo<IR::Constant>()
                                   ->asUint64();
-             const auto *sessionIdExpr = externInfo.externArguments.at(1)->expression;
+             auto sessionIdExpr = externInfo.externArguments.at(1)->expression;
              auto &nextState = stepper.state.clone();
              // This is the clone state. Clone the state and save it.
              // TODO: Do we really need to clone twice?
@@ -1311,16 +1311,16 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < externInfo.externArguments.size(); ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
+                 auto arg = externInfo.externArguments.at(idx);
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
-             const auto *verifyCond = externInfo.externArguments.at(0)->expression;
-             const auto *data = externInfo.externArguments.at(1)->expression;
-             const auto *checksumValue = externInfo.externArguments.at(2)->expression;
-             const auto *checksumValueType = checksumValue->type;
-             const auto *algo = externInfo.externArguments.at(3)->expression;
-             const auto *oneBitType = IR::Type_Bits::get(1);
+             auto verifyCond = externInfo.externArguments.at(0)->expression;
+             auto data = externInfo.externArguments.at(1)->expression;
+             auto checksumValue = externInfo.externArguments.at(2)->expression;
+             auto checksumValueType = checksumValue->type;
+             auto algo = externInfo.externArguments.at(3)->expression;
+             auto oneBitType = IR::Type_Bits::get(1);
 
              // In some cases the condition is false already. No need to do complex processing then.
              if (const auto *boolVal = verifyCond->to<IR::BoolLiteral>()) {
@@ -1419,16 +1419,16 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < externInfo.externArguments.size() - 2; ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
+                 auto arg = externInfo.externArguments.at(idx);
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
              const auto &checksumVar =
                  externInfo.externArguments.at(2)->expression->checkedTo<IR::InOutReference>()->ref;
-             const auto *updateCond = externInfo.externArguments.at(0)->expression;
-             const auto *checksumVarType = checksumVar->type;
-             const auto *data = externInfo.externArguments.at(1)->expression;
-             const auto *algo = externInfo.externArguments.at(3)->expression;
+             auto updateCond = externInfo.externArguments.at(0)->expression;
+             auto checksumVarType = checksumVar->type;
+             auto data = externInfo.externArguments.at(1)->expression;
+             auto algo = externInfo.externArguments.at(3)->expression;
 
              // In some cases the condition is false already. No need to do complex processing then.
              if (const auto *boolVal = updateCond->to<IR::BoolLiteral>()) {
@@ -1494,16 +1494,16 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < externInfo.externArguments.size() - 2; ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
+                 auto arg = externInfo.externArguments.at(idx);
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
              const auto &checksumVar =
                  externInfo.externArguments.at(2)->expression->checkedTo<IR::InOutReference>()->ref;
-             const auto *updateCond = externInfo.externArguments.at(0)->expression;
-             const auto *checksumVarType = checksumVar->type;
-             const auto *data = externInfo.externArguments.at(1)->expression;
-             const auto *algo = externInfo.externArguments.at(3)->expression;
+             auto updateCond = externInfo.externArguments.at(0)->expression;
+             auto checksumVarType = checksumVar->type;
+             auto data = externInfo.externArguments.at(1)->expression;
+             auto algo = externInfo.externArguments.at(3)->expression;
              // If the condition is tainted or the input data is tainted.
              // The checksum will also be tainted.
              if (argsAreTainted) {
@@ -1555,16 +1555,16 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < externInfo.externArguments.size(); ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
+                 auto arg = externInfo.externArguments.at(idx);
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
-             const auto *verifyCond = externInfo.externArguments.at(0)->expression;
-             const auto *data = externInfo.externArguments.at(1)->expression;
-             const auto *checksumValue = externInfo.externArguments.at(2)->expression;
-             const auto *checksumValueType = checksumValue->type;
-             const auto *algo = externInfo.externArguments.at(3)->expression;
-             const auto *oneBitType = IR::Type_Bits::get(1);
+             auto verifyCond = externInfo.externArguments.at(0)->expression;
+             auto data = externInfo.externArguments.at(1)->expression;
+             auto checksumValue = externInfo.externArguments.at(2)->expression;
+             auto checksumValueType = checksumValue->type;
+             auto algo = externInfo.externArguments.at(3)->expression;
+             auto oneBitType = IR::Type_Bits::get(1);
              // If the condition is tainted or the input data is tainted, the checksum error
              // will not be reliable.
              if (argsAreTainted) {

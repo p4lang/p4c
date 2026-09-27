@@ -20,7 +20,7 @@ using namespace P4::literals;
 /// A list of constraints. These constraints may take the form of "x == 8w1","x != y", where "x" and
 /// "y" are symbolic variables. They are expressed in P4C IR form and may be consumed by SMT or
 /// similar solvers.
-using ConstraintsVector = std::vector<const IR::Expression *>;
+using ConstraintsVector = std::vector<IR::Ptr<IR::Expression>>;
 
 namespace ToolsVariables {
 
@@ -33,7 +33,7 @@ static const cstring VALID = "*valid"_cs;
 ///
 /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
 /// different @type.
-const IR::StateVariable &getStateVariable(const IR::Type *type, cstring name);
+IR::StateVariable getStateVariable(const IR::Type *type, cstring name);
 
 /// @returns the symbolic variable with the given @type, @incarnation, and @name.
 ///

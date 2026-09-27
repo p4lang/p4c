@@ -20,7 +20,7 @@ namespace P4::P4Tools {
 
 CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
                                                   std::string_view toolName) {
-    const auto *program = P4Tools::CompilerTarget::runParser(options);
+    auto program = P4Tools::CompilerTarget::runParser(options);
     if (program == nullptr) {
         return std::nullopt;
     }
@@ -32,9 +32,9 @@ CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options
                                                   std::string_view toolName,
                                                   const std::string &source) {
 #ifdef SUPPORT_P4_14
-    const auto *program = parseP4String(source, options.langVersion);
+    auto program = parseP4String(source, options.langVersion);
 #else
-    const auto *program = parseP4String(source);
+    auto program = parseP4String(source);
 #endif
     if (program == nullptr) {
         return std::nullopt;
@@ -45,12 +45,12 @@ CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options
 
 CompilerResultOrError CompilerTarget::runCompiler(const CompilerOptions &options,
                                                   std::string_view toolName,
-                                                  const IR::P4Program *program) {
+                                                  IR::Ptr<IR::P4Program> program) {
     return get(toolName).runCompilerImpl(options, program);
 }
 
 CompilerResultOrError CompilerTarget::runCompilerImpl(const CompilerOptions &options,
-                                                      const IR::P4Program *program) const {
+                                                      IR::Ptr<IR::P4Program> program) const {
     program = runFrontend(options, program);
     if (program == nullptr) {
         return std::nullopt;
@@ -61,19 +61,19 @@ CompilerResultOrError CompilerTarget::runCompilerImpl(const CompilerOptions &opt
         return std::nullopt;
     }
 
-    return *new CompilerResult(*program);
+    return std::make_shared<CompilerResult>(*program);
 }
 
-const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {
-    const auto *program = parseP4File(options);
+IR::Ptr<IR::P4Program> CompilerTarget::runParser(const ParserOptions &options) {
+    auto program = parseP4File(options);
     if (errorCount() > 0) {
         return nullptr;
     }
     return program;
 }
 
-const IR::P4Program *CompilerTarget::runFrontend(const CompilerOptions &options,
-                                                 const IR::P4Program *program) const {
+IR::Ptr<IR::P4Program> CompilerTarget::runFrontend(const CompilerOptions &options,
+                                                   IR::Ptr<IR::P4Program> program) const {
     P4COptionPragmaParser optionsPragmaParser(false);
     program->apply(ApplyOptionsPragmas(optionsPragmaParser));
 
@@ -99,8 +99,8 @@ MidEnd CompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     return midEnd;
 }
 
-const IR::P4Program *CompilerTarget::runMidEnd(const CompilerOptions &options,
-                                               const IR::P4Program *program) const {
+IR::Ptr<IR::P4Program> CompilerTarget::runMidEnd(const CompilerOptions &options,
+                                                 IR::Ptr<IR::P4Program> program) const {
     auto midEnd = mkMidEnd(options);
     midEnd.addPasses({
         new P4::MidEndLast(),
