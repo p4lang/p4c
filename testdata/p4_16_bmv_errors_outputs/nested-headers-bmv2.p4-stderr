@@ -1,0 +1,29 @@
+v1model.p4(751): [--Werror=type-error] error: 'package V1Switch'
+package V1Switch<H, M>(Parser<H, M> p,
+        ^^^^^^^^
+  ---- Actual error:
+nested-headers-bmv2.p4(38): Cannot unify 'in' parameter 'h' with 'inout' parameter 'hdr' because they have different directions
+  control vrfy(in Headers h, inout Meta m) { apply {} }
+                          ^
+v1model.p4(725)
+  control VerifyChecksum<H, M>(inout H hdr,
+                                       ^^^
+  ---- Originating from:
+nested-headers-bmv2.p4(45): Type of argument 'vrfy' (control vrfy) does not match type of parameter 'vr' (control VerifyChecksum<...>)
+  V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+                ^^^^^^
+nested-headers-bmv2.p4(38)
+  control vrfy(in Headers h, inout Meta m) { apply {} }
+          ^^^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                                              ^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                         ^^^^^^^^^^^^^^^^^^^^
+  Where 'H' is bound to 'struct Headers'
+  Where 'M' is bound to 'struct Meta'
+  ---- Originating from:
+nested-headers-bmv2.p4(45): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+  V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+                                                                   ^^^^
