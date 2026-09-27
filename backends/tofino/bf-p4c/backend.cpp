@@ -174,7 +174,8 @@ static void debug_hook(const char *parent, unsigned idx, const char *pass, const
 }
 
 Backend::Backend(const BFN_Options &o, int pipe_id)
-    : options(o),
+    : ownedOptions(o.clone()),
+      options(*ownedOptions),
       uses(phv),
       clot(uses),
       defuse(phv),

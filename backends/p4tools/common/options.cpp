@@ -23,7 +23,7 @@ std::vector<char *> AbstractP4cToolOptions::convertArgs(const std::vector<const 
     std::vector<char *> argv;
     argv.reserve(args.size());
     for (const char *arg : args) {
-        argumentStorage.push_back(std::make_shared<std::string>(arg));
+        argumentStorage.push_back(std::make_unique<std::string>(arg));
         argv.push_back(argumentStorage.back()->data());
     }
     return argv;

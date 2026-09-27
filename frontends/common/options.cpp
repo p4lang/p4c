@@ -9,6 +9,11 @@
 
 namespace P4 {
 
+void CompilerOptions::copyConfigurationFrom(const CompilerOptions &other) {
+    ParserOptions::copyConfigurationFrom(other);
+    static_cast<CompilerOptionsConfig &>(*this) = other;
+}
+
 CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOptions(defaultMessage) {
     registerOption(
         "--excludeFrontendPasses", "pass1[,pass2]",

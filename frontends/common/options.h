@@ -19,13 +19,8 @@
 
 namespace P4 {
 
-class CompilerOptions : public ParserOptions {
- protected:
-    bool validateOptions() const override;
-
- public:
-    explicit CompilerOptions(std::string_view defaultMessage = "Compile a P4 program");
-
+/// Compiler settings that can be copied without copying command-line callbacks.
+struct CompilerOptionsConfig {
     // If true, skip frontend passes whose names are contained in
     // passesToExcludeFrontend vector.
     bool excludeFrontendPasses = false;
@@ -81,6 +76,16 @@ class CompilerOptions : public ParserOptions {
     int optimizationLevel = 1;
     bool optimizeDebug = false;  // optimize favoring debuggability
     bool optimizeSize = false;   // optimize favoring size
+};
+
+class CompilerOptions : public ParserOptions, public CompilerOptionsConfig {
+ protected:
+    void copyConfigurationFrom(const CompilerOptions &other);
+
+    bool validateOptions() const override;
+
+ public:
+    explicit CompilerOptions(std::string_view defaultMessage = "Compile a P4 program");
 
     virtual bool enable_intrinsic_metadata_fix();
 

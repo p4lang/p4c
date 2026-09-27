@@ -85,6 +85,13 @@ const char *ANSI_reset_maybe(FILE *output_channel) { return ANSI_DRY("0m", outpu
 
 // ^^^ --- ANSI code --- ^^^ //
 
+std::unique_ptr<BFN_Options> BFN_Options::clone() const {
+    auto result = std::make_unique<BFN_Options>();
+    result->copyConfigurationFrom(*this);
+    static_cast<BFN_OptionsConfig &>(*result) = *this;
+    return result;
+}
+
 BFN_Options::BFN_Options() {
     target = "tofino"_cs;
     arch = "v1model"_cs;
@@ -785,16 +792,16 @@ std::vector<const char *> *BFN_Options::process(int argc, char *const argv[]) {
 
 thread_local BFN_Options *BFNContext::optionsInstance = nullptr;
 
-BFN_Options &BFNContext::options() { return optionsInstance ? *optionsInstance : primaryOptions; }
+BFN_Options &BFNContext::options() { return optionsInstance ? *optionsInstance : *primaryOptions; }
 
 void BFNContext::setBackendOptions(BFN_Options *options) {
-    BUG_CHECK(!optionsInstance || optionsInstance == &primaryOptions,
+    BUG_CHECK(!optionsInstance || optionsInstance == primaryOptions.get(),
               "Attempt to create new backend options while non-primary options are active");
     optionsInstance = options;
 }
 
 void BFNContext::clearBackendOptions() {
-    BUG_CHECK(optionsInstance != &primaryOptions,
+    BUG_CHECK(optionsInstance != primaryOptions.get(),
               "Attempt to destroy backend options while primary options are active");
     optionsInstance = nullptr;
 }

@@ -61,7 +61,7 @@ class Options {
     cstring buildDate;
     std::ostream *outStream = &std::cerr;
 
-    std::map<cstring, std::shared_ptr<const Option>> options;
+    std::map<cstring, std::unique_ptr<const Option>> options;
     std::vector<cstring> optionOrder;
     std::vector<const char *> additionalUsage;
     std::vector<const char *> remainingOptions;  // produced as output
@@ -81,11 +81,21 @@ class Options {
         : binaryName(nullptr), message(message), compileCommand("") {}
     virtual ~Options() = default;
 
+    /// Copy invocation metadata without copying registrations or their callbacks.
+    void copyConfigurationFrom(const Options &other);
+
     /// Checks if parsed options make sense with respect to each-other.
     /// @returns true if the validation was successful and false otherwise.
     [[nodiscard]] virtual bool validateOptions() const;
 
  public:
+    // Registered callbacks capture this, so the options object must keep its address.
+    // Transfer ownership through a unique_ptr instead of moving the object itself.
+    Options(const Options &) = delete;
+    Options &operator=(const Options &) = delete;
+    Options(Options &&) = delete;
+    Options &operator=(Options &&) = delete;
+
     /**
      * Process options; return list of remaining options.
      * Also extracts the command name, startup time and saves a copy of the literal

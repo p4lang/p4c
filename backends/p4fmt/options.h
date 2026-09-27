@@ -10,10 +10,6 @@ class P4fmtOptions : public CompilerOptions {
  public:
     P4fmtOptions();
     virtual ~P4fmtOptions() = default;
-    P4fmtOptions(const P4fmtOptions &) = default;
-    P4fmtOptions(P4fmtOptions &&) = delete;
-    P4fmtOptions &operator=(const P4fmtOptions &) = default;
-    P4fmtOptions &operator=(P4fmtOptions &&) = delete;
 
     const std::filesystem::path &outputFile() const;
 

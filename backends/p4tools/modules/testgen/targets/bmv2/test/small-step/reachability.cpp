@@ -31,10 +31,6 @@ class P4ReachabilityOptions : public CompilerOptions {
  public:
     virtual ~P4ReachabilityOptions() = default;
     P4ReachabilityOptions() = default;
-    P4ReachabilityOptions(const P4ReachabilityOptions &) = default;
-    P4ReachabilityOptions(P4ReachabilityOptions &&) = delete;
-    P4ReachabilityOptions &operator=(const P4ReachabilityOptions &) = default;
-    P4ReachabilityOptions &operator=(P4ReachabilityOptions &&) = delete;
 };
 
 using P4ReachabilityContext = P4Tools::CompileContext<P4ReachabilityOptions>;

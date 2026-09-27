@@ -560,7 +560,7 @@ bool TestCode::apply_pass(Visitor &pass, const Visitor_Context *context) {
 
 bool TestCode::apply_pass(Pass pass) {
     constexpr bool skip_side_effect_ordering = true;
-    auto options = BackendOptions();
+    auto &options = BackendOptions();
     switch (pass) {
         case Pass::FullFrontend: {
             pipe = nullptr;

@@ -34,10 +34,6 @@ class CompileContext : public virtual BaseCompileContext {
 
     CompileContext() {}
 
-    template <typename OptionsDerivedType>
-    CompileContext(CompileContext<OptionsDerivedType> &context)
-        : optionsInstance(context.options()) {}
-
     /// @return the compiler options for this compilation context.
     OptionsType &options() { return optionsInstance; }
 

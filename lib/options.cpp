@@ -21,16 +21,25 @@ void Util::Options::registerOption(const char *option, const char *argName,
     if (strlen(option) <= 1) throw std::logic_error(std::string("Option too short: ") + option);
     if (option[0] != '-')
         throw std::logic_error(std::string("Expected option to start with -: ") + option);
-    auto o = std::make_shared<Option>();
+    auto o = std::make_unique<Option>();
     o->option = cstring(option);
     o->argName = argName;
     o->processor = processor;
     o->description = description;
     o->flags = flags;
-    auto opt = get(options, cstring(option));
-    if (opt != nullptr) throw std::logic_error(std::string("Option already registered: ") + option);
-    options.emplace(option, o);
+    if (options.count(cstring(option)) != 0)
+        throw std::logic_error(std::string("Option already registered: ") + option);
+    options.emplace(option, std::move(o));
     optionOrder.push_back(cstring(option));
+}
+
+void Util::Options::copyConfigurationFrom(const Options &other) {
+    binaryName = cstring(other.binaryName).c_str();
+    compileCommand = other.compileCommand;
+    buildDate = other.buildDate;
+    outStream = other.outStream;
+    remainingOptions = other.remainingOptions;
+    collectUnknownOptions = other.collectUnknownOptions;
 }
 
 // Process options; return list of remaining options.
@@ -55,14 +64,18 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
 }
 
 std::vector<const char *> *Util::Options::process_options(int argc, char *const argv[]) {
+    auto findOption = [this](cstring name) -> const Option * {
+        auto it = options.find(name);
+        return it == options.end() ? nullptr : it->second.get();
+    };
     for (int i = 1; i < argc; i++) {
         cstring opt = cstring(argv[i]);
         const char *arg = nullptr;
-        std::shared_ptr<const Option> option;
+        const Option *option = nullptr;
 
         if (opt.startsWith("--")) {
-            option = get(options, opt);
-            if (!option && (arg = opt.find('='))) option = get(options, opt.before(arg++));
+            option = findOption(opt);
+            if (!option && (arg = opt.find('='))) option = findOption(opt.before(arg++));
             if (option == nullptr) {
                 ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
                 shortUsage();
@@ -70,13 +83,13 @@ std::vector<const char *> *Util::Options::process_options(int argc, char *const 
             }
         } else if (opt.startsWith("-") && opt.size() > 1) {
             // Support GCC-style long options that begin with a single '-'.
-            option = get(options, opt);
+            option = findOption(opt);
 
             // If there's no such option, try single-character options.
             if (option == nullptr && opt.size() > 2) {
                 arg = opt.substr(2).c_str();
                 opt = opt.substr(0, 2);
-                option = get(options, opt);
+                option = findOption(opt);
             }
             if (option == nullptr) {
                 ::P4::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
@@ -124,7 +137,7 @@ void Util::Options::usage() {
     size_t labelLen = 0;
     for (const auto &o : optionOrder) {
         size_t len = o.size();
-        auto option = get(options, o);
+        const auto &option = options.at(o);
         CHECK_NULL(option);
         if (option->argName != nullptr) len += 1 + strlen(option->argName);
         if (labelLen < len) labelLen = len;
@@ -132,7 +145,7 @@ void Util::Options::usage() {
 
     labelLen += 3;
     for (const auto &o : optionOrder) {
-        auto option = get(options, o);
+        const auto &option = options.at(o);
         CHECK_NULL(option);
         size_t len = o.size();
         if (option->flags & OptionFlags::Hide) continue;

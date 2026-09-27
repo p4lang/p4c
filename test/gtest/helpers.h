@@ -107,7 +107,7 @@ namespace P4::Test {
 /// context for the test to run in.
 class P4CTest : public ::testing::Test {
  public:
-    P4CTest() : autoGTestContext(new GTestContext(GTestContext::get())) {}
+    P4CTest() : autoGTestContext(new GTestContext) {}
 
  private:
     AutoCompileContext autoGTestContext;

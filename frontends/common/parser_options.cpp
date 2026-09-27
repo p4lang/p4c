@@ -27,6 +27,11 @@
 
 namespace P4 {
 
+void ParserOptions::copyConfigurationFrom(const ParserOptions &other) {
+    Util::Options::copyConfigurationFrom(other);
+    static_cast<ParserOptionsConfig &>(*this) = other;
+}
+
 /* CONFIG_PKGDATADIR is defined by cmake at compile time to be the same as
  * CMAKE_INSTALL_PREFIX This is only valid when the compiler is built and
  * installed from source locally. If the compiled binary is moved to another

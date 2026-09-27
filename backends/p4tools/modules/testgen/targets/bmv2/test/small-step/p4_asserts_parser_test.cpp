@@ -39,10 +39,6 @@ class P4TestOptions : public CompilerOptions {
  public:
     virtual ~P4TestOptions() = default;
     P4TestOptions() = default;
-    P4TestOptions(const P4TestOptions &) = default;
-    P4TestOptions(P4TestOptions &&) = delete;
-    P4TestOptions &operator=(const P4TestOptions &) = default;
-    P4TestOptions &operator=(P4TestOptions &&) = delete;
 };
 /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
 using P4TestContext = P4Tools::CompileContext<P4TestOptions>;

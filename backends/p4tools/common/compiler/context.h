@@ -22,10 +22,6 @@ class CompileContext : public virtual P4CContext {
 
     CompileContext() = default;
 
-    template <typename OptionsDerivedType>
-    explicit CompileContext(CompileContext<OptionsDerivedType> &context)
-        : _optionsInstance(context.options()) {}
-
     /// @return the compiler options for this compilation context.
     OptionsType &options() override { return _optionsInstance; }
 

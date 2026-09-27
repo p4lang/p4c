@@ -104,7 +104,7 @@ int main(int argc, char *const argv[]) {
         new BMV2::PnaNicBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
 
     // Necessary because BMV2Context is expected at the top of stack in further processing
-    AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::PnaNicContext::get()));
+    AutoCompileContext autoContext(new BMV2::BMV2Context(options));
     try {
         backend->convert(toplevel);
     } catch (const std::exception &bug) {

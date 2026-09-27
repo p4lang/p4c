@@ -24,8 +24,8 @@
 #include "lib/cstring.h"
 #include "logging/bf_error_reporter.h"
 
-class BFN_Options : public CompilerOptions {
- public:
+/// Per-pipeline settings, without ownership of command-line callbacks.
+struct BFN_OptionsConfig {
     bool allowUnimplemented = false;
     bool debugInfo = false;
     bool no_deadcode_elimination = false;
@@ -99,11 +99,6 @@ class BFN_Options : public CompilerOptions {
     // whenever latest version model number changes in the frontend
     int v1ModelVersion = 20200408;
 
-    BFN_Options();
-
-    /// Process the command line arguments and set options accordingly.
-    std::vector<const char *> *process(int argc, char *const argv[]) override;
-
     // private:
     // BFN_Options::process is called twice: once from the main, and once
     // from applyPragmaOptions to handle pragma command_line.
@@ -123,6 +118,17 @@ class BFN_Options : public CompilerOptions {
     unsigned int inclusive_max_errors_before_enforcing_silence_other_than_the_summary = INT_MAX;
 };
 
+class BFN_Options : public CompilerOptions, public BFN_OptionsConfig {
+ public:
+    BFN_Options();
+
+    /// Process the command line arguments and set options accordingly.
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
+
+    /// Copy settings into an independent object with callbacks bound to that object.
+    std::unique_ptr<BFN_Options> clone() const;
+};
+
 // forward declarations so we do not include ir-generated.h
 namespace P4 {
 namespace IR {
@@ -134,6 +140,13 @@ class ToplevelBlock;  // NOLINT(build/forward_decl)
 /// A CompileContext for bf-p4c.
 class BFNContext : public virtual P4CContext {
  public:
+    BFNContext() = default;
+    explicit BFNContext(const BFNContext &other)
+        : P4CContext(other),
+          primaryOptions(other.primaryOptions->clone()),
+          _pipes(other._pipes),
+          bfErrorReporter(other.bfErrorReporter) {}
+
     /// @return the current compilation context, which must be of type
     /// BFNContext.
     static BFNContext &get();
@@ -195,7 +208,7 @@ class BFNContext : public virtual P4CContext {
 
     /// Primary compiler options for this compilation context.
     /// Backend options are created by cloning these options.
-    BFN_Options primaryOptions;
+    std::unique_ptr<BFN_Options> primaryOptions = std::make_unique<BFN_Options>();
 
     /// Current options instance
     thread_local static BFN_Options *optionsInstance;

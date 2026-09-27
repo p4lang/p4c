@@ -8,8 +8,8 @@
 #define BACKENDS_P4TOOLS_COMMON_OPTIONS_H_
 
 #include <cstdint>
+#include <memory>
 #include <optional>
-#include <tuple>
 #include <vector>
 
 #include "frontends/common/options.h"
@@ -26,7 +26,7 @@ class AbstractP4cToolOptions : public CompilerOptions {
     std::string _toolName;
 
     // Keep argument buffers alive while option fields and compilerArgs borrow them.
-    std::vector<std::shared_ptr<std::string>> argumentStorage;
+    std::vector<std::unique_ptr<std::string>> argumentStorage;
 
  public:
     virtual ~AbstractP4cToolOptions() = default;
@@ -48,11 +48,6 @@ class AbstractP4cToolOptions : public CompilerOptions {
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 
  protected:
-    // Self-assignments and copy constructor can only be used by other options.
-    AbstractP4cToolOptions &operator=(const AbstractP4cToolOptions &) = default;
-    AbstractP4cToolOptions(const AbstractP4cToolOptions &) = default;
-    AbstractP4cToolOptions(AbstractP4cToolOptions &&) = default;
-
     [[nodiscard]] bool validateOptions() const override;
 
     /// The name of the tool associated with these options.

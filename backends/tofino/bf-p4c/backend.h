@@ -43,7 +43,8 @@ struct CollectPhvLoggingInfo;
 namespace BFN {
 
 class Backend : public PassManager {
-    BFN_Options options;
+    std::unique_ptr<BFN_Options> ownedOptions;
+    BFN_Options &options;
     PhvInfo phv;
     PhvUse uses;
     ClotInfo clot;

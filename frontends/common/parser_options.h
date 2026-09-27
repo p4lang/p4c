@@ -12,6 +12,7 @@
 
 #include <cstdio>
 #include <filesystem>
+#include <memory>
 #include <set>
 
 #include "../p4/metrics/metricsStructure.h"
@@ -36,35 +37,17 @@ extern std::filesystem::path p4_14includePath;
 bool isSystemFile(cstring filename);
 bool isSystemFile(const std::filesystem::path &filename);
 
-/// Base class for compiler options.
-/// This class contains the options for the front-ends.
-/// Each back-end should subclass this file.
-class ParserOptions : public Util::Options {
+/// Parsed settings, separate from the callbacks that populate them.
+struct ParserOptionsConfig {
+ protected:
     /// Annotation names that are to be ignored by the compiler.
     std::set<cstring> disabledAnnotations;
 
     /// Used to generate dump file names.
     mutable size_t dump_uid = 0;
 
- protected:
-    /// Implements function that is returned by getDebugHook. The hook will take the same arguments.
-    /// The hook uses \ref getToP4 to obtain the P4 printer.
-    void dumpPass(const char *manager, unsigned seq, const char *pass, const IR::Node *node) const;
-
-    /// Obtain an instance of ToP4 or its descendant. The arguments correspond to constructor
-    /// arguments of ToP4.
-    virtual std::unique_ptr<ToP4> getToP4(std::ostream *, bool, std::filesystem::path) const;
-
  public:
-    explicit ParserOptions(std::string_view defaultMessage = "Parse a P4 program");
-
-    std::vector<const char *> *process(int argc, char *const argv[]) override;
     enum class FrontendVersion { P4_14, P4_16 };
-
-    /// Tries to close the input stream associated with the result.
-    static void closeFile(FILE *file);
-    /// Records the result of the preprocessor.
-    using PreprocessorResult = std::unique_ptr<FILE, decltype(&closeFile)>;
 
     /// Name of executable that is being run.
     cstring exe_name;
@@ -86,6 +69,36 @@ class ParserOptions : public Util::Options {
     std::filesystem::path dumpFolder = ".";
     /// If false, optimization of callee parsers (subparsers) inlining is disabled.
     bool optimizeParserInlining = false;
+    /// If true do not generate #include statements.
+    /// Used for debugging.
+    bool noIncludes = false;
+    /// Holds code metric values, makes them accessible during the entire compilation.
+    Metrics metrics;
+};
+
+/// Base class for compiler options and their command-line registrations.
+class ParserOptions : public Util::Options, public ParserOptionsConfig {
+ protected:
+    void copyConfigurationFrom(const ParserOptions &other);
+
+    /// Implements function that is returned by getDebugHook. The hook will take the same arguments.
+    /// The hook uses \ref getToP4 to obtain the P4 printer.
+    void dumpPass(const char *manager, unsigned seq, const char *pass, const IR::Node *node) const;
+
+    /// Obtain an instance of ToP4 or its descendant. The arguments correspond to constructor
+    /// arguments of ToP4.
+    virtual std::unique_ptr<ToP4> getToP4(std::ostream *, bool, std::filesystem::path) const;
+
+ public:
+    explicit ParserOptions(std::string_view defaultMessage = "Parse a P4 program");
+
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
+
+    /// Tries to close the input stream associated with the result.
+    static void closeFile(FILE *file);
+    /// Records the result of the preprocessor.
+    using PreprocessorResult = std::unique_ptr<FILE, decltype(&closeFile)>;
+
     /// Expect that the only remaining argument is the input file.
     void setInputFile();
     /// Return target specific include path.
@@ -106,11 +119,6 @@ class ParserOptions : public Util::Options {
     static bool searchForIncludePath(std::filesystem::path &includePathOut,
                                      const std::vector<cstring> &userSpecifiedPaths,
                                      const std::filesystem::path &exename);
-    /// If true do not generate #include statements.
-    /// Used for debugging.
-    bool noIncludes = false;
-    /// Holds code metric values, makes them accessible during the entire compilation.
-    Metrics metrics;
 };
 
 /// A compilation context which exposes compiler options and a compiler
@@ -179,24 +187,24 @@ class P4CContextWithOptions final : public P4CContext {
         return CompileContextStack::top<P4CContextWithOptions>();
     }
 
-    P4CContextWithOptions() {}
+    P4CContextWithOptions()
+        : ownedOptions(std::make_unique<OptionsType>()), optionsInstance(*ownedOptions) {}
 
-    template <typename OptionsDerivedType>
-    P4CContextWithOptions(P4CContextWithOptions<OptionsDerivedType> &context) {
-        optionsInstance = context.options();
-    }
+    /// Borrow existing options. They must outlive this context.
+    explicit P4CContextWithOptions(OptionsType &options) : optionsInstance(options) {}
 
-    template <typename OptionsDerivedType>
-    P4CContextWithOptions &operator=(P4CContextWithOptions<OptionsDerivedType> &context) {
-        optionsInstance = context.options();
-    }
+    P4CContextWithOptions(const P4CContextWithOptions &) = delete;
+    P4CContextWithOptions &operator=(const P4CContextWithOptions &) = delete;
+    P4CContextWithOptions(P4CContextWithOptions &&) = delete;
+    P4CContextWithOptions &operator=(P4CContextWithOptions &&) = delete;
 
     /// @return the compiler options for this compilation context.
     OptionsType &options() override { return optionsInstance; }
 
  private:
     /// Compiler options for this compilation context.
-    OptionsType optionsInstance;
+    std::unique_ptr<OptionsType> ownedOptions;
+    OptionsType &optionsInstance;
 };
 
 }  // namespace P4
