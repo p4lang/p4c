@@ -232,7 +232,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
 
         builder->emitIndent();
         builder->appendFormat(".u = {.%v = {", actionName);
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             visit(mi->substitution.lookup(p));
             builder->append(", ");
         }
