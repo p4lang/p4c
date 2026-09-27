@@ -130,7 +130,8 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
     LOG1("Visiting " << dbp(action));
     BUG_CHECK(getParent<IR::P4Control>() || getParent<IR::P4Program>(),
               "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
-    auto result = new IR::IndexedVector<IR::Declaration>();
+    IR::MutablePtr<IR::IndexedVector<IR::Declaration>> result =
+        new IR::IndexedVector<IR::Declaration>();
     IR::IndexedVector<IR::Parameter> leftParams;
     IR::IndexedVector<IR::StatOrDecl> body;
     IR::IndexedVector<IR::StatOrDecl> postamble;
@@ -164,8 +165,8 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
                 IR::IndexedVector<IR::StatOrDecl> tempAssigns;
                 ExtractArrayIndices eai(typeMap, *nameGen, tempDecls, tempAssigns);
                 eai.setCalledBy(this);
-                auto argExpr = arg->expression->apply(eai)->to<IR::Expression>();
-                for (auto *d : tempDecls) result->push_back(d);
+                IR::Ptr<IR::Expression> argExpr = arg->expression->apply(eai)->to<IR::Expression>();
+                for (const IR::Declaration *d : tempDecls) result->push_back(d);
                 body.append(tempAssigns);
 
                 auto left = new IR::PathExpression(p->name);
@@ -192,7 +193,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
 
     InsertBeforeExits ibf(&postamble);
     ibf.setCalledBy(this);
-    auto actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
+    IR::Ptr<IR::BlockStatement> actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
     body.append(actionBody->components);
     body.append(postamble);
 
@@ -201,7 +202,7 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
         new IR::BlockStatement(action->body->srcInfo, action->body->annotations, std::move(body));
     LOG1("To replace " << dbp(action));
     result->push_back(action);
-    return result;
+    return guardReturn(IR::Ptr<IR::Node>(result));
 }
 
 const IR::Node *DoRemoveActionParameters::postorder(IR::ActionListElement *element) {
@@ -216,18 +217,19 @@ const IR::Node *DoRemoveActionParameters::postorder(IR::MethodCallExpression *ex
     if (invocations->isCall(orig)) {
         RemoveMethodCallArguments rmca;
         rmca.setCalledBy(this);
-        return expression->apply(rmca);
+        return guardReturn(expression->apply(rmca, getContext()));
     } else if (unsigned toRemove = invocations->argsToRemove(orig)) {
         RemoveMethodCallArguments rmca(toRemove);
         rmca.setCalledBy(this);
-        return expression->apply(rmca);
+        return guardReturn(expression->apply(rmca, getContext()));
     }
     return expression;
 }
 
 RemoveActionParameters::RemoveActionParameters(TypeMap *typeMap, TypeChecking *typeChecking) {
     setName("RemoveActionParameters");
-    auto ai = new ActionInvocation();
+    invocationsOwner = std::make_shared<ActionInvocation>();
+    auto *ai = invocationsOwner.get();
     // MoveDeclarations() is needed because of this case:
     // action a(inout x) { x = x + 1 }
     // bit<32> w;

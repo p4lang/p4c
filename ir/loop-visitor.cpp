@@ -13,19 +13,19 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
     if (auto *cfv = v.controlFlowVisitor()) {
         LOG4("for loop top" << Log::indent);
         ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-"_cs, "-CONTINUE-"_cs);
-        ControlFlowVisitor *top = nullptr;
+        IR::MutablePtr<ControlFlowVisitor> top = nullptr;
         while (true) {
             top = &cfv->flow_clone();
             cfv->visit(self->condition, "condition", 1000);
             LOG4("for loop after condition");
-            auto &inloop = cfv->flow_clone();
-            inloop.visit(self->body, "body");
-            inloop.flow_merge_global_from("-CONTINUE-"_cs);
+            IR::MutablePtr<ControlFlowVisitor> inloop = &cfv->flow_clone();
+            inloop->visit(self->body, "body");
+            inloop->flow_merge_global_from("-CONTINUE-"_cs);
             LOG4("for loop before updates");
-            inloop.visit(self->updates, "updates");
-            inloop.flow_merge(*top);
-            if (inloop == *top) break;
-            cfv->flow_copy(inloop);
+            inloop->visit(self->updates, "updates");
+            inloop->flow_merge(*top);
+            if (*inloop == *top) break;
+            cfv->flow_copy(*inloop);
         }
         LOG4("for loop exit" << Log::unindent);
         cfv->flow_merge_global_from("-BREAK-"_cs);
@@ -54,7 +54,7 @@ void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
     if (auto *cfv = v.controlFlowVisitor()) {
         LOG4("for in loop top" << Log::indent);
         ControlFlowVisitor::SaveGlobal outer(*cfv, "-BREAK-"_cs, "-CONTINUE-"_cs);
-        ControlFlowVisitor *top = nullptr;
+        IR::MutablePtr<ControlFlowVisitor> top = nullptr;
         do {
             top = &cfv->flow_clone();
             cfv->visit(self->ref, "ref", 1);

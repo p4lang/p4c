@@ -364,9 +364,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Mux *expr) {
         return new IR::LNot(expr->srcInfo, expr->type, expr->e0);
     else if (const auto *lnot = expr->e0->to<IR::LNot>()) {
         expr->e0 = lnot->expr;
-        const auto *tmp = expr->e1;
-        expr->e1 = expr->e2;
-        expr->e2 = tmp;
+        std::swap(expr->e1, expr->e2);
         return expr;
     } else if (!hasSideEffects(expr) && expr->e1->equiv(*expr->e2))
         return expr->e1;

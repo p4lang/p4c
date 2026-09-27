@@ -22,6 +22,11 @@
 #include "lib/stringify.h"
 
 namespace P4 {
+namespace IR {
+template <class T>
+class shared_ptr;
+}
+
 namespace FormatDetail {
 
 // Normalize supported placeholders to positional Abseil conversions. Arguments
@@ -32,6 +37,14 @@ std::string formatMessage(std::string_view format, absl::Span<const absl::Format
 void setFormatFlags(std::ostream &out, const absl::FormatConversionSpec &spec);
 bool appendStreamArgument(std::string text, const absl::FormatConversionSpec &spec,
                           absl::FormatSink *sink, bool arithmetic);
+
+template <bool PreferDbprint, typename T>
+void streamArgument(std::ostream &out, const T &arg);
+
+template <bool PreferDbprint, typename T>
+void streamArgument(std::ostream &out, const IR::shared_ptr<T> &arg) {
+    streamArgument<PreferDbprint>(out, arg.get());
+}
 
 template <bool PreferDbprint, typename T>
 void streamArgument(std::ostream &out, const T &arg) {
@@ -127,6 +140,14 @@ std::string formatTuple(std::string_view format, const Tuple &args,
 
 // Use the same source-info traversal for errors and bugs, including pointers
 // to SourceInfo. Unrelated arguments must not erase previously found locations.
+template <typename T, typename Emit>
+void visitSourceInfo(const T &arg, const Emit &emit);
+
+template <typename T, typename Emit>
+void visitSourceInfo(const IR::shared_ptr<T> &arg, const Emit &emit) {
+    visitSourceInfo(arg.get(), emit);
+}
+
 template <typename T, typename Emit>
 void visitSourceInfo(const T &arg, const Emit &emit) {
     using Type = std::remove_cvref_t<T>;
