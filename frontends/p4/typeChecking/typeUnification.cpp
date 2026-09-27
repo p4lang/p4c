@@ -154,7 +154,7 @@ bool TypeUnification::unifyFunctions(const BinaryConstraint *constraint, bool sk
         constraints->add(constraint->create(dest->returnType, src->returnType));
 
     auto sit = src->parameters->parameters.begin();
-    for (auto dit : *dest->parameters->getEnumerator()) {
+    for (auto dit : dest->parameters->getEnumerator()) {
         if (sit == src->parameters->parameters.end()) {
             if (dit->isOptional()) continue;
             if (dit->defaultValue != nullptr) continue;

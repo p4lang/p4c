@@ -421,7 +421,7 @@ static const IR::MAU::Action *createActionFunction(const IR::P4Action *ac,
     rv->name.name = ac->externalName();
     ActionArgSetup aas;
     size_t arg_idx = 0;
-    for (auto param : *ac->parameters->getEnumerator()) {
+    for (auto param : ac->parameters->getEnumerator()) {
         if ((param->direction == IR::Direction::None) ||
             ((!args || arg_idx >= args->size()) && param->direction == IR::Direction::In)) {
             auto arg = new IR::MAU::ActionArg(param->srcInfo, param->type, rv->name, param->name,
@@ -674,7 +674,7 @@ static IR::MAU::AttachedMemory *createAttached(
         sel->sps_scramble = sps_scramble;
 
         // processing ActionSelector constructor parameters.
-        for (auto p : *substitution->getParametersInOrder()) {
+        for (auto p : substitution->getParametersInOrder()) {
             auto arg = substitution->lookup(p);
             if (arg == nullptr) continue;
             if (p->name == "mode") {
@@ -754,7 +754,7 @@ static IR::MAU::AttachedMemory *createAttached(
         return sel;
     } else if (tname == "ActionProfile") {
         auto ap = new IR::MAU::ActionData(srcInfo, IR::ID(name), annot);
-        for (auto p : *substitution->getParametersInOrder()) {
+        for (auto p : substitution->getParametersInOrder()) {
             auto arg = substitution->lookup(p);
             if (arg == nullptr) continue;
             if (p->name == "size") ap->size = getConstant(arg);
@@ -764,7 +764,7 @@ static IR::MAU::AttachedMemory *createAttached(
         auto ctr = new IR::MAU::Counter(srcInfo, name, annot);
         if (tname == "DirectCounter") ctr->direct = true;
 
-        for (auto p : *substitution->getParametersInOrder()) {
+        for (auto p : substitution->getParametersInOrder()) {
             auto arg = substitution->lookup(p);
             if (arg == nullptr) continue;
             if (p->name == "type") {
@@ -806,7 +806,7 @@ static IR::MAU::AttachedMemory *createAttached(
         // populate the 'name' field of IR::Argument when it is used as a named argument.
         // We had to access the name by 'index' and be careful about not to access indices
         // that do not exist.
-        for (auto p : *substitution->getParametersInOrder()) {
+        for (auto p : substitution->getParametersInOrder()) {
             auto arg = substitution->lookup(p);
             if (arg == nullptr) continue;
             auto expr = arg->expression;
@@ -863,7 +863,7 @@ static IR::MAU::AttachedMemory *createAttached(
     } else if (tname == "Lpf") {
         auto mtr = new IR::MAU::Meter(srcInfo, name, annot);
         mtr->implementation = IR::ID("lpf");
-        for (auto p : *substitution->getParametersInOrder()) {
+        for (auto p : substitution->getParametersInOrder()) {
             auto arg = substitution->lookup(p);
             if (arg == nullptr) continue;
             if (p->name == "size") {
@@ -879,7 +879,7 @@ static IR::MAU::AttachedMemory *createAttached(
     } else if (tname == "Wred") {
         auto mtr = new IR::MAU::Meter(srcInfo, name, annot);
         mtr->implementation = IR::ID("wred");
-        for (auto p : *substitution->getParametersInOrder()) {
+        for (auto p : substitution->getParametersInOrder()) {
             auto arg = substitution->lookup(p);
             if (arg == nullptr) continue;
             if (p->name == "size") {
@@ -895,7 +895,7 @@ static IR::MAU::AttachedMemory *createAttached(
         auto mtr = new IR::MAU::Meter(srcInfo, name, annot);
         mtr->implementation = IR::ID("wred");
         mtr->direct = true;
-        for (auto p : *substitution->getParametersInOrder()) {
+        for (auto p : substitution->getParametersInOrder()) {
             auto arg = substitution->lookup(p);
             if (arg == nullptr) continue;
             if (p->name == "drop_value") {
