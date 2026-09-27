@@ -106,11 +106,11 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     nextState.pushCurrentContinuation(handlers);
 
     // Set the start state as the new body.
-    const auto *startState = p4parser->states.getDeclaration<IR::ParserState>("start"_cs);
+    auto startState = p4parser->states.getDeclaration<IR::ParserState>("start"_cs);
     std::vector<Continuation::Command> cmds;
 
     // Initialize parser-local declarations.
-    for (const auto *decl : p4parser->parserLocals) {
+    for (auto decl : p4parser->parserLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
             nextState.declareVariable(TestgenTarget::get(), *declVar);
         }
@@ -145,7 +145,7 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
 
     // Add control-local declarations.
     std::vector<Continuation::Command> cmds;
-    for (const auto *decl : p4control->controlLocals) {
+    for (auto decl : p4control->controlLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
             state.declareVariable(target, *declVar);
         }
@@ -253,7 +253,7 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
     logStep(methodCallStatement);
     state.markVisited(methodCallStatement);
     state.popBody();
-    const auto *type = methodCallStatement->methodCall->type;
+    auto type = methodCallStatement->methodCall->type;
     // Table and action calls do not really return anything (for now).
     // TODO: We should not need these convoluted type checks in a method call statement.
     // We can directly jump to the respective visitor function instead of placing a continuation.
@@ -276,7 +276,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
 
     const auto &options = TestgenOptions::get();
     // Get the initial constraints of the target. These constraints influence branch selection.
-    std::optional<const Constraint *> cond = programInfo.getTargetConstraints();
+    auto cond = programInfo.getTargetConstraints();
 
     // Initialize all relevant environment variables for the respective target.
     initializeTargetEnvironment(state);
@@ -368,7 +368,7 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
     // Replace the parser state with its non-declaration components, followed by the select
     // expression.
     std::vector<Continuation::Command> cmds;
-    for (const auto *component : parserState->components) {
+    for (auto component : parserState->components) {
         if (component->is<IR::IDeclaration>() && !component->is<IR::Declaration_Variable>()) {
             continue;
         }
@@ -378,17 +378,17 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
             cmds.emplace_back(component);
         }
     }
-    const auto *select = parserState->selectExpression;
+    auto select = parserState->selectExpression;
     if (select->is<IR::SelectExpression>()) {
         // Push a new continuation that will take the next state as an argument and execute the
         // state as a command. Create a parameter for the continuation we're about to build.
-        const auto *v = Continuation::genParameter(IR::Type_State::get(), "nextState"_cs,
-                                                   state.getNamespaceContext());
+        const auto v = Continuation::genParameter(IR::Type_State::get(), "nextState"_cs,
+                                                  state.getNamespaceContext());
 
         // Create the continuation itself.
-        Continuation::Body kBody({v->param});
+        Continuation::Body kBody({v.param});
         Continuation k(v, kBody);
-        nextState.pushContinuation(*new ExecutionState::StackFrame(k, state.getNamespaceContext()));
+        nextState.pushContinuation(ExecutionState::StackFrame(k, state.getNamespaceContext()));
         // Add the next parser state(s) to the cmds
         cmds.emplace_back(Continuation::Return(parserState->selectExpression));
     } else if (const auto *pathExpression = select->to<IR::PathExpression>()) {
@@ -413,7 +413,7 @@ bool CmdStepper::preorder(const IR::BlockStatement *block) {
     // Do not forget to add the namespace of the block statement.
     nextState.pushNamespace(block);
     // TODO (Fabian): Remove this? What is this for?
-    for (const auto *component : block->components) {
+    for (auto component : block->components) {
         if (component->is<IR::IDeclaration>() && !component->is<IR::Declaration_Variable>()) {
             continue;
         }
@@ -449,14 +449,14 @@ const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionS
     const auto *parserCursorVarType = &PacketVars::PACKET_SIZE_VAR_TYPE;
 
     // Constrain the input packet size to its maximum.
-    const auto *boolType = IR::Type::Boolean::get();
+    auto boolType = IR::Type::Boolean::get();
     const Constraint *result =
         new IR::Leq(boolType, ExecutionState::getInputPacketSizeVar(),
                     IR::Constant::get(parserCursorVarType, ExecutionState::getMaxPacketLength()));
 
     // Constrain the input packet size to be a multiple of 8 bits. Do this by constraining the
     // lowest three bits of the packet size to 0.
-    const auto *threeBitType = IR::Type::Bits::get(3);
+    auto threeBitType = IR::Type::Bits::get(3);
     result = new IR::LAnd(
         boolType, result,
         new IR::Equ(boolType,
@@ -490,7 +490,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
                 return newSwitch;
             });
     }
-    const auto *switchExpr = switchStatement->expression;
+    auto switchExpr = switchStatement->expression;
     const auto &switchCases = switchStatement->cases;
 
     // After we have executed, we simple pick the index that matches with the returned constant.
@@ -500,7 +500,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     if (Taint::hasTaint(switchExpr)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState"_cs);
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, true));
-        for (const auto *switchCase : switchCases) {
+        for (auto switchCase : switchCases) {
             if (switchCase->statement != nullptr) {
                 cmds.emplace_back(switchCase->statement);
             }
@@ -517,7 +517,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     /// Get the action list associated with this switch/case.
     auto switchActionString = switchExpr->checkedTo<IR::StringLiteral>();
 
-    for (const auto *switchCase : switchCases) {
+    for (auto switchCase : switchCases) {
         // We have either matched already, or still need to match.
         hasMatched = hasMatched || switchActionString->value == switchCase->label->toString();
         // Nothing to do with this statement. Fall through to the next case.

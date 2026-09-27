@@ -56,7 +56,7 @@ const std::vector<Continuation::Command> *ProgramInfo::getPipelineSequence() con
     return &pipelineSequence;
 }
 
-std::optional<const IR::Expression *> ProgramInfo::getTargetConstraints() const {
+std::optional<IR::Ptr<IR::Expression>> ProgramInfo::getTargetConstraints() const {
     return targetConstraints;
 }
 
@@ -72,7 +72,7 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
                                        const ArchSpec::ArchMember *archMember,
                                        std::vector<Continuation::Command> *copyIns,
                                        std::vector<Continuation::Command> *copyOuts) const {
-    const auto *paramType = param->type;
+    auto paramType = param->type;
     // We need to resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
         paramType = resolveProgramType(&getP4Program(), tn);

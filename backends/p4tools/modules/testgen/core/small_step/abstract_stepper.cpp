@@ -33,7 +33,10 @@ namespace P4::P4Tools::P4Testgen {
 
 AbstractStepper::AbstractStepper(ExecutionState &state, AbstractSolver &solver,
                                  const ProgramInfo &programInfo)
-    : programInfo(programInfo), state(state), solver(solver), result(new std::vector<Branch>()) {}
+    : programInfo(programInfo),
+      state(state),
+      solver(solver),
+      result(std::make_shared<std::vector<Branch>>()) {}
 
 AbstractStepper::Result AbstractStepper::step(const IR::Node *node) {
     node->apply(*this);
@@ -88,19 +91,19 @@ bool AbstractStepper::stepToSubexpr(
     const IR::Expression *subexpr, SmallStepEvaluator::Result &result, const ExecutionState &state,
     std::function<const Continuation::Command(const Continuation::Parameter *)> rebuildCmd) {
     // Create a parameter for the continuation we're about to build.
-    const auto *v = Continuation::genParameter(subexpr->type, "v"_cs, state.getNamespaceContext());
+    const auto v = Continuation::genParameter(subexpr->type, "v"_cs, state.getNamespaceContext());
 
     // Create the continuation itself.
     Continuation::Body kBody(state.getBody());
     kBody.pop();
-    kBody.push(rebuildCmd(v));
+    kBody.push(rebuildCmd(&v));
     Continuation k(v, kBody);
 
     // Create our new state.
     auto &nextState = state.clone();
     Continuation::Body stateBody({Continuation::Return(subexpr)});
     nextState.replaceBody(stateBody);
-    nextState.pushContinuation(*new ExecutionState::StackFrame(k, state.getNamespaceContext()));
+    nextState.pushContinuation(ExecutionState::StackFrame(k, state.getNamespaceContext()));
 
     result->emplace_back(nextState);
     return false;
@@ -130,7 +133,7 @@ bool AbstractStepper::stepToListSubexpr(
     size_t nonValueComponentIdx = 0;
     for (nonValueComponentIdx = 0; nonValueComponentIdx < components.size();
          nonValueComponentIdx++) {
-        const auto *curComponent = components.at(nonValueComponentIdx);
+        auto curComponent = components.at(nonValueComponentIdx);
         if (!SymbolicEnv::isSymbolicValue(curComponent)) {
             nonValueComponent = curComponent;
             break;
@@ -162,7 +165,7 @@ bool AbstractStepper::stepToStructSubexpr(
     size_t nonValueComponentIdx = 0;
     for (nonValueComponentIdx = 0; nonValueComponentIdx < components.size();
          nonValueComponentIdx++) {
-        const auto *curComponent = components.at(nonValueComponentIdx);
+        auto curComponent = components.at(nonValueComponentIdx);
         if (!SymbolicEnv::isSymbolicValue(curComponent->expression)) {
             nonValueComponent = curComponent->expression;
             break;
@@ -176,10 +179,10 @@ bool AbstractStepper::stepToStructSubexpr(
     return stepToSubexpr(
         nonValueComponent, result, state,
         [nonValueComponentIdx, rebuildCmd, subexpr](const Continuation::Parameter *v) {
-            auto *result = IR::Traversal::apply(subexpr, &IR::StructExpression::components,
-                                                IR::Traversal::Index(nonValueComponentIdx),
-                                                &IR::NamedExpression::expression,
-                                                IR::Traversal::Assign(v->param));
+            auto result = IR::Traversal::apply(subexpr, &IR::StructExpression::components,
+                                               IR::Traversal::Index(nonValueComponentIdx),
+                                               &IR::NamedExpression::expression,
+                                               IR::Traversal::Assign(v->param));
             return rebuildCmd(result);
         });
 }
@@ -188,7 +191,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::StateVariable &headerRef) 
     // The top of the body should be a Return command containing a call to getValid on the given
     // header ref. Replace this with the variable representing the header ref's validity.
     if (const auto *headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
-        for (const auto *field : headerUnion->fields) {
+        for (auto field : headerUnion->fields) {
             auto *fieldRef = new IR::Member(field->type, headerRef, field->name);
             const auto &variable = ToolsVariables::getHeaderValidity(fieldRef);
             BUG_CHECK(state.exists(variable),
@@ -225,10 +228,10 @@ void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool
         if (headerBaseMember == nullptr) {
             return;
         }
-        const auto *headerBase = headerBaseMember->expr;
+        auto headerBase = headerBaseMember->expr;
         // In the case of header unions, we need to set all other union members invalid.
         if (const auto *hdrUnion = headerBase->type->to<IR::Type_HeaderUnion>()) {
-            for (const auto *field : hdrUnion->fields) {
+            for (auto field : hdrUnion->fields) {
                 auto *member = new IR::Member(field->type, headerBase, field->name);
                 // Ignore the member we are setting to valid.
                 if (headerRef->equiv(*member)) {
@@ -274,7 +277,7 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
                                      std::vector<Continuation::Command> &replacements,
                                      const IR::Expression *stackRef, int leftIndex,
                                      int rightIndex) {
-    const auto *elemType = stackRef->type->checkedTo<IR::Type_Array>()->elementType;
+    auto elemType = stackRef->type->checkedTo<IR::Type_Array>()->elementType;
     const auto *leftArIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, leftIndex);
     const auto *rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
@@ -325,8 +328,9 @@ bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
     return false;
 }
 
-const IR::Literal *AbstractStepper::evaluateExpression(
-    const IR::Expression *expr, std::optional<const IR::Expression *> cond) const {
+IR::Ptr<IR::Literal> AbstractStepper::evaluateExpression(
+    const IR::Expression *input, std::optional<const IR::Expression *> cond) const {
+    IR::Ptr<IR::Expression> expr = input;
     BUG_CHECK(solver.isInIncrementalMode(),
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
@@ -339,7 +343,7 @@ const IR::Literal *AbstractStepper::evaluateExpression(
     auto solverResult = solver.checkSat(constraints);
     // If the solver can find a solution under the given condition, get the model and return the
     // value.
-    const IR::Literal *result = nullptr;
+    IR::Ptr<IR::Literal> result = nullptr;
     if (solverResult != std::nullopt && *solverResult) {
         auto model = Model(solver.getSymbolicMapping());
         result = model.evaluate(expr, true);

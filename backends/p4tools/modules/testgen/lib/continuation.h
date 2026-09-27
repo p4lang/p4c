@@ -77,7 +77,7 @@ class Continuation {
     /// of IR::Expression; other IR nodes may be treated as expressions in the metalanguage, even
     /// though they are not P4 expressions.
     struct Return {
-        std::optional<const IR::Node *> expr;
+        std::optional<IR::Ptr<IR::Node>> expr;
 
         /// Delegates to IR equality.
         bool operator==(const Return &other) const;
@@ -108,7 +108,7 @@ class Continuation {
     /// For example, specific port values are not supported in a hardware target guards can enforce
     /// that only the appropriate port variables are chosen. Any other possible path is discarded.
     struct Guard {
-        const IR::Expression *cond;
+        IR::Ptr<IR::Expression> cond;
 
         /// Delegates to IR equality.
         bool operator==(const Guard &other) const;
@@ -118,9 +118,9 @@ class Continuation {
 
     using Command = std::variant<
         /// Executes a statement-like IR node.
-        const IR::Node *,
+        IR::Ptr<IR::Node>,
         /// Registers a trace event.
-        const TraceEvent *,
+        IR::Ptr<TraceEvent>,
         /// Invokes the topmost continuation on the continuation stack. Execution halts if the
         /// stack is empty. It is a BUG to return a value with an empty continuation stack.
         Return,
@@ -175,7 +175,7 @@ class Continuation {
         friend Continuation;
 
      public:
-        const IR::PathExpression *param;
+        IR::Ptr<IR::PathExpression> param;
 
      private:
         explicit Parameter(const IR::PathExpression *param) : param(param) {}
@@ -184,7 +184,7 @@ class Continuation {
     /// Represents the continuation's parameter.
     //
     // Invariant: this parameter is uniquely named.
-    std::optional<const IR::PathExpression *> parameterOpt;
+    std::optional<IR::Ptr<IR::PathExpression>> parameterOpt;
     Body body;
 
     /// @returns a body that is equivalent to applying this continuation to the given value (or
@@ -193,20 +193,20 @@ class Continuation {
     ///
     /// Expressions in the metalanguage include P4 non-expressions. Because of this, the value (if
     /// provided) does not necessarily need to be an instance of IR::Expression.
-    Body apply(std::optional<const IR::Node *> value_opt) const;
+    Body apply(std::optional<IR::Ptr<IR::Node>> value_opt) const;
 
     /// @returns a parameter for use in building continuations. The parameter will be fresh in the
     /// given @ctx.
-    static const Parameter *genParameter(const IR::Type *type, cstring name,
-                                         const NamespaceContext *ctx);
+    static Parameter genParameter(const IR::Type *type, cstring name,
+                                  std::shared_ptr<const NamespaceContext> ctx);
 
     /// Creates a parameterless continuation.
     explicit Continuation(Body body) : Continuation(std::nullopt, std::move(body)) {}
 
     /// Creates a continuation. The continuation will have the given parameter, if one is provided;
     /// otherwise, the continuation will have no parameters.
-    Continuation(std::optional<const Parameter *> parameterOpt, Body body)
-        : parameterOpt(parameterOpt ? std::make_optional((*parameterOpt)->param) : std::nullopt),
+    Continuation(std::optional<Parameter> parameterOpt, Body body)
+        : parameterOpt(parameterOpt ? std::make_optional(parameterOpt->param) : std::nullopt),
           body(std::move(body)) {}
 };
 

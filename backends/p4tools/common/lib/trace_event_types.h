@@ -69,7 +69,7 @@ class GenericDescription : public Generic {
 /// A simple event that stores the provided expression.
 class Expression : public Generic {
  private:
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
  public:
     [[nodiscard]] const Expression *subst(const SymbolicEnv &env) const override;
@@ -96,7 +96,7 @@ class Expression : public Generic {
 /// Label dedicated to method call expression.
 class MethodCall : public TraceEvent {
  private:
-    const IR::MethodCallExpression *call;
+    IR::Ptr<IR::MethodCallExpression> call;
 
  public:
     explicit MethodCall(const IR::MethodCallExpression *call);
@@ -119,8 +119,8 @@ class MethodCall : public TraceEvent {
 /// Represents an if statement condition.
 class IfStatementCondition : public TraceEvent {
  private:
-    const IR::Expression *preEvalCond = nullptr;
-    const IR::Expression *postEvalCond;
+    IR::Ptr<IR::Expression> preEvalCond = nullptr;
+    IR::Ptr<IR::Expression> postEvalCond;
 
     void setPreEvalCond(const IR::Expression *cond);
 
@@ -145,7 +145,7 @@ class IfStatementCondition : public TraceEvent {
 /// Represents an assignment statement.
 class AssignmentStatement : public TraceEvent {
  private:
-    const IR::AssignmentStatement &stmt;
+    IR::Ptr<IR::AssignmentStatement> stmt;
 
  public:
     [[nodiscard]] const AssignmentStatement *subst(const SymbolicEnv &env) const override;
@@ -171,16 +171,16 @@ class ExtractSuccess : public TraceEvent {
  private:
     /// The label of the extracted header.
     /// The type is IR::Expression because we may also have IR::PathExpression as inputs.
-    const IR::Expression *extractedHeader;
+    IR::Ptr<IR::Expression> extractedHeader;
 
     /// The current parser offset on the input packet.
     int offset;
 
     /// The condition that allowed us to extract this header.
-    const IR::Expression *condition;
+    IR::Ptr<IR::Expression> condition;
 
     /// The list of fields and their values of the emitted header.
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
+    std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> fields;
 
  public:
     [[nodiscard]] const ExtractSuccess *subst(const SymbolicEnv &env) const override;
@@ -195,12 +195,12 @@ class ExtractSuccess : public TraceEvent {
     [[nodiscard]] int getOffset() const;
 
     /// @returns the bit fields stored in this class
-    [[nodiscard]] const std::vector<std::pair<IR::StateVariable, const IR::Expression *>> &
+    [[nodiscard]] const std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> &
     getFields() const;
 
     ExtractSuccess(const IR::Expression *extractedHeader, int offset,
                    const IR::Expression *condition,
-                   std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields);
+                   std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> fields);
     ExtractSuccess(const ExtractSuccess &) = default;
     ExtractSuccess(ExtractSuccess &&) = default;
     ExtractSuccess &operator=(const ExtractSuccess &) = default;
@@ -223,13 +223,13 @@ class ExtractFailure : public TraceEvent {
  private:
     /// The label of the extracted header.
     /// The type is IR::Expression because we may also have IR::PathExpression as inputs.
-    const IR::Expression *extractedHeader;
+    IR::Ptr<IR::Expression> extractedHeader;
 
     /// The current parser offset on the input packet.
     int offset;
 
     /// The condition that forbade us to extract this header.
-    const IR::Expression *condition;
+    IR::Ptr<IR::Expression> condition;
 
  public:
     ExtractFailure(const IR::Expression *extractedHeader, int offset,
@@ -255,7 +255,7 @@ class ExtractFailure : public TraceEvent {
 class Emit : public TraceEvent {
  private:
     /// The emitted header structure.
-    const IR::HeaderExpression *emitHeader;
+    IR::Ptr<IR::HeaderExpression> emitHeader;
 
  public:
     [[nodiscard]] const Emit *subst(const SymbolicEnv &env) const override;
@@ -305,7 +305,7 @@ class Packet : public TraceEvent {
 
  private:
     Direction direction;
-    const IR::Expression *packetValue;
+    IR::Ptr<IR::Expression> packetValue;
 
  protected:
     void print(std::ostream &os) const override;
@@ -322,7 +322,7 @@ std::ostream &operator<<(std::ostream &os, const Packet::Direction &direction);
 /// Marks the start of a parser.
 class ParserStart : public TraceEvent {
  private:
-    const IR::P4Parser *parser;
+    IR::Ptr<IR::P4Parser> parser;
 
  public:
     explicit ParserStart(const IR::P4Parser *parser);
@@ -345,7 +345,7 @@ class ParserStart : public TraceEvent {
 /// Marks the entry into a parser state.
 class ParserState : public TraceEvent {
  private:
-    const IR::ParserState *state;
+    IR::Ptr<IR::ParserState> state;
 
  public:
     explicit ParserState(const IR::ParserState *state);

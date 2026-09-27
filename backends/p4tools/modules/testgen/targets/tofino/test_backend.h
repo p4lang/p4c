@@ -49,10 +49,10 @@ class TofinoTestBackend : public TestBackEnd {
                                const TestBackendConfiguration &testBackendConfiguration,
                                SymbolicExecutor &symbex);
 
-    TestInfo produceTestInfo(
-        const ExecutionState *executionState, const Model *finalModel,
-        const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-        const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) override;
+    TestInfo produceTestInfo(const ExecutionState *executionState, const Model *finalModel,
+                             const IR::Expression *outputPacketExpr,
+                             const IR::Expression *outputPortExpr,
+                             const std::vector<IR::Ptr<TraceEvent>> *programTraces) override;
 
     const TestSpec *createTestSpec(const ExecutionState *executionState, const Model *finalModel,
                                    const TestInfo &testInfo) override;

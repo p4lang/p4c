@@ -31,6 +31,8 @@ class MidEnd : public PassManager {
  protected:
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
+    std::vector<std::shared_ptr<P4::ChooseEnumRepresentation>> enumPolicies;
+    std::vector<std::shared_ptr<P4::ChooseErrorRepresentation>> errorPolicies;
 
     /// Provides a target-specific pass that converts P4 enums to bit<n>. The default
     /// implementation returns P4::ConvertEnums, instantiated with the policy provided by
