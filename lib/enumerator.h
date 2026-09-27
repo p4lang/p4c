@@ -665,7 +665,7 @@ auto concat(Args &&...inputs) {
     return concat(init);
 }
 
-/// Iterate over the owning handle itself so range-for extends its lifetime.
+/// Iterate over the handle directly to keep the enumerator alive until the loop finishes.
 template <typename T>
 EnumeratorHandle<T> begin(const EnumeratorPtr<T> &enumerator) {
     return enumerator->begin();
