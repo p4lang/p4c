@@ -5,6 +5,8 @@
 
 #include "ubpfBackend.h"
 
+#include <memory>
+
 #include "codeGen.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "lib/error.h"
@@ -27,9 +29,9 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
         return;
     }
 
-    UbpfTarget *target;
+    std::unique_ptr<UbpfTarget> target;
     if (options.target.isNullOrEmpty() || options.target == "ubpf") {
-        target = new UbpfTarget();
+        target = std::make_unique<UbpfTarget>();
     } else {
         ::P4::error(ErrorType::ERR_INVALID, "Unknown target %s; legal choice is 'ubpf'",
                     options.target);
@@ -37,7 +39,8 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     }
 
     UBPFTypeFactory::createFactory(typeMap);
-    auto *prog = new UBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
+    auto prog =
+        std::make_unique<UBPFProgram>(options, toplevel->getProgram(), refMap, typeMap, toplevel);
 
     if (!prog->build()) return;
 
@@ -52,8 +55,8 @@ void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
     auto hstream = openFile(hfile, false);
     if (hstream == nullptr) return;
 
-    UbpfCodeBuilder c(target);
-    UbpfCodeBuilder h(target);
+    UbpfCodeBuilder c(target.get());
+    UbpfCodeBuilder h(target.get());
 
     prog->emitH(&h, hfile);
     prog->emitC(&c, hfile.filename());
