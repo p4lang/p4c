@@ -55,7 +55,7 @@ bool CheckUnsupported::preorder(const IR::Declaration_Instance *instance) {
 }
 
 bool hasAtcamPragma(const IR::P4Table *const table_ptr) {
-    for (const auto *annotation : table_ptr->annotations) {
+    for (const IR::Annotation *annotation : table_ptr->annotations) {
         if (annotation->name.name.startsWith("atcam") ||
             annotation->name.originalName.startsWith("atcam"))
             return true;
@@ -64,11 +64,11 @@ bool hasAtcamPragma(const IR::P4Table *const table_ptr) {
 }
 
 void CheckUnsupported::postorder(const IR::P4Table *const table_ptr) {
-    if (const auto *const key_ptr = table_ptr->getKey()) {
+    if (const IR::Key *key_ptr = table_ptr->getKey()) {
         int lpm_key_count = 0, ternary_key_count = 0, range_key_count = 0;
         size_t total_TCAM_key_bits = 0u;
 
-        for (const auto *const key_element_ptr : key_ptr->keyElements) {
+        for (const IR::KeyElement *key_element_ptr : key_ptr->keyElements) {
             if (key_element_ptr->matchType->path->name == "lpm") {
                 ++lpm_key_count;
             }

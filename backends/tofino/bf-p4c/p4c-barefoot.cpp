@@ -341,7 +341,7 @@ void execute_backend(const IR::BFN::Pipe *maupipe, BFN_Options &options) {
             }
         }
         BFN::Backend &backend;
-        const IR::BFN::Pipe *maupipe;
+        IR::Ptr<IR::BFN::Pipe> maupipe;
     };
     failure_guard guard(backend, maupipe);
 #endif  // BFP4C_CATCH_EXCEPTIONS
@@ -442,7 +442,7 @@ int main(int ac, char **av) {
 #if BFP4C_CATCH_EXCEPTIONS
     try {
 #endif  // BFP4C_CATCH_EXCEPTIONS
-        auto *program = run_frontend();
+        auto program = run_frontend();
 
         if (options.num_stages_override) {
             Device::overrideNumStages(options.num_stages_override);

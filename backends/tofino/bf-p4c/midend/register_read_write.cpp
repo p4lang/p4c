@@ -28,8 +28,8 @@ namespace BFN {
 
 bool RegisterReadWrite::CheckRegisterActions::preorder(
     const IR::Declaration_Instance *reg_act_decl_inst) {
-    auto *reg_act_ext_inst = dynamic_cast<P4::ExternInstantiation *>(
-        P4::ExternInstantiation::resolve(reg_act_decl_inst, self.refMap, self.typeMap));
+    auto resolved = P4::Instantiation::resolve(reg_act_decl_inst, self.refMap, self.typeMap);
+    auto *reg_act_ext_inst = resolved->to<P4::ExternInstantiation>();
     if (!reg_act_ext_inst || reg_act_ext_inst->type->name != "RegisterAction") return true;
     auto *reg_path_expr =
         reg_act_ext_inst->constructorArguments->at(0)->expression->to<IR::PathExpression>();
@@ -185,7 +185,7 @@ bool RegisterReadWrite::UpdateRegisterActionsAndExecuteCalls::processDeclaration
 
 IR::Node *RegisterReadWrite::UpdateRegisterActionsAndExecuteCalls::preorder(IR::P4Action *act) {
     auto p4act = getOriginal<IR::P4Action>();
-    auto src_body = p4act->body;
+    const IR::BlockStatement *src_body = p4act->body;
     if (!processDeclaration(p4act, src_body)) return act;
 
     LOG2(" -> replacing p4 action");
@@ -200,8 +200,8 @@ IR::Node *RegisterReadWrite::UpdateRegisterActionsAndExecuteCalls::preorder(IR::
 IR::Node *RegisterReadWrite::UpdateRegisterActionsAndExecuteCalls::preorder(
     IR::Declaration_Instance *act) {
     // this pass expects a P4 action or a register action
-    auto inst = dynamic_cast<P4::ExternInstantiation *>(
-        P4::ExternInstantiation::resolve(act, self.refMap, self.typeMap));
+    auto resolved = P4::Instantiation::resolve(act, self.refMap, self.typeMap);
+    auto inst = resolved->to<P4::ExternInstantiation>();
     if (!inst || inst->type->name != "RegisterAction") return act;
 
     auto regAct = getOriginal<IR::Declaration_Instance>();
@@ -591,7 +591,7 @@ void RegisterReadWrite::CollectRegisterReadsWrites::end_apply() {
                 if (first_addr == nullptr) {
                     first_addr = mce->arguments->at(0)->expression;
                 } else {
-                    auto *addr = mce->arguments->at(0)->expression;
+                    const IR::Expression *addr = mce->arguments->at(0)->expression;
                     if (!first_addr->equiv(*addr))
                         error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                               "%1%: uses of all registers within a single action have to "
@@ -605,13 +605,13 @@ void RegisterReadWrite::CollectRegisterReadsWrites::end_apply() {
 
 bool RegisterReadWrite::MoveRegisterParameters::preorder(IR::P4Control *c) {
     IR::IndexedVector<IR::Declaration> reg_params;
-    for (auto *decl : c->controlLocals) {
-        auto *type = self.typeMap->getType(decl);
+    for (const IR::Declaration *decl : c->controlLocals) {
+        const IR::Type *type = self.typeMap->getType(decl);
         if (auto *canonical = type->to<IR::Type_SpecializedCanonical>()) type = canonical->baseType;
         if (auto *ext = type->to<IR::Type_Extern>())
             if (ext->name == "RegisterParam") reg_params.push_back(decl);
     }
-    for (auto *decl : reg_params) c->controlLocals.removeByName(decl->getName());
+    for (const IR::Declaration *decl : reg_params) c->controlLocals.removeByName(decl->getName());
     c->controlLocals.prepend(reg_params);
     return true;
 }

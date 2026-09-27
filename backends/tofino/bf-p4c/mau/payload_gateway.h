@@ -31,7 +31,7 @@ class LayoutChoices;
 class FindPayloadCandidates {
  public:
     static constexpr int GATEWAY_ROWS_FOR_ENTRIES = 4;
-    using PayloadArguments = std::vector<const IR::Constant *>;
+    using PayloadArguments = std::vector<IR::Ptr<IR::Constant>>;
 
  private:
     struct ContainerByte {
@@ -73,7 +73,7 @@ class FindPayloadCandidates {
     static bitvec determine_match_group_payload(const IR::MAU::Table *tbl,
                                                 const TableResourceAlloc *alloc,
                                                 const IR::MAU::Action *act,
-                                                std::vector<const IR::Constant *> arguments,
+                                                std::vector<IR::Ptr<IR::Constant>> arguments,
                                                 int entry_idx);
 
  public:

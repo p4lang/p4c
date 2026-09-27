@@ -39,7 +39,7 @@ class CalcCriticalPathClusters : public Inspector {
  private:
     ordered_set<const PHV::Field *> critical_fields_i;
     const CalcParserCriticalPath &parser_critical_path;
-    const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char *name = 0) override;
 
  public:
     explicit CalcCriticalPathClusters(const CalcParserCriticalPath &parser_critical_path)

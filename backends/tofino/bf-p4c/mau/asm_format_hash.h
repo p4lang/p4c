@@ -177,7 +177,7 @@ class FormatHash::SliceWidth : public Inspector {
     }
     bool preorder(const IR::ListExpression *fl) {
         int tmp = bit;
-        for (auto *e : boost::adaptors::reverse(fl->components)) {
+        for (const IR::Expression *e : boost::adaptors::reverse(fl->components)) {
             if (bit < e->type->width_bits()) {
                 if (width > e->type->width_bits() - bit) width = e->type->width_bits() - bit;
                 visit(e);
@@ -190,7 +190,7 @@ class FormatHash::SliceWidth : public Inspector {
     }
     bool preorder(const IR::StructExpression *sl) {
         int tmp = bit;
-        for (auto *e : boost::adaptors::reverse(sl->components)) {
+        for (const IR::NamedExpression *e : boost::adaptors::reverse(sl->components)) {
             if (bit < e->expression->type->width_bits()) {
                 if (width > e->expression->type->width_bits() - bit)
                     width = e->expression->type->width_bits() - bit;
@@ -293,7 +293,7 @@ class FormatHash::ZeroHash : public Inspector {
     }
     bool preorder(const IR::ListExpression *fl) {
         auto tmp = slice;
-        for (auto *e : boost::adaptors::reverse(fl->components)) {
+        for (const IR::Expression *e : boost::adaptors::reverse(fl->components)) {
             int width = e->type->width_bits();
             if (slice.lo < width) {
                 BUG_CHECK(slice.hi < width, "Slice too wide in FormatHash::ZeroHash");
@@ -307,7 +307,7 @@ class FormatHash::ZeroHash : public Inspector {
     }
     bool preorder(const IR::StructExpression *sl) {
         auto tmp = slice;
-        for (auto *e : boost::adaptors::reverse(sl->components)) {
+        for (const IR::NamedExpression *e : boost::adaptors::reverse(sl->components)) {
             int width = e->expression->type->width_bits();
             if (slice.lo < width) {
                 BUG_CHECK(slice.hi < width, "Slice too wide in FormatHash::ZeroHash");
@@ -395,7 +395,7 @@ class FormatHash::Output : public Inspector {
     }
     bool preorder(const IR::ListExpression *fl) {
         auto tmp = slice;
-        for (auto *e : boost::adaptors::reverse(fl->components)) {
+        for (const IR::Expression *e : boost::adaptors::reverse(fl->components)) {
             if (slice.lo < e->type->width_bits()) {
                 visit(e);
                 break;
@@ -407,7 +407,7 @@ class FormatHash::Output : public Inspector {
     }
     bool preorder(const IR::StructExpression *sl) {
         auto tmp = slice;
-        for (auto *e : boost::adaptors::reverse(sl->components)) {
+        for (const IR::NamedExpression *e : boost::adaptors::reverse(sl->components)) {
             if (slice.lo < e->expression->type->width_bits()) {
                 visit(e->expression);
                 break;

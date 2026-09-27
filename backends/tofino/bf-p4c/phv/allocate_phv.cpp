@@ -4186,7 +4186,7 @@ AllocResult AllocatePHV::brute_force_alloc(
     return result;
 }
 
-const IR::Node *AllocatePHV::apply_visitor(const IR::Node *root_, const char *) {
+IR::Ptr<IR::Node> AllocatePHV::apply_visitor(const IR::Node *root_, const char *) {
     if (utils_i.settings.physical_liverange_overlay) {
         BUG_CHECK(utils_i.settings.no_code_change,
                   "If physical_live_range_overlay is enabled,"
@@ -5793,7 +5793,7 @@ int FieldPackingOpportunity::nOpportunitiesAfter(const PHV::Field *f1, const PHV
     }
 }
 
-const IR::Node *IncrementalPHVAllocation::apply_visitor(const IR::Node *root, const char *) {
+IR::Ptr<IR::Node> IncrementalPHVAllocation::apply_visitor(const IR::Node *root, const char *) {
     // phv_i contains out-of-date information at this point, but CollectPhvInfo cannot
     // yet be rerun because of uncommited allocation information.
     //

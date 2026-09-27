@@ -169,7 +169,7 @@ bool SplitAttachedInfo::ValidateAttachedOfAllTables::preorder(const IR::MAU::Tab
     tbl->attached.apply(validate_attached);
 
     for (auto ba : tbl->attached) {
-        auto *at = ba->attached;
+        auto at = ba->attached;
         if (!FormatType_t::track(at)) continue;
 
         ValidateAttachedOfSingleTable::addr_type_t addr_type;
@@ -199,7 +199,7 @@ bool SplitAttachedInfo::EnableAndTypesOnActions::preorder(const IR::MAU::Action 
     auto tbl = findContext<IR::MAU::Table>();
 
     for (auto ba : tbl->attached) {
-        auto *at = ba->attached;
+        auto at = ba->attached;
         if (!FormatType_t::track(at)) continue;
 
         auto uai = at->unique_id();
@@ -562,7 +562,7 @@ const IR::MAU::Action *SplitAttachedInfo::get_split_action(const IR::MAU::Action
     // FIXME -- need to refresh the PhvInfo in case it has been cleared and recomputed
     // and has no references to the tempvars used in this action.  Should be a better
     // way of doing this.
-    for (auto *ba : tbl->attached) {
+    for (const IR::MAU::BackendAttached *ba : tbl->attached) {
         auto tv = index_tempvars.find(ba->attached->name);
         if (tv != index_tempvars.end()) {
             if (tv->second.enable) phv.addTempVar(tv->second.enable, tbl->gress);
@@ -579,7 +579,7 @@ std::vector<const IR::MAU::AttachedMemory *> ActionData::FormatType_t::tracking(
     const IR::MAU::Table *tbl) {
     std::vector<const IR::MAU::AttachedMemory *> rv;
     if (tbl) {
-        for (auto *ba : tbl->attached) {
+        for (const IR::MAU::BackendAttached *ba : tbl->attached) {
             if (track(ba->attached)) {
                 rv.push_back(ba->attached);
             }
@@ -592,7 +592,7 @@ ActionData::FormatType_t ActionData::FormatType_t::default_for_table(const IR::M
     ActionData::FormatType_t rv;
     int shift = 3;
     rv.value = THIS_STAGE;
-    for (auto *ba : tbl->attached) {
+    for (const IR::MAU::BackendAttached *ba : tbl->attached) {
         if (!track(ba->attached)) continue;
         rv.value |= THIS_STAGE << shift;
         shift += 3;
@@ -607,8 +607,8 @@ void ActionData::FormatType_t::initialize(const IR::MAU::Table *tbl, int entries
     if (prev_stages) value |= EARLIER_STAGE;
     // FIXME -- when to set LATER_STAGE?  Do we ever care?
     int shift = 3;
-    for (auto *ba : tbl->attached) {
-        auto *at = ba->attached;
+    for (auto ba : tbl->attached) {
+        auto at = ba->attached;
         if (!track(at)) continue;
         BUG_CHECK(shift < 30, "too many attached tables for %s", tbl);
         if (!attached.at(ba->attached).first_stage) value |= EARLIER_STAGE << shift;

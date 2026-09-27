@@ -79,7 +79,8 @@ const IR::Node *DoInitializeMirrorIOSelect::preorder(IR::ParserState *state) {
         new IR::Constant(IR::Type_Bits::get(1), 1));
     IR::IndexedVector<IR::StatOrDecl> newStateComponents;
     newStateComponents.push_back(mirrorIOSelectInit);
-    for (const auto *component : state->components) newStateComponents.push_back(component);
+    for (const IR::StatOrDecl *component : state->components)
+        newStateComponents.push_back(component);
     const auto *newState = new IR::ParserState(state->srcInfo, state->name, state->annotations,
                                                newStateComponents, state->selectExpression);
     return newState;
