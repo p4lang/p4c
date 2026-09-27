@@ -70,7 +70,7 @@ class DeclarationGenerator : public Generator {
 
     virtual IR::Type_Declaration *genTypeDeclaration();
 
-    virtual const IR::Type *genType();
+    virtual IR::Ptr<IR::Type> genType();
 
     virtual IR::Type_Typedef *genTypeDef();
 

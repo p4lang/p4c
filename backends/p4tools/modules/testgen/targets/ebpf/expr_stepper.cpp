@@ -81,7 +81,7 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
         {"*method.verify_ipv4_checksum"_cs,
          {"iphdr"_cs},
          [](const ExternInfo &externInfo, EBPFExprStepper &stepper) {
-             const auto *ipHdrRef = externInfo.externArguments.at(0)->expression;
+             auto ipHdrRef = externInfo.externArguments.at(0)->expression;
              if (!(ipHdrRef->is<IR::Member>() || ipHdrRef->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("IP header input %1% of type %2% not supported", ipHdrRef,
                                        ipHdrRef->type);
@@ -113,9 +113,9 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
              const auto *hdrChecksum = stepper.state.get(new IR::Member(ipHdrRef, "hdrChecksum"));
              const auto *srcAddr = stepper.state.get(new IR::Member(ipHdrRef, "srcAddr"));
              const auto *dstAddr = stepper.state.get(new IR::Member(ipHdrRef, "dstAddr"));
-             const auto *bt8 = IR::Type_Bits::get(8);
-             const auto *bt16 = IR::Type_Bits::get(16);
-             const auto *bt32 = IR::Type_Bits::get(32);
+             auto bt8 = IR::Type_Bits::get(8);
+             auto bt16 = IR::Type_Bits::get(16);
+             auto bt32 = IR::Type_Bits::get(32);
 
              // The checksum is computed as a series of 16-bit additions.
              // We need to widen to 32 bits to handle overflows.
@@ -160,15 +160,15 @@ const EBPFExprStepper::ExternMethodImpls<EBPFExprStepper> EBPFExprStepper::EBPF_
              // Input must be the headers struct.
              const auto *headers =
                  externInfo.externArguments.at(0)->expression->checkedTo<IR::StructExpression>();
-             const auto *tcpRef = headers->getField("tcp"_cs);
+             auto tcpRef = headers->getField("tcp"_cs);
              CHECK_NULL(tcpRef);
              const auto *tcpHeader = tcpRef->expression->checkedTo<IR::HeaderExpression>();
-             const auto *syn = tcpHeader->getField("syn"_cs);
+             auto syn = tcpHeader->getField("syn"_cs);
              CHECK_NULL(syn);
-             const auto *ack = tcpHeader->getField("ack"_cs);
+             auto ack = tcpHeader->getField("ack"_cs);
              CHECK_NULL(ack);
-             const auto *synExpr = syn->expression;
-             const auto *ackExpr = ack->expression;
+             auto synExpr = syn->expression;
+             auto ackExpr = ack->expression;
 
              // Implement the simple conntrack case since we do not support multiple packets here
              // yet.

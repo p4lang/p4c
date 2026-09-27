@@ -20,7 +20,7 @@ class Taint {
     /// either return a literal, a Member/PathExpression, or a concatenation. Any non-tainted
     /// variable is replaced with a zero constant. This function is used for the generation of taint
     /// masks.
-    static const IR::Expression *propagateTaint(const IR::Expression *expr);
+    static IR::Ptr<IR::Expression> propagateTaint(const IR::Expression *expr);
 
     /// @returns whether the given expression is tainted. An expression is tainted if one or more
     /// bits of the expression are expected to evaluate to (possibly part of) IR::TaintExpression.
@@ -28,8 +28,8 @@ class Taint {
 
     /// @returns the mask for the corresponding program packet, indicating bits of the expression
     /// which are not tainted.
-    static const IR::Literal *buildTaintMask(const Model *evaluatedModel,
-                                             const IR::Expression *programPacket);
+    static IR::Ptr<IR::Literal> buildTaintMask(const Model *evaluatedModel,
+                                               const IR::Expression *programPacket);
 };
 
 }  // namespace P4::P4Tools

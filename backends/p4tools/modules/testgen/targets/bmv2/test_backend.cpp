@@ -53,15 +53,17 @@ Bmv2TestBackend::Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
     }
 
     if (testBackendString == "PTF") {
-        testWriter = new PTF(testBackendConfiguration);
+        testWriter = std::make_unique<PTF>(testBackendConfiguration);
     } else if (testBackendString == "STF") {
-        testWriter = new STF(testBackendConfiguration);
+        testWriter = std::make_unique<STF>(testBackendConfiguration);
     } else if (testBackendString == "PROTOBUF") {
-        testWriter = new Protobuf(testBackendConfiguration, programInfo.getP4RuntimeAPI());
+        testWriter =
+            std::make_unique<Protobuf>(testBackendConfiguration, programInfo.getP4RuntimeAPI());
     } else if (testBackendString == "PROTOBUF_IR") {
-        testWriter = new ProtobufIr(testBackendConfiguration, programInfo.getP4RuntimeAPI());
+        testWriter =
+            std::make_unique<ProtobufIr>(testBackendConfiguration, programInfo.getP4RuntimeAPI());
     } else if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testBackendConfiguration);
+        testWriter = std::make_unique<Metadata>(testBackendConfiguration);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
@@ -72,7 +74,7 @@ Bmv2TestBackend::Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
 TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
     const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
+    const std::vector<IR::Ptr<TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     return testInfo;
@@ -80,7 +82,7 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
 
 const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionState,
                                                 const Model *finalModel, const TestInfo &testInfo) {
-    const auto *ingressPayload = testInfo.inputPacket;
+    auto ingressPayload = testInfo.inputPacket;
     const auto *ingressPayloadMask = IR::Constant::get(IR::Type_Bits::get(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
@@ -99,7 +101,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser"_cs, 2);
         const auto &flatFields = executionState->getFlatFields(localMetadataVar, {});
         for (const auto &fieldRef : flatFields) {
-            const auto *fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
+            auto fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
             auto fieldString = fieldRef->toString();

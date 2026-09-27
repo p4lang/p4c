@@ -41,7 +41,7 @@ class P4ToolsTestCase {
                                                           std::string archName,
                                                           const std::string &source);
 
-    explicit P4ToolsTestCase(const P4Tools::CompilerResult &compilerResults);
+    explicit P4ToolsTestCase(std::shared_ptr<const P4Tools::CompilerResult> compilerResults);
 
     /// @returns the P4 program associated with this test case.
     [[nodiscard]] const IR::P4Program &getProgram() const;
@@ -52,7 +52,7 @@ class P4ToolsTestCase {
 
  private:
     /// The output of the compiler's mid end.
-    std::reference_wrapper<const P4Tools::CompilerResult> compilerResults;
+    std::shared_ptr<const P4Tools::CompilerResult> compilerResults;
 
     /// Ensures target plug-ins are initialized.
     static void ensureInit();
