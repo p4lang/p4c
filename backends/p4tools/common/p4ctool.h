@@ -73,7 +73,7 @@ class AbstractP4cTool {
         if (!compilerResult.has_value()) {
             return EXIT_FAILURE;
         }
-        return mainImpl(compilerResult.value());
+        return mainImpl(*compilerResult.value());
     }
 };
 

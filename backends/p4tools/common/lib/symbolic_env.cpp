@@ -32,7 +32,7 @@ void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value)
     map[var] = value;
 }
 
-const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
+IR::Ptr<IR::Expression> SymbolicEnv::subst(const IR::Expression *expr) const {
     /// Traverses the IR to perform substitution.
     class SubstVisitor : public Transform {
         const SymbolicEnv &symbolicEnv;

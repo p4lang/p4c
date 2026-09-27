@@ -78,8 +78,8 @@ SmallStepEvaluator::SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo
     }
 }
 
-void SmallStepEvaluator::renginePostprocessing(ReachabilityResult &result,
-                                               std::vector<SmallStepEvaluator::Branch> *branches) {
+void SmallStepEvaluator::renginePostprocessing(
+    ReachabilityResult &result, std::shared_ptr<std::vector<SmallStepEvaluator::Branch>> branches) {
     // All Reachability engine state for branch should be copied.
     if (branches->size() > 1 || result.second != nullptr) {
         for (auto &n : *branches) {
@@ -98,14 +98,14 @@ void SmallStepEvaluator::renginePostprocessing(ReachabilityResult &result,
 SmallStepEvaluator::REngineType SmallStepEvaluator::renginePreprocessing(
     SmallStepEvaluator &stepper, const ExecutionState &nextState, const IR::Node *node) {
     ReachabilityResult rresult = std::make_pair(true, nullptr);
-    std::vector<SmallStepEvaluator::Branch> *branches = nullptr;
+    std::shared_ptr<std::vector<SmallStepEvaluator::Branch>> branches = nullptr;
     // Current node should be inside DCG.
     if (stepper.reachabilityEngine->getDCG().isCaller(node)) {
         // Move reachability engine to next state.
         rresult = stepper.reachabilityEngine->next(nextState.getReachabilityEngineState(), node);
         if (!rresult.first) {
             // Reachability property was failed.
-            branches = new std::vector<SmallStepEvaluator::Branch>({});
+            branches = std::make_shared<std::vector<SmallStepEvaluator::Branch>>();
         }
     } else if (const auto *method = node->to<IR::MethodCallStatement>()) {
         return renginePreprocessing(stepper, nextState, method->methodCall);
@@ -131,9 +131,9 @@ class CommandVisitor {
                 return r.second;
             }
         }
-        auto *stepper =
-            TestgenTarget::getCmdStepper(state, self.get().solver, self.get().programInfo);
-        auto *result = stepper->step(node);
+        auto stepper = std::unique_ptr<CmdStepper>(
+            TestgenTarget::getCmdStepper(state, self.get().solver, self.get().programInfo));
+        auto result = stepper->step(node);
         if (self.get().reachabilityEngine != nullptr) {
             SmallStepEvaluator::renginePostprocessing(r.first, result);
         }
@@ -146,22 +146,23 @@ class CommandVisitor {
 
         state.get().add(*event);
         state.get().popBody();
-        return new std::vector<Branch>({Branch(state)});
+        return std::make_shared<std::vector<Branch>>(std::initializer_list<Branch>{Branch(state)});
     }
 
     Result operator()(Continuation::Return ret) {
         if (ret.expr) {
             // Step on the returned expression.
-            const auto *expr = *ret.expr;
+            auto expr = *ret.expr;
             BUG_CHECK(expr, "Attempted to evaluate null expr.");
             // Do not bother with the stepper, if the expression is already symbolic.
             if (SymbolicEnv::isSymbolicValue(expr)) {
                 state.get().popContinuation(expr);
-                return new std::vector<Branch>({Branch(state)});
+                return std::make_shared<std::vector<Branch>>(
+                    std::initializer_list<Branch>{Branch(state)});
             }
-            auto *stepper =
-                TestgenTarget::getExprStepper(state, self.get().solver, self.get().programInfo);
-            auto *result = stepper->step(expr);
+            auto stepper = std::unique_ptr<ExprStepper>(
+                TestgenTarget::getExprStepper(state, self.get().solver, self.get().programInfo));
+            auto result = stepper->step(expr);
             if (self.get().reachabilityEngine != nullptr) {
                 ReachabilityResult rresult = std::make_pair(true, nullptr);
                 SmallStepEvaluator::renginePostprocessing(rresult, result);
@@ -171,18 +172,18 @@ class CommandVisitor {
 
         // Step on valueless return.
         state.get().popContinuation();
-        return new std::vector<Branch>({Branch(state)});
+        return std::make_shared<std::vector<Branch>>(std::initializer_list<Branch>{Branch(state)});
     }
 
     Result operator()(Continuation::Exception e) {
         state.get().handleException(e);
-        return new std::vector<Branch>({Branch(state)});
+        return std::make_shared<std::vector<Branch>>(std::initializer_list<Branch>{Branch(state)});
     }
 
     Result operator()(const Continuation::PropertyUpdate &e) {
         state.get().setProperty(e.propertyName, e.property);
         state.get().popBody();
-        return new std::vector<Branch>({Branch(state)});
+        return std::make_shared<std::vector<Branch>>(std::initializer_list<Branch>{Branch(state)});
     }
 
     Result operator()(const Continuation::Guard &guard) {
@@ -200,7 +201,7 @@ class CommandVisitor {
         }
 
         // Evaluate the guard condition by directly using the solver.
-        const auto *cond = guard.cond;
+        auto cond = guard.cond;
         std::optional<bool> solverResult = std::nullopt;
 
         // If the guard condition is tainted, treat it equivalent to an invalid state.get().
@@ -227,10 +228,12 @@ class CommandVisitor {
                 " Incrementing number of guard violations.",
                 condStream.str().c_str());
             self.get().violatedGuardConditions++;
-            return new std::vector<Branch>({{IR::BoolLiteral::get(false), state, nextState}});
+            return std::make_shared<std::vector<Branch>>(
+                std::initializer_list<Branch>{{IR::BoolLiteral::get(false), state, nextState}});
         }
         // Otherwise, we proceed as usual.
-        return new std::vector<Branch>({{cond, state, nextState}});
+        return std::make_shared<std::vector<Branch>>(
+            std::initializer_list<Branch>{{cond, state, nextState}});
     }
 
     explicit CommandVisitor(SmallStepEvaluator &self, ExecutionState &state)
@@ -245,7 +248,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
     }
     // State has an empty body. Pop the continuation stack.
     state.popContinuation();
-    return new std::vector<Branch>({Branch(state)});
+    return std::make_shared<std::vector<Branch>>(std::initializer_list<Branch>{Branch(state)});
 }
 
 }  // namespace P4::P4Tools::P4Testgen

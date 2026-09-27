@@ -37,10 +37,10 @@ class Packet : public TestObject {
     int port;
 
     /// The actual content of the packet.
-    const IR::Expression *payload;
+    IR::Ptr<IR::Expression> payload;
 
     /// The mask of this packet.
-    const IR::Expression *payloadIgnoreMask;
+    IR::Ptr<IR::Expression> payloadIgnoreMask;
 
  public:
     Packet(int port, const IR::Expression *payload, const IR::Expression *payloadIgnoreMask);
@@ -72,10 +72,10 @@ class Packet : public TestObject {
 class ActionArg : public TestObject {
  private:
     /// The original parameter associated with this object.
-    const IR::Parameter *param;
+    IR::Ptr<IR::Parameter> param;
 
     /// Value being supplied.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
  public:
     ActionArg(const IR::Parameter *param, const IR::Expression *value);
@@ -103,7 +103,7 @@ class ActionCall : public TestObject {
     cstring identifier;
 
     /// The action that is associated with this object.
-    const IR::P4Action *action;
+    IR::Ptr<IR::P4Action> action;
 
     /// Action arguments.
     const std::vector<ActionArg> args;
@@ -133,7 +133,7 @@ class ActionCall : public TestObject {
 class TableMatch : public TestObject {
  private:
     /// The key associated with this object.
-    const IR::KeyElement *key;
+    IR::Ptr<IR::KeyElement> key;
 
  public:
     explicit TableMatch(const IR::KeyElement *key);
@@ -144,15 +144,15 @@ class TableMatch : public TestObject {
     DECLARE_TYPEINFO(TableMatch, TestObject);
 };
 
-using TableMatchMap = ordered_map<cstring, const TableMatch *>;
+using TableMatchMap = ordered_map<cstring, IR::Ptr<TableMatch>>;
 
 class Ternary : public TableMatch {
  private:
     /// The actual match value.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
     /// The mask is applied using binary and operator when matching with a key.
-    const IR::Expression *mask;
+    IR::Ptr<IR::Expression> mask;
 
  public:
     explicit Ternary(const IR::KeyElement *key, const IR::Expression *value,
@@ -178,10 +178,10 @@ class Ternary : public TableMatch {
 class LPM : public TableMatch {
  private:
     /// How value the key is matched with.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
     /// How much of the value to match.
-    const IR::Expression *prefixLength;
+    IR::Ptr<IR::Expression> prefixLength;
 
  public:
     explicit LPM(const IR::KeyElement *key, const IR::Expression *value,
@@ -207,7 +207,7 @@ class LPM : public TableMatch {
 class Exact : public TableMatch {
  private:
     /// The value the key is matched with.
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
 
  public:
     explicit Exact(const IR::KeyElement *key, const IR::Expression *value);
@@ -260,7 +260,7 @@ class TableRule : public TestObject {
 class TableConfig : public TestObject {
  private:
     /// The original table associated with this object.
-    const IR::P4Table *table;
+    IR::Ptr<IR::P4Table> table;
 
     /// Vector of TableRules.
     const std::vector<TableRule> rules;
@@ -310,7 +310,7 @@ class TestSpec {
     const std::optional<Packet> egressPacket;
 
     /// The traces that have been collected while the interpreter stepped through the program.
-    const std::vector<std::reference_wrapper<const TraceEvent>> traces;
+    const std::vector<IR::Ptr<TraceEvent>> traces;
 
     /// A map of additional properties associated with this test specification.
     /// For example, tables, registers, or action profiles.
@@ -318,7 +318,7 @@ class TestSpec {
 
  public:
     TestSpec(Packet ingressPacket, std::optional<Packet> egressPacket,
-             std::vector<std::reference_wrapper<const TraceEvent>> traces);
+             std::vector<IR::Ptr<TraceEvent>> traces);
 
     /// Add a test object to the test specification with @param category as the object category
     /// (for example, "tables", "registers", "action_profiles") and objectLabel as the concrete,
@@ -353,7 +353,7 @@ class TestSpec {
     [[nodiscard]] std::optional<const Packet *> getEgressPacket() const;
 
     /// @returns the list of traces that has been executed
-    [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> *getTraces() const;
+    [[nodiscard]] const std::vector<IR::Ptr<TraceEvent>> *getTraces() const;
 
     /// Priority definitions for LPM and ternary entries.
     static constexpr int NO_PRIORITY = -1;

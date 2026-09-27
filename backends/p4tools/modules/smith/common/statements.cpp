@@ -206,7 +206,7 @@ IR::Statement *StatementGenerator::genMethodCallExpression(const IR::PathExpress
     // all this boilerplate should be somewhere else...
     P4Scope::startLocalScope();
 
-    for (const auto *par : params) {
+    for (auto par : params) {
         IR::Argument *arg = nullptr;
         // TODO(fruffy): Fix the direction none issue here.
         if (!target().expressionGenerator().checkInputArg(par) &&
@@ -388,10 +388,10 @@ IR::SwitchStatement *StatementGenerator::genSwitchStatement() {
 
     // get the switch cases
     IR::Vector<IR::SwitchCase> switchCases;
-    for (const auto *tabProperty : tbl->properties->properties) {
+    for (auto tabProperty : tbl->properties->properties) {
         if (tabProperty->name.name == IR::TableProperties::actionsPropertyName) {
             const auto *property = tabProperty->value->to<IR::ActionList>();
-            for (const auto *action : property->actionList) {
+            for (auto action : property->actionList) {
                 cstring actName = action->getName();
                 auto *blkStat = genBlockStatement(false);
                 auto *switchCase = new IR::SwitchCase(new IR::PathExpression(actName), blkStat);

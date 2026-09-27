@@ -38,7 +38,7 @@ bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
     const auto &executionState = state.get();
 
     if (const auto *selectExpr = parserState->selectExpression->to<IR::SelectExpression>()) {
-        for (const auto *selectCase : selectExpr->selectCases) {
+        for (auto selectCase : selectExpr->selectCases) {
             const auto *decl = executionState.findDecl(selectCase->state)->getNode();
             decl->apply_visitor_preorder(*this);
         }
@@ -74,10 +74,10 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
             TableUtils::checkTableImmutability(*table, properties);
             auto tableActionList = TableUtils::buildTableActionList(*table);
             if (properties.tableIsImmutable) {
-                const auto *entries = table->getEntries();
+                auto entries = table->getEntries();
                 if (entries != nullptr) {
                     auto entryVector = entries->entries;
-                    for (const auto *entry : entryVector) {
+                    for (auto entry : entryVector) {
                         if (coverageOptions.coverTableEntries && entry->getSourceInfo().isValid()) {
                             coverableNodes.insert(entry);
                         }
@@ -95,7 +95,7 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                     actionType->apply_visitor_preorder(*this);
                 }
             }
-            const auto *defaultAction = table->getDefaultAction();
+            auto defaultAction = table->getDefaultAction();
             const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
             const auto *actionType = executionState.getP4Action(tableAction);
             actionType->apply_visitor_preorder(*this);

@@ -74,7 +74,7 @@ Bmv2TestBackend::Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
 TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
     const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
+    const std::vector<IR::Ptr<TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     return testInfo;
@@ -82,7 +82,7 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
 
 const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionState,
                                                 const Model *finalModel, const TestInfo &testInfo) {
-    const auto *ingressPayload = testInfo.inputPacket;
+    auto ingressPayload = testInfo.inputPacket;
     const auto *ingressPayloadMask = IR::Constant::get(IR::Type_Bits::get(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
@@ -101,7 +101,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser"_cs, 2);
         const auto &flatFields = executionState->getFlatFields(localMetadataVar, {});
         for (const auto &fieldRef : flatFields) {
-            const auto *fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
+            auto fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
             auto fieldString = fieldRef->toString();

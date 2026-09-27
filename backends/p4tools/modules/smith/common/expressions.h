@@ -58,15 +58,15 @@ class ExpressionGenerator : public Generator {
 
     static constexpr size_t MAX_DEPTH = 3;
 
-    static const IR::Type_Boolean *genBoolType();
+    static IR::Ptr<IR::Type_Boolean> genBoolType();
 
-    static const IR::Type_InfInt *genIntType();
+    static IR::Ptr<IR::Type_InfInt> genIntType();
 
     // isSigned, true -> int<>, false -> bit<>
-    [[nodiscard]] const IR::Type_Bits *genBitType(bool isSigned) const;
-    [[nodiscard]] const IR::Type *pickRndBaseType(const std::vector<int64_t> &type_probs) const;
+    [[nodiscard]] IR::Ptr<IR::Type_Bits> genBitType(bool isSigned) const;
+    [[nodiscard]] IR::Ptr<IR::Type> pickRndBaseType(const std::vector<int64_t> &type_probs) const;
 
-    [[nodiscard]] virtual const IR::Type *pickRndType(TyperefProbs type_probs);
+    [[nodiscard]] virtual IR::Ptr<IR::Type> pickRndType(TyperefProbs type_probs);
 
     static IR::BoolLiteral *genBoolLiteral();
 

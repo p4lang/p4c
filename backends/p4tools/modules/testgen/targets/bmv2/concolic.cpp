@@ -65,7 +65,7 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
         const auto *concatExpr = exprList.at(0);
         for (size_t idx = 1; idx < exprList.size(); idx++) {
             const auto *expr = exprList.at(idx);
-            const auto *newWidth =
+            auto newWidth =
                 IR::Type_Bits::get(concatExpr->type->width_bits() + expr->type->width_bits());
             concatExpr = new IR::Concat(newWidth, concatExpr, expr);
         }
@@ -108,8 +108,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
         const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
-         const auto *args = var->arguments;
-         const auto *checksumVar = args->at(0)->expression;
+         auto args = var->arguments;
+         auto checksumVar = args->at(0)->expression;
          if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
              TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
                                    checksumVar->node_type_name());
@@ -117,12 +117,10 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // Assign arguments to concrete variables and perform type checking.
          auto algo = Bmv2HashAlgorithm(args->at(1)->expression->checkedTo<IR::Constant>()->asInt());
          Model::ExpressionMap resolvedExpressions;
-         const auto *base =
-             finalModel.evaluate(args->at(2)->expression, true, &resolvedExpressions);
+         auto base = finalModel.evaluate(args->at(2)->expression, true, &resolvedExpressions);
          auto baseInt = IR::getBigIntFromLiteral(base);
-         const auto *dataExpr = args->at(3)->expression;
-         const auto *maxHash =
-             finalModel.evaluate(args->at(4)->expression, true, &resolvedExpressions);
+         auto dataExpr = args->at(3)->expression;
+         auto maxHash = finalModel.evaluate(args->at(4)->expression, true, &resolvedExpressions);
          auto maxHashInt = IR::getBigIntFromLiteral(maxHash);
 
          /// Flatten the data input and compute the byte array that will be used for
@@ -159,8 +157,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // We can not use resolvedConcolic variables here because there might be multiple resolved
          // expressions for a single concolic variable.
          for (const auto &variable : resolvedExpressions) {
-             const auto *varName = variable.first;
-             const auto *varExpr = variable.second;
+             auto varName = variable.first;
+             auto varExpr = variable.second;
              (*resolvedConcolicVariables)[varName] = varExpr;
          }
      }},
@@ -175,11 +173,11 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
         const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          // Assign arguments to concrete variables and perform type checking.
-         const auto *args = var->arguments;
-         const auto *checksumVar = args->at(0)->expression;
+         auto args = var->arguments;
+         auto checksumVar = args->at(0)->expression;
          auto algo = Bmv2HashAlgorithm(args->at(1)->expression->checkedTo<IR::Constant>()->asInt());
-         const auto *dataExpr = args->at(2)->expression;
-         const auto *checksumVarType = checksumVar->type;
+         auto dataExpr = args->at(2)->expression;
+         auto checksumVarType = checksumVar->type;
          // This is the maximum value this checksum can have.
          auto maxHashInt = IR::getMaxBvVal(checksumVarType);
 
@@ -212,8 +210,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // We can not use resolvedConcolic variables here because there might be multiple resolved
          // expressions for a single concolic variable.
          for (const auto &variable : resolvedExpressions) {
-             const auto *varName = variable.first;
-             const auto *varExpr = variable.second;
+             auto varName = variable.first;
+             auto varExpr = variable.second;
              (*resolvedConcolicVariables)[varName] = varExpr;
          }
      }},
@@ -224,11 +222,11 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
         const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          // Assign arguments to concrete variables and perform type checking.
-         const auto *args = var->arguments;
-         const auto *checksumVar = args->at(0)->expression;
+         auto args = var->arguments;
+         auto checksumVar = args->at(0)->expression;
          auto algo = Bmv2HashAlgorithm(args->at(1)->expression->checkedTo<IR::Constant>()->asInt());
-         const auto *dataExpr = args->at(2)->expression;
-         const auto *checksumVarType = checksumVar->type;
+         auto dataExpr = args->at(2)->expression;
+         auto checksumVarType = checksumVar->type;
          Model::ExpressionMap resolvedExpressions;
 
          /// Iterate through the data input and compute the byte array that will be used for
@@ -267,8 +265,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // We can not use resolvedConcolic variables here because there might be multiple resolved
          // expressions for a single concolic variable.
          for (const auto &variable : resolvedExpressions) {
-             const auto *varName = variable.first;
-             const auto *varExpr = variable.second;
+             auto varName = variable.first;
+             auto varExpr = variable.second;
              (*resolvedConcolicVariables)[varName] = varExpr;
          }
      }},

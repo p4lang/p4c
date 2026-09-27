@@ -84,7 +84,7 @@ bool TofinoTestBackend::printTestInfo(const ExecutionState *executionState,
 TestBackEnd::TestInfo TofinoTestBackend::produceTestInfo(
     const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
+    const std::vector<IR::Ptr<TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     if (outputPortExpr->is<IR::UninitializedTaintExpression>()) {

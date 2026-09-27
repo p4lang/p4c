@@ -48,10 +48,10 @@ const ProgramInfo *TableStepper::getProgramInfo() { return &stepper->programInfo
 
 ExprStepper::Result TableStepper::getResult() { return stepper->result; }
 
-const IR::StateVariable &TableStepper::getTableStateVariable(const IR::Type *type,
-                                                             const IR::P4Table *table, cstring name,
-                                                             std::optional<int> idx1_opt,
-                                                             std::optional<int> idx2_opt) {
+IR::StateVariable TableStepper::getTableStateVariable(const IR::Type *type,
+                                                      const IR::P4Table *table, cstring name,
+                                                      std::optional<int> idx1_opt,
+                                                      std::optional<int> idx2_opt) {
     // Mash the table name, the given name, and the optional indices together.
     // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
     // XXX can probably get away with this.
@@ -67,7 +67,7 @@ const IR::StateVariable &TableStepper::getTableStateVariable(const IR::Type *typ
     return ToolsVariables::getStateVariable(type, out.str());
 }
 
-const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
+IR::StateVariable TableStepper::getTableActionVar(const IR::P4Table *table) {
     auto numActions = table->getActionList()->size();
     size_t max = 255;
     BUG_CHECK(numActions < max, "Number of actions in the table (%1%) exceeds the maximum of %2%.",
@@ -75,15 +75,15 @@ const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *tabl
     return getTableStateVariable(IR::Type_Bits::get(8), table, "*action"_cs);
 }
 
-const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *table) {
+IR::StateVariable TableStepper::getTableResultVar(const IR::P4Table *table) {
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*result"_cs);
 }
 
-const IR::StateVariable &TableStepper::getActiveTableVar() {
+IR::StateVariable TableStepper::getActiveTableVar() {
     return ToolsVariables::getStateVariable(IR::Type::String::get(), "*active_table_var"_cs);
 }
 
-const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
+IR::StateVariable TableStepper::getTableHitVar(const IR::P4Table *table) {
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit"_cs);
 }
 
@@ -146,8 +146,8 @@ const IR::Expression *TableStepper::computeTargetMatchType(
     TESTGEN_UNIMPLEMENTED("Match type %s not implemented for table keys.", keyProperties.matchType);
 }
 
-const IR::Expression *TableStepper::computeHit(TableMatchMap *matches) {
-    const IR::Expression *hitCondition = IR::BoolLiteral::get(!properties.resolvedKeys.empty());
+IR::Ptr<IR::Expression> TableStepper::computeHit(TableMatchMap *matches) {
+    IR::Ptr<IR::Expression> hitCondition = IR::BoolLiteral::get(!properties.resolvedKeys.empty());
     for (auto keyProperties : properties.resolvedKeys) {
         hitCondition = computeTargetMatchType(keyProperties, matches, hitCondition);
     }
@@ -159,13 +159,13 @@ const IR::StringLiteral *TableStepper::getTableActionString(
     return IR::StringLiteral::get(actionCall->method->toString());
 }
 
-const IR::Expression *TableStepper::evalTableConstEntries() {
-    const IR::Expression *tableMissCondition = IR::BoolLiteral::get(true);
+IR::Ptr<IR::Expression> TableStepper::evalTableConstEntries() {
+    IR::Ptr<IR::Expression> tableMissCondition = IR::BoolLiteral::get(true);
 
-    const auto *key = table->getKey();
+    auto key = table->getKey();
     BUG_CHECK(key != nullptr, "An empty key list should have been handled earlier.");
 
-    const auto *entries = table->getEntries();
+    auto entries = table->getEntries();
     // Sometimes, there are no entries. Just return.
     if (entries == nullptr) {
         return tableMissCondition;
@@ -175,7 +175,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
 
     // Sort entries if one of the key contains an LPM match.
     for (size_t idx = 0; idx < key->keyElements.size(); ++idx) {
-        const auto *keyElement = key->keyElements.at(idx);
+        auto keyElement = key->keyElements.at(idx);
         if (keyElement->matchType->path->toString() == P4Constants::MATCH_KIND_LPM) {
             std::sort(entryVector.begin(), entryVector.end(), [idx](auto &&PH1, auto &&PH2) {
                 return TableUtils::compareLPMEntries(std::forward<decltype(PH1)>(PH1),
@@ -185,14 +185,14 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         }
     }
 
-    for (const auto *entry : entryVector) {
-        const auto *action = entry->getAction();
+    for (auto entry : entryVector) {
+        auto action = entry->getAction();
         const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
         const auto *actionType = stepper->state.getP4Action(tableAction);
         auto &nextState = stepper->state.clone();
         nextState.markVisited(entry);
         // Compute the table key for a constant entry
-        const auto *hitCondition = TableUtils::computeEntryMatch(*table, *entry, *key);
+        IR::Ptr<IR::Expression> hitCondition = TableUtils::computeEntryMatch(*table, *entry, *key);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -215,7 +215,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         bool isFirstKey = true;
         const auto &keyElements = key->keyElements;
 
-        for (const auto *keyElement : keyElements) {
+        for (auto keyElement : keyElements) {
             if (isFirstKey) {
                 tableStream << " | Key(s): ";
             } else {
@@ -225,9 +225,9 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
             isFirstKey = false;
         }
         tableStream << " | Chosen action: " << tableAction->toString();
-        const auto *args = tableAction->arguments;
+        auto args = tableAction->arguments;
         bool isFirstArg = true;
-        for (const auto *arg : *args) {
+        for (auto arg : *args) {
             if (isFirstArg) {
                 tableStream << " | Arg(s): ";
             } else {
@@ -262,7 +262,7 @@ void TableStepper::setTableDefaultEntries(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (const auto *parameter : *parameters) {
+        for (auto parameter : *parameters) {
             // Synthesize a variable constant here that corresponds to a control plane argument.
             const auto &actionArg = ControlPlaneState::getTableActionArgument(
                 properties.tableName, actionName, parameter->name, parameter->type);
@@ -309,12 +309,12 @@ void TableStepper::setTableDefaultEntries(
 
 void TableStepper::evalTableControlEntries(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
-    const auto *key = table->getKey();
+    auto key = table->getKey();
     BUG_CHECK(key != nullptr, "An empty key list should have been handled earlier.");
 
     // First, we compute the hit condition to trigger this particular action call.
     TableMatchMap matches;
-    const auto *hitCondition = computeHit(&matches);
+    auto hitCondition = computeHit(&matches);
 
     // It is possible we hit the same table twice for some targets. Our current framework does not
     // support multiple entries that are executed at different times when stepping through the same
@@ -353,7 +353,7 @@ void TableStepper::evalTableControlEntries(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (const auto *parameter : *parameters) {
+        for (auto parameter : *parameters) {
             // Synthesize a variable constant here that corresponds to a control plane argument.
             const auto &actionArg = ControlPlaneState::getTableActionArgument(
                 properties.tableName, actionName, parameter->name, parameter->type);
@@ -399,7 +399,7 @@ void TableStepper::evalTableControlEntries(
         bool isFirstKey = true;
         const auto &keyElements = key->keyElements;
 
-        for (const auto *keyElement : keyElements) {
+        for (auto keyElement : keyElements) {
             if (isFirstKey) {
                 tableStream << " | Key(s): ";
             } else {
@@ -429,7 +429,7 @@ void TableStepper::evalTaintedTable() {
     auto currentTaint = stepper->state.getProperty<bool>("inUndefinedState"_cs);
     replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState"_cs, true));
 
-    const auto *entries = table->getEntries();
+    auto entries = table->getEntries();
     // Sometimes, there are no entries. Just return.
     if (entries == nullptr) {
         return;
@@ -437,7 +437,7 @@ void TableStepper::evalTaintedTable() {
     auto entryVector = entries->entries;
 
     for (const auto &entry : entryVector) {
-        const auto *action = entry->getAction();
+        auto action = entry->getAction();
         const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     }
@@ -465,7 +465,7 @@ bool TableStepper::resolveTableKeys() {
     const IR::Key *key = nullptr;
     for (propertyIdx = 0; propertyIdx < static_cast<int>(table->properties->properties.size());
          ++propertyIdx) {
-        const auto *property = table->properties->properties.at(propertyIdx);
+        auto property = table->properties->properties.at(propertyIdx);
         if (property->name == "key") {
             key = property->value->checkedTo<IR::Key>();
             break;
@@ -478,11 +478,11 @@ bool TableStepper::resolveTableKeys() {
 
     auto keyElements = key->keyElements;
     for (size_t keyIdx = 0; keyIdx < keyElements.size(); ++keyIdx) {
-        const auto *keyElement = keyElements.at(keyIdx);
-        const auto *keyExpr = keyElement->expression;
+        auto keyElement = keyElements.at(keyIdx);
+        auto keyExpr = keyElement->expression;
         if (!SymbolicEnv::isSymbolicValue(keyExpr)) {
             // Resolve all keys in the table.
-            const auto *const p4Table = table;
+            auto p4Table = table;
             ExprStepper::stepToSubexpr(
                 keyExpr, stepper->result, stepper->state,
                 [p4Table, propertyIdx, keyIdx](const Continuation::Parameter *v) {
@@ -491,7 +491,7 @@ bool TableStepper::resolveTableKeys() {
                     auto *clonedTableProperties = p4Table->properties->clone();
                     auto *properties = &clonedTableProperties->properties;
                     auto *propertyValue = properties->at(propertyIdx)->clone();
-                    const auto *key = clonedTable->getKey();
+                    auto key = clonedTable->getKey();
                     CHECK_NULL(key);
                     auto *newKey = key->clone();
                     auto *newKeyElement = newKey->keyElements[keyIdx]->clone();
@@ -507,7 +507,7 @@ bool TableStepper::resolveTableKeys() {
             return true;
         }
 
-        const auto *nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
+        auto nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
         // Some hidden tables do not have any key name annotations.
         BUG_CHECK(nameAnnot != nullptr || properties.tableIsImmutable,
                   "Non-constant table key without an annotation");
@@ -529,8 +529,8 @@ bool TableStepper::resolveTableKeys() {
     return false;
 }
 
-void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableMissCondition) {
-    const auto *defaultAction = table->getDefaultAction();
+void TableStepper::addDefaultAction(std::optional<IR::Ptr<IR::Expression>> tableMissCondition) {
+    auto defaultAction = table->getDefaultAction();
     const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
     const auto *actionType = stepper->state.getP4Action(tableAction);
     auto &nextState = stepper->state.clone();
@@ -565,7 +565,7 @@ void TableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
+    std::optional<IR::Ptr<IR::Expression>> tableMissCondition = std::nullopt;
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {
         // If the entries properties is constant it means the entries are fixed.
@@ -607,7 +607,7 @@ TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
     : stepper(stepper), table(table) {
     properties.tableName = table->controlPlaneName();
     for (size_t index = 0; index < table->getActionList()->size(); index++) {
-        const auto *action = table->getActionList()->actionList.at(index);
+        auto action = table->getActionList()->actionList.at(index);
         properties.actionIdMap.emplace(action->controlPlaneName(), index);
     }
 

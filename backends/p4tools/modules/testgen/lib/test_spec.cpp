@@ -52,8 +52,8 @@ const IR::Constant *Packet::getEvaluatedPayload() const {
 }
 
 const Packet *Packet::evaluate(const Model &model, bool doComplete) const {
-    const auto *newPayload = model.evaluate(payload, true);
-    const auto *newPayloadIgnoreMask = model.evaluate(payloadIgnoreMask, doComplete);
+    auto newPayload = model.evaluate(payload, true);
+    auto newPayloadIgnoreMask = model.evaluate(payloadIgnoreMask, doComplete);
     return new Packet(port, newPayload, newPayloadIgnoreMask);
 }
 
@@ -101,7 +101,8 @@ const ActionCall *ActionCall::evaluate(const Model &model, bool doComplete) cons
     std::vector<ActionArg> evaluatedArgs;
     evaluatedArgs.reserve(args.size());
     for (const auto &actionArg : args) {
-        evaluatedArgs.emplace_back(*actionArg.evaluate(model, doComplete));
+        IR::Ptr<ActionArg> evaluatedArg = actionArg.evaluate(model, doComplete);
+        evaluatedArgs.emplace_back(*evaluatedArg);
     }
     return new ActionCall(identifier, action, evaluatedArgs);
 }
@@ -136,8 +137,8 @@ const IR::Constant *Ternary::getEvaluatedMask() const {
 }
 
 const Ternary *Ternary::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(value, doComplete);
-    const auto *evaluatedMask = model.evaluate(mask, doComplete);
+    auto evaluatedValue = model.evaluate(value, doComplete);
+    auto evaluatedMask = model.evaluate(mask, doComplete);
     return new Ternary(getKey(), evaluatedValue, evaluatedMask);
 }
 
@@ -165,8 +166,8 @@ const IR::Constant *LPM::getEvaluatedPrefixLength() const {
 }
 
 const LPM *LPM::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(value, doComplete);
-    const auto *evaluatedPrefixLength = model.evaluate(prefixLength, doComplete);
+    auto evaluatedValue = model.evaluate(value, doComplete);
+    auto evaluatedPrefixLength = model.evaluate(prefixLength, doComplete);
     return new LPM(getKey(), evaluatedValue, evaluatedPrefixLength);
 }
 
@@ -184,7 +185,7 @@ const IR::Constant *Exact::getEvaluatedValue() const {
 }
 
 const Exact *Exact::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(value, doComplete);
+    auto evaluatedValue = model.evaluate(value, doComplete);
     return new Exact(getKey(), evaluatedValue);
 }
 
@@ -212,7 +213,7 @@ const TableRule *TableRule::evaluate(const Model &model, bool doComplete) const 
         const auto *evaluatedMatch = match->evaluate(model, doComplete)->checkedTo<TableMatch>();
         evaluatedMatches[name] = evaluatedMatch;
     }
-    const auto *evaluatedAction = action.evaluate(model, doComplete);
+    IR::Ptr<ActionCall> evaluatedAction = action.evaluate(model, doComplete);
     return new TableRule(evaluatedMatches, priority, *evaluatedAction, ttl);
 }
 
@@ -249,13 +250,13 @@ void TableConfig::addTableProperty(cstring propertyName, const TestObject *prope
 const TableConfig *TableConfig::evaluate(const Model &model, bool doComplete) const {
     std::vector<TableRule> evaluatedRules;
     for (const auto &rule : rules) {
-        const auto *evaluatedRule = rule.evaluate(model, doComplete);
+        IR::Ptr<TableRule> evaluatedRule = rule.evaluate(model, doComplete);
         evaluatedRules.emplace_back(*evaluatedRule);
     }
     TestObjectMap evaluatedProperties;
     for (const auto &propertyTuple : tableProperties) {
         auto name = propertyTuple.first;
-        const auto *property = propertyTuple.second;
+        auto property = propertyTuple.second;
         // This is a lambda function that applies the visitor to each variant.
         const auto *evaluatedProperty = property->evaluate(model, doComplete);
         evaluatedProperties.emplace(name, evaluatedProperty);
@@ -268,7 +269,7 @@ const TableConfig *TableConfig::evaluate(const Model &model, bool doComplete) co
  * ========================================================================================= */
 
 TestSpec::TestSpec(Packet ingressPacket, std::optional<Packet> egressPacket,
-                   std::vector<std::reference_wrapper<const TraceEvent>> traces)
+                   std::vector<IR::Ptr<TraceEvent>> traces)
     : ingressPacket(std::move(ingressPacket)),
       egressPacket(std::move(egressPacket)),
       traces(std::move(traces)) {}
@@ -282,9 +283,7 @@ std::optional<const Packet *> TestSpec::getEgressPacket() const {
 
 const Packet *TestSpec::getIngressPacket() const { return &ingressPacket; }
 
-const std::vector<std::reference_wrapper<const TraceEvent>> *TestSpec::getTraces() const {
-    return &traces;
-}
+const std::vector<IR::Ptr<TraceEvent>> *TestSpec::getTraces() const { return &traces; }
 
 void TestSpec::addTestObject(cstring category, cstring objectLabel, const TestObject *object) {
     testObjects[category][objectLabel] = object;

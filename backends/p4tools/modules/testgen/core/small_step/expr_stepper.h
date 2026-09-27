@@ -57,7 +57,7 @@ class ExprStepper : public AbstractStepper {
                                        const IR::Vector<IR::Argument> &args) const {
             // Extern functions and internal methods use a placeholder receiver, such as "*method".
             // This placeholder also has an extern type.
-            const auto *externType = IR::getExternType(externObjectRef.type);
+            IR::Ptr<IR::Type_Extern> externType = IR::getExternType(externObjectRef.type);
             BUG_CHECK(externType != nullptr,
                       "Not a valid extern: %1% with member %2%. Type is %3%.", externObjectRef,
                       methodName, externObjectRef.type->node_type_name());
@@ -174,13 +174,13 @@ class ExprStepper : public AbstractStepper {
         int advanceSize;
 
         /// The condition that needs to be satisfied to successfully advance the parser cursor.
-        const IR::Expression *advanceCond;
+        IR::Ptr<IR::Expression> advanceCond;
 
         /// Specifies at what point the parser cursor advancement will fail.
         int advanceFailSize;
 
         /// The condition that needs to be satisfied for the advance/extract to be rejected.
-        const IR::Expression *advanceFailCond;
+        IR::Ptr<IR::Expression> advanceFailCond;
     };
 
     /// Calculates the conditions that need to be satisfied for a successful parser advance.
@@ -199,7 +199,7 @@ class ExprStepper : public AbstractStepper {
     /// Iterate over the fields in @param flatFields and set the corresponding values in
     /// @param nextState. If there is a varbit, assign the @param varbitFieldSize as size to
     /// it. @returns the list of members and their assigned values.
-    static std::vector<std::pair<IR::StateVariable, const IR::Expression *>> setFields(
+    static std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> setFields(
         ExecutionState &nextState, const std::vector<IR::StateVariable> &flatFields,
         int varBitFieldSize);
     /// This function call is used in member expressions to cleanly resolve hit, miss, and action

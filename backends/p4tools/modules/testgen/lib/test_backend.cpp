@@ -96,7 +96,7 @@ bool TestBackEnd::run(const FinalState &state) {
 
         outputPacketExpr->apply(concolicResolver);
         outputPortExpr->apply(concolicResolver);
-        for (const auto *assert : executionState->getPathConstraint()) {
+        for (const auto &assert : executionState->getPathConstraint()) {
             CHECK_NULL(assert);
             assert->apply(concolicResolver);
         }
@@ -109,7 +109,7 @@ bool TestBackEnd::run(const FinalState &state) {
             testCount++;
             return needsToTerminate(testCount);
         }
-        auto replacedState = concolicOptState.value().get();
+        const auto &replacedState = concolicOptState.value();
         executionState = replacedState.getExecutionState();
         outputPacketExpr = executionState->getPacketBuffer();
         const auto &finalModel = replacedState.getFinalModel();
@@ -129,7 +129,8 @@ bool TestBackEnd::run(const FinalState &state) {
             testCount++;
             return needsToTerminate(testCount);
         }
-        const auto *testSpec = createTestSpec(executionState, &finalModel, testInfo);
+        std::unique_ptr<const TestSpec> testSpec(
+            createTestSpec(executionState, &finalModel, testInfo));
 
         // Commit an update to the visited nodes.
         // Only do this once we are sure we are generating a test.
@@ -161,10 +162,10 @@ bool TestBackEnd::run(const FinalState &state) {
         // Output the test.
         Util::withTimer("backend", [this, &testSpec, &selectedBranches] {
             if (testWriter->isInFileMode()) {
-                testWriter->writeTestToFile(testSpec, selectedBranches, testCount, coverage);
+                testWriter->writeTestToFile(testSpec.get(), selectedBranches, testCount, coverage);
             } else {
                 auto testOpt =
-                    testWriter->produceTest(testSpec, selectedBranches, testCount, coverage);
+                    testWriter->produceTest(testSpec.get(), selectedBranches, testCount, coverage);
                 if (!testOpt.has_value()) {
                     BUG("Failed to produce test.");
                 }
@@ -188,13 +189,14 @@ bool TestBackEnd::run(const FinalState &state) {
 
 TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const ExecutionState *executionState, const Model *finalModel,
-    const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
+    const IR::Expression *outputPacketExpression, const IR::Expression *outputPortExpr,
+    const std::vector<IR::Ptr<TraceEvent>> *programTraces) {
+    IR::Ptr<IR::Expression> outputPacketExpr = outputPacketExpression;
     // Evaluate all the important expressions necessary for program execution by using the
     // final model.
     int calculatedPacketSize =
         IR::getIntFromLiteral(finalModel->evaluate(ExecutionState::getInputPacketSizeVar(), true));
-    const auto *inputPacketExpr = executionState->getInputPacket();
+    IR::Ptr<IR::Expression> inputPacketExpr = executionState->getInputPacket();
     // The payload fills the space between the minimum input size needed and the symbolically
     // calculated packet size.
     const auto *payloadExpr = finalModel->get(&PacketVars::PAYLOAD_SYMBOL, false);
@@ -205,14 +207,14 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
                                                              payloadExpr->type->width_bits()),
                                           outputPacketExpr, payloadExpr);
     }
-    const auto *inputPacket = finalModel->evaluate(inputPacketExpr, true);
-    const auto *outputPacket = finalModel->evaluate(outputPacketExpr, true);
-    const auto *inputPort =
+    auto inputPacket = finalModel->evaluate(inputPacketExpr, true);
+    auto outputPacket = finalModel->evaluate(outputPacketExpr, true);
+    auto inputPort =
         finalModel->evaluate(executionState->get(getProgramInfo().getTargetInputPortVar()), true);
 
-    const auto *outputPortVar = finalModel->evaluate(outputPortExpr, true);
+    auto outputPortVar = finalModel->evaluate(outputPortExpr, true);
     // Build the taint mask by dissecting the program packet variable
-    const auto *evalMask = Taint::buildTaintMask(finalModel, outputPacketExpr);
+    auto evalMask = Taint::buildTaintMask(finalModel, outputPacketExpr);
 
     // Get the input/output port integers.
     auto inputPortInt = IR::getIntFromLiteral(inputPort);

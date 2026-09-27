@@ -58,9 +58,9 @@ const IR::PathExpression *SharedPnaProgramInfo::getBlockParam(cstring blockLabel
     const auto *typeDecl = programmableBlocks->at(blockLabel);
     const auto *applyBlock = typeDecl->to<IR::IApply>();
     CHECK_NULL(applyBlock);
-    const auto *params = applyBlock->getApplyParameters();
-    const auto *param = params->getParameter(paramIndex);
-    const auto *paramType = param->type;
+    auto params = applyBlock->getApplyParameters();
+    auto param = params->getParameter(paramIndex);
+    auto paramType = param->type;
     // For convenience, resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
         paramType = resolveProgramType(&getP4Program(), tn);

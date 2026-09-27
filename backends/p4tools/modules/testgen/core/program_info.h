@@ -41,7 +41,7 @@ class ProgramInfo : public ICastable {
     std::vector<Continuation::Command> pipelineSequence;
 
     /// The constraints imposed by the target.
-    std::optional<const IR::Expression *> targetConstraints = std::nullopt;
+    std::optional<IR::Ptr<IR::Expression>> targetConstraints = std::nullopt;
 
     /// Maps the programmable blocks in the P4 program to their canonical counterpart.
     ordered_map<cstring, cstring> blockMap;
@@ -69,7 +69,7 @@ class ProgramInfo : public ICastable {
 
     /// @returns the constraints of this target.
     /// These constraints can influence the execution of the interpreter
-    [[nodiscard]] std::optional<const IR::Expression *> getTargetConstraints() const;
+    [[nodiscard]] std::optional<IR::Ptr<IR::Expression>> getTargetConstraints() const;
 
     /// @returns the metadata member corresponding to the ingress port
     [[nodiscard]] virtual IR::StateVariable getTargetInputPortVar() const = 0;

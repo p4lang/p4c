@@ -33,7 +33,7 @@ class Bmv2V1ModelExprStepper : public ExprStepper {
     /// associated with @ref unless a value contained in the Type_StructLike type of ref has an
     /// annotation associated with it. If the annotation index matches @param recirculateIndex, the
     /// reference is not reset.
-    void resetPreservingFieldList(ExecutionState &nextState, const IR::PathExpression *ref,
+    void resetPreservingFieldList(ExecutionState &nextState, IR::Ptr<IR::PathExpression> ref,
                                   uint64_t recirculateIndex) const;
 
     /// Helper function, which is triggered when clone was called in the P4 program.

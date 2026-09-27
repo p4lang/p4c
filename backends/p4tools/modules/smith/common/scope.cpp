@@ -52,7 +52,7 @@ void P4Scope::startLocalScope() { scope.push_back(new IR::Vector<IR::Node>()); }
 void P4Scope::endLocalScope() {
     IR::Vector<IR::Node> *localScope = scope.back();
 
-    for (const auto *node : *localScope) {
+    for (auto node : *localScope) {
         if (const auto *decl = node->to<IR::Declaration_Variable>()) {
             deleteLval(decl->type, decl->name.name);
         } else if (const auto *dc = node->to<IR::Declaration_Constant>()) {
@@ -68,7 +68,7 @@ void P4Scope::endLocalScope() {
 }
 
 void addCompoundLvals(const IR::Type_StructLike *sl_type, cstring sl_name, bool read_only) {
-    for (const auto *field : sl_type->fields) {
+    for (auto field : sl_type->fields) {
         std::stringstream ss;
         ss.str("");
         ss << sl_name << "." << field->name.name;
@@ -78,7 +78,7 @@ void addCompoundLvals(const IR::Type_StructLike *sl_type, cstring sl_name, bool 
 }
 
 void deleteCompoundLvals(const IR::Type_StructLike *sl_type, cstring sl_name) {
-    for (const auto *field : sl_type->fields) {
+    for (auto field : sl_type->fields) {
         std::stringstream ss;
         ss.str("");
         ss << sl_name << "." << field->name.name;
@@ -331,7 +331,7 @@ const IR::Type_Bits *P4Scope::pickDeclaredBitType(bool must_write) {
 std::vector<const IR::Type_Declaration *> P4Scope::getFilteredDecls(std::set<cstring> filter) {
     std::vector<const IR::Type_Declaration *> ret;
     for (auto *subScope : scope) {
-        for (const auto *node : *subScope) {
+        for (auto node : *subScope) {
             cstring name = node->node_type_name();
             if (filter.find(name) == filter.end()) {
                 if (const auto *decl = node->to<IR::Type_Declaration>()) {
@@ -347,7 +347,7 @@ std::set<const IR::P4Table *> *P4Scope::getCallableTables() { return &callableTa
 
 const IR::Type_Declaration *P4Scope::getTypeByName(cstring name) {
     for (auto *subScope : scope) {
-        for (const auto *node : *subScope) {
+        for (auto node : *subScope) {
             if (const auto *decl = node->to<IR::Type_Declaration>()) {
                 if (decl->name.name == name) {
                     return decl;

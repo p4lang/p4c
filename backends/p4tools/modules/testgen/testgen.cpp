@@ -193,8 +193,9 @@ std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view
     }
 
     const auto *testgenCompilerResult =
-        compilerResultOpt.value().get().checkedTo<TestgenCompilerResult>();
-    const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
+        compilerResultOpt.value()->checkedTo<TestgenCompilerResult>();
+    std::unique_ptr<const ProgramInfo> programInfo(
+        TestgenTarget::produceProgramInfo(*testgenCompilerResult));
     if (programInfo == nullptr || errorCount() > 0) {
         error("P4Testgen encountered errors during preprocessing.");
         return std::nullopt;
@@ -222,7 +223,8 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
     // Make sure the input result corresponds to the result we expect.
     const auto *testgenCompilerResult = compilerResult.checkedTo<TestgenCompilerResult>();
 
-    const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
+    std::unique_ptr<const ProgramInfo> programInfo(
+        TestgenTarget::produceProgramInfo(*testgenCompilerResult));
     if (programInfo == nullptr || errorCount() > 0) {
         error("P4Testgen encountered errors during preprocessing.");
         return EXIT_FAILURE;

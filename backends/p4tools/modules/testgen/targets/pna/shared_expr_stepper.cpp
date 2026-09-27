@@ -60,7 +60,7 @@ const ExprStepper::ExternMethodImpls<SharedPnaExprStepper>
          [](const ExternInfo &externInfo, SharedPnaExprStepper &stepper) {
              auto &nextState = stepper.state.clone();
 
-             const auto *destPort = externInfo.externArguments.at(0)->expression;
+             auto destPort = externInfo.externArguments.at(0)->expression;
              // TODO: Frontload this in the expression stepper for method call expressions.
              if (!SymbolicEnv::isSymbolicValue(destPort)) {
                  // Evaluate the condition.
@@ -109,8 +109,8 @@ const ExprStepper::ExternMethodImpls<SharedPnaExprStepper>
          {"direction"_cs, "n2h_value"_cs, "h2n_value"_cs},
          [](const ExternInfo &externInfo, SharedPnaExprStepper &stepper) {
              for (size_t idx = 0; idx < externInfo.externArguments.size(); ++idx) {
-                 const auto *arg = externInfo.externArguments.at(idx);
-                 const auto *argExpr = arg->expression;
+                 auto arg = externInfo.externArguments.at(idx);
+                 auto argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
@@ -128,9 +128,9 @@ const ExprStepper::ExternMethodImpls<SharedPnaExprStepper>
                      return;
                  }
              }
-             const auto *directionVar = externInfo.externArguments.at(0)->expression;
-             const auto *n2hValue = externInfo.externArguments.at(1)->expression;
-             const auto *h2nValue = externInfo.externArguments.at(2)->expression;
+             auto directionVar = externInfo.externArguments.at(0)->expression;
+             auto n2hValue = externInfo.externArguments.at(1)->expression;
+             auto h2nValue = externInfo.externArguments.at(2)->expression;
              if (Taint::hasTaint(directionVar)) {
                  auto &taintedState = stepper.state.clone();
                  taintedState.replaceTopBody(

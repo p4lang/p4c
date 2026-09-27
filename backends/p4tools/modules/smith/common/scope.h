@@ -53,7 +53,7 @@ struct Properties {
     size_t depth = 0;
     // This means we are in a block that returns.
     // We need to return an expression with the specified type.
-    const IR::Type *ret_type = nullptr;
+    IR::Ptr<IR::Type> ret_type = nullptr;
     Properties() = default;
 };
 
@@ -116,7 +116,7 @@ class P4Scope {
         std::vector<const T *> ret;
 
         for (auto *subScope : scope) {
-            for (const auto *node : *subScope) {
+            for (auto node : *subScope) {
                 if (const T *tmpObj = node->to<T>()) {
                     ret.push_back(tmpObj);
                 }

@@ -54,10 +54,14 @@ MidEnd::MidEnd(const CompilerOptions & /*options*/) {
 #endif
 }
 
-Visitor *MidEnd::mkConvertEnums() { return new P4::ConvertEnums(&typeMap, mkConvertEnumsPolicy()); }
+Visitor *MidEnd::mkConvertEnums() {
+    enumPolicies.emplace_back(mkConvertEnumsPolicy());
+    return new P4::ConvertEnums(&typeMap, enumPolicies.back().get());
+}
 
 Visitor *MidEnd::mkConvertErrors() {
-    return new P4::ConvertErrors(&typeMap, mkConvertErrorPolicy());
+    errorPolicies.emplace_back(mkConvertErrorPolicy());
+    return new P4::ConvertErrors(&typeMap, errorPolicies.back().get());
 }
 
 Visitor *MidEnd::mkConvertKeys() {

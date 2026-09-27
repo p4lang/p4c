@@ -65,7 +65,7 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo,
 TestBackEnd::TestInfo PnaTestBackend::produceTestInfo(
     const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
+    const std::vector<IR::Ptr<TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     return testInfo;
@@ -76,7 +76,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     // Create a testSpec.
     TestSpec *testSpec = nullptr;
 
-    const auto *ingressPayload = testInfo.inputPacket;
+    auto ingressPayload = testInfo.inputPacket;
     const auto *ingressPayloadMask = IR::Constant::get(IR::Type_Bits::get(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
@@ -94,7 +94,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
         const auto *localMetadataVar = pnaProgInfo->getBlockParam("MainParserT"_cs, 2);
         const auto &flatFields = executionState->getFlatFields(localMetadataVar, {});
         for (const auto &fieldRef : flatFields) {
-            const auto *fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
+            auto fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
             auto fieldString = fieldRef->toString();

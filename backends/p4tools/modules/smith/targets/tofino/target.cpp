@@ -331,7 +331,7 @@ IR::P4Parser *TofinoTnaSmithTarget::generateIngressParserBlock() const {
     auto *tpParser = new IR::Type_Parser("SwitchIngressParser", parList);
 
     // Add params to the parser scope.
-    for (const auto *param : parList->parameters) {
+    for (auto param : parList->parameters) {
         P4Scope::addToScope(param);
         // we only add values that are not read-only, to the modifiable types
         if (param->direction == IR::Direction::In) {
@@ -406,7 +406,7 @@ IR::P4Control *TofinoTnaSmithTarget::generateIngressBlock() const {
     auto *typeCtrl = new IR::Type_Control("ingress", parList);
 
     // add to the scope
-    for (const auto *param : parList->parameters) {
+    for (auto param : parList->parameters) {
         P4Scope::addToScope(param);
         // add to the name_2_type
         // only add values that are !read-only to the modifiable types
