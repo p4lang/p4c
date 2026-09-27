@@ -74,11 +74,15 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
 };
 
 class FrontEnd {
+    std::shared_ptr<FrontEndPolicy> defaultPolicy;
     FrontEndPolicy *policy;
     std::vector<DebugHook> hooks;
 
  public:
-    FrontEnd() : FrontEnd(new FrontEndPolicy()) {}
+    FrontEnd()
+        : defaultPolicy(std::make_shared<FrontEndPolicy>()),
+          policy(defaultPolicy.get()),
+          hooks(policy->getDebugHooks()) {}
     explicit FrontEnd(FrontEndPolicy *policy) : policy(policy), hooks(policy->getDebugHooks()) {}
 
     void addDebugHook(const DebugHook &hook) { hooks.push_back(hook); }
