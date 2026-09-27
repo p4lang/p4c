@@ -58,10 +58,12 @@
 namespace P4::P4Test {
 
 class SkipControls : public P4::ActionSynthesisPolicy {
-    const std::set<cstring> *skip;
+    std::shared_ptr<const std::set<cstring>> skip;
 
  public:
-    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    explicit SkipControls(std::shared_ptr<const std::set<cstring>> skip) : skip(skip) {
+        CHECK_NULL(skip);
+    }
     bool convert(const Visitor::Context *, const IR::P4Control *control) override {
         if (skip->find(control->name) != skip->end()) return false;
         return true;
@@ -76,7 +78,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     setName("MidEnd");
 
-    auto v1controls = new std::set<cstring>();
+    auto v1controls = std::make_shared<std::set<cstring>>();
     auto defUse = new P4::ComputeDefUse;
     ParserConfig config;
 
@@ -136,8 +138,8 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          new P4::MoveDeclarations(),  // more may have been introduced
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
-             const auto *toplevel = evaluator->getToplevelBlock();
-             const auto *main = toplevel->getMain();
+             auto toplevel = evaluator->getToplevelBlock();
+             auto main = toplevel->getMain();
              if (main == nullptr) {
                  // nothing further to do.
                  return root;

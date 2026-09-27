@@ -33,8 +33,10 @@ void IR::Node::traceCreation() const {
     if (id == 279493)
         raise(SIGINT);
     */
-    LOG5("Created node " << id);
+    LOG5("Created node " << id << '(' << clone_id << ')' << dbheap());
 }
+
+IR::Node::~Node() { LOG5("Destroy node " << id << '(' << clone_id << ')' << dbheap()); }
 
 int IR::Node::currentId = 0;
 

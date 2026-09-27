@@ -64,13 +64,14 @@ IR::Vector<IR::Annotation> FlattenHeader::mergeAnnotations() const {
 }
 
 /* static */
-const IR::Type_Header *FlattenHeader::flatten(P4::TypeMap *typeMap,
-                                              const IR::Type_Header *headerType) {
-    auto flattenedHeader = headerType->clone();
+IR::Ptr<IR::Type_Header> FlattenHeader::flatten(P4::TypeMap *typeMap,
+                                                const IR::Type_Header *headerType) {
+    IR::MutablePtr<IR::Type_Header> flattenedHeader = headerType->clone();
     flattenedHeader->fields.clear();
     FlattenHeader flattener(typeMap, flattenedHeader);
     flattener.doFlatten(headerType);
-    return flattener.needsFlattening ? flattenedHeader : headerType;
+    if (flattener.needsFlattening) return flattenedHeader;
+    return headerType;
 }
 
 }  // namespace ControlPlaneAPI

@@ -13,7 +13,7 @@ using namespace literals;
 bool ComplexValues::isNestedStruct(const IR::Type *type) const {
     if (!type->is<IR::Type_Struct>()) return false;
     auto st = type->to<IR::Type_Struct>();
-    for (const auto *f : st->fields) {
+    for (const IR::StructField *f : st->fields) {
         auto ftype = typeMap->getType(f, true);
         if (ftype->is<IR::Type_StructLike>() || ftype->is<IR::Type_Tuple>() ||
             ftype->is<IR::Type_Array>()) {
@@ -28,16 +28,16 @@ template <class T>
 void ComplexValues::explode(std::string_view prefix, const IR::Type_Struct *type, FieldsMap *map,
                             IR::Vector<T> *result) {
     CHECK_NULL(type);
-    for (const auto *f : type->fields) {
+    for (const IR::StructField *f : type->fields) {
         std::string fname = absl::StrCat(prefix, "_", f->name);
         auto ftype = typeMap->getType(f, true);
         if (isNestedStruct(ftype)) {
-            auto submap = new FieldsMap(ftype);
+            auto submap = std::make_shared<FieldsMap>(ftype);
             map->members.emplace(f->name.name, submap);
-            explode(fname, ftype->to<IR::Type_Struct>(), submap, result);
+            explode(fname, ftype->to<IR::Type_Struct>(), submap.get(), result);
         } else {
             cstring newName = nameGen.newName(fname);
-            auto comp = new FinalName(newName);
+            auto comp = std::make_shared<FinalName>(newName);
             map->members.emplace(f->name.name, comp);
             auto clone = new IR::Declaration_Variable(IR::ID(newName), ftype->getP4Type());
             LOG3("Created " << clone);
@@ -53,15 +53,17 @@ const IR::Node *RemoveNestedStructs::postorder(IR::Declaration_Variable *decl) {
     BUG_CHECK(decl->initializer == nullptr, "%1%: did not expect an initializer", decl);
     BUG_CHECK(!decl->hasAnnotations() || decl->hasOnlyAnnotation(IR::Annotation::nameAnnotation),
               "%1%: don't know how to handle variable annotations other than @name", decl);
-    auto map = new ComplexValues::FieldsMap(type);
+    auto map = std::make_shared<ComplexValues::FieldsMap>(type);
     values.values.emplace(getOriginal<IR::Declaration_Variable>(), map);
     if (isInContext<IR::Function>()) {
         auto result = new IR::IndexedVector<IR::StatOrDecl>();
-        values.explode(decl->getName().string_view(), type->to<IR::Type_Struct>(), map, result);
+        values.explode(decl->getName().string_view(), type->to<IR::Type_Struct>(), map.get(),
+                       result);
         return result;
     } else {
         auto result = new IR::Vector<IR::Declaration>();
-        values.explode(decl->getName().string_view(), type->to<IR::Type_Struct>(), map, result);
+        values.explode(decl->getName().string_view(), type->to<IR::Type_Struct>(), map.get(),
+                       result);
         return result;
     }
 }
@@ -82,7 +84,7 @@ const IR::Node *RemoveNestedStructs::postorder(IR::Member *expression) {
         // Translation done by parent (if necessary)
         return expression;
     auto e = comp->convertToExpression();
-    return e;
+    return guardReturn(e);
 }
 
 const IR::Node *RemoveNestedStructs::postorder(IR::MethodCallExpression *expression) {
@@ -112,7 +114,7 @@ const IR::Node *RemoveNestedStructs::postorder(IR::PathExpression *expression) {
         // translation done by parent
         return expression;
     auto list = comp->convertToExpression();
-    return list;
+    return guardReturn(list);
 }
 
 }  // namespace P4

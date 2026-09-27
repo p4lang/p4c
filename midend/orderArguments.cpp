@@ -35,7 +35,7 @@ const IR::Node *DoOrderArguments::postorder(IR::MethodCallExpression *expression
 }
 
 const IR::Node *DoOrderArguments::postorder(IR::ConstructorCallExpression *expression) {
-    ConstructorCall *ccd = ConstructorCall::resolve(expression, this, typeMap);
+    auto ccd = ConstructorCall::resolve(expression, this, typeMap);
     expression->arguments = reorder(ccd->substitution);
     return expression;
 }

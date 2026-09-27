@@ -18,6 +18,8 @@
 
 #include "check_design_pattern.h"
 
+#include <utility>
+
 #include "lib/error.h"
 
 bool BFN::CheckExternValidity::preorder(const IR::MethodCallExpression *expr) {
@@ -114,7 +116,7 @@ bool BFN::FindDirectExterns::preorder(const IR::MethodCallExpression *expr) {
         auto act = findContext<IR::P4Action>();
         if (!act) return false;
 
-        directExterns[act].push_back(em);
+        directExterns[act].push_back(std::move(mi));
     }
     return false;
 }
@@ -124,8 +126,9 @@ bool BFN::CheckDirectExternsOnTables::preorder(IR::P4Table *table) {
     for (auto act : actionList->actionList) {
         auto action = refMap->getDeclaration(act->getPath())->to<IR::P4Action>();
         if (directExterns.count(action)) {
-            auto externMethods = directExterns[action];
-            for (auto em : externMethods) {
+            const auto &externMethods = directExterns[action];
+            for (const auto &method : externMethods) {
+                const auto *em = method->checkedTo<P4::ExternMethod>();
                 auto externName = em->actualExternType->name;
                 auto externObjName = em->object->getName();
                 auto propToCheck = BFN_CheckDiResIn::externsToProperties.at(externName);
