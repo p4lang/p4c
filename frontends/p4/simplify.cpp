@@ -15,8 +15,8 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) 
     if (statement->hasAnnotations() &&
         !(foldInlinedFrom && statement->hasOnlyAnnotation(IR::Annotation::inlinedFromAnnotation))) {
         if (auto *pblk = getParent<IR::BlockStatement>()) {
-            for (auto *annot : statement->annotations) {
-                if (auto *p = pblk->getAnnotation(annot->name); !p || !p->equiv(*annot))
+            for (auto annot : statement->annotations) {
+                if (auto p = pblk->getAnnotation(annot->name); !p || !p->equiv(*annot))
                     return statement;
             }
         } else {
@@ -42,7 +42,14 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) 
                 hasDeclarations = true;
                 break;
             }
-        if (!hasDeclarations) return &statement->components;
+        if (!hasDeclarations) {
+#if !HAVE_LIBGC
+            // DANGER -- if !HAVE_LIBGC, can't safely return a pointer to an inlined field
+            return statement->components.clone();
+#else
+            return &statement->components;
+#endif
+        }
     }
 
     if (statement->components.empty()) return new IR::EmptyStatement(statement->srcInfo);

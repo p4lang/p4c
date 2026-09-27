@@ -69,7 +69,7 @@ std::optional<std::string> stringRepr(const TypeMap &typeMap, const IR::Expressi
     while (const auto *cast = expression->to<IR::Cast>()) {
         expression = cast->expr;
     }
-    auto *ei = EnumInstance::resolve(expression, &typeMap);
+    auto ei = EnumInstance::resolve(expression, &typeMap);
     if (expression->is<IR::Constant>()) {
         return stringRepr(expression->to<IR::Constant>(), width);
     }

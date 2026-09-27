@@ -14,7 +14,7 @@ void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type
         auto sl = type->to<IR::Type_StructLike>();
         for (auto f : sl->fields) {
             auto ftype = typeMap->getType(f, true);
-            auto member = new IR::Member(expr, f->name);
+            IR::Ptr<IR::Member> member = new IR::Member(expr, f->name);
             generateResets(typeMap, ftype, member, resets);
         }
     } else if (type->is<IR::Type_Header>()) {
@@ -33,7 +33,7 @@ void DoResetHeaders::generateResets(const TypeMap *typeMap, const IR::Type *type
         }
         for (unsigned i = 0; i < tstack->getSize(); i++) {
             auto index = new IR::Constant(i);
-            auto elem = new IR::ArrayIndex(expr, index);
+            IR::Ptr<IR::ArrayIndex> elem = new IR::ArrayIndex(expr, index);
             generateResets(typeMap, tstack->elementType, elem, resets);
         }
     }
@@ -46,16 +46,16 @@ const IR::Node *DoResetHeaders::postorder(IR::Declaration_Variable *decl) {
     // Don't reset index var in for..in statements.
     if (parent->is<IR::ForInStatement>()) return decl;
     auto type = typeMap->getType(getOriginal(), true);
-    auto path = new IR::PathExpression(decl->getName());
+    IR::Ptr<IR::PathExpression> path = new IR::PathExpression(decl->getName());
     // For declarations in parsers and controls we have to insert the
     // reset in the start state or the body respectively.
     bool separate = parent->is<IR::P4Parser>() || parent->is<IR::P4Control>();
     if (!separate) {
-        auto resets = new IR::Vector<IR::StatOrDecl>();
+        IR::MutablePtr<IR::Vector<IR::StatOrDecl>> resets = new IR::Vector<IR::StatOrDecl>();
         resets->push_back(decl);
         generateResets(typeMap, type, path, resets);
         if (resets->size() == 1) return decl;
-        return resets;
+        return guardReturn(IR::Ptr<IR::Node>(resets));
     } else {
         generateResets(typeMap, type, path, &insert);
         return decl;

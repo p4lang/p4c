@@ -91,7 +91,9 @@ class ComputeDefUse : public Inspector,
 
  private:
     // DANGER -- pointers to elements of this set must be stable
+    std::shared_ptr<std::unordered_set<loc_t>> cachedLocsOwner;
     std::unordered_set<loc_t> &cached_locs;
+    IR::Ptr<IR::Node> analyzedProgram;
     const loc_t *getLoc(const Visitor::Context *ctxt);
     const loc_t *getLoc() { return getLoc(getChildContext()); }
     const loc_t *getLoc(const IR::Node *, const Visitor::Context *);
@@ -137,12 +139,15 @@ class ComputeDefUse : public Inspector,
         // uses/defs are lvalue expressions, or param declarations.
         hvec_map<const IR::Node *, locset_t> defs;
         hvec_map<const IR::Node *, locset_t> uses;
-    } & defuse;
+    };
+    std::shared_ptr<defuse_t> defuseOwner;
+    defuse_t &defuse;
     static const locset_t empty;
 
     profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
         LOG3("## Midend ComputeDefUse");
+        analyzedProgram = root;
         uid_ctr = 0;
         state = SKIPPING;
         clear();

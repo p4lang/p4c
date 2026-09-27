@@ -24,7 +24,7 @@ using Constraint = IR::Expression;
 
 /// This type maps symbolic variables to their value assigned by the solver.
 using SymbolicMapping =
-    P4::flat_map<const IR::SymbolicVariable *, const IR::Expression *, IR::SymbolicVariableLess>;
+    P4::flat_map<IR::Ptr<IR::SymbolicVariable>, IR::Ptr<IR::Expression>, IR::SymbolicVariableLess>;
 
 /// Provides a higher-level interface for an SMT solver.
 class AbstractSolver : public ICastable {
@@ -45,7 +45,7 @@ class AbstractSolver : public ICastable {
     /// @return true if the given assertions are consistent.
     /// @return false if the given assertions are inconsistent.
     /// @return std::nullopt if the solver times out, or is otherwise unable to provide an answer.
-    virtual std::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) = 0;
+    virtual std::optional<bool> checkSat(const std::vector<IR::Ptr<Constraint>> &asserts) = 0;
 
     /// Obtains the first solution found by the solver in the last call to @checkSat.
     ///

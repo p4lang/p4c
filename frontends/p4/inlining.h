@@ -26,11 +26,11 @@ namespace P4 {
 
 /// Describes information about a caller-callee pair
 struct CallInfo : public IHasDbPrint {
-    const IR::IContainer *caller;
-    const IR::IContainer *callee;
-    const IR::Declaration_Instance *instantiation;  // callee instantiation
+    IR::Ptr<IR::IContainer> caller;
+    IR::Ptr<IR::IContainer> callee;
+    IR::Ptr<IR::Declaration_Instance> instantiation;  // callee instantiation
     // Each instantiation may be invoked multiple times.
-    std::set<const IR::MethodCallStatement *> invocations;  // all invocations within the caller
+    std::set<IR::Ptr<IR::MethodCallStatement>> invocations;  // all invocations within the caller
 
     CallInfo(const IR::IContainer *caller, const IR::IContainer *callee,
              const IR::Declaration_Instance *instantiation)
@@ -47,8 +47,8 @@ struct CallInfo : public IHasDbPrint {
 };
 
 class SymRenameMap {
-    std::map<const IR::IDeclaration *, cstring> internalName;
-    std::map<const IR::IDeclaration *, cstring> externalName;
+    std::map<IR::Ptr<IR::IDeclaration>, cstring> internalName;
+    std::map<IR::Ptr<IR::IDeclaration>, cstring> externalName;
 
  public:
     void setNewName(const IR::IDeclaration *decl, cstring name, cstring extName) {
@@ -85,7 +85,7 @@ struct PerInstanceSubstitutions {
     PerInstanceSubstitutions(const PerInstanceSubstitutions &other)
         : paramSubst(other.paramSubst), tvs(other.tvs), renameMap(other.renameMap) {}
     template <class T>
-    const T *rename(ReferenceMap *refMap, const IR::Node *node);
+    IR::Ptr<T> rename(ReferenceMap *refMap, const IR::Node *node);
 };
 
 /// Summarizes all inline operations to be performed.
@@ -120,7 +120,7 @@ struct InlineSummary : public IHasDbPrint {
          *
          * @see field invocationToState
          */
-        typedef std::pair<const IR::MethodCallStatement *, const IR::PathExpression *>
+        typedef std::pair<IR::Ptr<IR::MethodCallStatement>, IR::Ptr<IR::PathExpression>>
             InlinedInvocationInfo;
 
         /**
@@ -151,11 +151,13 @@ struct InlineSummary : public IHasDbPrint {
         };
 
         /// For each instance (key) the container that is intantiated.
-        std::map<const IR::Declaration_Instance *, const IR::IContainer *> declToCallee;
+        std::map<IR::Ptr<IR::Declaration_Instance>, IR::Ptr<IR::IContainer>> declToCallee;
         /// For each instance (key) we must apply a bunch of substitutions
-        std::map<const IR::Declaration_Instance *, PerInstanceSubstitutions *> substitutions;
+        std::map<IR::Ptr<IR::Declaration_Instance>, std::shared_ptr<PerInstanceSubstitutions>>
+            substitutions;
         /// For each invocation (key) call the instance that is invoked.
-        std::map<const IR::MethodCallStatement *, const IR::Declaration_Instance *> callToInstance;
+        std::map<IR::Ptr<IR::MethodCallStatement>, IR::Ptr<IR::Declaration_Instance>>
+            callToInstance;
 
         /**
          * For each distinct invocation of the subparser identified by InlinedInvocationInfo
@@ -284,7 +286,7 @@ struct InlineSummary : public IHasDbPrint {
             return call;
         }
     };
-    std::map<const IR::IContainer *, PerCaller> callerToWork;
+    std::map<IR::Ptr<IR::IContainer>, PerCaller> callerToWork;
 
     void add(const CallInfo *cci) {
         callerToWork[cci->caller].declToCallee[cci->instantiation] = cci->callee;
@@ -299,7 +301,7 @@ struct InlineSummary : public IHasDbPrint {
 // Inling information constructed here.
 class InlineList {
     // We use an ordered map to make the iterator deterministic
-    ordered_map<const IR::Declaration_Instance *, CallInfo *> inlineMap;
+    ordered_map<IR::Ptr<IR::Declaration_Instance>, std::shared_ptr<CallInfo>> inlineMap;
     std::vector<CallInfo *> toInline;  // sorted in order of inlining
     const bool allowMultipleCalls = true;
 
@@ -310,7 +312,7 @@ class InlineList {
         CHECK_NULL(callee);
         CHECK_NULL(instantiation);
         LOG3("Inline instantiation " << dbp(instantiation));
-        auto inst = new CallInfo(caller, callee, instantiation);
+        auto inst = std::make_shared<CallInfo>(caller, callee, instantiation);
         inlineMap[instantiation] = inst;
     }
 
@@ -337,7 +339,7 @@ class InlineList {
     }
 
     void analyze();
-    InlineSummary *next();
+    std::shared_ptr<InlineSummary> next();
 };
 
 /// Must be run after an evaluator; uses the blocks to discover caller/callee relationships.
@@ -389,6 +391,7 @@ class DiscoverInlining : public Inspector {
 /// Performs actual inlining work
 class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     ReferenceMap *refMap;
+    std::shared_ptr<TypeMap> typeMapOwner;
     TypeMap *typeMap;
     InlineSummary::PerCaller *workToDo;
     bool optimizeParserInlining;
@@ -396,7 +399,8 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
  public:
     explicit GeneralInliner(ReferenceMap *refMap, bool _optimizeParserInlining)
         : refMap(refMap),
-          typeMap(new TypeMap()),
+          typeMapOwner(std::make_shared<TypeMap>()),
+          typeMap(typeMapOwner.get()),
           workToDo(nullptr),
           optimizeParserInlining(_optimizeParserInlining) {
         setName("GeneralInliner");
@@ -410,7 +414,7 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
      */
     template <class P4Block, class P4BlockType>
     void inline_subst(P4Block *caller, IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
-                      const P4BlockType *P4Block::*blockType);
+                      P4BlockType P4Block::*blockType);
     const IR::Node *preorder(IR::P4Control *caller) override;
     const IR::Node *preorder(IR::P4Parser *caller) override;
     const IR::Node *preorder(IR::ParserState *state) override;

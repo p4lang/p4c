@@ -3,7 +3,7 @@
 namespace P4 {
 
 void InlinedActionsMetricPass::postorder(const IR::BlockStatement *block) {
-    const auto *annotation = block->getAnnotation(IR::Annotation::inlinedFromAnnotation);
+    const IR::Annotation *annotation = block->getAnnotation(IR::Annotation::inlinedFromAnnotation);
     if (annotation == nullptr) return;
 
     if (std::holds_alternative<IR::Vector<IR::Expression>>(annotation->body)) {

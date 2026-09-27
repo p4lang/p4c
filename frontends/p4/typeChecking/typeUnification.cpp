@@ -209,12 +209,13 @@ bool TypeUnification::unifyBlocks(const BinaryConstraint *constraint) {
             return constraint->reportError(constraints->getCurrentSubstitution());
         auto destConstructor = dest->to<IR::Type_Package>()->getConstructorMethodType();
         auto srcConstructor = src->to<IR::Type_Package>()->getConstructorMethodType();
-        return unifyFunctions(constraint->create(destConstructor, srcConstructor), true);
+        return unifyFunctions(
+            constraints->retain(constraint->create(destConstructor, srcConstructor)), true);
     } else if (dest->is<IR::IApply>()) {
         // parsers, controls
         auto srcapply = src->to<IR::IApply>()->getApplyMethodType();
         auto destapply = dest->to<IR::IApply>()->getApplyMethodType();
-        return unifyFunctions(constraint->create(destapply, srcapply));
+        return unifyFunctions(constraints->retain(constraint->create(destapply, srcapply)));
     }
     return constraint->reportError(constraints->getCurrentSubstitution());
 }
@@ -292,7 +293,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
         }
         if (!src->is<IR::Type_ArchBlock>())
             return constraint->reportError(constraints->getCurrentSubstitution());
-        return unifyBlocks(constraint->create(dest, src));
+        return unifyBlocks(constraints->retain(constraint->create(dest, src)));
     } else if (dest->is<IR::Type_MethodBase>()) {
         if (src->is<IR::Type_MethodCall>()) return unifyCall(constraint);
         if (src->is<IR::Type_MethodBase>()) return unifyFunctions(constraint);
@@ -424,7 +425,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                 if (dest->is<IR::Type_Bits>()) {
                     // unify with enum's underlying type
                     auto stype = typeMap->getTypeType(senum->type, true);
-                    return unify(constraint->create(stype, dest));
+                    return unify(constraints->retain(constraint->create(stype, dest)));
                 }
             }
         }

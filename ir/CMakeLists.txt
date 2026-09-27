@@ -21,6 +21,7 @@ set (IR_SRCS
   node.cpp
   pass_manager.cpp
   pass_utils.cpp
+  shared_ptr.cpp
   splitter.cpp
   type.cpp
   visitor.cpp
@@ -48,6 +49,7 @@ set (IR_HDRS
   nodemap.h
   pass_manager.h
   pass_utils.h
+  shared_ptr.h
   vector.h
   visitor.h
 )
@@ -60,6 +62,10 @@ set (BASE_IR_DEF_FILES
 )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
+
+# Keep the allocation wrappers separate: GCC can incorrectly diagnose mismatched
+# new/delete when only one wrapper is inlined into its caller.
+set_source_files_properties(shared_ptr.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
 add_library (ir STATIC ${IR_SRCS})
 target_link_libraries(ir PRIVATE absl::flat_hash_map ${LIBGC_LIBRARIES})

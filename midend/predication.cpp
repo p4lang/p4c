@@ -134,7 +134,7 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux *mux, bool then) {
     }
 }
 
-const IR::Expression *Predication::clone(const IR::Expression *expression) {
+IR::Ptr<IR::Expression> Predication::clone(const IR::Expression *expression) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression. This is most obvious if one clone is on the LHS and one
@@ -144,7 +144,7 @@ const IR::Expression *Predication::clone(const IR::Expression *expression) {
     return expression->apply(cloner);
 }
 
-const IR::AssignmentStatement *Predication::clone(const IR::AssignmentStatement *statement) {
+IR::Ptr<IR::AssignmentStatement> Predication::clone(const IR::AssignmentStatement *statement) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression.
@@ -273,7 +273,8 @@ const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
         auto indexDecl =
             new IR::Declaration_Variable(srcInfo, name, arrInd->right->type->getP4Type());
         auto index = new IR::PathExpression(name);
-        auto indexAssignment = new IR::AssignmentStatement(srcInfo, index, clone(arrInd->right));
+        IR::MutablePtr<IR::AssignmentStatement> indexAssignment =
+            new IR::AssignmentStatement(srcInfo, index, clone(arrInd->right));
         ExpressionReplacer replacer(clone(indexAssignment), traversalPath, conditions);
         // Creates the initial Mux expression
         replacer.setVisitingIndex(true);
@@ -310,7 +311,7 @@ const IR::Node *Predication::preorder(IR::IfStatement *statement) {
         auto srcInfo = statement->condition->srcInfo;
         auto name = IR::ID(srcInfo, conditionName);
         rv->push_back(new IR::Declaration_Variable(srcInfo, name, IR::Type::Boolean::get()));
-        auto condition = new IR::PathExpression(name);
+        IR::Ptr<IR::PathExpression> condition = new IR::PathExpression(name);
         liveAssigns.push_back(
             new IR::AssignmentStatement(srcInfo, clone(condition), statement->condition));
         LOG1("Composite condition alias created: " << conditionName);
@@ -348,7 +349,7 @@ const IR::Node *Predication::preorder(IR::IfStatement *statement) {
     prune();
     // Remove all empty statements which are inside this 'rv' block
     remover.setCalledBy(this);
-    return rv->apply(remover);
+    return guardReturn(rv->apply(remover));
 }
 
 const IR::Node *Predication::preorder(IR::P4Action *action) {

@@ -37,13 +37,13 @@ class V1ParserDriver;
 using namespace P4::literals;
 
 struct BBoxType {
-    IR::Vector<IR::Method>* methods;
-    IR::NameMap<IR::Declaration, ordered_map>* attribs;
+    IR::MutablePtr<IR::Vector<IR::Method>> methods = nullptr;
+    IR::MutablePtr<IR::NameMap<IR::Declaration, ordered_map>> attribs = nullptr;
 };
 
 struct HeaderType {
-    IR::Vector<IR::Annotation>* annotations;
-    IR::IndexedVector<IR::StructField>* fields;
+    IR::MutablePtr<IR::Vector<IR::Annotation>> annotations = nullptr;
+    IR::MutablePtr<IR::IndexedVector<IR::StructField>> fields = nullptr;
 };
 
 struct Attributes {
@@ -73,7 +73,7 @@ inline std::ostream& operator<<(std::ostream& out, const V1::Attributes& a) {
     return out << "Attributes(" << (a.signed_ ? "signed," : "") <<
                   (a.saturating ? "saturating," : "") << a.annotations << ')'; }
 
-typedef std::pair<const IR::Expression*, const IR::Constant*> CaseValue;
+using CaseValue = std::pair<IR::Ptr<IR::Expression>, IR::Ptr<IR::Constant>>;
 
 inline std::ostream& operator<<(std::ostream& out, const CaseValue& caseValue) {
     out << "CaseValue(" << caseValue.first << ',' << caseValue.second << ')';
@@ -85,7 +85,7 @@ inline std::ostream& operator<<(std::ostream& out, const CaseValue& caseValue) {
 // naive and it always prepends 'const' to the type. This is problematic when
 // the symbol type we want is itself const, since duplicate const qualifiers are
 // forbidden in C++. We avoid the problem using a typedef.
-typedef const IR::Type ConstType;
+using ConstType = IR::Ptr<IR::Type>;
 
 }  // namespace P4
 
@@ -120,8 +120,8 @@ using namespace P4;
 
 #define YYLLOC_DEFAULT(Cur, Rhs, N)                                                        \
     ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                                     \
-        : YYRHSLOC(Rhs, 0) ?  Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd())  \
-                 : Util::SourceInfo(driver.sources, driver.sources->getCurrentPosition()))
+        : YYRHSLOC(Rhs, 0) ?  Util::SourceInfo(driver.sources.get(), YYRHSLOC(Rhs, 0).getEnd())  \
+                 : Util::SourceInfo(driver.sources.get(), driver.sources->getCurrentPosition()))
 
 #undef yylex
 #define yylex lexer.yylex
@@ -218,40 +218,40 @@ static const IR::Expression *removeRedundantValid(const IR::Expression *e);
 
 %type<Attributes>                   opt_field_modifiers attributes attrib
 %type<IR::ID>                       name
-%type<IR::ActionFunction*>          action_function_body action_statement_list
-%type<IR::ActionProfile*>           action_profile_body
-%type<IR::ActionSelector*>          action_selector_body
-%type<IR::Vector<IR::Annotation>*>  blackbox_method
-%type<IR::Apply*>                   apply_case_list
-%type<IR::Attribute*>               blackbox_attribute
-%type<IR::AttribLocal*>             local_var
-%type<IR::AttribLocals*>            locals_list opt_locals_list
-%type<IR::NameMap<IR::Property>*>   blackbox_config
+%type<IR::MutablePtr<IR::ActionFunction>>          action_function_body action_statement_list
+%type<IR::MutablePtr<IR::ActionProfile>>           action_profile_body
+%type<IR::MutablePtr<IR::ActionSelector>>          action_selector_body
+%type<IR::MutablePtr<IR::Vector<IR::Annotation>>>  blackbox_method
+%type<IR::MutablePtr<IR::Apply>>                   apply_case_list
+%type<IR::MutablePtr<IR::Attribute>>               blackbox_attribute
+%type<IR::MutablePtr<IR::AttribLocal>>             local_var
+%type<IR::MutablePtr<IR::AttribLocals>>            locals_list opt_locals_list
+%type<IR::MutablePtr<IR::NameMap<IR::Property>>>   blackbox_config
 %type<BBoxType>                     blackbox_body
-%type<IR::CalculatedField*>         update_verify_spec_list
+%type<IR::MutablePtr<IR::CalculatedField>>         update_verify_spec_list
 %type<CaseValue>                    case_value
-%type<IR::CaseEntry*>               case_value_list
-%type<IR::Vector<IR::CaseEntry>*>   case_entry_list
-%type<IR::Constant*>                const_expression
-%type<IR::Counter*>                 counter_spec_list
+%type<IR::MutablePtr<IR::CaseEntry>>               case_value_list
+%type<IR::MutablePtr<IR::Vector<IR::CaseEntry>>>   case_entry_list
+%type<IR::MutablePtr<IR::Constant>>                const_expression
+%type<IR::MutablePtr<IR::Counter>>                 counter_spec_list
 %type<IR::Direction>                inout
-%type<IR::Expression*>              expression header_ref header_or_field_ref
+%type<IR::MutablePtr<IR::Expression>>              expression header_ref header_or_field_ref
                                     field_or_masked_ref opt_condition pragma_operand
-%type<IR::Vector<IR::Expression>*>  expression_list opt_expression_list
+%type<IR::MutablePtr<IR::Vector<IR::Expression>>>  expression_list opt_expression_list
                                     control_statement control_statement_list
                                     field_match_list expressions pragma_operands
-%type<IR::FieldList*>               field_list_entries
-%type<IR::FieldListCalculation*>    field_list_calculation_body
-%type<IR::Member*>                  field_ref
+%type<IR::MutablePtr<IR::FieldList>>               field_list_entries
+%type<IR::MutablePtr<IR::FieldListCalculation>>    field_list_calculation_body
+%type<IR::MutablePtr<IR::Member>>                  field_ref
 %type<HeaderType>                   header_dec_body field_declarations
-%type<IR::NameList*>                action_list name_list opt_name_list field_list_list
-%type<IR::Meter*>                   meter_spec_list
-%type<IR::Parameter*>               argument
-%type<IR::ParameterList*>           opt_argument_list argument_list
-%type<IR::V1Parser*>                parser_statement_list
-%type<IR::Register*>                register_spec_list
-%type<IR::V1Table*>                 table_body
-%type<ConstType*>                   bit_width type
+%type<IR::MutablePtr<IR::NameList>>                action_list name_list opt_name_list field_list_list
+%type<IR::MutablePtr<IR::Meter>>                   meter_spec_list
+%type<IR::MutablePtr<IR::Parameter>>               argument
+%type<IR::MutablePtr<IR::ParameterList>>           opt_argument_list argument_list
+%type<IR::MutablePtr<IR::V1Parser>>                parser_statement_list
+%type<IR::MutablePtr<IR::Register>>                register_spec_list
+%type<IR::MutablePtr<IR::V1Table>>                 table_body
+%type<ConstType>                   bit_width type
 
 %%
 
@@ -308,7 +308,7 @@ field_declarations: /* epsilon */
       { $$.annotations = new IR::Vector<IR::Annotation>;
         $$.fields = new IR::IndexedVector<IR::StructField>; }
     | field_declarations name ":" bit_width opt_field_modifiers ";" {
-        auto *type = $4;
+        auto type = $4;
         if ($5.signed_ && type->is<IR::Type::Bits>())
             type = IR::Type::Bits::get(type->to<IR::Type::Bits>()->size, true);
         ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2),
@@ -535,9 +535,9 @@ case_value_list:
 
 case_value:
       expression
-      { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), new IR::Constant(-1)); }
+      { $$ = CaseValue($1 ? $1 : IR::MutablePtr<IR::Constant>(new IR::Constant(-1)), new IR::Constant(-1)); }
     | expression MASK const_expression
-      { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), $3 ? $3 : new IR::Constant(0)); }
+      { $$ = CaseValue($1 ? $1 : IR::MutablePtr<IR::Constant>(new IR::Constant(-1)), $3 ? $3 : IR::MutablePtr<IR::Constant>(new IR::Constant(0))); }
     | DEFAULT
       { $$ = CaseValue(new IR::Constant(0), new IR::Constant(0)); }
     ;
