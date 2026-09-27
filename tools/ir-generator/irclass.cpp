@@ -119,7 +119,7 @@ void IrDefinitions::toposort() {
     elements = std::move(sorted);
 }
 
-Util::Enumerator<IrClass *> *IrDefinitions::getClasses() const {
+Util::EnumeratorPtr<IrClass *> IrDefinitions::getClasses() const {
     return Util::enumerate(elements)->as<IrClass *>()->where(
         [](IrClass *e) { return e != nullptr; });
 }
@@ -167,7 +167,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     impl << "std::map<cstring, NodeFactoryFn> IR::unpacker_table = {\n";
 
     bool first = true;
-    for (auto cls : *getClasses()) {
+    for (auto cls : getClasses()) {
         if (cls->kind == NodeKind::Concrete) {
             if (first)
                 first = false;
@@ -184,7 +184,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     out << "extern template class IR::Vector<IR::Node>;" << std::endl;
     impl << "template class IR::IndexedVector<IR::Node>;" << std::endl;
     out << "extern template class IR::IndexedVector<IR::Node>;" << std::endl;
-    for (auto cls : *getClasses()) {
+    for (auto cls : getClasses()) {
         if (cls->needVector || cls->needIndexedVector) {
             impl << "template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
                  << std::endl;
@@ -215,7 +215,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 
     t << "#define IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(M, T, D, B, ...) \\"
       << std::endl;
-    for (auto cls : *getClasses())
+    for (auto cls : getClasses())
         if (cls->kind != NodeKind::Interface) cls->generateTreeMacro(t);
 
     t << "T(Vector<IR::Node>, D(Node), ##__VA_ARGS__) \\" << std::endl;
@@ -223,7 +223,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          "D(Vector<IR::Node>) "
          "B(Node), ##__VA_ARGS__) \\"
       << std::endl;
-    for (auto cls : *getClasses()) {
+    for (auto cls : getClasses()) {
         if (cls->needVector || cls->needIndexedVector)
             t << "T(Vector<IR::" << cls->containedIn << cls->name
               << ">, D(Node), "
@@ -247,7 +247,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     t << "namespace P4::IR {" << std::endl;
 
     // Emit forward declarations
-    for (auto *cls : *getClasses()) {
+    for (auto *cls : getClasses()) {
         enter_namespace(t, cls->containedIn);
         cls->declare(t);
         exit_namespace(t, cls->containedIn);
@@ -265,7 +265,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
 
     unsigned nkId = 3;
     auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
-    for (auto *cls : *getClasses())
+    for (auto *cls : getClasses())
         t << "  " << cls->qualified_name(irNamespace).replace("::", "_") << " = " << nkId++
           << ",\n";
 
@@ -498,7 +498,7 @@ void IrClass::computeConstructorArguments(IrClass::ctor_args_t &args) const {
         concreteParent->computeConstructorArguments(args);
     }
 
-    for (auto field : *getFields())
+    for (auto field : getFields())
         if (!field->isStatic && (!field->initializer || field->optional))
             args.emplace_back(field, this);
 }
@@ -555,12 +555,12 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     return optargs;
 }
 
-Util::Enumerator<IrField *> *IrClass::getFields() const {
+Util::EnumeratorPtr<IrField *> IrClass::getFields() const {
     return Util::enumerate(elements)->as<IrField *>()->where(
         [](IrField *f) { return f && !f->isStatic; });
 }
 
-Util::Enumerator<IrMethod *> *IrClass::getUserMethods() const {
+Util::EnumeratorPtr<IrMethod *> IrClass::getUserMethods() const {
     return Util::enumerate(elements)->as<IrMethod *>()->where(
         [](IrElement *e) { return e != nullptr; });
 }

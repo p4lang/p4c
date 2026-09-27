@@ -340,7 +340,7 @@ bool ToP4::preorder(const IR::Type_Enum *t) {
     builder.spc();
     builder.blockStart();
     bool first = true;
-    for (auto a : *t->getDeclarations()) {
+    for (auto a : t->getDeclarations()) {
         dump(2, a->getNode(), 1);
         if (!first) builder.append(",\n");
         first = false;
@@ -1411,7 +1411,7 @@ bool ToP4::preorder(const IR::P4Control *c) {
 bool ToP4::preorder(const IR::ParameterList *p) {
     builder.append("(");
     bool first = true;
-    for (auto param : *p->getEnumerator()) {
+    for (auto param : p->getEnumerator()) {
         if (!first) builder.append(", ");
         first = false;
         visit(param);

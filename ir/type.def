@@ -251,9 +251,9 @@ class Parameter : Declaration, IAnnotated {
 class ParameterList : ISimpleNamespace {
     optional inline IndexedVector<Parameter> parameters;
     validate{ parameters.check_null(); }
-    inline Util::Enumerator<Parameter>* getEnumerator() const {
+    inline Util::EnumeratorPtr<Parameter> getEnumerator() const {
         return parameters.getEnumerator(); }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return parameters.getDeclarations(); }
     inline size_t size() const { return parameters.size(); }
     inline bool empty() const { return size() == 0; }
@@ -380,7 +380,7 @@ class Type_MatchKind : Type_Base {
 
 class TypeParameters : ISimpleNamespace {
     optional inline IndexedVector<Type_Var> parameters;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return parameters.getDeclarations(); }
     inline bool empty() const { return parameters.empty(); }
     inline size_t size() const { return parameters.size(); }
@@ -417,7 +417,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return fields.getDeclarations(); }
     inline StructField getField(cstring name) const {
         return fields.getDeclaration<StructField>(name); }
@@ -636,7 +636,7 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     TypeParameters getTypeParameters() const override { return typeParameters; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return typeParameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return typeParameters->getDeclByName(name); }
@@ -650,7 +650,7 @@ class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
     toString{ return "package "_cs + externalName(); }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(constructorParams->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
         auto decl = constructorParams->getDeclByName(name);
@@ -796,7 +796,7 @@ class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
     inline IndexedVector<Declaration_ID> members;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
@@ -820,7 +820,7 @@ class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
     inline IndexedVector<SerEnumMember> members;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
@@ -873,7 +873,7 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     void dbprint(std::ostream& out) const override;
     toString { return "<Method>"_cs; }
     const IR::Type* getP4Type() const override { return nullptr; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(parameters->getDeclarations()); }
     IDeclaration getDeclByName(cstring name) const override {
         auto decl = parameters->getDeclByName(name);
@@ -938,7 +938,7 @@ class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
         return type->parameters->getDeclByName(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
         return type->parameters->getDeclByName(name); }
-    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration>getDeclarations() const override {
         return type->parameters->getDeclarations(); }
 }
 
@@ -979,7 +979,7 @@ class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
     optional inline Vector<Annotation> annotations;
 
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+    Util::EnumeratorPtr<IDeclaration> getDeclarations() const override {
         return attributes.valueEnumerator()->as<const IDeclaration*>()
             ->concat(methods.getEnumerator()->as<const IDeclaration*>()); }
     TypeParameters getTypeParameters() const override { return typeParameters; }

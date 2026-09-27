@@ -541,7 +541,7 @@ class P4RuntimeAnalyzer {
 
         // Allocate ids for all action parameters.
         std::vector<const IR::Parameter *> actionParams;
-        for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
+        for (auto actionParam : actionDeclaration->parameters->getEnumerator()) {
             actionParams.push_back(actionParam);
         }
         FieldIdAllocator<decltype(actionParams)::value_type> idAllocator(actionParams.begin(),

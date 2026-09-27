@@ -63,7 +63,7 @@ class Vector : public VectorBase {
     Vector(std::initializer_list<const T *> a) : vec(a) {}
     template <class InputIt>
     Vector(InputIt first, InputIt last) : vec(first, last) {}
-    Vector(Util::Enumerator<const T *> *e)  // NOLINT(runtime/explicit)
+    Vector(Util::EnumeratorPtr<const T *> e)  // NOLINT(runtime/explicit)
         : vec(e->begin(), e->end()) {}
     static Node *fromJSON(JSONLoader &json);
 
@@ -183,9 +183,9 @@ class Vector : public VectorBase {
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr);
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr) const;
     void toJSON(JSONGenerator &json) const override;
-    Util::Enumerator<const T *> *getEnumerator() const { return Util::enumerate(vec); }
+    Util::EnumeratorPtr<const T *> getEnumerator() const { return Util::enumerate(vec); }
     template <typename S>
-    Util::Enumerator<const S *> *only() const {
+    Util::EnumeratorPtr<const S *> only() const {
         return getEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
     }
