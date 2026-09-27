@@ -134,7 +134,7 @@ int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
-    AutoCompileContext autoP4TestContext(new P4TestContext);
+    AutoCompileContext autoP4TestContext(std::make_unique<P4TestContext>());
     auto &options = P4TestContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(P4TEST_VERSION_STRING);
