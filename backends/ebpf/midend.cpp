@@ -57,8 +57,8 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     unsigned enumSize(unsigned) const override { return 32; }
 };
 
-const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *program,
-                                     std::ostream *outStream) {
+IR::Ptr<IR::ToplevelBlock> MidEnd::run(EbpfOptions &options, const IR::P4Program *program,
+                                       std::ostream *outStream) {
     if (program == nullptr && options.listMidendPasses == 0) return nullptr;
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
