@@ -65,7 +65,7 @@ std::optional<MirroredFieldList *> analyzeMirrorStatement(
             }
         }
         auto *finalFieldList = new MirroredFieldList;
-        for (auto *field : fieldList->components) {
+        for (auto field : fieldList->components) {
             LOG2("mirror field list would include field: " << field);
             if (!field->expression->is<IR::Concat>() && !field->expression->is<IR::Cast>() &&
                 !field->expression->is<IR::Constant>() && !field->expression->is<IR::Member>()) {
@@ -129,7 +129,7 @@ struct FindMirroredFieldLists : public Inspector {
 
         auto gress = deparser->thread;
 
-        auto *mi = P4::MethodInstance::resolve(call, refMap, typeMap);
+        auto mi = P4::MethodInstance::resolve(call, refMap, typeMap);
         if (!mi->is<P4::ExternMethod>()) return false;
 
         auto *em = mi->to<P4::ExternMethod>();

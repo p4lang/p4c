@@ -102,7 +102,7 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
         }
         bool preorder(const IR::Node *) { return !rv; }
         void postorder(const IR::MethodCallExpression *mc) {
-            auto *mi = P4::MethodInstance::resolve(mc, self.refMap, self.typeMap, true);
+            auto mi = P4::MethodInstance::resolve(mc, self.refMap, self.typeMap, true);
             if (auto *em = mi ? mi->to<P4::ExternMethod>() : nullptr) {
                 for (auto *n : em->mayCall()) {
                     if (auto *fn = n->to<IR::Function>()) {
@@ -155,7 +155,7 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
         auto *write_mce = write_rv.first;
         if (!write_mce) return false;
 
-        auto *read_inst = P4::MethodInstance::resolve(read_mce, refMap, typeMap);
+        auto read_inst = P4::MethodInstance::resolve(read_mce, refMap, typeMap);
         // Check also object becuase of plain functions
         if (!read_inst || !read_inst->object) return false;
         auto *read_decl = read_inst->object->to<IR::Declaration_Instance>();
@@ -167,7 +167,7 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
         if (!read_extern_type) return false;
         if (read_extern_type->name != "Register" || read_member->member != "read") return false;
 
-        auto *write_inst = P4::MethodInstance::resolve(write_mce, refMap, typeMap);
+        auto write_inst = P4::MethodInstance::resolve(write_mce, refMap, typeMap);
         // Check also object becuase of plain functions
         if (!write_inst || !write_inst->object) return false;
         auto *write_decl = write_inst->object->to<IR::Declaration_Instance>();

@@ -47,7 +47,7 @@ struct RewritePathToStartState : public Modifier {
 /// leave the parser without a start state, so the caller must create a new
 /// one.
 const IR::ParserState *convertStartStateToNormalState(IR::P4Parser *parser, cstring newName) {
-    auto *origStartState = parser->getDeclByName(IR::ParserState::start);
+    auto origStartState = parser->getDeclByName(IR::ParserState::start);
     auto origStartStateIt = std::find(parser->states.begin(), parser->states.end(), origStartState);
     BUG_CHECK(origStartStateIt != parser->states.end(), "Couldn't find the original start state?");
     parser->states.erase(origStartStateIt);
@@ -109,7 +109,7 @@ const IR::Statement *createAdvanceCall(cstring pkt, int bits) {
 /// applied.
 const IR::SelectCase *createSelectCase(unsigned bitWidth, unsigned value, unsigned mask,
                                        const IR::ParserState *nextState) {
-    auto *type = IR::Type::Bits::get(bitWidth);
+    auto type = IR::Type::Bits::get(bitWidth);
     auto *valueExpr = new IR::Constant(type, value);
     auto *maskExpr = new IR::Constant(type, mask);
     auto *nextStateExpr = new IR::PathExpression(nextState->name);

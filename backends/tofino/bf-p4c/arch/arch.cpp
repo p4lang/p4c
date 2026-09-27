@@ -62,7 +62,7 @@ bool Pipeline::equiv(const Pipeline &other) const {
     return true;
 }
 
-void Pipeline::insertPragmas(const std::vector<const IR::Annotation *> &all_pragmas) {
+void Pipeline::insertPragmas(const std::vector<IR::Ptr<IR::Annotation>> &all_pragmas) {
     auto applies = [this](const IR::Annotation *p) {
         if (p->getExpr().empty() || p->getExpr(0) == nullptr) {
             return true;
@@ -77,7 +77,7 @@ void Pipeline::insertPragmas(const std::vector<const IR::Annotation *> &all_prag
         }
         return true;
     };
-    for (const auto *pragma : all_pragmas) {
+    for (auto pragma : all_pragmas) {
         if (applies(pragma)) {
             pragmas.push_back(pragma);
         }
@@ -392,7 +392,7 @@ void add_param(ordered_map<cstring, cstring> &tnaParams, const IR::ParameterList
                IR::ParameterList *newParams, cstring hdr, size_t index, cstring hdr_type = ""_cs,
                IR::Direction dir = IR::Direction::None) {
     if (params->parameters.size() > index) {
-        auto *param = params->parameters.at(index);
+        auto param = params->parameters.at(index);
         tnaParams.emplace(hdr, param->name);
     } else {
         // add optional parameter to parser and control type
@@ -403,7 +403,7 @@ void add_param(ordered_map<cstring, cstring> &tnaParams, const IR::ParameterList
 }
 
 const IR::Node *RestoreParams::postorder(IR::BFN::TnaControl *control) {
-    auto *params = control->type->getApplyParameters();
+    auto params = control->type->getApplyParameters();
     ordered_map<cstring, cstring> tnaParams;
     auto *newParams = new IR::ParameterList();
     for (auto p : params->parameters) {
@@ -451,7 +451,7 @@ const IR::Node *RestoreParams::postorder(IR::BFN::TnaControl *control) {
 }
 
 const IR::Node *RestoreParams::postorder(IR::BFN::TnaParser *parser) {
-    auto *params = parser->type->getApplyParameters();
+    auto params = parser->type->getApplyParameters();
     ordered_map<cstring, cstring> tnaParams;
 
     auto *newParams = new IR::ParameterList();
@@ -488,7 +488,7 @@ const IR::Node *RestoreParams::postorder(IR::BFN::TnaParser *parser) {
 }
 
 const IR::Node *RestoreParams::postorder(IR::BFN::TnaDeparser *control) {
-    auto *params = control->type->getApplyParameters();
+    auto params = control->type->getApplyParameters();
     ordered_map<cstring, cstring> tnaParams;
     auto *newParams = new IR::ParameterList();
     for (auto p : params->parameters) {

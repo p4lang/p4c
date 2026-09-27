@@ -1038,17 +1038,16 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     std::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
                                     p4configv1::P4TypeInfo *p4RtTypeInfo) {
-        std::vector<const P4::ExternMethod *> packCalls;
+        size_t packCalls = 0;
         // Check that the pack method is called exactly once on the digest
         // instance. The type of the data being packed used to be a type
         // parameter of the pack method itself, and not a type parameter of the
         // extern, so the we used to require a reference to the P4::ExternMethod
         // for the pack call in order to produce the P4Info type spec. This is
         // no longer the case but we keep this code as a sanity check.
-        forAllExternMethodCalls(
-            decl, [&](const P4::ExternMethod *method) { packCalls.push_back(method); });
-        if (packCalls.size() == 0) return std::nullopt;
-        if (packCalls.size() > 1) {
+        forAllExternMethodCalls(decl, [&](const P4::ExternMethod *) { ++packCalls; });
+        if (packCalls == 0) return std::nullopt;
+        if (packCalls > 1) {
             error("Expected single call to pack for digest instance '%1%'", decl);
             return std::nullopt;
         }
@@ -1068,10 +1067,10 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     std::optional<DynHash> getDynHash(const IR::Declaration_Instance *decl,
                                       p4configv1::P4TypeInfo *p4RtTypeInfo) {
-        std::vector<const P4::ExternMethod *> hashCalls;
+        std::vector<IR::Ptr<IR::MethodCallExpression>> hashCalls;
         // Get Hash Calls in the program for the declaration.
         forAllExternMethodCalls(
-            decl, [&](const P4::ExternMethod *method) { hashCalls.push_back(method); });
+            decl, [&](const P4::ExternMethod *method) { hashCalls.push_back(method->expr); });
         if (hashCalls.size() == 0) return std::nullopt;
         if (hashCalls.size() > 1) {
             warning(
@@ -1084,7 +1083,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
         // Extract typeArgs and field Names to be passed on through dynHash
         // instance
-        if (auto *call = hashCalls[0]->expr->to<IR::MethodCallExpression>()) {
+        if (const IR::MethodCallExpression *call = hashCalls[0]) {
             int hashWidth = 0;
             if (auto t = call->type->to<IR::Type_Bits>()) {
                 hashWidth = t->width_bits();
@@ -1575,7 +1574,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         } else {
             auto parserName = "ingress_parser"_cs;
             forAllPipeBlocks(evaluatedProgram, [&](cstring, const IR::PackageBlock *pkg) {
-                auto *block = pkg->findParameterValue(parserName);
+                const IR::CompileTimeValue *block = pkg->findParameterValue(parserName);
                 if (!block) return;
                 if (!block->is<IR::ParserBlock>()) return;
                 auto parserBlock = block->to<IR::ParserBlock>();
@@ -1731,7 +1730,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         // phase0 table in bf-rt.json (e.g. ig_intr_md.ingress_port). TNA
         // translation will extract this value during midend and set the key
         // name in phase0 table in context.json to be consistent.
-        auto *params = parser->getApplyParameters();
+        const IR::ParameterList *params = parser->getApplyParameters();
         for (auto p : *params) {
             if (p->type->toString() == "ingress_intrinsic_metadata_t") {
                 BUG_CHECK(ingressIntrinsicMdParamName.count(parserBlock) == 0 ||
@@ -2024,7 +2023,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
             }
             void postorder(const IR::P4Table *table) override {
                 // Find the M/A table with attached direct register that uses a register parameter
-                auto *registers = table->properties->getProperty("registers"_cs);
+                const IR::Property *registers = table->properties->getProperty("registers"_cs);
                 if (registers == nullptr) return;
                 auto *registers_value = registers->value->to<IR::ExpressionValue>();
                 CHECK_NULL(registers_value);
@@ -2206,7 +2205,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         if (function->method->name != BFN::ExternPortMetadataUnpackString) return std::nullopt;
 
         if (auto *call = function->expr->to<IR::MethodCallExpression>()) {
-            auto *typeArg = call->typeArguments->at(0);
+            const IR::Type *typeArg = call->typeArguments->at(0);
             auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(refMap, typeMap,
                                                                             typeArg, p4RtTypeInfo);
             return PortMetadata{typeSpec};

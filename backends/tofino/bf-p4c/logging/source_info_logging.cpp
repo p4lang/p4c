@@ -292,9 +292,9 @@ bool CollectSourceInfoLogging::preorder(const IR::Path *path) {
 
 bool CollectSourceInfoLogging::preorder(const IR::Argument *argument) {
     // Find the Path to be used as key to the reference map
-    auto *expr = argument->expression;
+    const IR::Expression *expr = argument->expression;
     if (!expr || !expr->is<IR::PathExpression>()) return true;
-    auto *exprPath = expr->to<IR::PathExpression>()->path;
+    const IR::Path *exprPath = expr->to<IR::PathExpression>()->path;
     if (!exprPath) return true;
 
     addSymbolReference(argument, refMap.getDeclaration(exprPath));
@@ -304,9 +304,9 @@ bool CollectSourceInfoLogging::preorder(const IR::Argument *argument) {
 
 bool CollectSourceInfoLogging::preorder(const IR::Member *member) {
     // Find the Path to be used as key to the reference map
-    auto *expr = member->expr;
+    const IR::Expression *expr = member->expr;
     if (!expr || !expr->is<IR::PathExpression>()) return true;
-    auto *exprPath = expr->to<IR::PathExpression>()->path;
+    const IR::Path *exprPath = expr->to<IR::PathExpression>()->path;
     if (!exprPath) return true;
 
     // Find the topmost Member or ArrayIndex that should have right source info
