@@ -76,7 +76,7 @@ class MauBacktracker : public Backtrack {
     /// input_xbar, live ranges etc.
     TableSummary *table_summary;
 
-    const IR::Node *apply_visitor(const IR::Node *root, const char *) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char *) override;
 
     /// This is the function that catches the backtracking exception from TableSummary. This should
     /// return true.

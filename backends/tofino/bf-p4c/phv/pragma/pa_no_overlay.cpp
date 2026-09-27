@@ -48,7 +48,7 @@ bool PragmaNoOverlay::preorder(const IR::MAU::Instruction *inst) {
     // initialized to 0), we have to disable overlay for any field used in concat operations (concat
     // operations that survive in the backend).
     if (inst->operands.empty()) return true;
-    for (auto *operand : inst->operands) {
+    for (auto operand : inst->operands) {
         if (!operand->is<IR::Concat>()) continue;
         const PHV::Field *f = phv_i.field(operand);
         if (f) {
@@ -63,7 +63,7 @@ bool PragmaNoOverlay::preorder(const IR::MAU::Instruction *inst) {
 
 bool PragmaNoOverlay::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto *annotation : global_pragmas) {
+    for (auto annotation : global_pragmas) {
         if (annotation->name.name != PragmaNoOverlay::name) continue;
 
         auto &exprs = annotation->getExpr();
