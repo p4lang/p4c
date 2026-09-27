@@ -624,7 +624,7 @@ struct TablePlacement::Placed {
     void update_attached(Placed *latest) {
         if (need_more && !need_more_match) {
             need_more = false;
-            for (auto *ba : table->attached) {
+            for (auto ba : table->attached) {
                 if (ba->attached->direct) continue;
                 BUG_CHECK(attached_entries.count(ba->attached),
                           "initial_stage_and_entries mismatch for %s", ba->attached);
@@ -652,7 +652,7 @@ struct TablePlacement::Placed {
             need_more = need_more_match = true;
         } else {
             need_more = need_more_match = false;
-            for (auto *ba : table->attached) {
+            for (auto ba : table->attached) {
                 if (!ba->attached->direct && attached_entries.at(ba->attached).need_more) {
                     need_more = true;
                     break;
@@ -1708,7 +1708,7 @@ bool TablePlacement::disable_split_layout(const IR::MAU::Table *tbl) {
 
     if (count_sful_actions(tbl) > 1) return true;
 
-    for (auto *ba : tbl->attached) {
+    for (auto ba : tbl->attached) {
         // Stateful actions that don't require any indexes and are not supported by the actual
         // split attach framework.
         if (ba->use == IR::MAU::StatefulUse::FAST_CLEAR ||
@@ -1832,8 +1832,8 @@ bool TablePlacement::try_pick_layout(const gress_t &gress, std::vector<Placed *>
 }
 
 bool TablePlacement::shrink_attached_tbl(Placed *next, bool first_time, bool &done_shrink) {
-    for (auto *ba : next->table->attached) {
-        auto *att = ba->attached;
+    for (auto ba : next->table->attached) {
+        auto att = ba->attached;
         if (att->direct || next->attached_entries.at(att).entries == 0) continue;
         if (first_time && !can_split(next->table, att)) {
             if (!can_duplicate(att)) return false;
@@ -1923,7 +1923,7 @@ bool TablePlacement::shrink_estimate(Placed *next, int &srams_left, int &tcams_l
     if (min_entries > 0) next->use.remove_invalid_option();
 
     LOG3("  - reducing to " << next->entries << " of " << t->name << " in stage " << next->stage);
-    for (auto *ba : next->table->attached)
+    for (auto ba : next->table->attached)
         if (ba->attached->direct) next->attached_entries.at(ba->attached).entries = next->entries;
 
     return true;
@@ -1955,7 +1955,7 @@ bool TablePlacement::shrink_preferred_lo(Placed *next) {
     }
 
     LOG3("  - reducing to " << next->entries << " of " << t->name << " in stage " << next->stage);
-    for (auto *ba : next->table->attached)
+    for (auto ba : next->table->attached)
         if (ba->attached->direct) next->attached_entries.at(ba->attached).entries = next->entries;
 
     return true;
@@ -2399,7 +2399,7 @@ bool TablePlacement::can_split(const IR::MAU::Table *tbl, const IR::MAU::Attache
         if (salu->synthetic_for_selector) return false;
         if (salu->selector) {
             // can't split the SALU if it is attached to a selector attached to the same table
-            for (auto *ba : tbl->attached)
+            for (auto ba : tbl->attached)
                 if (ba->attached == salu->selector) return false;
         }
         return true;
@@ -2478,7 +2478,7 @@ bool TablePlacement::initial_stage_and_entries(Placed *rv, int &furthest_stage) 
     /* Not yet placed tables that share an attached table with this table -- if any of them
      * have a dependency that prevents placement in the current stage, we want to defer */
     ordered_set<const IR::MAU::Table *> tables_with_shared;
-    for (auto *ba : rv->table->attached) {
+    for (auto ba : rv->table->attached) {
         if (!rv->attached_entries.emplace(ba->attached, ba->attached->size).second)
             BUG("%s attached more than once", ba->attached);
         if (ba->attached->direct || can_duplicate(ba->attached)) continue;
@@ -2504,7 +2504,7 @@ bool TablePlacement::initial_stage_and_entries(Placed *rv, int &furthest_stage) 
                     // selector.  Since a selector cannot be split from its match table, we
                     // don't want to try to place the table until all the tables that write
                     // to it are placed.
-                    auto *att_ba = att_to->get_attached(ba->attached);
+                    auto att_ba = att_to->get_attached(ba->attached);
                     BUG_CHECK(att_ba, "%s not attached to %s?", ba->attached, att_to);
                     if (att_ba->use != IR::MAU::StatefulUse::NO_USE) return false;
                 } else {
@@ -2655,7 +2655,7 @@ bool TablePlacement::initial_stage_and_entries(Placed *rv, int &furthest_stage) 
     if (prev_stage_tables > 0) {
         rv->stage_split = prev_stage_tables;
     }
-    for (auto *ba : rv->table->attached) {
+    for (auto ba : rv->table->attached) {
         if (ba->attached->direct) rv->attached_entries.at(ba->attached).entries = rv->entries;
     }
 
@@ -4118,7 +4118,7 @@ class DecidePlacement::BacktrackManagement {
     // the next and the previous stage was still invalid.
     std::optional<const IR::MAU::AttachedMemory *> is_unstable_placement(const Placed *placed) {
         for (const Placed *p = placed->prev; p; p = p->prev) {
-            for (auto *ba : p->table->attached) {
+            for (auto ba : p->table->attached) {
                 if (ba->attached->direct) continue;
                 if (self.self.can_duplicate(ba->attached)) continue;
                 if (p->attached_entries.at(ba->attached).entries != 0 &&
@@ -5065,7 +5065,7 @@ IR::Vector<IR::MAU::Table> *TransformTables::break_up_dleft(IR::MAU::Table *tbl,
 void TablePlacement::setup_detached_gateway(IR::MAU::Table *tbl, const Placed *placed) {
     tbl->remove_gateway();
     BUG_CHECK(placed->entries == 0, "match entries present");
-    for (auto *ba : placed->table->attached) {
+    for (auto ba : placed->table->attached) {
         if (ba->attached->direct || placed->attached_entries.at(ba->attached).entries == 0)
             continue;
         if (auto *ena = att_info.split_enable(ba->attached, tbl)) {
@@ -5426,7 +5426,7 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
     IR::MAU::Table::Layout gw_layout;
     bool gw_only = true;
     bool gw_layout_used = false;
-    ordered_map<cstring, const IR::MAU::TableSeq *> match_table_next;
+    ordered_map<cstring, IR::Ptr<IR::MAU::TableSeq>> match_table_next;
     IR::MAU::TableSeq *gw_result_tag_seq = nullptr;
 
     if (pl->use.preferred() && pl->use.preferred()->layout.gateway_match) {
@@ -5483,7 +5483,7 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
     LOG1("splitting " << tbl->name << " across " << self.table_placed.count(tbl->name)
                       << " stages");
     int deferred_attached = 0;
-    for (auto *att : tbl->attached) {
+    for (auto att : tbl->attached) {
         if (att->attached->direct) continue;
         if (!pl->attached_entries.at(att->attached).need_more) continue;
         // splitting a table with an un-duplicatable indirect attached table
@@ -5649,7 +5649,7 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
         // check for any attached tables not completely placed as of this stage and do any
         // address updates needed for later stages.
         for (auto &ba : table_part->attached) {
-            auto *att = ba->attached;
+            auto att = ba->attached;
             if (att->direct) continue;
             if (pl->attached_entries.at(att).entries == 0) continue;
             if (pl->attached_entries.at(att).need_more) {

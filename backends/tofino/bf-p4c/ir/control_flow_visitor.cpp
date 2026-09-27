@@ -23,7 +23,7 @@
 namespace BFN {
 
 void ControlFlowVisitor::visit_def(const IR::PathExpression *pe) {
-    auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+    const P4::IR::IDeclaration *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
     BUG_CHECK(d, "failed to resolve %s", pe);
     if (auto *ps = d->to<IR::ParserState>()) {
         visit(ps, "transition");
@@ -36,7 +36,7 @@ void ControlFlowVisitor::visit_def(const IR::PathExpression *pe) {
 }
 
 void ControlFlowVisitor::visit_def(const IR::MethodCallExpression *mc) {
-    auto *mi = P4::MethodInstance::resolve(mc, this);
+    auto mi = P4::MethodInstance::resolve(mc, this);
     BUG_CHECK(mi, "failed to resolve %s", mi);
     if (auto *act = mi->to<P4::ActionCall>()) {
         visit(act->action, "action");

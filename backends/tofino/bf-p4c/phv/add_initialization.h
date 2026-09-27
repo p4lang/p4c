@@ -74,7 +74,7 @@ class ComputeFieldsRequiringInit : public Visitor {
     // Map of all fields that must be initialized (across all actions).
     ordered_set<PHV::FieldSlice> fieldsForInit;
 
-    const IR::Node *apply_visitor(const IR::Node *root, const char * = nullptr) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *root, const char * = nullptr) override;
 
  public:
     explicit ComputeFieldsRequiringInit(const PhvInfo &p) : phv(p) {}
