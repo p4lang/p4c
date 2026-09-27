@@ -38,6 +38,11 @@ struct has_static_type_name<T, std::void_t<decltype(T::static_type_name())>> : s
 template <class T>
 inline constexpr bool has_static_type_name_v = has_static_type_name<T>::value;
 
+template <class T>
+using Ptr = const T *;
+template <class T>
+using MutablePtr = T *;
+
 // node interface
 class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable {
  public:

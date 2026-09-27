@@ -469,6 +469,13 @@ class Transform : public virtual Visitor {
         return rv;
     }
     bool forceClone = false;  // force clone whole tree even if unchanged
+
+ public:
+    /// Return a node from a transform; reference counting will retain it here.
+    template <class T>
+    const T *guardReturn(const T *result) const {
+        return result;
+    }
 };
 
 // turn this on for extra info tracking control joinFlows for debugging
