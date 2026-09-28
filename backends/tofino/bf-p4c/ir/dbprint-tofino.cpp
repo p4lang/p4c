@@ -65,7 +65,8 @@ void IR::MAU::Table::dbprint(std::ostream &out) const {
      * way to allocate target-specific DBPrint flags */
     if (!match_key.empty()) {
         out << indent;
-        for (auto *key : match_key) out << endl << key->expr << ": " << key->match_type;
+        for (const IR::MAU::TableKey *key : match_key)
+            out << endl << key->expr << ": " << key->match_type;
         out << unindent;
     }
     if (!(dbgetflags(out) & TableNoActions)) {
@@ -242,11 +243,11 @@ void IR::BFN::LoweredParserMatch::dbprint(std::ostream &out) const {
         out << "(shift=" << shift << ')';
 
         out << indent;
-        for (auto *st : extracts) out << endl << *st;
-        for (auto *save : saves) out << endl << *save;
-        for (auto &scratch : scratches) out << endl << scratch;
-        for (auto *chk : checksums) out << endl << *chk;
-        for (auto *ctr : counters) out << endl << *ctr;
+        for (const LoweredParserPrimitive *st : extracts) out << endl << *st;
+        for (const LoweredSave *save : saves) out << endl << *save;
+        for (const MatchRegister &scratch : scratches) out << endl << scratch;
+        for (const LoweredParserChecksum *chk : checksums) out << endl << *chk;
+        for (const ParserCounterPrimitive *ctr : counters) out << endl << *ctr;
 
         out << unindent;
 
@@ -268,7 +269,7 @@ void IR::BFN::ParserState::dbprint(std::ostream &out) const {
     if (dbgetflags(out) & Brief) return;
     out << ':' << indent;
 
-    for (auto *statement : statements) out << endl << *statement;
+    for (const ParserPrimitive *statement : statements) out << endl << *statement;
 
     if (!selects.empty()) {
         out << endl << "select(" << setprec(Prec_Low);
@@ -280,7 +281,7 @@ void IR::BFN::ParserState::dbprint(std::ostream &out) const {
         out << ")" << setprec(0);
     }
 
-    for (auto *transition : transitions) out << endl << *transition;
+    for (const Transition *transition : transitions) out << endl << *transition;
 
     out << unindent;
 }
@@ -303,7 +304,7 @@ void IR::BFN::LoweredParserState::dbprint(std::ostream &out) const {
     out << *select;
     out << ")" << setprec(0);
 
-    for (auto *m : transitions) out << endl << *m;
+    for (const LoweredParserMatch *m : transitions) out << endl << *m;
     out << unindent;
 }
 
@@ -328,7 +329,7 @@ void IR::BFN::DigestFieldList::dbprint(std::ostream &out) const {
     out << "[ ";
 
     const char *sep = "";
-    for (auto *source : sources) {
+    for (const FieldLVal *source : sources) {
         out << sep << source->field->toString();
         sep = ", ";
     }
@@ -349,7 +350,7 @@ void IR::BFN::EmitChecksum::dbprint(std::ostream &out) const {
     out << "emit checksum { ";
 
     const char *sep = "";
-    for (auto *source : sources) {
+    for (const ChecksumEntry *source : sources) {
         out << sep << source->field->toString();
         sep = ", ";
     }
@@ -361,8 +362,8 @@ void IR::BFN::Deparser::dbprint(std::ostream &out) const {
     out << gress << " deparser";
     if (dbgetflags(out) & Brief) return;
     out << ':' << indent;
-    for (auto *emit : emits) out << endl << *emit;
-    for (auto *param : params) out << endl << *param;
+    for (const Emit *emit : emits) out << endl << *emit;
+    for (const DeparserParameter *param : params) out << endl << *param;
     for (auto digest : Values(digests)) out << endl << *digest;
     out << unindent;
 }
@@ -371,7 +372,7 @@ void IR::BFN::DigestTableEntry::dbprint(std::ostream &out) const {
     out << "[ ";
 
     const char *sep = "";
-    for (auto *source : sources) {
+    for (const ContainerRef *source : sources) {
         out << sep << *source;
         sep = ", ";
     }
@@ -386,7 +387,7 @@ void IR::BFN::LearningTableEntry::dbprint(std::ostream &out) const {
 void IR::BFN::LoweredDigest::dbprint(std::ostream &out) const {
     out << endl << name << ": " << indent << endl << "select: " << *selector;
     int idx = 0;
-    for (auto *entry : entries) {
+    for (const DigestTableEntry *entry : entries) {
         out << endl << name << ' ' << idx++ << ": " << indent << *entry << unindent;
     }
     out << unindent;
@@ -405,7 +406,7 @@ void IR::BFN::ChecksumClotInput::dbprint(std::ostream &out) const {
 void IR::BFN::PartialChecksumUnitConfig::dbprint(std::ostream &out) const {
     out << "checksum unit " << unit << " {";
 
-    for (auto *phv : phvs) out << endl << indent << *phv << unindent;
+    for (const ChecksumPhvInput *phv : phvs) out << endl << indent << *phv << unindent;
 
     out << " }";
 }
@@ -413,7 +414,8 @@ void IR::BFN::PartialChecksumUnitConfig::dbprint(std::ostream &out) const {
 void IR::BFN::FullChecksumUnitConfig::dbprint(std::ostream &out) const {
     out << "checksum unit " << unit << " {";
 
-    for (auto *partial : partialUnits) out << endl << indent << *partial << unindent;
+    for (const PartialChecksumUnitConfig *partial : partialUnits)
+        out << endl << indent << *partial << unindent;
 
     out << " }";
 }
@@ -426,10 +428,10 @@ void IR::BFN::LoweredDeparser::dbprint(std::ostream &out) const {
     out << gress << " deparser";
     if (dbgetflags(out) & Brief) return;
     out << ':' << indent;
-    for (auto *emit : emits) out << endl << *emit;
-    for (auto *param : params) out << endl << *param;
+    for (const LoweredEmit *emit : emits) out << endl << *emit;
+    for (const LoweredDeparserParameter *param : params) out << endl << *param;
     for (auto digest : digests) out << endl << *digest;
-    for (auto *checksumFieldList : checksums) out << *checksumFieldList;
+    for (const FullChecksumUnitConfig *checksumFieldList : checksums) out << *checksumFieldList;
     out << unindent;
 }
 

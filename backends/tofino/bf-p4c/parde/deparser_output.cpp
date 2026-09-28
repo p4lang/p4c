@@ -74,7 +74,7 @@ std::ostream &outputDebugInfo(std::ostream &out, indent_t indent,
 template <class T>
 std::ostream &outputDebugInfo(std::ostream &out, indent_t indent, const IR::Vector<T> sourcesRef,
                               const IR::BFN::Reference *povBitRef = nullptr) {
-    for (const auto *source : sourcesRef) {
+    for (auto source : sourcesRef) {
         if (sourcesRef.size() > 1) {
             AutoIndent debugInfoIndent(indent, 2);
             out << std::endl << indent << "# " << source << ":";
@@ -168,7 +168,7 @@ struct OutputChecksums : public Inspector {
         out << indent << "partial_checksum " << partial->unit << ": " << std::endl;
         visited.insert(partial->unit);
         AutoIndent checksumIndent(indent);
-        for (auto *input : partial->phvs) {
+        for (auto input : partial->phvs) {
             out << indent << "- " << input->source;
             out << ": {";
             if (input->swap != 0) {
@@ -193,7 +193,7 @@ struct OutputChecksums : public Inspector {
         if (checksum->zeros_as_ones) {
             out << indent << "- " << "zeros_as_ones: true" << std::endl;
         }
-        for (auto *partial : checksum->partialUnits) {
+        for (auto partial : checksum->partialUnits) {
             if (partial->phvs.size()) {
                 out << indent << "- partial_checksum " << partial->unit << ": {";
                 if (Device::currentDevice() != Device::TOFINO) {
@@ -205,7 +205,7 @@ struct OutputChecksums : public Inspector {
                 out << " }" << std::endl;
             }
         }
-        for (auto *clot : checksum->clots) {
+        for (auto clot : checksum->clots) {
             out << indent << "- clot " << clot->clot->tag << ": {";
             out << " pov: " << clot->povBit;
             if (clot->invert) {
@@ -265,7 +265,7 @@ struct OutputParameters : public Inspector {
         if (param->sources.size() > 1) {
             out << "[";
             std::string sep = "";
-            for (const auto *source : param->sources) {
+            for (auto source : param->sources) {
                 out << sep << source;
                 sep = ", ";
             }
@@ -313,7 +313,7 @@ struct OutputDigests : public Inspector {
             outputDebugInfo(out, indent, digest->selector) << std::endl;
         }
 
-        for (auto *entry : digest->entries) {
+        for (auto entry : digest->entries) {
             out << indent << entry->idx << ":";
             if (entry->sources.size() == 0) {
                 out << " []" << std::endl;  // output empty list when no params present
@@ -336,7 +336,7 @@ struct OutputDigests : public Inspector {
                 outputDebugInfo(out, indent, digest->selector) << std::endl;
             }
 
-            for (auto *source : entry->sources) {
+            for (auto source : entry->sources) {
                 out << indent << "- " << source;
                 outputDebugInfo(out, indent, source) << std::endl;
             }
@@ -357,7 +357,7 @@ struct OutputDigests : public Inspector {
         //  select: H5(0..2)  # bit[2..0]: ingress::ig_intr_md_for_dprsr.digest_type
         // The offset must be calculated accordingly to encode the learn quant fields
         int digestOffset = digest->selector->container.size() / 8;
-        for (auto *digestEntry : digest->entries) {
+        for (auto digestEntry : digest->entries) {
             out << indent << digestEntry->idx << ":";
 
             auto *entry = digestEntry->to<IR::BFN::LearningTableEntry>();
@@ -393,7 +393,7 @@ struct OutputDigests : public Inspector {
 
         const char *sep = "";
         out << indent << "name" << ": [ ";
-        for (auto *entry : digest->entries) {
+        for (auto entry : digest->entries) {
             out << sep << entry->to<IR::BFN::LearningTableEntry>()->controlPlaneName;
             sep = ", ";
         }
@@ -437,7 +437,7 @@ struct OutputRemainingBridgeMetadata : public Inspector {
 DeparserAsmOutput::DeparserAsmOutput(const IR::BFN::Pipe *pipe, const PhvInfo &phv,
                                      const ClotInfo &clot, gress_t gress)
     : phv(phv), clot(clot), deparser(nullptr) {
-    auto *abstractDeparser = pipe->thread[gress].deparser;
+    auto abstractDeparser = pipe->thread[gress].deparser;
     BUG_CHECK(abstractDeparser != nullptr, "No deparser?");
     deparser = abstractDeparser->to<IR::BFN::LoweredDeparser>();
     BUG_CHECK(deparser, "Writing assembly for a non-lowered deparser?");

@@ -218,7 +218,7 @@ class Primitive : Operation {
         operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
     virtual bool isOutput(int operand_index) const;
     virtual unsigned inferOperandTypes() const;
-    virtual Type inferOperandType(int operand) const;
+    virtual const Type *inferOperandType(int operand) const;
     virtual void typecheck() const;
 #apply
     stringOp = name;
@@ -335,7 +335,7 @@ class Counter : CounterOrMeter {
     int         max_width = -1;
     int         min_width = -1;
     const char *kind() const override { return "stats"; }
-    const Type *getType() const override { return Type_Counter::get(); }
+    Type getType() const override { return Type_Counter::get(); }
 }
 
 class Meter : CounterOrMeter {
@@ -464,7 +464,7 @@ class AttribLocals : ISimpleNamespace {
     inline NameMap<AttribLocal> locals = {};
 #nodbprint
     Util::Enumerator<IDeclaration> *getDeclarations() const override {
-        return locals.valueEnumerator()->as<const IDeclaration *>(); }
+        return locals.valueEnumerator()->as<IR::Ptr<IDeclaration>>(); }
     IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
     IDeclaration getDeclByName(std::string_view name) const override { return locals[cstring(name)]; }
 }

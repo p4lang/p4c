@@ -67,7 +67,7 @@ std::optional<std::pair<cstring, ResubmitSources *>> analyzeResubmitStatement(
         auto type = methodCall->typeArguments->at(0);
         auto typeName = type->to<IR::Type_Name>();
         auto *sources = new ResubmitSources;
-        for (auto *field : fieldList->components) {
+        for (auto field : fieldList->components) {
             LOG2("resubmit would include field: " << field);
             if (!field->expression->is<IR::Concat>() && !field->expression->is<IR::Cast>() &&
                 !field->expression->is<IR::Constant>() && !field->expression->is<IR::Member>()) {

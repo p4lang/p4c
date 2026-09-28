@@ -50,7 +50,7 @@ bool isMetadata(const LinearPath &path, P4::TypeMap *typeMap) {
     return std::all_of(path.components.begin(), path.components.end(),
                        [&](const IR::Expression *component) {
                            LOG2("isMetadata? checking component: " << component);
-                           auto *type = typeMap->getType(component);
+                           auto type = typeMap->getType(component);
                            BUG_CHECK(type, "Couldn't find type for: %1%", component);
                            LOG3("isMetadata? type is: " << type);
                            if (component == lastComponent) return isMetadataOrPrimitiveType(type);
@@ -65,7 +65,7 @@ std::optional<cstring> containingTnaParam(const LinearPath &linearPath, const Tn
               "Path-like expression tree was rooted in "
               "non-path expression: %1%",
               linearPath.components[0]);
-    auto *decl = refMap->getDeclaration(topLevelPath->path);
+    auto decl = refMap->getDeclaration(topLevelPath->path);
     BUG_CHECK(decl,
               "No declaration for top level path in path-like "
               "expression: %1%",
@@ -96,13 +96,13 @@ void forAllTouchedFields(const LinearPath &linearPath, P4::TypeMap *typeMap, Fun
             BUG("Unexpected path-like expression component: %1%", component);
     }
 
-    auto *lastComponentType = typeMap->getType(components.back());
+    auto lastComponentType = typeMap->getType(components.back());
     BUG_CHECK(lastComponentType, "Couldn't find type for: %1%", components.back());
     if (auto *structType = lastComponentType->to<IR::Type_StructLike>()) {
         fullPathStr.push_back('.');
         cstring fullPath(fullPathStr);
-        for (auto *field : structType->fields) {
-            auto *fieldType = typeMap->getType(field);
+        for (auto field : structType->fields) {
+            auto fieldType = typeMap->getType(field);
             BUG_CHECK(fieldType, "Couldn't find type for: %1%", field);
             auto *fieldExpr = new IR::Member(fieldType, components.back(), IR::ID(field->name));
             func(fullPath + field->name, fieldType, fieldExpr);
@@ -267,8 +267,8 @@ bool CollectBridgedFields::preorder(const IR::BFN::TnaDeparser *d) {
     return false;
 }
 bool CollectBridgedFields::preorder(const IR::P4Table *tbl) {
-    if (auto *key = tbl->getKey()) visit(key, "key");
-    if (auto *actions = tbl->getActionList()) {
+    if (auto key = tbl->getKey()) visit(key, "key");
+    if (auto actions = tbl->getActionList()) {
         parallel_visit(actions->actionList, "actions");
     } else {
         BUG("No actions in %s", tbl);
