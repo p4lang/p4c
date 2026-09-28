@@ -41,7 +41,7 @@ class ParameterSubstitution : public IHasDbPrint {
     }
 
     const IR::Parameter *findParameter(const IR::Argument *argument) const {
-        for (auto p : *getParametersInOrder())
+        for (auto p : getParametersInOrder())
             if (lookup(p) == argument) return p;
         return nullptr;
     }
@@ -54,14 +54,15 @@ class ParameterSubstitution : public IHasDbPrint {
     void populate(const IR::ParameterList *params, const IR::Vector<IR::Argument> *args);
 
     /// Returns parameters in the order they were added
-    Util::Enumerator<const IR::Parameter *> *getParametersInArgumentOrder() const {
+    Util::EnumeratorPtr<const IR::Parameter *> getParametersInArgumentOrder() const {
         return Util::enumerate(parameters);
     }
 
     /// Returns parameters in the order of the parameter list.
     /// Only works if parameters were inserted using populate.
-    Util::Enumerator<const IR::Parameter *> *getParametersInOrder() const {
-        if (paramList == nullptr) return new Util::EmptyEnumerator<const IR::Parameter *>;
+    Util::EnumeratorPtr<const IR::Parameter *> getParametersInOrder() const {
+        if (paramList == nullptr)
+            return std::make_shared<Util::EmptyEnumerator<const IR::Parameter *>>();
         return paramList->getEnumerator();
     }
 
@@ -69,7 +70,7 @@ class ParameterSubstitution : public IHasDbPrint {
         bool brief = (DBPrint::dbgetflags(out) & DBPrint::Brief);
         if (paramList != nullptr) {
             if (!brief) out << "paramList:" << Log::endl;
-            for (auto s : *paramList->getEnumerator()) {
+            for (auto s : paramList->getEnumerator()) {
                 out << dbp(s) << "=>" << dbp(lookup(s));
                 if (!brief) out << " " << lookup(s);
                 out << Log::endl;

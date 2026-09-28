@@ -499,7 +499,7 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::P4Progra
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Declaration_MatchKind *decl) {
     if (done()) return decl;
-    for (auto id : *decl->getDeclarations()) setType(id->getNode(), IR::Type_MatchKind::get());
+    for (auto id : decl->getDeclarations()) setType(id->getNode(), IR::Type_MatchKind::get());
     return decl;
 }
 
@@ -804,7 +804,7 @@ TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const I
 
     auto args = new IR::Vector<IR::ArgumentInfo>();
     size_t i = 0;
-    for (auto pi : *methodType->parameters->getEnumerator()) {
+    for (auto pi : methodType->parameters->getEnumerator()) {
         if (i >= arguments->size()) {
             BUG_CHECK(pi->isOptional() || pi->defaultValue != nullptr, "Missing nonoptional arg %s",
                       pi);
