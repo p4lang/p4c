@@ -9,6 +9,7 @@
 #define IR_JSON_LOADER_H_
 
 #include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -47,20 +48,21 @@ class JSONLoader {
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
-    std::unordered_map<int, IR::Node *> &node_refs;
+    using NodeReferences = std::unordered_map<int, IR::Node *>;
+    std::shared_ptr<NodeReferences> node_refs;
     std::unique_ptr<JsonData> json_root;
     const JsonData *json = nullptr;
     JsonData::LocationInfo *locinfo = nullptr;
     std::unique_ptr<absl::flat_hash_set<P4::cstring, Util::Hash>> decoded;
     bool (*errfn)(const JSONLoader &, std::string_view msg) = nullptr;
 
-    JSONLoader(const JsonData *json, std::unordered_map<int, IR::Node *> &refs,
+    JSONLoader(const JsonData *json, std::shared_ptr<NodeReferences> refs,
                JsonData::LocationInfo *locinfo)
-        : node_refs(refs), json(json), locinfo(locinfo) {}
+        : node_refs(std::move(refs)), json(json), locinfo(locinfo) {}
 
  public:
     explicit JSONLoader(std::istream &in, JsonData::LocationInfo *li = nullptr)
-        : node_refs(*(new std::unordered_map<int, IR::Node *>())), locinfo(li) {
+        : node_refs(std::make_shared<NodeReferences>()), locinfo(li) {
         in >> json_root;
         json = json_root.get();
     }
@@ -133,7 +135,7 @@ class JSONLoader {
         auto success = load("Node_ID", id) || error("missing field Node_ID");
         if (!success) return nullptr;
         if (id >= 0) {
-            if (node_refs.find(id) == node_refs.end()) {
+            if (node_refs->find(id) == node_refs->end()) {
                 cstring type;
                 if (!factory) {
                     auto success = load("Node_Type", type) || error("missing field Node_Type");
@@ -143,17 +145,17 @@ class JSONLoader {
                 if (factory) {
                     auto *node = factory(*this)->to<IR::Node>();
                     CHECK_NULL(node);
-                    node_refs[id] = node;
+                    node_refs->emplace(id, node);
                     // Creating JsonObject from source_info read from jsonFile
                     // and setting SourceInfo for each node
                     // when "--fromJSON" flag is used
-                    node_refs[id]->sourceInfoFromJSON(*this);
+                    node->sourceInfoFromJSON(*this);
                 } else {
                     error("no Node factory for " + type);
                     return nullptr;
                 }
             }
-            return node_refs[id];
+            return node_refs->at(id);
         }
         error("invalid Node_ID " + std::to_string(id));
         return nullptr;
