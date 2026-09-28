@@ -1,0 +1,13 @@
+#ifndef BACKENDS_P4TOOLS_MODULES_RTSMITH_REGISTER_H_
+#define BACKENDS_P4TOOLS_MODULES_RTSMITH_REGISTER_H_
+
+@include_statements_var@
+
+namespace P4::P4Tools::RtSmith {
+
+inline void registerRtSmithTargets() {
+@rtsmith_targets_var@}
+
+}  // namespace P4::P4Tools::RtSmith
+
+#endif  /* BACKENDS_P4TOOLS_MODULES_RTSMITH_REGISTER_H_ */
