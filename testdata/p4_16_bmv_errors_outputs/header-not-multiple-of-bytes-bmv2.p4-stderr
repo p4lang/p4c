@@ -1,0 +1,3 @@
+header-not-multiple-of-bytes-bmv2.p4(11): [--Werror=target-error] error: header hdr: Found header with fields totaling 41 bits.  BMv2 target only supports headers with fields totaling a multiple of 8 bits.
+header hdr {
+       ^^^
