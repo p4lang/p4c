@@ -18,7 +18,12 @@ namespace P4::P4Tools::P4Testgen {
  *  Abstract Test Object Class
  * ========================================================================================= */
 
-class TestObject : public ICastable {
+class TestObject : public ICastable
+#if !HAVE_LIBGC
+    ,
+                   public IR::shared_ptr_base
+#endif
+{
  public:
     TestObject() = default;
     ~TestObject() override = default;
@@ -29,6 +34,7 @@ class TestObject : public ICastable {
 
     /// @returns the string name of this particular test object.
     [[nodiscard]] virtual cstring getObjectName() const = 0;
+    [[nodiscard]] cstring toString() const { return getObjectName(); }
 
     /// @returns a version of the test object where all expressions are resolved and symbolic
     /// variables are substituted according to the mapping present in the @param model.
@@ -38,7 +44,7 @@ class TestObject : public ICastable {
 };
 
 /// A map of test objects.
-using TestObjectMap = ordered_map<cstring, const TestObject *>;
+using TestObjectMap = ordered_map<cstring, IR::Ptr<TestObject>>;
 
 }  // namespace P4::P4Tools::P4Testgen
 

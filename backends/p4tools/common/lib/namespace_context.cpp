@@ -13,14 +13,15 @@
 
 namespace P4::P4Tools {
 
-const NamespaceContext *NamespaceContext::Empty = new NamespaceContext(nullptr, nullptr);
+std::shared_ptr<const NamespaceContext> NamespaceContext::Empty{
+    new NamespaceContext(nullptr, nullptr)};
 
-const NamespaceContext *NamespaceContext::push(const IR::INamespace *ns) const {
-    return new NamespaceContext(ns, this);
+std::shared_ptr<const NamespaceContext> NamespaceContext::push(const IR::INamespace *ns) const {
+    return std::shared_ptr<const NamespaceContext>(new NamespaceContext(ns, shared_from_this()));
 }
 
-const NamespaceContext *NamespaceContext::pop() const {
-    BUG_CHECK(this != Empty, "Popped an empty namespace context");
+std::shared_ptr<const NamespaceContext> NamespaceContext::pop() const {
+    BUG_CHECK(this != Empty.get(), "Popped an empty namespace context");
     return outer;
 }
 
@@ -28,12 +29,12 @@ const IR::IDeclaration *NamespaceContext::findNestedDecl(
     const IR::INestedNamespace *nestedNameSpace, const IR::Path *path) const {
     auto name = path->name.name;
     const auto namespaces = nestedNameSpace->getNestedNamespaces();
-    for (const auto *subNamespace : namespaces) {
+    for (auto subNamespace : namespaces) {
         // Handle case where current namespace is an ISimpleNamespace.
         // If there is no match, we fall through. P4 Nodes may have multiple namespace types with
         // different levels of declaration visibility.
         if (const auto *ns = subNamespace->to<IR::ISimpleNamespace>()) {
-            if (const auto *decl = ns->getDeclByName(name)) {
+            if (auto decl = ns->getDeclByName(name)) {
                 return decl;
             }
         }
@@ -41,7 +42,7 @@ const IR::IDeclaration *NamespaceContext::findNestedDecl(
         // Handle case where current namespace is an IGeneralNamespace.
         // If there is no match, we fall through.
         if (const auto *ns = subNamespace->to<IR::IGeneralNamespace>()) {
-            auto *decl = ns->getDeclsByName(name)->singleOrDefault();
+            auto decl = ns->getDeclsByName(name)->singleOrDefault();
             if (decl != nullptr) return decl;
         }
 
@@ -60,7 +61,7 @@ const IR::IDeclaration *NamespaceContext::findNestedDecl(
 }
 
 const IR::IDeclaration *NamespaceContext::findDecl(const IR::Path *path) const {
-    BUG_CHECK(this != Empty, "Variable %1% not found in the available namespaces.", path);
+    BUG_CHECK(this != Empty.get(), "Variable %1% not found in the available namespaces.", path);
 
     // Handle absolute paths by ensuring they are looked up in the outermost non-empty namespace
     // context.
@@ -73,7 +74,7 @@ const IR::IDeclaration *NamespaceContext::findDecl(const IR::Path *path) const {
     // If there is no match, we fall through. P4 Nodes may have multiple namespace types with
     // different levels of declaration visibility.
     if (const auto *ns = curNamespace->to<IR::ISimpleNamespace>()) {
-        if (const auto *decl = ns->getDeclByName(name)) {
+        if (auto decl = ns->getDeclByName(name)) {
             return decl;
         }
     }
@@ -81,7 +82,7 @@ const IR::IDeclaration *NamespaceContext::findDecl(const IR::Path *path) const {
     // Handle case where current namespace is an IGeneralNamespace.
     // If there is no match, we fall through.
     if (const auto *ns = curNamespace->to<IR::IGeneralNamespace>()) {
-        auto *decl = ns->getDeclsByName(name)->singleOrDefault();
+        auto decl = ns->getDeclsByName(name)->singleOrDefault();
         if (decl != nullptr) return decl;
     }
     // As last resort, check if the NestedNamespace contains the declaration.
@@ -97,13 +98,13 @@ const IR::IDeclaration *NamespaceContext::findDecl(const IR::Path *path) const {
 
 const std::set<cstring> &NamespaceContext::getUsedNames() const {
     if (!usedNames) {
-        if (this == Empty) {
-            usedNames = *new std::set<cstring>();
+        if (this == Empty.get()) {
+            usedNames.emplace();
         } else {
             usedNames = outer->getUsedNames();
 
             // Add names in curNamespace.
-            for (const auto *decl : curNamespace->getDeclarations()) {
+            for (auto decl : curNamespace->getDeclarations()) {
                 usedNames->insert(decl->getName());
             }
         }

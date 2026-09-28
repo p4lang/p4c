@@ -128,9 +128,9 @@ struct RemoveExternMethodCallsExcludedByAnnotation : public Transform {
         auto *callExpr = call->methodCall->to<IR::MethodCallExpression>();
         BUG_CHECK(callExpr, "Malformed method call IR: %1%", call);
 
-        auto *dontTranslate = action->getAnnotation("dont_translate_extern_method"_cs);
+        auto dontTranslate = action->getAnnotation("dont_translate_extern_method"_cs);
         if (!dontTranslate) return call;
-        for (auto *excluded : dontTranslate->getExpr()) {
+        for (const IR::Expression *excluded : dontTranslate->getExpr()) {
             auto *excludedMethod = excluded->to<IR::StringLiteral>();
             if (!excludedMethod) {
                 error(
@@ -287,7 +287,7 @@ struct Pipeline {
  private:
     // Inserts global pragmas into this instance. Filters out all pragmas which are applied
     // to a different pipeline.
-    void insertPragmas(const std::vector<const IR::Annotation *> &all_pragmas);
+    void insertPragmas(const std::vector<IR::Ptr<IR::Annotation>> &all_pragmas);
 };
 
 class ProgramPipelines {
@@ -392,7 +392,7 @@ struct RewriteControlAndParserBlocks : public PassManager {
             // other output declarations.
             BFNContext::get().discoverPipes(evaluated_program, toplevel);
 
-            auto *main = toplevel->getMain();
+            const IR::PackageBlock *main = toplevel->getMain();
             ERROR_CHECK(main != nullptr, ErrorType::ERR_INVALID,
                         "program: does not instantiate `main`");
             main->apply(*parseTna);

@@ -11,10 +11,9 @@
 
 namespace P4 {
 
-StackVariable::StackVariable(const IR::Expression *expr) : variable(expr) {
+StackVariable::StackVariable(IR::Ptr<IR::Expression> expr) : variable(expr) {
     CHECK_NULL(expr);
     BUG_CHECK(repOk(expr), "Invalid stack variable %1%", expr);
-    variable = expr;
 }
 
 bool StackVariable::repOk(const IR::Expression *expr) {
@@ -144,7 +143,7 @@ class ParserStateRewriter : public Transform {
  public:
     /// Default constructor.
     ParserStateRewriter(ParserStructure *parserStructure, ParserStateInfo *state,
-                        ValueMap *valueMap, ReferenceMap *refMap, TypeMap *typeMap,
+                        std::shared_ptr<ValueMap> valueMap, ReferenceMap *refMap, TypeMap *typeMap,
                         ExpressionEvaluator *afterExec, StatesVisitedMap &visitedStates)
         : parserStructure(parserStructure),
           state(state),
@@ -175,7 +174,7 @@ class ParserStateRewriter : public Transform {
         if (!basetype->is<IR::Type_Array>()) return expression;
         IR::ArrayIndex *newExpression = expression->clone();
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
-        auto *value = ev.evaluate(expression->right, false);
+        auto value = ev.evaluate(expression->right, false);
         if (!value->is<SymbolicInteger>()) return expression;
         if (!value->to<SymbolicInteger>()->isKnown()) {
             ::P4::warning(ErrorType::WARN_INVALID,
@@ -344,7 +343,7 @@ class ParserStateRewriter : public Transform {
  private:
     ParserStructure *parserStructure;
     ParserStateInfo *state;
-    ValueMap *valueMap;
+    std::shared_ptr<ValueMap> valueMap;
     ReferenceMap *refMap;
     TypeMap *typeMap;
     ExpressionEvaluator *afterExec;
@@ -362,15 +361,15 @@ class ParserSymbolicInterpreter {
     const IR::P4Parser *parser;
     ReferenceMap *refMap;
     TypeMap *typeMap;
-    SymbolicValueFactory *factory;
-    ParserInfo *synthesizedParser;  // output produced
+    std::shared_ptr<SymbolicValueFactory> factory;
+    std::shared_ptr<ParserInfo> synthesizedParser;  // output produced
     bool unroll;
     StatesVisitedMap visitedStates;
     bool &wasError;
 
-    ValueMap *initializeVariables() {
+    std::shared_ptr<ValueMap> initializeVariables() {
         wasError = false;
-        ValueMap *result = new ValueMap();
+        auto result = std::make_shared<ValueMap>();
         ExpressionEvaluator ev(refMap, typeMap, result);
 
         for (auto p : parser->getApplyParameters()->parameters) {
@@ -382,7 +381,7 @@ class ParserSymbolicInterpreter {
         }
         for (auto d : parser->parserLocals) {
             auto type = typeMap->getType(d);
-            SymbolicValue *value = nullptr;
+            IR::MutablePtr<SymbolicValue> value = nullptr;
             if (d->is<IR::Declaration_Constant>()) {
                 auto dc = d->to<IR::Declaration_Constant>();
                 value = ev.evaluate(dc->initializer, false);
@@ -407,7 +406,7 @@ class ParserSymbolicInterpreter {
     }
 
     ParserStateInfo *newStateInfo(const ParserStateInfo *predecessor, cstring stateName,
-                                  ValueMap *values, size_t index) {
+                                  std::shared_ptr<ValueMap> values, size_t index) {
         if (stateName == IR::ParserState::accept || stateName == IR::ParserState::reject)
             return nullptr;
         auto state = structure->get(stateName);
@@ -434,7 +433,7 @@ class ParserSymbolicInterpreter {
     }
 
     /// Return false if an error can be detected statically
-    bool reportIfError(const ParserStateInfo *state, SymbolicValue *value) const {
+    bool reportIfError(const ParserStateInfo *state, IR::MutablePtr<SymbolicValue> value) const {
         if (value->is<SymbolicException>()) {
             auto exc = value->to<SymbolicException>();
 
@@ -464,12 +463,12 @@ class ParserSymbolicInterpreter {
     /// Executes symbolically the specified statement.
     /// Returns pointer to generated statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
-    const IR::StatOrDecl *executeStatement(ParserStateInfo *state, const IR::StatOrDecl *sord,
-                                           ValueMap *valueMap) {
+    IR::Ptr<IR::StatOrDecl> executeStatement(ParserStateInfo *state, const IR::StatOrDecl *sord,
+                                             std::shared_ptr<ValueMap> valueMap) {
         const IR::StatOrDecl *newSord = nullptr;
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
-        SymbolicValue *errorValue = nullptr;
+        IR::MutablePtr<SymbolicValue> errorValue = nullptr;
         bool success = true;
         if (sord->is<IR::AssignmentStatement>()) {
             auto ass = sord->to<IR::AssignmentStatement>();
@@ -490,7 +489,7 @@ class ParserSymbolicInterpreter {
             success = reportIfError(state, e);
         } else if (auto bs = sord->to<IR::BlockStatement>()) {
             IR::IndexedVector<IR::StatOrDecl> newComponents;
-            for (auto *component : bs->components) {
+            for (const IR::StatOrDecl *component : bs->components) {
                 auto newComponent = executeStatement(state, component, valueMap);
                 if (!newComponent)
                     success = false;
@@ -515,7 +514,7 @@ class ParserSymbolicInterpreter {
         }
         ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                      visitedStates);
-        const IR::Node *node = sord->apply(rewriter);
+        auto node = sord->apply(rewriter);
         if (rewriter.checkError()) {
             wasError = true;
             return nullptr;
@@ -529,14 +528,15 @@ class ParserSymbolicInterpreter {
     }
 
     using EvaluationSelectResult =
-        std::pair<std::vector<ParserStateInfo *> *, const IR::Expression *>;
+        std::pair<std::shared_ptr<std::vector<ParserStateInfo *>>, IR::Ptr<IR::Expression>>;
 
-    EvaluationSelectResult evaluateSelect(ParserStateInfo *state, ValueMap *valueMap) {
-        const IR::Expression *newSelect = nullptr;
+    EvaluationSelectResult evaluateSelect(ParserStateInfo *state,
+                                          std::shared_ptr<ValueMap> valueMap) {
+        IR::Ptr<IR::Expression> newSelect = nullptr;
         auto select = state->state->selectExpression;
         if (select == nullptr) return EvaluationSelectResult(nullptr, nullptr);
 
-        auto result = new std::vector<ParserStateInfo *>();
+        auto result = std::make_shared<std::vector<ParserStateInfo *>>();
         if (select->is<IR::PathExpression>()) {
             auto path = select->to<IR::PathExpression>()->path;
             auto next = refMap->getDeclaration(path);
@@ -544,7 +544,7 @@ class ParserSymbolicInterpreter {
             // update call indexes
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, nullptr,
                                          visitedStates);
-            const IR::Expression *node = select->apply(rewriter);
+            auto node = select->apply(rewriter);
             if (rewriter.isOutOfBound()) {
                 return EvaluationSelectResult(nullptr, nullptr);
             }
@@ -570,7 +570,7 @@ class ParserSymbolicInterpreter {
             }
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                          visitedStates);
-            const IR::Node *node = se->select->apply(rewriter);
+            auto node = se->select->apply(rewriter);
             if (rewriter.isOutOfBound()) {
                 return EvaluationSelectResult(nullptr, nullptr);
             }
@@ -585,7 +585,7 @@ class ParserSymbolicInterpreter {
                 // update call indexes
                 ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, nullptr,
                                              visitedStates);
-                const IR::Node *node = c->apply(rewriter);
+                auto node = c->apply(rewriter);
                 if (rewriter.isOutOfBound()) {
                     return EvaluationSelectResult(nullptr, nullptr);
                 }
@@ -676,7 +676,7 @@ class ParserSymbolicInterpreter {
                 };
                 auto packets = state->before->filter(filter);
                 auto prevPackets = crt->before->filter(filter);
-                if (packets->equals(prevPackets)) {
+                if (packets->equals(prevPackets.get())) {
                     for (auto p : state->before->map) {
                         if (p.second->is<SymbolicPacketIn>()) {
                             auto pkt = p.second->to<SymbolicPacketIn>();
@@ -696,7 +696,7 @@ class ParserSymbolicInterpreter {
                 }
 
                 // If no header validity has changed we can't really unroll
-                if (!headerValidityChange(crt->before, state->before)) {
+                if (!headerValidityChange(crt->before.get(), state->before.get())) {
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
                         ::P4::warning(ErrorType::WARN_INVALID,
                                       "Parser cycle can't be unrolled, because ParserUnroll can't "
@@ -720,8 +720,8 @@ class ParserSymbolicInterpreter {
         return IR::ID(state->state->name + std::to_string(state->currentIndex));
     }
 
-    using EvaluationStateResult =
-        std::tuple<std::vector<ParserStateInfo *> *, bool, IR::IndexedVector<IR::StatOrDecl>>;
+    using EvaluationStateResult = std::tuple<std::shared_ptr<std::vector<ParserStateInfo *>>, bool,
+                                             IR::IndexedVector<IR::StatOrDecl>>;
 
     /// Generates new state with the help of symbolic execution.
     /// If corresponded state was generated previously then it returns @a nullptr and false.
@@ -740,7 +740,7 @@ class ParserSymbolicInterpreter {
             newStates.insert(newName);
         }
         for (auto s : state->state->components) {
-            auto *newComponent = executeStatement(state, s, valueMap);
+            auto newComponent = executeStatement(state, s, valueMap);
             if (!newComponent) {
                 return EvaluationStateResult(nullptr, true, components);
             }
@@ -780,7 +780,7 @@ class ParserSymbolicInterpreter {
         CHECK_NULL(structure);
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
-        factory = new SymbolicValueFactory(typeMap);
+        factory = std::make_shared<SymbolicValueFactory>(typeMap);
         parser = structure->parser;
         hasOutOfboundState = false;
     }
@@ -802,8 +802,8 @@ class ParserSymbolicInterpreter {
     }
 
     /// running symbolic execution
-    ParserInfo *run() {
-        synthesizedParser = new ParserInfo();
+    std::shared_ptr<ParserInfo> run() {
+        synthesizedParser = std::make_shared<ParserInfo>();
         auto initMap = initializeVariables();
         if (initMap == nullptr)
             // error during initializer evaluation

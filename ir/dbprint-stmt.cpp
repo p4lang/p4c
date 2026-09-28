@@ -87,14 +87,14 @@ void IR::ForStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << annotations << Prec_Low << "for (";
     bool first = true;
-    for (auto *sd : init) {
+    for (const IR::StatOrDecl *sd : init) {
         if (!first) out << ", ";
         out << sd;
         first = false;
     }
     out << "; " << condition << "; ";
     first = true;
-    for (auto *sd : updates) {
+    for (const IR::StatOrDecl *sd : updates) {
         if (!first) out << ", ";
         out << sd;
         first = false;

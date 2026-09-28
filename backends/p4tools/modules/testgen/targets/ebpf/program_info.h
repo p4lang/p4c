@@ -43,9 +43,9 @@ class EBPFProgramInfo : public ProgramInfo {
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
         const;
 
-    [[nodiscard]] const IR::StateVariable &getTargetInputPortVar() const override;
+    [[nodiscard]] IR::StateVariable getTargetInputPortVar() const override;
 
-    [[nodiscard]] const IR::StateVariable &getTargetOutputPortVar() const override;
+    [[nodiscard]] IR::StateVariable getTargetOutputPortVar() const override;
 
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 

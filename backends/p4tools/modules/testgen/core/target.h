@@ -70,7 +70,7 @@ class TestgenTarget : public CompilerTarget {
     explicit TestgenTarget(const std::string &deviceName, const std::string &archName);
 
     CompilerResultOrError runCompilerImpl(const CompilerOptions &options,
-                                          const IR::P4Program *program) const override;
+                                          IR::Ptr<IR::P4Program> program) const override;
 
     [[nodiscard]] ICompileContext *makeContext() const override;
 };

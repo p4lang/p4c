@@ -26,11 +26,10 @@
 namespace P4::P4Tools::P4Testgen {
 
 FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState)
-    : solver(solver),
-      state(finalState),
-      finalModel(processModel(finalState, *new Model(solver.getSymbolicMapping()))) {
+    : solver(solver), state(finalState), finalModel(solver.getSymbolicMapping()) {
+    processModel(finalState, finalModel);
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(finalModel, true));
+        trace.emplace_back(event->evaluate(finalModel, true));
     }
 }
 
@@ -38,18 +37,18 @@ FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState,
                        const Model &finalModel)
     : solver(solver), state(finalState), finalModel(finalModel) {
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(finalModel, true));
+        trace.emplace_back(event->evaluate(finalModel, true));
     }
 }
 
 void FinalState::calculatePayload(const ExecutionState &executionState, Model &evaluatedModel) {
     const auto &packetBitSizeVar = ExecutionState::getInputPacketSizeVar();
-    const auto *payloadSizeConst = evaluatedModel.evaluate(packetBitSizeVar, true);
+    auto payloadSizeConst = evaluatedModel.evaluate(packetBitSizeVar, true);
     int calculatedPacketSize = IR::getIntFromLiteral(payloadSizeConst);
     const auto *inputPacketExpr = executionState.getInputPacket();
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
     if (payloadSize > 0) {
-        const auto *payloadType = IR::Type_Bits::get(payloadSize);
+        auto payloadType = IR::Type_Bits::get(payloadSize);
         const IR::Expression *payloadExpr = evaluatedModel.get(&PacketVars::PAYLOAD_SYMBOL, false);
         if (payloadExpr == nullptr) {
             payloadExpr = Utils::getRandConstantForType(payloadType);
@@ -67,25 +66,25 @@ Model &FinalState::processModel(const ExecutionState &finalState, Model &model, 
     return model;
 }
 
-std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConcolicState(
+std::optional<FinalState> FinalState::computeConcolicState(
     const ConcolicVariableMap &resolvedConcolicVariables) const {
     // If there are no new concolic variables, there is nothing to do.
     if (resolvedConcolicVariables.empty()) {
         return *this;
     }
-    std::vector<const Constraint *> asserts = state.get().getPathConstraint();
+    std::vector<IR::Ptr<Constraint>> asserts = state.get().getPathConstraint();
 
     for (const auto &resolvedConcolicVariable : resolvedConcolicVariables) {
         const auto &concolicVariable = resolvedConcolicVariable.first;
-        const auto *concolicAssignment = resolvedConcolicVariable.second;
-        const IR::Expression *pathConstraint = nullptr;
+        auto concolicAssignment = resolvedConcolicVariable.second;
+        IR::Ptr<IR::Expression> pathConstraint = nullptr;
         // We need to differentiate between state variables and expressions here.
         if (std::holds_alternative<IR::ConcolicVariable>(concolicVariable)) {
             pathConstraint = new IR::Equ(std::get<IR::ConcolicVariable>(concolicVariable).clone(),
                                          concolicAssignment);
-        } else if (std::holds_alternative<const IR::Expression *>(concolicVariable)) {
-            pathConstraint =
-                new IR::Equ(std::get<const IR::Expression *>(concolicVariable), concolicAssignment);
+        } else if (std::holds_alternative<IR::Ptr<IR::Expression>>(concolicVariable)) {
+            pathConstraint = new IR::Equ(std::get<IR::Ptr<IR::Expression>>(concolicVariable),
+                                         concolicAssignment);
         }
         CHECK_NULL(pathConstraint);
         pathConstraint = state.get().getSymbolicEnv().subst(pathConstraint);
@@ -102,11 +101,12 @@ std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConco
         warning("Concolic constraints for this path are unsatisfiable.");
         return std::nullopt;
     }
-    auto &model = processModel(state, *new Model(solver.get().getSymbolicMapping()), false);
+    Model model(solver.get().getSymbolicMapping());
+    processModel(state, model, false);
     /// Transfer any derived variables from that are missing  in this model.
     /// Do NOT update any variables that already exist.
-    model.mergeMap(finalModel.get().getSymbolicMap());
-    return *new FinalState(solver, state, model);
+    model.mergeMap(finalModel.getSymbolicMap());
+    return FinalState(solver, state, model);
 }
 
 const Model &FinalState::getFinalModel() const { return finalModel; }
@@ -115,9 +115,7 @@ AbstractSolver &FinalState::getSolver() const { return solver; }
 
 const ExecutionState *FinalState::getExecutionState() const { return &state.get(); }
 
-const std::vector<std::reference_wrapper<const TraceEvent>> *FinalState::getTraces() const {
-    return &trace;
-}
+const std::vector<IR::Ptr<TraceEvent>> *FinalState::getTraces() const { return &trace; }
 
 const P4::Coverage::CoverageSet &FinalState::getVisited() const { return state.get().getVisited(); }
 }  // namespace P4::P4Tools::P4Testgen

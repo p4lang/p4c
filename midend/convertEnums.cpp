@@ -15,7 +15,7 @@ const IR::Node *DoConvertEnums::preorder(IR::Type_Enum *type) {
     unsigned long long width = policy->enumSize(count);
     LOG2("Converting enum " << type->name << " to " << "bit<" << width << ">");
     BUG_CHECK(count <= (1ULL << width), "%1%: not enough bits to represent %2%", width, type);
-    auto r = new EnumRepresentation(type->srcInfo, width);
+    auto r = std::make_shared<EnumRepresentation>(type->srcInfo, width);
     auto canontype = typeMap->getTypeType(getOriginal(), true);
     BUG_CHECK(canontype->is<IR::Type_Enum>(), "canon type of enum %s is non enum %s?", type,
               canontype);

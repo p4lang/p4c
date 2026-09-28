@@ -383,9 +383,9 @@ fi
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 function build_gauntlet() {
-  # Symlink the toz3 extension for the p4 compiler.
+  # Use the toz3 branch updated for the compiler's owning IR interfaces.
   mkdir -p ${P4C_DIR}/extensions
-  git clone -b stable https://github.com/p4gauntlet/toz3 extensions/toz3
+  git clone -b "${TOZ3_REF:-fruffy/no-bdwgc}" https://github.com/p4gauntlet/toz3 extensions/toz3
   # Disable failures on crashes
   CMAKE_FLAGS+="-DVALIDATION_IGNORE_CRASHES=ON "
 }

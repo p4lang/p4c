@@ -43,9 +43,9 @@ bool P4ProgramDCGCreator::preorder(const IR::Annotation *annotation) {
 }
 
 bool P4ProgramDCGCreator::preorder(const IR::ConstructorCallExpression *callExpr) {
-    const auto *p4Type = callExpr->constructedType->getP4Type();
+    auto p4Type = callExpr->constructedType->getP4Type();
     if (const auto *typeName = p4Type->to<IR::Type_Name>()) {
-        const auto *decl = p4program->getDeclsByName(typeName->path->name.name)->single();
+        auto decl = p4program->getDeclsByName(typeName->path->name.name)->single();
         visit(decl->checkedTo<IR::Type_Declaration>());
     } else {
         visit(p4Type);
@@ -55,7 +55,7 @@ bool P4ProgramDCGCreator::preorder(const IR::ConstructorCallExpression *callExpr
 
 bool P4ProgramDCGCreator::preorder(const IR::MethodCallExpression *call) {
     CHECK_NULL(call->method);
-    for (const auto *arg : *call->arguments) {
+    for (auto arg : *call->arguments) {
         visit(arg);
     }
     if (call->method->type->is<IR::Type_Action>()) {
@@ -130,7 +130,7 @@ bool P4ProgramDCGCreator::preorder(const IR::MethodCallExpression *call) {
 
 bool P4ProgramDCGCreator::preorder(const IR::MethodCallStatement *method) {
     addEdge(method);
-    for (const auto *arg : *method->methodCall->arguments) {
+    for (auto arg : *method->methodCall->arguments) {
         visit(arg);
     }
     visit(method->methodCall);
@@ -139,7 +139,7 @@ bool P4ProgramDCGCreator::preorder(const IR::MethodCallStatement *method) {
 
 bool P4ProgramDCGCreator::preorder(const IR::P4Action *action) {
     addEdge(action, action->name);
-    for (const auto *annotation : action->getAnnotations()) {
+    for (auto annotation : action->getAnnotations()) {
         visit(annotation);
     }
     visit(action->body);
@@ -154,10 +154,10 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Parser *parser) {
 
 bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
     addEdge(table, table->name);
-    for (const auto *annotation : table->getAnnotations()) visit(annotation);
+    for (auto annotation : table->getAnnotations()) visit(annotation);
     bool wasImplementations = false;
     if (table->properties != nullptr) {
-        for (const auto *property : table->properties->properties) {
+        for (auto property : table->properties->properties) {
             if (property->name.name == "implementation") {
                 visit(property->annotations);
                 wasImplementations = true;
@@ -172,9 +172,9 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
     if (properties.tableIsImmutable) {
         // We can only match on entries when there are keys present.
         if (table->getKey() != nullptr) {
-            const auto *entryList = table->getEntries();
+            auto entryList = table->getEntries();
             if (entryList != nullptr) {
-                for (const auto *entry : entryList->entries) {
+                for (auto entry : entryList->entries) {
                     prev = storedSet;
                     visit(entry);
                     prevSet.insert(prev.begin(), prev.end());
@@ -192,7 +192,7 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
             return false;
         }
     }
-    for (const auto *action : table->getActionList()->actionList) {
+    for (auto action : table->getActionList()->actionList) {
         prev = storedSet;
         visit(action);
         prevSet.insert(prev.begin(), prev.end());
@@ -205,10 +205,10 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
 bool P4ProgramDCGCreator::preorder(const IR::ParserState *parserState) {
     addEdge(parserState, parserState->name);
     visited.insert(parserState);
-    for (const auto *annotation : parserState->annotations) {
+    for (auto annotation : parserState->annotations) {
         visit(annotation);
     }
-    for (const auto *component : parserState->components) {
+    for (auto component : parserState->components) {
         visit(component);
     }
     if (parserState->selectExpression != nullptr) {
@@ -240,12 +240,12 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Program *program) {
     p4program = program;
     const auto mainCount = program->getDeclsByName(IR::P4Program::main)->count();
     BUG_CHECK(mainCount > 0, "Program doesn't have a main declaration.");
-    const auto *mainIDecl = program->getDeclsByName(IR::P4Program::main)->single();
+    auto mainIDecl = program->getDeclsByName(IR::P4Program::main)->single();
     BUG_CHECK(mainIDecl, "Program's main declaration not found: %1%", program->main);
     const auto *declInstance = mainIDecl->to<IR::Declaration_Instance>();
     std::vector<const IR::ConstructorCallExpression *> v;
-    for (const auto *arg : *declInstance->arguments) {
-        const auto *expr = arg->expression;
+    for (auto arg : *declInstance->arguments) {
+        auto expr = arg->expression;
         if (const auto *ctorCall = expr->template to<IR::ConstructorCallExpression>()) {
             v.push_back(ctorCall);
             continue;
@@ -288,10 +288,10 @@ bool P4ProgramDCGCreator::preorder(const IR::SelectExpression *selectExpression)
     const auto *currentParser = findContext<IR::P4Parser>();
     BUG_CHECK(currentParser != nullptr, "Null parser pointer");
     auto storedSet = prev;
-    for (const auto *selectCase : selectExpression->selectCases) {
+    for (auto selectCase : selectExpression->selectCases) {
         prev = storedSet;
         visit(selectCase->keyset);
-        const auto *parserState = currentParser->states.getDeclaration<IR::ParserState>(
+        auto parserState = currentParser->states.getDeclaration<IR::ParserState>(
             selectCase->state->path->name.name);
 
         if (visited.count(parserState) != 0U) {
@@ -326,7 +326,7 @@ bool P4ProgramDCGCreator::preorder(const IR::SwitchStatement *switchStatement) {
     visit(switchStatement->expression);
     DCGVertexTypeSet prevSet;
     auto storedSet = prev;
-    for (const auto *switchCase : switchStatement->cases) {
+    for (auto switchCase : switchStatement->cases) {
         prev = storedSet;
         visit(switchCase->label);
         visit(switchCase->statement);
@@ -338,8 +338,8 @@ bool P4ProgramDCGCreator::preorder(const IR::SwitchStatement *switchStatement) {
 
 bool P4ProgramDCGCreator::preorder(const IR::StatOrDecl *statOrDecl) {
     if (const auto *block = statOrDecl->to<IR::BlockStatement>()) {
-        for (const auto *a : block->annotations) visit(a);
-        for (const auto *c : block->components) visit(c);
+        for (auto a : block->annotations) visit(a);
+        for (auto c : block->components) visit(c);
         return false;
     }
     IR::ID name;

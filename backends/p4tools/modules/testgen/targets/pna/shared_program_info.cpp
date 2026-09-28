@@ -36,14 +36,13 @@ SharedPnaProgramInfo::getProgrammableBlocks() const {
     return &programmableBlocks;
 }
 
-const IR::StateVariable &SharedPnaProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(PnaConstants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*parser_istd"),
-                                                 "input_port"));
+IR::StateVariable SharedPnaProgramInfo::getTargetInputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(PnaConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*parser_istd"), "input_port"));
 }
 
-const IR::StateVariable &SharedPnaProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(&PnaConstants::OUTPUT_PORT_VAR);
+IR::StateVariable SharedPnaProgramInfo::getTargetOutputPortVar() const {
+    return IR::StateVariable(&PnaConstants::OUTPUT_PORT_VAR);
 }
 
 const IR::Expression *SharedPnaProgramInfo::dropIsActive() const { return &PnaConstants::DROP_VAR; }
@@ -59,9 +58,9 @@ const IR::PathExpression *SharedPnaProgramInfo::getBlockParam(cstring blockLabel
     const auto *typeDecl = programmableBlocks->at(blockLabel);
     const auto *applyBlock = typeDecl->to<IR::IApply>();
     CHECK_NULL(applyBlock);
-    const auto *params = applyBlock->getApplyParameters();
-    const auto *param = params->getParameter(paramIndex);
-    const auto *paramType = param->type;
+    auto params = applyBlock->getApplyParameters();
+    auto param = params->getParameter(paramIndex);
+    auto paramType = param->type;
     // For convenience, resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
         paramType = resolveProgramType(&getP4Program(), tn);

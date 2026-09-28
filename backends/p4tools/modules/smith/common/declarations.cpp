@@ -86,7 +86,7 @@ IR::Declaration_Constant *DeclarationGenerator::genConstantDeclaration() {
         Probabilities::get().CONSTANTDECLARATION_TYPE_MATCH_KIND,
     };
 
-    const auto *tp = target().expressionGenerator().pickRndType(typePercent);
+    auto tp = target().expressionGenerator().pickRndType(typePercent);
 
     IR::Declaration_Constant *ret = nullptr;
     // constant declarations need to be compile-time known
@@ -261,7 +261,7 @@ IR::Type_Enum *DeclarationGenerator::genEnumDeclaration(cstring name) {
 
 IR::Type_SerEnum *DeclarationGenerator::genSerEnumDeclaration(cstring name) {
     auto members = genSpecifiedIdentifierList(3);
-    const auto *tp = target().expressionGenerator().genBitType(false);
+    auto tp = target().expressionGenerator().genBitType(false);
 
     auto *ret = new IR::Type_SerEnum(name, tp, members);
 
@@ -301,7 +301,7 @@ IR::Method *DeclarationGenerator::genExternDeclaration() {
         Probabilities::get().FUNCTIONDECLARATION_TYPE_VOID,
         Probabilities::get().FUNCTIONDECLARATION_TYPE_MATCH_KIND,
     };
-    const auto *returnType = target().expressionGenerator().pickRndType(typePercent);
+    auto returnType = target().expressionGenerator().pickRndType(typePercent);
     tm = new IR::Type_Method(returnType, params, name);
     auto *ret = new IR::Method(name, tm);
     P4Scope::endLocalScope();
@@ -333,7 +333,7 @@ IR::Function *DeclarationGenerator::genFunctionDeclaration() {
         Probabilities::get().FUNCTIONDECLARATION_TYPE_VOID,
         Probabilities::get().FUNCTIONDECLARATION_TYPE_MATCH_KIND,
     };
-    const auto *returnType = target().expressionGenerator().pickRndType(typePercent);
+    auto returnType = target().expressionGenerator().pickRndType(typePercent);
     tm = new IR::Type_Method(returnType, params, name);
 
     P4Scope::prop.ret_type = returnType;
@@ -386,7 +386,7 @@ IR::Type_Header *DeclarationGenerator::genHeaderTypeDeclaration() {
     size_t len = Utils::getRandInt(1, 5);
     for (size_t i = 0; i < len; i++) {
         cstring fieldName = getRandomString(4);
-        const auto *fieldTp = target().expressionGenerator().pickRndType(typePercent);
+        auto fieldTp = target().expressionGenerator().pickRndType(typePercent);
 
         if (const auto *structTp = fieldTp->to<IR::Type_Struct>()) {
             fieldTp = new IR::Type_Name(structTp->name);
@@ -398,7 +398,7 @@ IR::Type_Header *DeclarationGenerator::genHeaderTypeDeclaration() {
     if (P4Scope::req.byte_align_headers) {
         auto remainder = ret->width_bits() % 8;
         if (remainder != 0) {
-            const auto *padBit = IR::Type_Bits::get(8 - remainder, false);
+            auto padBit = IR::Type_Bits::get(8 - remainder, false);
             auto *padField = new IR::StructField("padding", padBit);
             ret->fields.push_back(padField);
         }
@@ -493,7 +493,7 @@ IR::Type_Struct *DeclarationGenerator::genStructTypeDeclaration() {
     size_t len = Utils::getRandInt(1, 5);
 
     for (size_t i = 0; i < len; i++) {
-        const auto *fieldTp = target().expressionGenerator().pickRndType(typePercent);
+        auto fieldTp = target().expressionGenerator().pickRndType(typePercent);
         cstring fieldName = getRandomString(4);
         if (fieldTp->to<IR::Type_Array>() != nullptr) {
             // Right now there is now way to initialize a header stack
@@ -590,7 +590,7 @@ IR::Type_Declaration *DeclarationGenerator::genTypeDeclaration() {
     return decl;
 }
 
-const IR::Type *DeclarationGenerator::genType() {
+IR::Ptr<IR::Type> DeclarationGenerator::genType() {
     std::vector<int64_t> percent = {Probabilities::get().TYPEDEFDECLARATION_BASE,
                                     Probabilities::get().TYPEDEFDECLARATION_STRUCTLIKE,
                                     Probabilities::get().TYPEDEFDECLARATION_STACK};
@@ -602,7 +602,7 @@ const IR::Type *DeclarationGenerator::genType() {
                                       Probabilities::get().TYPEDEFDECLARATION_BASETYPE_BIT,
                                       Probabilities::get().TYPEDEFDECLARATION_BASETYPE_SIGNED_BIT,
                                       Probabilities::get().TYPEDEFDECLARATION_BASETYPE_VARBIT};
-    const IR::Type *tp = nullptr;
+    IR::Ptr<IR::Type> tp = nullptr;
     switch (Utils::getRandInt(percent)) {
         case 0: {
             std::vector<int> bTypes = {1};  // only bit<>
@@ -668,7 +668,7 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
         Probabilities::get().VARIABLEDECLARATION_TYPE_MATCH_KIND,
     };
 
-    const IR::Type *tp = target().expressionGenerator().pickRndType(typePercent);
+    IR::Ptr<IR::Type> tp = target().expressionGenerator().pickRndType(typePercent);
 
     IR::Declaration_Variable *ret = nullptr;
 
@@ -678,7 +678,7 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
         ret = new IR::Declaration_Variable(name, tp, expr);
     } else if (tp->is<IR::Type_Array>()) {
         IR::Vector<IR::Expression> elems;
-        const IR::Type_Array *arrayTp = dynamic_cast<const IR::Type_Array *>(tp);
+        const auto *arrayTp = tp->checkedTo<IR::Type_Array>();
         for (unsigned i = 0; i < arrayTp->getSize(); i++) {
             const IR::Expression *elem =
                 target().expressionGenerator().genExpression(arrayTp->elementType);
@@ -702,7 +702,7 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
 
 IR::Parameter *DeclarationGenerator::genTypedParameter(bool if_none_dir) {
     cstring name = getRandomString(4);
-    const IR::Type *tp = nullptr;
+    IR::Ptr<IR::Type> tp = nullptr;
     IR::Direction dir;
     TyperefProbs typePercent;
 

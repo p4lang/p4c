@@ -265,16 +265,14 @@ std::vector<Continuation::Command> TofinoProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::StateVariable &TofinoProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(
-        new IR::Member(IR::Type_Bits::get(TofinoConstants::PORT_BIT_WIDTH),
-                       new IR::PathExpression("*ig_intr_md"), "ingress_port"));
+IR::StateVariable TofinoProgramInfo::getTargetInputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(TofinoConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*ig_intr_md"), "ingress_port"));
 }
 
-const IR::StateVariable &TofinoProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(
-        new IR::Member(IR::Type_Bits::get(TofinoConstants::PORT_BIT_WIDTH),
-                       new IR::PathExpression("*eg_intr_md"), "egress_port"));
+IR::StateVariable TofinoProgramInfo::getTargetOutputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(TofinoConstants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*eg_intr_md"), "egress_port"));
 }
 
 const IR::Expression *TofinoProgramInfo::dropIsActive() const {

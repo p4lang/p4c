@@ -13,7 +13,8 @@ namespace P4 {
 
 unsigned SymbolicValue::crtid = 0;
 
-SymbolicValue *SymbolicValueFactory::create(const IR::Type *type, bool uninitialized) const {
+IR::MutablePtr<SymbolicValue> SymbolicValueFactory::create(const IR::Type *type,
+                                                           bool uninitialized) const {
     type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Bits>())
         return new SymbolicInteger(ScalarValue::init(uninitialized), type->to<IR::Type_Bits>());
@@ -254,7 +255,7 @@ SymbolicStruct::SymbolicStruct(const IR::Type_StructLike *type, bool uninitializ
     }
 }
 
-SymbolicValue *SymbolicStruct::clone() const {
+IR::MutablePtr<SymbolicValue> SymbolicStruct::clone() const {
     auto result = new SymbolicStruct(type->to<IR::Type_StructLike>());
     for (auto f : fieldValue) result->fieldValue[f.first] = f.second->clone();
     return result;
@@ -312,7 +313,7 @@ SymbolicHeaderUnion::SymbolicHeaderUnion(const IR::Type_HeaderUnion *type, bool 
                                          const SymbolicValueFactory *factory)
     : SymbolicStruct(type, uninitialized, factory) {}
 
-SymbolicBool *SymbolicHeaderUnion::isValid() const {
+IR::MutablePtr<SymbolicBool> SymbolicHeaderUnion::isValid() const {
     int validFields = 0;
     for (auto f : type->to<IR::Type_StructLike>()->fields) {
         if (fieldValue.count(f->name.name)) {
@@ -334,7 +335,7 @@ SymbolicBool *SymbolicHeaderUnion::isValid() const {
     return new SymbolicBool(false);
 }
 
-SymbolicValue *SymbolicHeaderUnion::get(const IR::Node *node, cstring field) const {
+IR::MutablePtr<SymbolicValue> SymbolicHeaderUnion::get(const IR::Node *node, cstring field) const {
     return SymbolicStruct::get(node, field);
 }
 
@@ -343,7 +344,7 @@ void SymbolicHeaderUnion::setAllUnknown() {
     this->isValid()->setAllUnknown();
 }
 
-SymbolicValue *SymbolicHeaderUnion::clone() const {
+IR::MutablePtr<SymbolicValue> SymbolicHeaderUnion::clone() const {
     auto result = new SymbolicHeaderUnion(type->to<IR::Type_HeaderUnion>());
     for (auto f : fieldValue) result->fieldValue[f.first] = f.second->clone();
     return result;
@@ -389,7 +390,7 @@ void SymbolicHeader::setValid(bool v) {
     valid = new SymbolicBool(v);
 }
 
-SymbolicValue *SymbolicHeader::get(const IR::Node *node, cstring field) const {
+IR::MutablePtr<SymbolicValue> SymbolicHeader::get(const IR::Node *node, cstring field) const {
     if (valid->isKnown() && !valid->value)
         return new SymbolicStaticError(node, "Reading field from invalid header");
     return SymbolicStruct::get(node, field);
@@ -400,7 +401,7 @@ void SymbolicHeader::setAllUnknown() {
     valid->setAllUnknown();
 }
 
-SymbolicValue *SymbolicHeader::clone() const {
+IR::MutablePtr<SymbolicValue> SymbolicHeader::clone() const {
     auto result = new SymbolicHeader(type->to<IR::Type_Header>());
     for (auto f : fieldValue) result->fieldValue[f.first] = f.second->clone();
     result->valid = valid->clone()->to<SymbolicBool>();
@@ -491,7 +492,7 @@ void SymbolicArray::shift(int amount) {
     }
 }
 
-SymbolicValue *SymbolicArray::next(const IR::Node *node) {
+IR::MutablePtr<SymbolicValue> SymbolicArray::next(const IR::Node *node) {
     for (unsigned i = 0; i < values.size(); i++) {
         auto v = values.at(i);
         if (values[i]->is<SymbolicHeader>()) {
@@ -507,7 +508,7 @@ SymbolicValue *SymbolicArray::next(const IR::Node *node) {
     return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
-SymbolicValue *SymbolicArray::lastIndex(const IR::Node *node) {
+IR::MutablePtr<SymbolicValue> SymbolicArray::lastIndex(const IR::Node *node) {
     for (unsigned i = 0; i < values.size(); i++) {
         unsigned index = values.size() - i - 1;
         auto v = values.at(index);
@@ -526,7 +527,7 @@ SymbolicValue *SymbolicArray::lastIndex(const IR::Node *node) {
     return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
 }
 
-SymbolicValue *SymbolicArray::last(const IR::Node *node) {
+IR::MutablePtr<SymbolicValue> SymbolicArray::last(const IR::Node *node) {
     for (unsigned i = 0; i < values.size(); i++) {
         unsigned index = values.size() - i - 1;
         auto v = values.at(index);
@@ -547,7 +548,7 @@ void SymbolicArray::setAllUnknown() {
     for (unsigned i = 0; i < values.size(); i++) values.at(i)->setAllUnknown();
 }
 
-SymbolicValue *SymbolicArray::clone() const {
+IR::MutablePtr<SymbolicValue> SymbolicArray::clone() const {
     auto result = new SymbolicArray(type->to<IR::Type_Array>());
     for (unsigned i = 0; i < values.size(); i++) result->values.push_back(get(nullptr, i)->clone());
     return result;
@@ -607,7 +608,7 @@ bool AnyElement::equals(const SymbolicValue *) const {
     return true;
 }
 
-SymbolicValue *AnyElement::collapse() const {
+IR::MutablePtr<SymbolicValue> AnyElement::collapse() const {
     auto result = parent->get(nullptr, 0)->clone();
     for (size_t i = 1; i < parent->values.size(); i++) (void)result->merge(parent->get(nullptr, i));
     return result;
@@ -626,7 +627,7 @@ void SymbolicTuple::setAllUnknown() {
     for (unsigned i = 0; i < values.size(); i++) values.at(i)->setAllUnknown();
 }
 
-SymbolicValue *SymbolicTuple::clone() const {
+IR::MutablePtr<SymbolicValue> SymbolicTuple::clone() const {
     auto result = new SymbolicTuple(type->to<IR::Type_Tuple>());
     for (unsigned i = 0; i < values.size(); i++) result->values.push_back(get(i)->clone());
     return result;
@@ -680,7 +681,7 @@ bool SymbolicPacketIn::equals(const SymbolicValue *other) const {
     return minimumStreamOffset == sp->minimumStreamOffset;
 }
 
-SymbolicVoid *SymbolicVoid::instance = new SymbolicVoid();
+IR::MutablePtr<SymbolicVoid> SymbolicVoid::instance = new SymbolicVoid();
 
 /*****************************************************************************************/
 
@@ -741,7 +742,8 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary *expression) {
         set(expression, e2);
         return;
     }
-    auto clone = expression->clone();
+    IR::MutablePtr<std::remove_pointer_t<decltype(expression->clone())>> clone =
+        expression->clone();
     BUG_CHECK(e0->is<ScalarValue>(), "%1%: expected an ScalarValue", e0);
     BUG_CHECK(e1->is<ScalarValue>(), "%1%: expected an ScalarValue", e1);
     BUG_CHECK(e2->is<ScalarValue>(), "%1%: expected an ScalarValue", e2);
@@ -791,7 +793,8 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary *expression) {
         set(expression, l);
         return;
     }
-    auto clone = expression->clone();
+    IR::MutablePtr<std::remove_pointer_t<decltype(expression->clone())>> clone =
+        expression->clone();
     BUG_CHECK(l->is<ScalarValue>(), "%1%: expected an ScalarValue", l);
     BUG_CHECK(r->is<ScalarValue>(), "%1%: expected an ScalarValue", r);
     auto li = l->to<ScalarValue>();
@@ -822,7 +825,8 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary *expression) {
         set(expression, l);
         return;
     }
-    auto clone = expression->clone();
+    IR::MutablePtr<std::remove_pointer_t<decltype(expression->clone())>> clone =
+        expression->clone();
     BUG_CHECK(l->is<ScalarValue>(), "%1%: expected a scalar", l);
     auto sv = l->to<ScalarValue>();
     if (sv->isUninitialized()) {
@@ -938,7 +942,8 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation *expression) {
         return;
     }
 
-    auto clone = expression->clone();
+    IR::MutablePtr<std::remove_pointer_t<decltype(expression->clone())>> clone =
+        expression->clone();
     if (l->is<SymbolicInteger>()) {
         BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected a SymbolicInteger", r);
         clone->left = l->to<SymbolicInteger>()->constant;
@@ -983,7 +988,7 @@ void ExpressionEvaluator::postorder(const IR::Member *expression) {
     if (basetype->is<IR::Type_Array>()) {
         BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
         auto array = l->to<SymbolicArray>();
-        SymbolicValue *v;
+        IR::MutablePtr<SymbolicValue> v;
         if (expression->member.name == IR::Type_Array::next) {
             v = array->next(expression);
             if (v->is<SymbolicError>()) {
@@ -1071,7 +1076,7 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex *expression) {
 void ExpressionEvaluator::postorder(const IR::PathExpression *expression) {
     auto type = typeMap->getType(expression, true);
     auto decl = refMap->getDeclaration(expression->path, true);
-    SymbolicValue *result;
+    IR::MutablePtr<SymbolicValue> result;
     if (type->is<IR::Type_Error>())
         result = new SymbolicEnum(type, decl->getName());
     else
@@ -1080,7 +1085,7 @@ void ExpressionEvaluator::postorder(const IR::PathExpression *expression) {
 }
 
 void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) {
-    MethodInstance *mi = MethodInstance::resolve(expression, refMap, typeMap);
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     for (auto arg : *expression->arguments) {
         auto argValue = get(arg->expression);
         CHECK_NULL(argValue);
@@ -1130,7 +1135,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
             return;
         } else {
             BUG_CHECK(name == IR::Type_Header::isValid, "%1%: unexpected method", bim->name);
-            SymbolicBool *v = nullptr;
+            IR::MutablePtr<SymbolicBool> v = nullptr;
             if (auto hv = structVar->to<SymbolicHeader>())
                 v = hv->valid;
             else if (auto hu = structVar->to<SymbolicHeaderUnion>())
@@ -1247,7 +1252,8 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
     }
 }
 
-SymbolicValue *ExpressionEvaluator::evaluate(const IR::Expression *expression, bool leftValue) {
+IR::MutablePtr<SymbolicValue> ExpressionEvaluator::evaluate(const IR::Expression *expression,
+                                                            bool leftValue) {
     evaluatingLeftValue = leftValue;
     (void)expression->apply(*this);
     auto result = get(expression);

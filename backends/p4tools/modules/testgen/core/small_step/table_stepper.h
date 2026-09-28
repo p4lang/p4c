@@ -29,7 +29,7 @@ class TableStepper {
     ExprStepper *stepper;
 
     /// The table for this particular stepper.
-    const IR::P4Table *table;
+    IR::Ptr<IR::P4Table> table;
 
     /// Basic table properties that are set when initializing the TableStepper.
     TableUtils::TableProperties properties;
@@ -42,24 +42,25 @@ class TableStepper {
     /// table. The returned variable will be named p4t*variables.table.t.name.idx1.idx2, where t is
     /// the name of the given table. The "idx1" and "idx2" components are produced only if idx1 and
     /// idx2 are given, respectively.
-    static const IR::StateVariable &getTableStateVariable(
-        const IR::Type *type, const IR::P4Table *table, cstring name,
-        std::optional<int> idx1_opt = std::nullopt, std::optional<int> idx2_opt = std::nullopt);
+    static IR::StateVariable getTableStateVariable(const IR::Type *type, const IR::P4Table *table,
+                                                   cstring name,
+                                                   std::optional<int> idx1_opt = std::nullopt,
+                                                   std::optional<int> idx2_opt = std::nullopt);
 
     /// @returns the string-typed state variable that tracks the current active table.
-    static const IR::StateVariable &getActiveTableVar();
+    static IR::StateVariable getActiveTableVar();
 
     /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
     /// The value of this variable is false if the table misses or is not reached.
-    static const IR::StateVariable &getTableHitVar(const IR::P4Table *table);
+    static IR::StateVariable getTableHitVar(const IR::P4Table *table);
 
     /// @returns the state variable that tracks the index of the action taken by the given table.
     ///
     /// This variable is initially set to the number of actions in the table, indicating that no
     /// action has been selected. It is set by setTableAction and read by getTableAction.
-    static const IR::StateVariable &getTableActionVar(const IR::P4Table *table);
+    static IR::StateVariable getTableActionVar(const IR::P4Table *table);
 
-    static const IR::StateVariable &getTableResultVar(const IR::P4Table *table);
+    static IR::StateVariable getTableResultVar(const IR::P4Table *table);
 
  protected:
     /* =========================================================================================
@@ -75,7 +76,7 @@ class TableStepper {
     ExprStepper::Result getResult();
 
     /// tableMissCondition is true.
-    void addDefaultAction(std::optional<const IR::Expression *> tableMissCondition);
+    void addDefaultAction(std::optional<IR::Ptr<IR::Expression>> tableMissCondition);
 
     /// Helper function that collects the list of actions contained in the table.
     std::vector<const IR::ActionListElement *> buildTableActionList();
@@ -103,7 +104,7 @@ class TableStepper {
     /// handle constant entries, it is specialized for control plane entries.
     /// The function also tracks the list of field matches created to achieve a  hit. We later use
     /// this to insert table entries using the STF/PTF framework.
-    const IR::Expression *computeHit(TableMatchMap *matches);
+    IR::Ptr<IR::Expression> computeHit(TableMatchMap *matches);
 
     /// Collects properties that may be set per table. Target back end may have different semantics
     /// for table execution that need to be collect before evaluation the table.
@@ -126,7 +127,7 @@ class TableStepper {
     /// @returns tableMissCondition reference to the current constraints of the miss condition.
     /// Any constant entry we hit implies that the table is hit, and the default action is not
     /// executed.
-    const IR::Expression *evalTableConstEntries();
+    IR::Ptr<IR::Expression> evalTableConstEntries();
 
     /// This helper function evaluates potential insertion from the control plane. We use variables
     /// variables to mimic an operator inserting entries. We only cover ONE entry per table for

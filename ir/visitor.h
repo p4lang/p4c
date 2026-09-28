@@ -63,7 +63,11 @@ class ControlFlowVisitor;
 class SplitFlowVisit_base;
 class Inspector;
 
-class Visitor {
+class Visitor
+#if !HAVE_LIBGC
+    : public IR::shared_ptr_base
+#endif
+{
  public:
     typedef Visitor_Context Context;
     class profile_t {
@@ -111,7 +115,34 @@ class Visitor {
     // apply_visitor is the main traversal function that manages the
     // depth-first recursive traversal.  `visit` is a convenience function
     // that calls it on a variable.
-    virtual const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) = 0;
+    virtual IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char *name = 0) = 0;
+    void visit(IR::Ptr<IR::Node> &n, const char *name = 0) { n = apply_visitor(n, name); }
+    void visit(IR::Ptr<IR::Node> const &n, const char *name = 0) {
+        auto t = apply_visitor(n, name);
+        if (t != n) visitor_const_error();
+    }
+    void visit(IR::Ptr<IR::Node> &n, const char *name, int cidx) {
+        ctxt->child_index = cidx;
+        n = apply_visitor(n, name);
+    }
+    void visit(IR::Ptr<IR::Node> const &n, const char *name, int cidx) {
+        ctxt->child_index = cidx;
+        auto t = apply_visitor(n, name);
+        if (t != n) visitor_const_error();
+    }
+    void visit(IR::Node *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
+#define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                             \
+    void visit(IR::Ptr<IR::CLASS> &n, const char *name = 0);             \
+    void visit(IR::Ptr<IR::CLASS> const &n, const char *name = 0);       \
+    void visit(IR::Ptr<IR::CLASS> &n, const char *name, int cidx);       \
+    void visit(IR::Ptr<IR::CLASS> const &n, const char *name, int cidx); \
+    void visit(IR::CLASS *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
+    IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
+#undef DECLARE_VISIT_FUNCTIONS
+
+#if !HAVE_LIBGC
+    /* additional visit functions needed when using IR::shared_ptr -- we sometimes visit
+     * raw pointer copies of an IR::Ptr */
     void visit(const IR::Node *&n, const char *name = 0) { n = apply_visitor(n, name); }
     void visit(const IR::Node *const &n, const char *name = 0) {
         auto t = apply_visitor(n, name);
@@ -126,15 +157,15 @@ class Visitor {
         auto t = apply_visitor(n, name);
         if (t != n) visitor_const_error();
     }
-    void visit(IR::Node *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
-#define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                           \
-    void visit(const IR::CLASS *&n, const char *name = 0);             \
-    void visit(const IR::CLASS *const &n, const char *name = 0);       \
-    void visit(const IR::CLASS *&n, const char *name, int cidx);       \
-    void visit(const IR::CLASS *const &n, const char *name, int cidx); \
-    void visit(IR::CLASS *&, const char * = 0, int = 0) { BUG("Can't visit non-const pointer"); }
+#define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                     \
+    void visit(const IR::CLASS *&n, const char *name = 0);       \
+    void visit(const IR::CLASS *const &n, const char *name = 0); \
+    void visit(const IR::CLASS *&n, const char *name, int cidx); \
+    void visit(const IR::CLASS *const &n, const char *name, int cidx);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
+#endif /* !HAVE_LIBGC */
+
     void visit(IR::Node &n, const char *name = 0) {
         if (ctxt) ctxt->child_name = name;
         n.visit_children(*this, name);
@@ -305,6 +336,12 @@ class Visitor {
     void warn(const int kind, const char *format, const T *node, Args &&...args) {
         if (warning_enabled(kind)) ::P4::warning(kind, format, node, std::forward<Args>(args)...);
     }
+#if !HAVE_LIBGC
+    template <class T, class... Args>
+    void warn(const int kind, const char *format, IR::shared_ptr<const T> node, Args... args) {
+        if (warning_enabled(kind)) ::P4::warning(kind, format, node, std::forward<Args>(args)...);
+    }
+#endif /* !HAVE_LIBGC */
 
     /// The const ref variant of the above
     template <class T,
@@ -381,7 +418,7 @@ class Modifier : public virtual Visitor {
 
  public:
     profile_t init_apply(const IR::Node *root) override;
-    const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char *name = 0) override;
     virtual bool preorder(IR::Node *) { return true; }
     virtual void postorder(IR::Node *) {}
     virtual void revisit(const IR::Node *, const IR::Node *) {}
@@ -412,7 +449,7 @@ class Inspector : public virtual Visitor {
 
  public:
     profile_t init_apply(const IR::Node *root) override;
-    const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char *name = 0) override;
     virtual bool preorder(const IR::Node *) { return true; }  // return 'false' to prune
     virtual void postorder(const IR::Node *) {}
     virtual void revisit(const IR::Node *) {}
@@ -439,7 +476,7 @@ class Transform : public virtual Visitor {
 
  public:
     profile_t init_apply(const IR::Node *root) override;
-    const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *, const char *name = 0) override;
     virtual const IR::Node *preorder(IR::Node *n) { return n; }
     virtual const IR::Node *postorder(IR::Node *n) { return n; }
     virtual void revisit(const IR::Node *, const IR::Node *) {}
@@ -463,25 +500,57 @@ class Transform : public virtual Visitor {
     }
 
  protected:
-    const IR::Node *transform_child(const IR::Node *child) {
-        auto *rv = apply_visitor(child);
+    IR::Ptr<IR::Node> transform_child(const IR::Node *child) {
+        auto rv = apply_visitor(child);
         prune_flag = true;
         return rv;
     }
     bool forceClone = false;  // force clone whole tree even if unchanged
+
+ public:
+    /* DANGER -- since pre/postorder methods return a raw pointer, when returning a value
+     * that might have been held in a temp IR::Ptr, we need to ensure that it doesn't get
+     * cleaned up prior to the return.  We do that by holding it temporarily in 'guard_hold'
+     * while it is being returned.
+     * We could instead make all Transform::pre/postorder methods return an IR::Ptr instead
+     * of a raw pointer, but then we'd lose the ability to return a subclass where appropriate
+     * and have the compiler's covariant return type handling fix it up, as that only works
+     * with raw pointers */
+    template <class T>
+    const T *guardReturn(const T *rv) const {
+#if !HAVE_LIBGC
+        guard_hold = rv;
+#endif
+        return rv;
+    }
+
+#if !HAVE_LIBGC
+    template <class T>
+    const T *guardReturn(IR::Ptr<T> rv) const {
+        guard_hold = rv;
+        return rv;
+    }
+
+ private:
+    mutable IR::Ptr<IR::Node> guard_hold;
+#endif
 };
 
 // turn this on for extra info tracking control joinFlows for debugging
 #define DEBUG_FLOW_JOIN 0
 
 class ControlFlowVisitor : public virtual Visitor {
-    std::shared_ptr<std::map<cstring, ControlFlowVisitor &>> globals;
+    using GlobalFlows = std::map<cstring, IR::MutablePtr<ControlFlowVisitor>>;
+    // The original visitor owns shared flow state. Traversal clones borrow it: owning
+    // it from a clone stored in this map would create a reference cycle.
+    std::shared_ptr<GlobalFlows> globalsOwner;
+    GlobalFlows *globals;
 
  protected:
     ControlFlowVisitor *clone() const override = 0;
     struct flow_join_info_t {
-        ControlFlowVisitor *vclone = nullptr;  // a clone to accumulate info into
-        int count = 0;                         // additional parents needed -1
+        IR::MutablePtr<ControlFlowVisitor> vclone = nullptr;  // a clone to accumulate info into
+        int count = 0;                                        // additional parents needed -1
         bool done = false;
 #if DEBUG_FLOW_JOIN
         struct ctrs_t {
@@ -503,7 +572,8 @@ class ControlFlowVisitor : public virtual Visitor {
     // clear this if merging a reachable state.
     bool unreachable = false;
 
-    flow_join_points_t *flow_join_points = 0;
+    std::shared_ptr<flow_join_points_t> joinPointsOwner;
+    flow_join_points_t *flow_join_points = nullptr;
     class SetupJoinPoints : public Inspector {
      protected:
         flow_join_points_t &join_points;
@@ -542,7 +612,8 @@ class ControlFlowVisitor : public virtual Visitor {
      * edge are never join points.
      */
     virtual bool filter_join_point(const IR::Node *) { return false; }
-    ControlFlowVisitor() : globals(std::make_shared<std::map<cstring, ControlFlowVisitor &>>()) {}
+    ControlFlowVisitor()
+        : globalsOwner(std::make_shared<GlobalFlows>()), globals(globalsOwner.get()) {}
 
  public:
     ControlFlowVisitor *controlFlowVisitor() override { return this; }
@@ -557,27 +628,27 @@ class ControlFlowVisitor : public virtual Visitor {
     bool isUnreachable() { return unreachable; }
     void flow_merge_global_to(cstring key) override {
         if (auto other = globals->find(key); other != globals->end())
-            other->second.flow_merge(*this);
+            other->second->flow_merge(*this);
         else
-            globals->emplace(key, flow_clone());
+            globals->emplace(key, &flow_clone());
     }
     void flow_merge_global_from(cstring key) override {
-        if (auto other = globals->find(key); other != globals->end()) flow_merge(other->second);
+        if (auto other = globals->find(key); other != globals->end()) flow_merge(*other->second);
     }
     void erase_global(cstring key) override { globals->erase(key); }
     bool check_global(cstring key) override { return globals->count(key) != 0; }
     void clear_globals() override { globals->clear(); }
-    std::pair<cstring, ControlFlowVisitor *> save_global(cstring key) {
-        ControlFlowVisitor *cfv = nullptr;
+    std::pair<cstring, IR::MutablePtr<ControlFlowVisitor>> save_global(cstring key) {
+        IR::MutablePtr<ControlFlowVisitor> cfv = nullptr;
         if (auto i = globals->find(key); i != globals->end()) {
-            cfv = &i->second;
+            cfv = std::move(i->second);
             globals->erase(i);
         }
         return std::make_pair(key, cfv);
     }
-    void restore_global(std::pair<cstring, ControlFlowVisitor *> saved) {
+    void restore_global(std::pair<cstring, IR::MutablePtr<ControlFlowVisitor>> saved) {
         globals->erase(saved.first);
-        if (saved.second) globals->emplace(saved.first, *saved.second);
+        if (saved.second) globals->emplace(saved.first, std::move(saved.second));
     }
 
     /// RAII class to ensure global key is only used in one place
@@ -594,7 +665,7 @@ class ControlFlowVisitor : public virtual Visitor {
     /// RAII class to save and restore one or more global keys
     class SaveGlobal {
         ControlFlowVisitor &self;
-        std::vector<std::pair<cstring, ControlFlowVisitor *>> saved;
+        std::vector<std::pair<cstring, IR::MutablePtr<ControlFlowVisitor>>> saved;
 
      public:
         SaveGlobal(ControlFlowVisitor &self, cstring key) : self(self) {
@@ -605,7 +676,8 @@ class ControlFlowVisitor : public virtual Visitor {
             saved.push_back(self.save_global(k2));
         }
         ~SaveGlobal() {
-            for (auto it = saved.rbegin(); it != saved.rend(); ++it) self.restore_global(*it);
+            for (auto it = saved.rbegin(); it != saved.rend(); ++it)
+                self.restore_global(std::move(*it));
         }
     };
 
@@ -629,6 +701,12 @@ class SplitFlowVisit_base {
     Visitor &v;
     SplitFlowVisit_base *prev;
     std::vector<Visitor *> visitors;
+    std::vector<IR::MutablePtr<Visitor>> ownedClones;
+    Visitor *cloneFlow() {
+        auto *clone = &v.flow_clone();
+        if (clone != &v) ownedClones.emplace_back(clone);
+        return clone;
+    }
     int visit_next = 0, start_index = 0;
     bool paused = false;
     friend ControlFlowVisitor;
@@ -663,23 +741,23 @@ class SplitFlowVisit_base {
 
 template <class N>
 class SplitFlowVisit : public SplitFlowVisit_base {
-    std::vector<const N **> nodes;
-    std::vector<const N *const *> const_nodes;
+    std::vector<IR::Ptr<N> *> nodes;
+    std::vector<IR::Ptr<N> const *> const_nodes;
 
  public:
     explicit SplitFlowVisit(Visitor &v) : SplitFlowVisit_base(v) {}
-    void addNode(const N *&node) {
+    void addNode(IR::Ptr<N> &node) {
         BUG_CHECK(const_nodes.empty(), "Mixing const and non-const in SplitFlowVisit");
         BUG_CHECK(visitors.size() == nodes.size(), "size mismatch in SplitFlowVisit");
         BUG_CHECK(visit_next == 0, "Can't addNode to SplitFlowVisit after visiting started");
-        visitors.push_back(visitors.empty() ? &v : &v.flow_clone());
+        visitors.push_back(visitors.empty() ? &v : cloneFlow());
         nodes.emplace_back(&node);
     }
-    void addNode(const N *const &node) {
+    void addNode(IR::Ptr<N> const &node) {
         BUG_CHECK(nodes.empty(), "Mixing const and non-const in SplitFlowVisit");
         BUG_CHECK(visitors.size() == const_nodes.size(), "size mismatch in SplitFlowVisit");
         BUG_CHECK(visit_next == 0, "Can't addNode to SplitFlowVisit after visiting started");
-        visitors.push_back(visitors.empty() ? &v : &v.flow_clone());
+        visitors.push_back(visitors.empty() ? &v : cloneFlow());
         const_nodes.emplace_back(&node);
     }
     template <class T1, class T2, class... Args>
@@ -710,10 +788,10 @@ template <class N>
 class SplitFlowVisitVector : public SplitFlowVisit_base {
     IR::Vector<N> *vec = nullptr;
     const IR::Vector<N> *const_vec = nullptr;
-    std::vector<const IR::Node *> result;
+    std::vector<IR::Ptr<IR::Node>> result;
     void init_visit(size_t size) {
         if (size > 0) visitors.push_back(&v);
-        while (visitors.size() < size) visitors.push_back(&v.flow_clone());
+        while (visitors.size() < size) visitors.push_back(cloneFlow());
     }
 
  public:
@@ -753,7 +831,7 @@ class SplitFlowVisitVector : public SplitFlowVisit_base {
                         i = vec->erase(i);
                     } else {
                         i = vec->insert(i, v->size() - 1, nullptr);
-                        for (auto el : *v) {
+                        for (const IR::Node *el : *v) {
                             CHECK_NULL(el);
                             if (auto e = el->template to<N>())
                                 *i++ = e;
@@ -828,7 +906,7 @@ void forAllMatching(const IR::Node *root, Func &&function) {
  * @return the root of the new, modified version of the subtree.
  */
 template <typename NodeType, typename RootType, typename Func>
-const RootType *modifyAllMatching(const RootType *root, Func &&function) {
+IR::Ptr<RootType> modifyAllMatching(const RootType *root, Func &&function) {
     struct NodeVisitor : public Modifier {
         explicit NodeVisitor(Func &&function) : function(function) {}
         Func function;
@@ -844,7 +922,7 @@ const RootType *modifyAllMatching(const RootType *root, Func &&function) {
  * @return the root of the new, transformed version of the subtree.
  */
 template <typename NodeType, typename Func>
-const IR::Node *transformAllMatching(const IR::Node *root, Func &&function) {
+IR::Ptr<IR::Node> transformAllMatching(const IR::Node *root, Func &&function) {
     struct NodeVisitor : public Transform {
         explicit NodeVisitor(Func &&function) : function(function) {}
         Func function;

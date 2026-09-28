@@ -7,6 +7,7 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_NAMESPACE_CONTEXT_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_NAMESPACE_CONTEXT_H_
 
+#include <memory>
 #include <optional>
 #include <set>
 
@@ -17,16 +18,16 @@
 namespace P4::P4Tools {
 
 /// Represents a stack of namespaces.
-class NamespaceContext {
+class NamespaceContext : public std::enable_shared_from_this<NamespaceContext> {
  private:
-    const IR::INamespace *curNamespace;
-    const NamespaceContext *outer;
+    IR::Ptr<IR::INamespace> curNamespace;
+    std::shared_ptr<const NamespaceContext> outer;
 
     /// All names that appear in this context and all outer contexts. Populated lazily.
     mutable std::optional<std::set<cstring>> usedNames;
 
-    NamespaceContext(const IR::INamespace *ns, const NamespaceContext *outer)
-        : curNamespace(ns), outer(outer) {}
+    NamespaceContext(const IR::INamespace *ns, std::shared_ptr<const NamespaceContext> outer)
+        : curNamespace(ns), outer(std::move(outer)) {}
 
     /// @returns either a declaration or a nullptr if no matching declaration was found in this
     /// nested namespace. If the nested namespace contains another nested namespace, this function
@@ -36,14 +37,14 @@ class NamespaceContext {
 
  public:
     /// Represents the empty namespace context.
-    static const NamespaceContext *Empty;
+    static std::shared_ptr<const NamespaceContext> Empty;
 
     /// @returns a new namespace context, representing the given namespace @ns pushed onto this
     /// namespace context.
-    const NamespaceContext *push(const IR::INamespace *ns) const;
+    std::shared_ptr<const NamespaceContext> push(const IR::INamespace *ns) const;
 
     /// @returns the namespace context surrounding this context.
-    const NamespaceContext *pop() const;
+    std::shared_ptr<const NamespaceContext> pop() const;
 
     /// Looks up a declaration in this context. A BUG occurs if the declaration cannot be found.
     const IR::IDeclaration *findDecl(const IR::Path *path) const;

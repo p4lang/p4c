@@ -71,6 +71,7 @@ class Backend {
         refMap->setIsV1(options.isv1());
 #endif
     }
+    virtual ~Backend() = default;
     void serialize(std::ostream &out) const { json->toplevel->serialize(out); }
     virtual void convert(const IR::ToplevelBlock *block) = 0;
 };

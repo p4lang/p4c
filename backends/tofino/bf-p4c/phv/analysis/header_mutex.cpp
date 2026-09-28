@@ -505,9 +505,9 @@ void FindParserHeaderEncounterInfo::end_apply() {
 }
 
 bool FindConstEntryTables::has_const_entries(const IR::MAU::Table *table) {
-    auto *p4table = (table->match_table) ? table->match_table : nullptr;
-    auto *properties = (p4table) ? p4table->properties : nullptr;
-    auto *entries_property =
+    auto p4table = (table->match_table) ? table->match_table : nullptr;
+    auto properties = (p4table) ? p4table->properties : nullptr;
+    auto entries_property =
         (properties) ? properties->getProperty(properties->entriesPropertyName) : nullptr;
     return (entries_property) ? entries_property->isConstant : false;
 }

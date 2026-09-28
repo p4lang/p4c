@@ -15,11 +15,11 @@ namespace P4::P4Tools::ToolsVariables {
 /// The prefix used for state variables.
 static const IR::PathExpression VAR_PREFIX = IR::PathExpression("p4tools*var");
 
-const IR::StateVariable &getStateVariable(const IR::Type *type, cstring name) {
+IR::StateVariable getStateVariable(const IR::Type *type, cstring name) {
     // TODO: Is caching worth it here?
     // TODO: Do we really need to "allocate" a state variable? They are immediately consumed  by the
     // symbolic environment.
-    return *new IR::StateVariable(new IR::Member(type, &VAR_PREFIX, name));
+    return IR::StateVariable(new IR::Member(type, &VAR_PREFIX, name));
 }
 
 const IR::SymbolicVariable *getSymbolicVariable(const IR::Type *type, cstring name) {
@@ -44,9 +44,9 @@ const IR::TaintExpression *getTaintExpression(const IR::Type *type) {
     // Taint expressions are interned. Keys in the intern map is the signedness and width of the
     // type.
     using key_t = std::tuple<int, bool>;
-    static std::map<key_t, const IR::TaintExpression *> TAINTS;
+    static std::map<key_t, IR::Ptr<IR::TaintExpression>> TAINTS;
 
-    auto *&result = TAINTS[{tb->width_bits(), tb->isSigned}];
+    auto &result = TAINTS[{tb->width_bits(), tb->isSigned}];
     if (result == nullptr) {
         result = new IR::TaintExpression(type);
     }

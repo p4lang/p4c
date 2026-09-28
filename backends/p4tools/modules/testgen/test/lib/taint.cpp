@@ -27,13 +27,13 @@ using P4Tools::Taint;
 /// Input: taint<8> + taint<8>
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint01) {
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     // Create a base state with a parameter continuation to apply the value on.
     {
         const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
         const auto *constantVar = IR::Constant::get(typeBits, 2);
         const auto *expr = new IR::Add(constantVar, taintExpression);
-        const auto *taintedExpr = Taint::propagateTaint(expr);
+        auto taintedExpr = Taint::propagateTaint(expr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -41,7 +41,7 @@ TEST_F(TaintTest, Taint01) {
         const auto *constantVar1 = IR::Constant::get(typeBits, 2);
         const auto *constantVar2 = IR::Constant::get(typeBits, 2);
         const auto *expr = new IR::Add(constantVar1, constantVar2);
-        const auto *taintedExpr = Taint::propagateTaint(expr);
+        auto taintedExpr = Taint::propagateTaint(expr);
         const auto *expectedExpr = IR::Constant::get(typeBits, 2);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -59,13 +59,13 @@ TEST_F(TaintTest, Taint01) {
 /// Expected output: 8w0 (since we replace values with zeroes)
 TEST_F(TaintTest, Taint02) {
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), IR::Constant::get(typeBits, 2), taintExpression);
         const auto *slicedExpr = new IR::Slice(expr, 15, 8);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = IR::Constant::get(typeBits, 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -73,7 +73,7 @@ TEST_F(TaintTest, Taint02) {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), taintExpression, IR::Constant::get(typeBits, 2));
         const auto *slicedExpr = new IR::Slice(expr, 7, 0);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = IR::Constant::get(typeBits, 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -86,13 +86,13 @@ TEST_F(TaintTest, Taint02) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint03) {
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), IR::Constant::get(typeBits, 2), taintExpression);
         const auto *slicedExpr = new IR::Slice(expr, 7, 0);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -100,7 +100,7 @@ TEST_F(TaintTest, Taint03) {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), taintExpression, IR::Constant::get(typeBits, 2));
         const auto *slicedExpr = new IR::Slice(expr, 15, 8);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -113,13 +113,13 @@ TEST_F(TaintTest, Taint03) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint04) {
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), IR::Constant::get(typeBits, 2), taintExpression);
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -127,7 +127,7 @@ TEST_F(TaintTest, Taint04) {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), taintExpression, IR::Constant::get(typeBits, 2));
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -140,14 +140,14 @@ TEST_F(TaintTest, Taint04) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint05) {
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
     {
         const auto *expr = new IR::Concat(IR::Type_Bits::get(16), taintExpression, constantVar);
         expr = new IR::Concat(IR::Type_Bits::get(24), taintExpression, expr);
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -155,7 +155,7 @@ TEST_F(TaintTest, Taint05) {
         const auto *expr = new IR::Concat(IR::Type_Bits::get(16), taintExpression, constantVar);
         expr = new IR::Concat(IR::Type_Bits::get(24), taintExpression, expr);
         const auto *slicedExpr = new IR::Slice(expr, 19, 12);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -168,14 +168,14 @@ TEST_F(TaintTest, Taint05) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint06) {
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
     {
         const auto *expr = new IR::Concat(IR::Type_Bits::get(16), constantVar, taintExpression);
         expr = new IR::Concat(IR::Type_Bits::get(24), expr, constantVar);
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -183,7 +183,7 @@ TEST_F(TaintTest, Taint06) {
         const auto *expr = new IR::Concat(IR::Type_Bits::get(16), constantVar, taintExpression);
         expr = new IR::Concat(IR::Type_Bits::get(24), expr, constantVar);
         const auto *slicedExpr = new IR::Slice(expr, 19, 12);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -196,7 +196,7 @@ TEST_F(TaintTest, Taint06) {
 /// Expected output: 2w0
 TEST_F(TaintTest, Taint07) {
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
 
@@ -205,7 +205,7 @@ TEST_F(TaintTest, Taint07) {
         expr = new IR::Concat(IR::Type_Bits::get(24), expr, taintExpression);
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
         slicedExpr = new IR::Slice(slicedExpr, 9, 8);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = IR::Constant::get(IR::Type_Bits::get(2), 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -214,7 +214,7 @@ TEST_F(TaintTest, Taint07) {
         expr = new IR::Concat(IR::Type_Bits::get(24), expr, taintExpression);
         const auto *slicedExpr = new IR::Slice(expr, 19, 12);
         slicedExpr = new IR::Slice(slicedExpr, 7, 5);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = IR::Constant::get(IR::Type_Bits::get(3), 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -226,7 +226,7 @@ TEST_F(TaintTest, Taint07) {
 /// Expected output: taint<3>
 TEST_F(TaintTest, Taint08) {
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
 
@@ -235,7 +235,7 @@ TEST_F(TaintTest, Taint08) {
         expr = new IR::Concat(IR::Type_Bits::get(24), expr, taintExpression);
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
         slicedExpr = new IR::Slice(slicedExpr, 4, 3);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = ToolsVariables::getTaintExpression(IR::Type_Bits::get(2));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -244,7 +244,7 @@ TEST_F(TaintTest, Taint08) {
         expr = new IR::Concat(IR::Type_Bits::get(24), expr, taintExpression);
         const auto *slicedExpr = new IR::Slice(expr, 19, 12);
         slicedExpr = new IR::Slice(slicedExpr, 2, 0);
-        const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
+        auto taintedExpr = Taint::propagateTaint(slicedExpr);
         const auto *expectedExpr = ToolsVariables::getTaintExpression(IR::Type_Bits::get(3));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
@@ -292,13 +292,13 @@ TEST_F(TaintTest, Taint09) {
 /// Input: (8w2 + 8w2)[3:0]
 /// Expected output: 8w2 (slicing should not cause this expression to be tainted.)
 TEST_F(TaintTest, Taint10) {
-    const auto *typeBits = IR::Type_Bits::get(8);
+    auto typeBits = IR::Type_Bits::get(8);
     // Create a base state with a parameter continuation to apply the value on.
     {
         const auto *constantVar1 = IR::Constant::get(typeBits, 2);
         const auto *constantVar2 = IR::Constant::get(typeBits, 2);
         const auto *expr = new IR::Slice(new IR::Add(constantVar1, constantVar2), 3, 0);
-        const auto *taintedExpr = Taint::propagateTaint(expr);
+        auto taintedExpr = Taint::propagateTaint(expr);
         const auto *expectedExpr = IR::Constant::get(IR::Type_Bits::get(4), 0);
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }

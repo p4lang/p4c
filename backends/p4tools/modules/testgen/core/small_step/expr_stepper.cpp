@@ -108,7 +108,7 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
     // provided by a constant entry or synthesized by us.
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
         const auto &parameters = action->parameters;
-        const auto *param = parameters->getParameter(argIdx);
+        auto param = parameters->getParameter(argIdx);
         const auto *paramType = state.resolveType(param->type);
         // We do not use the control plane name here. We assume that UniqueParameters and
         // UniqueNames ensure uniqueness of parameter names.
@@ -117,7 +117,7 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
         const auto *tableActionDataVar = new IR::PathExpression(paramType, new IR::Path(paramName));
-        const auto *curArg = call->arguments->at(argIdx)->expression;
+        auto curArg = call->arguments->at(argIdx)->expression;
         state.set(tableActionDataVar, curArg);
     }
     state.replaceTopBody(action->body);
@@ -130,11 +130,11 @@ bool ExprStepper::resolveMethodCallArguments(const IR::MethodCallExpression *cal
     IR::Vector<IR::Argument> resolvedArgs;
     const auto *method = call->method->type->checkedTo<IR::Type_MethodBase>();
     const auto &methodParams = method->parameters->parameters;
-    const auto *callArguments = call->arguments;
+    auto callArguments = call->arguments;
     for (size_t idx = 0; idx < callArguments->size(); ++idx) {
-        const auto *arg = callArguments->at(idx);
-        const auto *param = methodParams.at(idx);
-        const auto *argExpr = arg->expression;
+        auto arg = callArguments->at(idx);
+        auto param = methodParams.at(idx);
+        auto argExpr = arg->expression;
         // Avoid resolving externs because they do not actually exist in the symbolic environment.
         // Do not resolve out parameters because we do not care about their content.
         // Skip symbolic values since they have already been resolved.
@@ -151,7 +151,7 @@ bool ExprStepper::resolveMethodCallArguments(const IR::MethodCallExpression *cal
                 // We should do this all at once. But how?
                 // This is the same problem as in stepToListSubexpr
                 // Thankfully, most method calls have less than 10 arguments.
-                auto *clonedCall = IR::Traversal::apply(
+                auto clonedCall = IR::Traversal::apply(
                     call, &IR::MethodCallExpression::arguments, IR::Traversal::Index(idx),
                     &IR::Argument::expression, [&](IR::Expression *expr) -> const IR::Expression * {
                         // A parameter with direction InOut might be read and also written to.
@@ -181,7 +181,7 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto *path = call->method->to<IR::PathExpression>()) {
             // Case where call->method is a PathExpression expression.
-            const auto *member = new IR::Member(
+            IR::Ptr<IR::Member> member = new IR::Member(
                 call->method->type,
                 new IR::PathExpression(new IR::Type_Extern("*method"), new IR::Path("*method")),
                 path->path->name);
@@ -328,7 +328,7 @@ bool ExprStepper::preorder(const IR::P4ValueSet *valueSet) {
     auto vsSize = valueSet->size->checkedTo<IR::Constant>()->value;
     IR::Vector<IR::Expression> components;
     // TODO: Fill components with values when we have an API.
-    const auto *pvsType = valueSet->elementType;
+    auto pvsType = valueSet->elementType;
     pvsType = state.resolveType(pvsType);
     TESTGEN_UNIMPLEMENTED("Value Set not yet fully implemented");
 
@@ -403,7 +403,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     }
 
     for (size_t idx = 0; idx < selectCases.size(); ++idx) {
-        const auto *selectCase = selectCases.at(idx);
+        auto selectCase = selectCases.at(idx);
         // Getting P4ValueSet from PathExpression , to highlight a particular case of processing
         // P4ValueSet.
         if (const auto *pathExpr = selectCase->keyset->to<IR::PathExpression>()) {
@@ -432,14 +432,15 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         }
     }
 
-    const IR::Expression *missCondition = IR::BoolLiteral::get(true);
+    IR::Ptr<IR::Expression> missCondition = IR::BoolLiteral::get(true);
     bool hasDefault = false;
-    for (const auto *selectCase : selectCases) {
+    for (auto selectCase : selectCases) {
         auto &nextState = state.clone();
 
         // Handle case where the first select case matches: proceed to the next parser state,
         // guarded by its path condition.
-        const auto *matchCondition = GenEq::equate(selectExpression->select, selectCase->keyset);
+        IR::Ptr<IR::Expression> matchCondition =
+            GenEq::equate(selectExpression->select, selectCase->keyset);
         hasDefault = hasDefault || selectCase->keyset->is<IR::DefaultExpression>();
 
         // TODO: Implement the taint case for select expressions.

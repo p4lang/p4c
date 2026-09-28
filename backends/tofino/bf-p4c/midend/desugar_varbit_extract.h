@@ -114,7 +114,7 @@ namespace BFN {
  */
 class AnnotateVarbitExtractStates : public Transform {
     IR::Node *preorder(IR::ParserState *state) override {
-        for (const auto *component : state->components) {
+        for (const IR::StatOrDecl *component : state->components) {
             const auto *statement = component->to<IR::MethodCallStatement>();
             if (!statement) continue;
             const IR::MethodCallExpression *call = statement->methodCall;

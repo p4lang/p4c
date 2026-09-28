@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <fstream>  // IWYU pragma: keep
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "backends/dpdk/backend.h"
@@ -42,7 +43,8 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
     auto p4Runtime = P4::generateP4Runtime(program, options.arch);
 
     std::filesystem::path filename = isTDI ? options.tdiFile : options.bfRtSchema;
-    auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
+    auto p4rt =
+        std::make_unique<P4::BFRT::BFRuntimeSchemaGenerator>(*p4Runtime.p4Info, isTDI, options);
     if (auto out = openFile(filename, false)) {
         p4rt->serializeBFRuntimeSchema(out.get());
     } else {
@@ -53,7 +55,7 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOpt
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
+    AutoCompileContext autoDpdkContext(std::make_unique<DPDK::DpdkContext>());
     auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(DPDK_VERSION_STRING);
@@ -65,8 +67,8 @@ int main(int argc, char *const argv[]) {
 
     auto hook = options.getDebugHook();
 
-    const IR::P4Program *program = nullptr;
-    const IR::ToplevelBlock *toplevel = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
+    IR::Ptr<IR::ToplevelBlock> toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
@@ -132,7 +134,8 @@ int main(int argc, char *const argv[]) {
     }
     if (::P4::errorCount() > 0) return 1;
 
-    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap, p4info);
+    auto backend =
+        std::make_unique<DPDK::DpdkBackend>(options, &midEnd.refMap, &midEnd.typeMap, p4info);
 
     backend->convert(toplevel);
     if (::P4::errorCount() > 0) return 1;

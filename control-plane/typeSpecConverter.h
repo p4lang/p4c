@@ -44,7 +44,7 @@ class TypeSpecConverter : public Inspector {
     ::p4::config::v1::P4TypeInfo *p4RtTypeInfo;
     /// after translating an Expression to P4DataTypeSpec, save the result to
     /// 'map'.
-    std::map<const IR::Type *, std::shared_ptr<::p4::config::v1::P4DataTypeSpec>> map;
+    std::map<IR::Ptr<IR::Type>, std::shared_ptr<::p4::config::v1::P4DataTypeSpec>> map;
 
     TypeSpecConverter(const P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       ::p4::config::v1::P4TypeInfo *p4RtTypeInfo);

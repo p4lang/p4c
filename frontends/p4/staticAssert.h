@@ -34,7 +34,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
         setName("DoStaticAssert");
     }
     const IR::Node *postorder(IR::MethodCallExpression *method) override {
-        MethodInstance *mi = MethodInstance::resolve(method, this, typeMap);
+        auto mi = MethodInstance::resolve(method, this, typeMap);
         if (auto ef = mi->to<ExternFunction>()) {
             if (ef->method->name == staticAssertMethodName) {
                 auto subst = ef->substitution;

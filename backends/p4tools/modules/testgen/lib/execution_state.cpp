@@ -45,12 +45,12 @@ namespace P4::P4Tools::P4Testgen {
  * ============================================================================================= */
 
 ExecutionState::StackFrame::StackFrame(Continuation normalContinuation,
-                                       const NamespaceContext *namespaces)
+                                       std::shared_ptr<const NamespaceContext> namespaces)
     : StackFrame(std::move(normalContinuation), {}, namespaces) {}
 
 ExecutionState::StackFrame::StackFrame(Continuation normalContinuation,
                                        ExceptionHandlers exceptionHandlers,
-                                       const NamespaceContext *namespaces)
+                                       std::shared_ptr<const NamespaceContext> namespaces)
     : normalContinuation(std::move(normalContinuation)),
       exceptionHandlers(std::move(exceptionHandlers)),
       namespaces(namespaces) {}
@@ -64,12 +64,12 @@ ExecutionState::StackFrame::getExceptionHandlers() const {
     return exceptionHandlers;
 }
 
-const NamespaceContext *ExecutionState::StackFrame::getNameSpaces() const { return namespaces; }
+std::shared_ptr<const NamespaceContext> ExecutionState::StackFrame::getNameSpaces() const {
+    return namespaces;
+}
 
 ExecutionState::ExecutionState(const IR::P4Program *program)
-    : AbstractExecutionState(program),
-      body({program}),
-      stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
+    : AbstractExecutionState(program), body({program}), stack() {
     env.set(&PacketVars::INPUT_PACKET_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
     env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::Constant::get(IR::Type_Bits::get(0), 0));
     // We also add the taint property and set it to false.
@@ -86,8 +86,7 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     }
 }
 
-ExecutionState::ExecutionState(Continuation::Body body)
-    : body(std::move(body)), stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
+ExecutionState::ExecutionState(Continuation::Body body) : body(std::move(body)), stack() {
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState"_cs, false);
     // Drop is initialized to false, too.
@@ -114,7 +113,7 @@ const std::vector<uint64_t> &ExecutionState::getSelectedBranches() const {
     return selectedBranches;
 }
 
-const std::vector<const IR::Expression *> &ExecutionState::getPathConstraint() const {
+const std::vector<IR::Ptr<IR::Expression>> &ExecutionState::getPathConstraint() const {
     return pathConstraint;
 }
 
@@ -199,8 +198,9 @@ static bool typeEquivSansVarbit(const IR::Type *a, const IR::Type *b) {
            (avar && bbit && avar->width_bits() == bbit->width_bits());
 }
 
-void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *value) {
-    const auto *type = value->type;
+void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *input) {
+    IR::Ptr<IR::Expression> value = input;
+    auto type = value->type;
     BUG_CHECK(type && !type->is<IR::Type_Unknown>(), "Cannot set value with unspecified type: %1%",
               value);
     if (getProperty<bool>("inUndefinedState"_cs)) {
@@ -217,14 +217,12 @@ void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *val
     env.set(var, value);
 }
 
-const std::vector<std::reference_wrapper<const TraceEvent>> &ExecutionState::getTrace() const {
-    return trace;
-}
+const std::vector<IR::Ptr<TraceEvent>> &ExecutionState::getTrace() const { return trace; }
 
 const Continuation::Body &ExecutionState::getBody() const { return body; }
 
-const std::stack<std::reference_wrapper<const ExecutionState::StackFrame>> &
-ExecutionState::getStack() const {
+const std::stack<std::shared_ptr<const ExecutionState::StackFrame>> &ExecutionState::getStack()
+    const {
     return stack;
 }
 
@@ -284,13 +282,15 @@ ReachabilityEngineState *ExecutionState::getReachabilityEngineState() const {
  *  Trace events.
  * ============================================================================================= */
 
-void ExecutionState::add(const TraceEvent &event) { trace.emplace_back(event); }
+void ExecutionState::add(const TraceEvent &event) { trace.emplace_back(&event); }
 
 void ExecutionState::popBody() { body.pop(); }
 
 void ExecutionState::replaceBody(const Continuation::Body &body) { this->body = body; }
 
-void ExecutionState::pushContinuation(const StackFrame &frame) { stack.push(frame); }
+void ExecutionState::pushContinuation(StackFrame frame) {
+    stack.push(std::make_shared<const StackFrame>(std::move(frame)));
+}
 
 void ExecutionState::pushCurrentContinuation(StackFrame::ExceptionHandlers handlers) {
     pushCurrentContinuation(std::nullopt, std::move(handlers));
@@ -304,38 +304,37 @@ void ExecutionState::pushCurrentContinuation(std::optional<const IR::Type *> par
     }
 
     // Create the optional parameter.
-    std::optional<const Continuation::Parameter *> parameterOpt = std::nullopt;
+    std::optional<Continuation::Parameter> parameterOpt = std::nullopt;
     if (parameterType_opt) {
-        const auto *parameter =
+        const auto parameter =
             Continuation::genParameter(*parameterType_opt, "_"_cs, getNamespaceContext());
         parameterOpt = parameter;
     }
 
     // Actually push the current continuation.
     Continuation k(parameterOpt, body);
-    const auto *frame = new StackFrame(k, std::move(handlers), namespaces);
-    pushContinuation(*frame);
+    pushContinuation(StackFrame(k, std::move(handlers), namespaces));
     body.clear();
 }
 
-void ExecutionState::popContinuation(std::optional<const IR::Node *> argument_opt) {
+void ExecutionState::popContinuation(std::optional<IR::Ptr<IR::Node>> argument_opt) {
     BUG_CHECK(!stack.empty(), "Popped an empty continuation stack");
     auto frame = stack.top();
     stack.pop();
 
-    auto newBody = frame.get().getContinuation().apply(argument_opt);
+    auto newBody = frame->getContinuation().apply(argument_opt);
     replaceBody(newBody);
-    setNamespaceContext(frame.get().getNameSpaces());
+    setNamespaceContext(frame->getNameSpaces());
 }
 
 void ExecutionState::handleException(Continuation::Exception e) {
     while (!stack.empty()) {
         auto frame = stack.top();
-        if (frame.get().getExceptionHandlers().count(e) > 0) {
-            auto k = frame.get().getExceptionHandlers().at(e);
+        if (frame->getExceptionHandlers().count(e) > 0) {
+            auto k = frame->getExceptionHandlers().at(e);
             auto newBody = k.apply(std::nullopt);
             replaceBody(newBody);
-            setNamespaceContext(frame.get().getNameSpaces());
+            setNamespaceContext(frame->getNameSpaces());
             return;
         }
         stack.pop();
@@ -388,14 +387,14 @@ int ExecutionState::getInputPacketSize() const {
 
 void ExecutionState::appendToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
-    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + inputPkt->type->width_bits());
+    auto width = IR::Type_Bits::get(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, inputPkt, expr);
     env.set(&PacketVars::INPUT_PACKET_LABEL, concat);
 }
 
 void ExecutionState::prependToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
-    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + inputPkt->type->width_bits());
+    auto width = IR::Type_Bits::get(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, inputPkt);
     env.set(&PacketVars::INPUT_PACKET_LABEL, concat);
 }
@@ -411,14 +410,14 @@ int ExecutionState::getPacketBufferSize() const {
     return buffer->type->width_bits();
 }
 
-const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
+IR::Ptr<IR::Expression> ExecutionState::peekPacketBuffer(int amount) {
     BUG_CHECK(amount > 0, "Peeked amount \"%1%\" should be larger than 0.", amount);
 
     const auto *buffer = getPacketBuffer();
     auto bufferSize = buffer->type->width_bits();
 
     auto diff = amount - bufferSize;
-    const auto *amountType = IR::Type_Bits::get(amount);
+    auto amountType = IR::Type_Bits::get(amount);
     // We are running off the available buffer, we need to generate new packet content.
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
@@ -444,7 +443,7 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
     return slice;
 }
 
-const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
+IR::Ptr<IR::Expression> ExecutionState::slicePacketBuffer(int amount) {
     BUG_CHECK(amount > 0, "Sliced amount \"%1%\" should be larger than 0.", amount);
 
     const auto *buffer = getPacketBuffer();
@@ -460,7 +459,7 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
 
     // Compute the difference between what we have in the buffer and what we want to slice.
     auto diff = amount - bufferSize;
-    const auto *amountType = IR::Type_Bits::get(amount);
+    auto amountType = IR::Type_Bits::get(amount);
     // We are running off the available buffer, we need to generate new packet content.
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
@@ -497,14 +496,14 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
 
 void ExecutionState::appendToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
-    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
+    auto width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
     env.set(&PacketVars::PACKET_BUFFER_LABEL, concat);
 }
 
 void ExecutionState::prependToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
-    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
+    auto width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, buffer);
     env.set(&PacketVars::PACKET_BUFFER_LABEL, concat);
 }
@@ -523,7 +522,7 @@ void ExecutionState::resetEmitBuffer() {
 
 void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     const auto *buffer = getEmitBuffer();
-    const auto *width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
+    auto width = IR::Type_Bits::get(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
     env.set(&PacketVars::EMIT_BUFFER_LABEL, concat);
 }

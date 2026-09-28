@@ -31,7 +31,8 @@
  */
 void ActionMutuallyExclusive::postorder(const IR::MAU::Table *tbl) {
     bitvec all_actions_in_table;
-    for (const auto *act : Values(tbl->actions)) all_actions_in_table.setbit(action_ids[act]);
+    for (const IR::MAU::Action *act : Values(tbl->actions))
+        all_actions_in_table.setbit(action_ids[act]);
 
     std::map<cstring, bitvec> actions_running_on_branch;
 
@@ -40,7 +41,7 @@ void ActionMutuallyExclusive::postorder(const IR::MAU::Table *tbl) {
     // A table is not an action_chain if it has one and only one path ($default).  Comes when
     // one wants to force a control dependency in the program
     if (tbl->action_chain() || tbl->has_default_path()) {
-        for (const auto *act : Values(tbl->actions)) {
+        for (const IR::MAU::Action *act : Values(tbl->actions)) {
             if (tbl->next.count(act->name.originalName) > 0) {
                 actions_running_on_branch[act->name.originalName].setbit(action_ids[act]);
             } else if (tbl->has_default_path()) {
@@ -48,7 +49,7 @@ void ActionMutuallyExclusive::postorder(const IR::MAU::Table *tbl) {
             }
         }
     } else if (tbl->hit_miss_p4()) {
-        for (const auto *act : Values(tbl->actions)) {
+        for (const IR::MAU::Action *act : Values(tbl->actions)) {
             if (tbl->next.count("$hit"_cs) > 0 && !act->miss_only())
                 actions_running_on_branch["$hit"_cs].setbit(action_ids[act]);
             if (tbl->next.count("$miss"_cs) > 0 && !act->hit_only()) {

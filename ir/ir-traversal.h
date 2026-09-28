@@ -116,9 +116,18 @@ Obj *modify(Obj *obj, Selectors &&...selectors) {
 /// @brief Similar to modify, but accepts constant argument which is cloned. Therefore, the result
 /// is a different object then @p obj. @sa `Traversal::modify`.
 template <typename Obj, typename... Selectors>
-Obj *apply(const Obj *obj, Selectors &&...selectors) {
-    return Detail::Traverse::modify(obj->clone(), std::forward<Selectors>(selectors)...);
+IR::Ptr<Obj> apply(const Obj *obj, Selectors &&...selectors) {
+    IR::MutablePtr<Obj> copy = obj->clone();
+    return Detail::Traverse::modify(static_cast<Obj *>(copy),
+                                    std::forward<Selectors>(selectors)...);
 }
+
+#if !HAVE_LIBGC
+template <typename Obj, typename... Selectors>
+IR::Ptr<Obj> apply(IR::Ptr<Obj> obj, Selectors &&...selectors) {
+    return apply(obj.get(), std::forward<Selectors>(selectors)...);
+}
+#endif
 
 }  // namespace P4::IR::Traversal
 

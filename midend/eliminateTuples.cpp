@@ -64,8 +64,8 @@ const IR::Type_Struct *ReplacementMap::getReplacement(const IR::Type_BaseList *t
     return st;
 }
 
-IR::IndexedVector<IR::Node> *ReplacementMap::getNewReplacements() {
-    auto retval = new IR::IndexedVector<IR::Node>();
+IR::MutablePtr<IR::IndexedVector<IR::Node>> ReplacementMap::getNewReplacements() {
+    IR::MutablePtr<IR::IndexedVector<IR::Node>> retval = new IR::IndexedVector<IR::Node>();
     for (auto t : replacement) {
         if (inserted.find(t.second) == inserted.end()) {
             retval->push_back(t.second);
@@ -84,7 +84,7 @@ const IR::Node *DoReplaceTuples::postorder(IR::Type_BaseList *bl) {
         if (targ->is<IR::Type_Var>()) return bl;
     }
     auto st = repl.getReplacement(type)->getP4Type();
-    return st;
+    return guardReturn(st);
 }
 
 const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {
@@ -95,7 +95,7 @@ const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {
     if (result == nullptr) return before;
     LOG3("Inserting replacements before " << dbp(before));
     result->push_back(before);
-    return result;
+    return guardReturn(IR::Ptr<IR::Node>(result));
 }
 
 const IR::Node *DoReplaceTuples::postorder(IR::ArrayIndex *expression) {

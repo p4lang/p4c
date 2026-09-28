@@ -94,12 +94,12 @@ class Z3SolverTest : public P4TestgenBmv2Test {
         }
 
         // Extract the binary operation from the P4Program
-        const auto *decl = test->getProgram().getDeclsByName("mau"_cs)->single();
+        auto decl = test->getProgram().getDeclsByName("mau"_cs)->single();
         const auto *control = decl->to<IR::P4Control>();
         SymbolicConverter converter;
-        for (const auto *st : control->body->components) {
+        for (auto st : control->body->components) {
             if (const auto *as = st->to<IR::IfStatement>()) {
-                const auto *asExpr = as->condition;
+                auto asExpr = as->condition;
                 if (asExpr->is<IR::Lss>()) {
                     // Convert members to symbolic variables.
                     opLss = asExpr->apply(converter)->checkedTo<IR::Lss>();
@@ -107,7 +107,7 @@ class Z3SolverTest : public P4TestgenBmv2Test {
             }
         }
     }
-    const IR::Lss *opLss{};
+    IR::Ptr<IR::Lss> opLss;
 };
 
 namespace {
@@ -130,7 +130,7 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     Z3Solver solver;
     Z3SolverAccessor solverAccessor(solver);
 
-    std::vector<const Constraint *> asserts;
+    std::vector<IR::Ptr<Constraint>> asserts;
     asserts.push_back(opLss);
 
     // getting right variable

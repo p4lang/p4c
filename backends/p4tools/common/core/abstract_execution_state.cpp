@@ -33,7 +33,7 @@ void AbstractExecutionState::printSymbolicEnv(std::ostream &out) const {
     out << "##### Symbolic Environment Begin #####\n";
     for (const auto &envVar : env.getInternalMap()) {
         const auto var = envVar.first;
-        const auto *val = envVar.second;
+        auto val = envVar.second;
         out << "Variable: " << var->toString() << " Value: " << val << '\n';
     }
     out << "##### Symbolic Environment End #####\n";
@@ -56,15 +56,18 @@ const IR::Type *AbstractExecutionState::resolveType(const IR::Type *type) const 
     if (typeName == nullptr) {
         return type;
     }
-    const auto *path = typeName->path;
+    auto path = typeName->path;
     const auto *decl = findDecl(path)->to<IR::Type_Declaration>();
     BUG_CHECK(decl, "Not a type: %1%", path);
     return decl;
 }
 
-const NamespaceContext *AbstractExecutionState::getNamespaceContext() const { return namespaces; }
+std::shared_ptr<const NamespaceContext> AbstractExecutionState::getNamespaceContext() const {
+    return namespaces;
+}
 
-void AbstractExecutionState::setNamespaceContext(const NamespaceContext *namespaces) {
+void AbstractExecutionState::setNamespaceContext(
+    std::shared_ptr<const NamespaceContext> namespaces) {
     this->namespaces = namespaces;
 }
 
@@ -123,7 +126,7 @@ std::vector<const IR::Expression *> AbstractExecutionState::flattenComplexExpres
     const IR::Expression *inputExpression, std::vector<const IR::Expression *> &flatValids) {
     std::vector<const IR::Expression *> exprList;
     if (const auto *structExpr = inputExpression->to<IR::StructExpression>()) {
-        for (const auto *listElem : structExpr->components) {
+        for (auto listElem : structExpr->components) {
             auto subList = flattenComplexExpression(listElem->expression, flatValids);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         }
@@ -131,7 +134,7 @@ std::vector<const IR::Expression *> AbstractExecutionState::flattenComplexExpres
             flatValids.emplace_back(headerExpr->validity);
         }
     } else if (const auto *arrayExpr = inputExpression->to<IR::ArrayExpression>()) {
-        for (const auto *arrayElem : arrayExpr->components) {
+        for (auto arrayElem : arrayExpr->components) {
             auto subList = flattenComplexExpression(arrayElem, flatValids);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         }
@@ -146,7 +149,7 @@ std::vector<IR::StateVariable> AbstractExecutionState::getFlatFields(
     std::vector<IR::StateVariable> flatFields;
     const auto *resolvedType = resolveType(parent->type);
     if (const auto *structType = resolvedType->to<IR::Type_StructLike>()) {
-        for (const auto *field : structType->fields) {
+        for (auto field : structType->fields) {
             const auto *fieldType = resolveType(field->type);
             auto subFields =
                 getFlatFields(new IR::Member(fieldType, parent, field->name), validVector);
@@ -218,7 +221,7 @@ void AbstractExecutionState::assignStructLike(const IR::StateVariable &left,
         auto arraySize = arrayExpression->components.size();
         for (size_t idx = 0; idx < arraySize; idx++) {
             const auto *ref = HSIndexToMember::produceStackIndex(arrayType->elementType, left, idx);
-            const auto *rightElem = arrayExpression->components.at(idx);
+            auto rightElem = arrayExpression->components.at(idx);
             assignStructLike(ref, rightElem);
         }
     } else if (right->is<IR::PathExpression>() || right->is<IR::Member>() ||
@@ -266,9 +269,9 @@ void AbstractExecutionState::declareVariable(const Target &target,
     if (declType->is<IR::Type_StructLike>()) {
         initializeStructLike(target, leftExpr, false);
     } else if (const auto *stackType = declType->to<IR::Type_Array>()) {
-        const auto *stackSizeExpr = stackType->size;
+        auto stackSizeExpr = stackType->size;
         auto stackSize = stackSizeExpr->checkedTo<IR::Constant>()->asInt();
-        const auto *stackElemType = stackType->elementType;
+        auto stackElemType = stackType->elementType;
         if (stackElemType->is<IR::Type_Name>()) {
             stackElemType = resolveType(stackElemType->to<IR::Type_Name>());
         }
@@ -351,9 +354,9 @@ void AbstractExecutionState::initializeBlockParams(const Target &target,
     // Also push the namespace of the respective parameter.
     pushNamespace(typeDecl->to<IR::INamespace>());
     // Collect parameters.
-    const auto *params = iApply->getApplyParameters();
+    auto params = iApply->getApplyParameters();
     for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-        const auto *param = params->getParameter(paramIdx);
+        auto param = params->getParameter(paramIdx);
         // Retrieve the identifier of the global architecture map using the parameter index.
         auto archRef = blockParams->at(paramIdx);
         // Irrelevant parameter. Ignore.
@@ -389,7 +392,7 @@ const IR::P4Table *AbstractExecutionState::findTable(const IR::Member *member) c
         const auto *declaration = findDecl(member->expr->to<IR::PathExpression>());
         return declaration->to<IR::P4Table>();
     }
-    const auto *type = member->expr->type;
+    auto type = member->expr->type;
     if (const auto *tableType = type->to<IR::Type_Table>()) {
         return tableType->table;
     }

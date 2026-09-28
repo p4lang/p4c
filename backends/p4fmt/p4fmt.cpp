@@ -13,8 +13,7 @@
 
 namespace P4::P4Fmt {
 
-std::optional<std::pair<const IR::P4Program *, const Util::InputSources *>> parseProgram(
-    const ParserOptions &options) {
+std::optional<P4ParserDriver::ProgramSources> parseProgram(const ParserOptions &options) {
     if (!std::filesystem::exists(options.file)) {
         ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file found.", options.file);
         return std::nullopt;
@@ -41,7 +40,7 @@ std::optional<std::pair<const IR::P4Program *, const Util::InputSources *>> pars
 }
 
 std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
-    AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
+    AutoCompileContext autoP4FmtContext(std::make_unique<P4Fmt::P4FmtContext>());
     auto &options = P4Fmt::P4FmtContext::get().options();
 
     options.file = std::move(inputFile);

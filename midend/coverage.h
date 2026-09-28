@@ -44,7 +44,7 @@ struct CoverageOptions {
 
 /// Set of nodes used for coverage purposes. Compares nodes based on their
 /// clone_id to take node modifications into account.
-using CoverageSet = std::set<const IR::Node *, SourceIdCmp>;
+using CoverageSet = std::set<IR::Ptr<IR::Node>, SourceIdCmp>;
 
 /// CollectNodes iterates across selected nodes in the P4 program and collects them in a
 /// "CoverageSet". The nodes to collect are specified as options to the collector.

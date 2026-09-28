@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -42,7 +43,7 @@ class TestBackEnd {
 
  protected:
     /// Writes the tests out to a file.
-    TestFramework *testWriter = nullptr;
+    std::unique_ptr<TestFramework> testWriter;
 
     /// Pointer to the symbolic executor.
     /// TODO: Remove this. We only need to update coverage tracking.
@@ -64,7 +65,7 @@ class TestBackEnd {
     [[nodiscard]] bool needsToTerminate(int64_t testCount) const;
 
  public:
-    TestBackEnd(const TestBackEnd &) = default;
+    TestBackEnd(const TestBackEnd &) = delete;
 
     TestBackEnd(TestBackEnd &&) = default;
 
@@ -77,22 +78,22 @@ class TestBackEnd {
     struct TestInfo {
         /// The concrete value of the input packet.
         /// This is a slice of the program packet according to packetSizeInInt.
-        const IR::Constant *inputPacket;
+        IR::Ptr<IR::Constant> inputPacket;
 
         /// The input port of the packet.
         int inputPort;
 
         /// The concrete value of the output packet as modified by the packet.
-        const IR::Constant *outputPacket;
+        IR::Ptr<IR::Constant> outputPacket;
 
         /// The output port of the packet.
         int outputPort;
 
         /// The taint mask.
-        const IR::Constant *packetTaintMask;
+        IR::Ptr<IR::Constant> packetTaintMask;
 
         /// The traces that have been collected during execution of this particular test path.
-        const std::vector<std::reference_wrapper<const TraceEvent>> programTraces;
+        const std::vector<IR::Ptr<TraceEvent>> programTraces;
 
         /// Indicates whether the packet is dropped.
         bool packetIsDropped = false;
@@ -114,10 +115,10 @@ class TestBackEnd {
 
     /// @returns a TestInfo objects, which contains information about the input/output ports, the
     /// taint mask, the packet sizes, etc...
-    virtual TestInfo produceTestInfo(
-        const ExecutionState *executionState, const Model *finalModel,
-        const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-        const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces);
+    virtual TestInfo produceTestInfo(const ExecutionState *executionState, const Model *finalModel,
+                                     const IR::Expression *outputPacketExpr,
+                                     const IR::Expression *outputPortExpr,
+                                     const std::vector<IR::Ptr<TraceEvent>> *programTraces);
 
     /// The callback that is executed by the symbolic executor.
     virtual bool run(const FinalState &state);

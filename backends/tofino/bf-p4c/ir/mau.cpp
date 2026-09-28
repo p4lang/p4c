@@ -87,6 +87,13 @@ struct Table::payload_info_t {
     };
     std::map<cstring, info_t> action_info;
     Visitor *post_payload = nullptr;
+    std::vector<IR::MutablePtr<Visitor>> ownedClones;
+
+    Visitor *cloneFlow(Visitor &visitor) {
+        auto *copy = &visitor.flow_clone();
+        if (copy != &visitor) ownedClones.emplace_back(copy);
+        return copy;
+    }
 };
 
 template <class THIS>
@@ -122,7 +129,7 @@ void Table::visit_children(THIS *self, Visitor &v, const char *n) {
     payload_info_t payload_info;
 
     if (have_gateway_payload && have_match_table) {
-        auto &gateway_visitor = v.flow_clone();
+        auto &gateway_visitor = *payload_info.cloneFlow(v);
         visit_gateway_inhibited(self, gateway_visitor, n, payload_info);
         visit_match_table(self, v, n, payload_info);
         v.flow_merge(gateway_visitor);
@@ -156,7 +163,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
     // Save the control-flow state. We use v to visit the first execution path through the gateway
     // actions. On subsequent paths, we visit with a copy of this saved state, and merge the result
     // into v.
-    Visitor *saved = &v.flow_clone();
+    Visitor *saved = payload_info.cloneFlow(v);
 
     // This is the visitor we will use to visit the various gateway actions. Initially, this is
     // v. After the first execution path, this becomes nullptr, and will be lazily instantiated
@@ -177,7 +184,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
         // action mapped in the gateway payload, from next to action
         if (self->gateway_payload.count(tag)) {
             if (cstring act_name = self->gateway_payload.at(tag).first) {
-                if (!current) current = &saved->flow_clone();
+                if (!current) current = payload_info.cloneFlow(*saved);
                 for (auto &con : self->gateway_payload.at(tag).second)
                     current->visit(con, "gateway_payload");
                 if (payload_info.action_info.count(act_name))
@@ -191,7 +198,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
         }
 
         if (self->next.count(tag)) {
-            if (!current) current = &saved->flow_clone();
+            if (!current) current = payload_info.cloneFlow(*saved);
             if (auto *gwcf = dynamic_cast<::BFN::GatewayControlFlow *>(current))
                 gwcf->pre_visit_table_next(self, tag);
             current->visit(self->next.at(tag), tag.c_str());
@@ -217,7 +224,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
                 if (payload_info.post_payload)
                     payload_info.post_payload->flow_merge(*saved);
                 else
-                    payload_info.post_payload = &saved->flow_clone();
+                    payload_info.post_payload = payload_info.cloneFlow(*saved);
             }
 
             fallen_through = true;
@@ -245,7 +252,10 @@ class SplitFlowVisitTableNext : public SplitFlowVisit_base {
             auto &next_visitor = visitors.at(idx);
 
             if (table->next.count(next_action_key)) {
-                if (!next_visitor) next_visitor = &saved->flow_clone();
+                if (!next_visitor) {
+                    next_visitor = &saved->flow_clone();
+                    if (next_visitor != saved) ownedClones.emplace_back(next_visitor);
+                }
                 next_visitor->visit(table->next.at(next_action_key), next_action_key.c_str(),
                                     start_index + idx);
             }
@@ -294,7 +304,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, const char *n, payload_inf
     // Save the current control-flow state. We use v to visit the first execution path through the
     // table. On subsequent paths, we visit with a copy of this saved state, and merge the result
     // into v.
-    Visitor *saved = &v.flow_clone();
+    Visitor *saved = payload_info.cloneFlow(v);
 
     // This is the visitor we will use to visit the various parts of the table. Initially, this is
     // v. After the first execution path, this becomes nullptr, and will be lazily instantiated
@@ -307,7 +317,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, const char *n, payload_inf
         auto action_name = kv.first;
         auto &action = kv.second;
         if (!action->exitAction) continue;
-        auto exit_visitor = &saved->flow_clone();
+        auto exit_visitor = payload_info.cloneFlow(*saved);
         if (payload_info.action_info.count(action_name))
             exit_visitor->flow_merge(*payload_info.action_info.at(action_name).flow_state);
         exit_visitor->visit(action, "actions");
@@ -341,7 +351,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, const char *n, payload_inf
             else
                 continue;
         } else {
-            if (!current) current = &saved->flow_clone();
+            if (!current) current = payload_info.cloneFlow(*saved);
             if (pinfo) current->flow_merge(*pinfo->flow_state);
         }
 
@@ -352,7 +362,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, const char *n, payload_inf
         if (pinfo) {
             for (auto tag : pinfo->tags) {
                 BUG_CHECK(next_visitors.count(tag) == 0, "gateway tag duplication");
-                next_visitors[tag] = &current->flow_clone();
+                next_visitors[tag] = payload_info.cloneFlow(*current);
             }
         }
 
@@ -385,7 +395,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, const char *n, payload_inf
             if (next_visitor) {
                 next_visitor->flow_merge(*current);
             } else if (current_used) {
-                next_visitor = &current->flow_clone();
+                next_visitor = payload_info.cloneFlow(*current);
             } else {
                 next_visitor = current;
                 current_used = true;
@@ -398,7 +408,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, const char *n, payload_inf
     // Visit $try_next_stage, if it exists.
     if (self->next.count("$try_next_stage"_cs)) {
         BUG_CHECK(next_visitors.count("$try_next_stage"_cs) == 0, "invalid");
-        if (!current) current = &saved->flow_clone();
+        if (!current) current = payload_info.cloneFlow(*saved);
         next_visitors["$try_next_stage"_cs] = current;
         current = nullptr;
     }
@@ -605,14 +615,14 @@ UniqueId IR::MAU::Table::get_uid(const IR::MAU::AttachedMemory *at, bool is_gw) 
     return is_placed() ? unique_id(at, is_gw) : pp_unique_id(at, is_gw);
 }
 
-const IR::MAU::BackendAttached *IR::MAU::Table::get_attached(UniqueId id) const {
-    for (auto *at : attached)
+IR::Ptr<IR::MAU::BackendAttached> IR::MAU::Table::get_attached(UniqueId id) const {
+    for (const BackendAttached *at : attached)
         if (unique_id(at->attached) == id) return at;
     return nullptr;
 }
 
-const IR::MAU::BackendAttached *IR::MAU::Table::get_attached(const AttachedMemory *am) const {
-    for (auto *at : attached)
+IR::Ptr<IR::MAU::BackendAttached> IR::MAU::Table::get_attached(const AttachedMemory *am) const {
+    for (const BackendAttached *at : attached)
         if (at->attached == am) return at;
     return nullptr;
 }
@@ -653,14 +663,14 @@ bool IR::MAU::Table::is_exit_table() const {
     return false;
 }
 
-const IR::MAU::Action *IR::MAU::Table::get_default_action() const {
-    for (auto *act : Values(actions))
+IR::Ptr<IR::MAU::Action> IR::MAU::Table::get_default_action() const {
+    for (const Action *act : Values(actions))
         if (act->init_default) return act;
     return nullptr;
 }
 
-std::vector<const IR::MAU::Action *> IR::MAU::Table::get_exit_actions() const {
-    std::vector<const IR::MAU::Action *> exit_actions;
+std::vector<IR::Ptr<IR::MAU::Action>> IR::MAU::Table::get_exit_actions() const {
+    std::vector<IR::Ptr<IR::MAU::Action>> exit_actions;
     for (auto &n : actions)
         if (n.second->exitAction) exit_actions.push_back(n.second);
     return exit_actions;
@@ -669,8 +679,8 @@ std::vector<const IR::MAU::Action *> IR::MAU::Table::get_exit_actions() const {
 // FIXME -- consider memoizing these boolean predicate functions for speed...
 bool IR::MAU::Table::has_exit_recursive() const {
     if (has_exit_action()) return true;
-    for (auto *n : Values(next))
-        for (auto *t : n->tables)
+    for (const TableSeq *n : Values(next))
+        for (const Table *t : n->tables)
             if (t->has_exit_recursive()) return true;
     return false;
 }
@@ -719,7 +729,7 @@ IR::Vector<IR::Annotation> &IR::MAU::Table::getAnnotations() {
     return empty;
 }
 
-const IR::Expression *IR::MAU::Table::getExprAnnotation(cstring name) const {
+IR::Ptr<IR::Expression> IR::MAU::Table::getExprAnnotation(cstring name) const {
     if (auto annot = getAnnotation(name)) {
         if (annot->getExpr().size() == 1) return annot->getExpr(0);
         error(ErrorType::ERR_UNEXPECTED,
@@ -731,7 +741,7 @@ const IR::Expression *IR::MAU::Table::getExprAnnotation(cstring name) const {
 }
 
 bool IR::MAU::Table::getAnnotation(cstring name, int &val) const {
-    if (auto *expr = getExprAnnotation(name)) {
+    if (const IR::Expression *expr = getExprAnnotation(name)) {
         if (auto constant = expr->to<IR::Constant>()) {
             val = constant->asInt();
             return true;
@@ -763,7 +773,7 @@ bool IR::MAU::Table::getAnnotation(cstring name, bool &val) const {
 }
 
 bool IR::MAU::Table::getAnnotation(cstring name, IR::ID &val) const {
-    if (auto *expr = getExprAnnotation(name)) {
+    if (const IR::Expression *expr = getExprAnnotation(name)) {
         if (auto v = expr->to<IR::StringLiteral>()) {
             val = *v;
             return true;
@@ -780,10 +790,10 @@ bool IR::MAU::Table::getAnnotation(cstring name, IR::ID &val) const {
 bool IR::MAU::Table::getAnnotation(cstring name, std::vector<IR::ID> &val) const {
     if (!match_table) return false;
     bool rv = false;
-    for (auto *annot : match_table->getAnnotations()) {
+    for (const IR::Annotation *annot : match_table->getAnnotations()) {
         if (annot->name != name) continue;
         rv = true;  // found at least 1
-        for (auto *expr : annot->getExpr()) {
+        for (const Expression *expr : annot->getExpr()) {
             if (auto v = expr->to<IR::StringLiteral>())
                 val.push_back(*v);
             else
@@ -802,7 +812,7 @@ int IR::MAU::Table::get_placement_priority_int() const {
     bool val_set = false;
     for (auto &annot : match_table->getAnnotations()) {
         if (annot->name != "placement_priority") continue;
-        for (auto *expr : annot->getExpr()) {
+        for (const IR::Expression *expr : annot->getExpr()) {
             if (auto constant = expr->to<IR::Constant>()) {
                 if (val_set)
                     error(ErrorType::ERR_INVALID,
@@ -822,7 +832,7 @@ std::set<cstring> IR::MAU::Table::get_placement_priority_string() const {
     if (!match_table) return rv;
     for (auto &annot : match_table->getAnnotations()) {
         if (annot->name != "placement_priority") continue;
-        for (auto *expr : annot->getExpr()) {
+        for (const IR::Expression *expr : annot->getExpr()) {
             if (auto sl = expr->to<IR::StringLiteral>()) {
                 rv.insert(sl->value);
             }
@@ -834,9 +844,9 @@ std::set<cstring> IR::MAU::Table::get_placement_priority_string() const {
 int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *flags) const {
     if (conditional_gateway_only()) {
         int min_stage = -1;
-        for (auto *seq : Values(next)) {
+        for (const TableSeq *seq : Values(next)) {
             int i = -1;
-            for (auto *tbl : seq->tables) {
+            for (const Table *tbl : seq->tables) {
                 if (seq->deps[++i]) continue;  // ignore tables dependent on earlier tables in seq
                 int stage = tbl->get_provided_stage();
                 if (stage < 0) return -1;  // no minimum stage
@@ -851,7 +861,7 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
         bool valid_pragma = true;
         int intvals = 0;
         int idx = -1;
-        for (auto *e : annot->getExpr()) {
+        for (const IR::Expression *e : annot->getExpr()) {
             ++idx;
             if (auto *k = e->to<IR::Constant>()) {
                 if (k->asInt() < 0) valid_pragma = false;
@@ -877,7 +887,7 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
             [](const IR::Annotation *annot) { return annot->name == "stage"; });
         if (!stage_annotations) return -1;
 
-        for (const auto *annot : stage_annotations) {
+        for (const IR::Annotation *annot : stage_annotations) {
             if (!checkPragma(annot)) return -1;
 
             int curr_stage = annot->getExpr(0)->to<IR::Constant>()->asInt();
@@ -903,7 +913,7 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
     }
     if (flags) {
         *flags = 0;
-        for (auto *e : stage_annot->getExpr()) {
+        for (const IR::Expression *e : stage_annot->getExpr()) {
             if (auto *l = e->to<IR::StringLiteral>()) {
                 if (l->value == "immediate")
                     *flags |= StageFlag::Immediate;
@@ -1026,18 +1036,14 @@ void IR::MAU::Table::remove_gateway() {
     gateway_payload.clear();
 }
 
-int IR::MAU::TableSeq::uid_ctr = 0;
-
 cstring IR::MAU::Action::externalName() const {
-    if (auto *name_annot = getAnnotation(IR::Annotation::nameAnnotation))
+    if (const IR::Annotation *name_annot = getAnnotation(IR::Annotation::nameAnnotation))
         return name_annot->getName();
     return name.toString();
 }
 
-int IR::MAU::HashGenExpression::nextId = 0;
-
-const IR::MAU::SaluAction *IR::MAU::StatefulAlu::calledAction(const IR::MAU::Table *tbl,
-                                                              const IR::MAU::Action *act) const {
+IR::Ptr<IR::MAU::SaluAction> IR::MAU::StatefulAlu::calledAction(const IR::MAU::Table *tbl,
+                                                                const IR::MAU::Action *act) const {
     auto ta_pair = tbl->name + "-" + act->name.originalName;
     if (!action_map.count(ta_pair)) return nullptr;
     auto *rv = instruction.get<SaluAction>(action_map.at(ta_pair));

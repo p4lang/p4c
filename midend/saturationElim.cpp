@@ -33,7 +33,7 @@ const IR::Mux *SaturationElim::eliminate(const IR::Operation_Binary *binary) {
     const auto *underflowNumber =
         (bitType->isSigned) ? IR::Constant::get(bitType, IR::getMinBvVal(bitType)) : zero;
 
-    const auto *boolType = IR::Type::Boolean::get();
+    const IR::Type::Boolean *boolType = IR::Type::Boolean::get();
     const IR::Expression *expr = nullptr;
     const IR::Expression *overflowCondition = nullptr;
     const IR::Expression *underflowCondition = nullptr;

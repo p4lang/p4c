@@ -28,7 +28,7 @@
  */
 const IR::Node *SplitPadding::preorder(IR::BFN::ParserState *state) {
     IR::Vector<IR::BFN::ParserPrimitive> adjusted_stmts;
-    for (const auto *prim : state->statements) {
+    for (auto prim : state->statements) {
         if (const auto *extract = prim->to<IR::BFN::Extract>()) {
             const auto *dest = extract->dest->to<IR::BFN::FieldLVal>();
             if (!dest) {

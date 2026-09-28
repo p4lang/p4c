@@ -7,7 +7,7 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_COMPILER_RESULT_H_
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_COMPILER_RESULT_H_
 
-#include <functional>
+#include <memory>
 #include <optional>
 
 #include "ir/ir.h"
@@ -20,7 +20,7 @@ namespace P4::P4Tools {
 class CompilerResult : public ICastable {
  private:
     /// The reference to the input P4 program, after it has been transformed by the compiler.
-    std::reference_wrapper<const IR::P4Program> program;
+    IR::Ptr<IR::P4Program> program;
 
  public:
     explicit CompilerResult(const IR::P4Program &program);
@@ -34,7 +34,7 @@ class CompilerResult : public ICastable {
 
 /// P4Tools compilers may return an error instead of a compiler result.
 /// This is a convenience definition for the return value.
-using CompilerResultOrError = std::optional<std::reference_wrapper<const CompilerResult>>;
+using CompilerResultOrError = std::optional<std::shared_ptr<const CompilerResult>>;
 
 }  // namespace P4::P4Tools
 

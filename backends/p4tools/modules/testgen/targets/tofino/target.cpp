@@ -89,7 +89,7 @@ MidEnd AbstractTofinoTestgenTarget::mkMidEnd(const CompilerOptions &options) con
 }
 
 CompilerResultOrError AbstractTofinoTestgenTarget::runCompilerImpl(
-    const CompilerOptions &options, const IR::P4Program *program) const {
+    const CompilerOptions &options, IR::Ptr<IR::P4Program> program) const {
     program = runFrontend(options, program);
     if (program == nullptr) {
         return std::nullopt;
@@ -129,9 +129,9 @@ CompilerResultOrError AbstractTofinoTestgenTarget::runCompilerImpl(
         return std::nullopt;
     }
 
-    return {*new TofinoCompilerResult(
+    return std::make_shared<TofinoCompilerResult>(
         TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg),
-        directExternMapper.getDirectExternMap())};
+        directExternMapper.getDirectExternMap());
 }
 
 /* =============================================================================================
@@ -160,7 +160,7 @@ const TofinoProgramInfo *Tofino_TnaTestgenTarget::produceProgramInfoImpl(
     // Convert mainDecl->arguments into a vector of pipes, represented as constructor-call
     // expressions.
     const auto *mainDeclArgs = mainDecl->arguments;
-    const auto *ns = NamespaceContext::Empty->push(&compilerResult.getProgram());
+    auto ns = NamespaceContext::Empty->push(&compilerResult.getProgram());
     std::vector<TofinoProgramInfo::PipeInfo> pipeInfos;
     std::map<int, gress_t> declIdToGress;
     std::map<int, size_t> declIdToPipe;
@@ -241,7 +241,7 @@ const JBayProgramInfo *JBay_T2naTestgenTarget::produceProgramInfoImpl(
     // Convert mainDecl->arguments into a vector of pipes, represented as constructor-call
     // expressions.
     const auto *mainDeclArgs = mainDecl->arguments;
-    const auto *ns = NamespaceContext::Empty->push(&compilerResult.getProgram());
+    auto ns = NamespaceContext::Empty->push(&compilerResult.getProgram());
     std::vector<TofinoProgramInfo::PipeInfo> pipeInfos;
     std::map<int, gress_t> declIdToGress;
     std::map<int, size_t> declIdToPipe;

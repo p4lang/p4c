@@ -24,13 +24,14 @@ class P4CMidendDefUse : public P4CTest {};
 
 /// Run the midend and return the ComputeDefUse object
 #ifdef SUPPORT_P4_14
-P4::ComputeDefUse *computeDefUse(std::string source, CompilerOptions::FrontendVersion langVersion =
-                                                         CompilerOptions::FrontendVersion::P4_16) {
-    AutoCompileContext autoP4TestContext(new P4TestContext);
-    auto *program = P4::parseP4String(source, langVersion);
+IR::MutablePtr<P4::ComputeDefUse> computeDefUse(
+    std::string source,
+    CompilerOptions::FrontendVersion langVersion = CompilerOptions::FrontendVersion::P4_16) {
+    AutoCompileContext autoP4TestContext(std::make_unique<P4TestContext>());
+    auto program = P4::parseP4String(source, langVersion);
 #else
-P4::ComputeDefUse *computeDefUse(std::string source) {
-    auto *program = P4::parseP4String(source);
+IR::MutablePtr<P4::ComputeDefUse> computeDefUse(std::string source) {
+    auto program = P4::parseP4String(source);
 #endif
     CHECK_NULL(program);
     BUG_CHECK(::P4::errorCount() == 0, "Unexpected errors");
@@ -43,7 +44,7 @@ P4::ComputeDefUse *computeDefUse(std::string source) {
     CHECK_NULL(program);
 
     MidEnd midEnd(options);
-    const IR::P4Program *res = program;
+    IR::Ptr<IR::P4Program> res = program;
     midEnd.process(res);
 
     return midEnd.defuse;
@@ -254,7 +255,7 @@ TEST_F(P4CMidendDefUse, whole_field_1) {
     )";
 
     auto program = make_program(headers, parser_body, control_body, deparser_body);
-    auto *defuse = computeDefUse(program);
+    auto defuse = computeDefUse(program);
     ASSERT_TRUE(defuse);
 
     auto [defs, uses] = get_defs_uses(defuse);
@@ -309,7 +310,7 @@ TEST_F(P4CMidendDefUse, whole_field_2) {
     )";
 
     auto program = make_program(headers, parser_body, control_body, deparser_body);
-    auto *defuse = computeDefUse(program);
+    auto defuse = computeDefUse(program);
     ASSERT_TRUE(defuse);
 
     auto [defs, uses] = get_defs_uses(defuse);
@@ -383,7 +384,7 @@ TEST_F(P4CMidendDefUse, slice_1) {
     )";
 
     auto program = make_program(headers, parser_body, control_body, deparser_body);
-    auto *defuse = computeDefUse(program);
+    auto defuse = computeDefUse(program);
     ASSERT_TRUE(defuse);
 
     auto [defs, uses] = get_defs_uses(defuse);

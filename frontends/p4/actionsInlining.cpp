@@ -76,7 +76,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     substitution.populate(callee->parameters, statement->methodCall->arguments);
 
     // evaluate in and inout parameters in order
-    for (const auto *param : callee->parameters->parameters) {
+    for (const IR::Parameter *param : callee->parameters->parameters) {
         const auto *argument = substitution.lookup(param);
         cstring newName = nameGen->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
@@ -137,7 +137,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
         });
     annotations.push_back(new IR::Annotation(statement->srcInfo,
                                              IR::Annotation::inlinedFromAnnotation,
-                                             {new IR::StringLiteral(callee->name.originalName)}));
+                                             new IR::StringLiteral(callee->name.originalName)));
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << orig << " with " << result);
     return result;

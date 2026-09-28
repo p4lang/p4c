@@ -57,7 +57,7 @@ using namespace P4::literals;
 template <class T>
 const T *extractExpr(const IR::P4Program &program) {
     // Get the mau declarations in the P4Program.
-    auto *decl = program.getDeclsByName("mau"_cs)->single();
+    auto decl = program.getDeclsByName("mau"_cs)->single();
 
     // Convert the mau declaration to a control and ensure that
     // there is a single statement in the body.
@@ -73,7 +73,7 @@ const T *extractExpr(const IR::P4Program &program) {
     }
 
     // Ensure that there is only one argument to the method call and return it.
-    const auto *mcArgs = mcStmt->methodCall->arguments;
+    auto mcArgs = mcStmt->methodCall->arguments;
     if (mcArgs->size() != 1) {
         return nullptr;
     }
@@ -88,8 +88,8 @@ void stepAndExamineValue(const T *value, const CompilerResult &compilerResult) {
     ASSERT_TRUE(progInfo);
 
     // Create a base state with a parameter continuation to apply the value on.
-    const auto *v = Continuation::genParameter(value->type, "v"_cs, NamespaceContext::Empty);
-    Body bodyBase({Return(v->param)});
+    const auto v = Continuation::genParameter(value->type, "v"_cs, NamespaceContext::Empty);
+    Body bodyBase({Return(v.param)});
     Continuation continuationBase(v, bodyBase);
     ExecutionState esBase = SmallStepTest::mkState(bodyBase);
 
@@ -99,14 +99,14 @@ void stepAndExamineValue(const T *value, const CompilerResult &compilerResult) {
     Body body({Return(value)});
     testState.replaceBody(body);
     testState.pushContinuation(
-        *new ExecutionState::StackFrame(continuationBase, esBase.getNamespaceContext()));
+        ExecutionState::StackFrame(continuationBase, esBase.getNamespaceContext()));
     SmallStepEvaluator eval(solver, *progInfo);
-    auto *successors = eval.step(testState);
+    auto successors = eval.step(testState);
     ASSERT_EQ(successors->size(), 1u);
 
     // Examine the resulting execution state.
     const auto branch = (*successors)[0];
-    const auto *constraint = branch.constraint;
+    auto constraint = branch.constraint;
     auto executionState = branch.nextState;
     ASSERT_TRUE(constraint->checkedTo<IR::BoolLiteral>()->value);
     ASSERT_EQ(executionState.get().getNamespaceContext(), NamespaceContext::Empty);
@@ -137,12 +137,12 @@ void stepAndExamineOp(
     Body body({Return(op)});
     ExecutionState es = SmallStepTest::mkState(body);
     SmallStepEvaluator eval(solver, *progInfo);
-    auto *successors = eval.step(es);
+    auto successors = eval.step(es);
     ASSERT_EQ(successors->size(), 1U);
 
     // Examine the resulting execution state.
     const auto branch = (*successors)[0];
-    const auto *constraint = branch.constraint;
+    auto constraint = branch.constraint;
     auto executionState = branch.nextState;
     ASSERT_TRUE(constraint->checkedTo<IR::BoolLiteral>()->value);
     ASSERT_EQ(executionState.get().getNamespaceContext(), NamespaceContext::Empty);
@@ -155,11 +155,11 @@ void stepAndExamineOp(
     // Examine the resulting stack.
     ASSERT_EQ(executionState.get().getStack().size(), 1u);
     const auto stackFrame = executionState.get().getStack().top();
-    ASSERT_TRUE(stackFrame.get().getExceptionHandlers().empty());
-    ASSERT_EQ(stackFrame.get().getNameSpaces(), NamespaceContext::Empty);
+    ASSERT_TRUE(stackFrame->getExceptionHandlers().empty());
+    ASSERT_EQ(stackFrame->getNameSpaces(), NamespaceContext::Empty);
 
     // Examine the pushed continuation.
-    Continuation pushedContinuation = stackFrame.get().getContinuation();
+    Continuation pushedContinuation = stackFrame->getContinuation();
     ASSERT_TRUE(pushedContinuation.parameterOpt);
     Body pushedBody = pushedContinuation.body;
     ASSERT_EQ(pushedBody, Body({Return(rebuildNode(*pushedContinuation.parameterOpt))}));

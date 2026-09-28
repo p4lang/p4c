@@ -189,7 +189,7 @@ class SimplifyParser : public PassManager {
 const IR::Node *SimplifyParsers::preorder(IR::P4Parser *parser) {
     SimplifyParser simpl;
     simpl.setCalledBy(this);
-    return parser->apply(simpl, getContext());
+    return guardReturn(parser->apply(simpl, getContext()));
 }
 
 }  // namespace P4

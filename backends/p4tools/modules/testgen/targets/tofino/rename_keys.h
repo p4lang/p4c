@@ -117,7 +117,7 @@ class ProcessAnnotatedTables : public Transform {
     ProcessAnnotatedTables() { setName("ProcessAnnotatedTables"); }
     const IR::Node *preorder(IR::P4Table *table) override {
         if (table->getAnnotation("ternary"_cs) != nullptr) {
-            return table->apply(ReplaceExactKeyMatches());
+            return guardReturn(table->apply(ReplaceExactKeyMatches()));
         }
         return table;
     }

@@ -101,7 +101,7 @@ ExprStepper::PacketCursorAdvanceInfo SharedTofinoExprStepper::calculateAdvanceEx
 
     int advanceVal = 0;
     const auto *advanceCond = new IR::LAnd(cond, restrictions);
-    const auto *advanceConst = evaluateExpression(advanceExpr, advanceCond);
+    auto advanceConst = evaluateExpression(advanceExpr, advanceCond);
     // If we can not satisfy the advance, set the condition to nullptr.
     if (advanceConst == nullptr) {
         advanceCond = nullptr;
@@ -687,7 +687,7 @@ const ExprStepper::ExternMethodImpls<SharedTofinoExprStepper>
              cond->dbprint(condStream);
              {
                  auto &nextState = stepper.state.clone();
-                 const auto *unpackExpr = nextState.slicePacketBuffer(unpackSize);
+                 auto unpackExpr = nextState.slicePacketBuffer(unpackSize);
 
                  BUG_CHECK(extractedType->width_bits() <= unpackSize,
                            "Trying unpack %1% bits. Only %2% are available.",

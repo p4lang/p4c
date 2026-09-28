@@ -54,7 +54,7 @@ const Expression *Expression::apply(Transform &visitor) const {
 }
 
 const Expression *Expression::evaluate(const Model &model, bool doComplete) const {
-    const IR::Expression *evaluatedValue = nullptr;
+    IR::Ptr<IR::Expression> evaluatedValue = nullptr;
     if (const auto *structExpr = value->to<IR::StructExpression>()) {
         evaluatedValue = model.evaluateStructExpr(structExpr, doComplete);
     } else if (const auto *listExpr = value->to<IR::BaseListExpression>()) {
@@ -109,7 +109,7 @@ const IfStatementCondition *IfStatementCondition::apply(Transform &visitor) cons
 
 const IfStatementCondition *IfStatementCondition::evaluate(const Model &model,
                                                            bool doComplete) const {
-    const IR::Literal *evaluatedPostVal = nullptr;
+    IR::Ptr<IR::Literal> evaluatedPostVal = nullptr;
     if (Taint::hasTaint(postEvalCond)) {
         evaluatedPostVal = &Taint::TAINTED_STRING_LITERAL;
     } else {
@@ -141,42 +141,42 @@ void IfStatementCondition::print(std::ostream &os) const {
  *   AssignmentStatement
  * ============================================================================================= */
 
-AssignmentStatement::AssignmentStatement(const IR::AssignmentStatement &stmt) : stmt(stmt) {}
+AssignmentStatement::AssignmentStatement(const IR::AssignmentStatement &stmt) : stmt(&stmt) {}
 
 const AssignmentStatement *AssignmentStatement::subst(const SymbolicEnv &env) const {
-    const auto *right = env.subst(stmt.right);
+    auto right = env.subst(stmt->right);
     auto *traceEvent =
-        new AssignmentStatement(*new IR::AssignmentStatement(stmt.srcInfo, stmt.left, right));
+        new AssignmentStatement(*new IR::AssignmentStatement(stmt->srcInfo, stmt->left, right));
     return traceEvent;
 }
 
 const AssignmentStatement *AssignmentStatement::apply(Transform &visitor) const {
-    const auto *right = stmt.right->apply(visitor);
+    auto right = stmt->right->apply(visitor);
     auto *traceEvent =
-        new AssignmentStatement(*new IR::AssignmentStatement(stmt.srcInfo, stmt.left, right));
+        new AssignmentStatement(*new IR::AssignmentStatement(stmt->srcInfo, stmt->left, right));
     return traceEvent;
 }
 
 const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
                                                          bool doComplete) const {
-    const IR::Expression *right = nullptr;
-    if (const auto *structExpr = stmt.right->to<IR::StructExpression>()) {
+    IR::Ptr<IR::Expression> right = nullptr;
+    if (const auto *structExpr = stmt->right->to<IR::StructExpression>()) {
         right = model.evaluateStructExpr(structExpr, doComplete);
-    } else if (const auto *listExpr = stmt.right->to<IR::BaseListExpression>()) {
+    } else if (const auto *listExpr = stmt->right->to<IR::BaseListExpression>()) {
         right = model.evaluateListExpr(listExpr, doComplete);
-    } else if (Taint::hasTaint(stmt.right)) {
+    } else if (Taint::hasTaint(stmt->right)) {
         right = &Taint::TAINTED_STRING_LITERAL;
     } else {
-        right = model.evaluate(stmt.right, doComplete);
+        right = model.evaluate(stmt->right, doComplete);
     }
 
     auto *traceEvent =
-        new AssignmentStatement(*new IR::AssignmentStatement(stmt.srcInfo, stmt.left, right));
+        new AssignmentStatement(*new IR::AssignmentStatement(stmt->srcInfo, stmt->left, right));
     return traceEvent;
 }
 
 void AssignmentStatement::print(std::ostream &os) const {
-    const auto &srcInfo = stmt.getSourceInfo();
+    const auto &srcInfo = stmt->getSourceInfo();
     if (srcInfo.isValid()) {
         auto fragment = srcInfo.toSourceFragment(false);
         fragment = fragment.trim();
@@ -192,14 +192,14 @@ void AssignmentStatement::print(std::ostream &os) const {
 
 ExtractSuccess::ExtractSuccess(
     const IR::Expression *extractedHeader, int offset, const IR::Expression *condition,
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields)
+    std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> fields)
     : extractedHeader(extractedHeader),
       offset(offset),
       condition(condition),
       fields(std::move(fields)) {}
 
 const ExtractSuccess *ExtractSuccess::subst(const SymbolicEnv &env) const {
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         applyFields.emplace_back(field.first, env.subst(field.second));
@@ -208,7 +208,7 @@ const ExtractSuccess *ExtractSuccess::subst(const SymbolicEnv &env) const {
 }
 
 const ExtractSuccess *ExtractSuccess::apply(Transform &visitor) const {
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         applyFields.emplace_back(field.first, field.second->apply(visitor));
@@ -217,7 +217,7 @@ const ExtractSuccess *ExtractSuccess::apply(Transform &visitor) const {
 }
 
 const ExtractSuccess *ExtractSuccess::evaluate(const Model &model, bool doComplete) const {
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         if (Taint::hasTaint(field.second)) {
@@ -244,8 +244,8 @@ void ExtractSuccess::print(std::ostream &os) const {
 
 int ExtractSuccess::getOffset() const { return offset; }
 
-const std::vector<std::pair<IR::StateVariable, const IR::Expression *>> &ExtractSuccess::getFields()
-    const {
+const std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> &
+ExtractSuccess::getFields() const {
     return fields;
 }
 
@@ -273,7 +273,7 @@ void ExtractFailure::print(std::ostream &os) const {
 Emit::Emit(const IR::HeaderExpression *emitHeader) : emitHeader(emitHeader) {}
 
 const Emit *Emit::subst(const SymbolicEnv &env) const {
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> applyFields;
     return new Emit(env.subst(emitHeader)->checkedTo<IR::HeaderExpression>());
 }
 

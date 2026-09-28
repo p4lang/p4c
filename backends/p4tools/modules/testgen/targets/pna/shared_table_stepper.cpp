@@ -94,7 +94,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
 
     // First, we compute the hit condition to trigger this particular action call.
     TableMatchMap matches;
-    const auto *hitCondition = computeHit(&matches);
+    auto hitCondition = computeHit(&matches);
 
     // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
@@ -112,7 +112,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (const auto *parameter : parameters->parameters) {
+        for (auto parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             const auto &actionArg = ControlPlaneState::getTableActionArgument(
                 properties.tableName, actionName, parameter->name, parameter->type);
@@ -171,7 +171,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
 
     // First, we compute the hit condition to trigger this particular action call.
     TableMatchMap matches;
-    const auto *hitCondition = computeHit(&matches);
+    auto hitCondition = computeHit(&matches);
 
     // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
@@ -191,7 +191,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (const auto *parameter : parameters->parameters) {
+        for (auto parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             const auto &actionArg = ControlPlaneState::getTableActionArgument(
                 properties.tableName, actionName, parameter->name, parameter->type);
@@ -255,7 +255,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
 }
 
 bool SharedPnaTableStepper::checkForActionProfile() {
-    const auto *impl = table->properties->getProperty("implementation");
+    auto impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -297,7 +297,7 @@ bool SharedPnaTableStepper::checkForActionProfile() {
 }
 
 bool SharedPnaTableStepper::checkForActionSelector() {
-    const auto *impl = table->properties->getProperty("implementation");
+    auto impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
@@ -371,7 +371,7 @@ void SharedPnaTableStepper::checkTargetProperties(
 
 void SharedPnaTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
-    const auto *keys = table->getKey();
+    auto keys = table->getKey();
     // If we have no keys, there is nothing to match.
     if (keys == nullptr) {
         // Either override the default action or fall back to executing it.
@@ -392,7 +392,7 @@ void SharedPnaTableStepper::evalTargetTable(
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
+    std::optional<IR::Ptr<IR::Expression>> tableMissCondition = std::nullopt;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {

@@ -50,7 +50,7 @@ class Predication final : public Transform {
     class ExpressionReplacer final : public Transform {
      private:
         // Original assignment that the replacer works on
-        const IR::AssignmentStatement *const statement;
+        IR::Ptr<IR::AssignmentStatement> statement;
         // To keep track of the path used while traversing nested if-else statements:
         //      IF - true / ELSE - false
         const std::vector<bool> &traversalPath;
@@ -94,14 +94,14 @@ class Predication final : public Transform {
     std::vector<cstring> dependencies;
     // Collects assignment statements with transformed right expression.
     // liveAssignments are pushed at the back of liveAssigns vector.
-    std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
+    std::map<cstring, IR::Ptr<IR::AssignmentStatement>> liveAssignments;
     // Vector of assignment statements which collects assignments from
     // liveAssignments and dependencies in adequate order. In preorder
     // of if statements assignments from liveAssigns are pushed on rv block.
-    std::vector<const IR::AssignmentStatement *> liveAssigns;
+    std::vector<IR::Ptr<IR::AssignmentStatement>> liveAssigns;
     // Vector of ArrayIndex declarations which is used to temporary
     // store these declarations so they can later be pushed on the 'rv' block.
-    std::vector<const IR::Declaration *> indexDeclarations;
+    std::vector<IR::Ptr<IR::Declaration>> indexDeclarations;
     // Map that shows if the current statement is dependent.
     // Bool value is true for dependent statements,
     // false for statements that are not dependent.
@@ -125,8 +125,8 @@ class Predication final : public Transform {
         return rv;
     }
 
-    const IR::Expression *clone(const IR::Expression *expression);
-    const IR::AssignmentStatement *clone(const IR::AssignmentStatement *statement);
+    IR::Ptr<IR::Expression> clone(const IR::Expression *expression);
+    IR::Ptr<IR::AssignmentStatement> clone(const IR::AssignmentStatement *statement);
     const IR::Node *preorder(IR::IfStatement *statement) override;
     const IR::Node *preorder(IR::P4Action *action) override;
     const IR::Node *postorder(IR::P4Action *action) override;

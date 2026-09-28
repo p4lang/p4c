@@ -42,11 +42,11 @@ using P4ReachabilityContext = P4Tools::CompileContext<P4ReachabilityOptions>;
 class P4CReachability : public testing::Test {};
 
 /// Loads example from a file
-using ReturnedInfo = std::tuple<const IR::P4Program *, const P4Tools::NodesCallGraph *,
+using ReturnedInfo = std::tuple<IR::Ptr<IR::P4Program>, const P4Tools::NodesCallGraph *,
                                 const P4Tools::ReachabilityHashType>;
 
 ReturnedInfo loadExampleForReachability(const char *curFile) {
-    AutoCompileContext autoP4TestContext(new P4ReachabilityContext());
+    AutoCompileContext autoP4TestContext(std::make_unique<P4ReachabilityContext>());
     auto &options = P4ReachabilityContext::get().options();
     const char *argv = "./p4testgen";
     options.process(1, const_cast<char *const *>(&argv));
@@ -54,7 +54,7 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
     std::string includeDir = std::string(buildPath) + std::string("p4include");
     auto *originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> program;
     options.file = sourcePath;
     options.file /= curFile;
     program = P4::parseP4File(options);
@@ -94,7 +94,7 @@ const Node *getSpecificNode(const IR::P4Program *program, S name) {
 
         return false;
     };
-    if (auto *node = program->getDeclarations()->where(filter)->singleOrDefault())
+    if (auto node = program->getDeclarations()->where(filter)->singleOrDefault())
         return node->template to<Node>();
     return nullptr;
 }
@@ -111,7 +111,7 @@ class NodeFinder : public Inspector {
 
 TEST_F(P4CReachability, testParserStatesAndAnnotations) {
     auto result = loadExampleForReachability("testdata/p4_16_samples/action_profile-bmv2.p4");
-    const auto *program = std::get<0>(result);
+    auto program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
     const auto *parser = getSpecificNode<IR::P4Parser>(program, "ParserI");
@@ -161,7 +161,7 @@ TEST_F(P4CReachability, testParserStatesAndAnnotations) {
 
 TEST_F(P4CReachability, testLoops) {
     auto result = loadExampleForReachability("testdata/p4_16_samples/stack_complex-bmv2.p4");
-    const auto *program = std::get<0>(result);
+    auto program = std::get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
     ASSERT_TRUE(dcg);
@@ -184,7 +184,7 @@ const IR::Node *getFromHash(const P4Tools::ReachabilityHashType &hash, const cha
 TEST_F(P4CReachability, testTableAndActions) {
     auto result = loadExampleForReachability(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_hit.p4");
-    const auto *program = get<0>(result);
+    auto program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
     ASSERT_TRUE(dcg);
@@ -225,7 +225,7 @@ TEST_F(P4CReachability, testTableAndActions) {
 
 TEST_F(P4CReachability, testSwitchStatement) {
     auto result = loadExampleForReachability("testdata/p4_16_samples/basic_routing-bmv2.p4");
-    const auto *program = get<0>(result);
+    auto program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
     ASSERT_TRUE(dcg);
@@ -254,7 +254,7 @@ TEST_F(P4CReachability, testIfStatement) {
     // Example for IsStatement checking.
     auto result = loadExampleForReachability(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
-    const auto *program = get<0>(result);
+    auto program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
     ASSERT_TRUE(dcg);
@@ -277,7 +277,7 @@ TEST_F(P4CReachability, testIfStatement) {
 
 TEST_F(P4CReachability, testParserValueSet) {
     auto result = loadExampleForReachability("testdata/p4_16_samples/value-sets.p4");
-    const auto *program = get<0>(result);
+    auto program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
     ASSERT_TRUE(dcg);
@@ -321,7 +321,7 @@ bool listEqu(std::list<const IR::Node *> &left, std::list<const IR::Node *> righ
 TEST_F(P4CReachability, testReachabilityEngine) {
     auto result = loadExampleForReachability(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
-    const auto *program = get<0>(result);
+    auto program = get<0>(result);
     ASSERT_TRUE(program);
     const auto *dcg = std::get<1>(result);
     ASSERT_TRUE(dcg);
