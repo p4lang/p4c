@@ -155,7 +155,7 @@ class ErrorReporter {
         msg = ::P4::error_helper(fmt, msg, std::forward<Args>(args)...);
         emit_message(msg);
 
-        if (errorCount > maxErrorCount)
+        if (errorCount >= maxErrorCount)
             FATAL_ERROR("Number of errors exceeded set maximum of %1%", maxErrorCount);
     }
 

@@ -1,0 +1,4 @@
+loop-bmv2.p4(32):syntax error, unexpected (, expecting {
+  table t(
+         ^
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

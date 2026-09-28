@@ -230,10 +230,9 @@ cstring cstring::substr(size_t start, size_t length) const {
 
 cstring cstring::replace(char c, char with) const {
     if (isNullOrEmpty()) return *this;
-    char *dup = strdup(c_str());
-    for (char *p = dup; *p; ++p)
-        if (*p == c) *p = with;
-    return cstring(dup);
+    auto result = string();
+    std::replace(result.begin(), result.end(), c, with);
+    return cstring(result);
 }
 
 cstring cstring::replace(std::string_view search, std::string_view replace) const {

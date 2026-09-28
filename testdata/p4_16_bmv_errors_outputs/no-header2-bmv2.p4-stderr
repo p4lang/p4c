@@ -1,0 +1,29 @@
+v1model.p4(751): [--Werror=type-error] error: 'package V1Switch'
+package V1Switch<H, M>(Parser<H, M> p,
+        ^^^^^^^^
+  ---- Actual error:
+no-header2-bmv2.p4(22): Cannot unify 'in' parameter 'hdr' with 'inout' parameter 'hdr' because they have different directions
+  control VerifyChecksumI(in H hdr,
+                               ^^^
+v1model.p4(725)
+  control VerifyChecksum<H, M>(inout H hdr,
+                                       ^^^
+  ---- Originating from:
+no-header2-bmv2.p4(56): Type of argument 'VerifyChecksumI' (control VerifyChecksumI) does not match type of parameter 'vr' (control VerifyChecksum<...>)
+           VerifyChecksumI(),
+           ^^^^^^^^^^^^^^^^^
+no-header2-bmv2.p4(22)
+  control VerifyChecksumI(in H hdr,
+          ^^^^^^^^^^^^^^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                                              ^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                         ^^^^^^^^^^^^^^^^^^^^
+  Where 'H' is bound to 'struct H'
+  Where 'M' is bound to 'struct M'
+  ---- Originating from:
+no-header2-bmv2.p4(60): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+           DeparserI()) main;
+                        ^^^^
