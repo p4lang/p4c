@@ -33,7 +33,7 @@ var namespace_p4 =
     [ "ApplyOptionsPragmas", "class_p4_1_1_apply_options_pragmas.html", null ],
     [ "ApplyTypesToExpressions", "class_p4_1_1_apply_types_to_expressions.html", null ],
     [ "ArrayLocation", "class_p4_1_1_array_location.html", null ],
-    [ "AutoCompileContext", "struct_p4_1_1_auto_compile_context.html", null ],
+    [ "AutoCompileContext", "struct_p4_1_1_auto_compile_context.html", "struct_p4_1_1_auto_compile_context" ],
     [ "backtrace_exception", "class_p4_1_1backtrace__exception.html", null ],
     [ "Backtrack", "class_p4_1_1_backtrack.html", "class_p4_1_1_backtrack" ],
     [ "BaseCompileContext", "class_p4_1_1_base_compile_context.html", "class_p4_1_1_base_compile_context" ],

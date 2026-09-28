@@ -137,9 +137,20 @@ $(function(){initNavTree('struct_p4_1_1_auto_compile_context.html',''); initResi
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:ad763a0d569bae7fe880f94505196abe3" id="r_ad763a0d569bae7fe880f94505196abe3"><td class="memItemLeft" align="right" valign="top"><a id="ad763a0d569bae7fe880f94505196abe3" name="ad763a0d569bae7fe880f94505196abe3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>AutoCompileContext</b> (const <a class="el" href="struct_p4_1_1_auto_compile_context.html">AutoCompileContext</a> &amp;)=delete</td></tr>
+<tr class="separator:ad763a0d569bae7fe880f94505196abe3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afdb2ab24427e81bfde2897aa8d671c13" id="r_afdb2ab24427e81bfde2897aa8d671c13"><td class="memItemLeft" align="right" valign="top"><a id="afdb2ab24427e81bfde2897aa8d671c13" name="afdb2ab24427e81bfde2897aa8d671c13"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>AutoCompileContext</b> (<a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> *context)</td></tr>
+<tr class="memdesc:afdb2ab24427e81bfde2897aa8d671c13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Borrow a context which outlives this stack entry. <br /></td></tr>
 <tr class="separator:afdb2ab24427e81bfde2897aa8d671c13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2dcd8039cbe1ff319e7978c6f47cdb54" id="r_a2dcd8039cbe1ff319e7978c6f47cdb54"><td class="memItemLeft" align="right" valign="top"><a id="a2dcd8039cbe1ff319e7978c6f47cdb54" name="a2dcd8039cbe1ff319e7978c6f47cdb54"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>AutoCompileContext</b> (std::unique_ptr&lt; <a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> &gt; context)</td></tr>
+<tr class="memdesc:a2dcd8039cbe1ff319e7978c6f47cdb54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Own a context and release it after removing it from the stack. <br /></td></tr>
+<tr class="separator:a2dcd8039cbe1ff319e7978c6f47cdb54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b7207e623006cc160953aa2bf9382e6" id="r_a5b7207e623006cc160953aa2bf9382e6"><td class="memItemLeft" align="right" valign="top"><a id="a5b7207e623006cc160953aa2bf9382e6" name="a5b7207e623006cc160953aa2bf9382e6"></a>
+<a class="el" href="struct_p4_1_1_auto_compile_context.html">AutoCompileContext</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="struct_p4_1_1_auto_compile_context.html">AutoCompileContext</a> &amp;)=delete</td></tr>
+<tr class="separator:a5b7207e623006cc160953aa2bf9382e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A RAII helper which pushes a compilation context onto the stack when it's created and pops it off when it's destroyed. To ensure the compilation stack is always nested correctly, this is the only interface for pushing or popping compilation contexts. </p>

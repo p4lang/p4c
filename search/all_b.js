@@ -592,7 +592,7 @@ var searchData=
   ['autoclone_5fptr_589',['autoclone_ptr',['../classautoclone__ptr.html',1,'']]],
   ['autoclone_5fptr_3c_20actiondatabus_3a_3ause_20_3e_590',['autoclone_ptr&lt; ActionDataBus::Use &gt;',['../classautoclone__ptr.html',1,'']]],
   ['autoclone_5fptr_3c_20ixbar_3a_3ause_20_3e_591',['autoclone_ptr&lt; IXBar::Use &gt;',['../classautoclone__ptr.html',1,'']]],
-  ['autocompilecontext_592',['AutoCompileContext',['../struct_p4_1_1_auto_compile_context.html',1,'P4']]],
+  ['autocompilecontext_592',['AutoCompileContext',['../struct_p4_1_1_auto_compile_context.html',1,'P4::AutoCompileContext'],['../struct_p4_1_1_auto_compile_context.html#afdb2ab24427e81bfde2897aa8d671c13',1,'P4::AutoCompileContext::AutoCompileContext(ICompileContext *context)'],['../struct_p4_1_1_auto_compile_context.html#a2dcd8039cbe1ff319e7978c6f47cdb54',1,'P4::AutoCompileContext::AutoCompileContext(std::unique_ptr&lt; ICompileContext &gt; context)']]],
   ['autoindent_593',['AutoIndent',['../struct_auto_indent.html',1,'']]],
   ['available_5fspots_594',['available_spots',['../class_p_h_v_1_1_allocation.html#a629d9dae7262a33cfdf3a50eec9bd784',1,'PHV::Allocation']]],
   ['availablespot_595',['AvailableSpot',['../struct_p_h_v_1_1_allocation_1_1_available_spot.html',1,'PHV::Allocation']]],

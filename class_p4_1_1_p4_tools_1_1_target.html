@@ -160,11 +160,11 @@ Public Member Functions</h2></td></tr>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:acfde37b7e27eee5a52a417c189c01ff2" id="r_acfde37b7e27eee5a52a417c189c01ff2"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acfde37b7e27eee5a52a417c189c01ff2">init</a> (std::string_view deviceName, std::string_view archName)</td></tr>
 <tr class="separator:acfde37b7e27eee5a52a417c189c01ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a680c83de864f84eab9ac9035a6881f28" id="r_a680c83de864f84eab9ac9035a6881f28"><td class="memItemLeft" align="right" valign="top">static std::optional&lt; <a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a680c83de864f84eab9ac9035a6881f28">initializeTarget</a> (std::string_view <a class="el" href="#a21a64cef7298a9526fba3850021a39b4">toolName</a>, const std::vector&lt; const char * &gt; &amp;args)</td></tr>
-<tr class="separator:a680c83de864f84eab9ac9035a6881f28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aebaa1b9bffd2c7274f78559c04500a82" id="r_aebaa1b9bffd2c7274f78559c04500a82"><td class="memItemLeft" align="right" valign="top"><a id="aebaa1b9bffd2c7274f78559c04500a82" name="aebaa1b9bffd2c7274f78559c04500a82"></a>
-static std::optional&lt; <a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>initializeTarget</b> (std::string_view <a class="el" href="#a21a64cef7298a9526fba3850021a39b4">toolName</a>, std::string_view target, std::string_view arch)</td></tr>
-<tr class="separator:aebaa1b9bffd2c7274f78559c04500a82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02984307dcd5a161bc738cd71df414d2" id="r_a02984307dcd5a161bc738cd71df414d2"><td class="memItemLeft" align="right" valign="top">static std::optional&lt; std::unique_ptr&lt; <a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02984307dcd5a161bc738cd71df414d2">initializeTarget</a> (std::string_view <a class="el" href="#a21a64cef7298a9526fba3850021a39b4">toolName</a>, const std::vector&lt; const char * &gt; &amp;args)</td></tr>
+<tr class="separator:a02984307dcd5a161bc738cd71df414d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2af7a1923564db78b47465e14968088c" id="r_a2af7a1923564db78b47465e14968088c"><td class="memItemLeft" align="right" valign="top"><a id="a2af7a1923564db78b47465e14968088c" name="a2af7a1923564db78b47465e14968088c"></a>
+static std::optional&lt; std::unique_ptr&lt; <a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>initializeTarget</b> (std::string_view <a class="el" href="#a21a64cef7298a9526fba3850021a39b4">toolName</a>, std::string_view target, std::string_view arch)</td></tr>
+<tr class="separator:a2af7a1923564db78b47465e14968088c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4543fb3aeccac3d016b01a9b314891d" id="r_af4543fb3aeccac3d016b01a9b314891d"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af4543fb3aeccac3d016b01a9b314891d">setArch</a> (std::string_view archName)</td></tr>
 <tr class="separator:af4543fb3aeccac3d016b01a9b314891d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a62d18dd5a0e0177dc38b67830051da9e" id="r_a62d18dd5a0e0177dc38b67830051da9e"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62d18dd5a0e0177dc38b67830051da9e">setDevice</a> (std::string_view deviceName)</td></tr>
@@ -328,8 +328,8 @@ template&lt;class TargetImpl&gt; </div>
 
 </div>
 </div>
-<a id="a680c83de864f84eab9ac9035a6881f28" name="a680c83de864f84eab9ac9035a6881f28"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a680c83de864f84eab9ac9035a6881f28">&#9670;&#160;</a></span>initializeTarget()</h2>
+<a id="a02984307dcd5a161bc738cd71df414d2" name="a02984307dcd5a161bc738cd71df414d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02984307dcd5a161bc738cd71df414d2">&#9670;&#160;</a></span>initializeTarget()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -338,7 +338,7 @@ template&lt;class TargetImpl&gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::optional&lt; <a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> * &gt; Target::initializeTarget </td>
+          <td class="memname">std::optional&lt; std::unique_ptr&lt; <a class="el" href="class_p4_1_1_i_compile_context.html">ICompileContext</a> &gt; &gt; Target::initializeTarget </td>
           <td>(</td>
           <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>toolName</em></span>, </td>
         </tr>

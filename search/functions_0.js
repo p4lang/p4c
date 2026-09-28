@@ -156,7 +156,8 @@ var searchData=
   ['assignvalues_153',['assignValues',['../class_p4_1_1_choose_error_representation.html#aa20a4fa1cbeb9a32f4f956cbf8bbd545',1,'P4::ChooseErrorRepresentation']]],
   ['atcam_5fmatch_154',['atcam_match',['../struct_i_x_bar_1_1_use.html#aa78f014f7fed83f797442e2a2645aecd',1,'IXBar::Use']]],
   ['atcam_5fpartition_155',['atcam_partition',['../struct_i_x_bar_1_1_use.html#a07e4813aa52e95458b921904a05758e6',1,'IXBar::Use::atcam_partition()'],['../struct_tofino_1_1_i_x_bar_1_1_use.html#ab39e901ab1936202c593179036dc0225',1,'Tofino::IXBar::Use::atcam_partition()']]],
-  ['available_5fspots_156',['available_spots',['../class_p_h_v_1_1_allocation.html#a629d9dae7262a33cfdf3a50eec9bd784',1,'PHV::Allocation']]],
-  ['availbitsat_157',['availBitsAt',['../class_p_h_v_1_1_container_occupancy.html#afdc7a89f76793d2b95c19b7e745826c7',1,'PHV::ContainerOccupancy']]],
-  ['average_5fcds_5fchain_5flength_158',['average_cds_chain_length',['../class_dynamic_dependency_metrics.html#ae25bb0da194fd21c9f8c1f587aefa68b',1,'DynamicDependencyMetrics']]]
+  ['autocompilecontext_156',['AutoCompileContext',['../struct_p4_1_1_auto_compile_context.html#afdb2ab24427e81bfde2897aa8d671c13',1,'P4::AutoCompileContext::AutoCompileContext(ICompileContext *context)'],['../struct_p4_1_1_auto_compile_context.html#a2dcd8039cbe1ff319e7978c6f47cdb54',1,'P4::AutoCompileContext::AutoCompileContext(std::unique_ptr&lt; ICompileContext &gt; context)']]],
+  ['available_5fspots_157',['available_spots',['../class_p_h_v_1_1_allocation.html#a629d9dae7262a33cfdf3a50eec9bd784',1,'PHV::Allocation']]],
+  ['availbitsat_158',['availBitsAt',['../class_p_h_v_1_1_container_occupancy.html#afdc7a89f76793d2b95c19b7e745826c7',1,'PHV::ContainerOccupancy']]],
+  ['average_5fcds_5fchain_5flength_159',['average_cds_chain_length',['../class_dynamic_dependency_metrics.html#ae25bb0da194fd21c9f8c1f587aefa68b',1,'DynamicDependencyMetrics']]]
 ];

@@ -1,5 +1,7 @@
 var NAVTREEINDEX35 =
 {
+"struct_b_f_n_1_1_p_s_a_arch_handler_builder.html":[12,0,4,163],
+"struct_b_f_n_1_1_p_s_a_arch_handler_builder.html":[13,0,4,167],
 "struct_b_f_n_1_1_p_s_a_arch_handler_builder.html#ab5cbc83b38cf6cb9dec1cc2b637e30d9":[12,0,4,163,0],
 "struct_b_f_n_1_1_p_s_a_arch_handler_builder.html#ab5cbc83b38cf6cb9dec1cc2b637e30d9":[13,0,4,167,0],
 "struct_b_f_n_1_1_parser_loops_info.html":[12,0,4,149],
@@ -247,7 +249,5 @@ var NAVTREEINDEX35 =
 "struct_infer_write_mode_1_1_counter_example.html":[13,0,368,0],
 "struct_input_xbar_1_1_group.html":[13,0,375,1],
 "struct_input_xbar_1_1_group_set.html":[13,0,375,2],
-"struct_input_xbar_1_1_hash_table.html":[13,0,375,4],
-"struct_input_xbar_1_1_input.html":[13,0,375,5],
-"struct_insert_init_save_state.html":[13,0,377]
+"struct_input_xbar_1_1_hash_table.html":[13,0,375,4]
 };
