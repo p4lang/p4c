@@ -58,10 +58,15 @@ void compareValuesInMaps(std::map<cstring, const IR::Expression *> *oldValues,
 }
 
 // Removes values if they are used as Out/InOut parameter
-void checkParametersForMap(const IR::ParameterList *params,
+void checkParametersForMap(const MethodInstance *mi,
                            std::map<cstring, const IR::Expression *> *vars) {
-    for (auto param : params->parameters)
-        if (param->hasOut()) removeVarsContaining(vars, param->name.name);
+    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+        if (param->hasOut()) {
+            auto arg = mi->substitution.lookup(param);
+            if (auto name = GlobalCopyProp::lValueName(arg->expression))
+                removeVarsContaining(vars, name);
+        }
+    }
 }
 
 bool FindVariableValues::preorder(const IR::P4Control *ctrl) {
@@ -189,7 +194,7 @@ bool FindVariableValues::preorder(const IR::OpAssignmentStatement *stat) {
 // An entry in the 'actions' map is set for the action node that was acquired by resolving
 // the 'ActionCall'.
 void FindVariableValues::postorder(const IR::MethodCallExpression *mc) {
-    if (!working || mc->method->is<IR::Member>()) return;
+    if (!working) return;
 
     LOG5("Working on 'MethodCallexpression': " << mc);
     auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
@@ -205,13 +210,8 @@ void FindVariableValues::postorder(const IR::MethodCallExpression *mc) {
         } else {
             LOG6("  Is 'ActionCall'. Entry already exists for this action: " << aCall->action);
         }
-    } else if (auto eFun = mi->to<ExternFunction>()) {
-        LOG6("  Is 'ExternFunction'. Checking params for: " << eFun->method);
-        checkParametersForMap(eFun->method->getParameters(), &vars);
-    } else if (auto fCall = mi->to<FunctionCall>()) {
-        LOG6("  Is 'FunctionCall'. Checking params for: " << fCall->function);
-        checkParametersForMap(fCall->function->getParameters(), &vars);
     }
+    checkParametersForMap(mi, &vars);
     LOG5("Finished 'MethodCallExpression': " << mc);
 }
 
@@ -271,21 +271,25 @@ const IR::P4Action *DoGlobalCopyPropagation::postorder(IR::P4Action *act) {
     return act;
 }
 
-IR::MethodCallExpression *DoGlobalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
-    if (!performRewrite || mc->method->is<IR::Member>()) return mc;
+IR::MethodCallExpression *DoGlobalCopyPropagation::preorder(IR::MethodCallExpression *mc) {
+    if (!performRewrite) return mc;
 
     auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     LOG5("Working on 'MethodCallExpression' : " << mc);
-    // Remove entries in the 'vars' map for variables that are used as 'Out' or 'InOut' parameters.
-    if (auto eFun = mi->to<ExternFunction>()) {
-        LOG6("  Is 'ExternFunction'. Checking params for: " << eFun->method);
-        checkParametersForMap(eFun->method->getParameters(), vars);
-    } else if (auto fCall = mi->to<P4::FunctionCall>()) {
-        LOG6("  Is 'FunctionCall'. Checking params for: " << fCall->function);
-        checkParametersForMap(fCall->function->getParameters(), vars);
+    visit(mc->method);
+    visit(mc->typeArguments);
+    auto *args = new IR::Vector<IR::Argument>();
+    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(param);
+        if (!param->hasOut()) visit(arg);
+        args->push_back(arg);
     }
+    mc->arguments = args;
+    // Copy-out invalidation must follow all copy-in argument visits.
+    checkParametersForMap(mi, vars);
     LOG5("Finished 'MethodCallExpression' : " << mc);
 
+    prune();
     return mc;
 }
 
@@ -332,13 +336,7 @@ class RemoveModifiedValues : public Inspector {
     }
     bool preorder(const IR::MethodCallExpression *mc) override {
         auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
-        if (auto eFun = mi->to<ExternFunction>()) {
-            LOG6("  Is 'ExternFunction'. Checking params for: " << eFun->method);
-            checkParametersForMap(eFun->method->getParameters(), vars);
-        } else if (auto fCall = mi->to<P4::FunctionCall>()) {
-            LOG6("  Is 'FunctionCall'. Checking params for: " << fCall->function);
-            checkParametersForMap(fCall->function->getParameters(), vars);
-        }
+        checkParametersForMap(mi, vars);
         return true;
     }
 
