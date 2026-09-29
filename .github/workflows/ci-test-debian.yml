@@ -98,7 +98,6 @@ jobs:
       ENABLE_P4TC: OFF
       ENABLE_P4FMT: OFF
       ENABLE_P4TEST: OFF
-      ENABLE_P4C_GRAPHS: OFF
     steps:
       - uses: actions/checkout@v7
         with:

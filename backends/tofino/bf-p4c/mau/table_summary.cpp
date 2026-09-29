@@ -67,8 +67,6 @@
 #include <numeric>
 #include <sstream>
 
-#include <boost/optional/optional_io.hpp>
-
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/table_printer.h"
 #include "backends/tofino/bf-p4c/common/utils.h"

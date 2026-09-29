@@ -25,8 +25,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
