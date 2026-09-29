@@ -311,7 +311,7 @@ Python dependencies can be installed using `uv`:
 curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
 uv sync
 ```
-The Python dependency versions are pinned in `pyproject.toml` (including `thrift==0.24.0`).
+The Python dependency versions are pinned in `pyproject.toml`.
 
 **For documentation building:**
 
