@@ -77,6 +77,7 @@ const IR::Node *LowerExpressions::postorder(IR::Cast *expression) {
         auto cast0 = new IR::Cast(expression->srcInfo, destType, and0);
         typeMap->setType(one, srcType);
         typeMap->setType(shift_value, shift_value->type);
+        typeMap->setCompileTimeConstant(shift_value);
         typeMap->setType(shl, srcType);
         typeMap->setType(mask, srcType);
         typeMap->setType(and0, srcType);
@@ -153,6 +154,7 @@ const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
     typeMap->setType(and0, resulttype);
     typeMap->setType(mask, resulttype);
     typeMap->setType(sizefb0, sizefb0->type);
+    typeMap->setCompileTimeConstant(sizefb0);
     LOG3("Replaced " << expression << " with " << result);
     return result;
 }
