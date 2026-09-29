@@ -32,11 +32,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<1> tmp;
     @name("ingress.sliced_val") bit<1> sliced_val_0;
     @name("ingress.slice_action") action slice_action() {
-        h.h.a = 8w2;
         sliced_val_0 = 1w1;
         tmp = sliced_val_0;
     }
     apply {
+        h.h.a = 8w2;
         slice_action();
         h.h.a[0:0] = tmp;
     }
