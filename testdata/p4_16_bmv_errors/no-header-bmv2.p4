@@ -23,9 +23,8 @@ parser MyParser(packet_in b,
   }
 }
 
-control MyVerifyChecksum(in h hdr,
-                       inout m meta,
-                       inout standard_metadata_t standard_metadata) {
+control MyVerifyChecksum(inout h hdr,
+                       inout m meta) {
   apply {}
 
 }
@@ -41,8 +40,7 @@ control MyEgress(inout h hdr,
 }
 
 control MyComputeChecksum(inout h hdr,
-                          inout m meta,
-                          inout standard_metadata_t standard_metadata) {
+                          inout m meta) {
   apply {}
 }
 control MyDeparser(packet_out b, in h hdr) {

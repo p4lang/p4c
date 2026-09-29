@@ -1,23 +1,9 @@
-v1model.p4(751): [--Werror=type-error] error: 'package V1Switch'
-package V1Switch<H, M>(Parser<H, M> p,
-        ^^^^^^^^
-  ---- Actual error:
-  Cannot unify functions with different number of arguments: MyComputeChecksum to ComputeChecksum
-  ---- Originating from:
-no-header-bmv2.p4(56): Type of argument 'MyComputeChecksum' (control MyComputeChecksum) does not match type of parameter 'ck' (control ComputeChecksum<...>)
-           MyComputeChecksum(),
-           ^^^^^^^^^^^^^^^^^^^
-no-header-bmv2.p4(43)
-  control MyComputeChecksum(inout h hdr,
-          ^^^^^^^^^^^^^^^^^
-v1model.p4(755)
-                         ComputeChecksum<H, M> ck,
-                                               ^^
-v1model.p4(755)
-                         ComputeChecksum<H, M> ck,
-                         ^^^^^^^^^^^^^^^^^^^^^
-  Where 'H' is bound to 'struct h'
-  ---- Originating from:
-no-header-bmv2.p4(57): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
-           MyDeparser()) main;
-                         ^^^^
+no-header-bmv2.p4(18): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsedHdr' may be uninitialized when 'MyParser' terminates
+                out h parsedHdr,
+                      ^^^^^^^^^
+no-header-bmv2.p4(17)
+parser MyParser(packet_in b,
+       ^^^^^^^^
+no-header-bmv2.p4(18): [--Werror=expected] error: h: the type should be a struct of headers, stacks, or unions
+                out h parsedHdr,
+                    ^
