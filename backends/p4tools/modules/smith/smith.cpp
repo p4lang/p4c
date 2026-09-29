@@ -40,7 +40,7 @@ int Smith::main(const std::vector<const char *> &args) {
         return EXIT_FAILURE;
     }
     // Set up the compilation context.
-    AutoCompileContext autoContext(context.value());
+    AutoCompileContext autoContext(context.value().get());
 
     // Process command-line options.
     auto &toolOptions = SmithOptions::get();

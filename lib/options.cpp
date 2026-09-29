@@ -21,7 +21,7 @@ void Util::Options::registerOption(const char *option, const char *argName,
     if (strlen(option) <= 1) throw std::logic_error(std::string("Option too short: ") + option);
     if (option[0] != '-')
         throw std::logic_error(std::string("Expected option to start with -: ") + option);
-    auto o = new Option();
+    auto o = std::make_shared<Option>();
     o->option = cstring(option);
     o->argName = argName;
     o->processor = processor;
@@ -58,7 +58,7 @@ std::vector<const char *> *Util::Options::process_options(int argc, char *const 
     for (int i = 1; i < argc; i++) {
         cstring opt = cstring(argv[i]);
         const char *arg = nullptr;
-        const Option *option = nullptr;
+        std::shared_ptr<const Option> option;
 
         if (opt.startsWith("--")) {
             option = get(options, opt);

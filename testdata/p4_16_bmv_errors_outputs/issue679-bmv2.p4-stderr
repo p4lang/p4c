@@ -1,0 +1,35 @@
+issue679-bmv2.p4(23): [--Wwarn=deprecated] warning: mark_to_drop: Using deprecated feature mark_to_drop. Please use mark_to_drop(standard_metadata) instead.
+    action drop() { mark_to_drop(); }
+                    ^^^^^^^^^^^^
+v1model.p4(397)
+extern void mark_to_drop();
+            ^^^^^^^^^^^^
+v1model.p4(751): [--Werror=type-error] error: 'package V1Switch'
+package V1Switch<H, M>(Parser<H, M> p,
+        ^^^^^^^^
+  ---- Actual error:
+issue679-bmv2.p4(57): Cannot unify 'in' parameter 'hdr' with 'inout' parameter 'hdr' because they have different directions
+  control VerifyChecksumI(in H hdr, inout M meta) {
+                               ^^^
+v1model.p4(725)
+  control VerifyChecksum<H, M>(inout H hdr,
+                                       ^^^
+  ---- Originating from:
+issue679-bmv2.p4(65): Type of argument 'VerifyChecksumI' (control VerifyChecksumI) does not match type of parameter 'vr' (control VerifyChecksum<...>)
+  V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(),
+                      ^^^^^^^^^^^^^^^^^
+issue679-bmv2.p4(57)
+  control VerifyChecksumI(in H hdr, inout M meta) {
+          ^^^^^^^^^^^^^^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                                              ^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                         ^^^^^^^^^^^^^^^^^^^^
+  Where 'H' is bound to 'struct H'
+  Where 'M' is bound to 'struct M'
+  ---- Originating from:
+issue679-bmv2.p4(66): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+           ComputeChecksumI(), DeparserI()) main;
+                                            ^^^^

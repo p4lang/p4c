@@ -4,6 +4,7 @@
 
 #include <initializer_list>
 #include <string_view>
+#include <vector>
 
 namespace P4::Test {
 
@@ -99,6 +100,18 @@ TEST(NetHash, csum16) {
     EXPECT_EQ(apply<csum16>({0x45, 0x00, 0x00, 0x73, 0x00, 0x00, 0x40, 0x00, 0x40, 0x11,
                              0x00, 0x00, 0xc0, 0xa8, 0x00, 0x01, 0xc0, 0xa8, 0x00, 0xc7}),
               0xb861_u16);
+}
+
+TEST(NetHash, csum16Unaligned) {
+    // Check csum16 with different buffer alignments.
+    const std::vector<uint8_t> ipHeader = {0x45, 0x00, 0x00, 0x73, 0x00, 0x00, 0x40,
+                                           0x00, 0x40, 0x11, 0x00, 0x00, 0xc0, 0xa8,
+                                           0x00, 0x01, 0xc0, 0xa8, 0x00, 0xc7};
+    for (size_t offset = 0; offset < 16; offset++) {
+        std::vector<uint8_t> buf(offset, 0xaa);
+        buf.insert(buf.end(), ipHeader.begin(), ipHeader.end());
+        EXPECT_EQ(csum16(buf.data() + offset, ipHeader.size()), 0xb861) << "offset=" << offset;
+    }
 }
 
 TEST(NetHash, xor16) { EXPECT_EQ(apply<xor16>({0x0b, 0xb8, 0x1f, 0x90}), 0x1428_u16); }
