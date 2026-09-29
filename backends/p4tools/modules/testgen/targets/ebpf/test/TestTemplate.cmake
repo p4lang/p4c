@@ -4,21 +4,23 @@
 
 # This file defines how a test should be written for a particular target. This is used by testutils
 
-# Write the script to check eBPF Kernel STF tests to the designated test file.
+# Append commands to run eBPF kernel STF tests.
 # Arguments:
-#   - testfile is the testing script that this script is written to.
+#   - testcontent is the name of the variable to append the script to.
 #   - testfolder is target folder of the test.
 #   - p4test is the file that is to be tested.
-macro(check_with_kernel testfile testfolder p4test runner_args)
+macro(check_with_kernel testcontent testfolder p4test runner_args)
   set(__p4cebpfpath "${P4C_BINARY_DIR}/p4c-ebpf")
   set(__ebpfrunner "${CMAKE_BINARY_DIR}/run-ebpf-test.py")
   # Find all the stf tests generated for this P4 file and test them with the eBPF kernel.
-  file(APPEND ${testfile} "stffiles=($(find ${testfolder} -name \"*.stf\"  | sort -n ))\n")
-  file(APPEND ${testfile} "for item in \${stffiles[@]}\n")
-  file(APPEND ${testfile} "do\n")
-  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${__testfile} "\tpython3 ${__ebpfrunner} ${runner_args} -t kernel -c ${__p4cebpfpath} -tf \${item} ${P4C_SOURCE_DIR} ${p4test}\n")
-  file(APPEND ${testfile} "done\n")
+  string(APPEND ${testcontent}
+    "stffiles=($(find ${testfolder} -name \"*.stf\"  | sort -n ))\n"
+    "for item in \${stffiles[@]}\n"
+    "do\n"
+    "\techo \"Found \${item}\"\n"
+    "\tpython3 ${__ebpfrunner} ${runner_args} -t kernel -c ${__p4cebpfpath} -tf \${item} ${P4C_SOURCE_DIR} ${p4test}\n"
+    "done\n"
+  )
 endmacro(check_with_kernel)
 
 # Add a single test to the testsuite.
@@ -64,20 +66,20 @@ macro(p4tools_add_test_with_args)
   set(__testfile "${P4TESTGEN_DIR}/${tag}/${alias}.test")
   set(__testfolder "${P4TESTGEN_DIR}/${tag}/${aliasname}.out")
   get_filename_component(__testdir ${p4test} DIRECTORY)
-  file(WRITE ${__testfile} "#! /usr/bin/env bash\n")
-  file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
-  file(APPEND ${__testfile} "set -e\n")
-  file(APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-  file(
-    APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
+  string(CONCAT __testcontent
+    "#! /usr/bin/env bash\n"
+    "# Generated file, modify with care\n\n"
+    "set -e\n"
+    "cd ${P4C_BINARY_DIR}\n")
+  string(APPEND __testcontent "${driver} --target ${target} --arch ${arch} "
     "${test_args} --out-dir ${__testfolder} \"$@\" ${p4test}\n"
   )
-  # If ENABLE_RUNNER is active, run the generated tests on the eBPF kernek.
+  # Run the generated tests on the eBPF kernel if requested.
   if(${TOOLS_EBPF_TESTS_ENABLE_RUNNER})
-    check_with_kernel(${__testfile} ${__testfolder} ${p4test} "${runner_args}")
+    check_with_kernel(__testcontent ${__testfolder} ${p4test} "${runner_args}")
   endif()
 
-  execute_process(COMMAND chmod +x ${__testfile})
+  p4c_write_test_script("${__testfile}" "${__testcontent}")
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
   add_test(
     NAME ${__testname}
