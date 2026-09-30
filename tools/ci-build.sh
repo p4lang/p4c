@@ -108,9 +108,6 @@ P4C_DEPS="bison \
           g++ \
           git \
           lld \
-          libboost-dev \
-          libboost-graph-dev \
-          libboost-iostreams-dev \
           libfl-dev \
           pkg-config \
           tcpdump"
@@ -195,11 +192,6 @@ function build_bmv2() {
                         thrift-compiler \
                         libxxhash-dev \
                         libjsoncpp-dev"
-
-    # TODO: Remove this check once 18.04 is deprecated.
-    if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-        P4C_RUNTIME_DEPS+=" libboost-graph1.65.1 libboost-iostreams1.65.1 "
-    fi
 
     # TODO: Remove this check once 18.04 is deprecated.
     if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
@@ -449,15 +441,14 @@ if [[ "${IMAGE_TYPE}" == "build" ]] ; then
   sudo apt-get autoremove --purge -y
 
   # Reinstall the runtime libraries required by the installed P4C executables. This must happen AFTER the purge/autoremove above:
-  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev
+  sudo apt-get install -y --no-install-recommends libboost-program-options-dev
 
   rm -rf "${P4C_DIR}" /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
 
 elif [[ "${IMAGE_TYPE}" == "test" ]] ; then
-  # libboost-iostreams is not provided by the BMv2 base image (BMv2 does
-  # not use Boost.Iostreams), but p4c executables link against it.
-  sudo apt-get install -y --no-install-recommends libboost-iostreams-dev libboost-program-options-dev libboost-filesystem-dev libboost-thread-dev libgmp-dev
+  # Keep the runtime libraries needed by BMv2 and its test tools.
+  sudo apt-get install -y --no-install-recommends libboost-program-options-dev libboost-filesystem-dev libboost-thread-dev libgmp-dev
   echo 'Test image ready'
 
 fi

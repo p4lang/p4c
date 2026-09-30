@@ -233,6 +233,8 @@ sudo dpkg -i /path/to/package.deb
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
      - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
+     - `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF`. Use installed Multiprecision and Boost.Config headers with standalone support instead of fetching them. Default is OFF.
+     - `-DP4C_USE_PREINSTALLED_BOOST=ON|OFF`. Use installed Boost (1.83 or newer) for the Graphs and Tofino backends instead of fetching it. Default is OFF. Has no effect when both backends are disabled.
      - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.
      - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable the use of static abseil libraries. Default is ON. Only has an effect when `P4C_USE_PREINSTALLED_ABSEIL` is enabled.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
@@ -283,7 +285,14 @@ platforms are untested; you can try to use them, but YMMV.
 
 - Google Protocol Buffers v3.25.3 or higher for control plane API generation
 
-- C++ boost library
+- Boost.Multiprecision headers (standalone mode, including Boost.Config) are
+  fetched automatically by CMake. To use installed headers with standalone
+  support, set `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON`, optionally specifying
+  `-DP4C_MULTIPRECISION_INCLUDE_DIR=<include-dir>` and
+  `-DP4C_BOOST_CONFIG_INCLUDE_DIR=<include-dir>` when configuring CMake.
+  The optional Graphs and Tofino backends fetch a matching Boost release for
+  their additional dependencies. To use system Boost for these backends, set
+  `-DP4C_USE_PREINSTALLED_BOOST=ON` (requires Boost 1.83 or newer).
 
 - Python 3 and uv for scripting and running tests
 
@@ -301,8 +310,7 @@ Most dependencies can be installed using `apt-get install`:
 
 ```bash
 sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
-libfl-dev libboost-dev libboost-iostreams-dev \
-libboost-graph-dev llvm pkg-config python3 python3-pip \
+libfl-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
 ```
@@ -358,7 +366,7 @@ P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a n
 
 ```bash
 sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
-libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
+libfl-devel gmp-devel llvm pkg-config \
 python3 python3-pip tcpdump uv
 
 uv sync
@@ -407,11 +415,11 @@ Installing on macOS:
 
 - Install dependencies using Homebrew:
   ```
-  brew install autoconf automake libtool bdw-gc boost bison pkg-config
+  brew install autoconf automake libtool bdw-gc bison pkg-config
   ```
   or with MacPorts
   ```
-  sudo port install autoconf automake coreutils libtool boehmgc boost bison pkg-config
+  sudo port install autoconf automake coreutils libtool boehmgc bison pkg-config
   ```
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
