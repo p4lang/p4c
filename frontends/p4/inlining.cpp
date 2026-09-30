@@ -279,8 +279,19 @@ class Substitutions : public SubstituteParameters {
         auto decl = refMap->getDeclaration(expression->path, true);
         auto param = decl->to<IR::Parameter>();
         if (param != nullptr && subst->contains(param)) {
-            // This path is the same as in SubstituteParameters
-            auto value = subst->lookup(param)->expression;
+            auto value = subst->lookup(param)->expression->clone();
+            // Point diagnostics to the location the parameter is read, not where the argument is
+            // passed. The identifier's location is unchanged and still resolves to the same
+            // declaration.
+            value->srcInfo = expression->srcInfo;
+            if (auto path = value->to<IR::PathExpression>()) {
+                auto oldPath = path->path;
+                auto newPath = oldPath->clone();
+                newPath->name.originalName = expression->path->name.originalName;
+                path->path = newPath;
+                if (auto replacementDecl = refMap->getDeclaration(oldPath, false))
+                    refMap->setDeclaration(newPath, replacementDecl);
+            }
             LOG3("(Substitutions) Replaced " << dbp(expression) << " for parameter " << decl
                                              << " with " << dbp(value));
             return value;
@@ -293,7 +304,7 @@ class Substitutions : public SubstituteParameters {
             newName = expression->path->name;
         IR::ID newid(expression->path->srcInfo, newName, expression->path->name.originalName);
         auto newpath = new IR::Path(newid, expression->path->absolute);
-        auto result = new IR::PathExpression(newpath);
+        auto result = new IR::PathExpression(expression->srcInfo, newpath);
         refMap->setDeclaration(newpath, decl);
         LOG3("(Substitutions) replaced " << dbp(getOriginal()) << " with " << dbp(result));
         return result;
