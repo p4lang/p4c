@@ -4,7 +4,9 @@ bit<16> reset(out bit<8> hPSe) {
 gauntlet_side_effects_in_mux-bmv2.p4(28)
 bit<16> reset(out bit<8> hPSe) {
         ^^^^^
-[--Wwarn=uninitialized-use] warning: hPSe_0 may be uninitialized
-[--Wwarn=uninitialized-use] warning: hPSe_1 may be uninitialized
-[--Wwarn=uninitialized-use] warning: hPSe_0 may be uninitialized
-[--Wwarn=uninitialized-use] warning: hPSe_1 may be uninitialized
+gauntlet_side_effects_in_mux-bmv2.p4(42): [--Wwarn=uninitialized-use] warning: hPSe_0 may be uninitialized
+        h.eth_hdr.eth_type = (h.eth_hdr.src_addr == 5) ? reset(h.h.a) : reset(h.h.b);
+                                                               ^^^^^
+gauntlet_side_effects_in_mux-bmv2.p4(42): [--Wwarn=uninitialized-use] warning: hPSe_1 may be uninitialized
+        h.eth_hdr.eth_type = (h.eth_hdr.src_addr == 5) ? reset(h.h.a) : reset(h.h.b);
+                                                                              ^^^^^

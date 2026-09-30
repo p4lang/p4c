@@ -14,7 +14,7 @@ control c(out bit<32> x, out bit<32> y) {
     @hidden action simplify_method_calls42() {
         x = h_0.a;
     }
-    @hidden action simplify_method_calls52() {
+    @hidden action simplify_method_calls51() {
         h_0.a = 32w0;
         x = 32w0;
     }
@@ -36,11 +36,11 @@ control c(out bit<32> x, out bit<32> y) {
         }
         const default_action = simplify_method_calls42();
     }
-    @hidden table tbl_simplify_method_calls52 {
+    @hidden table tbl_simplify_method_calls51 {
         actions = {
-            simplify_method_calls52();
+            simplify_method_calls51();
         }
-        const default_action = simplify_method_calls52();
+        const default_action = simplify_method_calls51();
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -53,7 +53,7 @@ control c(out bit<32> x, out bit<32> y) {
         if (b_0) {
             tbl_simplify_method_calls42.apply();
         } else {
-            tbl_simplify_method_calls52.apply();
+            tbl_simplify_method_calls51.apply();
         }
         tbl_simple_action.apply();
     }
