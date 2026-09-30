@@ -168,6 +168,17 @@ $(function(){initNavTree('contribute.html',''); initResizable(true); });
         <a href="#handling-errors">Handling errors</a>
       </li>
       <li class="level2">
+        <a href="#diagnostic-messages">Diagnostic Messages</a>
+        <ul>
+          <li class="level3">
+            <a href="#choosing-placeholders">Choosing placeholders</a>
+          </li>
+          <li class="level3">
+            <a href="#displaying-objects-and-source-locations">Displaying objects and source locations</a>
+          </li>
+        </ul>
+      </li>
+      <li class="level2">
         <a href="#git-commits-and-pull-requests">Git commits and pull requests</a>
       </li>
     </ul>
@@ -228,16 +239,43 @@ Handling errors</h2>
 <p>The main goal of issuing errors and warnings is for the programmer to write correct P4 code. Errors and warnings should be <em>actionable</em>, i.e., the programmer needs to understand what was wrong with the program and if possible, get an idea on how to fix the problem. While error messages are not intended to replace learning the language and reading the language specification, there are many instances in which the compiler messages really help emphasizing certain semantics aspects that are overlooked. Therefore, please take the time to think through the information you want to convey and write good, explicit error messages.</p>
 <p>An additional goal of the P4C compiler is to provide as many error messages as possible in one go. Therefore, while there is support for <code>FATAL_ERROR</code>s, it is desirable to try to continue execution and report all possible errors, using the <code>error</code> and <code>warning</code> calls. With the free form implementation of error messages, repeated passes of the compiler will then issue the same message multiple times. This results in frustrating the programmer.</p>
 <p>To address the repeated message issue, as of Dec 2018, we introduce error/warning types. They classify the errors and impose a format that allows the compiler to automatically filter repeated messages. The filtering is based on the type of error and the source code location of the object that reports the error. Thus, it allows multiple error types per source code line, and ensures that only one error is reported even if the message is raised multiple times. We encourage compiler developers to use this method for issuing errors. The error codes and formats are defined in <code>lib/error_catalog.[h,cpp]</code>. Backends can extend the codes and formats as needed (and they are encouraged to do so).</p>
-<p>Most of the errors as of Dec 2018 are written in free form: they use the <code>boost::format</code> for the format argument, which has some compatibility for <code>printf</code> arguments. These functions handle IR and SourceInfo objects smartly. Here is an example:</p>
-<div class="fragment"><div class="line">IR::NamedRef *ref;</div>
+<h2><a class="anchor" id="diagnostic-messages"></a>
+Diagnostic Messages</h2>
+<p>The <code>error</code> and <code>warning</code> functions and bug-reporting macros take a message followed by the values to insert into it. Pass objects directly; there is no need to convert them to strings first. For errors and warnings, the diagnostic helpers add the severity, source location, and source excerpt when available, so write only the message itself.</p>
+<h3><a class="anchor" id="choosing-placeholders"></a>
+Choosing placeholders</h3>
+<p>Prefer Abseil's printf-style placeholders for new diagnostic messages. Boost-style placeholders are still supported, but may be deprecated in the future. Both work through the same diagnostic functions; there is no formatter to select.</p>
+<ul>
+<li><code>s</code>, <code>d</code>, <code>x</code>, <code>%.2f</code>, etc. consume arguments from left to right. Use <code>s</code> for an object's usual text, including IR nodes and numbers; it is not restricted to strings. Use numeric conversions when the presentation matters: <code>d</code> for an integer, <code>x</code> for hexadecimal, or <code>%.2f</code> for a floating-point value with two decimal places. Abseil's <code>v</code> conversion, which chooses a representation based on the type, is also supported.</li>
+<li><code>%1$s</code>, <code>%2$x</code>, etc. combine explicit argument numbers with conversion options, counting from one. Use these when you need to repeat arguments or display them in a different order.</li>
+<li>Boost-style <code>%1%</code>, <code>%2%</code>, etc. insert the corresponding argument's usual text. The bracketed form <code>%|2$8x|</code> is also supported. Prefer <code>%1$s</code>, <code>%2$s</code>, and <code>%2$8x</code>, respectively, when writing new messages.</li>
+</ul>
+<p>Choose either numbered or sequential arguments for each message. Different placeholder spellings can be mixed as long as that choice is consistent:</p>
+<div class="fragment"><div class="line"><span class="comment">// Preferred: consume arguments from left to right.</span></div>
+<div class="line">error(ErrorType::ERR_INVALID, <span class="stringliteral">&quot;%s has invalid mask 0x%x&quot;</span>, field, mask);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Also preferred when explicit argument numbers are useful.</span></div>
+<div class="line">error(ErrorType::ERR_INVALID, <span class="stringliteral">&quot;%1$s has invalid mask 0x%2$x&quot;</span>, field, mask);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Supported: different spellings, but all placeholders are numbered.</span></div>
+<div class="line">error(ErrorType::ERR_INVALID, <span class="stringliteral">&quot;%1% has invalid mask 0x%2$x&quot;</span>, field, mask);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Invalid: numbered and sequential placeholders in the same message.</span></div>
+<div class="line">error(ErrorType::ERR_INVALID, <span class="stringliteral">&quot;%1% has invalid mask 0x%x&quot;</span>, field, mask);</div>
+</div><!-- fragment --><p>Width and precision options such as <code>%8s</code>, <code>%08x</code>, and <code>%.2f</code> are supported. If width or precision is supplied by a <code>*</code> argument, that argument must follow the same numbering rule. Write <code>%%</code> for a literal percent sign; it does not consume an argument. Brace placeholders such as <code>{}</code>, Boost's tabulation and centering options, and printf's <code>n</code> are not supported.</p>
+<p>Messages may be string literals or constructed at runtime. Formats are checked when used: malformed placeholders, incorrect argument counts, and incompatible numeric conversions are errors in the compiler, not errors in the P4 program. For example, <code>d</code> cannot format a floating-point value; use <code>s</code> for its usual text or <code>f</code> to control its numeric presentation.</p>
+<h3><a class="anchor" id="displaying-objects-and-source-locations"></a>
+Displaying objects and source locations</h3>
+<p>For <code>s</code> (or <code>N%</code>), errors and warnings use an object's <code>toString()</code> when available, otherwise its stream output (<code>operator&lt;&lt;</code>). Bug reports use <code>dbprint()</code> when available to show more detail, otherwise stream output.</p>
+<p>Passing an IR node also supplies its source location. To attach a location without printing an object, pass a <code>SourceInfo</code> argument. It still needs a placeholder, but contributes no text there: the location and source excerpt are displayed separately. Do not add a colon or space for that placeholder. For example:</p>
+<div class="fragment"><div class="line"><span class="comment">// Given a pointer ref to an IR::NamedRef:</span></div>
 <div class="line">error(ErrorType::ERR_INVALID,</div>
-<div class="line">      <span class="stringliteral">&quot;%1%: No header or metadata named &#39;%2%&#39;&quot;</span>, ref-&gt;srcInfo, ref-&gt;name);</div>
-</div><!-- fragment --><p>output:</p>
-<div class="fragment"><div class="line">missing_decls1.p4(6): [-Werror=invalid] Error: No header or metadata named &#39;data&#39;</div>
+<div class="line">      <span class="stringliteral">&quot;%sNo header or metadata named &#39;%s&#39;&quot;</span>, ref-&gt;srcInfo, ref-&gt;name);</div>
+</div><!-- fragment --><p>Example output:</p>
+<div class="fragment"><div class="line">missing_decls1.p4(6): [--Werror=invalid] error: No header or metadata named &#39;data&#39;</div>
 <div class="line">    if (data.b2 == 0) {</div>
 <div class="line">        ^^^^</div>
-</div><!-- fragment --><p>To ease the transition to typed errors and warnings, free form messages whose first argument (<code>%1%</code>) is an <code>IR::Node</code> (or more precisely a class that implements <code>Util::IHasSourceInfo</code> interface), will be converted automatically to typed errors that use the format argument of the message rather than the error catalog predefined formats.</p>
-<h2><a class="anchor" id="git-commits-and-pull-requests"></a>
+</div><!-- fragment --><h2><a class="anchor" id="git-commits-and-pull-requests"></a>
 Git commits and pull requests</h2>
 <p>Git histories are a beautiful tool to understand design decisions and build a knowledge base for resolving issues. Commit messages allow relating issues to resolutions and to explain the resolutions to everyone. Writing good commit messages takes some practice, fortunately, there are a number of simple guideline steps that go a long way. Universally, the recommendation is to use a 50 character summary line, followed by a detailed explanation of your commit, why it is necessary (link to the relevant issue), how it addresses the issue, what are its implications. For a more detailed exposure, including guidelines on how to express the text, see this <a href="http://chris.beams.io/posts/git-commit/">blog post</a>.</p>
 <p>Github pull requests (PRs) created based on a single commit will inherit the commit message, and thus allow your reviewers to understand the work done without chasing multiple other issues, email messages, etc. Multi-commit PRs do not have this feature, however, we encourage you to cut and paste from your commit messages and provide a synopsis of what the PR is trying to accomplish. It is also strongly recommended that multi-commit PRs squash all their commits in to a single commit when merged. The Github web interface makes it very easy to do, and allows you to edit the final commit message directly in the browser.   </p>

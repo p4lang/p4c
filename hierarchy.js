@@ -1194,8 +1194,6 @@ var hierarchy =
         [ "TableMutex", "class_table_mutex.html", null ]
       ] ]
     ] ],
-    [ "P4::detail::DbprintDispatchPtr< T >", "struct_p4_1_1detail_1_1_dbprint_dispatch_ptr.html", null ],
-    [ "P4::detail::DbprintDispatchRef< T >", "struct_p4_1_1detail_1_1_dbprint_dispatch_ref.html", null ],
     [ "P4::DiagnosticCountInfo", "struct_p4_1_1_diagnostic_count_info.html", null ],
     [ "P4::DiagnosticCountInfoGuard", "struct_p4_1_1_diagnostic_count_info_guard.html", null ],
     [ "P4::DiagnosticCountInfoState", "struct_p4_1_1_diagnostic_count_info_state.html", null ],
@@ -1259,6 +1257,7 @@ var hierarchy =
     [ "P4::ExternMetrics", "namespace_p4.html#struct_p4_1_1_extern_metrics", null ],
     [ "P4::flat_map< K, V, Compare, Container >", "struct_p4_1_1flat__map.html", null ],
     [ "P4::flat_map< K, V, Compare, Container >::value_compare", "struct_p4_1_1flat__map_1_1value__compare.html", null ],
+    [ "P4::FormatDetail::StreamArgument< PreferDbprint, T >", "struct_p4_1_1_format_detail_1_1_stream_argument.html", null ],
     [ "P4::FrontEnd", "class_p4_1_1_front_end.html", null ],
     [ "P4::FunctionSpecialization", "struct_p4_1_1_function_specialization.html", null ],
     [ "P4::FunctionSpecializationMap", "struct_p4_1_1_function_specialization_map.html", null ],
@@ -1725,6 +1724,7 @@ var hierarchy =
     ] ],
     [ "P4::P4Tools::ArchSpec", "class_p4_1_1_p4_tools_1_1_arch_spec.html", null ],
     [ "P4::P4Tools::ArchSpec::ArchMember", "class_p4_1_1_p4_tools_1_1_arch_spec.html#struct_p4_1_1_p4_tools_1_1_arch_spec_1_1_arch_member", null ],
+    [ "P4::P4Tools::detail::LogArgument< T >", "struct_p4_1_1_p4_tools_1_1detail_1_1_log_argument.html", null ],
     [ "P4::P4Tools::FormatOptions", "namespace_p4_1_1_p4_tools.html#struct_p4_1_1_p4_tools_1_1_format_options", null ],
     [ "P4::P4Tools::Model", "class_p4_1_1_p4_tools_1_1_model.html", null ],
     [ "P4::P4Tools::NamespaceContext", "class_p4_1_1_p4_tools_1_1_namespace_context.html", null ],

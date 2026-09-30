@@ -111,8 +111,6 @@ var namespace_p4_1_1_p4_tools =
     [ "insertHexSeparators", "namespace_p4_1_1_p4_tools.html#accc7c3362cd50931d2cb09e051fd2480", null ],
     [ "insertOctalSeparators", "namespace_p4_1_1_p4_tools.html#a544a93ae2fc3303aeb9b62add7b407de", null ],
     [ "insertSeparators", "namespace_p4_1_1_p4_tools.html#ae3eeccf88ae88dc3a8be15b26fa76556", null ],
-    [ "logHelper", "namespace_p4_1_1_p4_tools.html#a08a5c60f10ece1d1f28cda3630471400", null ],
-    [ "logHelper", "namespace_p4_1_1_p4_tools.html#adf1cde5d85f16a11d1ab7c53ccb0eece", null ],
     [ "printDebug", "namespace_p4_1_1_p4_tools.html#a4df6cd6cbb14b6b13851bca7441c8109", null ],
     [ "printFeature", "namespace_p4_1_1_p4_tools.html#a5360e4fcc47cc5519d39cd840de0943e", null ],
     [ "printInfo", "namespace_p4_1_1_p4_tools.html#a624f88447940aa36a38ae9f1f63ae3f2", null ],

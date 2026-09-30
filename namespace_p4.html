@@ -1534,10 +1534,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>backtrace_fill_stackt
 template&lt;class Iter&gt; </td></tr>
 <tr class="memitem:a950f77c1e3967d1a0c0c176b3f598d44"><td class="memTemplItemLeft" align="right" valign="top">Iter&#160;</td><td class="memTemplItemRight" valign="bottom"><b>begin</b> (std::pair&lt; Iter, Iter &gt; pr)</td></tr>
 <tr class="separator:a950f77c1e3967d1a0c0c176b3f598d44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ce8ca929f3782bb43920d05a10ba16b" id="r_a5ce8ca929f3782bb43920d05a10ba16b"><td class="memTemplParams" colspan="2"><a id="a5ce8ca929f3782bb43920d05a10ba16b" name="a5ce8ca929f3782bb43920d05a10ba16b"></a>
-template&lt;class... Args&gt; </td></tr>
-<tr class="memitem:a5ce8ca929f3782bb43920d05a10ba16b"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><b>bug_helper</b> (boost::format &amp;f, std::string_view position, std::string_view tail, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:a5ce8ca929f3782bb43920d05a10ba16b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aabd80658030904c765838a763d66fc47" id="r_aabd80658030904c765838a763d66fc47"><td class="memItemLeft" align="right" valign="top"><a id="aabd80658030904c765838a763d66fc47" name="aabd80658030904c765838a763d66fc47"></a>
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cgMakeString</b> (char c)</td></tr>
 <tr class="separator:aabd80658030904c765838a763d66fc47"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1574,6 +1570,17 @@ template&lt;class C, class Pred&gt; </td></tr>
 <tr class="separator:a554a0e35c97b48ee08727630457b4cca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4336d46d8a0b70f02b3d97d662ff4da6" id="r_a4336d46d8a0b70f02b3d97d662ff4da6"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4336d46d8a0b70f02b3d97d662ff4da6">convert</a> (const IR::Expression *expression, const IR::Type *type)</td></tr>
 <tr class="separator:a4336d46d8a0b70f02b3d97d662ff4da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9182dfeb02642a6c384f3a4f2119edfa" id="r_a9182dfeb02642a6c384f3a4f2119edfa"><td class="memTemplParams" colspan="2"><a id="a9182dfeb02642a6c384f3a4f2119edfa" name="a9182dfeb02642a6c384f3a4f2119edfa"></a>
+template&lt;typename... Args&gt; </td></tr>
+<tr class="memitem:a9182dfeb02642a6c384f3a4f2119edfa"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><b>createBugMessage</b> (const char *format, const Args &amp;...args)</td></tr>
+<tr class="separator:a9182dfeb02642a6c384f3a4f2119edfa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a157298dc5ad575acbb749ba800376485" id="r_a157298dc5ad575acbb749ba800376485"><td class="memTemplParams" colspan="2"><a id="a157298dc5ad575acbb749ba800376485" name="a157298dc5ad575acbb749ba800376485"></a>
+template&lt;bool PreferDbprint = false, typename... Args&gt; </td></tr>
+<tr class="memitem:a157298dc5ad575acbb749ba800376485"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><b>createFormattedMessage</b> (const char *format, const Args &amp;...args)</td></tr>
+<tr class="separator:a157298dc5ad575acbb749ba800376485"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f7ea78c870490fe948a328ba2417c1d" id="r_a5f7ea78c870490fe948a328ba2417c1d"><td class="memTemplParams" colspan="2">template&lt;bool PreferDbprint = false, typename Tuple&gt; </td></tr>
+<tr class="memitem:a5f7ea78c870490fe948a328ba2417c1d"><td class="memTemplItemLeft" align="right" valign="top">std::string&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a5f7ea78c870490fe948a328ba2417c1d">createFormattedMessageFromTuple</a> (const char *format, const Tuple &amp;args)</td></tr>
+<tr class="separator:a5f7ea78c870490fe948a328ba2417c1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1759ab40483a78e42047854ffce7093c" id="r_a1759ab40483a78e42047854ffce7093c"><td class="memItemLeft" align="right" valign="top"><a id="a1759ab40483a78e42047854ffce7093c" name="a1759ab40483a78e42047854ffce7093c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>dbprint</b> (const <a class="el" href="class_p4_1_1_i_has_db_print.html">IHasDbPrint</a> *o)</td></tr>
 <tr class="separator:a1759ab40483a78e42047854ffce7093c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1761,18 +1768,18 @@ template&lt;class T, typename = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&
 <tr class="memitem:a9e71d45d846a8c94de1ad21ee2bf4d51" id="r_a9e71d45d846a8c94de1ad21ee2bf4d51"><td class="memTemplParams" colspan="2">template&lt;class T, typename = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&gt;&gt;, class... Args&gt; </td></tr>
 <tr class="memitem:a9e71d45d846a8c94de1ad21ee2bf4d51"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a9e71d45d846a8c94de1ad21ee2bf4d51">error</a> (const int kind, const char *format, const T *node, Args &amp;&amp;...args)</td></tr>
 <tr class="separator:a9e71d45d846a8c94de1ad21ee2bf4d51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5635dad0ad5ba9c0d47997bf1656308" id="r_aa5635dad0ad5ba9c0d47997bf1656308"><td class="memTemplParams" colspan="2"><a id="aa5635dad0ad5ba9c0d47997bf1656308" name="aa5635dad0ad5ba9c0d47997bf1656308"></a>
+<tr class="memitem:a38b4aea9e53b4dfeee89bd80b9ed0632" id="r_a38b4aea9e53b4dfeee89bd80b9ed0632"><td class="memTemplParams" colspan="2"><a id="a38b4aea9e53b4dfeee89bd80b9ed0632" name="a38b4aea9e53b4dfeee89bd80b9ed0632"></a>
 template&lt;class... Args&gt; </td></tr>
-<tr class="memitem:aa5635dad0ad5ba9c0d47997bf1656308"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error_helper</b> (boost::format &amp;f, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:aa5635dad0ad5ba9c0d47997bf1656308"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6c3fc133c7e62d38cb3daaab9ed7aa77" id="r_a6c3fc133c7e62d38cb3daaab9ed7aa77"><td class="memTemplParams" colspan="2"><a id="a6c3fc133c7e62d38cb3daaab9ed7aa77" name="a6c3fc133c7e62d38cb3daaab9ed7aa77"></a>
+<tr class="memitem:a38b4aea9e53b4dfeee89bd80b9ed0632"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error_helper</b> (const char *format, const Args &amp;...args)</td></tr>
+<tr class="separator:a38b4aea9e53b4dfeee89bd80b9ed0632"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0d205b18ac96040f390a7da0900eb05" id="r_ac0d205b18ac96040f390a7da0900eb05"><td class="memTemplParams" colspan="2"><a id="ac0d205b18ac96040f390a7da0900eb05" name="ac0d205b18ac96040f390a7da0900eb05"></a>
 template&lt;class... Args&gt; </td></tr>
-<tr class="memitem:a6c3fc133c7e62d38cb3daaab9ed7aa77"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error_helper</b> (boost::format &amp;f, const std::string &amp;<a class="el" href="structprefix.html">prefix</a>, const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">Util::SourceInfo</a> &amp;<a class="el" href="#ac88f69b11f3155bdc0cabc0b2d684eb9">info</a>, const std::string &amp;suffix, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:a6c3fc133c7e62d38cb3daaab9ed7aa77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2222be20a92103e9f7b40dc70bb6929" id="r_ae2222be20a92103e9f7b40dc70bb6929"><td class="memTemplParams" colspan="2"><a id="ae2222be20a92103e9f7b40dc70bb6929" name="ae2222be20a92103e9f7b40dc70bb6929"></a>
+<tr class="memitem:ac0d205b18ac96040f390a7da0900eb05"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error_helper</b> (const char *format, const std::string &amp;<a class="el" href="structprefix.html">prefix</a>, const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">Util::SourceInfo</a> &amp;<a class="el" href="#ac88f69b11f3155bdc0cabc0b2d684eb9">info</a>, const std::string &amp;suffix, const Args &amp;...args)</td></tr>
+<tr class="separator:ac0d205b18ac96040f390a7da0900eb05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73bc9d8b3b1d3c5c638f462851fcfeca" id="r_a73bc9d8b3b1d3c5c638f462851fcfeca"><td class="memTemplParams" colspan="2"><a id="a73bc9d8b3b1d3c5c638f462851fcfeca" name="a73bc9d8b3b1d3c5c638f462851fcfeca"></a>
 template&lt;class... Args&gt; </td></tr>
-<tr class="memitem:ae2222be20a92103e9f7b40dc70bb6929"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error_helper</b> (boost::format &amp;f, <a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a> msg, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:ae2222be20a92103e9f7b40dc70bb6929"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73bc9d8b3b1d3c5c638f462851fcfeca"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a>&#160;</td><td class="memTemplItemRight" valign="bottom"><b>error_helper</b> (const char *format, <a class="el" href="struct_p4_1_1_error_message.html">ErrorMessage</a> msg, const Args &amp;...args)</td></tr>
+<tr class="separator:a73bc9d8b3b1d3c5c638f462851fcfeca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbe06846156e654f97b8a43a27862a4a" id="r_afbe06846156e654f97b8a43a27862a4a"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afbe06846156e654f97b8a43a27862a4a">errorCount</a> ()</td></tr>
 <tr class="separator:afbe06846156e654f97b8a43a27862a4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c93ff1d8de246c278b749009b2781f6" id="r_a7c93ff1d8de246c278b749009b2781f6"><td class="memTemplParams" colspan="2"><a id="a7c93ff1d8de246c278b749009b2781f6" name="a7c93ff1d8de246c278b749009b2781f6"></a>
@@ -3302,6 +3309,30 @@ interPassCounts</td>
       </table>
 </div><div class="memdoc">
 <p>Given an expression and a destination type, convert ListExpressions that occur within expression to StructExpression if the destination type matches. </p>
+
+</div>
+</div>
+<a id="a5f7ea78c870490fe948a328ba2417c1d" name="a5f7ea78c870490fe948a328ba2417c1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5f7ea78c870490fe948a328ba2417c1d">&#9670;&#160;</a></span>createFormattedMessageFromTuple()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;bool PreferDbprint = false, typename Tuple&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string P4::createFormattedMessageFromTuple </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>format</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Tuple &amp;</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Format runtime diagnostic strings using Abseil. Supports N%, N$spec, %|N$spec|, and printf conversions. Numbered and unnumbered arguments cannot be mixed. Invalid formats/counts throw Util::CompilerBug, as formatting errors are compiler bugs. Boost-only tabulation and centering are unsupported. Explicit numeric conversions use Abseil's type rules (e.g. d requires an integer); N% and s use the argument's text representation for any type. </p>
 
 </div>
 </div>

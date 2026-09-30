@@ -191,7 +191,7 @@ MessageType&#160;</td><td class="memItemRight" valign="bottom"><b>type</b> = Mes
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Structure populated via error_helper functions</p>
-<p>Typically, calls to P4::error/P4::warning have many parameters, some of them might have SourceInfo attribute. P4::error_helper parse those parameters, format parameters to output message and extracts SourceInfo wherever possible.</p>
+<p>Typically, calls to P4::error/P4::warning have many parameters, some of them might have SourceInfo. P4::error_helper parses those parameters, formats the message, and extracts SourceInfo wherever possible.</p>
 <p>Populated structure can be serialized to canonical error message with toString() method.</p>
 <p>This structure is mainly used inside ErrorReporter, but some uses invoke P4::error_helper directly and those uses need to call toString() on returned object. </p>
 </div></div><!-- contents -->

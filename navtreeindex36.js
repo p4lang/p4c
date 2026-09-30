@@ -1,5 +1,6 @@
 var NAVTREEINDEX36 =
 {
+"struct_input_xbar_1_1_hash_table.html":[13,0,375,4],
 "struct_input_xbar_1_1_input.html":[13,0,375,5],
 "struct_insert_init_save_state.html":[13,0,377],
 "struct_insert_parser_counter_stall.html":[13,0,380],
@@ -248,6 +249,5 @@ var NAVTREEINDEX36 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_n_a_01_4.html":[12,0,14,1,1,30],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_n_a_01_4.html":[13,0,12,3,1,30],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html":[12,0,14,1,1,31],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html":[13,0,12,3,1,31],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html":[12,0,14,1,1,33]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html":[13,0,12,3,1,31]
 };

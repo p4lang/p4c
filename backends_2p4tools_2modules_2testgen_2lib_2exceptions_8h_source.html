@@ -148,7 +148,7 @@ $(function(){initNavTree('backends_2p4tools_2modules_2testgen_2lib_2exceptions_8
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span>... Args&gt;</div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>    <span class="keyword">explicit</span> TestgenUnimplemented(<span class="keyword">const</span> <span class="keywordtype">char</span> *format, Args &amp;&amp;...args)</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        : P4CExceptionBase(format, std::forward&lt;Args&gt;(args)...) {</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>        : <a class="code hl_function" href="class_p4_1_1_util_1_1_p4_c_exception_base.html#ac6ed3131d04ea951d817b1dc30caa3f3">P4CExceptionBase</a>(format, std::forward&lt;Args&gt;(args)...) {</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        <span class="comment">// Check if output is redirected and if so, then don&#39;t color text so that</span></div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="comment">// escape characters are not present</span></div>
 <div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        message = absl::StrCat(Util::cerr_colorize(Util::ANSI_BLUE), <span class="stringliteral">&quot;Not yet implemented&quot;</span>,</div>
@@ -157,7 +157,7 @@ $(function(){initNavTree('backends_2p4tools_2modules_2testgen_2lib_2exceptions_8
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span>... Args&gt;</div>
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    TestgenUnimplemented(<span class="keywordtype">int</span> line, <span class="keyword">const</span> <span class="keywordtype">char</span> *file, <span class="keyword">const</span> <span class="keywordtype">char</span> *format, Args &amp;&amp;...args)</div>
-<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        : P4CExceptionBase(format, std::forward&lt;Args&gt;(args)...) {</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        : <a class="code hl_function" href="class_p4_1_1_util_1_1_p4_c_exception_base.html#ac6ed3131d04ea951d817b1dc30caa3f3">P4CExceptionBase</a>(format, std::forward&lt;Args&gt;(args)...) {</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        message = absl::StrCat(</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>            <span class="stringliteral">&quot;In file: &quot;</span>, file, <span class="stringliteral">&quot;:&quot;</span>, line, <span class="stringliteral">&quot;\n&quot;</span>, Util::cerr_colorize(Util::ANSI_BLUE),</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>            <span class="stringliteral">&quot;Unimplemented compiler support&quot;</span>, Util::cerr_clear_colors(), <span class="stringliteral">&quot;: &quot;</span>, message);</div>
@@ -173,7 +173,8 @@ $(function(){initNavTree('backends_2p4tools_2modules_2testgen_2lib_2exceptions_8
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>}  <span class="comment">// namespace P4::P4Tools::P4Testgen</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXCEPTIONS_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_util_1_1_p4_c_exception_base_html"><div class="ttname"><a href="class_p4_1_1_util_1_1_p4_c_exception_base.html">P4::Util::P4CExceptionBase</a></div><div class="ttdef"><b>Definition</b> lib/exceptions.h:61</div></div>
+<div class="ttc" id="aclass_p4_1_1_util_1_1_p4_c_exception_base_html"><div class="ttname"><a href="class_p4_1_1_util_1_1_p4_c_exception_base.html">P4::Util::P4CExceptionBase</a></div><div class="ttdef"><b>Definition</b> lib/exceptions.h:60</div></div>
+<div class="ttc" id="aclass_p4_1_1_util_1_1_p4_c_exception_base_html_ac6ed3131d04ea951d817b1dc30caa3f3"><div class="ttname"><a href="class_p4_1_1_util_1_1_p4_c_exception_base.html#ac6ed3131d04ea951d817b1dc30caa3f3">P4::Util::P4CExceptionBase::P4CExceptionBase</a></div><div class="ttdeci">P4CExceptionBase(std::string formattedMessage)</div><div class="ttdoc">Use already-formatted text without invoking the diagnostic formatter.</div><div class="ttdef"><b>Definition</b> lib/exceptions.h:67</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!--

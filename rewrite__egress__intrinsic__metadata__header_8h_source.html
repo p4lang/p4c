@@ -192,8 +192,8 @@ $(function(){initNavTree('rewrite__egress__intrinsic__metadata__header_8h_source
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                        BUG_CHECK(</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                            prev &amp;&amp;</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                                (canonicalType-&gt;width_bits() + prev_type-&gt;width_bits()) % 8 == 0,</div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>                            <span class="stringliteral">&quot;%1% not padded to be byte-aligned in %2%&quot;</span>, field-&gt;name,</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                            <span class="stringliteral">&quot;egress_intrinsic_metadata_t&quot;</span>);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>                            <span class="stringliteral">&quot;%1% not padded to be byte-aligned in egress_intrinsic_metadata_t&quot;</span>,</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                            field-&gt;name);</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                        new_fields.push_back(prev);</div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>                    }</div>
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>                    new_fields.push_back(field);</div>
