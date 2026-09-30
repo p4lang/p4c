@@ -34,7 +34,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.a = 8w2;
         tmp = 1w1;
     }
-    @hidden action act() {
+    @hidden action issue2498bmv2l48() {
         h.h.a[0:0] = tmp;
     }
     @hidden table tbl_slice_action {
@@ -43,15 +43,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = slice_action();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue2498bmv2l48 {
         actions = {
-            act();
+            issue2498bmv2l48();
         }
-        const default_action = act();
+        const default_action = issue2498bmv2l48();
     }
     apply {
         tbl_slice_action.apply();
-        tbl_act.apply();
+        tbl_issue2498bmv2l48.apply();
     }
 }
 

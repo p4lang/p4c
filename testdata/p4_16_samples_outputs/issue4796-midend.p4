@@ -43,32 +43,20 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
         }
         default_action = NoAction_1();
     }
-    @hidden action act() {
+    @hidden action issue4796l47() {
         tmp = true;
     }
-    @hidden action act_0() {
+    @hidden action issue4796l47_0() {
         tmp = false;
     }
-    @hidden action issue4796l47() {
+    @hidden action issue4796l47_1() {
         tmp_0 = 16w48951;
     }
-    @hidden action issue4796l47_0() {
+    @hidden action issue4796l47_2() {
         tmp_0 = 16w0;
     }
-    @hidden action issue4796l47_1() {
+    @hidden action issue4796l47_3() {
         hdr.eth_hdr.eth_type = tmp_0;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
     }
     @hidden table tbl_issue4796l47 {
         actions = {
@@ -88,18 +76,30 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
         }
         const default_action = issue4796l47_1();
     }
+    @hidden table tbl_issue4796l47_2 {
+        actions = {
+            issue4796l47_2();
+        }
+        const default_action = issue4796l47_2();
+    }
+    @hidden table tbl_issue4796l47_3 {
+        actions = {
+            issue4796l47_3();
+        }
+        const default_action = issue4796l47_3();
+    }
     apply {
         if (greatY_0.apply().hit) {
-            tbl_act.apply();
-        } else {
-            tbl_act_0.apply();
-        }
-        if (tmp) {
             tbl_issue4796l47.apply();
         } else {
             tbl_issue4796l47_0.apply();
         }
-        tbl_issue4796l47_1.apply();
+        if (tmp) {
+            tbl_issue4796l47_1.apply();
+        } else {
+            tbl_issue4796l47_2.apply();
+        }
+        tbl_issue4796l47_3.apply();
     }
 }
 

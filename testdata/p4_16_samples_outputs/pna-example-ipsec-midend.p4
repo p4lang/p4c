@@ -171,7 +171,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     @hidden action pnaexampleipsec232() {
         drop_packet();
     }
-    @hidden action act() {
+    @hidden action pnaexampleipsec218() {
         tmp = ipsec.from_ipsec(status_1);
     }
     @hidden action pnaexampleipsec256() {
@@ -180,14 +180,14 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     @hidden action pnaexampleipsec249() {
         drop_packet();
     }
-    @hidden action act_0() {
+    @hidden action pnaexampleipsec244() {
         tmp_0 = ipsec.from_ipsec(status_2);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_pnaexampleipsec218 {
         actions = {
-            act();
+            pnaexampleipsec218();
         }
-        const default_action = act();
+        const default_action = pnaexampleipsec218();
     }
     @hidden table tbl_pnaexampleipsec239 {
         actions = {
@@ -201,11 +201,11 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         }
         const default_action = pnaexampleipsec232();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_pnaexampleipsec244 {
         actions = {
-            act_0();
+            pnaexampleipsec244();
         }
-        const default_action = act_0();
+        const default_action = pnaexampleipsec244();
     }
     @hidden table tbl_pnaexampleipsec256 {
         actions = {
@@ -221,7 +221,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     apply {
         if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
-            tbl_act.apply();
+            tbl_pnaexampleipsec218.apply();
             if (tmp) {
                 if (status_1 == ipsec_status.IPSEC_SUCCESS) {
                     routing_table_0.apply();
@@ -244,7 +244,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                 tbl_pnaexampleipsec232.apply();
             }
         } else {
-            tbl_act_0.apply();
+            tbl_pnaexampleipsec244.apply();
             if (tmp_0) {
                 if (status_2 == ipsec_status.IPSEC_SUCCESS) {
                     routing_table_0.apply();
