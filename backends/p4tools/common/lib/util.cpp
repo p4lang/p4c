@@ -4,6 +4,7 @@
 
 #include "backends/p4tools/common/lib/util.h"
 
+#include <bit>
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
 #include <cstdint>
 #include <ctime>
@@ -73,7 +74,7 @@ int64_t Utils::getRandInt(int64_t min, int64_t max) {
 }
 
 int64_t Utils::getRandInt(const std::vector<int64_t> &percent) {
-    int sum = std::accumulate(percent.begin(), percent.end(), 0);
+    const auto sum = std::accumulate(percent.begin(), percent.end(), int64_t{0});
 
     // Do not pick zero since that conflicts with zero percentage values.
     auto randNum = getRandInt(1, sum);
@@ -98,17 +99,22 @@ big_int Utils::getRandBigInt(const big_int &min, const big_int &max) {
     }
     BUG_CHECK(min <= max, "Invalid random integer range [%1%, %2%]", min, max);
     const big_int range = max - min;
-    if (range == 0) return min;
+    if (range == 0) {
+        return min;
+    }
 
     // Generate enough random bits to cover the range, then reject out-of-range
     // values. Reducing modulo the range would bias non-power-of-two intervals.
+    // Use the engine word size.
+    using RngResult = decltype(rng)::result_type;
+    constexpr auto rngBits = static_cast<unsigned>(std::bit_width(decltype(rng)::max()));
     const unsigned bits = boost::multiprecision::msb(range) + 1;
     big_int value;
     do {
         value = 0;
         for (unsigned offset = 0; offset < bits;) {
-            const unsigned chunkBits = std::min(32U, bits - offset);
-            const auto chunk = static_cast<uint32_t>(rng()) >> (32U - chunkBits);
+            const unsigned chunkBits = std::min(rngBits, bits - offset);
+            const auto chunk = static_cast<RngResult>(rng()) >> (rngBits - chunkBits);
             value |= big_int(chunk) << offset;
             offset += chunkBits;
         }
