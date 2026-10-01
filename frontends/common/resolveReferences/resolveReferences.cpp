@@ -20,12 +20,12 @@ const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarati
     std::vector<const IR::IDeclaration *> decls;
     if (const auto *nest = ns->to<IR::INestedNamespace>()) {
         for (const auto *nn : nest->getNestedNamespaces()) {
-            auto *nnDecls = nn->getDeclarations();
+            auto nnDecls = nn->getDeclarations();
             decls.insert(decls.end(), nnDecls->begin(), nnDecls->end());
         }
     }
 
-    auto *nsDecls = ns->getDeclarations();
+    auto nsDecls = ns->getDeclarations();
     decls.insert(decls.end(), nsDecls->begin(), nsDecls->end());
 
     return (namespaceDecls[ns] = std::move(decls));
@@ -56,7 +56,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 
     if (const auto *gen = current->to<IR::IGeneralNamespace>()) {
         // FIXME: implement range filtering without enumerator wrappers
-        auto *decls = getDeclsByName(gen, name);
+        auto decls = getDeclsByName(gen, name);
         switch (type) {
             case P4::ResolutionType::Any:
                 break;

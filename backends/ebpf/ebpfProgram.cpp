@@ -208,7 +208,7 @@ class ErrorCodesVisitor : public Inspector {
  public:
     explicit ErrorCodesVisitor(CodeBuilder *builder) : builder(builder) {}
     bool preorder(const IR::Type_Error *errors) override {
-        for (auto m : *errors->getDeclarations()) {
+        for (auto m : errors->getDeclarations()) {
             builder->emitIndent();
             builder->appendFormat("%s,\n", m->getName().name.c_str());
         }

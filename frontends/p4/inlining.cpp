@@ -512,15 +512,15 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 std::map<const IR::Parameter *, const LocationSet *> locationSets;
                 FindLocationSets fls(refMap, typeMap);
 
-                for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+                for (auto param : mi->substitution.getParametersInArgumentOrder()) {
                     auto arg = mi->substitution.lookup(param);
                     auto ls = fls.locations(arg->expression);
                     locationSets.emplace(param, ls);
                 }
 
-                for (auto param1 : *mi->substitution.getParametersInArgumentOrder()) {
+                for (auto param1 : mi->substitution.getParametersInArgumentOrder()) {
                     auto ls1 = ::P4::get(locationSets, param1);
-                    for (auto param2 : *mi->substitution.getParametersInArgumentOrder()) {
+                    for (auto param2 : mi->substitution.getParametersInArgumentOrder()) {
                         if (param1 == param2) continue;
                         auto ls2 = ::P4::get(locationSets, param2);
                         if (ls1->overlaps(ls2)) {
@@ -613,7 +613,7 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
     auto substs = new PerInstanceSubstitutions(*workToDo->substitutions[decl]);
 
     auto mi = MethodInstance::resolve(statement->methodCall, refMap, typeMap);
-    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
         LOG3("Looking for " << param->name);
         auto initializer = substs->paramSubst.lookup(param);
         auto arg = mi->substitution.lookup(param);
@@ -647,7 +647,7 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
     body.append(callee->body->components);
 
     // Copy values of out and inout parameters
-    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             auto left = mi->substitution.lookup(param);
             auto arg = substs->paramSubst.lookupByName(param->name);

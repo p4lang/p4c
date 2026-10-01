@@ -321,7 +321,7 @@ const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
     auto listInstance =
         MethodInstance::resolve(actionListCall, this, typeMap, getChildContext(), true);
 
-    for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
+    for (auto param : listInstance->substitution.getParametersInArgumentOrder()) {
         auto aa = listInstance->substitution.lookup(param);
         auto da = callInstance->substitution.lookup(param);
         if (da == nullptr) {
@@ -335,7 +335,7 @@ const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
         }
     }
 
-    for (auto param : *callInstance->substitution.getParametersInOrder()) {
+    for (auto param : callInstance->substitution.getParametersInOrder()) {
         auto da = callInstance->substitution.lookup(param);
         if (da == nullptr) {
             typeError("%1%: parameter should be assigned in call %2%", param, call);

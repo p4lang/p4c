@@ -38,9 +38,9 @@ std::optional<cstring> TdiBfrtConf::findPipeName(const IR::P4Program *prog,
     }
     if (options.arch == "psa") {
         // We try to infer the pipename by looking up the "main" declaration.
-        auto *decls = prog->getDeclsByName("main"_cs);
+        auto decls = prog->getDeclsByName("main"_cs);
         const IR::Declaration_Instance *main = nullptr;
-        for (const auto *decl : *decls) {
+        for (const auto *decl : decls) {
             main = decl->checkedTo<IR::Declaration_Instance>();
         }
         if (main == nullptr) {

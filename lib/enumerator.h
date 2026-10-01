@@ -15,6 +15,7 @@
 #include <functional>
 #include <initializer_list>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -28,9 +29,12 @@ enum class EnumeratorState { NotStarted, Valid, PastEnd };
 template <typename T>
 class Enumerator;
 
+template <typename T>
+using EnumeratorPtr = std::shared_ptr<Enumerator<T>>;
+
 /// This class provides support for C++-style range for loops
-/// Enumerator<T>* e;
-/// for (auto a : *e) ...
+/// EnumeratorPtr<T> e;
+/// for (auto a : e) ...
 // FIXME: It is not a proper iterator (see reference type above) and should be removed
 // in favor of more standard approach. Note that Enumerator<T>::getCurrent() always
 // returns element by value, so more or less suitable only for copyable types that are cheap
@@ -57,13 +61,14 @@ class EnumeratorHandle {
 
 /// Type-erased Enumerator interface
 template <class T>
-class Enumerator {
+class Enumerator : public std::enable_shared_from_this<Enumerator<T>> {
  protected:
     EnumeratorState state = EnumeratorState::NotStarted;
 
     // This is a weird oddity of C++: this class is a friend of itself with different templates
     template <class S>
     friend class Enumerator;
+
     static std::vector<T> emptyVector;
     template <typename S>
     friend class EnumeratorHandle;
@@ -104,29 +109,29 @@ class Enumerator {
     ////////////////// factories
     template <typename Container>
     [[deprecated(
-        "Use Util::enumerate() instead")]] static Enumerator<typename Container::value_type> *
+        "Use Util::enumerate() instead")]] static EnumeratorPtr<typename Container::value_type>
     createEnumerator(const Container &data);
-    static Enumerator<T> *emptyEnumerator();  // empty data
+    static EnumeratorPtr<T> emptyEnumerator();  // empty data
     template <typename Iter>
-    [[deprecated("Use Util::enumerate() instead")]] static Enumerator<typename Iter::value_type> *
+    [[deprecated("Use Util::enumerate() instead")]] static EnumeratorPtr<typename Iter::value_type>
     createEnumerator(Iter begin, Iter end);
     template <typename Iter>
-    [[deprecated("Use Util::enumerate() instead")]] static Enumerator<typename Iter::value_type> *
+    [[deprecated("Use Util::enumerate() instead")]] static EnumeratorPtr<typename Iter::value_type>
     createEnumerator(iterator_range<Iter> range);
 
     /// Return an enumerator returning all elements that pass the filter
     template <typename Filter>
-    Enumerator<T> *where(Filter filter);
+    EnumeratorPtr<T> where(Filter filter);
     /// Apply specified function to all elements of this enumerator
     template <typename Mapper>
-    Enumerator<std::invoke_result_t<Mapper, T>> *map(Mapper map);
+    EnumeratorPtr<std::invoke_result_t<Mapper, T>> map(Mapper map);
     /// Cast to an enumerator of S objects
     template <typename S>
-    Enumerator<S> *as();
+    EnumeratorPtr<S> as();
     /// Append all elements of other after all elements of this
-    virtual Enumerator<T> *concat(Enumerator<T> *other);
+    virtual EnumeratorPtr<T> concat(EnumeratorPtr<T> other);
     /// Concatenate all these collections into a single one
-    static Enumerator<T> *concatAll(Enumerator<Enumerator<T> *> *inputs);
+    static EnumeratorPtr<T> concatAll(EnumeratorPtr<EnumeratorPtr<T>> inputs);
 
     std::vector<T> toVector() {
         std::vector<T> result;
@@ -306,12 +311,12 @@ class EmptyEnumerator : public Enumerator<T> {
 /// false.
 template <typename T, typename Filter>
 class FilterEnumerator final : public Enumerator<T> {
-    Enumerator<T> *input;
+    EnumeratorPtr<T> input;
     Filter filter;
     T current;  // must prevent repeated evaluation
 
  public:
-    FilterEnumerator(Enumerator<T> *input, Filter filter)
+    FilterEnumerator(EnumeratorPtr<T> input, Filter filter)
         : input(input), filter(std::move(filter)) {}
 
  private:
@@ -362,41 +367,24 @@ class FilterEnumerator final : public Enumerator<T> {
 
 ///////////////////////////
 
-namespace Detail {
-// See if we can use ICastable interface to cast from T to S. This is only possible if:
-// - Both T and S are pointer types (let's denote T = From* and S = To*)
-// - Expression (From*)()->to<To>() is well-formed
-// Essentially this means the following code is well-formed:
-// From *current = input->getCurrent(); current->to<To>();
-template <typename From, typename To, typename = void>
-static constexpr bool can_be_casted = false;
-
-template <typename From, typename To>
-static constexpr bool
-    can_be_casted<From *, To *, std::void_t<decltype(std::declval<From *>()->template to<To>())>> =
-        true;
-}  // namespace Detail
-
-/// Casts each element
+/// Casts each element, preserving ownership when S is a smart pointer.
 template <typename T, typename S>
 class AsEnumerator final : public Enumerator<S> {
-    template <typename U = S>
-    typename std::enable_if_t<!Detail::can_be_casted<T, S>, U> getCurrentImpl() const {
+    S getCurrentImpl() const {
         T current = input->getCurrent();
-        return dynamic_cast<S>(current);
-    }
-
-    template <typename U = S>
-    typename std::enable_if_t<Detail::can_be_casted<T, S>, U> getCurrentImpl() const {
-        T current = input->getCurrent();
-        return current->template to<std::remove_pointer_t<S>>();
+        using Target = typename std::pointer_traits<S>::element_type;
+        if constexpr (requires { current->template to<Target>(); }) {
+            return current ? current->template to<Target>() : nullptr;
+        } else {
+            return dynamic_cast<S>(current);
+        }
     }
 
  protected:
-    Enumerator<T> *input;
+    EnumeratorPtr<T> input;
 
  public:
-    explicit AsEnumerator(Enumerator<T> *input) : input(input) {}
+    explicit AsEnumerator(EnumeratorPtr<T> input) : input(input) {}
 
     std::string toString() const {
         return "AsEnumerator(" + this->input->toString() + "):" + this->stateName();
@@ -425,12 +413,12 @@ class AsEnumerator final : public Enumerator<S> {
 template <typename T, typename S, typename Mapper>
 class MapEnumerator final : public Enumerator<S> {
  protected:
-    Enumerator<T> *input;
+    EnumeratorPtr<T> input;
     Mapper map;
     S current;
 
  public:
-    MapEnumerator(Enumerator<T> *input, Mapper map) : input(input), map(std::move(map)) {}
+    MapEnumerator(EnumeratorPtr<T> input, Mapper map) : input(input), map(std::move(map)) {}
 
     void reset() {
         this->input->reset();
@@ -476,7 +464,7 @@ class MapEnumerator final : public Enumerator<S> {
 };
 
 template <typename T, typename Mapper>
-MapEnumerator(Enumerator<T> *,
+MapEnumerator(EnumeratorPtr<T>,
               Mapper) -> MapEnumerator<T, typename std::invoke_result_t<Mapper, T>, Mapper>;
 
 /////////////////////////////////////////////////////////////////////
@@ -484,22 +472,22 @@ MapEnumerator(Enumerator<T> *,
 /// Concatenation
 template <typename T>
 class ConcatEnumerator final : public Enumerator<T> {
-    std::vector<Enumerator<T> *> inputs;
+    std::vector<EnumeratorPtr<T>> inputs;
     T currentResult;
 
  public:
     ConcatEnumerator() = default;
     // We take ownership of the vector
-    explicit ConcatEnumerator(std::vector<Enumerator<T> *> &&inputs) : inputs(std::move(inputs)) {
-        for (auto *currentInput : inputs)
+    explicit ConcatEnumerator(std::vector<EnumeratorPtr<T>> &&inputs) : inputs(std::move(inputs)) {
+        for (const auto &currentInput : inputs)
             if (currentInput == nullptr) throw std::logic_error("Null iterator in concatenation");
     }
 
-    ConcatEnumerator(std::initializer_list<Enumerator<T> *> inputs) : inputs(inputs) {
-        for (auto *currentInput : inputs)
+    ConcatEnumerator(std::initializer_list<EnumeratorPtr<T>> inputs) : inputs(inputs) {
+        for (const auto &currentInput : inputs)
             if (currentInput == nullptr) throw std::logic_error("Null iterator in concatenation");
     }
-    explicit ConcatEnumerator(Enumerator<Enumerator<T> *> *inputs)
+    explicit ConcatEnumerator(EnumeratorPtr<EnumeratorPtr<T>> inputs)
         : ConcatEnumerator(inputs->toVector()) {}
 
     [[nodiscard]] std::string toString() const { return "ConcatEnumerator:" + this->stateName(); }
@@ -507,7 +495,7 @@ class ConcatEnumerator final : public Enumerator<T> {
  private:
     bool advance() {
         this->state = EnumeratorState::Valid;
-        for (auto *currentInput : inputs) {
+        for (const auto &currentInput : inputs) {
             if (currentInput->moveNext()) {
                 this->currentResult = currentInput->getCurrent();
                 return true;
@@ -519,18 +507,18 @@ class ConcatEnumerator final : public Enumerator<T> {
     }
 
  public:
-    Enumerator<T> *concat(Enumerator<T> *other) override {
+    EnumeratorPtr<T> concat(EnumeratorPtr<T> other) override {
         // Too late to add
         if (this->state == EnumeratorState::PastEnd)
             throw std::runtime_error("Invalid enumerator state to concatenate");
 
         inputs.push_back(other);
 
-        return this;
+        return this->shared_from_this();
     }
 
     void reset() override {
-        for (auto *currentInput : inputs) currentInput->reset();
+        for (const auto &currentInput : inputs) currentInput->reset();
         Enumerator<T>::reset();
     }
 
@@ -562,53 +550,59 @@ class ConcatEnumerator final : public Enumerator<T> {
 
 template <typename T>
 template <typename Mapper>
-Enumerator<std::invoke_result_t<Mapper, T>> *Enumerator<T>::map(Mapper map) {
-    return new MapEnumerator(this, std::move(map));
+EnumeratorPtr<std::invoke_result_t<Mapper, T>> Enumerator<T>::map(Mapper map) {
+    return std::make_shared<MapEnumerator<T, std::invoke_result_t<Mapper, T>, Mapper>>(
+        this->shared_from_this(), std::move(map));
 }
 
 template <typename T>
 template <typename S>
-Enumerator<S> *Enumerator<T>::as() {
-    return new AsEnumerator<T, S>(this);
+EnumeratorPtr<S> Enumerator<T>::as() {
+    return std::make_shared<AsEnumerator<T, S>>(this->shared_from_this());
 }
 
 template <typename T>
 template <typename Filter>
-Enumerator<T> *Enumerator<T>::where(Filter filter) {
-    return new FilterEnumerator(this, std::move(filter));
+EnumeratorPtr<T> Enumerator<T>::where(Filter filter) {
+    return std::make_shared<FilterEnumerator<T, Filter>>(this->shared_from_this(),
+                                                         std::move(filter));
 }
 
 template <typename T>
 template <typename Container>
-Enumerator<typename Container::value_type> *Enumerator<T>::createEnumerator(const Container &data) {
-    return new IteratorEnumerator(data.begin(), data.end(), typeid(Container).name());
+EnumeratorPtr<typename Container::value_type> Enumerator<T>::createEnumerator(
+    const Container &data) {
+    return std::make_shared<IteratorEnumerator<decltype(data.begin())>>(data.begin(), data.end(),
+                                                                        typeid(Container).name());
 }
 
 template <typename T>
-Enumerator<T> *Enumerator<T>::emptyEnumerator() {
-    return new EmptyEnumerator<T>();
-}
-
-template <typename T>
-template <typename Iter>
-Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(Iter begin, Iter end) {
-    return new IteratorEnumerator(begin, end, "iterator");
+EnumeratorPtr<T> Enumerator<T>::emptyEnumerator() {
+    return std::make_shared<EmptyEnumerator<T>>();
 }
 
 template <typename T>
 template <typename Iter>
-Enumerator<typename Iter::value_type> *Enumerator<T>::createEnumerator(iterator_range<Iter> range) {
-    return new IteratorEnumerator(range.begin(), range.end(), "range");
+EnumeratorPtr<typename Iter::value_type> Enumerator<T>::createEnumerator(Iter begin, Iter end) {
+    return std::make_shared<IteratorEnumerator<Iter>>(begin, end, "iterator");
 }
 
 template <typename T>
-Enumerator<T> *Enumerator<T>::concatAll(Enumerator<Enumerator<T> *> *inputs) {
-    return new ConcatEnumerator<T>(inputs);
+template <typename Iter>
+EnumeratorPtr<typename Iter::value_type> Enumerator<T>::createEnumerator(
+    iterator_range<Iter> range) {
+    return std::make_shared<IteratorEnumerator<Iter>>(range.begin(), range.end(), "range");
 }
 
 template <typename T>
-Enumerator<T> *Enumerator<T>::concat(Enumerator<T> *other) {
-    return new ConcatEnumerator<T>({this, other});
+EnumeratorPtr<T> Enumerator<T>::concatAll(EnumeratorPtr<EnumeratorPtr<T>> inputs) {
+    return std::make_shared<ConcatEnumerator<T>>(inputs);
+}
+
+template <typename T>
+EnumeratorPtr<T> Enumerator<T>::concat(EnumeratorPtr<T> other) {
+    return std::make_shared<ConcatEnumerator<T>>(
+        std::initializer_list<EnumeratorPtr<T>>{this->shared_from_this(), other});
 }
 
 ///////////////////////////////// EnumeratorHandle ///////////////////
@@ -638,35 +632,48 @@ bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T> &other) const {
 }
 
 template <typename Iter>
-Enumerator<typename std::iterator_traits<Iter>::value_type> *enumerate(Iter begin, Iter end) {
-    return new IteratorEnumerator(begin, end, "iterator");
+EnumeratorPtr<typename std::iterator_traits<Iter>::value_type> enumerate(Iter begin, Iter end) {
+    return std::make_shared<IteratorEnumerator<Iter>>(begin, end, "iterator");
 }
 
 template <typename Iter>
-Enumerator<typename std::iterator_traits<Iter>::value_type> *enumerate(iterator_range<Iter> range) {
-    return new IteratorEnumerator(range.begin(), range.end(), "range");
+EnumeratorPtr<typename std::iterator_traits<Iter>::value_type> enumerate(
+    iterator_range<Iter> range) {
+    return std::make_shared<IteratorEnumerator<Iter>>(range.begin(), range.end(), "range");
 }
 
 template <typename Container>
-Enumerator<typename Container::value_type> *enumerate(const Container &data) {
+EnumeratorPtr<typename Container::value_type> enumerate(const Container &data) {
     using std::begin;
     using std::end;
-    return new IteratorEnumerator(begin(data), end(data), typeid(data).name());
+    return std::make_shared<IteratorEnumerator<decltype(begin(data))>>(begin(data), end(data),
+                                                                       typeid(data).name());
 }
 
 // TODO: Flatten ConcatEnumerator's during concatenation
 template <typename T>
-Enumerator<T> *concat(std::initializer_list<Enumerator<T> *> inputs) {
-    return new ConcatEnumerator<T>(inputs);
+EnumeratorPtr<T> concat(std::initializer_list<EnumeratorPtr<T>> inputs) {
+    return std::make_shared<ConcatEnumerator<T>>(inputs);
 }
 
 template <typename... Args>
 auto concat(Args &&...inputs) {
     using FirstEnumeratorTy =
-        std::remove_pointer_t<std::decay_t<std::tuple_element_t<0, std::tuple<Args...>>>>;
-    std::initializer_list<Enumerator<typename FirstEnumeratorTy::value_type> *> init{
+        typename std::decay_t<std::tuple_element_t<0, std::tuple<Args...>>>::element_type;
+    std::initializer_list<EnumeratorPtr<typename FirstEnumeratorTy::value_type>> init{
         std::forward<Args>(inputs)...};
     return concat(init);
+}
+
+/// Iterate over the handle directly to keep the enumerator alive until the loop finishes.
+template <typename T>
+EnumeratorHandle<T> begin(const EnumeratorPtr<T> &enumerator) {
+    return enumerator->begin();
+}
+
+template <typename T>
+EnumeratorHandle<T> end(const EnumeratorPtr<T> &enumerator) {
+    return enumerator->end();
 }
 
 }  // namespace P4::Util
