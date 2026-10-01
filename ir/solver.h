@@ -53,7 +53,7 @@ class AbstractSolver : public ICastable {
     /// @checkSat returned anything other than true, if there was no such previous call, or if the
     /// state in the solver has changed since the last such call (e.g., more assertions have been
     /// made).
-    [[nodiscard]] virtual const SymbolicMapping &getSymbolicMapping() const = 0;
+    [[nodiscard]] virtual SymbolicMapping getSymbolicMapping() const = 0;
 
     /// Saves solver state to the given JSON generator.
     virtual void toJSON(JSONGenerator &) const = 0;
