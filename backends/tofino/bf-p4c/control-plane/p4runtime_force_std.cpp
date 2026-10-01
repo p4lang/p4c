@@ -1,18 +1,18 @@
 /**
  * Copyright (C) 2024 Intel Corporation
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License.  You may obtain a copy
  * of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software distributed
  * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations under the License.
- * 
- * 
+ *
+ *
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -393,9 +393,10 @@ class P4RuntimeStdConverter {
 
 P4::P4RuntimeAPI convertToStdP4Runtime(const P4::P4RuntimeAPI &p4RuntimeIn) {
     CHECK_NULL(p4RuntimeIn.p4Info);
-    P4RuntimeStdConverter converter(p4RuntimeIn.p4Info);
+    P4RuntimeStdConverter converter(p4RuntimeIn.p4Info.get());
 
-    P4::P4RuntimeAPI p4RuntimeOut(converter.convert(), p4RuntimeIn.entries);
+    P4::P4RuntimeAPI p4RuntimeOut(
+        std::shared_ptr<const p4::config::v1::P4Info>(converter.convert()), p4RuntimeIn.entries);
 
     // Note that the output P4Info may include some additional data in
     // P4TypeInfo which is not required any more, however, this is unlikely to
