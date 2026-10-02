@@ -10,6 +10,8 @@ on:
     - cron: "0 0 * * *"
   pull_request:
     branches: [main]
+    # "labeled" so adding run-sanitizer to an open PR starts a run.
+    types: [opened, synchronize, reopened, labeled]
   push:
     branches: [main]
 
