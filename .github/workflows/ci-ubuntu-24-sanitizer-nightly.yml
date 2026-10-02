@@ -25,7 +25,7 @@ jobs:
     if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-sanitizer') }}
     runs-on: ubuntu-24.04
     env:
-      CTEST_PARALLEL_LEVEL: 2
+      CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       COMPILE_WITH_CLANG: ON
       BUILD_AUTO_VAR_INIT_PATTERN: ON
