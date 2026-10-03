@@ -1,0 +1,15 @@
+issue1672-bmv2.p4(30): [--Wwarn=invalid-header] warning: accessing a field of an invalid header tmp
+        tmp.x = 0;
+        ^^^
+issue1672-bmv2.p4(32): [--Wwarn=invalid-header] warning: accessing a field of an invalid header tmp
+        tmp.f = h.f + 1;
+        ^^^
+issue1672-bmv2.p4(33): [--Wwarn=invalid-header] warning: accessing a field of an invalid header tmp
+        h.f = tmp.f;
+              ^^^
+issue1672-bmv2.p4(34): [--Wwarn=invalid-header] warning: accessing a field of an invalid header tmp
+        h.x = tmp.x;
+              ^^^
+issue1672-bmv2.p4(16): [--Werror=expected] error: hdr: expected type to be a struct
+parser parserI(packet_in pkt, out hdr h, inout metadata meta,
+                                  ^^^

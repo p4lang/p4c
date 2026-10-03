@@ -11,6 +11,7 @@
 import argparse
 import logging
 import os
+import re
 import sys
 import tempfile
 import traceback
@@ -187,6 +188,35 @@ def isError(p4_file: Path) -> bool:
     return "_errors" in str(p4_file)
 
 
+def check_error_reference(options: Options, output: str) -> int:
+    # Compare the diagnostics of a negative test against its reference.
+    expected_dir = Path(str(options.p4_file.parent).replace("_errors", "_errors_outputs", 1))
+    expected_file = expected_dir.joinpath(options.p4_file.name + "-stderr")
+    # Reduce leading paths to basenames, as run-p4-sample.py does with sed.
+    produced = re.sub(r"^.*/(?=[^/\s]+\.[ph]4?[:(]\d+)", "", output, flags=re.MULTILINE).strip()
+
+    if options.replace:
+        testutils.check_and_create_dir(expected_dir)
+        expected_file.write_text(produced + "\n", encoding="utf-8")
+        testutils.log.info("Wrote %s", expected_file)
+        return testutils.SUCCESS
+
+    if not expected_file.is_file():
+        testutils.log.error(
+            "Expected output file %s does not exist. Rerun with --replace to create it.",
+            expected_file,
+        )
+        return testutils.FAILURE
+
+    expected = expected_file.read_text(encoding="utf-8").strip()
+    if expected != produced:
+        testutils.log.error("Error output mismatch.")
+        testutils.log.error("Expected:\n%s", expected)
+        testutils.log.error("Produced:\n%s", produced)
+        return testutils.FAILURE
+    return testutils.SUCCESS
+
+
 def run_model(options: Options, tmpdir: Path, jsonfile: Path) -> int:
     if not options.test_file:
         return testutils.SUCCESS
@@ -274,6 +304,8 @@ def process_file(options: Options) -> int:
             returnvalue = testutils.FAILURE
         else:
             returnvalue = testutils.SUCCESS
+        if returnvalue == testutils.SUCCESS:
+            returnvalue = check_error_reference(options, result.output)
 
     if returnvalue == testutils.SUCCESS and not expected_error:
         return run_model(options, tmpdir, jsonfile)

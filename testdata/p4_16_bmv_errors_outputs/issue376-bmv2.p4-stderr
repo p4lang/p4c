@@ -1,0 +1,29 @@
+v1model.p4(751): [--Werror=type-error] error: 'package V1Switch'
+package V1Switch<H, M>(Parser<H, M> p,
+        ^^^^^^^^
+  ---- Actual error:
+issue376-bmv2.p4(34): Cannot unify 'in' parameter 'hdrs' with 'inout' parameter 'hdr' because they have different directions
+  control vc(in headers_t hdrs, inout meta_t meta) { apply { } }
+                          ^^^^
+v1model.p4(725)
+  control VerifyChecksum<H, M>(inout H hdr,
+                                       ^^^
+  ---- Originating from:
+issue376-bmv2.p4(37): Type of argument 'vc' (control vc) does not match type of parameter 'vr' (control VerifyChecksum<...>)
+  V1Switch(p(), vc(), i(), e(), cc(), d1()) main;
+                ^^^^
+issue376-bmv2.p4(34)
+  control vc(in headers_t hdrs, inout meta_t meta) { apply { } }
+          ^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                                              ^^
+v1model.p4(752)
+                         VerifyChecksum<H, M> vr,
+                         ^^^^^^^^^^^^^^^^^^^^
+  Where 'H' is bound to 'struct headers_t'
+  Where 'M' is bound to 'struct meta_t'
+  ---- Originating from:
+issue376-bmv2.p4(37): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+  V1Switch(p(), vc(), i(), e(), cc(), d1()) main;
+                                            ^^^^

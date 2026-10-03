@@ -139,32 +139,89 @@ codes and formats are defined in `lib/error_catalog.[h,cpp]`. Backends
 can extend the codes and formats as needed (and they are encouraged to
 do so).
 
-Most of the errors as of Dec 2018 are written in free form: they use
-the `boost::format` for the format argument, which has some
-compatibility for `printf` arguments.  These functions handle IR and
-SourceInfo objects smartly.  Here is an example:
+## Diagnostic Messages
 
-```C++
-IR::NamedRef *ref;
+The `error` and `warning` functions and bug-reporting macros take a
+message followed by the values to insert into it. Pass objects directly;
+there is no need to convert them to strings first. For errors and
+warnings, the diagnostic helpers add the severity, source location, and
+source excerpt when available, so write only the message itself.
+
+### Choosing placeholders
+
+Prefer Abseil's printf-style placeholders for new diagnostic messages.
+Boost-style placeholders are still supported, but may be deprecated in
+the future. Both work through the same diagnostic functions; there is
+no formatter to select.
+
+- `%s`, `%d`, `%x`, `%.2f`, etc. consume arguments from left to right.
+  Use `%s` for an object's usual text, including IR nodes and numbers;
+  it is not restricted to strings. Use numeric conversions when the
+  presentation matters: `%d` for an integer, `%x` for hexadecimal, or
+  `%.2f` for a floating-point value with two decimal places. Abseil's
+  `%v` conversion, which chooses a representation based on the type,
+  is also supported.
+- `%1$s`, `%2$x`, etc. combine explicit argument numbers with conversion
+  options, counting from one. Use these when you need to repeat arguments
+  or display them in a different order.
+- Boost-style `%1%`, `%2%`, etc. insert the corresponding argument's usual
+  text. The bracketed form `%|2$8x|` is also supported. Prefer `%1$s`,
+  `%2$s`, and `%2$8x`, respectively, when writing new messages.
+
+Choose either numbered or sequential arguments for each message. Different
+placeholder spellings can be mixed as long as that choice is consistent:
+
+```cpp
+// Preferred: consume arguments from left to right.
+error(ErrorType::ERR_INVALID, "%s has invalid mask 0x%x", field, mask);
+
+// Also preferred when explicit argument numbers are useful.
+error(ErrorType::ERR_INVALID, "%1$s has invalid mask 0x%2$x", field, mask);
+
+// Supported: different spellings, but all placeholders are numbered.
+error(ErrorType::ERR_INVALID, "%1% has invalid mask 0x%2$x", field, mask);
+
+// Invalid: numbered and sequential placeholders in the same message.
+error(ErrorType::ERR_INVALID, "%1% has invalid mask 0x%x", field, mask);
+```
+
+Width and precision options such as `%8s`, `%08x`, and `%.2f` are supported.
+If width or precision is supplied by a `*` argument, that argument must
+follow the same numbering rule. Write `%%` for a literal percent sign;
+it does not consume an argument. Brace placeholders such as `{}`, Boost's
+tabulation and centering options, and printf's `%n` are not supported.
+
+Messages may be string literals or constructed at runtime. Formats are
+checked when used: malformed placeholders, incorrect argument counts, and
+incompatible numeric conversions are errors in the compiler, not errors
+in the P4 program. For example, `%d` cannot format a floating-point value;
+use `%s` for its usual text or `%f` to control its numeric presentation.
+
+### Displaying objects and source locations
+
+For `%s` (or `%N%`), errors and warnings use an object's `toString()` when
+available, otherwise its stream output (`operator<<`). Bug reports use
+`dbprint()` when available to show more detail, otherwise stream output.
+
+Passing an IR node also supplies its source location. To attach a location
+without printing an object, pass a `SourceInfo` argument. It still needs a
+placeholder, but contributes no text there: the location and source excerpt
+are displayed separately. Do not add a colon or space for that placeholder.
+For example:
+
+```cpp
+// Given a pointer ref to an IR::NamedRef:
 error(ErrorType::ERR_INVALID,
-      "%1%: No header or metadata named '%2%'", ref->srcInfo, ref->name);
+      "%sNo header or metadata named '%s'", ref->srcInfo, ref->name);
 ```
 
-output:
+Example output:
 
 ```
-missing_decls1.p4(6): [-Werror=invalid] Error: No header or metadata named 'data'
+missing_decls1.p4(6): [--Werror=invalid] error: No header or metadata named 'data'
     if (data.b2 == 0) {
         ^^^^
 ```
-
-To ease the transition to typed errors and warnings, free form
-messages whose first argument (`%1%`) is an `IR::Node` (or more
-precisely a class that implements `Util::IHasSourceInfo` interface),
-will be converted automatically to typed errors that use the format
-argument of the message rather than the error catalog predefined
-formats.
-
 
 ## Git commits and pull requests
 

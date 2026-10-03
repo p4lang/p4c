@@ -1,0 +1,3 @@
+issue679-bmv2.p4(25): [--Werror=invalid] error: Action selector IngressI.as is used by multiple tables with different selector inputs
+    action_selector (HashAlgorithm.identity, 32w1024, 32w10) as;
+                                                             ^^

@@ -20,7 +20,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 
-    action drop() { mark_to_drop(); }
+    action drop() { mark_to_drop(smeta); }
 
     action_selector (HashAlgorithm.identity, 32w1024, 32w10) as;
 
@@ -54,7 +54,7 @@ control DeparserI(packet_out pk, in H hdr) {
     apply { }
 }
 
-control VerifyChecksumI(in H hdr, inout M meta) {
+control VerifyChecksumI(inout H hdr, inout M meta) {
     apply { }
 }
 

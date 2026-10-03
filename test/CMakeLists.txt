@@ -34,6 +34,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/ir-splitter.cpp
   gtest/ir-traversal.cpp
   gtest/json_test.cpp
+  gtest/log_test.cpp
   gtest/map.cpp
   gtest/midend_def_use.cpp
   gtest/midend_pass.cpp

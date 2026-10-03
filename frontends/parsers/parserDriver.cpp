@@ -6,8 +6,7 @@
 #include <sstream>
 #include <string_view>
 
-#include <boost/format.hpp>
-
+#include "absl/strings/str_format.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
@@ -106,7 +105,8 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
     auto &context = BaseCompileContext::get();
     if (message == unexpectedIdentifierError) {
         context.errorReporter().parser_error(
-            location, boost::format("%s \"%s\"") % unexpectedIdentifierError % lastIdentifier);
+            location,
+            absl::StrFormat("%s \"%s\"", unexpectedIdentifierError, lastIdentifier.c_str()));
     } else {
         context.errorReporter().parser_error(location, message);
     }
