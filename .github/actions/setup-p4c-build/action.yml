@@ -5,8 +5,18 @@ name: "Setup and Build p4c"
 description: "Handles ccache configuration and runs the initial CI build script."
 inputs:
   ccache-key:
-    description: "The unique key string prefix to use for ccache"
+    description: "Cache key for jobs using the same compiler and build settings."
     required: true
+  max-size:
+    description: "Maximum compiler cache size."
+    required: false
+    default: "750M"
+  save-main:
+    description: "Allow this job to update the main cache."
+    default: "true"
+  use-ccache:
+    description: "Disable for jobs that do not compile, such as formatting."
+    default: "true"
   custom-build-command:
     description: "Optional custom compilation commands instead of running ci-build.sh"
     required: false
@@ -14,14 +24,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Configure ccache
-      uses: hendrikmuhs/ccache-action@v1
+    - name: Restore compiler cache
+      if: inputs.use-ccache == 'true'
+      id: ccache
+      uses: ./.github/actions/restore-ccache
       with:
-        key: ${{ inputs.ccache-key }}-${{ runner.os }}
-        max-size: 1000M
-        # act's ubuntu-22 image needs an update, but it's slow, so don't do it
-        # unilaterally.
-        update-package-index: ${{ env.ACT == 'true' }}
+        key: ${{ inputs.ccache-key }}
+        max-size: ${{ inputs.max-size }}
     - name: Run baseline CI build
       shell: bash
       env:
@@ -35,3 +44,9 @@ runs:
         else
           tools/ci-build.sh
         fi
+    - name: Save compiler cache
+      if: inputs.use-ccache == 'true'
+      uses: ./.github/actions/save-ccache
+      with:
+        prefix: ${{ steps.ccache.outputs.prefix }}
+        save-main: ${{ inputs.save-main }}

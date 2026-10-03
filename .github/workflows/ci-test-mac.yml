@@ -28,20 +28,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Get brew cache dir
-        id: brew-cache
-        run: |
-          echo "dir=$(brew --prefix)" >> $GITHUB_OUTPUT
-
-      - name: Cache Homebrew Packages
-        id: cache-homebrew-packages
-        uses: actions/cache@v6
-        env:
-          cache-name: homebrew-packages
-        with:
-          path: ${{ steps.brew-cache.outputs.dir }}
-          key: ${{ runner.os }}-${{ hashFiles('tools/install_mac_deps.sh') }}
-
       - name: Install dependencies (MacOS)
         run: |
           tools/install_mac_deps.sh
@@ -50,7 +36,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-macOS"
+          ccache-key: "macos-clang-unity"
           custom-build-command: |
             source ~/.bash_profile
             ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=Release \

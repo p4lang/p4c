@@ -155,7 +155,6 @@ if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
   # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
   uv pip install cmake==3.16.3
 fi
-ccache --set-config max_size=1G
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
