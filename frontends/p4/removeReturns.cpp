@@ -67,12 +67,15 @@ bool MoveToElseAfterBranch::preorder(IR::SwitchStatement *swch) {
     // TBD: if there is exactly one case that falls through (all others end with a branch)
     // then we could move subsequent code into that case, as it done with 'if'
     bool canFallThrough = false;
+    bool hasDefault = false;
     for (auto &c : swch->cases) {
+        hasDefault |= c->label->is<IR::DefaultExpression>();
         hasJumped = false;
         visit(c, "cases");
         canFallThrough |= !hasJumped;
     }
-    hasJumped = !canFallThrough;
+    // Without a default case, an unmatched switch expression also falls through.
+    hasJumped = hasDefault && !canFallThrough;
     return false;
 }
 
