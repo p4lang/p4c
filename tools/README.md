@@ -47,6 +47,31 @@ make clang-format-fix-errors
 ```
 in the build directory.
 
+## p4fmt
+
+Check the formatting of all P4 files in `testdata` (prints unified diffs and fails
+on formatting changes or unsupported input):
+
+```sh
+cmake --build build --target p4fmt-check
+```
+
+This target passes `--fail-on-fallback`: unsupported input fails alongside files
+needing formatting. The driver reports every failure and still prints diffs for
+supported files. Existing unsupported testdata therefore fails CI until parser
+coverage improves.
+
+Apply the formatting changes:
+
+```sh
+cmake --build build --target p4fmt-fix-errors
+```
+
+For individual paths, use
+`python3 tools/format-p4.py --check --fail-on-fallback <files-or-directories>`
+or `--write`. See [p4fmt](../backends/p4fmt/README.md) for its current coverage and
+source-preservation behavior.
+
 ## cpplint
 cpplint contains additional semantic checks that are enforced. These are configured in `CPPLINT.cfg`
 

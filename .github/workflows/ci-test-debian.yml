@@ -39,6 +39,9 @@ jobs:
         with:
           ccache-key: "test-ubuntu24"
 
+      - name: Check P4 formatting (reject fallback and print diffs)
+        run: uv run cmake --build build --target p4fmt-check p4fmt-external-check
+
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
         run: |

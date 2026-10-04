@@ -5,7 +5,8 @@
 """Check every P4 source, including negative tests and generated references.
 
 Every invocation uses strict mode. The report separates changed and unchanged
-results, including sources already in the chosen style.
+results; the external acceptance test also probes active formatting in every
+DASH/PINS source, including sources already in the chosen style.
 """
 
 import argparse

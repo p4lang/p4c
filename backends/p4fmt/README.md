@@ -43,6 +43,37 @@ Sample Usage:
     ./build/p4fmtsample.p4
     ./build/p4fmt sample.p4 -o out.p4
 
+## Repository formatting check
+
+Check every P4 file under `testdata`, including generated P4 references:
+
+    cmake --build build --target p4fmt-check
+
+The check runs p4fmt with `--fail-on-fallback` and compares the checked-in bytes
+with its output. It prints unified diffs for supported files needing changes and
+reports every file that cannot be formatted. Either condition fails the check,
+without modifying files. The Ubuntu 24.04 CI build runs this target before the
+compiler tests. CI also checks pinned DASH and PINS sources with the
+`p4fmt-external-check` target. This explicit target downloads its inputs; normal
+CTest runs do not require network access.
+
+To apply supported formatting changes locally:
+
+    cmake --build build --target p4fmt-fix-errors
+
+For individual files or other directories, use the same driver directly:
+
+    python3 tools/format-p4.py --check --fail-on-fallback testdata/p4_16_samples/example.p4
+    python3 tools/format-p4.py --write testdata/p4_16_samples
+
+Use `--formatter <path>` for a different build directory. The driver discovers
+`*.p4` recursively and preserves file permissions when writing. After changes
+that affect source locations, regenerate the affected compiler diagnostic
+references, then rerun the formatting check. `p4fmt-fix-errors` uses strict mode and leaves the batch untouched if any file
+cannot be formatted. The driver also accepts
+`--write --fail-on-fallback`, which leaves every input untouched if any file
+cannot be formatted.
+
 ## Rejecting fallback
 
     ./build/p4fmt --fail-on-fallback input.p4
@@ -103,7 +134,12 @@ The separate corpus regression test discovers every `*.p4` file recursively unde
 P4-14, negative tests, target extensions, and generated references. It checks
 strict successful execution, preservation of non-whitespace content and complete
 comments/strings, and idempotence. It never overwrites the inputs. Its report
-counts changed and unchanged files separately.
+counts changed and unchanged files separately. The external corpus manifest
+pins all 39 DASH and 12 PINS P4 sources by revision and SHA-256. Its acceptance
+test additionally appends an unformatted declaration to a copy of every source
+and requires actual, stable formatting, so pass-through cannot count as coverage.
+
+    cmake --build build --target p4fmt-external-check
 
     ctest --test-dir build --output-on-failure -R '^p4fmt-corpus$'
 
