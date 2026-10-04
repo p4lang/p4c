@@ -24,7 +24,7 @@
         },
         {
           "id" : 2,
-          "name" : "a.vlan_tag$0.ether_type",
+          "name" : "b.vlan_ether_type",
           "repeated" : false,
           "annotations" : [],
           "mandatory" : false,
@@ -36,6 +36,13 @@
         }
       ],
       "action_specs" : [
+        {
+          "id" : 25756908,
+          "name" : "MyIC.forward",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
         {
           "id" : 21257015,
           "name" : "NoAction",
