@@ -4,79 +4,84 @@
 
 # This file defines how a test should be written for a particular target. This is used by testutils
 
-# Write the script to check BMv2 STF tests to the designated test file.
+# Append commands to run BMv2 STF tests.
 # Arguments:
-#   - testfile is the testing script that this script is written to.
+#   - testcontent is the name of the variable to append the script to.
 #   - testfolder is target folder of the test.
 #   - p4test is the file that is to be tested.
-function(check_with_bmv2 testfile testfolder p4test)
+function(check_with_bmv2 testcontent testfolder p4test)
   set(__p4cbmv2path "${P4C_BINARY_DIR}")
   set(__bmv2runner "${CMAKE_BINARY_DIR}/run-bmv2-test.py")
   # Find all the stf tests generated for this P4 file and test them with bmv2 model
-  file(APPEND ${testfile} "stffiles=($(find ${testfolder} -name \"*.stf\"  | sort -n ))\n")
-  file(APPEND ${testfile} "for item in \${stffiles[@]}\n")
-  file(APPEND ${testfile} "do\n")
-  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\tpython3 ${__bmv2runner} ${P4C_SOURCE_DIR} -v -b -tf \${item} -bd ${__p4cbmv2path} ${p4test}\n")
-  file(APPEND ${testfile} "done\n")
+  string(APPEND ${testcontent}
+    "stffiles=($(find ${testfolder} -name \"*.stf\"  | sort -n ))\n"
+    "for item in \${stffiles[@]}\n"
+    "do\n"
+    "\techo \"Found \${item}\"\n"
+    "\tpython3 ${__bmv2runner} ${P4C_SOURCE_DIR} -v -b -tf \${item} -bd ${__p4cbmv2path} ${p4test}\n"
+    "done\n"
+  )
+  set(${testcontent} "${${testcontent}}" PARENT_SCOPE)
 endfunction(check_with_bmv2)
 
 
-# Write the script to check BMv2 PTF tests to the designated test file.
+# Append commands to run BMv2 PTF tests.
 # Arguments:
-#   - testfile is the testing script that this script is written to.
+#   - testcontent is the name of the variable to append the script to.
 #   - testfolder is target folder of the test.
 #   - p4test is the file that is to be tested.
-macro(check_bmv2_with_ptf testfile testfolder p4test)
+macro(check_bmv2_with_ptf testcontent testfolder p4test)
   set(__p4cbmv2path "${P4C_BINARY_DIR}")
   set(__bmv2runner " ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-ptf-test.py")
   # Find all the ptf tests generated for this P4 file and test them with bmv2 model
-  file(APPEND ${testfile} "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n")
-  file(APPEND ${testfile} "for item in \${ptffiles[@]}\n")
-  file(APPEND ${testfile} "do\n")
-  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\t python3 ${__bmv2runner} --use-nanomsg -tf \${item} ${P4C_SOURCE_DIR}")
-  file(APPEND ${testfile} " -pfn ${p4test} \n")
-  file(APPEND ${testfile} "done\n")
+  string(APPEND ${testcontent}
+    "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n"
+    "for item in \${ptffiles[@]}\n"
+    "do\n"
+    "\techo \"Found \${item}\"\n"
+    "\t python3 ${__bmv2runner} --use-nanomsg -tf \${item} ${P4C_SOURCE_DIR}"
+    " -pfn ${p4test} \n"
+    "done\n"
+  )
 endmacro(check_bmv2_with_ptf)
 
-# Write the script to validate whether a given protobuf text format file has a valid format.
+# Append commands to validate protobuf text files.
 # Arguments:
-#   - testfile is the testing script that this script is written to.
+#   - testcontent is the name of the variable to append the script to.
 #   - testfolder is target folder of the test.
-function(validate_protobuf testfile testfolder)
+function(validate_protobuf testcontent testfolder)
   # Find all the proto tests generated for this P4 file and validate their correctness.
-  file(APPEND ${testfile} "txtpbfiles=($(find ${testfolder} -name \"*.txtpb\"  | sort -n ))\n")
-  file(APPEND ${testfile} "for item in \${txtpbfiles[@]}\n")
-  file(APPEND ${testfile} "do\n")
-  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(
-    APPEND ${testfile}
+  string(APPEND ${testcontent}
+    "txtpbfiles=($(find ${testfolder} -name \"*.txtpb\"  | sort -n ))\n"
+    "for item in \${txtpbfiles[@]}\n"
+    "do\n"
+    "\techo \"Found \${item}\"\n"
     "\t${Protobuf_PROTOC_EXECUTABLE} --proto_path ${Protobuf_INCLUDE_DIRS} --proto_path ${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path ${P4RUNTIME_STD_DIR} --proto_path ${P4C_SOURCE_DIR}/control-plane --encode=p4testgen.TestCase p4testgen.proto < \${item} > /dev/null\n"
+    "done\n"
   )
-  file(APPEND ${testfile} "done\n")
+  set(${testcontent} "${${testcontent}}" PARENT_SCOPE)
 endfunction(validate_protobuf)
 
-# Write the script to validate whether a given protobuf IR text format file has a valid format.
+# Append commands to validate protobuf IR text files.
 # Arguments:
-#   - testfile is the testing script that this script is written to.
+#   - testcontent is the name of the variable to append the script to.
 #   - testfolder is target folder of the test.
-function(validate_protobuf_ir testfile testfolder)
+function(validate_protobuf_ir testcontent testfolder)
   # Find all the proto tests generated for this P4 file and validate their correctness.
-  file(APPEND ${testfile} "txtpbfiles=($(find ${testfolder} -name \"*.txtpb\"  | sort -n ))\n")
-  file(APPEND ${testfile} "for item in \${txtpbfiles[@]}\n")
-  file(APPEND ${testfile} "do\n")
-  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(
-    APPEND ${testfile}
+  string(APPEND ${testcontent}
+    "txtpbfiles=($(find ${testfolder} -name \"*.txtpb\"  | sort -n ))\n"
+    "for item in \${txtpbfiles[@]}\n"
+    "do\n"
+    "\techo \"Found \${item}\"\n"
     "\t${Protobuf_PROTOC_EXECUTABLE} --proto_path ${Protobuf_INCLUDE_DIRS} --proto_path ${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path ${P4RUNTIME_STD_DIR} --proto_path ${P4C_SOURCE_DIR} --proto_path ${P4C_SOURCE_DIR}/control-plane --encode=p4testgen_ir.TestCase p4testgen_ir.proto < \${item} > /dev/null\n"
+    "done\n"
   )
-  file(APPEND ${testfile} "done\n")
+  set(${testcontent} "${${testcontent}}" PARENT_SCOPE)
 endfunction(validate_protobuf_ir)
 
 
 
-# Write the script to validate whether a given protobuf file has a valid format.
+# Append a command that checks whether the test folder is empty.
 # Arguments:
 #   - testfile is the testing script that this script is written to.
 #   - testfolder is target folder of the test.
@@ -98,7 +103,7 @@ endfunction(check_empty_folder)
 #   - ARCH is the p4 architecture
 #   - ENABLE_RUNNER is the flag to  execute BMv2 on the generated tests.
 #   - VALIDATE_PROTOBUF is the flag to check whether the generated Protobuf tests are valid.
-#   - VALIDATE_PROTOBUF is the flag to check whether the generated Protobuf IR tests are valid.
+#   - VALIDATE_PROTOBUF_IR checks whether the generated Protobuf IR tests are valid.
 #   - TEST_ARGS is a list of arguments to pass to the test
 #   - CMAKE_ARGS are additional arguments to pass to the test
 #
@@ -130,10 +135,11 @@ function(p4tools_add_test_with_args)
   set(__testfile "${P4TESTGEN_DIR}/${tag}/${alias}.test")
   set(__testfolder "${P4TESTGEN_DIR}/${tag}/${aliasname}.out")
   get_filename_component(__testdir ${p4test} DIRECTORY)
-  file(WRITE ${__testfile} "#! /usr/bin/env bash\n")
-  file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
-  file(APPEND ${__testfile} "set -e\n")
-  file(APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
+  string(CONCAT __testcontent
+    "#! /usr/bin/env bash\n"
+    "# Generated file, modify with care\n\n"
+    "set -e\n"
+    "cd ${P4C_BINARY_DIR}\n")
 
   if(${TOOLS_BMV2_TESTS_USE_ASSERT_MODE})
     set(test_args "${test_args} --assertion-mode")
@@ -142,37 +148,36 @@ function(p4tools_add_test_with_args)
     set(test_args "${test_args} --disable-assumption-mode")
   endif()
 
-  file(
-    APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
+  string(APPEND __testcontent "${driver} --target ${target} --arch ${arch} "
     "${test_args} --out-dir ${__testfolder} \"$@\" ${p4test}\n"
   )
 
   if(${TOOLS_BMV2_TESTS_USE_ASSERT_MODE} OR ${TOOLS_BMV2_TESTS_DISABLE_ASSUME_MODE})
     # Check whether the folder is empty.
     if(${TOOLS_BMV2_TESTS_CHECK_EMPTY})
-      file(APPEND ${__testfile} "[ \"$(ls -A ${__testfolder})\" ] && exit 1 || exit 0")
+      string(APPEND __testcontent "[ \"$(ls -A ${__testfolder})\" ] && exit 1 || exit 0")
     else()
-      file(APPEND ${__testfile} "[ \"$(ls -A ${__testfolder})\" ] && exit 0 || exit 1")
+      string(APPEND __testcontent "[ \"$(ls -A ${__testfolder})\" ] && exit 0 || exit 1")
     endif()
   else()
     # If ENABLE_RUNNER is active, run the BMv2 runner.
     if(${TOOLS_BMV2_TESTS_ENABLE_RUNNER})
-      check_with_bmv2(${__testfile} ${__testfolder} ${p4test})
+      check_with_bmv2(__testcontent ${__testfolder} ${p4test})
     endif()
     # If P416_PTF is active, run the PTF BMv2 runner.
     if(${TOOLS_BMV2_TESTS_P416_PTF})
-      check_bmv2_with_ptf(${__testfile} ${__testfolder} ${p4test} ${__ptfRunerFolder})
+      check_bmv2_with_ptf(__testcontent ${__testfolder} ${p4test} ${__ptfRunerFolder})
     endif()
     # If VALIDATE_PROTOBUF is active, check whether the format of the generated tests is valid.
     if(${TOOLS_BMV2_TESTS_VALIDATE_PROTOBUF})
-      validate_protobuf(${__testfile} ${__testfolder})
+      validate_protobuf(__testcontent ${__testfolder})
     endif()
     if(${TOOLS_BMV2_TESTS_VALIDATE_PROTOBUF_IR})
-      validate_protobuf_ir(${__testfile} ${__testfolder})
+      validate_protobuf_ir(__testcontent ${__testfolder})
     endif()
   endif()
 
-  execute_process(COMMAND chmod +x ${__testfile})
+  p4c_write_test_script("${__testfile}" "${__testcontent}")
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
   add_test(
     NAME ${__testname}
