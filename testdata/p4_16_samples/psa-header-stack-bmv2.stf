@@ -1,0 +1,14 @@
+# Exercise the no-tag, one-tag, and full two-element VLAN header stack paths.
+setdefault tbl forward()
+
+# No VLAN headers are extracted or emitted.
+packet 0  000000000001 000000000002 0800
+expect 1  000000000001 000000000002 0800
+
+# One VLAN header is extracted and emitted.
+packet 0  000000000003 000000000004 8100 1234 0800
+expect 1  000000000003 000000000004 8100 1234 0800
+
+# Both elements of the two-element VLAN header stack are extracted and emitted.
+packet 0  000000000005 000000000006 8100 1234 8100 5678 0800
+expect 1  000000000005 000000000006 8100 1234 8100 5678 0800

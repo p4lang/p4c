@@ -85,7 +85,7 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
 
     action forward() {
-        d.egress_port = (PortId_t)1;
+        send_to_port(d, (PortId_t)1);
     }
 
     table tbl {
@@ -94,12 +94,13 @@ control MyIC(
             a.vlan_tag[0].ether_type : exact;
         }
         actions = {
+            forward;
             NoAction;
         }
     }
 
     apply {
-        if (!a.ethernet.isValid()) {
+        if (a.ethernet.isValid()) {
             tbl.apply();
         }
     }
