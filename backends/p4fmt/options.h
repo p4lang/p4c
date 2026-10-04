@@ -16,8 +16,10 @@ class P4fmtOptions : public CompilerOptions {
     P4fmtOptions &operator=(P4fmtOptions &&) = delete;
 
     const std::filesystem::path &outputFile() const;
+    bool failOnFallback() const { return failOnFallback_; }
 
  private:
+    bool failOnFallback_ = false;
     /// File to output to.
     std::filesystem::path outFile;
 };

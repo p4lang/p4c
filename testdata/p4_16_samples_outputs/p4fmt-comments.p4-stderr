@@ -1,0 +1,10 @@
+p4fmt-comments.p4(7): [--Wwarn=unused] warning: control 'C' is unused
+control C() {
+        ^
+p4fmt-comments.p4(8): [--Wwarn=unused] warning: 'empty' is unused
+    action empty() { /* inside an empty body */ }
+           ^^^^^
+p4fmt-comments.p4(7): [--Winfo=removed] info: removing control 'C'
+control C() {
+        ^
+[--Wwarn=missing] warning: Program does not contain a `main' module

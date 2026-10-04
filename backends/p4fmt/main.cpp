@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <filesystem>
 #include <memory>
-#include <sstream>
 
 #include "lib/nullstream.h"
 #include "options.h"
@@ -17,10 +16,10 @@ int main(int argc, char *const argv[]) {
     }
     options.setInputFile();
 
-    std::stringstream formattedOutput = P4Fmt::getFormattedOutput(options.file);
-    if (formattedOutput.str().empty()) {
+    auto formattedOutput = P4Fmt::getFormattedOutput(options.file, options.failOnFallback());
+    if (!formattedOutput) {
         return EXIT_FAILURE;
-    };
+    }
 
     std::ostream *out = nullptr;
     std::unique_ptr<std::ostream> outFile;
@@ -38,7 +37,7 @@ int main(int argc, char *const argv[]) {
         out = outFile.get();
     }
 
-    (*out) << formattedOutput.str();
+    (*out) << *formattedOutput;
     out->flush();
     if (!(*out)) {
         ::P4::error(ErrorType::ERR_IO, "Failed to write to output file.");
