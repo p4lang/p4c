@@ -47,13 +47,14 @@ set (GTEST_UNITTEST_SOURCES
   gtest/remove_dontcare_args_test.cpp
   gtest/source_file_test.cpp
   gtest/strength_reduction.cpp
+  gtest/toP4_system_declarations_test.cpp
+  gtest/toP4_test.cpp
   gtest/string_map.cpp
   gtest/transforms.cpp
   gtest/rtti_test.cpp
   gtest/nethash.cpp
   gtest/visitor.cpp
   gtest/metrics_test.cpp
-  gtest/toP4_system_declarations_test.cpp
 )
 
 if (ENABLE_CONTROL_PLANE)

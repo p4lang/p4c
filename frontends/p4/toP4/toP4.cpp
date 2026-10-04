@@ -17,6 +17,42 @@
 
 namespace P4 {
 
+void ToP4::printSource(const SourceDocument &document) {
+    unsigned indent = 0;
+    for (const auto &fragment : document) {
+        while (indent < fragment.indent) {
+            builder.increaseIndent();
+            ++indent;
+        }
+        while (indent > fragment.indent) {
+            builder.decreaseIndent();
+            --indent;
+        }
+        switch (fragment.before) {
+            case SourceFragment::Break::Original:
+                builder.append(std::string(fragment.trivia));
+                break;
+            case SourceFragment::Break::None:
+                break;
+            case SourceFragment::Break::Space:
+                builder.spc();
+                break;
+            case SourceFragment::Break::BlankLine:
+                builder.newline();
+                [[fallthrough]];
+            case SourceFragment::Break::Line:
+                builder.newline();
+                if (!fragment.spelling.empty()) builder.emitIndent();
+                break;
+        }
+        builder.append(std::string(fragment.spelling));
+    }
+    while (indent > 0) {
+        builder.decreaseIndent();
+        --indent;
+    }
+}
+
 Visitor::profile_t ToP4::init_apply(const IR::Node *node) {
     LOG4("Program dump:" << std::endl << dumpToString(node));
     listTerminators_init_apply_size = listTerminators.size();
@@ -522,7 +558,7 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
     size_t len = 0;
     for (auto f : t->fields) {
         Util::SourceCodeBuilder builder;
-        ToP4 rec(builder, showIR);
+        ToP4 rec(builder, showIR, formatting);
         rec.isDeclaration = false;
 
         f->type->apply(rec);
@@ -540,7 +576,7 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
         builder.emitIndent();
         cstring t = get(type, f);
         builder.append(t);
-        size_t spaces = len + 1 - t.size();
+        size_t spaces = formatting.alignStructFields ? len + 1 - t.size() : 1;
         builder.append(std::string(spaces, ' '));
         builder.append(f->name);
         builder.endOfStatement(true);
@@ -1526,7 +1562,7 @@ bool ToP4::preorder(const IR::Key *v) {
     size_t len = 0;
     for (auto f : v->keyElements) {
         Util::SourceCodeBuilder builder;
-        ToP4 rec(builder, showIR);
+        ToP4 rec(builder, showIR, formatting);
 
         f->expression->apply(rec);
         cstring s = builder.toString();
@@ -1539,7 +1575,7 @@ bool ToP4::preorder(const IR::Key *v) {
         builder.emitIndent();
         cstring s = get(kf, f);
         builder.append(s);
-        size_t spaces = len - s.size();
+        size_t spaces = formatting.alignTableKeys ? len - s.size() : 0;
         builder.append(std::string(spaces, ' '));
         builder.append(": ");
         visit(f->matchType);
