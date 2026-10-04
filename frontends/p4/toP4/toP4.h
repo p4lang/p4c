@@ -14,11 +14,23 @@
 #include <vector>
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/toP4/sourceDocument.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/sourceCodeBuilder.h"
 
 namespace P4 {
+
+/// Layout choices shared by compiler output and source formatting. Defaults
+/// preserve the compiler's historical output. Source trivia belongs to the
+/// caller, not to these style options.
+struct ToP4FormattingOptions {
+    unsigned indentWidth = 4;
+    /// Align field names in structs, headers, and header unions.
+    bool alignStructFields = true;
+    /// Align the colons separating table-key expressions from match kinds.
+    bool alignTableKeys = true;
+};
 
 /**
 This pass converts a P4-16 IR into a P4 source (text) program.
@@ -26,6 +38,7 @@ It can optionally emit as comments a representation of the program IR.
 */
 class ToP4 : public Inspector, ResolutionContext {
  protected:
+    const ToP4FormattingOptions formatting;
     /// precedence of current IR::Operation
     int expressionPrecedence = DBPrint::Prec_Low;
     bool isDeclaration = true;    /// current type is a declaration
@@ -90,25 +103,33 @@ class ToP4 : public Inspector, ResolutionContext {
         emitted. */
     std::optional<std::filesystem::path> mainFile;
 
-    ToP4(Util::SourceCodeBuilder &builder, bool showIR) : showIR(showIR), builder(builder) {
+    ToP4(Util::SourceCodeBuilder &builder, bool showIR, ToP4FormattingOptions formatting = {})
+        : formatting(formatting), showIR(showIR), builder(builder) {
+        builder.setIndentWidth(formatting.indentWidth);
         visitDagOnce = false;
         setName("ToP4");
     }
 
-    ToP4(std::ostream *outStream, bool showIR) : ToP4(*new Util::SourceCodeBuilder(), showIR) {
+    ToP4(std::ostream *outStream, bool showIR, ToP4FormattingOptions formatting = {})
+        : ToP4(*new Util::SourceCodeBuilder(), showIR, formatting) {
         this->outStream = outStream;
     }
 
-    ToP4(Util::SourceCodeBuilder &builder, bool showIR, std::filesystem::path mainFile)
-        : ToP4(builder, showIR) {
+    ToP4(Util::SourceCodeBuilder &builder, bool showIR, std::filesystem::path mainFile,
+         ToP4FormattingOptions formatting = {})
+        : ToP4(builder, showIR, formatting) {
         this->mainFile = mainFile;
     }
-    ToP4(std::ostream *outStream, bool showIR, std::filesystem::path mainFile)
-        : ToP4(outStream, showIR) {
+    ToP4(std::ostream *outStream, bool showIR, std::filesystem::path mainFile,
+         ToP4FormattingOptions formatting = {})
+        : ToP4(outStream, showIR, formatting) {
         this->mainFile = mainFile;
     }
 
     ToP4() : ToP4(*new Util::SourceCodeBuilder(), false) {}
+
+    /// Render a lossless source layout with the same builder and style as IR output.
+    void printSource(const SourceDocument &document);
 
     using Inspector::preorder;
 

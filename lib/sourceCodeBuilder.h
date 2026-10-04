@@ -28,6 +28,8 @@ class SourceCodeBuilder {
  public:
     SourceCodeBuilder() : indentLevel(0), indentAmount(4), endsInSpace(false) {}
 
+    void setIndentWidth(unsigned width) { indentAmount = width; }
+
     void increaseIndent() { indentLevel += indentAmount; }
     void decreaseIndent() {
         indentLevel -= indentAmount;
