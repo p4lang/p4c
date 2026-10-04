@@ -1,84 +1,105 @@
 #include "backends/p4fmt/p4fmt.h"
 
-#include "backends/p4fmt/attach.h"
-#include "backends/p4fmt/p4formatter.h"
-#include "frontends/common/parseInput.h"
-#include "frontends/common/parser_options.h"
+#include <fstream>
+#include <memory>
+#include <sstream>
+
+#include "backends/p4fmt/formatTokens.h"
+#include "backends/p4fmt/sourceParser.h"
+#include "backends/p4fmt/syntaxRecovery.h"
+#include "frontends/p4/toP4/toP4.h"
 #include "frontends/parsers/parserDriver.h"
-#include "ir/ir.h"
 #include "lib/compile_context.h"
 #include "lib/error.h"
-#include "lib/source_file.h"
+#include "lib/exceptions.h"
+#include "lib/nullstream.h"
 #include "options.h"
 
 namespace P4::P4Fmt {
 
-std::optional<std::pair<const IR::P4Program *, const Util::InputSources *>> parseProgram(
-    const ParserOptions &options) {
-    if (!std::filesystem::exists(options.file)) {
-        ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file found.", options.file);
-        return std::nullopt;
-    }
-#ifdef SUPPORT_P4_14
-    if (options.isv1()) {
-        ::P4::error(ErrorType::ERR_UNKNOWN, "p4fmt cannot deal with p4-14 programs.");
-        return std::nullopt;
-    }
-#endif
-    auto preprocessorResult = options.preprocess();
-    auto result =
-        P4ParserDriver::parseProgramSources(preprocessorResult.value().get(), options.file.c_str());
+namespace {
 
-    if (::P4::errorCount() > 0) {
-        ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
-                    ::P4::errorCount());
+// Keep speculative parser/printer diagnostics isolated. The caller reports a
+// fallback only after this context has been destroyed, so strict-mode errors
+// are visible and counted in the caller's compilation context.
+std::optional<std::string> tryFormat(const FormatTokens &source,
+                                     const std::filesystem::path &inputFile,
+                                     std::string_view &fallbackReason) {
+    if (auto reason = SyntaxRecovery::preservationReason(source)) {
+        fallbackReason = *reason;
         return std::nullopt;
     }
 
-    BUG_CHECK(result.first != nullptr, "Parsing failed, but no error was reported");
+    nullstream diagnostics;
+    AutoCompileContext context(std::make_unique<P4FmtContext>());
+    P4FmtContext::get().errorReporter().setOutputStream(&diagnostics);
+    try {
+        std::istringstream stream(std::string{source.source});
+        const auto *program = P4ParserDriver::parse(stream, inputFile.string());
+        if (program == nullptr || ::P4::errorCount() > 0) {
+            fallbackReason = "input could not be parsed as standalone P4";
+            return std::nullopt;
+        }
 
-    return result;
+        Util::SourceCodeBuilder proposal;
+        ToP4 formatter(proposal, false);
+        formatter.setnoIncludesArg(true);
+        program->apply(formatter);
+        if (::P4::errorCount() > 0) {
+            fallbackReason = "ToP4 could not print this input";
+            return std::nullopt;
+        }
+
+        auto result = SyntaxRecovery::reconcile(source, proposal.toString());
+        if (!result) fallbackReason = "ToP4 output changes source token spelling or order";
+        return result;
+    } catch (const Util::CompilationError &) {
+        fallbackReason = "input is unsupported by the parser or printer";
+    } catch (const Util::CompilerUnimplemented &) {
+        fallbackReason = "input uses unimplemented parser or printer functionality";
+    }
+    return std::nullopt;
 }
 
-std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
-    AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
-    auto &options = P4Fmt::P4FmtContext::get().options();
+}  // namespace
 
-    options.file = std::move(inputFile);
-
-    std::stringstream formattedOutput;
-
-    auto parseResult = parseProgram(options);
-    if (!parseResult) {
-        if (::P4::errorCount() > 0) {
-            ::P4::error("Failed to parse P4 file.");
-        }
-        return formattedOutput;
+std::optional<std::string> getFormattedOutput(const std::filesystem::path &inputFile,
+                                              bool failOnFallback) {
+    std::ifstream input(inputFile, std::ios::binary);
+    if (!input) {
+        ::P4::error(ErrorType::ERR_IO, "Could not read %1%", inputFile);
+        return std::nullopt;
     }
-    const auto &[program, sources] = *parseResult;
-
-    std::unordered_map<const Util::Comment *, bool> globalCommentsMap;
-
-    // Initialize the global comments map from the list of comments in the program.
-    if (sources != nullptr) {
-        for (const auto *comment : sources->getAllComments()) {
-            globalCommentsMap[comment] =
-                false;  // Initialize all comments as not yet attached to nodes
-        }
+    std::string original;
+    char buffer[4096];
+    while (input) {
+        input.read(buffer, sizeof(buffer));
+        original.append(buffer, static_cast<size_t>(input.gcount()));
+    }
+    if (input.bad()) {
+        ::P4::error(ErrorType::ERR_IO, "Failed to read %1%", inputFile);
+        return std::nullopt;
     }
 
-    auto top4 = P4Fmt::P4Formatter(&formattedOutput);
-    auto attach = P4::P4Fmt::Attach(globalCommentsMap);
-    program->apply(attach);
-    // Print the program before running front end passes.
-    program->apply(top4);
-
-    if (::P4::errorCount() > 0) {
-        ::P4::error("Failed to format p4 program.");
-        return formattedOutput;
+    const FormatTokens source(original);
+    std::string_view fallbackReason;
+    auto formatted = tryFormat(source, inputFile, fallbackReason);
+    if (formatted) return formatted;
+    if (auto document = parseSource(source)) {
+        AutoCompileContext context(std::make_unique<P4FmtContext>());
+        Util::SourceCodeBuilder proposal;
+        ToP4 printer(proposal, false);
+        printer.printSource(*document);
+        auto result = proposal.toString();
+        if (sameSourceTokens(source, FormatTokens(result))) return result;
+        fallbackReason = "source layout changes token spelling or boundaries";
     }
-
-    return formattedOutput;
+    if (failOnFallback) {
+        ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: formatting fallback: %2%", inputFile,
+                    fallbackReason);
+        return std::nullopt;
+    }
+    return original;
 }
 
 }  // namespace P4::P4Fmt

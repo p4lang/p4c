@@ -26,6 +26,8 @@ class ReferenceCheckerOptions : protected P4fmtOptions {
     bool overwriteReferences = false;
 
  public:
+    using P4fmtOptions::failOnFallback;
+
     ReferenceCheckerOptions() {
         registerOption(
             "--file", "inputFile",
@@ -92,28 +94,25 @@ class ReferenceCheckerOptions : protected P4fmtOptions {
     [[nodiscard]] bool doOverwriteReferences() const { return overwriteReferences; }
 };
 
-int compareAgainstReference(const std::stringstream &formattedOutput,
+int compareAgainstReference(const std::string &formattedOutput,
                             const std::filesystem::path &referenceFile) {
-    // Construct the command to invoke the diff utility
-    std::stringstream command;
-    command << "echo " << std::quoted(formattedOutput.str());
-    command << "| diff --color -u " << referenceFile.c_str() << " -";
-
-    // Open a pipe to capture the output of the diff command.
-    P4Tools::printInfo("Running diff command: \"%s\"", command.str());
-    FILE *pipe = popen(command.str().c_str(), "r");
-    if (pipe == nullptr) {
-        ::P4::error("Unable to create pipe to diff command.");
+    std::ifstream input(referenceFile, std::ios::binary);
+    if (!input) {
+        ::P4::error("Could not read reference file %1%", referenceFile);
         return EXIT_FAILURE;
     }
-    // Read and print the output of the diff command.
-    std::stringstream result;
-    char buffer[128];
-    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-        result << buffer;
+    std::string expected;
+    char buffer[4096];
+    while (input) {
+        input.read(buffer, sizeof(buffer));
+        expected.append(buffer, static_cast<size_t>(input.gcount()));
     }
-    if (pclose(pipe) != 0) {
-        ::P4::error("Diff command failed.\n%1%", result.str());
+    if (input.bad()) {
+        ::P4::error("Failed to read reference file %1%", referenceFile);
+        return EXIT_FAILURE;
+    }
+    if (formattedOutput != expected) {
+        ::P4::error("Formatted output differs from %1%", referenceFile);
         return EXIT_FAILURE;
     }
     return EXIT_SUCCESS;
@@ -139,9 +138,9 @@ std::optional<std::filesystem::path> getFilePath(const ReferenceCheckerOptions &
 int run(const ReferenceCheckerOptions &options) {
     auto referenceFileOpt = options.getReferenceFile();
 
-    std::stringstream formattedOutput = getFormattedOutput(options.getInputFile());
+    auto formattedOutput = getFormattedOutput(options.getInputFile(), options.failOnFallback());
 
-    if (formattedOutput.str().empty()) {
+    if (!formattedOutput) {
         ::P4::error("Formatting Failed");
         return EXIT_FAILURE;
     }
@@ -152,15 +151,19 @@ int run(const ReferenceCheckerOptions &options) {
             return EXIT_FAILURE;
         }
 
-        std::ofstream ofs(referencePath.value());
-        ofs << formattedOutput << std::endl;
-        P4Tools::printInfo("Writing reference file %s", referencePath.value().c_str());
+        std::ofstream ofs(referencePath.value(), std::ios::binary);
+        ofs << *formattedOutput;
         ofs.close();
+        if (!ofs) {
+            ::P4::error("Failed to write reference file %1%", referencePath.value());
+            return EXIT_FAILURE;
+        }
+        P4Tools::printInfo("Writing reference file %s", referencePath.value().c_str());
         return EXIT_SUCCESS;
     }
     if (referenceFileOpt.has_value()) {
         auto referenceFile = std::filesystem::absolute(referenceFileOpt.value());
-        return compareAgainstReference(formattedOutput, referenceFile);
+        return compareAgainstReference(*formattedOutput, referenceFile);
     }
     ::P4::error("Reference file has not been specified.");
     return EXIT_FAILURE;
