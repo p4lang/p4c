@@ -1,0 +1,11 @@
+# s = -16 (0xF0), u = 0x81: s ++ u = 0xF081, u ++ s = 0x81F0
+packet 0 F0 81 00 00 00 00
+expect 0 F0 81 F0 81 81 F0
+
+# s = 127 (0x7F), u = 0x00: s ++ u = 0x7F00, u ++ s = 0x007F
+packet 0 7F 00 00 00 00 00
+expect 0 7F 00 7F 00 00 7F
+
+# s = -128 (0x80), u = 0xFF: s ++ u = 0x80FF, u ++ s = 0xFF80
+packet 0 80 FF 00 00 00 00
+expect 0 80 FF 80 FF FF 80

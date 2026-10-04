@@ -140,7 +140,17 @@ const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
               expression->right, type);
     unsigned sizeofb = type->to<IR::Type_Bits>()->size;
     auto cast0 = new IR::Cast(expression->left->srcInfo, resulttype, expression->left);
-    auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
+    // The result has the signedness of the left operand. A P4 cast cannot change both
+    // the width and the signedness, so if the right operand's signedness differs from
+    // the result's, first convert it to a same-width value with the result's signedness.
+    const IR::Expression *right = expression->right;
+    bool resultSigned = resulttype->to<IR::Type_Bits>()->isSigned;
+    if (type->to<IR::Type_Bits>()->isSigned != resultSigned) {
+        auto rtype = IR::Type_Bits::get(sizeofb, resultSigned);
+        right = new IR::Cast(expression->right->srcInfo, rtype, right);
+        typeMap->setType(right, rtype);
+    }
+    auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, right);
     auto sizefb0 = new IR::Constant(IR::Type_InfInt::get(), sizeofb);
     auto sh = new IR::Shl(cast0->srcInfo, cast0, sizefb0);
     big_int m = Util::maskFromSlice(sizeofb - 1, 0);
