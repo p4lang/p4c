@@ -77,6 +77,7 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
             a.vlan_tag[0].ether_type: exact;
         }
         actions = {
+            forward;
             NoAction;
         }
     }
