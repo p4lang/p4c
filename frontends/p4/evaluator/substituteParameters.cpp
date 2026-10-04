@@ -7,6 +7,24 @@
 
 namespace P4 {
 
+bool SubstituteParameters::useParameterSourceInfo(const IR::Expression *replacement) const {
+    if (!replacement->srcInfo.isValid()) return true;
+    auto path = replacement->to<IR::PathExpression>();
+    if (!path) return false;
+    if (path->path->name.originalName == nullptr) return true;
+
+    const IR::IDeclaration *decl = nullptr;
+    if (refMap) {
+        decl = refMap->getDeclaration(path->path, false);
+    } else {
+        // The temporary may not have been added to the program yet.
+        // Look it up without reporting an error if it is missing.
+        auto declarations = resolve(path->path->name, ResolutionType::Any);
+        if (declarations.size() == 1) decl = declarations.front();
+    }
+    return decl && decl->getName().originalName == nullptr;
+}
+
 const IR::Node *SubstituteParameters::postorder(IR::This *t) {
     auto result = new IR::This(t->srcInfo);
     LOG1("Cloned " << dbp(t) << " into " << dbp(result));
@@ -20,17 +38,17 @@ const IR::Node *SubstituteParameters::postorder(IR::PathExpression *expr) {
     if (param != nullptr && subst->contains(param)) {
         const auto *value = subst->lookup(param)->expression;
         LOG1("Replaced " << dbp(expr) << " with " << dbp(value));
-        // Return a new Expression with source info of the PathExpression
-        // being substituted.
+        // Keep the argument's source location unless it is a compiler temporary.
+        // For temporaries, use the location of the parameter reference.
         auto *cloned = value->clone();
-        cloned->srcInfo = expr->srcInfo;
+        if (useParameterSourceInfo(value)) cloned->srcInfo = expr->srcInfo;
         return cloned;
     }
 
     // Path expressions always need to be cloned.
     IR::ID newid = expr->path->name;
     auto path = new IR::Path(newid, expr->path->absolute);
-    auto result = new IR::PathExpression(path);
+    auto result = new IR::PathExpression(expr->srcInfo, path);
     LOG1("Cloned " << dbp(expr) << " into " << dbp(result));
     return result;
 }
