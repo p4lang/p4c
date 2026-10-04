@@ -1,5 +1,5 @@
-binary_e.p4(10): [--Wwarn=unused] warning: control 'p' is unused
-control p()
+binary_e.p4(13): [--Wwarn=unused] warning: control 'p' is unused
+control p() {
         ^
 binary_e.p4(23): [--Werror=type-error] error: Indexing a[2] applied to non-array and non-tuple type int<2>
         c = a[2]; // not an array

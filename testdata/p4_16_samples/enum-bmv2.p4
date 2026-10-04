@@ -26,9 +26,9 @@ control compute(inout hdr h)
         Choice c = Choice.First;
 
         if (c == Choice.Second)
-            h.c = h.a;
+        h.c = h.a;
         else
-            h.c = h.b;
+        h.c = h.b;
     }
 }
 

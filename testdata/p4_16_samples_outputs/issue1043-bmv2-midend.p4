@@ -16,7 +16,7 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract < hdr >(h.h);
         transition accept;
     }
 }
@@ -38,24 +38,24 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit < hdr >(h.h);
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue1043bmv2l39() {
+    @hidden action issue1043bmv2l51() {
         resubmit_preserving_field_list(8w0);
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_issue1043bmv2l39 {
+    @hidden table tbl_issue1043bmv2l51 {
         actions = {
-            issue1043bmv2l39();
+            issue1043bmv2l51();
         }
-        const default_action = issue1043bmv2l39();
+        const default_action = issue1043bmv2l51();
     }
     apply {
-        tbl_issue1043bmv2l39.apply();
+        tbl_issue1043bmv2l51.apply();
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

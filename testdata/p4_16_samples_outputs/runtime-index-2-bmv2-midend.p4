@@ -19,7 +19,7 @@ header vec_e_t {
 
 struct headers {
     ethernet_t ethernet;
-    ml_hdr_t   ml;
+    ml_hdr_t ml;
     vec_e_t[8] vector;
 }
 
@@ -28,16 +28,16 @@ struct metadata_t {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        packet.extract<ml_hdr_t>(hdr.ml);
-        packet.extract<vec_e_t>(hdr.vector[0]);
-        packet.extract<vec_e_t>(hdr.vector[1]);
-        packet.extract<vec_e_t>(hdr.vector[2]);
-        packet.extract<vec_e_t>(hdr.vector[3]);
-        packet.extract<vec_e_t>(hdr.vector[4]);
-        packet.extract<vec_e_t>(hdr.vector[5]);
-        packet.extract<vec_e_t>(hdr.vector[6]);
-        packet.extract<vec_e_t>(hdr.vector[7]);
+        packet.extract < ethernet_t >(hdr.ethernet);
+        packet.extract < ml_hdr_t >(hdr.ml);
+        packet.extract < vec_e_t >(hdr.vector[0]);
+        packet.extract < vec_e_t >(hdr.vector[1]);
+        packet.extract < vec_e_t >(hdr.vector[2]);
+        packet.extract < vec_e_t >(hdr.vector[3]);
+        packet.extract < vec_e_t >(hdr.vector[4]);
+        packet.extract < vec_e_t >(hdr.vector[5]);
+        packet.extract < vec_e_t >(hdr.vector[6]);
+        packet.extract < vec_e_t >(hdr.vector[7]);
         transition accept;
     }
 }
@@ -56,280 +56,280 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     bit<8> hsiVar_8;
     bit<8> hsiVar_9;
     @hidden action runtimeindex2bmv2l59() {
-        hdr.vector[8w0].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w0].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_0() {
-        hdr.vector[8w1].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w1].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_1() {
-        hdr.vector[8w2].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w2].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_2() {
-        hdr.vector[8w3].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w3].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_3() {
-        hdr.vector[8w4].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w4].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_4() {
-        hdr.vector[8w5].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w5].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_5() {
-        hdr.vector[8w6].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w6].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_6() {
-        hdr.vector[8w7].e = hdr.ethernet.etherType[15:8] + 8w7;
+        hdr.vector[8w7].e = hdr.ethernet.etherType[15 : 8] + 8w7;
     }
     @hidden action runtimeindex2bmv2l59_7() {
-        hsiVar = hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1);
+        hsiVar = hdr.ml.idx1 -(hdr.ml.idx2 >> 8w1);
     }
     @hidden action runtimeindex2bmv2l62() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w0].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w0].e;
     }
     @hidden action runtimeindex2bmv2l62_0() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w1].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w1].e;
     }
     @hidden action runtimeindex2bmv2l62_1() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w2].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w2].e;
     }
     @hidden action runtimeindex2bmv2l62_2() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w3].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w3].e;
     }
     @hidden action runtimeindex2bmv2l62_3() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w4].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w4].e;
     }
     @hidden action runtimeindex2bmv2l62_4() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w5].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w5].e;
     }
     @hidden action runtimeindex2bmv2l62_5() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w6].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w6].e;
     }
     @hidden action runtimeindex2bmv2l62_6() {
-        hdr.ethernet.etherType[7:0] = hdr.vector[8w7].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[8w7].e;
     }
     @hidden action runtimeindex2bmv2l62_7() {
-        hdr.ethernet.etherType[7:0] = hsVar;
+        hdr.ethernet.etherType[7 : 0] = hsVar;
     }
     @hidden action runtimeindex2bmv2l62_8() {
-        hsiVar_0 = (hdr.ml.idx2 ^ 8w0x7) & 8w0x7;
+        hsiVar_0 =(hdr.ml.idx2 ^ 8w0x7) & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_0() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_1() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_2() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_3() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_4() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_5() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_6() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_7() {
         hsiVar_2 = hdr.vector[8w0].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_8() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_9() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_10() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_11() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_12() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_13() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_14() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_15() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_16() {
         hsiVar_3 = hdr.vector[8w1].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_17() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_18() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_19() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_20() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_21() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_22() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_23() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_24() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_25() {
         hsiVar_4 = hdr.vector[8w2].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_26() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_27() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_28() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_29() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_30() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_31() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_32() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_33() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_34() {
         hsiVar_5 = hdr.vector[8w3].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_35() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_36() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_37() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_38() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_39() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_40() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_41() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_42() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_43() {
         hsiVar_6 = hdr.vector[8w4].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_44() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_45() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_46() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_47() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_48() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_49() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_50() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_51() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_52() {
         hsiVar_7 = hdr.vector[8w5].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_53() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_54() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_55() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_56() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_57() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_58() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_59() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_60() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_61() {
         hsiVar_8 = hdr.vector[8w6].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_62() {
-        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w0].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_63() {
-        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w1].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_64() {
-        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w2].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_65() {
-        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w3].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_66() {
-        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w4].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_67() {
-        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w5].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_68() {
-        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w6].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_69() {
-        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47:40];
+        hdr.vector[8w7].e = hdr.ethernet.dstAddr[47 : 40];
     }
     @hidden action runtimeindex2bmv2l67_70() {
         hsiVar_9 = hdr.vector[8w7].e & 8w0x7;
     }
     @hidden action runtimeindex2bmv2l67_71() {
-        hsiVar_1 = hdr.ethernet.dstAddr[39:32] & 8w0x7;
+        hsiVar_1 = hdr.ethernet.dstAddr[39 : 32] & 8w0x7;
     }
     @hidden table tbl_runtimeindex2bmv2l59 {
         actions = {
@@ -1096,17 +1096,17 @@ control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ml_hdr_t>(hdr.ml);
-        packet.emit<vec_e_t>(hdr.vector[0]);
-        packet.emit<vec_e_t>(hdr.vector[1]);
-        packet.emit<vec_e_t>(hdr.vector[2]);
-        packet.emit<vec_e_t>(hdr.vector[3]);
-        packet.emit<vec_e_t>(hdr.vector[4]);
-        packet.emit<vec_e_t>(hdr.vector[5]);
-        packet.emit<vec_e_t>(hdr.vector[6]);
-        packet.emit<vec_e_t>(hdr.vector[7]);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ml_hdr_t >(hdr.ml);
+        packet.emit < vec_e_t >(hdr.vector[0]);
+        packet.emit < vec_e_t >(hdr.vector[1]);
+        packet.emit < vec_e_t >(hdr.vector[2]);
+        packet.emit < vec_e_t >(hdr.vector[3]);
+        packet.emit < vec_e_t >(hdr.vector[4]);
+        packet.emit < vec_e_t >(hdr.vector[5]);
+        packet.emit < vec_e_t >(hdr.vector[6]);
+        packet.emit < vec_e_t >(hdr.vector[7]);
     }
 }
 
-V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata_t >(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;

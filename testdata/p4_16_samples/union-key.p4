@@ -24,12 +24,15 @@ struct Headers {
 }
 
 control c(in Headers h) {
-    action a() {}
+    action a() {
+    }
     table t {
         key = {
-            h.u.h1.x: exact;
+            h.u.h1.x : exact;
         }
-        actions = { a; }
+        actions = {
+            a;
+        }
     }
     apply {
         t.apply();

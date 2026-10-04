@@ -3,18 +3,18 @@ control ctrl(out bit<32> c) {
     @name("ctrl.e") action e() {
         hasExited = true;
     }
-    @hidden action exit2l22() {
+    @hidden action exit2l19() {
         hasExited = false;
         c = 32w2;
     }
-    @hidden action exit2l32() {
+    @hidden action exit2l29() {
         c = 32w5;
     }
-    @hidden table tbl_exit2l22 {
+    @hidden table tbl_exit2l19 {
         actions = {
-            exit2l22();
+            exit2l19();
         }
-        const default_action = exit2l22();
+        const default_action = exit2l19();
     }
     @hidden table tbl_e {
         actions = {
@@ -22,19 +22,19 @@ control ctrl(out bit<32> c) {
         }
         const default_action = e();
     }
-    @hidden table tbl_exit2l32 {
+    @hidden table tbl_exit2l29 {
         actions = {
-            exit2l32();
+            exit2l29();
         }
-        const default_action = exit2l32();
+        const default_action = exit2l29();
     }
     apply {
-        tbl_exit2l22.apply();
+        tbl_exit2l19.apply();
         tbl_e.apply();
         if (hasExited) {
             ;
         } else {
-            tbl_exit2l32.apply();
+            tbl_exit2l29.apply();
         }
     }
 }

@@ -14,10 +14,13 @@ header foo_t {
 struct H {
     foo_t foo;
 };
-struct M { };
+struct M {
+};
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }
 
 control Aux(inout H hdr, inout M meta) {
@@ -31,7 +34,10 @@ control Aux(inout H hdr, inout M meta) {
     }
 
     table z {
-        actions = { x; y; }
+        actions = {
+            x;
+            y;
+        }
     }
 
     apply {
@@ -47,21 +53,24 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 }
 
 control EgressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out pk, in H hdr) {
-    apply { }
+    apply {
+    }
 }
 
 control VerifyChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(),
          ComputeChecksumI(), DeparserI()) main;

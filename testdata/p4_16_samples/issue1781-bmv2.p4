@@ -8,10 +8,10 @@
 #include <core.p4>
 #include <v1model.p4>
 
-
-struct headers { }
-struct metadata { }
-
+struct headers {
+}
+struct metadata {
+}
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
@@ -19,11 +19,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-
 bit<32> test_func() {
     return 1;
 }
-
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action update_value(out bit<32> value) {
@@ -37,26 +35,25 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-
 control VerifyChecksumImpl(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 control EgressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
-
 
 control ComputeChecksumImpl(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 control DeparserImpl(packet_out packet, in headers hdr) {
-    apply { }
+    apply {
+    }
 }
-
 
 V1Switch(
     ParserImpl(),

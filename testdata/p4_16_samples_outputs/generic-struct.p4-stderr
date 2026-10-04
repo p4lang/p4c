@@ -1,15 +1,15 @@
 generic-struct.p4(36): [--Wwarn=unused] warning: 'bz' is unused
-const Header<bit<16>> bz = {
-                      ^^
+const Header < bit<16 >> bz = {
+                         ^^
 generic-struct.p4(74): [--Wwarn=unused] warning: 'g' is unused
-const GH<bit<32>> g = { data = 0 };
-                  ^
+const GH < bit<32 >> g = { data = 0 };
+                     ^
 generic-struct.p4(75): [--Wwarn=unused] warning: 'g1' is unused
-const GH<S> g1 = { data = { b = 0 } };
-            ^^
+const GH <S> g1 = { data = { b = 0 } };
+             ^^
 generic-struct.p4(79): [--Wwarn=unused] warning: 'h4' is unused
-const H3<S> h4 = {
-            ^^
+const H3 < S > h4 = {
+               ^^
 generic-struct.p4(94): [--Wwarn=unused] warning: 'h5' is unused
-        H3<S> h5;
-              ^^
+        H3 < S > h5;
+                 ^^

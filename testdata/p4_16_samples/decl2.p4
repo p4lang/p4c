@@ -14,7 +14,7 @@ control p()
         {
             bit<1> x_0;
             x_0 = x;
-            z = (x & x_0);
+            z =(x & x_0);
             y = z;
         }
     }

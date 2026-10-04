@@ -9,38 +9,38 @@ header ethernet_t {
 }
 
 header H {
-    bool   a;
+    bool a;
     bit<1> b;
     int<1> c;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue3225l31() {
-        h.h.b = (bit<1>)h.h.a + (bit<1>)h.h.c;
+    @hidden action issue3225l32() {
+        h.h.b =(bit<1>) h.h.a +(bit<1>) h.h.c;
     }
-    @hidden table tbl_issue3225l31 {
+    @hidden table tbl_issue3225l32 {
         actions = {
-            issue3225l31();
+            issue3225l32();
         }
-        const default_action = issue3225l31();
+        const default_action = issue3225l32();
     }
     apply {
-        tbl_issue3225l31.apply();
+        tbl_issue3225l32.apply();
     }
 }
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -62,9 +62,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

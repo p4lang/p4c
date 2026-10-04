@@ -18,15 +18,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -37,10 +37,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -59,28 +59,28 @@ struct headers {
     @name("ethernet")
     ethernet_t ethernet;
     @name("ipv4")
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
     @name("tcp")
-    tcp_t      tcp;
+    tcp_t tcp;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     @name("ParserImpl.parse_ipv4") state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            8w6: parse_tcp;
-            default: accept;
+        packet.extract < ipv4_t >(hdr.ipv4);
+        transition select (hdr.ipv4.protocol) {
+            8w6 : parse_tcp;
+            default : accept;
         }
     }
     @name("ParserImpl.parse_tcp") state parse_tcp {
-        packet.extract<tcp_t>(hdr.tcp);
+        packet.extract < tcp_t >(hdr.tcp);
         transition accept;
     }
     @name("ParserImpl.start") state start {
@@ -104,7 +104,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             NoAction_2();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
+            standard_metadata.egress_port : exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction_2();
@@ -117,7 +117,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 struct tuple_0 {
     bit<32> f0;
     bit<32> f1;
-    bit<8>  f2;
+    bit<8> f2;
     bit<16> f3;
     bit<16> f4;
     bit<16> f5;
@@ -126,7 +126,7 @@ struct tuple_0 {
 struct tuple_1 {
     bit<32> f0;
     bit<32> f1;
-    bit<8>  f2;
+    bit<8> f2;
     bit<16> f3;
     bit<16> f4;
 }
@@ -142,8 +142,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @name("ingress.flowlet_id") register<bit<16>>(32w8192) flowlet_id_0;
-    @name("ingress.flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_0;
+    @name("ingress.flowlet_id") register < bit<16 >>(32w8192) flowlet_id_0;
+    @name("ingress.flowlet_lasttime") register <bit<32 >>(32w8192) flowlet_lasttime_0;
     @name("ingress._drop") action _drop_2() {
         mark_to_drop(standard_metadata);
     }
@@ -154,7 +154,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name("ingress.set_ecmp_select") action set_ecmp_select(@name("ecmp_base") bit<8> ecmp_base, @name("ecmp_count") bit<8> ecmp_count) {
-        hash<bit<14>, bit<10>, tuple_0, bit<20>>(meta._ingress_metadata_ecmp_offset4, HashAlgorithm.crc16, (bit<10>)ecmp_base, (tuple_0){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = hdr.ipv4.protocol,f3 = hdr.tcp.srcPort,f4 = hdr.tcp.dstPort,f5 = meta._ingress_metadata_flowlet_id2}, (bit<20>)ecmp_count);
+        hash < bit<14>, bit<10>, tuple_0, bit<20 >>(meta._ingress_metadata_ecmp_offset4, HashAlgorithm.crc16, (bit<10>)ecmp_base, (tuple_0){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = hdr.ipv4.protocol,f3 = hdr.tcp.srcPort,f4 = hdr.tcp.dstPort,f5 = meta._ingress_metadata_flowlet_id2}, (bit<20>)ecmp_count);
     }
     @name("ingress.set_nhop") action set_nhop(@name("nhop_ipv4") bit<32> nhop_ipv4_1, @name("port") bit<9> port) {
         meta._ingress_metadata_nhop_ipv45 = nhop_ipv4_1;
@@ -162,11 +162,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("ingress.lookup_flowlet_map") action lookup_flowlet_map() {
-        hash<bit<13>, bit<13>, tuple_1, bit<26>>(meta._ingress_metadata_flowlet_map_index1, HashAlgorithm.crc16, 13w0, (tuple_1){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = hdr.ipv4.protocol,f3 = hdr.tcp.srcPort,f4 = hdr.tcp.dstPort}, 26w13);
+        hash < bit<13>, bit<13>, tuple_1, bit<26 >>(meta._ingress_metadata_flowlet_map_index1, HashAlgorithm.crc16, 13w0, (tuple_1){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = hdr.ipv4.protocol,f3 = hdr.tcp.srcPort,f4 = hdr.tcp.dstPort}, 26w13);
         flowlet_id_0.read(meta._ingress_metadata_flowlet_id2, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
-        meta._ingress_metadata_flow_ipg0 = (bit<32>)standard_metadata.ingress_global_timestamp;
+        meta._ingress_metadata_flow_ipg0 =(bit<32>) standard_metadata.ingress_global_timestamp;
         flowlet_lasttime_0.read(meta._ingress_metadata_flowlet_lasttime3, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
-        meta._ingress_metadata_flow_ipg0 = (bit<32>)standard_metadata.ingress_global_timestamp - meta._ingress_metadata_flowlet_lasttime3;
+        meta._ingress_metadata_flow_ipg0 =(bit<32>) standard_metadata.ingress_global_timestamp - meta._ingress_metadata_flowlet_lasttime3;
         flowlet_lasttime_0.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, (bit<32>)standard_metadata.ingress_global_timestamp);
     }
     @name("ingress.set_dmac") action set_dmac(@name("dmac") bit<48> dmac) {
@@ -183,7 +183,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction_3();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr : lpm @name("hdr.ipv4.dstAddr");
         }
         size = 1024;
         default_action = NoAction_3();
@@ -195,7 +195,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction_4();
         }
         key = {
-            meta._ingress_metadata_ecmp_offset4: exact @name("meta.ingress_metadata.ecmp_offset");
+            meta._ingress_metadata_ecmp_offset4 : exact @name("meta.ingress_metadata.ecmp_offset");
         }
         size = 16384;
         default_action = NoAction_4();
@@ -214,7 +214,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction_6();
         }
         key = {
-            meta._ingress_metadata_nhop_ipv45: exact @name("meta.ingress_metadata.nhop_ipv4");
+            meta._ingress_metadata_nhop_ipv45 : exact @name("meta.ingress_metadata.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction_6();
@@ -241,36 +241,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
 }
 
 struct tuple_2 {
-    bit<4>  f0;
-    bit<4>  f1;
-    bit<8>  f2;
+    bit<4> f0;
+    bit<4> f1;
+    bit<8> f2;
     bit<16> f3;
     bit<16> f4;
-    bit<3>  f5;
+    bit<3> f5;
     bit<13> f6;
-    bit<8>  f7;
-    bit<8>  f8;
+    bit<8> f7;
+    bit<8> f8;
     bit<32> f9;
     bit<32> f10;
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple_2, bit<16>>(hdr.ipv4.isValid(), (tuple_2){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum < tuple_2, bit<16 >>(hdr.ipv4.isValid(), (tuple_2){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_2, bit<16>>(hdr.ipv4.isValid(), (tuple_2){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum < tuple_2, bit<16 >>(hdr.ipv4.isValid(), (tuple_2){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

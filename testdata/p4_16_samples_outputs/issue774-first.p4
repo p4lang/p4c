@@ -6,11 +6,11 @@ header Header {
 
 parser p0(packet_in p, out Header h) {
     state start {
-        p.extract<Header>(_);
+        p.extract < Header >(_);
         transition next;
     }
     state next {
-        p.extract<Header>(h);
+        p.extract < Header >(h);
         transition accept;
     }
 }

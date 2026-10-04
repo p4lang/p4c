@@ -7,7 +7,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_h {
     EthernetAddress dst_addr;
     EthernetAddress src_addr;
-    etype_t         ether_type;
+    etype_t ether_type;
 }
 
 struct headers_t {
@@ -38,8 +38,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
     }
     table t1 {
         key = {
-            hdr.ethernet.src_addr  : exact;
-            hdr.ethernet.ether_type: ternary;
+            hdr.ethernet.src_addr : exact;
+            hdr.ethernet.ether_type : ternary;
         }
         actions = {
             a;
@@ -49,12 +49,12 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         largest_priority_wins = true;
         priority_delta = 10;
         entries = {
-                        priority=12: (0x1, 0x1111 &&& 0xf) : a_params(1);
-                        (0x2, 0x1181) : a_params(2);
-                        (0x3, 0x1000 &&& 0xf000) : a_params(3);
-                        (0x4, 0x210 &&& 0x2f0) : a_params(4);
-                        (0x4, 0x10 &&& 0x2f0) : a_params(5);
-                        (0x6, default) : a_params(6);
+            priority = 12 :(0x1, 0x1111 &&& 0xf) : a_params(1);
+            (0x2, 0x1181) : a_params(2);
+            (0x3, 0x1000 &&& 0xf000) : a_params(3);
+            (0x4, 0x210 &&& 0x2f0) : a_params(4);
+            (0x4, 0x10 &&& 0x2f0) : a_params(5);
+            (0x6, default) : a_params(6);
         }
     }
     apply {

@@ -23,5 +23,4 @@ control c(inout bit<32> y) {
 
 control cs(inout bit<32> arg);
 package top(cs _ctrl);
-
 top(c()) main;

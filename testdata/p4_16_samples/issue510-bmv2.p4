@@ -37,7 +37,8 @@ control MyVerifyChecksum(
     inout my_headers_t   hdr,
     inout my_metadata_t  meta)
 {
-    apply {     }
+    apply {
+    }
 }
 
 control MyIngress(
@@ -47,7 +48,7 @@ control MyIngress(
 {
     apply {
         if (meta.parser_error == error.NoMatch)
-            hdr.s.setInvalid();
+        hdr.s.setInvalid();
     }
 }
 
@@ -55,14 +56,16 @@ control MyEgress(
     inout my_headers_t        hdr,
     inout my_metadata_t       meta,
     inout standard_metadata_t standard_metadata) {
-    apply {    }
+    apply {
+    }
 }
 
 control MyComputeChecksum(
     inout my_headers_t  hdr,
     inout my_metadata_t meta)
 {
-    apply {   }
+    apply {
+    }
 }
 
 control MyDeparser(

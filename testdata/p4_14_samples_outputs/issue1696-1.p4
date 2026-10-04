@@ -27,9 +27,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         packet.extract(hdr.stack[0]);
-        transition select(hdr.stack[0].f) {
-            16w0xffff: p1;
-            default: p2;
+        transition select (hdr.stack[0].f) {
+            16w0xffff : p1;
+            default : p2;
         }
     }
 }

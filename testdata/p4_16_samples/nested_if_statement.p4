@@ -9,20 +9,20 @@ typedef bit<32> ip4Addr_t;
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -31,8 +31,8 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t   ethernet;
-    ipv4_t       ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 parser MyParser(packet_in packet,
@@ -46,22 +46,23 @@ parser MyParser(packet_in packet,
 
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            TYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            default : accept;
         }
     }
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control MyIngress(inout headers hdr,
@@ -83,13 +84,13 @@ control MyIngress(inout headers hdr,
         c2 = hdr.ipv4.identification > 16w2;
         c3 = hdr.ipv4.identification > 16w3;
 
-        if(c){
+        if (c) {
             x = 0;
-        } else if(c1){
+        } else if (c1) {
             x = 1;
-        } else if(c2){
+        } else if (c2) {
             x = 2;
-        } else if (c3){
+        } else if (c3) {
             x = 3;
         } else {
             x = 4;
@@ -98,16 +99,16 @@ control MyIngress(inout headers hdr,
         value = z + x + y;
     }
 
-    action ipv4_forward(){
+    action ipv4_forward() {
         if_testing(hdr.ipv4.totalLen, hdr.ipv4.protocol);
     }
 
-    action drop(){
+    action drop() {
     }
 
     table ipv4_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             ipv4_forward;
@@ -118,7 +119,6 @@ control MyIngress(inout headers hdr,
         default_action = NoAction();
     }
 
-
     apply {
         ipv4_lpm.apply();
     }
@@ -127,7 +127,8 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
@@ -138,7 +139,8 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
-     apply { }
+    apply {
+    }
 }
 
 V1Switch(

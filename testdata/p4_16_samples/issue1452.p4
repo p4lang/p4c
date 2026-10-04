@@ -6,7 +6,6 @@
 
 control c() {
     bit<32> x;
-
     action a(inout bit<32> arg) {
         arg = 1;
         return;
@@ -18,5 +17,4 @@ control c() {
 
 control proto();
 package top(proto p);
-
 top(c()) main;

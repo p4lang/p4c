@@ -8,4 +8,3 @@ parser q() {
         p.apply(_);
     }
 }
-

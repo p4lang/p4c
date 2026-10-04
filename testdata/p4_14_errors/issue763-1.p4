@@ -6,7 +6,7 @@
 
 header_type X {
     fields {
-        x: 32;
+        x : 32;
     }
 }
 
@@ -16,4 +16,5 @@ parser start {
     return ingress;
 }
 
-control ingress {}
+control ingress {
+}

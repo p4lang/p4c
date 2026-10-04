@@ -10,8 +10,8 @@ struct meta_t {
 
 header hdr0_t {
     bit<16> a;
-    bit<8>  b;
-    bit<8>  c;
+    bit<8> b;
+    bit<8> c;
 }
 
 struct metadata {
@@ -26,7 +26,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".p_hdr0") state p_hdr0 {
-        packet.extract<hdr0_t>(hdr.hdr0);
+        packet.extract < hdr0_t >(hdr.hdr0);
         transition accept;
     }
     @name(".start") state start {
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a");
+            hdr.hdr0.a : ternary @name("hdr0.a");
         }
         size = 512;
         default_action = NoAction();
@@ -71,7 +71,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a");
+            hdr.hdr0.a : ternary @name("hdr0.a");
         }
         size = 512;
         default_action = NoAction();
@@ -83,8 +83,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.y: ternary @name("meta.y");
-            meta.meta.z: exact @name("meta.z");
+            meta.meta.y : ternary @name("meta.y");
+            meta.meta.z : exact @name("meta.z");
         }
         size = 512;
         default_action = NoAction();
@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a");
+            hdr.hdr0.a : ternary @name("hdr0.a");
         }
         size = 512;
         default_action = NoAction();
@@ -121,7 +121,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<hdr0_t>(hdr.hdr0);
+        packet.emit < hdr0_t >(hdr.hdr0);
     }
 }
 
@@ -135,4 +135,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

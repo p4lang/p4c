@@ -19,8 +19,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -30,19 +30,19 @@ header ethernet_t {
 
 // IPv4 header _with_ options
 header ipv4_t {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
-    varbit<320>  options;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
+    varbit<320> options;
 }
 
 header tcp_t {
@@ -50,14 +50,14 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum; // Includes Pseudo Hdr + TCP segment (hdr + payload)
     bit<16> urgentPtr;
-    varbit<320>  options;
+    varbit<320> options;
 }
 
 header udp_t {
@@ -68,8 +68,8 @@ header udp_t {
 }
 
 header IPv4_up_to_ihl_only_h {
-    bit<4>       version;
-    bit<4>       ihl;
+    bit<4> version;
+    bit<4> ihl;
 }
 
 header tcp_upto_data_offset_only_h {
@@ -80,33 +80,33 @@ header tcp_upto_data_offset_only_h {
     // dataOffset in TCP hdr uses 4 bits but needs padding.
     // If 4 bits are used for it, p4c-bm2-ss complains the header
     // is not a multiple of 8 bits.
-    bit<4>  dataOffset;
-    bit<4>  dontCare;
+    bit<4> dataOffset;
+    bit<4> dontCare;
 }
 
 struct headers {
-    ethernet_t           ethernet;
-    ipv4_t               ipv4;
-    tcp_t                tcp;
-    udp_t                udp;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
+    tcp_t tcp;
+    udp_t udp;
 }
 
 struct mystruct1_t {
-    bit<4>  a;
-    bit<4>  b;
+    bit<4> a;
+    bit<4> b;
 }
 
 struct metadata {
     mystruct1_t mystruct1;
-    bit<16>     l4Len; // includes TCP hdr len + TCP payload len in bytes.
+    bit<16> l4Len; // includes TCP hdr len + TCP payload len in bytes.
 }
 
-typedef tuple<
-    bit<4>,
-    bit<4>,
-    bit<8>,
-    varbit<56>
-    > myTuple1;
+typedef tuple <
+bit<4>,
+bit<4>,
+bit<8>,
+varbit<56>
+> myTuple1;
 
 // Declare user-defined errors that may be signaled during parsing
 error {
@@ -123,9 +123,9 @@ parser parserI(packet_in pkt,
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -142,11 +142,11 @@ parser parserI(packet_in pkt,
                       - 20)));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
-        meta.l4Len = hdr.ipv4.totalLen - (bit<16>)(hdr.ipv4.ihl)*4;
+        meta.l4Len = hdr.ipv4.totalLen -(bit<16>)(hdr.ipv4.ihl) * 4;
         transition select (hdr.ipv4.protocol) {
-            6: parse_tcp;
-            17: parse_udp;
-            default: accept;
+            6 : parse_tcp;
+            17 : parse_udp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -189,7 +189,10 @@ control cIngress(inout headers hdr,
         key = {
             hdr.tcp.dstPort : exact;
         }
-        actions = { foot; NoAction; }
+        actions = {
+            foot;
+            NoAction;
+        }
         const default_action = NoAction;
 
         const entries = {
@@ -200,7 +203,10 @@ control cIngress(inout headers hdr,
         key = {
             hdr.udp.dstPort : exact;
         }
-        actions = { foou; NoAction; }
+        actions = {
+            foou;
+            NoAction;
+        }
         const default_action = NoAction;
 
         const entries = {
@@ -341,7 +347,7 @@ control DeparserI(packet_out packet,
     }
 }
 
-V1Switch<headers, metadata>(parserI(),
+V1Switch < headers, metadata >(parserI(),
                             vc(),
                             cIngress(),
                             cEgress(),

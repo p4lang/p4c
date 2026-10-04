@@ -27,10 +27,10 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     apply {
         n = 0;
         for (bit<8> i = 0; i < 8; i = i + 1) {
-            i = i + 1;
-            n = n + 1;
+        i = i + 1;
+        n = n + 1;
         }
-        hdr.ethernet.srcAddr[7:0] = n;
+        hdr.ethernet.srcAddr[7 : 0] = n;
         stdmeta.egress_spec = 1;
     }
 }

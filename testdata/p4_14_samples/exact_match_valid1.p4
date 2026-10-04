@@ -22,7 +22,7 @@ header data_t data2;
 
 parser start {
     extract(data);
-    return select(data.f2) {
+    return select (data.f2) {
     0xf0000000 mask 0xf0000000 : parse_data2;
     default : ingress;
     }
@@ -32,7 +32,8 @@ parser parse_data2 {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     modify_field(data.b1, val);
     modify_field(standard_metadata.egress_spec, port);

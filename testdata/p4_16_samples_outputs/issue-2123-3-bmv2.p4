@@ -33,23 +33,23 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    h0_t       h0;
-    h1_t       h1;
-    h2_t       h2;
-    h3_t       h3;
-    h4_t       h4;
+    h0_t h0;
+    h1_t h1;
+    h2_t h2;
+    h3_t h3;
+    h4_t h4;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.srcAddr[7:0], hdr.ethernet.etherType) {
-            (0x61 .. 0x67, 0x800 .. 0x806): parse_h0;
-            (0x61 .. 0x67, 0x901 .. 0x902): parse_h1;
-            (0x77 .. 0x7b, 0x801 .. 0x806): parse_h2;
-            (0x77 .. 0x7b, 0xa00 .. 0xaaa): parse_h3;
-            (default, 0xa00 .. 0xaaa): parse_h4;
-            default: accept;
+        transition select (hdr.ethernet.srcAddr[7 : 0], hdr.ethernet.etherType) {
+            (0x61 .. 0x67, 0x800 .. 0x806) : parse_h0;
+            (0x61 .. 0x67, 0x901 .. 0x902) : parse_h1;
+            (0x77 .. 0x7b, 0x801 .. 0x806) : parse_h2;
+            (0x77 .. 0x7b, 0xa00 .. 0xaaa) : parse_h3;
+            (default, 0xa00 .. 0xaaa) : parse_h4;
+            default : accept;
         }
     }
     state parse_h0 {
@@ -76,11 +76,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        hdr.ethernet.dstAddr[44:44] = (hdr.h4.isValid() ? 1w1 : 0);
-        hdr.ethernet.dstAddr[43:43] = (hdr.h3.isValid() ? 1w1 : 0);
-        hdr.ethernet.dstAddr[42:42] = (hdr.h2.isValid() ? 1w1 : 0);
-        hdr.ethernet.dstAddr[41:41] = (hdr.h1.isValid() ? 1w1 : 0);
-        hdr.ethernet.dstAddr[40:40] = (hdr.h0.isValid() ? 1w1 : 0);
+        hdr.ethernet.dstAddr[44 : 44] =(hdr.h4.isValid() ? 1w1 : 0);
+        hdr.ethernet.dstAddr[43 : 43] =(hdr.h3.isValid() ? 1w1 : 0);
+        hdr.ethernet.dstAddr[42 : 42] =(hdr.h2.isValid() ? 1w1 : 0);
+        hdr.ethernet.dstAddr[41 : 41] =(hdr.h1.isValid() ? 1w1 : 0);
+        hdr.ethernet.dstAddr[40 : 40] =(hdr.h0.isValid() ? 1w1 : 0);
         standard_metadata.egress_spec = 3;
     }
 }

@@ -7,8 +7,8 @@
 
 header_type ethernet_t {
     fields {
-        dstAddr   : 48;
-        srcAddr   : 48;
+        dstAddr : 48;
+        srcAddr : 48;
         ethertype : 16;
     }
 }
@@ -34,15 +34,15 @@ parser start {
 
 header_type ingress_metadata_t {
     fields {
-        drop        : 1;
+        drop : 1;
         egress_port : 8;
         f1 : 8;
         f2 : 16;
         f3 : 32;
         f4 : 64;
-         
+
     }
-} 
+}
 
 metadata ingress_metadata_t ing_metadata;
 

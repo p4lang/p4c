@@ -21,7 +21,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
     }
     @name("red") table foo_table {
         key = {
-            smeta.ingress_port: exact @name("green");
+            smeta.ingress_port : exact @name("green");
         }
         actions = {
             @name("yellow") foo;

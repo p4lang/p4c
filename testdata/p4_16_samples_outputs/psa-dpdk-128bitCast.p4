@@ -28,7 +28,7 @@ parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t 
 control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     bit<128> flg;
     action macswp() {
-        if ((bit<64>)flg == 0x2) {
+        if ((bit<64>) flg == 0x2) {
             m.addr = hdr.ethernet.dst_addr;
             hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
             hdr.ethernet.src_addr = m.addr;
@@ -43,7 +43,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         size = 1000000;
     }
     apply {
-        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 1);
+        d.egress_port =(PortId_t)((bit<32>) c.ingress_port ^ 1);
         stub.apply();
     }
 }

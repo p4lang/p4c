@@ -5,4 +5,3 @@ control c(inout bit<8> x) {
         x = x | 8w1;
     }
 }
-

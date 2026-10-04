@@ -19,7 +19,7 @@ limitations under the License.
 extern void extern_func(out bit<32> d, bit<32> s);
 
 header hdr {
-  bit<32> a;
+    bit<32> a;
 }
 
 control compute(inout hdr h)

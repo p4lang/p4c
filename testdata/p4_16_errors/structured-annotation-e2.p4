@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@badType[a = { 2, 3 }]
-control c() {
-    apply {}
+@badType[a={ 2, 3 }] control c() {
+    apply {
+    }
 }

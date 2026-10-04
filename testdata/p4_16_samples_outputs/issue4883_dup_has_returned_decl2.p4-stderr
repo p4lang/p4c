@@ -1,4 +1,4 @@
-issue4883_dup_has_returned_decl2.p4(40): [--Wwarn=uninitialized-use] warning: s.f may be uninitialized
+issue4883_dup_has_returned_decl2.p4(42): [--Wwarn=uninitialized-use] warning: s.f may be uninitialized
         C.apply(s);
                 ^
 issue4883_dup_has_returned_decl2.p4(17): [--Wwarn=uninitialized-use] warning: s.f may be uninitialized

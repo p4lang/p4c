@@ -27,7 +27,7 @@ parser myp(packet_in pkt, out headers_t hdrs, inout meta_t m) {
     @name("myp.tmp") bit<8> tmp;
     state start {
         tmp = m.idx;
-        pkt.extract<h1>(hdrs.hus[tmp].x);
+        pkt.extract < h1 >(hdrs.hus[tmp].x);
         transition accept;
     }
 }

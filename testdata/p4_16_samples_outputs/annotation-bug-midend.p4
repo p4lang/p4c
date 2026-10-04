@@ -4,7 +4,7 @@ struct standard_metadata_t {
 }
 
 header ipv4_option_timestamp_t {
-    bit<8>      len;
+    bit<8> len;
     @length((bit<32>)len)
     varbit<304> data;
 }
@@ -17,21 +17,21 @@ struct tuple_0 {
     ipv4_option_timestamp_t field_12;
 }
 
-extern bit<16> get<T>(in T data);
+extern bit<16> get < T >(in T data);
 control cc() {
     ipv4_option_timestamp_t hdr_0_ipv4_option_timestamp;
-    @hidden action annotationbug28() {
+    @hidden action annotationbug29() {
         hdr_0_ipv4_option_timestamp.setInvalid();
-        get<headers>((headers){ipv4_option_timestamp = hdr_0_ipv4_option_timestamp});
+        get < headers >((headers){ipv4_option_timestamp = hdr_0_ipv4_option_timestamp});
     }
-    @hidden table tbl_annotationbug28 {
+    @hidden table tbl_annotationbug29 {
         actions = {
-            annotationbug28();
+            annotationbug29();
         }
-        const default_action = annotationbug28();
+        const default_action = annotationbug29();
     }
     apply {
-        tbl_annotationbug28.apply();
+        tbl_annotationbug29.apply();
     }
 }
 

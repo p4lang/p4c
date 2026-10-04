@@ -4,6 +4,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-extern I { I(); }
+extern I {
+    I();
+}
 
 const I x = I(); // illegal constants of extern types

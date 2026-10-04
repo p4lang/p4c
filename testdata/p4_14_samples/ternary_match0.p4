@@ -25,7 +25,8 @@ parser start {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 
 table test1 {
     reads {

@@ -48,9 +48,9 @@ action _nop() {
 }
 
 register my_register {
-    width: 32;
-    static: m_table;
-    instance_count: 16384;
+    width : 32;
+    static : m_table;
+    instance_count : 16384;
 }
 
 action m_action(register_idx) {
@@ -65,7 +65,8 @@ table m_table {
         ethernet.srcAddr : exact;
     }
     actions {
-        m_action; _nop;
+        m_action;
+        _nop;
     }
     size : 16384;
 }

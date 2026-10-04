@@ -5,8 +5,8 @@
  */
 
 enum bit<8> E {
-  e1 = 1,
-  e2 = 2
+    e1 = 1,
+    e2 = 2
 }
 
 control compute() {

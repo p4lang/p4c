@@ -16,8 +16,8 @@ parser p1(out bit<2> z1)(bit<2> a) {
 
 parser p2(out bit<2> z2)(bit<2> b, bit<2> c) {
     p1(2w0) p1a;
-    p1(b)   p1b;
-    p1(c)   p1c;
+    p1(b) p1b;
+    p1(c) p1c;
 
     state start {
         bit<2> x1;

@@ -31,4 +31,3 @@ control c(in Headers h) {
     apply {
     }
 }
-

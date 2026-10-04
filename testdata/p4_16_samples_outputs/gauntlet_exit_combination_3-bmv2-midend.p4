@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -37,7 +37,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.eth_hdr.eth_type: exact @name("key");
+            h.eth_hdr.eth_type : exact @name("key");
         }
         actions = {
             do_action();
@@ -45,7 +45,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_exit_combination_3bmv2l48() {
+    @hidden action gauntlet_exit_combination_3bmv2l49() {
         hasReturned = true;
     }
     @hidden action act() {
@@ -58,11 +58,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = act();
     }
-    @hidden table tbl_gauntlet_exit_combination_3bmv2l48 {
+    @hidden table tbl_gauntlet_exit_combination_3bmv2l49 {
         actions = {
-            gauntlet_exit_combination_3bmv2l48();
+            gauntlet_exit_combination_3bmv2l49();
         }
-        const default_action = gauntlet_exit_combination_3bmv2l48();
+        const default_action = gauntlet_exit_combination_3bmv2l49();
     }
     @hidden table tbl_do_action {
         actions = {
@@ -73,14 +73,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         tbl_act.apply();
         switch (simple_table_0.apply().action_run) {
-            do_action: {
-                if (hasExited) {
-                    ;
-                } else {
-                    tbl_gauntlet_exit_combination_3bmv2l48.apply();
-                }
+            do_action : {
+            if (hasExited) {
+            ;
+            } else {
+            tbl_gauntlet_exit_combination_3bmv2l49.apply();
             }
-            default: {
+            }
+            default : {
             }
         }
         if (hasExited) {
@@ -110,8 +110,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

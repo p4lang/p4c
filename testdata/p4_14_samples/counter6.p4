@@ -9,7 +9,11 @@
  * Simple program, just a direct mapped RAM
  */
 
-header_type type_t { fields { type : 16; } }
+header_type type_t {
+    fields {
+        type : 16;
+    }
+}
 header_type A_t {
     fields {
         f1 : 32;
@@ -17,7 +21,8 @@ header_type A_t {
         h1 : 16;
         b1 : 8;
         b2 : 8;
-} }
+    }
+}
 header_type B_t {
     fields {
         b1 : 8;
@@ -25,14 +30,15 @@ header_type B_t {
         h1 : 16;
         f1 : 32;
         f2 : 32;
-} }
+    }
+}
 header type_t packet_type;
 header A_t hdrA;
 header B_t hdrB;
 
 parser start {
     extract(packet_type);
-    return select(packet_type.type) {
+    return select (packet_type.type) {
     0xA mask 0xf : parseA;
     0xB mask 0xf : parseB;
     }
@@ -47,9 +53,9 @@ parser parseB {
 }
 
 counter cntDum {
-	type: packets;
-        instance_count: 4096;
-        min_width:64;
+    type : packets;
+    instance_count : 4096;
+    min_width : 64;
 }
 action act(port, idx) {
     modify_field(standard_metadata.egress_spec, port);
@@ -64,7 +70,9 @@ table tabA {
         act;
     }
 }
-control processA { apply(tabA); }
+control processA {
+    apply(tabA);
+}
 
 table tabB {
     reads {
@@ -74,7 +82,9 @@ table tabB {
         act;
     }
 }
-control processB { apply(tabB); }
+control processB {
+    apply(tabB);
+}
 
 control ingress {
     if (valid(hdrA)) {

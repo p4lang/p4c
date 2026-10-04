@@ -40,7 +40,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             a12;
         }
         key = {
-            hdr.hdr1.f1: exact;
+            hdr.hdr1.f1 : exact;
         }
         size = 128;
     }

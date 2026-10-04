@@ -9,30 +9,30 @@
  * Standard ethernet header
  */
 header ethernet_t {
-    @tc_type ("macaddr") bit<48> dstAddr;
-    @tc_type ("macaddr") bit<48> srcAddr;
+    @tc_type("macaddr") bit<48> dstAddr;
+    @tc_type("macaddr") bit<48> srcAddr;
     bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    @tc_type("ipv4") bit<32> srcAddr;
+    @tc_type("ipv4") bit<32> dstAddr;
 }
 
 struct my_ingress_headers_t {
-    ethernet_t   ethernet;
-    ipv4_t       outer;
-    ipv4_t       inner;
+    ethernet_t ethernet;
+    ipv4_t outer;
+    ipv4_t inner;
 }
 
 #define ETHERTYPE_IPV4 0x0800
@@ -43,7 +43,7 @@ struct my_ingress_headers_t {
 struct my_ingress_metadata_t {
     bit<32> src;
     bit<32> dst;
-    bool    push;
+    bool push;
 }
 
 struct empty_metadata_t {
@@ -55,22 +55,22 @@ error {
 
 void ip_ttl_dec(InternetChecksum chk, inout ipv4_t ip)
 {
-      chk.clear();
+    chk.clear();
 
-      chk.set_state(~ip.hdrChecksum);
+    chk.set_state(~ip.hdrChecksum);
 
-      chk.subtract({ ip.ttl, ip.protocol });
+    chk.subtract({ ip.ttl, ip.protocol });
 
-      ip.ttl = ip.ttl - 1;
-      chk.add({ ip.ttl, ip.protocol });
+    ip.ttl = ip.ttl - 1;
+    chk.add({ ip.ttl, ip.protocol });
 
-      ip.hdrChecksum = chk.get();
+    ip.hdrChecksum = chk.get();
 }
 
 void ip_checksum(InternetChecksum chk, inout ipv4_t ip)
 {
-   chk.clear();
-   chk.add({
+    chk.clear();
+    chk.add({
       /* 16-bit word 0 */ ip.version, ip.ihl, ip.diffserv,
       /* 16-bit word 1 */ ip.totalLen,
       /* 16-bit word 2 */ ip.identification,
@@ -80,19 +80,19 @@ void ip_checksum(InternetChecksum chk, inout ipv4_t ip)
       /* 16-bit words 6-7 */ ip.srcAddr,
       /* 16-bit words 8-9 */ ip.dstAddr
    });
-   ip.hdrChecksum = chk.get();
+    ip.hdrChecksum = chk.get();
 }
 
 void ipip_internet_checksum_push(inout my_ingress_headers_t hdr, in my_ingress_metadata_t meta)
 {
-   hdr.inner = hdr.outer;
-   hdr.outer.srcAddr = meta.src;
-   hdr.outer.dstAddr = meta.dst;
-   hdr.outer.ttl = 64;
-   hdr.outer.protocol = 4; /* IPIP */
+    hdr.inner = hdr.outer;
+    hdr.outer.srcAddr = meta.src;
+    hdr.outer.dstAddr = meta.dst;
+    hdr.outer.ttl = 64;
+    hdr.outer.protocol = 4; /* IPIP */
    /* Assume MTU can accomodate +20 bytes */
    hdr.outer.totalLen = hdr.outer.totalLen + 20;
-   hdr.outer.hdrChecksum = 0;
+    hdr.outer.hdrChecksum = 0;
 }
 
 
@@ -110,17 +110,17 @@ parser Ingress_Parser(
 
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_IPV4: parse_ipv4;
-            default: reject;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4 : parse_ipv4;
+            default : reject;
         }
     }
 
     state parse_ipv4 {
         pkt.extract(hdr.outer);
-        transition select(hdr.outer.protocol) {
-            IPPROTO_IPV4: parse_ipv4_inner;
-            default: accept;
+        transition select (hdr.outer.protocol) {
+            IPPROTO_IPV4 : parse_ipv4_inner;
+            default : accept;
         }
     }
 
@@ -140,42 +140,42 @@ control ingress(
 )
 {
     action set_ipip_csum(@tc_type("ipv4") bit<32> src, @tc_type("ipv4") bit<32> dst, @tc_type("dev") PortId_t port) {
-      meta.src = src;
-      meta.dst = dst;
-      meta.push = true;
-      send_to_port(port);
-   }
+        meta.src = src;
+        meta.dst = dst;
+        meta.push = true;
+        send_to_port(port);
+    }
 
-   action set_nh(@tc_type("macaddr") bit<48> dmac, @tc_type("dev") PortId_t port) {
-      hdr.ethernet.dstAddr = dmac;
-      send_to_port(port);
-   }
+    action set_nh(@tc_type("macaddr") bit<48> dmac, @tc_type("dev") PortId_t port) {
+        hdr.ethernet.dstAddr = dmac;
+        send_to_port(port);
+    }
 
-   action drop() {
-      drop_packet();
-   }
+    action drop() {
+        drop_packet();
+    }
 
-   table fwd_table {
-      key = {
-         istd.input_port : exact @tc_type("dev") @name("port");
-      }
-      actions = {
-         set_ipip_csum;
-         set_nh;
-         drop;
-      }
-      default_action = drop;
-   }
+    table fwd_table {
+        key = {
+            istd.input_port : exact @tc_type("dev") @name("port");
+        }
+        actions = {
+            set_ipip_csum;
+            set_nh;
+            drop;
+        }
+        default_action = drop;
+    }
 
-   apply {
-      if (hdr.outer.isValid()) { /* applies to both ipip_internet_checksum and plain ip */
+    apply {
+        if (hdr.outer.isValid()) { /* applies to both ipip_internet_checksum and plain ip */
          fwd_table.apply(); /* lookup based on incoming netdev */
          if (hdr.inner.isValid()) { /* incoming packet ipip_internet_checksum */
             /* Pop the ipip_internet_checksum header by invalidating outer header */
             hdr.outer.setInvalid();
-         }
-      }
-   }
+            }
+        }
+    }
 }
 
 /*********************  D E P A R S E R  ************************/
@@ -190,12 +190,12 @@ control Ingress_Deparser(
 
     apply {
         pkt.emit(hdr.ethernet);
-	if (meta.push && hdr.outer.isValid()) {
+        if (meta.push && hdr.outer.isValid()) {
                /* Push the ipip_internet_checksum header */
                ipip_internet_checksum_push(hdr, meta);
-               ip_checksum(chk, hdr.outer);
-               ip_ttl_dec(chk, hdr.inner);
-	}
+            ip_checksum(chk, hdr.outer);
+            ip_ttl_dec(chk, hdr.inner);
+        }
         pkt.emit(hdr.outer);
         pkt.emit(hdr.inner);
     }

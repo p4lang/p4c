@@ -10,15 +10,15 @@ header Ethernet {
 }
 
 header IPv4 {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -34,15 +34,15 @@ header_union IP {
 
 struct Parsed_packet {
     Ethernet ethernet;
-    IP       ip;
+    IP ip;
 }
 
 parser top(packet_in b, out Parsed_packet p) {
     state start {
         b.extract(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
+        transition select (p.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
         }
     }
     state parse_ipv4 {
@@ -65,4 +65,3 @@ control Automatic(packet_out b, in Parsed_packet p) {
         b.emit(p.ip.ipv4);
     }
 }
-

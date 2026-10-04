@@ -25,7 +25,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -38,7 +38,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".table0_actionlist") action table0_actionlist(bit<1> do_goto_table, bit<8> goto_table_id) {
         meta.metadata_global.do_goto_table = do_goto_table;
-        meta.metadata_global.goto_table_id = (do_goto_table != 1w0 ? goto_table_id : meta.metadata_global.goto_table_id);
+        meta.metadata_global.goto_table_id =(do_goto_table != 1w0 ? goto_table_id : meta.metadata_global.goto_table_id);
     }
     @name(".table0") table table0 {
         actions = {
@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.etherType: ternary @name("ethernet.etherType");
+            hdr.ethernet.etherType : ternary @name("ethernet.etherType");
         }
         size = 2000;
         default_action = NoAction();
@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -74,4 +74,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

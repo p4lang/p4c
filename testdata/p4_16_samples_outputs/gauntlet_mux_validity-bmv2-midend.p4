@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -22,8 +22,8 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -39,14 +39,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         h.eth_hdr.eth_type = tmp;
     }
-    @hidden action gauntlet_mux_validitybmv2l43() {
+    @hidden action gauntlet_mux_validitybmv2l44() {
         b_0 = false;
     }
-    @hidden table tbl_gauntlet_mux_validitybmv2l43 {
+    @hidden table tbl_gauntlet_mux_validitybmv2l44 {
         actions = {
-            gauntlet_mux_validitybmv2l43();
+            gauntlet_mux_validitybmv2l44();
         }
-        const default_action = gauntlet_mux_validitybmv2l43();
+        const default_action = gauntlet_mux_validitybmv2l44();
     }
     @hidden table tbl_dummy {
         actions = {
@@ -55,7 +55,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = dummy_2();
     }
     apply {
-        tbl_gauntlet_mux_validitybmv2l43.apply();
+        tbl_gauntlet_mux_validitybmv2l44.apply();
         tbl_dummy.apply();
     }
 }
@@ -77,9 +77,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

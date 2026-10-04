@@ -15,7 +15,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -24,7 +24,7 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action do_thing(inout bit<8> val_0) {
-        h.h.a = (h.h.b >= 4 ? h.h.b : h.h.b + 1);
+        h.h.a =(h.h.b >= 4 ? h.h.b : h.h.b + 1);
     }
     apply {
         do_thing(h.h.b);

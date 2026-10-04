@@ -20,11 +20,11 @@ control c() {
         bit<8> y = 0;
         // the crash happens when reassigning c while referencing b
         // removing either the slice or the bor operation will fix the crash
-        y = (x < 4 ? 8w2 : 8w1)[7:0] | 8w8;
+        y =(x < 4 ? 8w2 : 8w1)[7 : 0] | 8w8;
     }
 }
 
-control e<T>();
-package top<T>(e<T> e);
+control e < T >();
+package top < T >(e<T> e);
 
-top<_>(c()) main;
+top < _ >(c()) main;

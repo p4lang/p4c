@@ -24,8 +24,11 @@ parser start {
     return ingress;
 }
 
-action noop() { }
-action setf4() { modify_field(data.f4, 0x70a50); }
+action noop() {
+}
+action setf4() {
+    modify_field(data.f4, 0x70a50);
+}
 
 table test1 {
     reads {

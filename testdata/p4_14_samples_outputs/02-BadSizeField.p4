@@ -15,7 +15,7 @@ header ethernet_t {
 
 header vag_t {
     bit<33> f1;
-    bit<7>  f2;
+    bit<7> f2;
 }
 
 struct metadata {
@@ -27,7 +27,7 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".vag")
-    vag_t      vag;
+    vag_t vag;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -46,7 +46,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -66,7 +66,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     apply {

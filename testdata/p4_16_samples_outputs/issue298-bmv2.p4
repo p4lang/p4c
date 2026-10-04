@@ -9,20 +9,20 @@ const PortId DROP_PORT = 0xf;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
@@ -44,16 +44,16 @@ struct headers {
     @name("ethernet")
     ethernet_t ethernet;
     @name("ipv4")
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
     @name("udp")
-    udp_t      udp;
+    udp_t udp;
     @name("myhdr")
-    myhdr_t    myhdr;
+    myhdr_t myhdr;
 }
 
 struct ingress_metadata_t {
     bit<16> round;
-    bit<1>  set_drop;
+    bit<1> set_drop;
 }
 
 struct metadata {
@@ -67,22 +67,22 @@ parser TopParser(packet_in b, out headers p, inout metadata meta, inout standard
     }
     state parse_ethernet {
         b.extract(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: parse_ipv4;
+        transition select (p.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
         }
     }
     state parse_ipv4 {
         b.extract(p.ipv4);
-        transition select(p.ipv4.protocol) {
-            8w0x11: parse_udp;
-            default: accept;
+        transition select (p.ipv4.protocol) {
+            8w0x11 : parse_udp;
+            default : accept;
         }
     }
     state parse_udp {
         b.extract(p.udp);
-        transition select(p.udp.dstPort) {
-            16w0x8888: parse_myhdr;
-            default: accept;
+        transition select (p.udp.dstPort) {
+            16w0x8888 : parse_myhdr;
+            default : accept;
         }
     }
     state parse_myhdr {
@@ -118,7 +118,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     table drop_tbl {
         key = {
-            meta.local_metadata.set_drop: exact;
+            meta.local_metadata.set_drop : exact;
         }
         actions = {
             _drop;
@@ -133,7 +133,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    register<bit<16>>(65536) registerRound;
+    register < bit<16 >>(65536) registerRound;
     action read_round() {
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }

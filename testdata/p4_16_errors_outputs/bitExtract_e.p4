@@ -10,4 +10,3 @@ control p() {
         bit<4> z = dt[7:4];
     }
 }
-

@@ -22,7 +22,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t std_meta) {
     apply {
         bit<8> output;
-        hash<bit<8>, bit<8>, bit<8>, bit<8>>(output, HashAlgorithm.crc16, 8w0, 8w42, 8w255);
+        hash < bit<8>, bit<8>, bit<8>, bit<8 >>(output, HashAlgorithm.crc16, 8w0, 8w42, 8w255);
     }
 }
 
@@ -41,4 +41,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

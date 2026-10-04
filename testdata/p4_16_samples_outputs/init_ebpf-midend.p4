@@ -13,7 +13,7 @@ struct Headers_t {
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<Ethernet>(headers.ethernet);
+        p.extract < Ethernet >(headers.ethernet);
         transition accept;
     }
 }
@@ -26,32 +26,32 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("pipe.tbl") table tbl_0 {
         key = {
-            headers.ethernet.protocol: exact @name("headers.ethernet.protocol");
+            headers.ethernet.protocol : exact @name("headers.ethernet.protocol");
         }
         actions = {
             match();
             NoAction_1();
         }
         const entries = {
-                        16w0x800 : match(true);
-                        16w0xd000 : match(false);
+            16w0x800 : match(true);
+            16w0xd000 : match(false);
         }
         implementation = hash_table(32w64);
         default_action = NoAction_1();
     }
-    @hidden action init_ebpf49() {
+    @hidden action init_ebpf52() {
         pass = true;
     }
-    @hidden table tbl_init_ebpf49 {
+    @hidden table tbl_init_ebpf52 {
         actions = {
-            init_ebpf49();
+            init_ebpf52();
         }
-        const default_action = init_ebpf49();
+        const default_action = init_ebpf52();
     }
     apply {
-        tbl_init_ebpf49.apply();
+        tbl_init_ebpf52.apply();
         tbl_0.apply();
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

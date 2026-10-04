@@ -1,6 +1,9 @@
-bit<8> add(in bit<8> a, in bit<8> b) { return 1; }
-bit<8> add(in bit<8> a, in bit<8> b, in bit<8> c) { return 2; }
-
+bit<8> add(in bit<8> a, in bit<8> b) {
+    return 1;
+}
+bit<8> add(in bit<8> a, in bit<8> b, in bit<8> c) {
+    return 2;
+}
 header hdr_t {
     bit<8> value_1;
     bit<8> value_2;
@@ -22,5 +25,4 @@ control c(inout hdr_t hdr) {
 
 control ctrl(inout hdr_t hdr);
 package top(ctrl _c);
-
 top(c()) main;

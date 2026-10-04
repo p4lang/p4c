@@ -39,4 +39,4 @@ control deparser(packet_out b, in Header_t h) {
     }
 }
 
-V1Switch<Header_t, Meta_t>(p(), c(), ingress(), egress(), c(), deparser()) main;
+V1Switch < Header_t, Meta_t >(p(), c(), ingress(), egress(), c(), deparser()) main;

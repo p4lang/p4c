@@ -27,7 +27,7 @@ control c(out bool b) {
     comp(ignore = 2w1, compare = 16w0) c0;
     comp(ignore = 2w2, compare = 16w1) c1;
     action a(in bit<16> bi, out bit<16> mb) {
-        mb = -bi;
+        mb = - bi;
     }
     apply {
         bit<16> xv = 16w0;

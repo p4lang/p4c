@@ -6,14 +6,14 @@ header data_t {
     bit<32> f1;
     bit<32> f2;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 header extra_t {
     bit<16> h;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 struct metadata {
@@ -21,7 +21,7 @@ struct metadata {
 
 struct headers {
     @name(".data")
-    data_t     data;
+    data_t data;
     @name(".extra")
     extra_t[4] extra;
 }
@@ -29,9 +29,9 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".extra") state extra {
         packet.extract(hdr.extra.next);
-        transition select(hdr.extra.last.b2) {
-            8w0x80 &&& 8w0x80: extra;
-            default: accept;
+        transition select (hdr.extra.last.b2) {
+            8w0x80 &&& 8w0x80 : extra;
+            default : accept;
         }
     }
     @name(".start") state start {
@@ -77,7 +77,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.extra[0].h: ternary;
+            hdr.extra[0].h : ternary;
         }
     }
     @name(".tbl1") table tbl1 {
@@ -86,7 +86,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".tbl2") table tbl2 {
@@ -95,7 +95,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".tbl3") table tbl3 {
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".test1") table test1 {
@@ -113,20 +113,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1 : ternary;
         }
     }
     apply {
         test1.apply();
         switch (ex1.apply().action_run) {
-            act1: {
-                tbl1.apply();
+            act1 : {
+            tbl1.apply();
             }
-            act2: {
-                tbl2.apply();
+            act2 : {
+            tbl2.apply();
             }
-            act3: {
-                tbl3.apply();
+            act3 : {
+            tbl3.apply();
             }
         }
     }

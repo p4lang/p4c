@@ -11,30 +11,30 @@
 // an IPv4 header, performing forwarding based on the
 // destination IP address
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 // standard Ethernet header
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 // IPv4 header without options
 header ipv4_t {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      packet_length;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> packet_length;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
 }
 
 // Parser section
@@ -42,15 +42,15 @@ header ipv4_t {
 // List of all recognized headers
 struct Headers {
     ethernet_t ethernet;
-    ipv4_t     ip;
+    ipv4_t ip;
 }
 
 struct Value {
-	bit<32> field1;
+    bit<32> field1;
 }
 
-
-struct Metadata {}
+struct Metadata {
+}
 
 parser P(packet_in b,
          out Headers p,
@@ -58,7 +58,7 @@ parser P(packet_in b,
          inout standard_metadata_t standard_meta) {
     state start {
         b.extract(p.ethernet);
-        transition select(p.ethernet.etherType) {
+        transition select (p.ethernet.etherType) {
             0x0800 : parse_ipv4;
             // no default rule: all other packets rejected
         }
@@ -84,14 +84,14 @@ control Eg(inout Headers hdrs,
            inout Metadata meta,
            inout standard_metadata_t standard_meta) {
 
-    register<bit<32>>(32w100) debug;
-    register<bit<32>>(32w1) reg;
+    register < bit<32 >>(32w100) debug;
+    register <bit<32 >>(32w1) reg;
 
     // Using register regKeys, regValues.
     action test() {
-        Value val = {0};
+        Value val = { 0 };
 
-        bool _pred = (val.field1 != 0);
+        bool _pred =(val.field1 != 0);
         bit<32> inc = _pred ? 32w1 : 0;
         debug.write(0, _pred ? 32w1 : 32w0); // Print _pred
         debug.write(1, inc); // Print inc
@@ -102,7 +102,7 @@ control Eg(inout Headers hdrs,
     }
 
     apply {
-       test();
+        test();
     }
 }
 
@@ -116,11 +116,13 @@ control DP(packet_out b, in Headers p) {
 
 // Fillers
 control Verify(inout Headers hdrs, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control Compute(inout Headers hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 // Instantiate the top-level V1 Model package.

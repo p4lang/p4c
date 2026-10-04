@@ -9,9 +9,11 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct headers {}
+struct headers {
+}
 
-struct metadata {}
+struct metadata {
+}
 
 parser MyParser(packet_in packet,
                 out headers hdr,
@@ -25,27 +27,32 @@ parser MyParser(packet_in packet,
 
 control MyVerifyChecksum(inout headers hdr,
                          inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+    }
 }
 
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
-    apply {}
+    apply {
+    }
 }
 
 V1Switch(

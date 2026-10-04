@@ -19,4 +19,3 @@ control test(inout hdrs hdr) {
         hdr.crc = (crc_poly<bit<16>, h1_t>(16w0x801a)).hash(hdr.h1);
     }
 }
-

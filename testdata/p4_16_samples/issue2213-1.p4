@@ -17,9 +17,8 @@ struct metadata_t {
     mystruct2_t s2;
 }
 
-control ingressImpl(inout metadata_t meta)
-{
-    mystruct2_t helper = {s1={f1=2}};
+control ingressImpl(inout metadata_t meta) {
+    mystruct2_t helper = {s1 = {f1 = 2}};
     apply {
         meta.s2 = helper;
     }
@@ -27,5 +26,4 @@ control ingressImpl(inout metadata_t meta)
 
 control c(inout metadata_t meta);
 package top(c _c);
-
 top(ingressImpl()) main;

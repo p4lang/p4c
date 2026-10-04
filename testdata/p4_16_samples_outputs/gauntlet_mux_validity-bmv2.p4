@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -37,7 +37,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool b = false;
     action dummy() {
-        h.eth_hdr.eth_type = (!b ? 16w1 : simple_fun(h.h));
+        h.eth_hdr.eth_type =(!b ? 16w1 : simple_fun(h.h));
     }
     apply {
         dummy();

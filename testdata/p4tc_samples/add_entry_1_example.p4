@@ -1,27 +1,27 @@
 #include <core.p4>
 #include <tc/pna.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     @tc_type("macaddr") EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    @tc_type("ipv4") bit<32> srcAddr;
+    @tc_type("ipv4") bit<32> dstAddr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -43,10 +43,10 @@ struct main_metadata_t {
 // main parser.
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW    = (ExpireTimeProfileId_t) 2;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_NOW =(ExpireTimeProfileId_t) 2;
 
 parser MainParserImpl(
     packet_in pkt,
@@ -56,8 +56,8 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800  : parse_ipv4;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
             default : accept;
         }
     }
@@ -78,7 +78,7 @@ control MainControlImpl(
         hdr.ethernet.dstAddr = dmac;
     }
     action next_hop() {
-         add_entry(action_name = "send_nh",  // name of action
+        add_entry(action_name = "send_nh",  // name of action
                  action_params = {hdr.ethernet.dstAddr, hdr.ethernet.srcAddr}, expire_time_profile_id = EXPIRE_TIME_PROFILE_NOW);
 
     }
@@ -89,7 +89,7 @@ control MainControlImpl(
 
     @tc_acl("CRUS:CRXP") table ipv4_tbl_1 {
         key = {
-            hdr.ipv4.dstAddr : exact @tc_type ("ipv4");
+            hdr.ipv4.dstAddr : exact @tc_type("ipv4");
             istd.input_port : exact;
         }
         actions = {

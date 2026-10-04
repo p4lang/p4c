@@ -27,17 +27,17 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
 header_type vlan_t {
-     fields {
-         pcp : 3;
-         cfi : 1;
-         vid : 12;
-         etherType : 16;
-     }
+    fields {
+        pcp : 3;
+        cfi : 1;
+        vid : 12;
+        etherType : 16;
+    }
 }
 
 parser start {
@@ -48,10 +48,10 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(ethernet.etherType) {
-        0x800 : parse_ipv4;
-        0x8100: parse_vlan;
-        default: ingress;
+    return select (ethernet.etherType) {
+    0x800 : parse_ipv4;
+    0x8100 : parse_vlan;
+    default : ingress;
     }
 }
 
@@ -68,8 +68,7 @@ parser parse_vlan {
     return ingress;
 }
 
-
-action action_0(my_param0, my_param1){
+action action_0(my_param0, my_param1) {
     modify_field(ipv4.protocol, my_param0, 0xF8);
     modify_field(ipv4.ttl, my_param1);
     //modify_field(ipv4.totalLen, ipv4.hdrChecksum);
@@ -80,16 +79,15 @@ action action_1(my_param2) {
     modify_field(ipv4.totalLen, ipv4.totalLen);
 }
 
-
 table table_0 {
-   reads {
-     ipv4.srcAddr : exact;
-   }
-   actions {
-     action_0;
-     action_1;
-   }
-   max_size : 4096;
+    reads {
+        ipv4.srcAddr : exact;
+    }
+    actions {
+        action_0;
+        action_1;
+    }
+    max_size : 4096;
 }
 
 

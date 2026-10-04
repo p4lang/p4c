@@ -20,14 +20,14 @@ struct OutControl {
 const PortId DROP_PORT = 0xf;
 const PortId CPU_OUT_PORT = 0xe;
 const PortId RECIRCULATE_OUT_PORT = 0xd;
-parser Parser<H>(packet_in b, out H parsedHeaders);
-control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
-control Deparser<H>(inout H outputHeaders, packet_out b);
-package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
+parser Parser < H >(packet_in b, out H parsedHeaders);
+control Pipe < H >(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
+control Deparser < H >(inout H outputHeaders, packet_out b);
+package VSS < H >(Parser<H> p, Pipe<H> map, Deparser<H> d);
 extern Ck16 {
     Ck16();
     void clear();
-    void update<T>(in T data);
+    void update < T >(in T data);
     bit<16> get();
 }
 
@@ -36,35 +36,35 @@ typedef bit<32> IPv4Address;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header Ipv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
 
 struct Parsed_packet {
     Ethernet_h ethernet;
-    Ipv4_h     ip;
+    Ipv4_h ip;
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
     Ck16() ck;
     state start {
         b.extract(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            0x800: parse_ipv4;
+        transition select (p.ethernet.etherType) {
+            0x800 : parse_ipv4;
         }
     }
     state parse_ipv4 {
@@ -90,7 +90,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     table ipv4_match {
         key = {
-            headers.ip.dstAddr: lpm;
+            headers.ip.dstAddr : lpm;
         }
         actions = {
             Drop_action;
@@ -104,7 +104,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     table check_ttl {
         key = {
-            headers.ip.ttl: exact;
+            headers.ip.ttl : exact;
         }
         actions = {
             Send_to_cpu;
@@ -117,7 +117,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     table dmac {
         key = {
-            nextHop: exact;
+            nextHop : exact;
         }
         actions = {
             Drop_action;
@@ -131,7 +131,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     table smac {
         key = {
-            outCtrl.outputPort: exact;
+            outCtrl.outputPort : exact;
         }
         actions = {
             Drop_action;

@@ -9,10 +9,10 @@ enum meter_color_t {
 }
 
 struct test_metadata_t {
-    bit<32>       color;
+    bit<32> color;
     meter_color_t enum_color;
-    bit<32>       other_metadata;
-    bit<16>       smaller_metadata;
+    bit<32> other_metadata;
+    bit<16> smaller_metadata;
 }
 
 header ethernet_t {
@@ -22,8 +22,8 @@ header ethernet_t {
 }
 
 struct headers {
-    ethernet_t    ethernet;
-    ethernet_t    ethernet2;
+    ethernet_t ethernet;
+    ethernet_t ethernet2;
     ethernet_t[2] ethernet_stack;
 }
 
@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
+            hdr.ethernet.etherType : exact @name("hdr.ethernet.etherType");
         }
         default_action = NoAction();
     }
@@ -77,4 +77,4 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
     }
 }
 
-V1Switch<headers, test_metadata_t>(parser_stub(), verify_checksum_stub(), ingress(), egress_stub(), compute_checksum_stub(), deparser_stub()) main;
+V1Switch < headers, test_metadata_t >(parser_stub(), verify_checksum_stub(), ingress(), egress_stub(), compute_checksum_stub(), deparser_stub()) main;

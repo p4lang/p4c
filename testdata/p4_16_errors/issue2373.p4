@@ -13,7 +13,7 @@
 *************************************************************************/
 
 header H {
-    bit<8>  h;
+    bit<8> h;
 }
 
 struct metadata {
@@ -55,7 +55,8 @@ parser PROTParser(packet_in packet,
 *************************************************************************/
 
 control PROTVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 
@@ -77,7 +78,7 @@ control PROTIngress(inout headers hdr,
 control PROTEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-   apply {
+    apply {
     }
 }
 
@@ -86,7 +87,8 @@ control PROTEgress(inout headers hdr,
 *************************************************************************/
 
 control PROTComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 

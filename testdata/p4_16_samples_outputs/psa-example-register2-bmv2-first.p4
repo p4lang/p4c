@@ -5,19 +5,19 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -35,36 +35,36 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 const bit<32> NUM_PORTS = 32w512;
 typedef bit<64> PacketByteCountState_t;
 action update_pkt_ip_byte_count(inout PacketByteCountState_t s, in bit<16> ip_length_bytes) {
-    s[63:48] = s[63:48] + 16w1;
-    s[47:0] = s[47:0] + (bit<48>)ip_length_bytes;
+    s[63 : 48] = s[63 : 48] + 16w1;
+    s[47 : 0] = s[47 : 0] +(bit<48>) ip_length_bytes;
 }
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
         transition parse_ethernet;
     }
     state parse_ethernet {
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        buffer.extract < ethernet_t >(parsed_hdr.ethernet);
+        transition select (parsed_hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
+        buffer.extract < ipv4_t >(parsed_hdr.ipv4);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in;
+    Register < PacketByteCountState_t, PortId_t >(32w512) port_pkt_ip_bytes_in;
     apply {
-        ostd.egress_port = (PortId_t)32w0;
+        ostd.egress_port =(PortId_t) 32w0;
         hdr.ipv4.setValid();
         hdr.ipv4.totalLen = 16w14;
         if (hdr.ipv4.isValid()) @atomic {
@@ -89,8 +89,8 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 
 control CommonDeparserImpl(packet_out packet, inout headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
     }
 }
 
@@ -108,6 +108,6 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
     }
 }
 
-IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
+EgressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
+PSA_Switch < headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

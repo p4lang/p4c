@@ -20,7 +20,7 @@ header ethernet_t {
 
 struct metadata {
     @name("meta")
-    meta_t               meta;
+    meta_t meta;
 }
 
 struct headers {
@@ -43,7 +43,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name("namedmeter") direct_meter<bit<32>>(MeterType.packets) my_meter;
+@name("namedmeter") direct_meter < bit<32 >>(MeterType.packets) my_meter;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_drop") action _drop() {
@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction;
         }
         key = {
-            meta.meta.meter_tag: exact;
+            meta.meta.meter_tag : exact;
         }
         size = 16;
         default_action = NoAction();
@@ -81,7 +81,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             NoAction;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         size = 16384;
         default_action = NoAction();

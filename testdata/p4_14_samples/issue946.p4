@@ -21,9 +21,9 @@ parser_value_set pvs;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        pvs : ingress;
-        default : ingress;
+    return select (latest.etherType) {
+    pvs : ingress;
+    default : ingress;
     }
 }
 
@@ -36,7 +36,6 @@ table dummy {
     }
     size : 512;
 }
-
 
 action noop() {
     no_op();

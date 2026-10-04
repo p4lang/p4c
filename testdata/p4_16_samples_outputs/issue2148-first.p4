@@ -21,7 +21,7 @@ bit<16> do_thing_function() {
     } else {
         new_val = 32w232;
     }
-    return (bit<16>)new_val;
+    return(bit<16>) new_val;
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action do_thing_action() {
@@ -59,4 +59,4 @@ control deparser(packet_out b, in Headers h) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

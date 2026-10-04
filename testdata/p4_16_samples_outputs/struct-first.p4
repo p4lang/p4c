@@ -22,4 +22,4 @@ const int<32> x = 32s10;
 const int<32> y = 32s25;
 const int<32> w = 32s10;
 const T t1 = (T){t1 = 32s15,t2 = 32s25};
-const Empty e = (Empty){};
+const Empty e = (Empty){  };

@@ -18,17 +18,17 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.dstAddr[47:40], hdr.ethernet.dstAddr[39:32], hdr.ethernet.dstAddr[31:24]) {
-            (8w0xca, 8w0xfe, 8w0xad): a7;
-            (8w0xca, 8w0xfe, default): a6;
-            (8w0xca, default, 8w0xad): a5;
-            (default, 8w0xfe, 8w0xad): a3;
-            (8w0xca, default, default): a4;
-            (default, 8w0xfe, default): a2;
-            (default, default, 8w0xad): a1;
-            (default, default, default): a0;
-            default: noMatch;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.dstAddr[47 : 40], hdr.ethernet.dstAddr[39 : 32], hdr.ethernet.dstAddr[31 : 24]) {
+            (8w0xca, 8w0xfe, 8w0xad) : a7;
+            (8w0xca, 8w0xfe, default) : a6;
+            (8w0xca, default, 8w0xad) : a5;
+            (default, 8w0xfe, 8w0xad) : a3;
+            (8w0xca, default, default) : a4;
+            (default, 8w0xfe, default) : a2;
+            (default, default, 8w0xad) : a1;
+            (default, default, default) : a0;
+            default : noMatch;
         }
     }
     state a0 {
@@ -91,7 +91,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -105,4 +105,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

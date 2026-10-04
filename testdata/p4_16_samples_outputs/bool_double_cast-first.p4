@@ -5,4 +5,3 @@ control SetAndFwd() {
         a = (bit<1>)(bool)b;
     }
 }
-

@@ -4,17 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-struct h<t> {
+struct h < t > {
     t f;
 };
-bool g<t>(in t a) {
-    h<t> v;
+bool g < t >(in t a) {
+    h < t > v;
     v.f = a;
     return v.f == a;
 }
 bool gg()
 {
-    h<bit> a = { 0 };
+    h < bit > a = { 0 };
     return g(a);
 }
 

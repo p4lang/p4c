@@ -7,7 +7,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-
 header H {
     bit<48> a;
 }
@@ -18,10 +17,11 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 struct Headers {
-    ethernet_t          eth_hdr;
+    ethernet_t eth_hdr;
     H h;
 }
 
@@ -45,11 +45,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {

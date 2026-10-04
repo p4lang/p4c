@@ -17,10 +17,10 @@ const bit<8> P4CALC_AND = 0x26;
 const bit<8> P4CALC_OR = 0x7c;
 const bit<8> P4CALC_CARET = 0x5e;
 header p4calc_t {
-    bit<8>  p;
-    bit<8>  four;
-    bit<8>  ver;
-    bit<8>  op;
+    bit<8> p;
+    bit<8> four;
+    bit<8> ver;
+    bit<8> op;
     bit<32> operand_a;
     bit<32> operand_b;
     bit<32> res;
@@ -28,21 +28,21 @@ header p4calc_t {
 
 struct headers {
     ethernet_t ethernet;
-    p4calc_t   p4calc;
+    p4calc_t p4calc;
 }
 
 parser Parser(packet_in packet, out headers hdr) {
     state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            P4CALC_ETYPE: check_p4calc;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            P4CALC_ETYPE : check_p4calc;
+            default : accept;
         }
     }
     state check_p4calc {
-        transition select((packet.lookahead<p4calc_t>()).p, (packet.lookahead<p4calc_t>()).four, (packet.lookahead<p4calc_t>()).ver) {
-            (P4CALC_P, P4CALC_4, P4CALC_VER): parse_p4calc;
-            default: accept;
+        transition select ((packet.lookahead < p4calc_t >()).p,(packet.lookahead < p4calc_t >()).four,(packet.lookahead < p4calc_t >()).ver) {
+            (P4CALC_P, P4CALC_4, P4CALC_VER) : parse_p4calc;
+            default : accept;
         }
     }
     state parse_p4calc {
@@ -79,7 +79,7 @@ control Ingress(inout headers hdr, out bool xout) {
     }
     table calculate {
         key = {
-            hdr.p4calc.op: exact;
+            hdr.p4calc.op : exact;
         }
         actions = {
             operation_add;
@@ -91,11 +91,11 @@ control Ingress(inout headers hdr, out bool xout) {
         }
         const default_action = operation_drop();
         const entries = {
-                        P4CALC_PLUS : operation_add();
-                        P4CALC_MINUS : operation_sub();
-                        P4CALC_AND : operation_and();
-                        P4CALC_OR : operation_or();
-                        P4CALC_CARET : operation_xor();
+            P4CALC_PLUS : operation_add();
+            P4CALC_MINUS : operation_sub();
+            P4CALC_AND : operation_and();
+            P4CALC_OR : operation_or();
+            P4CALC_CARET : operation_xor();
         }
         implementation = hash_table(8);
         size = 100;

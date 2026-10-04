@@ -2,5 +2,5 @@ expr-indexaccess-on-unsupported-type-3.p4(4): [--Wwarn=unused] warning: control 
 control c()() {
         ^
 expr-indexaccess-on-unsupported-type-3.p4(7): [--Werror=type-error] error: Tuple index f((bit<32>)2) must be constant
-    h[f(2)].setValid();
-      ^^^^
+        h[f(2)].setValid();
+          ^^^^

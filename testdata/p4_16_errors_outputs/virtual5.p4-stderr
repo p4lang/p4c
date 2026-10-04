@@ -1,5 +1,5 @@
 virtual5.p4(17): [--Werror=type-error] error: g: no matching abstract method in Virtual
-        bit<16> g() { return 0; }
+        bit<16> g() {
                 ^
 virtual5.p4(7)
 extern Virtual {

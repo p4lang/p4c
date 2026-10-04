@@ -44,4 +44,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+V1Switch < Headers, Metadata >(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;

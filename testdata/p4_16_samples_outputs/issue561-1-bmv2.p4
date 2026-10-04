@@ -30,10 +30,10 @@ struct metadata {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract(hdr.base);
-        transition select(hdr.base.t) {
-            0: parseO1;
-            1: parseO2;
-            default: accept;
+        transition select (hdr.base.t) {
+            0 : parseO1;
+            1 : parseO2;
+            default : accept;
         }
     }
     state parseO1 {
@@ -49,8 +49,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     table debug_hdr {
         key = {
-            hdr.base.t           : exact;
-            hdr.u.short.isValid(): exact;
+            hdr.base.t : exact;
+            hdr.u.short.isValid() : exact;
             hdr.u.byte.isValid() : exact;
         }
         actions = {

@@ -12,7 +12,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
+    H[2] h;
 }
 
 parser p(packet_in pkt, out Headers hdr) {

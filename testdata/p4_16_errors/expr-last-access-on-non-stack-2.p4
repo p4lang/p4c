@@ -1,10 +1,11 @@
 // generated from gauntlet_parser_test.p4
 
 struct Headers {
-  bool h1;
+    bool h1;
 }
 parser P(out Headers h)() {
-  state start {
-    transition select(h.h1.last.x) {}
-  }
+    state start {
+        transition select (h.h1.last.x) {
+        }
+    }
 }

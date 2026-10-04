@@ -29,7 +29,7 @@ parser p(packet_in pkt, out Headers hdr) {
 }
 
 control ingress(inout Headers h) {
-    bool tmp = (false || true);
+    bool tmp =(false || true);
 
     apply {
         h.eth_hdr.src_addr = simple_extern(tmp, 8w1 == 8w2);
@@ -40,5 +40,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-
-

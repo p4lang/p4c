@@ -7,10 +7,10 @@ header data_t {
     bit<32> f2;
     bit<32> f3;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 struct metadata {
@@ -41,11 +41,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             setf1;
         }
         key = {
-            hdr.data.b1: exact;
-            hdr.data.f1: selector;
-            hdr.data.f2: selector;
-            hdr.data.f3: selector;
-            hdr.data.f4: selector;
+            hdr.data.b1 : exact;
+            hdr.data.f1 : selector;
+            hdr.data.f2 : selector;
+            hdr.data.f3 : selector;
+            hdr.data.f4 : selector;
         }
         size = 1024;
         implementation = sel_profile;

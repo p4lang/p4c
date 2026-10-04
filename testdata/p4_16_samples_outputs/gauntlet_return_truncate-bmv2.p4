@@ -9,28 +9,28 @@ header ethernet_t {
 }
 
 header H {
-    bit<8>  a;
+    bit<8> a;
     bit<32> b;
     bit<64> c;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
 }
 
 bit<16> do_thing() {
-    return (bit<16>)16w4;
+    return(bit<16>) 16w4;
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<64> y = 64w3;
     bit<64> z = 64w2;
     action iuJze(in bit<8> hyhe) {
         h.h.c = 64w2;
-        y = (bit<64>)do_thing();
+        y =(bit<64>) do_thing();
         h.h.c = y;
     }
     apply {

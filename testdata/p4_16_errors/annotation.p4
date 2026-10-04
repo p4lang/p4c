@@ -1,2 +1,1 @@
-@pkginfo
-const bit<32> x = 0;
+@pkginfo const bit<32> x = 0;

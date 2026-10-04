@@ -1,12 +1,12 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header t1 {
     bit<32> f1;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  cnt;
+    bit<8> b1;
+    bit<8> cnt;
 }
 
 header t2 {
@@ -14,7 +14,7 @@ header t2 {
 }
 
 struct headers_t {
-    t1    head;
+    t1 head;
     t2[8] stack;
 }
 
@@ -24,7 +24,7 @@ control c(inout headers_t hdrs) {
             hdrs.head.f1 = hdrs.head.f1 + v.x;
         }
         for (bit<8> v = 0, bit<16> x = 1; v < hdrs.head.cnt; v = v + 1, x = x << 1) {
-            hdrs.head.h1 = hdrs.head.h1 + x;
+        hdrs.head.h1 = hdrs.head.h1 + x;
         }
     }
 }

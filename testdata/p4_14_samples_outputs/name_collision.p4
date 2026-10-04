@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 struct B {
-    bit<9>  A;
+    bit<9> A;
     bit<10> B;
 }
 
@@ -11,8 +11,8 @@ struct B {
     bit<32> A;
     bit<32> B;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 struct metadata {
@@ -35,7 +35,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-@name(".B") counter<bit<10>>(32w1024, CounterType.packets_and_bytes) B_1;
+@name(".B") counter < bit<10 >>(32w1024, CounterType.packets_and_bytes) B_1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".A") action A_3(bit<8> val, bit<9> port, bit<10> idx) {
         hdr.A.b1 = val;
@@ -53,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.A.A: exact;
+            hdr.A.A : exact;
         }
     }
     @name(".B") table B_3 {

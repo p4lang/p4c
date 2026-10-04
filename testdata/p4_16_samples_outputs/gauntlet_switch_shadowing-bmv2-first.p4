@@ -20,7 +20,7 @@ bit<2> set_undefined(out bit<32> val) {
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -33,7 +33,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.src_addr: exact @name("aiiIgQ");
+            h.eth_hdr.src_addr : exact @name("aiiIgQ");
         }
         actions = {
             action_1();
@@ -44,12 +44,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            action_1: {
-                action_1();
+            action_1 : {
+            action_1();
             }
-            action_2: {
+            action_2 : {
             }
-            default: {
+            default : {
             }
         }
         set_undefined(sm.instance_type);
@@ -73,8 +73,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

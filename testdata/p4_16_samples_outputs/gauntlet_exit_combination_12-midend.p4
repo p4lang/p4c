@@ -12,7 +12,7 @@ struct Headers {
 
 parser p(packet_in pkt, out Headers hdr) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -30,7 +30,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.eth_hdr.eth_type: exact @name("tyhSfv");
+            h.eth_hdr.eth_type : exact @name("tyhSfv");
         }
         actions = {
             do_action();
@@ -59,14 +59,14 @@ control ingress(inout Headers h) {
     apply {
         tbl_act.apply();
         switch (simple_table_0.apply().action_run) {
-            do_action: {
-                if (hasExited) {
-                    ;
-                } else {
-                    tbl_gauntlet_exit_combination_12l48.apply();
-                }
+            do_action : {
+            if (hasExited) {
+            ;
+            } else {
+            tbl_gauntlet_exit_combination_12l48.apply();
             }
-            default: {
+            }
+            default : {
             }
         }
     }

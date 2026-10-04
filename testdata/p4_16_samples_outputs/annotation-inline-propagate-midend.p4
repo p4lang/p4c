@@ -16,7 +16,7 @@ struct headers {
 @my_anno_2 @name("MyParser.outer_parser") @my_anno_1 parser MyParser(packet_in buffer, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         hdr.hdr.setInvalid();
-        buffer.extract<hdr_t>(hdr.hdr);
+        buffer.extract < hdr_t >(hdr.hdr);
         transition accept;
     }
 }
@@ -39,21 +39,21 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
         }
         default_action = NoAction_1();
     }
-    @hidden action annotationinlinepropagate82() {
+    @hidden action annotationinlinepropagate83() {
         hdr.hdr.field = 16w0x1;
     }
-    @hidden table tbl_annotationinlinepropagate82 {
+    @hidden table tbl_annotationinlinepropagate83 {
         actions = {
-            annotationinlinepropagate82();
+            annotationinlinepropagate83();
         }
-        const default_action = annotationinlinepropagate82();
+        const default_action = annotationinlinepropagate83();
     }
     apply {
         @my_anno_3 {
             if (inner_inner_table.apply().hit) {
                 ;
             } else {
-                tbl_annotationinlinepropagate82.apply();
+                tbl_annotationinlinepropagate83.apply();
             }
         }
     }
@@ -74,4 +74,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

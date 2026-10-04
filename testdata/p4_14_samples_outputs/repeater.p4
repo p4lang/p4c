@@ -39,7 +39,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port : exact;
         }
     }
     apply {

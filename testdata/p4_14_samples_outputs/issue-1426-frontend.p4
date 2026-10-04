@@ -18,7 +18,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -56,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         size = 1024;
         default_action = NoAction_1();
@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         size = 1024;
         default_action = NoAction_2();
@@ -92,7 +92,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         size = 1024;
         default_action = NoAction_3();
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         size = 1024;
         default_action = NoAction_4();
@@ -132,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -146,4 +146,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

@@ -4,17 +4,17 @@ struct tuple_0 {
 }
 
 control c(out bit<16> r) {
-    @hidden action tuple4l11() {
+    @hidden action tuple4l13() {
         r = 16w12;
     }
-    @hidden table tbl_tuple4l11 {
+    @hidden table tbl_tuple4l13 {
         actions = {
-            tuple4l11();
+            tuple4l13();
         }
-        const default_action = tuple4l11();
+        const default_action = tuple4l13();
     }
     apply {
-        tbl_tuple4l11.apply();
+        tbl_tuple4l13.apply();
     }
 }
 

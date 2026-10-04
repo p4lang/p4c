@@ -1,5 +1,5 @@
 {
-  "lines_of_code" : 222,
+  "lines_of_code" : 224,
   "cyclomatic_complexity" : {
     "ParserImpl" : 3,
     "ingress" : 5,

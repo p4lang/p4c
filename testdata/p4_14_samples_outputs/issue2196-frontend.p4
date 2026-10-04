@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 struct my_meta_t {
-    bit<8>  pv_parsed;
+    bit<8> pv_parsed;
     bit<16> f1_16;
 }
 
@@ -14,7 +14,7 @@ header ethernet_t {
 }
 
 header my_header_t {
-    bit<3>  f1;
+    bit<3> f1;
     bit<13> f2;
 }
 
@@ -25,21 +25,21 @@ struct metadata {
 
 struct headers {
     @name(".ethernet")
-    ethernet_t  ethernet;
+    ethernet_t ethernet;
     @name(".my_header")
     my_header_t my_header;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".pv2") value_set<bit<16>>(4) pv2_0;
-    @name(".pv1") value_set<bit<16>>(4) pv1_0;
+    @name(".pv2") value_set < bit<16 >>(4) pv2_0;
+    @name(".pv1") value_set <bit<16 >>(4) pv1_0;
     @name(".parse_pv1") state parse_pv1 {
         meta.my_meta.pv_parsed = 8w1;
-        packet.extract<my_header_t>(hdr.my_header);
-        meta.my_meta.f1_16 = (bit<16>)hdr.my_header.f1;
-        transition select(meta.my_meta.f1_16 << 13 | (bit<16>)hdr.my_header.f2) {
-            pv2_0: parse_pv2;
-            default: accept;
+        packet.extract < my_header_t >(hdr.my_header);
+        meta.my_meta.f1_16 =(bit<16>) hdr.my_header.f1;
+        transition select (meta.my_meta.f1_16 << 13 |(bit<16>) hdr.my_header.f2) {
+            pv2_0 : parse_pv2;
+            default : accept;
         }
     }
     @name(".parse_pv2") state parse_pv2 {
@@ -47,12 +47,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.ethertype) {
-            16w0x800: accept;
-            pv1_0: parse_pv1;
-            pv2_0: parse_pv2;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.ethertype) {
+            16w0x800 : accept;
+            pv1_0 : parse_pv1;
+            pv2_0 : parse_pv2;
+            default : accept;
         }
     }
 }
@@ -73,7 +73,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dst_addr: lpm @name("ethernet.dst_addr");
+            hdr.ethernet.dst_addr : lpm @name("ethernet.dst_addr");
         }
         default_action = NoAction_1();
     }
@@ -89,8 +89,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<my_header_t>(hdr.my_header);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < my_header_t >(hdr.my_header);
     }
 }
 
@@ -104,4 +104,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

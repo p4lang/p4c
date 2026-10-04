@@ -6,4 +6,3 @@ struct FourStruct {
 typedef FourStruct FStruct;
 struct Empty {
 }
-

@@ -13,8 +13,8 @@ enum bit<16> EthTypes {
 }
 
 header ethernet_t {
-    bit<48>  dst_addr;
-    bit<48>  src_addr;
+    bit<48> dst_addr;
+    bit<48> src_addr;
     EthTypes eth_type;
 }
 
@@ -29,10 +29,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     ethernet_t e;
     state start {
         pkt.extract(e);
-        transition select(e.eth_type) {
-            EthTypes.IPv4: accept;
-            EthTypes.ARP: accept;
-            default: reject;
+        transition select (e.eth_type) {
+            EthTypes.IPv4 : accept;
+            EthTypes.ARP : accept;
+            default : reject;
         }
     }
 }
@@ -43,14 +43,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table tns {
         key = {
-            h.eth_hdr.eth_type: exact;
+            h.eth_hdr.eth_type : exact;
         }
         actions = {
             do_act;
         }
         const entries = {
-                        EthTypes.IPv4 : do_act(0x800);
-                        EthTypes.VLAN : do_act(0x8100);
+            EthTypes.IPv4 : do_act(0x800);
+            EthTypes.VLAN : do_act(0x8100);
         }
     }
     apply {

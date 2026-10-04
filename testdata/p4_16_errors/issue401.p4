@@ -7,11 +7,11 @@
 #include <v1model.p4>
 
 header h_t {
-  bit<8> f;
+    bit<8> f;
 }
 
 struct my_packet {
-  h_t h;
+    h_t h;
 }
 
 struct my_metadata {
@@ -19,31 +19,35 @@ struct my_metadata {
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-  state start {
-    transition accept;
-  }
+    state start {
+        transition accept;
+    }
 }
 
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
-  apply { }
+    apply {
+    }
 }
 
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-  apply {
-    bit<1> b = (bit<1>) { 0 };
-  }
+    apply {
+        bit<1> b =(bit<1>) { 0 };
+    }
 }
 
 control MyEgress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-  apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
-  apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out b, in my_packet p) {
-  apply { }
+    apply {
+    }
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

@@ -40,7 +40,7 @@ control ingress(inout headers_t hdr, inout user_metadata_t meta, inout standard_
     }
     table t1 {
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType : exact;
         }
         actions = {
             @tableonly a1;
@@ -48,7 +48,7 @@ control ingress(inout headers_t hdr, inout user_metadata_t meta, inout standard_
             @defaultonly a3;
         }
         const entries = {
-                        3 : a3();
+            3 : a3();
         }
         default_action = a1;
     }

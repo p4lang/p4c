@@ -15,8 +15,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -25,18 +25,18 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
 }
 
 header tcp_t {
@@ -44,36 +44,36 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
 }
 
 struct headers {
-    ethernet_t    ethernet;
-    ipv4_t        ipv4;
-    tcp_t         tcp;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 struct mystruct1_t {
-    bit<4>  a;
-    bit<4>  b;
+    bit<4> a;
+    bit<4> b;
 }
 
 struct metadata {
     mystruct1_t mystruct1;
 }
 
-typedef tuple<
-    bit<4>,
-    bit<4>,
-    bit<8>,
-    varbit<56>
-    > myTuple1;
+typedef tuple <
+bit<4>,
+bit<4>,
+bit<8>,
+varbit<56>
+> myTuple1;
 
 // Declare user-defined errors that may be signaled during parsing
 error {
@@ -88,9 +88,9 @@ parser parserI(packet_in pkt,
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -98,8 +98,8 @@ parser parserI(packet_in pkt,
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         transition select (hdr.ipv4.protocol) {
-            6: parse_tcp;
-            default: accept;
+            6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -139,7 +139,8 @@ control cEgress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control vc(inout headers hdr,
@@ -166,7 +167,8 @@ control vc(inout headers hdr,
 control uc(inout headers hdr,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out packet,
@@ -179,7 +181,7 @@ control DeparserI(packet_out packet,
     }
 }
 
-V1Switch<headers, metadata>(parserI(),
+V1Switch < headers, metadata >(parserI(),
                             vc(),
                             cIngress(),
                             cEgress(),

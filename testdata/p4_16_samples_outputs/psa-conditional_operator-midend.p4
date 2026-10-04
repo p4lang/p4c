@@ -20,7 +20,7 @@ struct headers_t {
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        buffer.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -46,7 +46,7 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -54,40 +54,40 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
         }
         default_action = NoAction_1();
     }
-    @hidden action psaconditional_operator73() {
+    @hidden action psaconditional_operator77() {
         tmp_1 = 16w2;
     }
-    @hidden action psaconditional_operator73_0() {
+    @hidden action psaconditional_operator77_0() {
         tmp_1 = 16w5;
     }
-    @hidden action psaconditional_operator74() {
+    @hidden action psaconditional_operator78() {
         b.data = tmp_1 + 16w5;
     }
-    @hidden table tbl_psaconditional_operator73 {
+    @hidden table tbl_psaconditional_operator77 {
         actions = {
-            psaconditional_operator73();
+            psaconditional_operator77();
         }
-        const default_action = psaconditional_operator73();
+        const default_action = psaconditional_operator77();
     }
-    @hidden table tbl_psaconditional_operator73_0 {
+    @hidden table tbl_psaconditional_operator77_0 {
         actions = {
-            psaconditional_operator73_0();
+            psaconditional_operator77_0();
         }
-        const default_action = psaconditional_operator73_0();
+        const default_action = psaconditional_operator77_0();
     }
-    @hidden table tbl_psaconditional_operator74 {
+    @hidden table tbl_psaconditional_operator78 {
         actions = {
-            psaconditional_operator74();
+            psaconditional_operator78();
         }
-        const default_action = psaconditional_operator74();
+        const default_action = psaconditional_operator78();
     }
     apply {
         if (b.data != 16w0) {
-            tbl_psaconditional_operator73.apply();
+            tbl_psaconditional_operator77.apply();
         } else {
-            tbl_psaconditional_operator73_0.apply();
+            tbl_psaconditional_operator77_0.apply();
         }
-        tbl_psaconditional_operator74.apply();
+        tbl_psaconditional_operator78.apply();
         tbl_0.apply();
     }
 }
@@ -107,6 +107,6 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
     }
 }
 
-IngressPipeline<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

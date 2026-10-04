@@ -1,25 +1,24 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -31,10 +30,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -43,17 +42,15 @@ header tcp_t {
 struct empty_metadata_t {
 }
 
-
 struct metadata {
-     bit<16> data;
+    bit<16> data;
 }
 
 struct headers {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
-    tcp_t            tcp;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
-
 
 parser IngressParserImpl(packet_in buffer,
                          out headers hdr,
@@ -72,7 +69,8 @@ control ingress(inout headers hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
-    apply { }
+    apply {
+    }
 }
 // END:Parse_Error_Example
 
@@ -86,7 +84,7 @@ parser EgressParserImpl(packet_in buffer,
 {
     state start {
         buffer.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
+        transition select (hdr.ethernet.etherType) {
             0x0800 &&& 0x0F00 : parse_ipv4;
             16w0x0d00 : parse_tcp;
             default : accept;
@@ -94,9 +92,9 @@ parser EgressParserImpl(packet_in buffer,
     }
     state parse_ipv4 {
         buffer.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            8w4 .. 8w7: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            8w4 .. 8w7 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -118,7 +116,10 @@ control egress(inout headers hdr,
             user_meta.data : exact;
             8w0x48 : exact;
         }
-        actions = { NoAction; execute; }
+        actions = {
+            NoAction;
+            execute;
+        }
     }
     apply {
         tbl.apply();

@@ -29,14 +29,16 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     jnf_counter(CounterType.packets) c;
     action a() {
-      c.count();
+        c.count();
     }
     table t {
-      actions = { a; }
+        actions = {
+            a;
+        }
     }
     apply {
-      t.apply();
-   }
+        t.apply();
+    }
 }
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {

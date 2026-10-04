@@ -16,7 +16,7 @@ struct meta {
 }
 
 @name("metadata") struct metadata {
-    meta    x;
+    meta x;
     bit<32> z;
 }
 
@@ -38,10 +38,10 @@ control cIngress(inout Parsed_packet hdr, inout metadata m, inout standard_metad
     }
     table t {
         key = {
-            hdr.x.add1: exact;
-            m.x.add2  : exact;
-            m.z       : exact;
-            z         : exact;
+            hdr.x.add1 : exact;
+            m.x.add2 : exact;
+            m.z : exact;
+            z : exact;
         }
         actions = {
             foo;
@@ -68,4 +68,4 @@ control uc(inout Parsed_packet hdr, inout metadata m) {
     }
 }
 
-V1Switch<Parsed_packet, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

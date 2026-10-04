@@ -11,7 +11,8 @@
 
 #include <core.p4>
 
-header h {}
+header h {
+}
 
 parser p() {
     state start {
@@ -24,7 +25,7 @@ control c()(bit<32> x) {
         h[4] s1;
         h[s1.size + 1] s2;
         h[x] s3;
-   }
+    }
 }
 
 parser Simple();

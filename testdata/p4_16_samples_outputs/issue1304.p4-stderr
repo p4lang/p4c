@@ -4,12 +4,12 @@ const bit<8> CONST_VAL = 8w10;
 issue1304.p4(38): [--Wwarn=unused] warning: control 'MyVerifyChecksum' is unused
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
         ^^^^^^^^^^^^^^^^
-issue1304.p4(60): [--Wwarn=unused] warning: control 'MyComputeChecksum' is unused
+issue1304.p4(64): [--Wwarn=unused] warning: control 'MyComputeChecksum' is unused
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
         ^^^^^^^^^^^^^^^^^
 issue1304.p4(38): [--Winfo=removed] info: removing control 'MyVerifyChecksum'
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
         ^^^^^^^^^^^^^^^^
-issue1304.p4(60): [--Winfo=removed] info: removing control 'MyComputeChecksum'
+issue1304.p4(64): [--Winfo=removed] info: removing control 'MyComputeChecksum'
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
         ^^^^^^^^^^^^^^^^^

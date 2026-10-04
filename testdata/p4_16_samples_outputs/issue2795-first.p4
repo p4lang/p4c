@@ -7,8 +7,8 @@ header H {
 
 control c(packet_out p) {
     apply {
-        p.emit<H>((H){a = 32w0,b = 32w1});
-        p.emit<H>((H){a = 32w0,b = 32w1});
+        p.emit < H >((H){a = 32w0,b = 32w1});
+        p.emit < H >((H){a = 32w0,b = 32w1});
     }
 }
 

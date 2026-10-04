@@ -6,7 +6,9 @@
 
 #include <core.p4>
 
-header H { bit<32> u; }
+header H {
+    bit<32> u;
+}
 
 control c() {
     apply {

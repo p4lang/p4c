@@ -26,7 +26,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     table t {
         key = {
-            meta.idx: exact;
+            meta.idx : exact;
         }
         actions = {
             rewrite;

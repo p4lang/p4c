@@ -19,7 +19,7 @@ struct headers_t {
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY_H d, in EMPTY_H e) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        buffer.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -33,13 +33,13 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("MyIC.counter") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter_0;
+    @name("MyIC.counter") Counter < bit<10>, bit<12 >>(32w1024, PSA_CounterType_t.PACKETS) counter_0;
     @name("MyIC.execute") action execute_1() {
         counter_0.count(12w1024);
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -67,6 +67,6 @@ control MyED(packet_out buffer, out EMPTY_H a, out EMPTY_H b, inout EMPTY c, in 
     }
 }
 
-IngressPipeline<headers_t, EMPTY, EMPTY, EMPTY_H, EMPTY_H, EMPTY_H>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY_H, EMPTY_H, EMPTY_H>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY_H, EMPTY_H, EMPTY_H, EMPTY_H>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, EMPTY, EMPTY, EMPTY_H, EMPTY_H, EMPTY_H >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY, EMPTY, EMPTY, EMPTY_H, EMPTY_H, EMPTY_H >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < headers_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY_H, EMPTY_H, EMPTY_H, EMPTY_H >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

@@ -8,12 +8,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h0_t {
@@ -41,17 +41,17 @@ struct s2_t {
 }
 
 header hstructs_t {
-    s0_t   s0;
-    s1_t   s1;
-    s2_t   s2;
+    s0_t s0;
+    s1_t s1;
+    s2_t s2;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
-    h0_t          h0;
-    h1_t          h1;
-    h2_t          h2;
-    hstructs_t    hstructs;
+    ethernet_t ethernet;
+    h0_t h0;
+    h1_t h1;
+    h2_t h2;
+    hstructs_t hstructs;
 }
 
 struct metadata_t {
@@ -73,7 +73,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(
@@ -88,23 +89,25 @@ control ingressImpl(
             // because the number of fields in {} (0) matches the
             // number of fields in hdr.h0 and hdr.hstructs.s0.  hdr.h0
             // is initialized to be a valid header with 0 fields.
-            hdr.h0 = {};
-            hdr.hstructs.s0 = {};
+            hdr.h0 = {
+            };
+            hdr.hstructs.s0 = {
+            };
             if (hdr.ethernet.etherType == 0) {
-                hdr.h1 = {42};
-                hdr.h2 = {43, 44};
-                hdr.hstructs.s1 = {5};
-                hdr.hstructs.s2 = {5, 10};
+                hdr.h1 = { 42 };
+                hdr.h2 = { 43, 44 };
+                hdr.hstructs.s1 = { 5 };
+                hdr.hstructs.s2 = { 5, 10 };
             } else {
-                hdr.h1 = {f1=52};
-                hdr.h2 = {f2=53, f1=54};
-                hdr.hstructs.s1 = {f1=6};
-                hdr.hstructs.s2 = {f2=11, f1=8};
+                hdr.h1 = { f1 = 52 };
+                hdr.h2 = { f2 = 53, f1 = 54 };
+                hdr.hstructs.s1 = { f1 = 6 };
+                hdr.hstructs.s2 = { f2 = 11, f1 = 8 };
             }
 
             // Code that can be used to distinguish whether hdr.h0 was
             // initialized to a valid or invalid header.
-            hdr.ethernet.dstAddr = (bit<48>) ((bit<1>) hdr.h0.isValid());
+            hdr.ethernet.dstAddr =(bit<48>)((bit<1>) hdr.h0.isValid());
         }
     }
 }
@@ -114,14 +117,16 @@ control egressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(

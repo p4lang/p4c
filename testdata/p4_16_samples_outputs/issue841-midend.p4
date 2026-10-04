@@ -17,7 +17,7 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<h_t>(hdr.h);
+        packet.extract < h_t >(hdr.h);
         transition accept;
     }
 }
@@ -50,8 +50,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
         h_0.src = hdr.h.src;
         h_0.dst = hdr.h.dst;
         h_0.csum = 16w0;
-        hdr.h.csum = checksum_0.get<h_t>(h_0);
+        hdr.h.csum = checksum_0.get < h_t >(h_0);
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

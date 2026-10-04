@@ -6,4 +6,3 @@ parser MyParser2(in bool t) {
         }
     }
 }
-

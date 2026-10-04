@@ -22,7 +22,8 @@ parser start {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 action op1(port) {
     modify_field_with_shift(data.h1, data.h2, 8, 0xff);
     modify_field(standard_metadata.egress_spec, port);
@@ -33,8 +34,14 @@ action op2(port) {
 }
 
 table test1 {
-    reads { data.f1 : exact; }
-    actions { op1; op2; noop; }
+    reads {
+        data.f1 : exact;
+    }
+    actions {
+        op1;
+        op2;
+        noop;
+    }
 }
 
 control ingress {

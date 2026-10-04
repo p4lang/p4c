@@ -1,12 +1,12 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header h1_t {
     bit<32> f1;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  cnt;
+    bit<8> b1;
+    bit<8> cnt;
 }
 
 struct headers_t {
@@ -31,7 +31,7 @@ control c(inout headers_t hdrs) {
     }
     table t1 {
         key = {
-            hdrs.head.f1: exact;
+            hdrs.head.f1 : exact;
         }
         actions = {
             a0;

@@ -12,11 +12,10 @@ control ctrl() {
     }
     apply {
         switch (t.apply().action_run) {
-            b: 
+            b:
             default: {
                 return;
             }
         }
     }
 }
-

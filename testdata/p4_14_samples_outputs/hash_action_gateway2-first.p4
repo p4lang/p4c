@@ -4,7 +4,7 @@
 
 struct counter_metadata_t {
     bit<16> counter_index;
-    bit<4>  counter_run;
+    bit<4> counter_run;
 }
 
 header data_t {
@@ -28,12 +28,12 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<data_t>(hdr.data);
+        packet.extract < data_t >(hdr.data);
         transition accept;
     }
 }
 
-@name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
+@name(".count1") @min_width(32) counter < bit<14 >>(32w16384, CounterType.packets) count1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
@@ -55,8 +55,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1");
-            hdr.data.f2: exact @name("data.f2");
+            hdr.data.f1 : exact @name("data.f1");
+            hdr.data.f2 : exact @name("data.f2");
         }
         size = 2048;
         default_action = NoAction();
@@ -73,7 +73,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.data.h1: exact @name("data.h1");
+            hdr.data.h1 : exact @name("data.h1");
         }
         default_action = NoAction();
     }
@@ -83,7 +83,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.data.h2: exact @name("data.h2");
+            hdr.data.h2 : exact @name("data.h2");
         }
         default_action = NoAction();
     }
@@ -105,7 +105,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data_t>(hdr.data);
+        packet.emit < data_t >(hdr.data);
     }
 }
 
@@ -119,4 +119,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch <headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

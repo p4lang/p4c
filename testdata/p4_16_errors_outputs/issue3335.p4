@@ -9,4 +9,3 @@ parser MyParser1(bit<1> tt1) {
         transition accept;
     }
 }
-

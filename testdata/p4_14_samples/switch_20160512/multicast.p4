@@ -409,7 +409,7 @@ control process_ipv4_multicast {
 
 #if !defined(L3_MULTICAST_DISABLE) && !defined(IPV4_DISABLE)
     if (DO_LOOKUP(L3) and
-        (multicast_metadata.ipv4_multicast_enabled == TRUE)) {
+    (multicast_metadata.ipv4_multicast_enabled == TRUE)) {
         apply(ipv4_multicast_route) {
             on_miss {
                 apply(ipv4_multicast_route_star_g);
@@ -501,7 +501,7 @@ control process_ipv6_multicast {
 
 #if !defined(L3_MULTICAST_DISABLE) && !defined(IPV6_DISABLE)
     if (DO_LOOKUP(L3) and
-        (multicast_metadata.ipv6_multicast_enabled == TRUE)) {
+    (multicast_metadata.ipv6_multicast_enabled == TRUE)) {
         apply(ipv6_multicast_route) {
             on_miss {
                 apply(ipv6_multicast_route_star_g);
@@ -612,7 +612,7 @@ table replica_type {
 
 control process_replication {
 #ifndef MULTICAST_DISABLE
-    if(egress_egress_rid != 0) {
+    if (egress_egress_rid != 0) {
         /* set info from rid */
         apply(rid);
 

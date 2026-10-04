@@ -1,12 +1,12 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header t1 {
     bit<32> f1;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  cnt;
+    bit<8> b1;
+    bit<8> cnt;
 }
 
 struct headers_t {
@@ -16,13 +16,13 @@ struct headers_t {
 control c(inout headers_t hdrs) {
     @name("c.sum") bit<32> sum_0;
     @name("c.i") bit<32> i_0;
-    @hidden action forloop10l29() {
+    @hidden action forloop10l30() {
         i_0 = i_0 + 32w4294967295;
     }
-    @hidden action forloop10l27() {
+    @hidden action forloop10l28() {
         sum_0 = sum_0 + i_0;
     }
-    @hidden action forloop10l31() {
+    @hidden action forloop10l32() {
         hdrs.head.cnt = hdrs.head.cnt + 8w1;
     }
     @hidden action forloop10l24() {
@@ -34,34 +34,34 @@ control c(inout headers_t hdrs) {
         }
         const default_action = forloop10l24();
     }
-    @hidden table tbl_forloop10l27 {
+    @hidden table tbl_forloop10l28 {
         actions = {
-            forloop10l27();
+            forloop10l28();
         }
-        const default_action = forloop10l27();
+        const default_action = forloop10l28();
     }
-    @hidden table tbl_forloop10l29 {
+    @hidden table tbl_forloop10l30 {
         actions = {
-            forloop10l29();
+            forloop10l30();
         }
-        const default_action = forloop10l29();
+        const default_action = forloop10l30();
     }
-    @hidden table tbl_forloop10l31 {
+    @hidden table tbl_forloop10l32 {
         actions = {
-            forloop10l31();
+            forloop10l32();
         }
-        const default_action = forloop10l31();
+        const default_action = forloop10l32();
     }
     apply {
         tbl_forloop10l24.apply();
-        @unroll for (i_0 = 32w5; i_0 != 32w0; ) {
-            tbl_forloop10l27.apply();
+        @unroll for (i_0 = 32w5; i_0 != 32w0;) {
+            tbl_forloop10l28.apply();
             if (sum_0 == 32w10) {
-                tbl_forloop10l29.apply();
+                tbl_forloop10l30.apply();
             }
-            tbl_forloop10l31.apply();
+            tbl_forloop10l32.apply();
         }
     }
 }
 
-top<headers_t>(c()) main;
+top < headers_t >(c()) main;

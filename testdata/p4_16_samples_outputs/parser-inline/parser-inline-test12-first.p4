@@ -14,10 +14,10 @@ header data_t16 {
 }
 
 struct headers {
-    data_t   h1;
+    data_t h1;
     data_t16 h2;
-    data_t   h3;
-    data_t   h4;
+    data_t h3;
+    data_t h4;
 }
 
 struct headers2 {
@@ -27,20 +27,20 @@ struct headers2 {
 parser Subparser(packet_in packet, out headers hdr, inout headers2 inout_hdr) {
     headers2 shdr;
     state start {
-        packet.extract<data_t>(hdr.h1);
-        transition select(hdr.h1.f) {
-            8w1: sp1;
-            8w2: sp2;
-            default: accept;
+        packet.extract < data_t >(hdr.h1);
+        transition select (hdr.h1.f) {
+            8w1 : sp1;
+            8w2 : sp2;
+            default : accept;
         }
     }
     state sp1 {
-        packet.extract<data_t>(hdr.h3);
-        packet.extract<data_t>(shdr.h1);
+        packet.extract < data_t >(hdr.h3);
+        packet.extract < data_t >(shdr.h1);
         transition sp3;
     }
     state sp2 {
-        packet.extract<data_t16>(hdr.h2);
+        packet.extract < data_t16 >(hdr.h2);
         transition accept;
     }
     state sp3 {
@@ -54,13 +54,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     Subparser() subp2;
     headers2 phdr;
     state start {
-        packet.extract<data_t>(phdr.h1);
-        transition select(standard_metadata.ingress_port) {
-            9w0: p0;
-            9w1: p1;
-            9w2: p2;
-            9w3: p3;
-            default: accept;
+        packet.extract < data_t >(phdr.h1);
+        transition select (standard_metadata.ingress_port) {
+            9w0 : p0;
+            9w1 : p1;
+            9w2 : p2;
+            9w3 : p3;
+            default : accept;
         }
     }
     state p0 {
@@ -104,7 +104,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
@@ -118,4 +118,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

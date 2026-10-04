@@ -2,8 +2,8 @@ width1_e.p4(8): [--Wwarn=unused] warning: 'c2' is unused
 const int<(c1 + c1)> c2 = 0;
                      ^^
 width1_e.p4(9): [--Wwarn=unused] warning: 'c3' is unused
-const int<(-3)> c3 = 0;
-                ^^
+const int<(- 3)> c3 = 0;
+                 ^^
 width1_e.p4(10): [--Wwarn=unused] warning: 'c4' is unused
 const int<(2w3 + 2w3)> c4 = 0;
                        ^^
@@ -14,5 +14,5 @@ width1_e.p4(8): [--Werror=invalid] error: int<-2>: invalid type size
 const int<(c1 + c1)> c2 = 0;
       ^^^^^^^^^^^^^^
 width1_e.p4(9): [--Werror=invalid] error: int<-3>: invalid type size
-const int<(-3)> c3 = 0;
-      ^^^^^^^^^
+const int<(- 3)> c3 = 0;
+      ^^^^^^^^^^

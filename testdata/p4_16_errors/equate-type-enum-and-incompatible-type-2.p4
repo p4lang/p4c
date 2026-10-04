@@ -1,10 +1,10 @@
 // generated from enum.p4
 
 enum X {
-  Field,
+    Field,
 };
 control c()() {
-  apply {
-    tuple<> v = X.Field;
-  }
+    apply {
+        tuple < > v = X.Field;
+    }
 }

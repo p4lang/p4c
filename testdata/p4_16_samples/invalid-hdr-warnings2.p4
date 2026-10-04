@@ -11,7 +11,8 @@ struct H {
     Header h2;
 }
 
-struct M { }
+struct M {
+}
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
@@ -54,9 +55,9 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             s2 = s1;
             if (s2.h1.data == 0 && s2.h2.data == 0) {
                 if (s1.h1.data > 0)
-                    s1.h1.setInvalid();
+                s1.h1.setInvalid();
                 else
-                    s1.h1.setInvalid();
+                s1.h1.setInvalid();
                 hdr.h1.data = s1.h1.data;   // s1.h1 invalid at this point
             } else {
                 s1.h1.setValid();
@@ -92,4 +93,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

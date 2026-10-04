@@ -29,4 +29,4 @@ control D(packet_out pkt, in H h) {
     }
 }
 
-V1Switch<H, M>(P(), C(), G(), G(), C(), D()) main;
+V1Switch < H, M >(P(), C(), G(), G(), C(), D()) main;

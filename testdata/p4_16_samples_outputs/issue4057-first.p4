@@ -15,7 +15,7 @@ header SimpleHeader {
 }
 
 struct ArrayStruct {
-    tuple<SimpleHeader[10]> n;
+    tuple < SimpleHeader[10] > n;
 }
 
 struct Meta_t {
@@ -24,7 +24,7 @@ struct Meta_t {
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract < hdr >(h.h);
         transition accept;
     }
 }
@@ -46,7 +46,7 @@ control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Header_t h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit < hdr >(h.h);
     }
 }
 
@@ -56,4 +56,4 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
 }
 
-V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Header_t, Meta_t >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

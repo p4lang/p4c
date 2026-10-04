@@ -15,7 +15,7 @@ header SimpleHeader {
 }
 
 struct ArrayStruct {
-    tuple<SimpleHeader[10]> n;
+    tuple < SimpleHeader[10] > n;
 }
 
 struct Meta_t {

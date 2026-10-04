@@ -4,7 +4,7 @@ issue610-bmv2.p4(146): [--Wwarn=deprecated] warning: Checksum16: Using deprecate
 v1model.p4(447)
 extern Checksum16 {
        ^^^^^^^^^^
-issue610-bmv2.p4(346): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
+issue610-bmv2.p4(353): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
     Checksum16() ipv4_checksum;
     ^^^^^^^^^^
 v1model.p4(447)

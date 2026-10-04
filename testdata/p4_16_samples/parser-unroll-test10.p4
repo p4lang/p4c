@@ -33,11 +33,13 @@ control DefaultDeparser(packet_out pkt, in header_t hdr) {
 }
 
 control EmptyControl(inout header_t hdr, inout metadata_t meta, inout standard_metadata_t std_meta) {
-    apply {}
+    apply {
+    }
 }
 
 control EmptyChecksum(inout header_t hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 V1Switch(

@@ -10,11 +10,11 @@ control c(packet_out p) {
     @name("c.tmp_0") H tmp_0;
     apply {
         tmp.setValid();
-        tmp = (H){a = 32w0,b = 32w1};
-        p.emit<H>(tmp);
+        tmp =(H) { a = 32w0, b = 32w1 };
+        p.emit < H >(tmp);
         tmp_0.setValid();
-        tmp_0 = (H){a = 32w0,b = 32w1};
-        p.emit<H>(tmp_0);
+        tmp_0 =(H) { a = 32w0, b = 32w1 };
+        p.emit < H >(tmp_0);
     }
 }
 

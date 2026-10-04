@@ -6,15 +6,20 @@
  */
 
 control c(out bit arun) {
-    action a() {}
+    action a() {
+    }
     table t {
-        actions = { a; }
+        actions = {
+            a;
+        }
         default_action = a;
     }
     apply {
         switch (t.apply().action_run) {
-            a: { arun = 1; }
-            a: { arun = 1; }  // duplicate label
+            a : { arun = 1;
+            }
+            a : { arun = 1;
+            }  // duplicate label
         }
     }
 }

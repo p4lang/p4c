@@ -25,4 +25,3 @@ header Ipv4_h {
 
 header Ipv6_h {
 }
-

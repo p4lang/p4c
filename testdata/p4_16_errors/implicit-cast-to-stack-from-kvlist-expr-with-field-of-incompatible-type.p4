@@ -1,10 +1,11 @@
 // generated from default-initializer.p4
 
-header H {}
+header H {
+}
 control C()() {
-  H[2] stack;
-  apply {
-    tuple<> h0;
-    stack = { h0, ... };
-  }
+    H[2] stack;
+    apply {
+        tuple < > h0;
+        stack = { h0, ... };
+    }
 }

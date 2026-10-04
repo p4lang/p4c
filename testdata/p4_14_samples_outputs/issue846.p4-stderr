@@ -1,18 +1,18 @@
 issue846.p4(38): [--Wwarn=type-inference] warning: Could not infer type for p, using bit<8>
-action action_0(p){
+action action_0(p) {
                 ^
 issue846.p4(42): [--Wwarn=type-inference] warning: Could not infer type for p, using bit<8>
-action action_1(p){
+action action_1(p) {
                 ^
 issue846.p4(45): [--Wwarn=type-inference] warning: Could not infer type for p, using bit<8>
-action action_2(p){
+action action_2(p) {
                 ^
 issue846.p4(38): [--Wwarn=unused] warning: 'p' is unused
-action action_0(p){
+action action_0(p) {
                 ^
 issue846.p4(42): [--Wwarn=unused] warning: 'p' is unused
-action action_1(p){
+action action_1(p) {
                 ^
 issue846.p4(45): [--Wwarn=unused] warning: 'p' is unused
-action action_2(p){
+action action_2(p) {
                 ^

@@ -40,7 +40,8 @@ control cIngress(inout Parsed_packet hdr, inout Metadata meta, inout standard_me
 }
 
 control cEgress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    apply {}
+    apply {
+    }
 }
 
 control vc(inout Parsed_packet hdr, inout Metadata meta) {

@@ -22,7 +22,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         retval = 8w1;
         inlinedRetval_0 = retval;
         tmp = inlinedRetval_0;
-        c_0 = (bit<32>)tmp;
+        c_0 =(bit<32>) tmp;
         sm.enq_timestamp = c_0;
     }
     apply {
@@ -53,8 +53,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

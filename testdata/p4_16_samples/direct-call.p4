@@ -5,9 +5,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 control c() {
-    apply {}
+    apply {
+    }
 }
 
 control d() {
-    apply { c.apply(); }
+    apply {
+        c.apply();
+    }
 }

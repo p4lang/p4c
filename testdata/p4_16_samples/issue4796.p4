@@ -11,7 +11,7 @@ header priceX {
 }
 struct Headers {
     ethernet_t eth_hdr;
-    priceX[4]  heal;
+    priceX[4] heal;
 }
 struct main_metadata_t {
 }
@@ -44,7 +44,7 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
         }
     }
     apply {
-        hdr.eth_hdr.eth_type = (greatY.apply().hit ? 16w48951 : 91w213560861023984182890738508[76:61] |-| 116w64291011913438215645283401046339830[19:4]);
+        hdr.eth_hdr.eth_type =(greatY.apply().hit ? 16w48951 : 91w213560861023984182890738508[76 : 61] |-| 116w64291011913438215645283401046339830[19 : 4]);
     }
 }
 

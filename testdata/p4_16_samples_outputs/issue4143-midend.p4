@@ -9,10 +9,10 @@ struct Foo {
 parser MyParser(packet_in packet) {
     @name("MyParser.tmp_0") Foo tmp_0;
     state start {
-        packet.lookahead<bit<0>>();
-        transition select(tmp_0.f0) {
-            0: accept;
-            default: reject;
+        packet.lookahead < bit<0 >>();
+        transition select (tmp_0.f0) {
+            0 : accept;
+            default : reject;
         }
     }
 }

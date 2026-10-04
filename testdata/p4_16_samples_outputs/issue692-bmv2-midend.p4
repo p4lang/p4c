@@ -28,10 +28,10 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta, inout standard_metada
         transition p0;
     }
     state p0 {
-        b.extract<T>(parsedHdr.hstack.next);
-        transition select(parsedHdr.hstack.next.y) {
-            32w0: p0;
-            default: accept;
+        b.extract < T >(parsedHdr.hstack.next);
+        transition select (parsedHdr.hstack.next.y) {
+            32w0 : p0;
+            default : accept;
         }
     }
 }
@@ -56,4 +56,4 @@ control DeparserI(packet_out b, in H hdr) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

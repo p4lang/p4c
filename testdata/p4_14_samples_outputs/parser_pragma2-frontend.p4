@@ -3,7 +3,6 @@
     start_e2e_mirrored = 32w1,
     start_i2e_mirrored = 32w2
 }
-
 #include <core.p4>
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
@@ -24,21 +23,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @packet_entry @name(".start_e2e_mirrored") state start_e2e_mirrored {
-        tmp_0 = packet.lookahead<bit<32>>();
+        tmp_0 = packet.lookahead < bit<32 >>();
         tmp = tmp_0;
-        transition select(tmp) {
-            default: accept;
-            32w0xab00: Cowles;
+        transition select (tmp) {
+            default : accept;
+            32w0xab00 : Cowles;
         }
     }
     @packet_entry @name(".start_i2e_mirrored") state start_i2e_mirrored {
         transition accept;
     }
     @name(".$start") state start {
-        transition select((InstanceType_0)standard_metadata.instance_type) {
-            InstanceType_0.START: start_0;
-            InstanceType_0.start_e2e_mirrored: start_e2e_mirrored;
-            InstanceType_0.start_i2e_mirrored: start_i2e_mirrored;
+        transition select ((InstanceType_0) standard_metadata.instance_type) {
+            InstanceType_0.START : start_0;
+            InstanceType_0.start_e2e_mirrored : start_e2e_mirrored;
+            InstanceType_0.start_i2e_mirrored : start_i2e_mirrored;
         }
     }
 }
@@ -54,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            standard_metadata.egress_spec: exact @name("standard_metadata.egress_spec");
+            standard_metadata.egress_spec : exact @name("standard_metadata.egress_spec");
         }
         default_action = NoAction_1();
     }
@@ -83,4 +82,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

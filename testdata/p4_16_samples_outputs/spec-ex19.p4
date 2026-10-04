@@ -2,9 +2,9 @@
 
 header Mpls_h {
     bit<20> label;
-    bit<3>  tc;
-    bit<1>  bos;
-    bit<8>  ttl;
+    bit<3> tc;
+    bit<1> bos;
+    bit<8> ttl;
 }
 
 control p() {
@@ -22,26 +22,26 @@ header Tcp_option_nop_h {
 }
 
 header Tcp_option_ss_h {
-    bit<8>  kind;
+    bit<8> kind;
     bit<32> maxSegmentSize;
 }
 
 header Tcp_option_s_h {
-    bit<8>  kind;
+    bit<8> kind;
     bit<24> scale;
 }
 
 header Tcp_option_sack_h {
-    bit<8>      kind;
-    bit<8>      length;
+    bit<8> kind;
+    bit<8> length;
     varbit<256> sack;
 }
 
 header_union Tcp_option_h {
-    Tcp_option_end_h  end;
-    Tcp_option_nop_h  nop;
-    Tcp_option_ss_h   ss;
-    Tcp_option_s_h    s;
+    Tcp_option_end_h end;
+    Tcp_option_nop_h nop;
+    Tcp_option_ss_h ss;
+    Tcp_option_s_h s;
     Tcp_option_sack_h sack;
 }
 
@@ -53,12 +53,12 @@ struct Tcp_option_sack_top {
 
 parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
     state start {
-        transition select(b.lookahead<bit<8>>()) {
-            8w0x0: parse_tcp_option_end;
-            8w0x1: parse_tcp_option_nop;
-            8w0x2: parse_tcp_option_ss;
-            8w0x3: parse_tcp_option_s;
-            8w0x5: parse_tcp_option_sack;
+        transition select (b.lookahead < bit<8 >>()) {
+            8w0x0 : parse_tcp_option_end;
+            8w0x1 : parse_tcp_option_nop;
+            8w0x2 : parse_tcp_option_ss;
+            8w0x3 : parse_tcp_option_s;
+            8w0x5 : parse_tcp_option_sack;
         }
     }
     state parse_tcp_option_end {
@@ -83,6 +83,6 @@ parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
     }
 }
 
-parser pr<H>(packet_in b, out H h);
-package top<H>(pr<H> p);
+parser pr < H >(packet_in b, out H h);
+package top < H >(pr<H> p);
 top(Tcp_option_parser()) main;

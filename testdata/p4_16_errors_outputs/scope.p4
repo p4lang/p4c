@@ -14,4 +14,3 @@ control r() {
         bit<8> y = .q.x.get();
     }
 }
-

@@ -8,4 +8,3 @@ parser p() {
         transition accept;
     }
 }
-

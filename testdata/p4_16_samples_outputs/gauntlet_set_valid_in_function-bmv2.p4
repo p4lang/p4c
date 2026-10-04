@@ -9,14 +9,14 @@ header ethernet_t {
 }
 
 header H {
-    bit<8>  a;
+    bit<8> a;
     bit<64> b;
     bit<16> c;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -29,7 +29,7 @@ bit<16> do_thing() {
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        m.t = (bit<32>)do_thing();
+        m.t =(bit<32>) do_thing();
     }
 }
 

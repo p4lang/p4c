@@ -4,10 +4,10 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-header h {}
+header h {
+}
 
-control p()
-{
+control p() {
     apply {
         int<3> w = 5;
         h[w] stack;

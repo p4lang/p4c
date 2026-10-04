@@ -8,15 +8,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -27,10 +27,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -45,28 +45,28 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType, hdr.ethernet.srcAddr) {
-            (16w0x800, 48w0xf00): parse_ipv4;
-            (16w0x800 &&& 16w0xf00, 48w0x3883): parse_tcp;
-            (default, 48w0x678): parse_ipv4;
-            default: accept;
+        buffer.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType, hdr.ethernet.srcAddr) {
+            (16w0x800, 48w0xf00) : parse_ipv4;
+            (16w0x800 &&& 16w0xf00, 48w0x3883) : parse_tcp;
+            (default, 48w0x678) : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        buffer.extract<ipv4_t>(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            default: parse_tcp;
+        buffer.extract < ipv4_t >(hdr.ipv4);
+        transition select (hdr.ipv4.protocol) {
+            default : parse_tcp;
         }
     }
     state parse_tcp {
-        buffer.extract<tcp_t>(hdr.tcp);
+        buffer.extract < tcp_t >(hdr.tcp);
         transition accept;
     }
 }
@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: ternary @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : ternary @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -104,39 +104,39 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampleselect_tuple1l141() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+    @hidden action psaexampleselect_tuple1l142() {
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
-    @hidden table tbl_psaexampleselect_tuple1l141 {
+    @hidden table tbl_psaexampleselect_tuple1l142 {
         actions = {
-            psaexampleselect_tuple1l141();
+            psaexampleselect_tuple1l142();
         }
-        const default_action = psaexampleselect_tuple1l141();
+        const default_action = psaexampleselect_tuple1l142();
     }
     apply {
-        tbl_psaexampleselect_tuple1l141.apply();
+        tbl_psaexampleselect_tuple1l142.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaexampleselect_tuple1l157() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+    @hidden action psaexampleselect_tuple1l158() {
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
-    @hidden table tbl_psaexampleselect_tuple1l157 {
+    @hidden table tbl_psaexampleselect_tuple1l158 {
         actions = {
-            psaexampleselect_tuple1l157();
+            psaexampleselect_tuple1l158();
         }
-        const default_action = psaexampleselect_tuple1l157();
+        const default_action = psaexampleselect_tuple1l158();
     }
     apply {
-        tbl_psaexampleselect_tuple1l157.apply();
+        tbl_psaexampleselect_tuple1l158.apply();
     }
 }
 
-IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
+EgressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
+PSA_Switch < headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

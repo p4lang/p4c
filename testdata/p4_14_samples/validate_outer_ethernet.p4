@@ -32,9 +32,9 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_VLAN : parse_vlan;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_VLAN : parse_vlan;
+    default : ingress;
     }
 }
 
@@ -43,9 +43,9 @@ header vlan_tag_t vlan_tag_[VLAN_DEPTH];
 
 parser parse_vlan {
     extract(vlan_tag_[next]);
-    return select(latest.etherType) {
-        ETHERTYPE_VLAN : parse_vlan;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_VLAN : parse_vlan;
+    default : ingress;
     }
 }
 

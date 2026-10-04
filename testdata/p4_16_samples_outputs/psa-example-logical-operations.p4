@@ -20,7 +20,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct metadata {
@@ -50,7 +50,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     }
     table tbl {
         key = {
-            a.srcAddr: exact;
+            a.srcAddr : exact;
         }
         actions = {
             forward;
@@ -61,7 +61,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         tbl.apply();
         a.dstAddr = b.meta;
         a.srcAddr = b.meta2;
-        a.etherType = b.meta3[15:0];
+        a.etherType = b.meta3[15 : 0];
     }
 }
 

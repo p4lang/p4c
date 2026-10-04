@@ -8,15 +8,15 @@ header Ethernet_h {
 }
 
 header IPv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -24,19 +24,19 @@ header IPv4_h {
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ip;
+            default : reject;
         }
     }
     state ip {
-        p.extract<IPv4_h>(headers.ipv4);
+        p.extract < IPv4_h >(headers.ipv4);
         transition accept;
     }
 }
@@ -49,7 +49,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
-            headers.ipv4.srcAddr: ternary @name("headers.ipv4.srcAddr");
+            headers.ipv4.srcAddr : ternary @name("headers.ipv4.srcAddr");
         }
         actions = {
             act_pass();
@@ -58,19 +58,19 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = act_pass();
     }
-    @hidden action ternary_ebpf59() {
+    @hidden action ternary_ebpf61() {
         pass = false;
     }
-    @hidden table tbl_ternary_ebpf59 {
+    @hidden table tbl_ternary_ebpf61 {
         actions = {
-            ternary_ebpf59();
+            ternary_ebpf61();
         }
-        const default_action = ternary_ebpf59();
+        const default_action = ternary_ebpf61();
     }
     apply {
-        tbl_ternary_ebpf59.apply();
+        tbl_ternary_ebpf61.apply();
         Check_src_ip_0.apply();
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

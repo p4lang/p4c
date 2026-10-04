@@ -14,4 +14,3 @@ struct metadata {
 struct headers {
     ethernet_t ethernet;
 }
-

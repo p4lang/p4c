@@ -4,28 +4,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-extern g1{
+extern g1 {
     g1();
     void f();
 }
 
-extern g
-{
+extern g {
     g();
     abstract void f();
     void h1();
 }
 
-extern gg
-{
+extern gg {
     gg();
     void f();
 }
 
 package myp(g1 tg, gg tgg);
-
-bool h()
-{
+bool h() {
     myp(g1(), gg()) ty;
     g() t = {
         myp(g1(), gg()) ty;

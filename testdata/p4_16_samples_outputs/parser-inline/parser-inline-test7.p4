@@ -26,9 +26,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state start {
         packet.extract(hdr.h1);
         packet.extract(hdr.h2);
-        transition select(standard_metadata.ingress_port) {
-            0: p0;
-            default: p1;
+        transition select (standard_metadata.ingress_port) {
+            0 : p0;
+            default : p1;
         }
     }
     state p0 {

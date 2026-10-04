@@ -27,12 +27,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.srcAddr, hdr.ethernet.dstAddr) {
-            (0x12f_0000                , 0x456             ): a1;
-            (0x12f_0000 &&& 0xffff_0000, 0x456             ): a2;
-            (0x12f_0000                , 0x456 &&& 0xfff   ): a3;
-            (0x12f_0000 &&& 0xffff_0000, 0x456 &&& 0xfff   ): a4;
-            default: a5;
+        transition select (hdr.ethernet.srcAddr, hdr.ethernet.dstAddr) {
+            (0x12f_0000, 0x456) : a1;
+            (0x12f_0000 &&& 0xffff_0000, 0x456) : a2;
+            (0x12f_0000, 0x456 &&& 0xfff) : a3;
+            (0x12f_0000 &&& 0xffff_0000, 0x456 &&& 0xfff) : a4;
+            default : a5;
         }
     }
     state a1 {

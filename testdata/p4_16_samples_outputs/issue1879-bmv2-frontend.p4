@@ -7,14 +7,14 @@ header preamble_t {
 }
 
 header prot_common_t {
-    bit<4>  version;
-    bit<6>  dstType;
-    bit<6>  srcType;
+    bit<4> version;
+    bit<6> dstType;
+    bit<6> srcType;
     bit<16> totalLen;
-    bit<8>  hdrLen;
-    bit<8>  curri;
-    bit<8>  currh;
-    bit<8>  nextHdr;
+    bit<8> hdrLen;
+    bit<8> curri;
+    bit<8> currh;
+    bit<8> nextHdr;
 }
 
 header prot_addr_common_t {
@@ -34,10 +34,10 @@ header prot_host_addr_padding_t {
 }
 
 header prot_i_t {
-    bit<7>  data;
-    bit<1>  upDirection;
+    bit<7> data;
+    bit<1> upDirection;
     bit<48> data2;
-    bit<8>  segLen;
+    bit<8> segLen;
 }
 
 header prot_h_t {
@@ -49,23 +49,23 @@ struct currenti_t {
 }
 
 struct metadata {
-    bit<8>     headerLen;
-    bit<8>     hLeft;
-    bit<9>     addrLen;
-    bit<8>     currPos;
+    bit<8> headerLen;
+    bit<8> hLeft;
+    bit<9> addrLen;
+    bit<8> currPos;
     currenti_t currenti;
 }
 
 struct headers {
-    preamble_t               preamble;
-    prot_common_t            prot_common;
-    prot_addr_common_t       prot_addr_common;
-    prot_host_addr_t         prot_host_addr_dst;
-    prot_host_addr_t         prot_host_addr_src;
+    preamble_t preamble;
+    prot_common_t prot_common;
+    prot_addr_common_t prot_addr_common;
+    prot_host_addr_t prot_host_addr_dst;
+    prot_host_addr_t prot_host_addr_src;
     prot_host_addr_padding_t prot_host_addr_padding;
-    prot_i_t                 prot_inf_0;
-    prot_h_t[10]             prot_h_0;
-    prot_i_t                 prot_inf_1;
+    prot_i_t prot_inf_0;
+    prot_h_t[10] prot_h_0;
+    prot_i_t prot_inf_1;
 }
 
 parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -76,32 +76,32 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("PROTParser.currI_0") bit<8> currI_0;
     @name("PROTParser.subParser.currentISelected2") bool subParser_currentISelected2;
     state start {
-        packet.extract<preamble_t>(hdr.preamble);
-        packet.extract<prot_common_t>(hdr.prot_common);
-        packet.extract<prot_addr_common_t>(hdr.prot_addr_common);
+        packet.extract < preamble_t >(hdr.preamble);
+        packet.extract < prot_common_t >(hdr.prot_common);
+        packet.extract < prot_addr_common_t >(hdr.prot_addr_common);
         meta.headerLen = hdr.prot_common.hdrLen;
-        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_dst.ipv4);
+        packet.extract < prot_host_addr_ipv4_t >(hdr.prot_host_addr_dst.ipv4);
         meta.addrLen = 9w32;
-        transition select(hdr.prot_common.srcType) {
-            6w0x1: parse_prot_host_addr_src_ipv4;
+        transition select (hdr.prot_common.srcType) {
+            6w0x1 : parse_prot_host_addr_src_ipv4;
         }
     }
     state parse_prot_host_addr_src_ipv4 {
-        packet.extract<prot_host_addr_ipv4_t>(hdr.prot_host_addr_src.ipv4);
+        packet.extract < prot_host_addr_ipv4_t >(hdr.prot_host_addr_src.ipv4);
         meta.addrLen = meta.addrLen + 9w32;
-        paddingLen_0 = 9w64 - (meta.addrLen & 9w63) & 9w63;
-        packet.extract<prot_host_addr_padding_t>(hdr.prot_host_addr_padding, (bit<32>)paddingLen_0);
+        paddingLen_0 = 9w64 -(meta.addrLen & 9w63) & 9w63;
+        packet.extract < prot_host_addr_padding_t >(hdr.prot_host_addr_padding, (bit<32>)paddingLen_0);
         meta.addrLen = meta.addrLen + paddingLen_0;
-        meta.currPos = (bit<8>)((meta.addrLen >> 6) + 9w3);
+        meta.currPos =(bit<8>)((meta.addrLen >> 6) + 9w3);
         inf_0.setInvalid();
         meta_0 = meta;
         currI_0 = hdr.prot_common.curri;
         transition SubParser_start;
     }
     state SubParser_start {
-        packet.extract<prot_i_t>(inf_0);
+        packet.extract < prot_i_t >(inf_0);
         subParser_currentISelected2 = currI_0 == meta_0.currPos;
-        meta_0.currenti.upDirection = meta_0.currenti.upDirection + (bit<1>)subParser_currentISelected2 * inf_0.upDirection;
+        meta_0.currenti.upDirection = meta_0.currenti.upDirection +(bit<1>) subParser_currentISelected2 * inf_0.upDirection;
         meta_0.hLeft = inf_0.segLen;
         meta_0.currPos = meta_0.currPos + 8w1;
         transition parse_prot_host_addr_src_ipv4_0;
@@ -112,22 +112,22 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_prot_h_0_pre;
     }
     state parse_prot_h_0_pre {
-        transition select(meta.hLeft) {
-            8w0: parse_prot_1;
-            default: parse_prot_h_0;
+        transition select (meta.hLeft) {
+            8w0 : parse_prot_1;
+            default : parse_prot_h_0;
         }
     }
     state parse_prot_h_0 {
-        packet.extract<prot_h_t>(hdr.prot_h_0.next);
+        packet.extract < prot_h_t >(hdr.prot_h_0.next);
         meta.hLeft = meta.hLeft + 8w255;
         meta.currPos = meta.currPos + 8w1;
         transition parse_prot_h_0_pre;
     }
     state parse_prot_1 {
         hdrLeft_0 = meta.headerLen - meta.currPos;
-        transition select(hdrLeft_0) {
-            8w0: accept;
-            default: parse_prot_inf_1;
+        transition select (hdrLeft_0) {
+            8w0 : accept;
+            default : parse_prot_inf_1;
         }
     }
     state parse_prot_inf_1 {
@@ -137,9 +137,9 @@ parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition SubParser_start_0;
     }
     state SubParser_start_0 {
-        packet.extract<prot_i_t>(inf_0);
+        packet.extract < prot_i_t >(inf_0);
         subParser_currentISelected2 = currI_0 == meta_0.currPos;
-        meta_0.currenti.upDirection = meta_0.currenti.upDirection + (bit<1>)subParser_currentISelected2 * inf_0.upDirection;
+        meta_0.currenti.upDirection = meta_0.currenti.upDirection +(bit<1>) subParser_currentISelected2 * inf_0.upDirection;
         meta_0.hLeft = inf_0.segLen;
         meta_0.currPos = meta_0.currPos + 8w1;
         transition parse_prot_inf;
@@ -176,8 +176,8 @@ control PROTComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control PROTDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
-V1Switch<headers, metadata>(PROTParser(), PROTVerifyChecksum(), PROTIngress(), PROTEgress(), PROTComputeChecksum(), PROTDeparser()) main;
+V1Switch < headers, metadata >(PROTParser(), PROTVerifyChecksum(), PROTIngress(), PROTEgress(), PROTComputeChecksum(), PROTDeparser()) main;

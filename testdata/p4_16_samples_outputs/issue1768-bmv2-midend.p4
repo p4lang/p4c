@@ -14,7 +14,7 @@ struct metadata {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.lookahead<bit<64>>();
+        packet.lookahead < bit<64 >>();
         transition accept;
     }
 }
@@ -25,18 +25,18 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue1768bmv2l38() {
+    @hidden action issue1768bmv2l41() {
         mark_to_drop(standard_metadata);
     }
-    @hidden table tbl_issue1768bmv2l38 {
+    @hidden table tbl_issue1768bmv2l41 {
         actions = {
-            issue1768bmv2l38();
+            issue1768bmv2l41();
         }
-        const default_action = issue1768bmv2l38();
+        const default_action = issue1768bmv2l41();
     }
     apply {
         if (standard_metadata.parser_error != error.NoError) {
-            tbl_issue1768bmv2l38.apply();
+            tbl_issue1768bmv2l41.apply();
         }
     }
 }
@@ -56,4 +56,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

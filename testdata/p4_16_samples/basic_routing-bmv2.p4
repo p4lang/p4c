@@ -20,15 +20,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -40,15 +40,15 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state parse_ethernet {
         packet.extract(hdr = hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -73,7 +73,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             rewrite_src_dst_mac;
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index : exact;
         }
         size = 32768;
     }
@@ -103,7 +103,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_vrf;
         }
         key = {
-            meta.ingress_metadata.bd: exact;
+            meta.ingress_metadata.bd : exact;
         }
         size = 65536;
     }
@@ -113,8 +113,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             fib_hit_nexthop;
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : exact;
+            meta.ingress_metadata.vrf : exact;
+            hdr.ipv4.dstAddr : exact;
         }
         size = 131072;
     }
@@ -124,8 +124,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             fib_hit_nexthop;
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : lpm;
+            meta.ingress_metadata.vrf : exact;
+            hdr.ipv4.dstAddr : lpm;
         }
         size = 16384;
     }
@@ -135,7 +135,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_details;
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index : exact;
         }
         size = 32768;
     }
@@ -144,7 +144,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_bd;
         }
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port : exact;
         }
         size = 32768;
     }
@@ -153,8 +153,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             port_mapping.apply();
             bd.apply();
             switch (ipv4_fib.apply().action_run) {
-                on_miss: {
-                    ipv4_fib_lpm.apply();
+                on_miss : {
+                ipv4_fib_lpm.apply();
                 }
             }
 

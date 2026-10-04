@@ -15,27 +15,37 @@ struct Headers {
     Header h;
 }
 
-struct M {}
+struct M {
+}
 
 parser prs(packet_in p, out Headers h, inout M meta, inout standard_metadata_t s) {
     state start {
-        p.extract<Header>(_);
+        p.extract < Header >(_);
         p.extract(h.h);
         transition accept;
     }
 }
 
-control vc(inout Headers hdr, inout M meta) { apply {} }
+control vc(inout Headers hdr, inout M meta) {
+    apply {
+    }
+}
 control i(inout Headers hdr,
           inout M meta,
           inout standard_metadata_t standard_metadata) {
-    apply {}}
+    apply {
+    }
+}
 control e(inout Headers hdr,
           inout M meta,
           inout standard_metadata_t standard_metadata) {
-    apply {}}
+    apply {
+    }
+}
 control cc(inout Headers hdr, inout M meta) {
-    apply {}}
+    apply {
+    }
+}
 control d(packet_out b, in Headers hdr) {
     apply {
         b.emit(hdr);

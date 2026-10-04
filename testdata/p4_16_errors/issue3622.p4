@@ -4,16 +4,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-action a(){}
-action b(){}
-action NoAction(){}
+action a() {
+}
+action b() {
+}
+action NoAction() {
+}
 control c() {
-    table t  {
-        actions = { a ; b;  }
+    table t {
+        actions = {
+            a;
+            b;
+        }
     }
     apply {
-        switch(t.apply().action_run) {
-            true ? a : b : {}
+        switch (t.apply().action_run) {
+            true ? a : b : {
+            }
         }
     }
 }

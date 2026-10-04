@@ -35,7 +35,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -85,48 +85,48 @@ header_type udp_t {
 
 header ethernet_t ethernet;
 header vlan_tag_t vlan_tag;
-header ipv4_t     ipv4;
-header ipv6_t     ipv6;
-header tcp_t      tcp;
-header udp_t      udp;
-header icmp_t     icmp;
+header ipv4_t ipv4;
+header ipv6_t ipv6;
+header tcp_t tcp;
+header udp_t udp;
+header icmp_t icmp;
 
 parser start {
     extract(ethernet);
-    return select(latest.etherType) {
-        0x8100, 0x9100 : parse_vlan_tag;
-        0x0800         : parse_ipv4;
-        0x86DD         : parse_ipv6;
-        default        : ingress;
+    return select (latest.etherType) {
+    0x8100, 0x9100 : parse_vlan_tag;
+    0x0800 : parse_ipv4;
+    0x86DD : parse_ipv6;
+    default : ingress;
     }
 }
 
 parser parse_vlan_tag {
     extract(vlan_tag);
-    return select(latest.etherType) {
-        0x0800         : parse_ipv4;
-        0x86DD         : parse_ipv6;
-        default        : ingress;
+    return select (latest.etherType) {
+    0x0800 : parse_ipv4;
+    0x86DD : parse_ipv6;
+    default : ingress;
     }
 }
 
 parser parse_ipv4 {
     extract(ipv4);
-    return select(latest.fragOffset, latest.ihl, latest.protocol) {
-        0x0000501 mask 0x0000fff : parse_icmp;
-        0x0000506 mask 0x0000fff : parse_tcp;
-        0x0000511 mask 0x0000fff : parse_udp;
-        default                  : ingress;
+    return select (latest.fragOffset, latest.ihl, latest.protocol) {
+    0x0000501 mask 0x0000fff : parse_icmp;
+    0x0000506 mask 0x0000fff : parse_tcp;
+    0x0000511 mask 0x0000fff : parse_udp;
+    default : ingress;
     }
 }
 
 parser parse_ipv6 {
     extract(ipv6);
-    return select(latest.nextHdr) {
-        0x01 : parse_icmp;
-        0x06 : parse_tcp;
-        0x11 : parse_udp;
-        default : ingress;
+    return select (latest.nextHdr) {
+    0x01 : parse_icmp;
+    0x06 : parse_tcp;
+    0x11 : parse_udp;
+    default : ingress;
     }
 }
 
@@ -282,15 +282,18 @@ control ingress {
             apply(ipv6_match);
         }
         default {
-          apply(l2_match);
+            apply(l2_match);
         }
     }
     if (valid(tcp)) {
-        apply(tcp_check); }
+        apply(tcp_check);
+    }
     else if (valid(udp)) {
-        apply(udp_check); }
+        apply(udp_check);
+    }
     else if (valid(icmp)) {
-        apply(icmp_check); }
+        apply(icmp_check);
+    }
     apply(set_egress);
 }
 

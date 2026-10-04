@@ -29,7 +29,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
     @name(".start") state start {
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.mymeta.f1: exact @name("mymeta.f1");
+            meta.mymeta.f1 : exact @name("mymeta.f1");
         }
         size = 128;
         default_action = NoAction();
@@ -71,7 +71,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.mymeta.f1: exact @name("mymeta.f1");
+            meta.mymeta.f1 : exact @name("mymeta.f1");
         }
         size = 128;
         default_action = NoAction();
@@ -84,7 +84,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -98,4 +98,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

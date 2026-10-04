@@ -20,21 +20,23 @@ parser start {
     return ingress;
 }
 
-action _drop() { drop(); }
+action _drop() {
+    drop();
+}
 
 table set_default_behavior_drop {
     actions {
         _drop;
     }
-    default_action: _drop;
+    default_action : _drop;
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     modify_field(data.b1, val);
     modify_field(standard_metadata.egress_spec, port);
 }
-
 
 table test1 {
     reads {

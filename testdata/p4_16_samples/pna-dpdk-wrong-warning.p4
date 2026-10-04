@@ -7,16 +7,16 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 header h1_t {
@@ -63,7 +63,7 @@ control ingress(inout headers_t hdr,
     hu1_t[2] au1b;
 
     apply {
-        hu1b.h1 = {hdr.ethernet.dstAddr[45:38], hdr.ethernet.dstAddr[44:37]};
+        hu1b.h1 = { hdr.ethernet.dstAddr[45 : 38], hdr.ethernet.dstAddr[44 : 37] };
         // hu1b is now completely initialized, but at least some
         // versions of p4c give a warning below when hu1b is used on
         // the right-hand side of an assignment.
@@ -80,11 +80,11 @@ control ingress(inout headers_t hdr,
 
         // Same test case as above, but for stack with header_union
         // elements.
-        au1b[0].h1 = {hdr.ethernet.dstAddr[37:30], hdr.ethernet.dstAddr[36:29]};
-        au1b[1].h2 = {hdr.ethernet.dstAddr[35:28], hdr.ethernet.dstAddr[34:27]};
-        
+        au1b[0].h1 = { hdr.ethernet.dstAddr[37 : 30], hdr.ethernet.dstAddr[36 : 29] };
+        au1b[1].h2 = { hdr.ethernet.dstAddr[35 : 28], hdr.ethernet.dstAddr[34 : 27] };
+
         au1 = au1b;
-        
+
         a1 = a1b;
     }
 }
@@ -108,4 +108,3 @@ control PreControlImpl(
 }
 
 PNA_NIC(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h0_t {
@@ -41,9 +41,9 @@ header hstructs_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    h0_t       h0;
-    h1_t       h1;
-    h2_t       h2;
+    h0_t h0;
+    h1_t h1;
+    h2_t h2;
     hstructs_t hstructs;
 }
 
@@ -66,20 +66,20 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     apply {
         if (hdr.ethernet.isValid()) {
             hdr.hstructs.setValid();
-            hdr.h0 = {  };
-            hdr.hstructs.s0 = {  };
+            hdr.h0 = { };
+            hdr.hstructs.s0 = { };
             if (hdr.ethernet.etherType == 0) {
                 hdr.h1 = { 42 };
                 hdr.h2 = { 43, 44 };
                 hdr.hstructs.s1 = { 5 };
                 hdr.hstructs.s2 = { 5, 10 };
             } else {
-                hdr.h1 = {f1 = 52};
-                hdr.h2 = {f2 = 53,f1 = 54};
-                hdr.hstructs.s1 = {f1 = 6};
-                hdr.hstructs.s2 = {f2 = 11,f1 = 8};
+                hdr.h1 = { f1 = 52 };
+                hdr.h2 = { f2 = 53, f1 = 54 };
+                hdr.hstructs.s1 = { f1 = 6 };
+                hdr.hstructs.s2 = { f2 = 11, f1 = 8 };
             }
-            hdr.ethernet.dstAddr = (bit<48>)(bit<1>)hdr.h0.isValid();
+            hdr.ethernet.dstAddr =(bit<48>)(bit<1>) hdr.h0.isValid();
         }
     }
 }

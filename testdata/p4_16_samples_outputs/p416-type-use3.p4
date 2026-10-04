@@ -19,19 +19,19 @@ type CustomTD_t CustomTDT_t;
 typedef CustomTT_t CustomTTD_t;
 type CustomTT_t CustomTTT_t;
 header ethernet_t {
-    EthD_t  dstAddr;
-    EthT_t  srcAddr;
+    EthD_t dstAddr;
+    EthT_t srcAddr;
     bit<16> etherType;
 }
 
 header custom_t {
-    bit<8>      e;
-    CustomD_t   ed;
-    CustomT_t   et;
-    CustomDD_t  edd;
-    CustomDT_t  edt;
-    CustomTD_t  etd;
-    CustomTT_t  ett;
+    bit<8> e;
+    CustomD_t ed;
+    CustomT_t et;
+    CustomDD_t edd;
+    CustomDT_t edt;
+    CustomTD_t etd;
+    CustomTT_t ett;
     CustomDDD_t eddd;
     CustomDDT_t eddt;
     CustomDTD_t edtd;
@@ -40,7 +40,7 @@ header custom_t {
     CustomTDT_t etdt;
     CustomTTD_t ettd;
     CustomTTT_t ettt;
-    bit<16>     checksum;
+    bit<16> checksum;
 }
 
 struct meta_t {
@@ -48,7 +48,7 @@ struct meta_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    custom_t   custom;
+    custom_t custom;
 }
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
@@ -58,9 +58,9 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_CUSTOM: parse_custom;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_CUSTOM : parse_custom;
+            default : accept;
         }
     }
     state parse_custom {
@@ -94,19 +94,19 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     table custom_table {
         key = {
-            hdr.ethernet.srcAddr: exact;
-            hdr.ethernet.dstAddr: exact;
-            hdr.custom.e        : exact;
-            hdr.custom.ed       : exact;
-            hdr.custom.et       : exact;
-            hdr.custom.edd      : exact;
-            hdr.custom.eddt     : exact;
-            hdr.custom.edtd     : exact;
-            hdr.custom.edtt     : exact;
-            hdr.custom.etdd     : exact;
-            hdr.custom.etdt     : exact;
-            hdr.custom.ettd     : exact;
-            hdr.custom.ettt     : exact;
+            hdr.ethernet.srcAddr : exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.custom.e : exact;
+            hdr.custom.ed : exact;
+            hdr.custom.et : exact;
+            hdr.custom.edd : exact;
+            hdr.custom.eddt : exact;
+            hdr.custom.edtd : exact;
+            hdr.custom.edtt : exact;
+            hdr.custom.etdd : exact;
+            hdr.custom.etdt : exact;
+            hdr.custom.ettd : exact;
+            hdr.custom.ettt : exact;
         }
         actions = {
             set_output;

@@ -5,6 +5,6 @@ spec-issue1068.p4(13): [--Winfo=removed] info: removing parser 'MyParser1'
 parser MyParser1() {
        ^^^^^^^^^
 spec-issue1068.p4(7): [--Winfo=removed] info: removing parser 'MyParser'
-parser MyParser<t>(t tt) {
+parser MyParser < t >(t tt) {
        ^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

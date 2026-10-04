@@ -59,20 +59,20 @@ header DIV {
 }
 
 header BOOL {
-    bool   a;
+    bool a;
     bit<7> padding;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    OVERFLOW   overflow;
-    UNDERFLOW  underflow;
-    RSH        rshift;
-    LSH        lshift;
-    MOD        mod;
-    COMPARE    comp;
-    DIV        div;
-    BOOL       b;
+    OVERFLOW overflow;
+    UNDERFLOW underflow;
+    RSH rshift;
+    LSH lshift;
+    MOD mod;
+    COMPARE comp;
+    DIV div;
+    BOOL b;
 }
 
 struct Meta {
@@ -80,21 +80,21 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<OVERFLOW>(hdr.overflow);
-        pkt.extract<UNDERFLOW>(hdr.underflow);
-        pkt.extract<RSH>(hdr.rshift);
-        pkt.extract<LSH>(hdr.lshift);
-        pkt.extract<MOD>(hdr.mod);
-        pkt.extract<COMPARE>(hdr.comp);
-        pkt.extract<DIV>(hdr.div);
-        pkt.extract<BOOL>(hdr.b);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < OVERFLOW >(hdr.overflow);
+        pkt.extract < UNDERFLOW >(hdr.underflow);
+        pkt.extract < RSH >(hdr.rshift);
+        pkt.extract < LSH >(hdr.lshift);
+        pkt.extract < MOD >(hdr.mod);
+        pkt.extract < COMPARE >(hdr.comp);
+        pkt.extract < DIV >(hdr.div);
+        pkt.extract < BOOL >(hdr.b);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_various_opsbmv2l106() {
+    @hidden action gauntlet_various_opsbmv2l107() {
         h.overflow.a = 8w255;
         h.overflow.b = 8w3;
         h.underflow.a = 8w0;
@@ -107,7 +107,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.rshift.a = 4w7;
         h.rshift.b = 4s1;
         h.rshift.c = 4w3;
-        h.rshift.d = -4s2;
+        h.rshift.d = - 4s2;
         h.rshift.e = 4w3;
         h.rshift.g = 4w0;
         h.rshift.h = 8w15;
@@ -124,14 +124,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.div.c = 8w254;
         h.b.a = true;
     }
-    @hidden table tbl_gauntlet_various_opsbmv2l106 {
+    @hidden table tbl_gauntlet_various_opsbmv2l107 {
         actions = {
-            gauntlet_various_opsbmv2l106();
+            gauntlet_various_opsbmv2l107();
         }
-        const default_action = gauntlet_various_opsbmv2l106();
+        const default_action = gauntlet_various_opsbmv2l107();
     }
     apply {
-        tbl_gauntlet_various_opsbmv2l106.apply();
+        tbl_gauntlet_various_opsbmv2l107.apply();
     }
 }
 
@@ -152,16 +152,16 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<OVERFLOW>(h.overflow);
-        pkt.emit<UNDERFLOW>(h.underflow);
-        pkt.emit<RSH>(h.rshift);
-        pkt.emit<LSH>(h.lshift);
-        pkt.emit<MOD>(h.mod);
-        pkt.emit<COMPARE>(h.comp);
-        pkt.emit<DIV>(h.div);
-        pkt.emit<BOOL>(h.b);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < OVERFLOW >(h.overflow);
+        pkt.emit < UNDERFLOW >(h.underflow);
+        pkt.emit < RSH >(h.rshift);
+        pkt.emit < LSH >(h.lshift);
+        pkt.emit < MOD >(h.mod);
+        pkt.emit < COMPARE >(h.comp);
+        pkt.emit < DIV >(h.div);
+        pkt.emit < BOOL >(h.b);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

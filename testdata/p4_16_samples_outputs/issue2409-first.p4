@@ -6,9 +6,9 @@ parser p(out bit<32> z) {
     @name("w") bit<32> w_0;
     state start {
         b_0 = true;
-        transition select(b_0) {
-            true: start_true;
-            false: start_false;
+        transition select (b_0) {
+            true : start_true;
+            false : start_false;
         }
     }
     state start_true {

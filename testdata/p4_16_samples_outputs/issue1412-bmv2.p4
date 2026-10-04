@@ -6,7 +6,7 @@ struct headers_t {
 }
 
 struct metadata {
-    bool   cond;
+    bool cond;
     bit<8> field;
 }
 
@@ -34,7 +34,7 @@ control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_meta
     }
     table change_cond {
         key = {
-            ostd.egress_spec: exact;
+            ostd.egress_spec : exact;
         }
         actions = {
             set_true;

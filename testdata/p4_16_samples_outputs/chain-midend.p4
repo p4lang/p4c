@@ -6,7 +6,7 @@ header Header {
 
 parser p1(packet_in p, out Header h) {
     state start {
-        p.extract<Header>(h);
+        p.extract < Header >(h);
         transition accept;
     }
 }

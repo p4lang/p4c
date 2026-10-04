@@ -7,10 +7,10 @@ header data_t {
     bit<32> f2;
     bit<16> h1;
     bit<16> h2;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 struct metadata {
@@ -56,4 +56,4 @@ control deparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
+V1Switch < headers, metadata >(p(), vc(), ingress(), egress(), uc(), deparser()) main;

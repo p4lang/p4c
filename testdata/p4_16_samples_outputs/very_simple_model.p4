@@ -15,14 +15,13 @@ struct OutControl {
 const PortId DROP_PORT = 0xf;
 const PortId CPU_OUT_PORT = 0xe;
 const PortId RECIRCULATE_OUT_PORT = 0xd;
-parser Parser<H>(packet_in b, out H parsedHeaders);
-control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
-control Deparser<H>(inout H outputHeaders, packet_out b);
-package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
+parser Parser < H >(packet_in b, out H parsedHeaders);
+control Pipe < H >(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
+control Deparser < H >(inout H outputHeaders, packet_out b);
+package VSS < H >(Parser<H> p, Pipe<H> map, Deparser<H> d);
 extern Ck16 {
     Ck16();
     void clear();
-    void update<T>(in T data);
+    void update < T >(in T data);
     bit<16> get();
 }
-

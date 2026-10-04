@@ -4,15 +4,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-parser mypt<t>(in t tt);
+parser mypt < t >(in t tt);
 
 parser MyParser1(in bit tt) {
-  state start {
-    transition select(tt) {
-     0: accept;
-     _: reject;
-   }
- }
+    state start {
+        transition select (tt) {
+            0 : accept;
+            _ : reject;
+        }
+    }
 }
 
 typedef bit t;

@@ -6,12 +6,12 @@ extern E {
     void f(in bit<16> z=2);
 }
 
-control c()(bit<32> binit=4) {
-    E(x = 32w0) e;
-    apply {
-        f(a = 32w0, b = binit);
-        e.f(z = 16w2);
-    }
+control c()(bit<32> binit = 4) {
+E(x = 32w0) e;
+apply {
+f(a = 32w0, b = binit);
+e.f(z = 16w2);
+}
 }
 
 control ctrl();

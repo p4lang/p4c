@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -31,11 +31,11 @@ bit<32> simple_function() {
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action simple_action() {
-        h.h.a = (bit<32>)simple_function();
+        h.h.a =(bit<32>) simple_function();
     }
     table simple_table {
         key = {
-            sm.egress_spec: exact @name("key");
+            sm.egress_spec : exact @name("key");
         }
         actions = {
             simple_action();

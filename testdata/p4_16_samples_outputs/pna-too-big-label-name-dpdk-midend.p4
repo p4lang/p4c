@@ -8,15 +8,15 @@ header ethernet_t {
 }
 
 header ipv4_dddddddddddddddddddddddddddddddddddddddddd_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -29,9 +29,9 @@ struct main_metadata_t {
 }
 
 struct headers_t {
-    ethernet_t                                        ethernet;
+    ethernet_t ethernet;
     ipv4_dddddddddddddddddddddddddddddddddddddddddd_t ipv4;
-    ethernet_t                                        ethernet1;
+    ethernet_t ethernet1;
 }
 
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
@@ -41,14 +41,14 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd;
-            default: accept;
+        pkt.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd;
+            default : accept;
         }
     }
     state parse_ipv4_dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd {
-        pkt.extract<ipv4_dddddddddddddddddddddddddddddddddddddddddd_t>(hdr.ipv4);
+        pkt.extract < ipv4_dddddddddddddddddddddddddddddddddddddddddd_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -74,7 +74,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     @name("MainControlImpl.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            tmpDir_0: lpm @name("ipv4_addr");
+            tmpDir_0 : lpm @name("ipv4_addr");
         }
         actions = {
             next_hop();
@@ -82,39 +82,39 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action pnatoobiglabelnamedpdk129() {
+    @hidden action pnatoobiglabelnamedpdk128() {
         tmpDir_0 = hdr.ipv4.srcAddr;
     }
-    @hidden action pnatoobiglabelnamedpdk131() {
+    @hidden action pnatoobiglabelnamedpdk130() {
         tmpDir_0 = hdr.ipv4.dstAddr;
     }
-    @hidden action pnatoobiglabelnamedpdk104() {
+    @hidden action pnatoobiglabelnamedpdk103() {
         eth_0.setInvalid();
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk104 {
+    @hidden table tbl_pnatoobiglabelnamedpdk103 {
         actions = {
-            pnatoobiglabelnamedpdk104();
+            pnatoobiglabelnamedpdk103();
         }
-        const default_action = pnatoobiglabelnamedpdk104();
+        const default_action = pnatoobiglabelnamedpdk103();
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk129 {
+    @hidden table tbl_pnatoobiglabelnamedpdk128 {
         actions = {
-            pnatoobiglabelnamedpdk129();
+            pnatoobiglabelnamedpdk128();
         }
-        const default_action = pnatoobiglabelnamedpdk129();
+        const default_action = pnatoobiglabelnamedpdk128();
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk131 {
+    @hidden table tbl_pnatoobiglabelnamedpdk130 {
         actions = {
-            pnatoobiglabelnamedpdk131();
+            pnatoobiglabelnamedpdk130();
         }
-        const default_action = pnatoobiglabelnamedpdk131();
+        const default_action = pnatoobiglabelnamedpdk130();
     }
     apply {
-        tbl_pnatoobiglabelnamedpdk104.apply();
+        tbl_pnatoobiglabelnamedpdk103.apply();
         if (PNA_Direction_t.NET_TO_HOST == istd.direction) {
-            tbl_pnatoobiglabelnamedpdk129.apply();
+            tbl_pnatoobiglabelnamedpdk128.apply();
         } else {
-            tbl_pnatoobiglabelnamedpdk131.apply();
+            tbl_pnatoobiglabelnamedpdk130.apply();
         }
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm_0.apply();
@@ -123,19 +123,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnatoobiglabelnamedpdk146() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-        pkt.emit<ipv4_dddddddddddddddddddddddddddddddddddddddddd_t>(hdr.ipv4);
+    @hidden action pnatoobiglabelnamedpdk145() {
+        pkt.emit < ethernet_t >(hdr.ethernet);
+        pkt.emit < ipv4_dddddddddddddddddddddddddddddddddddddddddd_t >(hdr.ipv4);
     }
-    @hidden table tbl_pnatoobiglabelnamedpdk146 {
+    @hidden table tbl_pnatoobiglabelnamedpdk145 {
         actions = {
-            pnatoobiglabelnamedpdk146();
+            pnatoobiglabelnamedpdk145();
         }
-        const default_action = pnatoobiglabelnamedpdk146();
+        const default_action = pnatoobiglabelnamedpdk145();
     }
     apply {
-        tbl_pnatoobiglabelnamedpdk146.apply();
+        tbl_pnatoobiglabelnamedpdk145.apply();
     }
 }
 
-PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, main_metadata_t, headers_t, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

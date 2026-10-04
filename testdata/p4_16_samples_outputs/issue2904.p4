@@ -41,15 +41,15 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     bit<4> y;
     table X {
         key = {
-            y: ternary;
+            y : ternary;
         }
         actions = {
             A;
         }
         const entries = {
-                        0x0 : A(TableType.TT_ACL);
-                        0x1 : A(TableType.TT_FWD);
-                        default : A(TableType.TT_FWD);
+            0x0 : A(TableType.TT_ACL);
+            0x1 : A(TableType.TT_FWD);
+            default : A(TableType.TT_FWD);
         }
     }
     apply {

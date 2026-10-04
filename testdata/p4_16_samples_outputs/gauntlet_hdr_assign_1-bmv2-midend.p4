@@ -10,12 +10,12 @@ header ethernet_t {
 
 header H {
     bit<16> a;
-    bit<8>  b;
+    bit<8> b;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -23,28 +23,28 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.x") H x_0;
-    @hidden action gauntlet_hdr_assign_1bmv2l40() {
+    @hidden action gauntlet_hdr_assign_1bmv2l41() {
         x_0.setInvalid();
         x_0 = h.h;
         x_0.a = 16w2;
         h.eth_hdr.eth_type = 16w2;
     }
-    @hidden table tbl_gauntlet_hdr_assign_1bmv2l40 {
+    @hidden table tbl_gauntlet_hdr_assign_1bmv2l41 {
         actions = {
-            gauntlet_hdr_assign_1bmv2l40();
+            gauntlet_hdr_assign_1bmv2l41();
         }
-        const default_action = gauntlet_hdr_assign_1bmv2l40();
+        const default_action = gauntlet_hdr_assign_1bmv2l41();
     }
     apply {
-        tbl_gauntlet_hdr_assign_1bmv2l40.apply();
+        tbl_gauntlet_hdr_assign_1bmv2l41.apply();
     }
 }
 
@@ -65,9 +65,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

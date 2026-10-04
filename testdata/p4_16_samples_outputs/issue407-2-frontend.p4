@@ -11,21 +11,20 @@ struct mystruct1 {
 
 struct mystruct2 {
     mystruct1 foo;
-    bit<4>    a;
-    bit<4>    b;
+    bit<4> a;
+    bit<4> b;
 }
 
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header MyHeader1 {
-    bit<8>          x1;
-    int<8>          x2;
+    bit<8> x1;
+    int<8> x2;
     EthernetAddress x3;
-    MySignedInt     x4;
-    varbit<8>       x5;
+    MySignedInt x4;
+    varbit<8> x5;
 }
-

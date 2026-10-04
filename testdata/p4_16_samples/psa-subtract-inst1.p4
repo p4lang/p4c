@@ -5,7 +5,8 @@
 /************ H E A D E R S ******************************/
 #define MAX_LAYERS 2
 
-struct EMPTY {};
+struct EMPTY {
+};
 
 header ethernet_t {
     bit<48> dst_addr;
@@ -14,14 +15,14 @@ header ethernet_t {
 }
 
 header udp_t {
-    bit<16>  sport;
-    bit<16>  dport;
-    bit<16>  length;
-    bit<16>  csum;
+    bit<16> sport;
+    bit<16> dport;
+    bit<16> length;
+    bit<16> csum;
 }
 
 struct headers_t {
-    ethernet_t  ethernet;
+    ethernet_t ethernet;
     udp_t[MAX_LAYERS] udp;
 }
 
@@ -75,18 +76,19 @@ control MyIngressControl(
     }
 
     table stub {
-        key = {}
+        key = {
+        }
 
         actions = {
             nonDefAct;
         }
         const default_action = nonDefAct;
-        size=1000000;
+        size = 1000000;
     }
 
     apply {
         meta.depth4 = meta.depth2 - 4;
-        d.egress_port = (PortId_t) ((bit <32>) c.ingress_port ^ 1);
+        d.egress_port =(PortId_t)((bit<32>) c.ingress_port ^ 1);
         stub.apply();
     }
 }
@@ -126,7 +128,8 @@ control MyEgressControl(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply {}
+    apply {
+    }
 }
 control MyEgressDeparser(
     packet_out pkt,
@@ -136,7 +139,8 @@ control MyEgressDeparser(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply {}
+    apply {
+    }
 }
 
 /************ F I N A L   P A C K A G E ******************************/

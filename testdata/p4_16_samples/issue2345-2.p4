@@ -11,7 +11,6 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-
 struct Meta {
 }
 
@@ -25,13 +24,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
 }
 
-void dummy2(inout Headers val1) { 
-	val1.eth_hdr.dst_addr = val1.eth_hdr.dst_addr + 48w3;
-} 
-void dummy(inout Headers val) { 
-	dummy2(val);
-	val.eth_hdr.eth_type = 16w2;
-	dummy2(val);
+void dummy2(inout Headers val1) {
+    val1.eth_hdr.dst_addr = val1.eth_hdr.dst_addr + 48w3;
+}
+void dummy(inout Headers val) {
+    dummy2(val);
+    val.eth_hdr.eth_type = 16w2;
+    dummy2(val);
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
@@ -42,23 +41,36 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.eth_hdr.src_addr = 48w1;
         // this serves as a barrier
         dummy(h);
-	h.eth_hdr.dst_addr = h.eth_hdr.dst_addr + 48w4;
+        h.eth_hdr.dst_addr = h.eth_hdr.dst_addr + 48w4;
     }
 
-    apply {	     
-	h.eth_hdr.src_addr = 48w2;
+    apply {
+        h.eth_hdr.src_addr = 48w2;
         h.eth_hdr.dst_addr = 48w2;
         h.eth_hdr.eth_type = 16w2;
-	simple_action();
-        
+        simple_action();
+
     }
 }
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

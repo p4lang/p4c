@@ -1,14 +1,14 @@
-issue401.p4(33): [--Wwarn=unused] warning: 'b' is unused
-    bit<1> b = (bit<1>) { 0 };
-           ^
-issue401.p4(33): [--Werror=type-error] error: '(bit<1>){ 0 }'
-    bit<1> b = (bit<1>) { 0 };
-               ^^^^^^^^^^^^^^
+issue401.p4(34): [--Wwarn=unused] warning: 'b' is unused
+        bit<1> b =(bit<1>) { 0 };
+               ^
+issue401.p4(34): [--Werror=type-error] error: '(bit<1>){ 0 }'
+        bit<1> b =(bit<1>) { 0 };
+                  ^^^^^^^^^^^^^^
   ---- Actual error:
-issue401.p4(33): Cannot unify type 'tuple<int>' with type 'bit<1>'
-      bit<1> b = (bit<1>) { 0 };
-                          ^^^^^
+issue401.p4(34): Cannot unify type 'tuple<int>' with type 'bit<1>'
+          bit<1> b =(bit<1>) { 0 };
+                             ^^^^^
   ---- Originating from:
-issue401.p4(33): Cannot cast from 'tuple<int>' to 'bit<1>'
-      bit<1> b = (bit<1>) { 0 };
-                          ^^^^^
+issue401.p4(34): Cannot cast from 'tuple<int>' to 'bit<1>'
+          bit<1> b =(bit<1>) { 0 };
+                             ^^^^^

@@ -5,7 +5,7 @@
 header hdr {
     bit<16> a;
     bit<16> b;
-    bit<8>  c;
+    bit<8> c;
 }
 
 struct Headers {
@@ -19,19 +19,19 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action case0() {
-        h.h.c = ((bit<12>)h.h.a)[11:4];
+        h.h.c =((bit<12>) h.h.a)[11 : 4];
     }
     action case1() {
-        h.h.c = (bit<8>)h.h.a[14:3][8:4];
+        h.h.c =(bit<8>) h.h.a[14 : 3][8 : 4];
     }
     action case2() {
-        h.h.c = (bit<8>)(16w0 ++ h.h.a)[31:8][15:8];
+        h.h.c =(bit<8>)(16w0 ++ h.h.a)[31 : 8][15 : 8];
     }
     action case3() {
-        h.h.c = (bit<8>)((int<32>)(int<16>)h.h.a)[14:2][10:3];
+        h.h.c =(bit<8>)((int<32>)(int<16>) h.h.a)[14 : 2][10 : 3];
     }
     action case4() {
-        h.h.c = (bit<8>)((int<32>)(int<16>)h.h.a)[22:15];
+        h.h.c =(bit<8>)((int<32>)(int<16>) h.h.a)[22 : 15];
     }
     table t {
         actions = {

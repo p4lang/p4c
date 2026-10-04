@@ -16,7 +16,7 @@ struct metadata {
 
 parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<payload_t>(hdr.payload);
+        packet.extract < payload_t >(hdr.payload);
         transition accept;
     }
 }
@@ -29,7 +29,7 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
     }
     @name("MyIngress.t1") table t1_0 {
         key = {
-            hdr.payload.x: exact @name("hdr.payload.x");
+            hdr.payload.x : exact @name("hdr.payload.x");
         }
         actions = {
             a1();
@@ -38,17 +38,11 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
         size = 1024;
         default_action = NoAction_1();
     }
-    @hidden action copyprop1l39() {
+    @hidden action copyprop1l44() {
         hdr.payload.x = hdr.payload.y;
     }
-    @hidden action copyprop1l44() {
+    @hidden action copyprop1l49() {
         standard_metadata.egress_spec = 9w2;
-    }
-    @hidden table tbl_copyprop1l39 {
-        actions = {
-            copyprop1l39();
-        }
-        const default_action = copyprop1l39();
     }
     @hidden table tbl_copyprop1l44 {
         actions = {
@@ -56,14 +50,20 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
         }
         const default_action = copyprop1l44();
     }
+    @hidden table tbl_copyprop1l49 {
+        actions = {
+            copyprop1l49();
+        }
+        const default_action = copyprop1l49();
+    }
     apply {
         if (hdr.payload.y == 8w0) {
-            tbl_copyprop1l39.apply();
+            tbl_copyprop1l44.apply();
             t1_0.apply();
         } else {
             t1_0.apply();
         }
-        tbl_copyprop1l44.apply();
+        tbl_copyprop1l49.apply();
     }
 }
 
@@ -79,7 +79,7 @@ control MyEgress(inout header_t hdr, inout metadata meta, inout standard_metadat
 
 control MyDeparser(packet_out packet, in header_t hdr) {
     apply {
-        packet.emit<payload_t>(hdr.payload);
+        packet.emit < payload_t >(hdr.payload);
     }
 }
 
@@ -88,4 +88,4 @@ control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
     }
 }
 
-V1Switch<header_t, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < header_t, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

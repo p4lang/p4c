@@ -10,7 +10,6 @@ header h {
 
 control c() {
     h[10] stack;
-
     apply {
         stack.last = { 10 };
     }

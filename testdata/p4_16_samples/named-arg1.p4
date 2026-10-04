@@ -34,7 +34,7 @@ control c(out bool b) {
     comp(ignore = 2, compare = 1) c1;
 
     action a(in bit<16> bi, out bit<16> mb) {
-        mb = -bi;
+        mb = - bi;
     }
 
     apply {

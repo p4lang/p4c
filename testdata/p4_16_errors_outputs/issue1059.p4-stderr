@@ -1,12 +1,12 @@
-issue1059.p4(9): [--Wwarn=unused] warning: control 'c' is unused
+issue1059.p4(10): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-issue1059.p4(10): [--Wwarn=unused] warning: 'z' is unused
+issue1059.p4(11): [--Wwarn=unused] warning: 'z' is unused
     action a(in bit<32> z) {
                         ^
 issue1059.p4(15): [--Werror=type-error] error: Field x is not a member of structure struct X
         a(x.x);
             ^
 issue1059.p4(7)
-struct X {}
+struct X {
        ^

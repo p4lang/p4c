@@ -12,16 +12,16 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 extern Checksum {
     Checksum();
-    void add<T>(in T data);
-    void subtract<T>(in T data);
+    void add < T >(in T data);
+    void subtract < T >(in T data);
     bool verify();
     bit<16> get();
-    bit<16> update<T>(in T data, @optional in bool zeros_as_ones);
+    bit<16> update < T >(in T data, @optional in bool zeros_as_ones);
 }
 
 parser p(packet_in pkt, out Headers hdr) {

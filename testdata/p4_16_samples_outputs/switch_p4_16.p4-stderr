@@ -47,5 +47,5 @@ switch_p4_16.p4(5592): [--Wwarn=unused] warning: 'fabric_mgid' is unused
 ...ame(".process_fabric_lag.set_fabric_multicast") action set_fabric_multicast(bit<8> fabric_mgid) {
                                                                                       ^^^^^^^^^^^
 switch_p4_16.p4(1045): [--Wwarn=parser-transition] warning: SelectCase: unreachable
-            default: parse_all_int_meta_value_heders;
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            default : parse_all_int_meta_value_heders;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

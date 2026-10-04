@@ -17,11 +17,11 @@ gauntlet_infinite_loop.p4(43)
         sub_parser.apply(packet, hdr, hdr.p);
                                  ^^^
 gauntlet_infinite_loop.p4(29): [--Wwarn=uninitialized-use] warning: padding.p may be uninitialized
-        transition select(padding.p) {
-                          ^^^^^^^^^
+        transition select (padding.p) {
+                           ^^^^^^^^^
 gauntlet_infinite_loop.p4(29): [--Wwarn=invalid-header] warning: accessing a field of an invalid header padding
-        transition select(padding.p) {
-                          ^^^^^^^
+        transition select (padding.p) {
+                           ^^^^^^^
 [--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
 [--Wwarn=uninitialized-use] warning: tmp.p may be uninitialized
 [--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized

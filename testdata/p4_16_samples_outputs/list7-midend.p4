@@ -9,17 +9,17 @@ struct S {
 
 control c() {
     @name("c.e") E<S>((S){f = 32w5}) e_0;
-    @hidden action list7l20() {
+    @hidden action list7l19() {
         e_0.run();
     }
-    @hidden table tbl_list7l20 {
+    @hidden table tbl_list7l19 {
         actions = {
-            list7l20();
+            list7l19();
         }
-        const default_action = list7l20();
+        const default_action = list7l19();
     }
     apply {
-        tbl_list7l20.apply();
+        tbl_list7l19.apply();
     }
 }
 

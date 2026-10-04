@@ -21,5 +21,4 @@ control c(inout S s) {
 
 control cc(inout S s);
 package top(cc c);
-
 top(c()) main;

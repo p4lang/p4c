@@ -8,15 +8,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -28,10 +28,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -46,28 +46,28 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800 &&& 16w0xf00: parse_ipv4;
-            16w0xd00: parse_tcp;
-            default: accept;
+        buffer.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 &&& 16w0xf00 : parse_ipv4;
+            16w0xd00 : parse_tcp;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        buffer.extract<ipv4_t>(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            8w4 &&& 8w252: parse_tcp;
-            default: accept;
+        buffer.extract < ipv4_t >(hdr.ipv4);
+        transition select (hdr.ipv4.protocol) {
+            8w4 &&& 8w252 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
-        buffer.extract<tcp_t>(hdr.tcp);
+        buffer.extract < tcp_t >(hdr.tcp);
         transition accept;
     }
 }
@@ -81,10 +81,10 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
-            user_meta.data      : exact @name("user_meta.data");
-            hdr.ethernet.srcAddr: lpm @name("hdr.ethernet.srcAddr");
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
-            key_0               : exact @name("0x48");
+            user_meta.data : exact @name("user_meta.data");
+            hdr.ethernet.srcAddr : lpm @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
+            key_0 : exact @name("0x48");
         }
         actions = {
             NoAction_1();
@@ -92,17 +92,17 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         }
         default_action = NoAction_1();
     }
-    @hidden action psadpdktablekeyconsolidationmixedkeys105() {
+    @hidden action psadpdktablekeyconsolidationmixedkeys102() {
         key_0 = 8w0x48;
     }
-    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys105 {
+    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys102 {
         actions = {
-            psadpdktablekeyconsolidationmixedkeys105();
+            psadpdktablekeyconsolidationmixedkeys102();
         }
-        const default_action = psadpdktablekeyconsolidationmixedkeys105();
+        const default_action = psadpdktablekeyconsolidationmixedkeys102();
     }
     apply {
-        tbl_psadpdktablekeyconsolidationmixedkeys105.apply();
+        tbl_psadpdktablekeyconsolidationmixedkeys102.apply();
         tbl_0.apply();
     }
 }
@@ -119,39 +119,39 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psadpdktablekeyconsolidationmixedkeys145() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+    @hidden action psadpdktablekeyconsolidationmixedkeys146() {
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
-    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys145 {
+    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys146 {
         actions = {
-            psadpdktablekeyconsolidationmixedkeys145();
+            psadpdktablekeyconsolidationmixedkeys146();
         }
-        const default_action = psadpdktablekeyconsolidationmixedkeys145();
+        const default_action = psadpdktablekeyconsolidationmixedkeys146();
     }
     apply {
-        tbl_psadpdktablekeyconsolidationmixedkeys145.apply();
+        tbl_psadpdktablekeyconsolidationmixedkeys146.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psadpdktablekeyconsolidationmixedkeys161() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+    @hidden action psadpdktablekeyconsolidationmixedkeys162() {
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
-    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys161 {
+    @hidden table tbl_psadpdktablekeyconsolidationmixedkeys162 {
         actions = {
-            psadpdktablekeyconsolidationmixedkeys161();
+            psadpdktablekeyconsolidationmixedkeys162();
         }
-        const default_action = psadpdktablekeyconsolidationmixedkeys161();
+        const default_action = psadpdktablekeyconsolidationmixedkeys162();
     }
     apply {
-        tbl_psadpdktablekeyconsolidationmixedkeys161.apply();
+        tbl_psadpdktablekeyconsolidationmixedkeys162.apply();
     }
 }
 
-IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
+EgressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
+PSA_Switch < headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

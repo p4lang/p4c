@@ -12,6 +12,6 @@ control p() {
         bit<1> a;
         bit<8> b = 3;
         bit<8> c = 4;
-        a = (bit)(b == 1) & (bit)(c == 2);
+        a =(bit)(b == 1) &(bit)(c == 2);
     }
 }

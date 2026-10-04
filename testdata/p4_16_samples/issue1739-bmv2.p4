@@ -8,30 +8,29 @@
 #include <core.p4>
 #include <v1model.p4>
 
-
-typedef bit<48>  EthernetAddressUint_t;
+typedef bit<48> EthernetAddressUint_t;
 type EthernetAddressUint_t EthernetAddress_t;
 
-typedef bit<32>  IPv4AddressUint_t;
+typedef bit<32> IPv4AddressUint_t;
 type IPv4AddressUint_t IPv4Address_t;
 type IPv4Address_t IPv4Address2_t;
 
 header ethernet_t {
     EthernetAddress_t dstAddr;
     EthernetAddress_t srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     //bit<32> srcAddr;
     //bit<32> dstAddr;
@@ -44,7 +43,7 @@ struct meta_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 action my_drop(inout standard_metadata_t smeta) {
@@ -63,9 +62,9 @@ parser ParserImpl(packet_in packet,
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -83,7 +82,7 @@ control ingress(inout headers_t hdr,
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             set_output;
@@ -115,7 +114,8 @@ control egress(inout headers_t hdr,
                inout meta_t meta,
                inout standard_metadata_t standard_metadata)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {

@@ -3,4 +3,3 @@ control C() {
         tuple<> s = {b = 2,...};
     }
 }
-

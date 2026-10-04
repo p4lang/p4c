@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -36,7 +36,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            tmp_key_0: exact @name("bKiScA");
+            tmp_key_0 : exact @name("bKiScA");
         }
         actions = {
             do_action();
@@ -44,25 +44,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_action_returnbmv2l28() {
+    @hidden action gauntlet_action_returnbmv2l29() {
         tmp_key_0 = 128w2;
     }
-    @hidden table tbl_gauntlet_action_returnbmv2l28 {
+    @hidden table tbl_gauntlet_action_returnbmv2l29 {
         actions = {
-            gauntlet_action_returnbmv2l28();
+            gauntlet_action_returnbmv2l29();
         }
-        const default_action = gauntlet_action_returnbmv2l28();
+        const default_action = gauntlet_action_returnbmv2l29();
     }
     apply {
-        tbl_gauntlet_action_returnbmv2l28.apply();
+        tbl_gauntlet_action_returnbmv2l29.apply();
         simple_table_0.apply();
     }
 }
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -84,9 +84,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

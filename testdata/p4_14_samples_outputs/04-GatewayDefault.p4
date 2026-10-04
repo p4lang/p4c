@@ -3,9 +3,9 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<8>  drop;
-    bit<8>  egress_port;
-    bit<8>  f1;
+    bit<8> drop;
+    bit<8> egress_port;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
     bit<64> f4;
@@ -42,7 +42,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -81,7 +81,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     @name(".i_t2") table i_t2 {
@@ -90,7 +90,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f2;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     @name(".i_t3") table i_t3 {
@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f3;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     @name(".i_t4") table i_t4 {
@@ -108,19 +108,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f4;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     apply {
         switch (i_t1.apply().action_run) {
-            nop: {
-                i_t2.apply();
+            nop : {
+            i_t2.apply();
             }
-            set_egress_port: {
-                i_t3.apply();
+            set_egress_port : {
+            i_t3.apply();
             }
-            default: {
-                i_t4.apply();
+            default : {
+            i_t4.apply();
             }
         }
     }

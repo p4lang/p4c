@@ -22,15 +22,15 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    H tmp_1 = (H){a = 8w3,b = 8w1,c = 8w1};
-    H tmp_2 = (H){a = 8w4,b = 8w0,c = 8w2};
+    H tmp_1 =(H) { a = 8w3, b = 8w1, c = 8w1 };
+    H tmp_2 =(H) { a = 8w4, b = 8w0, c = 8w2 };
     bit<8> val = 8w3;
     action do_action() {
         sm.ingress_port = 9w0;
     }
     table BfyXpa {
         key = {
-            val: exact @name("eJPEfW");
+            val : exact @name("eJPEfW");
         }
         actions = {
             do_action();
@@ -61,8 +61,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

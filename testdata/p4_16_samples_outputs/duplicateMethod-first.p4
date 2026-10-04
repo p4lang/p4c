@@ -8,4 +8,3 @@ extern Checksum<T> {
     void append(in packet_in b);
     T get();
 }
-

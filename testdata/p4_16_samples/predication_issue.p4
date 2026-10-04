@@ -25,10 +25,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
 }
 
-
 action assign_addrs(inout Headers h, bool check_1, bool check_2) {
     h.eth_hdr.dst_addr = 4;
-	if (check_1) {
+    if (check_1) {
         h.eth_hdr.dst_addr = 2;
         if (check_2) {
             // note that this is not dst_addr
@@ -45,12 +44,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

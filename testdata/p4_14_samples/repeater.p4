@@ -4,7 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-header_type data_t { fields { bit<32> x; } }
+header_type data_t {
+    fields {
+        bit<32> x;
+    }
+}
 header data_t data;
 
 parser start {
@@ -22,7 +26,7 @@ action set_egress_port(egress_port) {
 
 table repeater {
     reads {
-        standard_metadata.ingress_port: exact;
+        standard_metadata.ingress_port : exact;
     }
     actions {
         my_drop;
@@ -34,4 +38,5 @@ control ingress {
     apply(repeater);
 }
 
-control egress { }
+control egress {
+}

@@ -9,4 +9,3 @@ control compute(inout hdr h) {
         }
     }
 }
-

@@ -27,20 +27,14 @@ control VeryChecksum(inout Parsed_packet hdr, inout Meta meta) {
 }
 
 control IngressP(inout Parsed_packet hdr, inout Meta m, inout standard_metadata_t standard_metadata) {
-    @hidden action issue737bmv2l41() {
+    @hidden action issue737bmv2l44() {
         hdr.h.field = 64w3;
     }
-    @hidden action issue737bmv2l44() {
+    @hidden action issue737bmv2l47() {
         hdr.h.field = 64w5;
     }
-    @hidden action issue737bmv2l47() {
+    @hidden action issue737bmv2l50() {
         hdr.h.field = 64w4;
-    }
-    @hidden table tbl_issue737bmv2l41 {
-        actions = {
-            issue737bmv2l41();
-        }
-        const default_action = issue737bmv2l41();
     }
     @hidden table tbl_issue737bmv2l44 {
         actions = {
@@ -54,19 +48,25 @@ control IngressP(inout Parsed_packet hdr, inout Meta m, inout standard_metadata_
         }
         const default_action = issue737bmv2l47();
     }
+    @hidden table tbl_issue737bmv2l50 {
+        actions = {
+            issue737bmv2l50();
+        }
+        const default_action = issue737bmv2l50();
+    }
     apply {
         if (m.metafield) {
-            tbl_issue737bmv2l41.apply();
-        }
-        if (m.metafield) {
-            ;
-        } else {
             tbl_issue737bmv2l44.apply();
         }
         if (m.metafield) {
             ;
         } else {
             tbl_issue737bmv2l47.apply();
+        }
+        if (m.metafield) {
+            ;
+        } else {
+            tbl_issue737bmv2l50.apply();
         }
     }
 }
@@ -86,4 +86,4 @@ control TopDeparser(packet_out b, in Parsed_packet hdr) {
     }
 }
 
-V1Switch<Parsed_packet, Meta>(TopParser(), VeryChecksum(), IngressP(), EgressP(), ChecksumComputer(), TopDeparser()) main;
+V1Switch < Parsed_packet, Meta >(TopParser(), VeryChecksum(), IngressP(), EgressP(), ChecksumComputer(), TopDeparser()) main;

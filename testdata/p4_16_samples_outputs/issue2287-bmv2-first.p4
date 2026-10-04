@@ -33,8 +33,8 @@ header B {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
-    B          b;
+    H h;
+    B b;
 }
 
 struct Meta {
@@ -50,9 +50,9 @@ bool bool_with_side_effect(inout bit<8> val) {
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
-        pkt.extract<B>(hdr.b);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
+        pkt.extract < B >(hdr.b);
         transition accept;
     }
 }
@@ -72,8 +72,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         dummy_var = function_with_side_effect(h.h.i) |+| 8w255;
         dummy_var = function_with_side_effect(h.h.j) + 8w255;
         dummy_var = 8w255 | function_with_side_effect(h.h.k);
-        dummy_var = -function_with_side_effect(h.h.l);
-        dummy_var = (16w1 ++ function_with_side_effect(h.h.m))[15:8];
+        dummy_var = - function_with_side_effect(h.h.l);
+        dummy_var =(16w1 ++ function_with_side_effect(h.h.m))[15 : 8];
         dummy_bool = true;
         dummy_bool = false;
         dummy_bool = function_with_side_effect(h.b.c) != function_with_side_effect(h.b.c);
@@ -98,8 +98,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<Headers>(h);
+        b.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

@@ -6,19 +6,19 @@ typedef bit<32> IPv4Address;
 header Ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header Ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -29,15 +29,15 @@ header Tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<1>  urgent;
-    bit<1>  ack;
-    bit<1>  psh;
-    bit<1>  rst;
-    bit<1>  syn;
-    bit<1>  fin;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<1> urgent;
+    bit<1> ack;
+    bit<1> psh;
+    bit<1> rst;
+    bit<1> syn;
+    bit<1> fin;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -45,8 +45,8 @@ header Tcp_t {
 
 struct Headers_t {
     Ethernet_t ethernet;
-    Ipv4_t     ipv4;
-    Tcp_t      tcp;
+    Ipv4_t ipv4;
+    Tcp_t tcp;
 }
 
 extern bool tcp_conntrack(in Headers_t hdrs);

@@ -8,4 +8,3 @@ control c0() {
         test((S1<bit<4>, int<6>>){x = 0,y = (string){x = 0,y = 0}});
     }
 }
-

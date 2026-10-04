@@ -18,8 +18,8 @@ parser RedundantParser(inout headers hdr) {
 parser IParser2(packet_in packet, inout headers hdr) {
     state start {
         packet.extract(hdr.h2);
-        transition select(hdr.h2.f) {
-            default: accept;
+        transition select (hdr.h2.f) {
+            default : accept;
         }
     }
 }
@@ -28,9 +28,9 @@ parser IParser(packet_in packet, inout headers hdr) {
     RedundantParser() redundant_parser;
     state start {
         packet.extract(hdr.h1);
-        transition select(hdr.h1.f) {
-            1: s1;
-            default: s2;
+        transition select (hdr.h1.f) {
+            1 : s1;
+            default : s2;
         }
     }
     state s1 {

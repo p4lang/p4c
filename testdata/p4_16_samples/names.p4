@@ -5,7 +5,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-struct S { bit d; }   
+struct S {
+    bit d;
+}
 const S c = { 1w1 };
 
 control p()

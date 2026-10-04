@@ -18,8 +18,8 @@ header_union Union {
 
 struct H {
     Header1 h1;
-    Union   u1;
-    Union   u2;
+    Union u1;
+    Union u2;
 }
 
 struct M {
@@ -34,9 +34,9 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u1.h1 = hdr.u1.h3;
         hdr.u1.h1.data = 1;
         hdr.u1.h3.data = 1;
-        transition select(hdr.u1.h1.data) {
-            0: next;
-            default: last;
+        transition select (hdr.u1.h1.data) {
+            0 : next;
+            default : last;
         }
     }
     state next {

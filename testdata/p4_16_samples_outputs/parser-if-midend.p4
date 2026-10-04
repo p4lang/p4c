@@ -10,10 +10,10 @@ struct m {
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
     state start {
-        transition select((bit<1>)(std.ingress_port == 9w0)) {
-            1w1: start_true;
-            1w0: start_join;
-            default: noMatch;
+        transition select ((bit<1>)(std.ingress_port == 9w0)) {
+            1w1 : start_true;
+            1w0 : start_join;
+            default : noMatch;
         }
     }
     state start_true {
@@ -54,4 +54,4 @@ control MyDeparser(packet_out b, in h hdr) {
     }
 }
 
-V1Switch<h, m>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < h, m >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

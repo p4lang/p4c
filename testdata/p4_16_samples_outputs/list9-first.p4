@@ -1,6 +1,6 @@
 #include <core.p4>
 
-struct S<T> {
+struct S < T > {
     T t;
 }
 

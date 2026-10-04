@@ -3,17 +3,17 @@ struct S {
 }
 
 control c(out bit<16> result) {
-    @hidden action constStruct18() {
+    @hidden action constStruct15() {
         result = 16w0;
     }
-    @hidden table tbl_constStruct18 {
+    @hidden table tbl_constStruct15 {
         actions = {
-            constStruct18();
+            constStruct15();
         }
-        const default_action = constStruct18();
+        const default_action = constStruct15();
     }
     apply {
-        tbl_constStruct18.apply();
+        tbl_constStruct15.apply();
     }
 }
 

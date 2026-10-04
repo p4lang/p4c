@@ -20,19 +20,19 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
     @name("Ing.s") S s_0;
-    @name("Ing.r") register<S>(32w100) r_0;
-    @hidden action issue907bmv2l28() {
+    @name("Ing.r") register < S >(32w100) r_0;
+    @hidden action issue907bmv2l32() {
         s_0.f = 32w0;
         r_0.write(32w0, s_0);
     }
-    @hidden table tbl_issue907bmv2l28 {
+    @hidden table tbl_issue907bmv2l32 {
         actions = {
-            issue907bmv2l28();
+            issue907bmv2l32();
         }
-        const default_action = issue907bmv2l28();
+        const default_action = issue907bmv2l32();
     }
     apply {
-        tbl_issue907bmv2l28.apply();
+        tbl_issue907bmv2l32.apply();
     }
 }
 
@@ -56,4 +56,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+V1Switch < Headers, Metadata >(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;

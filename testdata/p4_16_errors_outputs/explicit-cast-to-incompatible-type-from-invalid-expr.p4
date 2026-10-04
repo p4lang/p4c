@@ -8,4 +8,3 @@ control c(inout bit<8> a) {
         a = (S2<int<6>>){x = {#},y = 0};
     }
 }
-

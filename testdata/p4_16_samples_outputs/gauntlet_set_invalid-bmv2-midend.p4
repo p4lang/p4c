@@ -15,7 +15,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -23,27 +23,27 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers h, inout Meta meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(h.eth_hdr);
-        pkt.extract<H>(h.h);
+        pkt.extract < ethernet_t >(h.eth_hdr);
+        pkt.extract < H >(h.h);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta meta, inout standard_metadata_t stdmeta) {
-    @hidden action gauntlet_set_invalidbmv2l41() {
+    @hidden action gauntlet_set_invalidbmv2l42() {
         h.h.a = 8w1;
         h.h.setInvalid();
         h.h.setValid();
         h.h.b = 8w2;
     }
-    @hidden table tbl_gauntlet_set_invalidbmv2l41 {
+    @hidden table tbl_gauntlet_set_invalidbmv2l42 {
         actions = {
-            gauntlet_set_invalidbmv2l41();
+            gauntlet_set_invalidbmv2l42();
         }
-        const default_action = gauntlet_set_invalidbmv2l41();
+        const default_action = gauntlet_set_invalidbmv2l42();
     }
     apply {
-        tbl_gauntlet_set_invalidbmv2l41.apply();
+        tbl_gauntlet_set_invalidbmv2l42.apply();
     }
 }
 
@@ -64,9 +64,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

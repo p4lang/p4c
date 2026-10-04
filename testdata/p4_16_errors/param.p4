@@ -10,7 +10,9 @@ extern E {
 }
 
 control c() {
-    action a(E e) { e.call(); }
+    action a(E e) {
+        e.call();
+    }
     E() einst;
     apply {
         a(einst);
@@ -19,5 +21,4 @@ control c() {
 
 control none();
 package top(none n);
-
 top(c()) main;

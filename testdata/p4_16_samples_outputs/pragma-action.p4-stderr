@@ -1,7 +1,7 @@
 pragma-action.p4(8): [--Wwarn=unused] warning: control 'test' is unused
 control test()
         ^^^^
-pragma-action.p4(13): [--Wwarn=unused] warning: table 'unit' is unused
+pragma-action.p4(15): [--Wwarn=unused] warning: table 'unit' is unused
     table unit {
           ^^^^
 pragma-action.p4(8): [--Winfo=removed] info: removing control 'test'

@@ -5,4 +5,3 @@ struct h<t> {
 struct h_bit1 {
     bit<1> f;
 }
-

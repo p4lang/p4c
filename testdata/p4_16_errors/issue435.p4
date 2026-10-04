@@ -5,7 +5,7 @@
  */
 
 struct mystruct1 {
-    bit<4>  a;
+    bit<4> a;
 }
 
 extern myExtern1 {
@@ -15,7 +15,8 @@ extern myExtern1 {
 
 control c() {
     myExtern1(1) m;
-    apply {}
+    apply {
+    }
 }
 
 control ct();

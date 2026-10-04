@@ -2,9 +2,9 @@
 
 parser p(in bit<16> x) {
     state start {
-        transition select(x) {
-            16w0 &&& 16w65534: accept;
-            default: reject;
+        transition select (x) {
+            16w0 &&& 16w65534 : accept;
+            default : reject;
         }
     }
 }

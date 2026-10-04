@@ -9,15 +9,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -40,20 +40,20 @@ struct meta_t {
 
 struct headers_t {
     switch_to_cpu_header_t switch_to_cpu;
-    ethernet_t             ethernet;
-    ipv4_t                 ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -147,7 +147,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr : lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr();
@@ -166,7 +166,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {
-            meta._fwd_l2ptr0: exact @name("meta.fwd.l2ptr");
+            meta._fwd_l2ptr0 : exact @name("meta.fwd.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
@@ -174,31 +174,31 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         default_action = my_drop_3();
     }
-    @hidden action v1modelspecialopsbmv2l283() {
+    @hidden action v1modelspecialopsbmv2l284() {
         hdr.ipv4.srcAddr = 32w184320258;
         meta._fwd_l2ptr0 = 32w0xe50b;
     }
-    @hidden action v1modelspecialopsbmv2l286() {
+    @hidden action v1modelspecialopsbmv2l287() {
         hdr.ipv4.srcAddr = 32w180835939;
         meta._fwd_l2ptr0 = 32w0xec1c;
     }
-    @hidden table tbl_v1modelspecialopsbmv2l283 {
+    @hidden table tbl_v1modelspecialopsbmv2l284 {
         actions = {
-            v1modelspecialopsbmv2l283();
+            v1modelspecialopsbmv2l284();
         }
-        const default_action = v1modelspecialopsbmv2l283();
+        const default_action = v1modelspecialopsbmv2l284();
     }
-    @hidden table tbl_v1modelspecialopsbmv2l286 {
+    @hidden table tbl_v1modelspecialopsbmv2l287 {
         actions = {
-            v1modelspecialopsbmv2l286();
+            v1modelspecialopsbmv2l287();
         }
-        const default_action = v1modelspecialopsbmv2l286();
+        const default_action = v1modelspecialopsbmv2l287();
     }
     apply {
         if (standard_metadata.instance_type == 32w6) {
-            tbl_v1modelspecialopsbmv2l283.apply();
+            tbl_v1modelspecialopsbmv2l284.apply();
         } else if (standard_metadata.instance_type == 32w4) {
-            tbl_v1modelspecialopsbmv2l286.apply();
+            tbl_v1modelspecialopsbmv2l287.apply();
         } else {
             ipv4_da_lpm_0.apply();
         }
@@ -253,7 +253,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     @name("egress.get_multicast_copy_out_bd") table get_multicast_copy_out_bd_0 {
         key = {
             standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp");
-            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid");
+            standard_metadata.egress_rid : exact @name("standard_metadata.egress_rid");
         }
         actions = {
             set_out_bd();
@@ -274,7 +274,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
-            meta._fwd_out_bd1: exact @name("meta.fwd.out_bd");
+            meta._fwd_out_bd1 : exact @name("meta.fwd.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -284,33 +284,33 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         }
         default_action = my_drop_4();
     }
-    @hidden action v1modelspecialopsbmv2l358() {
+    @hidden action v1modelspecialopsbmv2l361() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0x12e012e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden action v1modelspecialopsbmv2l364() {
+    @hidden action v1modelspecialopsbmv2l367() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0xe2e0e2e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden table tbl_v1modelspecialopsbmv2l358 {
+    @hidden table tbl_v1modelspecialopsbmv2l361 {
         actions = {
-            v1modelspecialopsbmv2l358();
+            v1modelspecialopsbmv2l361();
         }
-        const default_action = v1modelspecialopsbmv2l358();
+        const default_action = v1modelspecialopsbmv2l361();
     }
-    @hidden table tbl_v1modelspecialopsbmv2l364 {
+    @hidden table tbl_v1modelspecialopsbmv2l367 {
         actions = {
-            v1modelspecialopsbmv2l364();
+            v1modelspecialopsbmv2l367();
         }
-        const default_action = v1modelspecialopsbmv2l364();
+        const default_action = v1modelspecialopsbmv2l367();
     }
     apply {
         if (standard_metadata.instance_type == 32w1) {
-            tbl_v1modelspecialopsbmv2l358.apply();
+            tbl_v1modelspecialopsbmv2l361.apply();
         } else if (standard_metadata.instance_type == 32w2) {
-            tbl_v1modelspecialopsbmv2l364.apply();
+            tbl_v1modelspecialopsbmv2l367.apply();
         } else {
             if (standard_metadata.instance_type == 32w5) {
                 get_multicast_copy_out_bd_0.apply();
@@ -322,36 +322,36 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<switch_to_cpu_header_t>(hdr.switch_to_cpu);
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit < switch_to_cpu_header_t >(hdr.switch_to_cpu);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
     }
 }
 
 struct tuple_0 {
-    bit<4>  f0;
-    bit<4>  f1;
-    bit<8>  f2;
+    bit<4> f0;
+    bit<4> f1;
+    bit<8> f2;
     bit<16> f3;
     bit<16> f4;
-    bit<3>  f5;
+    bit<3> f5;
     bit<13> f6;
-    bit<8>  f7;
-    bit<8>  f8;
+    bit<8> f7;
+    bit<8> f8;
     bit<32> f9;
     bit<32> f10;
 }
 
 control verifyChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum < tuple_0, bit<16 >>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum < tuple_0, bit<16 >>(hdr.ipv4.isValid() && hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
-V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers_t, meta_t >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

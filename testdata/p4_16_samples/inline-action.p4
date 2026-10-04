@@ -7,7 +7,9 @@
 
 control p(inout bit bt) {
     action a(inout bit y0)
-    { y0 = y0 | 1w1; }
+    {
+        y0 = y0 | 1w1;
+    }
 
     action b() {
         a(bt);
@@ -15,7 +17,9 @@ control p(inout bit bt) {
     }
 
     table t {
-        actions = { b; }
+        actions = {
+            b;
+        }
         default_action = b;
     }
 
@@ -24,7 +28,7 @@ control p(inout bit bt) {
     }
 }
 
-control simple<T>(inout T arg);
-package m<T>(simple<T> pipe);
+control simple < T >(inout T arg);
+package m < T >(simple<T> pipe);
 
 m(p()) main;

@@ -20,4 +20,3 @@ control p() {
         h<bit<1>> x;
     }
 }
-

@@ -15,7 +15,7 @@ struct metadata {
 
 struct headers {
     @name(".heartlands")
-    main_0   heartlands;
+    main_0 heartlands;
     @name(".z")
     packet_0 z;
 }

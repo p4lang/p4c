@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
+    H[2] h;
 }
 
 struct Meta {
@@ -22,9 +22,9 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
         transition accept;
     }
 }
@@ -36,14 +36,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             h.h[3w0].a = 8w1;
         }
     }
-    @hidden action predication_issue_3l38() {
+    @hidden action predication_issue_3l39() {
         bool_val_0 = true;
     }
-    @hidden table tbl_predication_issue_3l38 {
+    @hidden table tbl_predication_issue_3l39 {
         actions = {
-            predication_issue_3l38();
+            predication_issue_3l39();
         }
-        const default_action = predication_issue_3l38();
+        const default_action = predication_issue_3l39();
     }
     @hidden table tbl_perform_action {
         actions = {
@@ -52,7 +52,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = perform_action();
     }
     apply {
-        tbl_predication_issue_3l38.apply();
+        tbl_predication_issue_3l39.apply();
         tbl_perform_action.apply();
     }
 }
@@ -74,10 +74,10 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<ethernet_t>(h.eth_hdr);
-        b.emit<H>(h.h[0]);
-        b.emit<H>(h.h[1]);
+        b.emit < ethernet_t >(h.eth_hdr);
+        b.emit < H >(h.h[0]);
+        b.emit < H >(h.h[1]);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

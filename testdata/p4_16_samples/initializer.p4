@@ -6,7 +6,6 @@
  */
 
 extern bit<32> random(bit<5> logRange);
-
 control ingress(out bit<32> field_d_32) {
     action action_1() {
         {

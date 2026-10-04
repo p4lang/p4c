@@ -37,8 +37,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ethernet.dstAddr: lpm;
-            hdr.ethernet.srcAddr: lpm;
+            hdr.ethernet.dstAddr : lpm;
+            hdr.ethernet.srcAddr : lpm;
         }
     }
     apply {

@@ -11,8 +11,8 @@ enum bit<16> EthTypes {
 }
 
 header Ethernet {
-    bit<48>  src;
-    bit<48>  dest;
+    bit<48> src;
+    bit<48> dest;
     EthTypes type;
 }
 
@@ -24,11 +24,11 @@ parser prs(packet_in p, out Headers h) {
     @name("prs.e") Ethernet e_0;
     state start {
         e_0.setInvalid();
-        p.extract<Ethernet>(e_0);
-        transition select(e_0.type) {
-            EthTypes.IPv4: accept;
-            EthTypes.ARP: accept;
-            default: reject;
+        p.extract < Ethernet >(e_0);
+        transition select (e_0.type) {
+            EthTypes.IPv4 : accept;
+            EthTypes.ARP : accept;
+            default : reject;
         }
     }
 }
@@ -39,7 +39,7 @@ control c(inout Headers h) {
             if (h.eth.type == EthTypes.IPv4) {
                 h.eth.setInvalid();
             } else {
-                h.eth.type = (EthTypes)16w0;
+                h.eth.type =(EthTypes) 16w0;
             }
         } else {
             ;
@@ -47,7 +47,7 @@ control c(inout Headers h) {
     }
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H>(inout H h);
-package top<H>(p<H> _p, ctr<H> _c);
-top<Headers>(prs(), c()) main;
+parser p < H >(packet_in _p, out H h);
+control ctr < H >(inout H h);
+package top < H >(p<H> _p, ctr<H> _c);
+top < Headers >(prs(), c()) main;

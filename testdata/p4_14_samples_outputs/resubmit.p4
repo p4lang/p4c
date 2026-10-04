@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_port;
         }
         key = {
-            meta.mymeta.f1: exact;
+            meta.mymeta.f1 : exact;
         }
         size = 128;
     }
@@ -74,7 +74,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _resubmit;
         }
         key = {
-            meta.mymeta.f1: exact;
+            meta.mymeta.f1 : exact;
         }
         size = 128;
     }

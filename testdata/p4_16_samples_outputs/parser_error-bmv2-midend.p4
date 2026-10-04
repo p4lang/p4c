@@ -17,38 +17,38 @@ struct local_metadata_t {
 
 parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        pk.extract<Ethernet>(hdr.eth);
+        pk.extract < Ethernet >(hdr.eth);
         transition accept;
     }
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action parser_errorbmv2l36() {
+    @hidden action parser_errorbmv2l37() {
         hdr.eth.setValid();
         hdr.eth.type = 16w0;
         hdr.eth.src = 48w0;
         hdr.eth.dst = 48w0;
     }
-    @hidden action parser_errorbmv2l41() {
+    @hidden action parser_errorbmv2l42() {
         standard_metadata.egress_spec = 9w0;
     }
-    @hidden table tbl_parser_errorbmv2l36 {
+    @hidden table tbl_parser_errorbmv2l37 {
         actions = {
-            parser_errorbmv2l36();
+            parser_errorbmv2l37();
         }
-        const default_action = parser_errorbmv2l36();
+        const default_action = parser_errorbmv2l37();
     }
-    @hidden table tbl_parser_errorbmv2l41 {
+    @hidden table tbl_parser_errorbmv2l42 {
         actions = {
-            parser_errorbmv2l41();
+            parser_errorbmv2l42();
         }
-        const default_action = parser_errorbmv2l41();
+        const default_action = parser_errorbmv2l42();
     }
     apply {
         if (standard_metadata.parser_error == error.PacketTooShort) {
-            tbl_parser_errorbmv2l36.apply();
+            tbl_parser_errorbmv2l37.apply();
         }
-        tbl_parser_errorbmv2l41.apply();
+        tbl_parser_errorbmv2l42.apply();
     }
 }
 
@@ -59,7 +59,7 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 
 control deparser(packet_out b, in parsed_packet_t hdr) {
     apply {
-        b.emit<Ethernet>(hdr.eth);
+        b.emit < Ethernet >(hdr.eth);
     }
 }
 
@@ -73,4 +73,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch<parsed_packet_t, local_metadata_t>(parse(), verify_checks(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch < parsed_packet_t, local_metadata_t >(parse(), verify_checks(), ingress(), egress(), compute_checksum(), deparser()) main;

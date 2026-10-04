@@ -18,18 +18,27 @@ extern Virtual {
 
 // User code
 control c(inout bit<16> p) {
-    bit<16>     local;
+    bit<16> local;
 
     Virtual() cntr = {  // implementation
         bit<16> f(in bit<16> ix) {  // abstract method implementation
-            return (ix + local);
-        }
+            return(ix + local);
+    }
     };
-    action final_ctr() { p = cntr.total(); }
-    action add_ctr() { cntr.increment(); }
+    action final_ctr() {
+        p = cntr.total();
+    }
+    action add_ctr() {
+        cntr.increment();
+    }
     table run_ctr {
-        key = { p : exact; }
-        actions = { add_ctr; final_ctr; }
+        key = {
+            p : exact;
+        }
+        actions = {
+            add_ctr;
+            final_ctr;
+        }
     }
 
     apply {

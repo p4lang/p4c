@@ -48,9 +48,9 @@ action _nop() {
 }
 
 meter my_meter {
-    type: packets; // or bytes
-    static: m_table;
-    instance_count: 16384;
+    type : packets; // or bytes
+    static : m_table;
+    instance_count : 16384;
 }
 
 action m_action(meter_idx) {
@@ -63,7 +63,8 @@ table m_table {
         ethernet.srcAddr : exact;
     }
     actions {
-        m_action; _nop;
+        m_action;
+        _nop;
     }
     size : 16384;
 }
@@ -73,9 +74,10 @@ table m_filter {
         meta.meter_tag : exact;
     }
     actions {
-        _drop; _nop;
+        _drop;
+        _nop;
     }
-    size: 16;
+    size : 16;
 }
 
 control ingress {

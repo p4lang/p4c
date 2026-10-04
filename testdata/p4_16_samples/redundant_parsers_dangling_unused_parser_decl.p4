@@ -46,36 +46,36 @@ parser RedundantParser(inout headers hdr) {
 }
 
 parser IParser2(packet_in packet, inout headers hdr) {
-state start {
-    packet.extract(hdr.h2);
-    transition select(hdr.h2.f) {
-      default: accept;
+    state start {
+        packet.extract(hdr.h2);
+        transition select (hdr.h2.f) {
+            default : accept;
+        }
     }
-  }
 }
 
 parser IParser(packet_in packet, inout headers hdr) {
   // This unused local parser declaration remains after RemoveRedundantParsers.
   RedundantParser() redundant_parser;
 
-  state start {
-    packet.extract(hdr.h1);
-    transition select(hdr.h1.f) {
-      1 : s1;
-      default : s2;
+    state start {
+        packet.extract(hdr.h1);
+        transition select (hdr.h1.f) {
+            1 : s1;
+            default : s2;
+        }
     }
-  }
 
-  state s1 {
+    state s1 {
     // The below application of redundant_parser gets optimized out by RemoveRedundantParsers.
     redundant_parser.apply(hdr);
-    transition accept;
-  }
+        transition accept;
+    }
 
-  state s2 {
-    IParser2.apply(packet, hdr);
-    transition accept;
-  }
+    state s2 {
+        IParser2.apply(packet, hdr);
+        transition accept;
+    }
 }
 
 parser Parser(packet_in p, inout headers hdr);

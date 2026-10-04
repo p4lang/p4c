@@ -23,9 +23,9 @@ parser p1(packet_in p, out Header h) {
         h.data2 = h.data3 + 32w1;
         stack[0] = stack[1];
         b = stack[1].isValid();
-        transition select(h.isValid()) {
-            true: next1;
-            false: next2;
+        transition select (h.isValid()) {
+            true : next1;
+            false : next2;
         }
     }
     state next1 {
@@ -75,10 +75,10 @@ control c(out bit<32> v) {
         e = e + 32w1;
         bool touched;
         switch (t.apply().action_run) {
-            a1: {
-                touched = true;
+            a1 : {
+            touched = true;
             }
-            default: {
+            default : {
             }
         }
         touched = !touched;

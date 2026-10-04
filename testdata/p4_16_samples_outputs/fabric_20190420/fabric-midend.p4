@@ -3,29 +3,29 @@
 #include <v1model.p4>
 
 struct int_metadata_t {
-    bool    source;
-    bool    transit;
-    bool    sink;
+    bool source;
+    bool transit;
+    bool sink;
     bit<32> switch_id;
-    bit<8>  new_words;
+    bit<8> new_words;
     bit<16> new_bytes;
     bit<32> ig_tstamp;
     bit<32> eg_tstamp;
 }
 
 header int_header_t {
-    bit<2>  ver;
-    bit<2>  rep;
-    bit<1>  c;
-    bit<1>  e;
-    bit<5>  rsvd1;
-    bit<5>  ins_cnt;
-    bit<8>  max_hop_cnt;
-    bit<8>  total_hop_cnt;
-    bit<4>  instruction_mask_0003;
-    bit<4>  instruction_mask_0407;
-    bit<4>  instruction_mask_0811;
-    bit<4>  instruction_mask_1215;
+    bit<2> ver;
+    bit<2> rep;
+    bit<1> c;
+    bit<1> e;
+    bit<5> rsvd1;
+    bit<5> ins_cnt;
+    bit<8> max_hop_cnt;
+    bit<8> total_hop_cnt;
+    bit<4> instruction_mask_0003;
+    bit<4> instruction_mask_0407;
+    bit<4> instruction_mask_0811;
+    bit<4> instruction_mask_1215;
     bit<16> rsvd2;
 }
 
@@ -37,10 +37,10 @@ header intl4_shim_t {
 }
 
 header intl4_tail_t {
-    bit<8>  next_proto;
+    bit<8> next_proto;
     bit<16> dest_port;
-    bit<2>  padding;
-    bit<6>  dscp;
+    bit<2> padding;
+    bit<6> dscp;
 }
 
 @controller_header("packet_in") header packet_in_header_t {
@@ -60,42 +60,42 @@ header ethernet_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pri;
-    bit<1>  cfi;
+    bit<3> pri;
+    bit<1> cfi;
     bit<12> vlan_id;
     bit<16> eth_type;
 }
 
 header mpls_t {
     bit<20> label;
-    bit<3>  tc;
-    bit<1>  bos;
-    bit<8>  ttl;
+    bit<3> tc;
+    bit<1> bos;
+    bit<8> ttl;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> total_len;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> frag_offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdr_checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
 }
 
 header ipv6_t {
-    bit<4>   version;
-    bit<8>   traffic_class;
-    bit<20>  flow_label;
-    bit<16>  payload_len;
-    bit<8>   next_hdr;
-    bit<8>   hop_limit;
+    bit<4> version;
+    bit<8> traffic_class;
+    bit<20> flow_label;
+    bit<16> payload_len;
+    bit<8> next_hdr;
+    bit<8> hop_limit;
     bit<128> src_addr;
     bit<128> dst_addr;
 }
@@ -105,10 +105,10 @@ header tcp_t {
     bit<16> dport;
     bit<32> seq_no;
     bit<32> ack_no;
-    bit<4>  data_offset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> data_offset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgent_ptr;
@@ -122,8 +122,8 @@ header udp_t {
 }
 
 header icmp_t {
-    bit<8>  icmp_type;
-    bit<8>  icmp_code;
+    bit<8> icmp_type;
+    bit<8> icmp_code;
     bit<16> checksum;
     bit<16> identifier;
     bit<16> sequence_number;
@@ -131,19 +131,19 @@ header icmp_t {
 }
 
 header gtpu_t {
-    bit<3>  version;
-    bit<1>  pt;
-    bit<1>  spare;
-    bit<1>  ex_flag;
-    bit<1>  seq_flag;
-    bit<1>  npdu_flag;
-    bit<8>  msgtype;
+    bit<3> version;
+    bit<1> pt;
+    bit<1> spare;
+    bit<1> ex_flag;
+    bit<1> seq_flag;
+    bit<1> npdu_flag;
+    bit<8> msgtype;
     bit<16> msglen;
     bit<32> teid;
 }
 
 struct spgw_meta_t {
-    bit<2>  direction;
+    bit<2> direction;
     bit<16> ipv4_len;
     bit<32> teid;
     bit<32> s1u_enb_addr;
@@ -154,21 +154,21 @@ struct fabric_metadata_t {
     bit<16> _eth_type0;
     bit<16> _ip_eth_type1;
     bit<12> _vlan_id2;
-    bit<3>  _vlan_pri3;
-    bit<1>  _vlan_cfi4;
+    bit<3> _vlan_pri3;
+    bit<1> _vlan_cfi4;
     bit<20> _mpls_label5;
-    bit<8>  _mpls_ttl6;
-    bool    _skip_forwarding7;
-    bool    _skip_next8;
-    bit<3>  _fwd_type9;
+    bit<8> _mpls_ttl6;
+    bool _skip_forwarding7;
+    bool _skip_next8;
+    bit<3> _fwd_type9;
     bit<32> _next_id10;
-    bool    _is_multicast11;
-    bool    _is_controller_packet_out12;
-    bool    _clone_to_cpu13;
-    bit<8>  _ip_proto14;
+    bool _is_multicast11;
+    bool _is_controller_packet_out12;
+    bool _clone_to_cpu13;
+    bit<8> _ip_proto14;
     bit<16> _l4_sport15;
     bit<16> _l4_dport16;
-    bit<2>  _spgw_direction17;
+    bit<2> _spgw_direction17;
     bit<16> _spgw_ipv4_len18;
     bit<32> _spgw_teid19;
     bit<32> _spgw_s1u_enb_addr20;
@@ -176,149 +176,149 @@ struct fabric_metadata_t {
 }
 
 struct parsed_headers_t {
-    ethernet_t          ethernet;
-    vlan_tag_t          vlan_tag;
-    vlan_tag_t          inner_vlan_tag;
-    mpls_t              mpls;
-    ipv4_t              gtpu_ipv4;
-    udp_t               gtpu_udp;
-    gtpu_t              gtpu;
-    ipv4_t              inner_ipv4;
-    udp_t               inner_udp;
-    ipv4_t              ipv4;
-    tcp_t               tcp;
-    udp_t               udp;
-    icmp_t              icmp;
+    ethernet_t ethernet;
+    vlan_tag_t vlan_tag;
+    vlan_tag_t inner_vlan_tag;
+    mpls_t mpls;
+    ipv4_t gtpu_ipv4;
+    udp_t gtpu_udp;
+    gtpu_t gtpu;
+    ipv4_t inner_ipv4;
+    udp_t inner_udp;
+    ipv4_t ipv4;
+    tcp_t tcp;
+    udp_t udp;
+    icmp_t icmp;
     packet_out_header_t packet_out;
-    packet_in_header_t  packet_in;
+    packet_in_header_t packet_in;
 }
 
 struct tuple_0 {
-    bit<4>  f0;
-    bit<4>  f1;
-    bit<6>  f2;
-    bit<2>  f3;
+    bit<4> f0;
+    bit<4> f1;
+    bit<6> f2;
+    bit<2> f3;
     bit<16> f4;
     bit<16> f5;
-    bit<3>  f6;
+    bit<3> f6;
     bit<13> f7;
-    bit<8>  f8;
-    bit<8>  f9;
+    bit<8> f8;
+    bit<8> f9;
     bit<32> f10;
     bit<32> f11;
 }
 
 control FabricComputeChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(hdr.gtpu_ipv4.isValid(), (tuple_0){f0 = hdr.gtpu_ipv4.version,f1 = hdr.gtpu_ipv4.ihl,f2 = hdr.gtpu_ipv4.dscp,f3 = hdr.gtpu_ipv4.ecn,f4 = hdr.gtpu_ipv4.total_len,f5 = hdr.gtpu_ipv4.identification,f6 = hdr.gtpu_ipv4.flags,f7 = hdr.gtpu_ipv4.frag_offset,f8 = hdr.gtpu_ipv4.ttl,f9 = hdr.gtpu_ipv4.protocol,f10 = hdr.gtpu_ipv4.src_addr,f11 = hdr.gtpu_ipv4.dst_addr}, hdr.gtpu_ipv4.hdr_checksum, HashAlgorithm.csum16);
+        update_checksum < tuple_0, bit<16 >>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
+        update_checksum <tuple_0, bit<16 >>(hdr.gtpu_ipv4.isValid(), (tuple_0){f0 = hdr.gtpu_ipv4.version,f1 = hdr.gtpu_ipv4.ihl,f2 = hdr.gtpu_ipv4.dscp,f3 = hdr.gtpu_ipv4.ecn,f4 = hdr.gtpu_ipv4.total_len,f5 = hdr.gtpu_ipv4.identification,f6 = hdr.gtpu_ipv4.flags,f7 = hdr.gtpu_ipv4.frag_offset,f8 = hdr.gtpu_ipv4.ttl,f9 = hdr.gtpu_ipv4.protocol,f10 = hdr.gtpu_ipv4.src_addr,f11 = hdr.gtpu_ipv4.dst_addr}, hdr.gtpu_ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
 
 control FabricVerifyChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
+        verify_checksum < tuple_0, bit<16 >>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
 
 parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
     @name("FabricParser.tmp_0") bit<4> tmp_0;
     state start {
-        transition select(standard_metadata.ingress_port) {
-            9w255: parse_packet_out;
-            default: parse_ethernet;
+        transition select (standard_metadata.ingress_port) {
+            9w255 : parse_packet_out;
+            default : parse_ethernet;
         }
     }
     state parse_packet_out {
-        packet.extract<packet_out_header_t>(hdr.packet_out);
+        packet.extract < packet_out_header_t >(hdr.packet_out);
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         fabric_metadata._eth_type0 = hdr.ethernet.eth_type;
         fabric_metadata._vlan_id2 = 12w4094;
-        transition select(hdr.ethernet.eth_type) {
-            16w0x8100: parse_vlan_tag;
-            16w0x8847: parse_mpls;
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.eth_type) {
+            16w0x8100 : parse_vlan_tag;
+            16w0x8847 : parse_mpls;
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_vlan_tag {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag);
-        transition select(hdr.vlan_tag.eth_type) {
-            16w0x800: parse_ipv4;
-            16w0x8847: parse_mpls;
-            16w0x8100: parse_inner_vlan_tag;
-            default: accept;
+        packet.extract < vlan_tag_t >(hdr.vlan_tag);
+        transition select (hdr.vlan_tag.eth_type) {
+            16w0x800 : parse_ipv4;
+            16w0x8847 : parse_mpls;
+            16w0x8100 : parse_inner_vlan_tag;
+            default : accept;
         }
     }
     state parse_inner_vlan_tag {
-        packet.extract<vlan_tag_t>(hdr.inner_vlan_tag);
-        transition select(hdr.inner_vlan_tag.eth_type) {
-            16w0x800: parse_ipv4;
-            16w0x8847: parse_mpls;
-            default: accept;
+        packet.extract < vlan_tag_t >(hdr.inner_vlan_tag);
+        transition select (hdr.inner_vlan_tag.eth_type) {
+            16w0x800 : parse_ipv4;
+            16w0x8847 : parse_mpls;
+            default : accept;
         }
     }
     state parse_mpls {
-        packet.extract<mpls_t>(hdr.mpls);
+        packet.extract < mpls_t >(hdr.mpls);
         fabric_metadata._mpls_label5 = hdr.mpls.label;
         fabric_metadata._mpls_ttl6 = hdr.mpls.ttl;
-        tmp_0 = packet.lookahead<bit<4>>();
-        transition select(tmp_0) {
-            4w4: parse_ipv4;
-            default: parse_ethernet;
+        tmp_0 = packet.lookahead < bit<4 >>();
+        transition select (tmp_0) {
+            4w4 : parse_ipv4;
+            default : parse_ethernet;
         }
     }
     state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract < ipv4_t >(hdr.ipv4);
         fabric_metadata._ip_proto14 = hdr.ipv4.protocol;
         fabric_metadata._ip_eth_type1 = 16w0x800;
-        transition select(hdr.ipv4.protocol) {
-            8w6: parse_tcp;
-            8w17: parse_udp;
-            8w1: parse_icmp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            8w6 : parse_tcp;
+            8w17 : parse_udp;
+            8w1 : parse_icmp;
+            default : accept;
         }
     }
     state parse_tcp {
-        packet.extract<tcp_t>(hdr.tcp);
+        packet.extract < tcp_t >(hdr.tcp);
         fabric_metadata._l4_sport15 = hdr.tcp.sport;
         fabric_metadata._l4_dport16 = hdr.tcp.dport;
         transition accept;
     }
     state parse_udp {
-        packet.extract<udp_t>(hdr.udp);
+        packet.extract < udp_t >(hdr.udp);
         fabric_metadata._l4_sport15 = hdr.udp.sport;
         fabric_metadata._l4_dport16 = hdr.udp.dport;
-        transition select(hdr.udp.dport) {
-            16w2152: parse_gtpu;
-            default: accept;
+        transition select (hdr.udp.dport) {
+            16w2152 : parse_gtpu;
+            default : accept;
         }
     }
     state parse_icmp {
-        packet.extract<icmp_t>(hdr.icmp);
+        packet.extract < icmp_t >(hdr.icmp);
         transition accept;
     }
     state parse_gtpu {
-        transition select(hdr.ipv4.dst_addr[31:24]) {
-            8w140: do_parse_gtpu;
-            default: accept;
+        transition select (hdr.ipv4.dst_addr[31 : 24]) {
+            8w140 : do_parse_gtpu;
+            default : accept;
         }
     }
     state do_parse_gtpu {
-        packet.extract<gtpu_t>(hdr.gtpu);
-        packet.extract<ipv4_t>(hdr.inner_ipv4);
-        transition select(hdr.inner_ipv4.protocol) {
-            8w6: parse_tcp;
-            8w17: parse_inner_udp;
-            8w1: parse_icmp;
-            default: accept;
+        packet.extract < gtpu_t >(hdr.gtpu);
+        packet.extract < ipv4_t >(hdr.inner_ipv4);
+        transition select (hdr.inner_ipv4.protocol) {
+            8w6 : parse_tcp;
+            8w17 : parse_inner_udp;
+            8w1 : parse_icmp;
+            default : accept;
         }
     }
     state parse_inner_udp {
-        packet.extract<udp_t>(hdr.inner_udp);
+        packet.extract < udp_t >(hdr.inner_udp);
         fabric_metadata._l4_sport15 = hdr.inner_udp.sport;
         fabric_metadata._l4_dport16 = hdr.inner_udp.dport;
         transition accept;
@@ -327,18 +327,18 @@ parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_met
 
 control FabricDeparser(packet_out packet, in parsed_headers_t hdr) {
     apply {
-        packet.emit<packet_in_header_t>(hdr.packet_in);
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<vlan_tag_t>(hdr.vlan_tag);
-        packet.emit<vlan_tag_t>(hdr.inner_vlan_tag);
-        packet.emit<mpls_t>(hdr.mpls);
-        packet.emit<ipv4_t>(hdr.gtpu_ipv4);
-        packet.emit<udp_t>(hdr.gtpu_udp);
-        packet.emit<gtpu_t>(hdr.gtpu);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
-        packet.emit<udp_t>(hdr.udp);
-        packet.emit<icmp_t>(hdr.icmp);
+        packet.emit < packet_in_header_t >(hdr.packet_in);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < vlan_tag_t >(hdr.vlan_tag);
+        packet.emit < vlan_tag_t >(hdr.inner_vlan_tag);
+        packet.emit < mpls_t >(hdr.mpls);
+        packet.emit < ipv4_t >(hdr.gtpu_ipv4);
+        packet.emit < udp_t >(hdr.gtpu_udp);
+        packet.emit < gtpu_t >(hdr.gtpu);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
+        packet.emit < udp_t >(hdr.udp);
+        packet.emit < icmp_t >(hdr.icmp);
     }
 }
 
@@ -378,9 +378,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.filtering.ingress_port_vlan") table filtering_ingress_port_vlan {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port");
-            hdr.vlan_tag.isValid()        : exact @name("vlan_is_valid");
-            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id");
+            standard_metadata.ingress_port : exact @name("ig_port");
+            hdr.vlan_tag.isValid() : exact @name("vlan_is_valid");
+            hdr.vlan_tag.vlan_id : ternary @name("vlan_id");
         }
         actions = {
             filtering_deny_0();
@@ -398,9 +398,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.filtering.fwd_classifier") table filtering_fwd_classifier {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port");
-            hdr.ethernet.dst_addr         : ternary @name("eth_dst");
-            fabric_metadata._eth_type0    : exact @name("eth_type");
+            standard_metadata.ingress_port : exact @name("ig_port");
+            hdr.ethernet.dst_addr : ternary @name("eth_dst");
+            fabric_metadata._eth_type0 : exact @name("eth_type");
         }
         actions = {
             filtering_set_forwarding_type_0();
@@ -418,8 +418,8 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.forwarding.bridging") table forwarding_bridging {
         key = {
-            fabric_metadata._vlan_id2: exact @name("vlan_id");
-            hdr.ethernet.dst_addr    : ternary @name("eth_dst");
+            fabric_metadata._vlan_id2 : exact @name("vlan_id");
+            hdr.ethernet.dst_addr : ternary @name("eth_dst");
         }
         actions = {
             forwarding_set_next_id_bridging_0();
@@ -439,7 +439,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.forwarding.mpls") table forwarding_mpls {
         key = {
-            fabric_metadata._mpls_label5: exact @name("mpls_label");
+            fabric_metadata._mpls_label5 : exact @name("mpls_label");
         }
         actions = {
             forwarding_pop_mpls_and_next_0();
@@ -461,7 +461,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.forwarding.routing_v4") table forwarding_routing_v4 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("ipv4_dst");
+            hdr.ipv4.dst_addr : lpm @name("ipv4_dst");
         }
         actions = {
             forwarding_set_next_id_routing_v4_0();
@@ -496,18 +496,18 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.acl.acl") table acl_acl {
         key = {
-            standard_metadata.ingress_port: ternary @name("ig_port");
-            fabric_metadata._ip_proto14   : ternary @name("ip_proto");
-            fabric_metadata._l4_sport15   : ternary @name("l4_sport");
-            fabric_metadata._l4_dport16   : ternary @name("l4_dport");
-            hdr.ethernet.dst_addr         : ternary @name("eth_src");
-            hdr.ethernet.src_addr         : ternary @name("eth_dst");
-            hdr.vlan_tag.vlan_id          : ternary @name("vlan_id");
-            fabric_metadata._eth_type0    : ternary @name("eth_type");
-            hdr.ipv4.src_addr             : ternary @name("ipv4_src");
-            hdr.ipv4.dst_addr             : ternary @name("ipv4_dst");
-            hdr.icmp.icmp_type            : ternary @name("icmp_type");
-            hdr.icmp.icmp_code            : ternary @name("icmp_code");
+            standard_metadata.ingress_port : ternary @name("ig_port");
+            fabric_metadata._ip_proto14 : ternary @name("ip_proto");
+            fabric_metadata._l4_sport15 : ternary @name("l4_sport");
+            fabric_metadata._l4_dport16 : ternary @name("l4_dport");
+            hdr.ethernet.dst_addr : ternary @name("eth_src");
+            hdr.ethernet.src_addr : ternary @name("eth_dst");
+            hdr.vlan_tag.vlan_id : ternary @name("vlan_id");
+            fabric_metadata._eth_type0 : ternary @name("eth_type");
+            hdr.ipv4.src_addr : ternary @name("ipv4_src");
+            hdr.ipv4.dst_addr : ternary @name("ipv4_dst");
+            hdr.icmp.icmp_type : ternary @name("icmp_type");
+            hdr.icmp.icmp_code : ternary @name("icmp_code");
         }
         actions = {
             acl_set_next_id_acl_0();
@@ -527,7 +527,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.next.next_vlan") table next_next_vlan {
         key = {
-            fabric_metadata._next_id10: exact @name("next_id");
+            fabric_metadata._next_id10 : exact @name("next_id");
         }
         actions = {
             next_set_vlan_0();
@@ -550,8 +550,8 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.next.xconnect") table next_xconnect {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port");
-            fabric_metadata._next_id10    : exact @name("next_id");
+            standard_metadata.ingress_port : exact @name("ig_port");
+            fabric_metadata._next_id10 : exact @name("next_id");
         }
         actions = {
             next_output_xconnect_0();
@@ -606,11 +606,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @name("FabricIngress.next.hashed") table next_hashed {
         key = {
             fabric_metadata._next_id10 : exact @name("next_id");
-            hdr.ipv4.dst_addr          : selector @name("hdr.ipv4.dst_addr");
-            hdr.ipv4.src_addr          : selector @name("hdr.ipv4.src_addr");
-            fabric_metadata._ip_proto14: selector @name("fabric_metadata.ip_proto");
-            fabric_metadata._l4_sport15: selector @name("fabric_metadata.l4_sport");
-            fabric_metadata._l4_dport16: selector @name("fabric_metadata.l4_dport");
+            hdr.ipv4.dst_addr : selector @name("hdr.ipv4.dst_addr");
+            hdr.ipv4.src_addr : selector @name("hdr.ipv4.src_addr");
+            fabric_metadata._ip_proto14 : selector @name("fabric_metadata.ip_proto");
+            fabric_metadata._l4_sport15 : selector @name("fabric_metadata.l4_sport");
+            fabric_metadata._l4_dport16 : selector @name("fabric_metadata.l4_dport");
         }
         actions = {
             next_output_hashed_0();
@@ -631,7 +631,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.next.multicast") table next_multicast {
         key = {
-            fabric_metadata._next_id10: exact @name("next_id");
+            fabric_metadata._next_id10 : exact @name("next_id");
         }
         actions = {
             next_set_mcast_group_id_0();
@@ -657,7 +657,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.spgw_ingress.dl_sess_lookup") table spgw_ingress_dl_sess_lookup {
         key = {
-            hdr.ipv4.dst_addr: exact @name("ipv4_dst");
+            hdr.ipv4.dst_addr : exact @name("ipv4_dst");
         }
         actions = {
             spgw_ingress_set_dl_sess_info_0();
@@ -668,7 +668,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.spgw_ingress.s1u_filter_table") table spgw_ingress_s1u_filter_table {
         key = {
-            hdr.gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst");
+            hdr.gtpu_ipv4.dst_addr : exact @name("gtp_ipv4_dst");
         }
         actions = {
             nop_10();
@@ -934,8 +934,8 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     }
     @name("FabricEgress.egress_next.egress_vlan") table egress_next_egress_vlan {
         key = {
-            fabric_metadata._vlan_id2    : exact @name("vlan_id");
-            standard_metadata.egress_port: exact @name("eg_port");
+            fabric_metadata._vlan_id2 : exact @name("vlan_id");
+            standard_metadata.egress_port : exact @name("eg_port");
         }
         actions = {
             egress_next_pop_vlan_0();
@@ -1129,4 +1129,4 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     }
 }
 
-V1Switch<parsed_headers_t, fabric_metadata_t>(FabricParser(), FabricVerifyChecksum(), FabricIngress(), FabricEgress(), FabricComputeChecksum(), FabricDeparser()) main;
+V1Switch < parsed_headers_t, fabric_metadata_t >(FabricParser(), FabricVerifyChecksum(), FabricIngress(), FabricEgress(), FabricComputeChecksum(), FabricDeparser()) main;

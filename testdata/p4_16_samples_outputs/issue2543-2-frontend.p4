@@ -28,8 +28,8 @@ control ingress(inout Headers h) {
         tmp_3 = inlinedRetval_1;
         tmp_2 = tmp_3;
         tmp.setValid();
-        tmp = (ethernet_t){dst_addr = tmp_0,src_addr = tmp_1,eth_type = tmp_2};
-        retval = (Headers){eth_hdr = tmp};
+        tmp =(ethernet_t) { dst_addr = tmp_0, src_addr = tmp_1, eth_type = tmp_2 };
+        retval =(Headers) { eth_hdr = tmp };
         inlinedRetval_2 = retval;
         h = inlinedRetval_2;
     }

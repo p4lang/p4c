@@ -20,7 +20,7 @@ header_union U {
 }
 
 struct headers {
-    S    base;
+    S base;
     U[1] u;
 }
 
@@ -29,19 +29,19 @@ struct metadata {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<S>(hdr.base);
-        transition select(hdr.base.t) {
-            8w0: parseO1;
-            8w1: parseO2;
-            default: accept;
+        packet.extract < S >(hdr.base);
+        transition select (hdr.base.t) {
+            8w0 : parseO1;
+            8w1 : parseO2;
+            default : accept;
         }
     }
     state parseO1 {
-        packet.extract<O1>(hdr.u[0].byte);
+        packet.extract < O1 >(hdr.u[0].byte);
         transition accept;
     }
     state parseO2 {
-        packet.extract<O2>(hdr.u[0].short);
+        packet.extract < O2 >(hdr.u[0].short);
         transition accept;
     }
 }
@@ -49,8 +49,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     table debug_hdr {
         key = {
-            hdr.base.t              : exact @name("hdr.base.t");
-            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$");
+            hdr.base.t : exact @name("hdr.base.t");
+            hdr.u[0].short.isValid() : exact @name("hdr.u[0].short.$valid$");
             hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$");
         }
         actions = {
@@ -76,7 +76,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
@@ -90,4 +90,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

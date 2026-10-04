@@ -275,7 +275,7 @@ control c(inout bit<32> x) {
         }
         x = u1_6_h1.a ^ u1_6_h2.a ^ hs1_6[0].a ^ hs1_6[1].a ^ us1_6[0].h1.a ^ us1_6[0].h2.a ^ us1_6[1].h1.a ^ us1_6[1].h2.a;
     }
-    @hidden action invalidhdrwarnings8l13() {
+    @hidden action invalidhdrwarnings8l17() {
         u_0_h1.setInvalid();
         u_0_h2.setInvalid();
         hs_0[0].setInvalid();
@@ -290,11 +290,11 @@ control c(inout bit<32> x) {
         us_0[0].h1.setValid();
         us_0[0].h2.setInvalid();
     }
-    @hidden table tbl_invalidhdrwarnings8l13 {
+    @hidden table tbl_invalidhdrwarnings8l17 {
         actions = {
-            invalidhdrwarnings8l13();
+            invalidhdrwarnings8l17();
         }
-        const default_action = invalidhdrwarnings8l13();
+        const default_action = invalidhdrwarnings8l17();
     }
     @hidden table tbl_inout_action2 {
         actions = {
@@ -309,7 +309,7 @@ control c(inout bit<32> x) {
         const default_action = xor();
     }
     apply @noWarn("uninitialized-use") {
-        tbl_invalidhdrwarnings8l13.apply();
+        tbl_invalidhdrwarnings8l17.apply();
         tbl_inout_action2.apply();
         tbl_xor.apply();
     }

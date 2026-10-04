@@ -9,7 +9,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     @tc_type("macaddr") EthernetAddress dstAddr;
     @tc_type("macaddr") EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header random_t {
@@ -22,7 +22,7 @@ header random_t {
 // main parser.
 struct headers_t {
     ethernet_t eth;
-    random_t   rand;
+    random_t rand;
 }
 
 parser MainParserImpl(
@@ -44,7 +44,7 @@ control Main(inout headers_t hdr,                 // from main parser
              inout pna_main_output_metadata_t ostd) {
 
     Random(16w0, 16w127) r1;
-    Random<bit<32>>(0x80_00_00_01, 0x80_00_00_05) r2;
+    Random < bit<32 >>(0x80_00_00_01, 0x80_00_00_05) r2;
     Random(16w256, 16w259) r3;
 
     action send_nh(@tc_type("dev") PortId_t port_id, @tc_type("macaddr") bit<48> dmac, @tc_type("macaddr") bit<48> smac) {

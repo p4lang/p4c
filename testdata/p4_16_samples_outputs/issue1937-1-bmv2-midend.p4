@@ -22,14 +22,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name(".foo") action foo_2() {
         hdr.h1.f2 = 8w1;
     }
-    @hidden action issue19371bmv2l21() {
+    @hidden action issue19371bmv2l27() {
         tmp = hdr.h1.f1;
     }
-    @hidden table tbl_issue19371bmv2l21 {
+    @hidden table tbl_issue19371bmv2l27 {
         actions = {
-            issue19371bmv2l21();
+            issue19371bmv2l27();
         }
-        const default_action = issue19371bmv2l21();
+        const default_action = issue19371bmv2l27();
     }
     @hidden table tbl_foo {
         actions = {
@@ -44,7 +44,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         const default_action = foo_2();
     }
     apply {
-        tbl_issue19371bmv2l21.apply();
+        tbl_issue19371bmv2l27.apply();
         tbl_foo.apply();
         tbl_foo_0.apply();
     }
@@ -76,4 +76,4 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

@@ -23,22 +23,22 @@ control c(inout H h, inout E e) {
         ih_0.setInvalid();
         h = ih_0;
     }
-    @hidden action invalidheader25() {
+    @hidden action invalidheader26() {
         ih_1.setInvalid();
         ih_2.setInvalid();
         h = ih_1;
         e = ih_2;
         x_0 = h.f;
     }
-    @hidden action invalidheader30() {
+    @hidden action invalidheader31() {
         h.setValid();
         h.f = x_0;
     }
-    @hidden table tbl_invalidheader25 {
+    @hidden table tbl_invalidheader26 {
         actions = {
-            invalidheader25();
+            invalidheader26();
         }
-        const default_action = invalidheader25();
+        const default_action = invalidheader26();
     }
     @hidden table tbl_a {
         actions = {
@@ -46,17 +46,17 @@ control c(inout H h, inout E e) {
         }
         const default_action = a();
     }
-    @hidden table tbl_invalidheader30 {
+    @hidden table tbl_invalidheader31 {
         actions = {
-            invalidheader30();
+            invalidheader31();
         }
-        const default_action = invalidheader30();
+        const default_action = invalidheader31();
     }
     apply {
-        tbl_invalidheader25.apply();
+        tbl_invalidheader26.apply();
         tbl_a.apply();
         if (e.isValid()) {
-            tbl_invalidheader30.apply();
+            tbl_invalidheader31.apply();
         }
     }
 }

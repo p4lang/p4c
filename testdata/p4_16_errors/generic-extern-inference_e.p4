@@ -15,11 +15,13 @@ extern TwoParameters<A, B> {
 control c1() {
     // B does not appear among the constructor parameters, so it cannot be inferred.
     TwoParameters(16w1) notInferable;
-    apply {}
+    apply {
+    }
 }
 
 control c2() {
     // The argument is an unsized integer constant, so no width can be inferred for ArgT.
     Parametrized(1) noWidth;
-    apply {}
+    apply {
+    }
 }

@@ -8,12 +8,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 // Some code copied and pasted from an example by Qinshi Wang on
@@ -43,7 +43,7 @@ H[1] h() {
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     H h1;
     U u1;
 }
@@ -63,7 +63,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(inout headers_t hdr,
@@ -117,11 +118,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

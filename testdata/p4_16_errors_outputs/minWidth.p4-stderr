@@ -10,7 +10,7 @@ const int sw = S.minWidthInBits();
 minWidth.p4(22): [--Wwarn=unused] warning: 'eew' is unused
 const int eew = e.minWidthInBits();
           ^^^
-minWidth.p4(28): [--Wwarn=unused] warning: 'ce' is unused
+minWidth.p4(29): [--Wwarn=unused] warning: 'ce' is unused
 const int ce = ctr.minWidthInBits();
           ^^
 minWidth.p4(13): [--Werror=type-error] error: Cannot extract field minWidthInBits from 2 which has type int
@@ -43,9 +43,9 @@ const int eew = e.minWidthInBits();
 minWidth.p4(22): [--Werror=type-error] error: e.minWidthInBits(): Cannot evaluate initializer to a compile-time constant
 const int eew = e.minWidthInBits();
                 ^^^^^^^^^^^^^^^^^^
-minWidth.p4(27): [--Werror=invalid] error: ctr: cannot instantiate at top-level
+minWidth.p4(28): [--Werror=invalid] error: ctr: cannot instantiate at top-level
 c() ctr;
     ^^^
-minWidth.p4(28): [--Werror=type-error] error: ctr.minWidthInBits(): Cannot evaluate initializer to a compile-time constant
+minWidth.p4(29): [--Werror=type-error] error: ctr.minWidthInBits(): Cannot evaluate initializer to a compile-time constant
 const int ce = ctr.minWidthInBits();
                ^^^^^^^^^^^^^^^^^^^^

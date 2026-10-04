@@ -38,7 +38,7 @@ typedef serializable_enum1_t serializable_enum1D_t;
 typedef h1_t H1D_t;
 typedef header h2a_t {
     bit<16> f2;
-    bit<8>  f3;
+    bit<8> f3;
 }
 H2aD_t;
 typedef h1_t[3] h1StackD_t;
@@ -49,8 +49,8 @@ typedef struct PointA_t {
     int<32> y;
 }
 PointAD_t;
-typedef tuple<bit<8>, bit<17>> Tuple1D_t;
-typedef tuple<bit<8>, varbit<17>> Tuple2D_t;
+typedef tuple < bit<8>, bit<17 >> Tuple1D_t;
+typedef tuple <bit<8>, varbit<17 >> Tuple2D_t;
 type int intT_t;
 type bit<8> bT_t;
 type int<8> iT_t;

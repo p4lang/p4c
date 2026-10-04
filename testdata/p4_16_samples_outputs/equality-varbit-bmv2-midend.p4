@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header H {
-    bit<8>     s;
+    bit<8> s;
     varbit<32> v;
 }
 
@@ -16,36 +16,36 @@ struct headers {
 
 parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        b.extract<H>(hdr.h, 32w32);
+        b.extract < H >(hdr.h, 32w32);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @name("ingress.h") H h_0;
-    @hidden action equalityvarbitbmv2l39() {
+    @hidden action equalityvarbitbmv2l40() {
         stdmeta.egress_spec = 9w1;
     }
-    @hidden action equalityvarbitbmv2l35() {
+    @hidden action equalityvarbitbmv2l36() {
         stdmeta.egress_spec = 9w0;
         h_0 = hdr.h;
     }
-    @hidden table tbl_equalityvarbitbmv2l35 {
+    @hidden table tbl_equalityvarbitbmv2l36 {
         actions = {
-            equalityvarbitbmv2l35();
+            equalityvarbitbmv2l36();
         }
-        const default_action = equalityvarbitbmv2l35();
+        const default_action = equalityvarbitbmv2l36();
     }
-    @hidden table tbl_equalityvarbitbmv2l39 {
+    @hidden table tbl_equalityvarbitbmv2l40 {
         actions = {
-            equalityvarbitbmv2l39();
+            equalityvarbitbmv2l40();
         }
-        const default_action = equalityvarbitbmv2l39();
+        const default_action = equalityvarbitbmv2l40();
     }
     apply {
-        tbl_equalityvarbitbmv2l35.apply();
+        tbl_equalityvarbitbmv2l36.apply();
         if (hdr.h.v == h_0.v) {
-            tbl_equalityvarbitbmv2l39.apply();
+            tbl_equalityvarbitbmv2l40.apply();
         }
     }
 }
@@ -67,8 +67,8 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control deparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<H>(hdr.h);
+        packet.emit < H >(hdr.h);
     }
 }
 
-V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
+V1Switch < headers, metadata >(p(), vc(), ingress(), egress(), uc(), deparser()) main;

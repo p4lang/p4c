@@ -5,6 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-control MyIngress<p>(inout bit<32> p) {
-  apply {}
+control MyIngress < p >(inout bit<32> p) {
+    apply {
+    }
 }

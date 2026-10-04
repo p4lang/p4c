@@ -27,9 +27,9 @@ header h3_t {
 }
 
 struct headers {
-    h1_t    h1;
+    h1_t h1;
     h2_t[5] h2;
-    h3_t    h3;
+    h3_t h3;
 }
 
 struct metadata {
@@ -37,25 +37,25 @@ struct metadata {
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<h1_t>(hdr.h1);
+        pkt.extract < h1_t >(hdr.h1);
         verify(hdr.h1.hdr_type == 8w1, error.BadHeaderType);
-        transition select(hdr.h1.next_hdr_type) {
-            8w2: parse_h2;
-            8w3: parse_h3;
-            default: accept;
+        transition select (hdr.h1.next_hdr_type) {
+            8w2 : parse_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
     state parse_h2 {
-        pkt.extract<h2_t>(hdr.h2.next);
+        pkt.extract < h2_t >(hdr.h2.next);
         verify(hdr.h2.last.hdr_type == 8w2, error.BadHeaderType);
-        transition select(hdr.h2.last.next_hdr_type) {
-            8w2: parse_h2;
-            8w3: parse_h3;
-            default: accept;
+        transition select (hdr.h2.last.next_hdr_type) {
+            8w2 : parse_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
     state parse_h3 {
-        pkt.extract<h3_t>(hdr.h3);
+        pkt.extract < h3_t >(hdr.h3);
         verify(hdr.h3.hdr_type == 8w3, error.BadHeaderType);
         transition accept;
     }
@@ -343,7 +343,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         hdr.h2[4] = hdr_0_h2[4];
     }
     @hidden action headerstackopsbmv2l177() {
-        hdr.h1.h2_valid_bits[0:0] = 1w1;
+        hdr.h1.h2_valid_bits[0 : 0] = 1w1;
     }
     @hidden action headerstackopsbmv2l175() {
         hdr.h2[0] = hdr_0_h2[0];
@@ -354,16 +354,16 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         hdr.h1.h2_valid_bits = 8w0;
     }
     @hidden action headerstackopsbmv2l180() {
-        hdr.h1.h2_valid_bits[1:1] = 1w1;
+        hdr.h1.h2_valid_bits[1 : 1] = 1w1;
     }
     @hidden action headerstackopsbmv2l183() {
-        hdr.h1.h2_valid_bits[2:2] = 1w1;
+        hdr.h1.h2_valid_bits[2 : 2] = 1w1;
     }
     @hidden action headerstackopsbmv2l186() {
-        hdr.h1.h2_valid_bits[3:3] = 1w1;
+        hdr.h1.h2_valid_bits[3 : 3] = 1w1;
     }
     @hidden action headerstackopsbmv2l189() {
-        hdr.h1.h2_valid_bits[4:4] = 1w1;
+        hdr.h1.h2_valid_bits[4 : 4] = 1w1;
     }
     @hidden table tbl_act {
         actions = {
@@ -819,168 +819,168 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         tbl_act.apply();
         if (hdr.h1.op1 == 8w0x0) {
             ;
-        } else if (hdr.h1.op1[7:4] == 4w1) {
-            if (hdr.h1.op1[3:0] == 4w1) {
+        } else if (hdr.h1.op1[7 : 4] == 4w1) {
+            if (hdr.h1.op1[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l85.apply();
-            } else if (hdr.h1.op1[3:0] == 4w2) {
+            } else if (hdr.h1.op1[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l87.apply();
-            } else if (hdr.h1.op1[3:0] == 4w3) {
+            } else if (hdr.h1.op1[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l89.apply();
-            } else if (hdr.h1.op1[3:0] == 4w4) {
+            } else if (hdr.h1.op1[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l91.apply();
-            } else if (hdr.h1.op1[3:0] == 4w5) {
+            } else if (hdr.h1.op1[3 : 0] == 4w5) {
                 tbl_headerstackopsbmv2l93.apply();
-            } else if (hdr.h1.op1[3:0] == 4w6) {
+            } else if (hdr.h1.op1[3 : 0] == 4w6) {
                 tbl_headerstackopsbmv2l95.apply();
             }
-        } else if (hdr.h1.op1[7:4] == 4w2) {
-            if (hdr.h1.op1[3:0] == 4w1) {
+        } else if (hdr.h1.op1[7 : 4] == 4w2) {
+            if (hdr.h1.op1[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l100.apply();
-            } else if (hdr.h1.op1[3:0] == 4w2) {
+            } else if (hdr.h1.op1[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l102.apply();
-            } else if (hdr.h1.op1[3:0] == 4w3) {
+            } else if (hdr.h1.op1[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l104.apply();
-            } else if (hdr.h1.op1[3:0] == 4w4) {
+            } else if (hdr.h1.op1[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l106.apply();
-            } else if (hdr.h1.op1[3:0] == 4w5) {
+            } else if (hdr.h1.op1[3 : 0] == 4w5) {
                 tbl_headerstackopsbmv2l108.apply();
-            } else if (hdr.h1.op1[3:0] == 4w6) {
+            } else if (hdr.h1.op1[3 : 0] == 4w6) {
                 tbl_headerstackopsbmv2l110.apply();
             }
-        } else if (hdr.h1.op1[7:4] == 4w3) {
-            if (hdr.h1.op1[3:0] == 4w0) {
+        } else if (hdr.h1.op1[7 : 4] == 4w3) {
+            if (hdr.h1.op1[3 : 0] == 4w0) {
                 tbl_headerstackopsbmv2l115.apply();
-            } else if (hdr.h1.op1[3:0] == 4w1) {
+            } else if (hdr.h1.op1[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l121.apply();
-            } else if (hdr.h1.op1[3:0] == 4w2) {
+            } else if (hdr.h1.op1[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l127.apply();
-            } else if (hdr.h1.op1[3:0] == 4w3) {
+            } else if (hdr.h1.op1[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l133.apply();
-            } else if (hdr.h1.op1[3:0] == 4w4) {
+            } else if (hdr.h1.op1[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l139.apply();
             }
-        } else if (hdr.h1.op1[7:4] == 4w4) {
-            if (hdr.h1.op1[3:0] == 4w0) {
+        } else if (hdr.h1.op1[7 : 4] == 4w4) {
+            if (hdr.h1.op1[3 : 0] == 4w0) {
                 tbl_headerstackopsbmv2l148.apply();
-            } else if (hdr.h1.op1[3:0] == 4w1) {
+            } else if (hdr.h1.op1[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l150.apply();
-            } else if (hdr.h1.op1[3:0] == 4w2) {
+            } else if (hdr.h1.op1[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l152.apply();
-            } else if (hdr.h1.op1[3:0] == 4w3) {
+            } else if (hdr.h1.op1[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l154.apply();
-            } else if (hdr.h1.op1[3:0] == 4w4) {
+            } else if (hdr.h1.op1[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l156.apply();
             }
         }
         tbl_act_0.apply();
         if (hdr.h1.op2 == 8w0x0) {
             ;
-        } else if (hdr.h1.op2[7:4] == 4w1) {
-            if (hdr.h1.op2[3:0] == 4w1) {
+        } else if (hdr.h1.op2[7 : 4] == 4w1) {
+            if (hdr.h1.op2[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l85_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w2) {
+            } else if (hdr.h1.op2[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l87_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w3) {
+            } else if (hdr.h1.op2[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l89_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w4) {
+            } else if (hdr.h1.op2[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l91_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w5) {
+            } else if (hdr.h1.op2[3 : 0] == 4w5) {
                 tbl_headerstackopsbmv2l93_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w6) {
+            } else if (hdr.h1.op2[3 : 0] == 4w6) {
                 tbl_headerstackopsbmv2l95_0.apply();
             }
-        } else if (hdr.h1.op2[7:4] == 4w2) {
-            if (hdr.h1.op2[3:0] == 4w1) {
+        } else if (hdr.h1.op2[7 : 4] == 4w2) {
+            if (hdr.h1.op2[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l100_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w2) {
+            } else if (hdr.h1.op2[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l102_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w3) {
+            } else if (hdr.h1.op2[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l104_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w4) {
+            } else if (hdr.h1.op2[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l106_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w5) {
+            } else if (hdr.h1.op2[3 : 0] == 4w5) {
                 tbl_headerstackopsbmv2l108_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w6) {
+            } else if (hdr.h1.op2[3 : 0] == 4w6) {
                 tbl_headerstackopsbmv2l110_0.apply();
             }
-        } else if (hdr.h1.op2[7:4] == 4w3) {
-            if (hdr.h1.op2[3:0] == 4w0) {
+        } else if (hdr.h1.op2[7 : 4] == 4w3) {
+            if (hdr.h1.op2[3 : 0] == 4w0) {
                 tbl_headerstackopsbmv2l115_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w1) {
+            } else if (hdr.h1.op2[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l121_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w2) {
+            } else if (hdr.h1.op2[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l127_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w3) {
+            } else if (hdr.h1.op2[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l133_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w4) {
+            } else if (hdr.h1.op2[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l139_0.apply();
             }
-        } else if (hdr.h1.op2[7:4] == 4w4) {
-            if (hdr.h1.op2[3:0] == 4w0) {
+        } else if (hdr.h1.op2[7 : 4] == 4w4) {
+            if (hdr.h1.op2[3 : 0] == 4w0) {
                 tbl_headerstackopsbmv2l148_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w1) {
+            } else if (hdr.h1.op2[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l150_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w2) {
+            } else if (hdr.h1.op2[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l152_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w3) {
+            } else if (hdr.h1.op2[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l154_0.apply();
-            } else if (hdr.h1.op2[3:0] == 4w4) {
+            } else if (hdr.h1.op2[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l156_0.apply();
             }
         }
         tbl_act_1.apply();
         if (hdr.h1.op3 == 8w0x0) {
             ;
-        } else if (hdr.h1.op3[7:4] == 4w1) {
-            if (hdr.h1.op3[3:0] == 4w1) {
+        } else if (hdr.h1.op3[7 : 4] == 4w1) {
+            if (hdr.h1.op3[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l85_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w2) {
+            } else if (hdr.h1.op3[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l87_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w3) {
+            } else if (hdr.h1.op3[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l89_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w4) {
+            } else if (hdr.h1.op3[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l91_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w5) {
+            } else if (hdr.h1.op3[3 : 0] == 4w5) {
                 tbl_headerstackopsbmv2l93_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w6) {
+            } else if (hdr.h1.op3[3 : 0] == 4w6) {
                 tbl_headerstackopsbmv2l95_1.apply();
             }
-        } else if (hdr.h1.op3[7:4] == 4w2) {
-            if (hdr.h1.op3[3:0] == 4w1) {
+        } else if (hdr.h1.op3[7 : 4] == 4w2) {
+            if (hdr.h1.op3[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l100_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w2) {
+            } else if (hdr.h1.op3[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l102_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w3) {
+            } else if (hdr.h1.op3[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l104_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w4) {
+            } else if (hdr.h1.op3[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l106_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w5) {
+            } else if (hdr.h1.op3[3 : 0] == 4w5) {
                 tbl_headerstackopsbmv2l108_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w6) {
+            } else if (hdr.h1.op3[3 : 0] == 4w6) {
                 tbl_headerstackopsbmv2l110_1.apply();
             }
-        } else if (hdr.h1.op3[7:4] == 4w3) {
-            if (hdr.h1.op3[3:0] == 4w0) {
+        } else if (hdr.h1.op3[7 : 4] == 4w3) {
+            if (hdr.h1.op3[3 : 0] == 4w0) {
                 tbl_headerstackopsbmv2l115_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w1) {
+            } else if (hdr.h1.op3[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l121_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w2) {
+            } else if (hdr.h1.op3[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l127_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w3) {
+            } else if (hdr.h1.op3[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l133_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w4) {
+            } else if (hdr.h1.op3[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l139_1.apply();
             }
-        } else if (hdr.h1.op3[7:4] == 4w4) {
-            if (hdr.h1.op3[3:0] == 4w0) {
+        } else if (hdr.h1.op3[7 : 4] == 4w4) {
+            if (hdr.h1.op3[3 : 0] == 4w0) {
                 tbl_headerstackopsbmv2l148_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w1) {
+            } else if (hdr.h1.op3[3 : 0] == 4w1) {
                 tbl_headerstackopsbmv2l150_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w2) {
+            } else if (hdr.h1.op3[3 : 0] == 4w2) {
                 tbl_headerstackopsbmv2l152_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w3) {
+            } else if (hdr.h1.op3[3 : 0] == 4w3) {
                 tbl_headerstackopsbmv2l154_1.apply();
-            } else if (hdr.h1.op3[3:0] == 4w4) {
+            } else if (hdr.h1.op3[3 : 0] == 4w4) {
                 tbl_headerstackopsbmv2l156_1.apply();
             }
         }
@@ -1020,14 +1020,14 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control DeparserI(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<h1_t>(hdr.h1);
-        packet.emit<h2_t>(hdr.h2[0]);
-        packet.emit<h2_t>(hdr.h2[1]);
-        packet.emit<h2_t>(hdr.h2[2]);
-        packet.emit<h2_t>(hdr.h2[3]);
-        packet.emit<h2_t>(hdr.h2[4]);
-        packet.emit<h3_t>(hdr.h3);
+        packet.emit < h1_t >(hdr.h1);
+        packet.emit < h2_t >(hdr.h2[0]);
+        packet.emit < h2_t >(hdr.h2[1]);
+        packet.emit < h2_t >(hdr.h2[2]);
+        packet.emit < h2_t >(hdr.h2[3]);
+        packet.emit < h2_t >(hdr.h2[4]);
+        packet.emit < h3_t >(hdr.h3);
     }
 }
 
-V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < headers, metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

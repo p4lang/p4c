@@ -34,13 +34,13 @@ counter storm_control_stats {
 
 table storm_control_stats {
     reads {
-        meter_metadata.meter_color: exact;
-        ingress_input_port: exact;
+        meter_metadata.meter_color : exact;
+        ingress_input_port : exact;
     }
     actions {
         nop;
     }
-    size: STORM_CONTROL_STATS_TABLE_SIZE;
+    size : STORM_CONTROL_STATS_TABLE_SIZE;
 }
 #endif /* STATS_DISABLE */
 
@@ -129,7 +129,7 @@ control process_ip_sourceguard {
 #ifndef IPSG_DISABLE
     /* l2 security features */
     if ((ingress_metadata.port_type == PORT_TYPE_NORMAL) and
-        (security_metadata.ipsg_enabled == TRUE)) {
+    (security_metadata.ipsg_enabled == TRUE)) {
         apply(ipsg) {
             on_miss {
                 apply(ipsg_permit_special);

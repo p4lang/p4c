@@ -42,9 +42,9 @@ control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
 control MyDeparser(packet_out b, in my_packet p) {
     apply {
         if (p.data[0].isValid()) {
-            b.emit<mpls[8]>(p.data);
+            b.emit < mpls[8] >(p.data);
         }
     }
 }
 
-V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < my_packet, my_metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

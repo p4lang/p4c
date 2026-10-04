@@ -1,15 +1,15 @@
 bit foo(in bit a) {
-  return a + 1; 
+    return a + 1;
 }
 
 control p(inout bit bt) {
     action a(inout bit y0, bit y1) {
-      bit y2 = y1 > 0 ? 1w1 : 0;
-      if (y2 == 1) {
-         y0 = 0;
-      } else if (y1 != 1) {
-         y0 = y0 | 1w1;
-      }
+        bit y2 = y1 > 0 ? 1w1 : 0;
+        if (y2 == 1) {
+            y0 = 0;
+        } else if (y1 != 1) {
+            y0 = y0 | 1w1;
+        }
     }
 
     action b() {
@@ -18,7 +18,9 @@ control p(inout bit bt) {
     }
 
     table t {
-        actions = { b; }
+        actions = {
+            b;
+        }
         default_action = b;
     }
 
@@ -27,7 +29,7 @@ control p(inout bit bt) {
     }
 }
 
-control simple<T>(inout T arg);
-package m<T>(simple<T> pipe);
+control simple < T >(inout T arg);
+package m < T >(simple<T> pipe);
 
 m(p()) main;

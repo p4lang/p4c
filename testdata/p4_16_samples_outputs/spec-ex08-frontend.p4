@@ -30,4 +30,3 @@ header_union Ip_h {
     Ipv4_h ipv4;
     Ipv6_h ipv6;
 }
-

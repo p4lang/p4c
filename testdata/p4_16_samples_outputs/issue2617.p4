@@ -13,10 +13,10 @@ enum E {
 
 parser p(out bit<32> v) {
     state start {
-        transition select(32w1) {
-            0: zero;
-            1: one;
-            2: two;
+        transition select (32w1) {
+            0 : zero;
+            1 : one;
+            2 : two;
         }
     }
     state zero {
@@ -35,10 +35,10 @@ parser p(out bit<32> v) {
 
 parser p1(out bit<32> v) {
     state start {
-        transition select(X.A, E.A, 32w0) {
-            (X.A, E.B, default): zero;
-            (X.A, E.A, 1): one;
-            (X.A, default, default): two;
+        transition select (X.A, E.A, 32w0) {
+            (X.A, E.B, default) : zero;
+            (X.A, E.A, 1) : one;
+            (X.A, default, default) : two;
         }
     }
     state zero {
@@ -58,45 +58,45 @@ parser p1(out bit<32> v) {
 control c(out bit<32> v) {
     apply {
         switch (32w1) {
-            0: {
-                v = 0;
+            0 : {
+            v = 0;
             }
-            1: {
-                v = 1;
+            1 : {
+            v = 1;
             }
-            2: 
+            2 :
         }
         switch (32w1) {
-            X.A: {
-                v = v + 20;
+            X.A : {
+            v = v + 20;
             }
-            X.B: {
-                v = v + 10;
+            X.B : {
+            v = v + 10;
             }
-            2: 
+            2 :
         }
         switch (E.C) {
-            E.A: {
-                v = v + 200;
+            E.A : {
+            v = v + 200;
             }
-            default: {
-                v = v + 100;
+            default : {
+            v = v + 100;
             }
         }
         switch (E.B) {
-            E.B: {
-                v = v + 1000;
+            E.B : {
+            v = v + 1000;
             }
-            default: {
-                v = v + 2000;
+            default : {
+            v = v + 2000;
             }
         }
         switch (X.B) {
-            X.A: {
-                v = v + 20000;
+            X.A : {
+            v = v + 20000;
             }
-            X.B: {
-                v = v + 10000;
+            X.B : {
+            v = v + 10000;
             }
         }
     }

@@ -5,7 +5,9 @@
  */
 
 header_type h_t {
-    fields { f : 8; }
+    fields {
+        f : 8;
+    }
 }
 
 header h_t h;
@@ -15,11 +17,16 @@ parser start {
     return ingress;
 }
 
-action nop() { }
+action nop() {
+}
 
 table exact {
-    reads { h.f : ternary; }
-    actions { nop; }
+    reads {
+        h.f : ternary;
+    }
+    actions {
+        nop;
+    }
     size : 256;
 }
 

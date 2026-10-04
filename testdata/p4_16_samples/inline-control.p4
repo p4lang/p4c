@@ -19,7 +19,6 @@ control c(out bit<32> x)(Y y) {
 control d(out bit<32> x) {
     const bit<32> arg = 32w16;
     c(Y(arg)) cinst;
-
     apply {
         cinst.apply(x);
     }
@@ -27,5 +26,4 @@ control d(out bit<32> x) {
 
 control dproto(out bit<32> x);
 package top(dproto _d);
-
 top(d()) main;

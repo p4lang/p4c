@@ -7,4 +7,3 @@ control p() {
         h[w] stack;
     }
 }
-

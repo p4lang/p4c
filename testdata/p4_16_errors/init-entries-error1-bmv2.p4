@@ -18,7 +18,7 @@ header ethernet_h {
 }
 
 struct headers_t {
-    ethernet_h    ethernet;
+    ethernet_h ethernet;
 }
 
 struct metadata_t {
@@ -40,7 +40,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t umd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(
@@ -49,7 +50,8 @@ control ingressImpl(
     inout standard_metadata_t stdmeta)
 {
     bit<32> x = 6;
-    action a() {}
+    action a() {
+    }
     action a_params(bit<32> param) {
         x = param;
     }
@@ -58,55 +60,64 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : exact;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         // This table definition should give an error, because it has
         // all key fields exact, and thus does not support priorities
         // for entries.
         entries = {
-            priority=10: (0x01, 0x1111) : a_params(1);
-                         (0x02, 0x1181) : a_params(2);
-                         (0x03, 0x1000) : a_params(3);
-                         (0x04, 0x0210) : a_params(4);
-                         (0x04, 0x0010) : a_params(5);
-                         (0x06, 0x0101) : a_params(6);
+            priority = 10 :(0x01, 0x1111) : a_params(1);
+            (0x02, 0x1181) : a_params(2);
+            (0x03, 0x1000) : a_params(3);
+            (0x04, 0x0210) : a_params(4);
+            (0x04, 0x0010) : a_params(5);
+            (0x06, 0x0101) : a_params(6);
         }
     }
     table t2 {
         key = {
             hdr.ethernet.dst_addr : lpm;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         // This table definition should give an error, because it has
         // all key fields lpm, and thus does not support priorities
         // for entries.
         entries = {
-            priority=10: (0x01) : a_params(1);
-                         (0x02) : a_params(2);
-                         (0x03) : a_params(3);
-                         (0x04) : a_params(4);
-                         (0x04) : a_params(5);
-                         (0x06) : a_params(6);
+            priority = 10 :(0x01) : a_params(1);
+            (0x02) : a_params(2);
+            (0x03) : a_params(3);
+            (0x04) : a_params(4);
+            (0x04) : a_params(5);
+            (0x06) : a_params(6);
         }
     }
     table t3 {
         key = {
             hdr.ethernet.dst_addr : lpm;
-            hdr.ethernet.ether_type: exact;
+            hdr.ethernet.ether_type : exact;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         // This table definition should give an error, because it has
         // all key fields lpm or exact, and thus does not support
         // priorities for entries.
         entries = {
-            priority=10: (0x01, 0x1111) : a_params(1);
-                         (0x02, 0x1181) : a_params(2);
-                         (0x03, 0x1000) : a_params(3);
-                         (0x04, 0x0210) : a_params(4);
-                         (0x04, 0x0010) : a_params(5);
-                         (0x06, 0x0101) : a_params(6);
+            priority = 10 :(0x01, 0x1111) : a_params(1);
+            (0x02, 0x1181) : a_params(2);
+            (0x03, 0x1000) : a_params(3);
+            (0x04, 0x0210) : a_params(4);
+            (0x04, 0x0010) : a_params(5);
+            (0x06, 0x0101) : a_params(6);
         }
     }
     apply {
@@ -121,14 +132,16 @@ control egressImpl(
     inout metadata_t umd,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t umd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control egressDeparserImpl(

@@ -8,4 +8,3 @@ control p() {
         x.f();
     }
 }
-

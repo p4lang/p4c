@@ -22,7 +22,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    apply { }
+    apply {
+    }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {

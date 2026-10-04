@@ -23,7 +23,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -45,11 +45,11 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 
 control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     action forward() {
-        d.egress_port = (PortId_t)1;
+        d.egress_port =(PortId_t) 1;
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

@@ -2,13 +2,14 @@
 
 control c(in bit t)
 {
-  table tt {
-    actions = {}
-  }
-  apply {
-    if (tt.apply().action_run == tt.apply().action_run) {
+    table tt {
+        actions = {
+        }
     }
-  }
+    apply {
+        if (tt.apply().action_run == tt.apply().action_run) {
+        }
+    }
 }
 
 control ct(in bit t);

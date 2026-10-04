@@ -28,12 +28,12 @@ header ml_hdr_t {
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 struct headers {
     ethernet_t ethernet;
-    ml_hdr_t   ml;
+    ml_hdr_t ml;
     vec_e_t[3] vector;
     aggregator_t[3] pool;
 }
@@ -54,7 +54,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
         packet.extract(hdr.pool[1]);
         packet.extract(hdr.pool[2]);
         meta.counter = 0;
-	transition accept;
+        transition accept;
     }
 }
 
@@ -79,15 +79,18 @@ control ingress(inout headers hdr, inout metadata_t meta,
 
 control egress(inout headers hdr, inout metadata_t meta,
                inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+    }
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
@@ -98,4 +101,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 
 V1Switch(MyParser(), MyVerifyChecksum(), ingress(), egress(),
 MyComputeChecksum(), MyDeparser()) main;
-

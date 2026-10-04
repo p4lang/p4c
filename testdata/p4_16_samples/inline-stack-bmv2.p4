@@ -13,8 +13,11 @@ typedef standard_metadata_t std_meta_t;
 header h_t {
     bit<8> f;
 }
-struct H { h_t[1] stack; }
-struct M {}
+struct H {
+    h_t[1] stack;
+}
+struct M {
+}
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout std_meta_t std_meta) {
     state start {
@@ -23,14 +26,19 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout std_meta_t std_meta)
 }
 
 control VerifyChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
-control Aux(inout H hdr) { apply{} }
+control Aux(inout H hdr) {
+    apply {
+    }
+}
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     Aux() aux;
@@ -40,13 +48,14 @@ control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     }
 }
 
-
 control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out b, in H hdr) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

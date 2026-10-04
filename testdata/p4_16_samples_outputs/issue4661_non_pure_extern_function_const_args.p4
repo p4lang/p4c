@@ -16,11 +16,11 @@ control c() {
     }
     apply {
         switch (baz()) {
-            1: {
-                foo();
+            1 : {
+            foo();
             }
-            4: {
-                bar();
+            4 : {
+            bar();
             }
         }
         t.apply();

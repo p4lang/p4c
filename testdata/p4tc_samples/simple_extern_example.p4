@@ -9,21 +9,21 @@
  * Standard ethernet header
  */
 header ethernet_t {
-    @tc_type ("macaddr") bit<48> dstAddr;
-    @tc_type ("macaddr") bit<48> srcAddr;
+    @tc_type("macaddr") bit<48> dstAddr;
+    @tc_type("macaddr") bit<48> srcAddr;
     bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -31,7 +31,7 @@ header ipv4_t {
 
 struct my_ingress_headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 /******  G L O B A L   I N G R E S S   M E T A D A T A  *********/
@@ -62,9 +62,9 @@ parser Ingress_Parser(
     }
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
+        transition select (hdr.ethernet.etherType) {
             ETHERTYPE_IPV4 : parse_ipv4;
-            default        : reject;
+            default : reject;
         }
     }
     state parse_ipv4 {
@@ -82,8 +82,8 @@ control ingress(
     inout pna_main_output_metadata_t ostd
 )
 {
-    Register<bit<32>, PortId_t>(10, 13) reg1;
-    Register<reg_val_t, bit<32>>(3) reg3;
+    Register < bit<32>, PortId_t >(10, 13) reg1;
+    Register < reg_val_t, bit<32 >>(3) reg3;
     action send_nh( @tc_type ("dev") PortId_t port_id,  @tc_type ("macaddr") bit<48> dmac,  @tc_type ("macaddr") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
@@ -113,7 +113,7 @@ control ingress(
         size = PORT_TABLE_SIZE;
         const default_action = drop;
     }
-    
+
     apply {
         reg_val_t arg_val;
         arg_val.protocol = hdr.ipv4.protocol;

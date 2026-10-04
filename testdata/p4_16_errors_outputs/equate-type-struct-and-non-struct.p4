@@ -12,4 +12,3 @@ control C2() {
         C.apply(s);
     }
 }
-

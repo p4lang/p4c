@@ -9,28 +9,28 @@ typedef bit<128> IPv4ORv6Address;
 header ethernet_t {
     EthernetAddress dst_addr;
     EthernetAddress src_addr;
-    bit<16>         ether_type;
+    bit<16> ether_type;
 }
 
 const bit<16> ETHER_HDR_SIZE = 112 / 8;
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdr_checksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> frag_offset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdr_checksum;
     IPv4Address src_addr;
     IPv4Address dst_addr;
 }
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 enum bit<16> direction_t {
@@ -40,19 +40,19 @@ enum bit<16> direction_t {
 }
 
 struct metadata_t {
-    bool            dropped;
-    direction_t     direction;
-    IPv4Address     dst_ip_addr;
-    IPv4Address     src_ip_addr;
+    bool dropped;
+    direction_t direction;
+    IPv4Address dst_ip_addr;
+    IPv4Address src_ip_addr;
     EthernetAddress ethernet_addr;
 }
 
 parser test_parser(packet_in packet, out headers_t hd, inout metadata_t meta, inout standard_metadata_t standard_meta) {
     state start {
         packet.extract(hd.ethernet);
-        transition select(hd.ethernet.ether_type) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (hd.ethernet.ether_type) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -96,7 +96,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     table pre_tbl1 {
         key = {
-            hdr.ipv4.dst_addr: exact;
+            hdr.ipv4.dst_addr : exact;
         }
         actions = {
             action1;
@@ -111,7 +111,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     table in_tbl2 {
         key = {
-            hdr.ipv4.protocol: exact;
+            hdr.ipv4.protocol : exact;
         }
         actions = {
             action4;
@@ -122,7 +122,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     table post_tbl3 {
         key = {
-            hdr.ipv4.src_addr: exact;
+            hdr.ipv4.src_addr : exact;
         }
         actions = {
             action5;
@@ -132,9 +132,9 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta.dropped = false;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
         switch (pre_tbl1.apply().action_run) {
-            action1: 
-            action2: {
-                in_tbl2.apply();
+            action1 :
+            action2 : {
+            in_tbl2.apply();
             }
         }
         post_tbl3.apply();

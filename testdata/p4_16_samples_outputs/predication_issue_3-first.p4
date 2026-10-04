@@ -14,23 +14,23 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
+    H[2] h;
 }
 
 struct Meta {
 }
 
 bit<3> bound(in bit<3> val, in bit<3> bound) {
-    return (val < bound ? val : bound);
+    return(val < bound ? val : bound);
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
         transition accept;
     }
 }
@@ -64,8 +64,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<Headers>(h);
+        b.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

@@ -31,15 +31,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -57,8 +57,8 @@ header udp_t {
 }
 
 struct my_ingress_headers_t {
-    ethernet_t   ethernet;
-    ipv4_t       ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
     v4_options_t opts;
     udp_t udp;
 }
@@ -77,22 +77,22 @@ parser Ingress_Parser(
 
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_IPV4: parse_ipv4;
-            default: reject;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4 : parse_ipv4;
+            default : reject;
         }
     }
 
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.ihl) {
-            4w0: reject;
-            4w1: reject;
-            4w2: reject;
-            4w3: reject;
-            4w4: reject;
-            5: parse_proto;
-            default: parse_v4_opts;
+        transition select (hdr.ipv4.ihl) {
+            4w0 : reject;
+            4w1 : reject;
+            4w2 : reject;
+            4w3 : reject;
+            4w4 : reject;
+            5 : parse_proto;
+            default : parse_v4_opts;
         }
     }
 
@@ -102,9 +102,9 @@ parser Ingress_Parser(
     }
 
     state parse_proto {
-        transition select(hdr.ipv4.protocol) {
-            IP_PROTO_UDP: parse_udp;
-            default: reject;
+        transition select (hdr.ipv4.protocol) {
+            IP_PROTO_UDP : parse_udp;
+            default : reject;
         }
     }
 

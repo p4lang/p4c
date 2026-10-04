@@ -2,7 +2,7 @@
 
 struct TArg1 {
     bit<9> field1;
-    bool   drop;
+    bool drop;
 }
 
 struct TArg2 {
@@ -11,7 +11,7 @@ struct TArg2 {
 
 struct PArg1 {
     bit<32> f0;
-    bool    drop;
+    bool drop;
 }
 
 struct QArg1 {
@@ -39,8 +39,8 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("Q_pipe.p1.thost.T") table p1_thost_T {
         key = {
-            qArg1.field1: ternary @name("tArg1.field1");
-            qArg2.field2: exact @name("aArg2.field2");
+            qArg1.field1 : ternary @name("tArg1.field1");
+            qArg2.field2 : exact @name("aArg2.field2");
         }
         actions = {
             p1_thost_B_action_0();
@@ -54,7 +54,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("Q_pipe.p1.Tinner") table p1_Tinner {
         key = {
-            qArg1.field1: ternary @name("pArg1.field1");
+            qArg1.field1 : ternary @name("pArg1.field1");
         }
         actions = {
             p1_Drop_0();

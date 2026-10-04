@@ -9,20 +9,20 @@
 #include <v1model.p4>
 
 extern Random2 {
-  Random2();
-  bit<10> read();
+    Random2();
+    bit<10> read();
 }
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -40,7 +40,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control foo2(inout headers_t my_headers,
@@ -60,7 +61,7 @@ control foo2(inout headers_t my_headers,
         // With those lines removed, that version of p4test gives no
         // error, and p4c-bm2-ss can compile the program to a BMv2
         // JSON file.
-        idx = (bit<32>) my_headers.ethernet.srcAddr[7:0];
+        idx =(bit<32>) my_headers.ethernet.srcAddr[7 : 0];
         my_reg.read(val, idx);
         val = val - 7;
         my_reg.write(idx, val);
@@ -84,7 +85,7 @@ control ingressImpl(inout headers_t hdr,
                     inout metadata_t meta,
                     inout standard_metadata_t stdmeta)
 {
-    register<bit<8>>(256) reg1;
+    register < bit<8 >>(256) reg1;
     foo2() foo2_inst;
     apply {
         stdmeta.egress_spec = 0;
@@ -96,11 +97,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

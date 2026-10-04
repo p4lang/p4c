@@ -8,16 +8,16 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -39,21 +39,27 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
-action foo1() { }
+action foo1() {
+}
 
-@name("foo2") action topa2() { }
+@name("foo2") action topa2() {
+}
 
-@name("foo3") action topa3() { }
+@name("foo3") action topa3() {
+}
 
 // Action topa4's control plane name should conflict with the control
 // plane name of action topa3, and cause a compile-time error message,
 // if you enable P4Info file generation.
-@name(".foo3") action topa4() { }
+@name(".foo3") action topa4() {
+}
 
-@name(".ingressImpl.foo5") action topa5() { }
+@name(".ingressImpl.foo5") action topa5() {
+}
 
 control c1(
     inout headers_t hdr,
@@ -63,14 +69,23 @@ control c1(
     // Action suba1's control plane name should conflict with the name
     // of top-level action foo1, and cause a compile-time error
     // message, if you enable P4Info file generation.
-    @name(".foo1") action suba1 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 1; }
+    @name(".foo1") action suba1(bit<8> x, bit<8> y) {
+        tmp1 = x;
+        tmp2 = y >> 1;
+    }
 
     // Action suba2's control plane name should conflict with the
     // control plane name of topa2, and cause a compile-time error
     // message, if you enable P4Info file generation.
-    @name(".foo2") action suba2 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 2; }
+    @name(".foo2") action suba2(bit<8> x, bit<8> y) {
+        tmp1 = x;
+        tmp2 = y >> 2;
+    }
 
-    @name("bar1") action suba3 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 3; }
+    @name("bar1") action suba3(bit<8> x, bit<8> y) {
+        tmp1 = x;
+        tmp2 = y >> 3;
+    }
 
     table t2 {
         actions = {
@@ -78,7 +93,9 @@ control c1(
             suba2;
             suba3;
         }
-        key = { hdr.ethernet.srcAddr: exact; }
+        key = {
+            hdr.ethernet.srcAddr : exact;
+        }
         size = 32;
     }
     apply {
@@ -98,22 +115,34 @@ control ingressImpl(
     // Action a1's control plane name should conflict with the name of
     // top-level action foo1, and cause a compile-time error message,
     // if you enable P4Info file generation.
-    @name(".foo1") action a1 (bit<8> x, bit<8> y) { tmp1 = x >> 1; tmp2 = y; }
+    @name(".foo1") action a1(bit<8> x, bit<8> y) {
+        tmp1 = x >> 1;
+        tmp2 = y;
+    }
 
     // Action a2's control plane name should conflict with the control
     // plane name of topa2, and cause a compile-time error message, if
     // you enable P4Info file generation.
-    @name(".foo2") action a2 (bit<8> x, bit<8> y) { tmp1 = x >> 2; tmp2 = y; }
+    @name(".foo2") action a2(bit<8> x, bit<8> y) {
+        tmp1 = x >> 2;
+        tmp2 = y;
+    }
 
     // Action a5's control plane name should conflict with the control
     // plane name of topa5, and cause a compile-time error message, if
     // you enable P4Info file generation.
-    @name("foo5") action a5 (bit<8> x, bit<8> y) { tmp1 = x >> 5; tmp2 = y; }
+    @name("foo5") action a5(bit<8> x, bit<8> y) {
+        tmp1 = x >> 5;
+        tmp2 = y;
+    }
 
     // Action a6's control plane name should conflict with the
     // control plane name of suba3, and cause a compile-time error
     // message, if you enable P4Info file generation.
-    @name("c1.bar1") action a6 (bit<8> x, bit<8> y) { tmp1 = x >> 6; tmp2 = y; }
+    @name("c1.bar1") action a6(bit<8> x, bit<8> y) {
+        tmp1 = x >> 6;
+        tmp2 = y;
+    }
 
     table t1 {
         actions = {
@@ -128,19 +157,21 @@ control ingressImpl(
             topa4;
             topa5;
         }
-        key = { hdr.ethernet.etherType: exact; }
+        key = {
+            hdr.ethernet.etherType : exact;
+        }
         default_action = NoAction();
         size = 512;
     }
     apply {
-        tmp1 = hdr.ethernet.srcAddr[7:0];
-        tmp2 = hdr.ethernet.dstAddr[7:0];
+        tmp1 = hdr.ethernet.srcAddr[7 : 0];
+        tmp2 = hdr.ethernet.dstAddr[7 : 0];
         c1.apply(hdr, tmp1, tmp2);
         t1.apply();
         // This is here simply to ensure that the compiler cannot
         // optimize away the effects of t1 and t2, which can only
         // assign values to variables tmp1 and tmp2.
-        hdr.ethernet.etherType = (bit<16>) (tmp1 - tmp2);
+        hdr.ethernet.etherType =(bit<16>)(tmp1 - tmp2);
     }
 }
 
@@ -149,14 +180,16 @@ control egressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(

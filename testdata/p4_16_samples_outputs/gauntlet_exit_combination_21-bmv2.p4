@@ -31,14 +31,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table tbl {
         key = {
-            h.eth_hdr.src_addr: exact @name("fbgPij");
+            h.eth_hdr.src_addr : exact @name("fbgPij");
         }
         actions = {
             exit_action();
         }
     }
     apply {
-        h.eth_hdr.eth_type = (false ? (tbl.apply().hit ? 16w1 : 16w2) : 16w3);
+        h.eth_hdr.eth_type =(false ?(tbl.apply().hit ? 16w1 : 16w2) : 16w3);
         exit;
     }
 }

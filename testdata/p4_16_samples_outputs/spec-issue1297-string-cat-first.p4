@@ -6,7 +6,7 @@ extern void log(string msg);
 control c() {
     @name("foo_y_bar_x_") action foo() {
     }
-    @DummyVendor_Structured[a="X_Y", b="Y_z"] action bar() {
+    @DummyVendor_Structured[a = "X_Y", b = "Y_z"] action bar() {
     }
     @DummyVendor_Structured2["X_Y", "Y_z"] action baz() {
     }

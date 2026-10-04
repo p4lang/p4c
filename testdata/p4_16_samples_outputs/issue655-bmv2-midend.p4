@@ -16,13 +16,13 @@ struct Metadata {
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<H>(hdr.h);
+        packet.emit < H >(hdr.h);
     }
 }
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<H>(hdr.h);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -53,14 +53,14 @@ struct tuple_0 {
 
 control vc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.h.d}, hdr.h.c, HashAlgorithm.csum16);
+        verify_checksum < tuple_0, bit<16 >>(true, (tuple_0){f0 = hdr.h.d}, hdr.h.c, HashAlgorithm.csum16);
     }
 }
 
 control uc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.h.d}, hdr.h.c, HashAlgorithm.csum16);
+        update_checksum < tuple_0, bit<16 >>(true, (tuple_0){f0 = hdr.h.d}, hdr.h.c, HashAlgorithm.csum16);
     }
 }
 
-V1Switch<Parsed_packet, Metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, Metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

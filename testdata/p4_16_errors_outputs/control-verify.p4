@@ -8,4 +8,3 @@ control C() {
         verify(8w0 == 8w1, error.Oops);
     }
 }
-

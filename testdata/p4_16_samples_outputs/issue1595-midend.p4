@@ -19,13 +19,13 @@ struct metadata_t {
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<Ethernet_h>(hdr.ethernet);
+        packet.emit < Ethernet_h >(hdr.ethernet);
     }
 }
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<Ethernet_h>(hdr.ethernet);
+        pkt.extract < Ethernet_h >(hdr.ethernet);
         transition accept;
     }
 }
@@ -37,17 +37,17 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
         hdr.ethernet.srcAddr = 48w1;
     }
     @name("cIngress.a2") action a2() {
-        hdr.ethernet.srcAddr[47:40] = 8w2;
+        hdr.ethernet.srcAddr[47 : 40] = 8w2;
     }
     @name("cIngress.a3") action a3() {
-        hdr.ethernet.srcAddr[47:40] = 8w3;
+        hdr.ethernet.srcAddr[47 : 40] = 8w3;
     }
     @name("cIngress.a4") action a4() {
-        hdr.ethernet.srcAddr[47:40] = 8w4;
+        hdr.ethernet.srcAddr[47 : 40] = 8w4;
     }
     @name("cIngress.t1") table t1_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             a1();
@@ -58,57 +58,57 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
         }
         default_action = NoAction_1();
     }
-    @hidden action issue1595l67() {
-        hdr.ethernet.srcAddr[39:32] = 8w2;
+    @hidden action issue1595l78() {
+        hdr.ethernet.srcAddr[39 : 32] = 8w2;
     }
-    @hidden action issue1595l68() {
-        hdr.ethernet.srcAddr[39:32] = 8w3;
+    @hidden action issue1595l80() {
+        hdr.ethernet.srcAddr[39 : 32] = 8w3;
     }
-    @hidden action issue1595l69() {
-        hdr.ethernet.srcAddr[39:32] = 8w4;
+    @hidden action issue1595l82() {
+        hdr.ethernet.srcAddr[39 : 32] = 8w4;
     }
-    @hidden action issue1595l70() {
-        hdr.ethernet.srcAddr[39:32] = 8w5;
+    @hidden action issue1595l84() {
+        hdr.ethernet.srcAddr[39 : 32] = 8w5;
     }
-    @hidden table tbl_issue1595l67 {
+    @hidden table tbl_issue1595l78 {
         actions = {
-            issue1595l67();
+            issue1595l78();
         }
-        const default_action = issue1595l67();
+        const default_action = issue1595l78();
     }
-    @hidden table tbl_issue1595l68 {
+    @hidden table tbl_issue1595l80 {
         actions = {
-            issue1595l68();
+            issue1595l80();
         }
-        const default_action = issue1595l68();
+        const default_action = issue1595l80();
     }
-    @hidden table tbl_issue1595l69 {
+    @hidden table tbl_issue1595l82 {
         actions = {
-            issue1595l69();
+            issue1595l82();
         }
-        const default_action = issue1595l69();
+        const default_action = issue1595l82();
     }
-    @hidden table tbl_issue1595l70 {
+    @hidden table tbl_issue1595l84 {
         actions = {
-            issue1595l70();
+            issue1595l84();
         }
-        const default_action = issue1595l70();
+        const default_action = issue1595l84();
     }
     apply {
         switch (t1_0.apply().action_run) {
-            a1: {
+            a1 : {
             }
-            a2: {
-                tbl_issue1595l67.apply();
+            a2 : {
+            tbl_issue1595l78.apply();
             }
-            a3: {
-                tbl_issue1595l68.apply();
+            a3 : {
+            tbl_issue1595l80.apply();
             }
-            a4: {
-                tbl_issue1595l69.apply();
+            a4 : {
+            tbl_issue1595l82.apply();
             }
-            NoAction_1: {
-                tbl_issue1595l70.apply();
+            NoAction_1 : {
+            tbl_issue1595l84.apply();
             }
         }
     }
@@ -129,4 +129,4 @@ control uc(inout Parsed_packet hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<Parsed_packet, metadata_t>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, metadata_t >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

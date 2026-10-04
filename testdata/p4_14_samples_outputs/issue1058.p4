@@ -38,13 +38,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name("test1_digest") struct test1_digest {
-    bit<48>             dstAddr;
+    bit<48> dstAddr;
     standard_metadata_t standard_metadata;
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".test_action") action test_action() {
-        digest<test1_digest>((bit<32>)0x666, { hdr.ethernet.dstAddr, standard_metadata });
+        digest < test1_digest >((bit<32>)0x666, { hdr.ethernet.dstAddr, standard_metadata });
     }
     @name(".tbl0") table tbl0 {
         actions = {

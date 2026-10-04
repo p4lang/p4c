@@ -7,4 +7,3 @@ control c() {
         f(y = b, y = b);
     }
 }
-

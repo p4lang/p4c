@@ -8,8 +8,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -19,28 +19,28 @@ header ethernet_t {
 
 // IPv4 header _with_ options
 header ipv4_t {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
 }
 
 struct headers {
-    ethernet_t    ethernet;
-    ipv4_t        ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 struct mystruct1_t {
-    bit<16>  hash1;
-    bool     hash_drop;
+    bit<16> hash1;
+    bool hash_drop;
 }
 
 struct metadata {
@@ -54,9 +54,9 @@ parser parserI(packet_in pkt,
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -73,7 +73,7 @@ control cIngress(inout headers hdr,
         hash(meta.mystruct1.hash1, HashAlgorithm.crc16, (bit<16>) 0,
             { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol },
             (bit<32>) 0xffff);
-        meta.mystruct1.hash_drop = (meta.mystruct1.hash1 < 0x8000);
+        meta.mystruct1.hash_drop =(meta.mystruct1.hash1 < 0x8000);
     }
     table guh {
         key = {
@@ -86,10 +86,12 @@ control cIngress(inout headers hdr,
     }
     table debug_table {
         key = {
-            meta.mystruct1.hash1     : exact;
+            meta.mystruct1.hash1 : exact;
             meta.mystruct1.hash_drop : exact;
         }
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
     }
     apply {
         if (hdr.ipv4.isValid()) {
@@ -97,9 +99,9 @@ control cIngress(inout headers hdr,
             guh.apply();
             debug_table.apply();
             if (meta.mystruct1.hash_drop) {
-                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++ (bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xdead;
+                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++(bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xdead;
             } else {
-                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++ (bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xc001;
+                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++(bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xc001;
             }
         }
     }
@@ -136,7 +138,7 @@ control DeparserI(packet_out packet,
     }
 }
 
-V1Switch<headers, metadata>(parserI(),
+V1Switch < headers, metadata >(parserI(),
                             verifyChecksum(),
                             cIngress(),
                             cEgress(),

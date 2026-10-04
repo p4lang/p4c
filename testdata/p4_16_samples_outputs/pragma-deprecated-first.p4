@@ -9,4 +9,3 @@ control c() {
         bit<6> x = wrong();
     }
 }
-

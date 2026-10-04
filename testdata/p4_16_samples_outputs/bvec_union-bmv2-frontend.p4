@@ -14,13 +14,13 @@ struct row_t {
 
 header Hdr1 {
     bit<8> a;
-    row_t  row0;
-    row_t  row1;
+    row_t row0;
+    row_t row1;
 }
 
 header Hdr2 {
     bit<16> b;
-    row_t   row;
+    row_t row;
 }
 
 header_union U {
@@ -30,7 +30,7 @@ header_union U {
 
 struct Headers {
     Hdr1 h1;
-    U    u;
+    U u;
 }
 
 struct Meta {
@@ -38,18 +38,18 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<Hdr1>(h.h1);
-        transition select(h.h1.a) {
-            8w0: getH1;
-            default: getH2;
+        b.extract < Hdr1 >(h.h1);
+        transition select (h.h1.a) {
+            8w0 : getH1;
+            default : getH2;
         }
     }
     state getH1 {
-        b.extract<Hdr1>(h.u.h1);
+        b.extract < Hdr1 >(h.u.h1);
         transition accept;
     }
     state getH2 {
-        b.extract<Hdr2>(h.u.h2);
+        b.extract < Hdr2 >(h.u.h2);
         transition accept;
     }
 }
@@ -71,8 +71,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<Hdr1>(h.h1);
-        b.emit<U>(h.u);
+        b.emit < Hdr1 >(h.h1);
+        b.emit < U >(h.u);
     }
 }
 
@@ -84,4 +84,4 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

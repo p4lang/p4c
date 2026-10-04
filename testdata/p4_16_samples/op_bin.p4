@@ -19,25 +19,25 @@ header Ethernet_h
 }
 
 header IPv6_h {
-    bit<32>     ip_version_traffic_class_and_flow_label;
-    bit<16>     payload_length;
-    bit<8>      protocol;
-    bit<8>      hop_limit;
-    bit<128>    src_address;
-    bit<128>    dst_address;
+    bit<32> ip_version_traffic_class_and_flow_label;
+    bit<16> payload_length;
+    bit<8> protocol;
+    bit<8> hop_limit;
+    bit<128> src_address;
+    bit<128> dst_address;
 }
 
 struct Headers_t
 {
     Ethernet_h ethernet;
-    IPv6_h     ipv6;
+    IPv6_h ipv6;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            0x86DD   : ipv6;
+        transition select (headers.ethernet.etherType) {
+            0x86DD : ipv6;
             default : reject;
         }
     }
@@ -52,7 +52,7 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool xout) {
     // UBPF does not support const entries, so using hard-coded label below.
     action set_flowlabel(bit<20> label) {
-     	headers.ipv6.ip_version_traffic_class_and_flow_label[31:12] = label;
+        headers.ipv6.ip_version_traffic_class_and_flow_label[31 : 12] = label;
     }
 
     table filter_tbl {
@@ -62,10 +62,13 @@ control pipe(inout Headers_t headers, out bool xout) {
         actions = {
             set_flowlabel;
         }
-	const entries = {
-	    {(8w0x20++8w0x02++8w0x04++8w0x20++8w0x03++8w0x80++8w0xDE++8w0xAD++8w0xBE++8w0xEF++8w0xF0++8w0x0D++8w0x0D++8w0x09++8w0++8w0x01)} : set_flowlabel(52);
-	}
-	implementation = hash_table(8);
+        const entries = {
+            {
+            (8w0x20 ++ 8w0x02 ++ 8w0x04 ++ 8w0x20 ++ 8w0x03 ++ 8w0x80 ++ 8w0xDE ++ 8w0xAD ++ 8w0xBE ++ 8w0xEF ++ 8w0xF0 ++ 8w0x0D ++ 8w0x0D ++ 8w0x09 ++ 8w0 ++ 8w0x01)
+            }
+            : set_flowlabel(52);
+        }
+        implementation = hash_table(8);
     }
 
     apply {
@@ -74,13 +77,13 @@ control pipe(inout Headers_t headers, out bool xout) {
 
         // If-statement below tests if appropriate parenthesis are
         // added because, if not, GCC compling fails with emitted C code.
-        if (headers.ipv6.isValid() && ((headers.ethernet.etherType == 0x86dd)
-	    || (headers.ipv6.hop_limit == 255)))
-            headers.ipv6.protocol = 17;
+        if (headers.ipv6.isValid() &&((headers.ethernet.etherType == 0x86dd)
+        ||(headers.ipv6.hop_limit == 255)))
+        headers.ipv6.protocol = 17;
         // If-statement below tests if duplicate parenthesis
         // are not added in emitted C code causing GCC compiling failure.
         if (headers.ethernet.etherType == 0x0800)
-            headers.ipv6.protocol = 10;
+        headers.ipv6.protocol = 10;
     }
 }
 

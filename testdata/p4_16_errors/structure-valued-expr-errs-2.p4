@@ -8,12 +8,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h0_t {
@@ -41,17 +41,17 @@ struct s2_t {
 }
 
 header hstructs_t {
-    s0_t   s0;
-    s1_t   s1;
-    s2_t   s2;
+    s0_t s0;
+    s1_t s1;
+    s2_t s2;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
-    h0_t          h0;
-    h1_t          h1;
-    h2_t          h2;
-    hstructs_t    hstructs;
+    ethernet_t ethernet;
+    h0_t h0;
+    h1_t h1;
+    h2_t h2;
+    hstructs_t hstructs;
 }
 
 struct metadata_t {
@@ -73,7 +73,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(
@@ -87,15 +88,15 @@ control ingressImpl(
             // This should be an error because it should be an error
             // for a structure-valued expression to assign a value to
             // the same field multiple times.
-            hdr.h2 = {f2=5, f1=2, f2=5};
-            hdr.hstructs.s2 = {f2=5, f1=2, f2=5};
+            hdr.h2 = { f2 = 5, f1 = 2, f2 = 5 };
+            hdr.hstructs.s2 = { f2 = 5, f1 = 2, f2 = 5 };
 
             // p4c gives an error for the following line because it
             // contains a mix of some values, and some "name=value"
             // elements, in the list expression.  This is not defined
             // in the P4_16 specification.
-            hdr.h2 = {2, f2=5};
-            hdr.hstructs.s2 = {2, f2=5};
+            hdr.h2 = { 2, f2 = 5 };
+            hdr.hstructs.s2 = { 2, f2 = 5 };
         }
     }
 }
@@ -105,14 +106,16 @@ control egressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(

@@ -19,19 +19,19 @@ type CustomTD_t CustomTDT_t;
 typedef CustomTT_t CustomTTD_t;
 type CustomTT_t CustomTTT_t;
 header ethernet_t {
-    EthD_t  dstAddr;
-    EthT_t  srcAddr;
+    EthD_t dstAddr;
+    EthT_t srcAddr;
     bit<16> etherType;
 }
 
 header custom_t {
-    bit<8>      e;
-    CustomD_t   ed;
-    CustomT_t   et;
-    CustomDD_t  edd;
-    CustomDT_t  edt;
-    CustomTD_t  etd;
-    CustomTT_t  ett;
+    bit<8> e;
+    CustomD_t ed;
+    CustomT_t et;
+    CustomDD_t edd;
+    CustomDT_t edt;
+    CustomTD_t etd;
+    CustomTT_t ett;
     CustomDDD_t eddd;
     CustomDDT_t eddt;
     CustomDTD_t edtd;
@@ -40,7 +40,7 @@ header custom_t {
     CustomTDT_t etdt;
     CustomTTD_t ettd;
     CustomTTT_t ettt;
-    bit<16>     checksum;
+    bit<16> checksum;
 }
 
 struct meta_t {
@@ -48,7 +48,7 @@ struct meta_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    custom_t   custom;
+    custom_t custom;
 }
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
@@ -57,14 +57,14 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0xdead: parse_custom;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0xdead : parse_custom;
+            default : accept;
         }
     }
     state parse_custom {
-        packet.extract<custom_t>(hdr.custom);
+        packet.extract < custom_t >(hdr.custom);
         transition accept;
     }
 }
@@ -94,19 +94,19 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     table custom_table {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
-            hdr.custom.e        : exact @name("hdr.custom.e");
-            hdr.custom.ed       : exact @name("hdr.custom.ed");
-            hdr.custom.et       : exact @name("hdr.custom.et");
-            hdr.custom.edd      : exact @name("hdr.custom.edd");
-            hdr.custom.eddt     : exact @name("hdr.custom.eddt");
-            hdr.custom.edtd     : exact @name("hdr.custom.edtd");
-            hdr.custom.edtt     : exact @name("hdr.custom.edtt");
-            hdr.custom.etdd     : exact @name("hdr.custom.etdd");
-            hdr.custom.etdt     : exact @name("hdr.custom.etdt");
-            hdr.custom.ettd     : exact @name("hdr.custom.ettd");
-            hdr.custom.ettt     : exact @name("hdr.custom.ettt");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
+            hdr.custom.e : exact @name("hdr.custom.e");
+            hdr.custom.ed : exact @name("hdr.custom.ed");
+            hdr.custom.et : exact @name("hdr.custom.et");
+            hdr.custom.edd : exact @name("hdr.custom.edd");
+            hdr.custom.eddt : exact @name("hdr.custom.eddt");
+            hdr.custom.edtd : exact @name("hdr.custom.edtd");
+            hdr.custom.edtt : exact @name("hdr.custom.edtt");
+            hdr.custom.etdd : exact @name("hdr.custom.etdd");
+            hdr.custom.etdt : exact @name("hdr.custom.etdt");
+            hdr.custom.ettd : exact @name("hdr.custom.ettd");
+            hdr.custom.ettt : exact @name("hdr.custom.ettt");
         }
         actions = {
             set_output();
@@ -129,21 +129,21 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<custom_t>(hdr.custom);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < custom_t >(hdr.custom);
     }
 }
 
 control verifyChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        verify_checksum<tuple<bit<8>, bit<8>, CustomT_t, bit<8>, CustomDT_t, CustomT_t, CustomTT_t, bit<8>, CustomDDT_t, CustomDT_t, CustomDTT_t, CustomT_t, CustomTDT_t, CustomTT_t, CustomTTT_t>, bit<16>>(hdr.custom.isValid(), { hdr.custom.e, hdr.custom.ed, hdr.custom.et, hdr.custom.edd, hdr.custom.edt, hdr.custom.etd, hdr.custom.ett, hdr.custom.eddd, hdr.custom.eddt, hdr.custom.edtd, hdr.custom.edtt, hdr.custom.etdd, hdr.custom.etdt, hdr.custom.ettd, hdr.custom.ettt }, hdr.custom.checksum, HashAlgorithm.csum16);
+        verify_checksum < tuple < bit<8>, bit<8>, CustomT_t, bit<8>, CustomDT_t, CustomT_t, CustomTT_t, bit<8>, CustomDDT_t, CustomDT_t, CustomDTT_t, CustomT_t, CustomTDT_t, CustomTT_t, CustomTTT_t >, bit<16 >>(hdr.custom.isValid(), { hdr.custom.e, hdr.custom.ed, hdr.custom.et, hdr.custom.edd, hdr.custom.edt, hdr.custom.etd, hdr.custom.ett, hdr.custom.eddd, hdr.custom.eddt, hdr.custom.edtd, hdr.custom.edtt, hdr.custom.etdd, hdr.custom.etdt, hdr.custom.ettd, hdr.custom.ettt }, hdr.custom.checksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        update_checksum<tuple<bit<8>, bit<8>, CustomT_t, bit<8>, CustomDT_t, CustomT_t, CustomTT_t, bit<8>, CustomDDT_t, CustomDT_t, CustomDTT_t, CustomT_t, CustomTDT_t, CustomTT_t, CustomTTT_t>, bit<16>>(hdr.custom.isValid(), { hdr.custom.e, hdr.custom.ed, hdr.custom.et, hdr.custom.edd, hdr.custom.edt, hdr.custom.etd, hdr.custom.ett, hdr.custom.eddd, hdr.custom.eddt, hdr.custom.edtd, hdr.custom.edtt, hdr.custom.etdd, hdr.custom.etdt, hdr.custom.ettd, hdr.custom.ettt }, hdr.custom.checksum, HashAlgorithm.csum16);
+        update_checksum < tuple < bit<8>, bit<8>, CustomT_t, bit<8>, CustomDT_t, CustomT_t, CustomTT_t, bit<8>, CustomDDT_t, CustomDT_t, CustomDTT_t, CustomT_t, CustomTDT_t, CustomTT_t, CustomTTT_t >, bit<16 >>(hdr.custom.isValid(), { hdr.custom.e, hdr.custom.ed, hdr.custom.et, hdr.custom.edd, hdr.custom.edt, hdr.custom.etd, hdr.custom.ett, hdr.custom.eddd, hdr.custom.eddt, hdr.custom.edtd, hdr.custom.edtt, hdr.custom.etdd, hdr.custom.etdt, hdr.custom.ettd, hdr.custom.ettt }, hdr.custom.checksum, HashAlgorithm.csum16);
     }
 }
 
-V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers_t, meta_t >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

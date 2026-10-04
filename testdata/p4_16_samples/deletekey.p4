@@ -7,15 +7,21 @@
 #include <core.p4>
 
 control c() {
-    action a() { }
+    action a() {
+    }
 
     table t1 {
-        key = {}
-        actions = {a;}
+        key = {
+        }
+        actions = {
+            a;
+        }
     }
 
     table t2 {
-        actions = {a;}
+        actions = {
+            a;
+        }
     }
 
     apply {

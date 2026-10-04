@@ -33,4 +33,3 @@ control for_tx_bfd_packets() {
         bfd_session_liveness_tracker.on_tx(index);
     }
 }
-

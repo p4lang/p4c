@@ -31,7 +31,6 @@ struct metadata {
     Foo_t x;
 }
 
-
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -90,11 +89,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(),

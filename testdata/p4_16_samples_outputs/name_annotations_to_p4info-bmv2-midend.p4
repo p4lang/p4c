@@ -23,7 +23,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
     }
     @name("IngressI.red") table foo_table_0 {
         key = {
-            smeta.ingress_port: exact @name("green");
+            smeta.ingress_port : exact @name("green");
         }
         actions = {
             @name("yellow") foo();
@@ -56,4 +56,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

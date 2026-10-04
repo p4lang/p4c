@@ -58,7 +58,7 @@ header_type fabric_header_cpu_t {
         txBypass : 1;
         reserved : 2;
 
-        ingressPort: 16;
+        ingressPort : 16;
         ingressIfindex : 16;
         ingressBd : 16;
 
@@ -83,7 +83,7 @@ parser fabric_header {
     return ingress;
 }
 
-action nop () {
+action nop() {
 }
 
 action terminate_cpu_packet() {
@@ -152,7 +152,7 @@ table packet_out {
  ****************************************************************/
 
 action ofpat_group_egress_update(bmap) {
-    bit_or (openflow_metadata.bmap, openflow_metadata.bmap, bmap);
+    bit_or(openflow_metadata.bmap, openflow_metadata.bmap, bmap);
 }
 
 table ofpat_group_egress {
@@ -338,7 +338,7 @@ table ofpat_pop_vlan {
         openflow_metadata.group_id : ternary;
         egress_egress_port : ternary;
     }
-    
+
     actions {
         ofpat_pop_vlan;
         nop;
@@ -532,4 +532,3 @@ control process_ofpat_egress {
 
     // oq (set queue)
 }
-

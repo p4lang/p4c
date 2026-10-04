@@ -9,19 +9,27 @@
 
 control c(out bool x) {
     table t1 {
-        key = { x : exact; }
-        actions = { NoAction; }
+        key = {
+            x : exact;
+        }
+        actions = {
+            NoAction;
+        }
         default_action = NoAction();
     }
     table t2 {
-        key = { x : exact; }
-        actions = { NoAction; }
+        key = {
+            x : exact;
+        }
+        actions = {
+            NoAction;
+        }
         default_action = NoAction();
     }
     apply {
         x = true;
         if (t1.apply().hit && t2.apply().hit)
-            x = false;
+        x = false;
     }
 }
 

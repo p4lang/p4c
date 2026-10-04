@@ -8,28 +8,32 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
-    Ethernet_h    ethernet;
+    Ethernet_h ethernet;
 }
 
 struct mystruct1 {
-    bit<4>  a;
-    bit<4>  b;
+    bit<4> a;
+    bit<4> b;
 }
 
-enum MeterColor_t {GREEN, YELLOW, RED};
+enum MeterColor_t {
+    GREEN, YELLOW, RED
+};
 
 control DeparserI(packet_out packet,
                   in Parsed_packet hdr) {
-    apply { packet.emit(hdr.ethernet); }
+    apply {
+        packet.emit(hdr.ethernet);
+    }
 }
 
 parser parserI(packet_in pkt,
@@ -45,7 +49,7 @@ parser parserI(packet_in pkt,
 control cIngress(inout Parsed_packet hdr,
                  inout mystruct1 meta,
                  inout standard_metadata_t stdmeta) {
-    direct_meter<MeterColor_t>(MeterType.bytes) my_meter;
+    direct_meter < MeterColor_t >(MeterType.bytes) my_meter;
     MeterColor_t egress_color = MeterColor_t.GREEN;
     action foo() {
         meta.b = meta.b + 5;
@@ -55,8 +59,12 @@ control cIngress(inout Parsed_packet hdr,
         //my_meter.read(egress_color);
     }
     table guh {
-        key = { hdr.ethernet.srcAddr : exact; }
-        actions = { foo; }
+        key = {
+            hdr.ethernet.srcAddr : exact;
+        }
+        actions = {
+            foo;
+        }
         default_action = foo;
         meters = my_meter;
     }
@@ -69,20 +77,23 @@ control cIngress(inout Parsed_packet hdr,
 control cEgress(inout Parsed_packet hdr,
                 inout mystruct1 meta,
                 inout standard_metadata_t stdmeta) {
-    apply { }
+    apply {
+    }
 }
 
 control vc(inout Parsed_packet hdr,
            inout mystruct1 meta) {
-    apply { }
+    apply {
+    }
 }
 
 control uc(inout Parsed_packet hdr,
            inout mystruct1 meta) {
-    apply { }
+    apply {
+    }
 }
 
-V1Switch<Parsed_packet, mystruct1>(parserI(),
+V1Switch < Parsed_packet, mystruct1 >(parserI(),
                                    vc(),
                                    cIngress(),
                                    cEgress(),

@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -34,7 +34,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            tmp_key: exact @name("bKiScA");
+            tmp_key : exact @name("bKiScA");
         }
         actions = {
             do_action(h.h.a);

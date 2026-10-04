@@ -1,7 +1,7 @@
 #include <core.p4>
 
-control MAPipe<H>(inout H hdr);
-package SimpleArch<H>(MAPipe<H> mapipe);
+control MAPipe < H >(inout H hdr);
+package SimpleArch < H >(MAPipe<H> mapipe);
 header h0_t {
     bit<1> f0;
 }
@@ -31,4 +31,4 @@ control MyIngress(inout headers hdr) {
     }
 }
 
-SimpleArch<headers>(MyIngress()) main;
+SimpleArch < headers >(MyIngress()) main;

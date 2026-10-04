@@ -13,7 +13,7 @@ action a1() {
 }
 
 table t1 {
-    actions { 
+    actions {
         a1;
     }
 }

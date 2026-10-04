@@ -16,7 +16,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -24,14 +24,20 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.local_h") H local_h_0;
-    @hidden action gauntlet_hdr_set_validbmv2l37() {
+    @hidden action gauntlet_hdr_set_validbmv2l35() {
         h.h.c = 16w2;
     }
-    @hidden action gauntlet_hdr_set_validbmv2l35() {
+    @hidden action gauntlet_hdr_set_validbmv2l33() {
         local_h_0.setValid();
         local_h_0.a = 16w0;
         local_h_0.b = 64w0;
         local_h_0.c = 16w0;
+    }
+    @hidden table tbl_gauntlet_hdr_set_validbmv2l33 {
+        actions = {
+            gauntlet_hdr_set_validbmv2l33();
+        }
+        const default_action = gauntlet_hdr_set_validbmv2l33();
     }
     @hidden table tbl_gauntlet_hdr_set_validbmv2l35 {
         actions = {
@@ -39,24 +45,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_hdr_set_validbmv2l35();
     }
-    @hidden table tbl_gauntlet_hdr_set_validbmv2l37 {
-        actions = {
-            gauntlet_hdr_set_validbmv2l37();
-        }
-        const default_action = gauntlet_hdr_set_validbmv2l37();
-    }
     apply {
-        tbl_gauntlet_hdr_set_validbmv2l35.apply();
+        tbl_gauntlet_hdr_set_validbmv2l33.apply();
         if (!local_h_0.isValid() && !h.h.isValid() || local_h_0.isValid() && h.h.isValid() && 16w0 == h.h.a && 64w0 == h.h.b && 16w0 == h.h.c) {
-            tbl_gauntlet_hdr_set_validbmv2l37.apply();
+            tbl_gauntlet_hdr_set_validbmv2l35.apply();
         }
     }
 }
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -78,9 +78,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

@@ -7,11 +7,16 @@
 
 #include <v1model.p4>
 
-struct m { int<8> x; }
+struct m {
+    int<8> x;
+}
 
-struct h { }
+struct h {
+}
 
-error { NewError }
+error {
+    NewError
+}
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
     state start {
@@ -24,20 +29,25 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
 }
 
 control MyVerifyChecksum(inout h hdr, inout m meta) {
-    apply {}
+    apply {
+    }
 }
 control MyIngress(inout h hdr, inout m meta, inout standard_metadata_t std) {
-    apply { }
+    apply {
+    }
 }
 control MyEgress(inout h hdr, inout m meta, inout standard_metadata_t std) {
-    apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout h hdr, inout m meta) {
-    apply {}
+    apply {
+    }
 }
 control MyDeparser(packet_out b, in h hdr) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

@@ -23,8 +23,12 @@ parser start {
     return ingress;
 }
 
-action noop() { }
-action setx() { modify_field(data.x2, 2); modify_field(data.x4,1); }
+action noop() {
+}
+action setx() {
+    modify_field(data.x2, 2);
+    modify_field(data.x4,1);
+}
 
 table test1 {
     reads {

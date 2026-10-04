@@ -13,7 +13,7 @@ header H {
 parser p(packet_in pkt) {
     H h;
     state start {
-        h = pkt.lookahead<H>();
+        h = pkt.lookahead < H >();
         transition accept;
     }
 }

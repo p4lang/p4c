@@ -9,12 +9,12 @@ control C() {
     action a() {
         __e(72);
     }
-
     table t {
-        actions = { a; }
+        actions = {
+            a;
+        }
         default_action = a;
     }
-
     apply {
         t.apply();
     }
@@ -22,5 +22,4 @@ control C() {
 
 control proto();
 package top(proto p);
-
 top(C()) main;

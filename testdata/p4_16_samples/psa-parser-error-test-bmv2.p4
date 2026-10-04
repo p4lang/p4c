@@ -8,46 +8,45 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header ipv6_t {
-    bit<4>       version;
-    bit<8>       trafficClass;
-    bit<20>      flowLabel;
-    bit<16>      payloadLen;
-    bit<8>       nextHdr;
-    bit<8>       hopLimit;
-    bit<128>     srcAddr;
-    bit<128>     dstAddr;
+    bit<4> version;
+    bit<8> trafficClass;
+    bit<20> flowLabel;
+    bit<16> payloadLen;
+    bit<8> nextHdr;
+    bit<8> hopLimit;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
 }
 
 header mpls_t {
     bit<20> label;
-    bit<3>  tc;
-    bit<1>  stack;
-    bit<8>  ttl;
+    bit<3> tc;
+    bit<1> stack;
+    bit<8> ttl;
 }
 
 struct empty_metadata_t {
@@ -61,13 +60,13 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
-    ipv6_t           ipv6;
-    mpls_t           mpls;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
+    ipv6_t ipv6;
+    mpls_t mpls;
 }
 
-control parser_error_to_int (in error err, out bit<16> ret)
+control parser_error_to_int(in error err, out bit<16> ret)
 {
     apply {
         // Unconditionally assign an initial value to ret, because if
@@ -104,10 +103,10 @@ parser IngressParserImpl(packet_in pkt,
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            0x8847: parse_mpls;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            0x8847 : parse_mpls;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -137,7 +136,7 @@ control ingress(inout headers hdr,
         // metadata with such packets, so there is not a good way to
         // pass along which error occurred in such packets.
         parser_error_to_int.apply(istd.parser_error, hdr.ethernet.dstAddr[47:32]);
-        hdr.ethernet.dstAddr[31:0] = (bit<32>) (TimestampUint_t) istd.ingress_timestamp;
+        hdr.ethernet.dstAddr[31 : 0] =(bit<32>)(TimestampUint_t) istd.ingress_timestamp;
     }
 }
 
@@ -158,10 +157,10 @@ parser EgressParserImpl(packet_in pkt,
     // error they encountered, independently of each other.
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x86dd: parse_ipv6;
-            0x8847: parse_mpls;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x86dd : parse_ipv6;
+            0x8847 : parse_mpls;
+            default : accept;
         }
     }
     state parse_ipv6 {
@@ -181,7 +180,7 @@ control egress(inout headers hdr,
 {
     apply {
         parser_error_to_int.apply(istd.parser_error, hdr.ethernet.srcAddr[47:32]);
-        hdr.ethernet.srcAddr[31:0] = (bit<32>) (TimestampUint_t) istd.egress_timestamp;
+        hdr.ethernet.srcAddr[31 : 0] =(bit<32>)(TimestampUint_t) istd.egress_timestamp;
     }
 }
 

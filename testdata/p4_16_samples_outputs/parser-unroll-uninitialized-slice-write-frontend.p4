@@ -6,7 +6,7 @@
 
 parser p(packet_in packet, out S s) {
     state start {
-        s.f[3:0] = 4w2;
+        s.f[3 : 0] = 4w2;
         transition accept;
     }
 }

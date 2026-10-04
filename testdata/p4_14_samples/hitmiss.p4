@@ -24,7 +24,8 @@ parser start {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     modify_field(data.b1, val);
     modify_field(standard_metadata.egress_spec, port);
@@ -62,7 +63,11 @@ table test3 {
 
 control ingress {
     apply(test1) {
-        hit { apply(test2); }
-        miss { apply(test3); }
+        hit {
+            apply(test2);
+        }
+        miss {
+            apply(test3);
+        }
     }
 }

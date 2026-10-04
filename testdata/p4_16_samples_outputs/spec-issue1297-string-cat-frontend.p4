@@ -6,7 +6,7 @@ control c() {
     }
     @name("c.foo_y_bar_x_") action foo() {
     }
-    @DummyVendor_Structured[a="X_Y", b="Y_z"] @name("c.bar") action bar() {
+    @DummyVendor_Structured[a = "X_Y", b = "Y_z"] @name("c.bar") action bar() {
     }
     @DummyVendor_Structured2["X_Y", "Y_z"] @name("c.baz") action baz() {
     }

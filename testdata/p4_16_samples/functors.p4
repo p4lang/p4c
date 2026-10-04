@@ -9,10 +9,10 @@
 
 parser p()(bit b, bit c)
 {
-   state start {
+    state start {
         bit z = b & c;
         transition accept;
-   }
+    }
 }
 
 const bit bv = 1w0;

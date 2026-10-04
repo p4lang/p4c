@@ -48,18 +48,16 @@ header_type ethernet_t {
     }
 }
 
-
 header_type vlan_t {
     fields {
         pcp : 3;
-	    cfi : 1;
-	    vid : 12;
-	    ethType : 16;
+        cfi : 1;
+        vid : 12;
+        ethType : 16;
     }
     //length  4;
     //max_length 4;
 }
-
 
 header_type ipv4_t {
     fields {
@@ -67,7 +65,7 @@ header_type ipv4_t {
         ihl : 4;
         diffserv : 8;
         ipv4_length : 16;
-        id : 16 ;
+        id : 16;
         flags : 3;
         offset : 13;
         ttl : 8;
@@ -105,18 +103,18 @@ header_type udp_t {
 }
 
 header_type ingress_metadata_t {
-	fields {
+    fields {
         port_lag : 10;
         ip_src : 32;
         ip_dest : 32;
         ip_prefix : 8;
-        routed: 1;          // switched/routed
+        routed : 1;          // switched/routed
         vrf : 16;
         nhop : 16;
         ecmp_nhop : 16;
         router_intf : 16;
         label : 16;
-        copy_to_cpu: 1;
+        copy_to_cpu : 1;
         pri : 3;
         qos_selector : 8;
         cos_index : 3;
@@ -152,28 +150,27 @@ header_type ingress_metadata_t {
 }
 
 header_type egress_metadata_t {
-	fields {
+    fields {
         mirror_port : 16;
     }
 }
-
 
 header ethernet_t eth;
 header vlan_t vlan;
 header ipv4_t ipv4;
 
 field_list ipv4_checksum_list {
-        ipv4.version;
-        ipv4.ihl;
-        ipv4.diffserv;
-        ipv4.ipv4_length;
-        ipv4.id;
-        ipv4.flags;
-        ipv4.offset;
-        ipv4.ttl;
-        ipv4.protocol;
-        ipv4.srcAddr;
-        ipv4.dstAddr;
+    ipv4.version;
+    ipv4.ihl;
+    ipv4.diffserv;
+    ipv4.ipv4_length;
+    ipv4.id;
+    ipv4.flags;
+    ipv4.offset;
+    ipv4.ttl;
+    ipv4.protocol;
+    ipv4.srcAddr;
+    ipv4.dstAddr;
 }
 
 field_list_calculation ipv4_checksum {
@@ -185,10 +182,9 @@ field_list_calculation ipv4_checksum {
 }
 
 calculated_field ipv4.checksum {
-    verify ipv4_checksum if(ipv4.ihl == 5);
-    update ipv4_checksum if(ipv4.ihl == 5);
+    verify ipv4_checksum if (ipv4.ihl == 5);
+    update ipv4_checksum if (ipv4.ihl == 5);
 }
-
 
 metadata ingress_metadata_t ingress_metadata;
 metadata egress_metadata_t egress_metadata;
@@ -217,21 +213,18 @@ metadata ingress_intrinsic_metadata_t intrinsic_metadata;
 #define VLAN_TYPE 0x8100
 #define IPV4_TYPE 0x0800
 
-
 parser start {
     return parse_eth;
 }
 
-
 parser parse_eth {
     extract(eth);
     return select (eth.ethType) {
-        VLAN_TYPE : parse_vlan;
-        IPV4_TYPE : parse_ipv4;
-        default : ingress;
+    VLAN_TYPE : parse_vlan;
+    IPV4_TYPE : parse_ipv4;
+    default : ingress;
     }
 }
-
 
 parser parse_vlan {
     extract(vlan);
@@ -242,7 +235,6 @@ parser parse_ipv4 {
     extract(ipv4);
     return ingress;
 }
-
 
 action nop() {
 }
@@ -263,12 +255,12 @@ action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on
 }
 
 table switch {
-	actions {
-		set_switch;
-	}
+    actions {
+        set_switch;
+    }
 }
 
-action  set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
+action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
     modify_field(ingress_metadata.port_lag, port);
     modify_field(ingress_metadata.mac_limit, max_learned_address);
     modify_field(ingress_metadata.port_type, type_);
@@ -292,11 +284,11 @@ counter port_counters {
 }
 
 table port {
-	reads {
-        intrinsic_metadata.ingress_port: exact;
-	}
-	actions {
-		set_in_port;
+    reads {
+        intrinsic_metadata.ingress_port : exact;
+    }
+    actions {
+        set_in_port;
 //		set_lag_index;
 	}
 }
@@ -313,18 +305,16 @@ action set_broadcast() {
 action set_unknown_unicast() {
 }
 
-
 action set_vlan(max_learned_address) {
     modify_field(ingress_metadata.mac_limit, max_learned_address);
     modify_field(ingress_metadata.vlan_id, vlan.vid);
 }
 
-
 action_profile vlan {
-	actions {
+    actions {
         set_vlan;
         nop;
-	}
+    }
 }
 
 
@@ -338,7 +328,7 @@ counter vlan_counters {
 table ports {
     reads {
         vlan : valid;
-		vlan.vid : exact;
+        vlan.vid : exact;
         intrinsic_metadata.ingress_port : exact;
     }
     action_profile : vlan;
@@ -358,12 +348,12 @@ action generate_learn_notify() {
 }
 
 table learn_notify {
-	reads {
-        intrinsic_metadata.ingress_port: exact;
-		ingress_metadata.vlan_id : exact;
-		eth.srcAddr : exact;
-	}
-	actions {
+    reads {
+        intrinsic_metadata.ingress_port : exact;
+        ingress_metadata.vlan_id : exact;
+        eth.srcAddr : exact;
+    }
+    actions {
         nop;
         generate_learn_notify;
     }
@@ -376,11 +366,11 @@ action fdb_set(type_, port_id) {
 }
 
 table fdb {
-	reads {
-		ingress_metadata.vlan_id : exact;
-		eth.dstAddr : exact;
-	}
-	actions {
+    reads {
+        ingress_metadata.vlan_id : exact;
+        eth.dstAddr : exact;
+    }
+    actions {
         fdb_set;
         // TODO: miss action - flood to vlan
 	}
@@ -406,15 +396,15 @@ action route_set_trap(trap_priority) {
 }
 
 table route {
-	reads {
-		ingress_metadata.vrf: exact;
+    reads {
+        ingress_metadata.vrf : exact;
         ipv4.dstAddr : lpm;
-	}
-	actions {
-		route_set_trap;
-		route_set_nexthop;
-		route_set_nexthop_group;
-	}
+    }
+    actions {
+        route_set_trap;
+        route_set_nexthop;
+        route_set_nexthop_group;
+    }
 }
 
 action set_next_hop(type_, ip, router_interface_id) {
@@ -422,12 +412,12 @@ action set_next_hop(type_, ip, router_interface_id) {
 }
 
 table next_hop {
-	reads {
-		ingress_metadata.nhop : exact;
-	}
-	actions {
+    reads {
+        ingress_metadata.nhop : exact;
+    }
+    actions {
         set_next_hop;
-	}
+    }
 }
 
 action set_next_hop_group(next_hop_count, type_, router_interface_id/*next_hop_list*/) {
@@ -471,7 +461,6 @@ table nexthop {
     action_profile : next_hop_group;
 }
 
-
 action ing_acl_drop() {
     drop();
 }
@@ -491,25 +480,24 @@ action ing_acl_egress_mirror() {
 action ing_acl_multicast() {
 }
 
-
 table ingress_acl {
-	reads {
-		ingress_metadata.label : exact;
-		ingress_metadata.ip_dest : exact;
-		ingress_metadata.ip_src : exact;
+    reads {
+        ingress_metadata.label : exact;
+        ingress_metadata.ip_dest : exact;
+        ingress_metadata.ip_src : exact;
 /*
         ingress_metadata.srcPort;
         ingress_metadata.dstPort;
 */
 	}
-	actions {
+    actions {
         ing_acl_drop;
-		ing_acl_set_fields;
-		ing_acl_ingress_mirror;
-		ing_acl_redirect;
-		ing_acl_egress_mirror;
-		ing_acl_multicast;
-	}
+        ing_acl_set_fields;
+        ing_acl_ingress_mirror;
+        ing_acl_redirect;
+        ing_acl_egress_mirror;
+        ing_acl_multicast;
+    }
 }
 
 action set_qos(priority, number_of_cos_classes, port_trust, scheduling_algorithm, scheduling_weight, bandwidth_limit, buffer_limit) {
@@ -517,12 +505,12 @@ action set_qos(priority, number_of_cos_classes, port_trust, scheduling_algorithm
 }
 
 table qos {
-	reads {
-		intrinsic_metadata.ingress_port : exact;
-	}
-	actions {
-		set_qos;
-	}
+    reads {
+        intrinsic_metadata.ingress_port : exact;
+    }
+    actions {
+        set_qos;
+    }
 }
 
 action set_cos_map(cos_value) {
@@ -539,7 +527,6 @@ table cos_map {
         set_cos_map;
     }
 }
-
 
 action set_router_interface(virtual_router_id, type_, port_id, vlan_id, src_mac_address, admin_v4_state, admin_v6_state, mtu) {
     modify_field(ingress_metadata.vrf, virtual_router_id);
@@ -567,7 +554,6 @@ table router_interface {
     }
 }
 
-
 action set_router(admin_v4_state, admin_v6_state, src_mac_address, violation_ttl1_action, violation_ip_options) {
     modify_field(ingress_metadata.def_smac, src_mac_address);
     modify_field(ingress_metadata.v4_enable, admin_v4_state);
@@ -590,14 +576,14 @@ action set_dmac(dst_mac_address, port_id) {
 }
 
 table neighbor {
-	reads {
-		ingress_metadata.vrf : exact;
-		ingress_metadata.ip_dest: exact;
-		ingress_metadata.router_intf: exact;
-	}
-	actions {
-		set_dmac;
-	}
+    reads {
+        ingress_metadata.vrf : exact;
+        ingress_metadata.ip_dest : exact;
+        ingress_metadata.router_intf : exact;
+    }
+    actions {
+        set_dmac;
+    }
 }
 
 // The NOT ready features to be enabled
@@ -607,7 +593,7 @@ control ingress {
     apply(switch);
     /* get the port properties */
     apply(port);
-    if(ingress_metadata.oper_status == UP) {
+    if (ingress_metadata.oper_status == UP) {
 #if NOT_READY_YET
         /* get the VLAN properties */
         apply(ports);
@@ -615,39 +601,39 @@ control ingress {
         /* router interface properties */
         apply(router_interface);
         /* SMAC check */
-        if(ingress_metadata.learning != 0) {
+        if (ingress_metadata.learning != 0) {
             apply(learn_notify);
         }
-        if(ingress_metadata.router_mac == 0) {
+        if (ingress_metadata.router_mac == 0) {
             /* L2 processing */
             apply(fdb);
         }
         else {
             /* L3 processing */
             apply(virtual_router);
-            if((valid(ipv4)) and (ingress_metadata.v4_enable != 0)) {
+            if ((valid(ipv4)) and(ingress_metadata.v4_enable != 0)) {
                 apply(route);
             }
 #if NOT_READY_YET
-            if(ingress_metadata.ecmp_nhop != 0) {
+            if (ingress_metadata.ecmp_nhop != 0) {
                 apply(nexthop);
             }
             else {
 #endif
-                apply(next_hop);
+            apply(next_hop);
 #if NOT_READY_YET
-            }
-#endif
         }
-        if(ingress_metadata.routed != 0) {
-            apply(neighbor);
-        }
-#if NOT_READY_YET 
-        apply(ingress_acl);
-        apply(qos);
-        apply(cos_map);
 #endif
     }
+    if (ingress_metadata.routed != 0) {
+        apply(neighbor);
+    }
+#if NOT_READY_YET 
+    apply(ingress_acl);
+    apply(qos);
+    apply(cos_map);
+#endif
+}
 }
 
 action eg_copy_to_cpu() {
@@ -666,23 +652,21 @@ action eg_acl_copy_to_cpu() {
     eg_copy_to_cpu();
 }
 
-
 table egress_acl {
-	reads {
-		ingress_metadata.label : exact;
-	}
-	actions {
-		eg_acl_egress_mirror;
-		eg_acl_drop;
-		eg_acl_copy_to_cpu;
-	}
+    reads {
+        ingress_metadata.label : exact;
+    }
+    actions {
+        eg_acl_egress_mirror;
+        eg_acl_drop;
+        eg_acl_copy_to_cpu;
+    }
 }
 
 control egress {
-    if(ingress_metadata.oper_status == UP) {
+    if (ingress_metadata.oper_status == UP) {
 #if NOT_READY_YET 
         apply(egress_acl);
 #endif
     }
 }
-

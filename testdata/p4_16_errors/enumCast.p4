@@ -12,11 +12,11 @@ enum bit<32> X {
 }
 
 enum bit<8> E1 {
-   e1 = 0, e2 = 1, e3 = 2
+    e1 = 0, e2 = 1, e3 = 2
 }
 
 enum bit<8> E2 {
-   e1 = 10, e2 = 11, e3 = 12
+    e1 = 10, e2 = 11, e3 = 12
 }
 
 header B {
@@ -48,6 +48,6 @@ parser p(packet_in packet, out O o) {
     }
 }
 
-parser proto<T>(packet_in p, out T t);
-package top<T>(proto<T> _p);
+parser proto < T >(packet_in p, out T t);
+package top < T >(proto<T> _p);
 top(p()) main;

@@ -31,7 +31,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("prefix|simple_table_1") table simple_table_1 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction;
@@ -40,7 +40,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("@prefix@simple_table_2") table simple_table_2 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction;
@@ -49,7 +49,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("<>]{]prefix/simple_table_3") table simple_table_3 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction;
@@ -58,7 +58,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("!@#$%^&*()_+=-prefix^simple_table_1") table simple_table_4 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction;
@@ -67,7 +67,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("prefix◕‿◕😀ツsimple_table_1") table simple_table_5 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction;

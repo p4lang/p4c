@@ -12,22 +12,22 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 extern Checksum {
     Checksum();
-    void add<T>(in T data);
-    void subtract<T>(in T data);
+    void add < T >(in T data);
+    void subtract < T >(in T data);
     bool verify();
     bit<16> get();
-    bit<16> update<T>(in T data, @optional in bool zeros_as_ones);
+    bit<16> update < T >(in T data, @optional in bool zeros_as_ones);
 }
 
 parser p(packet_in pkt, out Headers hdr) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -46,7 +46,7 @@ struct tuple_0 {
 control egress(inout Headers h) {
     @name("egress.ipv4_checksum") Checksum() ipv4_checksum_0;
     @hidden action gauntlet_optionalbmv2l51() {
-        h.h.result = ipv4_checksum_0.update<tuple_0>((tuple_0){f0 = h.eth_hdr.dst_addr,f1 = h.eth_hdr.src_addr,f2 = h.eth_hdr.eth_type});
+        h.h.result = ipv4_checksum_0.update < tuple_0 >((tuple_0){f0 = h.eth_hdr.dst_addr,f1 = h.eth_hdr.src_addr,f2 = h.eth_hdr.eth_type});
     }
     @hidden table tbl_gauntlet_optionalbmv2l51 {
         actions = {
@@ -61,8 +61,8 @@ control egress(inout Headers h) {
 
 control deparser(packet_out pkt, in Headers h) {
     @hidden action gauntlet_optionalbmv2l57() {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
     @hidden table tbl_gauntlet_optionalbmv2l57 {
         actions = {

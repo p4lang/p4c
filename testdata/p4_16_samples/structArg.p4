@@ -17,7 +17,6 @@ control c(inout S data) {
 control caller() {
     S data;
     c() cinst;
-
     apply {
         data.f = 0;
         cinst.apply(data);
@@ -26,5 +25,4 @@ control caller() {
 
 control none();
 package top(none n);
-
 top(caller()) main;

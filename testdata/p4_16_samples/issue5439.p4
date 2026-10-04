@@ -12,11 +12,15 @@ control MyIngress() {
         key = {
             get_some_data() : exact @name("data");
         }
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
         const default_action = NoAction();
     }
 
-    apply{ t0.apply(); }
+    apply {
+        t0.apply();
+    }
 }
 
 SimpleArch(SimplePipeline(

@@ -14,7 +14,7 @@ struct row_t {
 
 header hdr {
     bit<32> f;
-    row_t   row;
+    row_t row;
 }
 
 control compute(inout hdr h) {
@@ -37,7 +37,7 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract < hdr >(h.h);
         transition accept;
     }
 }
@@ -59,7 +59,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit < hdr >(h.h);
     }
 }
 
@@ -71,4 +71,4 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

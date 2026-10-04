@@ -18,8 +18,8 @@ header IDX {
 
 struct Headers {
     ethernet_t eth_hdr;
-    IDX        idx;
-    H[2]       h;
+    IDX idx;
+    H[2] h;
 }
 
 struct Meta {
@@ -27,10 +27,10 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<IDX>(hdr.idx);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < IDX >(hdr.idx);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
         transition accept;
     }
 }
@@ -77,11 +77,11 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<ethernet_t>(h.eth_hdr);
-        b.emit<IDX>(h.idx);
-        b.emit<H>(h.h[0]);
-        b.emit<H>(h.h[1]);
+        b.emit < ethernet_t >(h.eth_hdr);
+        b.emit < IDX >(h.idx);
+        b.emit < H >(h.h[0]);
+        b.emit < H >(h.h[1]);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

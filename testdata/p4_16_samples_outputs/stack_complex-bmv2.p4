@@ -20,9 +20,9 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
         b.extract(h.hs.next);
         m.v = h.hs.last.f2;
         m.v = m.v + h.hs.last.f2;
-        transition select(h.hs.last.f1) {
-            0: start;
-            default: accept;
+        transition select (h.hs.last.f1) {
+            0 : start;
+            default : accept;
         }
     }
 }
@@ -50,7 +50,7 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action set_port() {
-        sm.egress_spec = (bit<9>)m.v;
+        sm.egress_spec =(bit<9>) m.v;
     }
     table t {
         actions = {

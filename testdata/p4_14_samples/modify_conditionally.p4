@@ -19,10 +19,10 @@ parser start {
     return ingress;
 }
 
-header_type metadata_global_t{
-    fields{
-        do_goto_table: 1;
-        goto_table_id: 8;
+header_type metadata_global_t {
+    fields {
+        do_goto_table : 1;
+        goto_table_id : 8;
     }
 }
 
@@ -38,19 +38,19 @@ action table0_actionlist(
 
 table table0 {
     reads {
-        ethernet.etherType:ternary;
+        ethernet.etherType : ternary;
     }
     actions {
         table0_actionlist;
     }
-    size: 2000;
+    size : 2000;
 }
 
-control ingress{
-    if(metadata_global.goto_table_id == 0) {
+control ingress {
+    if (metadata_global.goto_table_id == 0) {
         apply( table0 );
     }
 }
 
-control egress{
+control egress {
 }

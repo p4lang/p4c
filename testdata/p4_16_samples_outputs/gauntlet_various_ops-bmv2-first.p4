@@ -59,20 +59,20 @@ header DIV {
 }
 
 header BOOL {
-    bool   a;
+    bool a;
     bit<7> padding;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    OVERFLOW   overflow;
-    UNDERFLOW  underflow;
-    RSH        rshift;
-    LSH        lshift;
-    MOD        mod;
-    COMPARE    comp;
-    DIV        div;
-    BOOL       b;
+    OVERFLOW overflow;
+    UNDERFLOW underflow;
+    RSH rshift;
+    LSH lshift;
+    MOD mod;
+    COMPARE comp;
+    DIV div;
+    BOOL b;
 }
 
 struct Meta {
@@ -83,15 +83,15 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<OVERFLOW>(hdr.overflow);
-        pkt.extract<UNDERFLOW>(hdr.underflow);
-        pkt.extract<RSH>(hdr.rshift);
-        pkt.extract<LSH>(hdr.lshift);
-        pkt.extract<MOD>(hdr.mod);
-        pkt.extract<COMPARE>(hdr.comp);
-        pkt.extract<DIV>(hdr.div);
-        pkt.extract<BOOL>(hdr.b);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < OVERFLOW >(hdr.overflow);
+        pkt.extract < UNDERFLOW >(hdr.underflow);
+        pkt.extract < RSH >(hdr.rshift);
+        pkt.extract < LSH >(hdr.lshift);
+        pkt.extract < MOD >(hdr.mod);
+        pkt.extract < COMPARE >(hdr.comp);
+        pkt.extract < DIV >(hdr.div);
+        pkt.extract < BOOL >(hdr.b);
         transition accept;
     }
 }
@@ -112,7 +112,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.rshift.a = tmp >> 1;
         h.rshift.b = 4s1;
         h.rshift.c = 4w3;
-        h.rshift.d = -4s2;
+        h.rshift.d = - 4s2;
         h.rshift.e = tmp >> 2;
         h.rshift.g = 4w0;
         h.rshift.h = 8w15;
@@ -150,8 +150,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

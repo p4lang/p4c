@@ -34,11 +34,11 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     IngressI() do;
     apply {
         switch (t.apply().action_run) {
-            a: {
-                return;
+            a : {
+            return;
             }
-            default: {
-                do.apply(hdr, meta, std_meta);
+            default : {
+            do.apply(hdr, meta, std_meta);
             }
         }
     }

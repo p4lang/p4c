@@ -19,11 +19,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".$start") state start {
-        transition select((bit<32>)standard_metadata.instance_type) {
-            32w0: start_0;
-            32w1: start_e2e_mirrored;
-            32w2: start_i2e_mirrored;
-            default: noMatch;
+        transition select ((bit<32>) standard_metadata.instance_type) {
+            32w0 : start_0;
+            32w1 : start_e2e_mirrored;
+            32w2 : start_i2e_mirrored;
+            default : noMatch;
         }
     }
     state noMatch {
@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            standard_metadata.egress_spec: exact @name("standard_metadata.egress_spec");
+            standard_metadata.egress_spec : exact @name("standard_metadata.egress_spec");
         }
         default_action = NoAction_1();
     }
@@ -72,4 +72,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

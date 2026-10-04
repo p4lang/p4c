@@ -6,7 +6,8 @@
  */
 
 enum X {
-    a, b
+    a,
+    b
 }
 
 const bool a = X.a == X.b;

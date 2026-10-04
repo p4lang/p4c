@@ -22,7 +22,7 @@ struct headers {
 
 parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<addr_ipv4_t>(hdr.addr_src1_ipv4);
+        packet.extract < addr_ipv4_t >(hdr.addr_src1_ipv4);
         hdr.addr_src1_ipv4.addr = hdr.addr_src2_ipv4.addr;
         transition reject;
     }
@@ -50,11 +50,11 @@ control ProtComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control ProtDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<addr_ipv4_t>(hdr.addr_src1_ipv4);
-        packet.emit<addr_ipv6_t>(hdr.addr_src1_ipv6);
-        packet.emit<addr_ipv4_t>(hdr.addr_src2_ipv4);
-        packet.emit<addr_ipv6_t>(hdr.addr_src2_ipv6);
+        packet.emit < addr_ipv4_t >(hdr.addr_src1_ipv4);
+        packet.emit < addr_ipv6_t >(hdr.addr_src1_ipv6);
+        packet.emit < addr_ipv4_t >(hdr.addr_src2_ipv4);
+        packet.emit < addr_ipv6_t >(hdr.addr_src2_ipv6);
     }
 }
 
-V1Switch<headers, metadata>(ProtParser(), ProtVerifyChecksum(), ProtIngress(), ProtEgress(), ProtComputeChecksum(), ProtDeparser()) main;
+V1Switch < headers, metadata >(ProtParser(), ProtVerifyChecksum(), ProtIngress(), ProtEgress(), ProtComputeChecksum(), ProtDeparser()) main;

@@ -12,16 +12,15 @@ extern BFD_Offload {
     // State manipulation
     void setTx(in bit<16> index, in bit<8> data);
     bit<8> getTx(in bit<16> index);
-
-    abstract void on_rx( in bit<16> index );
-    abstract bool on_tx( in bit<16> index );
+    abstract void on_rx(in bit<16> index);
+    abstract bool on_tx(in bit<16> index);
 }
 
 BFD_Offload(32768) bfd_session_liveness_tracker = {
-    void on_rx( in bit<16> index ) {
+    void on_rx(in bit<16> index) {
         this.setTx(index, 0);
     }
-    bool on_tx( in bit<16> index ) {
+    bool on_tx(in bit<16> index) {
         bit<8> c = this.getTx(index) + 1;
         if (c >= 4) {
             return true;
@@ -31,16 +30,16 @@ BFD_Offload(32768) bfd_session_liveness_tracker = {
         }
     }
 };
-
 control for_rx_bfd_packets() {
     apply {
         bit<16> index;
-        bfd_session_liveness_tracker.on_rx( index );
+        bfd_session_liveness_tracker.on_rx(index);
     }
 }
+
 control for_tx_bfd_packets() {
     apply {
         bit<16> index;
-        bfd_session_liveness_tracker.on_tx( index );
+        bfd_session_liveness_tracker.on_tx(index);
     }
 }

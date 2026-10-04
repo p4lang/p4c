@@ -7,35 +7,35 @@
 #include <v1model.p4>
 
 header data_h {
-  bit<32> da;
-  bit<32> db;
+    bit<32> da;
+    bit<32> db;
 }
 
 struct my_packet {
-  data_h data;
+    data_h data;
 }
 
 struct my_metadata {
-  data_h[2] data;
+    data_h[2] data;
 }
 
 struct inner_value_set_t {
-  bit<32> field;
+    bit<32> field;
 }
 
 struct value_set_t {
-  bit<32> field;
-  inner_value_set_t inner;
+    bit<32> field;
+    inner_value_set_t inner;
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
 
-    value_set<value_set_t>(4) pvs;
+    value_set < value_set_t >(4) pvs;
 
     state start {
         b.extract(p.data);
-        transition select(p.data.da, p.data.da) {
-            pvs: accept;
+        transition select (p.data.da, p.data.da) {
+            pvs : accept;
             (0x810, 0x810) : foo;
         }
     }
@@ -46,16 +46,20 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
 }
 
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
-  apply { }
+    apply {
+    }
 }
-
 
 control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_metadata_t s) {
     action set_data() {
     }
     table t {
-        actions = { set_data; }
-        key = { meta.data[0].da : exact;}
+        actions = {
+            set_data;
+        }
+        key = {
+            meta.data[0].da : exact;
+        }
     }
     apply {
         t.apply();
@@ -63,16 +67,18 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
 }
 
 control MyEgress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-  apply {
-  }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
-  apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out b, in my_packet p) {
-  apply { }
+    apply {
+    }
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

@@ -13,12 +13,12 @@ enum bit<16> EthTypes {
 }
 
 struct alt_t {
-    bit<1>   valid;
-    bit<7>   port;
-    int<8>   hashRes;
-    bool     useHash;
+    bit<1> valid;
+    bit<7> port;
+    int<8> hashRes;
+    bool useHash;
     EthTypes type;
-    bit<7>   pad;
+    bit<7> pad;
 }
 
 struct row_t {
@@ -32,8 +32,8 @@ header bitvec_hdr {
 
 struct local_metadata_t {
     @field_list(0)
-    row_t      row0;
-    row_t      row1;
+    row_t row0;
+    row_t row1;
     bitvec_hdr bvh0;
     bitvec_hdr bvh1;
 }
@@ -45,8 +45,8 @@ struct parsed_packet_t {
 
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        pk.extract<bitvec_hdr>(h.bvh0);
-        pk.extract<bitvec_hdr>(h.bvh1);
+        pk.extract < bitvec_hdr >(h.bvh0);
+        pk.extract < bitvec_hdr >(h.bvh1);
         transition accept;
     }
 }
@@ -59,8 +59,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     table tns {
         key = {
-            h.bvh1.row.alt1.valid         : exact @name("h.bvh1.row.alt1.valid");
-            local_metadata.row0.alt0.valid: exact @name("local_metadata.row0.alt0.valid");
+            h.bvh1.row.alt1.valid : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata.row0.alt0.valid : exact @name("local_metadata.row0.alt0.valid");
         }
         actions = {
             do_act();
@@ -85,8 +85,8 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 
 control deparser(packet_out b, in parsed_packet_t h) {
     apply {
-        b.emit<bitvec_hdr>(h.bvh0);
-        b.emit<bitvec_hdr>(h.bvh1);
+        b.emit < bitvec_hdr >(h.bvh0);
+        b.emit < bitvec_hdr >(h.bvh1);
     }
 }
 
@@ -100,4 +100,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch < parsed_packet_t, local_metadata_t >(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;

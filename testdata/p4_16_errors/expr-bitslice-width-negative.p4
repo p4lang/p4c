@@ -7,4 +7,4 @@
 // A negative slice width is an error. Constant folding used to shift by
 // a negative amount for it.
 
-const bool tmp = (1 != 8w2[0 +: -1]);
+const bool tmp =(1 != 8w2[0 +: - 1]);

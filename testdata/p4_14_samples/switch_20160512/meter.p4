@@ -9,11 +9,11 @@
  * Meter metadata
  */
  header_type meter_metadata_t {
-     fields {
-         meter_color : 2;                /* meter color */
+    fields {
+        meter_color : 2;                /* meter color */
          meter_index : 16;               /* meter index */
      }
- }
+}
 metadata meter_metadata_t meter_metadata;
 
 /*****************************************************************************/
@@ -44,7 +44,7 @@ table meter_action {
         meter_permit;
         meter_deny;
     }
-    size: METER_ACTION_TABLE_SIZE;
+    size : METER_ACTION_TABLE_SIZE;
 }
 
 meter meter_index {
@@ -55,12 +55,12 @@ meter meter_index {
 
 table meter_index {
     reads {
-        meter_metadata.meter_index: exact;
+        meter_metadata.meter_index : exact;
     }
     actions {
         nop;
     }
-    size: METER_INDEX_TABLE_SIZE;
+    size : METER_INDEX_TABLE_SIZE;
 }
 #endif /* METER_DISABLE */
 

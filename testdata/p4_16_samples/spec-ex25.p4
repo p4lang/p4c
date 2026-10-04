@@ -5,21 +5,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-match_kind { exact }
+match_kind {
+    exact
+}
 
 typedef bit<48> EthernetAddress;
 
-extern tbl { tbl(); }
+extern tbl {
+    tbl();
+}
 
 control c(bit<32> x)
 {
     action Set_dmac(EthernetAddress dmac)
-    {}
+    {
+    }
 
-    action drop() {}
+    action drop() {
+    }
 
     table unit {
-        key = { x : exact; }
+        key = {
+            x : exact;
+        }
         actions = {
             Set_dmac;
             drop;
@@ -37,5 +45,6 @@ control c(bit<32> x)
         implementation = tbl();
     }
 
-    apply {}
+    apply {
+    }
 }

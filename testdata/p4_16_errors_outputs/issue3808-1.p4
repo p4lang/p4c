@@ -16,4 +16,3 @@ control eq0(f<_> tt) {
         tt.g(t);
     }
 }
-

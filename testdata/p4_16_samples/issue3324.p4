@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-void f<t>(in t a){ }
-void g<t>(in t b)
-{
-  f(b);
+void f<t>(in t a) {
+}
+void g<t>(in t b) {
+    f(b);
 }

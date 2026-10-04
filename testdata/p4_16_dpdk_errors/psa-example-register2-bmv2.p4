@@ -8,25 +8,24 @@
 #include <core.p4>
 #include "bmv2/psa.p4"
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -43,8 +42,8 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 // BEGIN:Register_Example2_Part1
@@ -69,12 +68,12 @@ const bit<32> NUM_PORTS = 512;
 
 typedef bit<PACKET_BYTE_COUNT_WIDTH> PacketByteCountState_t;
 
-action update_pkt_ip_byte_count (inout PacketByteCountState_t s,
+action update_pkt_ip_byte_count(inout PacketByteCountState_t s,
                                  in bit<16> ip_length_bytes)
 {
     s[PACKET_COUNT_RANGE] = s[PACKET_COUNT_RANGE] + 1;
-    s[BYTE_COUNT_RANGE] = (s[BYTE_COUNT_RANGE] +
-                           (bit<BYTE_COUNT_WIDTH>) ip_length_bytes);
+    s[BYTE_COUNT_RANGE] =(s[BYTE_COUNT_RANGE] +
+    (bit<BYTE_COUNT_WIDTH>) ip_length_bytes);
 }
 // END:Register_Example2_Part1
 
@@ -90,9 +89,9 @@ parser IngressParserImpl(packet_in buffer,
     }
     state parse_ethernet {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (parsed_hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -107,14 +106,14 @@ control ingress(inout headers hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
-    Register<PacketByteCountState_t, PortId_t>(NUM_PORTS)
-        port_pkt_ip_bytes_in;
+    Register < PacketByteCountState_t, PortId_t >(NUM_PORTS)
+    port_pkt_ip_bytes_in;
 
     apply {
-        ostd.egress_port = (PortId_t) 0;
+        ostd.egress_port =(PortId_t) 0;
         hdr.ipv4.setValid();
         // dstAddr (48 bits), srcAddr (48 bits), etherType (16 bits)
-        hdr.ipv4.totalLen = (48 + 48 + 16) / 8;
+        hdr.ipv4.totalLen =(48 + 48 + 16) / 8;
         if (hdr.ipv4.isValid()) {
             @atomic {
                 PacketByteCountState_t tmp;
@@ -145,7 +144,8 @@ control egress(inout headers hdr,
                in    psa_egress_input_metadata_t  istd,
                inout psa_egress_output_metadata_t ostd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control CommonDeparserImpl(packet_out packet,

@@ -9,17 +9,17 @@ control MyC(inout bit<2> x) {
     }
     table t {
         key = {
-            x: exact;
+            x : exact;
         }
         actions = {
             a;
             b;
         }
         const entries = {
-                        0 : a;
-                        1 : b;
-                        2 : a();
-                        3 : b();
+            0 : a;
+            1 : b;
+            2 : a();
+            3 : b();
         }
     }
     apply {

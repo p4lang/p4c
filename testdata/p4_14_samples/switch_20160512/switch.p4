@@ -27,9 +27,9 @@ header_type ingress_metadata_t {
 
         drop_flag : 1;                         /* if set, drop the packet */
         drop_reason : 8;                       /* drop reason */
-        control_frame: 1;                      /* control frame */
+        control_frame : 1;                      /* control frame */
         bypass_lookups : 16;                   /* list of lookups to skip */
-        sflow_take_sample : 32 (saturating);
+        sflow_take_sample : 32(saturating);
     }
 }
 
@@ -129,7 +129,7 @@ control ingress {
 
     if (ingress_metadata.port_type != PORT_TYPE_FABRIC) {
 #ifndef MPLS_DISABLE
-        if (not (valid(mpls[0]) and (l3_metadata.fib_hit == TRUE))) {
+        if (not(valid(mpls[0]) and (l3_metadata.fib_hit == TRUE))) {
 #endif /* MPLS_DISABLE */
 
             /* validate packet */
@@ -140,58 +140,58 @@ control ingress {
 
             /* port and vlan ACL */
             if (l3_metadata.lkp_ip_type == IPTYPE_NONE) {
-                process_mac_acl();
-            } else {
-                process_ip_acl();
+            process_mac_acl();
+        } else {
+            process_ip_acl();
+        }
+
+        process_qos();
+
+        apply(rmac) {
+            rmac_miss {
+                process_multicast();
             }
-
-            process_qos();
-
-            apply(rmac) {
-                rmac_miss {
-                    process_multicast();
-                }
-                default {
-                    if (DO_LOOKUP(L3)) {
-                        if ((l3_metadata.lkp_ip_type == IPTYPE_IPV4) and
-                            (ipv4_metadata.ipv4_unicast_enabled == TRUE)) {
+            default {
+                if (DO_LOOKUP(L3)) {
+                    if ((l3_metadata.lkp_ip_type == IPTYPE_IPV4) and
+                    (ipv4_metadata.ipv4_unicast_enabled == TRUE)) {
                             /* router ACL/PBR */
                             process_ipv4_racl();
 
-                            process_ipv4_urpf();
-                            process_ipv4_fib();
+                        process_ipv4_urpf();
+                        process_ipv4_fib();
 
-                        } else {
-                            if ((l3_metadata.lkp_ip_type == IPTYPE_IPV6) and
-                                (ipv6_metadata.ipv6_unicast_enabled == TRUE)) {
+                    } else {
+                        if ((l3_metadata.lkp_ip_type == IPTYPE_IPV6) and
+                        (ipv6_metadata.ipv6_unicast_enabled == TRUE)) {
 
                                 /* router ACL/PBR */
                                 process_ipv6_racl();
-                                process_ipv6_urpf();
-                                process_ipv6_fib();
-                            }
+                            process_ipv6_urpf();
+                            process_ipv6_fib();
                         }
-                        process_urpf_bd();
                     }
+                    process_urpf_bd();
                 }
             }
-#ifndef MPLS_DISABLE
         }
-#endif /* MPLS_DISABLE */
+#ifndef MPLS_DISABLE
     }
+#endif /* MPLS_DISABLE */
+}
 
-    process_meter_index();
+process_meter_index();
 
     /* compute hashes based on packet type  */
     process_hashes();
 
-    process_meter_action();
+process_meter_action();
 
-    if (ingress_metadata.port_type != PORT_TYPE_FABRIC) {
+if (ingress_metadata.port_type != PORT_TYPE_FABRIC) {
         /* update statistics */
         process_ingress_bd_stats();
-        process_ingress_acl_stats();
-        process_storm_control_stats();
+    process_ingress_acl_stats();
+    process_storm_control_stats();
 
         /* decide final forwarding choice */
         process_fwd_results();
@@ -199,13 +199,13 @@ control ingress {
         /* ecmp/nexthop lookup */
         process_nexthop();
 
-        if (ingress_metadata.egress_ifindex == IFINDEX_FLOOD) {
+    if (ingress_metadata.egress_ifindex == IFINDEX_FLOOD) {
             /* resolve multicast index for flooding */
             process_multicast_flooding();
-        } else {
+    } else {
             /* resolve final egress port for unicast traffic */
             process_lag();
-        }
+    }
 
 #ifdef OPENFLOW_ENABLE
         /* openflow processing for ingress */
@@ -214,15 +214,15 @@ control ingress {
 
         /* generate learn notify digest if permitted */
         process_mac_learning();
-    }
+}
 
     /* resolve fabric port to destination device */
     process_fabric_lag();
 
-    if (ingress_metadata.port_type != PORT_TYPE_FABRIC) {
+if (ingress_metadata.port_type != PORT_TYPE_FABRIC) {
         /* system acls */
         process_system_acl();
-    }
+}
 }
 
 control egress {
@@ -235,28 +235,28 @@ control egress {
         /* check for -ve mirrored pkt */
         if (
 #ifdef INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
-            (intrinsic_metadata.deflection_flag == FALSE) and
+    (intrinsic_metadata.deflection_flag == FALSE) and
 #endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
-            (egress_metadata.bypass == FALSE)) {
+    (egress_metadata.bypass == FALSE)) {
 
             /* check if pkt is mirrored */
             if (pkt_is_mirrored) {
                 /* set the nexthop for the mirror id */
                 /* for sflow i2e mirror pkt, result will set required sflow info */
                 apply(mirror);
-            } else {
+        } else {
 
                 /* multi-destination replication */
                 process_replication();
-            }
+        }
 
             /* determine egress port properties */
             apply(egress_port_mapping) {
-                egress_port_type_normal {
-                    if (pkt_is_not_mirrored) {
+            egress_port_type_normal {
+                if (pkt_is_not_mirrored) {
                         /* strip vlan header */
                         process_vlan_decap();
-                    }
+                }
 
                     /* perform tunnel decap */
                     process_tunnel_decap();
@@ -277,9 +277,9 @@ control egress {
                     /* INT processing */
                     process_int_insertion();
 
-                    process_egress_bd_stats();
-                }
+                process_egress_bd_stats();
             }
+        }
     
             /* perform tunnel encap */
             process_tunnel_encap();
@@ -287,18 +287,18 @@ control egress {
             /* update underlay header based on INT information inserted */
             process_int_outer_encap();
 
-            if (egress_metadata.port_type == PORT_TYPE_NORMAL) {
+        if (egress_metadata.port_type == PORT_TYPE_NORMAL) {
                 /* egress vlan translation */
                 process_vlan_xlate();
-            }
+        }
 
             /* egress filter */
             process_egress_filter();
-        }
+    }
 
         /* apply egress acl */
         process_egress_acl();
 #ifdef OPENFLOW_ENABLE
-    }
+}
 #endif /* OPENFLOW_ENABLE */
 }

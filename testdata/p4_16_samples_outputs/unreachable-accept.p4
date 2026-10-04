@@ -22,7 +22,7 @@ control Deparser(in headers_t hdr, packet_out pkt_out) {
     }
 }
 
-parser P<H>(packet_in pkt, out H hdr);
-control D<H>(in H hdr, packet_out pkt);
-package S<H>(P<H> p, D<H> d);
+parser P < H >(packet_in pkt, out H hdr);
+control D < H >(in H hdr, packet_out pkt);
+package S < H >(P<H> p, D<H> d);
 S(Parser(), Deparser()) main;

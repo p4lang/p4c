@@ -39,7 +39,7 @@ const PortId RECIRCULATE_OUT_PORT = 0xD;
  * @param b input packet
  * @param parsedHeaders headers constructed by parser
  */
-parser Parser<H>(packet_in b,
+parser Parser < H >(packet_in b,
                  out H parsedHeaders);
 /**
  * Match-action pipeline
@@ -49,7 +49,7 @@ parser Parser<H>(packet_in b,
  * @param inCtrl information from target, accompanying input packet
  * @param outCtrl information for target, accompanying output packet
  */
-control Pipe<H>(inout H headers,
+control Pipe < H >(inout H headers,
                 in error parseError, // parser error
                 in InControl inCtrl, // input port
                 out OutControl outCtrl); // output port
@@ -59,7 +59,7 @@ control Pipe<H>(inout H headers,
  * @param b output packet
  * @param outputHeaders headers for output packet
  */
-control Deparser<H>(inout H outputHeaders,
+control Deparser < H >(inout H outputHeaders,
                     packet_out b);
 
 /**
@@ -68,7 +68,7 @@ control Deparser<H>(inout H outputHeaders,
  * must be instantiated by the user.
  * @param <H> user-defined type of the headers processed.
  */
-package VSS<H>(Parser<H> p,
+package VSS < H >(Parser<H> p,
                Pipe<H> map,
                Deparser<H> d);
 
@@ -78,7 +78,7 @@ package VSS<H>(Parser<H> p,
 extern Ck16 {
     Ck16();
     void clear();           // prepare unit for computation
-    void update<T>(in T data); // add data to checksum
+    void update < T >(in T data); // add data to checksum
     bit<16> get(); // get the checksum for the data added since last clear
 }
 

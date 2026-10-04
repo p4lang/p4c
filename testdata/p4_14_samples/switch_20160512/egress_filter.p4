@@ -49,12 +49,12 @@ control process_egress_filter {
     apply(egress_filter);
     if (multicast_metadata.inner_replica == TRUE) {
         if (((tunnel_metadata.ingress_tunnel_type == INGRESS_TUNNEL_TYPE_NONE) and
-             (tunnel_metadata.egress_tunnel_type == EGRESS_TUNNEL_TYPE_NONE) and
-             (egress_filter_metadata.bd == 0) and
-             (egress_filter_metadata.ifindex_check == 0)) or
-            ((tunnel_metadata.ingress_tunnel_type != INGRESS_TUNNEL_TYPE_NONE) and
+        (tunnel_metadata.egress_tunnel_type == EGRESS_TUNNEL_TYPE_NONE) and
+        (egress_filter_metadata.bd == 0) and
+        (egress_filter_metadata.ifindex_check == 0)) or
+        ((tunnel_metadata.ingress_tunnel_type != INGRESS_TUNNEL_TYPE_NONE) and
              (tunnel_metadata.egress_tunnel_type != EGRESS_TUNNEL_TYPE_NONE)) and
-             (egress_filter_metadata.inner_bd == 0)) {
+        (egress_filter_metadata.inner_bd == 0)) {
             apply(egress_filter_drop);
         }
     }

@@ -22,7 +22,7 @@ struct headers_t {
 control C(inout headers_t hdrs);
 package top(C c);
 control c(inout headers_t hdrs) {
-    @hidden action issue5706_header_union_stack24() {
+    @hidden action issue5706_header_union_stack33() {
         if (hdrs.hus2_x.isValid()) {
             hdrs.hus3_x.setValid();
             hdrs.hus3_x = hdrs.hus2_x;
@@ -100,14 +100,14 @@ control c(inout headers_t hdrs) {
         hdrs.hus3_x.setInvalid();
         hdrs.hus3_y.setInvalid();
     }
-    @hidden table tbl_issue5706_header_union_stack24 {
+    @hidden table tbl_issue5706_header_union_stack33 {
         actions = {
-            issue5706_header_union_stack24();
+            issue5706_header_union_stack33();
         }
-        const default_action = issue5706_header_union_stack24();
+        const default_action = issue5706_header_union_stack33();
     }
     apply {
-        tbl_issue5706_header_union_stack24.apply();
+        tbl_issue5706_header_union_stack33.apply();
     }
 }
 

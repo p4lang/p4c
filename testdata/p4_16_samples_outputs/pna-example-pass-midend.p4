@@ -8,15 +8,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -37,8 +37,8 @@ struct main_metadata_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    udp_t      udp;
+    ipv4_t ipv4;
+    udp_t udp;
 }
 
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
@@ -48,52 +48,52 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        pkt.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
-        pkt.extract<udp_t>(hdr.udp);
+        pkt.extract < ipv4_t >(hdr.ipv4);
+        pkt.extract < udp_t >(hdr.udp);
         transition accept;
     }
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplepass98() {
+    @hidden action pnaexamplepass97() {
         hdr.udp.src_port = hdr.udp.src_port + 16w1;
         recirculate();
     }
-    @hidden table tbl_pnaexamplepass98 {
+    @hidden table tbl_pnaexamplepass97 {
         actions = {
-            pnaexamplepass98();
+            pnaexamplepass97();
         }
-        const default_action = pnaexamplepass98();
+        const default_action = pnaexamplepass97();
     }
     apply {
-        if ((bit<8>)(bit<3>)istd.pass <= 8w0x4) {
-            tbl_pnaexamplepass98.apply();
+        if ((bit<8>)(bit<3>) istd.pass <= 8w0x4) {
+            tbl_pnaexamplepass97.apply();
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexamplepass111() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-        pkt.emit<ipv4_t>(hdr.ipv4);
-        pkt.emit<udp_t>(hdr.udp);
+    @hidden action pnaexamplepass110() {
+        pkt.emit < ethernet_t >(hdr.ethernet);
+        pkt.emit < ipv4_t >(hdr.ipv4);
+        pkt.emit < udp_t >(hdr.udp);
     }
-    @hidden table tbl_pnaexamplepass111 {
+    @hidden table tbl_pnaexamplepass110 {
         actions = {
-            pnaexamplepass111();
+            pnaexamplepass110();
         }
-        const default_action = pnaexamplepass111();
+        const default_action = pnaexamplepass110();
     }
     apply {
-        tbl_pnaexamplepass111.apply();
+        tbl_pnaexamplepass110.apply();
     }
 }
 
-PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, main_metadata_t, headers_t, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

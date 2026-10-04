@@ -14,10 +14,11 @@ header ethernet_t {
 }
 
 struct Headers {
-    ethernet_t    eth_hdr;
+    ethernet_t eth_hdr;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 bit<48> do_thing(inout bit<48> val_0, out bit<48> val_1) {
     if (val_0 <= 100) {
@@ -50,11 +51,20 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -62,4 +72,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

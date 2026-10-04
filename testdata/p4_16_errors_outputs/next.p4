@@ -8,4 +8,3 @@ control c() {
         stack.last = { 10 };
     }
 }
-

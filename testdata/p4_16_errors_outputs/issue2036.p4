@@ -13,7 +13,7 @@ parser D(in s z) {
 }
 
 parser E() {
-    tuple<bit<8>> a = { 0 };
+    tuple < bit<8 >> a = { 0 };
     s b = { 1 };
     D() d;
     state start {

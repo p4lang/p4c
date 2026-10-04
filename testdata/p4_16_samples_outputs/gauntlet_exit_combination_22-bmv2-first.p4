@@ -20,7 +20,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table tbl {
         key = {
-            h.eth_hdr.src_addr: exact @name("fbgPij");
+            h.eth_hdr.src_addr : exact @name("fbgPij");
         }
         actions = {
             exit_action();
@@ -40,7 +40,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = NoAction();
     }
     apply {
-        h.eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w4 ? (tbl.apply().hit ? 16w1 : 16w2) : 16w3);
+        h.eth_hdr.eth_type =(h.eth_hdr.eth_type == 16w4 ?(tbl.apply().hit ? 16w1 : 16w2) : 16w3);
         exit;
     }
 }
@@ -62,8 +62,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

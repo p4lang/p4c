@@ -17,9 +17,9 @@ parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadat
     }
     state s1 {
         packet.advance(16);
-        transition select(packet.lookahead<bit<16>>()) {
-            0: s1;
-            default: s2;
+        transition select (packet.lookahead < bit<16 >>()) {
+            0 : s1;
+            default : s2;
         }
     }
     state s2 {
@@ -27,10 +27,10 @@ parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadat
     }
     state s3 {
         packet.advance(16);
-        transition select(packet.lookahead<bit<16>>()) {
-            0: s1;
-            1: s2;
-            default: s4;
+        transition select (packet.lookahead < bit<16 >>()) {
+            0 : s1;
+            1 : s2;
+            default : s4;
         }
     }
     state s4 {

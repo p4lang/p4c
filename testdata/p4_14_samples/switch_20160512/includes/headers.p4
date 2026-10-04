@@ -96,7 +96,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -255,7 +255,7 @@ header_type nsh_t {
         context : 1;
         flags : 6;
         reserved : 8;
-        protoType: 16;
+        protoType : 16;
         spath : 24;
         sindex : 8;
     }
@@ -272,10 +272,10 @@ header_type nsh_context_t {
 
 header_type vxlan_gpe_int_header_t {
     fields {
-        int_type    : 8;
-        rsvd        : 8;
-        len         : 8;
-        next_proto  : 8;
+        int_type : 8;
+        rsvd : 8;
+        len : 8;
+        next_proto : 8;
     }
 }
 
@@ -430,16 +430,15 @@ header_type sflow_raw_hdr_record_t {
     }
 }
 
-
 header_type sflow_sample_cpu_t {
     fields {
-        sampleLength        : 16;
-        samplePool          : 32;
-        inputIfindex        : 16;
-        outputIfindex       : 16;
-        numFlowRecords      : 8;
-        sflow_session_id    : 3;
-        pipe_id             : 2;
+        sampleLength : 16;
+        samplePool : 32;
+        inputIfindex : 16;
+        outputIfindex : 16;
+        numFlowRecords : 8;
+        sflow_session_id : 3;
+        pipe_id : 2;
     }
 }
 
@@ -505,7 +504,7 @@ header_type fabric_header_cpu_t {
         txBypass : 1;
         reserved : 2;
 
-        ingressPort: 16;
+        ingressPort : 16;
         ingressIfindex : 16;
         ingressBd : 16;
 
@@ -515,7 +514,7 @@ header_type fabric_header_cpu_t {
 
 header_type fabric_header_sflow_t {
     fields {
-        sflow_session_id  : 16;
+        sflow_session_id : 16;
     }
 }
 
@@ -528,78 +527,77 @@ header_type fabric_payload_header_t {
 // INT headers
 header_type int_header_t {
     fields {
-        ver                     : 2;
-        rep                     : 2;
-        c                       : 1;
-        e                       : 1;
-        rsvd1                   : 5;
-        ins_cnt                 : 5;
-        max_hop_cnt             : 8;
-        total_hop_cnt           : 8;
-        instruction_mask_0003   : 4;   // split the bits for lookup
-        instruction_mask_0407   : 4;
-        instruction_mask_0811   : 4;
-        instruction_mask_1215   : 4;
-        rsvd2                   : 16;
+        ver : 2;
+        rep : 2;
+        c : 1;
+        e : 1;
+        rsvd1 : 5;
+        ins_cnt : 5;
+        max_hop_cnt : 8;
+        total_hop_cnt : 8;
+        instruction_mask_0003 : 4;   // split the bits for lookup
+        instruction_mask_0407 : 4;
+        instruction_mask_0811 : 4;
+        instruction_mask_1215 : 4;
+        rsvd2 : 16;
     }
 }
 // INT meta-value headers - different header for each value type
 header_type int_switch_id_header_t {
     fields {
-        bos                 : 1;
-        switch_id           : 31;
+        bos : 1;
+        switch_id : 31;
     }
 }
 header_type int_ingress_port_id_header_t {
     fields {
-        bos                 : 1;
-        ingress_port_id_1   : 15;
-        ingress_port_id_0   : 16;
+        bos : 1;
+        ingress_port_id_1 : 15;
+        ingress_port_id_0 : 16;
     }
 }
 header_type int_hop_latency_header_t {
     fields {
-        bos                 : 1;
-        hop_latency         : 31;
+        bos : 1;
+        hop_latency : 31;
     }
 }
 header_type int_q_occupancy_header_t {
     fields {
-        bos                 : 1;
-        q_occupancy1        : 7;
-        q_occupancy0        : 24;
+        bos : 1;
+        q_occupancy1 : 7;
+        q_occupancy0 : 24;
     }
 }
 header_type int_ingress_tstamp_header_t {
     fields {
-        bos                 : 1;
-        ingress_tstamp      : 31;
+        bos : 1;
+        ingress_tstamp : 31;
     }
 }
 header_type int_egress_port_id_header_t {
     fields {
-        bos                 : 1;
-        egress_port_id      : 31;
+        bos : 1;
+        egress_port_id : 31;
     }
 }
 header_type int_q_congestion_header_t {
     fields {
-        bos                 : 1;
-        q_congestion        : 31;
+        bos : 1;
+        q_congestion : 31;
     }
 }
 header_type int_egress_port_tx_utilization_header_t {
     fields {
-        bos                         : 1;
-        egress_port_tx_utilization  : 31;
+        bos : 1;
+        egress_port_tx_utilization : 31;
     }
 }
 
 // generic int value (info) header for extraction
 header_type int_value_t {
     fields {
-        bos         : 1;
-        val         : 31;
+        bos : 1;
+        val : 31;
     }
 }
-

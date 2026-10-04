@@ -4,7 +4,6 @@ header H {
     bit<16> a;
 }
 
-
 struct metadata {
 }
 
@@ -15,9 +14,9 @@ struct Headers {
 parser p(packet_in packet, out Headers hdr) {
     state start {
         packet.extract(hdr.h);
-        transition select(hdr.h.a) {
-            0x0000 .. 0x0004: parse;
-            default: accept;
+        transition select (hdr.h.a) {
+            0x0000 .. 0x0004 : parse;
+            default : accept;
         }
     }
     state parse {
@@ -26,8 +25,6 @@ parser p(packet_in packet, out Headers hdr) {
     }
 
 }
-
-
 
 parser Parser(packet_in b, out Headers hdr);
 package top(Parser p);

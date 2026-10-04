@@ -64,21 +64,21 @@ header ethernet_t {
  * ethertype 0x1234 for is (see parser)
  */
 const bit<16> P4CALC_ETYPE = 0x1234;
-const bit<8>  P4CALC_P     = 0x50;   // 'P'
-const bit<8>  P4CALC_4     = 0x34;   // '4'
-const bit<8>  P4CALC_VER   = 0x01;   // v0.1
-const bit<8>  P4CALC_PLUS  = 0x2b;   // '+'
-const bit<8>  P4CALC_MINUS = 0x2d;   // '-'
-const bit<8>  P4CALC_AND   = 0x26;   // '&'
-const bit<8>  P4CALC_OR    = 0x7c;   // '|'
-const bit<8>  P4CALC_CARET = 0x5e;   // '^'
-const bit<8>  P4CALC_CRC = 0x3e;   // '>'
+const bit<8> P4CALC_P = 0x50;   // 'P'
+const bit<8> P4CALC_4 = 0x34;   // '4'
+const bit<8> P4CALC_VER = 0x01;   // v0.1
+const bit<8> P4CALC_PLUS = 0x2b;   // '+'
+const bit<8> P4CALC_MINUS = 0x2d;   // '-'
+const bit<8> P4CALC_AND = 0x26;   // '&'
+const bit<8> P4CALC_OR = 0x7c;   // '|'
+const bit<8> P4CALC_CARET = 0x5e;   // '^'
+const bit<8> P4CALC_CRC = 0x3e;   // '>'
 
 header p4calc_t {
-    bit<8>  p;
-    bit<8>  four;
-    bit<8>  ver;
-    bit<8>  op;
+    bit<8> p;
+    bit<8> four;
+    bit<8> ver;
+    bit<8> op;
     bit<32> operand_a;
     bit<32> operand_b;
     bit<32> res;
@@ -90,8 +90,8 @@ header p4calc_t {
  * because it is done "by the architecture", i.e. outside of P4 functions
  */
 struct headers {
-    ethernet_t   ethernet;
-    p4calc_t     p4calc;
+    ethernet_t ethernet;
+    p4calc_t p4calc;
 }
 
 /*
@@ -115,18 +115,18 @@ parser MyParser(packet_in packet,
 
     state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
+        transition select (hdr.ethernet.etherType) {
             P4CALC_ETYPE : check_p4calc;
-            default      : accept;
+            default : accept;
         }
     }
 
     state check_p4calc {
-        transition select(packet.lookahead<p4calc_t>().p,
-        packet.lookahead<p4calc_t>().four,
-        packet.lookahead<p4calc_t>().ver) {
+        transition select (packet.lookahead < p4calc_t >().p,
+        packet.lookahead < p4calc_t >().four,
+        packet.lookahead < p4calc_t >().ver) {
             (P4CALC_P, P4CALC_4, P4CALC_VER) : parse_p4calc;
-            default                          : accept;
+            default : accept;
         }
     }
 
@@ -141,7 +141,8 @@ parser MyParser(packet_in packet,
  *************************************************************************/
 control MyVerifyChecksum(inout headers hdr,
                          inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 /*************************************************************************
@@ -188,8 +189,8 @@ control MyIngress(inout headers hdr,
 
     action operation_crc() {
 
-        bit<32> nbase=hdr.p4calc.operand_b;
-        bit<64> ncount=4294967296*2;
+        bit<32> nbase = hdr.p4calc.operand_b;
+        bit<64> ncount = 4294967296 * 2;
         bit<32> nselect;
         bit<32> ninput = hdr.p4calc.operand_a;
         //bit<32> nbase = 0;
@@ -208,7 +209,7 @@ control MyIngress(inout headers hdr,
 
     table calculate {
         key = {
-            hdr.p4calc.op        : exact;
+            hdr.p4calc.op : exact;
         }
         actions = {
             operation_add;
@@ -222,14 +223,13 @@ control MyIngress(inout headers hdr,
         const default_action = operation_drop();
         const entries = {
             P4CALC_PLUS : operation_add();
-            P4CALC_MINUS: operation_sub();
-            P4CALC_AND  : operation_and();
-            P4CALC_OR   : operation_or();
-            P4CALC_CARET: operation_xor();
-            P4CALC_CRC: operation_crc();
+            P4CALC_MINUS : operation_sub();
+            P4CALC_AND : operation_and();
+            P4CALC_OR : operation_or();
+            P4CALC_CARET : operation_xor();
+            P4CALC_CRC : operation_crc();
         }
     }
-
 
     apply {
         if (hdr.p4calc.isValid()) {
@@ -246,7 +246,8 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 /*************************************************************************

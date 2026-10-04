@@ -15,13 +15,13 @@ parser p1(out bit z1)(bit b1) {
 }
 
 parser p(out bit z)(bit b, bit c) {
-   p1(b) p1i;
+    p1(b) p1i;
 
-   state start {
+    state start {
         p1i.apply(z);
         z = z & b & c;
         transition accept;
-   }
+    }
 }
 
 const bit bv = 1w0;

@@ -9,8 +9,8 @@ header ethernet_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vlan_id;
     bit<16> ethertype;
 }
@@ -28,9 +28,9 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
-            default: accept;
+        transition select (hdr.ethernet.ethertype) {
+            16w0x8100 &&& 16w0xefff : parse_vlan_tag;
+            default : accept;
         }
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {
@@ -50,7 +50,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -66,7 +66,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nop;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     apply {

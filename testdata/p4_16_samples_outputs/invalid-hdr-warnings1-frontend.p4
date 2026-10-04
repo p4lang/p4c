@@ -20,37 +20,37 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         transition next;
     }
     state next {
-        transition select(hdr.h2.data == 32w1) {
-            true: next_true;
-            false: next_join;
+        transition select (hdr.h2.data == 32w1) {
+            true : next_true;
+            false : next_join;
         }
     }
     state next_true {
         transition next_join;
     }
     state next_join {
-        pkt.extract<Header>(hdr.h1);
+        pkt.extract < Header >(hdr.h1);
         hdr.h2.setInvalid();
-        transition select(hdr.h1.data) {
-            32w0: state0;
-            32w1: state1;
-            default: accept;
+        transition select (hdr.h1.data) {
+            32w0 : state0;
+            32w1 : state1;
+            default : accept;
         }
     }
     state state0 {
         hdr.h1.setInvalid();
-        transition select(hdr.h2.data) {
-            32w2: state1;
-            default: next;
+        transition select (hdr.h2.data) {
+            32w2 : state1;
+            default : next;
         }
     }
     state state1 {
         hdr.h2.data = hdr.h2.data + 32w1;
         hdr.h2.setValid();
-        transition select(hdr.h2.data) {
-            32w1: state1;
-            32w2: state0;
-            default: accept;
+        transition select (hdr.h2.data) {
+            32w1 : state1;
+            32w2 : state0;
+            default : accept;
         }
     }
 }
@@ -80,4 +80,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

@@ -33,19 +33,23 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout 
 }
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    apply {}
+    apply {
+    }
 }
 
 control egress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    apply {}
+    apply {
+    }
 }
 
 control vc(inout Parsed_packet hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control uc(inout Parsed_packet hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 V1Switch(parserI(), vc(), ingress(), egress(), uc(), DeparserI()) main;

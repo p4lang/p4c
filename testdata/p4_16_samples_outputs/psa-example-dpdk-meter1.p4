@@ -5,19 +5,19 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -33,15 +33,15 @@ struct metadata_t {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
         buffer.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -51,16 +51,16 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata_t use
 }
 
 control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    Meter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
+    Meter < bit<12 >>(1024, PSA_MeterType_t.PACKETS) meter0;
     PSA_MeterColor_t color_out;
     PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
     action execute(bit<12> index) {
         color_out = meter0.dpdk_execute(index, color_in, (bit<32>)hdr.ipv4.totalLen);
-        user_meta.port_out = (color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        user_meta.port_out =(color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

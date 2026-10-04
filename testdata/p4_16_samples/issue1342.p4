@@ -1,5 +1,5 @@
 const bit X = 1;
 
-bit f<X>() {
-  return .X ;
+bit f < X >() {
+    return.X;
 }

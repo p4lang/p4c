@@ -19,7 +19,7 @@ header data_t {
     bit<16> h4;
     bit<16> h5;
     bit<16> h6;
-    bit<8>  color_1;
+    bit<8> color_1;
 }
 
 struct metadata {
@@ -34,13 +34,13 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<data_t>(hdr.data);
+        packet.extract < data_t >(hdr.data);
         transition accept;
     }
 }
 
-@name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
-@name(".meter1") meter<bit<10>>(32w1024, MeterType.bytes) meter1;
+@name(".count1") @min_width(32) counter < bit<14 >>(32w16384, CounterType.packets) count1;
+@name(".meter1") meter <bit<10 >>(32w1024, MeterType.bytes) meter1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -53,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".count_entries") action count_entries() {
         count1.count((bit<14>)meta._counter_metadata_counter_index0);
-        meter1.execute_meter<bit<8>>((bit<10>)meta._meter_metadata_meter_index1, hdr.data.color_1);
+        meter1.execute_meter < bit<8 >>((bit<10>)meta._meter_metadata_meter_index1, hdr.data.color_1);
     }
     @name(".index_setter") table index_setter_0 {
         actions = {
@@ -61,8 +61,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1");
-            hdr.data.f2: exact @name("data.f2");
+            hdr.data.f1 : exact @name("data.f1");
+            hdr.data.f2 : exact @name("data.f2");
         }
         size = 2048;
         default_action = NoAction_1();
@@ -87,7 +87,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data_t>(hdr.data);
+        packet.emit < data_t >(hdr.data);
     }
 }
 
@@ -101,4 +101,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch <headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

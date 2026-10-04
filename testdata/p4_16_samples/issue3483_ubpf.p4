@@ -11,7 +11,7 @@
 struct Headers_t
 {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 struct Meta {
@@ -23,7 +23,7 @@ parser prs(packet_in p, out Headers_t headers, inout Meta meta, inout standard_m
     state start
     {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType)
+        transition select (headers.ethernet.etherType)
         {
             16w0x800 : ip;
             default : reject;
@@ -45,7 +45,9 @@ control pipe(inout Headers_t headers, inout Meta meta, inout standard_metadata u
     }
 
     table Check_src_ip {
-        key = { headers.ipv4.srcAddr : exact; }
+        key = {
+            headers.ipv4.srcAddr : exact;
+        }
         actions =
         {
             Reject;
@@ -61,10 +63,11 @@ control pipe(inout Headers_t headers, inout Meta meta, inout standard_metadata u
         }
 
         switch (Check_src_ip.apply().action_run) {
-        Reject: {
+            Reject : {
             meta.b = 0;
-        }
-        NoAction: {}
+            }
+            NoAction : {
+            }
         }
     }
 }
@@ -75,6 +78,5 @@ control dprs(packet_out packet, in Headers_t headers) {
         packet.emit(headers.ipv4);
     }
 }
-
 
 ubpf(prs(), pipe(), dprs()) main;

@@ -4,9 +4,9 @@
 
 header mpls_t {
     bit<20> label;
-    bit<3>  tc;
-    bit<1>  bos;
-    bit<8>  ttl;
+    bit<3> tc;
+    bit<1> bos;
+    bit<8> ttl;
 }
 
 struct metadata {
@@ -20,9 +20,9 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract(hdr.value.next);
-        transition select(hdr.value.last.bos) {
-            1w0: start;
-            1w1: accept;
+        transition select (hdr.value.last.bos) {
+            1w0 : start;
+            1w1 : accept;
         }
     }
 }

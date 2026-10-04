@@ -16,7 +16,7 @@ struct my_metadata_t {
 
 parser MyParser(packet_in packet, out my_headers_t hdr, inout my_metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<simple>(hdr.s);
+        packet.extract < simple >(hdr.s);
         meta.parser_error = error.NoMatch;
         transition accept;
     }
@@ -28,18 +28,18 @@ control MyVerifyChecksum(inout my_headers_t hdr, inout my_metadata_t meta) {
 }
 
 control MyIngress(inout my_headers_t hdr, inout my_metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue510bmv2l50() {
+    @hidden action issue510bmv2l51() {
         hdr.s.setInvalid();
     }
-    @hidden table tbl_issue510bmv2l50 {
+    @hidden table tbl_issue510bmv2l51 {
         actions = {
-            issue510bmv2l50();
+            issue510bmv2l51();
         }
-        const default_action = issue510bmv2l50();
+        const default_action = issue510bmv2l51();
     }
     apply {
         if (meta.parser_error == error.NoMatch) {
-            tbl_issue510bmv2l50.apply();
+            tbl_issue510bmv2l51.apply();
         }
     }
 }
@@ -56,8 +56,8 @@ control MyComputeChecksum(inout my_headers_t hdr, inout my_metadata_t meta) {
 
 control MyDeparser(packet_out packet, in my_headers_t hdr) {
     apply {
-        packet.emit<simple>(hdr.s);
+        packet.emit < simple >(hdr.s);
     }
 }
 
-V1Switch<my_headers_t, my_metadata_t>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < my_headers_t, my_metadata_t >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

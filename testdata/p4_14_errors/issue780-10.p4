@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-control standard_metadata_t { }
+control standard_metadata_t {
+}
 
 parser start {
-  return ingress1;
+    return ingress1;
 }
-control ingress1 { }
+control ingress1 {
+}

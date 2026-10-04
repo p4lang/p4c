@@ -8,7 +8,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -19,7 +19,7 @@ header output_data_t {
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     output_data_t output_data;
 }
 
@@ -41,21 +41,21 @@ parser MyEP(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa
 }
 
 control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    Register<bit<16>, bit<8>>(6) reg;
+    Register < bit<16>, bit<8 >>(6) reg;
     bit<8> idx;
     bit<8> action_type;
     bit<16> orig_data;
     bit<16> next_data;
     apply {
         if (hdr.ethernet.isValid()) {
-            idx = hdr.ethernet.dstAddr[7:0];
-            action_type = hdr.ethernet.dstAddr[15:8];
+            idx = hdr.ethernet.dstAddr[7 : 0];
+            action_type = hdr.ethernet.dstAddr[15 : 8];
             bool validAction = action_type >= 1 && action_type <= 3;
             if (validAction) {
                 orig_data = reg.read(idx);
             }
             if (action_type == 1) {
-                next_data = hdr.ethernet.dstAddr[47:32];
+                next_data = hdr.ethernet.dstAddr[47 : 32];
             } else if (action_type == 2) {
                 next_data = orig_data;
             } else if (action_type == 3) {
@@ -65,8 +65,8 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
                 next_data = 0xbeef;
             }
             reg.write(idx, next_data);
-            hdr.output_data.word0 = (bit<32>)orig_data;
-            hdr.output_data.word1 = (bit<32>)next_data;
+            hdr.output_data.word0 =(bit<32>) orig_data;
+            hdr.output_data.word1 =(bit<32>) next_data;
         }
         send_to_port(ostd, (PortId_t)1);
     }

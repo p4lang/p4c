@@ -16,7 +16,8 @@ struct Headers {
     hdr h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in b, out Headers h,
          inout Meta m, inout standard_metadata_t sm) {
@@ -26,32 +27,50 @@ parser p(packet_in b, out Headers h,
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
-control update(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {}
+    apply {
+    }
 }
 
 control deparser(packet_out b, in Headers h) {
-    apply { b.emit(h.h); }
+    apply {
+        b.emit(h.h);
+    }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     direct_counter(CounterType.packets) c;
 
-    action my_action(bit<9> a) { sm.egress_spec = a; }
+    action my_action(bit<9> a) {
+        sm.egress_spec = a;
+    }
     table t1 {
-        actions = { my_action; }
+        actions = {
+            my_action;
+        }
         const default_action = my_action(0);
         counters = c;
     }
     table t2 {
-        actions = { my_action; }
+        actions = {
+            my_action;
+        }
         const default_action = my_action(0);
         counters = c;
     }
-    apply { t1.apply(); t2.apply(); }
+    apply {
+        t1.apply();
+        t2.apply();
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

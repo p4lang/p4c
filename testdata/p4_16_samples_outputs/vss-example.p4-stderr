@@ -10,6 +10,6 @@ const PortId CPU_IN_PORT = 0xE;
 very_simple_model.p4(34): [--Wwarn=unused] warning: 'RECIRCULATE_OUT_PORT' is unused
 const PortId RECIRCULATE_OUT_PORT = 0xD;
              ^^^^^^^^^^^^^^^^^^^^
-vss-example.p4(150): [--Wwarn=uninitialized-use] warning: nextHop may be uninitialized
-          key = { nextHop : exact; }
-                  ^^^^^^^
+vss-example.p4(164): [--Wwarn=uninitialized-use] warning: nextHop may be uninitialized
+            nextHop : exact;
+            ^^^^^^^

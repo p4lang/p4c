@@ -5,10 +5,9 @@ enum bit<4> e {
 control c(in e v) {
     apply {
         switch (v) {
-            4w1: 
+            4w1:
             default: {
             }
         }
     }
 }
-

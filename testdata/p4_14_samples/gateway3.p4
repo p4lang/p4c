@@ -23,16 +23,19 @@ parser start {
     return ingress;
 }
 
-action _drop() { drop(); }
+action _drop() {
+    drop();
+}
 
 table set_default_behavior_drop {
     actions {
         _drop;
     }
-    default_action: _drop;
+    default_action : _drop;
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     modify_field(data.b1, val);
     modify_field(standard_metadata.egress_spec, port);
@@ -66,7 +69,9 @@ control ingress {
         if (data.b1 == data.b2 and data.b4 == 10) {
             apply(test1);
         }
-    } else { if (data.b1 != data.b2) {
-        apply(test2);
-    } }
+    } else {
+        if (data.b1 != data.b2) {
+            apply(test2);
+        }
+    }
 }

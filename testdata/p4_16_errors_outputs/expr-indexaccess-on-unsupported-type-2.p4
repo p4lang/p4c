@@ -4,4 +4,3 @@ control c(out bit<32> r) {
         r = s[2];
     }
 }
-

@@ -3,10 +3,10 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<9>  ingress_port;
+    bit<9> ingress_port;
     bit<14> bd;
     bit<14> rid;
-    bit<1>  drop_flag;
+    bit<1> drop_flag;
 }
 
 header ethernet_t {
@@ -16,38 +16,38 @@ header ethernet_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> etherType;
 }
 
 struct metadata {
-    bit<9>  _ingress_metadata_ingress_port0;
+    bit<9> _ingress_metadata_ingress_port0;
     bit<14> _ingress_metadata_bd1;
     bit<14> _ingress_metadata_rid2;
-    bit<1>  _ingress_metadata_drop_flag3;
+    bit<1> _ingress_metadata_drop_flag3;
 }
 
 struct headers {
     @name(".ethernet")
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     @name(".vlan_tag_")
     vlan_tag_t[2] vlan_tag_;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_vlan") state parse_vlan {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag_[0]);
-        transition select(hdr.vlan_tag_[0].etherType) {
-            16w0x800: accept;
-            default: noMatch;
+        packet.extract < vlan_tag_t >(hdr.vlan_tag_[0]);
+        transition select (hdr.vlan_tag_[0].etherType) {
+            16w0x800 : accept;
+            default : noMatch;
         }
     }
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            default: parse_vlan;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            default : parse_vlan;
         }
     }
     state noMatch {
@@ -88,8 +88,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly _no_op_0();
         }
         key = {
-            hdr.vlan_tag_[0].isValid(): exact @name("vlan_tag_[0].$valid$");
-            hdr.vlan_tag_[0].vid      : ternary @name("vlan_tag_[0].vid");
+            hdr.vlan_tag_[0].isValid() : exact @name("vlan_tag_[0].$valid$");
+            hdr.vlan_tag_[0].vid : ternary @name("vlan_tag_[0].vid");
         }
         size = 1024;
         const default_action = _no_op_0();
@@ -102,7 +102,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly _no_op_1();
         }
         key = {
-            hdr.vlan_tag_[0].vid: exact @name("vlan_tag_[0].vid");
+            hdr.vlan_tag_[0].vid : exact @name("vlan_tag_[0].vid");
         }
         size = 1024;
         const default_action = _no_op_1();
@@ -119,8 +119,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<vlan_tag_t>(hdr.vlan_tag_[0]);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < vlan_tag_t >(hdr.vlan_tag_[0]);
     }
 }
 
@@ -134,4 +134,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

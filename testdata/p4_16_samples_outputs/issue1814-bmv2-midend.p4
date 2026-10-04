@@ -19,28 +19,28 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     @name("IngressImpl.registerData") bit<1> registerData_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("IngressImpl.testRegister") register<bit<1>>(32w1) testRegister_0;
+    @name("IngressImpl.testRegister") register < bit<1 >>(32w1) testRegister_0;
     @name("IngressImpl.debug_table") table debug_table_0 {
         key = {
-            meta.test: exact @name("meta.test");
+            meta.test : exact @name("meta.test");
         }
         actions = {
             NoAction_1();
         }
         default_action = NoAction_1();
     }
-    @hidden action issue1814bmv2l39() {
+    @hidden action issue1814bmv2l38() {
         testRegister_0.read(registerData_0, 32w0);
-        meta.test = (bool)registerData_0;
+        meta.test =(bool) registerData_0;
     }
-    @hidden table tbl_issue1814bmv2l39 {
+    @hidden table tbl_issue1814bmv2l38 {
         actions = {
-            issue1814bmv2l39();
+            issue1814bmv2l38();
         }
-        const default_action = issue1814bmv2l39();
+        const default_action = issue1814bmv2l38();
     }
     apply {
-        tbl_issue1814bmv2l39.apply();
+        tbl_issue1814bmv2l38.apply();
         debug_table_0.apply();
     }
 }
@@ -65,4 +65,4 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;

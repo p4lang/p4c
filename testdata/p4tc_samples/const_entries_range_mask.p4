@@ -2,17 +2,18 @@
 #include <tc/pna.p4>
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
+    bit<8> l;
     bit<8> r;
-    bit<8>  v;
+    bit<8> v;
 }
 
 struct Header_t {
     hdr h;
 }
-struct Meta_t {}
+struct Meta_t {
+}
 
 parser MainParserImpl(packet_in b, out Header_t h, inout Meta_t m, in pna_main_parser_input_metadata_t istd) {
     state start {
@@ -25,12 +26,16 @@ control MainControlImpl(inout Header_t h, inout Meta_t m,
                         in    pna_main_input_metadata_t istd,
                         inout pna_main_output_metadata_t ostd) {
 
-    action a() { h.h.e = 0; }
-    action a_with_control_params(bit<16> x) { h.h.t = x; }
+    action a() {
+        h.h.e = 0;
+    }
+    action a_with_control_params(bit<16> x) {
+        h.h.t = x;
+    }
 
     table t_range {
 
- 	key = {
+        key = {
             h.h.r : range;
         }
 
@@ -43,10 +48,10 @@ control MainControlImpl(inout Header_t h, inout Meta_t m,
 
         const entries = {
             1 : a_with_control_params(21);
-            6: a_with_control_params(22);
-            15   : a_with_control_params(24);
-            1..8    : a_with_control_params(23);
-            1 &&& 2    : a_with_control_params(26);
+            6 : a_with_control_params(22);
+            15 : a_with_control_params(24);
+            1 .. 8 : a_with_control_params(23);
+            1 &&& 2 : a_with_control_params(26);
         }
     }
 
@@ -60,7 +65,8 @@ control MainControlImpl(inout Header_t h, inout Meta_t m,
 control MainDeparserImpl(
     packet_out b, inout Header_t h, in Meta_t m, in pna_main_output_metadata_t ostd)
 {
-    apply {}
+    apply {
+    }
 }
 
 /************ F I N A L   P A C K A G E ******************************/

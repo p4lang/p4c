@@ -7,4 +7,3 @@ parser p() {
         transition accept;
     }
 }
-

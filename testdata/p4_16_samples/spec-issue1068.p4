@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-parser MyParser<t>(t tt) {
+parser MyParser < t >(t tt) {
     state start {
         transition accept;
     }
@@ -12,7 +12,7 @@ parser MyParser<t>(t tt) {
 
 parser MyParser1() {
     state start {
-        MyParser<bit>.apply(1);
+        MyParser < bit >.apply(1);
         transition accept;
     }
 }

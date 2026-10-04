@@ -8,16 +8,16 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -39,7 +39,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 action foo1() {
@@ -61,13 +62,18 @@ control c1(
     // This is not a name conflict with a4 in control ingressImpl,
     // because it has a hierarchical name "ingressImpl.bar", but suba1
     // will have hierarchical name "ingressImpl.c1.bar".
-    @name("bar") action suba1 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 3; }
+    @name("bar") action suba1(bit<8> x, bit<8> y) {
+        tmp1 = x;
+        tmp2 = y >> 3;
+    }
 
     table t2 {
         actions = {
             suba1;
         }
-        key = { hdr.ethernet.srcAddr: exact; }
+        key = {
+            hdr.ethernet.srcAddr : exact;
+        }
         size = 32;
     }
     apply {
@@ -86,23 +92,38 @@ control ingressImpl(
     // This is not a name conflict with foo1, because it has a top
     // level name ".foo1", but a1 will have hierarchical name
     // "ingressImpl.foo1".
-    @name("foo1") action a1 (bit<8> x, bit<8> y) { tmp1 = x >> 1; tmp2 = y; }
+    @name("foo1") action a1(bit<8> x, bit<8> y) {
+        tmp1 = x >> 1;
+        tmp2 = y;
+    }
 
     // This should not be a name conflict with foo2, because it has a
     // top level name ".foo2", but a2 will have hierarchical name
     // "ingressImpl.foo2".
-    @name("foo2") action a2 (bit<8> x, bit<8> y) { tmp1 = x >> 2; tmp2 = y; }
+    @name("foo2") action a2(bit<8> x, bit<8> y) {
+        tmp1 = x >> 2;
+        tmp2 = y;
+    }
 
-    @name(".bar") action a3 (bit<8> x, bit<8> y) { tmp1 = x >> 3; tmp2 = y; }
+    @name(".bar") action a3(bit<8> x, bit<8> y) {
+        tmp1 = x >> 3;
+        tmp2 = y;
+    }
     // This is not a name conflict with a3, because it has a top level
     // name ".bar", but a4 will have hierarchical name
     // "ingressImpl.bar".
-    @name("bar") action a4 (bit<8> x, bit<8> y) { tmp1 = x >> 4; tmp2 = y; }
+    @name("bar") action a4(bit<8> x, bit<8> y) {
+        tmp1 = x >> 4;
+        tmp2 = y;
+    }
 
     // This is not a name conflict with foo3, because it has a top
     // level name ".baz", but a5 will have hierarchical name
     // "ingressImpl.baz".
-    @name("baz") action a5 (bit<8> x, bit<8> y) { tmp1 = x >> 5; tmp2 = y; }
+    @name("baz") action a5(bit<8> x, bit<8> y) {
+        tmp1 = x >> 5;
+        tmp2 = y;
+    }
 
     table t1 {
         actions = {
@@ -116,19 +137,21 @@ control ingressImpl(
             foo2;
             foo3;
         }
-        key = { hdr.ethernet.etherType: exact; }
+        key = {
+            hdr.ethernet.etherType : exact;
+        }
         default_action = NoAction();
         size = 512;
     }
     apply {
-        tmp1 = hdr.ethernet.srcAddr[7:0];
-        tmp2 = hdr.ethernet.dstAddr[7:0];
+        tmp1 = hdr.ethernet.srcAddr[7 : 0];
+        tmp2 = hdr.ethernet.dstAddr[7 : 0];
         c1.apply(hdr, tmp1, tmp2);
         t1.apply();
         // This is here simply to ensure that the compiler cannot
         // optimize away the effects of t1 and t2, which can only
         // assign values to variables tmp1 and tmp2.
-        hdr.ethernet.etherType = (bit<16>) (tmp1 - tmp2);
+        hdr.ethernet.etherType =(bit<16>)(tmp1 - tmp2);
     }
 }
 
@@ -137,14 +160,16 @@ control egressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(

@@ -18,12 +18,19 @@ header hdr {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action concat()
-    { h.h.c = h.h.a ++ h.h.b; sm.egress_spec = 0; }
+    {
+        h.h.c = h.h.a ++ h.h.b;
+        sm.egress_spec = 0;
+    }
     table t {
-        actions = { concat; }
+        actions = {
+            concat;
+        }
         const default_action = concat;
     }
-    apply { t.apply(); }
+    apply {
+        t.apply();
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

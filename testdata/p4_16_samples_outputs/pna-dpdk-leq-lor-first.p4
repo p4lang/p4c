@@ -1,5 +1,4 @@
 #include <core.p4>
-
 #include <pna.p4>
 
 header hdr_t {
@@ -18,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers h, inout Meta m, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<hdr_t>(h.h);
+        pkt.extract < hdr_t >(h.h);
         transition accept;
     }
 }
@@ -44,8 +43,8 @@ control ingress(inout Headers h, inout Meta m, in pna_main_input_metadata_t istd
 
 control deparser(packet_out pkt, in Headers h, in Meta m, in pna_main_output_metadata_t ostd) {
     apply {
-        pkt.emit<hdr_t>(h.h);
+        pkt.emit < hdr_t >(h.h);
     }
 }
 
-PNA_NIC<Headers, Meta, Headers, Meta>(p(), PreControlImpl(), ingress(), deparser()) main;
+PNA_NIC < Headers, Meta, Headers, Meta >(p(), PreControlImpl(), ingress(), deparser()) main;

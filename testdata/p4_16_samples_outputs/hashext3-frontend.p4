@@ -20,4 +20,3 @@ struct hdrs {
     h1_t    h1;
     bit<16> hash;
 }
-

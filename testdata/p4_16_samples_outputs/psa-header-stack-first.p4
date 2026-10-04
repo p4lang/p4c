@@ -29,34 +29,34 @@ enum bit<16> ether_type_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header vlan_tag_h {
-    bit<3>       pcp;
-    bit<1>       cfi;
-    bit<12>      vid;
+    bit<3> pcp;
+    bit<1> cfi;
+    bit<12> vid;
     ether_type_t ether_type;
 }
 
 struct header_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     vlan_tag_h[2] vlan_tag;
 }
 
 parser MyIP(packet_in buffer, out header_t h, inout EMPTY_M b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
     state start {
-        buffer.extract<ethernet_t>(h.ethernet);
-        transition select(h.ethernet.etherType) {
-            ether_type_t.TPID: parse_vlan_tag;
-            default: accept;
+        buffer.extract < ethernet_t >(h.ethernet);
+        transition select (h.ethernet.etherType) {
+            ether_type_t.TPID : parse_vlan_tag;
+            default : accept;
         }
     }
     state parse_vlan_tag {
-        buffer.extract<vlan_tag_h>(h.vlan_tag.next);
-        transition select(h.vlan_tag.last.ether_type) {
-            ether_type_t.TPID: parse_vlan_tag;
-            default: accept;
+        buffer.extract < vlan_tag_h >(h.vlan_tag.next);
+        transition select (h.vlan_tag.last.ether_type) {
+            ether_type_t.TPID : parse_vlan_tag;
+            default : accept;
         }
     }
 }
@@ -69,12 +69,12 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 
 control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     action forward() {
-        d.egress_port = (PortId_t)32w1;
+        d.egress_port =(PortId_t) 32w1;
     }
     table tbl {
         key = {
-            a.ethernet.srcAddr      : exact @name("a.ethernet.srcAddr");
-            a.vlan_tag[0].ether_type: exact @name("a.vlan_tag[0].ether_type");
+            a.ethernet.srcAddr : exact @name("a.ethernet.srcAddr");
+            a.vlan_tag[0].ether_type : exact @name("a.vlan_tag[0].ether_type");
         }
         actions = {
             NoAction();
@@ -97,9 +97,9 @@ control MyEC(inout EMPTY_H a, inout EMPTY_M b, in psa_egress_input_metadata_t c,
 
 control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout header_t d, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
     apply {
-        buffer.emit<ethernet_t>(d.ethernet);
-        buffer.emit<vlan_tag_h>(d.vlan_tag[0]);
-        buffer.emit<vlan_tag_h>(d.vlan_tag[1]);
+        buffer.emit < ethernet_t >(d.ethernet);
+        buffer.emit < vlan_tag_h >(d.vlan_tag[0]);
+        buffer.emit < vlan_tag_h >(d.vlan_tag[1]);
     }
 }
 
@@ -108,6 +108,6 @@ control MyED(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIRC b, inout EMP
     }
 }
 
-IngressPipeline<header_t, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<header_t, EMPTY_M, EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < header_t, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < header_t, EMPTY_M, EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

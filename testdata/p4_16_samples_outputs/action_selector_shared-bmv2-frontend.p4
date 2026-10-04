@@ -29,7 +29,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("IngressI.as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as_0;
     @name("IngressI.indirect_ws") table indirect_ws_0 {
         key = {
-            meta.hash1: selector @name("meta.hash1");
+            meta.hash1 : selector @name("meta.hash1");
         }
         actions = {
             drop();
@@ -40,7 +40,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name("IngressI.indirect_ws_1") table indirect_ws_2 {
         key = {
-            meta.hash1: selector @name("meta.hash1");
+            meta.hash1 : selector @name("meta.hash1");
         }
         actions = {
             drop_1();
@@ -75,4 +75,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

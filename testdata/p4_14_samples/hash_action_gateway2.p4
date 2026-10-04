@@ -7,7 +7,7 @@ header_type data_t {
         h3 : 16;
         h4 : 16;
     }
-} 
+}
 
 header data_t data;
 
@@ -37,7 +37,7 @@ table index_setter {
         data.f2 : exact;
     }
     actions {
-        set_index;    
+        set_index;
     }
     size : 2048;
 }
@@ -67,7 +67,6 @@ action seth2(val) {
 action seth4(val) {
     modify_field(data.h4, val);
 }
-
 
 table test1 {
     reads {

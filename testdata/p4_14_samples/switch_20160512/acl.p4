@@ -22,7 +22,7 @@ header_type acl_metadata_t {
         racl_nexthop : 16;                     /* next hop from racl */
         acl_nexthop_type : 1;                  /* ecmp or nexthop */
         racl_nexthop_type : 1;                 /* ecmp or nexthop */
-        acl_redirect :   1;                    /* ifacl/vacl redirect action */
+        acl_redirect : 1;                    /* ifacl/vacl redirect action */
         racl_redirect : 1;                     /* racl redirect action */
         if_label : 16;                         /* if label for acls */
         bd_label : 16;                         /* bd label for acls */
@@ -40,7 +40,7 @@ header_type qos_metadata_t {
 
 header_type i2e_metadata_t {
     fields {
-        ingress_tstamp    : 32;
+        ingress_tstamp : 32;
         mirror_session_id : 16;
     }
 }
@@ -489,7 +489,7 @@ table system_acl {
         security_metadata.ipsg_check_fail : ternary;
         security_metadata.storm_control_color : ternary;
         acl_metadata.acl_deny : ternary;
-        acl_metadata.racl_deny: ternary;
+        acl_metadata.racl_deny : ternary;
         l3_metadata.urpf_check_fail : ternary;
         ingress_metadata.drop_flag : ternary;
 
@@ -510,7 +510,7 @@ table system_acl {
         l3_metadata.same_bd_check : ternary;
         l3_metadata.lkp_ip_ttl : ternary;
         l2_metadata.stp_state : ternary;
-        ingress_metadata.control_frame: ternary;
+        ingress_metadata.control_frame : ternary;
         ipv4_metadata.ipv4_unicast_enabled : ternary;
         ipv6_metadata.ipv6_unicast_enabled : ternary;
 

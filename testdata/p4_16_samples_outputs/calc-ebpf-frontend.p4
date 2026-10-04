@@ -8,10 +8,10 @@ header ethernet_t {
 }
 
 header p4calc_t {
-    bit<8>  p;
-    bit<8>  four;
-    bit<8>  ver;
-    bit<8>  op;
+    bit<8> p;
+    bit<8> four;
+    bit<8> ver;
+    bit<8> op;
     bit<32> operand_a;
     bit<32> operand_b;
     bit<32> res;
@@ -19,7 +19,7 @@ header p4calc_t {
 
 struct headers {
     ethernet_t ethernet;
-    p4calc_t   p4calc;
+    p4calc_t p4calc;
 }
 
 parser Parser(packet_in packet, out headers hdr) {
@@ -30,26 +30,26 @@ parser Parser(packet_in packet, out headers hdr) {
     @name("Parser.tmp_4") bit<8> tmp_3;
     @name("Parser.tmp_5") p4calc_t tmp_4;
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x1234: check_p4calc;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x1234 : check_p4calc;
+            default : accept;
         }
     }
     state check_p4calc {
-        tmp_0 = packet.lookahead<p4calc_t>();
+        tmp_0 = packet.lookahead < p4calc_t >();
         tmp = tmp_0.p;
-        tmp_2 = packet.lookahead<p4calc_t>();
+        tmp_2 = packet.lookahead < p4calc_t >();
         tmp_1 = tmp_2.four;
-        tmp_4 = packet.lookahead<p4calc_t>();
+        tmp_4 = packet.lookahead < p4calc_t >();
         tmp_3 = tmp_4.ver;
-        transition select(tmp, tmp_1, tmp_3) {
-            (8w0x50, 8w0x34, 8w0x1): parse_p4calc;
-            default: accept;
+        transition select (tmp, tmp_1, tmp_3) {
+            (8w0x50, 8w0x34, 8w0x1) : parse_p4calc;
+            default : accept;
         }
     }
     state parse_p4calc {
-        packet.extract<p4calc_t>(hdr.p4calc);
+        packet.extract < p4calc_t >(hdr.p4calc);
         transition accept;
     }
 }
@@ -94,7 +94,7 @@ control Ingress(inout headers hdr, out bool xout) {
     }
     @name("Ingress.calculate") table calculate_0 {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op");
+            hdr.p4calc.op : exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -106,11 +106,11 @@ control Ingress(inout headers hdr, out bool xout) {
         }
         const default_action = operation_drop();
         const entries = {
-                        8w0x2b : operation_add();
-                        8w0x2d : operation_sub();
-                        8w0x26 : operation_and();
-                        8w0x7c : operation_or();
-                        8w0x5e : operation_xor();
+            8w0x2b : operation_add();
+            8w0x2d : operation_sub();
+            8w0x26 : operation_and();
+            8w0x7c : operation_or();
+            8w0x5e : operation_xor();
         }
         implementation = hash_table(32w8);
         size = 100;
@@ -125,4 +125,4 @@ control Ingress(inout headers hdr, out bool xout) {
     }
 }
 
-ebpfFilter<headers>(Parser(), Ingress()) main;
+ebpfFilter < headers >(Parser(), Ingress()) main;

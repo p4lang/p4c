@@ -15,7 +15,7 @@ header h_index {
 
 struct headers {
     h_stack[2] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {
@@ -29,12 +29,12 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
     }
     state start_loops {
         hdr.i.counter = hdr.i.counter + 1;
-        transition select(hdr.i.index) {
-            0: mixed_finite_loop;
-            1: mixed_infinite_loop;
-            2: infinite_loop;
-            3: finite_loop;
-            default: reject;
+        transition select (hdr.i.index) {
+            0 : mixed_finite_loop;
+            1 : mixed_infinite_loop;
+            2 : infinite_loop;
+            3 : finite_loop;
+            default : reject;
         }
     }
     state finite_loop {
@@ -42,7 +42,7 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
         pkt.extract(hdr.h.next);
         transition select (hdr.h.last.i1) {
             2 : accept;
-            default: finite_loop;
+            default : finite_loop;
         }
     }
     state mixed_finite_loop {

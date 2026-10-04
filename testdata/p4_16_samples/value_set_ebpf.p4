@@ -24,13 +24,13 @@ struct Headers_t {
 }
 
 parser prs(packet_in p, out Headers_t headers) {
-    value_set<bit<8>>(4) pvs;
+    value_set < bit<8 >>(4) pvs;
 
     state start {
         p.extract(headers.first);
-        transition select(headers.first.value) {
-            pvs: parse_next;
-            default: accept;
+        transition select (headers.first.value) {
+            pvs : parse_next;
+            default : accept;
         }
     }
 

@@ -1,7 +1,7 @@
 #include <core.p4>
 
 bit<3> max(in bit<3> val, in bit<3> bound) {
-    return (val < bound ? val : bound);
+    return(val < bound ? val : bound);
 }
 header h_t {
 }

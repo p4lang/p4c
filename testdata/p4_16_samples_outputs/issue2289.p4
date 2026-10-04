@@ -26,7 +26,7 @@ struct Meta {
 bit<16> function_1() {
     nested_struct tmp_struct = { { 1 } };
     tmp_struct.s.a = 1;
-    return (bit<16>)1;
+    return(bit<16>) 1;
 }
 bit<16> function_2(in bit<16> val) {
     return function_1();

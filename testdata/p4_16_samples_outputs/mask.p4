@@ -10,10 +10,10 @@ struct Parsed_Packet {
 
 parser Parser(packet_in b, out Parsed_Packet p) {
     state start {
-        transition select(8w0, b.lookahead<bit<8>>()) {
-            default: accept;
-            (0, 0 &&& 0): accept;
-            (0 &&& 0, 0x44): ipv4_option_NOP;
+        transition select (8w0, b.lookahead < bit<8 >>()) {
+            default : accept;
+            (0, 0 &&& 0) : accept;
+            (0 &&& 0, 0x44) : ipv4_option_NOP;
         }
     }
     state ipv4_option_NOP {

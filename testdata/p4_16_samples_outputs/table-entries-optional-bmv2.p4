@@ -3,11 +3,11 @@
 #include <v1model.p4>
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
-    bit<8>  r;
-    bit<8>  v;
+    bit<8> l;
+    bit<8> r;
+    bit<8> v;
 }
 
 struct Header_t {
@@ -54,8 +54,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_optional {
         key = {
-            h.h.e: optional;
-            h.h.t: optional;
+            h.h.e : optional;
+            h.h.t : optional;
         }
         actions = {
             a;
@@ -63,10 +63,10 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a;
         const entries = {
-                        (0xaa, 0x1111) : a_with_control_params(1);
-                        (default, 0x1111) : a_with_control_params(2);
-                        (0xaa, default) : a_with_control_params(3);
-                        (default, default) : a_with_control_params(4);
+            (0xaa, 0x1111) : a_with_control_params(1);
+            (default, 0x1111) : a_with_control_params(2);
+            (0xaa, default) : a_with_control_params(3);
+            (default, default) : a_with_control_params(4);
         }
     }
     apply {

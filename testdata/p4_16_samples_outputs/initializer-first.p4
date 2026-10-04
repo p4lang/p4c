@@ -9,4 +9,3 @@ control ingress(out bit<32> field_d_32) {
     apply {
     }
 }
-

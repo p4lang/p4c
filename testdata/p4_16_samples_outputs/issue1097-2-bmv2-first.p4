@@ -17,12 +17,12 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<myhdr_t>(h.myhdr);
+        b.extract < myhdr_t >(h.myhdr);
         transition accept;
     }
 }
 
-register<bit<8>>(32w256) r;
+register < bit<8 >>(32w256) r;
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<8> x;
@@ -43,7 +43,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<myhdr_t>(h.myhdr);
+        b.emit < myhdr_t >(h.myhdr);
     }
 }
 
@@ -57,4 +57,4 @@ control update(inout Headers h, inout Meta m) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch <Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

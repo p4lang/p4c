@@ -4,9 +4,9 @@
 
 typedef bit<8> shiftEnum;
 header hdr {
-    int<32>   a;
-    bit<8>    b;
-    int<64>   c;
+    int<32> a;
+    bit<8> b;
+    int<64> c;
     shiftEnum e;
 }
 
@@ -47,7 +47,7 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action shift() {
-        h.h.c = (int<64>)(h.h.a << h.h.e);
+        h.h.c =(int<64>)(h.h.a << h.h.e);
         sm.egress_spec = 0;
     }
     table t {

@@ -1,12 +1,12 @@
-side_effects.p4(20): [--Wwarn=ordering] warning: a: 'out' argument has fields in common with a
+side_effects.p4(22): [--Wwarn=ordering] warning: a: 'out' argument has fields in common with a
         a = f(a, g(a));
               ^
-side_effects.p4(20)
+side_effects.p4(22)
         a = f(a, g(a));
                    ^
-side_effects.p4(21): [--Wwarn=ordering] warning: s[a].z: 'out' argument has fields in common with a
+side_effects.p4(23): [--Wwarn=ordering] warning: s[a].z: 'out' argument has fields in common with a
         a = f(s[a].z, g(a));
               ^^^^^^
-side_effects.p4(21)
+side_effects.p4(23)
         a = f(s[a].z, g(a));
                         ^

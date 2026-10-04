@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -34,7 +34,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            key_0: exact @name("akSTMF");
+            key_0 : exact @name("akSTMF");
         }
         actions = {
             dummy();
@@ -42,24 +42,24 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_exit_combination_1bmv2l58() {
+    @hidden action gauntlet_exit_combination_1bmv2l60() {
         hasReturned = true;
     }
-    @hidden action gauntlet_exit_combination_1bmv2l45() {
+    @hidden action gauntlet_exit_combination_1bmv2l47() {
         hasReturned = false;
         key_0 = 32w1;
     }
-    @hidden table tbl_gauntlet_exit_combination_1bmv2l45 {
+    @hidden table tbl_gauntlet_exit_combination_1bmv2l47 {
         actions = {
-            gauntlet_exit_combination_1bmv2l45();
+            gauntlet_exit_combination_1bmv2l47();
         }
-        const default_action = gauntlet_exit_combination_1bmv2l45();
+        const default_action = gauntlet_exit_combination_1bmv2l47();
     }
-    @hidden table tbl_gauntlet_exit_combination_1bmv2l58 {
+    @hidden table tbl_gauntlet_exit_combination_1bmv2l60 {
         actions = {
-            gauntlet_exit_combination_1bmv2l58();
+            gauntlet_exit_combination_1bmv2l60();
         }
-        const default_action = gauntlet_exit_combination_1bmv2l58();
+        const default_action = gauntlet_exit_combination_1bmv2l60();
     }
     @hidden table tbl_do_action {
         actions = {
@@ -68,12 +68,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_action();
     }
     apply {
-        tbl_gauntlet_exit_combination_1bmv2l45.apply();
+        tbl_gauntlet_exit_combination_1bmv2l47.apply();
         switch (simple_table_0.apply().action_run) {
-            dummy: {
+            dummy : {
             }
-            default: {
-                tbl_gauntlet_exit_combination_1bmv2l58.apply();
+            default : {
+            tbl_gauntlet_exit_combination_1bmv2l60.apply();
             }
         }
         if (hasReturned) {
@@ -101,8 +101,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

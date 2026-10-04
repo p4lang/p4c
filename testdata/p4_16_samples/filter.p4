@@ -5,7 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-extern packet_in {}
+extern packet_in {
+}
 
 parser filter(packet_in packet, out bool drop);
 package Filter(filter f);

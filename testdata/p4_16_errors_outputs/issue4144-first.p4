@@ -2,4 +2,3 @@
 
 extern main {
 }
-

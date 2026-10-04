@@ -7,24 +7,24 @@
 
 header_type mac_da_t {
     fields {
-        mac   : 48;
+        mac : 48;
     }
 }
 
 header_type mac_sa_t {
     fields {
-        mac   : 48;
+        mac : 48;
     }
 }
 
 header_type len_or_type_t {
     fields {
-        value   : 48;
+        value : 48;
     }
 }
 
-header mac_da_t      mac_da;
-header mac_sa_t      mac_sa;
+header mac_da_t mac_da;
+header mac_sa_t mac_sa;
 header len_or_type_t len_or_type;
 
 parser start {
@@ -40,7 +40,7 @@ action nop() {
 table t1 {
     reads {
         mac_da.mac : exact;
-        len_or_type.value: exact;
+        len_or_type.value : exact;
     }
     actions {
         nop;

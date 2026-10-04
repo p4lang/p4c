@@ -14,13 +14,13 @@ const.p4(12): [--Wwarn=unused] warning: 'max' is unused
 const bit<32> max = 32w0xFFFF_FFFF;
               ^^^
 const.p4(20): [--Wwarn=unused] warning: 'v' is unused
-const S v = { 32w3, (bit<32>)z };
+const S v = { 32w3,(bit<32>) z };
         ^
 const.p4(24): [--Wwarn=unused] warning: 'twothree' is unused
-const bit<32> twothree = (bit<32>)twotwo;
+const bit<32> twothree =(bit<32>) twotwo;
               ^^^^^^^^
 const.p4(25): [--Wwarn=unused] warning: 'twofour' is unused
-const bit<6> twofour = (bit<6>)(bit<32>)(int<32>)two;
+const bit<6> twofour =(bit<6>)(bit<32>)(int<32>) two;
              ^^^^^^^
 const.p4(33): [--Wwarn=unused] warning: 'zz' is unused
 const T zz = {
@@ -31,8 +31,8 @@ const bit<32> x = 32w0;
 const.p4(39): [--Wwarn=unused] warning: 'x1' is unused
 const bit<32> x1 = ~32w0;
               ^^
-const.p4(44): [--Wwarn=unused] warning: 'izero' is unused
-const int32 izero = (int32)32w0;
+const.p4(43): [--Wwarn=unused] warning: 'izero' is unused
+const int32 izero =(int32) 32w0;
             ^^^^^
 const.p4(13): [--Werror=type-error] error: z: initializer has wrong type bit<1>
 const bit<32> z = 1w1;

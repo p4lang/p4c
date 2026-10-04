@@ -86,7 +86,7 @@ control caller(inout headers hdr) {
     }
     table calculate {
         key = {
-            hdr.p4calc.op: exact;
+            hdr.p4calc.op : exact;
         }
         actions = {
             operation_add;
@@ -105,18 +105,18 @@ control caller(inout headers hdr) {
         }
         const default_action = NoAction();
         const entries = {
-                        P4CALC_ADD : operation_add();
-                        P4CALC_SUB : operation_sub();
-                        P4CALC_MUL : operation_mul();
-                        P4CALC_DIV : operation_div();
-                        P4CALC_MOD : operation_mod();
-                        P4CALC_BAND : operation_band();
-                        P4CALC_BOR : operation_bor();
-                        P4CALC_BXOR : operation_bxor();
-                        P4CALC_SHL : operation_shl();
-                        P4CALC_SHR : operation_shr();
-                        P4CALC_SATADD : operation_addsat();
-                        P4CALC_SATSUB : operation_subsat();
+            P4CALC_ADD : operation_add();
+            P4CALC_SUB : operation_sub();
+            P4CALC_MUL : operation_mul();
+            P4CALC_DIV : operation_div();
+            P4CALC_MOD : operation_mod();
+            P4CALC_BAND : operation_band();
+            P4CALC_BOR : operation_bor();
+            P4CALC_BXOR : operation_bxor();
+            P4CALC_SHL : operation_shl();
+            P4CALC_SHR : operation_shr();
+            P4CALC_SATADD : operation_addsat();
+            P4CALC_SATSUB : operation_subsat();
         }
     }
     apply {
@@ -126,6 +126,6 @@ control caller(inout headers hdr) {
     }
 }
 
-control Ingress<H>(inout H hdr);
-package s<H>(Ingress<H> ig);
+control Ingress < H >(inout H hdr);
+package s < H >(Ingress<H> ig);
 s(caller()) main;

@@ -17,10 +17,11 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 bit<128> do_function(inout bit<128> val) {
-    return ((bit<128>)val);
+    return((bit<128>)val);
 }
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
@@ -37,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     const int int_val = 123;
     apply {
         return;
-        bit<128> cast_int = ((bit<128>)int_val);
+        bit<128> cast_int =((bit<128>) int_val);
         do_function(cast_int);
     }
 }
@@ -64,4 +65,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

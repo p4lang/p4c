@@ -20,7 +20,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct metadata {
@@ -29,7 +29,7 @@ struct metadata {
 
 parser MyIP(packet_in buffer, out ethernet_t h, inout metadata b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
     state start {
-        buffer.extract<ethernet_t>(h);
+        buffer.extract < ethernet_t >(h);
         transition accept;
     }
 }
@@ -43,7 +43,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
 control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     table tbl {
         key = {
-            a.srcAddr: exact @name("a.srcAddr");
+            a.srcAddr : exact @name("a.srcAddr");
         }
         actions = {
             NoAction();
@@ -52,17 +52,17 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     }
     apply {
         switch (16w2) {
-            16w1: {
-                b.meta = 48w5;
+            16w1 : {
+            b.meta = 48w5;
             }
-            16w2: 
-            16w3: 
-            16w4: {
-                b.meta = 48w7;
+            16w2 :
+            16w3 :
+            16w4 : {
+            b.meta = 48w7;
             }
-            16w5: 
-            default: {
-                b.meta = 48w9;
+            16w5 :
+            default : {
+            b.meta = 48w9;
             }
         }
         if (b.meta == 48w7) {
@@ -86,6 +86,6 @@ control MyED(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIRC b, inout EMP
     }
 }
 
-IngressPipeline<ethernet_t, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<ethernet_t, metadata, EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < ethernet_t, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < ethernet_t, metadata, EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

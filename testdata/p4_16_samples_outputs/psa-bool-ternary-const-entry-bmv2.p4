@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct fwd_metadata_t {
@@ -50,14 +50,14 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table test_table {
         key = {
-            hdr.ethernet.isValid(): ternary;
+            hdr.ethernet.isValid() : ternary;
         }
         actions = {
             DummyAction;
             NoAction;
         }
         const entries = {
-                        true : DummyAction();
+            true : DummyAction();
         }
     }
     apply {

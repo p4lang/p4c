@@ -9,7 +9,7 @@ enum bit<8> FieldLists {
 
 struct intrinsic_metadata_t {
     bit<16> mcast_grp;
-    bit<4>  egress_rid;
+    bit<4> egress_rid;
     bit<64> ingress_global_timestamp;
 }
 
@@ -44,7 +44,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<hdrA_t>(hdr.hdrA);
+        packet.extract < hdrA_t >(hdr.hdrA);
         transition accept;
     }
 }
@@ -66,8 +66,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1");
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
+            hdr.hdrA.f1 : exact @name("hdrA.f1");
+            standard_metadata.instance_type : ternary @name("standard_metadata.instance_type");
         }
         size = 128;
         default_action = NoAction();
@@ -101,8 +101,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1  : exact @name("hdrA.f1");
-            meta.metaA.f1: exact @name("metaA.f1");
+            hdr.hdrA.f1 : exact @name("hdrA.f1");
+            meta.metaA.f1 : exact @name("metaA.f1");
         }
         size = 128;
         default_action = NoAction();
@@ -115,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1");
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
+            hdr.hdrA.f1 : exact @name("hdrA.f1");
+            standard_metadata.instance_type : ternary @name("standard_metadata.instance_type");
         }
         size = 128;
         default_action = NoAction();
@@ -129,7 +129,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<hdrA_t>(hdr.hdrA);
+        packet.emit < hdrA_t >(hdr.hdrA);
     }
 }
 
@@ -143,4 +143,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

@@ -10,7 +10,7 @@ control p(in bit y_0)
     apply {
         bit x;
         x = 1w0;
-    
+
         if (x == 1w0)
         {
             bit y;

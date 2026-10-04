@@ -20,13 +20,13 @@ issue982.p4(130): [--Wwarn=unused] warning: 'egress_truncate' is unused
 action egress_truncate(inout psa_ingress_output_metadata_t meta, in PacketLength_t payload_bytes) {
        ^^^^^^^^^^^^^^^
 issue982.p4(189): [--Wwarn=unused] warning: 'W' is unused
-extern Counter<W, S> {
-               ^
+extern Counter < W, S > {
+                 ^
 issue982.p4(194): [--Wwarn=unused] warning: 'W' is unused
-extern DirectCounter<W> {
-                     ^
+extern DirectCounter < W > {
+                       ^
 issue982.p4(255): [--Wwarn=unused] warning: 'control Deparser' is unused
-control Deparser<H, M>(packet_out buffer, inout H hdr, in M user_meta);
+control Deparser < H, M >(packet_out buffer, inout H hdr, in M user_meta);
         ^^^^^^^^
 issue982.p4(334): [--Wwarn=uninitialized-out-param] warning: out parameter 'ostd' may be uninitialized when 'EgressParserImpl' terminates
 ...a user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {

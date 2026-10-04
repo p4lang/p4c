@@ -8,13 +8,12 @@
 #include <core.p4>
 #include "bmv2/psa.p4"
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -31,11 +30,11 @@ struct metadata_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
-    output_data_t    output_data;
+    ethernet_t ethernet;
+    output_data_t output_data;
 }
 
-control packet_path_to_int (in PSA_PacketPath_t packet_path,
+control packet_path_to_int(in PSA_PacketPath_t packet_path,
                             out bit<32> ret)
 {
     apply {
@@ -82,15 +81,15 @@ control cIngress(inout headers_t hdr,
                  inout metadata_t user_meta,
                  in    psa_ingress_input_metadata_t  istd,
                  inout psa_ingress_output_metadata_t ostd)
-{   
+{
     bit<32> int_packet_path;
 
     action record_ingress_ports_in_pkt() {
-        hdr.output_data.word1 = (bit<32>) ((PortIdUint_t) istd.ingress_port);
+        hdr.output_data.word1 =(bit<32>)((PortIdUint_t) istd.ingress_port);
     }
 
     apply {
-        if (hdr.ethernet.dstAddr[3:0] >= 4) {
+        if (hdr.ethernet.dstAddr[3 : 0] >= 4) {
             record_ingress_ports_in_pkt();
             send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
         } else {
@@ -132,10 +131,12 @@ control cEgress(inout headers_t hdr,
         hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + hdr.ethernet.srcAddr;
     }
     table e {
-        actions = { add; }
+        actions = {
+            add;
+        }
         default_action = add;
     }
-    apply { 
+    apply {
         e.apply();
         if (istd.egress_port == PSA_PORT_RECIRCULATE) {
             packet_path_to_int.apply(istd.packet_path, hdr.output_data.word3);
@@ -176,7 +177,7 @@ control EgressDeparserImpl(packet_out buffer,
 {
     CommonDeparserImpl() cp;
     apply {
-      cp.apply(buffer, hdr);
+        cp.apply(buffer, hdr);
     }
 }
 

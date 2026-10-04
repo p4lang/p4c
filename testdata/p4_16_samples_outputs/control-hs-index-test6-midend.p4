@@ -21,7 +21,7 @@ header h_index {
 struct headers {
     ethernet_t eth_hdr;
     h_stack[2] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {
@@ -29,10 +29,10 @@ struct Meta {
 
 parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<h_stack>(hdr.h[0]);
-        pkt.extract<h_stack>(hdr.h[1]);
-        pkt.extract<h_index>(hdr.i);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < h_stack >(hdr.h[0]);
+        pkt.extract < h_stack >(hdr.h[1]);
+        pkt.extract < h_index >(hdr.i);
         transition accept;
     }
 }
@@ -51,54 +51,54 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             @defaultonly NoAction_1();
         }
         key = {
-            key_0: exact @name("h.h[h.i.index].a");
+            key_0 : exact @name("h.h[h.i.index].a");
         }
         default_action = NoAction_1();
     }
-    @hidden action controlhsindextest6l48() {
+    @hidden action controlhsindextest6l51() {
         key_0 = h.h[32w0].a;
     }
-    @hidden action controlhsindextest6l48_0() {
+    @hidden action controlhsindextest6l51_0() {
         key_0 = h.h[32w1].a;
     }
-    @hidden action controlhsindextest6l48_1() {
+    @hidden action controlhsindextest6l51_1() {
         key_0 = hsVar;
     }
-    @hidden action controlhsindextest6l48_2() {
+    @hidden action controlhsindextest6l51_2() {
         hsiVar = h.i.index;
     }
-    @hidden table tbl_controlhsindextest6l48 {
+    @hidden table tbl_controlhsindextest6l51 {
         actions = {
-            controlhsindextest6l48_2();
+            controlhsindextest6l51_2();
         }
-        const default_action = controlhsindextest6l48_2();
+        const default_action = controlhsindextest6l51_2();
     }
-    @hidden table tbl_controlhsindextest6l48_0 {
+    @hidden table tbl_controlhsindextest6l51_0 {
         actions = {
-            controlhsindextest6l48();
+            controlhsindextest6l51();
         }
-        const default_action = controlhsindextest6l48();
+        const default_action = controlhsindextest6l51();
     }
-    @hidden table tbl_controlhsindextest6l48_1 {
+    @hidden table tbl_controlhsindextest6l51_1 {
         actions = {
-            controlhsindextest6l48_0();
+            controlhsindextest6l51_0();
         }
-        const default_action = controlhsindextest6l48_0();
+        const default_action = controlhsindextest6l51_0();
     }
-    @hidden table tbl_controlhsindextest6l48_2 {
+    @hidden table tbl_controlhsindextest6l51_2 {
         actions = {
-            controlhsindextest6l48_1();
+            controlhsindextest6l51_1();
         }
-        const default_action = controlhsindextest6l48_1();
+        const default_action = controlhsindextest6l51_1();
     }
     apply {
-        tbl_controlhsindextest6l48.apply();
+        tbl_controlhsindextest6l51.apply();
         if (hsiVar == 32w0) {
-            tbl_controlhsindextest6l48_0.apply();
+            tbl_controlhsindextest6l51_0.apply();
         } else if (hsiVar == 32w1) {
-            tbl_controlhsindextest6l48_1.apply();
+            tbl_controlhsindextest6l51_1.apply();
         } else if (hsiVar >= 32w1) {
-            tbl_controlhsindextest6l48_2.apply();
+            tbl_controlhsindextest6l51_2.apply();
         }
         t_0.apply();
     }
@@ -121,11 +121,11 @@ control egress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<h_stack>(h.h[0]);
-        pkt.emit<h_stack>(h.h[1]);
-        pkt.emit<h_index>(h.i);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < h_stack >(h.h[0]);
+        pkt.emit < h_stack >(h.h[1]);
+        pkt.emit < h_index >(h.i);
     }
 }
 
-V1Switch<headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

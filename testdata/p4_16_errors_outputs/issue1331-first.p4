@@ -24,7 +24,7 @@ control MyC(packet_in pkt, inout ethernet ether)(P p) {
         default_action = NoAction();
     }
     apply {
-        pkt.extract<ethernet>(ether);
+        pkt.extract < ethernet >(ether);
         p.apply(pkt);
         t.apply();
     }

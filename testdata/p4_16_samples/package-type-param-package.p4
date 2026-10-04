@@ -14,6 +14,5 @@ Outer<Inner>(Inner()) outer_explicit;
 
 // Type argument inferred from the constructor argument.
 Outer(Inner()) outer_inferred;
-
 package Top(Outer<Inner> a, Outer<Inner> b);
 Top(outer_explicit, outer_inferred) main;

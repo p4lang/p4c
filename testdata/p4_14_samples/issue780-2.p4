@@ -12,7 +12,7 @@ header_type main {
 
 header_type packet {
     fields {
-        y: 32;
+        y : 32;
     }
 }
 
@@ -28,4 +28,5 @@ action add_heartlands() {
     add_header(z);
 }
 
-control ingress { }
+control ingress {
+}

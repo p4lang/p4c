@@ -27,19 +27,21 @@ header data2_t data2;
 
 parser start {
     extract(data);
-    return select(data.b1) {
-        0x01 : parse_data2;
-        default : ingress;
+    return select (data.b1) {
+    0x01 : parse_data2;
+    default : ingress;
     }
 }
 
-action _drop() { drop(); }
+action _drop() {
+    drop();
+}
 
 table set_default_behavior_drop {
     actions {
         _drop;
     }
-    default_action: _drop;
+    default_action : _drop;
 }
 
 parser parse_data2 {
@@ -47,7 +49,8 @@ parser parse_data2 {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     modify_field(data.b1, val);
     modify_field(standard_metadata.egress_spec, port);
@@ -78,6 +81,7 @@ control ingress {
     // dropped at the end of ingress.
     apply(set_default_behavior_drop);
     if (valid(data2)) {
-        apply(test1); }
+        apply(test1);
+    }
     apply(test2);
 }

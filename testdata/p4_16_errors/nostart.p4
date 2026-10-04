@@ -6,7 +6,8 @@
  */
 
 parser p() {
-    state next {}
+    state next {
+    }
 }  // no start state
 
 parser nothing();

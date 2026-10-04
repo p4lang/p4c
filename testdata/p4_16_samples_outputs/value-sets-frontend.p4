@@ -19,19 +19,19 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     @name("TopParser.setIndex") bit<8> setIndex_0;
     @name("TopParser.ethtype_kinds") ValueSet(32w5) ethtype_kinds_0;
     state start {
-        b.extract<Ethernet_h>(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            16w0x806: parse_arp;
-            16w0x86dd: parse_ipv6;
-            default: dispatch_value_sets;
+        b.extract < Ethernet_h >(p.ethernet);
+        transition select (p.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            16w0x806 : parse_arp;
+            16w0x86dd : parse_ipv6;
+            default : dispatch_value_sets;
         }
     }
     state dispatch_value_sets {
         setIndex_0 = ethtype_kinds_0.index(p.ethernet.etherType);
-        transition select(setIndex_0) {
-            8w1: parse_trill;
-            8w2: parse_vlan_tag;
+        transition select (setIndex_0) {
+            8w1 : parse_trill;
+            8w2 : parse_vlan_tag;
         }
     }
     state parse_ipv4 {
@@ -51,6 +51,6 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     }
 }
 
-parser proto<T>(packet_in p, out T h);
-package top<T>(proto<T> _p);
-top<Parsed_packet>(TopParser()) main;
+parser proto < T >(packet_in p, out T h);
+package top < T >(proto<T> _p);
+top < Parsed_packet >(TopParser()) main;

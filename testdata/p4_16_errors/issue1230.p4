@@ -8,7 +8,9 @@
 
 control c() {
     table t {
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
         size = true;
     }
 
@@ -16,7 +18,6 @@ control c() {
         t.apply();
     }
 }
-
 
 control empty();
 package top(empty e);

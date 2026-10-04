@@ -20,6 +20,6 @@ parser parserImpl(out h1_t hdr) {
     }
 }
 
-parser p<T>(out T h);
-package top<T>(p<T> p);
+parser p < T >(out T h);
+package top < T >(p<T> p);
 top(parserImpl()) main;

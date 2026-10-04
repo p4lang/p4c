@@ -5,4 +5,3 @@ control c() {
         test((varbit<4>)0);
     }
 }
-

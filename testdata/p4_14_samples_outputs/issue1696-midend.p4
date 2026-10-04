@@ -16,10 +16,10 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<stack_t>(hdr.stack.next);
-        transition select(hdr.stack.last.f) {
-            16w0xffff: start;
-            default: accept;
+        packet.extract < stack_t >(hdr.stack.next);
+        transition select (hdr.stack.last.f) {
+            16w0xffff : start;
+            default : accept;
         }
     }
 }
@@ -36,10 +36,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<stack_t>(hdr.stack[0]);
-        packet.emit<stack_t>(hdr.stack[1]);
-        packet.emit<stack_t>(hdr.stack[2]);
-        packet.emit<stack_t>(hdr.stack[3]);
+        packet.emit < stack_t >(hdr.stack[0]);
+        packet.emit < stack_t >(hdr.stack[1]);
+        packet.emit < stack_t >(hdr.stack[2]);
+        packet.emit < stack_t >(hdr.stack[3]);
     }
 }
 
@@ -53,4 +53,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

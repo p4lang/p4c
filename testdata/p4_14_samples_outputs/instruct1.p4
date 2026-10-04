@@ -7,10 +7,10 @@ header data_t {
     bit<32> f2;
     bit<32> f3;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 @name("data2_t") header data2_t_0 {
@@ -23,7 +23,7 @@ struct metadata {
 
 struct headers {
     @name(".data")
-    data_t    data;
+    data_t data;
     @name(".hdr1")
     data2_t_0 hdr1;
     @name(".hdr2")
@@ -33,9 +33,9 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_data2") state parse_data2 {
         packet.extract(hdr.hdr1);
-        transition select(hdr.hdr1.x1) {
-            16w1 &&& 16w1: parse_hdr2;
-            default: accept;
+        transition select (hdr.hdr1.x1) {
+            16w1 &&& 16w1 : parse_hdr2;
+            default : accept;
         }
     }
     @name(".parse_hdr2") state parse_hdr2 {
@@ -44,9 +44,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         packet.extract(hdr.data);
-        transition select(hdr.data.b1) {
-            8w0x0: parse_data2;
-            default: accept;
+        transition select (hdr.data.b1) {
+            8w0x0 : parse_data2;
+            default : accept;
         }
     }
 }
@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1 : exact;
         }
     }
     apply {

@@ -23,7 +23,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -49,7 +49,7 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

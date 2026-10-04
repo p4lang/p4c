@@ -10,7 +10,9 @@ package top(Filter f);
 
 parser g(in bit x) // mismatch in direction
 {
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }
 
 top(g()) main;

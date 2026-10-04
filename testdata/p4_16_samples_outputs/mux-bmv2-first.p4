@@ -21,9 +21,9 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
     action update(in bool p, inout bit<64> val) {
-        bit<32> _sub = val[31:0];
-        _sub = (p ? _sub : 32w1);
-        val[31:0] = _sub;
+        bit<32> _sub = val[31 : 0];
+        _sub =(p ? _sub : 32w1);
+        val[31 : 0] = _sub;
     }
     apply {
         bit<64> res = 64w0;
@@ -46,4 +46,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+V1Switch < Headers, Metadata >(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;

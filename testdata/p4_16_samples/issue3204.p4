@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-struct h<t> {
+struct h < t > {
     t f;
 }
 
 bit func() {
-    h<bit> a;
+    h < bit > a;
     a.f = 1;
     return a.f;
 }

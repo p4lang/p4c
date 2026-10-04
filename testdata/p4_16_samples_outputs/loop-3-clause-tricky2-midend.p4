@@ -17,7 +17,7 @@ struct headers_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -25,18 +25,18 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.n") bit<8> n_0;
     @hidden action loop3clausetricky2l45() {
-        n_0 = hdr.ethernet.srcAddr[15:8];
-        n_0 = hdr.ethernet.srcAddr[15:8] + 8w3;
-        n_0 = hdr.ethernet.srcAddr[15:8] + 8w3 + 8w6;
-        n_0 = hdr.ethernet.srcAddr[15:8] + 8w3 + 8w6 + 8w1;
-        n_0 = hdr.ethernet.srcAddr[15:8] + 8w3 + 8w6 + 8w1 + 8w4;
+        n_0 = hdr.ethernet.srcAddr[15 : 8];
+        n_0 = hdr.ethernet.srcAddr[15 : 8] + 8w3;
+        n_0 = hdr.ethernet.srcAddr[15 : 8] + 8w3 + 8w6;
+        n_0 = hdr.ethernet.srcAddr[15 : 8] + 8w3 + 8w6 + 8w1;
+        n_0 = hdr.ethernet.srcAddr[15 : 8] + 8w3 + 8w6 + 8w1 + 8w4;
     }
     @hidden action loop3clausetricky2l39() {
-        n_0 = hdr.ethernet.srcAddr[15:8];
+        n_0 = hdr.ethernet.srcAddr[15 : 8];
     }
     @hidden action loop3clausetricky2l47() {
-        hdr.ethernet.srcAddr[7:0] = 8w7;
-        hdr.ethernet.srcAddr[15:8] = n_0;
+        hdr.ethernet.srcAddr[7 : 0] = 8w7;
+        hdr.ethernet.srcAddr[15 : 8] = n_0;
         stdmeta.egress_spec = 9w1;
     }
     @hidden table tbl_loop3clausetricky2l39 {
@@ -71,7 +71,7 @@ control egressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_me
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -85,4 +85,4 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

@@ -4,6 +4,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-struct s {}
+struct s {
+}
 
 s() s1;

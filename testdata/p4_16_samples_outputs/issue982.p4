@@ -19,7 +19,7 @@ header_union clone_union_t {
 }
 
 struct clone_metadata_t {
-    bit<3>        type;
+    bit<3> type;
     clone_union_t data;
 }
 
@@ -40,13 +40,13 @@ enum InstanceType_t {
 }
 
 struct psa_ingress_parser_input_metadata_t {
-    PortId_t       ingress_port;
+    PortId_t ingress_port;
     InstanceType_t instance_type;
 }
 
 struct psa_egress_parser_input_metadata_t {
-    PortId_t        egress_port;
-    InstanceType_t  instance_type;
+    PortId_t egress_port;
+    InstanceType_t instance_type;
     CloneMetadata_t clone_metadata;
 }
 
@@ -63,41 +63,41 @@ struct psa_egress_deparser_output_metadata_t {
 }
 
 struct psa_ingress_input_metadata_t {
-    PortId_t       ingress_port;
+    PortId_t ingress_port;
     InstanceType_t instance_type;
-    Timestamp_t    ingress_timestamp;
-    ParserError_t  parser_error;
+    Timestamp_t ingress_timestamp;
+    ParserError_t parser_error;
 }
 
 struct psa_ingress_output_metadata_t {
     ClassOfService_t class_of_service;
-    bool             clone;
-    PortId_t         clone_port;
+    bool clone;
+    PortId_t clone_port;
     ClassOfService_t clone_class_of_service;
-    bool             drop;
-    bool             resubmit;
+    bool drop;
+    bool resubmit;
     MulticastGroup_t multicast_group;
-    PortId_t         egress_port;
-    bool             truncate;
-    PacketLength_t   truncate_payload_bytes;
+    PortId_t egress_port;
+    bool truncate;
+    PacketLength_t truncate_payload_bytes;
 }
 
 struct psa_egress_input_metadata_t {
     ClassOfService_t class_of_service;
-    PortId_t         egress_port;
-    InstanceType_t   instance_type;
+    PortId_t egress_port;
+    InstanceType_t instance_type;
     EgressInstance_t instance;
-    Timestamp_t      egress_timestamp;
-    ParserError_t    parser_error;
+    Timestamp_t egress_timestamp;
+    ParserError_t parser_error;
 }
 
 struct psa_egress_output_metadata_t {
-    bool             clone;
+    bool clone;
     ClassOfService_t clone_class_of_service;
-    bool             drop;
-    bool             recirculate;
-    bool             truncate;
-    PacketLength_t   truncate_payload_bytes;
+    bool drop;
+    bool recirculate;
+    bool truncate;
+    PacketLength_t truncate_payload_bytes;
 }
 
 action send_to_port(inout psa_ingress_output_metadata_t meta, in PortId_t egress_port) {
@@ -130,15 +130,15 @@ extern BufferingQueueingEngine {
 }
 
 extern clone {
-    void emit<T>(in T hdr);
+    void emit < T >(in T hdr);
 }
 
 extern resubmit {
-    void emit<T>(in T hdr);
+    void emit < T >(in T hdr);
 }
 
 extern recirculate {
-    void emit<T>(in T hdr);
+    void emit < T >(in T hdr);
 }
 
 enum HashAlgorithm_t {
@@ -151,24 +151,24 @@ enum HashAlgorithm_t {
     TARGET_DEFAULT
 }
 
-extern Hash<O> {
+extern Hash < O > {
     Hash(HashAlgorithm_t algo);
-    O get_hash<D>(in D data);
-    O get_hash<T, D>(in T base, in D data, in T max);
+    O get_hash < D >(in D data);
+    O get_hash < T, D >(in T base, in D data, in T max);
 }
 
-extern Checksum<W> {
+extern Checksum < W > {
     Checksum(HashAlgorithm_t hash);
     void clear();
-    void update<T>(in T data);
+    void update < T >(in T data);
     W get();
 }
 
 extern InternetChecksum {
     InternetChecksum();
     void clear();
-    void update<T>(in T data);
-    void remove<T>(in T data);
+    void update < T >(in T data);
+    void remove < T >(in T data);
     bit<16> get();
 }
 
@@ -178,12 +178,12 @@ enum CounterType_t {
     PACKETS_AND_BYTES
 }
 
-extern Counter<W, S> {
+extern Counter < W, S > {
     Counter(bit<32> n_counters, CounterType_t type);
     void count(in S index);
 }
 
-extern DirectCounter<W> {
+extern DirectCounter < W > {
     DirectCounter(CounterType_t type);
     void count();
 }
@@ -199,7 +199,7 @@ enum MeterColor_t {
     YELLOW
 }
 
-extern Meter<S> {
+extern Meter < S > {
     Meter(bit<32> n_meters, MeterType_t type);
     MeterColor_t execute(in S index, in MeterColor_t color);
     MeterColor_t execute(in S index);
@@ -211,13 +211,13 @@ extern DirectMeter {
     MeterColor_t execute();
 }
 
-extern Register<T, S> {
+extern Register < T, S > {
     Register(bit<32> size);
     T read(in S index);
     void write(in S index, in T value);
 }
 
-extern Random<T> {
+extern Random < T > {
     Random(T min, T max);
     T read();
 }
@@ -230,41 +230,41 @@ extern ActionSelector {
     ActionSelector(HashAlgorithm_t algo, bit<32> size, bit<32> outputWidth);
 }
 
-extern Digest<T> {
+extern Digest < T > {
     Digest(PortId_t receiver);
     void emit(in T data);
 }
 
-extern ValueSet<D> {
+extern ValueSet < D > {
     ValueSet(int<32> size);
     bool is_member(in D data);
 }
 
-parser IngressParser<H, M>(packet_in buffer, out H parsed_hdr, inout M user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd);
-control Ingress<H, M>(inout H hdr, inout M user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd);
-parser EgressParser<H, M>(packet_in buffer, out H parsed_hdr, inout M user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd);
-control Egress<H, M>(inout H hdr, inout M user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd);
-control Deparser<H, M>(packet_out buffer, inout H hdr, in M user_meta);
-control IngressDeparser<H, M>(packet_out buffer, inout H hdr, in M user_meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd);
-control EgressDeparser<H, M>(packet_out buffer, inout H hdr, in M user_meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd);
-package PSA_Switch<IH, IM, EH, EM>(IngressParser<IH, IM> ip, Ingress<IH, IM> ig, IngressDeparser<IH, IM> id, EgressParser<EH, EM> ep, Egress<EH, EM> eg, EgressDeparser<EH, EM> ed);
+parser IngressParser < H, M >(packet_in buffer, out H parsed_hdr, inout M user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd);
+control Ingress < H, M >(inout H hdr, inout M user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd);
+parser EgressParser < H, M >(packet_in buffer, out H parsed_hdr, inout M user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd);
+control Egress < H, M >(inout H hdr, inout M user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd);
+control Deparser < H, M >(packet_out buffer, inout H hdr, in M user_meta);
+control IngressDeparser < H, M >(packet_out buffer, inout H hdr, in M user_meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd);
+control EgressDeparser < H, M >(packet_out buffer, inout H hdr, in M user_meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd);
+package PSA_Switch < IH, IM, EH, EM >(IngressParser<IH, IM> ip, Ingress<IH, IM> ig, IngressDeparser<IH, IM> id, EgressParser<EH, EM> ep, Egress<EH, EM> eg, EgressDeparser<EH, EM> ed);
 typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -276,14 +276,14 @@ struct fwd_metadata_t {
 
 struct metadata {
     fwd_metadata_t fwd_metadata;
-    bit<3>         custom_clone_id;
-    clone_0_t      clone_0;
-    clone_1_t      clone_1;
+    bit<3> custom_clone_id;
+    clone_0_t clone_0;
+    clone_1_t clone_1;
 }
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata user_meta) {
@@ -292,9 +292,9 @@ parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata use
     }
     state parse_ethernet {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (parsed_hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -305,10 +305,10 @@ parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata use
 
 parser CloneParser(in psa_egress_parser_input_metadata_t istd, inout metadata user_meta) {
     state start {
-        transition select(istd.clone_metadata.type) {
-            0: parse_clone_header_0;
-            1: parse_clone_header_1;
-            default: reject;
+        transition select (istd.clone_metadata.type) {
+            0 : parse_clone_header_0;
+            1 : parse_clone_header_1;
+            default : reject;
         }
     }
     state parse_clone_header_0 {
@@ -327,9 +327,9 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
     CommonParser() p;
     CloneParser() cp;
     state start {
-        transition select(istd.instance_type) {
-            InstanceType_t.CLONE: parse_clone_header;
-            InstanceType_t.NORMAL: parse_ethernet;
+        transition select (istd.instance_type) {
+            InstanceType_t.CLONE : parse_clone_header;
+            InstanceType_t.NORMAL : parse_ethernet;
         }
     }
     state parse_ethernet {
@@ -344,14 +344,14 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     action process_clone_h0() {
-        user_meta.fwd_metadata.outport = (bit<32>)user_meta.clone_0.data;
+        user_meta.fwd_metadata.outport =(bit<32>) user_meta.clone_0.data;
     }
     action process_clone_h1() {
         user_meta.fwd_metadata.outport = user_meta.clone_1.data;
     }
     table t {
         key = {
-            user_meta.custom_clone_id: exact;
+            user_meta.custom_clone_id : exact;
         }
         actions = {
             process_clone_h0;
@@ -381,7 +381,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table t {
         key = {
-            user_meta.fwd_metadata.outport: exact;
+            user_meta.fwd_metadata.outport : exact;
         }
         actions = {
             do_clone;

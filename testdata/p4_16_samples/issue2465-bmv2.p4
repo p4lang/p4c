@@ -21,12 +21,12 @@ struct m {
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
     state start {
         h l;
-        l = b.lookahead<h>();
-        transition select(l.h[0].f1, l.h[1].f1, l.h[2].f1) {
+        l = b.lookahead < h >();
+        transition select (l.h[0].f1, l.h[1].f1, l.h[2].f1) {
             (1, _, _) : one;
             (0, 1, _) : two;
             (0, 0, 1) : three;
-            default: many;
+            default : many;
         }
     }
 
@@ -58,20 +58,25 @@ parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t
 }
 
 control MyVerifyChecksum(inout h hdr, inout m meta) {
-  apply {}
+    apply {
+    }
 }
 control MyIngress(inout h hdr, inout m meta, inout standard_metadata_t std) {
-  apply { }
+    apply {
+    }
 }
 control MyEgress(inout h hdr, inout m meta, inout standard_metadata_t std) {
-  apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout h hdr, inout m meta) {
-  apply {}
+    apply {
+    }
 }
 control MyDeparser(packet_out b, in h hdr) {
-  apply { }
+    apply {
+    }
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

@@ -29,8 +29,11 @@ parser start {
     return ingress;
 }
 
-action noop() { }
-action setb1(val) { modify_field(data.b1, val); }
+action noop() {
+}
+action setb1(val) {
+    modify_field(data.b1, val);
+}
 
 table test1 {
     reads {

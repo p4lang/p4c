@@ -8,8 +8,8 @@ struct intrinsic_metadata_t {
 struct empty_t {
 }
 
-control C<H, M>(inout H hdr, inout M meta, in intrinsic_metadata_t intr_md);
-package P<H, M>(C<H, M> c);
+control C < H, M >(inout H hdr, inout M meta, in intrinsic_metadata_t intr_md);
+package P < H, M >(C<H, M> c);
 struct hdr_t {
 }
 
@@ -24,7 +24,7 @@ control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md)
     }
     @name("MyC.c2.a") table c2_a {
         key = {
-            8w0: exact @name("meta.f0");
+            8w0 : exact @name("meta.f0");
         }
         actions = {
             NoAction_1();
@@ -36,4 +36,4 @@ control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md)
     }
 }
 
-P<hdr_t, meta_t>(MyC()) main;
+P < hdr_t, meta_t >(MyC()) main;

@@ -8,7 +8,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-
 const bit<6> TYPE_ADDR_IPV4 = 0x1;
 
 /*************************************************************************
@@ -16,21 +15,21 @@ const bit<6> TYPE_ADDR_IPV4 = 0x1;
 *************************************************************************/
 
 header preamble_t {
-    bit<336>  data;
+    bit<336> data;
 }
 
 
 #define LEN_ADDR_IPV4 32
 
 header prot_common_t {
-    bit<4>    version;
-    bit<6>    dstType;
-    bit<6>    srcType;
-    bit<16>   totalLen;
-    bit<8>    hdrLen;
-    bit<8>    curri;
-    bit<8>    currh;
-    bit<8>    nextHdr;
+    bit<4> version;
+    bit<6> dstType;
+    bit<6> srcType;
+    bit<16> totalLen;
+    bit<8> hdrLen;
+    bit<8> curri;
+    bit<8> currh;
+    bit<8> nextHdr;
 }
 
 header prot_addr_common_t {
@@ -38,23 +37,22 @@ header prot_addr_common_t {
 }
 
 header prot_host_addr_ipv4_t {
-    bit<LEN_ADDR_IPV4>  addr;
+    bit<LEN_ADDR_IPV4> addr;
 }
 
-
 header_union prot_host_addr_t {
-    prot_host_addr_ipv4_t  ipv4;
+    prot_host_addr_ipv4_t ipv4;
 }
 
 header prot_host_addr_padding_t {
-    varbit<32>   padding;
+    varbit<32> padding;
 }
 
 header prot_i_t {
     bit<7> data;
-    bit       upDirection;
+    bit upDirection;
     bit<48> data2;
-    bit<8>    segLen;
+    bit<8> segLen;
 }
 
 header prot_h_t {
@@ -62,27 +60,27 @@ header prot_h_t {
 }
 
 struct currenti_t {
-    bit       upDirection;
+    bit upDirection;
 }
 
 struct metadata {
-    bit<8>    headerLen;
-    bit<8>    hLeft;
-    bit<9>    addrLen;
-    bit<8>    currPos;
+    bit<8> headerLen;
+    bit<8> hLeft;
+    bit<9> addrLen;
+    bit<8> currPos;
     currenti_t currenti;
 }
 
 struct headers {
     preamble_t preamble;
-    prot_common_t            prot_common;
-    prot_addr_common_t       prot_addr_common;
-    prot_host_addr_t         prot_host_addr_dst;
-    prot_host_addr_t         prot_host_addr_src;
+    prot_common_t prot_common;
+    prot_addr_common_t prot_addr_common;
+    prot_host_addr_t prot_host_addr_dst;
+    prot_host_addr_t prot_host_addr_src;
     prot_host_addr_padding_t prot_host_addr_padding;
-    prot_i_t     prot_inf_0;
+    prot_i_t prot_inf_0;
     prot_h_t[10] prot_h_0;
-    prot_i_t     prot_inf_1;
+    prot_i_t prot_inf_1;
 }
 
 /*************************************************************************
@@ -100,7 +98,7 @@ parser SubParser(packet_in packet,
         bool currentISelected2 = currI == meta.currPos;
 
 //        meta.currenti.upDirection = meta.currenti.upDirection + (bit<1>)currentISelected * inf.upDirection;//WORKS
-        meta.currenti.upDirection = meta.currenti.upDirection + (bit<1>)currentISelected2 * inf.upDirection;//DOES NOT WORK
+        meta.currenti.upDirection = meta.currenti.upDirection +(bit<1>) currentISelected2 * inf.upDirection;//DOES NOT WORK
 
         meta.hLeft = inf.segLen;
         meta.currPos = meta.currPos + 1;
@@ -131,9 +129,9 @@ parser PROTParser(packet_in packet,
     }
 
     state parse_prot_host_addr_src_select {
-        transition select(hdr.prot_common.srcType) {
-            TYPE_ADDR_IPV4: parse_prot_host_addr_src_ipv4;
-       }
+        transition select (hdr.prot_common.srcType) {
+            TYPE_ADDR_IPV4 : parse_prot_host_addr_src_ipv4;
+        }
     }
 
     state parse_prot_host_addr_src_ipv4 {
@@ -143,14 +141,14 @@ parser PROTParser(packet_in packet,
     }
 
     state parse_prot_addr_padding {
-        bit<9> paddingLen = (64 - (meta.addrLen % 64)) % 64;
+        bit<9> paddingLen =(64 -(meta.addrLen % 64)) % 64;
         packet.extract(hdr.prot_host_addr_padding, (bit<32>)paddingLen);
         meta.addrLen = meta.addrLen + paddingLen;
         transition parse_prot_inf_0;
     }
 
     state parse_prot_inf_0 {
-        meta.currPos = (bit<8>)(1 + 2 + meta.addrLen / 64);
+        meta.currPos =(bit<8>)(1 + 2 + meta.addrLen / 64);
 
         bool currentISelected = hdr.prot_common.curri == meta.currPos;
         subParser.apply(packet, hdr.prot_inf_0, meta, currentISelected, hdr.prot_common.curri);
@@ -159,9 +157,9 @@ parser PROTParser(packet_in packet,
     }
 
     state parse_prot_h_0_pre {
-        transition select(meta.hLeft) {
-            0: parse_prot_1;
-            default: parse_prot_h_0;
+        transition select (meta.hLeft) {
+            0 : parse_prot_1;
+            default : parse_prot_h_0;
         }
     }
 
@@ -176,9 +174,9 @@ parser PROTParser(packet_in packet,
 
     state parse_prot_1 {
         bit<8> hdrLeft = meta.headerLen - meta.currPos;
-        transition select(hdrLeft) {
-            0: accept;
-            default: parse_prot_inf_1;
+        transition select (hdrLeft) {
+            0 : accept;
+            default : parse_prot_inf_1;
         }
     }
 
@@ -196,7 +194,8 @@ parser PROTParser(packet_in packet,
 *************************************************************************/
 
 control PROTVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 
@@ -221,7 +220,7 @@ control PROTIngress(inout headers hdr,
 control PROTEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-   apply {
+    apply {
     }
 }
 
@@ -230,7 +229,8 @@ control PROTEgress(inout headers hdr,
 *************************************************************************/
 
 control PROTComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 

@@ -3,4 +3,3 @@ extern e {
     e();
     abstract t f(out string e);
 }
-

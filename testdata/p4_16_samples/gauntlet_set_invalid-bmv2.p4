@@ -23,7 +23,8 @@ struct Headers {
     H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers h, inout Meta meta, inout standard_metadata_t stdmeta) {
     state start {
@@ -46,11 +47,20 @@ control ingress(inout Headers h, inout Meta meta, inout standard_metadata_t stdm
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {

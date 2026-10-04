@@ -4,4 +4,3 @@ extern Checksum16 {
     void append<D>(in bool condition, in D d);
     bit<16> get();
 }
-

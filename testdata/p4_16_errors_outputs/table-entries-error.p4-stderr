@@ -1,24 +1,24 @@
-table-entries-error.p4(29): [--Wwarn=keys] warning: Ternary entry covered by previous entry
+table-entries-error.p4(34): [--Wwarn=keys] warning: Ternary entry covered by previous entry
             (0x00, 0x02, 0x02) : a1(3);
             ^^^^^^^^^^^^^^^^^^
-table-entries-error.p4(28)
+table-entries-error.p4(33)
             (0x00, 0x00 &&& 0xf0, 0x02) : a1(2);
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-table-entries-error.p4(32): [--Wwarn=keys] warning: Ternary entry covered by previous entry
+table-entries-error.p4(37): [--Wwarn=keys] warning: Ternary entry covered by previous entry
             (0x01, 0x00 &&& 0x0f, 0x04) : a1(6);
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-table-entries-error.p4(31)
+table-entries-error.p4(36)
             (0x01, _, 0x04) : a1(5);
             ^^^^^^^^^^^^^^^
-table-entries-error.p4(33): [--Wwarn=keys] warning: Ternary entry covered by previous entry
+table-entries-error.p4(38): [--Wwarn=keys] warning: Ternary entry covered by previous entry
             (0x01, 0x10, 0x04) : a1(7);
             ^^^^^^^^^^^^^^^^^^
-table-entries-error.p4(31)
+table-entries-error.p4(36)
             (0x01, _, 0x04) : a1(5);
             ^^^^^^^^^^^^^^^
-table-entries-error.p4(46): [--Werror=keys] error: Duplicate entry keys
+table-entries-error.p4(56): [--Werror=keys] error: Duplicate entry keys
             0x00 : a1(6);
             ^^^^
-table-entries-error.p4(41)
+table-entries-error.p4(51)
             0x00 : a1(1);
             ^^^^

@@ -7,10 +7,10 @@ header data_t {
     bit<32> f2;
     bit<32> f3;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 @name("data2_t") header data2_t_0 {
@@ -23,7 +23,7 @@ struct metadata {
 
 struct headers {
     @name(".data")
-    data_t    data;
+    data_t data;
     @name(".hdr1")
     data2_t_0 hdr1;
     @name(".hdr2")
@@ -32,21 +32,21 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_data2") state parse_data2 {
-        packet.extract<data2_t_0>(hdr.hdr1);
-        transition select(hdr.hdr1.x1) {
-            16w1 &&& 16w1: parse_hdr2;
-            default: accept;
+        packet.extract < data2_t_0 >(hdr.hdr1);
+        transition select (hdr.hdr1.x1) {
+            16w1 &&& 16w1 : parse_hdr2;
+            default : accept;
         }
     }
     @name(".parse_hdr2") state parse_hdr2 {
-        packet.extract<data2_t_0>(hdr.hdr2);
+        packet.extract < data2_t_0 >(hdr.hdr2);
         transition accept;
     }
     @name(".start") state start {
-        packet.extract<data_t>(hdr.data);
-        transition select(hdr.data.b1) {
-            8w0x0: parse_data2;
-            default: accept;
+        packet.extract < data_t >(hdr.data);
+        transition select (hdr.data.b1) {
+            8w0x0 : parse_data2;
+            default : accept;
         }
     }
 }
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1");
+            hdr.data.f1 : exact @name("data.f1");
         }
         default_action = NoAction_1();
     }
@@ -83,9 +83,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data_t>(hdr.data);
-        packet.emit<data2_t_0>(hdr.hdr1);
-        packet.emit<data2_t_0>(hdr.hdr2);
+        packet.emit < data_t >(hdr.data);
+        packet.emit < data2_t_0 >(hdr.hdr1);
+        packet.emit < data2_t_0 >(hdr.hdr2);
     }
 }
 
@@ -99,4 +99,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

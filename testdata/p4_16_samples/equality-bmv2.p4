@@ -8,7 +8,7 @@
 #include <v1model.p4>
 
 header H {
-    bit<8>     s;
+    bit<8> s;
     varbit<32> v;
 }
 
@@ -16,7 +16,8 @@ header Same {
     bit<8> same;
 }
 
-struct metadata {}
+struct metadata {
+}
 
 struct headers {
     H h;
@@ -66,17 +67,20 @@ control ingress(inout headers hdr,
 control egress(inout headers hdr,
                inout metadata meta,
                inout standard_metadata_t stdmeta) {
-    apply {}
+    apply {
+    }
 }
 
 control vc(inout headers hdr,
            inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control uc(inout headers hdr,
            inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control deparser(packet_out packet,
@@ -86,7 +90,7 @@ control deparser(packet_out packet,
     }
 }
 
-V1Switch<headers, metadata>(p(),
+V1Switch < headers, metadata >(p(),
                             vc(),
                             ingress(),
                             egress(),

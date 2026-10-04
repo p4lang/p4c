@@ -11,12 +11,12 @@ header ethernet_t {
 header H {
     bit<32> a;
     bit<32> b;
-    bit<8>  c;
+    bit<8> c;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -25,8 +25,8 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(h.eth_hdr);
-        pkt.extract<H>(h.h);
+        pkt.extract < ethernet_t >(h.eth_hdr);
+        pkt.extract < H >(h.h);
         transition accept;
     }
 }
@@ -40,7 +40,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.c.t") table c_t {
         key = {
-            key_0: exact @name("e");
+            key_0 : exact @name("e");
         }
         actions = {
             c_a_0();
@@ -52,7 +52,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         m.test = 8w1;
         key_0 = h.h.a + h.h.a;
     }
-    @hidden action gauntlet_variable_shadowingbmv2l68() {
+    @hidden action gauntlet_variable_shadowingbmv2l67() {
         h.h.c = 8w1;
     }
     @hidden table tbl_gauntlet_variable_shadowingbmv2l37 {
@@ -61,16 +61,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_variable_shadowingbmv2l37();
     }
-    @hidden table tbl_gauntlet_variable_shadowingbmv2l68 {
+    @hidden table tbl_gauntlet_variable_shadowingbmv2l67 {
         actions = {
-            gauntlet_variable_shadowingbmv2l68();
+            gauntlet_variable_shadowingbmv2l67();
         }
-        const default_action = gauntlet_variable_shadowingbmv2l68();
+        const default_action = gauntlet_variable_shadowingbmv2l67();
     }
     apply {
         tbl_gauntlet_variable_shadowingbmv2l37.apply();
         c_t.apply();
-        tbl_gauntlet_variable_shadowingbmv2l68.apply();
+        tbl_gauntlet_variable_shadowingbmv2l67.apply();
     }
 }
 
@@ -91,9 +91,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

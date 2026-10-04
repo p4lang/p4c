@@ -1,2 +1,3 @@
-
-struct S { S x; }
+struct S {
+    S x;
+}

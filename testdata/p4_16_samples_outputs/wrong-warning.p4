@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -55,10 +55,10 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     hu1_t[2] au1;
     hu1_t[2] au1b;
     apply {
-        hu1b.h1 = { hdr.ethernet.dstAddr[45:38], hdr.ethernet.dstAddr[44:37] };
+        hu1b.h1 = { hdr.ethernet.dstAddr[45 : 38], hdr.ethernet.dstAddr[44 : 37] };
         hu1 = hu1b;
-        au1b[0].h1 = { hdr.ethernet.dstAddr[37:30], hdr.ethernet.dstAddr[36:29] };
-        au1b[1].h2 = { hdr.ethernet.dstAddr[35:28], hdr.ethernet.dstAddr[34:27] };
+        au1b[0].h1 = { hdr.ethernet.dstAddr[37 : 30], hdr.ethernet.dstAddr[36 : 29] };
+        au1b[1].h2 = { hdr.ethernet.dstAddr[35 : 28], hdr.ethernet.dstAddr[34 : 27] };
         au1 = au1b;
         a1 = a1b;
     }

@@ -19,7 +19,7 @@ control C(inout H hdr) {
     bool h_is_valid;
     table t {
         key = {
-            h_is_valid: exact;
+            h_is_valid : exact;
         }
         actions = {
             NoAction;

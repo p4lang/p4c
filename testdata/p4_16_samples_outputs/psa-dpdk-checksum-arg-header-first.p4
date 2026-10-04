@@ -8,18 +8,18 @@ typedef bit<48> ethernet_addr_t;
 header ethernet_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
-    bit<16>         ether_type;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
-    bit<4>  ver;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> ver;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> total_len;
     bit<16> identification;
     bit<16> flags_offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdr_checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
@@ -33,52 +33,52 @@ header udp_t {
 }
 
 header vxlan_t {
-    bit<8>  flags;
+    bit<8> flags;
     bit<24> reserved;
     bit<24> vni;
-    bit<8>  reserved2;
+    bit<8> reserved2;
 }
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    vxlan_t    vxlan;
+    ipv4_t ipv4;
+    vxlan_t vxlan;
     ethernet_t outer_ethernet;
-    ipv4_t     outer_ipv4;
-    udp_t      outer_udp;
-    vxlan_t    outer_vxlan;
+    ipv4_t outer_ipv4;
+    udp_t outer_udp;
+    vxlan_t outer_vxlan;
 }
 
 struct local_metadata_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
-    bit<32>         mem1;
+    bit<32> mem1;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
     InternetChecksum() csum;
     state start {
-        csum.add<bit<31>>(31w0x7);
+        csum.add < bit<31 >>(31w0x7);
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(headers.ethernet);
+        packet.extract < ethernet_t >(headers.ethernet);
         transition parser_ipv4;
     }
     state parser_ipv4 {
-        packet.extract<ipv4_t>(headers.ipv4);
+        packet.extract < ipv4_t >(headers.ipv4);
         transition accept;
     }
 }
 
 control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t headers, in local_metadata_t local_metadata, in psa_ingress_output_metadata_t istd) {
     apply {
-        packet.emit<ethernet_t>(headers.outer_ethernet);
-        packet.emit<ipv4_t>(headers.outer_ipv4);
-        packet.emit<udp_t>(headers.outer_udp);
-        packet.emit<vxlan_t>(headers.outer_vxlan);
-        packet.emit<ethernet_t>(headers.ethernet);
-        packet.emit<ipv4_t>(headers.ipv4);
+        packet.emit < ethernet_t >(headers.outer_ethernet);
+        packet.emit < ipv4_t >(headers.outer_ipv4);
+        packet.emit < udp_t >(headers.outer_udp);
+        packet.emit < vxlan_t >(headers.outer_vxlan);
+        packet.emit < ethernet_t >(headers.ethernet);
+        packet.emit < ipv4_t >(headers.ipv4);
     }
 }
 
@@ -105,20 +105,20 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
         headers.vxlan.reserved = vxlan_reserved;
         headers.vxlan.vni = vxlan_vni;
         headers.vxlan.reserved2 = vxlan_reserved2;
-        ostd.egress_port = (PortId_t)port_out;
-        csum.add<ipv4_t>(headers.outer_ipv4);
-        csum.add<bit<32>>(32w0x7);
-        csum.add<tuple<bit<16>, bit<16>, bit<4>, bit<32>, bit<32>>>({ headers.outer_ipv4.hdr_checksum, headers.ipv4.total_len, headers.ipv4.ver, 32w0x6, local_metadata1.mem1 });
+        ostd.egress_port =(PortId_t) port_out;
+        csum.add < ipv4_t >(headers.outer_ipv4);
+        csum.add < bit<32 >>(32w0x7);
+        csum.add <tuple <bit<16>, bit<16>, bit<4>, bit<32>, bit<32 >>>({ headers.outer_ipv4.hdr_checksum, headers.ipv4.total_len, headers.ipv4.ver, 32w0x6, local_metadata1.mem1 });
         headers.outer_ipv4.hdr_checksum = csum.get();
         headers.outer_ipv4.total_len = headers.outer_ipv4.total_len + headers.ipv4.total_len;
         headers.outer_udp.length = headers.outer_udp.length + headers.ipv4.total_len;
     }
     action drop() {
-        ostd.egress_port = (PortId_t)32w4;
+        ostd.egress_port =(PortId_t) 32w4;
     }
     table vxlan {
         key = {
-            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr");
+            headers.ethernet.dst_addr : exact @name("headers.ethernet.dst_addr");
         }
         actions = {
             vxlan_encap();
@@ -148,6 +148,6 @@ control egress_deparser(packet_out packet, out empty_metadata_t clone_e2e_meta, 
     }
 }
 
-IngressPipeline<headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(packet_parser(), ingress(), packet_deparser()) ip;
-EgressPipeline<headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(egress_parser(), egress(), egress_deparser()) ep;
-PSA_Switch<headers_t, local_metadata_t, headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(packet_parser(), ingress(), packet_deparser()) ip;
+EgressPipeline < headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(egress_parser(), egress(), egress_deparser()) ep;
+PSA_Switch < headers_t, local_metadata_t, headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

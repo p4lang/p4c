@@ -22,9 +22,9 @@ struct col_t {
 
 struct local_metadata_t {
     @field_list(0)
-    row_t      row0;
-    row_t      row1;
-    col_t      col;
+    row_t row0;
+    row_t row1;
+    col_t col;
     bitvec_hdr bvh0;
     bitvec_hdr bvh1;
 }
@@ -35,9 +35,9 @@ struct parsed_packet_t {
 }
 
 struct tst_t {
-    row_t      row0;
-    row_t      row1;
-    col_t      col;
+    row_t row0;
+    row_t row1;
+    col_t col;
     bitvec_hdr bvh0;
     bitvec_hdr bvh1;
 }
@@ -60,8 +60,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     table tns {
         key = {
-            h.bvh1.row.alt1.valid                : exact;
-            local_metadata.col.bvh.row.alt0.valid: exact;
+            h.bvh1.row.alt1.valid : exact;
+            local_metadata.col.bvh.row.alt0.valid : exact;
         }
         actions = {
             do_act;

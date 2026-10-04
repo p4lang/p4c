@@ -9,20 +9,20 @@ typedef bit<32> ip4Addr_t;
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -40,7 +40,7 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -48,13 +48,13 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
         }
     }
     state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -98,27 +98,27 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ipv4_lpm {
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
+            standard_metadata.ingress_port : exact @name("standard_metadata.ingress_port");
         }
         actions = {
             forward_and_do_something();
             NoAction();
         }
         const entries = {
-                        9w1 : forward_and_do_something(9w2);
-                        9w2 : forward_and_do_something(9w1);
+            9w1 : forward_and_do_something(9w2);
+            9w2 : forward_and_do_something(9w1);
         }
         default_action = NoAction();
     }
     table debug {
         key = {
-            meta.before1: exact @name("meta.before1");
+            meta.before1 : exact @name("meta.before1");
             meta.after1 : exact @name("meta.after1");
-            meta.before2: exact @name("meta.before2");
+            meta.before2 : exact @name("meta.before2");
             meta.after2 : exact @name("meta.after2");
-            meta.before3: exact @name("meta.before3");
+            meta.before3 : exact @name("meta.before3");
             meta.after3 : exact @name("meta.after3");
-            meta.before4: exact @name("meta.before4");
+            meta.before4 : exact @name("meta.before4");
             meta.after4 : exact @name("meta.after4");
         }
         actions = {
@@ -141,7 +141,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum < tuple < bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32 >>, bit<16 >>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
@@ -150,4 +150,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

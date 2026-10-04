@@ -39,11 +39,11 @@ control ingressImpl(inout headers_t hdr,
     bit<8> n = 0;
     bit<8> i = 20;
     apply {
-        for (i in 1..6) {
+        for (i in 1 .. 6) {
             n = n + i;
         }
-        hdr.ethernet.srcAddr[15:8] = n;
-        hdr.ethernet.srcAddr[7:0] = i;
+        hdr.ethernet.srcAddr[15 : 8] = n;
+        hdr.ethernet.srcAddr[7 : 0] = i;
         stdmeta.egress_spec = 1;
     }
 }

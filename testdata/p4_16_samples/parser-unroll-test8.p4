@@ -22,7 +22,7 @@ header h_index {
 
 struct headers {
     h_stack[2] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {

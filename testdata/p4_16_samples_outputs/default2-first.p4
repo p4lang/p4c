@@ -6,10 +6,10 @@ header Header {
 
 parser p0(packet_in p, out Header h) {
     state start {
-        p.extract<Header>(h);
-        transition select(h.data) {
-            default: next;
-            default: reject;
+        p.extract < Header >(h);
+        transition select (h.data) {
+            default : next;
+            default : reject;
         }
     }
     state next {

@@ -12,7 +12,7 @@ struct user_meta_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -42,8 +42,8 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
-            b.data              : selector;
+            hdr.ethernet.srcAddr : exact;
+            b.data : selector;
         }
         actions = {
             NoAction;
@@ -64,11 +64,11 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     apply {
         switch (tbl.apply().action_run) {
-            a1: {
-                foo.apply();
+            a1 : {
+            foo.apply();
             }
-            a2: {
-                bar.apply();
+            a2 : {
+            bar.apply();
             }
         }
     }

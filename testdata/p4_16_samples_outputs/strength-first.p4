@@ -43,4 +43,3 @@ control strength() {
         z = z;
     }
 }
-

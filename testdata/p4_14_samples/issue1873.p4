@@ -18,7 +18,9 @@ action simple() {
 }
 
 table simple_tbl {
-    actions { simple; }
+    actions {
+        simple;
+    }
 }
 
 parser start {
@@ -26,5 +28,5 @@ parser start {
 }
 
 control ingress {
-    apply (simple_tbl);
+    apply(simple_tbl);
 }

@@ -5,18 +5,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-extern Crc16<T>
-{}
+extern Crc16<T> {
+}
 
-extern Checksum16
-{
+extern Checksum16 {
     void initialize<T>();
 }
 
 extern void f<T>(in T dt);
-
-control q<S>(in S dt)
-{
+control q<S>(in S dt) {
     apply {
         f<bit<32>>(32w0);
         f(32w0);
@@ -24,13 +21,11 @@ control q<S>(in S dt)
     }
 }
 
-extern X<D>
-{
-   T f<T>(in D d, in T t);
+extern X<D> {
+    T f<T>(in D d, in T t);
 }
 
-control z<D1, T1>(X<D1> x, in D1 v, in T1 t)
-{
+control z<D1, T1>(X<D1> x, in D1 v, in T1 t) {
    // x's type is X<D1>
    // x.f's type is T f<T>(D1 d, T t);
 

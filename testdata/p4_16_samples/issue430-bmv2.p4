@@ -6,7 +6,9 @@
  */
 #include <v1model.p4>
 
-header H { bit<32> f; }
+header H {
+    bit<32> f;
+}
 
 struct my_packet {
     H h;
@@ -22,7 +24,8 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
 }
 
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
-  apply { }
+    apply {
+    }
 }
 
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
@@ -33,15 +36,18 @@ control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadat
 }
 
 control MyEgress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-  apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
-  apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out b, in my_packet p) {
-  apply { }
+    apply {
+    }
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

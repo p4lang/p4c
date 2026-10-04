@@ -7,7 +7,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_h {
     EthernetAddress dst_addr;
     EthernetAddress src_addr;
-    etype_t         ether_type;
+    etype_t ether_type;
 }
 
 struct headers_t {
@@ -38,8 +38,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
     }
     table t1 {
         key = {
-            hdr.ethernet.src_addr  : exact;
-            hdr.ethernet.ether_type: exact;
+            hdr.ethernet.src_addr : exact;
+            hdr.ethernet.ether_type : exact;
         }
         actions = {
             a;
@@ -47,17 +47,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         }
         default_action = a;
         entries = {
-                        priority=10: (0x1, 0x1111) : a_params(1);
-                        (0x2, 0x1181) : a_params(2);
-                        (0x3, 0x1000) : a_params(3);
-                        (0x4, 0x210) : a_params(4);
-                        (0x4, 0x10) : a_params(5);
-                        (0x6, 0x101) : a_params(6);
+            priority = 10 :(0x1, 0x1111) : a_params(1);
+            (0x2, 0x1181) : a_params(2);
+            (0x3, 0x1000) : a_params(3);
+            (0x4, 0x210) : a_params(4);
+            (0x4, 0x10) : a_params(5);
+            (0x6, 0x101) : a_params(6);
         }
     }
     table t2 {
         key = {
-            hdr.ethernet.dst_addr: lpm;
+            hdr.ethernet.dst_addr : lpm;
         }
         actions = {
             a;
@@ -65,18 +65,18 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         }
         default_action = a;
         entries = {
-                        priority=10: 0x1 : a_params(1);
-                        0x2 : a_params(2);
-                        0x3 : a_params(3);
-                        0x4 : a_params(4);
-                        0x4 : a_params(5);
-                        0x6 : a_params(6);
+            priority = 10 : 0x1 : a_params(1);
+            0x2 : a_params(2);
+            0x3 : a_params(3);
+            0x4 : a_params(4);
+            0x4 : a_params(5);
+            0x6 : a_params(6);
         }
     }
     table t3 {
         key = {
-            hdr.ethernet.dst_addr  : lpm;
-            hdr.ethernet.ether_type: exact;
+            hdr.ethernet.dst_addr : lpm;
+            hdr.ethernet.ether_type : exact;
         }
         actions = {
             a;
@@ -84,12 +84,12 @@ control ingressImpl(inout headers_t hdr, inout metadata_t umd, inout standard_me
         }
         default_action = a;
         entries = {
-                        priority=10: (0x1, 0x1111) : a_params(1);
-                        (0x2, 0x1181) : a_params(2);
-                        (0x3, 0x1000) : a_params(3);
-                        (0x4, 0x210) : a_params(4);
-                        (0x4, 0x10) : a_params(5);
-                        (0x6, 0x101) : a_params(6);
+            priority = 10 :(0x1, 0x1111) : a_params(1);
+            (0x2, 0x1181) : a_params(2);
+            (0x3, 0x1000) : a_params(3);
+            (0x4, 0x210) : a_params(4);
+            (0x4, 0x10) : a_params(5);
+            (0x6, 0x101) : a_params(6);
         }
     }
     apply {

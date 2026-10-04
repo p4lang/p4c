@@ -8,4 +8,3 @@ extern E {
     void h(bit<8> a);
     void h(bit<8> a, bit<8> b);
 }
-

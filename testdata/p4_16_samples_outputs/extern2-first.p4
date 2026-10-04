@@ -9,4 +9,3 @@ control c() {
         x.method<bit<8>>(16w0, 8w0);
     }
 }
-

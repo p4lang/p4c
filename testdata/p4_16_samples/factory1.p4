@@ -6,13 +6,17 @@
  */
 #include <core.p4>
 
-extern widget { }
+extern widget {
+}
 
-extern widget createWidget<T, U>(U a, T b);
+extern widget createWidget < T, U >(U a, T b);
 
 parser P();
 parser p1()(widget w) {
-    state start { transition accept; } }
+    state start {
+        transition accept;
+    }
+}
 
 package sw0(P p);
 

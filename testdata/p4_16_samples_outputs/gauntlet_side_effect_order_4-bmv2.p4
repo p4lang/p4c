@@ -16,7 +16,7 @@ struct Meta {
 }
 
 bit<16> do_thing(inout bit<16> val_0) {
-    val_0 = (val_0 < 6 ? 16w0 : 16w3);
+    val_0 =(val_0 < 6 ? 16w0 : 16w3);
     return 16w2;
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {

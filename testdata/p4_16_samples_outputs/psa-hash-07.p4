@@ -12,19 +12,19 @@ struct user_meta_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -32,7 +32,7 @@ header ipv4_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
@@ -49,7 +49,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    Hash<bit<16>>(PSA_HashAlgorithm_t.CRC16) h;
+    Hash < bit<16 >>(PSA_HashAlgorithm_t.CRC16) h;
     const bit<16> base = 2;
     const bit<16> max_val = 32;
     action a1() {
@@ -57,7 +57,7 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

@@ -3,6 +3,7 @@
 control C(inout string s);
 package P(C c);
 control c(out string s)() {
-  apply {}
+    apply {
+    }
 }
 P(c()) main;

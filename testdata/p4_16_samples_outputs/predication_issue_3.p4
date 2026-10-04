@@ -14,14 +14,14 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
+    H[2] h;
 }
 
 struct Meta {
 }
 
 bit<3> bound(in bit<3> val, in bit<3> bound) {
-    return (val < bound ? val : bound);
+    return(val < bound ? val : bound);
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {

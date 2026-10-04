@@ -1,9 +1,10 @@
 // generated from methodArgs.p4
 
 extern Random {
-  Random(bit<16> min);
+    Random(bit<16> min);
 }
 control c()() {
-  Random({#}) r;
-  apply {}
+    Random({#}) r;
+    apply {
+    }
 }

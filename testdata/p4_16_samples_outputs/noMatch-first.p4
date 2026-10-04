@@ -3,8 +3,8 @@
 parser p() {
     state start {
         bit<32> x;
-        transition select(x) {
-            32w0: reject;
+        transition select (x) {
+            32w0 : reject;
         }
     }
 }

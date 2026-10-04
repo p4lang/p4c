@@ -9,7 +9,7 @@ module_e.p4(7)
   parser Filter(out bool filter);
                          ^^^^^^
   ---- Originating from:
-module_e.p4(16): Type of argument 'g' (parser g) does not match type of parameter 'f' (parser Filter)
+module_e.p4(18): Type of argument 'g' (parser g) does not match type of parameter 'f' (parser Filter)
   top(g()) main;
       ^^^
 module_e.p4(11)
@@ -22,6 +22,6 @@ module_e.p4(7)
   parser Filter(out bool filter);
          ^^^^^^
   ---- Originating from:
-module_e.p4(16): Constructor invocation '<Method call>' does not match declaration 'top'
+module_e.p4(18): Constructor invocation '<Method call>' does not match declaration 'top'
   top(g()) main;
            ^^^^

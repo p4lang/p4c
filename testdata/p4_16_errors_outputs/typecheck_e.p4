@@ -4,4 +4,3 @@ control p<T>(in T x) {
         f(x);
     }
 }
-

@@ -15,19 +15,19 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -35,8 +35,8 @@ header ipv4_t {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    EthTypes   type;
+    ipv4_t ipv4;
+    EthTypes type;
 }
 
 struct empty_metadata_t {
@@ -44,11 +44,11 @@ struct empty_metadata_t {
 
 struct mac_learn_digest_t {
     EthernetAddress srcAddr;
-    PortId_t        ingress_port;
+    PortId_t ingress_port;
 }
 
 struct metadata {
-    bool               send_mac_learn_msg;
+    bool send_mac_learn_msg;
     mac_learn_digest_t mac_learn_msg;
 }
 
@@ -58,9 +58,9 @@ parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata met
     }
     state parse_ethernet {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (parsed_hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table learned_sources {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;
@@ -115,7 +115,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table l2_tbl {
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         actions = {
             do_L2_forward;
@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table tst_tbl {
         key = {
-            meta.mac_learn_msg.ingress_port: exact;
+            meta.mac_learn_msg.ingress_port : exact;
         }
         actions = {
             do_tst;
@@ -155,7 +155,7 @@ control CommonDeparserImpl(packet_out packet, inout headers hdr) {
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
     CommonDeparserImpl() common_deparser;
-    Digest<mac_learn_digest_t>() mac_learn_digest;
+    Digest < mac_learn_digest_t >() mac_learn_digest;
     apply {
         if (meta.send_mac_learn_msg) {
             mac_learn_digest.pack(meta.mac_learn_msg);

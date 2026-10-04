@@ -5,4 +5,3 @@ struct InControl {
 
 struct OutControl {
 }
-

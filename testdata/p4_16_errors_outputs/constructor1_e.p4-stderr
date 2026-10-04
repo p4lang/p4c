@@ -1,4 +1,4 @@
 constructor1_e.p4(9):syntax error, unexpected (
-    Y<T>(
-        ^
+    Y < T >(
+           ^
 [--Werror=overlimit] error: 1 errors encountered, aborting compilation

@@ -13,7 +13,6 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-
 struct Headers {
     ethernet_t eth_hdr;
 }
@@ -21,9 +20,8 @@ struct Headers {
 struct Meta {
 }
 
-
 ethernet_t do_function() {
-    return  {1, 1, 1};
+    return { 1, 1, 1 };
 }
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {

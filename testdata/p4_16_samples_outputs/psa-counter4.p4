@@ -8,7 +8,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -29,10 +29,10 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    DirectCounter<bit<12>>(PSA_CounterType_t.PACKETS) counter0;
+    DirectCounter < bit<12 >>(PSA_CounterType_t.PACKETS) counter0;
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

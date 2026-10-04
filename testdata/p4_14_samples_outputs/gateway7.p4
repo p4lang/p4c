@@ -5,10 +5,10 @@
 header data_t {
     bit<32> f1;
     bit<32> f2;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 struct metadata {
@@ -38,7 +38,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1 : exact;
         }
     }
     @name(".test2") table test2 {
@@ -47,7 +47,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: exact;
+            hdr.data.f2 : exact;
         }
     }
     apply {

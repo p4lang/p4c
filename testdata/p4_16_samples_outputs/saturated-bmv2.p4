@@ -9,9 +9,9 @@ header hdr {
     USat_t opr1_8;
     USat_t opr2_8;
     USat_t res_8;
-    Sat_t  opr1_16;
-    Sat_t  opr2_16;
-    Sat_t  res_16;
+    Sat_t opr1_16;
+    Sat_t opr2_16;
+    Sat_t res_16;
 }
 
 struct Header_t {
@@ -73,7 +73,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     Sat_t r;
     table t {
         key = {
-            h.h.op: exact;
+            h.h.op : exact;
         }
         actions = {
             usat_plus;
@@ -84,10 +84,10 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = drop;
         const entries = {
-                        0x1 : usat_plus();
-                        0x2 : usat_minus();
-                        0x3 : sat_plus();
-                        0x4 : sat_minus();
+            0x1 : usat_plus();
+            0x2 : usat_minus();
+            0x3 : sat_plus();
+            0x4 : sat_minus();
         }
     }
     apply {

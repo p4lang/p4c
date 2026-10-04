@@ -13,9 +13,9 @@ header H {
 }
 
 struct S {
-    H[3] h;
+    H[3]    h;
     bit<32> a;
-    T t;
+    T       t;
 }
 
 extern E {

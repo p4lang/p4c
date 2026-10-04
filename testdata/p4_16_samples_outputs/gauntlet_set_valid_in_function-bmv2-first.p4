@@ -9,14 +9,14 @@ header ethernet_t {
 }
 
 header H {
-    bit<8>  a;
+    bit<8> a;
     bit<64> b;
     bit<16> c;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -24,12 +24,12 @@ struct Meta {
 }
 
 bit<16> do_thing() {
-    H tmp_ret = (H){a = 8w0,b = 64w0,c = 16w0};
+    H tmp_ret =(H) { a = 8w0, b = 64w0, c = 16w0 };
     return tmp_ret.c;
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        m.t = (bit<32>)do_thing();
+        m.t =(bit<32>) do_thing();
     }
 }
 
@@ -38,8 +38,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -61,8 +61,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

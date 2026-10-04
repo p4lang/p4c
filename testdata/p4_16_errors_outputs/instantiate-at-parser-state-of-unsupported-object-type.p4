@@ -4,4 +4,3 @@ parser q() {
         p.apply();
     }
 }
-

@@ -3,8 +3,8 @@
 #include <v1model.p4>
 
 header hdr2_t {
-    bit<8>  f1;
-    bit<8>  f2;
+    bit<8> f1;
+    bit<8> f2;
     bit<16> f3;
 }
 
@@ -41,7 +41,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             a22;
         }
         key = {
-            hdr.hdr2.f1: exact;
+            hdr.hdr2.f1 : exact;
         }
         size = 64;
     }

@@ -16,7 +16,7 @@ struct Meta {
 }
 
 bit<8> do_function() {
-    return -1;
+    return - 1;
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -30,7 +30,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        h.eth_hdr.eth_type = (bit<16>)do_function();
+        h.eth_hdr.eth_type =(bit<16>) do_function();
     }
 }
 

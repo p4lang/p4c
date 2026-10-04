@@ -15,4 +15,3 @@ control c() {
     apply {
     }
 }
-

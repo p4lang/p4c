@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -32,7 +32,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            key_0: exact @name("bblsPX");
+            key_0 : exact @name("bblsPX");
         }
         actions = {
             simple_action();
@@ -40,51 +40,51 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_exit_combination_13bmv2l47() {
+    @hidden action gauntlet_exit_combination_13bmv2l48() {
         h.eth_hdr.src_addr = 48w1;
     }
-    @hidden action gauntlet_exit_combination_13bmv2l38() {
+    @hidden action gauntlet_exit_combination_13bmv2l39() {
         hasExited = false;
         key_0 = 8w1;
     }
-    @hidden action gauntlet_exit_combination_13bmv2l50() {
+    @hidden action gauntlet_exit_combination_13bmv2l51() {
         h.eth_hdr.dst_addr = 48w2;
     }
-    @hidden table tbl_gauntlet_exit_combination_13bmv2l38 {
+    @hidden table tbl_gauntlet_exit_combination_13bmv2l39 {
         actions = {
-            gauntlet_exit_combination_13bmv2l38();
+            gauntlet_exit_combination_13bmv2l39();
         }
-        const default_action = gauntlet_exit_combination_13bmv2l38();
+        const default_action = gauntlet_exit_combination_13bmv2l39();
     }
-    @hidden table tbl_gauntlet_exit_combination_13bmv2l47 {
+    @hidden table tbl_gauntlet_exit_combination_13bmv2l48 {
         actions = {
-            gauntlet_exit_combination_13bmv2l47();
+            gauntlet_exit_combination_13bmv2l48();
         }
-        const default_action = gauntlet_exit_combination_13bmv2l47();
+        const default_action = gauntlet_exit_combination_13bmv2l48();
     }
-    @hidden table tbl_gauntlet_exit_combination_13bmv2l50 {
+    @hidden table tbl_gauntlet_exit_combination_13bmv2l51 {
         actions = {
-            gauntlet_exit_combination_13bmv2l50();
+            gauntlet_exit_combination_13bmv2l51();
         }
-        const default_action = gauntlet_exit_combination_13bmv2l50();
+        const default_action = gauntlet_exit_combination_13bmv2l51();
     }
     apply {
-        tbl_gauntlet_exit_combination_13bmv2l38.apply();
+        tbl_gauntlet_exit_combination_13bmv2l39.apply();
         switch (simple_table_0.apply().action_run) {
-            simple_action: {
-                if (hasExited) {
-                    ;
-                } else {
-                    tbl_gauntlet_exit_combination_13bmv2l47.apply();
-                }
+            simple_action : {
+            if (hasExited) {
+            ;
+            } else {
+            tbl_gauntlet_exit_combination_13bmv2l48.apply();
             }
-            default: {
+            }
+            default : {
             }
         }
         if (hasExited) {
             ;
         } else {
-            tbl_gauntlet_exit_combination_13bmv2l50.apply();
+            tbl_gauntlet_exit_combination_13bmv2l51.apply();
         }
     }
 }
@@ -106,8 +106,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

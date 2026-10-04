@@ -7,4 +7,3 @@ control p() {
         z = 1w0;
     }
 }
-

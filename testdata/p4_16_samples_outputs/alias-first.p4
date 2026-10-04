@@ -32,4 +32,3 @@ control c() {
         e.set4(s, s.h[2].b);
     }
 }
-

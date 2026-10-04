@@ -14,32 +14,32 @@ ors
 +-----------------+------------+------------+---+------------+------+
 */
 
-typedef bit<9>  egressSpec_t;
+typedef bit<9> egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header srcRoute_t {
-    bit<2>    bos;   /* Bottom of stack */
-    bit<15>   port;
+    bit<2> bos;   /* Bottom of stack */
+    bit<15> port;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -49,12 +49,12 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t              ethernet;
-    srcRoute_t              srcRoutes1;
-    srcRoute_t              srcRoutes2;
-    srcRoute_t              srcRoutes3;
-    ipv4_t                  ipv4;
-    bit<32>                 index;
+    ethernet_t ethernet;
+    srcRoute_t srcRoutes1;
+    srcRoute_t srcRoutes2;
+    srcRoute_t srcRoutes3;
+    ipv4_t ipv4;
+    bit<32> index;
 }
 
 parser MyParser(packet_in packet,
@@ -64,12 +64,12 @@ parser MyParser(packet_in packet,
     state start {
         hdr.index = 0;
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0: last;
-            1: access1;
-            2: access2;
-            3: access3;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0 : last;
+            1 : access1;
+            2 : access2;
+            3 : access3;
+            default : accept;
         }
     }
 
@@ -98,16 +98,20 @@ parser MyParser(packet_in packet,
 }
 
 control mau(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {
-apply {}
+    apply {
+    }
 }
 control deparse(packet_out pkt, in headers hdr) {
-apply {}
+    apply {
+    }
 }
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-apply {}
+    apply {
+    }
 }
 control computeChecksum(inout headers hdr, inout metadata meta) {
-apply {}
+    apply {
+    }
 }
 V1Switch(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(),
         deparse()) main;

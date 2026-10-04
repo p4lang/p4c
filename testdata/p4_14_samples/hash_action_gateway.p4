@@ -8,7 +8,7 @@ header_type data_t {
         h3 : 16;
         h4 : 16;
     }
-} 
+}
 
 header data_t data;
 
@@ -38,7 +38,7 @@ table index_setter {
         data.f2 : exact;
     }
     actions {
-        set_index;    
+        set_index;
     }
     size : 2048;
 }

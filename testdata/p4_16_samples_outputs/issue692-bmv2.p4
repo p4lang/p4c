@@ -30,9 +30,9 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta, inout std_meta_t std_
     }
     state p0 {
         b.extract(parsedHdr.hstack.next);
-        transition select(parsedHdr.hstack.next.y) {
-            0: p0;
-            default: accept;
+        transition select (parsedHdr.hstack.next.y) {
+            0 : p0;
+            default : accept;
         }
     }
 }

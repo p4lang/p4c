@@ -30,22 +30,22 @@ struct headers {
     @name(".cpu_header")
     cpu_header_t cpu_header;
     @name(".ethernet")
-    ethernet_t   ethernet;
+    ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_cpu_header") state parse_cpu_header {
-        packet.extract<cpu_header_t>(hdr.cpu_header);
+        packet.extract < cpu_header_t >(hdr.cpu_header);
         transition parse_ethernet;
     }
     @name(".parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
     @name(".start") state start {
-        transition select(packet.lookahead<bit<64>>()) {
-            64w0: parse_cpu_header;
-            default: parse_ethernet;
+        transition select (packet.lookahead < bit<64 >>()) {
+            64w0 : parse_cpu_header;
+            default : parse_ethernet;
         }
     }
 }
@@ -66,7 +66,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.instance_type: exact @name("standard_metadata.instance_type");
+            standard_metadata.instance_type : exact @name("standard_metadata.instance_type");
         }
         size = 16;
         default_action = NoAction();
@@ -95,8 +95,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<cpu_header_t>(hdr.cpu_header);
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < cpu_header_t >(hdr.cpu_header);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -110,4 +110,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

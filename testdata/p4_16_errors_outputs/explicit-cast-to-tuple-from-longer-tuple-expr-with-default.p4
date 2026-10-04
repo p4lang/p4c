@@ -7,4 +7,3 @@ control C() {
         stack = (tuple<>){ (H){#}, ... };
     }
 }
-

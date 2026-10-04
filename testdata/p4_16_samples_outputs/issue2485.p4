@@ -14,9 +14,9 @@ struct Headers {
 parser p(packet_in packet, out Headers hdr) {
     state start {
         packet.extract(hdr.h);
-        transition select(hdr.h.a) {
-            0x0 .. 0x4: parse;
-            default: accept;
+        transition select (hdr.h.a) {
+            0x0 .. 0x4 : parse;
+            default : accept;
         }
     }
     state parse {

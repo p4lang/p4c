@@ -3,70 +3,70 @@
 #include <v1model.p4>
 
 struct m_t {
-    bit<8>  field_8_01;
-    bit<8>  field_8_02;
-    bit<8>  field_8_03;
-    bit<8>  field_8_04;
-    bit<8>  field_8_05;
-    bit<8>  field_8_06;
-    bit<8>  field_8_07;
-    bit<8>  field_8_08;
-    bit<8>  field_8_09;
-    bit<8>  field_8_10;
-    bit<8>  field_8_11;
-    bit<8>  field_8_12;
-    bit<8>  field_8_13;
-    bit<8>  field_8_14;
-    bit<8>  field_8_15;
-    bit<8>  field_8_16;
-    bit<8>  field_8_17;
-    bit<8>  field_8_18;
-    bit<8>  field_8_19;
-    bit<8>  field_8_20;
-    bit<8>  field_8_21;
-    bit<8>  field_8_22;
-    bit<8>  field_8_23;
-    bit<8>  field_8_24;
-    bit<8>  field_8_25;
-    bit<8>  field_8_26;
-    bit<8>  field_8_27;
-    bit<8>  field_8_28;
-    bit<8>  field_8_29;
-    bit<8>  field_8_30;
-    bit<8>  field_8_31;
-    bit<8>  field_8_32;
-    bit<8>  field_8_33;
-    bit<8>  field_8_34;
-    bit<8>  field_8_35;
-    bit<8>  field_8_36;
-    bit<8>  field_8_37;
-    bit<8>  field_8_38;
-    bit<8>  field_8_39;
-    bit<8>  field_8_40;
-    bit<8>  field_8_41;
-    bit<8>  field_8_42;
-    bit<8>  field_8_43;
-    bit<8>  field_8_44;
-    bit<8>  field_8_45;
-    bit<8>  field_8_46;
-    bit<8>  field_8_47;
-    bit<8>  field_8_48;
-    bit<8>  field_8_49;
-    bit<8>  field_8_50;
-    bit<8>  field_8_51;
-    bit<8>  field_8_52;
-    bit<8>  field_8_53;
-    bit<8>  field_8_54;
-    bit<8>  field_8_55;
-    bit<8>  field_8_56;
-    bit<8>  field_8_57;
-    bit<8>  field_8_58;
-    bit<8>  field_8_59;
-    bit<8>  field_8_60;
-    bit<8>  field_8_61;
-    bit<8>  field_8_62;
-    bit<8>  field_8_63;
-    bit<8>  field_8_64;
+    bit<8> field_8_01;
+    bit<8> field_8_02;
+    bit<8> field_8_03;
+    bit<8> field_8_04;
+    bit<8> field_8_05;
+    bit<8> field_8_06;
+    bit<8> field_8_07;
+    bit<8> field_8_08;
+    bit<8> field_8_09;
+    bit<8> field_8_10;
+    bit<8> field_8_11;
+    bit<8> field_8_12;
+    bit<8> field_8_13;
+    bit<8> field_8_14;
+    bit<8> field_8_15;
+    bit<8> field_8_16;
+    bit<8> field_8_17;
+    bit<8> field_8_18;
+    bit<8> field_8_19;
+    bit<8> field_8_20;
+    bit<8> field_8_21;
+    bit<8> field_8_22;
+    bit<8> field_8_23;
+    bit<8> field_8_24;
+    bit<8> field_8_25;
+    bit<8> field_8_26;
+    bit<8> field_8_27;
+    bit<8> field_8_28;
+    bit<8> field_8_29;
+    bit<8> field_8_30;
+    bit<8> field_8_31;
+    bit<8> field_8_32;
+    bit<8> field_8_33;
+    bit<8> field_8_34;
+    bit<8> field_8_35;
+    bit<8> field_8_36;
+    bit<8> field_8_37;
+    bit<8> field_8_38;
+    bit<8> field_8_39;
+    bit<8> field_8_40;
+    bit<8> field_8_41;
+    bit<8> field_8_42;
+    bit<8> field_8_43;
+    bit<8> field_8_44;
+    bit<8> field_8_45;
+    bit<8> field_8_46;
+    bit<8> field_8_47;
+    bit<8> field_8_48;
+    bit<8> field_8_49;
+    bit<8> field_8_50;
+    bit<8> field_8_51;
+    bit<8> field_8_52;
+    bit<8> field_8_53;
+    bit<8> field_8_54;
+    bit<8> field_8_55;
+    bit<8> field_8_56;
+    bit<8> field_8_57;
+    bit<8> field_8_58;
+    bit<8> field_8_59;
+    bit<8> field_8_60;
+    bit<8> field_8_61;
+    bit<8> field_8_62;
+    bit<8> field_8_63;
+    bit<8> field_8_64;
     bit<16> field_16_01;
     bit<16> field_16_02;
     bit<16> field_16_03;
@@ -247,7 +247,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -498,7 +498,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -512,4 +512,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

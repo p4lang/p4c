@@ -11,7 +11,8 @@ struct H {
     Header[2] h2;
 }
 
-struct M { }
+struct M {
+}
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
@@ -35,8 +36,8 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.h1[1].data = 1;
         hdr.h1[0].setInvalid();
         transition select (hdr.h1[1].data) {
-            0: init;
-            default: accept;
+            0 : init;
+            default : accept;
         }
     }
 }
@@ -57,7 +58,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     action invalidateStack(inout Header[2] stack) {
         invalidateHeader(stack[0]);
         invalidateHeader(stack[1]);
-    } 
+    }
 
     apply {
         validateHeader(h.h1[0]);
@@ -134,4 +135,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

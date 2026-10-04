@@ -2,25 +2,24 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -37,17 +36,14 @@ struct metadata_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
-
 
 error {
     UnhandledIPv4Options,
     BadIPv4HeaderChecksum
 }
-
-
 
 parser IngressParserImpl(packet_in buffer,
                             out headers_t parsed_hdr,
@@ -61,15 +57,15 @@ parser IngressParserImpl(packet_in buffer,
     }
     state parse_ethernet {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (parsed_hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         buffer.extract(parsed_hdr.ipv4);
 
-    transition accept;
+        transition accept;
     }
 }
 
@@ -78,12 +74,12 @@ control ingress(inout headers_t hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
-    Hash<bit<16>>(PSA_HashAlgorithm_t.CRC16) h;
-    bit<12> a=0x456;
-    apply{
+    Hash < bit<16 >>(PSA_HashAlgorithm_t.CRC16) h;
+    bit<12> a = 0x456;
+    apply {
         send_to_port(ostd, istd.ingress_port);
         hdr.ipv4.hdrChecksum = h.get_hash({a});
-    if (hdr.ipv4.hdrChecksum == 0xfe82)
+        if (hdr.ipv4.hdrChecksum == 0xfe82)
         hdr.ethernet.etherType = 7;
     }
 }
@@ -107,10 +103,10 @@ control egress(inout headers_t hdr,
                 in    psa_egress_input_metadata_t  istd,
                 inout psa_egress_output_metadata_t ostd)
 {
-    Hash<bit<16>>(PSA_HashAlgorithm_t.CRC16) h;
+    Hash < bit<16 >>(PSA_HashAlgorithm_t.CRC16) h;
     bit<4> base = 0x06;
     bit<4> max = 0x0A;
-    apply { 
+    apply {
         hdr.ipv4.hdrChecksum = h.get_hash(base, { hdr.ipv4.version,
                 hdr.ipv4.ihl,
                 hdr.ipv4.diffserv,
@@ -149,8 +145,8 @@ control EgressDeparserImpl(packet_out buffer,
 {
     apply {
 
-    buffer.emit(hdr.ethernet);   
-    buffer.emit(hdr.ipv4);
+        buffer.emit(hdr.ethernet);
+        buffer.emit(hdr.ipv4);
     }
 }
 

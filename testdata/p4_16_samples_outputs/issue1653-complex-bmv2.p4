@@ -13,12 +13,12 @@ enum bit<16> EthTypes {
 }
 
 struct alt_t {
-    bit<1>   valid;
-    bit<7>   port;
-    int<8>   hashRes;
-    bool     useHash;
+    bit<1> valid;
+    bit<7> port;
+    int<8> hashRes;
+    bool useHash;
     EthTypes type;
-    bit<7>   pad;
+    bit<7> pad;
 }
 
 struct row_t {
@@ -32,8 +32,8 @@ header bitvec_hdr {
 
 struct local_metadata_t {
     @field_list(0)
-    row_t      row0;
-    row_t      row1;
+    row_t row0;
+    row_t row1;
     bitvec_hdr bvh0;
     bitvec_hdr bvh1;
 }
@@ -59,8 +59,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     table tns {
         key = {
-            h.bvh1.row.alt1.valid         : exact;
-            local_metadata.row0.alt0.valid: exact;
+            h.bvh1.row.alt1.valid : exact;
+            local_metadata.row0.alt0.valid : exact;
         }
         actions = {
             do_act;

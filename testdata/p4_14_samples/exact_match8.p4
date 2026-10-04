@@ -25,17 +25,44 @@ parser start {
     return ingress;
 }
 
-action noop() { }
-action setb1(val) { modify_field(data.b1, val); }
-action setb2(val) { modify_field(data.b2, val); }
-action setb3(val) { modify_field(data.b3, val); }
-action setb4(val) { modify_field(data.b4, val); }
-action setb12(v1, v2) { modify_field(data.b1, v1); modify_field(data.b2, v2); }
-action setb13(v1, v2) { modify_field(data.b1, v1); modify_field(data.b3, v2); }
-action setb14(v1, v2) { modify_field(data.b1, v1); modify_field(data.b4, v2); }
-action setb23(v1, v2) { modify_field(data.b2, v1); modify_field(data.b3, v2); }
-action setb24(v1, v2) { modify_field(data.b2, v1); modify_field(data.b4, v2); }
-action setb34(v1, v2) { modify_field(data.b3, v1); modify_field(data.b4, v2); }
+action noop() {
+}
+action setb1(val) {
+    modify_field(data.b1, val);
+}
+action setb2(val) {
+    modify_field(data.b2, val);
+}
+action setb3(val) {
+    modify_field(data.b3, val);
+}
+action setb4(val) {
+    modify_field(data.b4, val);
+}
+action setb12(v1, v2) {
+    modify_field(data.b1, v1);
+    modify_field(data.b2, v2);
+}
+action setb13(v1, v2) {
+    modify_field(data.b1, v1);
+    modify_field(data.b3, v2);
+}
+action setb14(v1, v2) {
+    modify_field(data.b1, v1);
+    modify_field(data.b4, v2);
+}
+action setb23(v1, v2) {
+    modify_field(data.b2, v1);
+    modify_field(data.b3, v2);
+}
+action setb24(v1, v2) {
+    modify_field(data.b2, v1);
+    modify_field(data.b4, v2);
+}
+action setb34(v1, v2) {
+    modify_field(data.b3, v1);
+    modify_field(data.b4, v2);
+}
 
 table test1 {
     reads {

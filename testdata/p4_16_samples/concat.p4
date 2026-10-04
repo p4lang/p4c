@@ -12,7 +12,7 @@ control c(out bit<32> x) {
     apply {
         bit<8> a = 0xF;
         bit<16> b = 0xF;
-        x = (a ++ b ++ a) + (b ++ (a ++ a));
+        x =(a ++ b ++ a) +(b ++(a ++ a));
     }
 }
 

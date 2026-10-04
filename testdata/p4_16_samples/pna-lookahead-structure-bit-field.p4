@@ -34,11 +34,11 @@ parser MainParserImpl(
     in    pna_main_parser_input_metadata_t istd)
 {
     state start {
-        main_meta.f1 = pkt.lookahead<bit<8>>();
-        transition select(main_meta.f1) {
-            8w01: parse_h1;
-            8w02: parse_h2;
-            default: accept;
+        main_meta.f1 = pkt.lookahead < bit<8 >>();
+        transition select (main_meta.f1) {
+            8w01 : parse_h1;
+            8w02 : parse_h2;
+            default : accept;
         }
     }
 
@@ -59,7 +59,8 @@ control PreControlImpl(
     in    pna_pre_input_metadata_t  istd,
     inout pna_pre_output_metadata_t ostd)
 {
-    apply {}
+    apply {
+    }
 }
 
 control MainControlImpl(

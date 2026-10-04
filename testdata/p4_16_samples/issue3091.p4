@@ -70,7 +70,7 @@ table vlt1 {
  * @param M  each field of the struct M must be of type match_kind.
  *           should have the same number of fields as K.
  */
-extern ValueLookupTable<M, K, V> {
+extern ValueLookupTable < M, K, V > {
     /**
      * Create a table with match kinds M and the specified size
      * (number of entries).  The default value returned when a lookup
@@ -98,7 +98,7 @@ extern ValueLookupTable<M, K, V> {
  * and the match_kind of all lookup key fields is restricted to be
  * exact.
  */
-extern ValueExactLookupTable<K, V> {
+extern ValueExactLookupTable < K, V > {
     /**
      * Create a table with match kinds all 'exact' and the specified
      * size (number of entries).  The default value returned when a
@@ -132,9 +132,9 @@ extern ValueExactLookupTable<K, V> {
  * implemented in today's p4c, whereas the 'union' keyword -- used in
  * Mihai's example linked to above -- is not.
  */
-struct ValueOrMiss<T> {
+struct ValueOrMiss < T > {
     bool hit;
-    T    value;
+    T value;
 }
 
 /**
@@ -146,7 +146,7 @@ struct ValueOrMiss<T> {
  * @param M  each field of the struct M must be of type match_kind.
  *           should have the same number of fields as K.
  */
-extern LookupTable<M, K, V> {
+extern LookupTable < M, K, V > {
     /**
      * Create a table with match kinds M and the specified size
      * (number of entries).
@@ -165,21 +165,21 @@ extern LookupTable<M, K, V> {
      *   V.  This value should not be relied upon to have a predictable
      *   value.
      */
-    ValueOrMiss<V> lookup(in K key);
+    ValueOrMiss < V > lookup(in K key);
 }
 
-extern bit<8> fn_foo<T>(in T data);
+extern bit<8> fn_foo < T >(in T data);
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -201,26 +201,27 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
-typedef tuple <match_kind> mk1_t;
+typedef tuple < match_kind > mk1_t;
 
-const tuple<match_kind> exact_once = {exact};
+const tuple < match_kind > exact_once = { exact };
 
 control ingressImpl(
     inout headers_t hdr,
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    ValueLookupTable<tuple<match_kind>, bit<8>, bit<16>>(exact_once, 1024) lut3;
+    ValueLookupTable < tuple < match_kind >, bit<8>, bit<16 >>(exact_once, 1024) lut3;
 
     apply {
         if (hdr.ethernet.isValid()) {
-            hdr.ethernet.dstAddr[47:40] = 5;
-            hdr.ethernet.etherType[7:0] = fn_foo(ternary);
+            hdr.ethernet.dstAddr[47 : 40] = 5;
+            hdr.ethernet.etherType[7 : 0] = fn_foo(ternary);
 
-            hdr.ethernet.dstAddr[15:0] = lut3.lookup(hdr.ethernet.etherType[7:0]);
+            hdr.ethernet.dstAddr[15 : 0] = lut3.lookup(hdr.ethernet.etherType[7:0]);
         }
     }
 }
@@ -230,14 +231,16 @@ control egressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(

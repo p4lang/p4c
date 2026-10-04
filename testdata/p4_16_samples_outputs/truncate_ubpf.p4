@@ -11,7 +11,7 @@ header next_header_t {
 
 struct Headers_t {
     truncate_spec_t spec;
-    next_header_t   data;
+    next_header_t data;
 }
 
 struct metadata {

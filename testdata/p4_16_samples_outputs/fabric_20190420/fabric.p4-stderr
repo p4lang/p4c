@@ -8,7 +8,7 @@ define.p4(97): [--Wwarn=unused] warning: 'ETHERTYPE_QINQ_NON_STD' is unused
 const bit<16> ETHERTYPE_QINQ_NON_STD = 0x9100;
               ^^^^^^^^^^^^^^^^^^^^^^
 define.p4(100): [--Wwarn=unused] warning: 'ETHERTYPE_MPLS_MULTICAST' is unused
-const bit<16> ETHERTYPE_MPLS_MULTICAST =0x8848;
+const bit<16> ETHERTYPE_MPLS_MULTICAST = 0x8848;
               ^^^^^^^^^^^^^^^^^^^^^^^^
 define.p4(102): [--Wwarn=unused] warning: 'ETHERTYPE_IPV6' is unused
 const bit<16> ETHERTYPE_IPV6 = 0x86dd;

@@ -15,7 +15,7 @@ parser p(packet_in pkt, out Headers hdr) {
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -30,7 +30,7 @@ control ingress(inout Headers h) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("tyhSfv");
+            h.eth_hdr.eth_type : exact @name("tyhSfv");
         }
         actions = {
             do_action();
@@ -40,10 +40,10 @@ control ingress(inout Headers h) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            do_action: {
-                h.eth_hdr.eth_type = 16w0xdead;
+            do_action : {
+            h.eth_hdr.eth_type = 16w0xdead;
             }
-            default: {
+            default : {
             }
         }
     }

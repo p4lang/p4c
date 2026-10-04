@@ -25,7 +25,7 @@ action send_to_cpu(inout standard_metadata_t standard_metadata) {
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     table t0 {
         key = {
-            standard_metadata.ingress_port: ternary;
+            standard_metadata.ingress_port : ternary;
         }
         actions = {
             send_to_cpu(standard_metadata);

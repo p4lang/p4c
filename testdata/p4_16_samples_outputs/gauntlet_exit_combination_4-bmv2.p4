@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            48w100: exact @name("key");
+            48w100 : exact @name("key");
         }
         actions = {
             exit_action();
@@ -39,9 +39,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            exit_action: {
-                h.eth_hdr.eth_type = 16w1;
-                exit_action();
+            exit_action : {
+            h.eth_hdr.eth_type = 16w1;
+            exit_action();
             }
         }
     }

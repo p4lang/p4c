@@ -4,4 +4,3 @@ control c() {
         c_inst.apply();
     }
 }
-

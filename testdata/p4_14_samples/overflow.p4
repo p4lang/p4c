@@ -7,8 +7,8 @@
 
 header_type metadata_t {
     fields {
-        field_1_1_1  : 1;
-        field_2_1_1  : 1;
+        field_1_1_1 : 1;
+        field_2_1_1 : 1;
     }
 }
 

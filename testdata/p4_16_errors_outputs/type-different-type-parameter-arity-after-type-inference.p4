@@ -5,4 +5,3 @@ control c() {
         f(x);
     }
 }
-

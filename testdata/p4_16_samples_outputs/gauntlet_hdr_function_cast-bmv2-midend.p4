@@ -18,8 +18,8 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr1);
-        pkt.extract<ethernet_t>(hdr.eth_hdr2);
+        pkt.extract < ethernet_t >(hdr.eth_hdr1);
+        pkt.extract < ethernet_t >(hdr.eth_hdr2);
         transition accept;
     }
 }
@@ -27,31 +27,37 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.retval") ethernet_t retval;
     @name("ingress.retval_0") ethernet_t retval_0;
-    @hidden action gauntlet_hdr_function_castbmv2l28() {
+    @hidden action gauntlet_hdr_function_castbmv2l26() {
         retval.setValid();
         retval.dst_addr = 48w1;
         retval.src_addr = 48w1;
         retval.eth_type = 16w1;
     }
-    @hidden action gauntlet_hdr_function_castbmv2l30() {
+    @hidden action gauntlet_hdr_function_castbmv2l28() {
         retval.setValid();
         retval.dst_addr = 48w2;
         retval.src_addr = 48w2;
         retval.eth_type = 16w2;
     }
-    @hidden action gauntlet_hdr_function_castbmv2l32() {
+    @hidden action gauntlet_hdr_function_castbmv2l30() {
         retval.setValid();
         retval.dst_addr = 48w3;
         retval.src_addr = 48w3;
         retval.eth_type = 16w3;
     }
-    @hidden action gauntlet_hdr_function_castbmv2l36() {
+    @hidden action gauntlet_hdr_function_castbmv2l34() {
         h.eth_hdr1 = retval;
         retval_0.setValid();
         retval_0.dst_addr = 48w1;
         retval_0.src_addr = 48w1;
         retval_0.eth_type = 16w1;
         h.eth_hdr2 = retval_0;
+    }
+    @hidden table tbl_gauntlet_hdr_function_castbmv2l26 {
+        actions = {
+            gauntlet_hdr_function_castbmv2l26();
+        }
+        const default_action = gauntlet_hdr_function_castbmv2l26();
     }
     @hidden table tbl_gauntlet_hdr_function_castbmv2l28 {
         actions = {
@@ -65,27 +71,21 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_hdr_function_castbmv2l30();
     }
-    @hidden table tbl_gauntlet_hdr_function_castbmv2l32 {
+    @hidden table tbl_gauntlet_hdr_function_castbmv2l34 {
         actions = {
-            gauntlet_hdr_function_castbmv2l32();
+            gauntlet_hdr_function_castbmv2l34();
         }
-        const default_action = gauntlet_hdr_function_castbmv2l32();
-    }
-    @hidden table tbl_gauntlet_hdr_function_castbmv2l36 {
-        actions = {
-            gauntlet_hdr_function_castbmv2l36();
-        }
-        const default_action = gauntlet_hdr_function_castbmv2l36();
+        const default_action = gauntlet_hdr_function_castbmv2l34();
     }
     apply {
         if (h.eth_hdr1.eth_type == 16w1) {
-            tbl_gauntlet_hdr_function_castbmv2l28.apply();
+            tbl_gauntlet_hdr_function_castbmv2l26.apply();
         } else if (h.eth_hdr1.eth_type == 16w2) {
-            tbl_gauntlet_hdr_function_castbmv2l30.apply();
+            tbl_gauntlet_hdr_function_castbmv2l28.apply();
         } else {
-            tbl_gauntlet_hdr_function_castbmv2l32.apply();
+            tbl_gauntlet_hdr_function_castbmv2l30.apply();
         }
-        tbl_gauntlet_hdr_function_castbmv2l36.apply();
+        tbl_gauntlet_hdr_function_castbmv2l34.apply();
     }
 }
 
@@ -106,9 +106,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr1);
-        pkt.emit<ethernet_t>(h.eth_hdr2);
+        pkt.emit < ethernet_t >(h.eth_hdr1);
+        pkt.emit < ethernet_t >(h.eth_hdr2);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

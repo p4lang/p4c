@@ -6,7 +6,7 @@ control c() {
     }
     @name("c.foo_y_bar_x_") action foo() {
     }
-    @DummyVendor_Structured[a="X_Y", b="Y_z"] @name("c.bar") action bar() {
+    @DummyVendor_Structured[a = "X_Y", b = "Y_z"] @name("c.bar") action bar() {
     }
     @DummyVendor_Structured2["X_Y", "Y_z"] @name("c.baz") action baz() {
     }
@@ -22,18 +22,18 @@ control c() {
         }
         default_action = NoAction_1();
     }
-    @hidden action specissue1297stringcat39() {
+    @hidden action specissue1297stringcat49() {
         log("simple msg");
         log("concat msg multiple lines");
     }
-    @hidden table tbl_specissue1297stringcat39 {
+    @hidden table tbl_specissue1297stringcat49 {
         actions = {
-            specissue1297stringcat39();
+            specissue1297stringcat49();
         }
-        const default_action = specissue1297stringcat39();
+        const default_action = specissue1297stringcat49();
     }
     apply {
-        tbl_specissue1297stringcat39.apply();
+        tbl_specissue1297stringcat49.apply();
         a_0.apply();
     }
 }

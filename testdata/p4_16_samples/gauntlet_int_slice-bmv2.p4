@@ -22,7 +22,8 @@ struct Headers {
     H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -42,7 +43,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 
     apply {
-        h.h.a = tmp.dst_addr[16:9];
+        h.h.a = tmp.dst_addr[16 : 9];
     }
 }
 
@@ -68,4 +69,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

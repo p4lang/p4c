@@ -25,7 +25,8 @@ struct Header_t {
     hdr h;
 }
 
-struct Meta_t {}
+struct Meta_t {
+}
 
 parser p(packet_in b,
          out Header_t h,
@@ -36,20 +37,28 @@ parser p(packet_in b,
     }
 }
 
-control c(inout Header_t h, inout Meta_t m) { apply {} }
+control c(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
 
 control ingress(inout Header_t h,
                 inout Meta_t m,
                 inout standard_metadata_t standard_meta) {
-    apply {}
+    apply {
+    }
 }
 
-control egress (inout Header_t h,
+control egress(inout Header_t h,
                 inout Meta_t m,
                 inout standard_metadata_t sm) {
-    apply {}
+    apply {
+    }
 }
 
-control deparser(packet_out b, in Header_t h) { apply {} }
+control deparser(packet_out b, in Header_t h) {
+    apply {
+    }
+}
 
 V1Switch(p(), c(), ingress(), egress(), c(), deparser()) main;

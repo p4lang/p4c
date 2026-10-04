@@ -19,7 +19,7 @@ struct headers_t {
 
 parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -29,27 +29,27 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr;
+        ostd.egress_port =(bit<32>) hdr.ethernet.dstAddr;
     }
-    @name("cIngress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
-    @hidden action psameter7bmv2l52() {
+    @name("cIngress.meter0") Meter < bit<12 >>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
+    @hidden action psameter7bmv2l51() {
         hdr.ethernet.dstAddr = 48w3;
     }
-    @hidden action psameter7bmv2l50() {
+    @hidden action psameter7bmv2l49() {
         hdr.ethernet.dstAddr = 48w2;
         tmp = meter0_0.execute(12w1);
     }
-    @hidden table tbl_psameter7bmv2l50 {
+    @hidden table tbl_psameter7bmv2l49 {
         actions = {
-            psameter7bmv2l50();
+            psameter7bmv2l49();
         }
-        const default_action = psameter7bmv2l50();
+        const default_action = psameter7bmv2l49();
     }
-    @hidden table tbl_psameter7bmv2l52 {
+    @hidden table tbl_psameter7bmv2l51 {
         actions = {
-            psameter7bmv2l52();
+            psameter7bmv2l51();
         }
-        const default_action = psameter7bmv2l52();
+        const default_action = psameter7bmv2l51();
     }
     @hidden table tbl_send_to_port {
         actions = {
@@ -58,9 +58,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         const default_action = send_to_port_0();
     }
     apply {
-        tbl_psameter7bmv2l50.apply();
+        tbl_psameter7bmv2l49.apply();
         if (tmp == PSA_MeterColor_t.GREEN) {
-            tbl_psameter7bmv2l52.apply();
+            tbl_psameter7bmv2l51.apply();
         }
         tbl_send_to_port.apply();
     }
@@ -68,7 +68,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
 
 parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        buffer.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -80,7 +80,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
     @hidden action psameter7bmv2l84() {
-        buffer.emit<ethernet_t>(hdr.ethernet);
+        buffer.emit < ethernet_t >(hdr.ethernet);
     }
     @hidden table tbl_psameter7bmv2l84 {
         actions = {
@@ -95,7 +95,7 @@ control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_me
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     @hidden action psameter7bmv2l84_0() {
-        buffer.emit<ethernet_t>(hdr.ethernet);
+        buffer.emit < ethernet_t >(hdr.ethernet);
     }
     @hidden table tbl_psameter7bmv2l84_0 {
         actions = {
@@ -108,6 +108,6 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
     }
 }
 
-IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
-EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
-PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
+EgressPipeline < headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
+PSA_Switch < headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

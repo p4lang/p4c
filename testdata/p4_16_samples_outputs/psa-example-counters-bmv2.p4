@@ -5,19 +5,19 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -39,7 +39,7 @@ typedef bit<64> PacketByteCounter_t;
 const bit<32> NUM_PORTS = 512;
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata user_meta) {
@@ -48,9 +48,9 @@ parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata use
     }
     state parse_ethernet {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (parsed_hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -76,8 +76,8 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    Counter<ByteCounter_t, PortId_t>(NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_in;
-    DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count;
+    Counter < ByteCounter_t, PortId_t >(NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_in;
+    DirectCounter < PacketByteCounter_t >(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count;
     action next_hop(PortId_t oport) {
         per_prefix_pkt_byte_count.count();
         send_to_port(ostd, oport);
@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             next_hop;
@@ -106,7 +106,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    Counter<ByteCounter_t, PortId_t>(NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_out;
+    Counter < ByteCounter_t, PortId_t >(NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_out;
     apply {
         port_bytes_out.count(istd.egress_port);
     }

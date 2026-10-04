@@ -6,4 +6,3 @@ control SetAndFwd() {
         d = (bool)a;
     }
 }
-

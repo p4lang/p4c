@@ -21,15 +21,15 @@ struct metadata {
 
 struct headers {
     @name(".expressivenesss")
-    backs_0   expressivenesss;
+    backs_0 expressivenesss;
     @name(".kilometer")
     affairs_0 kilometer;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<affairs_0>(hdr.kilometer);
-        packet.extract<backs_0>(hdr.expressivenesss);
+        packet.extract < affairs_0 >(hdr.kilometer);
+        packet.extract < backs_0 >(hdr.expressivenesss);
         transition accept;
     }
 }
@@ -47,9 +47,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.kilometer.isValid()      : exact @name("kilometer.$valid$");
-            48w0                         : lpm @name("kilometer.flaccidly");
-            hdr.expressivenesss.isValid(): exact @name("expressivenesss.$valid$");
+            hdr.kilometer.isValid() : exact @name("kilometer.$valid$");
+            48w0 : lpm @name("kilometer.flaccidly");
+            hdr.expressivenesss.isValid() : exact @name("expressivenesss.$valid$");
         }
         default_action = NoAction_1();
     }
@@ -65,8 +65,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<affairs_0>(hdr.kilometer);
-        packet.emit<backs_0>(hdr.expressivenesss);
+        packet.emit < affairs_0 >(hdr.kilometer);
+        packet.emit < backs_0 >(hdr.expressivenesss);
     }
 }
 
@@ -80,4 +80,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

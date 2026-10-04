@@ -11,8 +11,7 @@
 #include "../define.p4"
 #include "../header.p4"
 
-
-control Forwarding (inout parsed_headers_t hdr,
+control Forwarding(inout parsed_headers_t hdr,
                     inout fabric_metadata_t fabric_metadata,
                     inout standard_metadata_t standard_metadata) {
 
@@ -36,8 +35,8 @@ control Forwarding (inout parsed_headers_t hdr,
     //  with a multi-table/algorithmic approach?
     table bridging {
         key = {
-            fabric_metadata.vlan_id: exact @name("vlan_id");
-            hdr.ethernet.dst_addr: ternary @name("eth_dst");
+            fabric_metadata.vlan_id : exact @name("vlan_id");
+            hdr.ethernet.dst_addr : ternary @name("eth_dst");
         }
         actions = {
             set_next_id_bridging;
@@ -61,7 +60,7 @@ control Forwarding (inout parsed_headers_t hdr,
 
     table mpls {
         key = {
-            fabric_metadata.mpls_label: exact @name("mpls_label");
+            fabric_metadata.mpls_label : exact @name("mpls_label");
         }
         actions = {
             pop_mpls_and_next;
@@ -91,7 +90,7 @@ control Forwarding (inout parsed_headers_t hdr,
     #endif
     table routing_v4 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("ipv4_dst");
+            hdr.ipv4.dst_addr : lpm @name("ipv4_dst");
         }
         actions = {
             set_next_id_routing_v4;
@@ -116,7 +115,7 @@ control Forwarding (inout parsed_headers_t hdr,
 
     table routing_v6 {
         key = {
-            hdr.ipv6.dst_addr: lpm @name("ipv6_dst");
+            hdr.ipv6.dst_addr : lpm @name("ipv6_dst");
         }
         actions = {
             set_next_id_routing_v6;

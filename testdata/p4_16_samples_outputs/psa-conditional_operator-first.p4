@@ -12,7 +12,7 @@ struct user_meta_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -21,7 +21,7 @@ struct headers_t {
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        buffer.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -35,12 +35,12 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     action execute() {
         bit<16> tmp = 16w0;
-        tmp = (b.data != 16w0 ? 16w0 : 16w1);
+        tmp =(b.data != 16w0 ? 16w0 : 16w1);
         b.data = tmp + 16w1;
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction();
@@ -50,7 +50,7 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     apply {
         bit<16> tmp1 = 16w0;
-        tmp1 = (b.data != 16w0 ? 16w2 : 16w5);
+        tmp1 =(b.data != 16w0 ? 16w2 : 16w5);
         b.data = tmp1 + 16w5;
         tbl.apply();
     }
@@ -71,6 +71,6 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
     }
 }
 
-IngressPipeline<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

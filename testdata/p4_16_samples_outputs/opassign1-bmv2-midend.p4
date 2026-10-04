@@ -7,10 +7,10 @@ header data_t {
     bit<32> f2;
     bit<16> h1;
     bit<16> h2;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 struct metadata {
@@ -22,25 +22,25 @@ struct headers {
 
 parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        b.extract<data_t>(hdr.data);
+        b.extract < data_t >(hdr.data);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action opassign1bmv2l41() {
+    @hidden action opassign1bmv2l42() {
         hdr.data.h1 = hdr.data.h1 + hdr.data.h2;
         hdr.data.b1 = hdr.data.b1 - hdr.data.b2;
         hdr.data.b3 = hdr.data.b3 ^ hdr.data.b4;
     }
-    @hidden table tbl_opassign1bmv2l41 {
+    @hidden table tbl_opassign1bmv2l42 {
         actions = {
-            opassign1bmv2l41();
+            opassign1bmv2l42();
         }
-        const default_action = opassign1bmv2l41();
+        const default_action = opassign1bmv2l42();
     }
     apply {
-        tbl_opassign1bmv2l41.apply();
+        tbl_opassign1bmv2l42.apply();
     }
 }
 
@@ -61,8 +61,8 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control deparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data_t>(hdr.data);
+        packet.emit < data_t >(hdr.data);
     }
 }
 
-V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
+V1Switch < headers, metadata >(p(), vc(), ingress(), egress(), uc(), deparser()) main;

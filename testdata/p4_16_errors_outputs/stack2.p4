@@ -10,4 +10,3 @@ control p() {
         stack2.size = 4;
     }
 }
-

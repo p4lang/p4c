@@ -15,8 +15,8 @@ struct M {
 
 parser prs(packet_in p, out Headers h, inout M meta, inout standard_metadata_t s) {
     state start {
-        p.extract<Header>(_);
-        p.extract<Header>(h.h);
+        p.extract < Header >(_);
+        p.extract < Header >(h.h);
         transition accept;
     }
 }
@@ -43,8 +43,8 @@ control cc(inout Headers hdr, inout M meta) {
 
 control d(packet_out b, in Headers hdr) {
     apply {
-        b.emit<Headers>(hdr);
+        b.emit < Headers >(hdr);
     }
 }
 
-V1Switch<Headers, M>(prs(), vc(), i(), e(), cc(), d()) main;
+V1Switch < Headers, M >(prs(), vc(), i(), e(), cc(), d()) main;

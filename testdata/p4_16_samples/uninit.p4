@@ -33,8 +33,8 @@ parser p1(packet_in p, out Header h) {
         stack[0] = stack[1];  // uninitialized
         b = stack[1].isValid();
         transition select (h.isValid()) {
-            true: next1;
-            false: next2;
+            true : next1;
+            false : next2;
         }
     }
 
@@ -61,11 +61,18 @@ control c(out bit<32> v) {  // uninitialized
     bit<32> d = 1;
     bit<32> setByAction;
 
-    action a1() { setByAction = 1; }
-    action a2() { setByAction = 1; }
+    action a1() {
+        setByAction = 1;
+    }
+    action a2() {
+        setByAction = 1;
+    }
 
     table t {
-        actions = { a1; a2; }
+        actions = {
+            a1;
+            a2;
+        }
         default_action = a1();
     }
 
@@ -83,13 +90,14 @@ control c(out bit<32> v) {  // uninitialized
         e = e + 1;  // uninitialized
         bool touched;
         switch (t.apply().action_run) {
-            a1: { touched = true; }
+            a1 : { touched = true;
+            }
         }
         touched = !touched;  // uninitialized
         if (e > 0)
-            t.apply();
+        t.apply();
         else
-            a1();
+        a1();
         setByAction = setByAction + 1;
     }
 }

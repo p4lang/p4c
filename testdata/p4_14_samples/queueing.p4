@@ -41,9 +41,9 @@ header queueing_metadata_t_padded queueing_hdr;
 
 parser start {
     extract(hdr1);
-    return select(standard_metadata.packet_length) {
-        0 : queueing_dummy;
-        default : ingress;
+    return select (standard_metadata.packet_length) {
+    0 : queueing_dummy;
+    default : ingress;
     }
 }
 
@@ -65,7 +65,8 @@ table t_ingress {
         hdr1.f1 : exact;
     }
     actions {
-        set_port; _drop;
+        set_port;
+        _drop;
     }
     size : 128;
 }

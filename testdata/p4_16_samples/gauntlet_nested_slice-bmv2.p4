@@ -20,11 +20,12 @@ header H {
 }
 
 struct Headers {
-    ethernet_t    eth_hdr;
-    H h ;
+    ethernet_t eth_hdr;
+    H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -40,16 +41,25 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<8> n = 8w0b11111111;
-        n[7:4][3:0][3:0] = 4w0;
+        n[7 : 4][3 : 0][3 : 0] = 4w0;
         h.h.a = n;
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {

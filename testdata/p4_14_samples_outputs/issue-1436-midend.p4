@@ -17,10 +17,10 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_extirpations") state parse_extirpations {
-        packet.extract<inboxes>(hdr.extirpations);
-        transition select(hdr.extirpations.khans) {
-            16s1024: accept;
-            default: noMatch;
+        packet.extract < inboxes >(hdr.extirpations);
+        transition select (hdr.extirpations.khans) {
+            16s1024 : accept;
+            default : noMatch;
         }
     }
     @name(".start") state start {
@@ -44,7 +44,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<inboxes>(hdr.extirpations);
+        packet.emit < inboxes >(hdr.extirpations);
     }
 }
 
@@ -58,4 +58,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

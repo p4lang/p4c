@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -41,11 +41,11 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         x = x - 7;
     }
     action a_two(in bit<16> y, in bit<16> z) {
-        hdr.ethernet.srcAddr[15:0] = y + z;
+        hdr.ethernet.srcAddr[15 : 0] = y + z;
     }
     table t_two {
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType : exact;
         }
         actions = {
             a_one(hdr.ethernet.dstAddr);
@@ -56,7 +56,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table t_one {
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType : exact;
         }
         actions = {
             a_one(hdr.ethernet.dstAddr);

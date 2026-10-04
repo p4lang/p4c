@@ -23,7 +23,7 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
 control C1(in bit<8> val) {
     apply {
         switch (val) {
-            1: {
+            1 : {
             }
         }
     }
@@ -32,11 +32,11 @@ control C1(in bit<8> val) {
 control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
         switch (hdr.payload.x) {
-            1: {
-                C1.apply(hdr.payload.x);
+            1 : {
+            C1.apply(hdr.payload.x);
             }
-            0: {
-                C1.apply(hdr.payload.x);
+            0 : {
+            C1.apply(hdr.payload.x);
             }
         }
     }

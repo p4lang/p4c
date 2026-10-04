@@ -5,14 +5,14 @@
  */
 
 header_type headers {
-  fields {
-     x : 32;
-  }
+    fields {
+        x : 32;
+    }
 }
 header headers h;
 
 parser start {
-  return ingress;
+    return ingress;
 }
 
 action mask() {
@@ -20,7 +20,9 @@ action mask() {
 }
 
 table t {
-    actions { mask; }
+    actions {
+        mask;
+    }
 }
 
 control ingress {

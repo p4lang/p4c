@@ -4,14 +4,17 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-extern C { bool get(); }
+extern C {
+    bool get();
+}
 
 control X(out bool b) {
     C c;
-    apply { b = c.get(); }
+    apply {
+        b = c.get();
+    }
 }
 
 control Z(out bool a);
 package top(Z z);
-
 top(X()) main;

@@ -4,7 +4,7 @@
 
 struct user_metadata_t {
     bit<32> pkt_count;
-    bit<2>  status_cycle;
+    bit<2> status_cycle;
     bit<64> global_count;
 }
 
@@ -29,12 +29,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".maintain_2bit_variable") action maintain_2bit_variable() {
-        meta.md.status_cycle = (bit<2>)(meta.md.pkt_count >> 4);
-        meta.md.status_cycle = (bit<2>)(meta.md.pkt_count << 2);
+        meta.md.status_cycle =(bit<2>)(meta.md.pkt_count >> 4);
+        meta.md.status_cycle =(bit<2>)(meta.md.pkt_count << 2);
     }
     @name(".incr_global_count") action incr_global_count() {
-        meta.md.global_count = (bit<64>)meta.md.pkt_count >> 4;
-        meta.md.global_count = (bit<64>)meta.md.pkt_count << 2;
+        meta.md.global_count =(bit<64>) meta.md.pkt_count >> 4;
+        meta.md.global_count =(bit<64>) meta.md.pkt_count << 2;
     }
     @name(".tb_maintain_2bit_variable") table tb_maintain_2bit_variable {
         actions = {

@@ -26,7 +26,7 @@ control ingress(inout Headers h) {
     }
     table dummy_table {
         key = {
-            h.eth_hdr.src_addr: exact @name("key") ;
+            h.eth_hdr.src_addr : exact @name("key");
         }
         actions = {
             NoAction();
@@ -35,10 +35,10 @@ control ingress(inout Headers h) {
     }
     apply {
         switch (dummy_table.apply().action_run) {
-            simple_assign: {
-                simple_assign();
+            simple_assign : {
+            simple_assign();
             }
-            NoAction: {
+            NoAction : {
             }
         }
         simple_assign();
@@ -49,4 +49,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

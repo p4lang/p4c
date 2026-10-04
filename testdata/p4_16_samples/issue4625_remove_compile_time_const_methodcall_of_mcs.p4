@@ -13,12 +13,12 @@ control C() {
         h_t h;
         h.minSizeInBits();
     }
-
     table t {
-        actions = { bar; }
+        actions = {
+            bar;
+        }
         default_action = bar;
     }
-
     apply {
         t.apply();
     }
@@ -26,5 +26,4 @@ control C() {
 
 control proto();
 package top(proto p);
-
 top(C()) main;

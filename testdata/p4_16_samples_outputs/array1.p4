@@ -3,10 +3,10 @@
 #include <v1model.p4>
 
 header data_t {
-    bit<32>    f1;
-    bit<32>    f2;
-    bit<16>    h1;
-    bit<16>    h2;
+    bit<32> f1;
+    bit<32> f2;
+    bit<16> h1;
+    bit<16> h2;
     bit<8>[16] arr;
 }
 
@@ -26,14 +26,14 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     apply {
-        hdr.data.arr[0] = hdr.data.f1[0+:8];
-        hdr.data.arr[1] = hdr.data.f1[8+:8];
-        hdr.data.arr[2] = hdr.data.f1[16+:8];
-        hdr.data.arr[3] = hdr.data.f1[24+:8];
-        hdr.data.arr[4] = hdr.data.f2[0+:8];
-        hdr.data.arr[5] = hdr.data.f2[8+:8];
-        hdr.data.arr[6] = hdr.data.f2[16+:8];
-        hdr.data.arr[7] = hdr.data.f2[24+:8];
+        hdr.data.arr[0] = hdr.data.f1[0 +: 8];
+        hdr.data.arr[1] = hdr.data.f1[8 +: 8];
+        hdr.data.arr[2] = hdr.data.f1[16 +: 8];
+        hdr.data.arr[3] = hdr.data.f1[24 +: 8];
+        hdr.data.arr[4] = hdr.data.f2[0 +: 8];
+        hdr.data.arr[5] = hdr.data.f2[8 +: 8];
+        hdr.data.arr[6] = hdr.data.f2[16 +: 8];
+        hdr.data.arr[7] = hdr.data.f2[24 +: 8];
     }
 }
 
@@ -58,4 +58,4 @@ control deparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
+V1Switch < headers, metadata >(p(), vc(), ingress(), egress(), uc(), deparser()) main;

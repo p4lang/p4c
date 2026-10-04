@@ -14,4 +14,3 @@ control c() {
         test((S1<int<6>>){y = { false, ... }});
     }
 }
-

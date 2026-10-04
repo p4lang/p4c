@@ -8,15 +8,15 @@ header Ethernet_h {
 }
 
 header IPv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -24,7 +24,7 @@ header IPv4_h {
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 struct Meta {
@@ -33,14 +33,14 @@ struct Meta {
 
 parser prs(packet_in p, out Headers_t headers, inout Meta meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ip;
+            default : reject;
         }
     }
     state ip {
-        p.extract<IPv4_h>(headers.ipv4);
+        p.extract < IPv4_h >(headers.ipv4);
         transition accept;
     }
 }
@@ -53,7 +53,7 @@ control pipe(inout Headers_t headers, inout Meta meta, inout standard_metadata u
     }
     @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
-            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr");
+            headers.ipv4.srcAddr : exact @name("headers.ipv4.srcAddr");
         }
         actions = {
             Reject();
@@ -61,54 +61,54 @@ control pipe(inout Headers_t headers, inout Meta meta, inout standard_metadata u
         }
         default_action = NoAction_1();
     }
-    @hidden action issue3483_ubpf60() {
+    @hidden action issue3483_ubpf62() {
         meta.b = 1w1;
     }
-    @hidden action issue3483_ubpf65() {
+    @hidden action issue3483_ubpf67() {
         meta.b = 1w0;
     }
-    @hidden table tbl_issue3483_ubpf60 {
+    @hidden table tbl_issue3483_ubpf62 {
         actions = {
-            issue3483_ubpf60();
+            issue3483_ubpf62();
         }
-        const default_action = issue3483_ubpf60();
+        const default_action = issue3483_ubpf62();
     }
-    @hidden table tbl_issue3483_ubpf65 {
+    @hidden table tbl_issue3483_ubpf67 {
         actions = {
-            issue3483_ubpf65();
+            issue3483_ubpf67();
         }
-        const default_action = issue3483_ubpf65();
+        const default_action = issue3483_ubpf67();
     }
     apply {
         if (Check_src_ip_0.apply().hit) {
             ;
         } else {
-            tbl_issue3483_ubpf60.apply();
+            tbl_issue3483_ubpf62.apply();
         }
         switch (Check_src_ip_0.apply().action_run) {
-            Reject: {
-                tbl_issue3483_ubpf65.apply();
+            Reject : {
+            tbl_issue3483_ubpf67.apply();
             }
-            NoAction_1: {
+            NoAction_1 : {
             }
         }
     }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action issue3483_ubpf74() {
-        packet.emit<Ethernet_h>(headers.ethernet);
-        packet.emit<IPv4_h>(headers.ipv4);
+    @hidden action issue3483_ubpf77() {
+        packet.emit < Ethernet_h >(headers.ethernet);
+        packet.emit < IPv4_h >(headers.ipv4);
     }
-    @hidden table tbl_issue3483_ubpf74 {
+    @hidden table tbl_issue3483_ubpf77 {
         actions = {
-            issue3483_ubpf74();
+            issue3483_ubpf77();
         }
-        const default_action = issue3483_ubpf74();
+        const default_action = issue3483_ubpf77();
     }
     apply {
-        tbl_issue3483_ubpf74.apply();
+        tbl_issue3483_ubpf77.apply();
     }
 }
 
-ubpf<Headers_t, Meta>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, Meta >(prs(), pipe(), dprs()) main;

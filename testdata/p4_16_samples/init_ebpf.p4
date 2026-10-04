@@ -32,9 +32,12 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 
     table tbl {
-        key = { headers.ethernet.protocol : exact; }
+        key = {
+            headers.ethernet.protocol : exact;
+        }
         actions = {
-            match; NoAction;
+            match;
+            NoAction;
         }
 
         const entries = {

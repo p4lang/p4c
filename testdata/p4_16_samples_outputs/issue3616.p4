@@ -4,4 +4,3 @@ enum bit<4> e {
     c = (bit<4>)a,
     d = a
 }
-

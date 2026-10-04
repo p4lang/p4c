@@ -6,8 +6,8 @@ header H {
 }
 
 struct S {
-    H       h1;
-    H       h2;
+    H h1;
+    H h2;
     bit<32> c;
 }
 

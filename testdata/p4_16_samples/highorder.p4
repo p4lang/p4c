@@ -7,14 +7,17 @@
 
 #include <core.p4>
 
-parser parse<H>(out H headers);
+parser parse < H >(out H headers);
 
-package ebpfFilter<H>(parse<H> prs);
+package ebpfFilter < H >(parse<H> prs);
 
-struct Headers_t {}
+struct Headers_t {
+}
 
 parser prs(out Headers_t headers) {
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }
 
 ebpfFilter(prs()) main;

@@ -22,34 +22,34 @@ struct OutControl {
 // Copied from 2017-Jul-17 version of the P4_16 spec .mdk file, in the
 // section "Example architecture description"
 
-parser Parser<IH>(packet_in b, out IH parsedHeaders);
+parser Parser < IH >(packet_in b, out IH parsedHeaders);
 // ingress match-action pipeline
-control IPipe<T, IH, OH>(in IH inputHeaders,
+control IPipe < T, IH, OH >(in IH inputHeaders,
                          in InControl inCtrl,
                          out OH outputHeaders,
                          out T toEgress,
                          out OutControl outCtrl);
 // egress match-action pipeline
-control EPipe<T, IH, OH>(in IH inputHeaders,
+control EPipe < T, IH, OH >(in IH inputHeaders,
                          in InControl inCtrl,
                          in T fromIngress,
                          out OH outputHeaders,
                          out OutControl outCtrl);
-control Deparser<OH>(in OH outputHeaders, packet_out b);
-package Ingress<T, IH, OH>(Parser<IH> p,
+control Deparser < OH >(in OH outputHeaders, packet_out b);
+package Ingress < T, IH, OH >(Parser<IH> p,
                            IPipe<T, IH, OH> map,
                            Deparser<OH> d);
-package Egress<T, IH, OH>(Parser<IH> p,
+package Egress < T, IH, OH >(Parser<IH> p,
                           EPipe<T, IH, OH> map,
                           Deparser<OH> d);
-package Switch<T>(Ingress<T, _, _> ingress, Egress<T, _, _> egress);
+package Switch < T >(Ingress<T, _, _> ingress, Egress<T, _, _> egress);
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 // Make all of the types ing_in_headers, ing_out_headers,
@@ -59,22 +59,22 @@ header ethernet_t {
 // code.
 
 struct ing_in_headers {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
     bit<10> a0;
 }
 
 struct ing_out_headers {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
     bit<11> a1;
 }
 
 struct egr_in_headers {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
     bit<12> a2;
 }
 
 struct egr_out_headers {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
     bit<13> a3;
 }
 
@@ -107,7 +107,9 @@ control ingress(in ing_in_headers ihdr,
 control ing_deparse(in ing_out_headers ohdr,
                     packet_out b)
 {
-    apply { b.emit(ohdr.ethernet); }
+    apply {
+        b.emit(ohdr.ethernet);
+    }
 }
 
 parser egr_parse(packet_in buffer,
@@ -134,7 +136,9 @@ control egress(in egr_in_headers ihdr,
 control egr_deparse(in egr_out_headers ohdr,
                     packet_out b)
 {
-    apply { b.emit(ohdr.ethernet); }
+    apply {
+        b.emit(ohdr.ethernet);
+    }
 }
 
 // It is normal for the compiler to give "unused instance" warnings
@@ -142,12 +146,12 @@ control egr_deparse(in egr_out_headers ohdr,
 // below, if the instances are not used later.
 
 Ingress(ing_parse(), ingress(), ing_deparse()) ig1;
-Ingress<ing_to_egr, ing_in_headers, ing_out_headers>
-    (ing_parse(), ingress(), ing_deparse()) ig2;
+Ingress < ing_to_egr, ing_in_headers, ing_out_headers >
+(ing_parse(), ingress(), ing_deparse()) ig2;
 
 Egress(egr_parse(), egress(), egr_deparse()) eg1;
-Egress<ing_to_egr, egr_in_headers, egr_out_headers>
-    (egr_parse(), egress(), egr_deparse()) eg2;
+Egress < ing_to_egr, egr_in_headers, egr_out_headers >
+(egr_parse(), egress(), egr_deparse()) eg2;
 
 // Next instantiation gives error, as expected:
 // "Cannot unify struct egr_in_headers to struct ing_in_headers"

@@ -20,12 +20,12 @@ struct value_set_t {
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    @name("MyParser.pvs") value_set<value_set_t>(4) pvs_0;
+    @name("MyParser.pvs") value_set < value_set_t >(4) pvs_0;
     state start {
-        b.extract<data_h>(p.data);
-        transition select(p.data.da) {
-            pvs_0: accept;
-            32w0x810: foo;
+        b.extract < data_h >(p.data);
+        transition select (p.data.da) {
+            pvs_0 : accept;
+            32w0x810 : foo;
         }
     }
     state foo {
@@ -49,7 +49,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction_1();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da");
+            meta.data[0].da : exact @name("meta.data[0].da");
         }
         default_action = NoAction_1();
     }
@@ -73,4 +73,4 @@ control MyDeparser(packet_out b, in my_packet p) {
     }
 }
 
-V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < my_packet, my_metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

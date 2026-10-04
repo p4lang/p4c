@@ -6,4 +6,3 @@ control C() {
         S s = (false ? { ... } : true);
     }
 }
-

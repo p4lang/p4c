@@ -3,13 +3,13 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<8>  f1;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
 }
 
 header vag_t {
-    bit<8>  f1;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
 }
@@ -39,7 +39,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1 : exact;
         }
     }
     apply {
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f1;
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1 : exact;
         }
         size = 1024;
     }

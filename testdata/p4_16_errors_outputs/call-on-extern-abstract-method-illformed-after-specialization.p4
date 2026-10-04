@@ -7,4 +7,3 @@ control c(packet_out p) {
         p.emit<string>({ 0, 1 });
     }
 }
-

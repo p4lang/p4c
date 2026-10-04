@@ -24,4 +24,3 @@ control ingress(inout standard_metadata_t sm) {
     apply {
     }
 }
-

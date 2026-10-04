@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 bit<3> bound(in bit<3> val, in bit<3> bound_val) {
-    return (val > bound_val ? bound_val : val);
+    return(val > bound_val ? bound_val : val);
 }
 header ethernet_t {
     bit<48> dst_addr;
@@ -22,8 +22,8 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    I          i;
-    H[2]       h;
+    I i;
+    H[2] h;
 }
 
 struct Meta {

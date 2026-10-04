@@ -3,13 +3,13 @@
 #include <v1model.p4>
 
 typedef standard_metadata_t std_meta_t;
-header standard_t<T> {
+header standard_t < T > {
     T src;
     T dst;
 }
 
-struct headers_t<T> {
-    standard_t<T> standard;
+struct headers_t < T > {
+    standard_t < T > standard;
 }
 
 struct meta_t {

@@ -3,9 +3,9 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<8>  drop;
-    bit<8>  egress_port;
-    bit<8>  f1;
+    bit<8> drop;
+    bit<8> egress_port;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
     bit<64> f4;
@@ -29,7 +29,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -43,7 +43,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("ethernet.srcAddr");
         }
         default_action = NoAction();
     }
@@ -84,7 +84,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         default_action = NoAction();
     }
@@ -95,7 +95,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         default_action = NoAction();
     }
@@ -106,7 +106,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         default_action = NoAction();
     }
@@ -117,20 +117,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         default_action = NoAction();
     }
     apply {
         switch (i_t1.apply().action_run) {
-            nop: {
-                i_t2.apply();
+            nop : {
+            i_t2.apply();
             }
-            set_egress_port: {
-                i_t3.apply();
+            set_egress_port : {
+            i_t3.apply();
             }
-            default: {
-                i_t4.apply();
+            default : {
+            i_t4.apply();
             }
         }
     }
@@ -138,7 +138,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -152,4 +152,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

@@ -19,15 +19,15 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     @name("p.tmp") bit<16> tmp;
     @name("p.tmp_0") ethernet_t tmp_0;
     state start {
-        tmp_0 = pkt.lookahead<ethernet_t>();
+        tmp_0 = pkt.lookahead < ethernet_t >();
         tmp = tmp_0.eth_type;
-        transition select(tmp) {
-            16w0xdead: parse_hdrs;
-            default: accept;
+        transition select (tmp) {
+            16w0xdead : parse_hdrs;
+            default : accept;
         }
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -54,8 +54,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

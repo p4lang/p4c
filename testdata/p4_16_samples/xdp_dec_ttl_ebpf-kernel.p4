@@ -11,15 +11,15 @@
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
+        transition select (headers.ethernet.etherType) {
             16w0x0800 : ipv4;
-            default   : accept;
+            default : accept;
         }
     }
 
@@ -32,11 +32,11 @@ parser prs(packet_in p, out Headers_t headers) {
 control sw(inout Headers_t headers, in xdp_input imd, out xdp_output omd) {
     apply {
         if (headers.ipv4.isValid()) {
-          headers.ipv4.ttl = headers.ipv4.ttl - 1;
+            headers.ipv4.ttl = headers.ipv4.ttl - 1;
         }
 
         omd.output_action = xdp_action.XDP_PASS;
-        omd.output_port   = imd.input_port;
+        omd.output_port = imd.input_port;
     }
 }
 

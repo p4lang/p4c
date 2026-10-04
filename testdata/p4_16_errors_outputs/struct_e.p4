@@ -9,4 +9,3 @@ control p() {
         b.data = 5;
     }
 }
-

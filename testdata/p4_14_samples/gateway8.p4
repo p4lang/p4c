@@ -20,12 +20,12 @@ parser start {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     modify_field(data.b1, val);
     modify_field(standard_metadata.egress_spec, port);
 }
-
 
 table test1 {
     reads {
@@ -48,7 +48,7 @@ table test2 {
 
 control ingress {
     if (data.b2 == 1 or data.b2 == 2 or data.b2 == 5 or data.b2 == 10 or
-        data.b2 == 17 or data.b2 == 19)
+    data.b2 == 17 or data.b2 == 19)
     {
         apply(test1);
     } else {

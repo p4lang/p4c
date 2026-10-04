@@ -135,7 +135,7 @@ table rewrite_multicast {
 
 control process_rewrite {
     if ((egress_metadata.routed == FALSE) or
-        (l3_metadata.nexthop_index != 0)) {
+    (l3_metadata.nexthop_index != 0)) {
         apply(rewrite);
     } else {
 #ifndef MULTICAST_DISABLE

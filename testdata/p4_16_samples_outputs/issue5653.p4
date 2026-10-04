@@ -5,7 +5,7 @@ header h_t {
 }
 
 struct meta_t {
-    h_t    h;
+    h_t h;
     bit<8> f;
 }
 

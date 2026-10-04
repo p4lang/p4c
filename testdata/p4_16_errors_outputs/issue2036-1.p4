@@ -9,4 +9,3 @@ control c() {
         f(b);
     }
 }
-

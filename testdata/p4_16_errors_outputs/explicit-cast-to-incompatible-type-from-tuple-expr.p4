@@ -7,4 +7,3 @@ control C() {
         stack = (list<match_kind>){ (H){#}, ... };
     }
 }
-

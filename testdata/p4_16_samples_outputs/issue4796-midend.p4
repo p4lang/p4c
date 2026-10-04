@@ -10,7 +10,7 @@ header priceX {
 
 struct Headers {
     ethernet_t eth_hdr;
-    priceX[4]  heal;
+    priceX[4] heal;
 }
 
 struct main_metadata_t {
@@ -108,4 +108,4 @@ control MainDeparserImpl(packet_out pkt, in Headers hdr, in main_metadata_t user
     }
 }
 
-PNA_NIC<Headers, main_metadata_t, Headers, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < Headers, main_metadata_t, Headers, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

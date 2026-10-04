@@ -6,22 +6,22 @@ typedef bit<48> EthernetAddress;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> totalLen;
     bit<16> identification;
-    bit<1>  flag_rsvd;
-    bit<1>  flag_noFrag;
-    bit<1>  flag_more;
+    bit<1> flag_rsvd;
+    bit<1> flag_noFrag;
+    bit<1> flag_more;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -29,7 +29,7 @@ header ipv4_t {
 
 struct Parsed_packet {
     Ethernet_h ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 struct mystruct1 {
@@ -47,18 +47,18 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
     state start {
         bit<8> my_local = 1;
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         bit<16> my_local = 2;
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.version, hdr.ipv4.protocol) {
-            (4w0x4, 8w0x6): accept;
-            (4w0x4, 8w0x17): accept;
-            default: accept;
+        transition select (hdr.ipv4.version, hdr.ipv4.protocol) {
+            (4w0x4, 8w0x6) : accept;
+            (4w0x4, 8w0x17) : accept;
+            default : accept;
         }
     }
 }
@@ -69,7 +69,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
     }
     table guh {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             foo;
@@ -96,4 +96,4 @@ control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
     }
 }
 
-V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, mystruct1 >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

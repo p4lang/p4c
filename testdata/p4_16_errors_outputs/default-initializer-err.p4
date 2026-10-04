@@ -13,29 +13,29 @@ enum myEnum1 {
 }
 
 header H {
-    int<8>    i;
-    bool      b;
-    bit<14>   l;
-    bit<1>    b1;
+    int<8> i;
+    bool b;
+    bit<14> l;
+    bit<1> b1;
     varbit<8> v;
 }
 
 struct S {
-    myEnum  val;
+    myEnum val;
     myEnum1 val1;
-    error   errorNoOne;
-    H       h;
-    bit<1>  z;
-    bool    b;
-    int<8>  i;
+    error errorNoOne;
+    H h;
+    bit<1> z;
+    bool b;
+    int<8> i;
 }
 
-extern void f<D>(in D data);
+extern void f < D >(in D data);
 control c(inout bit<1> r) {
     S sa;
     bit<1> tmp;
     apply {
-        S sb = {b = false,h = { 3, true, ..., 2 },...};
+        S sb = { b = false, h = { 3, true, ..., 2 }, ... };
     }
 }
 

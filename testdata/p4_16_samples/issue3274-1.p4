@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-void x() {}
-
+void x() {
+}
 control c() {
     apply {
         x();
@@ -14,5 +14,4 @@ control c() {
 
 control _c();
 package top(_c _c);
-
 top(c()) main;

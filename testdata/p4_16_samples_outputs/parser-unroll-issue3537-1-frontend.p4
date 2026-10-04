@@ -18,21 +18,21 @@ parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadat
     }
     state s1 {
         packet.advance(32w16);
-        tmp_0 = packet.lookahead<bit<16>>();
+        tmp_0 = packet.lookahead < bit<16 >>();
         tmp = tmp_0;
-        transition select(tmp) {
-            16w0: s1;
-            default: s2;
+        transition select (tmp) {
+            16w0 : s1;
+            default : s2;
         }
     }
     state s2 {
         packet.advance(32w16);
-        tmp_2 = packet.lookahead<bit<16>>();
+        tmp_2 = packet.lookahead < bit<16 >>();
         tmp_1 = tmp_2;
-        transition select(tmp_1) {
-            16w0: s1;
-            16w1: s2;
-            default: s4;
+        transition select (tmp_1) {
+            16w0 : s1;
+            16w1 : s2;
+            default : s4;
         }
     }
     state s4 {
@@ -65,4 +65,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

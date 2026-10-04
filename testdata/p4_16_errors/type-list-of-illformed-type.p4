@@ -1,8 +1,9 @@
 // generated from list9.p4
 
 header_union S<T> {
-  T t;
+    T t;
 }
+
 extern E {
-  E(list<S<bit<32>>> data);
+    E(list<S<bit<32>>> data);
 }

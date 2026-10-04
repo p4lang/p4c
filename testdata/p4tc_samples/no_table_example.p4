@@ -7,27 +7,27 @@
 #include <core.p4>
 #include <tc/pna.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    @tc_type("ipv4") bit<32> srcAddr;
+    @tc_type("ipv4") bit<32> dstAddr;
 }
 
 header udp_t {
@@ -56,8 +56,8 @@ struct main_metadata_t {
 // main parser.
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    udp_t      udp;
+    ipv4_t ipv4;
+    udp_t udp;
 }
 
 parser MainParserImpl(
@@ -68,8 +68,8 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800  : parse_ipv4;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
             default : accept;
         }
     }
@@ -90,7 +90,7 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     apply {
-        if ((bit<32>)(PortId_t)istd.input_port == 4) {
+        if ((bit<32>)(PortId_t) istd.input_port == 4) {
             hdr.udp.src_port = hdr.udp.src_port + 1;
         }
     }

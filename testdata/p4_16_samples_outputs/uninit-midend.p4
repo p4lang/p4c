@@ -23,10 +23,10 @@ parser p1(packet_in p, out Header h) {
         tmp_1 = g(h.data2, tmp_0);
         g(tmp, tmp_1);
         h.data2 = h.data3 + 32w1;
-        transition select((bit<1>)h.isValid()) {
-            1w1: next1;
-            1w0: next2;
-            default: noMatch;
+        transition select ((bit<1>) h.isValid()) {
+            1w1 : next1;
+            1w0 : next2;
+            default : noMatch;
         }
     }
     state next1 {
@@ -59,23 +59,23 @@ control c(out bit<32> v) {
         }
         default_action = a1();
     }
-    @hidden action uninit78() {
+    @hidden action uninit85() {
         e_0 = 32w1;
     }
-    @hidden action uninit83() {
+    @hidden action uninit90() {
         e_0 = e_0 + 32w1;
     }
-    @hidden table tbl_uninit78 {
+    @hidden table tbl_uninit85 {
         actions = {
-            uninit78();
+            uninit85();
         }
-        const default_action = uninit78();
+        const default_action = uninit85();
     }
-    @hidden table tbl_uninit83 {
+    @hidden table tbl_uninit90 {
         actions = {
-            uninit83();
+            uninit90();
         }
-        const default_action = uninit83();
+        const default_action = uninit90();
     }
     @hidden table tbl_a1 {
         actions = {
@@ -85,15 +85,15 @@ control c(out bit<32> v) {
     }
     apply {
         if (e_0 > 32w0) {
-            tbl_uninit78.apply();
+            tbl_uninit85.apply();
         } else {
             ;
         }
-        tbl_uninit83.apply();
+        tbl_uninit90.apply();
         switch (t_0.apply().action_run) {
-            a1: {
+            a1 : {
             }
-            default: {
+            default : {
             }
         }
         if (e_0 > 32w0) {

@@ -24,15 +24,15 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table tbl {
         key = {
-            headers.ethernet.protocol: exact;
+            headers.ethernet.protocol : exact;
         }
         actions = {
             match;
             NoAction;
         }
         const entries = {
-                        0x800 : match(true);
-                        0xd000 : match(false);
+            0x800 : match(true);
+            0xd000 : match(false);
         }
         implementation = hash_table(64);
     }

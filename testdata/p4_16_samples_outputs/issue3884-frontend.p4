@@ -11,8 +11,8 @@ struct internal_t {
 }
 
 struct headers_t {
-    eth_t      baseEth;
-    eth_t      extEth;
+    eth_t baseEth;
+    eth_t extEth;
     internal_t internal;
 }
 
@@ -25,7 +25,7 @@ control ingress(inout headers_t hdr) {
     }
     @name("ingress.c2.outerDst.lookup") table c2_outerDst_lookup {
         key = {
-            hdr.baseEth.dstAddr: exact @name("address");
+            hdr.baseEth.dstAddr : exact @name("address");
         }
         actions = {
             c2_outerDst_A_0();
@@ -42,7 +42,7 @@ control ingress(inout headers_t hdr) {
     }
     @name("ingress.c2.outerSrc.lookup") table c2_outerSrc_lookup {
         key = {
-            hdr.baseEth.srcAddr: exact @name("address");
+            hdr.baseEth.srcAddr : exact @name("address");
         }
         actions = {
             c2_outerSrc_A_0();
@@ -59,7 +59,7 @@ control ingress(inout headers_t hdr) {
     }
     @name("ingress.c2.innerDst.lookup") table c2_innerDst_lookup {
         key = {
-            hdr.extEth.dstAddr: exact @name("address");
+            hdr.extEth.dstAddr : exact @name("address");
         }
         actions = {
             c2_innerDst_A_0();
@@ -76,7 +76,7 @@ control ingress(inout headers_t hdr) {
     }
     @name("ingress.c2.innerSrc.lookup") table c2_innerSrc_lookup {
         key = {
-            hdr.extEth.srcAddr: exact @name("address");
+            hdr.extEth.srcAddr : exact @name("address");
         }
         actions = {
             c2_innerSrc_A_0();
@@ -109,8 +109,8 @@ control ingress(inout headers_t hdr) {
     }
 }
 
-control Ingress<H>(inout H hdr);
-package Pipeline<H>(Ingress<H> ingress);
-package Switch<H>(Pipeline<H> pipe);
-Pipeline<headers_t>(ingress()) ig;
-Switch<headers_t>(ig) main;
+control Ingress < H >(inout H hdr);
+package Pipeline < H >(Ingress<H> ingress);
+package Switch < H >(Pipeline<H> pipe);
+Pipeline < headers_t >(ingress()) ig;
+Switch < headers_t >(ig) main;

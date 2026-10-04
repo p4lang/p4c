@@ -9,4 +9,3 @@ control c(inout h hdr) {
     apply {
     }
 }
-

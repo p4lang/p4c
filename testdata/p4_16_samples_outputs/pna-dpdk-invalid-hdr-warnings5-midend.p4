@@ -27,14 +27,14 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         hdr.u1_h1.setValid();
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
-        pkt.extract<Header1>(hdr.u1_h3);
+        pkt.extract < Header1 >(hdr.u1_h3);
         hdr.u1_h3.setValid();
         hdr.u1_h3.data = 32w1;
         hdr.u1_h1.setInvalid();
         hdr.u1_h2.setInvalid();
-        transition select(hdr.u1_h3.isValid()) {
-            true: start_true;
-            false: start_false;
+        transition select (hdr.u1_h3.isValid()) {
+            true : start_true;
+            false : start_false;
         }
     }
     state start_true {
@@ -79,7 +79,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
     @name("u2_0_h1") Header1 u2_0_h1_0;
     @name("u2_0_h2") Header2 u2_0_h2_0;
     @name("u2_0_h3") Header1 u2_0_h3_0;
-    @hidden @name("pnadpdkinvalidhdrwarnings5l66") action pnadpdkinvalidhdrwarnings5l66_0() {
+    @hidden @name("pnadpdkinvalidhdrwarnings5l67") action pnadpdkinvalidhdrwarnings5l67_0() {
         u1_0_h1_0.setInvalid();
         u1_0_h2_0.setInvalid();
         u1_0_h3_0.setInvalid();
@@ -129,14 +129,14 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u1_0_h3_0.setInvalid();
         u1_0_h3_0.setInvalid();
     }
-    @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l66") table tbl_pnadpdkinvalidhdrwarnings5l66_0 {
+    @hidden @name("tbl_pnadpdkinvalidhdrwarnings5l67") table tbl_pnadpdkinvalidhdrwarnings5l67_0 {
         actions = {
-            pnadpdkinvalidhdrwarnings5l66_0();
+            pnadpdkinvalidhdrwarnings5l67_0();
         }
-        const default_action = pnadpdkinvalidhdrwarnings5l66_0();
+        const default_action = pnadpdkinvalidhdrwarnings5l67_0();
     }
     apply {
-        tbl_pnadpdkinvalidhdrwarnings5l66_0.apply();
+        tbl_pnadpdkinvalidhdrwarnings5l67_0.apply();
     }
 }
 
@@ -150,4 +150,4 @@ control PreControlImpl(in H hdr, inout M meta, in pna_pre_input_metadata_t istd,
     }
 }
 
-PNA_NIC<H, M, H, M>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
+PNA_NIC < H, M, H, M >(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;

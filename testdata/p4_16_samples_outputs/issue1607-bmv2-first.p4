@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header elem {
-    bit<1>  bos;
+    bit<1> bos;
     bit<31> value;
 }
 
@@ -17,7 +17,7 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<elem>(hdr.stack.next);
+        packet.extract < elem >(hdr.stack.next);
         meta.temp = hdr.stack.last;
         transition accept;
     }
@@ -45,8 +45,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<elem[100]>(hdr.stack);
+        packet.emit < elem[100] >(hdr.stack);
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

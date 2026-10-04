@@ -18,22 +18,22 @@ struct Meta {
 
 ethernet_t do_function_1(inout bit<16> val) {
     if (val == 16w1) {
-        return (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
+        return(ethernet_t) { dst_addr = 48w1, src_addr = 48w1, eth_type = 16w1 };
     } else if (val == 16w2) {
-        return (ethernet_t){dst_addr = 48w2,src_addr = 48w2,eth_type = 16w2};
+        return(ethernet_t) { dst_addr = 48w2, src_addr = 48w2, eth_type = 16w2 };
     }
-    return (ethernet_t){dst_addr = 48w3,src_addr = 48w3,eth_type = 16w3};
+    return(ethernet_t) { dst_addr = 48w3, src_addr = 48w3, eth_type = 16w3 };
 }
 ethernet_t do_function_2() {
-    return (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
+    return(ethernet_t) { dst_addr = 48w1, src_addr = 48w1, eth_type = 16w1 };
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr1);
-        pkt.extract<ethernet_t>(hdr.eth_hdr2);
+        pkt.extract < ethernet_t >(hdr.eth_hdr1);
+        pkt.extract < ethernet_t >(hdr.eth_hdr2);
         transition accept;
     }
 }
@@ -62,8 +62,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

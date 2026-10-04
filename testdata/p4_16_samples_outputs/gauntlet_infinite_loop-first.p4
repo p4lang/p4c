@@ -9,7 +9,7 @@ header padding {
 }
 
 struct headers {
-    H       nop;
+    H nop;
     padding p;
 }
 
@@ -18,13 +18,13 @@ parser sub_parser(packet_in b, out headers hdr, out padding padding) {
         transition next;
     }
     state next {
-        transition select(padding.p) {
-            8w0: parse_hdr;
-            default: accept;
+        transition select (padding.p) {
+            8w0 : parse_hdr;
+            default : accept;
         }
     }
     state parse_hdr {
-        b.extract<H>(hdr.nop);
+        b.extract < H >(hdr.nop);
         transition next;
     }
 }

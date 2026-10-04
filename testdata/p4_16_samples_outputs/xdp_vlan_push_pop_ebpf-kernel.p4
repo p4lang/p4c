@@ -7,42 +7,42 @@
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
 
 header VLAN_h {
-    bit<3>  pcp;
-    bit<1>  dei;
+    bit<3> pcp;
+    bit<1> dei;
     bit<12> vid;
     bit<16> tpid;
 }
 
 struct Headers_t {
     Ethernet_h ethernet;
-    VLAN_h     vlan;
+    VLAN_h vlan;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x8100: vlan;
-            default: accept;
+        transition select (headers.ethernet.etherType) {
+            16w0x8100 : vlan;
+            default : accept;
         }
     }
     state vlan {

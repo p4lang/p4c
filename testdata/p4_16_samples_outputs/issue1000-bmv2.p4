@@ -22,15 +22,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.dstAddr[47:40], hdr.ethernet.dstAddr[39:32], hdr.ethernet.dstAddr[31:24]) {
-            (0xca, 0xfe, 0xad): a7;
-            (0xca, 0xfe, default): a6;
-            (0xca, default, 0xad): a5;
-            (default, 0xfe, 0xad): a3;
-            (0xca, default, default): a4;
-            (default, 0xfe, default): a2;
-            (default, default, 0xad): a1;
-            (default, default, default): a0;
+        transition select (hdr.ethernet.dstAddr[47 : 40], hdr.ethernet.dstAddr[39 : 32], hdr.ethernet.dstAddr[31 : 24]) {
+            (0xca, 0xfe, 0xad) : a7;
+            (0xca, 0xfe, default) : a6;
+            (0xca, default, 0xad) : a5;
+            (default, 0xfe, 0xad) : a3;
+            (0xca, default, default) : a4;
+            (default, 0xfe, default) : a2;
+            (default, default, 0xad) : a1;
+            (default, default, default) : a0;
         }
     }
     state a0 {

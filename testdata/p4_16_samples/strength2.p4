@@ -12,10 +12,10 @@ control strength() {
         bit<4> z;
         z = ~x ^ ~y;
         if (!(x < y)) {
-            z = ~(x ^ (~y & ~z));
+            z = ~(x ^(~y & ~z));
         }
         if (!(x > y)) {
-            z = ~(x ^ (~y | ~z));
+            z = ~(x ^(~y | ~z));
         }
     }
 }

@@ -17,7 +17,8 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -30,7 +31,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    action call_action(inout bit<48> val) { }
+    action call_action(inout bit<48> val) {
+    }
     table simple_table {
         key = {
         }
@@ -44,8 +46,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             return;
         } else {
             switch (simple_table.apply().action_run) {
-                default: {
-                    h.eth_hdr.dst_addr = 48w32;
+                default : {
+                h.eth_hdr.dst_addr = 48w32;
                 }
             }
 
@@ -55,13 +57,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

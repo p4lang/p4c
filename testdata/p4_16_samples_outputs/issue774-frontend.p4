@@ -7,8 +7,8 @@ header Header {
 parser p0(packet_in p, out Header h) {
     @name("p0.arg") Header arg;
     state start {
-        p.extract<Header>(arg);
-        p.extract<Header>(h);
+        p.extract < Header >(arg);
+        p.extract < Header >(h);
         transition accept;
     }
 }

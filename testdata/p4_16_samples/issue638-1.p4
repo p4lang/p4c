@@ -8,7 +8,8 @@
 
 control c() {
     table t {
-        actions = {}  // empty actions list
+        actions = {
+        }  // empty actions list
     }
     apply {
         t.apply();

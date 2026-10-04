@@ -4,11 +4,12 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-struct S { }
+struct S {
+}
 
-control p()
-{
+control p() {
     S() s;   // structs have no constructors
 
-    apply{}
+    apply {
+    }
 }

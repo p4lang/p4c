@@ -175,21 +175,21 @@ table compute_other_hashes {
 
 control process_hashes {
     if (((tunnel_metadata.tunnel_terminate == FALSE) and valid(ipv4)) or
-        ((tunnel_metadata.tunnel_terminate == TRUE) and valid(inner_ipv4))) {
+    ((tunnel_metadata.tunnel_terminate == TRUE) and valid(inner_ipv4))) {
         apply(compute_ipv4_hashes);
     }
 #ifndef IPV6_DISABLE
     else {
         if (((tunnel_metadata.tunnel_terminate == FALSE) and valid(ipv6)) or
-             ((tunnel_metadata.tunnel_terminate == TRUE) and valid(inner_ipv6))) {
+        ((tunnel_metadata.tunnel_terminate == TRUE) and valid(inner_ipv6))) {
             apply(compute_ipv6_hashes);
         }
 #endif /* IPV6_DISABLE */
-        else {
-            apply(compute_non_ip_hashes);
-        }
-#ifndef IPV6_DISABLE
+    else {
+        apply(compute_non_ip_hashes);
     }
+#ifndef IPV6_DISABLE
+}
 #endif /* IPV6_DISABLE */
-    apply(compute_other_hashes);
+apply(compute_other_hashes);
 }

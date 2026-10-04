@@ -7,8 +7,8 @@ header data_t {
     bit<32> f2;
     bit<32> f3;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
     bit<16> h1;
 }
 
@@ -40,7 +40,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1 : ternary;
         }
     }
     @name(".test2") table test2 {
@@ -49,7 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".test3") table test3 {
@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f3: ternary;
+            hdr.data.f3 : ternary;
         }
     }
     apply {

@@ -27,7 +27,7 @@ header Ethernet {
     bit<48> src;
     bit<48> dest;
     EthTypes type;
-    
+
 }
 
 struct Headers {
@@ -39,10 +39,10 @@ parser prs(packet_in p, out Headers h) {
 
     state start {
         p.extract(e);
-        transition select(e.type) {
-            EthTypes.IPv4: accept;
-            EthTypes.ARP: accept;
-            default: reject;
+        transition select (e.type) {
+            EthTypes.IPv4 : accept;
+            EthTypes.ARP : accept;
+            default : reject;
         }
     }
 }
@@ -50,16 +50,16 @@ parser prs(packet_in p, out Headers h) {
 control c(inout Headers h) {
     apply {
         if (!h.eth.isValid())
-            return;
+        return;
         if (h.eth.type == EthTypes.IPv4)
-            h.eth.setInvalid();
+        h.eth.setInvalid();
         else
-            h.eth.type = (EthTypes)(bit<16>)0;
+        h.eth.type =(EthTypes)(bit<16>) 0;
     }
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H>(inout H h);
-package top<H>(p<H> _p, ctr<H> _c);
+parser p < H >(packet_in _p, out H h);
+control ctr < H >(inout H h);
+package top < H >(p<H> _p, ctr<H> _c);
 
 top(prs(), c()) main;

@@ -34,7 +34,7 @@ control compute(inout H h) {
     }
     @name("t") table t_0 {
         key = {
-            h.a + h.a: exact @name("e") ;
+            h.a + h.a : exact @name("e");
         }
         actions = {
             a_0();
@@ -44,17 +44,16 @@ control compute(inout H h) {
     }
     apply {
         bit<8> tmp = 0;
-        Meta m = {0};
+        Meta m = { 0 };
         t_0.apply();
         tmp = 0;
     }
 }
 
-
 parser p(packet_in pkt, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
         pkt.extract(h.eth_hdr);
-        pkt.extract<H>(h.h);
+        pkt.extract < H >(h.h);
         transition accept;
     }
 }
@@ -69,11 +68,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -81,4 +89,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

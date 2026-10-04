@@ -26,14 +26,14 @@ header Opt {
 }
 
 struct O {
-    B   b;
+    B b;
     Opt opt;
 }
 
 parser p(packet_in packet, out O o) {
     state start {
-        X x = (X)0;
-        bit<32> z = (bit<32>)X.One;
+        X x =(X) 0;
+        bit<32> z =(bit<32>) X.One;
         bit<32> z1 = X.One;
         bool bb;
         E1 a = E1.e1;
@@ -41,13 +41,13 @@ parser p(packet_in packet, out O o) {
         bb = a == b;
         bb = bb && a == 0;
         bb = bb && b == 0;
-        a = (E1)b;
-        a = (E1)(E1.e1 + 1);
-        a = (E1)(E2.e1 + E2.e2);
+        a =(E1) b;
+        a =(E1)(E1.e1 + 1);
+        a =(E1)(E2.e1 + E2.e2);
         packet.extract(o.b);
-        transition select(o.b.x) {
-            X.Zero &&& 0x1: accept;
-            default: getopt;
+        transition select (o.b.x) {
+            X.Zero &&& 0x1 : accept;
+            default : getopt;
         }
     }
     state getopt {
@@ -56,6 +56,6 @@ parser p(packet_in packet, out O o) {
     }
 }
 
-parser proto<T>(packet_in p, out T t);
-package top<T>(proto<T> _p);
+parser proto < T >(packet_in p, out T t);
+package top < T >(proto<T> _p);
 top(p()) main;

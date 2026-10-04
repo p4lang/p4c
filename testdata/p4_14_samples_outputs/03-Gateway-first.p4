@@ -3,9 +3,9 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<1>  drop;
-    bit<8>  egress_port;
-    bit<8>  f1;
+    bit<1> drop;
+    bit<8> egress_port;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
     bit<64> f4;
@@ -18,7 +18,7 @@ header ethernet_t {
 }
 
 header vag_t {
-    bit<8>  f1;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
     bit<64> f4;
@@ -33,13 +33,13 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".vag")
-    vag_t      vag;
+    vag_t vag;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        packet.extract<vag_t>(hdr.vag);
+        packet.extract < ethernet_t >(hdr.ethernet);
+        packet.extract < vag_t >(hdr.vag);
         transition accept;
     }
 }
@@ -53,7 +53,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("ethernet.srcAddr");
         }
         default_action = NoAction();
     }
@@ -92,7 +92,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f1: exact @name("vag.f1");
+            hdr.vag.f1 : exact @name("vag.f1");
         }
         size = 1024;
         default_action = NoAction();
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f2: exact @name("vag.f2");
+            hdr.vag.f2 : exact @name("vag.f2");
         }
         size = 1024;
         default_action = NoAction();
@@ -116,7 +116,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f3: exact @name("vag.f3");
+            hdr.vag.f3 : exact @name("vag.f3");
         }
         size = 1024;
         default_action = NoAction();
@@ -128,7 +128,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f4: exact @name("vag.f4");
+            hdr.vag.f4 : exact @name("vag.f4");
         }
         size = 1024;
         default_action = NoAction();
@@ -148,8 +148,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<vag_t>(hdr.vag);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < vag_t >(hdr.vag);
     }
 }
 
@@ -163,4 +163,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

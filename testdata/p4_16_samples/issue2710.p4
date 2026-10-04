@@ -16,14 +16,16 @@ control Wrapped(inout bit<8> valueSet) {
         }
         default_action = set(8w0);
     }
-   apply {
+    apply {
         doSet.apply();
-   }
+    }
 }
 
 control Wrapper(inout bit<8> value) {
-   Wrapped() wrapped;
-   apply { wrapped.apply(value); }
+    Wrapped() wrapped;
+    apply {
+        wrapped.apply(value);
+    }
 }
 
 control c(inout bit<8> v);

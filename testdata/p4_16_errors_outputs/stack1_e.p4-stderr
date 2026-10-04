@@ -1,5 +1,5 @@
-stack1_e.p4(9): [--Wwarn=unused] warning: control 'p' is unused
-control p()
+stack1_e.p4(10): [--Wwarn=unused] warning: control 'p' is unused
+control p() {
         ^
 stack1_e.p4(13): [--Wwarn=unused] warning: 'stack' is unused
         h[w] stack;

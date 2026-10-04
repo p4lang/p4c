@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -35,7 +35,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             exit;
         }
         ret = ret + 8w8;
-        h.eth_hdr.src_addr[7:0] = ret;
+        h.eth_hdr.src_addr[7 : 0] = ret;
     }
     action top_a1(bit<16> y) {
         sub_a1(y);
@@ -49,7 +49,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table t1 {
         key = {
-            h.eth_hdr.dst_addr: exact @name("h.eth_hdr.dst_addr");
+            h.eth_hdr.dst_addr : exact @name("h.eth_hdr.dst_addr");
         }
         actions = {
             top_a1();
@@ -61,7 +61,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         if (h.eth_hdr.isValid()) {
             t1.apply();
-            h.eth_hdr.src_addr[7:0] = ret;
+            h.eth_hdr.src_addr[7 : 0] = ret;
         }
     }
 }
@@ -83,8 +83,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

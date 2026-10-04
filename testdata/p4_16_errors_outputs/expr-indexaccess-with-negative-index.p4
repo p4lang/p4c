@@ -4,4 +4,3 @@ control c(out bit<16> r) {
         r = x[-2];
     }
 }
-

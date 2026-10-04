@@ -32,9 +32,9 @@ parser sub_parser(packet_in b, out headers hdr) {
             b.extract(hdr.p);
             hdr.p.p = 1;
         }
-        transition select(hdr.p.p) {
-            0: parse_hdr;
-            default: accept;
+        transition select (hdr.p.p) {
+            0 : parse_hdr;
+            default : accept;
         }
     }
     state parse_hdr {

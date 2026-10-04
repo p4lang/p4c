@@ -9,7 +9,7 @@ control MyIngress() {
     }
     @name("MyIngress.t0") table t0_0 {
         key = {
-            get_some_data(): exact @name("data");
+            get_some_data() : exact @name("data");
         }
         actions = {
             NoAction_1();

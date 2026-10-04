@@ -29,7 +29,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
     @name(".start") state start {
@@ -42,7 +42,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".my_meter") meter<bit<14>>(32w16384, MeterType.packets) my_meter;
+@name(".my_meter") meter < bit<14 >>(32w16384, MeterType.packets) my_meter;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -56,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop_1() {
     }
     @name(".m_action") action m_action(@name("meter_idx") bit<14> meter_idx) {
-        my_meter.execute_meter<bit<32>>(meter_idx, meta.meta.meter_tag);
+        my_meter.execute_meter < bit<32 >>(meter_idx, meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }
     @name(".m_filter") table m_filter_0 {
@@ -66,7 +66,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            meta.meta.meter_tag: exact @name("meta.meter_tag");
+            meta.meta.meter_tag : exact @name("meta.meter_tag");
         }
         size = 16;
         default_action = NoAction_1();
@@ -78,7 +78,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("ethernet.srcAddr");
         }
         size = 16384;
         default_action = NoAction_2();
@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -105,4 +105,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch <headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

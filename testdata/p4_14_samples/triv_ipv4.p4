@@ -7,26 +7,26 @@
 
 header_type ethernet_t {
     fields {
-        dst_addr        : 48; // width in bits
-        src_addr        : 48;
-        ethertype       : 16;
+        dst_addr : 48; // width in bits
+        src_addr : 48;
+        ethertype : 16;
     }
 }
 
 header_type ipv4_t {
     fields {
-        version         : 4;
-        ihl             : 4;
-        diffserv        : 8;
-        totalLen        : 16;
-        identification  : 16;
-        flags           : 3;
-        fragOffset      : 13;
-        ttl             : 8;
-        protocol        : 8;
-        hdrChecksum     : 16;
-        srcAddr         : 32;
-        dstAddr         : 32;
+        version : 4;
+        ihl : 4;
+        diffserv : 8;
+        totalLen : 16;
+        identification : 16;
+        flags : 3;
+        fragOffset : 13;
+        ttl : 8;
+        protocol : 8;
+        hdrChecksum : 16;
+        srcAddr : 32;
+        dstAddr : 32;
 //        options         : *;  // Variable length options
     }
 //    length : ihl * 4;
@@ -43,8 +43,8 @@ parser start {
 
 parser ethernet {
     extract(ethernet);   // Start with the ethernet header
-    return select(ethernet.ethertype) {
-        0x800: ipv4;
+    return select (ethernet.ethertype) {
+    0x800 : ipv4;
 //        default: ingress;
     }
 }
@@ -59,17 +59,18 @@ action route_ipv4(egress_spec) {
     modify_field(standard_metadata.egress_spec, egress_spec);
 }
 action do_drop() { /*drop();*/ }
-action do_noop() { }
+action do_noop() {
+}
 
 table routing {
     reads {
-	ipv4.dstAddr : lpm;
+        ipv4.dstAddr : lpm;
     }
     actions {
-	do_drop;
-	route_ipv4;
+        do_drop;
+        route_ipv4;
     }
-    size: 2048;
+    size : 2048;
 }
 
 control ingress {

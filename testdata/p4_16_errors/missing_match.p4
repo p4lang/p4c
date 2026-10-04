@@ -9,9 +9,14 @@
 
 control c(in bit b) {
     table t {
-        key = { b : noSuchMatch; }
-        actions = { NoAction; }
+        key = {
+            b : noSuchMatch;
+        }
+        actions = {
+            NoAction;
+        }
     }
 
-    apply {}
+    apply {
+    }
 }

@@ -17,10 +17,9 @@ header H {
     bit<8> a;
 }
 
-
 struct Headers {
-    ethernet_t    eth_hdr;
-    H    h;
+    ethernet_t eth_hdr;
+    H h;
 }
 
 struct Meta {

@@ -20,7 +20,7 @@ header_union U {
 }
 
 struct headers {
-    S    base;
+    S base;
     U[2] u;
 }
 
@@ -29,33 +29,33 @@ struct metadata {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<S>(hdr.base);
-        transition select(hdr.base.t) {
-            8w0: parseO1O1;
-            8w1: parseO1O2;
-            8w2: parseO2O1;
-            8w3: parseO2O2;
-            default: accept;
+        packet.extract < S >(hdr.base);
+        transition select (hdr.base.t) {
+            8w0 : parseO1O1;
+            8w1 : parseO1O2;
+            8w2 : parseO2O1;
+            8w3 : parseO2O2;
+            default : accept;
         }
     }
     state parseO1O1 {
-        packet.extract<O1>(hdr.u[0].byte);
-        packet.extract<O1>(hdr.u[1].byte);
+        packet.extract < O1 >(hdr.u[0].byte);
+        packet.extract < O1 >(hdr.u[1].byte);
         transition accept;
     }
     state parseO1O2 {
-        packet.extract<O1>(hdr.u[0].byte);
-        packet.extract<O2>(hdr.u[1].short);
+        packet.extract < O1 >(hdr.u[0].byte);
+        packet.extract < O2 >(hdr.u[1].short);
         transition accept;
     }
     state parseO2O1 {
-        packet.extract<O2>(hdr.u[0].short);
-        packet.extract<O1>(hdr.u[1].byte);
+        packet.extract < O2 >(hdr.u[0].short);
+        packet.extract < O1 >(hdr.u[1].byte);
         transition accept;
     }
     state parseO2O2 {
-        packet.extract<O2>(hdr.u[0].short);
-        packet.extract<O2>(hdr.u[1].short);
+        packet.extract < O2 >(hdr.u[0].short);
+        packet.extract < O2 >(hdr.u[1].short);
         transition accept;
     }
 }
@@ -65,42 +65,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t              : exact @name("hdr.base.t");
+            hdr.base.t : exact @name("hdr.base.t");
             hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$");
-            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$");
+            hdr.u[0].short.isValid() : exact @name("hdr.u[0].short.$valid$");
             hdr.u[1].byte.isValid() : exact @name("hdr.u[1].byte.$valid$");
-            hdr.u[1].short.isValid(): exact @name("hdr.u[1].short.$valid$");
+            hdr.u[1].short.isValid() : exact @name("hdr.u[1].short.$valid$");
         }
         actions = {
             NoAction_1();
         }
         const default_action = NoAction_1();
     }
-    @hidden action issue5614bmv2l87() {
+    @hidden action issue5614bmv2l90() {
         hdr.u[0].short.setValid();
         hdr.u[0].short.data = 16w0xffff;
         hdr.u[0].byte.setInvalid();
     }
-    @hidden action issue5614bmv2l90() {
+    @hidden action issue5614bmv2l93() {
         hdr.u[0].byte.setValid();
         hdr.u[0].byte.data = 8w0xaa;
         hdr.u[0].short.setInvalid();
     }
-    @hidden action issue5614bmv2l93() {
+    @hidden action issue5614bmv2l96() {
         hdr.u[1].short.setValid();
         hdr.u[1].short.data = 16w0xffff;
         hdr.u[1].byte.setInvalid();
     }
-    @hidden action issue5614bmv2l96() {
+    @hidden action issue5614bmv2l99() {
         hdr.u[1].byte.setValid();
         hdr.u[1].byte.data = 8w0xaa;
         hdr.u[1].short.setInvalid();
-    }
-    @hidden table tbl_issue5614bmv2l87 {
-        actions = {
-            issue5614bmv2l87();
-        }
-        const default_action = issue5614bmv2l87();
     }
     @hidden table tbl_issue5614bmv2l90 {
         actions = {
@@ -120,19 +114,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         const default_action = issue5614bmv2l96();
     }
+    @hidden table tbl_issue5614bmv2l99 {
+        actions = {
+            issue5614bmv2l99();
+        }
+        const default_action = issue5614bmv2l99();
+    }
     apply {
         debug_hdr_0.apply();
         if (hdr.u[0].short.isValid()) {
-            tbl_issue5614bmv2l87.apply();
-        }
-        if (hdr.u[0].byte.isValid()) {
             tbl_issue5614bmv2l90.apply();
         }
-        if (hdr.u[1].short.isValid()) {
+        if (hdr.u[0].byte.isValid()) {
             tbl_issue5614bmv2l93.apply();
         }
-        if (hdr.u[1].byte.isValid()) {
+        if (hdr.u[1].short.isValid()) {
             tbl_issue5614bmv2l96.apply();
+        }
+        if (hdr.u[1].byte.isValid()) {
+            tbl_issue5614bmv2l99.apply();
         }
     }
 }
@@ -144,11 +144,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<S>(hdr.base);
-        packet.emit<O1>(hdr.u[0].byte);
-        packet.emit<O2>(hdr.u[0].short);
-        packet.emit<O1>(hdr.u[1].byte);
-        packet.emit<O2>(hdr.u[1].short);
+        packet.emit < S >(hdr.base);
+        packet.emit < O1 >(hdr.u[0].byte);
+        packet.emit < O2 >(hdr.u[0].short);
+        packet.emit < O1 >(hdr.u[1].byte);
+        packet.emit < O2 >(hdr.u[1].short);
     }
 }
 
@@ -162,4 +162,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

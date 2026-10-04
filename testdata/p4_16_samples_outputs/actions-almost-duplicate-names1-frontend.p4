@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -18,7 +18,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in pkt, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -74,7 +74,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             foo3_0();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
+            hdr.ethernet.etherType : exact @name("hdr.ethernet.etherType");
         }
         default_action = NoAction_1();
         size = 512;
@@ -89,17 +89,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         size = 32;
         default_action = NoAction_2();
     }
     apply {
-        tmp1_0 = hdr.ethernet.srcAddr[7:0];
-        tmp2_0 = hdr.ethernet.dstAddr[7:0];
+        tmp1_0 = hdr.ethernet.srcAddr[7 : 0];
+        tmp2_0 = hdr.ethernet.dstAddr[7 : 0];
         c1_t2.apply();
         t1_0.apply();
-        hdr.ethernet.etherType = (bit<16>)(tmp1_0 - tmp2_0);
+        hdr.ethernet.etherType =(bit<16>)(tmp1_0 - tmp2_0);
     }
 }
 
@@ -115,8 +115,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out pkt, in headers_t hdr) {
     apply {
-        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

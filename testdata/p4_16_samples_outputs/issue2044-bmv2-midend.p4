@@ -36,7 +36,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit < hdr >(h.h);
     }
 }
 
@@ -45,29 +45,29 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.h.b: exact @name("h.h.b");
+            h.h.b : exact @name("h.h.b");
         }
         actions = {
             NoAction_1();
         }
         default_action = NoAction_1();
     }
-    @hidden action issue2044bmv2l43() {
+    @hidden action issue2044bmv2l59() {
         h.h.setInvalid();
     }
-    @hidden table tbl_issue2044bmv2l43 {
+    @hidden table tbl_issue2044bmv2l59 {
         actions = {
-            issue2044bmv2l43();
+            issue2044bmv2l59();
         }
-        const default_action = issue2044bmv2l43();
+        const default_action = issue2044bmv2l59();
     }
     apply {
         if (t_0.apply().hit) {
             ;
         } else {
-            tbl_issue2044bmv2l43.apply();
+            tbl_issue2044bmv2l59.apply();
         }
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

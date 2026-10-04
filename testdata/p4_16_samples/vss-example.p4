@@ -14,30 +14,30 @@
 // an IPv4 header, performing forwarding based on the
 // destination IP address
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 // standard Ethernet header
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 // IPv4 header without options
 header Ipv4_h {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
 }
 
 // Parser section
@@ -52,7 +52,7 @@ error {
 // List of all recognized headers
 struct Parsed_packet {
     Ethernet_h ethernet;
-    Ipv4_h     ip;
+    Ipv4_h ip;
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
@@ -60,7 +60,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 
     state start {
         b.extract(p.ethernet);
-        transition select(p.ethernet.etherType) {
+        transition select (p.ethernet.etherType) {
             0x0800 : parse_ipv4;
             // no default rule: all other packets rejected
         }
@@ -89,9 +89,11 @@ control TopPipe(inout Parsed_packet headers,
       * output port to the DROP_PORT
       */
       action Drop_action()
-      { outCtrl.outputPort = DROP_PORT; }
+    {
+        outCtrl.outputPort = DROP_PORT;
+    }
 
-      IPv4Address nextHop;
+    IPv4Address nextHop;
 
      /**
       * Set the next hop and the output port.
@@ -100,10 +102,10 @@ control TopPipe(inout Parsed_packet headers,
       * @param port output port
       */
       action Set_nhop(IPv4Address ipv4_dest, PortId port) {
-          nextHop = ipv4_dest;
-          headers.ip.ttl = headers.ip.ttl-1;
-          outCtrl.outputPort = port;
-      }
+        nextHop = ipv4_dest;
+        headers.ip.ttl = headers.ip.ttl - 1;
+        outCtrl.outputPort = port;
+    }
 
      /**
       * Computes address of next Ipv4 hop and output port
@@ -111,29 +113,38 @@ control TopPipe(inout Parsed_packet headers,
       * Decrements packet Ipv4 TTL.
       */
      table ipv4_match {
-         key = { headers.ip.dstAddr : lpm; }
-         actions = {
-              Drop_action;
-              Set_nhop;
-         }
+        key = {
+            headers.ip.dstAddr : lpm;
+        }
+        actions = {
+            Drop_action;
+            Set_nhop;
+        }
 
-         size = 1024;
-         default_action = Drop_action;
-     }
+        size = 1024;
+        default_action = Drop_action;
+    }
 
      /**
       * Send the packet to the CPU port
       */
       action Send_to_cpu()
-      { outCtrl.outputPort = CPU_OUT_PORT; }
+    {
+        outCtrl.outputPort = CPU_OUT_PORT;
+    }
 
      /**
       * Check packet TTL and send to CPU if expired.
       */
      table check_ttl {
-         key = { headers.ip.ttl : exact; }
-         actions = { Send_to_cpu; NoAction; }
-         const default_action = NoAction; // defined in core.p4
+        key = {
+            headers.ip.ttl : exact;
+        }
+        actions = {
+            Send_to_cpu;
+            NoAction;
+        }
+        const default_action = NoAction; // defined in core.p4
      }
 
      /**
@@ -141,57 +152,65 @@ control TopPipe(inout Parsed_packet headers,
       * @param dmac destination MAC address.
       */
       action Set_dmac(EthernetAddress dmac)
-      { headers.ethernet.dstAddr = dmac; }
+    {
+        headers.ethernet.dstAddr = dmac;
+    }
      /**
       * Set the destination Ethernet address of the packet
       * based on the next hop IP address.
       */
       table dmac {
-          key = { nextHop : exact; }
-          actions = {
-               Drop_action;
-               Set_dmac;
-          }
-          size = 1024;
-          default_action = Drop_action;
-      }
+        key = {
+            nextHop : exact;
+        }
+        actions = {
+            Drop_action;
+            Set_dmac;
+        }
+        size = 1024;
+        default_action = Drop_action;
+    }
 
       /**
        * Set the source MAC address.
        * @param smac: source MAC address to use
        */
        action Set_smac(EthernetAddress smac)
-       { headers.ethernet.srcAddr = smac; }
+    {
+        headers.ethernet.srcAddr = smac;
+    }
 
       /**
        * Set the source mac address based on the output port.
        */
       table smac {
-           key = { outCtrl.outputPort : exact; }
-           actions = {
-                Drop_action;
-                Set_smac;
-          }
-          size = 16;
-          default_action = Drop_action;
-      }
+        key = {
+            outCtrl.outputPort : exact;
+        }
+        actions = {
+            Drop_action;
+            Set_smac;
+        }
+        size = 16;
+        default_action = Drop_action;
+    }
 
-      apply {
-          if (parseError != error.NoError) {
-               Drop_action();  // invoke drop directly
+    apply {
+        if (parseError != error.NoError) {
+            Drop_action();  // invoke drop directly
                return;
-          }
+        }
 
-          ipv4_match.apply(); // Match result will go into nextHop
+        ipv4_match.apply(); // Match result will go into nextHop
           if (outCtrl.outputPort == DROP_PORT) return;
 
-          check_ttl.apply();
-          if (outCtrl.outputPort == CPU_OUT_PORT) return;
+        check_ttl.apply();
+        if (outCtrl.outputPort == CPU_OUT_PORT) return;
 
-          dmac.apply();
-          if (outCtrl.outputPort == DROP_PORT) return;
+        dmac.apply();
+        if (outCtrl.outputPort == DROP_PORT) return;
 
-          smac.apply();
+        smac.apply();
     }
 }
 

@@ -13,4 +13,3 @@ control C()(A a) {
     apply {
     }
 }
-

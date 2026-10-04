@@ -11,7 +11,7 @@
 // EtherTypes
 const bit<16> TYPE_IPV4 = 0x800;
 
-typedef bit<9>  egressSpec_t;
+typedef bit<9> egressSpec_t;
 typedef bit<32> switchID_t;
 typedef bit<19> qdepth_t;
 typedef bit<48> timestamp_t;
@@ -21,10 +21,10 @@ type bit<32> foo_t;
 type foo_t bar_t;
 
 @p4runtime_translation("com.fingerhutpress/andysp4arch/v1/EthernetAddr_t", 32)
-type bit<48>         EthernetAddr_t;
+type bit<48> EthernetAddr_t;
 
 @p4runtime_translation("com.fingerhutpress/andysp4arch/v1/IPv4Addr_t", 32)
-type bit<32>         IPv4Addr_t;
+type bit<32> IPv4Addr_t;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -33,20 +33,20 @@ type bit<32>         IPv4Addr_t;
 header ethernet_t {
     EthernetAddr_t dstAddr;
     EthernetAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Addr_t srcAddr;
     IPv4Addr_t dstAddr;
 }
@@ -58,18 +58,18 @@ enum MyPacketTypes {
 
 struct test_digest_t {
     EthernetAddr_t in_mac_srcAddr;
-    error   my_parser_error;
+    error my_parser_error;
     MyPacketTypes pkt_type;
     bar_t bar;
 }
 
 struct metadata {
-    test_digest_t       test_digest;
+    test_digest_t test_digest;
 }
 
 struct headers {
-	ethernet_t ethernet;
-	ipv4_t ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 /*************************************************************************
@@ -87,9 +87,9 @@ parser MyParser(packet_in packet,
 
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            TYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
 
@@ -104,7 +104,8 @@ parser MyParser(packet_in packet,
 *************************************************************************/
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {  }
+    apply {
+    }
 }
 
 
@@ -121,11 +122,12 @@ control MyIngress(inout headers hdr,
     action set_dmac(EthernetAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;
     }
-    action drop() {}
-    
+    action drop() {
+    }
+
     table forward {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             set_dmac;
@@ -143,7 +145,7 @@ control MyIngress(inout headers hdr,
 
     table ipv4_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             set_nhop;
@@ -158,7 +160,7 @@ control MyIngress(inout headers hdr,
         meta.test_digest.in_mac_srcAddr = hdr.ethernet.srcAddr;
         meta.test_digest.my_parser_error = error.PacketTooShort;
         meta.test_digest.pkt_type = MyPacketTypes.IPv4;
-        meta.test_digest.bar = (bar_t)(foo_t)32w777;
+        meta.test_digest.bar =(bar_t)(foo_t) 32w777;
         digest(1, meta.test_digest);
     }
 
@@ -184,7 +186,7 @@ control MyEgress(inout headers hdr,
 
     table send_frame {
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port : exact;
         }
         actions = {
             rewrite_mac;
@@ -204,8 +206,8 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-     apply {
-	update_checksum(
+    apply {
+        update_checksum(
 	    hdr.ipv4.isValid(),
             { hdr.ipv4.version,
 	      hdr.ipv4.ihl,
@@ -238,7 +240,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
 ***********************  S W I T C H  *******************************
 *************************************************************************/
 
-V1Switch<headers, metadata>(
+V1Switch < headers, metadata >(
 MyParser(),
 MyVerifyChecksum(),
 MyIngress(),
@@ -246,4 +248,3 @@ MyEgress(),
 MyComputeChecksum(),
 MyDeparser()
 ) main;
-

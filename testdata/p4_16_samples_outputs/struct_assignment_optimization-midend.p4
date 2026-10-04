@@ -21,7 +21,7 @@ struct Metadata {
 
 parser p(packet_in pkt, out Headers hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -29,7 +29,7 @@ parser p(packet_in pkt, out Headers hdr, inout Metadata meta, inout standard_met
 control ingress(inout Headers hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     @name("ingress.pointless_action") action pointless_action() {
     }
-    @hidden action struct_assignment_optimization43() {
+    @hidden action struct_assignment_optimization42() {
         hdr.eth_hdr.eth_type = 16w1;
     }
     @hidden table tbl_pointless_action {
@@ -38,21 +38,21 @@ control ingress(inout Headers hdr, inout Metadata meta, inout standard_metadata_
         }
         const default_action = pointless_action();
     }
-    @hidden table tbl_struct_assignment_optimization43 {
+    @hidden table tbl_struct_assignment_optimization42 {
         actions = {
-            struct_assignment_optimization43();
+            struct_assignment_optimization42();
         }
-        const default_action = struct_assignment_optimization43();
+        const default_action = struct_assignment_optimization42();
     }
     apply {
         tbl_pointless_action.apply();
-        tbl_struct_assignment_optimization43.apply();
+        tbl_struct_assignment_optimization42.apply();
     }
 }
 
 control deparser(packet_out packet, in Headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.eth_hdr);
+        packet.emit < ethernet_t >(hdr.eth_hdr);
     }
 }
 
@@ -71,4 +71,4 @@ control update(inout Headers hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Headers, Metadata>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Metadata >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

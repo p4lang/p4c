@@ -16,7 +16,7 @@ struct Meta {
 }
 
 bit<2> set_undefined(out bit<32> val) {
-    return (bit<2>)2w2;
+    return(bit<2>) 2w2;
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -33,7 +33,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.src_addr: exact @name("aiiIgQ");
+            h.eth_hdr.src_addr : exact @name("aiiIgQ");
         }
         actions = {
             action_1();
@@ -42,10 +42,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            action_1: {
-                action_1();
+            action_1 : {
+            action_1();
             }
-            action_2: {
+            action_2 : {
             }
         }
         set_undefined(sm.instance_type);

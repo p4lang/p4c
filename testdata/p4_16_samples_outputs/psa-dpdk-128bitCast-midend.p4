@@ -20,7 +20,7 @@ struct user_meta_data_t {
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -30,7 +30,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngressControl.macswp") action macswp() {
-        if ((bit<64>)flg_0 == 64w0x2) {
+        if ((bit<64>) flg_0 == 64w0x2) {
             m.addr = hdr.ethernet.dst_addr;
             hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
             hdr.ethernet.src_addr = m.addr;
@@ -44,33 +44,33 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         size = 1000000;
         default_action = NoAction_1();
     }
-    @hidden action psadpdk128bitCast73() {
-        d.egress_port = (bit<32>)c.ingress_port ^ 32w1;
+    @hidden action psadpdk128bitCast75() {
+        d.egress_port =(bit<32>) c.ingress_port ^ 32w1;
     }
-    @hidden table tbl_psadpdk128bitCast73 {
+    @hidden table tbl_psadpdk128bitCast75 {
         actions = {
-            psadpdk128bitCast73();
+            psadpdk128bitCast75();
         }
-        const default_action = psadpdk128bitCast73();
+        const default_action = psadpdk128bitCast75();
     }
     apply {
-        tbl_psadpdk128bitCast73.apply();
+        tbl_psadpdk128bitCast75.apply();
         stub_0.apply();
     }
 }
 
 control MyIngressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_data_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psadpdk128bitCast88() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
+    @hidden action psadpdk128bitCast90() {
+        pkt.emit < ethernet_t >(hdr.ethernet);
     }
-    @hidden table tbl_psadpdk128bitCast88 {
+    @hidden table tbl_psadpdk128bitCast90 {
         actions = {
-            psadpdk128bitCast88();
+            psadpdk128bitCast90();
         }
-        const default_action = psadpdk128bitCast88();
+        const default_action = psadpdk128bitCast90();
     }
     apply {
-        tbl_psadpdk128bitCast88.apply();
+        tbl_psadpdk128bitCast90.apply();
     }
 }
 
@@ -90,6 +90,6 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
     }
 }
 
-IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY >(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
+EgressPipeline < EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
+PSA_Switch < headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

@@ -12,4 +12,3 @@ control c() {
     apply {
     }
 }
-

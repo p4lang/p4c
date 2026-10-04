@@ -3,7 +3,7 @@
 #include <ubpf_model.p4>
 
 header truncate_spec_t {
-    bit<8>  bytes_to_save;
+    bit<8> bytes_to_save;
 }
 header next_header_t {
     bit<32> data;
@@ -11,7 +11,7 @@ header next_header_t {
 
 struct Headers_t {
     truncate_spec_t spec;
-    next_header_t   data;
+    next_header_t data;
 }
 
 struct metadata {

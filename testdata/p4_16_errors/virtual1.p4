@@ -11,9 +11,9 @@ extern Virtual {
 
 control c(inout bit<16> p) {
     Virtual() cntr = {
-        bool f(in bit<16> ix) {
-            return (ix + 1);
-        }
+    bool f(in bit<16> ix) {
+    return(ix + 1);
+    }
     };
 
     apply {

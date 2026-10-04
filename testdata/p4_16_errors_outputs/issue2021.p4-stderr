@@ -1,7 +1,7 @@
-issue2021.p4(14): [--Werror=type-error] error: Expression .x cannot be the target of an assignment
+issue2021.p4(13): [--Werror=type-error] error: Expression .x cannot be the target of an assignment
         .x = 8w3;
          ^
-issue2021.p4(15): [--Werror=type-error] error: 'f(8w1)'
+issue2021.p4(14): [--Werror=type-error] error: 'f(8w1)'
         f(.x);
         ^^^^^
   ---- Actual error:
@@ -15,6 +15,6 @@ issue2021.p4(10)
 issue2021.p4(10): Function type 'f' does not match invocation type '<Method call>'
   extern void f(out bit<8> a);
               ^
-issue2021.p4(15)
+issue2021.p4(14)
           f(.x);
           ^^^^^

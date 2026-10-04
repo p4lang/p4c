@@ -16,7 +16,9 @@ extern int<8> f0();
 extern bit<8> f1();
 
 // error
-error { Error0, Error1 }
+error {
+    Error0, Error1
+}
 extern error f2();
 
 // enum
@@ -34,48 +36,68 @@ enum bit<3> s {
 extern s f4();
 
 control c() {
-  action a() {
-    switch (f0()) {
-      (int<8>)1: {}
-      (int<8>)1: {}
-      default : {}
+    action a() {
+        switch (f0()) {
+            (int<8>) 1 : {
+            }
+            (int<8>) 1 : {
+            }
+            default : {
+            }
+        }
+
+        switch (f1()) {
+            (bit<8>) 1 : {
+            }
+            (bit<8>) 1 : {
+            }
+            default : {
+            }
+        }
+
+        switch (f2()) {
+            error.Error1 : {
+            }
+            error.Error1 : {
+            }
+            default : {
+            }
+        }
+
+        switch (f3()) {
+            e.e1 : {
+            }
+            e.e1 : {
+            }
+            default : {
+            }
+        }
+
+        switch (f4()) {
+            s.s1 : {
+            }
+            s.s1 : {
+            }
+            default : {
+            }
+        }
     }
 
-    switch (f1()) {
-      (bit<8>)1: {}
-      (bit<8>)1: {}
-      default : {}
+    table t {
+        actions = {
+            a;
+        }
     }
 
-    switch (f2()) {
-      error.Error1: {}
-      error.Error1: {}
-      default : {}
+    apply {
+        switch (t.apply().action_run) {
+            a : {
+            }
+            a : {
+            }
+            default : {
+            }
+        }
     }
-
-    switch (f3()) {
-      e.e1: {}
-      e.e1: {}
-      default : {}
-    }
-
-    switch (f4()) {
-      s.s1: {}
-      s.s1: {}
-      default : {}
-    }
-  }
-
-  table t {
-    actions = { a; }
-  }
-
-  apply {
-    switch (t.apply().action_run) {
-      a: {}
-      a: {}
-      default: {}
-    }
-  }
 }
 Pkg(c()) main;

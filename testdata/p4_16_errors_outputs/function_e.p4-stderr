@@ -1,6 +1,6 @@
 function_e.p4(8): [--Wwarn=unused] warning: 'T' is unused
-extern void g<T>();
-              ^
+extern void g < T >();
+                ^
 function_e.p4(10): [--Wwarn=unused] warning: control 'p' is unused
 control p()
         ^
@@ -33,8 +33,8 @@ function_e.p4(14)
           f(1w1, 1w0); // too many arguments
           ^^^^^^^^^^^
 function_e.p4(15): [--Werror=type-error] error: 'f(1w0)'
-        f<bit>(1w0); // too many type arguments
-        ^^^^^^^^^^^
+        f < bit >(1w0); // too many type arguments
+        ^^^^^^^^^^^^^^
   ---- Actual error:
 function_e.p4(7): f: 0 type parameters expected, but 1 type arguments supplied
   extern void f(in bit x);
@@ -44,19 +44,19 @@ function_e.p4(7): Function type 'f' does not match invocation type '<Method call
   extern void f(in bit x);
               ^
 function_e.p4(15)
-          f<bit>(1w0); // too many type arguments
-          ^^^^^^^^^^^
+          f < bit >(1w0); // too many type arguments
+          ^^^^^^^^^^^^^^
 function_e.p4(16): [--Werror=type-error] error: 'g()'
-        g<bit, bit>(); // too many type arguments
-        ^^^^^^^^^^^^^
+        g < bit, bit >(); // too many type arguments
+        ^^^^^^^^^^^^^^^^
   ---- Actual error:
 function_e.p4(8): g: 1 type parameters expected, but 2 type arguments supplied
-  extern void g<T>();
+  extern void g < T >();
               ^
   ---- Originating from:
 function_e.p4(8): Function type 'g' does not match invocation type '<Method call>'
-  extern void g<T>();
+  extern void g < T >();
               ^
 function_e.p4(16)
-          g<bit, bit>(); // too many type arguments
-          ^^^^^^^^^^^^^
+          g < bit, bit >(); // too many type arguments
+          ^^^^^^^^^^^^^^^^

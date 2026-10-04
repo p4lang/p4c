@@ -8,10 +8,10 @@ parser p1(packet_in p, out Header[2] h) {
     @name("p1.h_0") Header h_0;
     state start {
         h_0.setInvalid();
-        p.extract<Header>(h_0);
+        p.extract < Header >(h_0);
         h[0] = h_0;
         h_0.setInvalid();
-        p.extract<Header>(h_0);
+        p.extract < Header >(h_0);
         h[1] = h_0;
         transition accept;
     }

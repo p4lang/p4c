@@ -1,6 +1,6 @@
 #include <core.p4>
 
-extern X<T> {
+extern X < T > {
     X();
 }
 
@@ -9,7 +9,7 @@ extern Y {
 }
 
 parser p() {
-    @name("p.x") X<int<32>>() x_0;
+    @name("p.x") X < int<32 >>() x_0;
     @name("p.y") Y() y_0;
     state start {
         transition accept;

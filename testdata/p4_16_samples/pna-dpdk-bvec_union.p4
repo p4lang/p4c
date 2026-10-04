@@ -8,19 +8,19 @@
 #include <pna.p4>
 
 struct alt_t {
-  bit<1> valid;
-  bit<7> port;
+    bit<1> valid;
+    bit<7> port;
 };
 
 struct row_t {
-  alt_t alt0;
-  alt_t alt1;
+    alt_t alt0;
+    alt_t alt1;
 };
 
 header Hdr1 {
     bit<8> a;
     row_t row0;
-    row_t row1;    
+    row_t row1;
 }
 
 header Hdr2 {
@@ -38,15 +38,16 @@ struct Headers {
     U u;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser ParserImpl(packet_in b, out Headers h, inout Meta m,
     in    pna_main_parser_input_metadata_t istd) {
-    state start {        
+    state start {
         b.extract(h.h1);
-        transition select(h.h1.a) {
-            0: getH1;
-            default: getH2;
+        transition select (h.h1.a) {
+            0 : getH1;
+            default : getH2;
         }
     }
 
@@ -74,7 +75,7 @@ control ingress(inout Headers h, inout Meta m,
     inout pna_main_output_metadata_t ostd) {
     apply {
         if (h.u.h2.isValid())
-            h.u.h2.setInvalid();
+        h.u.h2.setInvalid();
     }
 }
 
@@ -89,4 +90,3 @@ control PreControlImpl(
 }
 
 PNA_NIC(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

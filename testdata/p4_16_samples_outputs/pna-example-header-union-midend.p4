@@ -14,7 +14,7 @@ header O2 {
 }
 
 struct headers {
-    S  base;
+    S base;
     O1 u_byte;
     O2 u_short;
 }
@@ -24,19 +24,19 @@ struct metadata {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        packet.extract<S>(hdr.base);
-        transition select(hdr.base.t) {
-            8w0: parseO1;
-            8w1: parseO2;
-            default: accept;
+        packet.extract < S >(hdr.base);
+        transition select (hdr.base.t) {
+            8w0 : parseO1;
+            8w1 : parseO2;
+            default : accept;
         }
     }
     state parseO1 {
-        packet.extract<O1>(hdr.u_byte);
+        packet.extract < O1 >(hdr.u_byte);
         transition accept;
     }
     state parseO2 {
-        packet.extract<O2>(hdr.u_short);
+        packet.extract < O2 >(hdr.u_short);
         transition accept;
     }
 }
@@ -46,8 +46,8 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t           : exact @name("hdr.base.t");
-            hdr.u_short.isValid(): exact @name("hdr.u.short.$valid$");
+            hdr.base.t : exact @name("hdr.base.t");
+            hdr.u_short.isValid() : exact @name("hdr.u.short.$valid$");
             hdr.u_byte.isValid() : exact @name("hdr.u.byte.$valid$");
         }
         actions = {
@@ -89,9 +89,9 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
 
 control DeparserImpl(packet_out packet, in headers hdr, in metadata meta, in pna_main_output_metadata_t ostd) {
     @hidden action pnaexampleheaderunion83() {
-        packet.emit<S>(hdr.base);
-        packet.emit<O1>(hdr.u_byte);
-        packet.emit<O2>(hdr.u_short);
+        packet.emit < S >(hdr.base);
+        packet.emit < O1 >(hdr.u_byte);
+        packet.emit < O2 >(hdr.u_short);
     }
     @hidden table tbl_pnaexampleheaderunion83 {
         actions = {
@@ -109,4 +109,4 @@ control PreControlImpl(in headers hdr, inout metadata meta, in pna_pre_input_met
     }
 }
 
-PNA_NIC<headers, metadata, headers, metadata>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
+PNA_NIC < headers, metadata, headers, metadata >(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;

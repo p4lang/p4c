@@ -12,7 +12,7 @@ struct user_meta_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -33,14 +33,14 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    Hash<bit<16>>(PSA_HashAlgorithm_t.CRC16) h;
+    Hash < bit<16 >>(PSA_HashAlgorithm_t.CRC16) h;
     bit<16> var = 0;
     action a1() {
         b.data = h.get_hash(var);
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

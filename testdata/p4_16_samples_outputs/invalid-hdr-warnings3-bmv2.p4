@@ -30,25 +30,25 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         h1.data = 0;
         h2.data = 1;
         switch (hdr.h1.data) {
-            0: {
-                h1.setValid();
-                h2.setInvalid();
+            0 : {
+            h1.setValid();
+            h2.setInvalid();
             }
-            default: {
-                h1.setValid();
-                h2.setInvalid();
+            default : {
+            h1.setValid();
+            h2.setInvalid();
             }
         }
         hdr.h1.data = h1.data;
         hdr.h1.data = h2.data;
         switch (hdr.h1.data) {
-            0: {
-                h1.setValid();
-                h2.setValid();
+            0 : {
+            h1.setValid();
+            h2.setValid();
             }
-            default: {
-                h1.setInvalid();
-                h2.setInvalid();
+            default : {
+            h1.setInvalid();
+            h2.setInvalid();
             }
         }
         hdr.h1.data = h1.data;

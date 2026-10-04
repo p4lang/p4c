@@ -21,7 +21,8 @@ bit<16> simple_action() {
     return 16w1;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -43,7 +44,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name") ;
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             simple_action;
@@ -51,17 +52,26 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
     }
     apply {
-        if(simple_table.apply().hit && h.eth_hdr.src_addr == h.eth_hdr.dst_addr) {
+        if (simple_table.apply().hit && h.eth_hdr.src_addr == h.eth_hdr.dst_addr) {
             h.eth_hdr.src_addr = 2;
         }
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -70,4 +80,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

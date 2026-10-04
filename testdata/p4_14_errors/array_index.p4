@@ -11,7 +11,7 @@ header_type data_t {
     }
 }
 
-header data_t   data[4];
+header data_t data[4];
 
 parser start {
     extract(data[next]);

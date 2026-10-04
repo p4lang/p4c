@@ -28,7 +28,8 @@ struct headers {
     U u;
 }
 
-struct metadata {}
+struct metadata {
+}
 
 parser ParserImpl(packet_in packet,
                   out headers hdr,
@@ -37,10 +38,10 @@ parser ParserImpl(packet_in packet,
 {
     state start {
         packet.extract(hdr.base);
-        transition select(hdr.base.t) {
-            0: parseO1;
-            1: parseO2;
-            default: skip;
+        transition select (hdr.base.t) {
+            0 : parseO1;
+            1 : parseO2;
+            default : skip;
         }
     }
     state parseO1 {
@@ -61,11 +62,13 @@ control ingress(inout headers hdr,
                 inout standard_metadata_t standard_metadata) {
     table debug_hdr {
         key = {
-            hdr.base.t: exact;
-            hdr.u.short.isValid(): exact;
-            hdr.u.byte.isValid(): exact;
+            hdr.base.t : exact;
+            hdr.u.short.isValid() : exact;
+            hdr.u.byte.isValid() : exact;
         }
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
         const default_action = NoAction();
     }
     apply {
@@ -85,7 +88,10 @@ control ingress(inout headers hdr,
 control egress(inout headers hdr,
                inout metadata meta,
                inout standard_metadata_t standard_metadata)
-{ apply {} }
+{
+    apply {
+    }
+}
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
@@ -94,11 +100,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(),

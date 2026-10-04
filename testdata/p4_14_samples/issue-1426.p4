@@ -6,8 +6,8 @@
 
 header_type ethernet_t {
     fields {
-        dstAddr   : 48;
-        srcAddr   : 48;
+        dstAddr : 48;
+        srcAddr : 48;
         etherType : 16;
     }
 }
@@ -47,7 +47,7 @@ control c {
     if (standard_metadata.ingress_port & 0x02 == 1) {
         apply(c1);
     }
-    if (standard_metadata.ingress_port & 0x04 == 1) { 
+    if (standard_metadata.ingress_port & 0x04 == 1) {
         apply(c2);
     }
 }
@@ -64,4 +64,3 @@ control ingress {
 
 control egress {
 }
-

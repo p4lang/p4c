@@ -18,17 +18,17 @@ control c(inout bit<16> p) {
             return tmp;
         }
     };
-    @hidden action virtual2l29() {
+    @hidden action virtual2l27() {
         cntr_0.run(16w6);
     }
-    @hidden table tbl_virtual2l29 {
+    @hidden table tbl_virtual2l27 {
         actions = {
-            virtual2l29();
+            virtual2l27();
         }
-        const default_action = virtual2l29();
+        const default_action = virtual2l27();
     }
     apply {
-        tbl_virtual2l29.apply();
+        tbl_virtual2l27.apply();
     }
 }
 

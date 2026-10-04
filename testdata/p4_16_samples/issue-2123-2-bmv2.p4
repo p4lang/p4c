@@ -14,23 +14,23 @@ header ethernet_t {
 }
 
 header h0_t {
-    bit<8>  f0;
+    bit<8> f0;
 }
 
 header h1_t {
-    bit<8>  f1;
+    bit<8> f1;
 }
 
 header h2_t {
-    bit<8>  f2;
+    bit<8> f2;
 }
 
 header h3_t {
-    bit<8>  f3;
+    bit<8> f3;
 }
 
 header h4_t {
-    bit<8>  f4;
+    bit<8> f4;
 }
 
 struct metadata {
@@ -38,11 +38,11 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    h0_t       h0;
-    h1_t       h1;
-    h2_t       h2;
-    h3_t       h3;
-    h4_t       h4;
+    h0_t h0;
+    h1_t h1;
+    h2_t h2;
+    h3_t h3;
+    h4_t h4;
 }
 
 parser ParserImpl(
@@ -53,13 +53,13 @@ parser ParserImpl(
 {
     state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800 .. 0x0806: parse_h0;
-            0x0808: parse_h1;
-            0xfff1 .. 0xfffe: parse_h2;
-            0x0900: parse_h3;
-            0x08ff .. 0x0901: parse_h4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 .. 0x0806 : parse_h0;
+            0x0808 : parse_h1;
+            0xfff1 .. 0xfffe : parse_h2;
+            0x0900 : parse_h3;
+            0x08ff .. 0x0901 : parse_h4;
+            default : accept;
         }
     }
     state parse_h0 {
@@ -94,11 +94,11 @@ control ingress(
         // the STF test we can match on the output packet contents and
         // know which case was taken in the select expression in the
         // parser.
-        hdr.ethernet.dstAddr[44:44] = hdr.h4.isValid() ? 1w1 : 0;
-        hdr.ethernet.dstAddr[43:43] = hdr.h3.isValid() ? 1w1 : 0;
-        hdr.ethernet.dstAddr[42:42] = hdr.h2.isValid() ? 1w1 : 0;
-        hdr.ethernet.dstAddr[41:41] = hdr.h1.isValid() ? 1w1 : 0;
-        hdr.ethernet.dstAddr[40:40] = hdr.h0.isValid() ? 1w1 : 0;
+        hdr.ethernet.dstAddr[44 : 44] = hdr.h4.isValid() ? 1w1 : 0;
+        hdr.ethernet.dstAddr[43 : 43] = hdr.h3.isValid() ? 1w1 : 0;
+        hdr.ethernet.dstAddr[42 : 42] = hdr.h2.isValid() ? 1w1 : 0;
+        hdr.ethernet.dstAddr[41 : 41] = hdr.h1.isValid() ? 1w1 : 0;
+        hdr.ethernet.dstAddr[40 : 40] = hdr.h0.isValid() ? 1w1 : 0;
 
         standard_metadata.egress_spec = 3;
     }
@@ -128,11 +128,13 @@ control DeparserImpl(
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(

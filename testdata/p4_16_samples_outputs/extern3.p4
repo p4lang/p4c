@@ -10,4 +10,3 @@ control c() {
         x.method1(x.method2(12w1), 8w0);
     }
 }
-

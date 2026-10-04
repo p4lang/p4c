@@ -33,12 +33,12 @@ header MOD {
 
 header RSH {
     bit<4> a;
-    int<4>  b;
-    bit<4>  c;
-    int<4>  d;
-    bit<4>  e;
-    bit<4>  g;
-    bit<8>  h;
+    int<4> b;
+    bit<4> c;
+    int<4> d;
+    bit<4> e;
+    bit<4> g;
+    bit<8> h;
 }
 
 header LSH {
@@ -80,7 +80,8 @@ struct Headers {
     BOOL b;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -121,31 +122,41 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.rshift.a = tmp / 4w2;
         h.rshift.b = 4s7 >> 1 >> 1;
         h.rshift.c = 4w15 >> 1 >> 1;
-        h.rshift.d = -4s7 >> 1 >> 1;
+        h.rshift.d = - 4s7 >> 1 >> 1;
         h.rshift.e = tmp >> 1 >> 1;
         h.rshift.g = 4w1 >> 8w16;
-        h.rshift.h = (bit<8>)~(4w1 >> 8w1);
+        h.rshift.h =(bit<8>) ~(4w1 >> 8w1);
         //left shift
-        h.lshift.a = (bit<8>)(4w4 << 8w2);
-        h.lshift.b = (bit<8>)(4w4 << 8w16);
+        h.lshift.a =(bit<8>)(4w4 << 8w2);
+        h.lshift.b =(bit<8>)(4w4 << 8w16);
         h.lshift.c = 1 << 1;
-        h.lshift.d = (bit<8>)1 << 256;
+        h.lshift.d =(bit<8>) 1 << 256;
         h.lshift.e = 8w1 << 8w0;
 
         // comparing various constants
-        if (4w15  > 2) { h.comp.a = 1; }
-        if (4w3  > 2) { h.comp.b = 1; }
-        if (-1  > 4w8) { h.comp.c = 1; }
-        if (4w8 > -1) { h.comp.d = 1; }
+        if (4w15 > 2) {
+            h.comp.a = 1;
+        }
+        if (4w3 > 2) {
+            h.comp.b = 1;
+        }
+        if (- 1 > 4w8) {
+            h.comp.c = 1;
+        }
+        if (4w8 > - 1) {
+            h.comp.d = 1;
+        }
         // FIXME: This expression should also work
         // if (-1  > 4s8) { h.comp.e = 1; }
-        if (-1  > 4s7) { h.comp.e = 1; }
+        if (- 1 > 4s7) {
+            h.comp.e = 1;
+        }
         // Division
-        h.div.a = (bit<8>)(4 / 1w1);
-        h.div.b = (3 - 8w2 / 2);
-        h.div.c = (8w2 / 2 - 3 );
+        h.div.a =(bit<8>)(4 / 1w1);
+        h.div.b =(3 - 8w2 / 2);
+        h.div.c =(8w2 / 2 - 3);
         // nested int operations
-        bit<48> tmp2 = (1 | 2) |+| 48w0;
+        bit<48> tmp2 =(1 | 2) |+| 48w0;
         const int int_def = 1;
 
         // bool evaluation
@@ -153,11 +164,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -165,5 +185,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-
-

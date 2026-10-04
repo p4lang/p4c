@@ -7,7 +7,7 @@ header_type data_t {
         h3 : 16;
         h4 : 16;
     }
-} 
+}
 
 header data_t data;
 
@@ -22,7 +22,7 @@ action set_port(port) {
 
 table test1 {
     reads {
-       data.f1 : exact;
+        data.f1 : exact;
     }
     actions {
         set_port;

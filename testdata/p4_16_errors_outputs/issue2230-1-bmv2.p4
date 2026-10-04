@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h1_t {
@@ -31,8 +31,8 @@ struct s2_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    h1_t       h1;
-    h2_t       h2;
+    h1_t h1;
+    h2_t h2;
 }
 
 struct metadata_t {
@@ -74,8 +74,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     s1_t s1;
     myCtrl() c1;
     apply {
-        hdr.h1 = { hdr.ethernet.dstAddr[47:40], hdr.ethernet.dstAddr[39:32] };
-        s1 = { hdr.ethernet.dstAddr[31:24], hdr.ethernet.dstAddr[23:16] };
+        hdr.h1 = { hdr.ethernet.dstAddr[47 : 40], hdr.ethernet.dstAddr[39 : 32] };
+        s1 = { hdr.ethernet.dstAddr[31 : 24], hdr.ethernet.dstAddr[23 : 16] };
         log_msg("Near start of ingress:");
         log_msg("(bit<1>) hdr.h1.isValid()={} .f1={} .f2={}", { (bit<1>)hdr.h1.isValid(), hdr.h1.f1, hdr.h1.f2 });
         log_msg("s1 .f1={} .f2={}", { s1.f1, s1.f2 });

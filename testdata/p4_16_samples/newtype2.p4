@@ -17,13 +17,13 @@ struct M {
 control Ingress(inout M sm);
 package V1Switch(Ingress ig);
 
-control Forwarding (inout M sm) {
+control Forwarding(inout M sm) {
     apply {
-        sm.es = (PortIdUInt_t)sm.e;
+        sm.es =(PortIdUInt_t) sm.e;
     }
 }
 
-control FabricIngress (inout M sm) {
+control FabricIngress(inout M sm) {
     Forwarding() forwarding;
     apply {
         forwarding.apply(sm);

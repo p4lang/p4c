@@ -16,7 +16,7 @@ struct Headers {
 control SubCtrl(bit<16> eth_type) {
     table dummy {
         key = {
-            eth_type: exact @name("dummy_key") ;
+            eth_type : exact @name("dummy_key");
         }
         actions = {
         }

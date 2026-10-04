@@ -12,11 +12,16 @@ parser start_e2e_mirrored {
     return ingress;
 }
 
-action nop() { }
+action nop() {
+}
 
 table exact {
-    reads { standard_metadata.egress_spec: exact; }
-    actions { nop; }
+    reads {
+        standard_metadata.egress_spec : exact;
+    }
+    actions {
+        nop;
+    }
 }
 
 control ingress {

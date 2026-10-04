@@ -38,7 +38,8 @@ struct S {
     H1 h2;
 }
 
-header Empty {}
+header Empty {
+}
 
 bit<32> v(in H h1, in H1 h2) {
     Empty e;
@@ -48,7 +49,7 @@ bit<32> v(in H h1, in H1 h2) {
     const bit<32> se = e.minSizeInBits() + n.minSizeInBits();
     const bit<32> sz = h1.minSizeInBits() + h2.minSizeInBits() + h2.minSizeInBytes();
     return h1.isValid +
-    (b1 ? (h2.minSizeInBits() + (5 + h1.minSizeInBits())) : (se + sz));
+    (b1 ?(h2.minSizeInBits() +(5 + h1.minSizeInBits())) :(se + sz));
 }
 
 control c(out bit<32> size) {

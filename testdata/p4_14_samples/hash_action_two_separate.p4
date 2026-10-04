@@ -8,7 +8,7 @@ header_type data_t {
         h3 : 16;
         h4 : 16;
     }
-} 
+}
 
 header data_t data;
 
@@ -28,7 +28,7 @@ parser start {
 
 action set_index(index1, index2, port) {
     modify_field(counter_metadata.counter_index_first, index1);
-    modify_field(counter_metadata.counter_index_second, index2); 
+    modify_field(counter_metadata.counter_index_second, index2);
     modify_field(standard_metadata.egress_spec, port);
 }
 
@@ -38,7 +38,7 @@ table index_setter {
         data.f2 : exact;
     }
     actions {
-        set_index;    
+        set_index;
     }
     size : 2048;
 }
@@ -65,7 +65,7 @@ table stats {
     actions {
         count_entries;
     }
-    default_action: count_entries;
+    default_action : count_entries;
 }
 
 action count_entries2() {
@@ -76,7 +76,7 @@ table stats2 {
     actions {
         count_entries2;
     }
-    default_action: count_entries2;
+    default_action : count_entries2;
 }
 
 control ingress {

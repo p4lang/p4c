@@ -15,7 +15,7 @@ struct metadata {
 
 struct headers {
     @name(".heartlands")
-    main_0   heartlands;
+    main_0 heartlands;
     @name(".z")
     packet_0 z;
 }
@@ -51,4 +51,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

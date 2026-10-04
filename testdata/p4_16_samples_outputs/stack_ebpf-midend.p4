@@ -8,15 +8,15 @@ header Ethernet_h {
 }
 
 header IPv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -24,20 +24,20 @@ header IPv4_h {
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h[2]  ipv4;
+    IPv4_h[2] ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ip;
+            default : reject;
         }
     }
     state ip {
-        p.extract<IPv4_h>(headers.ipv4[0]);
-        p.extract<IPv4_h>(headers.ipv4[1]);
+        p.extract < IPv4_h >(headers.ipv4[0]);
+        p.extract < IPv4_h >(headers.ipv4[1]);
         transition accept;
     }
 }
@@ -51,7 +51,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
-            headers.ipv4[0].srcAddr: exact @name("headers.ipv4[0].srcAddr");
+            headers.ipv4[0].srcAddr : exact @name("headers.ipv4[0].srcAddr");
         }
         actions = {
             Reject();
@@ -60,34 +60,34 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_1();
     }
-    @hidden action stack_ebpf64() {
+    @hidden action stack_ebpf66() {
         pass = false;
     }
-    @hidden action stack_ebpf60() {
+    @hidden action stack_ebpf62() {
         pass = true;
     }
-    @hidden table tbl_stack_ebpf60 {
+    @hidden table tbl_stack_ebpf62 {
         actions = {
-            stack_ebpf60();
+            stack_ebpf62();
         }
-        const default_action = stack_ebpf60();
+        const default_action = stack_ebpf62();
     }
-    @hidden table tbl_stack_ebpf64 {
+    @hidden table tbl_stack_ebpf66 {
         actions = {
-            stack_ebpf64();
+            stack_ebpf66();
         }
-        const default_action = stack_ebpf64();
+        const default_action = stack_ebpf66();
     }
     apply {
-        tbl_stack_ebpf60.apply();
+        tbl_stack_ebpf62.apply();
         switch (Check_src_ip_0.apply().action_run) {
-            Reject: {
-                tbl_stack_ebpf64.apply();
+            Reject : {
+            tbl_stack_ebpf66.apply();
             }
-            NoAction_1: {
+            NoAction_1 : {
             }
         }
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

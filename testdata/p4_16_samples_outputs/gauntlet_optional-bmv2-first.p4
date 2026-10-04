@@ -12,16 +12,16 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 extern Checksum {
     Checksum();
-    void add<T>(in T data);
-    void subtract<T>(in T data);
+    void add < T >(in T data);
+    void subtract < T >(in T data);
     bool verify();
     bit<16> get();
-    bit<16> update<T>(in T data, @optional in bool zeros_as_ones);
+    bit<16> update < T >(in T data, @optional in bool zeros_as_ones);
 }
 
 parser p(packet_in pkt, out Headers hdr) {
@@ -29,8 +29,8 @@ parser p(packet_in pkt, out Headers hdr) {
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -43,13 +43,13 @@ control ingress(inout Headers h) {
 control egress(inout Headers h) {
     Checksum() ipv4_checksum;
     apply {
-        h.h.result = ipv4_checksum.update<tuple<bit<48>, bit<48>, bit<16>>>({ h.eth_hdr.dst_addr, h.eth_hdr.src_addr, h.eth_hdr.eth_type });
+        h.h.result = ipv4_checksum.update < tuple < bit<48>, bit<48>, bit<16 >>>({ h.eth_hdr.dst_addr, h.eth_hdr.src_addr, h.eth_hdr.eth_type });
     }
 }
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 

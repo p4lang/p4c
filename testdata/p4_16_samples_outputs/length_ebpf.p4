@@ -11,15 +11,15 @@ header next_header {
 
 struct Headers_t {
     first_header first;
-    next_header  next;
+    next_header next;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract(headers.first);
-        transition select(p.length()) {
-            16: parse_next;
-            default: reject;
+        transition select (p.length()) {
+            16 : parse_next;
+            default : reject;
         }
     }
     state parse_next {

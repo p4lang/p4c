@@ -3,16 +3,16 @@
 control c(inout bit<32> b) {
     apply {
         switch (b) {
-            16: 
-            32: {
-                b = 1;
+            16 :
+            32 : {
+            b = 1;
             }
-            64: {
-                b = 2;
+            64 : {
+            b = 2;
             }
-            92: 
-            default: {
-                b = 3;
+            92 :
+            default : {
+            b = 3;
             }
         }
     }

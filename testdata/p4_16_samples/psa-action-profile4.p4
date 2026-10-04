@@ -7,14 +7,15 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -55,20 +56,30 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
 
     ActionProfile(1024) ap;
-    action a1(bit<48> param) { hdr.ethernet.dstAddr = param; }
-    action a2(bit<16> param) { hdr.ethernet.etherType = param; }
+    action a1(bit<48> param) {
+        hdr.ethernet.dstAddr = param;
+    }
+    action a2(bit<16> param) {
+        hdr.ethernet.etherType = param;
+    }
     table tbl {
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; a2; }
+        actions = {
+            NoAction;
+            a2;
+        }
         psa_implementation = ap;
     }
     table tbl2 {
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; a1; }
+        actions = {
+            NoAction;
+            a1;
+        }
         psa_implementation = ap;
     }
     apply {
@@ -82,7 +93,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -106,7 +118,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

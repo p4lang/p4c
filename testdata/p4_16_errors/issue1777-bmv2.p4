@@ -23,8 +23,8 @@ struct reg_data2_t {
 }
 
 struct metadata_t {
-    bit<8>              reg_data1;
-    reg_data2_t         reg_data2;
+    bit<8> reg_data1;
+    reg_data2_t reg_data2;
 }
 
 parser ParserImpl(packet_in packet,
@@ -42,11 +42,11 @@ control ingress(inout headers_t hdr,
                 inout metadata_t meta,
                 inout standard_metadata_t stdmeta)
 {
-    register<bit<8> >(16) reg1;
-    register<reg_data2_t>(16) reg2;
+    register < bit<8> >(16) reg1;
+    register < reg_data2_t >(16) reg2;
 
     apply {
-        bit<4> reg_idx = hdr.ethernet.dstAddr[3:0];
+        bit<4> reg_idx = hdr.ethernet.dstAddr[3 : 0];
 
         reg1.read(meta.reg_data1, (bit<32>) reg_idx);
         meta.reg_data1 = meta.reg_data1 + 1;
@@ -62,7 +62,8 @@ control egress(inout headers_t hdr,
                inout metadata_t meta,
                inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {
@@ -72,11 +73,13 @@ control DeparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(),

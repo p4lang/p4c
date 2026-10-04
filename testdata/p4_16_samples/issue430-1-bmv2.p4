@@ -7,21 +7,23 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
-    Ethernet_h    ethernet;
+    Ethernet_h ethernet;
 }
 
-struct Metadata {}
+struct Metadata {
+}
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
-    apply {}
+    apply {
+    }
 }
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {

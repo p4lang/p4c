@@ -6,4 +6,3 @@ control compute(inout bool h) {
         }
     }
 }
-

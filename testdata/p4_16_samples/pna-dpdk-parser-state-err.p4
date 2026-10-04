@@ -8,25 +8,24 @@
 #include <core.p4>
 #include "dpdk/pna.p4"
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -37,15 +36,14 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  flags;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
 }
-
 
 struct empty_metadata_t {
 }
@@ -101,11 +99,11 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.tcp);
-        main_meta.rng_result1  = (bit<1>) ((main_meta.min1 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= main_meta.max1));
+        main_meta.rng_result1 =(bit<1>)((main_meta.min1 <= hdr.tcp.srcPort) &&(hdr.tcp.srcPort <= main_meta.max1));
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -115,14 +113,14 @@ parser MainParserImpl(
 }
 
 bit<1> dummy_func(inout headers_t hdr,   bit<16> min1,
-        bit<16> max1,inout main_metadata_t user_meta){
-    return  (bit<1>) ((min1 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= max1));
+        bit<16> max1,inout main_metadata_t user_meta) {
+    return(bit<1>)((min1 <= hdr.tcp.srcPort) &&(hdr.tcp.srcPort <= max1));
 }
 
-action do_range_checks_0 (inout headers_t hdr,inout main_metadata_t user_meta,
+action do_range_checks_0(inout headers_t hdr,inout main_metadata_t user_meta,
         bit<16> min1,
         bit<16> max1) {
-    user_meta.rng_result1  = dummy_func(hdr,min1, max1, user_meta );
+    user_meta.rng_result1 = dummy_func(hdr,min1, max1, user_meta );
 }
 
 control MainControlImpl(
@@ -139,16 +137,16 @@ control MainControlImpl(
         add_entry(action_name="next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
 
-    action do_range_checks_1 (
+    action do_range_checks_1(
         bit<16> min1,
         bit<16> max1)
     {
-        user_meta.rng_result1 =  (bit<1>) ((min1 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= max1));
+        user_meta.rng_result1 =(bit<1>)((min1 <= hdr.tcp.srcPort) &&(hdr.tcp.srcPort <= max1));
     }
 
     table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
 
         }
         actions = {
@@ -167,7 +165,7 @@ control MainControlImpl(
     }
     table ipv4_da2 {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             @tableonly next_hop2;
@@ -179,7 +177,7 @@ control MainControlImpl(
         const default_action = add_on_miss_action2;
     }
     apply {
-        user_meta.rng_result1  = (bit<1>) ((100 <= hdr.tcp.srcPort) && (hdr.tcp.srcPort <= 200));
+        user_meta.rng_result1 =(bit<1>)((100 <= hdr.tcp.srcPort) &&(hdr.tcp.srcPort <= 200));
         if (hdr.ipv4.isValid()) {
             ipv4_da.apply();
             ipv4_da2.apply();

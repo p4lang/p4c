@@ -9,9 +9,13 @@
 
 control x()
 {
-    apply {}
+    apply {
+    }
 }
 
 #line 5 "file1.p4"
 
-control y() { apply {} }
+control y() {
+    apply {
+    }
+}

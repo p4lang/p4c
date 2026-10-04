@@ -8,4 +8,3 @@ control d() {
         c.apply();
     }
 }
-

@@ -9,19 +9,19 @@ typedef bit<9> egressSpec_t;
 header Ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header Ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -32,15 +32,15 @@ header Tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<1>  urgent;
-    bit<1>  ack;
-    bit<1>  psh;
-    bit<1>  rst;
-    bit<1>  syn;
-    bit<1>  fin;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<1> urgent;
+    bit<1> ack;
+    bit<1> psh;
+    bit<1> rst;
+    bit<1> syn;
+    bit<1> fin;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -48,8 +48,8 @@ header Tcp_t {
 
 struct Headers_t {
     Ethernet_t ethernet;
-    Ipv4_t     ipv4;
-    Tcp_t      tcp;
+    Ipv4_t ipv4;
+    Tcp_t tcp;
 }
 
 struct ConnectionInfo_t {
@@ -59,7 +59,7 @@ struct ConnectionInfo_t {
 
 struct metadata {
     ConnectionInfo_t connInfo;
-    bit<32>          conn_id;
+    bit<32> conn_id;
 }
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
@@ -68,9 +68,9 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
     }
     state parse_ethernet {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (headers.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -84,8 +84,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    Register<bit<32>, bit<32>>(65536) conn_state;
-    Register<bit<32>, bit<32>>(65536) conn_srv_addr;
+    Register < bit<32>, bit<32 >>(65536) conn_state;
+    Register <bit<32>, bit<32 >>(65536) conn_srv_addr;
     action update_conn_state(bit<32> s) {
         conn_state.write(meta.conn_id, s);
     }

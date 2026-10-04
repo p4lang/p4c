@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct fwd_metadata_t {
@@ -51,7 +51,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     }
     table match_meta {
         key = {
-            user_meta.field: exact;
+            user_meta.field : exact;
         }
         actions = {
             set_output;
@@ -59,7 +59,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         }
     }
     apply {
-        user_meta.field = hdr.ethernet.dstAddr[7:0];
+        user_meta.field = hdr.ethernet.dstAddr[7 : 0];
         match_meta.apply();
     }
 }

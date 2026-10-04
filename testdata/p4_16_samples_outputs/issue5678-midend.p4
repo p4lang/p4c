@@ -3,17 +3,17 @@ struct S {
 }
 
 control c(out bit<8> result) {
-    @hidden action issue5678l13() {
+    @hidden action issue5678l12() {
         result = 8w1;
     }
-    @hidden table tbl_issue5678l13 {
+    @hidden table tbl_issue5678l12 {
         actions = {
-            issue5678l13();
+            issue5678l12();
         }
-        const default_action = issue5678l13();
+        const default_action = issue5678l12();
     }
     apply {
-        tbl_issue5678l13.apply();
+        tbl_issue5678l12.apply();
     }
 }
 

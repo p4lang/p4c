@@ -8,32 +8,32 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
-    ipv4_t        ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 struct metadata_t {
@@ -46,9 +46,9 @@ parser parserImpl(packet_in packet,
 {
     state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -58,7 +58,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 enum MyEnum_t {
@@ -92,7 +93,7 @@ control ingressImpl(inout headers_t hdr,
         log_msg("GREPME Packet ingress begin");
         
         // bool value prints as 1 for true, 0 for false
-        bool1 = (bool) hdr.ethernet.dstAddr[0:0];
+        bool1 =(bool) hdr.ethernet.dstAddr[0 : 0];
         log_msg("GREPME bool1={}", {bool1});
 
         // bool cast to bit<1> value prints as 1 for true, 0 for false
@@ -100,7 +101,7 @@ control ingressImpl(inout headers_t hdr,
         log_msg("GREPME (bit<1>) (!bool1)={}", {(bit<1>) (!bool1)});
 
         // bit<1> prints as 0 or 1
-        bit1 = hdr.ethernet.dstAddr[0:0];
+        bit1 = hdr.ethernet.dstAddr[0 : 0];
         log_msg("GREPME bit1={}", {bit1});
 
         // signed int<W>
@@ -126,9 +127,9 @@ control ingressImpl(inout headers_t hdr,
         log_msg("GREPME hdr.ethernet.dstAddr[1:0]={}", {hdr.ethernet.dstAddr[1:0]});
 
         // enum
-        if (hdr.ethernet.dstAddr[1:0] == 0) {
+        if (hdr.ethernet.dstAddr[1 : 0] == 0) {
             enum1 = MyEnum_t.VAL1;
-        } else if (hdr.ethernet.dstAddr[1:0] == 1) {
+        } else if (hdr.ethernet.dstAddr[1 : 0] == 1) {
             enum1 = MyEnum_t.VAL2;
         } else {
             enum1 = MyEnum_t.VAL3;
@@ -143,9 +144,9 @@ control ingressImpl(inout headers_t hdr,
         log_msg("GREPME enum1={}", {enum1});
 
         // serializable enum
-        if (hdr.ethernet.dstAddr[1:0] == 0) {
+        if (hdr.ethernet.dstAddr[1 : 0] == 0) {
             serenum1 = MySerializableEnum_t.VAL17;
-        } else if (hdr.ethernet.dstAddr[1:0] == 1) {
+        } else if (hdr.ethernet.dstAddr[1 : 0] == 1) {
             serenum1 = MySerializableEnum_t.VAL23;
         } else {
             serenum1 = MySerializableEnum_t.VAL19;
@@ -195,11 +196,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

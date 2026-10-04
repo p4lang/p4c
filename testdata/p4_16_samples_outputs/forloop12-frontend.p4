@@ -1,7 +1,7 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header t1 {
     bit<32> x;
     bit<32> y;
@@ -18,11 +18,11 @@ control c(inout headers_t hdrs) {
     @name("c.a0") action a0() {
         result_0 = 32w0;
         for (i_0 = 8w0; i_0 < 8w4; i_0 = i_0 + 8w1) {
-            result_0 = result_0 << 8;
-            result_0 = result_0 + ((hdrs.t1.x >> (i_0 << 3)) + (hdrs.t1.y >> (i_0 << 3)) & 32w0xff);
-            if (hdrs.t2.isValid()) {
-                result_0 = result_0 + ((hdrs.t2.x >> (i_0 << 3)) + (hdrs.t2.y >> (i_0 << 3)) & 32w0xff);
-            }
+        result_0 = result_0 << 8;
+        result_0 = result_0 +((hdrs.t1.x >>(i_0 << 3)) +(hdrs.t1.y >>(i_0 << 3)) & 32w0xff);
+        if (hdrs.t2.isValid()) {
+        result_0 = result_0 +((hdrs.t2.x >>(i_0 << 3)) +(hdrs.t2.y >>(i_0 << 3)) & 32w0xff);
+        }
         }
         hdrs.t1.x = result_0;
     }
@@ -31,4 +31,4 @@ control c(inout headers_t hdrs) {
     }
 }
 
-top<headers_t>(c()) main;
+top < headers_t >(c()) main;

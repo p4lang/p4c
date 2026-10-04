@@ -17,21 +17,21 @@ enum EthT EthTypes {
 typedef int<8> I8;
 enum I8 UnrepresentableInt {
     representable_p = 127,
-    representable_n = -128,
+    representable_n = - 128,
     unrepresentable_p = 128,
-    unrepresentable_n = -129,
-    explicit_cast = (I8)4 * 4 * 4 * 4
+    unrepresentable_n = - 129,
+    explicit_cast =(I8) 4 * 4 * 4 * 4
 }
 
 enum bit<4> UnrepresentableBit {
-    unrepresentable_n = -1,
+    unrepresentable_n = - 1,
     representable_p = 15,
     unrepresentable_p = 16
 }
 
 header Ethernet {
-    bit<48>  src;
-    bit<48>  dest;
+    bit<48> src;
+    bit<48> dest;
     EthTypes type;
 }
 
@@ -43,10 +43,10 @@ parser prs(packet_in p, out Headers h) {
     Ethernet e;
     state start {
         p.extract(e);
-        transition select(e.type) {
-            EthTypes.IPv4: accept;
-            EthTypes.ARP: accept;
-            default: reject;
+        transition select (e.type) {
+            EthTypes.IPv4 : accept;
+            EthTypes.ARP : accept;
+            default : reject;
         }
     }
 }
@@ -59,12 +59,12 @@ control c(inout Headers h) {
         if (h.eth.type == EthTypes.IPv4) {
             h.eth.setInvalid();
         } else {
-            h.eth.type = (EthTypes)(bit<16>)0;
+            h.eth.type =(EthTypes)(bit<16>) 0;
         }
     }
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H>(inout H h);
-package top<H>(p<H> _p, ctr<H> _c);
+parser p < H >(packet_in _p, out H h);
+control ctr < H >(inout H h);
+package top < H >(p<H> _p, ctr<H> _c);
 top(prs(), c()) main;

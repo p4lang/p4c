@@ -10,6 +10,5 @@ header IPv4 {
 
 struct Packet_header {
     EthernetHeader ethernet;
-    IPv4           ipv4;
+    IPv4 ipv4;
 }
-

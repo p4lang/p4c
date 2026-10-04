@@ -21,10 +21,10 @@ parser TestParser(packet_in b, out headers_t headers, inout metadata_t meta, ino
         transition reject;
     }
     state start {
-        b.extract<test_header_t>(headers.test[32w0]);
-        transition select((32w0 << 1) + 32w4294967295) {
-            32w0: f;
-            default: a;
+        b.extract < test_header_t >(headers.test[32w0]);
+        transition select ((32w0 << 1) + 32w4294967295) {
+            32w0 : f;
+            default : a;
         }
     }
 }
@@ -54,4 +54,4 @@ control TestDeparser(packet_out b, in headers_t hdr) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(TestParser(), TestVerifyChecksum(), TestIngress(), TestEgress(), TestComputeChecksum(), TestDeparser()) main;
+V1Switch < headers_t, metadata_t >(TestParser(), TestVerifyChecksum(), TestIngress(), TestEgress(), TestComputeChecksum(), TestDeparser()) main;

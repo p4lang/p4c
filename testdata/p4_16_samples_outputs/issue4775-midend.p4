@@ -9,19 +9,19 @@ header hdr_t {
 }
 
 control c(inout hdr_t hdr) {
-    @hidden action issue4775l17() {
+    @hidden action issue4775l20() {
         hdr.value_3 = 8w1;
         hdr.value_7 = 8w2;
     }
-    @hidden table tbl_issue4775l17 {
+    @hidden table tbl_issue4775l20 {
         actions = {
-            issue4775l17();
+            issue4775l20();
         }
-        const default_action = issue4775l17();
+        const default_action = issue4775l20();
     }
     apply {
         if (hdr.isValid()) {
-            tbl_issue4775l17.apply();
+            tbl_issue4775l20.apply();
         }
     }
 }

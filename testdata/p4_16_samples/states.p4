@@ -7,8 +7,8 @@
 
 #include <core.p4>
 
-parser parse<H>(packet_in packet, out H headers);
-package ebpfFilter<H>(parse<H> prs);
+parser parse < H >(packet_in packet, out H headers);
+package ebpfFilter < H >(parse<H> prs);
 
 header Ethernet_h
 {
@@ -27,7 +27,7 @@ parser prs(packet_in p, out Headers_t headers)
     state start
     {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType)
+        transition select (headers.ethernet.etherType)
         {
             16w0x800 : ip;
             default : reject;

@@ -11,7 +11,7 @@ header next_header_t {
 
 struct Headers_t {
     truncate_spec_t spec;
-    next_header_t   data;
+    next_header_t data;
 }
 
 struct metadata {
@@ -19,8 +19,8 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<truncate_spec_t>(headers.spec);
-        p.extract<next_header_t>(headers.data);
+        p.extract < truncate_spec_t >(headers.spec);
+        p.extract < next_header_t >(headers.data);
         transition accept;
     }
 }
@@ -43,7 +43,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 
 control dprs(packet_out packet, in Headers_t headers) {
     @hidden action truncate_ubpf40() {
-        packet.emit<next_header_t>(headers.data);
+        packet.emit < next_header_t >(headers.data);
     }
     @hidden table tbl_truncate_ubpf40 {
         actions = {
@@ -56,4 +56,4 @@ control dprs(packet_out packet, in Headers_t headers) {
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;

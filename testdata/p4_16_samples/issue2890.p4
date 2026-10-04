@@ -11,7 +11,7 @@ header E {
 }
 
 header H {
-    bit<16>  a;
+    bit<16> a;
 }
 
 struct Headers {

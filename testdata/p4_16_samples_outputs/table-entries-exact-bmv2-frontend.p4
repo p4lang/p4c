@@ -3,11 +3,11 @@
 #include <v1model.p4>
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
-    bit<8>  r;
-    bit<8>  v;
+    bit<8> l;
+    bit<8> r;
+    bit<8> v;
 }
 
 struct Header_t {
@@ -19,7 +19,7 @@ struct Meta_t {
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract < hdr >(h.h);
         transition accept;
     }
 }
@@ -41,7 +41,7 @@ control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Header_t h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit < hdr >(h.h);
     }
 }
 
@@ -54,7 +54,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t_exact") table t_exact_0 {
         key = {
-            h.h.e: exact @name("h.h.e");
+            h.h.e : exact @name("h.h.e");
         }
         actions = {
             a();
@@ -62,8 +62,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a();
         const entries = {
-                        8w0x1 : a_with_control_params(9w1);
-                        8w0x2 : a_with_control_params(9w2);
+            8w0x1 : a_with_control_params(9w1);
+            8w0x2 : a_with_control_params(9w2);
         }
     }
     apply {
@@ -71,4 +71,4 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
 }
 
-V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Header_t, Meta_t >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

@@ -16,7 +16,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<h1_t>(hdr.h1);
+        packet.extract < h1_t >(hdr.h1);
         transition accept;
     }
 }
@@ -30,7 +30,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table t1 {
         key = {
-            hdr.h1.f1: exact @name("hdr.h1.f1");
+            hdr.h1.f1 : exact @name("hdr.h1.f1");
         }
         actions = {
             act1();
@@ -64,4 +64,4 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

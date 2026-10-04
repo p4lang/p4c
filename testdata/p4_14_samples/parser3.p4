@@ -43,9 +43,9 @@ header data3_t data3;
 
 parser start {
     extract(data1);
-    return select(data1.x3, data1.x1, data1.x7) {
-        0xe4: parse_data2;
-        default: ingress;
+    return select (data1.x3, data1.x1, data1.x7) {
+    0xe4 : parse_data2;
+    default : ingress;
     }
 }
 
@@ -54,7 +54,8 @@ parser parse_data2 {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 
 table test1 {
     reads {

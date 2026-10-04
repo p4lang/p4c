@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header bitvec_hdr {
-    bool   x;
+    bool x;
     bit<7> pp;
 }
 
@@ -50,4 +50,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch < parsed_packet_t, local_metadata_t >(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;

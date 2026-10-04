@@ -15,4 +15,3 @@ control C(inout data d, inout bit<16> foo, Object o) {
         }
     }
 }
-

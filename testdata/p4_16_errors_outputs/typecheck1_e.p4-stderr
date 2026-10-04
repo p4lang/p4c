@@ -1,18 +1,18 @@
 typecheck1_e.p4(7): [--Wwarn=unused] warning: control 'p' is unused
-control p()
+control p() {
         ^
-typecheck1_e.p4(18): [--Werror=type-error] error: Cannot apply operation '~' to expression 'd' with type 'bool'
+typecheck1_e.p4(17): [--Werror=type-error] error: Cannot apply operation '~' to expression 'd' with type 'bool'
         d = ~d;
              ^
-typecheck1_e.p4(23): [--Werror=type-error] error: +: cannot be applied to expression 'd' with type 'bool'
+typecheck1_e.p4(20): [--Werror=type-error] error: +: cannot be applied to expression 'd' with type 'bool'
         d = d + d;
             ^
-typecheck1_e.p4(24): [--Werror=type-error] error: -: cannot be applied to expression 'd' with type 'bool'
+typecheck1_e.p4(21): [--Werror=type-error] error: -: cannot be applied to expression 'd' with type 'bool'
         d = d - d;
             ^
-typecheck1_e.p4(26): [--Werror=type-error] error: Cannot apply ! to value a of type bit<32>
+typecheck1_e.p4(22): [--Werror=type-error] error: Cannot apply ! to value a of type bit<32>
         a = !a;
              ^
-typecheck1_e.p4(27): [--Werror=type-error] error: Cannot apply ! to value b of type int<32>
+typecheck1_e.p4(23): [--Werror=type-error] error: Cannot apply ! to value b of type int<32>
         b = !b;
              ^

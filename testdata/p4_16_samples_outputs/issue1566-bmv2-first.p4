@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -53,7 +53,7 @@ control E(inout bit<16> x) {
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<Ethernet_h>(hdr.ethernet);
+        pkt.extract < Ethernet_h >(hdr.ethernet);
         transition accept;
     }
 }
@@ -72,7 +72,7 @@ control cEgress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_m
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<Ethernet_h>(hdr.ethernet);
+        packet.emit < Ethernet_h >(hdr.ethernet);
     }
 }
 
@@ -86,4 +86,4 @@ control uc(inout Parsed_packet hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<Parsed_packet, metadata_t>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, metadata_t >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

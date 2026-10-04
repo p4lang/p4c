@@ -5,8 +5,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-header A_h {}
-header B_h {}
+header A_h {
+}
+
+header B_h {
+}
 
 struct Alternate {
     A_h a0;

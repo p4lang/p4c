@@ -3,10 +3,9 @@
 control c(in bit<1> x) {
     table t {
         key = {
-            x: exact;
+            x : exact;
         }
     }
     apply {
     }
 }
-

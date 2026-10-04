@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -36,17 +36,17 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
         hdr.ethernet.srcAddr = 1;
     }
     action a2() {
-        hdr.ethernet.srcAddr[47:40] = 2;
+        hdr.ethernet.srcAddr[47 : 40] = 2;
     }
     action a3() {
-        hdr.ethernet.srcAddr[47:40] = 3;
+        hdr.ethernet.srcAddr[47 : 40] = 3;
     }
     action a4() {
-        hdr.ethernet.srcAddr[47:40] = 4;
+        hdr.ethernet.srcAddr[47 : 40] = 4;
     }
     table t1 {
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         actions = {
             a1;
@@ -59,19 +59,19 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
     }
     apply {
         switch (t1.apply().action_run) {
-            a1: {
+            a1 : {
             }
-            a2: {
-                hdr.ethernet.srcAddr[39:32] = 2;
+            a2 : {
+            hdr.ethernet.srcAddr[39 : 32] = 2;
             }
-            a3: {
-                hdr.ethernet.srcAddr[39:32] = 3;
+            a3 : {
+            hdr.ethernet.srcAddr[39 : 32] = 3;
             }
-            a4: {
-                hdr.ethernet.srcAddr[39:32] = 4;
+            a4 : {
+            hdr.ethernet.srcAddr[39 : 32] = 4;
             }
-            NoAction: {
-                hdr.ethernet.srcAddr[39:32] = 5;
+            NoAction : {
+            hdr.ethernet.srcAddr[39 : 32] = 5;
             }
         }
     }

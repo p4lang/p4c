@@ -35,12 +35,12 @@ table tab1 {
     actions {
         act;
     }
-  size: 128;
+    size : 128;
 }
 
 counter cnt {
-	type: packets;
-	direct: tab1;
+    type : packets;
+    direct : tab1;
 
 }
 control ingress {

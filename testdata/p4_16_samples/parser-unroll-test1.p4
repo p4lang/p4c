@@ -14,32 +14,32 @@ ors
 +-----------------+------------+------------+---+------------+------+
 */
 
-typedef bit<9>  egressSpec_t;
+typedef bit<9> egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header srcRoute_t {
-    bit<1>    bos;   /* Bottom of stack */
-    bit<15>   port;
+    bit<1> bos;   /* Bottom of stack */
+    bit<15> port;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -49,39 +49,39 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t              ethernet;
-    srcRoute_t[MAX_HOPS]    srcRoutes;
-    ipv4_t                  ipv4;
+    ethernet_t ethernet;
+    srcRoute_t[MAX_HOPS] srcRoutes;
+    ipv4_t ipv4;
 }
 
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
-    
-    int<32>                 index;
 
-    @name (".start") state start {
+    int<32> index;
+
+    @name(".start") state start {
         transition parse_ethernet;
     }
 
     state parse_ethernet {
         index = 0;
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            TYPE_SRCROUTING: parse_srcRouting;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_SRCROUTING : parse_srcRouting;
+            default : accept;
         }
     }
 
-    @name (".parse_srcRouting") state parse_srcRouting {
+    @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract(hdr.srcRoutes[index]);
         // Check arbitrary size int handling in interpreter
-        index = (int<32>)((int)index + 1);
-        hdr.srcRoutes[index - 1].port = (bit<15>)((int)hdr.srcRoutes[index - 1].port + 1);
-        transition select(hdr.srcRoutes[index - 1].bos) {
-            1: parse_ipv4;
-            default: parse_srcRouting;
+        index =(int<32>)((int) index + 1);
+        hdr.srcRoutes[index - 1].port =(bit<15>)((int) hdr.srcRoutes[index - 1].port + 1);
+        transition select (hdr.srcRoutes[index - 1].bos) {
+            1 : parse_ipv4;
+            default : parse_srcRouting;
         }
     }
 
@@ -93,16 +93,20 @@ parser MyParser(packet_in packet,
 }
 
 control mau(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {
-apply {}
+    apply {
+    }
 }
 control deparse(packet_out pkt, in headers hdr) {
-apply {}
+    apply {
+    }
 }
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-apply {}
+    apply {
+    }
 }
 control computeChecksum(inout headers hdr, inout metadata meta) {
-apply {}
+    apply {
+    }
 }
 V1Switch(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(),
         deparse()) main;

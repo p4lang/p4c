@@ -8,13 +8,12 @@
 #include <core.p4>
 #include "dpdk/pna.p4"
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header custom_t {
@@ -55,9 +54,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x08ff: parse_custom;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x08ff : parse_custom;
+            default : accept;
         }
     }
     state parse_custom {
@@ -73,11 +72,11 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     action a1(bit<73> x) {
-        hdr.custom.f128 = (bit<128>) x;
+        hdr.custom.f128 =(bit<128>) x;
     }
     table t1 {
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         actions = {
             @tableonly a1;
@@ -114,4 +113,3 @@ PNA_NIC(
     // by p4c yet.
     //, PreParserImpl()
     ) main;
-

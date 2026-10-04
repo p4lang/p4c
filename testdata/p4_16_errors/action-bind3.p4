@@ -9,7 +9,9 @@ control c(inout bit<32> x) {
         b = d;
     }
     table t {
-        actions = { a(x, 0); }  // error: too many arguments
+        actions = {
+            a(x, 0);
+        }  // error: too many arguments
         default_action = a(0);
     }
     apply {
@@ -19,5 +21,4 @@ control c(inout bit<32> x) {
 
 control proto(inout bit<32> x);
 package top(proto p);
-
 top(c()) main;

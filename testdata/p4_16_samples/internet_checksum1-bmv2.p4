@@ -3,25 +3,24 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -39,8 +38,8 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 
@@ -63,9 +62,9 @@ parser IngressParserImpl(packet_in buffer,
 
     state start {
         buffer.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -101,9 +100,9 @@ control ingress(inout headers hdr,
                 inout metadata user_meta,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd) {
-                    apply {
-                        send_to_port(ostd, istd.ingress_port);
-                    }
+    apply {
+        send_to_port(ostd, istd.ingress_port);
+    }
 
 }
 
@@ -125,7 +124,8 @@ control egress(inout headers hdr,
                in    psa_egress_input_metadata_t  istd,
                inout psa_egress_output_metadata_t ostd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control IngressDeparserImpl(packet_out packet,
@@ -153,11 +153,11 @@ control EgressDeparserImpl(packet_out packet,
 {
     InternetChecksum() ck;
     bit<16> a;
-        apply {
+    apply {
 
             // Calculate IPv4 header checksum from scratch.
             ck.clear();
-            ck.add({
+        ck.add({
                 /* 16-bit word  0   */ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv,
                 /* 16-bit word  1   */ hdr.ipv4.totalLen,
                 /* 16-bit word  2   */ hdr.ipv4.identification,
@@ -167,14 +167,11 @@ control EgressDeparserImpl(packet_out packet,
                 /* 16-bit words 6-7 */ hdr.ipv4.srcAddr,
                 /* 16-bit words 8-9 */ hdr.ipv4.dstAddr
                 });
-            hdr.ipv4.hdrChecksum = ck.get();
-        
-
+        hdr.ipv4.hdrChecksum = ck.get();
 
         ck.set_state(6);
 
-
-            ck.add({
+        ck.add({
                 /* 16-bit words 0-1 */ hdr.ipv4.srcAddr,
                 /* 16-bit words 2-3 */ hdr.ipv4.dstAddr
             });

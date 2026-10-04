@@ -9,9 +9,9 @@ parser P(packet_in p, out H[2] h) {
     H tmp;
     state start {
         p.extract(tmp);
-        transition select(tmp.field) {
-            0: n1;
-            default: n2;
+        transition select (tmp.field) {
+            0 : n1;
+            default : n2;
         }
     }
     state n1 {
@@ -32,6 +32,6 @@ parser P(packet_in p, out H[2] h) {
     }
 }
 
-parser Simple<T>(packet_in p, out T t);
-package top<T>(Simple<T> prs);
+parser Simple < T >(packet_in p, out T t);
+package top < T >(Simple<T> prs);
 top(P()) main;

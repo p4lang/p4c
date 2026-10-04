@@ -25,9 +25,9 @@ header ethernet_t {
 }
 
 struct headers {
-    ethernet_t      ethernet;
-    ml_hdr_t        ml;
-    vec_e_t[3]      vector;
+    ethernet_t ethernet;
+    ml_hdr_t ml;
+    vec_e_t[3] vector;
     aggregator_t[3] pool;
 }
 
@@ -37,14 +37,14 @@ struct metadata_t {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        packet.extract<ml_hdr_t>(hdr.ml);
-        packet.extract<vec_e_t>(hdr.vector[0]);
-        packet.extract<vec_e_t>(hdr.vector[1]);
-        packet.extract<vec_e_t>(hdr.vector[2]);
-        packet.extract<aggregator_t>(hdr.pool[0]);
-        packet.extract<aggregator_t>(hdr.pool[1]);
-        packet.extract<aggregator_t>(hdr.pool[2]);
+        packet.extract < ethernet_t >(hdr.ethernet);
+        packet.extract < ml_hdr_t >(hdr.ml);
+        packet.extract < vec_e_t >(hdr.vector[0]);
+        packet.extract < vec_e_t >(hdr.vector[1]);
+        packet.extract < vec_e_t >(hdr.vector[2]);
+        packet.extract < aggregator_t >(hdr.pool[0]);
+        packet.extract < aggregator_t >(hdr.pool[1]);
+        packet.extract < aggregator_t >(hdr.pool[2]);
         meta.counter = 8s0;
         transition accept;
     }
@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     @hidden action issue2726bmv2l70() {
         meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
-        hsiVar = (int<8>)hdr.ml.idx;
+        hsiVar =(int<8>) hdr.ml.idx;
     }
     @hidden action issue2726bmv2l77() {
         hdr.pool[8s0].base2 = hdr.vector[0].e;
@@ -77,7 +77,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.pool[8s2].base2 = hdr.vector[0].e;
     }
     @hidden action issue2726bmv2l77_2() {
-        hsiVar = (int<8>)hdr.ml.idx;
+        hsiVar =(int<8>) hdr.ml.idx;
     }
     @hidden action issue2726bmv2l79() {
         hdr.vector[1].e = hdr.pool[8s0].base0;
@@ -92,7 +92,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.vector[1].e = hsVar;
     }
     @hidden action issue2726bmv2l79_3() {
-        hsiVar = (int<8>)hdr.ml.idx;
+        hsiVar =(int<8>) hdr.ml.idx;
     }
     @hidden action issue2726bmv2l81() {
         hdr.pool[8s0].base0 = hdr.pool[8s0].base1 + 8w1;
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         hdr.pool[8s2].base0 = hdr.pool[8s2].base1 + 8w1;
     }
     @hidden action issue2726bmv2l81_2() {
-        hsiVar = (int<8>)hdr.ml.idx;
+        hsiVar =(int<8>) hdr.ml.idx;
     }
     @hidden action issue2726bmv2l82() {
         standard_metadata.egress_spec = standard_metadata.ingress_port;
@@ -273,15 +273,15 @@ control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ml_hdr_t>(hdr.ml);
-        packet.emit<vec_e_t>(hdr.vector[0]);
-        packet.emit<vec_e_t>(hdr.vector[1]);
-        packet.emit<vec_e_t>(hdr.vector[2]);
-        packet.emit<aggregator_t>(hdr.pool[0]);
-        packet.emit<aggregator_t>(hdr.pool[1]);
-        packet.emit<aggregator_t>(hdr.pool[2]);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ml_hdr_t >(hdr.ml);
+        packet.emit < vec_e_t >(hdr.vector[0]);
+        packet.emit < vec_e_t >(hdr.vector[1]);
+        packet.emit < vec_e_t >(hdr.vector[2]);
+        packet.emit < aggregator_t >(hdr.pool[0]);
+        packet.emit < aggregator_t >(hdr.pool[1]);
+        packet.emit < aggregator_t >(hdr.pool[2]);
     }
 }
 
-V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata_t >(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;

@@ -18,7 +18,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         default_action = NoAction_1();
     }
@@ -106,18 +106,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         switch (A_0.apply().action_run) {
-            do_b: {
-                B_0.apply();
-                C_0.apply();
+            do_b : {
+            B_0.apply();
+            C_0.apply();
             }
-            do_d: {
-                D_0.apply();
-                C_0.apply();
+            do_d : {
+            D_0.apply();
+            C_0.apply();
             }
-            do_e: {
-                E_0.apply();
+            do_e : {
+            E_0.apply();
             }
-            default: {
+            default : {
             }
         }
         F_0.apply();
@@ -126,7 +126,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -140,4 +140,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

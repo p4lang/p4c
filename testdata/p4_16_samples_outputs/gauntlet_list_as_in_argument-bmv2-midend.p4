@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -29,17 +29,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         val_0 = tmp;
         h.eth_hdr.eth_type = val_0.eth_type;
     }
-    @hidden action gauntlet_list_as_in_argumentbmv2l37() {
+    @hidden action gauntlet_list_as_in_argumentbmv2l38() {
         tmp.setValid();
         tmp.dst_addr = 48w1;
         tmp.src_addr = 48w1;
         tmp.eth_type = 16w1;
     }
-    @hidden table tbl_gauntlet_list_as_in_argumentbmv2l37 {
+    @hidden table tbl_gauntlet_list_as_in_argumentbmv2l38 {
         actions = {
-            gauntlet_list_as_in_argumentbmv2l37();
+            gauntlet_list_as_in_argumentbmv2l38();
         }
-        const default_action = gauntlet_list_as_in_argumentbmv2l37();
+        const default_action = gauntlet_list_as_in_argumentbmv2l38();
     }
     @hidden table tbl_do_action {
         actions = {
@@ -48,7 +48,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_action();
     }
     apply {
-        tbl_gauntlet_list_as_in_argumentbmv2l37.apply();
+        tbl_gauntlet_list_as_in_argumentbmv2l38.apply();
         tbl_do_action.apply();
     }
 }
@@ -70,8 +70,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

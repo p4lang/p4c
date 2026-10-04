@@ -12,6 +12,7 @@ T f<T>(T x) {
 control MyC() {
     apply {
         bit<8> y = f(255);
-   }
+    }
 }
+
 S(MyC()) main;

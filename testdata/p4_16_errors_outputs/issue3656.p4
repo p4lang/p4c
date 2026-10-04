@@ -5,4 +5,3 @@ control c() {
         a<bit<1>>();
     }
 }
-

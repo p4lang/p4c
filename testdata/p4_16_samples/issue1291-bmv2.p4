@@ -11,7 +11,7 @@ struct headers_t {
 }
 
 struct metadata_t {
-   varbit<8> test;
+    varbit<8> test;
 }
 
 parser ParserImpl(packet_in packet,
@@ -19,8 +19,8 @@ parser ParserImpl(packet_in packet,
                   inout metadata_t meta,
                   inout standard_metadata_t standard_metadata) {
     state start {
-        transition select() {
-            default: accept;
+        transition select () {
+            default : accept;
         }
     }
 }

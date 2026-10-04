@@ -12,6 +12,6 @@ parser p(packet_in packet, out H h) {
     }
 }
 
-parser proto<T>(packet_in p, out T t);
-package top<T>(proto<T> p);
+parser proto < T >(packet_in p, out T t);
+package top < T >(proto<T> p);
 top(p()) main;

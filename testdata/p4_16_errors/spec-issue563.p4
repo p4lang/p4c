@@ -7,14 +7,17 @@
 // User Program
 
 control X();
-
 control A() {
     apply {
     }
 }
+
 control B()(X x) {
-    apply {}
+    apply {
+    }
 }
+
 control C()(A a) {
-    apply {}
+    apply {
+    }
 }

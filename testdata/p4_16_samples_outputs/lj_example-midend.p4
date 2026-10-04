@@ -8,14 +8,14 @@ struct OutControl {
     bit<4> outputPort;
 }
 
-parser Parser<H>(packet_in b, out H parsedHeaders);
-control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
-control Deparser<H>(inout H outputHeaders, packet_out b);
-package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
+parser Parser < H >(packet_in b, out H parsedHeaders);
+control Pipe < H >(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
+control Deparser < H >(inout H outputHeaders, packet_out b);
+package VSS < H >(Parser<H> p, Pipe<H> map, Deparser<H> d);
 extern Ck16 {
     Ck16();
     void clear();
-    void update<T>(in T data);
+    void update < T >(in T data);
     bit<16> get();
 }
 
@@ -31,7 +31,7 @@ struct Parsed_rep {
 
 parser LJparse(packet_in b, out Parsed_rep p) {
     state start {
-        b.extract<ARPA_hdr>(p.arpa_pak);
+        b.extract < ARPA_hdr >(p.arpa_pak);
         transition accept;
     }
 }
@@ -48,7 +48,7 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
     }
     @name("LjPipe.Enet_lkup") table Enet_lkup_0 {
         key = {
-            p.arpa_pak.dest: exact @name("p.arpa_pak.dest");
+            p.arpa_pak.dest : exact @name("p.arpa_pak.dest");
         }
         actions = {
             Drop_action();
@@ -57,17 +57,17 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
         }
         default_action = Drop_0();
     }
-    @hidden action lj_example61() {
+    @hidden action lj_example63() {
         outCtrl.outputPort = 4w0xf;
     }
-    @hidden table tbl_lj_example61 {
+    @hidden table tbl_lj_example63 {
         actions = {
-            lj_example61();
+            lj_example63();
         }
-        const default_action = lj_example61();
+        const default_action = lj_example63();
     }
     apply {
-        tbl_lj_example61.apply();
+        tbl_lj_example63.apply();
         if (p.arpa_pak.isValid()) {
             Enet_lkup_0.apply();
         }
@@ -75,18 +75,18 @@ control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out
 }
 
 control LJdeparse(inout Parsed_rep p, packet_out b) {
-    @hidden action lj_example70() {
-        b.emit<ARPA_hdr>(p.arpa_pak);
+    @hidden action lj_example72() {
+        b.emit < ARPA_hdr >(p.arpa_pak);
     }
-    @hidden table tbl_lj_example70 {
+    @hidden table tbl_lj_example72 {
         actions = {
-            lj_example70();
+            lj_example72();
         }
-        const default_action = lj_example70();
+        const default_action = lj_example72();
     }
     apply {
-        tbl_lj_example70.apply();
+        tbl_lj_example72.apply();
     }
 }
 
-VSS<Parsed_rep>(LJparse(), LjPipe(), LJdeparse()) main;
+VSS < Parsed_rep >(LJparse(), LjPipe(), LJdeparse()) main;

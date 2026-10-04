@@ -28,7 +28,8 @@ struct headers {
     U[2] u;
 }
 
-struct metadata {}
+struct metadata {
+}
 
 parser ParserImpl(packet_in packet,
                   out headers hdr,
@@ -37,12 +38,12 @@ parser ParserImpl(packet_in packet,
 {
     state start {
         packet.extract(hdr.base);
-        transition select(hdr.base.t) {
-            0: parseO1O1;
-            1: parseO1O2;
-            2: parseO2O1;
-            3: parseO2O2;
-            default: accept;
+        transition select (hdr.base.t) {
+            0 : parseO1O1;
+            1 : parseO1O2;
+            2 : parseO2O1;
+            3 : parseO2O2;
+            default : accept;
         }
     }
     state parseO1O1 {
@@ -72,13 +73,15 @@ control ingress(inout headers hdr,
                 inout standard_metadata_t standard_metadata) {
     table debug_hdr {
         key = {
-            hdr.base.t: exact;
-            hdr.u[0].byte.isValid(): exact;
-            hdr.u[0].short.isValid(): exact;
-            hdr.u[1].byte.isValid(): exact;
-            hdr.u[1].short.isValid(): exact;
+            hdr.base.t : exact;
+            hdr.u[0].byte.isValid() : exact;
+            hdr.u[0].short.isValid() : exact;
+            hdr.u[1].byte.isValid() : exact;
+            hdr.u[1].short.isValid() : exact;
         }
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
         const default_action = NoAction();
     }
     apply {
@@ -101,7 +104,10 @@ control ingress(inout headers hdr,
 control egress(inout headers hdr,
                inout metadata meta,
                inout standard_metadata_t standard_metadata)
-{ apply {} }
+{
+    apply {
+    }
+}
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
@@ -110,11 +116,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(),

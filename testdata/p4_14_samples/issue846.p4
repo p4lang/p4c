@@ -15,35 +15,35 @@ header_type hdr0_t {
 
 header_type meta_t {
     fields {
-       x : 16;
-       y : 16;
-       z : 16;
+        x : 16;
+        y : 16;
+        z : 16;
     }
 }
 
 header hdr0_t hdr0;
 metadata meta_t meta;
 
-
 parser start {
-   return p_hdr0;
+    return p_hdr0;
 }
 
 parser p_hdr0 {
-   extract(hdr0);
-   return ingress;
+    extract(hdr0);
+    return ingress;
 }
 
-action do_nothing(){}
-action action_0(p){
-   modify_field(meta.x, 1);
-   modify_field(meta.y, 2);
+action do_nothing() {
 }
-action action_1(p){
-   add(meta.z, meta.y, meta.x);
+action action_0(p) {
+    modify_field(meta.x, 1);
+    modify_field(meta.y, 2);
 }
-action action_2(p){
-   modify_field(hdr0.a, meta.z);
+action action_1(p) {
+    add(meta.z, meta.y, meta.x);
+}
+action action_2(p) {
+    modify_field(hdr0.a, meta.z);
 }
 
 table t0 {
@@ -91,23 +91,22 @@ table t3 {
     size : 512;
 }
 
-
 control ingress {
-  if (hdr0.valid == 1){
-      apply(t0);
-  }
+    if (hdr0.valid == 1) {
+        apply(t0);
+    }
 
-  if (hdr0.valid == 0) {
-      apply(t1);
-  }
+    if (hdr0.valid == 0) {
+        apply(t1);
+    }
 
-  if (hdr0.valid == 1 or valid(hdr0)) {
-      apply(t2);
-  }
+    if (hdr0.valid == 1 or valid(hdr0)) {
+        apply(t2);
+    }
 
-  if (hdr0.valid != 0) {
-      apply(t3);
-  }
+    if (hdr0.valid != 0) {
+        apply(t3);
+    }
 
 }
 

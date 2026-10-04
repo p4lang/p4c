@@ -4,4 +4,3 @@ header H {
     @length(((bit<32>)len << 3) + 32w4294967280)
     varbit<304> data;
 }
-

@@ -6,19 +6,17 @@
  */
 
 control noargs();
-
 control p() {
-    apply {}
+    apply {
+    }
 }
 
 control q() {
     p() p1;
-    
-    apply {    
+    apply {
         p1.apply();
     }
 }
 
 package m(noargs n);
-
 m(q()) main;

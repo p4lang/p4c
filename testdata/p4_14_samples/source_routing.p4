@@ -7,8 +7,8 @@
 
 header_type easyroute_head_t {
     fields {
-        preamble: 64;
-        num_valid: 32;
+        preamble : 64;
+        num_valid : 32;
     }
 }
 
@@ -16,24 +16,24 @@ header easyroute_head_t easyroute_head;
 
 header_type easyroute_port_t {
     fields {
-        port: 8;
+        port : 8;
     }
 }
 
 header easyroute_port_t easyroute_port;
 
 parser start {
-    return select(current(0, 64)) {
-        0: parse_head;
-        default: ingress;
+    return select (current(0, 64)) {
+    0 : parse_head;
+    default : ingress;
     }
 }
 
 parser parse_head {
     extract(easyroute_head);
-    return select(latest.num_valid) {
-        0: ingress;
-        default: parse_port;
+    return select (latest.num_valid) {
+    0 : ingress;
+    default : parse_port;
     }
 }
 
@@ -54,13 +54,13 @@ action route() {
 
 table route_pkt {
     reads {
-        easyroute_port: valid;
+        easyroute_port : valid;
     }
     actions {
         _drop;
         route;
     }
-    size: 1;
+    size : 1;
 }
 
 control ingress {

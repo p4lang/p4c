@@ -16,4 +16,3 @@ control compute() {
         bit<4> x8 = 8w0[4:E.e1];
     }
 }
-

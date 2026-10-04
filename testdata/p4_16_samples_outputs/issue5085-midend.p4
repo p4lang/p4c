@@ -5,4 +5,3 @@ match_kind {
     second_kind,
     third_kind
 }
-

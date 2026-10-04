@@ -3,12 +3,12 @@
 
 struct my_struct_t {
     bit<16> type1;
-    bit<8>  type2;
+    bit<8> type2;
 }
 
 header my_header_t {
     bit<16> type1;
-    bit<8>  type2;
+    bit<8> type2;
     bit<32> value;
 }
 
@@ -23,18 +23,18 @@ struct headers_t {
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        my_struct_t tmp = pkt.lookahead<my_struct_t>();
-        transition select(tmp.type1) {
-            16w0x1234: parse_h1;
-            default: accept;
+        my_struct_t tmp = pkt.lookahead < my_struct_t >();
+        transition select (tmp.type1) {
+            16w0x1234 : parse_h1;
+            default : accept;
         }
     }
     state parse_h1 {
         pkt.extract(hdr.h1);
-        main_meta.s1 = pkt.lookahead<my_struct_t>();
-        transition select(main_meta.s1.type2) {
-            8w0x1: parse_h2;
-            default: accept;
+        main_meta.s1 = pkt.lookahead < my_struct_t >();
+        transition select (main_meta.s1.type2) {
+            8w0x1 : parse_h2;
+            default : accept;
         }
     }
     state parse_h2 {

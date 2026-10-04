@@ -44,33 +44,33 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action issue986bmv2l33() {
+    @hidden action issue986bmv2l50() {
         sm.egress_spec = 9w1;
     }
-    @hidden action issue986bmv2l36() {
+    @hidden action issue986bmv2l53() {
         sm.egress_spec = 9w2;
     }
-    @hidden table tbl_issue986bmv2l33 {
+    @hidden table tbl_issue986bmv2l50 {
         actions = {
-            issue986bmv2l33();
+            issue986bmv2l50();
         }
-        const default_action = issue986bmv2l33();
+        const default_action = issue986bmv2l50();
     }
-    @hidden table tbl_issue986bmv2l36 {
+    @hidden table tbl_issue986bmv2l53 {
         actions = {
-            issue986bmv2l36();
+            issue986bmv2l53();
         }
-        const default_action = issue986bmv2l36();
+        const default_action = issue986bmv2l53();
     }
     apply {
         if (m.b == 1w0) {
             t1_0.apply();
-            tbl_issue986bmv2l33.apply();
+            tbl_issue986bmv2l50.apply();
         } else {
             t1_0.apply();
-            tbl_issue986bmv2l36.apply();
+            tbl_issue986bmv2l53.apply();
         }
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

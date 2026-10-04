@@ -17,9 +17,9 @@ header hdr {
 control compute(inout hdr h) {
     apply {
         if (h.a < h.b)
-            h.c = 0;
+        h.c = 0;
         else
-            h.c = 1;
+        h.c = 1;
     }
 }
 

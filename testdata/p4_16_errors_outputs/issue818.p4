@@ -18,10 +18,10 @@ BoolReg() r;
 parser Loop()(WrapControl c1, WrapControl c2) {
     state start {
         r.flip();
-        transition select(r.get()) {
-            true: q1;
-            false: q2;
-            default: accept;
+        transition select (r.get()) {
+            true : q1;
+            false : q2;
+            default : accept;
         }
     }
     state q1 {

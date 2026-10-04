@@ -18,7 +18,8 @@ struct Headers {
     myhdr_t myhdr;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in b,
     out Headers h,
@@ -31,7 +32,7 @@ parser p(packet_in b,
     }
 }
 
-register<bit<8>>(256) r;
+register < bit<8 >>(256) r;
 
 control ingress(inout Headers h,
     inout Meta m,
@@ -65,7 +66,13 @@ control deparser(packet_out b,
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
-control update(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

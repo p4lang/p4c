@@ -4,4 +4,4 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package S<T, T>();
+package S < T, T >();

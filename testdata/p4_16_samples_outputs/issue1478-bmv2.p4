@@ -47,13 +47,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table t2 {
         key = {
-            sm.ingress_port: exact;
+            sm.ingress_port : exact;
         }
         actions = {
             NoAction;
         }
         const entries = {
-                        0 : NoAction();
+            0 : NoAction();
         }
         size = 10;
     }

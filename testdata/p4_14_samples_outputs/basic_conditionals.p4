@@ -35,7 +35,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_port;
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1 : exact;
         }
     }
     apply {

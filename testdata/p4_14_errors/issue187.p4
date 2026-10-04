@@ -37,9 +37,9 @@ table forward {
     }
     actions {
         _drop;
-	_nop;
+        _nop;
     }
-    size: 4;
+    size : 4;
 }
 
 control ingress {
@@ -48,8 +48,11 @@ control ingress {
 
 control foobar {
     apply(forward) {
-        hit { foobar(); }
+        hit {
+            foobar();
+        }
     }
 }
 
-control egress { }
+control egress {
+}

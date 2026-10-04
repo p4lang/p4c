@@ -35,7 +35,7 @@ struct metadata {
 
 parser MyIP(packet_in buffer, out ethernet_t h, inout metadata b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
     state start {
-        buffer.extract<ethernet_t>(h);
+        buffer.extract < ethernet_t >(h);
         transition accept;
     }
 }
@@ -53,7 +53,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            a.srcAddr: exact @name("a.srcAddr");
+            a.srcAddr : exact @name("a.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -61,30 +61,30 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         }
         default_action = NoAction_1();
     }
-    @hidden action psadpdkbinaryoperations1l85() {
+    @hidden action psadpdkbinaryoperations1l90() {
         b.meta = 32w1 << b.meta2;
         b.meta1 = 32w0x800 >> b.meta2;
         b.meta2 = 16w0xf0 - b.meta2;
         b.meta4 = ~b.meta6 + 32w0x808;
-        b.meta3 = -b.meta3;
+        b.meta3 = - b.meta3;
         b.meta6 = 32w0x808 - b.meta3;
         b.meta3 = b.meta3 + 32w0x1;
         b.meta5 = b.meta7 + 16w0xf0;
         b.meta7 = b.meta2 + 16w0xf0;
-        a.dstAddr = (bit<48>)b.meta;
-        a.srcAddr = (bit<48>)b.meta1;
+        a.dstAddr =(bit<48>) b.meta;
+        a.srcAddr =(bit<48>) b.meta1;
         a.etherType = b.meta2;
-        b.meta = b.meta2 ++ (b.meta2 + 16w0xf0);
+        b.meta = b.meta2 ++(b.meta2 + 16w0xf0);
     }
-    @hidden table tbl_psadpdkbinaryoperations1l85 {
+    @hidden table tbl_psadpdkbinaryoperations1l90 {
         actions = {
-            psadpdkbinaryoperations1l85();
+            psadpdkbinaryoperations1l90();
         }
-        const default_action = psadpdkbinaryoperations1l85();
+        const default_action = psadpdkbinaryoperations1l90();
     }
     apply {
         tbl_0.apply();
-        tbl_psadpdkbinaryoperations1l85.apply();
+        tbl_psadpdkbinaryoperations1l90.apply();
     }
 }
 
@@ -103,6 +103,6 @@ control MyED(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIRC b, inout EMP
     }
 }
 
-IngressPipeline<ethernet_t, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<ethernet_t, metadata, EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < ethernet_t, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < ethernet_t, metadata, EMPTY_H, metadata, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

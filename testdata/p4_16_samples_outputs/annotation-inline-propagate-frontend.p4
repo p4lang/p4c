@@ -19,7 +19,7 @@ struct headers {
         transition InnerParser_start;
     }
     state InnerParser_start {
-        buffer.extract<hdr_t>(hdr.hdr);
+        buffer.extract < hdr_t >(hdr.hdr);
         transition start_0;
     }
     state start_0 {
@@ -69,4 +69,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

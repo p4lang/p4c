@@ -1,55 +1,55 @@
 fold_match.p4(8): [--Wwarn=unused] warning: parser 'p' is unused
-parser p()
+parser p() {
        ^
-fold_match.p4(16): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            default : reject;
-            ^^^^^^^^^^^^^^^^
+fold_match.p4(13): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: reject;
+            ^^^^^^^^^^^^^^^
+fold_match.p4(20): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            32w0: reject;
+            ^^^^^^^^^^^^
 fold_match.p4(26): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            32w0 : reject;
-            ^^^^^^^^^^^^^
-fold_match.p4(35): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            32w0 : reject;
-            ^^^^^^^^^^^^^
-fold_match.p4(36): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            default : reject;
-            ^^^^^^^^^^^^^^^^
-fold_match.p4(45): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            32w0 : reject;
-            ^^^^^^^^^^^^^
-fold_match.p4(46): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            default : reject;
-            ^^^^^^^^^^^^^^^^
+            32w0: reject;
+            ^^^^^^^^^^^^
+fold_match.p4(27): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: reject;
+            ^^^^^^^^^^^^^^^
+fold_match.p4(33): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            32w0: reject;
+            ^^^^^^^^^^^^
+fold_match.p4(34): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: reject;
+            ^^^^^^^^^^^^^^^
+fold_match.p4(40): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            32w0: reject;
+            ^^^^^^^^^^^^
+fold_match.p4(41): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: reject;
+            ^^^^^^^^^^^^^^^
+fold_match.p4(48): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            (true, 32w0): reject;
+            ^^^^^^^^^^^^^^^^^^^^
+fold_match.p4(54): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            (true, 32w0): reject;
+            ^^^^^^^^^^^^^^^^^^^^
 fold_match.p4(55): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            32w0 : reject;
-            ^^^^^^^^^^^^^
-fold_match.p4(56): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            default : reject;
-            ^^^^^^^^^^^^^^^^
-fold_match.p4(66): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            (true, 32w0) : reject;
-            ^^^^^^^^^^^^^^^^^^^^^
-fold_match.p4(75): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            (true, 32w0) : reject;
-            ^^^^^^^^^^^^^^^^^^^^^
-fold_match.p4(76): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            default : reject;
-            ^^^^^^^^^^^^^^^^
-fold_match.p4(85): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            (true, 32w0) : reject;
-            ^^^^^^^^^^^^^^^^^^^^^
-fold_match.p4(86): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            default : reject;
-            ^^^^^^^^^^^^^^^^
-fold_match.p4(95): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            (true, 32w0) : reject;
-            ^^^^^^^^^^^^^^^^^^^^^
-fold_match.p4(96): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
-            default : reject;
-            ^^^^^^^^^^^^^^^^
-fold_match.p4(102): [--Wwarn=parser-transition] warning: SelectExpression: no case matches
-        transition select(32w0)
+            default: reject;
+            ^^^^^^^^^^^^^^^
+fold_match.p4(61): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            (true, 32w0): reject;
+            ^^^^^^^^^^^^^^^^^^^^
+fold_match.p4(62): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: reject;
+            ^^^^^^^^^^^^^^^
+fold_match.p4(68): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            (true, 32w0): reject;
+            ^^^^^^^^^^^^^^^^^^^^
+fold_match.p4(69): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: reject;
+            ^^^^^^^^^^^^^^^
+fold_match.p4(73): [--Wwarn=parser-transition] warning: SelectExpression: no case matches
+        transition select(32w0) {
                    ^
 fold_match.p4(8): [--Winfo=removed] info: removing parser 'p'
-parser p()
+parser p() {
        ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

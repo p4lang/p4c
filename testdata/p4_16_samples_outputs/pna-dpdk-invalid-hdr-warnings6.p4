@@ -16,7 +16,7 @@ header_union Union {
 }
 
 struct H {
-    Header1  h1;
+    Header1 h1;
     Union[2] u;
 }
 
@@ -32,9 +32,9 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         hdr.u[0].h1 = hdr.u[0].h3;
         hdr.u[0].h1.data = 1;
         hdr.u[0].h3.data = 1;
-        transition select(hdr.u[0].h1.data) {
-            0: next;
-            default: last;
+        transition select (hdr.u[0].h1.data) {
+            0 : next;
+            default : last;
         }
     }
     state next {

@@ -25,7 +25,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -55,9 +55,9 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_IPV4 : parse_ipv4;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_IPV4 : parse_ipv4;
+    default : ingress;
     }
 }
 
@@ -67,9 +67,9 @@ header ipv4_t ipv4;
 
 parser parse_ipv4 {
     extract(ipv4);
-    return select(latest.protocol) {
-        IP_PROTOCOLS_TCP : parse_tcp;
-        default: ingress;
+    return select (latest.protocol) {
+    IP_PROTOCOLS_TCP : parse_tcp;
+    default : ingress;
     }
 }
 
@@ -84,17 +84,17 @@ parser parse_tcp {
 #define HEAVY_HITTER_THRESHOLD 100
 
 field_list ipv4_checksum_list {
-        ipv4.version;
-        ipv4.ihl;
-        ipv4.diffserv;
-        ipv4.totalLen;
-        ipv4.identification;
-        ipv4.flags;
-        ipv4.fragOffset;
-        ipv4.ttl;
-        ipv4.protocol;
-        ipv4.srcAddr;
-        ipv4.dstAddr;
+    ipv4.version;
+    ipv4.ihl;
+    ipv4.diffserv;
+    ipv4.totalLen;
+    ipv4.identification;
+    ipv4.flags;
+    ipv4.fragOffset;
+    ipv4.ttl;
+    ipv4.protocol;
+    ipv4.srcAddr;
+    ipv4.dstAddr;
 }
 
 field_list_calculation ipv4_checksum {
@@ -105,7 +105,7 @@ field_list_calculation ipv4_checksum {
     output_width : 16;
 }
 
-calculated_field ipv4.hdrChecksum  {
+calculated_field ipv4.hdrChecksum {
     verify ipv4_checksum;
     update ipv4_checksum;
 }
@@ -116,12 +116,12 @@ action _drop() {
 
 header_type custom_metadata_t {
     fields {
-        nhop_ipv4: 32;
+        nhop_ipv4 : 32;
         // TODO: Add the metadata for hash indices and count values
-        hash_val1: 16;
-        hash_val2: 16;
-        count_val1: 16;
-        count_val2: 16;
+        hash_val1 : 16;
+        hash_val2 : 16;
+        count_val1 : 16;
+        count_val2 : 16;
     }
 }
 
@@ -168,12 +168,12 @@ field_list_calculation heavy_hitter_hash2 {
 }
 
 // TODO: Define the registers to store the counts
-register heavy_hitter_counter1{
+register heavy_hitter_counter1 {
     width : 16;
     instance_count : 16;
 }
 
-register heavy_hitter_counter2{
+register heavy_hitter_counter2 {
     width : 16;
     instance_count : 16;
 }
@@ -198,13 +198,15 @@ table set_heavy_hitter_count_table {
     actions {
         set_heavy_hitter_count;
     }
-    size: 1;
+    size : 1;
 }
 
 // TODO: Define table to drop the heavy hitter traffic
 table drop_heavy_hitter_table {
-    actions { _drop; }
-    size: 1;
+    actions {
+        _drop;
+    }
+    size : 1;
 }
 
 table ipv4_lpm {
@@ -215,7 +217,7 @@ table ipv4_lpm {
         set_nhop;
         _drop;
     }
-    size: 1024;
+    size : 1024;
 }
 
 table forward {
@@ -226,7 +228,7 @@ table forward {
         set_dmac;
         _drop;
     }
-    size: 512;
+    size : 512;
 }
 
 action rewrite_mac(smac) {
@@ -235,13 +237,13 @@ action rewrite_mac(smac) {
 
 table send_frame {
     reads {
-        standard_metadata.egress_port: exact;
+        standard_metadata.egress_port : exact;
     }
     actions {
         rewrite_mac;
         _drop;
     }
-    size: 256;
+    size : 256;
 }
 
 control ingress {

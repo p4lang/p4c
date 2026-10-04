@@ -4,11 +4,13 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-header h {}
-struct s {}
+header h {
+}
 
-control p()
-{
+struct s {
+}
+
+control p() {
     apply {
         h[5] stack;
         s[5] stack1; // 'normal' array can't use stack operations

@@ -11,17 +11,18 @@
 #define ENABLE_NEGATIVE_TESTS 1
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
+    bit<8> l;
     bit<8> r;
-    bit<1>  v;
+    bit<1> v;
 }
 
 struct Header_t {
     hdr h;
 }
-struct Meta_t {}
+struct Meta_t {
+}
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
     state start {
@@ -30,40 +31,56 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(inout Header_t h, inout Meta_t m) { apply {} }
-control update(inout Header_t h, inout Meta_t m) { apply {} }
-control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) { apply {} }
-control deparser(packet_out b, in Header_t h) { apply { b.emit(h.h); } }
+control vrfy(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control update(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+control deparser(packet_out b, in Header_t h) {
+    apply {
+        b.emit(h.h);
+    }
+}
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
 
-    action a() { standard_meta.egress_spec = 0; }
-    action a_with_control_params(bit<9> x) { standard_meta.egress_spec = x; }
-
+    action a() {
+        standard_meta.egress_spec = 0;
+    }
+    action a_with_control_params(bit<9> x) {
+        standard_meta.egress_spec = x;
+    }
 
     table t_ternary {
 
-  	key = {
+        key = {
             h.h.t : ternary;
         }
 
-	actions = {
+        actions = {
             a;
             a_with_control_params;
         }
 
-	default_action = a;
+        default_action = a;
 
         const entries = {
-            0x1111 &&& 0xF    : a_with_control_params(1);
-            0x1187            : a_with_control_params(2);
+            0x1111 &&& 0xF : a_with_control_params(1);
+            0x1187 : a_with_control_params(2);
             0x1111 &&& 0xF000 : a_with_control_params(3);
             // test default entries
-            _                 : a_with_control_params(4);
+            _ : a_with_control_params(4);
 #ifdef ENABLE_NEGATIVE_TESTS
             // negative tests:
-            1..2 : a();                            // invalid ternary key
-            (0x2 , 0x3) : a();                     // invalid keyset
+            1 .. 2 : a();                            // invalid ternary key
+            (0x2, 0x3) : a();                     // invalid keyset
             0x1111 : missing_a();                  // action not in action list
             0x1111 : a_with_control_params(32w10); // invalid argument
 
@@ -75,6 +92,5 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         t_ternary.apply();
     }
 }
-
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

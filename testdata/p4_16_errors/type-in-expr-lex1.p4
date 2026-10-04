@@ -2,9 +2,9 @@
 
 #include <core.p4>
 
-parser pars<H>(in bit<16> buf, out H hdrs) {
+parser pars < H >(in bit<16> buf, out H hdrs) {
     bool var;
     state start {
-        var = buf > H; 
+        var = buf > H;
     }
 }

@@ -11,4 +11,3 @@ control Ingress0() {
     apply {
     }
 }
-

@@ -20,27 +20,27 @@ header icmp_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header ipv6_t {
-    bit<4>   version;
-    bit<8>   trafficClass;
-    bit<20>  flowLabel;
-    bit<16>  payloadLen;
-    bit<8>   nextHdr;
-    bit<8>   hopLimit;
+    bit<4> version;
+    bit<8> trafficClass;
+    bit<20> flowLabel;
+    bit<16> payloadLen;
+    bit<8> nextHdr;
+    bit<8> hopLimit;
     bit<128> srcAddr;
     bit<128> dstAddr;
 }
@@ -50,9 +50,9 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> dataOffset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -66,8 +66,8 @@ header udp_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> etherType;
 }
@@ -81,15 +81,15 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".icmp")
-    icmp_t     icmp;
+    icmp_t icmp;
     @name(".ipv4")
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
     @name(".ipv6")
-    ipv6_t     ipv6;
+    ipv6_t ipv6;
     @name(".tcp")
-    tcp_t      tcp;
+    tcp_t tcp;
     @name(".udp")
-    udp_t      udp;
+    udp_t udp;
     @name(".vlan_tag")
     vlan_tag_t vlan_tag;
 }
@@ -101,20 +101,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x1 &&& 8w0xff): parse_icmp;
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x6 &&& 8w0xff): parse_tcp;
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x11 &&& 8w0xff): parse_udp;
-            default: accept;
+        transition select (hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
+            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x1 &&& 8w0xff) : parse_icmp;
+            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x6 &&& 8w0xff) : parse_tcp;
+            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x11 &&& 8w0xff) : parse_udp;
+            default : accept;
         }
     }
     @name(".parse_ipv6") state parse_ipv6 {
         packet.extract(hdr.ipv6);
-        transition select(hdr.ipv6.nextHdr) {
-            8w0x1: parse_icmp;
-            8w0x6: parse_tcp;
-            8w0x11: parse_udp;
-            default: accept;
+        transition select (hdr.ipv6.nextHdr) {
+            8w0x1 : parse_icmp;
+            8w0x6 : parse_tcp;
+            8w0x11 : parse_udp;
+            default : accept;
         }
     }
     @name(".parse_tcp") state parse_tcp {
@@ -127,20 +127,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {
         packet.extract(hdr.vlan_tag);
-        transition select(hdr.vlan_tag.etherType) {
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
-            default: accept;
+        transition select (hdr.vlan_tag.etherType) {
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
+            default : accept;
         }
     }
     @name(".start") state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x8100: parse_vlan_tag;
-            16w0x9100: parse_vlan_tag;
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x8100 : parse_vlan_tag;
+            16w0x9100 : parse_vlan_tag;
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
+            default : accept;
         }
     }
 }
@@ -162,7 +162,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ipv4.srcAddr: exact;
+            hdr.ipv4.srcAddr : exact;
         }
     }
     @name(".ipv6_match") table ipv6_match {
@@ -171,7 +171,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ipv6.srcAddr: exact;
+            hdr.ipv6.srcAddr : exact;
         }
     }
     @name(".l2_match") table l2_match {
@@ -180,7 +180,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {

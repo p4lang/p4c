@@ -9,4 +9,3 @@ control c() {
         h = t;
     }
 }
-

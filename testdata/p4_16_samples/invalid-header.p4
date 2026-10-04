@@ -4,7 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-header E {}
+header E {
+}
+
 header H {
     bit<32> f;
 }
@@ -20,7 +22,6 @@ control c(inout H h, inout E e) {
     action a() {
         h = (H){#};
     }
-
     apply {
         h = (H){#};
         e = (E){#};
@@ -36,5 +37,4 @@ control c(inout H h, inout E e) {
 parser P(inout H h);
 control C(inout H h, inout E e);
 package top(P _p, C _c);
-
 top(p(), c()) main;

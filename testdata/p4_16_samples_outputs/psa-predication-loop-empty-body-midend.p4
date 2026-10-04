@@ -1,5 +1,4 @@
 #include <core.p4>
-
 #include <bmv2/psa.p4>
 
 struct EMPTY {
@@ -21,7 +20,7 @@ struct metadata_t {
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout metadata_t meta, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        buffer.extract < ethernet_t >(hdr.ethernet);
         meta.counter = 32w0;
         transition accept;
     }
@@ -52,7 +51,7 @@ control MyIC(inout headers_t hdr, inout metadata_t meta, in psa_ingress_input_me
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
@@ -71,17 +70,17 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t f) {
-    @hidden action psapredicationloopemptybody116() {
-        buffer.emit<ethernet_t>(hdr.ethernet);
+    @hidden action psapredicationloopemptybody121() {
+        buffer.emit < ethernet_t >(hdr.ethernet);
     }
-    @hidden table tbl_psapredicationloopemptybody116 {
+    @hidden table tbl_psapredicationloopemptybody121 {
         actions = {
-            psapredicationloopemptybody116();
+            psapredicationloopemptybody121();
         }
-        const default_action = psapredicationloopemptybody116();
+        const default_action = psapredicationloopemptybody121();
     }
     apply {
-        tbl_psapredicationloopemptybody116.apply();
+        tbl_psapredicationloopemptybody121.apply();
     }
 }
 
@@ -90,6 +89,6 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
     }
 }
 
-IngressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

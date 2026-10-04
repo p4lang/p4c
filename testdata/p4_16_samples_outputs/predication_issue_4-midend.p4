@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[3]       h;
+    H[3] h;
 }
 
 struct Meta {
@@ -22,10 +22,10 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
         transition accept;
     }
 }
@@ -37,14 +37,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             h.h[1w0].a = 8w1;
         }
     }
-    @hidden action predication_issue_4l39() {
+    @hidden action predication_issue_4l40() {
         bool_val_0 = h.eth_hdr.eth_type == 16w0xde;
     }
-    @hidden table tbl_predication_issue_4l39 {
+    @hidden table tbl_predication_issue_4l40 {
         actions = {
-            predication_issue_4l39();
+            predication_issue_4l40();
         }
-        const default_action = predication_issue_4l39();
+        const default_action = predication_issue_4l40();
     }
     @hidden table tbl_perform_action {
         actions = {
@@ -53,7 +53,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = perform_action();
     }
     apply {
-        tbl_predication_issue_4l39.apply();
+        tbl_predication_issue_4l40.apply();
         tbl_perform_action.apply();
     }
 }
@@ -75,11 +75,11 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<ethernet_t>(h.eth_hdr);
-        b.emit<H>(h.h[0]);
-        b.emit<H>(h.h[1]);
-        b.emit<H>(h.h[2]);
+        b.emit < ethernet_t >(h.eth_hdr);
+        b.emit < H >(h.h[0]);
+        b.emit < H >(h.h[1]);
+        b.emit < H >(h.h[2]);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

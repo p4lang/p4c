@@ -1,8 +1,8 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
-extern void func<T>(in T x);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
+extern void func < T >(in T x);
 struct foobar {
     bit<32> a;
     bit<32> b;

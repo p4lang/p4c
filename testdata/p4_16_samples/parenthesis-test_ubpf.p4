@@ -8,7 +8,7 @@
 #include <ubpf_model.p4>
 
 typedef bit<48> EthernetAddress;
-typedef bit<32>     IPv4Address;
+typedef bit<32> IPv4Address;
 
 header Ethernet_h
 {
@@ -18,24 +18,24 @@ header Ethernet_h
 }
 
 header IPv4_h {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
 }
 
 struct Headers_t
 {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 struct metadata {
@@ -47,7 +47,7 @@ struct metadata {
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
+        transition select (headers.ethernet.etherType) {
             16w0x800 : ipv4;
             default : reject;
         }
@@ -79,11 +79,11 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 
     apply {
         if (headers.ipv4.isValid())
-            filter_tbl.apply();
+        filter_tbl.apply();
         if ((meta.qfi != 0) &&
-            ((meta.filt_dir == 2) ||
-             (meta.reflec_qos == 1)))
-	     meta.qfi = 3;
+        ((meta.filt_dir == 2) ||
+        (meta.reflec_qos == 1)))
+        meta.qfi = 3;
     }
 }
 
@@ -93,6 +93,5 @@ control dprs(packet_out packet, in Headers_t headers) {
         packet.emit(headers.ipv4);
     }
 }
-
 
 ubpf(prs(), pipe(), dprs()) main;

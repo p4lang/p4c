@@ -4,7 +4,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-struct s {}
+struct s {
+}
 
 header h
 {
@@ -20,6 +21,6 @@ struct s1
 
 header_union u
 {
-   s field;   // no struct field allowed in header_union
+    s field;   // no struct field allowed in header_union
    bit field1;  // no non-header field allowed in header_union
 }

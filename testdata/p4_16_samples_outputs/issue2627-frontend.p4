@@ -9,4 +9,3 @@ struct S {
 struct H3_S {
     tuple<S> t;
 }
-

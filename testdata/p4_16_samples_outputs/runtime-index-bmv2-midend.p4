@@ -25,9 +25,9 @@ header ethernet_t {
 }
 
 struct headers {
-    ethernet_t      ethernet;
-    ml_hdr_t        ml;
-    vec_e_t[3]      vector;
+    ethernet_t ethernet;
+    ml_hdr_t ml;
+    vec_e_t[3] vector;
     aggregator_t[3] pool;
 }
 
@@ -37,14 +37,14 @@ struct metadata_t {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        packet.extract<ml_hdr_t>(hdr.ml);
-        packet.extract<vec_e_t>(hdr.vector[0]);
-        packet.extract<vec_e_t>(hdr.vector[1]);
-        packet.extract<vec_e_t>(hdr.vector[2]);
-        packet.extract<aggregator_t>(hdr.pool[0]);
-        packet.extract<aggregator_t>(hdr.pool[1]);
-        packet.extract<aggregator_t>(hdr.pool[2]);
+        packet.extract < ethernet_t >(hdr.ethernet);
+        packet.extract < ml_hdr_t >(hdr.ml);
+        packet.extract < vec_e_t >(hdr.vector[0]);
+        packet.extract < vec_e_t >(hdr.vector[1]);
+        packet.extract < vec_e_t >(hdr.vector[2]);
+        packet.extract < aggregator_t >(hdr.pool[0]);
+        packet.extract < aggregator_t >(hdr.pool[1]);
+        packet.extract < aggregator_t >(hdr.pool[2]);
         meta.counter = 8s0;
         transition accept;
     }
@@ -273,15 +273,15 @@ control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ml_hdr_t>(hdr.ml);
-        packet.emit<vec_e_t>(hdr.vector[0]);
-        packet.emit<vec_e_t>(hdr.vector[1]);
-        packet.emit<vec_e_t>(hdr.vector[2]);
-        packet.emit<aggregator_t>(hdr.pool[0]);
-        packet.emit<aggregator_t>(hdr.pool[1]);
-        packet.emit<aggregator_t>(hdr.pool[2]);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ml_hdr_t >(hdr.ml);
+        packet.emit < vec_e_t >(hdr.vector[0]);
+        packet.emit < vec_e_t >(hdr.vector[1]);
+        packet.emit < vec_e_t >(hdr.vector[2]);
+        packet.emit < aggregator_t >(hdr.pool[0]);
+        packet.emit < aggregator_t >(hdr.pool[1]);
+        packet.emit < aggregator_t >(hdr.pool[2]);
     }
 }
 
-V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata_t >(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;

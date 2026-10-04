@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header elem {
-    bit<1>  bos;
+    bit<1> bos;
     bit<31> value;
 }
 

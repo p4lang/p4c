@@ -7,4 +7,3 @@ parser MyParser1(in bit<6> ttt) {
         }
     }
 }
-

@@ -10,7 +10,7 @@
 
 header hdr {
     int<32> a;
-    bit<8>  b;
+    bit<8> b;
     int<64> c;
 }
 
@@ -18,12 +18,19 @@ header hdr {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action shift()
-    { h.h.c = (int<64>)(h.h.a >> "aaaa"); sm.egress_spec = 0; }
+    {
+        h.h.c =(int<64>)(h.h.a >> "aaaa");
+        sm.egress_spec = 0;
+    }
     table t {
-        actions = { shift; }
+        actions = {
+            shift;
+        }
         const default_action = shift;
     }
-    apply { t.apply(); }
+    apply {
+        t.apply();
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

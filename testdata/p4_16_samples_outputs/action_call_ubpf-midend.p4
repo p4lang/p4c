@@ -35,7 +35,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @hidden action act() {
         hasExited = false;
     }
-    @hidden action action_call_ubpf56() {
+    @hidden action action_call_ubpf58() {
         hasExited = true;
     }
     @hidden table tbl_act {
@@ -44,11 +44,11 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         const default_action = act();
     }
-    @hidden table tbl_action_call_ubpf56 {
+    @hidden table tbl_action_call_ubpf58 {
         actions = {
-            action_call_ubpf56();
+            action_call_ubpf58();
         }
-        const default_action = action_call_ubpf56();
+        const default_action = action_call_ubpf58();
     }
     apply {
         tbl_act.apply();
@@ -56,7 +56,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         if (hasExited) {
             ;
         } else {
-            tbl_action_call_ubpf56.apply();
+            tbl_action_call_ubpf58.apply();
         }
     }
 }
@@ -66,4 +66,4 @@ control dprs(packet_out packet, in Headers_t headers) {
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;

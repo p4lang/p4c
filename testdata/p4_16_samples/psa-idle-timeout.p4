@@ -1,20 +1,21 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
     EthernetAddress srcAddr2;
     EthernetAddress srcAddr3;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 parser MyIP(
@@ -50,29 +51,45 @@ control MyIC(
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
 
-    action a1(bit<48> param) { hdr.ethernet.dstAddr = param; }
-    action a2(bit<16> param) { hdr.ethernet.etherType = param; }
+    action a1(bit<48> param) {
+        hdr.ethernet.dstAddr = param;
+    }
+    action a2(bit<16> param) {
+        hdr.ethernet.etherType = param;
+    }
     table tbl_idle_timeout {
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; a1; a2; }
-        psa_idle_timeout = PSA_IdleTimeout_t.NOTIFY_CONTROL; 
+        actions = {
+            NoAction;
+            a1;
+            a2;
+        }
+        psa_idle_timeout = PSA_IdleTimeout_t.NOTIFY_CONTROL;
     }
 
     table tbl_no_idle_timeout {
         key = {
-            hdr.ethernet.srcAddr2: exact;
+            hdr.ethernet.srcAddr2 : exact;
         }
-        actions = { NoAction; a1; a2; }
-        psa_idle_timeout = PSA_IdleTimeout_t.NO_TIMEOUT; 
+        actions = {
+            NoAction;
+            a1;
+            a2;
+        }
+        psa_idle_timeout = PSA_IdleTimeout_t.NO_TIMEOUT;
     }
 
     table tbl_no_idle_timeout_prop {
         key = {
-            hdr.ethernet.srcAddr2: exact;
+            hdr.ethernet.srcAddr2 : exact;
         }
-        actions = { NoAction; a1; a2; }
+        actions = {
+            NoAction;
+            a1;
+            a2;
+        }
     }
 
     apply {
@@ -87,7 +104,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -111,7 +129,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

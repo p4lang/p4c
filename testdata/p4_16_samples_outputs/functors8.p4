@@ -1,12 +1,12 @@
 #include <core.p4>
 
-extern e<T> {
+extern e < T > {
     e();
     T get();
 }
 
-parser p1<T>(out T a) {
-    e<T>() ei;
+parser p1 < T >(out T a) {
+    e < T >() ei;
     state start {
         a = ei.get();
         transition accept;

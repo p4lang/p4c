@@ -11,14 +11,14 @@ control C();
 package V1Switch(P p, C c);
 
 parser MyP() {
-  state start {
-    transition accept;
-  }
+    state start {
+        transition accept;
+    }
 }
 
 control MyC() {
-  apply {
-  }
+    apply {
+    }
 }
 
 V1Switch(MyP(), MyC()) main;

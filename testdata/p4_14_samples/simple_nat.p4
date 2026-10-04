@@ -26,24 +26,24 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
 parser start {
     set_metadata(meta.if_index, standard_metadata.ingress_port);
-    return select(current(0, 64)) {
-        0 : parse_cpu_header;  // dummy transition
-        default: parse_ethernet;
+    return select (current(0, 64)) {
+    0 : parse_cpu_header;  // dummy transition
+        default : parse_ethernet;
     }
 }
 
 header_type cpu_header_t {
     fields {
-        preamble: 64;
-        device: 8;
-        reason: 8;
-        if_index: 8;
+        preamble : 64;
+        device : 8;
+        reason : 8;
+        if_index : 8;
     }
 }
 
@@ -61,26 +61,26 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_IPV4 : parse_ipv4;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_IPV4 : parse_ipv4;
+    default : ingress;
     }
 }
 
 header ipv4_t ipv4;
 
 field_list ipv4_checksum_list {
-        ipv4.version;
-        ipv4.ihl;
-        ipv4.diffserv;
-        ipv4.totalLen;
-        ipv4.identification;
-        ipv4.flags;
-        ipv4.fragOffset;
-        ipv4.ttl;
-        ipv4.protocol;
-        ipv4.srcAddr;
-        ipv4.dstAddr;
+    ipv4.version;
+    ipv4.ihl;
+    ipv4.diffserv;
+    ipv4.totalLen;
+    ipv4.identification;
+    ipv4.flags;
+    ipv4.fragOffset;
+    ipv4.ttl;
+    ipv4.protocol;
+    ipv4.srcAddr;
+    ipv4.dstAddr;
 }
 
 field_list_calculation ipv4_checksum {
@@ -91,7 +91,7 @@ field_list_calculation ipv4_checksum {
     output_width : 16;
 }
 
-calculated_field ipv4.hdrChecksum  {
+calculated_field ipv4.hdrChecksum {
     verify ipv4_checksum;
     update ipv4_checksum;
 }
@@ -103,9 +103,9 @@ parser parse_ipv4 {
     set_metadata(meta.ipv4_sa, ipv4.srcAddr);
     set_metadata(meta.ipv4_da, ipv4.dstAddr);
     set_metadata(meta.tcpLength, ipv4.totalLen - 20);
-    return select(ipv4.protocol) {
-        IP_PROT_TCP : parse_tcp;
-        default : ingress;
+    return select (ipv4.protocol) {
+    IP_PROT_TCP : parse_tcp;
+    default : ingress;
     }
 }
 
@@ -134,21 +134,21 @@ parser parse_tcp {
 }
 
 field_list tcp_checksum_list {
-        ipv4.srcAddr;
-        ipv4.dstAddr;
-        8w0;
-        ipv4.protocol;
-        meta.tcpLength;
-        tcp.srcPort;
-        tcp.dstPort;
-        tcp.seqNo;
-        tcp.ackNo;
-        tcp.dataOffset;
-        tcp.res;
-        tcp.flags;
-        tcp.window;
-        tcp.urgentPtr;
-        payload;
+    ipv4.srcAddr;
+    ipv4.dstAddr;
+    8w0;
+    ipv4.protocol;
+    meta.tcpLength;
+    tcp.srcPort;
+    tcp.dstPort;
+    tcp.seqNo;
+    tcp.ackNo;
+    tcp.dataOffset;
+    tcp.res;
+    tcp.flags;
+    tcp.window;
+    tcp.urgentPtr;
+    payload;
 }
 
 field_list_calculation tcp_checksum {
@@ -160,8 +160,8 @@ field_list_calculation tcp_checksum {
 }
 
 calculated_field tcp.checksum {
-    verify tcp_checksum if(valid(tcp));
-    update tcp_checksum if(valid(tcp));
+    verify tcp_checksum if (valid(tcp));
+    update tcp_checksum if (valid(tcp));
 }
 
 action _drop() {
@@ -242,7 +242,7 @@ action nat_no_nat() {
     modify_field(meta.do_forward, 1);
 }
 
-table nat      {
+table nat {
     reads {
         meta.is_ext_if : exact;
         ipv4 : valid;
@@ -277,7 +277,7 @@ table ipv4_lpm {
         set_nhop;
         _drop;
     }
-    size: 1024;
+    size : 1024;
 }
 
 action set_dmac(dmac) {
@@ -292,7 +292,7 @@ table forward {
         set_dmac;
         _drop;
     }
-    size: 512;
+    size : 512;
 }
 
 action do_rewrites(smac) {
@@ -307,13 +307,13 @@ action do_rewrites(smac) {
 
 table send_frame {
     reads {
-        standard_metadata.egress_port: exact;
+        standard_metadata.egress_port : exact;
     }
     actions {
         do_rewrites;
         _drop;
     }
-    size: 256;
+    size : 256;
 }
 
 action do_cpu_encap() {
@@ -325,7 +325,9 @@ action do_cpu_encap() {
 }
 
 table send_to_cpu {
-    actions { do_cpu_encap; }
+    actions {
+        do_cpu_encap;
+    }
     size : 0;
 }
 

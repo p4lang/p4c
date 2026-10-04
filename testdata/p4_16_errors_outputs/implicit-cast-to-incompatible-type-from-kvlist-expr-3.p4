@@ -3,4 +3,3 @@ control C() {
         error s = {b = 2,...};
     }
 }
-

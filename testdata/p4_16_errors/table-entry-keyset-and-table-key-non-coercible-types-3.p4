@@ -1,28 +1,31 @@
 // generated from entries-prio.p4
 
 match_kind {
-  exact,
-  ternary,
-  lpm
+    exact,
+    ternary,
+    lpm
 }
 header H {
-  bit<32> e;
-  bit<32> t;
+    bit<32> e;
+    bit<32> t;
 }
 struct Headers {
-  H h;
+    H h;
 }
 control c(in Headers h)() {
-  action a_params(bit<32> param) {}
-  table t_exact_ternary {
-    key = {
-      h.h.e : exact;
-      h.h.t : ternary;
+    action a_params(bit<32> param) {
     }
-    actions = {}
-    entries = {
-      const priority = 10 : (1, 4369 &&& 4w2) : a_params(1);
+    table t_exact_ternary {
+        key = {
+            h.h.e : exact;
+            h.h.t : ternary;
+        }
+        actions = {
+        }
+        entries = {
+            const priority = 10 :(1, 4369 &&& 4w2) : a_params(1);
+        }
     }
-  }
-  apply {}
+    apply {
+    }
 }

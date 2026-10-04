@@ -11,4 +11,3 @@ control x() {
         get<tuple<H>>({ h });
     }
 }
-

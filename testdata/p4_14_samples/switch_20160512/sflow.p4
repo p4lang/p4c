@@ -8,7 +8,7 @@
 #ifdef SFLOW_ENABLE
 header_type sflow_meta_t {
     fields {
-        sflow_session_id        : 16;
+        sflow_session_id : 16;
     }
 }
 metadata sflow_meta_t sflow_metadata;
@@ -36,10 +36,10 @@ table sflow_ingress {
     /* This is separate from ACLs so that this table can be applied */
     /* independent of ACLs */
     reads {
-        ingress_metadata.ifindex    : ternary;
-        ipv4_metadata.lkp_ipv4_sa   : ternary;
-        ipv4_metadata.lkp_ipv4_da   : ternary;
-        sflow                       : valid;    /* do not sflow an sflow frame */
+        ingress_metadata.ifindex : ternary;
+        ipv4_metadata.lkp_ipv4_sa : ternary;
+        ipv4_metadata.lkp_ipv4_da : ternary;
+        sflow : valid;    /* do not sflow an sflow frame */
     }
     actions {
         nop; /* default action */

@@ -23,7 +23,7 @@ parser TestParser(packet_in pkt, out header_t hdr, inout metadata_t meta, inout 
 
 control DefaultDeparser(packet_out pkt, in header_t hdr) {
     apply {
-        pkt.emit<header_t>(hdr);
+        pkt.emit < header_t >(hdr);
     }
 }
 
@@ -37,4 +37,4 @@ control EmptyChecksum(inout header_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<header_t, metadata_t>(TestParser(), EmptyChecksum(), EmptyControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;
+V1Switch < header_t, metadata_t >(TestParser(), EmptyChecksum(), EmptyControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;

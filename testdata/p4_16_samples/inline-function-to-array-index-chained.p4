@@ -30,9 +30,13 @@ control ingress(inout Headers h) {
         val = 8w1;
     }
     table t {
-        actions = { a(h.mid_arr[max(3w0, 3w0)].inner_arr[max(3w0, 3w0)].f2); }
+        actions = {
+            a(h.mid_arr[max(3w0, 3w0)].inner_arr[max(3w0, 3w0)].f2);
+        }
     }
-    apply { t.apply(); }
+    apply {
+        t.apply();
+    }
 }
 
 top(ingress()) main;

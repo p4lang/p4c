@@ -21,4 +21,3 @@ control ingress(Header_t h) {
         badtable.apply();
     }
 }
-

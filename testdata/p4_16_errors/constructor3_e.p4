@@ -11,5 +11,6 @@ extern E {
 
 control c() {
     E(true) e;
-    apply {}
+    apply {
+    }
 }

@@ -3,7 +3,7 @@
 control MyC(bit<8> t) {
     table t {
         key = {
-            t: exact;
+            t : exact;
         }
         actions = {
         }
@@ -11,4 +11,3 @@ control MyC(bit<8> t) {
     apply {
     }
 }
-

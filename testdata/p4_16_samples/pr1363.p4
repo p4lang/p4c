@@ -3,14 +3,17 @@
 typedef bit implementation;
 
 extern ActionProfile {
-   ActionProfile(bit<32> size); // number of distinct actions expected
+    ActionProfile(bit<32> size); // number of distinct actions expected
 }
 
 control c() {
-  table t {
-    actions = { NoAction; }
-    implementation = ActionProfile(32);
-  }
+    table t {
+        actions = {
+            NoAction;
+        }
+        implementation = ActionProfile(32);
+    }
 
-  apply {}
+    apply {
+    }
 }

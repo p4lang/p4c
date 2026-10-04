@@ -21,9 +21,9 @@ struct headers {
     @name(".len_or_type")
     len_or_type_t len_or_type;
     @name(".mac_da")
-    mac_da_t      mac_da;
+    mac_da_t mac_da;
     @name(".mac_sa")
-    mac_sa_t      mac_sa;
+    mac_sa_t mac_sa;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -52,7 +52,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.mac_sa.mac: exact;
+            hdr.mac_sa.mac : exact;
         }
     }
     apply {
@@ -68,8 +68,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nop;
         }
         key = {
-            hdr.mac_da.mac       : exact;
-            hdr.len_or_type.value: exact;
+            hdr.mac_da.mac : exact;
+            hdr.len_or_type.value : exact;
         }
     }
     apply {

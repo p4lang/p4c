@@ -16,16 +16,16 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
     varbit<320> options;
@@ -36,10 +36,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -52,8 +52,8 @@ header IPv4_up_to_ihl_only_h {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 struct mystruct1_t {
@@ -63,24 +63,24 @@ struct mystruct1_t {
 
 struct metadata {
     mystruct1_t mystruct1;
-    bit<16>     hash1;
+    bit<16> hash1;
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4, (bit<32>)(8 * (4 * (bit<9>)(pkt.lookahead<IPv4_up_to_ihl_only_h>()).ihl - 20)));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
-        transition select(hdr.ipv4.protocol) {
-            6: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -101,7 +101,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table t0 {
         key = {
-            hdr.tcp.dstPort: exact;
+            hdr.tcp.dstPort : exact;
         }
         actions = {
             foo1;
@@ -111,7 +111,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table t1 {
         key = {
-            hdr.tcp.dstPort: exact;
+            hdr.tcp.dstPort : exact;
         }
         actions = {
             foo1;
@@ -125,15 +125,15 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             foo2;
         }
         key = {
-            hdr.tcp.srcPort: exact;
-            meta.hash1     : selector;
+            hdr.tcp.srcPort : exact;
+            meta.hash1 : selector;
         }
         size = 16;
     }
     apply {
         t0.apply();
         t1.apply();
-        meta.hash1 = hdr.ipv4.dstAddr[15:0];
+        meta.hash1 = hdr.ipv4.dstAddr[15 : 0];
         t2.apply();
     }
 }
@@ -161,4 +161,4 @@ control DeparserI(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < headers, metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

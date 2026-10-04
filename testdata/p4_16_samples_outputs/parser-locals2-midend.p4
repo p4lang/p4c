@@ -9,18 +9,18 @@ header Ethernet_h {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> totalLen;
     bit<16> identification;
-    bit<1>  flag_rsvd;
-    bit<1>  flag_noFrag;
-    bit<1>  flag_more;
+    bit<1> flag_rsvd;
+    bit<1> flag_noFrag;
+    bit<1> flag_more;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -28,7 +28,7 @@ header ipv4_t {
 
 struct Parsed_packet {
     Ethernet_h ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 struct mystruct1 {
@@ -38,20 +38,20 @@ struct mystruct1 {
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<Ethernet_h>(hdr.ethernet);
+        packet.emit < Ethernet_h >(hdr.ethernet);
     }
 }
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<Ethernet_h>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        pkt.extract < Ethernet_h >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
+        pkt.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -62,7 +62,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             foo();
@@ -89,4 +89,4 @@ control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
     }
 }
 
-V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, mystruct1 >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

@@ -7,25 +7,24 @@
 #include <core.p4>
 #include <dpdk/pna.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -48,8 +47,8 @@ struct main_metadata_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 control PreControlImpl(
@@ -70,9 +69,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -95,23 +94,25 @@ control MainControlImpl(
     DirectMeter(PNA_MeterType_t.BYTES) meter1;
     action next_hop(PortId_t oport) {
         out1 = meter0.dpdk_execute(color_in, 32w1024);
-        user_meta.port_out = (out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        user_meta.port_out =(out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         color_out = meter1.dpdk_execute(color_in, 32w1024);
-        user_meta.port_out1 = (color_out == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);        
+        user_meta.port_out1 =(color_out == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         send_to_port(oport);
     }
     action default_route_drop() {
         out1 = meter0.dpdk_execute(color_in, 32w1024);
-        user_meta.port_out = (out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        user_meta.port_out =(out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         drop_packet();
     }
     action default_route_drop1() {
         out1 = meter1.dpdk_execute(color_in, 32w1024);
-        user_meta.port_out = (out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        user_meta.port_out =(out1 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
         drop_packet();
     }
     table ipv4_da1 {
-        key = { hdr.ipv4.dstAddr: exact; }
+        key = {
+            hdr.ipv4.dstAddr : exact;
+        }
         actions = {
             next_hop;
             default_route_drop;
@@ -121,7 +122,9 @@ control MainControlImpl(
         pna_direct_meter = meter0;
     }
     table ipv4_da {
-        key = { hdr.ipv4.dstAddr: exact; }
+        key = {
+            hdr.ipv4.dstAddr : exact;
+        }
         actions = {
             next_hop;
             default_route_drop1;

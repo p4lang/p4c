@@ -12,7 +12,6 @@ extern Generic<T> {
 }
 
 extern void f<T>(in T arg);
-
 control c<T>()(T size) {
     Generic<T>(size) x;
     apply {

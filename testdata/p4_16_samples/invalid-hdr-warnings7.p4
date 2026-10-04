@@ -1,5 +1,9 @@
-header H1 { bit<32> a; }
-header H2 { bit<32> a; }
+header H1 {
+    bit<32> a;
+}
+header H2 {
+    bit<32> a;
+}
 
 header_union U {
     H1 h1;
@@ -54,7 +58,7 @@ control c(inout bit<32> x) {
 
     action xor(in U u1, in H1[2] hs1, in U[2] us1, out bit<32> result) {
         result = u1.h1.a ^ u1.h2.a ^ hs1[0].a ^ hs1[1].a ^ us1[0].h1.a
-                 ^ us1[0].h2.a ^ us1[1].h1.a ^ us1[1].h2.a;
+        ^ us1[0].h2.a ^ us1[1].h1.a ^ us1[1].h2.a;
     }
 
     apply @noWarn("uninitialized-use") {

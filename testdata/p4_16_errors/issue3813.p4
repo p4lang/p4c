@@ -1,20 +1,20 @@
 bit f(@optional bit a)
 {
-  return a;
+    return a;
 }
 
 bit g()
 {
-  return f();
+    return f();
 }
 
 control ct();
 control c()
 {
-  apply
-  {
-    g();
-  }
+    apply
+    {
+        g();
+    }
 }
 package pt(ct c);
 pt(c()) main;

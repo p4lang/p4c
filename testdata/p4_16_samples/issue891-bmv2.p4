@@ -12,32 +12,37 @@ header mpls {
 }
 
 struct my_packet {
-  @name("mpls_data")
-  mpls[8] data;
+    @name("mpls_data")
+    mpls[8] data;
 }
 
-struct my_metadata {}
+struct my_metadata {
+}
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-  state start {
-    transition accept;
-  }
+    state start {
+        transition accept;
+    }
 }
 
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    apply { }
+    apply {
+    }
 }
 
 control MyEgress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
-    apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out b, in my_packet p) {

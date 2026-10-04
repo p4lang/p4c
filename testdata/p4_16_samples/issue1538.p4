@@ -8,7 +8,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-
 bit<16> incr(in bit<16> x)
 {
     return x + 1;
@@ -19,11 +18,9 @@ bit<16> twoxplus1(in bit<16> x)
     return x + incr(x);
 }
 
-
 struct metadata {
     bit<16> tmp_port;
 }
-
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -66,7 +63,7 @@ control ingress(inout headers hdr,
     }
     table mac_da {
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         actions = {
             set_port;
@@ -78,8 +75,8 @@ control ingress(inout headers hdr,
         mac_da.apply();
         // Any one of these 3 lines by itself causes errors with
         // p4test or p4c if uncommented.
-        hdr.ethernet.srcAddr[15:0] = twoxplus1(hdr.ethernet.srcAddr[15:0]);
-        hdr.ethernet.srcAddr[15:0] = incr(hdr.ethernet.srcAddr[15:0]);
+        hdr.ethernet.srcAddr[15 : 0] = twoxplus1(hdr.ethernet.srcAddr[15:0]);
+        hdr.ethernet.srcAddr[15 : 0] = incr(hdr.ethernet.srcAddr[15:0]);
         hdr.ethernet.etherType = incr(hdr.ethernet.etherType);
     }
 }
@@ -99,11 +96,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(),

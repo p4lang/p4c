@@ -7,18 +7,23 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-header EMPTY_H {};
-struct EMPTY_RESUB {};
-struct EMPTY_CLONE {};
-struct EMPTY_BRIDGE {};
-struct EMPTY_RECIRC {};
+header EMPTY_H {
+};
+struct EMPTY_RESUB {
+};
+struct EMPTY_CLONE {
+};
+struct EMPTY_BRIDGE {
+};
+struct EMPTY_RECIRC {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct metadata {
@@ -69,15 +74,18 @@ control MyIC(
 
     apply {
         switch (16w2) {
-            1: { b.meta = 48w5;}
-            2: 
-            3: 
-            4: { b.meta = 48w7;}
-            5: 
-            default: { b.meta = 48w9; }
+            1 : { b.meta = 48w5;
+            }
+            2 :
+            3 :
+            4 : { b.meta = 48w7;
+            }
+            5 :
+            default : { b.meta = 48w9;
+            }
         }
         if (b.meta == 48w7)
-	    tbl.apply();
+        tbl.apply();
     }
 }
 
@@ -86,7 +94,8 @@ control MyEC(
     inout metadata b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -97,7 +106,8 @@ control MyID(
     inout ethernet_t d,
     in metadata e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 control MyED(
@@ -108,7 +118,8 @@ control MyED(
     in metadata d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

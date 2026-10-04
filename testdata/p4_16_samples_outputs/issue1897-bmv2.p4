@@ -25,15 +25,15 @@ struct metadata {
 
 struct headers {
     addr_type_t addr_type;
-    addr_t      addr_dst;
-    addr_t      addr_src;
+    addr_t addr_dst;
+    addr_t addr_src;
 }
 
 parser ProtAddrParser(packet_in packet, in bit<8> addrType, out addr_t addr) {
     state start {
-        transition select(addrType) {
-            0x1: ipv4;
-            0x2: ipv6;
+        transition select (addrType) {
+            0x1 : ipv4;
+            0x2 : ipv6;
         }
     }
     state ipv4 {
@@ -78,7 +78,7 @@ control ProtComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control ProtDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 

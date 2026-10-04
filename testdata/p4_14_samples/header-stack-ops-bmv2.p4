@@ -52,19 +52,19 @@ metadata metadata_t m;
 
 parser start {
     extract(h1);
-    return select(latest.next_hdr_type) {
-        2: parse_h2;
-        3: parse_h3;
-        default: ingress;
+    return select (latest.next_hdr_type) {
+    2 : parse_h2;
+    3 : parse_h3;
+    default : ingress;
     }
 }
 
 parser parse_h2 {
     extract(h2[next]);
-    return select(latest.next_hdr_type) {
-        2: parse_h2;
-        3: parse_h3;
-        default: ingress;
+    return select (latest.next_hdr_type) {
+    2 : parse_h2;
+    3 : parse_h3;
+    default : ingress;
     }
 }
 
@@ -361,57 +361,65 @@ control THISOP ## _do { \
     } \
 }
 
-
 DO_OP(op1)
 DO_OP(op2)
 DO_OP(op3)
-
-
 
 action a_clear_h2_valid() {
     modify_field(h1.h2_valid_bits, 0);
 }
 table t_clear_h2_valid {
-    actions { a_clear_h2_valid; }
-    default_action: a_clear_h2_valid;
+    actions {
+        a_clear_h2_valid;
+    }
+    default_action : a_clear_h2_valid;
 }
 
 action a_set_h2_valid_bit_0() {
     modify_field(h1.h2_valid_bits, 0x01, 0x01);
 }
 table t_set_h2_valid_bit_0 {
-    actions { a_set_h2_valid_bit_0; }
-    default_action: a_set_h2_valid_bit_0;
+    actions {
+        a_set_h2_valid_bit_0;
+    }
+    default_action : a_set_h2_valid_bit_0;
 }
 action a_set_h2_valid_bit_1() {
     modify_field(h1.h2_valid_bits, 0x02, 0x02);
 }
 table t_set_h2_valid_bit_1 {
-    actions { a_set_h2_valid_bit_1; }
-    default_action: a_set_h2_valid_bit_1;
+    actions {
+        a_set_h2_valid_bit_1;
+    }
+    default_action : a_set_h2_valid_bit_1;
 }
 action a_set_h2_valid_bit_2() {
     modify_field(h1.h2_valid_bits, 0x04, 0x04);
 }
 table t_set_h2_valid_bit_2 {
-    actions { a_set_h2_valid_bit_2; }
-    default_action: a_set_h2_valid_bit_2;
+    actions {
+        a_set_h2_valid_bit_2;
+    }
+    default_action : a_set_h2_valid_bit_2;
 }
 action a_set_h2_valid_bit_3() {
     modify_field(h1.h2_valid_bits, 0x08, 0x08);
 }
 table t_set_h2_valid_bit_3 {
-    actions { a_set_h2_valid_bit_3; }
-    default_action: a_set_h2_valid_bit_3;
+    actions {
+        a_set_h2_valid_bit_3;
+    }
+    default_action : a_set_h2_valid_bit_3;
 }
 action a_set_h2_valid_bit_4() {
     modify_field(h1.h2_valid_bits, 0x10, 0x10);
 }
 table t_set_h2_valid_bit_4 {
-    actions { a_set_h2_valid_bit_4; }
-    default_action: a_set_h2_valid_bit_4;
+    actions {
+        a_set_h2_valid_bit_4;
+    }
+    default_action : a_set_h2_valid_bit_4;
 }
-
 
 control ingress {
     apply(op1_t_record_op);

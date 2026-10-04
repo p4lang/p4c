@@ -7,15 +7,15 @@ struct hop_metadata_t {
     bit<64> ipv6_prefix;
     bit<16> next_hop_index;
     bit<16> mcast_grp;
-    bit<1>  urpf_fail;
-    bit<8>  drop_reason;
+    bit<1> urpf_fail;
+    bit<8> drop_reason;
 }
 
 header arp_rarp_t {
     bit<16> hwType;
     bit<16> protoType;
-    bit<8>  hwAddrLen;
-    bit<8>  protoAddrLen;
+    bit<8> hwAddrLen;
+    bit<8> protoAddrLen;
     bit<16> opcode;
 }
 
@@ -26,45 +26,45 @@ header ethernet_t {
 }
 
 header gre_t {
-    bit<1>  C;
-    bit<1>  R;
-    bit<1>  K;
-    bit<1>  S;
-    bit<1>  s;
-    bit<3>  recurse;
-    bit<5>  flags;
-    bit<3>  ver;
+    bit<1> C;
+    bit<1> R;
+    bit<1> K;
+    bit<1> S;
+    bit<1> s;
+    bit<3> recurse;
+    bit<5> flags;
+    bit<3> ver;
     bit<16> proto;
 }
 
 header icmp_t {
-    bit<8>  type_;
-    bit<8>  code;
+    bit<8> type_;
+    bit<8> code;
     bit<16> hdrChecksum;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header ipv6_t {
-    bit<4>   version;
-    bit<8>   trafficClass;
-    bit<20>  flowLabel;
-    bit<16>  payloadLen;
-    bit<8>   nextHdr;
-    bit<8>   hopLimit;
+    bit<4> version;
+    bit<8> trafficClass;
+    bit<20> flowLabel;
+    bit<16> payloadLen;
+    bit<8> nextHdr;
+    bit<8> hopLimit;
     bit<128> srcAddr;
     bit<128> dstAddr;
 }
@@ -74,10 +74,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -92,14 +92,14 @@ header udp_t {
 
 header mpls_t {
     bit<20> label;
-    bit<3>  exp;
-    bit<1>  bos;
-    bit<8>  ttl;
+    bit<3> exp;
+    bit<1> bos;
+    bit<8> ttl;
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> etherType;
 }
@@ -111,23 +111,23 @@ struct metadata {
 
 struct headers {
     @name(".arp_rarp")
-    arp_rarp_t    arp_rarp;
+    arp_rarp_t arp_rarp;
     @name(".ethernet")
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     @name(".gre")
-    gre_t         gre;
+    gre_t gre;
     @name(".icmp")
-    icmp_t        icmp;
+    icmp_t icmp;
     @name(".ipv4")
-    ipv4_t        ipv4;
+    ipv4_t ipv4;
     @name(".ipv6")
-    ipv6_t        ipv6;
+    ipv6_t ipv6;
     @name(".tcp")
-    tcp_t         tcp;
+    tcp_t tcp;
     @name(".udp")
-    udp_t         udp;
+    udp_t udp;
     @name(".mpls")
-    mpls_t[1]     mpls;
+    mpls_t[1] mpls;
     @name(".vlan_tag_")
     vlan_tag_t[1] vlan_tag_;
 }
@@ -139,15 +139,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x8100: parse_vlan;
-            16w0x9100: parse_vlan;
-            16w0x8847: parse_mpls;
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
-            16w0x806: parse_arp_rarp;
-            16w0x8035: parse_arp_rarp;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x8100 : parse_vlan;
+            16w0x9100 : parse_vlan;
+            16w0x8847 : parse_mpls;
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
+            16w0x806 : parse_arp_rarp;
+            16w0x8035 : parse_arp_rarp;
+            default : accept;
         }
     }
     @name(".parse_gre") state parse_gre {
@@ -160,29 +160,29 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
-            (13w0x0, 4w0x5, 8w0x1): parse_icmp;
-            (13w0x0, 4w0x5, 8w0x6): parse_tcp;
-            (13w0x0, 4w0x5, 8w0x11): parse_udp;
-            (13w0x0, 4w0x5, 8w0x2f): parse_gre;
-            default: accept;
+        transition select (hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
+            (13w0x0, 4w0x5, 8w0x1) : parse_icmp;
+            (13w0x0, 4w0x5, 8w0x6) : parse_tcp;
+            (13w0x0, 4w0x5, 8w0x11) : parse_udp;
+            (13w0x0, 4w0x5, 8w0x2f) : parse_gre;
+            default : accept;
         }
     }
     @name(".parse_ipv6") state parse_ipv6 {
         packet.extract(hdr.ipv6);
-        transition select(hdr.ipv6.nextHdr) {
-            8w58: parse_icmp;
-            8w6: parse_tcp;
-            8w17: parse_udp;
-            8w47: parse_gre;
-            default: accept;
+        transition select (hdr.ipv6.nextHdr) {
+            8w58 : parse_icmp;
+            8w6 : parse_tcp;
+            8w17 : parse_udp;
+            8w47 : parse_gre;
+            default : accept;
         }
     }
     @name(".parse_mpls") state parse_mpls {
         packet.extract(hdr.mpls.next);
-        transition select(hdr.mpls.last.bos) {
-            1w0: parse_mpls;
-            default: accept;
+        transition select (hdr.mpls.last.bos) {
+            1w0 : parse_mpls;
+            default : accept;
         }
     }
     @name(".parse_tcp") state parse_tcp {
@@ -195,15 +195,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_vlan") state parse_vlan {
         packet.extract(hdr.vlan_tag_.next);
-        transition select(hdr.vlan_tag_.last.etherType) {
-            16w0x8100: parse_vlan;
-            16w0x9100: parse_vlan;
-            16w0x8847: parse_mpls;
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
-            16w0x806: parse_arp_rarp;
-            16w0x8035: parse_arp_rarp;
-            default: accept;
+        transition select (hdr.vlan_tag_.last.etherType) {
+            16w0x8100 : parse_vlan;
+            16w0x9100 : parse_vlan;
+            16w0x8847 : parse_mpls;
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
+            16w0x806 : parse_arp_rarp;
+            16w0x8035 : parse_arp_rarp;
+            default : accept;
         }
     }
     @name(".start") state start {
@@ -258,10 +258,10 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             action_drop;
         }
         key = {
-            hdr.ipv4.srcAddr    : lpm;
-            hdr.ipv4.dstAddr    : lpm;
-            hdr.ethernet.srcAddr: exact;
-            hdr.ethernet.dstAddr: exact;
+            hdr.ipv4.srcAddr : lpm;
+            hdr.ipv4.dstAddr : lpm;
+            hdr.ethernet.srcAddr : exact;
+            hdr.ethernet.dstAddr : exact;
         }
         size = 80000;
     }
@@ -271,7 +271,7 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             on_miss;
         }
         key = {
-            hdr.ipv6.isValid(): exact;
+            hdr.ipv6.isValid() : exact;
         }
         size = 1;
     }
@@ -280,7 +280,7 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             nop;
         }
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         size = 1;
     }
@@ -289,9 +289,9 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             nop;
         }
         key = {
-            hdr.ipv4.dstAddr              : lpm;
-            hdr.vlan_tag_[0].vid          : exact;
-            standard_metadata.ingress_port: exact;
+            hdr.ipv4.dstAddr : lpm;
+            hdr.vlan_tag_[0].vid : exact;
+            standard_metadata.ingress_port : exact;
         }
         size = 16000;
     }
@@ -300,8 +300,8 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             set_next_hop;
         }
         key = {
-            meta.hop_metadata.vrf: exact;
-            hdr.ipv4.dstAddr     : lpm;
+            meta.hop_metadata.vrf : exact;
+            hdr.ipv4.dstAddr : lpm;
         }
         size = 160000;
     }
@@ -310,10 +310,10 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             set_multicast_replication_list;
         }
         key = {
-            hdr.vlan_tag_[0].vid          : exact;
-            hdr.ipv4.dstAddr              : lpm;
-            hdr.ipv4.srcAddr              : lpm;
-            standard_metadata.ingress_port: exact;
+            hdr.vlan_tag_[0].vid : exact;
+            hdr.ipv4.dstAddr : lpm;
+            hdr.ipv4.srcAddr : lpm;
+            standard_metadata.ingress_port : exact;
         }
         size = 16000;
     }
@@ -322,9 +322,9 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             set_next_hop;
         }
         key = {
-            meta.hop_metadata.vrf        : exact;
-            meta.hop_metadata.ipv6_prefix: exact;
-            hdr.ipv6.dstAddr             : lpm;
+            meta.hop_metadata.vrf : exact;
+            meta.hop_metadata.ipv6_prefix : exact;
+            hdr.ipv6.dstAddr : lpm;
         }
         size = 5000;
     }
@@ -334,7 +334,7 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             set_ipv6_prefix_xcast;
         }
         key = {
-            hdr.ipv6.dstAddr: lpm;
+            hdr.ipv6.dstAddr : lpm;
         }
         size = 1000;
     }
@@ -343,10 +343,10 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             set_multicast_replication_list;
         }
         key = {
-            hdr.vlan_tag_[0].vid          : exact;
-            hdr.ipv6.dstAddr              : lpm;
-            hdr.ipv6.srcAddr              : lpm;
-            standard_metadata.ingress_port: exact;
+            hdr.vlan_tag_[0].vid : exact;
+            hdr.ipv6.dstAddr : lpm;
+            hdr.ipv6.srcAddr : lpm;
+            standard_metadata.ingress_port : exact;
         }
         size = 1000;
     }
@@ -355,7 +355,7 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             set_ethernet_addr;
         }
         key = {
-            meta.hop_metadata.next_hop_index: exact;
+            meta.hop_metadata.next_hop_index : exact;
         }
         size = 41250;
     }
@@ -365,9 +365,9 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             nop;
         }
         key = {
-            hdr.vlan_tag_[0].vid          : exact;
-            standard_metadata.ingress_port: exact;
-            hdr.ipv4.srcAddr              : exact;
+            hdr.vlan_tag_[0].vid : exact;
+            standard_metadata.ingress_port : exact;
+            hdr.ipv4.srcAddr : exact;
         }
         size = 160000;
     }
@@ -377,9 +377,9 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             nop;
         }
         key = {
-            hdr.vlan_tag_[0].vid          : exact;
-            standard_metadata.ingress_port: exact;
-            hdr.ipv6.srcAddr              : exact;
+            hdr.vlan_tag_[0].vid : exact;
+            standard_metadata.ingress_port : exact;
+            hdr.ipv6.srcAddr : exact;
         }
         size = 5000;
     }
@@ -388,38 +388,38 @@ control process_ip(inout headers hdr, inout metadata meta, inout standard_metada
             set_vrf;
         }
         key = {
-            hdr.vlan_tag_[0].isValid()    : exact;
-            hdr.vlan_tag_[0].vid          : exact;
-            hdr.ethernet.srcAddr          : exact;
-            standard_metadata.ingress_port: exact;
+            hdr.vlan_tag_[0].isValid() : exact;
+            hdr.vlan_tag_[0].vid : exact;
+            hdr.ethernet.srcAddr : exact;
+            standard_metadata.ingress_port : exact;
         }
         size = 40000;
     }
     apply {
         vrf.apply();
         switch (check_ipv6.apply().action_run) {
-            on_hit: {
-                switch (ipv6_prefix.apply().action_run) {
-                    set_ipv6_prefix_ucast: {
-                        urpf_v6.apply();
-                        ipv6_forwarding.apply();
-                    }
-                    set_ipv6_prefix_xcast: {
-                        ipv6_xcast_forwarding.apply();
-                    }
-                }
+            on_hit : {
+            switch (ipv6_prefix.apply().action_run) {
+            set_ipv6_prefix_ucast : {
+            urpf_v6.apply();
+            ipv6_forwarding.apply();
             }
-            on_miss: {
-                switch (check_ucast_ipv4.apply().action_run) {
-                    on_hit: {
-                        urpf_v4.apply();
-                        ipv4_forwarding.apply();
-                    }
-                    on_miss: {
-                        igmp_snooping.apply();
-                        ipv4_xcast_forwarding.apply();
-                    }
-                }
+            set_ipv6_prefix_xcast : {
+            ipv6_xcast_forwarding.apply();
+            }
+            }
+            }
+            on_miss : {
+            switch (check_ucast_ipv4.apply().action_run) {
+            on_hit : {
+            urpf_v4.apply();
+            ipv4_forwarding.apply();
+            }
+            on_miss : {
+            igmp_snooping.apply();
+            ipv4_xcast_forwarding.apply();
+            }
+            }
             }
         }
         acl.apply();
@@ -442,9 +442,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ethernet.dstAddr          : exact;
-            hdr.vlan_tag_[0].vid          : exact;
-            standard_metadata.ingress_port: exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.vlan_tag_[0].vid : exact;
+            standard_metadata.ingress_port : exact;
         }
         size = 160000;
     }
@@ -454,11 +454,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             on_miss;
         }
         key = {
-            hdr.vlan_tag_[0].isValid()    : exact;
-            hdr.vlan_tag_[0].vid          : exact;
-            standard_metadata.ingress_port: exact;
-            hdr.ethernet.dstAddr          : exact;
-            hdr.ethernet.etherType        : exact;
+            hdr.vlan_tag_[0].isValid() : exact;
+            hdr.vlan_tag_[0].vid : exact;
+            standard_metadata.ingress_port : exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.ethernet.etherType : exact;
         }
         size = 64;
     }
@@ -467,8 +467,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr          : exact;
-            standard_metadata.ingress_port: exact;
+            hdr.ethernet.srcAddr : exact;
+            standard_metadata.ingress_port : exact;
         }
         size = 160000;
     }
@@ -476,8 +476,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         smac_vlan.apply();
         switch (routable.apply().action_run) {
-            on_hit: {
-                process_ip_0.apply(hdr, meta, standard_metadata);
+            on_hit : {
+            process_ip_0.apply(hdr, meta, standard_metadata);
             }
         }
         dmac_vlan.apply();

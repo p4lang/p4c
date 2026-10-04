@@ -9,15 +9,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> packet_length;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -25,7 +25,7 @@ header ipv4_t {
 
 struct Headers {
     ethernet_t ethernet;
-    ipv4_t     ip;
+    ipv4_t ip;
 }
 
 struct Value {
@@ -37,14 +37,14 @@ struct Metadata {
 
 parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadata_t standard_meta) {
     state start {
-        b.extract<ethernet_t>(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: noMatch;
+        b.extract < ethernet_t >(p.ethernet);
+        transition select (p.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : noMatch;
         }
     }
     state parse_ipv4 {
-        b.extract<ipv4_t>(p.ip);
+        b.extract < ipv4_t >(p.ip);
         transition accept;
     }
     state noMatch {
@@ -69,8 +69,8 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    @name("Eg.debug") register<bit<32>>(32w100) debug_0;
-    @name("Eg.reg") register<bit<32>>(32w1) reg_0;
+    @name("Eg.debug") register < bit<32 >>(32w100) debug_0;
+    @name("Eg.reg") register <bit<32 >>(32w1) reg_0;
     @name("Eg.test") action test() {
         debug_0.write(32w0, 32w0);
         debug_0.write(32w1, 32w0);
@@ -90,8 +90,8 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
 
 control DP(packet_out b, in Headers p) {
     apply {
-        b.emit<ethernet_t>(p.ethernet);
-        b.emit<ipv4_t>(p.ip);
+        b.emit < ethernet_t >(p.ethernet);
+        b.emit < ipv4_t >(p.ip);
     }
 }
 
@@ -105,4 +105,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+V1Switch < Headers, Metadata >(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;

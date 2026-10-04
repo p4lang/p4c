@@ -7,4 +7,3 @@ control c(inout bit<8> x) {
         }
     }
 }
-

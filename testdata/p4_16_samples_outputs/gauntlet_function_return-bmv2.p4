@@ -14,11 +14,11 @@ struct Meta {
 }
 
 bit<8> do_thing(out bit<32> d) {
-    return (bit<8>)32w1;
+    return(bit<8>) 32w1;
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action action_thing(inout bit<32> c) {
-        c = (bit<32>)do_thing(c);
+        c =(bit<32>) do_thing(c);
     }
     apply {
         action_thing(sm.enq_timestamp);

@@ -26,7 +26,7 @@ header_type ingress_metadata_t {
         f2 : 16;
         f3 : 32;
     }
-} 
+}
 
 metadata ingress_metadata_t ing_metadata;
 
@@ -79,7 +79,7 @@ table i_t3 {
 }
 
 control ingress {
-        apply(i_t1);
+    apply(i_t1);
 //        apply(i_t2);
 //        apply(i_t3);
 }

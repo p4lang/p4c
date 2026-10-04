@@ -6,16 +6,21 @@
 
 #include <v1model.p4>
 
-struct headers_t { }
-struct metadata_t { }
+struct headers_t {
+}
+struct metadata_t {
+}
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta,
                     inout standard_metadata_t standard_metadata) {
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {
-    apply { }
+    apply {
+    }
 }
 
 #define CPU_PORT 64
@@ -26,11 +31,15 @@ action send_to_cpu(inout standard_metadata_t standard_metadata) {
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     table t0 {
-          key = { standard_metadata.ingress_port : ternary; }
-          actions = { send_to_cpu(standard_metadata); }
+        key = {
+            standard_metadata.ingress_port : ternary;
+        }
+        actions = {
+            send_to_cpu(standard_metadata);
+        }
     }
     apply {
-          t0.apply();
+        t0.apply();
     }
 }
 

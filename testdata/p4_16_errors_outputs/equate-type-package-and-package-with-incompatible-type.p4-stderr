@@ -1,18 +1,18 @@
-equate-type-package-and-package-with-incompatible-type.p4(8): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
-  state start {}
-        ^^^^^
+equate-type-package-and-package-with-incompatible-type.p4(10): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+    state start {
+          ^^^^^
 equate-type-package-and-package-with-incompatible-type.p4(5): [--Werror=type-error] error: 'package Switch'
 package Switch<IH>(Ingress<IH> ingress);
         ^^^^^^
   ---- Actual error:
 equate-type-package-and-package-with-incompatible-type.p4(6): Cannot cast implicitly type 'struct H' to type 'tuple<>'
-  struct H {}
+  struct H {
          ^
-equate-type-package-and-package-with-incompatible-type.p4(11)
+equate-type-package-and-package-with-incompatible-type.p4(15)
   Switch<tuple<>>(ig1) main;
          ^^^^^^^
   ---- Originating from:
-equate-type-package-and-package-with-incompatible-type.p4(11): Type of argument 'ig1' (package Ingress<...>) does not match type of parameter 'ingress' (package Ingress<...>)
+equate-type-package-and-package-with-incompatible-type.p4(15): Type of argument 'ig1' (package Ingress<...>) does not match type of parameter 'ingress' (package Ingress<...>)
   Switch<tuple<>>(ig1) main;
                   ^^^
 equate-type-package-and-package-with-incompatible-type.p4(4)
@@ -25,6 +25,6 @@ equate-type-package-and-package-with-incompatible-type.p4(5)
   package Switch<IH>(Ingress<IH> ingress);
                      ^^^^^^^^^^^
   ---- Originating from:
-equate-type-package-and-package-with-incompatible-type.p4(11): Constructor invocation '<Method call>' does not match declaration 'Switch'
+equate-type-package-and-package-with-incompatible-type.p4(15): Constructor invocation '<Method call>' does not match declaration 'Switch'
   Switch<tuple<>>(ig1) main;
                        ^^^^

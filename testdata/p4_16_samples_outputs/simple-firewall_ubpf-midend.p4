@@ -8,15 +8,15 @@ header Ethernet_t {
 }
 
 header Ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -27,15 +27,15 @@ header Tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<1>  urgent;
-    bit<1>  ack;
-    bit<1>  psh;
-    bit<1>  rst;
-    bit<1>  syn;
-    bit<1>  fin;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<1> urgent;
+    bit<1> ack;
+    bit<1> psh;
+    bit<1> rst;
+    bit<1> syn;
+    bit<1> fin;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -43,8 +43,8 @@ header Tcp_t {
 
 struct Headers_t {
     Ethernet_t ethernet;
-    Ipv4_t     ipv4;
-    Tcp_t      tcp;
+    Ipv4_t ipv4;
+    Tcp_t tcp;
 }
 
 struct ConnectionInfo_t {
@@ -60,15 +60,15 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<Ethernet_t>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        p.extract < Ethernet_t >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        p.extract<Ipv4_t>(headers.ipv4);
-        p.extract<Tcp_t>(headers.tcp);
+        p.extract < Ipv4_t >(headers.ipv4);
+        p.extract < Tcp_t >(headers.tcp);
         transition accept;
     }
 }
@@ -79,8 +79,8 @@ struct tuple_0 {
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @name("pipe.conn_state") Register<bit<32>, bit<32>>(32w65536) conn_state_0;
-    @name("pipe.conn_srv_addr") Register<bit<32>, bit<32>>(32w65536) conn_srv_addr_0;
+    @name("pipe.conn_state") Register < bit<32>, bit<32 >>(32w65536) conn_state_0;
+    @name("pipe.conn_srv_addr") Register <bit<32>, bit<32 >>(32w65536) conn_srv_addr_0;
     @name("pipe.update_conn_state") action update_conn_state() {
         conn_state_0.write(meta._conn_id2, 32w2);
     }
@@ -106,10 +106,10 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         mark_to_drop();
     }
     @hidden action simplefirewall_ubpf116() {
-        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.srcAddr,f1 = headers.ipv4.dstAddr});
+        hash < tuple_0 >(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.srcAddr,f1 = headers.ipv4.dstAddr});
     }
     @hidden action simplefirewall_ubpf118() {
-        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.dstAddr,f1 = headers.ipv4.srcAddr});
+        hash < tuple_0 >(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.dstAddr,f1 = headers.ipv4.srcAddr});
     }
     @hidden action simplefirewall_ubpf121() {
         meta._connInfo_s0 = conn_state_0.read(meta._conn_id2);
@@ -216,9 +216,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 
 control dprs(packet_out packet, in Headers_t headers) {
     @hidden action simplefirewall_ubpf163() {
-        packet.emit<Ethernet_t>(headers.ethernet);
-        packet.emit<Ipv4_t>(headers.ipv4);
-        packet.emit<Tcp_t>(headers.tcp);
+        packet.emit < Ethernet_t >(headers.ethernet);
+        packet.emit < Ipv4_t >(headers.ipv4);
+        packet.emit < Tcp_t >(headers.tcp);
     }
     @hidden table tbl_simplefirewall_ubpf163 {
         actions = {
@@ -231,4 +231,4 @@ control dprs(packet_out packet, in Headers_t headers) {
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;

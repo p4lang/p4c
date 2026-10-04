@@ -11,16 +11,16 @@ struct Headers {
 
 parser P(packet_in p, out Headers h) {
     state start {
-        p.extract<Hdr>(h.h1.next);
-        p.extract<Hdr>(h.h1.next);
-        transition select((bit<1>)(h.h1[1].x == 8w1)) {
-            1w1: start_true;
-            1w0: start_join;
-            default: noMatch;
+        p.extract < Hdr >(h.h1.next);
+        p.extract < Hdr >(h.h1.next);
+        transition select ((bit<1>)(h.h1[1].x == 8w1)) {
+            1w1 : start_true;
+            1w0 : start_join;
+            default : noMatch;
         }
     }
     state start_true {
-        p.extract<Hdr>(h.h1.next);
+        p.extract < Hdr >(h.h1.next);
         transition start_join;
     }
     state start_join {
@@ -33,6 +33,6 @@ parser P(packet_in p, out Headers h) {
     }
 }
 
-parser Simple<T>(packet_in p, out T t);
-package top<T>(Simple<T> prs);
-top<Headers>(P()) main;
+parser Simple < T >(packet_in p, out T t);
+package top < T >(Simple<T> prs);
+top < Headers >(P()) main;

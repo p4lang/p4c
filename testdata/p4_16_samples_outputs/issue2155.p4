@@ -17,9 +17,9 @@ parser ParserImpl(packet_in b, out headers p, inout metadata m) {
     state start {
         b.extract(p.hdr);
         m.foo = 32w1;
-        transition select(p.hdr.da) {
-            0xaa: parse_b;
-            default: reject;
+        transition select (p.hdr.da) {
+            0xaa : parse_b;
+            default : reject;
         }
     }
     state parse_b {
@@ -28,6 +28,6 @@ parser ParserImpl(packet_in b, out headers p, inout metadata m) {
     }
 }
 
-parser P<H, M>(packet_in b, out H h, inout M m);
-package top<H, M>(P<H, M> p);
+parser P < H, M >(packet_in b, out H h, inout M m);
+package top < H, M >(P<H, M> p);
 top(ParserImpl()) main;

@@ -20,11 +20,11 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H    h;
+    H h;
 }
 
 struct Meta {
-    H    h;
+    H h;
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
@@ -69,6 +69,4 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 
-
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

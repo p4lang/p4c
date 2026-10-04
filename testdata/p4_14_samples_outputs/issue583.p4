@@ -7,15 +7,15 @@ struct routing_metadata_t {
 }
 
 @name("ipv4_t") struct ipv4_t_1 {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -28,39 +28,39 @@ header ethernet_t {
 }
 
 header icmp_t {
-    bit<8>  hdr_type;
-    bit<8>  code;
+    bit<8> hdr_type;
+    bit<8> code;
     bit<16> hdrChecksum;
 }
 
 header icmpv6_t {
-    bit<8>  hdr_type;
-    bit<8>  code;
+    bit<8> hdr_type;
+    bit<8> code;
     bit<16> hdrChecksum;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header ipv6_t {
-    bit<4>   version;
-    bit<8>   trafficClass;
-    bit<20>  flowLabel;
-    bit<16>  payloadLen;
-    bit<8>   nextHdr;
-    bit<8>   hopLimit;
+    bit<4> version;
+    bit<8> trafficClass;
+    bit<20> flowLabel;
+    bit<16> payloadLen;
+    bit<8> nextHdr;
+    bit<8> hopLimit;
     bit<128> srcAddr;
     bit<128> dstAddr;
 }
@@ -70,10 +70,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -87,8 +87,8 @@ header udp_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> etherType;
 }
@@ -100,19 +100,19 @@ struct metadata {
 
 struct headers {
     @name(".ethernet")
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     @name(".icmp")
-    icmp_t        icmp;
+    icmp_t icmp;
     @name(".icmpv6")
-    icmpv6_t      icmpv6;
+    icmpv6_t icmpv6;
     @name(".ipv4")
-    ipv4_t        ipv4;
+    ipv4_t ipv4;
     @name(".ipv6")
-    ipv6_t        ipv6;
+    ipv6_t ipv6;
     @name(".tcp")
-    tcp_t         tcp;
+    tcp_t tcp;
     @name(".udp")
-    udp_t         udp;
+    udp_t udp;
     @name(".vlan_tag_")
     vlan_tag_t[4] vlan_tag_;
 }
@@ -120,13 +120,13 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x8100: parse_vlan;
-            16w0x9100: parse_vlan;
-            16w0x9200: parse_vlan;
-            16w0x9300: parse_vlan;
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
+        transition select (hdr.ethernet.etherType) {
+            16w0x8100 : parse_vlan;
+            16w0x9100 : parse_vlan;
+            16w0x9200 : parse_vlan;
+            16w0x9300 : parse_vlan;
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
         }
     }
     @name(".parse_icmp") state parse_icmp {
@@ -139,18 +139,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.fragOffset, hdr.ipv4.protocol) {
-            (13w0, 8w1): parse_icmp;
-            (13w0, 8w6): parse_tcp;
-            (13w0, 8w17): parse_udp;
+        transition select (hdr.ipv4.fragOffset, hdr.ipv4.protocol) {
+            (13w0, 8w1) : parse_icmp;
+            (13w0, 8w6) : parse_tcp;
+            (13w0, 8w17) : parse_udp;
         }
     }
     @name(".parse_ipv6") state parse_ipv6 {
         packet.extract(hdr.ipv6);
-        transition select(hdr.ipv6.nextHdr) {
-            8w58: parse_icmpv6;
-            8w6: parse_tcp;
-            8w17: parse_udp;
+        transition select (hdr.ipv6.nextHdr) {
+            8w58 : parse_icmpv6;
+            8w6 : parse_tcp;
+            8w17 : parse_udp;
         }
     }
     @name(".parse_tcp") state parse_tcp {
@@ -163,13 +163,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_vlan") state parse_vlan {
         packet.extract(hdr.vlan_tag_.next);
-        transition select(hdr.vlan_tag_.last.etherType) {
-            16w0x8100: parse_vlan;
-            16w0x9100: parse_vlan;
-            16w0x9200: parse_vlan;
-            16w0x9300: parse_vlan;
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
+        transition select (hdr.vlan_tag_.last.etherType) {
+            16w0x8100 : parse_vlan;
+            16w0x9100 : parse_vlan;
+            16w0x9200 : parse_vlan;
+            16w0x9300 : parse_vlan;
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
         }
     }
     @name(".start") state start {
@@ -183,14 +183,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".cnt1") counter<bit<5>>(32w32, CounterType.packets) cnt1;
+@name(".cnt1") counter < bit<5 >>(32w32, CounterType.packets) cnt1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".drop_pkt") action drop_pkt() {
         mark_to_drop(standard_metadata);
     }
     @name(".hop") action hop(inout bit<8> ttl, bit<9> egress_spec) {
         ttl = ttl - 8w1;
-        standard_metadata.egress_spec[8:0] = egress_spec[8:0];
+        standard_metadata.egress_spec[8 : 0] = egress_spec[8 : 0];
     }
     @name(".hop_ipv4") action hop_ipv4(bit<9> egress_spec) {
         hop(hdr.ipv4.ttl, egress_spec);
@@ -204,7 +204,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hop_ipv4;
         }
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
     }
     @name(".table_2") table table_2 {
@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             act;
         }
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
     }
     apply {

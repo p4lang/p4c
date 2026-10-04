@@ -14,10 +14,17 @@ header hdr {
 }
 
 control compute(inout hdr h) {
-    action a() { h.b = h.a; }
+    action a() {
+        h.b = h.a;
+    }
     table t {
-        key = { h.a + h.a : exact; }
-        actions = { a; NoAction; }
+        key = {
+            h.a + h.a : exact;
+        }
+        actions = {
+            a;
+            NoAction;
+        }
         default_action = NoAction;
     }
     apply {

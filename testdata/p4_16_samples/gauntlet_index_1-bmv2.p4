@@ -7,7 +7,7 @@
 #include <core.p4>
 #include <v1model.p4>
 bit<3> bound(in bit<3> val, in bit<3> bound_val) {
-    return (val > bound_val ? bound_val : val);
+    return(val > bound_val ? bound_val : val);
 }
 
 header ethernet_t {
@@ -17,21 +17,22 @@ header ethernet_t {
 }
 
 header I {
-    bit<3>  a;
+    bit<3> a;
     bit<5> padding;
 }
 
 header H {
-    bit<32>  a;
+    bit<32> a;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    I     i;
-    H[2]  h;
+    I i;
+    H[2] h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -52,11 +53,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -67,4 +77,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

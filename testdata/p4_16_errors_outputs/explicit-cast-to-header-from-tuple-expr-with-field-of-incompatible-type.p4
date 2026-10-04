@@ -11,4 +11,3 @@ control c(packet_out p) {
         p.emit((H){ 0, 1 });
     }
 }
-

@@ -9,15 +9,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -30,14 +30,14 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".ipv4")
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".ethernet") state ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.ethertype) {
-            16w0x800: ipv4;
+        transition select (hdr.ethernet.ethertype) {
+            16w0x800 : ipv4;
         }
     }
     @name(".ipv4") state ipv4 {
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             route_ipv4;
         }
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         size = 2048;
     }

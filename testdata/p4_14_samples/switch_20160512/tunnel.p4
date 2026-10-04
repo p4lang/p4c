@@ -17,11 +17,11 @@ header_type tunnel_metadata_t {
         ingress_tunnel_type : 5;               /* tunnel type from parser */
         tunnel_vni : 24;                       /* tunnel id */
         mpls_enabled : 1;                      /* is mpls enabled on BD */
-        mpls_label: 20;                        /* Mpls label */
-        mpls_exp: 3;                           /* Mpls Traffic Class */
-        mpls_ttl: 8;                           /* Mpls Ttl */
+        mpls_label : 20;                        /* Mpls label */
+        mpls_exp : 3;                           /* Mpls Traffic Class */
+        mpls_ttl : 8;                           /* Mpls Ttl */
         egress_tunnel_type : 5;                /* type of tunnel */
-        tunnel_index: 14;                      /* tunnel index */
+        tunnel_index : 14;                      /* tunnel index */
         tunnel_src_index : 9;                  /* index to tunnel src ip */
         tunnel_smac_index : 9;                 /* index to tunnel src mac */
         tunnel_dst_index : 14;                 /* index to tunnel dst ip */
@@ -29,7 +29,7 @@ header_type tunnel_metadata_t {
         vnid : 24;                             /* tunnel vnid */
         tunnel_terminate : 1;                  /* is tunnel being terminated? */
         tunnel_if_check : 1;                   /* tun terminate xor originate */
-        egress_header_count: 4;                /* number of mpls header stack */
+        egress_header_count : 4;                /* number of mpls header stack */
         inner_ip_proto : 8;                    /* Inner IP protocol */
     }
 }
@@ -393,7 +393,7 @@ control process_tunnel {
 
     /* perform tunnel termination */
     if ((tunnel_metadata.tunnel_terminate == TRUE) or
-        ((multicast_metadata.outer_mcast_route_hit == TRUE) and
+    ((multicast_metadata.outer_mcast_route_hit == TRUE) and
          (((multicast_metadata.outer_mcast_mode == MCAST_MODE_SM) and
            (multicast_metadata.mcast_rpf_group == 0)) or
           ((multicast_metadata.outer_mcast_mode == MCAST_MODE_BIDIR) and
@@ -524,9 +524,9 @@ action forward_mpls(nexthop_index) {
 
 table mpls {
     reads {
-        tunnel_metadata.mpls_label: exact;
-        inner_ipv4: valid;
-        inner_ipv6: valid;
+        tunnel_metadata.mpls_label : exact;
+        inner_ipv4 : valid;
+        inner_ipv6 : valid;
     }
     actions {
         terminate_eompls;
@@ -889,7 +889,7 @@ control process_tunnel_decap {
 #ifndef TUNNEL_DISABLE
     if (tunnel_metadata.tunnel_terminate == TRUE) {
         if ((multicast_metadata.inner_replica == TRUE) or
-            (multicast_metadata.replica == FALSE)) {
+        (multicast_metadata.replica == FALSE)) {
             apply(tunnel_decap_process_outer);
             apply(tunnel_decap_process_inner);
         }
@@ -909,13 +909,13 @@ action set_egress_tunnel_vni(vnid) {
 table egress_vni {
     reads {
         egress_metadata.bd : exact;
-        tunnel_metadata.egress_tunnel_type: exact;
+        tunnel_metadata.egress_tunnel_type : exact;
     }
     actions {
         nop;
         set_egress_tunnel_vni;
     }
-    size: EGRESS_VNID_MAPPING_TABLE_SIZE;
+    size : EGRESS_VNID_MAPPING_TABLE_SIZE;
 }
 
 
@@ -1475,13 +1475,13 @@ table tunnel_dmac_rewrite {
 control process_tunnel_encap {
 #ifndef TUNNEL_DISABLE
     if ((fabric_metadata.fabric_header_present == FALSE) and
-        (tunnel_metadata.egress_tunnel_type != EGRESS_TUNNEL_TYPE_NONE)) {
+    (tunnel_metadata.egress_tunnel_type != EGRESS_TUNNEL_TYPE_NONE)) {
         /* derive egress vni from egress bd */
         apply(egress_vni);
 
         /* tunnel rewrites */
         if ((tunnel_metadata.egress_tunnel_type != EGRESS_TUNNEL_TYPE_FABRIC) and
-            (tunnel_metadata.egress_tunnel_type != EGRESS_TUNNEL_TYPE_CPU)) {
+        (tunnel_metadata.egress_tunnel_type != EGRESS_TUNNEL_TYPE_CPU)) {
             apply(tunnel_encap_process_inner);
         }
         apply(tunnel_encap_process_outer);

@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            48w1: exact @name("Vmhbwk");
+            48w1 : exact @name("Vmhbwk");
         }
         actions = {
             simple_action();
@@ -40,17 +40,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            simple_action: {
-                h.eth_hdr.eth_type = 16w1;
-                exit;
+            simple_action : {
+            h.eth_hdr.eth_type = 16w1;
+            exit;
             }
-            NoAction: {
-                h.eth_hdr.eth_type = 16w2;
-                exit;
+            NoAction : {
+            h.eth_hdr.eth_type = 16w2;
+            exit;
             }
-            default: {
-                h.eth_hdr.eth_type = 16w3;
-                exit;
+            default : {
+            h.eth_hdr.eth_type = 16w3;
+            exit;
             }
         }
         h.eth_hdr.eth_type = 16w4;

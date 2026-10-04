@@ -3,11 +3,11 @@
 #include <v1model.p4>
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
-    bit<8>  r;
-    bit<8>  v;
+    bit<8> l;
+    bit<8> r;
+    bit<8> v;
 }
 
 struct Header_t {
@@ -53,14 +53,14 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_exact {
         key = {
-            m.my_err: exact;
+            m.my_err : exact;
         }
         actions = {
             set_error_idx;
         }
         default_action = set_error_idx(0);
         const entries = {
-                        error.NoError : set_error_idx(1);
+            error.NoError : set_error_idx(1);
         }
     }
     apply {

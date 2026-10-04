@@ -36,10 +36,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta,
     in    pna_main_parser_input_metadata_t istd) {
     state start {
         packet.extract(hdr.base);
-        transition select(hdr.base.t) {
-            0: parseO1;
-            1: parseO2;
-            default: accept;
+        transition select (hdr.base.t) {
+            0 : parseO1;
+            1 : parseO2;
+            default : accept;
         }
     }
     state parseO1 {
@@ -54,18 +54,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta,
 
 bool checkValid(in headers hdr) {
     if (hdr.base.isValid() && hdr.u.short.isValid())
-        return true;
+    return true;
     return false;
 }
-
 
 control ingress(inout headers hdr, inout metadata meta,
     in    pna_main_input_metadata_t  istd,
     inout pna_main_output_metadata_t ostd) {
     table debug_hdr {
         key = {
-            hdr.base.t           : exact;
-            hdr.u.short.isValid(): exact;
+            hdr.base.t : exact;
+            hdr.u.short.isValid() : exact;
             hdr.u.byte.isValid() : exact;
         }
         actions = {
@@ -76,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta,
     apply {
         debug_hdr.apply();
         if (checkValid(hdr))
-           hdr.base.t = 8w3;
+        hdr.base.t = 8w3;
         if (hdr.u.short.isValid()) {
             hdr.u.short.data = 0xffff;
         } else if (hdr.u.byte.isValid()) {
@@ -104,4 +103,3 @@ control PreControlImpl(
 }
 
 PNA_NIC(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

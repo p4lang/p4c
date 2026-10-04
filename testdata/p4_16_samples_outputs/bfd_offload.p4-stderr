@@ -1,13 +1,13 @@
-bfd_offload.p4(35): [--Wwarn=unused] warning: control 'for_rx_bfd_packets' is unused
+bfd_offload.p4(33): [--Wwarn=unused] warning: control 'for_rx_bfd_packets' is unused
 control for_rx_bfd_packets() {
         ^^^^^^^^^^^^^^^^^^
-bfd_offload.p4(41): [--Wwarn=unused] warning: control 'for_tx_bfd_packets' is unused
+bfd_offload.p4(40): [--Wwarn=unused] warning: control 'for_tx_bfd_packets' is unused
 control for_tx_bfd_packets() {
         ^^^^^^^^^^^^^^^^^^
-bfd_offload.p4(35): [--Winfo=removed] info: removing control 'for_rx_bfd_packets'
+bfd_offload.p4(33): [--Winfo=removed] info: removing control 'for_rx_bfd_packets'
 control for_rx_bfd_packets() {
         ^^^^^^^^^^^^^^^^^^
-bfd_offload.p4(41): [--Winfo=removed] info: removing control 'for_tx_bfd_packets'
+bfd_offload.p4(40): [--Winfo=removed] info: removing control 'for_tx_bfd_packets'
 control for_tx_bfd_packets() {
         ^^^^^^^^^^^^^^^^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

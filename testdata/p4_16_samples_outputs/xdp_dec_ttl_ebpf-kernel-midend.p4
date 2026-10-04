@@ -9,15 +9,15 @@ header Ethernet_h {
 }
 
 header IPv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -25,19 +25,19 @@ header IPv4_h {
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ipv4;
-            default: accept;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ipv4;
+            default : accept;
         }
     }
     state ipv4 {
-        p.extract<IPv4_h>(headers.ipv4);
+        p.extract < IPv4_h >(headers.ipv4);
         transition accept;
     }
 }
@@ -72,8 +72,8 @@ control sw(inout Headers_t headers, in xdp_input imd, out xdp_output omd) {
 
 control deprs(in Headers_t headers, packet_out packet) {
     @hidden action xdp_dec_ttl_ebpfkernel46() {
-        packet.emit<Ethernet_h>(headers.ethernet);
-        packet.emit<IPv4_h>(headers.ipv4);
+        packet.emit < Ethernet_h >(headers.ethernet);
+        packet.emit < IPv4_h >(headers.ipv4);
     }
     @hidden table tbl_xdp_dec_ttl_ebpfkernel46 {
         actions = {
@@ -86,4 +86,4 @@ control deprs(in Headers_t headers, packet_out packet) {
     }
 }
 
-xdp<Headers_t>(prs(), sw(), deprs()) main;
+xdp < Headers_t >(prs(), sw(), deprs()) main;

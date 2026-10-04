@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -32,7 +32,7 @@ struct metadata_t {
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t m, in pna_main_parser_input_metadata_t istd) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -66,7 +66,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
 
 control DeparserImpl(packet_out packet, in headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -75,4 +75,4 @@ control PreControlImpl(in headers_t hdr, inout metadata_t meta, in pna_pre_input
     }
 }
 
-PNA_NIC<headers_t, metadata_t, headers_t, metadata_t>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
+PNA_NIC < headers_t, metadata_t, headers_t, metadata_t >(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;

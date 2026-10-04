@@ -7,9 +7,9 @@
 // Standard L2 Ethernet header
 header_type ethernet_t {
     fields {
-        dst_addr        : 48; // width in bits
-        src_addr        : 48;
-        ethertype       : 16;
+        dst_addr : 48; // width in bits
+        src_addr : 48;
+        ethertype : 16;
     }
 }
 
@@ -30,7 +30,7 @@ parser_value_set pv2;
 header_type my_meta_t {
     fields {
         pv_parsed : 8;
-        f1_16: 16;
+        f1_16 : 16;
     }
 }
 
@@ -38,11 +38,11 @@ metadata my_meta_t my_meta;
 
 parser start {
     extract(ethernet);
-    return select(ethernet.ethertype) {
-        0x0800 : ingress;
-        pv1 : parse_pv1;
-        pv2 : parse_pv2;
-        default : ingress;
+    return select (ethernet.ethertype) {
+    0x0800 : ingress;
+    pv1 : parse_pv1;
+    pv2 : parse_pv2;
+    default : ingress;
     }
 }
 
@@ -50,9 +50,9 @@ parser parse_pv1 {
     set_metadata(my_meta.pv_parsed, 1);
     extract(my_header);
     my_meta.f1_16 = my_header.f1;
-    return select(my_meta.f1_16 << 13 | my_header.f2) {
-        pv2 : parse_pv2;
-        default : ingress;
+    return select (my_meta.f1_16 << 13 | my_header.f2) {
+    pv2 : parse_pv2;
+    default : ingress;
     }
 }
 
@@ -65,15 +65,16 @@ action route_eth(egress_spec, src_addr) {
     modify_field(standard_metadata.egress_spec, egress_spec);
     modify_field(ethernet.src_addr, src_addr);
 }
-action noop() { }
+action noop() {
+}
 
 table routing {
     reads {
-	ethernet.dst_addr : lpm;
+        ethernet.dst_addr : lpm;
     }
     actions {
-	route_eth;
-	noop;
+        route_eth;
+        noop;
     }
 }
 

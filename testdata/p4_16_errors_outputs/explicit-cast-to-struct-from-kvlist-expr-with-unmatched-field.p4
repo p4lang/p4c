@@ -8,4 +8,3 @@ control c0() {
         test((S1<bit<4>, int<6>>){T = 0,y = 0});
     }
 }
-

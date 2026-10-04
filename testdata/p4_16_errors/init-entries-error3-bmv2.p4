@@ -18,7 +18,7 @@ header ethernet_h {
 }
 
 struct headers_t {
-    ethernet_h    ethernet;
+    ethernet_h ethernet;
 }
 
 struct metadata_t {
@@ -40,7 +40,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t umd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(
@@ -49,7 +50,8 @@ control ingressImpl(
     inout standard_metadata_t stdmeta)
 {
     bit<32> x = 6;
-    action a() {}
+    action a() {
+    }
     action a_params(bit<32> param) {
         x = param;
     }
@@ -58,7 +60,10 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         largest_priority_wins = true;
         priority_delta = 10;
@@ -67,12 +72,12 @@ control ingressImpl(
         // and later entries would be assigned a negative priority
         // value, which is not supported.
         entries = {
-            priority=12: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                         (0x02, 0x1181           ) : a_params(2); // priority 2
+            priority = 12 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // priority 2
                          (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority -8
                          (0x04, 0x0210 &&& 0x02F0) : a_params(4);
-                         (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                         (0x06, _                ) : a_params(6);
+            (0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6);
         }
     }
     apply {
@@ -85,14 +90,16 @@ control egressImpl(
     inout metadata_t umd,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t umd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control egressDeparserImpl(

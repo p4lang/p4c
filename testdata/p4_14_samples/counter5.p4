@@ -35,14 +35,14 @@ table tab1 {
     actions {
         act;
     }
-  size: 160000;
+    size : 160000;
 }
 
 counter cntDum {
-	type: packets;
-	static: tab1;
-        instance_count: 70000;
-        min_width:64;
+    type : packets;
+    static : tab1;
+    instance_count : 70000;
+    min_width : 64;
 }
 control ingress {
     apply(tab1);

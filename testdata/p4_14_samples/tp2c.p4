@@ -25,39 +25,80 @@ parser start {
     return ingress;
 }
 
-action on_hit() { }
-action on_miss() { }
-action noop() { }
-action setb1(val) { modify_field(data.b1, val); }
-action setb2(val) { modify_field(data.b2, val); }
-action setb3(val) { modify_field(data.b3, val); }
-action setb4(val) { modify_field(data.b4, val); }
+action on_hit() {
+}
+action on_miss() {
+}
+action noop() {
+}
+action setb1(val) {
+    modify_field(data.b1, val);
+}
+action setb2(val) {
+    modify_field(data.b2, val);
+}
+action setb3(val) {
+    modify_field(data.b3, val);
+}
+action setb4(val) {
+    modify_field(data.b4, val);
+}
 
 table A1 {
-    reads { data.f1 : ternary; }
-    actions { setb1; noop; }
+    reads {
+        data.f1 : ternary;
+    }
+    actions {
+        setb1;
+        noop;
+    }
 }
 table A2 {
-    reads { data.b1 : ternary; }
-    actions { setb3; noop; }
+    reads {
+        data.b1 : ternary;
+    }
+    actions {
+        setb3;
+        noop;
+    }
 }
 table A3 {
-    reads { data.f2 : ternary; }
-    actions { on_hit; on_miss; }
+    reads {
+        data.f2 : ternary;
+    }
+    actions {
+        on_hit;
+        on_miss;
+    }
 }
 table A4 {
-    reads { data.f2 : ternary; }
-    actions { on_hit; on_miss; }
+    reads {
+        data.f2 : ternary;
+    }
+    actions {
+        on_hit;
+        on_miss;
+    }
 }
 
 table B1 {
-    reads { data.f2 : ternary; }
-    actions { setb2; noop; }
+    reads {
+        data.f2 : ternary;
+    }
+    actions {
+        setb2;
+        noop;
+    }
 }
 
 table B2 {
-    reads { data.b2 : ternary; }
-    actions { setb4; noop; }
+    reads {
+        data.b2 : ternary;
+    }
+    actions {
+        setb4;
+        noop;
+    }
 }
 
 control ingress {

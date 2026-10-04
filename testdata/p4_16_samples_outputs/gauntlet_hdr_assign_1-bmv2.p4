@@ -10,12 +10,12 @@ header ethernet_t {
 
 header H {
     bit<16> a;
-    bit<8>  b;
+    bit<8> b;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {

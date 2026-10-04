@@ -9,4 +9,3 @@ struct Alternate {
     B_h b;
     A_h a1;
 }
-

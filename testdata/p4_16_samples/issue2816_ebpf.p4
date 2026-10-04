@@ -11,13 +11,13 @@
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType, 16w1) {
+        transition select (headers.ethernet.etherType, 16w1) {
             (default, 16w1) : ip;
             default : reject;
         }
@@ -43,10 +43,11 @@ control pipe(inout Headers_t headers, out bool pass) {
             headers.ipv4.srcAddr : exact;
             headers.ipv4.dstAddr : exact;
             headers.ethernet.dstAddr : exact;
-            headers.ethernet.srcAddr: exact;
+            headers.ethernet.srcAddr : exact;
         }
         actions = {
-            invalidate; drop;
+            invalidate;
+            drop;
         }
         implementation = hash_table(10);
         default_action = drop;

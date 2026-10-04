@@ -28,7 +28,8 @@ action setbyte(dest, val) {
     modify_field(dest, val);
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     setbyte(data.b1, val);
     modify_field(standard_metadata.egress_spec, port);

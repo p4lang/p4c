@@ -16,17 +16,17 @@ parser p(out bit<32> b) {
     state start_join {
         b = tmp;
         b = tmp + 32w1;
-        transition select((bit<1>)(a_0 > 32w0)) {
-            1w1: start_true_0;
-            1w0: start_false_0;
-            default: noMatch;
+        transition select ((bit<1>)(a_0 > 32w0)) {
+            1w1 : start_true_0;
+            1w0 : start_false_0;
+            default : noMatch;
         }
     }
     state start_true_0 {
-        transition select((bit<1>)(a_0 > 32w1)) {
-            1w1: start_true_0_true;
-            1w0: start_true_0_false;
-            default: noMatch;
+        transition select ((bit<1>)(a_0 > 32w1)) {
+            1w1 : start_true_0_true;
+            1w0 : start_true_0_false;
+            default : noMatch;
         }
     }
     state start_true_0_true {

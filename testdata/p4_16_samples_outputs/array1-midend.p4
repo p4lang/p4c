@@ -3,10 +3,10 @@
 #include <v1model.p4>
 
 header data_t {
-    bit<32>    f1;
-    bit<32>    f2;
-    bit<16>    h1;
-    bit<16>    h2;
+    bit<32> f1;
+    bit<32> f2;
+    bit<16> h1;
+    bit<16> h2;
     bit<8>[16] arr;
 }
 
@@ -19,30 +19,30 @@ struct headers {
 
 parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        b.extract<data_t>(hdr.data);
+        b.extract < data_t >(hdr.data);
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action array1l38() {
-        hdr.data.arr[0] = hdr.data.f1[7:0];
-        hdr.data.arr[1] = hdr.data.f1[15:8];
-        hdr.data.arr[2] = hdr.data.f1[23:16];
-        hdr.data.arr[3] = hdr.data.f1[31:24];
-        hdr.data.arr[4] = hdr.data.f2[7:0];
-        hdr.data.arr[5] = hdr.data.f2[15:8];
-        hdr.data.arr[6] = hdr.data.f2[23:16];
-        hdr.data.arr[7] = hdr.data.f2[31:24];
+    @hidden action array1l39() {
+        hdr.data.arr[0] = hdr.data.f1[7 : 0];
+        hdr.data.arr[1] = hdr.data.f1[15 : 8];
+        hdr.data.arr[2] = hdr.data.f1[23 : 16];
+        hdr.data.arr[3] = hdr.data.f1[31 : 24];
+        hdr.data.arr[4] = hdr.data.f2[7 : 0];
+        hdr.data.arr[5] = hdr.data.f2[15 : 8];
+        hdr.data.arr[6] = hdr.data.f2[23 : 16];
+        hdr.data.arr[7] = hdr.data.f2[31 : 24];
     }
-    @hidden table tbl_array1l38 {
+    @hidden table tbl_array1l39 {
         actions = {
-            array1l38();
+            array1l39();
         }
-        const default_action = array1l38();
+        const default_action = array1l39();
     }
     apply {
-        tbl_array1l38.apply();
+        tbl_array1l39.apply();
     }
 }
 
@@ -63,8 +63,8 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control deparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data_t>(hdr.data);
+        packet.emit < data_t >(hdr.data);
     }
 }
 
-V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
+V1Switch < headers, metadata >(p(), vc(), ingress(), egress(), uc(), deparser()) main;

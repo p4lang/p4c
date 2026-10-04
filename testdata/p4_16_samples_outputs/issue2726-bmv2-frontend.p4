@@ -22,13 +22,13 @@ header ml_hdr_t {
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 struct headers {
-    ethernet_t      ethernet;
-    ml_hdr_t        ml;
-    vec_e_t[3]      vector;
+    ethernet_t ethernet;
+    ml_hdr_t ml;
+    vec_e_t[3] vector;
     aggregator_t[3] pool;
 }
 
@@ -38,14 +38,14 @@ struct metadata_t {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        packet.extract<ml_hdr_t>(hdr.ml);
-        packet.extract<vec_e_t>(hdr.vector[0]);
-        packet.extract<vec_e_t>(hdr.vector[1]);
-        packet.extract<vec_e_t>(hdr.vector[2]);
-        packet.extract<aggregator_t>(hdr.pool[0]);
-        packet.extract<aggregator_t>(hdr.pool[1]);
-        packet.extract<aggregator_t>(hdr.pool[2]);
+        packet.extract < ethernet_t >(hdr.ethernet);
+        packet.extract < ml_hdr_t >(hdr.ml);
+        packet.extract < vec_e_t >(hdr.vector[0]);
+        packet.extract < vec_e_t >(hdr.vector[1]);
+        packet.extract < vec_e_t >(hdr.vector[2]);
+        packet.extract < aggregator_t >(hdr.pool[0]);
+        packet.extract < aggregator_t >(hdr.pool[1]);
+        packet.extract < aggregator_t >(hdr.pool[2]);
         meta.counter = 8s0;
         transition accept;
     }
@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     apply {
         meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
-        i_0 = (Index_t)hdr.ml.idx;
+        i_0 =(Index_t) hdr.ml.idx;
         hdr.pool[i_0].val = hdr.vector[0].e;
         hdr.pool[i_0].base2 = hdr.vector[0].e;
         hdr.vector[1].e = hdr.pool[i_0].base0;
@@ -88,8 +88,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
-V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata_t >(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;

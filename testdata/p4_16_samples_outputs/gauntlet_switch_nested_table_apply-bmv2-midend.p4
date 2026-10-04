@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -38,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
-            key_0: exact @name("JGOUaj");
+            key_0 : exact @name("JGOUaj");
         }
         actions = {
             set_valid_action();
@@ -48,37 +48,37 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
-            key_1: exact @name("qkgOtm");
+            key_1 : exact @name("qkgOtm");
         }
         actions = {
             NoAction_2();
         }
         default_action = NoAction_2();
     }
-    @hidden action gauntlet_switch_nested_table_applybmv2l40() {
+    @hidden action gauntlet_switch_nested_table_applybmv2l41() {
         key_0 = 128w1;
     }
-    @hidden action gauntlet_switch_nested_table_applybmv2l48() {
+    @hidden action gauntlet_switch_nested_table_applybmv2l49() {
         key_1 = 48w1;
     }
-    @hidden table tbl_gauntlet_switch_nested_table_applybmv2l48 {
+    @hidden table tbl_gauntlet_switch_nested_table_applybmv2l49 {
         actions = {
-            gauntlet_switch_nested_table_applybmv2l48();
+            gauntlet_switch_nested_table_applybmv2l49();
         }
-        const default_action = gauntlet_switch_nested_table_applybmv2l48();
+        const default_action = gauntlet_switch_nested_table_applybmv2l49();
     }
-    @hidden table tbl_gauntlet_switch_nested_table_applybmv2l40 {
+    @hidden table tbl_gauntlet_switch_nested_table_applybmv2l41 {
         actions = {
-            gauntlet_switch_nested_table_applybmv2l40();
+            gauntlet_switch_nested_table_applybmv2l41();
         }
-        const default_action = gauntlet_switch_nested_table_applybmv2l40();
+        const default_action = gauntlet_switch_nested_table_applybmv2l41();
     }
     apply {
-        tbl_gauntlet_switch_nested_table_applybmv2l48.apply();
+        tbl_gauntlet_switch_nested_table_applybmv2l49.apply();
         switch (simple_table_0.apply().action_run) {
-            NoAction_2: {
-                tbl_gauntlet_switch_nested_table_applybmv2l40.apply();
-                simple_table.apply();
+            NoAction_2 : {
+            tbl_gauntlet_switch_nested_table_applybmv2l41.apply();
+            simple_table.apply();
             }
         }
     }
@@ -101,8 +101,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

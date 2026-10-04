@@ -14,7 +14,7 @@ control c(out bit<32> r) {
         s_0[0].setInvalid();
         s_0[1].setInvalid();
         s_0[2].setInvalid();
-        s_0 = (H_bit32[3]){(H_bit32){b = 32w0,t = 32w1},(H_bit32){b = 32w2,t = 32w3},(H_bit32){#}};
+        s_0 = (H_bit32[3]){ (H_bit32){b = 32w0,t = 32w1}, (H_bit32){b = 32w2,t = 32w3}, (H_bit32){#} };
         r = s_0[0].b + s_0[0].t + s_0[1].b + s_0[1].t + s_0[2].b;
     }
 }

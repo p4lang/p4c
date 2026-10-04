@@ -22,11 +22,11 @@ struct Headers {
 
 extern Checksum {
     Checksum();
-    void add<T>(in T data);
-    void subtract<T>(in T data);
+    void add < T >(in T data);
+    void subtract < T >(in T data);
     bool verify();
     bit<16> get();
-    bit<16> update<T>(in T data, @optional in bool zeros_as_ones);
+    bit<16> update < T >(in T data, @optional in bool zeros_as_ones);
 }
 
 parser p(packet_in pkt, out Headers hdr) {
@@ -64,4 +64,3 @@ control Egress(inout Headers hdr);
 control Deparser(packet_out b, in Headers hdr);
 package top(Parser p, Ingress ig, Egress eg, Deparser dep);
 top(p(), ingress(), egress(), deparser()) main;
-

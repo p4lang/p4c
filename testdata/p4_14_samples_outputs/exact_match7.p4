@@ -3,18 +3,18 @@
 #include <v1model.p4>
 
 header data_t {
-    bit<3>  x1;
-    bit<7>  f1;
-    bit<6>  x2;
+    bit<3> x1;
+    bit<7> f1;
+    bit<6> x2;
     bit<32> f2;
-    bit<5>  x3;
+    bit<5> x3;
     bit<20> f3;
-    bit<7>  x4;
+    bit<7> x4;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 struct metadata {
@@ -44,8 +44,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: exact;
-            hdr.data.f3: exact;
+            hdr.data.f1 : exact;
+            hdr.data.f3 : exact;
         }
     }
     apply {

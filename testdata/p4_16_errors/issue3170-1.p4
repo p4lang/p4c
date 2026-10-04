@@ -10,8 +10,8 @@ header yy {
 struct y {
     yy[2] tt;
 }
-header t<tt> {
+header t < tt > {
     tt y;
 }
 
-typedef t<y> tty;
+typedef t < y > tty;

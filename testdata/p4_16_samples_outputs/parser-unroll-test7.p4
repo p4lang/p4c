@@ -20,7 +20,7 @@ header_union U {
 }
 
 struct headers {
-    S    base;
+    S base;
     U[2] u;
 }
 

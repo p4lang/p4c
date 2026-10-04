@@ -1,9 +1,12 @@
 // generated from issue3307.p4
 
 control e()() {
-  apply {}
+    apply {
+    }
 }
 parser MyParser()() {
-  e() ee = {};
-  state start {}
+    e() ee = {
+    };
+    state start {
+    }
 }

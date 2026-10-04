@@ -5,18 +5,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-struct headers {}
-struct metadata {}
+struct headers {
+}
+struct metadata {
+}
 
 #include <core.p4>
 #include <v1model.p4>
 
-parser ParserImpl (packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start { transition accept; }
+parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state start {
+        transition accept;
+    }
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+    }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -29,15 +34,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
-    apply {}
+    apply {
+    }
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

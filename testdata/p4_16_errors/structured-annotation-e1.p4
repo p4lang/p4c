@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@dup[]
-@dup[]
-control c() {
-    apply {}
+@dup[] @dup[] control c() {
+    apply {
+    }
 }

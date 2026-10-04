@@ -28,7 +28,7 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     apply {
         // this expression will slow the compiler to a crawl to print a warning
-        h.eth_hdr.eth_type =  1985245330 << 903012108;
+        h.eth_hdr.eth_type = 1985245330 << 903012108;
     }
 }
 

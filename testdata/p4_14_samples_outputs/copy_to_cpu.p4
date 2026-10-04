@@ -30,7 +30,7 @@ struct headers {
     @name(".cpu_header")
     cpu_header_t cpu_header;
     @name(".ethernet")
-    ethernet_t   ethernet;
+    ethernet_t ethernet;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -43,9 +43,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".start") state start {
-        transition select((packet.lookahead<bit<64>>())[63:0]) {
-            64w0: parse_cpu_header;
-            default: parse_ethernet;
+        transition select ((packet.lookahead < bit<64 >>())[63 : 0]) {
+            64w0 : parse_cpu_header;
+            default : parse_ethernet;
         }
     }
 }
@@ -65,7 +65,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             do_cpu_encap;
         }
         key = {
-            standard_metadata.instance_type: exact;
+            standard_metadata.instance_type : exact;
         }
         size = 16;
     }

@@ -5,7 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-extern X {}
+extern X {
+}
 
 control c(in X x) { // Cannot have externs with direction
     apply {
@@ -14,5 +15,4 @@ control c(in X x) { // Cannot have externs with direction
 
 control proto(in X x);
 package top(proto _c);
-
 top(c()) main;

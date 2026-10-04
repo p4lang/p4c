@@ -17,11 +17,11 @@ struct EMPTY_RECIRC {
 }
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
-    bit<8>  r;
-    bit<8>  v;
+    bit<8> l;
+    bit<8> r;
+    bit<8> v;
 }
 
 struct Header_t {
@@ -46,15 +46,15 @@ parser egressParserImpl(packet_in buffer, out EMPTY_H a, inout Meta_t b, in psa_
 
 control ingress(inout Header_t h, inout Meta_t m, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     action a() {
-        ostd.egress_port = (PortId_t)(PortIdUint_t)0;
+        ostd.egress_port =(PortId_t)(PortIdUint_t) 0;
     }
     action a_with_control_params(bit<9> x) {
-        ostd.egress_port = (PortId_t)(PortIdUint_t)x;
+        ostd.egress_port =(PortId_t)(PortIdUint_t) x;
     }
     table t_exact_ternary {
         key = {
-            h.h.e: exact;
-            h.h.t: ternary;
+            h.h.e : exact;
+            h.h.t : ternary;
         }
         actions = {
             a;
@@ -62,10 +62,10 @@ control ingress(inout Header_t h, inout Meta_t m, in psa_ingress_input_metadata_
         }
         default_action = a;
         const entries = {
-                        ((bit<8>)32w0x1, 0x1111 &&& 0xf) : a_with_control_params(1);
-                        (0x2, 0x1181) : a_with_control_params(2);
-                        (0x3, 0x1111 &&& 0xf000) : a_with_control_params(3);
-                        (0x4, default) : a_with_control_params(4);
+            ((bit<8>) 32w0x1, 0x1111 &&& 0xf) : a_with_control_params(1);
+            (0x2, 0x1181) : a_with_control_params(2);
+            (0x3, 0x1111 &&& 0xf000) : a_with_control_params(3);
+            (0x4, default) : a_with_control_params(4);
         }
     }
     apply {

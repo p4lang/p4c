@@ -26,7 +26,8 @@ struct H {
     Union[2] u;
 }
 
-struct M { }
+struct M {
+}
 
 parser ParserImpl(packet_in pkt, out H hdr, inout M meta,
     in    pna_main_parser_input_metadata_t istd) {
@@ -41,8 +42,8 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta,
         hdr.u[0].h3.data = 1;
 
         transition select (hdr.u[0].h1.data) {
-            0: next;
-            default: last;
+            0 : next;
+            default : last;
         }
     }
 
@@ -108,4 +109,3 @@ control PreControlImpl(
 }
 
 PNA_NIC(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

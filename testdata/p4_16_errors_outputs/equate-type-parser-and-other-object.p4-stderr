@@ -1,6 +1,6 @@
 equate-type-parser-and-other-object.p4(6): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
-  state start {}
-        ^^^^^
+    state start {
+          ^^^^^
 equate-type-parser-and-other-object.p4(4): [--Werror=type-error] error: 'package V1Switch'
 package V1Switch(C c);
         ^^^^^^^^
@@ -12,7 +12,7 @@ equate-type-parser-and-other-object.p4(3)
   control C();
           ^
   ---- Originating from:
-equate-type-parser-and-other-object.p4(8): Type of argument 'MyP' (parser MyP) does not match type of parameter 'c' (control C)
+equate-type-parser-and-other-object.p4(9): Type of argument 'MyP' (parser MyP) does not match type of parameter 'c' (control C)
   V1Switch(MyP()) main;
            ^^^^^
 equate-type-parser-and-other-object.p4(5)
@@ -25,6 +25,6 @@ equate-type-parser-and-other-object.p4(3)
   control C();
           ^
   ---- Originating from:
-equate-type-parser-and-other-object.p4(8): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
+equate-type-parser-and-other-object.p4(9): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
   V1Switch(MyP()) main;
                   ^^^^

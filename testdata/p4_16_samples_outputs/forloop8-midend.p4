@@ -23,45 +23,45 @@ struct empty_metadata_t {
 control c(inout headers_t headers, inout empty_metadata_t user_meta) {
     @name("c.sum") bit<32> sum_0;
     @name("c.i") bit<8> i_0;
-    @hidden action forloop8l47() {
+    @hidden action forloop8l40() {
         sum_0 += 32w1;
         i_0 -= 8w1;
     }
-    @hidden action forloop8l37() {
+    @hidden action forloop8l32() {
         sum_0 = 32w1;
     }
-    @hidden action forloop8l53() {
+    @hidden action forloop8l45() {
         headers.ipv4.src_addr = sum_0;
     }
-    @hidden table tbl_forloop8l37 {
+    @hidden table tbl_forloop8l32 {
         actions = {
-            forloop8l37();
+            forloop8l32();
         }
-        const default_action = forloop8l37();
+        const default_action = forloop8l32();
     }
-    @hidden table tbl_forloop8l47 {
+    @hidden table tbl_forloop8l40 {
         actions = {
-            forloop8l47();
+            forloop8l40();
         }
-        const default_action = forloop8l47();
+        const default_action = forloop8l40();
     }
-    @hidden table tbl_forloop8l53 {
+    @hidden table tbl_forloop8l45 {
         actions = {
-            forloop8l53();
+            forloop8l45();
         }
-        const default_action = forloop8l53();
+        const default_action = forloop8l45();
     }
     apply {
-        tbl_forloop8l37.apply();
+        tbl_forloop8l32.apply();
         @unroll for (i_0 = 8w20; i_0 != 8w0; i_0 -= 8w2) {
             if (i_0 == 8w64) {
                 continue;
             } else {
-                tbl_forloop8l47.apply();
+                tbl_forloop8l40.apply();
             }
         }
         if (sum_0 == 32w10) {
-            tbl_forloop8l53.apply();
+            tbl_forloop8l45.apply();
         }
     }
 }

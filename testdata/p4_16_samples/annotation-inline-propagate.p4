@@ -25,7 +25,7 @@ header hdr_t {
 }
 
 struct headers {
-    hdr_t   hdr;
+    hdr_t hdr;
 }
 
 @my_anno_1
@@ -57,7 +57,8 @@ parser MyParser(
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {  }
+    apply {
+    }
 }
 
 @my_anno_3
@@ -98,15 +99,18 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(

@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -37,16 +37,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             h.eth_hdr.dst_addr = h.eth_hdr.dst_addr + 48w4;
         }
     }
-    @hidden action issue23452l49() {
+    @hidden action issue23452l48() {
         h.eth_hdr.src_addr = 48w2;
         h.eth_hdr.dst_addr = 48w2;
         h.eth_hdr.eth_type = 16w2;
     }
-    @hidden table tbl_issue23452l49 {
+    @hidden table tbl_issue23452l48 {
         actions = {
-            issue23452l49();
+            issue23452l48();
         }
-        const default_action = issue23452l49();
+        const default_action = issue23452l48();
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -55,7 +55,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = simple_action();
     }
     apply {
-        tbl_issue23452l49.apply();
+        tbl_issue23452l48.apply();
         tbl_simple_action.apply();
     }
 }
@@ -77,8 +77,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<ethernet_t>(h.eth_hdr);
+        b.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

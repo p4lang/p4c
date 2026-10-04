@@ -14,7 +14,7 @@ control Ing(out bit<32> a) {
         if (b)  // <<< use of b
            a = 5;
         else
-           a = 10;
+        a = 10;
     }
 
     apply {

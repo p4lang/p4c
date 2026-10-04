@@ -46,7 +46,8 @@ parser MyParser(packet_in packet,
 *************************************************************************/
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 
@@ -58,7 +59,8 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    apply { }
+    apply {
+    }
 }
 
 /*************************************************************************
@@ -68,7 +70,8 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+    apply {
+    }
 }
 
 /*************************************************************************
@@ -76,7 +79,8 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 /*************************************************************************

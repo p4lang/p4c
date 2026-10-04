@@ -16,9 +16,9 @@ struct Headers_t {
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<test_header>(headers.first);
+        p.extract < test_header >(headers.first);
         p.advance(32w128);
-        p.extract<next_header>(headers.next);
+        p.extract < next_header >(headers.next);
         transition accept;
     }
 }
@@ -35,4 +35,4 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

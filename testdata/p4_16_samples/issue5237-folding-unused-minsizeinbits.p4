@@ -21,7 +21,9 @@ control C(inout meta_t meta) {
     }
 
     table t {
-        actions = { a; }
+        actions = {
+            a;
+        }
     }
 
     apply {

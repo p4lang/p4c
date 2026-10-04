@@ -7,18 +7,18 @@ header header_one {
 }
 
 header header_two {
-    bit<8>  type;
+    bit<8> type;
     bit<16> data;
 }
 
 header header_four {
-    bit<8>  type;
+    bit<8> type;
     bit<32> data;
 }
 
 struct Headers_t {
-    header_one  one;
-    header_two  two;
+    header_one one;
+    header_two two;
     header_four four;
 }
 
@@ -30,11 +30,11 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
         transition parse_headers;
     }
     state parse_headers {
-        transition select(p.lookahead<bit<8>>()) {
-            1: parse_one;
-            2: parse_two;
-            4: parse_four;
-            default: accept;
+        transition select (p.lookahead < bit<8 >>()) {
+            1 : parse_one;
+            2 : parse_two;
+            4 : parse_four;
+            default : accept;
         }
     }
     state parse_one {

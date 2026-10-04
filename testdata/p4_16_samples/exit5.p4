@@ -9,18 +9,19 @@ control ctrl() {
     action e() {
         exit;
     }
-    action f() {}
-
+    action f() {
+    }
     table t {
-        actions = { e; f; }
+        actions = {
+            e;
+            f;
+        }
         default_action = e();
     }
-
     apply {
         bit<32> a;
         bit<32> b;
         bit<32> c;
-
         a = 0;
         b = 1;
         c = 2;

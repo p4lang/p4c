@@ -20,7 +20,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 parser p(packet_in pkt, out Headers hdr) {
@@ -39,8 +39,8 @@ control ingress(inout Headers h) {
     apply {
         bit<0> tmp = 1;
         h.h.a = tmp;
-        h.h.b = (bit<1>) h.h.a;
-        h.h.c = h.h.a + (bit<0>) h.h.b;
+        h.h.b =(bit<1>) h.h.a;
+        h.h.c = h.h.a +(bit<0>) h.h.b;
     }
 }
 

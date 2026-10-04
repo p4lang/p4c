@@ -21,7 +21,7 @@ header h_index {
 struct headers {
     ethernet_t eth_hdr;
     h_stack[2] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {
@@ -48,7 +48,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             set_data;
         }
         key = {
-            h.h[h.i.index].a: exact;
+            h.h[h.i.index].a : exact;
         }
     }
     apply {

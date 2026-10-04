@@ -14,7 +14,9 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    action a1(bit<8> v) { h.a = v; }
+    action a1(bit<8> v) {
+        h.a = v;
+    }
 
     table t1 {
         key = {
@@ -22,21 +24,29 @@ control ingress(inout Headers h) {
             h.c : ternary;
             h.d : exact;
         }
-        actions = { a1; NoAction; }
+        actions = {
+            a1;
+            NoAction;
+        }
         const entries = {
-            (0x00, 0x01,          0x02) : a1(1);
+            (0x00, 0x01, 0x02) : a1(1);
             (0x00, 0x00 &&& 0xf0, 0x02) : a1(2);
-            (0x00, 0x02,          0x02) : a1(3);
-            (0x00, 0x02,          0x03) : a1(4);
-            (0x01, _,             0x04) : a1(5);
+            (0x00, 0x02, 0x02) : a1(3);
+            (0x00, 0x02, 0x03) : a1(4);
+            (0x01, _, 0x04) : a1(5);
             (0x01, 0x00 &&& 0x0f, 0x04) : a1(6);
-            (0x01, 0x10,          0x04) : a1(7);
+            (0x01, 0x10, 0x04) : a1(7);
         }
     }
 
     table t2 {
-        key = { h.b : exact; }
-        actions = { a1; NoAction; }
+        key = {
+            h.b : exact;
+        }
+        actions = {
+            a1;
+            NoAction;
+        }
         const entries = {
             0x00 : a1(1);
             0x01 : a1(2);
@@ -53,7 +63,7 @@ control ingress(inout Headers h) {
     }
 }
 
-control c<T>(inout T d);
-package top<T>(c<T> _c);
+control c < T >(inout T d);
+package top < T >(c<T> _c);
 
 top(ingress()) main;

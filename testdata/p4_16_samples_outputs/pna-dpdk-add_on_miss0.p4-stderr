@@ -20,11 +20,11 @@ pna-dpdk-add_on_miss0.p4(75): [--Wwarn=unused] warning: 'TCP_FIN_MASK' is unused
 const bit<8> TCP_FIN_MASK = 0x01;
              ^^^^^^^^^^^^
 pna-dpdk-add_on_miss0.p4(89): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NOW' is unused
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW = (ExpireTimeProfileId_t) 0;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW =(ExpireTimeProfileId_t) 0;
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pna-dpdk-add_on_miss0.p4(91): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_ESTABLISHED' is unused
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t) 2;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED =(ExpireTimeProfileId_t) 2;
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pna-dpdk-add_on_miss0.p4(92): [--Wwarn=unused] warning: 'EXPIRE_TIME_PROFILE_TCP_NEVER' is unused
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER = (ExpireTimeProfileId_t) 3;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER =(ExpireTimeProfileId_t) 3;
                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

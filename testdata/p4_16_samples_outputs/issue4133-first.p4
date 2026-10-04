@@ -1,7 +1,7 @@
 #include <core.p4>
 
-control MAPipe<H>(inout H hdr);
-package SimpleArch<H>(MAPipe<H> mapipe);
+control MAPipe < H >(inout H hdr);
+package SimpleArch < H >(MAPipe<H> mapipe);
 header h0_t {
     bit<1> f0;
 }
@@ -12,7 +12,7 @@ struct headers {
 
 control MyIngress(inout headers hdr) {
     action a0(bit<3> some_param) {
-        hdr.h0.f0 = (some_param == 3w7 ? 1w1 : 1w0);
+        hdr.h0.f0 =(some_param == 3w7 ? 1w1 : 1w0);
     }
     table t0 {
         actions = {
@@ -25,4 +25,4 @@ control MyIngress(inout headers hdr) {
     }
 }
 
-SimpleArch<headers>(MyIngress()) main;
+SimpleArch < headers >(MyIngress()) main;

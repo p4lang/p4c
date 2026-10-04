@@ -25,14 +25,15 @@ struct Headers {
     H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         pkt.extract(hdr.eth_hdr);
-        transition select(hdr.eth_hdr.dst_addr[31:32 -1]) {
-            prefix[31:32 - 1]: do_parse;
-            default: accept;
+        transition select (hdr.eth_hdr.dst_addr[31 : 32 - 1]) {
+            prefix[31 : 32 - 1] : do_parse;
+            default : accept;
         }
     }
     state do_parse {
@@ -47,11 +48,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -59,4 +69,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

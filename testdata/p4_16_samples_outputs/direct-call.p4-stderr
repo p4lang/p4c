@@ -1,7 +1,7 @@
-direct-call.p4(11): [--Wwarn=unused] warning: control 'd' is unused
+direct-call.p4(12): [--Wwarn=unused] warning: control 'd' is unused
 control d() {
         ^
-direct-call.p4(11): [--Winfo=removed] info: removing control 'd'
+direct-call.p4(12): [--Winfo=removed] info: removing control 'd'
 control d() {
         ^
 direct-call.p4(7): [--Winfo=removed] info: removing control 'c'

@@ -8,7 +8,7 @@
 
 header hdr {
     bit<31> f;
-    bit<1>  x;
+    bit<1> x;
 }
 
 struct metadata {
@@ -38,19 +38,22 @@ control cIngressI(inout hdr h, inout metadata meta,
 control cEgress(inout hdr h, inout metadata meta,
                 inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control vc(inout hdr h,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control uc(inout hdr h,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out packet, in hdr h)

@@ -14,7 +14,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-register<bit<8>>(2) r;
+register < bit<8 >>(2) r;
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<8> x;

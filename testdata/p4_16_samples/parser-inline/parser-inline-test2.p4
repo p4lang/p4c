@@ -6,7 +6,8 @@
 
 #include <v1model.p4>
 
-struct metadata { }
+struct metadata {
+}
 
 header data_t {
     bit<8> f;
@@ -17,10 +18,10 @@ header data_t16 {
 }
 
 struct headers {
-    data_t   h1;
+    data_t h1;
     data_t16 h2;
-    data_t   h3;
-    data_t   h4;
+    data_t h3;
+    data_t h4;
 }
 
 struct headers2 {
@@ -34,10 +35,10 @@ parser Subparser(      packet_in packet,
 
     state start {
         packet.extract(hdr.h1);
-        transition select(hdr.h1.f) {
-            1: sp1;
-            2: sp2;
-            default: accept;
+        transition select (hdr.h1.f) {
+            1 : sp1;
+            2 : sp2;
+            default : accept;
         }
     }
 
@@ -67,15 +68,21 @@ parser ParserImpl(      packet_in           packet,
 
     state start {
         packet.extract(phdr.h1);
-        transition select(standard_metadata.ingress_port) {
-            0: p0;
-            1: p1;
-            default: accept;
+        transition select (standard_metadata.ingress_port) {
+            0 : p0;
+            1 : p1;
+            default : accept;
         }
     }
 
-    state p0 { p.apply(packet, hdr, phdr); transition p2; }
-    state p1 { p.apply(packet, hdr, phdr); transition accept; }
+    state p0 {
+        p.apply(packet, hdr, phdr);
+        transition p2;
+    }
+    state p1 {
+        p.apply(packet, hdr, phdr);
+        transition accept;
+    }
 
     state p2 {
         hdr.h4 = phdr.h1;

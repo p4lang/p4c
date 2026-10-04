@@ -15,7 +15,7 @@ control C() {
         default_action = a();
     }
     apply {
-        h_t[1] arr = (h_t[1]){(h_t){a = func()}};
+        h_t[1] arr = (h_t[1]){ (h_t){a = func()} };
     }
 }
 

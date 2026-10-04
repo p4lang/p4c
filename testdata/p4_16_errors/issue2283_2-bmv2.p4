@@ -22,7 +22,8 @@ struct Headers {
     ports_t ports;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -31,7 +32,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     table t {
@@ -44,15 +48,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             NoAction;
         }
     }
-    apply { t.apply(); }
+    apply {
+        t.apply();
+    }
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {}
+    apply {
+    }
 }
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

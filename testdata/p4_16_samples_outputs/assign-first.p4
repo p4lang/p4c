@@ -8,4 +8,3 @@ control c() {
         hdr = (h){field = 32w10};
     }
 }
-

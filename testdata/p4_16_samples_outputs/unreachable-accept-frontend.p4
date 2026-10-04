@@ -12,18 +12,18 @@ struct headers_t {
 
 parser Parser(packet_in pkt_in, out headers_t hdr) {
     state start {
-        pkt_in.extract<ethernet_h>(hdr.ethernet);
+        pkt_in.extract < ethernet_h >(hdr.ethernet);
         transition reject;
     }
 }
 
 control Deparser(in headers_t hdr, packet_out pkt_out) {
     apply {
-        pkt_out.emit<ethernet_h>(hdr.ethernet);
+        pkt_out.emit < ethernet_h >(hdr.ethernet);
     }
 }
 
-parser P<H>(packet_in pkt, out H hdr);
-control D<H>(in H hdr, packet_out pkt);
-package S<H>(P<H> p, D<H> d);
-S<headers_t>(Parser(), Deparser()) main;
+parser P < H >(packet_in pkt, out H hdr);
+control D < H >(in H hdr, packet_out pkt);
+package S < H >(P<H> p, D<H> d);
+S < headers_t >(Parser(), Deparser()) main;

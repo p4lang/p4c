@@ -17,7 +17,8 @@ struct parsed_packet_t {
     Ethernet eth;
 };
 
-struct local_metadata_t {};
+struct local_metadata_t {
+};
 
 parser parse(packet_in pk, out parsed_packet_t hdr,
              inout local_metadata_t local_metadata,
@@ -45,7 +46,8 @@ control ingress(inout parsed_packet_t hdr,
 control egress(inout parsed_packet_t hdr,
                inout local_metadata_t local_metadata,
 	       inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control deparser(packet_out b, in parsed_packet_t hdr) {
@@ -56,12 +58,14 @@ control deparser(packet_out b, in parsed_packet_t hdr) {
 
 control verify_checks(inout parsed_packet_t hdr,
                       inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control compute_checksum(inout parsed_packet_t hdr,
                          inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(parse(), verify_checks(), ingress(), egress(),

@@ -7,4 +7,3 @@ control c() {
         tuple<> v = X.Field;
     }
 }
-

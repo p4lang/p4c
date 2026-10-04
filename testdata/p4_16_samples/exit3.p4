@@ -9,16 +9,15 @@ control ctrl(out bit<32> c) {
     action e() {
         exit;
     }
-
     table t {
-        actions = { e; }
+        actions = {
+            e;
+        }
         default_action = e();
     }
-
     apply {
         bit<32> a;
         bit<32> b;
-
         a = 0;
         b = 1;
         c = 2;

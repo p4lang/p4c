@@ -15,7 +15,7 @@ header_type ethernet_t {
 
 header_type ipv4_base_t {
     fields {
-        version : 4; 
+        version : 4;
         ihl : 4;
         diffserv : 8;
         totalLen : 16;
@@ -96,29 +96,29 @@ parser start {
 #define ETHERTYPE_IPV4 0x0800
 parser parse_ethernet {
     extract(ethernet);
-    return select(ethernet.etherType) {
-        ETHERTYPE_IPV4 : parse_ipv4;
-        default: ingress;   
+    return select (ethernet.etherType) {
+    ETHERTYPE_IPV4 : parse_ipv4;
+    default : ingress;
     }
 }
 
 parser parse_ipv4 {
     extract(ipv4_base);
     set_metadata(my_metadata.parse_ipv4_counter, ipv4_base.ihl * 4 - 20);
-    return select(ipv4_base.ihl) {
-        0x05 : ingress;
-        default : parse_ipv4_options;
+    return select (ipv4_base.ihl) {
+    0x05 : ingress;
+    default : parse_ipv4_options;
     }
 }
 
 parser parse_ipv4_options {
     // match on byte counter and option value
-    return select(my_metadata.parse_ipv4_counter, current(0, 8)) {
-        0x0000 mask 0xff00 : ingress;
-        0x0000 mask 0x00ff : parse_ipv4_option_EOL;
-        0x0001 mask 0x00ff : parse_ipv4_option_NOP;
-        0x0082 mask 0x00ff : parse_ipv4_option_security;
-        0x0044 mask 0x00ff : parse_ipv4_option_timestamp;
+    return select (my_metadata.parse_ipv4_counter, current(0, 8)) {
+    0x0000 mask 0xff00 : ingress;
+    0x0000 mask 0x00ff : parse_ipv4_option_EOL;
+    0x0001 mask 0x00ff : parse_ipv4_option_NOP;
+    0x0082 mask 0x00ff : parse_ipv4_option_security;
+    0x0044 mask 0x00ff : parse_ipv4_option_timestamp;
     }
 }
 
@@ -152,20 +152,20 @@ parser parse_ipv4_option_timestamp {
 }
 
 field_list ipv4_checksum_list {
-        ipv4_base.version;
-        ipv4_base.ihl;
-        ipv4_base.diffserv;
-        ipv4_base.totalLen;
-        ipv4_base.identification;
-        ipv4_base.flags;
-        ipv4_base.fragOffset;
-        ipv4_base.ttl;
-        ipv4_base.protocol;
-        ipv4_base.srcAddr;
-        ipv4_base.dstAddr;
-        ipv4_option_security;
-        ipv4_option_NOP[0];
-        ipv4_option_timestamp;        
+    ipv4_base.version;
+    ipv4_base.ihl;
+    ipv4_base.diffserv;
+    ipv4_base.totalLen;
+    ipv4_base.identification;
+    ipv4_base.flags;
+    ipv4_base.fragOffset;
+    ipv4_base.ttl;
+    ipv4_base.protocol;
+    ipv4_base.srcAddr;
+    ipv4_base.dstAddr;
+    ipv4_option_security;
+    ipv4_option_NOP[0];
+    ipv4_option_timestamp;
 }
 
 field_list_calculation ipv4_checksum {
@@ -176,7 +176,7 @@ field_list_calculation ipv4_checksum {
     output_width : 16;
 }
 
-calculated_field ipv4_base.hdrChecksum  {
+calculated_field ipv4_base.hdrChecksum {
     update ipv4_checksum;
 }
 

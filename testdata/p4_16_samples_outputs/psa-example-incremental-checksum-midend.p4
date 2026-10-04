@@ -12,15 +12,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -31,10 +31,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -53,27 +53,27 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        buffer.extract < ethernet_t >(parsed_hdr.ethernet);
+        transition select (parsed_hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
-        transition select(parsed_hdr.ipv4.protocol) {
-            8w6: parse_tcp;
-            default: accept;
+        buffer.extract < ipv4_t >(parsed_hdr.ipv4);
+        transition select (parsed_hdr.ipv4.protocol) {
+            8w6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
-        buffer.extract<tcp_t>(parsed_hdr.tcp);
+        buffer.extract < tcp_t >(parsed_hdr.tcp);
         transition accept;
     }
 }
@@ -93,7 +93,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.route") table route_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr : lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             forward();
@@ -121,32 +121,32 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampleincrementalchecksum161() {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+    @hidden action psaexampleincrementalchecksum162() {
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
-    @hidden table tbl_psaexampleincrementalchecksum161 {
+    @hidden table tbl_psaexampleincrementalchecksum162 {
         actions = {
-            psaexampleincrementalchecksum161();
+            psaexampleincrementalchecksum162();
         }
-        const default_action = psaexampleincrementalchecksum161();
+        const default_action = psaexampleincrementalchecksum162();
     }
     apply {
-        tbl_psaexampleincrementalchecksum161.apply();
+        tbl_psaexampleincrementalchecksum162.apply();
     }
 }
 
 struct tuple_0 {
-    bit<4>  f0;
-    bit<4>  f1;
-    bit<8>  f2;
+    bit<4> f0;
+    bit<4> f1;
+    bit<8> f2;
     bit<16> f3;
     bit<16> f4;
-    bit<3>  f5;
+    bit<3> f5;
     bit<13> f6;
-    bit<8>  f7;
-    bit<8>  f8;
+    bit<8> f7;
+    bit<8> f8;
     bit<32> f9;
     bit<32> f10;
 }
@@ -161,30 +161,30 @@ struct tuple_2 {
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata user_meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     @name("EgressDeparserImpl.ck") InternetChecksum() ck_0;
-    @hidden action psaexampleincrementalchecksum182() {
+    @hidden action psaexampleincrementalchecksum183() {
         ck_0.clear();
-        ck_0.add<tuple_0>((tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr});
+        ck_0.add < tuple_0 >((tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr});
         hdr.ipv4.hdrChecksum = ck_0.get();
         ck_0.clear();
-        ck_0.subtract<tuple_1>((tuple_1){f0 = hdr.tcp.checksum});
-        ck_0.subtract<tuple_2>((tuple_2){f0 = user_meta._fwd_metadata_old_srcAddr0});
-        ck_0.add<tuple_2>((tuple_2){f0 = hdr.ipv4.srcAddr});
+        ck_0.subtract < tuple_1 >((tuple_1){f0 = hdr.tcp.checksum});
+        ck_0.subtract < tuple_2 >((tuple_2){f0 = user_meta._fwd_metadata_old_srcAddr0});
+        ck_0.add < tuple_2 >((tuple_2){f0 = hdr.ipv4.srcAddr});
         hdr.tcp.checksum = ck_0.get();
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
-    @hidden table tbl_psaexampleincrementalchecksum182 {
+    @hidden table tbl_psaexampleincrementalchecksum183 {
         actions = {
-            psaexampleincrementalchecksum182();
+            psaexampleincrementalchecksum183();
         }
-        const default_action = psaexampleincrementalchecksum182();
+        const default_action = psaexampleincrementalchecksum183();
     }
     apply {
-        tbl_psaexampleincrementalchecksum182.apply();
+        tbl_psaexampleincrementalchecksum183.apply();
     }
 }
 
-IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
+EgressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
+PSA_Switch < headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

@@ -9,4 +9,3 @@ control c() {
         x.method(0, 8w0);
     }
 }
-

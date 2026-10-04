@@ -17,7 +17,7 @@ header nested_header {
 }
 
 struct Headers {
-    ethernet_t    eth_hdr;
+    ethernet_t eth_hdr;
     nested_header n;
 }
 

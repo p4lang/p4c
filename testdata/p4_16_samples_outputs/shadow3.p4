@@ -6,4 +6,3 @@ control MyIngress(inout H p) {
     apply {
     }
 }
-

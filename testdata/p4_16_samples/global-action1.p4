@@ -5,16 +5,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-action Global() {}
-
-action Global1() { Global(); }
-
+action Global() {
+}
+action Global1() {
+    Global();
+}
 control c() {
     table t {
-        actions = { Global; }
+        actions = {
+            Global;
+        }
         default_action = Global;
     }
-
     apply {
         t.apply();
     }

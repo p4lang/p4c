@@ -12,22 +12,22 @@ header eth_h {
 }
 
 header ipv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  tos;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> tos;
     bit<16> len;
     bit<16> id;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> frag;
-    bit<8>  ttl;
-    bit<8>  proto;
+    bit<8> ttl;
+    bit<8> proto;
     bit<16> chksum;
     bit<32> src;
     bit<32> dst;
 }
 
 struct headers_t {
-    eth_h  eth;
+    eth_h eth;
     ipv4_h ipv4;
 }
 
@@ -37,9 +37,9 @@ parser InnerParser(packet_in pkt, out headers_t hdr) {
     }
     state parse_eth {
         pkt.extract(hdr.eth);
-        transition select(hdr.eth.type) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.eth.type) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {

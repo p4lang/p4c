@@ -36,16 +36,16 @@ control ingressImpl(inout headers_t hdr,
                     inout metadata_t meta,
                     inout standard_metadata_t stdmeta)
 {
-    bit<8> n = hdr.ethernet.srcAddr[15:8];
+    bit<8> n = hdr.ethernet.srcAddr[15 : 8];
     bit<3> i;
     apply {
         // Correct sequence of values that i iterates through: 0, 3,
         // 6, 1, 4
         for (i = 0; i < 7; i = i + 3) {
-            n = n + (bit<8>) i;
+        n = n +(bit<8>) i;
         }
-        hdr.ethernet.srcAddr[7:0] = (bit<8>) i;
-        hdr.ethernet.srcAddr[15:8] = n;
+        hdr.ethernet.srcAddr[7 : 0] =(bit<8>) i;
+        hdr.ethernet.srcAddr[15 : 8] = n;
         stdmeta.egress_spec = 1;
     }
 }

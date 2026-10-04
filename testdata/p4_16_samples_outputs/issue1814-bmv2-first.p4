@@ -16,10 +16,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    register<bit<1>>(32w1) testRegister;
+    register < bit<1 >>(32w1) testRegister;
     table debug_table {
         key = {
-            meta.test: exact @name("meta.test");
+            meta.test : exact @name("meta.test");
         }
         actions = {
             NoAction();
@@ -29,7 +29,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     apply {
         bit<1> registerData;
         testRegister.read(registerData, 32w0);
-        meta.test = (bool)registerData;
+        meta.test =(bool) registerData;
         debug_table.apply();
     }
 }
@@ -54,4 +54,4 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;

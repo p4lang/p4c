@@ -5,7 +5,7 @@
 header hdr {
     bit<32> a;
     bit<32> b;
-    bit<8>  c;
+    bit<8> c;
 }
 
 control compute(inout hdr h) {

@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct empty_metadata_t {
@@ -27,7 +27,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
-        if (hdr.ethernet.dstAddr == (EthernetAddress)8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
+        if (hdr.ethernet.dstAddr ==(EthernetAddress) 8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
             send_to_port(ostd, PSA_PORT_RECIRCULATE);
         } else {
             send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
@@ -45,25 +45,25 @@ parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t us
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     action clone() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)8;
+        ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 8;
     }
     apply {
         if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
             hdr.ethernet.etherType = 0xface;
         } else {
             clone();
-            if (hdr.ethernet.dstAddr == (EthernetAddress)9) {
+            if (hdr.ethernet.dstAddr ==(EthernetAddress) 9) {
                 egress_drop(ostd);
-                ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)9;
+                ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 9;
             }
             if (istd.egress_port == PSA_PORT_RECIRCULATE) {
-                hdr.ethernet.srcAddr = (EthernetAddress)0xbeef;
-                ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)10;
+                hdr.ethernet.srcAddr =(EthernetAddress) 0xbeef;
+                ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 10;
             } else {
-                if (hdr.ethernet.dstAddr == (EthernetAddress)8) {
-                    ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)11;
+                if (hdr.ethernet.dstAddr ==(EthernetAddress) 8) {
+                    ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 11;
                 }
-                hdr.ethernet.srcAddr = (EthernetAddress)0xcafe;
+                hdr.ethernet.srcAddr =(EthernetAddress) 0xcafe;
             }
         }
     }

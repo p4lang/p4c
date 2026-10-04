@@ -1,20 +1,20 @@
 issue2036.p4(29): [--Werror=type-error] error: 'd.apply(a)'
-    d.apply(a);
-    ^^^^^^^^^^
+        d.apply(a);
+        ^^^^^^^^^^
   ---- Actual error:
 issue2036.p4(25): Cannot cast implicitly type 'tuple<bit<8>>' to type 'struct s'
-    tuple<bit<8>> a = { 0 };
-    ^^^^^^^^^^^^^
+      tuple < bit<8 >> a = { 0 };
+      ^^^^^^^^^^^^^^^^
 issue2036.p4(14)
   struct s {
          ^
   ---- Originating from:
 issue2036.p4(29): Type of argument 'a' (tuple<bit<8>>) does not match type of parameter 'z' (struct s)
-      d.apply(a);
-              ^
+          d.apply(a);
+                  ^
 issue2036.p4(25)
-    tuple<bit<8>> a = { 0 };
-    ^^^^^^^^^^^^^
+      tuple < bit<8 >> a = { 0 };
+      ^^^^^^^^^^^^^^^^
 issue2036.p4(18)
   parser D(in s z) {
                 ^
@@ -23,5 +23,5 @@ issue2036.p4(14)
          ^
   ---- Originating from:
 issue2036.p4(29): Function type 'D' does not match invocation type '<Method call>'
-      d.apply(a);
-      ^^^^^^^^^^
+          d.apply(a);
+          ^^^^^^^^^^

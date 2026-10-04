@@ -8,7 +8,6 @@
 parser Parser();
 parser MyParser(Parser p);
 package Package(MyParser p1, MyParser p2);
-
 parser Parser1(Parser p) {
     state start {
         p.apply();
@@ -25,5 +24,4 @@ parser Parser2(Parser p) {
 
 Parser1() p1;
 Parser2() p2;
-
-Package(p1,p2) main;
+Package(p1, p2) main;

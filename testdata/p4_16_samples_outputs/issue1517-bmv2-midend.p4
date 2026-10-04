@@ -17,7 +17,7 @@ struct headers_t {
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -28,7 +28,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @hidden action issue1517bmv2l47() {
-        random<bit<16>>(rand_int_0, 16w0, 16w49151);
+        random < bit<16 >>(rand_int_0, 16w0, 16w49151);
     }
     @hidden table tbl_issue1517bmv2l47 {
         actions = {
@@ -57,7 +57,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -71,4 +71,4 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
     }
 }
 
-V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers_t, meta_t >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

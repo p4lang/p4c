@@ -16,7 +16,6 @@ const bit<8> PROTO_ICMP6 = 58;
 const bit<8> TCP_SEQ_LEN = 4;
 const bit<8> ICMP6_ECHO_REQUEST = 128;
 const bit<8> ICMP6_ECHO_REPLY = 129;
-
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;
@@ -62,9 +61,9 @@ header udp_t {
 }
 
 header icmp6_t {
-    bit<8>   type;
-    bit<8>   code;
-    bit<16>  checksum;
+    bit<8>  type;
+    bit<8>  code;
+    bit<16> checksum;
 }
 
 struct headers {
@@ -74,7 +73,7 @@ struct headers {
     tcp_t      inner_tcp;
     udp_t      inner_udp;
     ethernet_t ethernet;
-    icmp6_t    icmp6;    
+    icmp6_t    icmp6;
     ipv6_t     ipv6;
     tcp_t      tcp;
     udp_t      udp;
@@ -156,7 +155,7 @@ struct ipv6_metadata_t {
 }
 
 struct acl_metadata_t {
-    bit<1> acl_deny;                      /* ifacl/vacl deny action */
+    bit<1>  acl_deny;                      /* ifacl/vacl deny action */
     bit<24> vnid;                         /* vnid for acls */
     bit<14> acl_stats_index;              /* acl stats index */
     bit<16> egress_if_label;              /* if label for egress acls */
@@ -169,14 +168,14 @@ struct fwd_meta_t {
 }
 
 struct metadata_t {
-    port_t  ingress_port;
-    port_t  egress_port;
-    bit<16> tcp_length;
-    bit<32> cast_length;
-    bit<1>  do_cksum;
-    l2_metadata_t l2_metadata;
-    l3_metadata_t l3_metadata;
-    ipv6_metadata_t ipv6_metadata;
+    port_t            ingress_port;
+    port_t            egress_port;
+    bit<16>           tcp_length;
+    bit<32>           cast_length;
+    bit<1>            do_cksum;
+    l2_metadata_t     l2_metadata;
+    l3_metadata_t     l3_metadata;
+    ipv6_metadata_t   ipv6_metadata;
     tunnel_metadata_t tunnel_metadata;
-    fwd_meta_t     fwd;    
+    fwd_meta_t        fwd;
 }

@@ -7,25 +7,25 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
     bit<32> port_in;
     bit<32> port_out;
 }
-
 
 parser MyIP(
     packet_in buffer,
@@ -63,15 +63,18 @@ control MyIC(
     PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
 
     DirectMeter(PSA_MeterType_t.PACKETS) meter0;
-    action execute_meter () {
+    action execute_meter() {
         color_out = meter0.dpdk_execute(color_in, 32w1024);
-        b.port_out = (color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        b.port_out =(color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
     }
     table tbl {
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; execute_meter;}
+        actions = {
+            NoAction;
+            execute_meter;
+        }
         psa_direct_meter = meter0;
     }
 
@@ -85,7 +88,8 @@ control MyEC(
     inout metadata_t b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -96,7 +100,8 @@ control MyID(
     inout headers_t hdr,
     in metadata_t e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 control MyED(
@@ -107,7 +112,8 @@ control MyED(
     in metadata_t d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

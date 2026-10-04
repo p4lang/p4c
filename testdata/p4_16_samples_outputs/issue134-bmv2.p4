@@ -3,8 +3,8 @@
 #include <v1model.p4>
 
 header ipv4_t {
-    bit<4>  ihl;
-    bit<4>  version;
+    bit<4> ihl;
+    bit<4> version;
     bit<16> hdrChecksum;
 }
 

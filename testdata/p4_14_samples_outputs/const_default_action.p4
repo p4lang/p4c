@@ -3,10 +3,10 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<9>  ingress_port;
+    bit<9> ingress_port;
     bit<14> bd;
     bit<14> rid;
-    bit<1>  drop_flag;
+    bit<1> drop_flag;
 }
 
 header ethernet_t {
@@ -16,8 +16,8 @@ header ethernet_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> etherType;
 }
@@ -29,7 +29,7 @@ struct metadata {
 
 struct headers {
     @name(".ethernet")
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     @name(".vlan_tag_")
     vlan_tag_t[2] vlan_tag_;
 }
@@ -37,14 +37,14 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_vlan") state parse_vlan {
         packet.extract(hdr.vlan_tag_[0]);
-        transition select(hdr.vlan_tag_[0].etherType) {
-            16w0x800: accept;
+        transition select (hdr.vlan_tag_[0].etherType) {
+            16w0x800 : accept;
         }
     }
     @name(".start") state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            default: parse_vlan;
+        transition select (hdr.ethernet.etherType) {
+            default : parse_vlan;
         }
     }
 }
@@ -72,8 +72,8 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
             @defaultonly no_op;
         }
         key = {
-            hdr.vlan_tag_[0].isValid(): exact;
-            hdr.vlan_tag_[0].vid      : ternary;
+            hdr.vlan_tag_[0].isValid() : exact;
+            hdr.vlan_tag_[0].vid : ternary;
         }
         size = 1024;
         const default_action = no_op();
@@ -86,7 +86,7 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
             @defaultonly no_op;
         }
         key = {
-            hdr.vlan_tag_[0].vid: exact;
+            hdr.vlan_tag_[0].vid : exact;
         }
         size = 1024;
         const default_action = no_op();

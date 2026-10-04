@@ -8,12 +8,12 @@ struct Foo {
 }
 
 parser MyParser(packet_in packet) {
-   state start {
-       transition select(packet.lookahead<Foo>().f0) {
-           0: accept;
-           default: reject;
-       }
-   }
+    state start {
+        transition select (packet.lookahead < Foo >().f0) {
+            0 : accept;
+            default : reject;
+        }
+    }
 }
 
 SimpleArch(MyParser()) main;

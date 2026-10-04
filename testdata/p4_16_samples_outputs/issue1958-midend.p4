@@ -22,7 +22,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -36,7 +36,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.foo2_inst.val") bit<8> foo2_inst_val;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingressImpl.reg1") register<bit<8>>(32w256) reg1_0;
+    @name("ingressImpl.reg1") register < bit<8 >>(32w256) reg1_0;
     @name("ingressImpl.foo2_inst.foo2_action") action foo2_inst_foo2_action_0() {
         reg1_0.read(foo2_inst_val, (bit<32>)hdr.ethernet.srcAddr[7:0]);
         foo2_inst_val = foo2_inst_val + 8w249;
@@ -44,7 +44,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.foo2_inst.foo2_table") table foo2_inst_foo2_table {
         key = {
-            hdr.ethernet.srcAddr: exact @name("my_headers.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("my_headers.ethernet.srcAddr");
         }
         actions = {
             foo2_inst_foo2_action_0();
@@ -52,17 +52,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         default_action = NoAction_1();
     }
-    @hidden action issue1958l90() {
+    @hidden action issue1958l91() {
         stdmeta.egress_spec = 9w0;
     }
-    @hidden table tbl_issue1958l90 {
+    @hidden table tbl_issue1958l91 {
         actions = {
-            issue1958l90();
+            issue1958l91();
         }
-        const default_action = issue1958l90();
+        const default_action = issue1958l91();
     }
     apply {
-        tbl_issue1958l90.apply();
+        tbl_issue1958l91.apply();
         foo2_inst_foo2_table.apply();
     }
 }
@@ -79,8 +79,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

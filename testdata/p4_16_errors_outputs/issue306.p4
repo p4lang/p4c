@@ -13,7 +13,7 @@ header data_h {
 
 struct my_packet {
     instr_h[4] instr;
-    data_h[4]  data;
+    data_h[4] data;
 }
 
 struct my_metadata {
@@ -25,16 +25,16 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
     }
     state parse_instr {
         b.extract(p.stack.next);
-        transition select(p.stack.last.op_code) {
-            0: parse_data;
-            default: parse_instr;
+        transition select (p.stack.last.op_code) {
+            0 : parse_data;
+            default : parse_instr;
         }
     }
     state parse_data {
         b.extract(p.stack.next);
-        transition select(p.stack.last.op_code) {
-            0: accept;
-            default: parse_data;
+        transition select (p.stack.last.op_code) {
+            0 : accept;
+            default : parse_data;
         }
     }
 }
@@ -49,7 +49,7 @@ control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadat
     }
     table t {
         key = {
-            p.stack[0].op_code: exact;
+            p.stack[0].op_code : exact;
         }
         actions = {
             nop;

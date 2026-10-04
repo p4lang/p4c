@@ -15,4 +15,3 @@ control c(inout Headers h) {
         h.eth.type = (EthTypes){  };
     }
 }
-

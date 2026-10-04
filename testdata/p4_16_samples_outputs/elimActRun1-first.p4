@@ -15,7 +15,7 @@ control ingress(inout Headers h) {
     }
     table simple_table_1 {
         key = {
-            48w1: exact @name("key");
+            48w1 : exact @name("key");
         }
         actions = {
             dummy_action();
@@ -25,7 +25,7 @@ control ingress(inout Headers h) {
     }
     table simple_table_2 {
         key = {
-            48w1: exact @name("key");
+            48w1 : exact @name("key");
         }
         actions = {
             dummy_action();
@@ -35,23 +35,23 @@ control ingress(inout Headers h) {
     }
     apply {
         switch (simple_table_1.apply().action_run) {
-            dummy_action: {
-                switch (simple_table_2.apply().action_run) {
-                    dummy_action: {
-                        h.eth_hdr.src_addr = 48w4;
-                        return;
-                    }
-                    default: {
-                    }
-                }
+            dummy_action : {
+            switch (simple_table_2.apply().action_run) {
+            dummy_action : {
+            h.eth_hdr.src_addr = 48w4;
+            return;
             }
-            default: {
+            default : {
+            }
+            }
+            }
+            default : {
             }
         }
         exit;
     }
 }
 
-control c<H>(inout H h);
-package top<H>(c<H> c);
-top<Headers>(ingress()) main;
+control c < H >(inout H h);
+package top < H >(c<H> c);
+top < Headers >(ingress()) main;

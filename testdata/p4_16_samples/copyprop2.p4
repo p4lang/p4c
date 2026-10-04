@@ -16,7 +16,7 @@ struct H {
 
 parser P(packet_in pkt, out H hdr) {
     state start {
-	pkt.extract(hdr.h);
+        pkt.extract(hdr.h);
         transition accept;
     }
 }
@@ -24,8 +24,8 @@ parser P(packet_in pkt, out H hdr) {
 control C(inout H hdr) {
     bool h_is_valid;
     table t {
-	key = {
-            h_is_valid: exact;
+        key = {
+            h_is_valid : exact;
         }
         actions = {
             NoAction;

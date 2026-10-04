@@ -1,7 +1,7 @@
 cases.p4(8): [--Wwarn=unused] warning: control 'ctrl' is unused
 control ctrl() {
         ^^^^
-cases.p4(22): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
+cases.p4(29): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
             c:
             ^
 cases.p4(8): [--Winfo=removed] info: removing control 'ctrl'

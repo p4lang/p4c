@@ -18,8 +18,8 @@ header I {
 
 struct h {
     ethernet_t ether;
-    H          h;
-    I          i;
+    H h;
+    I i;
 }
 
 struct m {
@@ -28,10 +28,10 @@ struct m {
 parser L3(packet_in b, inout h hdr) {
     bit<16> etherType = hdr.ether.etherType;
     state start {
-        transition select(etherType) {
-            0x800: h0;
-            0x8100: i;
-            default: accept;
+        transition select (etherType) {
+            0x800 : h0;
+            0x8100 : i;
+            default : accept;
         }
     }
     state h0 {

@@ -6,14 +6,14 @@
 
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 
 @test_keep_opassign
 
 header t1 {
     bit<32> f1;
-    bool    b1;
+    bool b1;
 }
 
 struct headers_t {

@@ -16,7 +16,7 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract < hdr >(h.h);
         transition accept;
     }
 }
@@ -38,7 +38,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit < hdr >(h.h);
     }
 }
 
@@ -51,7 +51,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.c.t") table c_t {
         key = {
-            key_0: exact @name("e");
+            key_0 : exact @name("e");
         }
         actions = {
             c_a_0();
@@ -59,29 +59,29 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action key1bmv2l19() {
+    @hidden action key1bmv2l22() {
         key_0 = h.h.a + 32w1;
     }
-    @hidden action arithinlineskeleton42() {
+    @hidden action arithinlineskeleton54() {
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_key1bmv2l19 {
+    @hidden table tbl_key1bmv2l22 {
         actions = {
-            key1bmv2l19();
+            key1bmv2l22();
         }
-        const default_action = key1bmv2l19();
+        const default_action = key1bmv2l22();
     }
-    @hidden table tbl_arithinlineskeleton42 {
+    @hidden table tbl_arithinlineskeleton54 {
         actions = {
-            arithinlineskeleton42();
+            arithinlineskeleton54();
         }
-        const default_action = arithinlineskeleton42();
+        const default_action = arithinlineskeleton54();
     }
     apply {
-        tbl_key1bmv2l19.apply();
+        tbl_key1bmv2l22.apply();
         c_t.apply();
-        tbl_arithinlineskeleton42.apply();
+        tbl_arithinlineskeleton54.apply();
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

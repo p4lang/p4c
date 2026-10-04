@@ -14,14 +14,14 @@ struct OutControl {
     PortId outputPort;
 }
 
-parser Parser<H>(packet_in b, out H parsedHeaders);
-control Pipe<H>(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
-control Deparser<H>(inout H outputHeaders, packet_out b);
-package VSS<H>(Parser<H> p, Pipe<H> map, Deparser<H> d);
+parser Parser < H >(packet_in b, out H parsedHeaders);
+control Pipe < H >(inout H headers, in error parseError, in InControl inCtrl, out OutControl outCtrl);
+control Deparser < H >(inout H outputHeaders, packet_out b);
+package VSS < H >(Parser<H> p, Pipe<H> map, Deparser<H> d);
 extern Ck16 {
     Ck16();
     void clear();
-    void update<T>(in T data);
+    void update < T >(in T data);
     bit<16> get();
 }
 
@@ -30,27 +30,27 @@ typedef bit<32> IPv4Address;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header Ipv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
 
 struct Parsed_packet {
     Ethernet_h ethernet;
-    Ipv4_h     ip;
+    Ipv4_h ip;
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
@@ -59,17 +59,17 @@ parser TopParser(packet_in b, out Parsed_packet p) {
     @name("TopParser.tmp_1") bool tmp_1;
     @name("TopParser.ck") Ck16() ck_0;
     state start {
-        b.extract<Ethernet_h>(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: parse_ipv4;
+        b.extract < Ethernet_h >(p.ethernet);
+        transition select (p.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
         }
     }
     state parse_ipv4 {
-        b.extract<Ipv4_h>(p.ip);
+        b.extract < Ipv4_h >(p.ip);
         verify(p.ip.version == 4w4, error.IPv4IncorrectVersion);
         verify(p.ip.ihl == 4w5, error.IPv4OptionsNotSupported);
         ck_0.clear();
-        ck_0.update<Ipv4_h>(p.ip);
+        ck_0.update < Ipv4_h >(p.ip);
         tmp = ck_0.get();
         tmp_0 = tmp == 16w0;
         tmp_1 = tmp_0;
@@ -101,7 +101,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.ipv4_match") table ipv4_match_0 {
         key = {
-            headers.ip.dstAddr: lpm @name("headers.ip.dstAddr");
+            headers.ip.dstAddr : lpm @name("headers.ip.dstAddr");
         }
         actions = {
             Drop_action();
@@ -115,7 +115,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.check_ttl") table check_ttl_0 {
         key = {
-            headers.ip.ttl: exact @name("headers.ip.ttl");
+            headers.ip.ttl : exact @name("headers.ip.ttl");
         }
         actions = {
             Send_to_cpu();
@@ -128,7 +128,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.dmac") table dmac_1 {
         key = {
-            nextHop_0: exact @name("nextHop");
+            nextHop_0 : exact @name("nextHop");
         }
         actions = {
             Drop_action_1();
@@ -142,7 +142,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.smac") table smac_1 {
         key = {
-            outCtrl.outputPort: exact @name("outCtrl.outputPort");
+            outCtrl.outputPort : exact @name("outCtrl.outputPort");
         }
         actions = {
             Drop_action_2();
@@ -178,15 +178,15 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     @name("TopDeparser.ck") Ck16() ck_1;
     apply {
-        b.emit<Ethernet_h>(p.ethernet);
+        b.emit < Ethernet_h >(p.ethernet);
         if (p.ip.isValid()) {
             ck_1.clear();
             p.ip.hdrChecksum = 16w0;
-            ck_1.update<Ipv4_h>(p.ip);
+            ck_1.update < Ipv4_h >(p.ip);
             p.ip.hdrChecksum = ck_1.get();
         }
-        b.emit<Ipv4_h>(p.ip);
+        b.emit < Ipv4_h >(p.ip);
     }
 }
 
-VSS<Parsed_packet>(TopParser(), TopPipe(), TopDeparser()) main;
+VSS < Parsed_packet >(TopParser(), TopPipe(), TopDeparser()) main;

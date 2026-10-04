@@ -2,5 +2,5 @@ equate-type-dont-care-and-non-dont-care.p4(4): [--Wwarn=unused] warning: control
 control cIngress()() {
         ^^^^^^^^
 equate-type-dont-care-and-non-dont-care.p4(6): [--Werror=type-error] error: 0: could not infer a width
-    random(_, 0);
-              ^
+        random(_, 0);
+                  ^

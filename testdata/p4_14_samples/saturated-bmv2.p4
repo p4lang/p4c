@@ -11,15 +11,15 @@
 /// oprX_8 - unsigned 8-bit operands, res_8 contains the result
 /// oprX_16 - signed 16-bit operands, res_16 contains the result
 header_type hdr {
-  fields {
-    op : 8;
-    opr1_8 : 8  (saturating);
-    opr2_8 : 8  (saturating);
-    res_8  : 8  (saturating);
-    opr1_16: 16 (signed,saturating);
-    opr2_16: 16 (signed,saturating);
-    res_16 : 16 (signed,saturating);
-  }
+    fields {
+        op : 8;
+        opr1_8 : 8(saturating);
+        opr2_8 : 8(saturating);
+        res_8 : 8(saturating);
+        opr1_16 : 16(signed, saturating);
+        opr2_16 : 16(signed, saturating);
+        res_16 : 16(signed, saturating);
+    }
 }
 
 header hdr data;
@@ -48,23 +48,25 @@ action sat_subtract_from() {
     subtract_from_field(data.res_16, data.opr2_16);
 }
 
-action _drop() { drop(); }
+action _drop() {
+    drop();
+}
 
 table t {
 
-  reads {
-    data.op : exact;
-  }
+    reads {
+        data.op : exact;
+    }
 
-  actions {
-    sat_plus;
-    sat_minus;
-    sat_add_to;
-    sat_subtract_from;
-    _drop;
-  }
+    actions {
+        sat_plus;
+        sat_minus;
+        sat_add_to;
+        sat_subtract_from;
+        _drop;
+    }
 
-  default_action: _drop;
+    default_action : _drop;
 
 }
 

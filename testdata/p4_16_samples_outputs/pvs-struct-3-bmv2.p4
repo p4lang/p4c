@@ -19,20 +19,20 @@ struct value_set_t {
     @match(ternary)
     bit<16> field1;
     @match(lpm)
-    bit<3>  field2;
+    bit<3> field2;
     @match(exact)
-    bit<6>  field3;
+    bit<6> field3;
     @match(range)
-    bit<5>  field4;
+    bit<5> field4;
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    value_set<value_set_t>(4) pvs;
+    value_set < value_set_t >(4) pvs;
     state start {
         b.extract(p.data);
-        transition select(p.data.da[15:0], p.data.db[7:5], p.data.db[29:24], p.data.da[30:26]) {
-            pvs: accept;
-            (0x810, 0x4 &&& 0x6, 0x32 &&& 0x33, 10 .. 20): foo;
+        transition select (p.data.da[15 : 0], p.data.db[7 : 5], p.data.db[29 : 24], p.data.da[30 : 26]) {
+            pvs : accept;
+            (0x810, 0x4 &&& 0x6, 0x32 &&& 0x33, 10 .. 20) : foo;
         }
     }
     state foo {
@@ -53,7 +53,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             set_data;
         }
         key = {
-            meta.data[0].da: exact;
+            meta.data[0].da : exact;
         }
     }
     apply {

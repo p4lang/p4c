@@ -25,10 +25,10 @@ header Hdr1 {
 
 header Hdr2 {
     bit<16> _b0;
-    bit<1>  _row_alt0_valid1;
-    bit<7>  _row_alt0_port2;
-    bit<1>  _row_alt1_valid3;
-    bit<7>  _row_alt1_port4;
+    bit<1> _row_alt0_valid1;
+    bit<7> _row_alt0_port2;
+    bit<1> _row_alt1_valid3;
+    bit<7> _row_alt1_port4;
 }
 
 struct Headers {
@@ -42,52 +42,52 @@ struct Meta {
 
 parser ParserImpl(packet_in b, out Headers h, inout Meta m, in pna_main_parser_input_metadata_t istd) {
     state start {
-        b.extract<Hdr1>(h.h1);
-        transition select(h.h1._a0) {
-            8w0: getH1;
-            default: getH2;
+        b.extract < Hdr1 >(h.h1);
+        transition select (h.h1._a0) {
+            8w0 : getH1;
+            default : getH2;
         }
     }
     state getH1 {
-        b.extract<Hdr1>(h.u_h1);
+        b.extract < Hdr1 >(h.u_h1);
         transition accept;
     }
     state getH2 {
-        b.extract<Hdr2>(h.u_h2);
+        b.extract < Hdr2 >(h.u_h2);
         transition accept;
     }
 }
 
 control DeparserImpl(packet_out b, in Headers h, in Meta m, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkbvec_union67() {
-        b.emit<Hdr1>(h.h1);
-        b.emit<Hdr1>(h.u_h1);
-        b.emit<Hdr2>(h.u_h2);
+    @hidden action pnadpdkbvec_union68() {
+        b.emit < Hdr1 >(h.h1);
+        b.emit < Hdr1 >(h.u_h1);
+        b.emit < Hdr2 >(h.u_h2);
     }
-    @hidden table tbl_pnadpdkbvec_union67 {
+    @hidden table tbl_pnadpdkbvec_union68 {
         actions = {
-            pnadpdkbvec_union67();
+            pnadpdkbvec_union68();
         }
-        const default_action = pnadpdkbvec_union67();
+        const default_action = pnadpdkbvec_union68();
     }
     apply {
-        tbl_pnadpdkbvec_union67.apply();
+        tbl_pnadpdkbvec_union68.apply();
     }
 }
 
 control ingress(inout Headers h, inout Meta m, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkbvec_union77() {
+    @hidden action pnadpdkbvec_union78() {
         h.u_h2.setInvalid();
     }
-    @hidden table tbl_pnadpdkbvec_union77 {
+    @hidden table tbl_pnadpdkbvec_union78 {
         actions = {
-            pnadpdkbvec_union77();
+            pnadpdkbvec_union78();
         }
-        const default_action = pnadpdkbvec_union77();
+        const default_action = pnadpdkbvec_union78();
     }
     apply {
         if (h.u_h2.isValid()) {
-            tbl_pnadpdkbvec_union77.apply();
+            tbl_pnadpdkbvec_union78.apply();
         }
     }
 }
@@ -97,4 +97,4 @@ control PreControlImpl(in Headers hdr, inout Meta meta, in pna_pre_input_metadat
     }
 }
 
-PNA_NIC<Headers, Meta, Headers, Meta>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
+PNA_NIC < Headers, Meta, Headers, Meta >(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;

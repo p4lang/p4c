@@ -26,15 +26,15 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     action redirect() {
         stdmeta.egress_spec = stdmeta.ingress_port;
     }
-    @MixedExprList[1, "hello", true, 1 == 2, 5 + 6] @MixedKV[label="text", my_bool=true, int_val=2 * 3] table t {
-        key = {
-        }
-        actions = {
-            @myid[1] redirect;
-            @myid[2] my_drop;
-            NoAction;
-        }
-        default_action = NoAction;
+    @MixedExprList[1, "hello", true, 1 == 2, 5 + 6] @MixedKV[label = "text", my_bool = true, int_val = 2 * 3] table t {
+    key = {
+    }
+    actions = {
+        @myid[1] redirect;
+        @myid[2] my_drop;
+        NoAction;
+    }
+    default_action = NoAction;
     }
     apply {
         t.apply();

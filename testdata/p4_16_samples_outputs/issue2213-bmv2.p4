@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -15,13 +15,13 @@ struct headers_t {
 
 struct mystruct1_t {
     bit<16> f1;
-    bit<8>  f2;
+    bit<8> f2;
 }
 
 struct mystruct2_t {
     mystruct1_t s1;
-    bit<16>     f3;
-    bit<32>     f4;
+    bit<16> f3;
+    bit<32> f4;
 }
 
 struct metadata_t {
@@ -43,11 +43,11 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     apply {
-        meta.s1 = {f1 = 2,f2 = 3};
+        meta.s1 = { f1 = 2, f2 = 3 };
         meta.s2.s1 = meta.s1;
-        meta.s2 = {s1 = meta.s1,f3 = 5,f4 = 8};
-        meta.s2 = {s1 = {f1 = 2,f2 = 3},f3 = 5,f4 = 8};
-        stdmeta.egress_spec = (bit<9>)meta.s2.s1.f2;
+        meta.s2 = { s1 = meta.s1, f3 = 5, f4 = 8 };
+        meta.s2 = { s1 = { f1 = 2, f2 = 3 }, f3 = 5, f4 = 8 };
+        stdmeta.egress_spec =(bit<9>) meta.s2.s1.f2;
     }
 }
 

@@ -8,16 +8,16 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -35,7 +35,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(inout headers_t hdr,
@@ -46,12 +47,12 @@ control ingressImpl(inout headers_t hdr,
         mark_to_drop(stdmeta);
     }
     action foo(bit<9> out_port) {
-        hdr.ethernet.dstAddr[22:18] = hdr.ethernet.srcAddr[5:1];
+        hdr.ethernet.dstAddr[22 : 18] = hdr.ethernet.srcAddr[5 : 1];
         stdmeta.egress_spec = out_port;
     }
     table t1 {
         key = {
-            hdr.ethernet.srcAddr[22:18] : exact @name("ethernet.srcAddr.slice");
+            hdr.ethernet.srcAddr[22 : 18] : exact @name("ethernet.srcAddr.slice");
             hdr.ethernet.dstAddr & 0x010101010101 : exact @name("dstAddr_lsbs");
             hdr.ethernet.etherType - 10 : exact @name("etherType_less_10");
         }
@@ -71,11 +72,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

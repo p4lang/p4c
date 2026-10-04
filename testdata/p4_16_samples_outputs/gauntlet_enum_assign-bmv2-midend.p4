@@ -11,14 +11,14 @@ struct Meta {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.do_thing") action do_thing() {
     }
-    @hidden action gauntlet_enum_assignbmv2l21() {
+    @hidden action gauntlet_enum_assignbmv2l23() {
         sm.egress_spec = 9w2;
     }
-    @hidden table tbl_gauntlet_enum_assignbmv2l21 {
+    @hidden table tbl_gauntlet_enum_assignbmv2l23 {
         actions = {
-            gauntlet_enum_assignbmv2l21();
+            gauntlet_enum_assignbmv2l23();
         }
-        const default_action = gauntlet_enum_assignbmv2l21();
+        const default_action = gauntlet_enum_assignbmv2l23();
     }
     @hidden table tbl_do_thing {
         actions = {
@@ -27,7 +27,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_thing();
     }
     apply {
-        tbl_gauntlet_enum_assignbmv2l21.apply();
+        tbl_gauntlet_enum_assignbmv2l23.apply();
         tbl_do_thing.apply();
     }
 }
@@ -58,4 +58,4 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

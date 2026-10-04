@@ -15,12 +15,12 @@ parser p1(out bit z1)(bit b1) {
 }
 
 parser p(out bit z) {
-   p1(1w0) p1i;
+    p1(1w0) p1i;
 
-   state start {
+    state start {
         p1i.apply(z);
         transition accept;
-   }
+    }
 }
 
 parser simple(out bit z);

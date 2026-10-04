@@ -10,43 +10,43 @@ struct ingress_metadata_t {
     bit<10> port_lag;
     bit<32> ip_src;
     bit<32> ip_dest;
-    bit<8>  ip_prefix;
-    bit<1>  routed;
+    bit<8> ip_prefix;
+    bit<1> routed;
     bit<16> vrf;
     bit<16> nhop;
     bit<16> ecmp_nhop;
     bit<16> router_intf;
     bit<16> label;
-    bit<1>  copy_to_cpu;
-    bit<3>  pri;
-    bit<8>  qos_selector;
-    bit<3>  cos_index;
+    bit<1> copy_to_cpu;
+    bit<3> pri;
+    bit<8> qos_selector;
+    bit<3> cos_index;
     bit<16> rif_id;
     bit<16> mac_limit;
     bit<12> def_vlan;
     bit<48> def_smac;
     bit<16> cpu_port;
-    bit<8>  max_ports;
-    bit<1>  mac_type;
-    bit<2>  oper_status;
-    bit<2>  port_type;
-    bit<3>  stp_state;
-    bit<2>  flow_ctrl;
-    bit<2>  port_mode;
-    bit<4>  port_speed;
-    bit<1>  drop_vlan;
-    bit<1>  drop_tagged;
-    bit<1>  drop_untagged;
-    bit<1>  update_dscp;
+    bit<8> max_ports;
+    bit<1> mac_type;
+    bit<2> oper_status;
+    bit<2> port_type;
+    bit<3> stp_state;
+    bit<2> flow_ctrl;
+    bit<2> port_mode;
+    bit<4> port_speed;
+    bit<1> drop_vlan;
+    bit<1> drop_tagged;
+    bit<1> drop_untagged;
+    bit<1> update_dscp;
     bit<14> mtu;
-    bit<2>  learning;
-    bit<1>  interface_type;
-    bit<1>  v4_enable;
-    bit<1>  v6_enable;
+    bit<2> learning;
+    bit<1> interface_type;
+    bit<1> v4_enable;
+    bit<1> v6_enable;
     bit<12> vlan_id;
     bit<16> srcPort;
     bit<16> dstPort;
-    bit<1>  router_mac;
+    bit<1> router_mac;
 }
 
 struct ingress_intrinsic_metadata_t {
@@ -60,30 +60,30 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> ipv4_length;
     bit<16> id;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> checksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header vlan_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> ethType;
 }
 
 struct metadata {
     @name(".egress_metadata")
-    egress_metadata_t  egress_metadata;
+    egress_metadata_t egress_metadata;
     @name(".ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
@@ -92,26 +92,26 @@ struct headers {
     @name(".eth")
     ethernet_t eth;
     @name(".ipv4")
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
     @name(".vlan")
-    vlan_t     vlan;
+    vlan_t vlan;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_eth") state parse_eth {
-        packet.extract<ethernet_t>(hdr.eth);
-        transition select(hdr.eth.ethType) {
-            16w0x8100: parse_vlan;
-            16w0x800: parse_ipv4;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.eth);
+        transition select (hdr.eth.ethType) {
+            16w0x8100 : parse_vlan;
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     @name(".parse_ipv4") state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
     @name(".parse_vlan") state parse_vlan {
-        packet.extract<vlan_t>(hdr.vlan);
+        packet.extract < vlan_t >(hdr.vlan);
         transition accept;
     }
     @name(".start") state start {
@@ -129,8 +129,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name("mac_learn_digest") struct mac_learn_digest {
     bit<12> vlan_id;
     bit<48> srcAddr;
-    bit<9>  ingress_port;
-    bit<2>  learning;
+    bit<9> ingress_port;
+    bit<2> learning;
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -143,7 +143,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".generate_learn_notify") action generate_learn_notify() {
-        digest<mac_learn_digest>(32w1024, (mac_learn_digest){vlan_id = meta.ingress_metadata.vlan_id,srcAddr = hdr.eth.srcAddr,ingress_port = standard_metadata.ingress_port,learning = meta.ingress_metadata.learning});
+        digest < mac_learn_digest >(32w1024, (mac_learn_digest){vlan_id = meta.ingress_metadata.vlan_id,srcAddr = hdr.eth.srcAddr,ingress_port = standard_metadata.ingress_port,learning = meta.ingress_metadata.learning});
     }
     @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;
@@ -223,8 +223,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vlan_id: exact @name("ingress_metadata.vlan_id");
-            hdr.eth.dstAddr              : exact @name("eth.dstAddr");
+            meta.ingress_metadata.vlan_id : exact @name("ingress_metadata.vlan_id");
+            hdr.eth.dstAddr : exact @name("eth.dstAddr");
         }
         default_action = NoAction();
     }
@@ -235,9 +235,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
+            standard_metadata.ingress_port : exact @name("standard_metadata.ingress_port");
             meta.ingress_metadata.vlan_id : exact @name("ingress_metadata.vlan_id");
-            hdr.eth.srcAddr               : exact @name("eth.srcAddr");
+            hdr.eth.srcAddr : exact @name("eth.srcAddr");
         }
         default_action = NoAction();
     }
@@ -247,9 +247,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf        : exact @name("ingress_metadata.vrf");
-            meta.ingress_metadata.ip_dest    : exact @name("ingress_metadata.ip_dest");
-            meta.ingress_metadata.router_intf: exact @name("ingress_metadata.router_intf");
+            meta.ingress_metadata.vrf : exact @name("ingress_metadata.vrf");
+            meta.ingress_metadata.ip_dest : exact @name("ingress_metadata.ip_dest");
+            meta.ingress_metadata.router_intf : exact @name("ingress_metadata.router_intf");
         }
         default_action = NoAction();
     }
@@ -259,7 +259,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.nhop: exact @name("ingress_metadata.nhop");
+            meta.ingress_metadata.nhop : exact @name("ingress_metadata.nhop");
         }
         default_action = NoAction();
     }
@@ -287,7 +287,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
+            standard_metadata.ingress_port : exact @name("standard_metadata.ingress_port");
         }
         counters = port_counters;
         default_action = NoAction();
@@ -300,8 +300,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf");
-            hdr.ipv4.dstAddr         : lpm @name("ipv4.dstAddr");
+            meta.ingress_metadata.vrf : exact @name("ingress_metadata.vrf");
+            hdr.ipv4.dstAddr : lpm @name("ipv4.dstAddr");
         }
         default_action = NoAction();
     }
@@ -312,7 +312,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.eth.dstAddr: exact @name("eth.dstAddr");
+            hdr.eth.dstAddr : exact @name("eth.dstAddr");
         }
         default_action = NoAction();
     }
@@ -329,7 +329,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact @name("ingress_metadata.vrf");
+            meta.ingress_metadata.vrf : exact @name("ingress_metadata.vrf");
         }
         default_action = NoAction();
     }
@@ -359,22 +359,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.eth);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<vlan_t>(hdr.vlan);
+        packet.emit < ethernet_t >(hdr.eth);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < vlan_t >(hdr.vlan);
     }
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.checksum, HashAlgorithm.csum16);
+        verify_checksum < tuple < bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32 >>, bit<16 >>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.checksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.checksum, HashAlgorithm.csum16);
+        update_checksum < tuple < bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32 >>, bit<16 >>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.ipv4_length, hdr.ipv4.id, hdr.ipv4.flags, hdr.ipv4.offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.checksum, HashAlgorithm.csum16);
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

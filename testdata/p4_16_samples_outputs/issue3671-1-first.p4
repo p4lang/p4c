@@ -18,4 +18,3 @@ control c() {
     apply {
     }
 }
-

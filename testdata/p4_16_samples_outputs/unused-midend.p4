@@ -12,7 +12,7 @@ struct S {
 
 extern E {
     E();
-    bit<32> get<T>(in T b);
+    bit<32> get < T >(in T b);
 }
 
 control c(inout S s) {
@@ -21,7 +21,7 @@ control c(inout S s) {
         s.h.data3 = 32w0;
     }
     @hidden action unused31() {
-        s.h.data1 = e_0.get<bit<32>>(s.h.data2);
+        s.h.data1 = e_0.get < bit<32 >>(s.h.data2);
     }
     @hidden table tbl_unused29 {
         actions = {
@@ -45,6 +45,6 @@ control c(inout S s) {
     }
 }
 
-control cproto<T>(inout T v);
+control cproto < T >(inout T v);
 package top(cproto<_> _c);
 top(c()) main;

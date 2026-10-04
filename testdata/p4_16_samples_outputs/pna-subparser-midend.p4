@@ -8,13 +8,13 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<8>  version_ihl;
-    bit<8>  diffserv;
+    bit<8> version_ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
     bit<16> flags_fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -25,21 +25,21 @@ struct main_metadata_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     state start {
         hdr.ethernet.setInvalid();
         hdr.ipv4.setInvalid();
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: CommonParser_parse_ipv4;
-            default: start_0;
+        pkt.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : CommonParser_parse_ipv4;
+            default : start_0;
         }
     }
     state CommonParser_parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
+        pkt.extract < ipv4_t >(hdr.ipv4);
         transition start_0;
     }
     state start_0 {
@@ -62,4 +62,4 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t me
     }
 }
 
-PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, main_metadata_t, headers_t, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

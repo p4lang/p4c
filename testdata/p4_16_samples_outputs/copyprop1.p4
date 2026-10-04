@@ -27,7 +27,7 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
     }
     table t1 {
         key = {
-            hdr.payload.x: exact;
+            hdr.payload.x : exact;
         }
         actions = {
             a1;

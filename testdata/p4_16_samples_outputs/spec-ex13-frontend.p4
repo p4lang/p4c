@@ -4,4 +4,3 @@ struct FourStruct {
 
 struct Empty {
 }
-

@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -18,7 +18,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -41,11 +41,11 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         x = x + 48w281474976710649;
     }
     action a_two(in bit<16> y, in bit<16> z) {
-        hdr.ethernet.srcAddr[15:0] = y + z;
+        hdr.ethernet.srcAddr[15 : 0] = y + z;
     }
     table t_two {
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
+            hdr.ethernet.etherType : exact @name("hdr.ethernet.etherType");
         }
         actions = {
             a_one(hdr.ethernet.dstAddr);
@@ -56,7 +56,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table t_one {
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
+            hdr.ethernet.etherType : exact @name("hdr.ethernet.etherType");
         }
         actions = {
             a_one(hdr.ethernet.dstAddr);
@@ -84,8 +84,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

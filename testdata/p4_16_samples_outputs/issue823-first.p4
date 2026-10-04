@@ -1,8 +1,8 @@
 #include <core.p4>
 
-parser P<H>(packet_in pkt, out H hdr);
+parser P < H >(packet_in pkt, out H hdr);
 control C();
-package S<H>(P<H> p, C c);
+package S < H >(P<H> p, C c);
 header data_h {
     bit<32> da;
 }
@@ -30,4 +30,4 @@ control MyC1() {
     }
 }
 
-S<headers_t>(MyP1(), MyC1()) main;
+S < headers_t >(MyP1(), MyC1()) main;

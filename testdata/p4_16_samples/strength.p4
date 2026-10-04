@@ -10,7 +10,7 @@ control strength() {
         bit<4> x;
         x = x & 4w0;
         x = 4w0 & x;
-        x = x | 4w0;    
+        x = x | 4w0;
         x = 4w0 | x;
         x = 4w0 ^ x;
         x = x ^ 4w0;
@@ -34,7 +34,7 @@ control strength() {
         y = 4w0 / y;
         y = y % 4w1;
         y = y % 4;
-        y = y - 4w1;    
+        y = y - 4w1;
         y = y - 4w0xF;
         int<4> w;
         w = w - 4s1;
@@ -47,6 +47,6 @@ control strength() {
         z = z || true;
         z = true || z;
         z = z || false;
-        z = false || z;            
+        z = false || z;
     }
 }

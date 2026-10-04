@@ -7,4 +7,3 @@ control ingress(hdr h) {
         h.a[7:0] = ((bit<32>)h.c)[7:0];
     }
 }
-

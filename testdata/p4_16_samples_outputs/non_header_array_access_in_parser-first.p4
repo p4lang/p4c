@@ -11,7 +11,7 @@ header h_t {
 
 struct metadata_t {
     S[2] array;
-    h_t  h;
+    h_t h;
 }
 
 parser p(packet_in packet, out metadata_t metadata) {
@@ -19,13 +19,13 @@ parser p(packet_in packet, out metadata_t metadata) {
         transition s0;
     }
     state s0 {
-        transition select(packet.lookahead<bit<8>>()) {
-            8w1: s1;
-            default: accept;
+        transition select (packet.lookahead < bit<8 >>()) {
+            8w1 : s1;
+            default : accept;
         }
     }
     state s1 {
-        packet.extract<h_t>(metadata.h);
+        packet.extract < h_t >(metadata.h);
         metadata.array[1].f1 = metadata.h.array[0].f1;
         transition accept;
     }

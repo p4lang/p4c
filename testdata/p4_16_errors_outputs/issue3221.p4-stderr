@@ -1,12 +1,12 @@
 issue3221.p4(10): [--Wwarn=unused] warning: 't2' is unused
 type b2 t2;
         ^^
-issue3221.p4(12): [--Wwarn=unused] warning: 'func' is unused
-t1 func(b2 a)
+issue3221.p4(11): [--Wwarn=unused] warning: 'func' is unused
+t1 func(b2 a) {
    ^^^^
-issue3221.p4(14): [--Werror=type-error] error: '(t1)a'
-  return (t1)a;
-         ^^^^^
+issue3221.p4(12): [--Werror=type-error] error: '(t1)a'
+    return (t1)a;
+           ^^^^^
   ---- Actual error:
   Cannot unify type 'bit<2>' with type 'bit<1>'
   ---- Originating from:

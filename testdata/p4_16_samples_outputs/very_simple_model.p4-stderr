@@ -17,6 +17,6 @@ very_simple_model.p4(34): [--Wwarn=unused] warning: 'RECIRCULATE_OUT_PORT' is un
 const PortId RECIRCULATE_OUT_PORT = 0xD;
              ^^^^^^^^^^^^^^^^^^^^
 very_simple_model.p4(71): [--Wwarn=unused] warning: 'package VSS' is unused
-package VSS<H>(Parser<H> p,
+package VSS < H >(Parser<H> p,
         ^^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

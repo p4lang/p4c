@@ -30,9 +30,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
     state parse_hdrs {
         pkt.extract(hdr.eth_hdr);
-        transition select(hdr.eth_hdr.eth_type) {
-            simple_action(): reject;
-            default: accept;
+        transition select (hdr.eth_hdr.eth_type) {
+            simple_action() : reject;
+            default : accept;
         }
     }
 }
@@ -40,7 +40,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     table simple_table {
         key = {
-            simple_action(): exact @name("dummy_name") ;
+            simple_action() : exact @name("dummy_name");
         }
         actions = {
         }
@@ -50,12 +50,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

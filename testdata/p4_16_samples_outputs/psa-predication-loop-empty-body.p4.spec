@@ -56,7 +56,7 @@ table tbl {
 		NoAction
 		increment_in_loop
 	}
-	default_action NoAction args none
+	default_action NoAction args none 
 	size 0x10000
 }
 
@@ -72,3 +72,5 @@ apply {
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
 }
+
+

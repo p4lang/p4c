@@ -8,12 +8,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h1_t {
@@ -37,7 +37,7 @@ struct s2_t {
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     h1_t h1;
     h2_t h2;
 }
@@ -57,7 +57,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 s2_t funky_swap(in s2_t s2)
@@ -91,8 +92,8 @@ control ingressImpl(inout headers_t hdr,
     myCtrl() c1;
 
     apply {
-        hdr.h1 = {hdr.ethernet.dstAddr[47:40], hdr.ethernet.dstAddr[39:32]};
-        s1 = {hdr.ethernet.dstAddr[31:24], hdr.ethernet.dstAddr[23:16]};
+        hdr.h1 = { hdr.ethernet.dstAddr[47 : 40], hdr.ethernet.dstAddr[39 : 32] };
+        s1 = { hdr.ethernet.dstAddr[31 : 24], hdr.ethernet.dstAddr[23 : 16] };
 
         log_msg("Near start of ingress:");
         log_msg("(bit<1>) hdr.h1.isValid()={} .f1={} .f2={}",
@@ -139,11 +140,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

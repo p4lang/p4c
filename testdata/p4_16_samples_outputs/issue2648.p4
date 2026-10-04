@@ -15,7 +15,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
+    H[2] h;
 }
 
 bit<8> give_value(H dummy_hdr) {

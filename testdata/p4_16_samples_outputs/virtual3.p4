@@ -10,9 +10,9 @@ extern Virtual {
 control c(inout bit<16> p) {
     bit<16> local;
     Virtual() cntr = {
-        bit<16> f(in bit<16> ix) {
-            return ix + local;
-        }
+    bit<16> f(in bit<16> ix) {
+    return ix + local;
+    }
     };
     action final_ctr() {
         p = cntr.total();
@@ -22,7 +22,7 @@ control c(inout bit<16> p) {
     }
     table run_ctr {
         key = {
-            p: exact;
+            p : exact;
         }
         actions = {
             add_ctr;

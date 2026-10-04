@@ -3,11 +3,11 @@
 #include <v1model.p4>
 
 struct row_t {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
-    bit<8>  r;
-    bit<8>  v;
+    bit<8> l;
+    bit<8> r;
+    bit<8> v;
 }
 
 header hdr {
@@ -58,7 +58,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_exact {
         key = {
-            h.h.row.e: exact;
+            h.h.row.e : exact;
         }
         actions = {
             a;
@@ -66,8 +66,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a;
         const entries = {
-                        0x1 : a_with_control_params(1);
-                        0x2 : a_with_control_params(2);
+            0x1 : a_with_control_params(1);
+            0x2 : a_with_control_params(2);
         }
     }
     apply {

@@ -1,7 +1,7 @@
 #include <core.p4>
 
-parser parse<H>(packet_in packet, out H headers);
-package ebpfFilter<H>(parse<H> prs);
+parser parse < H >(packet_in packet, out H headers);
+package ebpfFilter < H >(parse<H> prs);
 header Ethernet_h {
     bit<64> dstAddr;
     bit<64> srcAddr;
@@ -14,10 +14,10 @@ struct Headers_t {
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ip;
+            default : reject;
         }
     }
     state ip {
@@ -25,4 +25,4 @@ parser prs(packet_in p, out Headers_t headers) {
     }
 }
 
-ebpfFilter<Headers_t>(prs()) main;
+ebpfFilter < Headers_t >(prs()) main;

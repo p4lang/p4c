@@ -41,16 +41,16 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     bit<4> y;
     table X {
         key = {
-            y: ternary @name("y");
+            y : ternary @name("y");
         }
         actions = {
             A();
             @defaultonly NoAction();
         }
         const entries = {
-                        4w0x0 : A(TableType.TT_ACL);
-                        4w0x1 : A(TableType.TT_FWD);
-                        default : A(TableType.TT_FWD);
+            4w0x0 : A(TableType.TT_ACL);
+            4w0x1 : A(TableType.TT_FWD);
+            default : A(TableType.TT_FWD);
         }
         default_action = NoAction();
     }
@@ -65,4 +65,4 @@ parser packet_parser(packet_in pkt, out headers_t hdrs, inout local_metadata_t l
     }
 }
 
-V1Switch<headers_t, local_metadata_t>(packet_parser(), verify_ck(), ingress(), egress(), compute_ck(), deparser()) main;
+V1Switch < headers_t, local_metadata_t >(packet_parser(), verify_ck(), ingress(), egress(), compute_ck(), deparser()) main;

@@ -2,7 +2,6 @@
     START = 32w0,
     start_i2e_mirrored = 32w1
 }
-
 #include <core.p4>
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
@@ -27,9 +26,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition start_0;
     }
     @name(".$start") state start {
-        transition select((InstanceType_0)standard_metadata.instance_type) {
-            InstanceType_0.START: start_0;
-            InstanceType_0.start_i2e_mirrored: start_i2e_mirrored;
+        transition select ((InstanceType_0) standard_metadata.instance_type) {
+            InstanceType_0.START : start_0;
+            InstanceType_0.start_i2e_mirrored : start_i2e_mirrored;
         }
     }
 }
@@ -72,4 +71,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

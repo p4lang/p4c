@@ -34,7 +34,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -115,10 +115,10 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_VLAN : parse_vlan;
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
+    return select (latest.etherType) {
+    ETHERTYPE_VLAN : parse_vlan;
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
     }
 }
 
@@ -127,10 +127,10 @@ header vlan_tag_t vlan_tag_[VLAN_DEPTH];
 
 parser parse_vlan {
     extract(vlan_tag_[next]);
-    return select(latest.etherType) {
-        ETHERTYPE_VLAN : parse_vlan;
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
+    return select (latest.etherType) {
+    ETHERTYPE_VLAN : parse_vlan;
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
     }
 }
 
@@ -143,10 +143,10 @@ header ipv4_t ipv4;
 
 parser parse_ipv4 {
     extract(ipv4);
-    return select(latest.fragOffset, latest.protocol) {
-        IP_PROTOCOLS_ICMP : parse_icmp;
-        IP_PROTOCOLS_TCP : parse_tcp;
-        IP_PROTOCOLS_UDP : parse_udp;
+    return select (latest.fragOffset, latest.protocol) {
+    IP_PROTOCOLS_ICMP : parse_icmp;
+    IP_PROTOCOLS_TCP : parse_tcp;
+    IP_PROTOCOLS_UDP : parse_udp;
     }
 }
 
@@ -154,10 +154,10 @@ header ipv6_t ipv6;
 
 parser parse_ipv6 {
     extract(ipv6);
-    return select(latest.nextHdr) {
-        IP_PROTOCOLS_ICMPV6 : parse_icmpv6;
-        IP_PROTOCOLS_TCP : parse_tcp;
-        IP_PROTOCOLS_UDP : parse_udp;
+    return select (latest.nextHdr) {
+    IP_PROTOCOLS_ICMPV6 : parse_icmpv6;
+    IP_PROTOCOLS_TCP : parse_tcp;
+    IP_PROTOCOLS_UDP : parse_udp;
     }
 }
 
@@ -181,7 +181,6 @@ parser parse_tcp {
     extract(tcp);
     return ingress;
 }
-
 
 header udp_t udp;
 
@@ -209,8 +208,8 @@ table ipv4_routing {
         ipv4.dstAddr : lpm;
     }
     actions {
-      drop_pkt;
-      hop_ipv4;
+        drop_pkt;
+        hop_ipv4;
     }
 }
 
@@ -244,7 +243,6 @@ register reg2 {
     layout : ipv4_t;
     direct : ipv4_routing;
 }
-
 
 control ingress {
     apply(ipv4_routing);

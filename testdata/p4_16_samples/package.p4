@@ -9,7 +9,9 @@ control proto(out bit<32> o);
 package top(proto _c, bool parameter);  // Testing package with boolean parameter
 
 control c(out bit<32> o) {
-    apply { o = 0; }
+    apply {
+        o = 0;
+    }
 }
 
 top(c(), true) main;

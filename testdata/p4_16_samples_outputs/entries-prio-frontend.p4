@@ -8,4 +8,3 @@ header H {
 struct Headers {
     H h;
 }
-

@@ -1,7 +1,7 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header t1 {
     bit<32> x;
 }
@@ -43,7 +43,7 @@ control c(inout headers_t hdrs) {
     }
     table test {
         key = {
-            hdrs.t1.x: exact;
+            hdrs.t1.x : exact;
         }
         actions = {
             a0;

@@ -4,4 +4,3 @@ extern E {
     void f(bit<8> a);
     void f(bit<8> a);
 }
-

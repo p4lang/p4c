@@ -10,4 +10,3 @@ struct tuple_0 {
 struct S_bit32 {
     tuple_0 t;
 }
-

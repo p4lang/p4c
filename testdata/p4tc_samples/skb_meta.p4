@@ -27,23 +27,23 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 struct my_ingress_headers_t {
-    ethernet_t   ethernet;
-    ipv4_t       ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
     /***********************  P A R S E R  **************************/
@@ -60,16 +60,16 @@ parser Ingress_Parser(
 
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_IPV4: parse_ipv4;
-            default: reject;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4 : parse_ipv4;
+            default : reject;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
+        transition select (hdr.ipv4.protocol) {
             IP_PROTO_TCP : accept;
-            default: reject;
+            default : reject;
         }
     }
 }
@@ -85,20 +85,20 @@ control ingress(
     inout pna_main_output_metadata_t ostd
 )
 {
-   action send_nh(@tc_type("dev") PortId_t port, @tc_type("macaddr") bit<48> srcMac, @tc_type("macaddr") bit<48> dstMac) {
+    action send_nh(@tc_type("dev") PortId_t port, @tc_type("macaddr") bit<48> srcMac, @tc_type("macaddr") bit<48> dstMac) {
 
-	skb_get_meta();
-	skb_set_tc_classid(skb_get_tc_classid() + 1);
-	skb_set_tc_index(skb_get_tc_index() + 1);
+        skb_get_meta();
+        skb_set_tc_classid(skb_get_tc_classid() + 1);
+        skb_set_tc_index(skb_get_tc_index() + 1);
         skb_set_meta();
-	hdr.ethernet.srcAddr = (bit<48>)skb_get_tstamp() ^ srcMac;
+        hdr.ethernet.srcAddr =(bit<48>) skb_get_tstamp() ^ srcMac;
         hdr.ethernet.dstAddr = dstMac;
         send_to_port(port);
-   }
+    }
 
-   action drop() {
+    action drop() {
         drop_packet();
-   }
+    }
 
     table nh_table {
         key = {

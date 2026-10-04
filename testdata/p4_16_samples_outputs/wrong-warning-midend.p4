@@ -32,7 +32,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -51,7 +51,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.a1b") h1_t[2] a1b_0;
     @name("ingressImpl.au1") hu1_t[2] au1_0;
     @name("ingressImpl.au1b") hu1_t[2] au1b_0;
-    @hidden action wrongwarning63() {
+    @hidden action wrongwarning64() {
         hu1_0_h1.setInvalid();
         hu1_0_h2.setInvalid();
         hu1b_0_h1.setInvalid();
@@ -69,14 +69,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         au1b_0[1].h1.setInvalid();
         au1b_0[1].h2.setInvalid();
     }
-    @hidden table tbl_wrongwarning63 {
+    @hidden table tbl_wrongwarning64 {
         actions = {
-            wrongwarning63();
+            wrongwarning64();
         }
-        const default_action = wrongwarning63();
+        const default_action = wrongwarning64();
     }
     apply {
-        tbl_wrongwarning63.apply();
+        tbl_wrongwarning64.apply();
     }
 }
 
@@ -92,8 +92,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

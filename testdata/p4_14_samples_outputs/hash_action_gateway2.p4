@@ -4,7 +4,7 @@
 
 struct counter_metadata_t {
     bit<16> counter_index;
-    bit<4>  counter_run;
+    bit<4> counter_run;
 }
 
 header data_t {
@@ -33,7 +33,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-@name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
+@name(".count1") @min_width(32) counter < bit<14 >>(32w16384, CounterType.packets) count1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
@@ -54,8 +54,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_index;
         }
         key = {
-            hdr.data.f1: exact;
-            hdr.data.f2: exact;
+            hdr.data.f1 : exact;
+            hdr.data.f2 : exact;
         }
         size = 2048;
     }
@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             seth2;
         }
         key = {
-            hdr.data.h1: exact;
+            hdr.data.h1 : exact;
         }
     }
     @name(".test2") table test2 {
@@ -78,7 +78,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             seth4;
         }
         key = {
-            hdr.data.h2: exact;
+            hdr.data.h2 : exact;
         }
     }
     apply {

@@ -2,5 +2,5 @@ expr-select-transition-to-non-state.p4(3): [--Wwarn=unused] warning: parser 'MyP
 parser MyParser10() {
        ^^^^^^^^^^
 expr-select-transition-to-non-state.p4(7): [--Werror=type-error] error: SelectCase must be state
-      (myvs): myvs;
-      ^^^^^^^^^^^^
+            (myvs) : myvs;
+            ^^^^^^^^^^^^^

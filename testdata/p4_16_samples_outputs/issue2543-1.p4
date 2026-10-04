@@ -22,7 +22,7 @@ control ingress(inout Headers h) {
     Headers foo = { { 1, 1, give_val() } };
     apply {
         give_hdr();
-        foo.eth_hdr.eth_type[3:0] = 4w1;
+        foo.eth_hdr.eth_type[3 : 0] = 4w1;
     }
 }
 

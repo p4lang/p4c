@@ -22,8 +22,8 @@ header I {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
-    I          i;
+    H[2] h;
+    I i;
 }
 
 struct Meta {

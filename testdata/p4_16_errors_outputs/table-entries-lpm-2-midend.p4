@@ -3,11 +3,11 @@
 #include <v1model.p4>
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
-    bit<8>  r;
-    bit<8>  v;
+    bit<8> l;
+    bit<8> r;
+    bit<8> v;
 }
 
 struct Header_t {
@@ -19,7 +19,7 @@ struct Meta_t {
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract < hdr >(h.h);
         transition accept;
     }
 }
@@ -41,7 +41,7 @@ control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Header_t h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit < hdr >(h.h);
     }
 }
 
@@ -54,7 +54,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t_lpm") table t_lpm_0 {
         key = {
-            h.h.l: lpm @name("h.h.l");
+            h.h.l : lpm @name("h.h.l");
         }
         actions = {
             a();
@@ -62,11 +62,11 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a();
         const entries = {
-                        8w0x0 &&& 8w0xf0 : a_with_control_params(9w11);
-                        8w0x11 &&& 8w0xf0 : a_with_control_params(9w12);
-                        8w0x11 &&& 8w0xe1 : a_with_control_params(9w13);
-                        8w0x11 &&& 8w0x81 : a_with_control_params(9w14);
-                        8w0x0 : a_with_control_params(9w15);
+            8w0x0 &&& 8w0xf0 : a_with_control_params(9w11);
+            8w0x11 &&& 8w0xf0 : a_with_control_params(9w12);
+            8w0x11 &&& 8w0xe1 : a_with_control_params(9w13);
+            8w0x11 &&& 8w0x81 : a_with_control_params(9w14);
+            8w0x0 : a_with_control_params(9w15);
         }
     }
     apply {
@@ -74,4 +74,4 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
 }
 
-V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Header_t, Meta_t >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

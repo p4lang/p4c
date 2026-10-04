@@ -1,4 +1,3 @@
 extern X {
     void X();
 }
-

@@ -23,7 +23,8 @@ struct headers {
     U[2] u;
 }
 
-struct metadata {}
+struct metadata {
+}
 
 parser ParserImpl(packet_in packet,
                   out headers hdr,
@@ -40,13 +41,17 @@ parser ParserImpl(packet_in packet,
 control ingress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+    }
 }
 
 control egress(inout headers hdr,
                inout metadata meta,
                inout standard_metadata_t standard_metadata)
-{ apply {} }
+{
+    apply {
+    }
+}
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
@@ -55,11 +60,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(),

@@ -46,7 +46,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             noop;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".E2") table E2 {
@@ -55,7 +55,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             noop;
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.b1 : ternary;
         }
     }
     @name(".EA") table EA {
@@ -64,7 +64,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             noop;
         }
         key = {
-            hdr.data.f3: ternary;
+            hdr.data.f3 : ternary;
         }
     }
     @name(".EB") table EB {
@@ -73,7 +73,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             noop;
         }
         key = {
-            hdr.data.f4: ternary;
+            hdr.data.f4 : ternary;
         }
     }
     apply {
@@ -108,7 +108,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1 : ternary;
         }
     }
     @name(".A2") table A2 {
@@ -117,7 +117,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.b1 : ternary;
         }
     }
     @name(".A3") table A3 {
@@ -126,7 +126,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.b3: ternary;
+            hdr.data.b3 : ternary;
         }
     }
     @name(".B1") table B1 {
@@ -135,7 +135,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".B2") table B2 {
@@ -144,7 +144,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.b2: ternary;
+            hdr.data.b2 : ternary;
         }
     }
     apply {

@@ -16,7 +16,7 @@ struct metadata {
 
 parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<payload_t>(hdr.payload);
+        packet.extract < payload_t >(hdr.payload);
         transition accept;
     }
 }
@@ -27,7 +27,7 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
     }
     table t1 {
         key = {
-            hdr.payload.x: exact @name("hdr.payload.x");
+            hdr.payload.x : exact @name("hdr.payload.x");
         }
         actions = {
             a1();
@@ -59,7 +59,7 @@ control MyEgress(inout header_t hdr, inout metadata meta, inout standard_metadat
 
 control MyDeparser(packet_out packet, in header_t hdr) {
     apply {
-        packet.emit<header_t>(hdr);
+        packet.emit < header_t >(hdr);
     }
 }
 
@@ -68,4 +68,4 @@ control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
     }
 }
 
-V1Switch<header_t, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < header_t, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

@@ -18,4 +18,3 @@ struct str {
     your_union  unn;
     bit<32>     dt;
 }
-

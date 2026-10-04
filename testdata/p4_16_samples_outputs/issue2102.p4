@@ -16,6 +16,6 @@ control c(inout headers hdr) {
     }
 }
 
-control e<T>(inout T t);
-package top<T>(e<T> e);
+control e < T >(inout T t);
+package top < T >(e<T> e);
 top(c()) main;

@@ -135,7 +135,7 @@ TEST_F(MetricPassesTest, MetricsTest10) {
     // Check if the metric values got written to compiler context.
     Metrics &metrics = P4CContext::get().options().metrics;
 
-    EXPECT_EQ(metrics.linesOfCode, 150u);
+    EXPECT_EQ(metrics.linesOfCode, 151u);
     EXPECT_EQ(metrics.cyclomaticComplexity.at(cstring::literal("MyIngress")), 7u);
     EXPECT_EQ(metrics.halsteadMetrics.uniqueOperators, 26u);
     EXPECT_NEAR(metrics.halsteadMetrics.effort, 43921.6, 0.1);

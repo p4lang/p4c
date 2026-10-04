@@ -5,4 +5,3 @@ struct S<T> {
 struct S_bit32 {
     tuple<bit<32>, bit<32>> t;
 }
-

@@ -17,7 +17,7 @@ control c(out bit b) {
     }
 }
 
-control e<T>(out T t);
-package top<T>(e<T> e);
+control e < T >(out T t);
+package top < T >(e<T> e);
 
 top(c()) main;

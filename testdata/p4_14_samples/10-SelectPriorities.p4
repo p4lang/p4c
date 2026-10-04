@@ -7,51 +7,50 @@
 
 header_type ethernet_t {
     fields {
-        dstAddr   : 48;
-        srcAddr   : 48;
+        dstAddr : 48;
+        srcAddr : 48;
         ethertype : 16;
     }
 }
 
 header_type vlan_tag_t {
     fields {
-        pcp       : 3;
-        cfi       : 1;
-        vlan_id   : 12;
+        pcp : 3;
+        cfi : 1;
+        vlan_id : 12;
         ethertype : 16;
     }
 }
 
 header_type other_tag_t {
     fields {
-        field1    : 16;
+        field1 : 16;
         ethertype : 16;
     }
 }
 
-header ethernet_t  ethernet;
-header vlan_tag_t  vlan_tag;
+header ethernet_t ethernet;
+header vlan_tag_t vlan_tag;
 header other_tag_t other_tag;
 
 parser start {
     extract(ethernet);
-    return select(latest.ethertype) {
-        0x8100 mask 0xFF00 : parse_vlan_tag;
-        0x8153             : parse_other_tag;
-        default            : ingress;
+    return select (latest.ethertype) {
+    0x8100 mask 0xFF00 : parse_vlan_tag;
+    0x8153 : parse_other_tag;
+    default : ingress;
     }
 }
 
 parser parse_vlan_tag {
     extract(vlan_tag);
-    return ingress; 
+    return ingress;
 }
 
 parser parse_other_tag {
     extract(other_tag);
-    return ingress; 
+    return ingress;
 }
-
 
 action nop() {
 }

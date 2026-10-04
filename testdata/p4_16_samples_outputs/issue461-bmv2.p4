@@ -14,15 +14,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -34,7 +34,7 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 action my_drop(inout standard_metadata_t smeta) {
@@ -44,9 +44,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     const bit<16> ETHERTYPE_IPV4 = 16w0x800;
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_with_count;
         }
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         default_action = drop_with_count;
         counters = ipv4_da_lpm_stats;
@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             my_drop(standard_metadata);
         }
         key = {
-            meta.fwd_metadata.l2ptr: exact;
+            meta.fwd_metadata.l2ptr : exact;
         }
         default_action = my_drop(standard_metadata);
     }
@@ -111,7 +111,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             my_drop(standard_metadata);
         }
         key = {
-            meta.fwd_metadata.out_bd: exact;
+            meta.fwd_metadata.out_bd : exact;
         }
         default_action = my_drop(standard_metadata);
     }

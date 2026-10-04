@@ -6,5 +6,5 @@
  */
 header H
 {
-    tuple<bit, bit> field1; // tuples not allowed in header
+    tuple < bit, bit > field1; // tuples not allowed in header
 }

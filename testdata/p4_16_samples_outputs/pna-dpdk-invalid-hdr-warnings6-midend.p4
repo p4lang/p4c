@@ -16,7 +16,7 @@ header_union Union {
 }
 
 struct H {
-    Header1  h1;
+    Header1 h1;
     Union[2] u;
 }
 
@@ -28,14 +28,14 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         hdr.u[0].h1.setValid();
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
-        pkt.extract<Header1>(hdr.u[0].h3);
+        pkt.extract < Header1 >(hdr.u[0].h3);
         hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h2.setInvalid();
-        transition select(hdr.u[0].h3.isValid()) {
-            true: start_true;
-            false: start_false;
+        transition select (hdr.u[0].h3.isValid()) {
+            true : start_true;
+            false : start_false;
         }
     }
     state start_true {
@@ -75,7 +75,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
 
 control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("ingress.u") Union[2] u_1;
-    @hidden @name("pnadpdkinvalidhdrwarnings6l65") action pnadpdkinvalidhdrwarnings6l65_0() {
+    @hidden @name("pnadpdkinvalidhdrwarnings6l66") action pnadpdkinvalidhdrwarnings6l66_0() {
         u_1[0].h1.setInvalid();
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
@@ -141,14 +141,14 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u_1[1w0].h2.setInvalid();
         u_1[1w0].h3.setInvalid();
     }
-    @hidden @name("tbl_pnadpdkinvalidhdrwarnings6l65") table tbl_pnadpdkinvalidhdrwarnings6l65_0 {
+    @hidden @name("tbl_pnadpdkinvalidhdrwarnings6l66") table tbl_pnadpdkinvalidhdrwarnings6l66_0 {
         actions = {
-            pnadpdkinvalidhdrwarnings6l65_0();
+            pnadpdkinvalidhdrwarnings6l66_0();
         }
-        const default_action = pnadpdkinvalidhdrwarnings6l65_0();
+        const default_action = pnadpdkinvalidhdrwarnings6l66_0();
     }
     apply {
-        tbl_pnadpdkinvalidhdrwarnings6l65_0.apply();
+        tbl_pnadpdkinvalidhdrwarnings6l66_0.apply();
     }
 }
 
@@ -162,4 +162,4 @@ control PreControlImpl(in H hdr, inout M meta, in pna_pre_input_metadata_t istd,
     }
 }
 
-PNA_NIC<H, M, H, M>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
+PNA_NIC < H, M, H, M >(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;

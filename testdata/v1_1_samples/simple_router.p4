@@ -40,9 +40,9 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_IPV4 : parse_ipv4;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_IPV4 : parse_ipv4;
+    default : ingress;
     }
 }
 
@@ -70,7 +70,7 @@ field_list_calculation ipv4_checksum {
     output_width : 16;
 }
 
-calculated_field ipv4.hdrChecksum  {
+calculated_field ipv4.hdrChecksum {
     verify ipv4_checksum;
     update ipv4_checksum;
 }
@@ -79,7 +79,6 @@ parser parse_ipv4 {
     extract(ipv4);
     return ingress;
 }
-
 
 action _drop() {
     drop();
@@ -94,26 +93,28 @@ header_type routing_metadata_t {
 metadata routing_metadata_t routing_metadata;
 
 register drops_register {
-    width: 32;
-    static: drop_expired;
-    instance_count: 16;
+    width : 32;
+    static : drop_expired;
+    instance_count : 16;
 }
 
 register drops_register_enabled {
-    width: 1;
-    static: drop_expired;
-    instance_count: 16;
+    width : 1;
+    static : drop_expired;
+    instance_count : 16;
 }
 
 action do_drop_expired() {
-    drops_register[0] = drops_register[0] + ((drops_register_enabled[0] == 1) ? (bit<32>)1 : 0);
+    drops_register[0] = drops_register[0] +((drops_register_enabled[0] == 1) ?(bit<32>) 1 : 0);
     drop();
 }
 
 table drop_expired {
-    actions { do_drop_expired; }
-    size: 0;
-}        
+    actions {
+        do_drop_expired;
+    }
+    size : 0;
+}
 
 action set_nhop(in bit<32> nhop_ipv4, in bit<9> port) {
     routing_metadata.nhop_ipv4 = nhop_ipv4;
@@ -129,7 +130,7 @@ table ipv4_lpm {
         set_nhop;
         _drop;
     }
-    size: 1024;
+    size : 1024;
 }
 
 action set_dmac(in bit<48> dmac) {
@@ -146,7 +147,7 @@ table forward {
         set_dmac;
         _drop;
     }
-    size: 512;
+    size : 512;
 }
 
 action rewrite_mac(in bit<48> smac) {
@@ -155,18 +156,18 @@ action rewrite_mac(in bit<48> smac) {
 
 table send_frame {
     reads {
-        standard_metadata.egress_port: exact;
+        standard_metadata.egress_port : exact;
     }
     actions {
         rewrite_mac;
         _drop;
     }
-    size: 256;
+    size : 256;
 }
 
 control ingress {
-    if(valid(ipv4)) {
-        if(ipv4.ttl > 1) {
+    if (valid(ipv4)) {
+        if (ipv4.ttl > 1) {
             apply(ipv4_lpm);
             apply(forward);
         } else {

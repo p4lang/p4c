@@ -19,7 +19,7 @@ struct headers {
     h_index2 h0_i2;
     h_index1 h1_i1;
     h_index2 h1_i2;
-    h_index  i;
+    h_index i;
 }
 
 struct Meta {
@@ -27,8 +27,8 @@ struct Meta {
 
 parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<h_index1>(hdr.h0_i1);
-        pkt.extract<h_index>(hdr.i);
+        pkt.extract < h_index1 >(hdr.h0_i1);
+        pkt.extract < h_index >(hdr.i);
         hdr.i.index = hdr.h0_i1.index;
         transition accept;
     }
@@ -56,9 +56,9 @@ control egress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in headers h) {
     apply {
-        pkt.emit<h_index1>(h.h0_i1);
-        pkt.emit<h_index>(h.i);
+        pkt.emit < h_index1 >(h.h0_i1);
+        pkt.emit < h_index >(h.i);
     }
 }
 
-V1Switch<headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

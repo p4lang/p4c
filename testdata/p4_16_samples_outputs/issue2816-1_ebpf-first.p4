@@ -6,44 +6,44 @@
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ip;
+            default : reject;
         }
     }
     state ip {
-        p.extract<IPv4_h>(headers.ipv4);
-        transition select(headers.ipv4.ihl, headers.ipv4.protocol, headers.ipv4.diffserv) {
-            (default, default, default): parse_l4;
-            (default, 8w17, default): parse_l4;
-            (default, default, 8w1): parse_l4;
-            default: reject;
+        p.extract < IPv4_h >(headers.ipv4);
+        transition select (headers.ipv4.ihl, headers.ipv4.protocol, headers.ipv4.diffserv) {
+            (default, default, default) : parse_l4;
+            (default, 8w17, default) : parse_l4;
+            (default, default, 8w1) : parse_l4;
+            default : reject;
         }
     }
     state parse_l4 {
@@ -58,7 +58,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table Check_src_ip {
         key = {
-            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr");
+            headers.ipv4.srcAddr : exact @name("headers.ipv4.srcAddr");
         }
         actions = {
             Reject();
@@ -70,13 +70,13 @@ control pipe(inout Headers_t headers, out bool pass) {
     apply {
         pass = true;
         switch (Check_src_ip.apply().action_run) {
-            Reject: {
-                pass = false;
+            Reject : {
+            pass = false;
             }
-            NoAction: {
+            NoAction : {
             }
         }
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

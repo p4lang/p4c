@@ -8,14 +8,14 @@ header ethernet_t {
 }
 
 header custom_t {
-    bit<1>   padding;
-    bit<1>   f1;
-    bit<2>   f2;
-    bit<4>   f4;
-    bit<8>   f8;
-    bit<16>  f16;
-    bit<32>  f32;
-    bit<64>  f64;
+    bit<1> padding;
+    bit<1> f1;
+    bit<2> f2;
+    bit<4> f4;
+    bit<8> f8;
+    bit<16> f16;
+    bit<32> f32;
+    bit<64> f64;
     bit<128> f128;
 }
 
@@ -24,7 +24,7 @@ struct main_metadata_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    custom_t   custom;
+    custom_t custom;
 }
 
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
@@ -34,14 +34,14 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x8ff: parse_custom;
-            default: accept;
+        pkt.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x8ff : parse_custom;
+            default : accept;
         }
     }
     state parse_custom {
-        pkt.extract<custom_t>(hdr.custom);
+        pkt.extract < custom_t >(hdr.custom);
         transition accept;
     }
 }
@@ -50,11 +50,11 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.a1") action a1(@name("x") bit<73> x) {
-        hdr.custom.f128 = (bit<128>)x;
+        hdr.custom.f128 =(bit<128>) x;
     }
     @name("MainControlImpl.t1") table t1_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             @tableonly a1();
@@ -71,19 +71,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdk_128bit_odd_size103() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-        pkt.emit<custom_t>(hdr.custom);
+    @hidden action pnadpdk_128bit_odd_size102() {
+        pkt.emit < ethernet_t >(hdr.ethernet);
+        pkt.emit < custom_t >(hdr.custom);
     }
-    @hidden table tbl_pnadpdk_128bit_odd_size103 {
+    @hidden table tbl_pnadpdk_128bit_odd_size102 {
         actions = {
-            pnadpdk_128bit_odd_size103();
+            pnadpdk_128bit_odd_size102();
         }
-        const default_action = pnadpdk_128bit_odd_size103();
+        const default_action = pnadpdk_128bit_odd_size102();
     }
     apply {
-        tbl_pnadpdk_128bit_odd_size103.apply();
+        tbl_pnadpdk_128bit_odd_size102.apply();
     }
 }
 
-PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, main_metadata_t, headers_t, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

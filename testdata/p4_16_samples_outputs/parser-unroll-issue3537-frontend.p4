@@ -10,9 +10,9 @@ header h2_t {
 }
 
 header h3_t {
-    bit<3>  pad;
+    bit<3> pad;
     bit<13> f2;
-    bit<8>  f3;
+    bit<8> f3;
 }
 
 header h4_t {
@@ -40,40 +40,40 @@ struct M {
 
 parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
-        packet.extract<h1_t>(hdr.h1);
-        packet.extract<h2_t>(hdr.h2);
-        transition select(hdr.h2.f1) {
-            16w0x800: parse_ipv4;
-            16w0x86dd: parse_ipv6;
-            default: accept;
+        packet.extract < h1_t >(hdr.h1);
+        packet.extract < h2_t >(hdr.h2);
+        transition select (hdr.h2.f1) {
+            16w0x800 : parse_ipv4;
+            16w0x86dd : parse_ipv6;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        packet.extract<h3_t>(hdr.h3);
-        transition select(hdr.h3.f2, hdr.h3.f3) {
-            (13w0, 8w6): parse_tcp;
-            (13w0, 8w17): parse_udp;
-            default: accept;
+        packet.extract < h3_t >(hdr.h3);
+        transition select (hdr.h3.f2, hdr.h3.f3) {
+            (13w0, 8w6) : parse_tcp;
+            (13w0, 8w17) : parse_udp;
+            default : accept;
         }
     }
     state parse_ipv6 {
-        packet.extract<h4_t>(hdr.h4);
-        transition select(hdr.h4.f4) {
-            8w6: parse_tcp;
-            8w17: parse_udp;
-            default: accept;
+        packet.extract < h4_t >(hdr.h4);
+        transition select (hdr.h4.f4) {
+            8w6 : parse_tcp;
+            8w17 : parse_udp;
+            default : accept;
         }
     }
     state parse_tcp {
-        packet.extract<h5_t>(hdr.h5);
+        packet.extract < h5_t >(hdr.h5);
         transition accept;
     }
     state parse_udp {
-        packet.extract<h6_t>(hdr.h6);
-        transition select(hdr.h6.f5) {
-            16w0xcafe: parse_ipv4;
-            16w0xffff: reject;
-            default: accept;
+        packet.extract < h6_t >(hdr.h6);
+        transition select (hdr.h6.f5) {
+            16w0xcafe : parse_ipv4;
+            16w0xffff : reject;
+            default : accept;
         }
     }
 }
@@ -103,4 +103,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

@@ -1,8 +1,9 @@
 // generated from struct_init-1.p4
 
-header H {}
+header H {
+}
 control I()() {
-  apply {
-    H h = { b = 1 };
-  }
+    apply {
+        H h = { b = 1 };
+    }
 }

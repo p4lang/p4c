@@ -1,5 +1,4 @@
 #include <core.p4>
-
 #include <bmv2/psa.p4>
 
 struct EMPTY {
@@ -9,7 +8,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -38,13 +37,13 @@ control MyIC(inout headers_t hdr, inout metadata_t meta, in psa_ingress_input_me
     action increment_in_loop() {
         if (meta.counter == 0) {
             for (bit<32> i = 0; i < 10; i = i + 1) {
-                meta.counter = meta.counter + 1;
+            meta.counter = meta.counter + 1;
             }
         }
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

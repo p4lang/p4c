@@ -6,12 +6,12 @@ header Header {
 
 parser p0(packet_in p, out Header h) {
     state start {
-        p.extract<Header>(h);
-        h.data[7:0] = 8w8;
-        h.data[7:0] = 8w8;
-        transition select(h.data[15:8]) {
-            8w0: next;
-            default: next2;
+        p.extract < Header >(h);
+        h.data[7 : 0] = 8w8;
+        h.data[7 : 0] = 8w8;
+        transition select (h.data[15 : 8]) {
+            8w0 : next;
+            default : next2;
         }
     }
     state next {
@@ -20,15 +20,15 @@ parser p0(packet_in p, out Header h) {
         transition final;
     }
     state next2 {
-        h.data[7:2] = 6w9;
-        h.data[7:2] = h.data[7:2];
-        h.data[7:2] = 6w3;
+        h.data[7 : 2] = 6w9;
+        h.data[7 : 2] = h.data[7 : 2];
+        h.data[7 : 2] = 6w3;
         transition final;
     }
     state final {
-        h.data[15:8] = 8w6;
-        h.data[15:8] = 8w6;
-        h.data[15:8] = 8w6;
+        h.data[15 : 8] = 8w6;
+        h.data[15 : 8] = 8w6;
+        h.data[15 : 8] = 8w6;
         transition accept;
     }
 }

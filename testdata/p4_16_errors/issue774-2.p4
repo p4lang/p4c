@@ -10,7 +10,8 @@
 header Header {
     bit<32> data;
 }
-struct M {}
+struct M {
+}
 
 parser ParserI(packet_in b, out Header p, inout M m, inout standard_metadata_t s) {
     state start {
@@ -25,23 +26,28 @@ parser ParserI(packet_in b, out Header p, inout M m, inout standard_metadata_t s
 }
 
 control IngressI(inout Header p, inout M meta, inout standard_metadata_t s) {
-    apply {}
+    apply {
+    }
 }
 
 control EgressI(inout Header hdr, inout M meta, inout standard_metadata_t smeta) {
-    apply { }
+    apply {
+    }
 };
 
 control DeparserI(packet_out pk, in Header hdr) {
-    apply { }
+    apply {
+    }
 }
 
 control VerifyChecksumI(inout Header hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ComputeChecksumI(inout Header hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(),

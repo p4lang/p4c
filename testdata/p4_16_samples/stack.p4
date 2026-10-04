@@ -7,7 +7,8 @@
 
 #include <core.p4>
 
-header h {}
+header h {
+}
 
 parser p()
 {

@@ -4,4 +4,3 @@ control c() {
         f<match_kind>({ 32w2 });
     }
 }
-

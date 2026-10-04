@@ -7,9 +7,9 @@ header Header {
 parser p0(packet_in p, out Header h) {
     state start {
         p.extract(h);
-        transition select(h.data) {
-            default: next;
-            default: reject;
+        transition select (h.data) {
+            default : next;
+            default : reject;
         }
     }
     state next {

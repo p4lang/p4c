@@ -3,4 +3,3 @@ parser MyParser1() {
         transition accept;
     }
 }
-

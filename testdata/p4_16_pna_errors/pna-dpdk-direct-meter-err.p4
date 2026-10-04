@@ -7,25 +7,25 @@
 #include <core.p4>
 #include <dpdk/pna.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 const bit<8> ETHERNET_HEADER_LEN = 14;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -34,11 +34,9 @@ header ipv4_t {
 struct empty_metadata_t {
 }
 
-
 struct main_metadata_t {
     bit<32> data;
 }
-
 
 struct headers_t {
     ethernet_t ethernet;
@@ -48,7 +46,7 @@ struct headers_t {
 typedef bit<48> ByteCounter_t;
 typedef bit<32> PacketCounter_t;
 typedef bit<80> PacketByteCounter_t;
-typedef bit<16>  FlowIdx_t;
+typedef bit<16> FlowIdx_t;
 const bit<32> IPV4_HOST_TABLE_MAX_ENTRIES = 1024;
 
 parser MainParserImpl(
@@ -59,9 +57,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
 
@@ -77,9 +75,9 @@ control PreControlImpl(
         in    pna_pre_input_metadata_t  istd,
         inout pna_pre_output_metadata_t ostd)
 {
-    apply { }
+    apply {
+    }
 }
-
 
 control MainControlImpl(
     inout headers_t       hdr,           // from main parser
@@ -87,7 +85,7 @@ control MainControlImpl(
     in    pna_main_input_metadata_t  istd,
     inout pna_main_output_metadata_t ostd)
 {
-    DirectCounter<PacketCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_count;
+    DirectCounter < PacketCounter_t >(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_count;
     ActionSelector(PNA_HashAlgorithm_t.TARGET_DEFAULT, 32w1024, 32w16) as;
     action drop() {
         drop_packet();
@@ -95,7 +93,7 @@ control MainControlImpl(
 
     action send(PortId_t port) {
         send_to_port(port);
-	per_prefix_pkt_count.count(1024);
+        per_prefix_pkt_count.count(1024);
     }
 
     table ipv4_host {
@@ -134,4 +132,3 @@ control MainDeparserImpl(
 }
 
 PNA_NIC(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

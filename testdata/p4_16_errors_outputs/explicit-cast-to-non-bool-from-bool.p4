@@ -5,4 +5,3 @@ control SetAndFwd() {
         a = (int<1>)b;
     }
 }
-

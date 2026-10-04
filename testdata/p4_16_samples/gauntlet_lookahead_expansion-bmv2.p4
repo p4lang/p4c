@@ -22,9 +22,9 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        transition select(pkt.lookahead<ethernet_t>().eth_type) {
+        transition select (pkt.lookahead < ethernet_t >().eth_type) {
             (0xDEAD) : parse_hdrs;
-            default  : accept;
+            default : accept;
         }
     }
 
@@ -60,6 +60,4 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 
-
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -27,7 +27,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -44,11 +44,11 @@ parser start {
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        pvs0 : ingress;
-        0x800 : parse_ipv4;
-        pvs1 : parse_inner_ethernet;
-        default : ingress;
+    return select (latest.etherType) {
+    pvs0 : ingress;
+    0x800 : parse_ipv4;
+    pvs1 : parse_inner_ethernet;
+    default : ingress;
     }
 }
 

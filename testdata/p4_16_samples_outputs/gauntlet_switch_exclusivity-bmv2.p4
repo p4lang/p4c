@@ -29,7 +29,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.src_addr: exact;
+            h.eth_hdr.src_addr : exact;
         }
         actions = {
             action_0();
@@ -39,11 +39,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<48> val_0 = 48w20;
         switch (simple_table.apply().action_run) {
-            action_0: {
-                h.eth_hdr.src_addr = val_0;
+            action_0 : {
+            h.eth_hdr.src_addr = val_0;
             }
-            action_1: {
-                val_0 = 48w10;
+            action_1 : {
+            val_0 = 48w10;
             }
         }
     }

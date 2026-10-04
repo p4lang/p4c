@@ -43,16 +43,16 @@ uninit.p4(32): [--Wwarn=invalid-header] warning: accessing a field of an invalid
 uninit.p4(32): [--Wwarn=invalid-header] warning: accessing a field of an invalid header h
         h.data2 = h.data3 + 1; // uninitialized
                   ^
-uninit.p4(73): [--Wwarn=uninitialized-use] warning: b may be uninitialized
+uninit.p4(80): [--Wwarn=uninitialized-use] warning: b may be uninitialized
         b = b + 1; // uninitialized
             ^
-uninit.p4(77): [--Wwarn=uninitialized-use] warning: e may be uninitialized
+uninit.p4(84): [--Wwarn=uninitialized-use] warning: e may be uninitialized
         if (e > 0) { // uninitialized
             ^
-uninit.p4(83): [--Wwarn=uninitialized-use] warning: e may be uninitialized
+uninit.p4(90): [--Wwarn=uninitialized-use] warning: e may be uninitialized
         e = e + 1; // uninitialized
             ^
-uninit.p4(88): [--Wwarn=uninitialized-use] warning: touched may be uninitialized
+uninit.p4(96): [--Wwarn=uninitialized-use] warning: touched may be uninitialized
         touched = !touched; // uninitialized
                    ^^^^^^^
 uninit.p4(59): [--Wwarn=uninitialized-out-param] warning: out parameter 'v' may be uninitialized when 'c' terminates

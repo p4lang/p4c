@@ -26,7 +26,9 @@ control C(inout S s) {
     }
 
     table t {
-        actions = { __xyz; }
+        actions = {
+            __xyz;
+        }
     }
 
     apply {

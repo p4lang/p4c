@@ -6,7 +6,8 @@
  */
 control p()(bit y)
 {
-    apply {}
+    apply {
+    }
 }
 
 control q(in bit z)

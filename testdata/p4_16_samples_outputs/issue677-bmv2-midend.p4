@@ -15,17 +15,17 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @hidden action issue677bmv2l25() {
+    @hidden action issue677bmv2l27() {
         smeta.egress_spec = 9w1;
     }
-    @hidden table tbl_issue677bmv2l25 {
+    @hidden table tbl_issue677bmv2l27 {
         actions = {
-            issue677bmv2l25();
+            issue677bmv2l27();
         }
-        const default_action = issue677bmv2l25();
+        const default_action = issue677bmv2l27();
     }
     apply {
-        tbl_issue677bmv2l25.apply();
+        tbl_issue677bmv2l27.apply();
     }
 }
 
@@ -49,4 +49,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

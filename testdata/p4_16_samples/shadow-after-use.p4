@@ -7,10 +7,16 @@
 #include <core.p4>
 
 control c(inout bit<16> x) {
-    action incx() { x = x + 1; }
-    action nop() { }
+    action incx() {
+        x = x + 1;
+    }
+    action nop() {
+    }
     table x {
-        actions = { incx; nop; }
+        actions = {
+            incx;
+            nop;
+        }
     }
     apply {
         x.apply();

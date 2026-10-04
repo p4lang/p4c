@@ -5,31 +5,31 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_base_t {
-    bit<8>  version_ihl;
-    bit<8>  diffserv;
+    bit<8> version_ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
     bit<16> flags_fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header ipv4_option_timestamp_t {
-    bit<8>      value;
-    bit<8>      len;
+    bit<8> value;
+    bit<8> len;
     varbit<304> data;
 }
 
 struct headers_t {
-    ethernet_t              ethernet;
-    ipv4_base_t             ipv4_base;
+    ethernet_t ethernet;
+    ipv4_base_t ipv4_base;
     ipv4_option_timestamp_t ipv4_option_timestamp;
 }
 
@@ -39,28 +39,28 @@ struct EMPTY {
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         packet.extract(hdr.ipv4_base);
-        transition select(hdr.ipv4_base.version_ihl) {
-            8w0x45: accept;
-            default: parse_ipv4_options;
+        transition select (hdr.ipv4_base.version_ihl) {
+            8w0x45 : accept;
+            default : parse_ipv4_options;
         }
     }
     state parse_ipv4_option_timestamp {
-        bit<16> tmp16 = packet.lookahead<bit<16>>();
-        bit<8> tmp_len = tmp16[7:0];
+        bit<16> tmp16 = packet.lookahead < bit<16 >>();
+        bit<8> tmp_len = tmp16[7 : 0];
         packet.extract(hdr.ipv4_option_timestamp, (bit<32>)tmp_len * 8 - 16);
         transition accept;
     }
     state parse_ipv4_options {
-        transition select(packet.lookahead<bit<8>>()) {
-            8w0x44: parse_ipv4_option_timestamp;
-            default: accept;
+        transition select (packet.lookahead < bit<8 >>()) {
+            8w0x44 : parse_ipv4_option_timestamp;
+            default : accept;
         }
     }
 }
@@ -81,7 +81,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;
@@ -91,7 +91,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl2 {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

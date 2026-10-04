@@ -14,25 +14,26 @@ package S(C c);
 package P(C c1, C c2);
 
 control Dummy() {
-  apply { }
+    apply {
+    }
 }
 
 control MyC1()(P p) {
-  apply {
-  }
+    apply {
+    }
 }
 control MyC2()(P p) {
-  apply {
-  }
+    apply {
+    }
 }
 control MyC3() {
-  Dummy() d;
-  P(d,d) p;
-  C c1 = MyC1(p);
-  C c2 = MyC2(p);
-  apply {
-    c1.apply();
-  }
+    Dummy() d;
+    P(d,d) p;
+    C c1 = MyC1(p);
+    C c2 = MyC2(p);
+    apply {
+        c1.apply();
+    }
 }
 
 S(MyC3()) main;

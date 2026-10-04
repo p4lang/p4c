@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct fwd_metadata_t {
@@ -28,7 +28,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
         transition CommonParser_start;
     }
     state CommonParser_start {
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        buffer.extract < ethernet_t >(parsed_hdr.ethernet);
         transition start_0;
     }
     state start_0 {
@@ -42,7 +42,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
         transition CommonParser_start_0;
     }
     state CommonParser_start_0 {
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        buffer.extract < ethernet_t >(parsed_hdr.ethernet);
         transition start_1;
     }
     state start_1 {
@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     }
     @name("ingress.match_meta") table match_meta_0 {
         key = {
-            user_meta.field: exact @name("user_meta.field");
+            user_meta.field : exact @name("user_meta.field");
         }
         actions = {
             set_output();
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         default_action = NoAction_1();
     }
     apply {
-        user_meta.field = hdr.ethernet.dstAddr[7:0];
+        user_meta.field = hdr.ethernet.dstAddr[7 : 0];
         match_meta_0.apply();
     }
 }
@@ -79,16 +79,16 @@ control egress(inout headers hdr, inout metadata_t user_meta, in psa_egress_inpu
 
 control IngressDeparserImpl(packet_out buffer, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
     apply {
-        buffer.emit<ethernet_t>(hdr.ethernet);
+        buffer.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out empty_t recirculate_meta, inout headers hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     apply {
-        buffer.emit<ethernet_t>(hdr.ethernet);
+        buffer.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-IngressPipeline<headers, metadata_t, empty_t, empty_t, empty_t, empty_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-EgressPipeline<headers, metadata_t, empty_t, empty_t, empty_t, empty_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-PSA_Switch<headers, metadata_t, headers, metadata_t, empty_t, empty_t, empty_t, empty_t, empty_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers, metadata_t, empty_t, empty_t, empty_t, empty_t >(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
+EgressPipeline < headers, metadata_t, empty_t, empty_t, empty_t, empty_t >(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
+PSA_Switch < headers, metadata_t, headers, metadata_t, empty_t, empty_t, empty_t, empty_t, empty_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

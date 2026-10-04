@@ -22,11 +22,11 @@ control c() {
     apply {
         tmp = baz();
         switch (tmp) {
-            8w1: {
-                foo();
+            8w1 : {
+            foo();
             }
-            8w4: {
-                bar();
+            8w4 : {
+            bar();
             }
         }
         t_0.apply();

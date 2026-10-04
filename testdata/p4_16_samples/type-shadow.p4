@@ -4,7 +4,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-extern X<D>
-{
-   void f<D>(in D d); // D shadows D
+extern X<D> {
+    void f<D>(in D d); // D shadows D
 }

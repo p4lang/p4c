@@ -1,4 +1,4 @@
-issue3282.p4(12): [--Werror=type-error] error: g: extern type g with abstract methods cannot be instantiated using a constructor call; consider using a declaration
+issue3282.p4(13): [--Werror=type-error] error: g: extern type g with abstract methods cannot be instantiated using a constructor call; consider using a declaration
 p(g()) main;
   ^^^
 issue3282.p4(7)

@@ -11,7 +11,6 @@ header h {
 
 control c() {
     h hdr;
-
     apply {
         hdr = { 10 };
     }

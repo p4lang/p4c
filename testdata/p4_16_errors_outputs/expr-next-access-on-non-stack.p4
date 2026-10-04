@@ -10,4 +10,3 @@ parser P(packet_in p, out Headers h) {
         p.extract(h.h1.next);
     }
 }
-

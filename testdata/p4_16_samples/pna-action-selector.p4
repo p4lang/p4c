@@ -8,25 +8,24 @@
 #include <core.p4>
 #include <pna.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -75,9 +74,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -93,19 +92,26 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     ActionSelector(PNA_HashAlgorithm_t.TARGET_DEFAULT, 32w1024, 32w16) as;
-    action a1(bit<48> param) { hdr.ethernet.dstAddr = param; }
-    action a2(bit<16> param) { hdr.ethernet.etherType = param; }
+    action a1(bit<48> param) {
+        hdr.ethernet.dstAddr = param;
+    }
+    action a2(bit<16> param) {
+        hdr.ethernet.etherType = param;
+    }
 
     table tbl {
         key = {
             hdr.ethernet.srcAddr : exact;
             user_meta.data : selector;
         }
-        actions = { NoAction; a1; a2; }
+        actions = {
+            NoAction;
+            a1;
+            a2;
+        }
         pna_implementation = as;
     }
 
- 
     apply {
         tbl.apply();
     }

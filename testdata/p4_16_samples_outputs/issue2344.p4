@@ -23,11 +23,11 @@ bit<32> simple_function() {
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action simple_action() {
-        h.h.a = (bit<32>)simple_function();
+        h.h.a =(bit<32>) simple_function();
     }
     table simple_table {
         key = {
-            h.h.b: exact @name("key");
+            h.h.b : exact @name("key");
         }
         actions = {
             simple_action();

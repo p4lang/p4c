@@ -9,6 +9,7 @@ control p()
     apply {
         bit b;
 
-        if (b) ; else ;  // non-bool condition
+        if (b);
+        else;  // non-bool condition
     }
 }

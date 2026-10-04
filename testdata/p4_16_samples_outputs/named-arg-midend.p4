@@ -1,16 +1,16 @@
 extern void f(in bit<16> x, in bool y);
 control c() {
-    @hidden action namedarg14() {
+    @hidden action namedarg12() {
         f(y = true, x = 16w0);
     }
-    @hidden table tbl_namedarg14 {
+    @hidden table tbl_namedarg12 {
         actions = {
-            namedarg14();
+            namedarg12();
         }
-        const default_action = namedarg14();
+        const default_action = namedarg12();
     }
     apply {
-        tbl_namedarg14.apply();
+        tbl_namedarg12.apply();
     }
 }
 

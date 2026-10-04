@@ -24,8 +24,8 @@ parser p(packet_in pkt, out headers hdr, inout metadata meta, inout standard_met
     }
     state parse_h1 {
         pkt.extract(hdr.h1);
-        transition select(2w0) {
-            0: parse_h2;
+        transition select (2w0) {
+            0 : parse_h2;
         }
     }
     state parse_h2 {

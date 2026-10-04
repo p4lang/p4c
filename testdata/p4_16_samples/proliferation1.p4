@@ -25,17 +25,18 @@ parser MyParser(packet_in packet,
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata)
 {
-    action do_round (inout bit<16> x) {
-        x = (x - 1) & x;
+    action do_round(inout bit<16> x) {
+        x =(x - 1) & x;
     }
-    action do_n_rounds (inout bit<16> x) {
+    action do_n_rounds(inout bit<16> x) {
         // As of 2020-Apr-13 version of p4c, and many earlier
         // versions, adding more calls to do_round(x) in this action
         // causes the LocalCopyPropagation pass to approximately
@@ -59,7 +60,7 @@ control MyIngress(inout headers hdr,
         do_round(x);
     }
     apply {
-	if (hdr.ethernet.isValid()) {
+        if (hdr.ethernet.isValid()) {
             do_n_rounds(hdr.ethernet.f);
         }
     }
@@ -69,11 +70,13 @@ control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata)
 {
-    apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
@@ -88,4 +91,4 @@ V1Switch(MyParser(),
          MyEgress(),
          MyComputeChecksum(),
          MyDeparser())
-    main;
+main;

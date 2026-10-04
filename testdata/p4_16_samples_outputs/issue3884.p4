@@ -9,7 +9,7 @@ control C1(in bit<48> address, inout bit<4> val, in bool valid)(int Size) {
     }
     table lookup {
         key = {
-            address: exact;
+            address : exact;
         }
         actions = {
             A;
@@ -55,8 +55,8 @@ struct internal_t {
 }
 
 struct headers_t {
-    eth_t      baseEth;
-    eth_t      extEth;
+    eth_t baseEth;
+    eth_t extEth;
     internal_t internal;
 }
 
@@ -67,8 +67,8 @@ control ingress(inout headers_t hdr) {
     }
 }
 
-control Ingress<H>(inout H hdr);
-package Pipeline<H>(Ingress<H> ingress);
-package Switch<H>(Pipeline<H> pipe);
+control Ingress < H >(inout H hdr);
+package Pipeline < H >(Ingress<H> ingress);
+package Switch < H >(Pipeline<H> pipe);
 Pipeline(ingress()) ig;
 Switch(ig) main;

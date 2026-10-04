@@ -8,18 +8,18 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> total_len;
     bit<16> identification;
-    bit<1>  reserved;
-    bit<1>  do_not_fragment;
-    bit<1>  more_fragments;
+    bit<1> reserved;
+    bit<1> do_not_fragment;
+    bit<1> more_fragments;
     bit<13> frag_offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> header_checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
@@ -27,15 +27,15 @@ header ipv4_t {
 
 struct headers_t {
     ethernet_t outer_ethernet;
-    ipv4_t     outer_ipv4;
+    ipv4_t outer_ipv4;
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 struct tunnel_metadata_t {
     bit<24> id;
     bit<24> vni;
-    bit<4>  tun_type;
+    bit<4> tun_type;
     bit<16> hash;
 }
 
@@ -43,32 +43,32 @@ struct local_metadata_t {
     bit<32> _outer_ipv4_dst0;
     bit<24> _tunnel_id1;
     bit<24> _tunnel_vni2;
-    bit<4>  _tunnel_tun_type3;
+    bit<4> _tunnel_tun_type3;
     bit<16> _tunnel_hash4;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, in pna_main_parser_input_metadata_t istd) {
     state start {
-        packet.extract<ethernet_t>(headers.outer_ethernet);
-        transition select(headers.outer_ethernet.ether_type) {
-            16w0x800: parse_ipv4_otr;
-            default: accept;
+        packet.extract < ethernet_t >(headers.outer_ethernet);
+        transition select (headers.outer_ethernet.ether_type) {
+            16w0x800 : parse_ipv4_otr;
+            default : accept;
         }
     }
     state parse_ipv4_otr {
-        packet.extract<ipv4_t>(headers.outer_ipv4);
-        transition select(headers.outer_ipv4.protocol) {
-            default: accept;
+        packet.extract < ipv4_t >(headers.outer_ipv4);
+        transition select (headers.outer_ipv4.protocol) {
+            default : accept;
         }
     }
 }
 
 control packet_deparser(packet_out packet, in headers_t headers, in local_metadata_t local_metadata, in pna_main_output_metadata_t ostd) {
     @hidden action pnaexampletunnel107() {
-        packet.emit<ethernet_t>(headers.outer_ethernet);
-        packet.emit<ipv4_t>(headers.outer_ipv4);
-        packet.emit<ethernet_t>(headers.ethernet);
-        packet.emit<ipv4_t>(headers.ipv4);
+        packet.emit < ethernet_t >(headers.outer_ethernet);
+        packet.emit < ipv4_t >(headers.outer_ipv4);
+        packet.emit < ethernet_t >(headers.ethernet);
+        packet.emit < ipv4_t >(headers.ipv4);
     }
     @hidden table tbl_pnaexampletunnel107 {
         actions = {
@@ -96,9 +96,9 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     }
     @name("main_control.tunnel_decap.ipv4_tunnel_term_table") table tunnel_decap_ipv4_tunnel_term_table {
         key = {
-            hdr.outer_ipv4.src_addr         : exact @name("ipv4_src");
-            hdr.outer_ipv4.dst_addr         : exact @name("ipv4_dst");
-            local_metadata._tunnel_tun_type3: exact @name("local_metadata.tunnel.tun_type");
+            hdr.outer_ipv4.src_addr : exact @name("ipv4_src");
+            hdr.outer_ipv4.dst_addr : exact @name("ipv4_dst");
+            local_metadata._tunnel_tun_type3 : exact @name("local_metadata.tunnel.tun_type");
         }
         actions = {
             tunnel_decap_decap_outer_ipv4_0();
@@ -111,7 +111,7 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     }
     @name("main_control.tunnel_encap.set_tunnel_encap") table tunnel_encap_set_tunnel_encap {
         key = {
-            istd.input_port: exact @name("istd.input_port");
+            istd.input_port : exact @name("istd.input_port");
         }
         actions = {
             tunnel_encap_set_tunnel_0();
@@ -129,4 +129,4 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     }
 }
 
-PNA_NIC<headers_t, local_metadata_t, headers_t, local_metadata_t>(packet_parser(), PreControlImpl(), main_control(), packet_deparser()) main;
+PNA_NIC < headers_t, local_metadata_t, headers_t, local_metadata_t >(packet_parser(), PreControlImpl(), main_control(), packet_deparser()) main;

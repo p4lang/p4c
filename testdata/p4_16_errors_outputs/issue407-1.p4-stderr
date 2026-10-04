@@ -29,8 +29,8 @@ issue407-1.p4(45): [--Werror=type-error] error: Field 'x14' of 'header H' cannot
     myTuple0 x14;
              ^^^
 issue407-1.p4(35)
-typedef tuple<bit<8>, bit<16>> myTuple0;
-        ^^^^^^^^^^^^^^^^^^^^^^
+typedef tuple < bit<8>, bit<16 >> myTuple0;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
 issue407-1.p4(37): [--Werror=type-error] error: Error while analyzing header H
 header H {
        ^

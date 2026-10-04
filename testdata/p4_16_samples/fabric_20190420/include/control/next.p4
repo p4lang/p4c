@@ -10,7 +10,7 @@
 
 #include "../header.p4"
 
-control Next (inout parsed_headers_t hdr,
+control Next(inout parsed_headers_t hdr,
               inout fabric_metadata_t fabric_metadata,
               inout standard_metadata_t standard_metadata) {
 
@@ -19,7 +19,7 @@ control Next (inout parsed_headers_t hdr,
      */
     @hidden
     action output(port_num_t port_num) {
-     standard_metadata.egress_spec = port_num;
+        standard_metadata.egress_spec = port_num;
     }
 
     @hidden
@@ -64,7 +64,7 @@ control Next (inout parsed_headers_t hdr,
 
     table next_vlan {
         key = {
-            fabric_metadata.next_id: exact @name("next_id");
+            fabric_metadata.next_id : exact @name("next_id");
         }
         actions = {
             set_vlan;
@@ -94,8 +94,8 @@ control Next (inout parsed_headers_t hdr,
 
     table xconnect {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port");
-            fabric_metadata.next_id: exact @name("next_id");
+            standard_metadata.ingress_port : exact @name("ig_port");
+            fabric_metadata.next_id : exact @name("next_id");
         }
         actions = {
             output_xconnect;
@@ -133,7 +133,7 @@ control Next (inout parsed_headers_t hdr,
 
     table simple {
         key = {
-            fabric_metadata.next_id: exact @name("next_id");
+            fabric_metadata.next_id : exact @name("next_id");
         }
         actions = {
             output_simple;
@@ -174,12 +174,12 @@ control Next (inout parsed_headers_t hdr,
 
     table hashed {
         key = {
-            fabric_metadata.next_id: exact @name("next_id");
-            hdr.ipv4.dst_addr: selector;
-            hdr.ipv4.src_addr: selector;
-            fabric_metadata.ip_proto: selector;
-            fabric_metadata.l4_sport: selector;
-            fabric_metadata.l4_dport: selector;
+            fabric_metadata.next_id : exact @name("next_id");
+            hdr.ipv4.dst_addr : selector;
+            hdr.ipv4.src_addr : selector;
+            fabric_metadata.ip_proto : selector;
+            fabric_metadata.l4_sport : selector;
+            fabric_metadata.l4_dport : selector;
         }
         actions = {
             output_hashed;
@@ -208,7 +208,7 @@ control Next (inout parsed_headers_t hdr,
 
     table multicast {
         key = {
-            fabric_metadata.next_id: exact @name("next_id");
+            fabric_metadata.next_id : exact @name("next_id");
         }
         actions = {
             set_mcast_group_id;
@@ -235,7 +235,7 @@ control Next (inout parsed_headers_t hdr,
     }
 }
 
-control EgressNextControl (inout parsed_headers_t hdr,
+control EgressNextControl(inout parsed_headers_t hdr,
                            inout fabric_metadata_t fabric_metadata,
                            inout standard_metadata_t standard_metadata) {
     @hidden
@@ -281,8 +281,8 @@ control EgressNextControl (inout parsed_headers_t hdr,
 
     table egress_vlan {
         key = {
-            fabric_metadata.vlan_id: exact @name("vlan_id");
-            standard_metadata.egress_port: exact @name("eg_port");
+            fabric_metadata.vlan_id : exact @name("vlan_id");
+            standard_metadata.egress_port : exact @name("eg_port");
         }
         actions = {
             pop_vlan;
@@ -295,7 +295,7 @@ control EgressNextControl (inout parsed_headers_t hdr,
 
     apply {
         if (fabric_metadata.is_multicast == _TRUE
-             && standard_metadata.ingress_port == standard_metadata.egress_port) {
+        && standard_metadata.ingress_port == standard_metadata.egress_port) {
             mark_to_drop(standard_metadata);
         }
 
@@ -317,7 +317,7 @@ control EgressNextControl (inout parsed_headers_t hdr,
             hdr.mpls.ttl = hdr.mpls.ttl - 1;
             if (hdr.mpls.ttl == 0) mark_to_drop(standard_metadata);
         } else {
-            if(hdr.ipv4.isValid()) {
+            if (hdr.ipv4.isValid()) {
                 hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
                 if (hdr.ipv4.ttl == 0) mark_to_drop(standard_metadata);
             }

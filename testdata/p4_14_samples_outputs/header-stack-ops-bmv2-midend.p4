@@ -33,32 +33,32 @@ struct metadata {
 
 struct headers {
     @name(".h1")
-    h1_t    h1;
+    h1_t h1;
     @name(".h3")
-    h3_t    h3;
+    h3_t h3;
     @name(".h2")
     h2_t[5] h2;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_h2") state parse_h2 {
-        packet.extract<h2_t>(hdr.h2.next);
-        transition select(hdr.h2.last.next_hdr_type) {
-            8w2: parse_h2;
-            8w3: parse_h3;
-            default: accept;
+        packet.extract < h2_t >(hdr.h2.next);
+        transition select (hdr.h2.last.next_hdr_type) {
+            8w2 : parse_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
     @name(".parse_h3") state parse_h3 {
-        packet.extract<h3_t>(hdr.h3);
+        packet.extract < h3_t >(hdr.h3);
         transition accept;
     }
     @name(".start") state start {
-        packet.extract<h1_t>(hdr.h1);
-        transition select(hdr.h1.next_hdr_type) {
-            8w2: parse_h2;
-            8w3: parse_h3;
-            default: accept;
+        packet.extract < h1_t >(hdr.h1);
+        transition select (hdr.h1.next_hdr_type) {
+            8w2 : parse_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
 }
@@ -82,19 +82,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.h1.h2_valid_bits = 8w0;
     }
     @name(".a_set_h2_valid_bit_0") action a_set_h2_valid_bit_0() {
-        hdr.h1.h2_valid_bits[0:0] = 1w0x1;
+        hdr.h1.h2_valid_bits[0 : 0] = 1w0x1;
     }
     @name(".a_set_h2_valid_bit_1") action a_set_h2_valid_bit_1() {
-        hdr.h1.h2_valid_bits[1:1] = 1w0x1;
+        hdr.h1.h2_valid_bits[1 : 1] = 1w0x1;
     }
     @name(".a_set_h2_valid_bit_2") action a_set_h2_valid_bit_2() {
-        hdr.h1.h2_valid_bits[2:2] = 1w0x1;
+        hdr.h1.h2_valid_bits[2 : 2] = 1w0x1;
     }
     @name(".a_set_h2_valid_bit_3") action a_set_h2_valid_bit_3() {
-        hdr.h1.h2_valid_bits[3:3] = 1w0x1;
+        hdr.h1.h2_valid_bits[3 : 3] = 1w0x1;
     }
     @name(".a_set_h2_valid_bit_4") action a_set_h2_valid_bit_4() {
-        hdr.h1.h2_valid_bits[4:4] = 1w0x1;
+        hdr.h1.h2_valid_bits[4 : 4] = 1w0x1;
     }
     @name(".op1_t_record_op") table op1_t_record_op_0 {
         actions = {
@@ -1129,13 +1129,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<h1_t>(hdr.h1);
-        packet.emit<h2_t>(hdr.h2[0]);
-        packet.emit<h2_t>(hdr.h2[1]);
-        packet.emit<h2_t>(hdr.h2[2]);
-        packet.emit<h2_t>(hdr.h2[3]);
-        packet.emit<h2_t>(hdr.h2[4]);
-        packet.emit<h3_t>(hdr.h3);
+        packet.emit < h1_t >(hdr.h1);
+        packet.emit < h2_t >(hdr.h2[0]);
+        packet.emit < h2_t >(hdr.h2[1]);
+        packet.emit < h2_t >(hdr.h2[2]);
+        packet.emit < h2_t >(hdr.h2[3]);
+        packet.emit < h2_t >(hdr.h2[4]);
+        packet.emit < h3_t >(hdr.h3);
     }
 }
 
@@ -1149,4 +1149,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

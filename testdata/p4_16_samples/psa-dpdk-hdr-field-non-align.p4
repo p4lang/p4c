@@ -3,7 +3,8 @@
 #include <dpdk/psa.p4>
 
 /************ H E A D E R S ******************************/
-struct EMPTY {};
+struct EMPTY {
+};
 
 header ethernet_t {
     bit<8> x0;
@@ -16,7 +17,7 @@ header ethernet_t {
 }
 
 struct headers_t {
-    ethernet_t  ethernet;
+    ethernet_t ethernet;
 }
 
 struct user_meta_data_t {
@@ -49,26 +50,27 @@ control MyIngressControl(
     inout user_meta_data_t m,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
-	action macswp() {
-	    if (m.flg == 0x2) {
-            m.x2= hdr.ethernet.x2;
+    action macswp() {
+        if (m.flg == 0x2) {
+            m.x2 = hdr.ethernet.x2;
             m.addr = hdr.ethernet.dst_addr;
-			hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
-			hdr.ethernet.src_addr = m.addr;
-		}
-	}
+            hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
+            hdr.ethernet.src_addr = m.addr;
+        }
+    }
     table stub {
-        key = {}
+        key = {
+        }
 
         actions = {
             macswp;
         }
-        size=1000000;
+        size = 1000000;
     }
 
     apply {
         m.flg = 0x2;
-        d.egress_port = (PortId_t) ((bit <32>) c.ingress_port ^ 1);
+        d.egress_port =(PortId_t)((bit<32>) c.ingress_port ^ 1);
         stub.apply();
     }
 }
@@ -107,7 +109,8 @@ control MyEgressControl(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply {}
+    apply {
+    }
 }
 
 control MyEgressDeparser(
@@ -118,7 +121,8 @@ control MyEgressDeparser(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply {}
+    apply {
+    }
 }
 
 /************ F I N A L   P A C K A G E ******************************/

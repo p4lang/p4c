@@ -17,15 +17,17 @@ header mpls_t value[5];
 
 parser start {
     extract(value[next]);
-    return select(latest.bos) {
-        0: start;
-        1: ingress;
+    return select (latest.bos) {
+    0 : start;
+    1 : ingress;
     }
 }
 
-table table_clean_bos{
-    actions{ clean_bos; }
-    size: 1;
+table table_clean_bos {
+    actions {
+        clean_bos;
+    }
+    size : 1;
 }
 
 action clean_bos() {

@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header custom_var_len_t {
@@ -14,7 +14,7 @@ header custom_var_len_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
     custom_var_len_t custom_var_len;
 }
 
@@ -23,11 +23,11 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition parse_custom_variable_len_header;
     }
     state parse_custom_variable_len_header {
-        packet.extract<custom_var_len_t>(hdr.custom_var_len, (bit<32>)hdr.ethernet.etherType[7:0]);
+        packet.extract < custom_var_len_t >(hdr.custom_var_len, (bit<32>)hdr.ethernet.etherType[7:0]);
         transition accept;
     }
 }
@@ -58,7 +58,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         } else {
             error_as_int = 8w7;
         }
-        hdr.ethernet.dstAddr[7:0] = error_as_int;
+        hdr.ethernet.dstAddr[7 : 0] = error_as_int;
     }
 }
 
@@ -74,8 +74,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

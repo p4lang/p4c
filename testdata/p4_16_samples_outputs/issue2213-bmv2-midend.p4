@@ -14,27 +14,27 @@ struct headers_t {
 
 struct mystruct1_t {
     bit<16> f1;
-    bit<8>  f2;
+    bit<8> f2;
 }
 
 struct mystruct2_t {
     mystruct1_t s1;
-    bit<16>     f3;
-    bit<32>     f4;
+    bit<16> f3;
+    bit<32> f4;
 }
 
 struct metadata_t {
     bit<16> _s1_f10;
-    bit<8>  _s1_f21;
+    bit<8> _s1_f21;
     bit<16> _s2_s1_f12;
-    bit<8>  _s2_s1_f23;
+    bit<8> _s2_s1_f23;
     bit<16> _s2_f34;
     bit<32> _s2_f45;
 }
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -45,7 +45,7 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @hidden action issue2213bmv2l62() {
+    @hidden action issue2213bmv2l63() {
         meta._s1_f10 = 16w2;
         meta._s1_f21 = 8w3;
         meta._s2_s1_f12 = 16w2;
@@ -54,14 +54,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         meta._s2_f45 = 32w8;
         stdmeta.egress_spec = 9w3;
     }
-    @hidden table tbl_issue2213bmv2l62 {
+    @hidden table tbl_issue2213bmv2l63 {
         actions = {
-            issue2213bmv2l62();
+            issue2213bmv2l63();
         }
-        const default_action = issue2213bmv2l62();
+        const default_action = issue2213bmv2l63();
     }
     apply {
-        tbl_issue2213bmv2l62.apply();
+        tbl_issue2213bmv2l63.apply();
     }
 }
 
@@ -77,8 +77,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

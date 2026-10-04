@@ -20,7 +20,6 @@ struct Headers {
 struct Meta {
 }
 
-
 bit<16> do_function(inout bit<48> val) {
     val = 48w1;
     return 16w1;
@@ -40,7 +39,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
     apply {
-        h.eth_hdr.eth_type = (do_function(h.eth_hdr.dst_addr) << 8w15)[15:0];
+        h.eth_hdr.eth_type =(do_function(h.eth_hdr.dst_addr) << 8w15)[15 : 0];
     }
 }
 

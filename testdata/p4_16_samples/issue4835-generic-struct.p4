@@ -3,16 +3,17 @@
 
 typedef standard_metadata_t std_meta_t;
 
-header standard_t<T> {
-  T src;
-  T dst;
+header standard_t < T > {
+    T src;
+    T dst;
 }
 
-struct headers_t<T> {
-  standard_t<T> standard;
+struct headers_t < T > {
+    standard_t < T > standard;
 }
 
-struct meta_t { }
+struct meta_t {
+}
 
 parser MyParser(packet_in pkt, out headers_t<bit<8>> hdr, inout meta_t meta, inout std_meta_t std_meta) {
     state start {
@@ -22,18 +23,23 @@ parser MyParser(packet_in pkt, out headers_t<bit<8>> hdr, inout meta_t meta, ino
 }
 
 control MyVerifyChecksum(inout headers_t<bit<8>> hdr, inout meta_t meta) {
-    apply { }
+    apply {
+    }
 }
 control MyComputeChecksum(inout headers_t<bit<8>> hdr, inout meta_t meta) {
-    apply { }
+    apply {
+    }
 }
 control MyIngress(inout headers_t<bit<8>> hdr, inout meta_t meta, inout std_meta_t std_meta) {
-   apply { }
+    apply {
+    }
 }
 control MyEgress(inout headers_t<bit<8>> hdr, inout meta_t meta, inout std_meta_t std_meta) {
-    apply { }
+    apply {
+    }
 }
 control MyDeparser(packet_out pkt, in headers_t<bit<8>> hdr) {
-    apply { }
+    apply {
+    }
 }
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

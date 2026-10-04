@@ -5,7 +5,7 @@ header EMPTY_H {
 }
 
 struct EMPTY_M {
-    bit<2>  depth;
+    bit<2> depth;
     bit<16> ret;
 }
 
@@ -28,32 +28,32 @@ header ethernet_t {
 }
 
 header vlan_tag_h {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> ether_type;
 }
 
 struct header_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     vlan_tag_h[2] vlan_tag;
 }
 
 parser MyIP(packet_in buffer, out header_t h, inout EMPTY_M b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
     state start {
         b.depth = 2w1;
-        buffer.extract<ethernet_t>(h.ethernet);
-        transition select(h.ethernet.etherType) {
-            16w0x8100: parse_vlan_tag;
-            default: accept;
+        buffer.extract < ethernet_t >(h.ethernet);
+        transition select (h.ethernet.etherType) {
+            16w0x8100 : parse_vlan_tag;
+            default : accept;
         }
     }
     state parse_vlan_tag {
-        buffer.extract<vlan_tag_h>(h.vlan_tag.next);
+        buffer.extract < vlan_tag_h >(h.vlan_tag.next);
         b.depth = b.depth + 2w3;
-        transition select(h.vlan_tag.last.ether_type) {
-            16w0x8100: parse_vlan_tag;
-            default: accept;
+        transition select (h.vlan_tag.last.ether_type) {
+            16w0x8100 : parse_vlan_tag;
+            default : accept;
         }
     }
 }
@@ -71,104 +71,104 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            a.ethernet.srcAddr: exact @name("a.ethernet.srcAddr");
+            a.ethernet.srcAddr : exact @name("a.ethernet.srcAddr");
         }
         actions = {
             NoAction_1();
         }
         default_action = NoAction_1();
     }
-    @hidden action psavariableindex113() {
-        b.ret = (bit<16>)a.vlan_tag[2w0].vid;
+    @hidden action psavariableindex118() {
+        b.ret =(bit<16>) a.vlan_tag[2w0].vid;
     }
-    @hidden action psavariableindex113_0() {
-        b.ret = (bit<16>)a.vlan_tag[2w1].vid;
+    @hidden action psavariableindex118_0() {
+        b.ret =(bit<16>) a.vlan_tag[2w1].vid;
     }
-    @hidden action psavariableindex113_1() {
+    @hidden action psavariableindex118_1() {
         b.ret = hsVar;
     }
-    @hidden action psavariableindex113_2() {
+    @hidden action psavariableindex118_2() {
         hsiVar = b.depth;
     }
-    @hidden action psavariableindex115() {
-        b.ret = (bit<16>)a.vlan_tag[2w0].vid + 16w5;
+    @hidden action psavariableindex120() {
+        b.ret =(bit<16>) a.vlan_tag[2w0].vid + 16w5;
     }
-    @hidden action psavariableindex115_0() {
-        b.ret = (bit<16>)a.vlan_tag[2w1].vid + 16w5;
+    @hidden action psavariableindex120_0() {
+        b.ret =(bit<16>) a.vlan_tag[2w1].vid + 16w5;
     }
-    @hidden action psavariableindex115_1() {
+    @hidden action psavariableindex120_1() {
         b.ret = hsVar;
     }
-    @hidden action psavariableindex115_2() {
+    @hidden action psavariableindex120_2() {
         hsiVar = b.depth;
     }
-    @hidden table tbl_psavariableindex113 {
+    @hidden table tbl_psavariableindex118 {
         actions = {
-            psavariableindex113_2();
+            psavariableindex118_2();
         }
-        const default_action = psavariableindex113_2();
+        const default_action = psavariableindex118_2();
     }
-    @hidden table tbl_psavariableindex113_0 {
+    @hidden table tbl_psavariableindex118_0 {
         actions = {
-            psavariableindex113();
+            psavariableindex118();
         }
-        const default_action = psavariableindex113();
+        const default_action = psavariableindex118();
     }
-    @hidden table tbl_psavariableindex113_1 {
+    @hidden table tbl_psavariableindex118_1 {
         actions = {
-            psavariableindex113_0();
+            psavariableindex118_0();
         }
-        const default_action = psavariableindex113_0();
+        const default_action = psavariableindex118_0();
     }
-    @hidden table tbl_psavariableindex113_2 {
+    @hidden table tbl_psavariableindex118_2 {
         actions = {
-            psavariableindex113_1();
+            psavariableindex118_1();
         }
-        const default_action = psavariableindex113_1();
+        const default_action = psavariableindex118_1();
     }
-    @hidden table tbl_psavariableindex115 {
+    @hidden table tbl_psavariableindex120 {
         actions = {
-            psavariableindex115_2();
+            psavariableindex120_2();
         }
-        const default_action = psavariableindex115_2();
+        const default_action = psavariableindex120_2();
     }
-    @hidden table tbl_psavariableindex115_0 {
+    @hidden table tbl_psavariableindex120_0 {
         actions = {
-            psavariableindex115();
+            psavariableindex120();
         }
-        const default_action = psavariableindex115();
+        const default_action = psavariableindex120();
     }
-    @hidden table tbl_psavariableindex115_1 {
+    @hidden table tbl_psavariableindex120_1 {
         actions = {
-            psavariableindex115_0();
+            psavariableindex120_0();
         }
-        const default_action = psavariableindex115_0();
+        const default_action = psavariableindex120_0();
     }
-    @hidden table tbl_psavariableindex115_2 {
+    @hidden table tbl_psavariableindex120_2 {
         actions = {
-            psavariableindex115_1();
+            psavariableindex120_1();
         }
-        const default_action = psavariableindex115_1();
+        const default_action = psavariableindex120_1();
     }
     apply {
-        tbl_psavariableindex113.apply();
+        tbl_psavariableindex118.apply();
         if (hsiVar == 2w0) {
-            tbl_psavariableindex113_0.apply();
+            tbl_psavariableindex118_0.apply();
         } else if (hsiVar == 2w1) {
-            tbl_psavariableindex113_1.apply();
+            tbl_psavariableindex118_1.apply();
         } else if (hsiVar >= 2w1) {
-            tbl_psavariableindex113_2.apply();
+            tbl_psavariableindex118_2.apply();
         }
         if (a.ethernet.isValid()) {
             ;
         } else {
-            tbl_psavariableindex115.apply();
+            tbl_psavariableindex120.apply();
             if (hsiVar == 2w0) {
-                tbl_psavariableindex115_0.apply();
+                tbl_psavariableindex120_0.apply();
             } else if (hsiVar == 2w1) {
-                tbl_psavariableindex115_1.apply();
+                tbl_psavariableindex120_1.apply();
             } else if (hsiVar >= 2w1) {
-                tbl_psavariableindex115_2.apply();
+                tbl_psavariableindex120_2.apply();
             }
             tbl_0.apply();
         }
@@ -181,19 +181,19 @@ control MyEC(inout EMPTY_H a, inout EMPTY_M b, in psa_egress_input_metadata_t c,
 }
 
 control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout header_t d, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
-    @hidden action psavariableindex138() {
-        buffer.emit<ethernet_t>(d.ethernet);
-        buffer.emit<vlan_tag_h>(d.vlan_tag[0]);
-        buffer.emit<vlan_tag_h>(d.vlan_tag[1]);
+    @hidden action psavariableindex144() {
+        buffer.emit < ethernet_t >(d.ethernet);
+        buffer.emit < vlan_tag_h >(d.vlan_tag[0]);
+        buffer.emit < vlan_tag_h >(d.vlan_tag[1]);
     }
-    @hidden table tbl_psavariableindex138 {
+    @hidden table tbl_psavariableindex144 {
         actions = {
-            psavariableindex138();
+            psavariableindex144();
         }
-        const default_action = psavariableindex138();
+        const default_action = psavariableindex144();
     }
     apply {
-        tbl_psavariableindex138.apply();
+        tbl_psavariableindex144.apply();
     }
 }
 
@@ -202,6 +202,6 @@ control MyED(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIRC b, inout EMP
     }
 }
 
-IngressPipeline<header_t, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<header_t, EMPTY_M, EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < header_t, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < header_t, EMPTY_M, EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

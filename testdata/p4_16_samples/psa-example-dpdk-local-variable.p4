@@ -14,7 +14,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -62,4 +62,3 @@ IngressPipeline(MyIP(), MyIC(), MyID()) ip;
 EgressPipeline(MyEP(), MyEC(), MyED()) ep;
 
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

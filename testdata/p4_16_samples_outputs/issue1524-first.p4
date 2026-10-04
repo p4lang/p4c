@@ -21,15 +21,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
 
 control bar() {
     apply {
-        const foo_t FOO = (foo_t)7w1;
-        foo_t tmp = (foo_t)7w1;
+        const foo_t FOO =(foo_t) 7w1;
+        foo_t tmp =(foo_t) 7w1;
     }
 }
-

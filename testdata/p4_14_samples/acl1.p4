@@ -36,7 +36,7 @@ header_type acl_metadata_t {
         racl_nexthop : 16;                     /* next hop from racl */
         acl_nexthop_type : 1;                  /* ecmp or nexthop */
         racl_nexthop_type : 1;                 /* ecmp or nexthop */
-        acl_redirect :   1;                    /* ifacl/vacl redirect action */
+        acl_redirect : 1;                    /* ifacl/vacl redirect action */
         racl_redirect : 1;                     /* racl redirect action */
         if_label : 15;                         /* if label for acls */
         bd_label : 16;                         /* bd label for acls */
@@ -60,7 +60,7 @@ header_type ingress_metadata_t {
 
         drop_flag : 1;                         /* if set, drop the packet */
         drop_reason : 8;                       /* drop reason */
-        control_frame: 1;                      /* control frame */
+        control_frame : 1;                      /* control frame */
         enable_dod : 1;                        /* enable deflect on drop */
     }
 }
@@ -104,7 +104,6 @@ header_type ipv6_metadata_t {
 
 metadata ipv6_metadata_t ipv6_metadata;
 
-
 header_type l2_metadata_t {
     fields {
         lkp_pkt_type : 3;
@@ -117,7 +116,7 @@ header_type l2_metadata_t {
         l2_redirect : 1;                       /* l2 redirect action */
         l2_src_miss : 1;                       /* l2 source miss */
         l2_src_move : 16;       		/* l2 source interface mis-match */
-        stp_group: 10;                         /* spanning tree group id */
+        stp_group : 10;                         /* spanning tree group id */
         stp_state : 3;                         /* spanning tree port state */
         bd_stats_idx : 16;                     /* ingress BD stats index */
         learning_enabled : 1;                  /* is learning enabled */
@@ -145,7 +144,7 @@ header_type l3_metadata_t {
         rmac_hit : 1;                          /* dst mac is the router's mac */
         urpf_mode : 2;                         /* urpf mode for current lookup */
         urpf_hit : 1;                          /* hit in urpf table */
-        urpf_check_fail :1;                    /* urpf check failed */
+        urpf_check_fail : 1;                    /* urpf check failed */
         urpf_bd_group : 16;          /* urpf bd group */
         fib_hit : 1;                           /* fib hit */
         fib_nexthop : 16;                      /* next hop from fib */
@@ -155,14 +154,14 @@ header_type l3_metadata_t {
         routed : 1;                            /* is packet routed? */
         outer_routed : 1;                      /* is outer packet routed? */
         mtu_index : 8;                         /* index into mtu table */
-        l3_mtu_check : 16 (saturating);        /* result of mtu check */
+        l3_mtu_check : 16(saturating);        /* result of mtu check */
     }
 }
 
 metadata l3_metadata_t l3_metadata;
 
 header_type security_metadata_t {
-    fields {                            
+    fields {
         storm_control_color : 1;               /* 0 : pass, 1 : fail */
         ipsg_enabled : 1;                      /* is ip source guard feature enabled */
         ipsg_check_fail : 1;                   /* ipsg check failed */
@@ -176,11 +175,11 @@ header_type tunnel_metadata_t {
         ingress_tunnel_type : 5;               /* tunnel type from parser */
         tunnel_vni : 24;                       /* tunnel id */
         mpls_enabled : 1;                      /* is mpls enabled on BD */
-        mpls_label: 20;                        /* Mpls label */
-        mpls_exp: 3;                           /* Mpls Traffic Class */
-        mpls_ttl: 8;                           /* Mpls Ttl */
+        mpls_label : 20;                        /* Mpls label */
+        mpls_exp : 3;                           /* Mpls Traffic Class */
+        mpls_ttl : 8;                           /* Mpls Ttl */
         egress_tunnel_type : 5;                /* type of tunnel */
-        tunnel_index: 14;                      /* tunnel index */
+        tunnel_index : 14;                      /* tunnel index */
         tunnel_src_index : 9;                  /* index to tunnel src ip */
         tunnel_smac_index : 9;                 /* index to tunnel src mac */
         tunnel_dst_index : 14;                 /* index to tunnel dst ip */
@@ -188,7 +187,7 @@ header_type tunnel_metadata_t {
         vnid : 24;                             /* tunnel vnid */
         tunnel_terminate : 1;                  /* is tunnel being terminated? */
         tunnel_if_check : 1;                   /* tun terminate xor originate */
-        egress_header_count: 4;                /* number of mpls header stack */
+        egress_header_count : 4;                /* number of mpls header stack */
     }
 }
 metadata tunnel_metadata_t tunnel_metadata;
@@ -247,7 +246,6 @@ action congestion_mirror_set() {
 action nop() {
 }
 
-
 table system_acl {
     reads {
         acl_metadata.if_label : ternary;
@@ -269,7 +267,7 @@ table system_acl {
         l2_metadata.port_vlan_mapping_miss : ternary;
         security_metadata.ipsg_check_fail : ternary;
         acl_metadata.acl_deny : ternary;
-        acl_metadata.racl_deny: ternary;
+        acl_metadata.racl_deny : ternary;
         l3_metadata.urpf_check_fail : ternary;
         ingress_metadata.drop_flag : ternary;
 
@@ -286,14 +284,14 @@ table system_acl {
         l3_metadata.same_bd_check : ternary;
         l3_metadata.lkp_ip_ttl : ternary;
         l2_metadata.stp_state : ternary;
-        ingress_metadata.control_frame: ternary;
+        ingress_metadata.control_frame : ternary;
         ipv4_metadata.ipv4_unicast_enabled : ternary;
 
         /* egress information */
         ingress_metadata.egress_ifindex : ternary;
 
         /* deflect on drop (-ve mirror) */
-        ingress_metadata.enable_dod: ternary;
+        ingress_metadata.enable_dod : ternary;
     }
     actions {
         nop;

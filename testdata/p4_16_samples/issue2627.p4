@@ -12,6 +12,4 @@ struct S {
     bit<32> b;
 }
 
-const H3<S> h4 = {
-    t = { { b = 0 } }
-};
+const H3<S> h4 = {t = { {b = 0} }};

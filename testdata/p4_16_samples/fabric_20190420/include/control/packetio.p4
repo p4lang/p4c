@@ -33,7 +33,7 @@ control PacketIoEgress(inout parsed_headers_t hdr,
         }
         if (standard_metadata.egress_port == CPU_PORT) {
             if (fabric_metadata.is_multicast == _TRUE &&
-                fabric_metadata.clone_to_cpu == _FALSE) {
+            fabric_metadata.clone_to_cpu == _FALSE) {
                 // Is multicast but clone was not requested.
                 mark_to_drop(standard_metadata);
             }

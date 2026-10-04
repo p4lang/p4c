@@ -8,25 +8,26 @@
 #include <core.p4>
 #include "bmv2/psa.p4"
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct fwd_metadata_t {
 }
 
-struct empty_t {}
+struct empty_t {
+}
 
 struct metadata {
     fwd_metadata_t fwd_metadata;
 }
 
 struct headers {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 parser CommonParser(packet_in buffer,
@@ -75,7 +76,8 @@ control ingress(inout headers hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control egress(inout headers hdr,
@@ -83,7 +85,8 @@ control egress(inout headers hdr,
                in    psa_egress_input_metadata_t  istd,
                inout psa_egress_output_metadata_t ostd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control CommonDeparserImpl(packet_out packet,

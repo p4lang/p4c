@@ -12,4 +12,3 @@ parser P(packet_in p) {
         transition accept;
     }
 }
-

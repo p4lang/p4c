@@ -72,10 +72,10 @@
 #define PKT_INSTANCE_TYPE_REPLICATION 5
 #define PKT_INSTANCE_TYPE_RESUBMIT 6
 
-typedef bit<3>  fwd_type_t;
+typedef bit<3> fwd_type_t;
 typedef bit<32> next_id_t;
 typedef bit<20> mpls_label_t;
-typedef bit<9>  port_num_t;
+typedef bit<9> port_num_t;
 typedef bit<48> mac_addr_t;
 typedef bit<16> mcast_group_id_t;
 typedef bit<12> vlan_id_t;
@@ -97,10 +97,10 @@ const bit<16> ETHERTYPE_QINQ = 0x88A8;
 const bit<16> ETHERTYPE_QINQ_NON_STD = 0x9100;
 const bit<16> ETHERTYPE_VLAN = 0x8100;
 const bit<16> ETHERTYPE_MPLS = 0x8847;
-const bit<16> ETHERTYPE_MPLS_MULTICAST =0x8848;
+const bit<16> ETHERTYPE_MPLS_MULTICAST = 0x8848;
 const bit<16> ETHERTYPE_IPV4 = 0x0800;
 const bit<16> ETHERTYPE_IPV6 = 0x86dd;
-const bit<16> ETHERTYPE_ARP  = 0x0806;
+const bit<16> ETHERTYPE_ARP = 0x0806;
 
 const bit<8> PROTO_ICMP = 1;
 const bit<8> PROTO_TCP = 6;

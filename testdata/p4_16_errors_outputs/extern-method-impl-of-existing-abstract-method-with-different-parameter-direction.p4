@@ -13,4 +13,3 @@ parser MyParser0() {
     state start {
     }
 }
-

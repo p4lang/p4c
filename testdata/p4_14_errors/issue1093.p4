@@ -5,10 +5,11 @@
  */
 
 parser start {
-  return ingress;
+    return ingress;
 }
 control ingress {
-  d();
+    d();
 }
 control d {
-    if(0 == 1) { }
+    if (0 == 1) {
+    }

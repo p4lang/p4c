@@ -17,7 +17,7 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    H tmp = (H){g = (G){eth = (ethernet_t){dst_addr = 48w1}}};
+    H tmp =(H) { g =(G) { eth =(ethernet_t) { dst_addr = 48w1 } } };
     apply {
         tmp.g.eth.dst_addr = 48w1;
     }

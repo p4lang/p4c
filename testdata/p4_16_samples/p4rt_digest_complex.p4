@@ -1,7 +1,8 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
 struct s_t {
     bit<8> f8;
@@ -9,14 +10,14 @@ struct s_t {
 }
 
 // generic struct without @name annotation
-struct s2_t<T> {
+struct s2_t < T > {
     bit<16> f16;
     T f;
 }
 
 // generic struct with @name annotation
 @name("s3_t")
-struct s3_t<T> {
+struct s3_t < T > {
     T f;
 }
 
@@ -25,7 +26,9 @@ header h_t {
     bit<32> f32;
 }
 
-struct headers { h_t h; }
+struct headers {
+    h_t h;
+}
 
 parser MyIP(
     packet_in buffer,
@@ -69,14 +72,15 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 struct digest_t {
     h_t h;
     PortId_t port;
-    s2_t<bit<32> > s2;
-    s3_t<bit<64> > s3;
+    s2_t < bit<32> > s2;
+    s3_t < bit<64> > s3;
 }
 
 control MyID(
@@ -87,7 +91,7 @@ control MyID(
     inout headers hdr,
     in EMPTY e,
     in psa_ingress_output_metadata_t f) {
-    Digest<digest_t>() digest;
+    Digest < digest_t >() digest;
     apply {
         digest.pack({hdr.h, f.egress_port, {16w10, 32w20}, {64w30}});
     }
@@ -101,7 +105,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

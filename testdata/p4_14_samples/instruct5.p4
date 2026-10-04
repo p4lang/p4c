@@ -27,20 +27,21 @@ header data2_t extra[4];
 
 parser start {
     extract(data);
-    return select(data.more) {
-        0: ingress;
-        default: parse_extra;
+    return select (data.more) {
+    0 : ingress;
+    default : parse_extra;
     }
 }
 parser parse_extra {
     extract(extra[next]);
-    return select(latest.more) {
-        0: ingress;
-        default: parse_extra;
+    return select (latest.more) {
+    0 : ingress;
+    default : parse_extra;
     }
 }
 
-action noop() { }
+action noop() {
+}
 action push1(x1) {
     push(extra);  // push with implicit size of 1
     extra[0].x1 = x1;
@@ -55,11 +56,10 @@ action push2(x1, x2) {
     extra[1].more = data.more;
     data.more = 1;
 }
-action pop1() { 
+action pop1() {
     data.more = extra[0].more;
     pop(extra, 1);
 }
-
 
 table test1 {
     reads {
@@ -73,8 +73,15 @@ table test1 {
     }
 }
 
-action output(port) { standard_metadata.egress_spec = port; }
-table output { actions { output; } default_action: output(1); }
+action output(port) {
+    standard_metadata.egress_spec = port;
+}
+table output {
+    actions {
+        output;
+    }
+    default_action : output(1);
+}
 
 control ingress {
     apply(test1);

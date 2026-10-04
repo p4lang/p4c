@@ -18,12 +18,12 @@ header IDX {
 
 struct Headers {
     ethernet_t eth_hdr;
-    IDX        idx;
-    H[2]       h;
+    IDX idx;
+    H[2] h;
 }
 
 bit<8> bound(in bit<8> val, in bit<8> bound) {
-    return (val < bound ? val : bound);
+    return(val < bound ? val : bound);
 }
 struct Meta {
 }

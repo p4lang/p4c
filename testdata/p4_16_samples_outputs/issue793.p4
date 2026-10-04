@@ -20,7 +20,7 @@ control c(in my_packet hdr) {
             nop;
         }
         key = {
-            hdr.data.db: exact;
+            hdr.data.db : exact;
         }
     }
     apply {

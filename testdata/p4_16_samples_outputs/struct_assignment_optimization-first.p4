@@ -22,13 +22,13 @@ struct Metadata {
 
 parser p(packet_in pkt, out Headers hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
 
 control ingress(inout Headers hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    simple_struct test = (simple_struct){a = 128w0};
+    simple_struct test =(simple_struct) { a = 128w0 };
     action pointless_action() {
         test = test;
     }
@@ -42,7 +42,7 @@ control ingress(inout Headers hdr, inout Metadata meta, inout standard_metadata_
 
 control deparser(packet_out packet, in Headers hdr) {
     apply {
-        packet.emit<Headers>(hdr);
+        packet.emit < Headers >(hdr);
     }
 }
 
@@ -61,4 +61,4 @@ control update(inout Headers hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Headers, Metadata>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Metadata >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

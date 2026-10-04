@@ -9,9 +9,9 @@ control c() {
     }
     table forward {
         key = {
-            b: exact;
-            x: exact;
-            b: exact;
+            b : exact;
+            x : exact;
+            b : exact;
         }
         actions = {
             drop;
@@ -19,7 +19,7 @@ control c() {
         }
         const default_action = multicast(1);
         const entries = {
-                        (true, 1, true) : multicast(2);
+            (true, 1, true) : multicast(2);
         }
     }
     apply {

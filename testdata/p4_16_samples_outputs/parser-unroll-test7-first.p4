@@ -20,7 +20,7 @@ header_union U {
 }
 
 struct headers {
-    S    base;
+    S base;
     U[2] u;
 }
 
@@ -29,8 +29,8 @@ struct metadata {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<O1>(hdr.u.next.byte);
-        packet.extract<O2>(hdr.u.next.short);
+        packet.extract < O1 >(hdr.u.next.byte);
+        packet.extract < O2 >(hdr.u.next.short);
         transition accept;
     }
 }
@@ -47,7 +47,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<U[2]>(hdr.u);
+        packet.emit < U[2] >(hdr.u);
     }
 }
 
@@ -61,4 +61,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

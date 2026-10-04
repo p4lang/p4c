@@ -20,4 +20,3 @@ header IPv4_h {
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
-

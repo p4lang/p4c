@@ -35,13 +35,13 @@ table tab1 {
     actions {
         act;
     }
-  size: 70000;
+    size : 70000;
 }
 
 counter cntDum {
-	type: packets;
-	static: tab1;
-        instance_count: 200;
+    type : packets;
+    static : tab1;
+    instance_count : 200;
 
 }
 control ingress {

@@ -19,20 +19,24 @@ parser start_i2e_mirrored {
 
 @pragma packet_entry
 parser start_e2e_mirrored {
-    return select(current(0, 32)) {
-        default : ingress;
-        0xAB00 : Cowles;
+    return select (current(0, 32)) {
+    default : ingress;
+    0xAB00 : Cowles;
     }
 }
 
-action nop() { }
+action nop() {
+}
 
 table exact {
-    reads { standard_metadata.egress_spec: exact; }
-    actions { nop; }
+    reads {
+        standard_metadata.egress_spec : exact;
+    }
+    actions {
+        nop;
+    }
 }
 
 control ingress {
     apply(exact);
 }
-

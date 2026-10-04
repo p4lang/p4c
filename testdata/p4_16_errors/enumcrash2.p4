@@ -5,20 +5,21 @@
  */
 
 #include <core.p4>
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 
 header t1 {
-    bit<32>     f1;
+    bit<32> f1;
 }
 
 struct headers_t {
-    t1          head;
+    t1 head;
 }
 
-
 typedef bit<1> Foo_t;
-enum Foo_t Foo { A = 1w0 , B = 1w1 };
+enum Foo_t Foo {
+    A = 1w0, B = 1w1
+};
 
 extern Object {
     Object(int size);

@@ -5,4 +5,3 @@ header h_t {
 struct my_packet {
     h_t h;
 }
-

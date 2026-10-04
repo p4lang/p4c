@@ -14,9 +14,11 @@
 #include <v1model.p4>
 
 // List of all recognized headers
-struct Headers {}
+struct Headers {
+}
 
-struct Metadata {}
+struct Metadata {
+}
 
 parser P(packet_in b,
          out Headers p,
@@ -32,7 +34,8 @@ parser P(packet_in b,
 control Ing(inout Headers headers,
             inout Metadata meta,
             inout standard_metadata_t standard_meta) {
-    apply {}
+    apply {
+    }
 }
 
 control Eg(inout Headers hdrs,
@@ -40,9 +43,9 @@ control Eg(inout Headers hdrs,
            inout standard_metadata_t standard_meta) {
 
     action update(in bool p, inout bit<64> val) {
-        bit<32> _sub = val[31:0];
+        bit<32> _sub = val[31 : 0];
         _sub = p ? _sub : 32w1;
-        val[31:0] = _sub;
+        val[31 : 0] = _sub;
     }
 
     apply {
@@ -53,16 +56,19 @@ control Eg(inout Headers hdrs,
 
 // deparser section
 control DP(packet_out b, in Headers p) {
-    apply {}
+    apply {
+    }
 }
 
 // Fillers
 control Verify(inout Headers hdrs, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control Compute(inout Headers hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 // Instantiate the top-level V1 Model package.

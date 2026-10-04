@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-typedef tuple<bit<32>, bit<32>> pair;
+typedef tuple < bit<32>, bit<32 >> pair;
 
 struct S {
     bit<32> l;
@@ -26,7 +26,7 @@ control test(out bool zout) {
         S q = { 2, 3 };
 
         zout = p == { 4, 5 };
-        zout = zout && (q == { 2, 3 });
+        zout = zout &&(q == { 2, 3 });
     }
 }
 

@@ -14,7 +14,7 @@ control d(out bool b) {
     H s_0_h;
     H s1_0_h;
     @name("d.tmp") H tmp;
-    @hidden action issue396l27() {
+    @hidden action issue396l26() {
         h_0.setInvalid();
         h3_0[0].setInvalid();
         h3_0[1].setInvalid();
@@ -30,14 +30,14 @@ control d(out bool b) {
         tmp.x = 32w0;
         b = h_0.isValid() && tmp.isValid() && h3_0[1].isValid() && s1_0_h.isValid();
     }
-    @hidden table tbl_issue396l27 {
+    @hidden table tbl_issue396l26 {
         actions = {
-            issue396l27();
+            issue396l26();
         }
-        const default_action = issue396l27();
+        const default_action = issue396l26();
     }
     apply {
-        tbl_issue396l27.apply();
+        tbl_issue396l26.apply();
     }
 }
 

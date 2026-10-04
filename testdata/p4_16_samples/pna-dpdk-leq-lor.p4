@@ -22,7 +22,8 @@ struct Headers {
     hdr_t h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers h, inout Meta m,
          in pna_main_parser_input_metadata_t istd) {
@@ -35,7 +36,8 @@ parser p(packet_in pkt, out Headers h, inout Meta m,
 control PreControlImpl(in Headers hdr, inout Meta meta,
                        in pna_pre_input_metadata_t istd,
                        inout pna_pre_output_metadata_t ostd) {
-    apply {}
+    apply {
+    }
 }
 
 control ingress(inout Headers h, inout Meta m,

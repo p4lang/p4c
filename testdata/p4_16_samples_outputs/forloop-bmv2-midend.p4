@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header hdr_t {
-    bit<8>  count;
+    bit<8> count;
     bit<32> sum;
     bit<32> product;
 }
@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr_t>(h.h);
+        b.extract < hdr_t >(h.h);
         transition accept;
     }
 }
@@ -39,7 +39,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<hdr_t>(h.h);
+        b.emit < hdr_t >(h.h);
     }
 }
 
@@ -51,15 +51,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.sum_loop") action sum_loop() {
         h.h.sum = 32w0;
         for (i_0 = 8w1; i_0 <= h.h.count; i_0 = i_0 + 8w1) {
-            h.h.sum = h.h.sum + (bit<32>)i_0;
+        h.h.sum = h.h.sum +(bit<32>) i_0;
         }
     }
     @name("ingress.nested_loop") action nested_loop() {
         h.h.product = 32w0;
         for (i_1 = 8w0; i_1 < h.h.count; i_1 = i_1 + 8w1) {
-            for (j_0 = 8w0; j_0 < h.h.count; j_0 = j_0 + 8w1) {
-                h.h.product = h.h.product + 32w1;
-            }
+        for (j_0 = 8w0; j_0 < h.h.count; j_0 = j_0 + 8w1) {
+        h.h.product = h.h.product + 32w1;
+        }
         }
     }
     @name("ingress.conditional_loop") action conditional_loop() {
@@ -73,11 +73,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.break_loop") action break_loop() {
         h.h.sum = 32w0;
         for (i_3 = 8w0; i_3 < h.h.count; i_3 = i_3 + 8w1) {
-            if (i_3 == 8w5) {
-                break;
-            } else {
-                h.h.sum = h.h.sum + 32w1;
-            }
+        if (i_3 == 8w5) {
+        break;
+        } else {
+        h.h.sum = h.h.sum + 32w1;
+        }
         }
     }
     @name("ingress.continue_loop") action continue_loop() {
@@ -90,7 +90,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.h.count: exact @name("h.h.count");
+            h.h.count : exact @name("h.h.count");
         }
         actions = {
             sum_loop();
@@ -101,19 +101,19 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = sum_loop();
     }
-    @hidden action forloopbmv2l99() {
+    @hidden action forloopbmv2l119() {
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_forloopbmv2l99 {
+    @hidden table tbl_forloopbmv2l119 {
         actions = {
-            forloopbmv2l99();
+            forloopbmv2l119();
         }
-        const default_action = forloopbmv2l99();
+        const default_action = forloopbmv2l119();
     }
     apply {
         t_0.apply();
-        tbl_forloopbmv2l99.apply();
+        tbl_forloopbmv2l119.apply();
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

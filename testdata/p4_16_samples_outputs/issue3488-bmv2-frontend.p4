@@ -7,27 +7,27 @@ typedef bit<32> IPv4Address;
 header ethernet_t {
     EthernetAddress dst_addr;
     EthernetAddress src_addr;
-    bit<16>         ether_type;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdr_checksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> frag_offset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdr_checksum;
     IPv4Address src_addr;
     IPv4Address dst_addr;
 }
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 enum bit<16> direction_t {
@@ -37,31 +37,31 @@ enum bit<16> direction_t {
 }
 
 struct metadata_t {
-    bool            dropped;
-    direction_t     direction;
-    IPv4Address     dst_ip_addr;
-    IPv4Address     src_ip_addr;
+    bool dropped;
+    direction_t direction;
+    IPv4Address dst_ip_addr;
+    IPv4Address src_ip_addr;
     EthernetAddress ethernet_addr;
 }
 
 parser test_parser(packet_in packet, out headers_t hd, inout metadata_t meta, inout standard_metadata_t standard_meta) {
     state start {
-        packet.extract<ethernet_t>(hd.ethernet);
-        transition select(hd.ethernet.ether_type) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        packet.extract < ethernet_t >(hd.ethernet);
+        transition select (hd.ethernet.ether_type) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        packet.extract<ipv4_t>(hd.ipv4);
+        packet.extract < ipv4_t >(hd.ipv4);
         transition accept;
     }
 }
 
 control test_deparser(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
     }
 }
 
@@ -96,7 +96,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     @name("test_ingress.pre_tbl1") table pre_tbl1_0 {
         key = {
-            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr");
+            hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr");
         }
         actions = {
             action1();
@@ -111,7 +111,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     @name("test_ingress.in_tbl2") table in_tbl2_0 {
         key = {
-            hdr.ipv4.protocol: exact @name("hdr.ipv4.protocol");
+            hdr.ipv4.protocol : exact @name("hdr.ipv4.protocol");
         }
         actions = {
             action4();
@@ -124,7 +124,7 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
     @name("test_ingress.post_tbl3") table post_tbl3_0 {
         key = {
-            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr");
+            hdr.ipv4.src_addr : exact @name("hdr.ipv4.src_addr");
         }
         actions = {
             action5();
@@ -135,11 +135,11 @@ control test_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     apply {
         standard_metadata.egress_spec = standard_metadata.ingress_port;
         switch (pre_tbl1_0.apply().action_run) {
-            action1: 
-            action2: {
-                in_tbl2_0.apply();
+            action1 :
+            action2 : {
+            in_tbl2_0.apply();
             }
-            default: {
+            default : {
             }
         }
         post_tbl3_0.apply();
@@ -154,4 +154,4 @@ control test_egress(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
 }
 
-V1Switch<headers_t, metadata_t>(test_parser(), test_verify_checksum(), test_ingress(), test_egress(), test_compute_checksum(), test_deparser()) main;
+V1Switch < headers_t, metadata_t >(test_parser(), test_verify_checksum(), test_ingress(), test_egress(), test_compute_checksum(), test_deparser()) main;

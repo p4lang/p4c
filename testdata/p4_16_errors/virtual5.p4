@@ -14,9 +14,10 @@ control c(inout bit<16> p) {
         bit<16> f(in bit<16> ix) {
             return ix;
         }
-        bit<16> g() { return 0; }
+        bit<16> g() {
+            return 0;
+        }
     };
-
     apply {
         p = cntr.f(6);
     }
@@ -24,5 +25,4 @@ control c(inout bit<16> p) {
 
 control ctr(inout bit<16> x);
 package top(ctr ctrl);
-
 top(c()) main;

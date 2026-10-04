@@ -34,9 +34,9 @@ struct metadata {
 
 struct headers {
     @name(".h1")
-    h1_t    h1;
+    h1_t h1;
     @name(".h3")
-    h3_t    h3;
+    h3_t h3;
     @name(".h2")
     h2_t[5] h2;
 }
@@ -44,10 +44,10 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_h2") state parse_h2 {
         packet.extract(hdr.h2.next);
-        transition select(hdr.h2.last.next_hdr_type) {
-            8w2: parse_h2;
-            8w3: parse_h3;
-            default: accept;
+        transition select (hdr.h2.last.next_hdr_type) {
+            8w2 : parse_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
     @name(".parse_h3") state parse_h3 {
@@ -56,10 +56,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         packet.extract(hdr.h1);
-        transition select(hdr.h1.next_hdr_type) {
-            8w2: parse_h2;
-            8w3: parse_h3;
-            default: accept;
+        transition select (hdr.h1.next_hdr_type) {
+            8w2 : parse_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
 }
@@ -1217,31 +1217,31 @@ control op3_do(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".op1_a_record_op") action op1_a_record_op() {
-        meta.m.op = (bit<8>)hdr.h1.op1;
+        meta.m.op =(bit<8>) hdr.h1.op1;
     }
     @name(".op2_a_record_op") action op2_a_record_op() {
-        meta.m.op = (bit<8>)hdr.h1.op2;
+        meta.m.op =(bit<8>) hdr.h1.op2;
     }
     @name(".op3_a_record_op") action op3_a_record_op() {
-        meta.m.op = (bit<8>)hdr.h1.op3;
+        meta.m.op =(bit<8>) hdr.h1.op3;
     }
     @name(".a_clear_h2_valid") action a_clear_h2_valid() {
         hdr.h1.h2_valid_bits = 8w0;
     }
     @name(".a_set_h2_valid_bit_0") action a_set_h2_valid_bit_0() {
-        hdr.h1.h2_valid_bits[0:0] = 8w0x1[0:0];
+        hdr.h1.h2_valid_bits[0 : 0] = 8w0x1[0 : 0];
     }
     @name(".a_set_h2_valid_bit_1") action a_set_h2_valid_bit_1() {
-        hdr.h1.h2_valid_bits[1:1] = 8w0x2[1:1];
+        hdr.h1.h2_valid_bits[1 : 1] = 8w0x2[1 : 1];
     }
     @name(".a_set_h2_valid_bit_2") action a_set_h2_valid_bit_2() {
-        hdr.h1.h2_valid_bits[2:2] = 8w0x4[2:2];
+        hdr.h1.h2_valid_bits[2 : 2] = 8w0x4[2 : 2];
     }
     @name(".a_set_h2_valid_bit_3") action a_set_h2_valid_bit_3() {
-        hdr.h1.h2_valid_bits[3:3] = 8w0x8[3:3];
+        hdr.h1.h2_valid_bits[3 : 3] = 8w0x8[3 : 3];
     }
     @name(".a_set_h2_valid_bit_4") action a_set_h2_valid_bit_4() {
-        hdr.h1.h2_valid_bits[4:4] = 8w0x10[4:4];
+        hdr.h1.h2_valid_bits[4 : 4] = 8w0x10[4 : 4];
     }
     @name(".op1_t_record_op") table op1_t_record_op {
         actions = {

@@ -15,20 +15,20 @@ type foo_t bar_t;
 header ethernet_t {
     EthernetAddr_t dstAddr;
     EthernetAddr_t srcAddr;
-    bit<16>        etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>     version;
-    bit<4>     ihl;
-    bit<8>     diffserv;
-    bit<16>    totalLen;
-    bit<16>    identification;
-    bit<3>     flags;
-    bit<13>    fragOffset;
-    bit<8>     ttl;
-    bit<8>     protocol;
-    bit<16>    hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Addr_t srcAddr;
     IPv4Addr_t dstAddr;
 }
@@ -40,9 +40,9 @@ enum MyPacketTypes {
 
 struct test_digest_t {
     EthernetAddr_t in_mac_srcAddr;
-    error          my_parser_error;
-    MyPacketTypes  pkt_type;
-    bar_t          bar;
+    error my_parser_error;
+    MyPacketTypes pkt_type;
+    bar_t bar;
 }
 
 struct metadata {
@@ -51,7 +51,7 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -60,9 +60,9 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            TYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -84,7 +84,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table forward {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             set_dmac;
@@ -100,7 +100,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ipv4_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             set_nhop;
@@ -114,7 +114,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         meta.test_digest.in_mac_srcAddr = hdr.ethernet.srcAddr;
         meta.test_digest.my_parser_error = error.PacketTooShort;
         meta.test_digest.pkt_type = MyPacketTypes.IPv4;
-        meta.test_digest.bar = (bar_t)(foo_t)32w777;
+        meta.test_digest.bar =(bar_t)(foo_t) 32w777;
         digest(1, meta.test_digest);
     }
     apply {
@@ -131,7 +131,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table send_frame {
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port : exact;
         }
         actions = {
             rewrite_mac;
@@ -158,4 +158,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

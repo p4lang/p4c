@@ -6,4 +6,3 @@ control c() {
         H<bit<32>>[-2] s;
     }
 }
-

@@ -32,4 +32,3 @@ control c(bit<32> x) {
     apply {
     }
 }
-

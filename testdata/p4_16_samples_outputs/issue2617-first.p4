@@ -50,47 +50,47 @@ parser p1(out bit<32> v) {
 control c(out bit<32> v) {
     apply {
         switch (32w1) {
-            32w0: {
-                v = 32w0;
+            32w0 : {
+            v = 32w0;
             }
-            32w1: {
-                v = 32w1;
+            32w1 : {
+            v = 32w1;
             }
-            32w2: {
+            32w2 : {
             }
         }
         switch (32w1) {
-            X.A: {
-                v = v + 32w20;
+            X.A : {
+            v = v + 32w20;
             }
-            X.B: {
-                v = v + 32w10;
+            X.B : {
+            v = v + 32w10;
             }
-            32w2: {
+            32w2 : {
             }
         }
         switch (E.C) {
-            E.A: {
-                v = v + 32w200;
+            E.A : {
+            v = v + 32w200;
             }
-            default: {
-                v = v + 32w100;
+            default : {
+            v = v + 32w100;
             }
         }
         switch (E.B) {
-            E.B: {
-                v = v + 32w1000;
+            E.B : {
+            v = v + 32w1000;
             }
-            default: {
-                v = v + 32w2000;
+            default : {
+            v = v + 32w2000;
             }
         }
         switch (X.B) {
-            X.A: {
-                v = v + 32w20000;
+            X.A : {
+            v = v + 32w20000;
             }
-            X.B: {
-                v = v + 32w10000;
+            X.B : {
+            v = v + 32w10000;
             }
         }
     }

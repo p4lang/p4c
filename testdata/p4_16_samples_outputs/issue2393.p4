@@ -10,7 +10,7 @@ struct Headers {
 
 action do_global_action(in bool make_zero, out bool val_undefined) {
     bit<16> tmp;
-    tmp = tmp * (make_zero ? 16w0 : 16w1);
+    tmp = tmp *(make_zero ? 16w0 : 16w1);
 }
 control ingress(inout Headers h) {
     bool filler_bool = true;
@@ -20,7 +20,7 @@ control ingress(inout Headers h) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.src_addr: exact;
+            h.eth_hdr.src_addr : exact;
         }
         actions = {
             do_action();
@@ -32,6 +32,6 @@ control ingress(inout Headers h) {
     }
 }
 
-control c<H>(inout H h);
-package top<H>(c<H> _c);
+control c < H >(inout H h);
+package top < H >(c<H> _c);
 top(ingress()) main;

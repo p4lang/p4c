@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -33,14 +33,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         mark_to_drop(stdmeta);
     }
     action foo(bit<9> out_port) {
-        hdr.ethernet.dstAddr[22:18] = hdr.ethernet.srcAddr[5:1];
+        hdr.ethernet.dstAddr[22 : 18] = hdr.ethernet.srcAddr[5 : 1];
         stdmeta.egress_spec = out_port;
     }
     table t1 {
         key = {
-            hdr.ethernet.srcAddr[22:18]         : exact;
-            hdr.ethernet.dstAddr & 0x10101010101: exact;
-            hdr.ethernet.etherType - 10         : exact @name("etherType_less_10");
+            hdr.ethernet.srcAddr[22 : 18] : exact;
+            hdr.ethernet.dstAddr & 0x10101010101 : exact;
+            hdr.ethernet.etherType - 10 : exact @name("etherType_less_10");
         }
         actions = {
             foo;

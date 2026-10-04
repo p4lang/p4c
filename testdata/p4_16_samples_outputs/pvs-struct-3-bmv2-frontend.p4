@@ -19,20 +19,20 @@ struct value_set_t {
     @match(ternary)
     bit<16> field1;
     @match(lpm)
-    bit<3>  field2;
+    bit<3> field2;
     @match(exact)
-    bit<6>  field3;
+    bit<6> field3;
     @match(range)
-    bit<5>  field4;
+    bit<5> field4;
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    @name("MyParser.pvs") value_set<value_set_t>(4) pvs_0;
+    @name("MyParser.pvs") value_set < value_set_t >(4) pvs_0;
     state start {
-        b.extract<data_h>(p.data);
-        transition select(p.data.da[15:0], p.data.db[7:5], p.data.db[29:24], p.data.da[30:26]) {
-            pvs_0: accept;
-            (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w10 .. 5w20): foo;
+        b.extract < data_h >(p.data);
+        transition select (p.data.da[15 : 0], p.data.db[7 : 5], p.data.db[29 : 24], p.data.da[30 : 26]) {
+            pvs_0 : accept;
+            (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w10 .. 5w20) : foo;
         }
     }
     state foo {
@@ -56,7 +56,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction_1();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da");
+            meta.data[0].da : exact @name("meta.data[0].da");
         }
         default_action = NoAction_1();
     }
@@ -80,4 +80,4 @@ control MyDeparser(packet_out b, in my_packet p) {
     }
 }
 
-V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < my_packet, my_metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

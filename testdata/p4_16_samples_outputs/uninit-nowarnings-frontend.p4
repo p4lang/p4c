@@ -26,9 +26,9 @@ extern bit<32> g(inout bit<32> v, in bit<32> w);
     }
     @noWarn("invalid-header") state next {
         h.data2 = h.data3 + 32w1;
-        transition select(h.isValid()) {
-            true: next1;
-            false: next2;
+        transition select (h.isValid()) {
+            true : next1;
+            false : next2;
         }
     }
     state next1 {
@@ -65,9 +65,9 @@ control c(out bit<32> v) {
         }
         e_0 = e_0 + 32w1;
         switch (t_0.apply().action_run) {
-            a1: {
+            a1 : {
             }
-            default: {
+            default : {
             }
         }
         if (e_0 > 32w0) {

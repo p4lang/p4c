@@ -8,36 +8,49 @@
 #include <core.p4>
 #include <v1model.p4>
 
-header Header { bit<32> data; }
-struct H { Header h; };
+header Header {
+    bit<32> data;
+}
+struct H {
+    Header h;
+};
 struct M {
     bit<32> hash1;
 }
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }
 
-action empty() { }
+action empty() {
+}
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    apply { bool b = hdr.h.isValid(); }
+    apply {
+        bool b = hdr.h.isValid();
+    }
 };
 
 control EgressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    apply { }
+    apply {
+    }
 };
 
 control DeparserI(packet_out pk, in H hdr) {
-    apply { }
+    apply {
+    }
 }
 
 control VerifyChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

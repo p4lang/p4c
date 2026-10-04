@@ -25,21 +25,21 @@ struct col_t {
 
 struct local_metadata_t {
     @MNK_annotation("(test flatten)") @field_list(0)
-    bit<1>     _row0_alt0_valid0;
+    bit<1> _row0_alt0_valid0;
     @MNK_annotation("(test flatten)") @field_list(0)
-    bit<7>     _row0_alt0_port1;
+    bit<7> _row0_alt0_port1;
     @MNK_annotation("(test flatten)") @field_list(0)
-    bit<1>     _row0_alt1_valid2;
+    bit<1> _row0_alt1_valid2;
     @MNK_annotation("(test flatten)") @field_list(0)
-    bit<7>     _row0_alt1_port3;
+    bit<7> _row0_alt1_port3;
     @MNK_annotation("(test flatten)")
-    bit<1>     _row1_alt0_valid4;
+    bit<1> _row1_alt0_valid4;
     @MNK_annotation("(test flatten)")
-    bit<7>     _row1_alt0_port5;
+    bit<7> _row1_alt0_port5;
     @MNK_annotation("(test flatten)")
-    bit<1>     _row1_alt1_valid6;
+    bit<1> _row1_alt1_valid6;
     @MNK_annotation("(test flatten)")
-    bit<7>     _row1_alt1_port7;
+    bit<7> _row1_alt1_port7;
     bitvec_hdr _col_bvh8;
     bitvec_hdr _bvh09;
     bitvec_hdr _bvh110;
@@ -51,18 +51,18 @@ struct parsed_packet_t {
 }
 
 struct tst_t {
-    row_t      row0;
-    row_t      row1;
-    col_t      col;
+    row_t row0;
+    row_t row1;
+    col_t col;
     bitvec_hdr bvh0;
     bitvec_hdr bvh1;
 }
 
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        pk.extract<bitvec_hdr>(h.bvh0);
-        pk.extract<bitvec_hdr>(h.bvh1);
-        pk.extract<bitvec_hdr>(local_metadata._col_bvh8);
+        pk.extract < bitvec_hdr >(h.bvh0);
+        pk.extract < bitvec_hdr >(h.bvh1);
+        pk.extract < bitvec_hdr >(local_metadata._col_bvh8);
         transition accept;
     }
 }
@@ -79,8 +79,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1._row_alt1_valid2                  : exact @name("h.bvh1.row.alt1.valid");
-            local_metadata._col_bvh8._row_alt0_valid0: exact @name("local_metadata.col.bvh.row.alt0.valid");
+            h.bvh1._row_alt1_valid2 : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata._col_bvh8._row_alt0_valid0 : exact @name("local_metadata.col.bvh.row.alt0.valid");
         }
         actions = {
             do_act();
@@ -128,8 +128,8 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 
 control deparser(packet_out b, in parsed_packet_t h) {
     apply {
-        b.emit<bitvec_hdr>(h.bvh0);
-        b.emit<bitvec_hdr>(h.bvh1);
+        b.emit < bitvec_hdr >(h.bvh0);
+        b.emit < bitvec_hdr >(h.bvh1);
     }
 }
 
@@ -143,4 +143,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch < parsed_packet_t, local_metadata_t >(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;

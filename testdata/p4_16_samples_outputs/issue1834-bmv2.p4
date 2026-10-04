@@ -21,13 +21,13 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     }
     table test_table {
         key = {
-            meta.test: exact;
+            meta.test : exact;
         }
         actions = {
             act;
         }
         const entries = {
-                        1 : act(1);
+            1 : act(1);
         }
     }
     apply {

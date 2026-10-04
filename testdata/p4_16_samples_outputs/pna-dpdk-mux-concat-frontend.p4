@@ -1,5 +1,4 @@
 #include <core.p4>
-
 #include <pna.p4>
 
 header H {
@@ -15,7 +14,7 @@ struct Metadata {
 
 parser MainParser(packet_in pkt, out Headers hdr, inout Metadata meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<H>(hdr.h);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -27,15 +26,15 @@ control PreControl(in Headers hdr, inout Metadata meta, in pna_pre_input_metadat
 
 control MainControl(inout Headers hdr, inout Metadata meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     apply {
-        hdr.h.value = (hdr.h.value == 8w1 ? 7w2 : 7w0) ++ 1w1;
+        hdr.h.value =(hdr.h.value == 8w1 ? 7w2 : 7w0) ++ 1w1;
         send_to_port((PortId_t)32w1);
     }
 }
 
 control MainDeparser(packet_out pkt, in Headers hdr, in Metadata meta, in pna_main_output_metadata_t ostd) {
     apply {
-        pkt.emit<Headers>(hdr);
+        pkt.emit < Headers >(hdr);
     }
 }
 
-PNA_NIC<Headers, Metadata, Headers, Metadata>(MainParser(), PreControl(), MainControl(), MainDeparser()) main;
+PNA_NIC < Headers, Metadata, Headers, Metadata >(MainParser(), PreControl(), MainControl(), MainDeparser()) main;

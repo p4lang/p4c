@@ -7,4 +7,3 @@ control c() {
         H<int>[3] s;
     }
 }
-

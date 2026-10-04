@@ -13,7 +13,8 @@ control c(in bit<4> v) {
         bool b = v == e.a;
         switch (v) {
             e.a:
-            default: {}
+            default: {
+            }
         }
     }
 }

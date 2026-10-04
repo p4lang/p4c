@@ -14,10 +14,10 @@ header data_t16 {
 }
 
 struct headers {
-    data_t   h1;
+    data_t h1;
     data_t16 h2;
-    data_t   h3;
-    data_t   h4;
+    data_t h3;
+    data_t h4;
 }
 
 struct headers2 {
@@ -29,11 +29,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     data_t p_shdr_h1;
     state start {
         phdr_0_h1.setInvalid();
-        packet.extract<data_t>(phdr_0_h1);
-        transition select(standard_metadata.ingress_port) {
-            9w0: p0;
-            9w1: p1;
-            default: accept;
+        packet.extract < data_t >(phdr_0_h1);
+        transition select (standard_metadata.ingress_port) {
+            9w0 : p0;
+            9w1 : p1;
+            default : accept;
         }
     }
     state p0 {
@@ -42,21 +42,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.h3.setInvalid();
         hdr.h4.setInvalid();
         p_shdr_h1.setInvalid();
-        packet.extract<data_t>(hdr.h1);
-        transition select(hdr.h1.f) {
-            8w1: Subparser_sp1;
-            8w2: Subparser_sp2;
-            default: p0_0;
+        packet.extract < data_t >(hdr.h1);
+        transition select (hdr.h1.f) {
+            8w1 : Subparser_sp1;
+            8w2 : Subparser_sp2;
+            default : p0_0;
         }
     }
     state Subparser_sp1 {
-        packet.extract<data_t>(hdr.h3);
-        packet.extract<data_t>(p_shdr_h1);
+        packet.extract < data_t >(hdr.h3);
+        packet.extract < data_t >(p_shdr_h1);
         phdr_0_h1 = p_shdr_h1;
         transition p0_0;
     }
     state Subparser_sp2 {
-        packet.extract<data_t16>(hdr.h2);
+        packet.extract < data_t16 >(hdr.h2);
         transition p0_0;
     }
     state p0_0 {
@@ -69,20 +69,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.h3.setInvalid();
         hdr.h4.setInvalid();
         p_shdr_h1.setInvalid();
-        packet.extract<data_t>(hdr.h1);
-        transition select(hdr.h1.f) {
-            8w1: Subparser_sp1_0;
-            8w2: Subparser_sp2_0;
-            default: p1_0;
+        packet.extract < data_t >(hdr.h1);
+        transition select (hdr.h1.f) {
+            8w1 : Subparser_sp1_0;
+            8w2 : Subparser_sp2_0;
+            default : p1_0;
         }
     }
     state Subparser_sp1_0 {
-        packet.extract<data_t>(hdr.h3);
-        packet.extract<data_t>(p_shdr_h1);
+        packet.extract < data_t >(hdr.h3);
+        packet.extract < data_t >(p_shdr_h1);
         transition p1_0;
     }
     state Subparser_sp2_0 {
-        packet.extract<data_t16>(hdr.h2);
+        packet.extract < data_t16 >(hdr.h2);
         transition p1_0;
     }
     state p1_0 {
@@ -91,40 +91,40 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action parserinlinetest2l89() {
+    @hidden action parserinlinetest2l96() {
         standard_metadata.egress_spec = 9w2;
     }
-    @hidden action parserinlinetest2l91() {
+    @hidden action parserinlinetest2l98() {
         standard_metadata.egress_spec = 9w3;
     }
-    @hidden action parserinlinetest2l93() {
+    @hidden action parserinlinetest2l100() {
         standard_metadata.egress_spec = 9w10;
     }
-    @hidden table tbl_parserinlinetest2l89 {
+    @hidden table tbl_parserinlinetest2l96 {
         actions = {
-            parserinlinetest2l89();
+            parserinlinetest2l96();
         }
-        const default_action = parserinlinetest2l89();
+        const default_action = parserinlinetest2l96();
     }
-    @hidden table tbl_parserinlinetest2l91 {
+    @hidden table tbl_parserinlinetest2l98 {
         actions = {
-            parserinlinetest2l91();
+            parserinlinetest2l98();
         }
-        const default_action = parserinlinetest2l91();
+        const default_action = parserinlinetest2l98();
     }
-    @hidden table tbl_parserinlinetest2l93 {
+    @hidden table tbl_parserinlinetest2l100 {
         actions = {
-            parserinlinetest2l93();
+            parserinlinetest2l100();
         }
-        const default_action = parserinlinetest2l93();
+        const default_action = parserinlinetest2l100();
     }
     apply {
         if (hdr.h2.isValid()) {
-            tbl_parserinlinetest2l89.apply();
+            tbl_parserinlinetest2l96.apply();
         } else if (hdr.h3.isValid()) {
-            tbl_parserinlinetest2l91.apply();
+            tbl_parserinlinetest2l98.apply();
         } else {
-            tbl_parserinlinetest2l93.apply();
+            tbl_parserinlinetest2l100.apply();
         }
     }
 }
@@ -136,10 +136,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data_t>(hdr.h1);
-        packet.emit<data_t16>(hdr.h2);
-        packet.emit<data_t>(hdr.h3);
-        packet.emit<data_t>(hdr.h4);
+        packet.emit < data_t >(hdr.h1);
+        packet.emit < data_t16 >(hdr.h2);
+        packet.emit < data_t >(hdr.h3);
+        packet.emit < data_t >(hdr.h4);
     }
 }
 
@@ -153,4 +153,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

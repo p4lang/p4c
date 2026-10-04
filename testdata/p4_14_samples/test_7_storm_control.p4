@@ -54,13 +54,13 @@ header_type ingress_metadata_t {
         drop_0 : 1;
         drop_reason : 8;
         copy_to_cpu : 1;
-        mirror_sesion_id: 10;
+        mirror_sesion_id : 10;
         urpf : 1;
-        urpf_mode: 2;
-        urpf_strict: 16;
-        ingress_bypass: 1;
-        ipv4_dstaddr_24b: 24;
-        nhop_index: 16;
+        urpf_mode : 2;
+        urpf_strict : 16;
+        ingress_bypass : 1;
+        ipv4_dstaddr_24b : 24;
+        nhop_index : 16;
 
         if_drop : 1;
         route_drop : 1;
@@ -73,7 +73,6 @@ header_type ingress_metadata_t {
         buffer_qos : 3;
         ip_srcPort : 16;
         ip_dstPort : 16;
-
 
         mcast_pkt : 1;
         inner_mcast_pkt : 1;
@@ -98,7 +97,6 @@ header_type ingress_metadata_t {
     }
 }
 
-
 header_type ethernet_t {
     fields {
         dstAddr : 48;
@@ -119,10 +117,8 @@ parser parse_ethernet {
     return ingress;
 }
 
-
-
-action no_action(){
-   no_op();
+action no_action() {
+    no_op();
 }
 
 action ing_meter_set(meter_) {
@@ -138,9 +134,8 @@ table storm_control {
         no_action;
         ing_meter_set;
     }
- size : 8192;
+    size : 8192;
 }
-
 
 control ingress {
     apply(storm_control);

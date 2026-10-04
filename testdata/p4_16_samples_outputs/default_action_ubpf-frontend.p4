@@ -15,7 +15,7 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<hdr_t>(headers.h);
+        p.extract < hdr_t >(headers.h);
         transition accept;
     }
 }
@@ -37,8 +37,8 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 
 control dprs(packet_out packet, in Headers_t headers) {
     apply {
-        packet.emit<hdr_t>(headers.h);
+        packet.emit < hdr_t >(headers.h);
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;

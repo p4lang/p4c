@@ -9,4 +9,3 @@ control c() {
         X v = X.Field;
     }
 }
-

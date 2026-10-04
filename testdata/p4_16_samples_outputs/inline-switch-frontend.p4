@@ -12,7 +12,7 @@ control d(out bit<32> x) {
     }
     apply {
         switch (cinst_t.apply().action_run) {
-            cinst_a1_0: 
+            cinst_a1_0:
             cinst_a2_0: {
             }
             default: {

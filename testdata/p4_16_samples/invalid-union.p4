@@ -1,6 +1,7 @@
 #include <core.p4>
 
-header E {}
+header E {
+}
 header H {
     bit<32> f;
 }
@@ -11,7 +12,7 @@ header_union HU {
 
 parser p(inout HU hu) {
     state start {
-        hu = (HU){#};
+        hu =(HU) {#};
         transition accept;
     }
 }
@@ -21,7 +22,7 @@ control c(inout HU hu) {
     }
 
     apply {
-        H h = (H){#};
+        H h =(H) {#};
         a();
         if (!hu.isValid()) {
             h.setValid();

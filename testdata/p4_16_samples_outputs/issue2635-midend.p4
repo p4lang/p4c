@@ -11,18 +11,18 @@ struct S_bit32_bit32 {
 control _c<T>(out T t);
 package top<T>(_c<T> c);
 control c(out S_bit32_bit32 t) {
-    @hidden action issue2635l19() {
+    @hidden action issue2635l17() {
         t.field = 32w0;
         t.otherField = 32w0;
     }
-    @hidden table tbl_issue2635l19 {
+    @hidden table tbl_issue2635l17 {
         actions = {
-            issue2635l19();
+            issue2635l17();
         }
-        const default_action = issue2635l19();
+        const default_action = issue2635l17();
     }
     apply {
-        tbl_issue2635l19.apply();
+        tbl_issue2635l17.apply();
     }
 }
 

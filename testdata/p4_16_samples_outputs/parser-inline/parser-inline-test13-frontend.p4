@@ -14,10 +14,10 @@ header data_t16 {
 }
 
 struct headers {
-    data_t   h1;
+    data_t h1;
     data_t16 h2;
-    data_t   h3;
-    data_t   h4;
+    data_t h3;
+    data_t h4;
 }
 
 struct headers2 {
@@ -30,15 +30,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.hdr_0") headers hdr_0;
     @name("ParserImpl.p.shdr") headers2 p_shdr;
     state start {
-        transition select(standard_metadata.ingress_port) {
-            9w0: p0;
-            9w1: p1;
-            default: accept;
+        transition select (standard_metadata.ingress_port) {
+            9w0 : p0;
+            9w1 : p1;
+            default : accept;
         }
     }
     state p0 {
         phdr_0.h1.setInvalid();
-        packet.extract<data_t>(phdr_0.h1);
+        packet.extract < data_t >(phdr_0.h1);
         hdr_0.h1.setInvalid();
         hdr_0.h2.setInvalid();
         hdr_0.h3.setInvalid();
@@ -47,20 +47,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Subparser_start {
         p_shdr.h1.setInvalid();
-        packet.extract<data_t>(hdr_0.h1);
-        transition select(hdr_0.h1.f) {
-            8w1: Subparser_sp1;
-            8w2: Subparser_sp2;
-            default: p0_0;
+        packet.extract < data_t >(hdr_0.h1);
+        transition select (hdr_0.h1.f) {
+            8w1 : Subparser_sp1;
+            8w2 : Subparser_sp2;
+            default : p0_0;
         }
     }
     state Subparser_sp1 {
-        packet.extract<data_t>(hdr_0.h3);
-        packet.extract<data_t>(p_shdr.h1);
+        packet.extract < data_t >(hdr_0.h3);
+        packet.extract < data_t >(p_shdr.h1);
         transition p0_0;
     }
     state Subparser_sp2 {
-        packet.extract<data_t16>(hdr_0.h2);
+        packet.extract < data_t16 >(hdr_0.h2);
         transition p0_0;
     }
     state p0_0 {
@@ -69,7 +69,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state p1 {
         phdr_1.h1.setInvalid();
-        packet.extract<data_t>(phdr_1.h1);
+        packet.extract < data_t >(phdr_1.h1);
         hdr_0.h1.setInvalid();
         hdr_0.h2.setInvalid();
         hdr_0.h3.setInvalid();
@@ -78,20 +78,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Subparser_start_0 {
         p_shdr.h1.setInvalid();
-        packet.extract<data_t>(hdr_0.h1);
-        transition select(hdr_0.h1.f) {
-            8w1: Subparser_sp1_0;
-            8w2: Subparser_sp2_0;
-            default: p1_0;
+        packet.extract < data_t >(hdr_0.h1);
+        transition select (hdr_0.h1.f) {
+            8w1 : Subparser_sp1_0;
+            8w2 : Subparser_sp2_0;
+            default : p1_0;
         }
     }
     state Subparser_sp1_0 {
-        packet.extract<data_t>(hdr_0.h3);
-        packet.extract<data_t>(p_shdr.h1);
+        packet.extract < data_t >(hdr_0.h3);
+        packet.extract < data_t >(p_shdr.h1);
         transition p1_0;
     }
     state Subparser_sp2_0 {
-        packet.extract<data_t16>(hdr_0.h2);
+        packet.extract < data_t16 >(hdr_0.h2);
         transition p1_0;
     }
     state p1_0 {
@@ -99,7 +99,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition p2;
     }
     state p2 {
-        packet.extract<data_t>(hdr.h4);
+        packet.extract < data_t >(hdr.h4);
         transition accept;
     }
 }
@@ -123,7 +123,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
@@ -137,4 +137,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

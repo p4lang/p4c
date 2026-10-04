@@ -33,7 +33,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
     apply {
-        if (8w255 == -1) {
+        if (8w255 == - 1) {
             h.eth_hdr.eth_type = 1;
         } else {
             h.eth_hdr.eth_type = 2;

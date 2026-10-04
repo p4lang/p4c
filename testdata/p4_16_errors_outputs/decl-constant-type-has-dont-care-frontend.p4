@@ -5,4 +5,3 @@ struct S<T> {
 struct S_ {
     tuple<_, _> t;
 }
-

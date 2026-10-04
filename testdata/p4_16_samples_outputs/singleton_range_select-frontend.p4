@@ -6,10 +6,10 @@ header h_t {
 
 parser p0(packet_in p, out h_t h) {
     state start {
-        p.extract<h_t>(h);
-        transition select(h.data) {
-            32w5: accept;
-            default: reject;
+        p.extract < h_t >(h);
+        transition select (h.data) {
+            32w5 : accept;
+            default : reject;
         }
     }
 }

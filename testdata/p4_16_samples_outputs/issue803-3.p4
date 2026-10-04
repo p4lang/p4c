@@ -1,8 +1,8 @@
 #include <core.p4>
 
-parser Parser<IH>(out IH parsedHeaders);
-package Ingress<IH>(Parser<IH> p);
-package Switch<IH>(Ingress<IH> ingress);
+parser Parser < IH >(out IH parsedHeaders);
+package Ingress < IH >(Parser<IH> p);
+package Switch < IH >(Ingress<IH> ingress);
 struct H {
 }
 
@@ -12,5 +12,5 @@ parser ing_parse(out H hdr) {
     }
 }
 
-Ingress<H>(ing_parse()) ig1;
+Ingress < H >(ing_parse()) ig1;
 Switch(ig1) main;

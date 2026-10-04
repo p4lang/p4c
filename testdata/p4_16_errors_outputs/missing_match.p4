@@ -3,7 +3,7 @@
 control c(in bit<1> b) {
     table t {
         key = {
-            b: noSuchMatch;
+            b : noSuchMatch;
         }
         actions = {
             NoAction;
@@ -12,4 +12,3 @@ control c(in bit<1> b) {
     apply {
     }
 }
-

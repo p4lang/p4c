@@ -6,11 +6,14 @@
 
 #include <core.p4>
 
-header h1_t { bit<8> f1; bit<8> f2; }
+header h1_t {
+    bit<8> f1;
+    bit<8> f2;
+}
 
-parser foo (out bit<8> x, in bit<8> y = 5) {
+parser foo(out bit<8> x, in bit<8> y = 5) {
     state start {
-        x = (y >> 2);
+        x =(y >> 2);
         transition accept;
     }
 }
@@ -23,7 +26,7 @@ parser parserImpl(out h1_t hdr) {
     }
 }
 
-parser p<T>(out T h);
-package top<T>(p<T> p);
+parser p < T >(out T h);
+package top < T >(p<T> p);
 
 top(parserImpl()) main;

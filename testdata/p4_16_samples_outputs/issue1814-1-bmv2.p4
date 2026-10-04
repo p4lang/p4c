@@ -16,7 +16,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    register<bit<1>>(1) testRegister;
+    register < bit<1 >>(1) testRegister;
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -25,7 +25,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     }
     table debug_table {
         key = {
-            meta.test: exact;
+            meta.test : exact;
         }
         actions = {
             drop;
@@ -35,7 +35,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     apply {
         bit<1> registerData;
         testRegister.read(registerData, 0);
-        meta.test = (bool)registerData;
+        meta.test =(bool) registerData;
         debug_table.apply();
     }
 }

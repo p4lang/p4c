@@ -15,7 +15,7 @@ struct headers {
 
 @my_anno_1 @name("inner_parser") parser InnerParser(packet_in buffer, out hdr_t a) {
     state start {
-        buffer.extract<hdr_t>(a);
+        buffer.extract < hdr_t >(a);
         transition accept;
     }
 }
@@ -73,4 +73,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

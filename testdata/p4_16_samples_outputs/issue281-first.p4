@@ -9,31 +9,31 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header vlan_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> etherType;
 }
 
 struct h {
     ethernet_t ether;
-    vlan_t     vlan;
-    ipv4_t     ipv4;
+    vlan_t vlan;
+    ipv4_t ipv4;
 }
 
 struct m {
@@ -41,7 +41,7 @@ struct m {
 
 parser EthernetParser(packet_in b, out ethernet_t ether) {
     state start {
-        b.extract<ethernet_t>(ether);
+        b.extract < ethernet_t >(ether);
         transition accept;
     }
 }
@@ -56,14 +56,14 @@ parser L2(packet_in b, out h hdr) {
 
 parser Ipv4Parser(packet_in b, out ipv4_t ipv4) {
     state start {
-        b.extract<ipv4_t>(ipv4);
+        b.extract < ipv4_t >(ipv4);
         transition accept;
     }
 }
 
 parser VlanParser(packet_in b, out vlan_t vlan) {
     state start {
-        b.extract<vlan_t>(vlan);
+        b.extract < vlan_t >(vlan);
         transition accept;
     }
 }
@@ -73,10 +73,10 @@ parser L3(packet_in b, inout h hdr) {
     VlanParser() vp;
     bit<16> etherType = hdr.ether.etherType;
     state start {
-        transition select(etherType) {
-            16w0x800: ipv4;
-            16w0x8100: vlan;
-            default: accept;
+        transition select (etherType) {
+            16w0x800 : ipv4;
+            16w0x8100 : vlan;
+            default : accept;
         }
     }
     state ipv4 {
@@ -125,4 +125,4 @@ control MyDeparser(packet_out b, in h hdr) {
     }
 }
 
-V1Switch<h, m>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < h, m >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

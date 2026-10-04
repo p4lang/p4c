@@ -14,10 +14,10 @@ header data_t16 {
 }
 
 struct headers {
-    data_t   h1;
+    data_t h1;
     data_t16 h2;
-    data_t   h3;
-    data_t   h4;
+    data_t h3;
+    data_t h4;
 }
 
 struct headers2 {
@@ -30,11 +30,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.subp2.shdr") headers2 subp2_shdr;
     state start {
         phdr_0.h1.setInvalid();
-        packet.extract<data_t>(phdr_0.h1);
-        transition select(standard_metadata.ingress_port) {
-            9w0: p0;
-            9w1: p1;
-            default: accept;
+        packet.extract < data_t >(phdr_0.h1);
+        transition select (standard_metadata.ingress_port) {
+            9w0 : p0;
+            9w1 : p1;
+            default : accept;
         }
     }
     state p0 {
@@ -46,21 +46,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Subparser_start {
         subp1_shdr.h1.setInvalid();
-        packet.extract<data_t>(hdr.h1);
-        transition select(hdr.h1.f) {
-            8w1: Subparser_sp1;
-            8w2: Subparser_sp2;
-            default: p0_0;
+        packet.extract < data_t >(hdr.h1);
+        transition select (hdr.h1.f) {
+            8w1 : Subparser_sp1;
+            8w2 : Subparser_sp2;
+            default : p0_0;
         }
     }
     state Subparser_sp1 {
-        packet.extract<data_t>(hdr.h3);
-        packet.extract<data_t>(subp1_shdr.h1);
+        packet.extract < data_t >(hdr.h3);
+        packet.extract < data_t >(subp1_shdr.h1);
         phdr_0.h1 = subp1_shdr.h1;
         transition p0_0;
     }
     state Subparser_sp2 {
-        packet.extract<data_t16>(hdr.h2);
+        packet.extract < data_t16 >(hdr.h2);
         transition p0_0;
     }
     state p0_0 {
@@ -75,21 +75,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state Subparser_start_0 {
         subp2_shdr.h1.setInvalid();
-        packet.extract<data_t>(hdr.h1);
-        transition select(hdr.h1.f) {
-            8w1: Subparser_sp1_0;
-            8w2: Subparser_sp2_0;
-            default: p1_0;
+        packet.extract < data_t >(hdr.h1);
+        transition select (hdr.h1.f) {
+            8w1 : Subparser_sp1_0;
+            8w2 : Subparser_sp2_0;
+            default : p1_0;
         }
     }
     state Subparser_sp1_0 {
-        packet.extract<data_t>(hdr.h3);
-        packet.extract<data_t>(subp2_shdr.h1);
+        packet.extract < data_t >(hdr.h3);
+        packet.extract < data_t >(subp2_shdr.h1);
         phdr_0.h1 = subp2_shdr.h1;
         transition p1_0;
     }
     state Subparser_sp2_0 {
-        packet.extract<data_t16>(hdr.h2);
+        packet.extract < data_t16 >(hdr.h2);
         transition p1_0;
     }
     state p1_0 {
@@ -120,7 +120,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
@@ -134,4 +134,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

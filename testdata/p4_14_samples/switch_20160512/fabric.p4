@@ -241,7 +241,7 @@ table fabric_lag {
     reads {
         fabric_metadata.dst_device : exact;
     }
-    action_profile: fabric_lag_action_profile;
+    action_profile : fabric_lag_action_profile;
 }
 #endif /* FABRIC_ENABLE */
 

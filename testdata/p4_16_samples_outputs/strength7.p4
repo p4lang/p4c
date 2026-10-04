@@ -1,15 +1,15 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header t1 {
     bit<32> f1;
     bit<32> f2;
     bit<32> f3;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
-    int<8>  b3;
+    bit<8> b1;
+    bit<8> b2;
+    int<8> b3;
 }
 
 struct headers_t {
@@ -55,10 +55,10 @@ control c(inout headers_t hdrs) {
         if (hdrs.head.b1 > 255) {
             act(12);
         }
-        if (hdrs.head.b3 >= -128) {
+        if (hdrs.head.b3 >= - 128) {
             act(13);
         }
-        if (hdrs.head.b3 < -128) {
+        if (hdrs.head.b3 < - 128) {
             act(14);
         }
         if (hdrs.head.b3 <= 127) {
@@ -79,10 +79,10 @@ control c(inout headers_t hdrs) {
         if (255 < hdrs.head.b1) {
             act(20);
         }
-        if (-128 <= hdrs.head.b3) {
+        if (- 128 <= hdrs.head.b3) {
             act(21);
         }
-        if (-128 > hdrs.head.b3) {
+        if (- 128 > hdrs.head.b3) {
             act(22);
         }
         if (127 >= hdrs.head.b3) {

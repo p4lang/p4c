@@ -8,15 +8,15 @@ header Ethernet_h {
 }
 
 header IPv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -24,19 +24,19 @@ header IPv4_h {
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ip;
+            default : reject;
         }
     }
     state ip {
-        p.extract<IPv4_h>(headers.ipv4);
+        p.extract < IPv4_h >(headers.ipv4);
         transition accept;
     }
 }
@@ -51,7 +51,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("pipe.c1.Check_ip") table c1_Check_ip {
         key = {
-            address_0: exact @name("address");
+            address_0 : exact @name("address");
         }
         actions = {
             c1_Reject_0();
@@ -71,17 +71,17 @@ control pipe(inout Headers_t headers, out bool pass) {
     @hidden action act_1() {
         pass = pass_0;
     }
-    @hidden action two_ebpf60() {
+    @hidden action two_ebpf62() {
         pass = false;
     }
-    @hidden action two_ebpf57() {
+    @hidden action two_ebpf59() {
         pass = true;
     }
-    @hidden table tbl_two_ebpf57 {
+    @hidden table tbl_two_ebpf59 {
         actions = {
-            two_ebpf57();
+            two_ebpf59();
         }
-        const default_action = two_ebpf57();
+        const default_action = two_ebpf59();
     }
     @hidden table tbl_act {
         actions = {
@@ -101,14 +101,14 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = act_1();
     }
-    @hidden table tbl_two_ebpf60 {
+    @hidden table tbl_two_ebpf62 {
         actions = {
-            two_ebpf60();
+            two_ebpf62();
         }
-        const default_action = two_ebpf60();
+        const default_action = two_ebpf62();
     }
     apply {
-        tbl_two_ebpf57.apply();
+        tbl_two_ebpf59.apply();
         if (headers.ipv4.isValid()) {
             tbl_act.apply();
             c1_Check_ip.apply();
@@ -116,9 +116,9 @@ control pipe(inout Headers_t headers, out bool pass) {
             c1_Check_ip.apply();
             tbl_act_1.apply();
         } else {
-            tbl_two_ebpf60.apply();
+            tbl_two_ebpf62.apply();
         }
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

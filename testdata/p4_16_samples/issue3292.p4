@@ -5,11 +5,11 @@
  */
 
 header h<t> {
-  t f;
+    t f;
 }
+
 extern void e<t>(in h<t> p);
-void func<t>(t a)
-{
-  h<t> v;
-  e(v);
+void func<t>(t a) {
+    h<t> v;
+    e(v);
 }

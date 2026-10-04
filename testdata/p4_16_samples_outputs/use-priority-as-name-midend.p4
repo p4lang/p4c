@@ -9,15 +9,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  priority;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> priority;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -35,19 +35,19 @@ struct metadata_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -66,7 +66,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr : lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr_and_prio();
@@ -82,7 +82,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.mac_da") table mac_da_0 {
         key = {
-            meta._fwd_metadata_l2ptr0: exact @name("meta.fwd_metadata.l2ptr");
+            meta._fwd_metadata_l2ptr0 : exact @name("meta.fwd_metadata.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
@@ -127,7 +127,7 @@ control egressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_me
     }
     @name("egressImpl.send_frame") table send_frame_0 {
         key = {
-            meta._fwd_metadata_out_bd1: exact @name("meta.fwd_metadata.out_bd");
+            meta._fwd_metadata_out_bd1 : exact @name("meta.fwd_metadata.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -142,8 +142,8 @@ control egressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_me
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
     }
 }
 
@@ -157,4 +157,4 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

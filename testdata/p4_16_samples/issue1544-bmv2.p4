@@ -8,7 +8,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-
 bit<16> sometimes_dec(in bit<16> x)
 {
     if (x > 5) {
@@ -20,7 +19,6 @@ bit<16> sometimes_dec(in bit<16> x)
 
 struct metadata {
 }
-
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -59,7 +57,7 @@ control ingress(inout headers hdr,
     }
     table mac_da {
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         actions = {
             set_port;
@@ -69,7 +67,7 @@ control ingress(inout headers hdr,
     }
     apply {
         mac_da.apply();
-        hdr.ethernet.srcAddr[15:0] = sometimes_dec(hdr.ethernet.srcAddr[15:0]);
+        hdr.ethernet.srcAddr[15 : 0] = sometimes_dec(hdr.ethernet.srcAddr[15:0]);
     }
 }
 
@@ -77,7 +75,8 @@ control egress(inout headers hdr,
                inout metadata meta,
                inout standard_metadata_t standard_metadata)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserImpl(packet_out packet, in headers hdr) {
@@ -87,11 +86,13 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserImpl(),

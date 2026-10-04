@@ -14,8 +14,8 @@ header ethernet_t {
 }
 
 header H {
-    bit<16>  a;
-    bit<8>  b;
+    bit<16> a;
+    bit<8> b;
 }
 
 struct Headers {
@@ -23,7 +23,8 @@ struct Headers {
     H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -68,4 +69,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -23,7 +23,7 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
         tmp2_0.setInvalid();
         tmp3_0.setInvalid();
     }
-    @hidden action issue313_3l32() {
+    @hidden action issue313_3l31() {
         out1 = tmp1_0;
         out2 = tmp3_0;
     }
@@ -39,16 +39,16 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
         }
         const default_action = act();
     }
-    @hidden table tbl_issue313_3l32 {
+    @hidden table tbl_issue313_3l31 {
         actions = {
-            issue313_3l32();
+            issue313_3l31();
         }
-        const default_action = issue313_3l32();
+        const default_action = issue313_3l31();
     }
     apply {
         tbl_issue313_3l19.apply();
         tbl_act.apply();
-        tbl_issue313_3l32.apply();
+        tbl_issue313_3l31.apply();
     }
 }
 

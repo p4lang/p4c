@@ -1,9 +1,9 @@
-default-last-switch.p4(11): [--Werror=invalid] error: switch label b follows 'default' label, which is not allowed.
+default-last-switch.p4(14): [--Werror=invalid] error: switch label b follows 'default' label, which is not allowed.
         switch (t.apply().action_run) {
         ^^^^^^
-default-last-switch.p4(13)
-            b: { return; }
+default-last-switch.p4(16)
+            b: {
             ^
-default-last-switch.p4(12)
+default-last-switch.p4(15)
             default:
             ^^^^^^^

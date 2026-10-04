@@ -35,17 +35,17 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) {
-    @hidden action issue2721bmv2l37() {
+    @hidden action issue2721bmv2l47() {
         meta._some_meta_flag0 = true;
     }
-    @hidden table tbl_issue2721bmv2l37 {
+    @hidden table tbl_issue2721bmv2l47 {
         actions = {
-            issue2721bmv2l37();
+            issue2721bmv2l47();
         }
-        const default_action = issue2721bmv2l37();
+        const default_action = issue2721bmv2l47();
     }
     apply {
-        tbl_issue2721bmv2l37.apply();
+        tbl_issue2721bmv2l47.apply();
     }
 }
 
@@ -54,4 +54,4 @@ control EgressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

@@ -1,9 +1,9 @@
-init-entries-error1-bmv2.p4(57): [--Werror=unsupported] error: Key key match type does not require priorities, but some are specified
+init-entries-error1-bmv2.p4(59): [--Werror=unsupported] error: Key key match type does not require priorities, but some are specified
         key = {
                ^
-init-entries-error1-bmv2.p4(76): [--Werror=unsupported] error: Key key match type does not require priorities, but some are specified
+init-entries-error1-bmv2.p4(81): [--Werror=unsupported] error: Key key match type does not require priorities, but some are specified
         key = {
                ^
-init-entries-error1-bmv2.p4(94): [--Werror=unsupported] error: Key key match type does not require priorities, but some are specified
+init-entries-error1-bmv2.p4(102): [--Werror=unsupported] error: Key key match type does not require priorities, but some are specified
         key = {
                ^

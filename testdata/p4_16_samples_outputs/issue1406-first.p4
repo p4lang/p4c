@@ -15,7 +15,7 @@ struct metadata_t {
 
 parser TestParser(packet_in b, out headers_t headers, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        b.extract<test_header_t>(headers.test.next);
+        b.extract < test_header_t >(headers.test.next);
         bit<32> lastIndex = headers.test.lastIndex;
         transition reject;
     }
@@ -46,4 +46,4 @@ control TestDeparser(packet_out b, in headers_t hdr) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(TestParser(), TestVerifyChecksum(), TestIngress(), TestEgress(), TestComputeChecksum(), TestDeparser()) main;
+V1Switch < headers_t, metadata_t >(TestParser(), TestVerifyChecksum(), TestIngress(), TestEgress(), TestComputeChecksum(), TestDeparser()) main;

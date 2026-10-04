@@ -41,7 +41,7 @@ header ethernet_t {
 
 struct metadata {
     @name(".mymeta")
-    mymeta_t      mymeta;
+    mymeta_t mymeta;
     @name(".temporaries")
     temporaries_t temporaries;
 }
@@ -78,16 +78,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".put_debug_vals_in_eth_dstaddr") action put_debug_vals_in_eth_dstaddr() {
         hdr.ethernet.dstAddr = 48w0;
-        meta.temporaries.temp1 = (bit<48>)meta.mymeta.resubmit_count << 40;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
-        meta.temporaries.temp1 = (bit<48>)meta.mymeta.recirculate_count << 32;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
-        meta.temporaries.temp1 = (bit<48>)meta.mymeta.clone_e2e_count << 24;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
-        meta.temporaries.temp1 = (bit<48>)meta.mymeta.f1 << 16;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
-        meta.temporaries.temp1 = (bit<48>)meta.mymeta.last_ing_instance_type << 8;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
+        meta.temporaries.temp1 =(bit<48>) meta.mymeta.resubmit_count << 40;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr |(bit<48>) meta.temporaries.temp1;
+        meta.temporaries.temp1 =(bit<48>) meta.mymeta.recirculate_count << 32;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr |(bit<48>) meta.temporaries.temp1;
+        meta.temporaries.temp1 =(bit<48>) meta.mymeta.clone_e2e_count << 24;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr |(bit<48>) meta.temporaries.temp1;
+        meta.temporaries.temp1 =(bit<48>) meta.mymeta.f1 << 16;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr |(bit<48>) meta.temporaries.temp1;
+        meta.temporaries.temp1 =(bit<48>) meta.mymeta.last_ing_instance_type << 8;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr |(bit<48>) meta.temporaries.temp1;
     }
     @name(".mark_egr_resubmit_packet") action mark_egr_resubmit_packet() {
         put_debug_vals_in_eth_dstaddr();
@@ -125,23 +125,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _nop;
         }
         key = {
-            standard_metadata.ingress_port            : exact;
-            standard_metadata.packet_length           : exact;
-            standard_metadata.egress_spec             : exact;
-            standard_metadata.egress_port             : exact;
-            standard_metadata.instance_type           : exact;
-            standard_metadata.ingress_global_timestamp: exact;
+            standard_metadata.ingress_port : exact;
+            standard_metadata.packet_length : exact;
+            standard_metadata.egress_spec : exact;
+            standard_metadata.egress_port : exact;
+            standard_metadata.instance_type : exact;
+            standard_metadata.ingress_global_timestamp : exact;
             standard_metadata.egress_global_timestamp : exact;
-            standard_metadata.mcast_grp               : exact;
-            standard_metadata.egress_rid              : exact;
-            meta.mymeta.resubmit_count                : exact;
-            meta.mymeta.recirculate_count             : exact;
-            meta.mymeta.clone_e2e_count               : exact;
-            meta.mymeta.f1                            : exact;
-            meta.mymeta.last_ing_instance_type        : exact;
-            hdr.ethernet.dstAddr                      : exact;
-            hdr.ethernet.srcAddr                      : exact;
-            hdr.ethernet.etherType                    : exact;
+            standard_metadata.mcast_grp : exact;
+            standard_metadata.egress_rid : exact;
+            meta.mymeta.resubmit_count : exact;
+            meta.mymeta.recirculate_count : exact;
+            meta.mymeta.clone_e2e_count : exact;
+            meta.mymeta.f1 : exact;
+            meta.mymeta.last_ing_instance_type : exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.ethernet.srcAddr : exact;
+            hdr.ethernet.etherType : exact;
         }
         default_action = _nop();
     }
@@ -150,23 +150,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _nop;
         }
         key = {
-            standard_metadata.ingress_port            : exact;
-            standard_metadata.packet_length           : exact;
-            standard_metadata.egress_spec             : exact;
-            standard_metadata.egress_port             : exact;
-            standard_metadata.instance_type           : exact;
-            standard_metadata.ingress_global_timestamp: exact;
+            standard_metadata.ingress_port : exact;
+            standard_metadata.packet_length : exact;
+            standard_metadata.egress_spec : exact;
+            standard_metadata.egress_port : exact;
+            standard_metadata.instance_type : exact;
+            standard_metadata.ingress_global_timestamp : exact;
             standard_metadata.egress_global_timestamp : exact;
-            standard_metadata.mcast_grp               : exact;
-            standard_metadata.egress_rid              : exact;
-            meta.mymeta.resubmit_count                : exact;
-            meta.mymeta.recirculate_count             : exact;
-            meta.mymeta.clone_e2e_count               : exact;
-            meta.mymeta.f1                            : exact;
-            meta.mymeta.last_ing_instance_type        : exact;
-            hdr.ethernet.dstAddr                      : exact;
-            hdr.ethernet.srcAddr                      : exact;
-            hdr.ethernet.etherType                    : exact;
+            standard_metadata.mcast_grp : exact;
+            standard_metadata.egress_rid : exact;
+            meta.mymeta.resubmit_count : exact;
+            meta.mymeta.recirculate_count : exact;
+            meta.mymeta.clone_e2e_count : exact;
+            meta.mymeta.f1 : exact;
+            meta.mymeta.last_ing_instance_type : exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.ethernet.srcAddr : exact;
+            hdr.ethernet.etherType : exact;
         }
         default_action = _nop();
     }
@@ -239,13 +239,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop() {
     }
     @name(".set_port_to_mac_da_lsbs") action set_port_to_mac_da_lsbs() {
-        standard_metadata.egress_spec = (bit<9>)hdr.ethernet.dstAddr & 9w0xf;
+        standard_metadata.egress_spec =(bit<9>) hdr.ethernet.dstAddr & 9w0xf;
     }
     @name(".mark_max_resubmit_packet") action mark_max_resubmit_packet() {
         hdr.ethernet.etherType = 16w0xe50b;
     }
     @name(".save_ing_instance_type") action save_ing_instance_type() {
-        meta.mymeta.last_ing_instance_type = (bit<8>)standard_metadata.instance_type;
+        meta.mymeta.last_ing_instance_type =(bit<8>) standard_metadata.instance_type;
     }
     @name(".t_do_resubmit") table t_do_resubmit {
         actions = {
@@ -260,23 +260,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop;
         }
         key = {
-            standard_metadata.ingress_port            : exact;
-            standard_metadata.packet_length           : exact;
-            standard_metadata.egress_spec             : exact;
-            standard_metadata.egress_port             : exact;
-            standard_metadata.instance_type           : exact;
-            standard_metadata.ingress_global_timestamp: exact;
+            standard_metadata.ingress_port : exact;
+            standard_metadata.packet_length : exact;
+            standard_metadata.egress_spec : exact;
+            standard_metadata.egress_port : exact;
+            standard_metadata.instance_type : exact;
+            standard_metadata.ingress_global_timestamp : exact;
             standard_metadata.egress_global_timestamp : exact;
-            standard_metadata.mcast_grp               : exact;
-            standard_metadata.egress_rid              : exact;
-            meta.mymeta.resubmit_count                : exact;
-            meta.mymeta.recirculate_count             : exact;
-            meta.mymeta.clone_e2e_count               : exact;
-            meta.mymeta.f1                            : exact;
-            meta.mymeta.last_ing_instance_type        : exact;
-            hdr.ethernet.dstAddr                      : exact;
-            hdr.ethernet.srcAddr                      : exact;
-            hdr.ethernet.etherType                    : exact;
+            standard_metadata.mcast_grp : exact;
+            standard_metadata.egress_rid : exact;
+            meta.mymeta.resubmit_count : exact;
+            meta.mymeta.recirculate_count : exact;
+            meta.mymeta.clone_e2e_count : exact;
+            meta.mymeta.f1 : exact;
+            meta.mymeta.last_ing_instance_type : exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.ethernet.srcAddr : exact;
+            hdr.ethernet.etherType : exact;
         }
         default_action = _nop();
     }
@@ -285,23 +285,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop;
         }
         key = {
-            standard_metadata.ingress_port            : exact;
-            standard_metadata.packet_length           : exact;
-            standard_metadata.egress_spec             : exact;
-            standard_metadata.egress_port             : exact;
-            standard_metadata.instance_type           : exact;
-            standard_metadata.ingress_global_timestamp: exact;
+            standard_metadata.ingress_port : exact;
+            standard_metadata.packet_length : exact;
+            standard_metadata.egress_spec : exact;
+            standard_metadata.egress_port : exact;
+            standard_metadata.instance_type : exact;
+            standard_metadata.ingress_global_timestamp : exact;
             standard_metadata.egress_global_timestamp : exact;
-            standard_metadata.mcast_grp               : exact;
-            standard_metadata.egress_rid              : exact;
-            meta.mymeta.resubmit_count                : exact;
-            meta.mymeta.recirculate_count             : exact;
-            meta.mymeta.clone_e2e_count               : exact;
-            meta.mymeta.f1                            : exact;
-            meta.mymeta.last_ing_instance_type        : exact;
-            hdr.ethernet.dstAddr                      : exact;
-            hdr.ethernet.srcAddr                      : exact;
-            hdr.ethernet.etherType                    : exact;
+            standard_metadata.mcast_grp : exact;
+            standard_metadata.egress_rid : exact;
+            meta.mymeta.resubmit_count : exact;
+            meta.mymeta.recirculate_count : exact;
+            meta.mymeta.clone_e2e_count : exact;
+            meta.mymeta.f1 : exact;
+            meta.mymeta.last_ing_instance_type : exact;
+            hdr.ethernet.dstAddr : exact;
+            hdr.ethernet.srcAddr : exact;
+            hdr.ethernet.etherType : exact;
         }
         default_action = _nop();
     }

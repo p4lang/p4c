@@ -21,16 +21,16 @@ struct Metadata {
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     @name("parserI.size") bit<32> size_0;
     state start {
-        pkt.extract<S>(hdr.s);
+        pkt.extract < S >(hdr.s);
         size_0 = hdr.s.size;
-        pkt.extract<H>(hdr.h, size_0);
+        pkt.extract < H >(hdr.h, size_0);
         transition accept;
     }
 }
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<H>(hdr.h);
+        packet.emit < H >(hdr.h);
     }
 }
 
@@ -54,4 +54,4 @@ control uc(inout Parsed_packet hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Parsed_packet, Metadata>(parserI(), vc(), ingress(), egress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, Metadata >(parserI(), vc(), ingress(), egress(), uc(), DeparserI()) main;

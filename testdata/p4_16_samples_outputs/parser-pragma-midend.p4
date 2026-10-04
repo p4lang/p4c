@@ -21,7 +21,7 @@ struct S {
 
 parser p(packet_in pkt, out Headers hdr, inout S s, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         s.start = 8w0;
         transition parse_a;
     }
@@ -58,8 +58,8 @@ control egress(inout Headers h, inout S s, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, S>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, S >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

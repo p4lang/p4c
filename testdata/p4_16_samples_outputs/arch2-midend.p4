@@ -7,4 +7,3 @@ struct InControl {
 struct OutControl {
     bit<4> outputPort;
 }
-

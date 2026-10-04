@@ -17,7 +17,8 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -30,10 +31,11 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    action dummy_action() {    }
+    action dummy_action() {
+    }
     table simple_table_1 {
         key = {
-            48w1 : exact @name("key") ;
+            48w1 : exact @name("key");
         }
         actions = {
             dummy_action();
@@ -41,7 +43,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table_2 {
         key = {
-            48w1 : exact @name("key") ;
+            48w1 : exact @name("key");
         }
         actions = {
             dummy_action();
@@ -49,13 +51,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (simple_table_1.apply().action_run) {
-            dummy_action: {
-                switch (simple_table_2.apply().action_run) {
-                    dummy_action: {
-                        h.eth_hdr.src_addr = 4;
-                        return;
-                    }
-                }
+            dummy_action : {
+            switch (simple_table_2.apply().action_run) {
+            dummy_action : {
+            h.eth_hdr.src_addr = 4;
+            return;
+            }
+            }
             }
         }
         exit;
@@ -63,11 +65,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -75,4 +86,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

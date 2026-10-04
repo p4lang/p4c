@@ -8,25 +8,26 @@
 #include <v1model.p4>
 
 header data_t {
-    bit<32>     f1;
-    bit<32>     f2;
-    bit<16>     h1;
-    bit<16>     h2;
-    bit<8>      b1;
-    bit<8>      b2;
-    bit<8>      b3;
-    bit<8>      b4;
+    bit<32> f1;
+    bit<32> f2;
+    bit<16> h1;
+    bit<16> h2;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 header word_t {
-    bit<32>     x;
+    bit<32> x;
 }
 
-struct metadata {}
+struct metadata {
+}
 
 struct headers {
-    data_t      data;
-    word_t[8]   rest;
+    data_t data;
+    word_t[8] rest;
 }
 
 parser p(packet_in b,
@@ -67,17 +68,20 @@ control ingress(inout headers hdr,
 control egress(inout headers hdr,
                inout metadata meta,
                inout standard_metadata_t stdmeta) {
-    apply {}
+    apply {
+    }
 }
 
 control vc(inout headers hdr,
            inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control uc(inout headers hdr,
            inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control deparser(packet_out packet,
@@ -87,7 +91,7 @@ control deparser(packet_out packet,
     }
 }
 
-V1Switch<headers, metadata>(p(),
+V1Switch < headers, metadata >(p(),
                             vc(),
                             ingress(),
                             egress(),

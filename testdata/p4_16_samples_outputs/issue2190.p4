@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         h.h.a = h.h.b / 8w2 >> h.h.b;
-        h.h.a = (h.h.b >> h.h.b) / 8w2;
+        h.h.a =(h.h.b >> h.h.b) / 8w2;
     }
 }
 

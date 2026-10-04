@@ -7,13 +7,13 @@
 
 #include <core.p4>
 
-extern e<T> {
+extern e < T > {
     e();
     T get();
 }
 
-parser p1<T>(in T a) {
-    e<T>() ei;
+parser p1 < T >(in T a) {
+    e < T >() ei;
     state start {
         T w = ei.get();
         transition accept;

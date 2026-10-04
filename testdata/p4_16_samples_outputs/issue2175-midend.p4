@@ -9,10 +9,10 @@ control c(inout bit<8> v) {
     @hidden action act() {
         val = v;
     }
-    @hidden action issue2175l20() {
+    @hidden action issue2175l18() {
         v = 8w1;
     }
-    @hidden action issue2175l23() {
+    @hidden action issue2175l21() {
         v = 8w2;
     }
     @hidden action act_0() {
@@ -42,17 +42,17 @@ control c(inout bit<8> v) {
         }
         const default_action = act_0();
     }
-    @hidden table tbl_issue2175l20 {
+    @hidden table tbl_issue2175l18 {
         actions = {
-            issue2175l20();
+            issue2175l18();
         }
-        const default_action = issue2175l20();
+        const default_action = issue2175l18();
     }
-    @hidden table tbl_issue2175l23 {
+    @hidden table tbl_issue2175l21 {
         actions = {
-            issue2175l23();
+            issue2175l21();
         }
-        const default_action = issue2175l23();
+        const default_action = issue2175l21();
     }
     apply {
         tbl_act.apply();
@@ -63,9 +63,9 @@ control c(inout bit<8> v) {
         }
         tbl_act_0.apply();
         if (val == 8w0) {
-            tbl_issue2175l20.apply();
+            tbl_issue2175l18.apply();
         } else {
-            tbl_issue2175l23.apply();
+            tbl_issue2175l21.apply();
         }
     }
 }

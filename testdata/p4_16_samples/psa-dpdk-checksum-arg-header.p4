@@ -9,7 +9,7 @@ typedef bit<48> ethernet_addr_t;
 header ethernet_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
-    bit<16>         ether_type;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
@@ -51,8 +51,8 @@ struct headers_t {
 }
 
 struct local_metadata_t {
-    ethernet_addr_t  dst_addr;
-    ethernet_addr_t  src_addr;
+    ethernet_addr_t dst_addr;
+    ethernet_addr_t src_addr;
     bit<32> mem1;
 }
 
@@ -113,14 +113,14 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
         headers.outer_ethernet.dst_addr = ethernet_dst_addr;
 
         headers.outer_ethernet.ether_type = ethernet_ether_type;
-        headers.outer_ipv4.diffserv = ipv4_diffserv; 
-        headers.outer_ipv4.total_len = ipv4_total_len; 
-        headers.outer_ipv4.identification = ipv4_identification; 
-        headers.outer_ipv4.flags_offset = ipv4_flags_offset; 
-        headers.outer_ipv4.ttl = ipv4_ttl; 
-        headers.outer_ipv4.protocol = ipv4_protocol; 
-        headers.outer_ipv4.hdr_checksum = ipv4_hdr_checksum; 
-        headers.outer_ipv4.src_addr = ipv4_src_addr; 
+        headers.outer_ipv4.diffserv = ipv4_diffserv;
+        headers.outer_ipv4.total_len = ipv4_total_len;
+        headers.outer_ipv4.identification = ipv4_identification;
+        headers.outer_ipv4.flags_offset = ipv4_flags_offset;
+        headers.outer_ipv4.ttl = ipv4_ttl;
+        headers.outer_ipv4.protocol = ipv4_protocol;
+        headers.outer_ipv4.hdr_checksum = ipv4_hdr_checksum;
+        headers.outer_ipv4.src_addr = ipv4_src_addr;
         headers.outer_ipv4.dst_addr = ipv4_dst_addr;
         headers.outer_udp.src_port = udp_src_port;
         headers.outer_udp.dst_port = udp_dst_port;
@@ -130,7 +130,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
         headers.vxlan.reserved = vxlan_reserved;
         headers.vxlan.vni = vxlan_vni;
         headers.vxlan.reserved2 = vxlan_reserved2;
-        ostd.egress_port = (PortId_t)port_out;
+        ostd.egress_port =(PortId_t) port_out;
         csum.add(headers.outer_ipv4);
         csum.add(32w0x7);
         csum.add({headers.outer_ipv4.hdr_checksum, headers.ipv4.total_len, headers.ipv4.ver, 32w0x6, local_metadata1.mem1});
@@ -138,26 +138,25 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
         headers.outer_ipv4.total_len = headers.outer_ipv4.total_len + headers.ipv4.total_len;
         headers.outer_udp.length = headers.outer_udp.length + headers.ipv4.total_len;
     }
-    action drop(){
-        ostd.egress_port = (PortId_t)4;
+    action drop() {
+        ostd.egress_port =(PortId_t) 4;
     }
     table vxlan {
         key = {
-            headers.ethernet.dst_addr: exact;
+            headers.ethernet.dst_addr : exact;
         }
         actions = {
             vxlan_encap;
             drop;
         }
         const default_action = drop;
-        size =  1024 * 1024;
+        size = 1024 * 1024;
     }
 
     apply {
         vxlan.apply();
     }
 }
-
 
 control egress(inout headers_t headers, inout local_metadata_t local_metadata, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     apply {
@@ -180,4 +179,3 @@ IngressPipeline(packet_parser(), ingress(), packet_deparser()) ip;
 EgressPipeline(egress_parser(), egress(), egress_deparser()) ep;
 
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

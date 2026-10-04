@@ -8,19 +8,19 @@ header ethernet_t {
 }
 
 header vlan_tag_h {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> ether_type;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     vlan_tag_h[2] vlan_tag;
 }
 
 struct main_metadata_t {
-    bit<2>  depth;
+    bit<2> depth;
     bit<16> ethType;
 }
 
@@ -32,18 +32,18 @@ control PreControlImpl(in headers_t hdrs, inout main_metadata_t meta, in pna_pre
 parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     state start {
         meta.depth = 2w1;
-        pkt.extract<ethernet_t>(hdrs.ethernet);
-        transition select(hdrs.ethernet.etherType) {
-            16w0x8100: parse_vlan_tag;
-            default: accept;
+        pkt.extract < ethernet_t >(hdrs.ethernet);
+        transition select (hdrs.ethernet.etherType) {
+            16w0x8100 : parse_vlan_tag;
+            default : accept;
         }
     }
     state parse_vlan_tag {
-        pkt.extract<vlan_tag_h>(hdrs.vlan_tag.next);
+        pkt.extract < vlan_tag_h >(hdrs.vlan_tag.next);
         meta.depth = meta.depth + 2w3;
-        transition select(hdrs.vlan_tag.last.ether_type) {
-            16w0x8100: parse_vlan_tag;
-            default: accept;
+        transition select (hdrs.vlan_tag.last.ether_type) {
+            16w0x8100 : parse_vlan_tag;
+            default : accept;
         }
     }
 }
@@ -77,7 +77,7 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     bit<12> key_0;
     @name("MainControlImpl.stub") table stub_0 {
         key = {
-            key_0: exact @name("hdrs.vlan_tag[meta.depth].vid");
+            key_0 : exact @name("hdrs.vlan_tag[meta.depth].vid");
         }
         actions = {
             execute_1();
@@ -136,9 +136,9 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
     @hidden action pnaexamplevarIndex1l115() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-        pkt.emit<vlan_tag_h>(hdr.vlan_tag[0]);
-        pkt.emit<vlan_tag_h>(hdr.vlan_tag[1]);
+        pkt.emit < ethernet_t >(hdr.ethernet);
+        pkt.emit < vlan_tag_h >(hdr.vlan_tag[0]);
+        pkt.emit < vlan_tag_h >(hdr.vlan_tag[1]);
     }
     @hidden table tbl_pnaexamplevarIndex1l115 {
         actions = {
@@ -151,4 +151,4 @@ control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t us
     }
 }
 
-PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, main_metadata_t, headers_t, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

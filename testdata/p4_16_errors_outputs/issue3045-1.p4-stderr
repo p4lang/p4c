@@ -6,25 +6,25 @@ issue3045-1.p4(22): [--Werror=type-error] error: 'f(r, exact)'
         ^^^^^^^^^^^
   ---- Actual error:
 issue3045-1.p4(19): Cannot cast implicitly type 'bool' to type 'match_kind'
-      register<bool>(1) r;
-               ^^^^
+      register < bool >(1) r;
+                 ^^^^
   ---- Originating from:
 issue3045-1.p4(22): Type of argument 'r' (register<...>) does not match type of parameter 'r' (register<...>)
           f(r, exact);
             ^
 issue3045-1.p4(19)
-      register<bool>(1) r;
-      ^^^^^^^^^^^^^^
+      register < bool >(1) r;
+      ^^^^^^^^^^^^^^^^^
 issue3045-1.p4(14)
-  void f<T>(register<T> r, in T t) {
-                        ^
+  void f < T >(register<T> r, in T t) {
+                           ^
 issue3045-1.p4(14)
-  void f<T>(register<T> r, in T t) {
-            ^^^^^^^^^^^
+  void f < T >(register<T> r, in T t) {
+               ^^^^^^^^^^^
   Where 'T' is bound to 'match_kind'
   ---- Originating from:
 issue3045-1.p4(14): Function type 'f' does not match invocation type '<Method call>'
-  void f<T>(register<T> r, in T t) {
+  void f < T >(register<T> r, in T t) {
        ^
 issue3045-1.p4(22)
           f(r, exact);

@@ -21,30 +21,30 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout metadata_t m
 }
 
 control IngressImpl(inout parsed_headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue1210l41() {
+    @hidden action issue1210l43() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
     }
-    @hidden action issue1210l50() {
+    @hidden action issue1210l52() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
     }
-    @hidden table tbl_issue1210l41 {
+    @hidden table tbl_issue1210l43 {
         actions = {
-            issue1210l41();
+            issue1210l43();
         }
-        const default_action = issue1210l41();
+        const default_action = issue1210l43();
     }
-    @hidden table tbl_issue1210l50 {
+    @hidden table tbl_issue1210l52 {
         actions = {
-            issue1210l50();
+            issue1210l52();
         }
-        const default_action = issue1210l50();
+        const default_action = issue1210l52();
     }
     apply {
         if (meta._foo__v0 == meta._bar__v1) {
-            tbl_issue1210l41.apply();
+            tbl_issue1210l43.apply();
         }
         if (meta._foo__v0 == 9w192) {
-            tbl_issue1210l50.apply();
+            tbl_issue1210l52.apply();
         }
     }
 }
@@ -69,4 +69,4 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<parsed_headers_t, metadata_t>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
+V1Switch < parsed_headers_t, metadata_t >(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;

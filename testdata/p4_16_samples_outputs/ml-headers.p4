@@ -172,4 +172,3 @@ struct metadata_t {
     tunnel_metadata_t tunnel_metadata;
     fwd_meta_t        fwd;
 }
-

@@ -21,17 +21,17 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t std_meta) {
     @name("MyIngress.output") bit<8> output_0;
-    @hidden action hashingnontuplebmv2l18() {
-        hash<bit<8>, bit<8>, bit<8>, bit<8>>(output_0, HashAlgorithm.crc16, 8w0, 8w42, 8w255);
+    @hidden action hashingnontuplebmv2l23() {
+        hash < bit<8>, bit<8>, bit<8>, bit<8 >>(output_0, HashAlgorithm.crc16, 8w0, 8w42, 8w255);
     }
-    @hidden table tbl_hashingnontuplebmv2l18 {
+    @hidden table tbl_hashingnontuplebmv2l23 {
         actions = {
-            hashingnontuplebmv2l18();
+            hashingnontuplebmv2l23();
         }
-        const default_action = hashingnontuplebmv2l18();
+        const default_action = hashingnontuplebmv2l23();
     }
     apply {
-        tbl_hashingnontuplebmv2l18.apply();
+        tbl_hashingnontuplebmv2l23.apply();
     }
 }
 
@@ -50,4 +50,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

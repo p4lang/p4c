@@ -12,15 +12,17 @@ control c() {
     bool b;
     bit x;
 
-    action drop() {}
+    action drop() {
+    }
 
-    action multicast(in bit<32> multicast_group_id) {}
+    action multicast(in bit<32> multicast_group_id) {
+    }
 
     table forward {
         key = {
-            b: exact;
-            x: exact;
-            b: exact;
+            b : exact;
+            x : exact;
+            b : exact;
         }
 
         actions = {
@@ -30,7 +32,7 @@ control c() {
 
         const default_action = multicast(1);
         const entries = {
-            ( true, ARP_OPER_REQUEST, true ) : multicast(2);
+            (true, ARP_OPER_REQUEST, true) : multicast(2);
         }
     }
 

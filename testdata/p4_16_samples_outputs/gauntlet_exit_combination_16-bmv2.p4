@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            8w255: exact @name("QIqvRY");
+            8w255 : exact @name("QIqvRY");
         }
         actions = {
             dummy_action();
@@ -40,9 +40,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (false) {
         } else {
             switch (simple_table.apply().action_run) {
-                dummy_action: {
-                    h.eth_hdr.eth_type = 1;
-                    return;
+                dummy_action : {
+                h.eth_hdr.eth_type = 1;
+                return;
                 }
             }
         }

@@ -14,4 +14,3 @@ parser MyParser(t tt) {
         transition accept;
     }
 }
-

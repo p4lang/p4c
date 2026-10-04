@@ -18,33 +18,33 @@ control c(out bit<32> x) {
             NoAction_1();
         }
         key = {
-            k_0: exact @name("k");
+            k_0 : exact @name("k");
         }
         default_action = NoAction_1();
     }
-    @hidden action newtype40() {
+    @hidden action newtype44() {
         k_0 = 32w0;
         x = 32w0;
     }
-    @hidden action newtype49() {
+    @hidden action newtype53() {
         x = 32w3;
     }
-    @hidden table tbl_newtype40 {
+    @hidden table tbl_newtype44 {
         actions = {
-            newtype40();
+            newtype44();
         }
-        const default_action = newtype40();
+        const default_action = newtype44();
     }
-    @hidden table tbl_newtype49 {
+    @hidden table tbl_newtype53 {
         actions = {
-            newtype49();
+            newtype53();
         }
-        const default_action = newtype49();
+        const default_action = newtype53();
     }
     apply {
-        tbl_newtype40.apply();
+        tbl_newtype44.apply();
         t_0.apply();
-        tbl_newtype49.apply();
+        tbl_newtype53.apply();
     }
 }
 

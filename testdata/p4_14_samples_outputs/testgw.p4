@@ -7,10 +7,10 @@ header data_t {
     bit<32> f2;
     bit<16> f3;
     bit<16> f4;
-    bit<8>  f5;
-    bit<8>  f6;
-    bit<4>  f7;
-    bit<4>  f8;
+    bit<8> f5;
+    bit<8> f6;
+    bit<4> f7;
+    bit<4> f8;
 }
 
 header ethernet_t {
@@ -24,7 +24,7 @@ struct metadata {
 
 struct headers {
     @name(".data")
-    data_t     data;
+    data_t data;
     @name(".ethernet")
     ethernet_t ethernet;
 }
@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.ethernet.dst_addr: lpm;
+            hdr.ethernet.dst_addr : lpm;
         }
     }
     @name(".test1") table test1 {
@@ -73,7 +73,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1 : exact;
         }
     }
     @name(".test2") table test2 {
@@ -82,12 +82,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: exact;
+            hdr.data.f2 : exact;
         }
     }
     apply {
         routing.apply();
-        if ((bit<8>)hdr.data.f5 != hdr.data.f6) {
+        if ((bit<8>) hdr.data.f5 != hdr.data.f6) {
             test1.apply();
         } else {
             test2.apply();

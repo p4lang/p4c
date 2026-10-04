@@ -2,5 +2,5 @@ stmt-switch-on-unsupported-type.p4(3): [--Wwarn=unused] warning: control 'ctrl' 
 control ctrl()() {
         ^^^^
 stmt-switch-on-unsupported-type.p4(5): [--Werror=type-error] error: ...: 'switch' type can't be ANYTYPE
-    switch (...) { }
-            ^^^
+        switch (...) {
+                ^^^

@@ -30,7 +30,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
     }
     @name("ingress.t0") table t0_0 {
         key = {
-            standard_metadata.ingress_port: ternary @name("standard_metadata.ingress_port");
+            standard_metadata.ingress_port : ternary @name("standard_metadata.ingress_port");
         }
         actions = {
             send_to_cpu_0();
@@ -58,4 +58,4 @@ control computeChecksum(inout headers_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers_t, metadata_t >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

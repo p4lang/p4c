@@ -11,7 +11,6 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-
 struct Meta {
 }
 
@@ -26,24 +25,24 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 action dummy1(inout bit<48> dst, inout bit<16> type) {
-	bool c = true;
-	bool c1 = false;
-	if(c) {
-		type = type + 16w0;
-		if(c1) {
-			dst = 48w1;		
-		}	
-		else {
-			dst = 48w2;		
-		}
-	} else {
-		type = 16w3;
-	}
+    bool c = true;
+    bool c1 = false;
+    if (c) {
+        type = type + 16w0;
+        if (c1) {
+            dst = 48w1;
+        }
+        else {
+            dst = 48w2;
+        }
+    } else {
+        type = 16w3;
+    }
 }
 
-action dummy(inout Headers val1) { 
-	dummy1(val1.eth_hdr.dst_addr, val1.eth_hdr.eth_type);
-	val1.eth_hdr.dst_addr = val1.eth_hdr.dst_addr + 48w3;
+action dummy(inout Headers val1) {
+    dummy1(val1.eth_hdr.dst_addr, val1.eth_hdr.eth_type);
+    val1.eth_hdr.dst_addr = val1.eth_hdr.dst_addr + 48w3;
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
@@ -64,12 +63,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         simple_action();
     }
 }
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

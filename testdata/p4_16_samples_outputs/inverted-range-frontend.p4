@@ -7,10 +7,10 @@ enum bit<16> V {
 
 parser p(in bit<16> x) {
     state start {
-        transition select(x) {
-            16w10 .. 16w0: accept;
-            V.z .. V.o: accept;
-            default: reject;
+        transition select (x) {
+            16w10 .. 16w0 : accept;
+            V.z .. V.o : accept;
+            default : reject;
         }
     }
 }

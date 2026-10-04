@@ -27,7 +27,7 @@ control c() {
     }
     @hidden table switch_0_table {
         key = {
-            tmp: exact;
+            tmp : exact;
         }
         actions = {
             switch_0_case();
@@ -36,14 +36,14 @@ control c() {
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        const 8w1 : switch_0_case();
-                        const 8w4 : switch_0_case_0();
+            const 8w1 : switch_0_case();
+            const 8w4 : switch_0_case_0();
         }
     }
-    @hidden action issue4656_const_fold_generic_switch_label_expr20() {
+    @hidden action issue4656_const_fold_generic_switch_label_expr25() {
         foo();
     }
-    @hidden action issue4656_const_fold_generic_switch_label_expr21() {
+    @hidden action issue4656_const_fold_generic_switch_label_expr27() {
         bar();
     }
     @hidden action act() {
@@ -55,28 +55,28 @@ control c() {
         }
         const default_action = act();
     }
-    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr20 {
+    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr25 {
         actions = {
-            issue4656_const_fold_generic_switch_label_expr20();
+            issue4656_const_fold_generic_switch_label_expr25();
         }
-        const default_action = issue4656_const_fold_generic_switch_label_expr20();
+        const default_action = issue4656_const_fold_generic_switch_label_expr25();
     }
-    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr21 {
+    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr27 {
         actions = {
-            issue4656_const_fold_generic_switch_label_expr21();
+            issue4656_const_fold_generic_switch_label_expr27();
         }
-        const default_action = issue4656_const_fold_generic_switch_label_expr21();
+        const default_action = issue4656_const_fold_generic_switch_label_expr27();
     }
     apply {
         tbl_act.apply();
         switch (switch_0_table.apply().action_run) {
-            switch_0_case: {
-                tbl_issue4656_const_fold_generic_switch_label_expr20.apply();
+            switch_0_case : {
+            tbl_issue4656_const_fold_generic_switch_label_expr25.apply();
             }
-            switch_0_case_0: {
-                tbl_issue4656_const_fold_generic_switch_label_expr21.apply();
+            switch_0_case_0 : {
+            tbl_issue4656_const_fold_generic_switch_label_expr27.apply();
             }
-            switch_0_case_1: {
+            switch_0_case_1 : {
             }
         }
         t_0.apply();

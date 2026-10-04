@@ -24,11 +24,12 @@ header_union addr_t2 {
     addr_ipv6_t ipv6;
 }
 
-struct metadata { }
+struct metadata {
+}
 
 struct headers {
-    addr_t1      addr_src1;
-    addr_t2      addr_src2;
+    addr_t1 addr_src1;
+    addr_t2 addr_src2;
 }
 
 /*************************************************************************
@@ -49,8 +50,9 @@ parser ProtParser(packet_in packet,
 ************   C H E C K S U M    V E R I F I C A T I O N   *************
 *************************************************************************/
 
-control ProtVerifyChecksum(inout headers hdr, inout metadata meta) {   
-    apply {  }
+control ProtVerifyChecksum(inout headers hdr, inout metadata meta) {
+    apply {
+    }
 }
 
 
@@ -61,7 +63,8 @@ control ProtVerifyChecksum(inout headers hdr, inout metadata meta) {
 control ProtIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 /*************************************************************************
@@ -71,7 +74,8 @@ control ProtIngress(inout headers hdr,
 control ProtEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 /*************************************************************************
@@ -79,7 +83,8 @@ control ProtEgress(inout headers hdr,
 *************************************************************************/
 
 control ProtComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 
@@ -89,7 +94,7 @@ control ProtComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control ProtDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 

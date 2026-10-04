@@ -1,10 +1,10 @@
 // generated from default-initializer.p4
 
 header H {
-  varbit<32> b;
+    varbit<32> b;
 }
 control C()() {
-  apply {
-    H h = (H) { b = 2, ... };
-  }
+    apply {
+        H h =(H) { b = 2, ... };
+    }
 }

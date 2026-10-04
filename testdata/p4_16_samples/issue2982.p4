@@ -5,15 +5,13 @@
  */
 
 control ComputeChecksum<H>(inout H hdr);
-
 extern void update_checksum_with_payload<T, O>(in T data, out O ck);
-
 struct flags {
-    bit<1>  cwr;
+    bit<1> cwr;
 }
 
 header tcp {
-    flags flags;
+    flags   flags;
     bit<16> checksum;
 }
 

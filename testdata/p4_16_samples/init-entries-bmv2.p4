@@ -9,7 +9,7 @@
 #include <v1model.p4>
 
 typedef bit<16> etype_t;
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 // https://en.wikipedia.org/wiki/Ethernet_frame
 header ethernet_h {
@@ -19,7 +19,7 @@ header ethernet_h {
 }
 
 struct headers_t {
-    ethernet_h    ethernet;
+    ethernet_h ethernet;
 }
 
 struct metadata_t {
@@ -41,7 +41,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t umd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(
@@ -50,7 +51,8 @@ control ingressImpl(
     inout standard_metadata_t stdmeta)
 {
     bit<32> x = 6;
-    action a() {}
+    action a() {
+    }
     action a_params(bit<32> param) {
         x = param;
     }
@@ -59,19 +61,22 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         // This table definition should cause a warning that the 3rd
         // and 4th entries ahve the same priority, 40.
         largest_priority_wins = false;
         priority_delta = 10;
         entries = {
-            const priority=10: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                               (0x02, 0x1181           ) : a_params(2); // priority=20
+            const priority = 10 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // priority=20
                                (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority=30
-            const              (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=40
-                  priority=40: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                               (0x06, _                ) : a_params(6); // priority=50
+            const(0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=40
+                  priority = 40 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6); // priority=50
         }
     }
     table t1b {
@@ -79,21 +84,24 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         // t1b is same as t1, but because it has
         // @noWarn("duplicate-priorities") annotation, no warning
         // should be created for it about duplicate priorities.
         largest_priority_wins = false;
         priority_delta = 10;
- 	@noWarn("duplicate-priorities")
+        @noWarn("duplicate-priorities")
         entries = {
-            const priority=10: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                               (0x02, 0x1181           ) : a_params(2); // priority=20
+            const priority = 10 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // priority=20
                                (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority=30
-            const              (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=40
-                  priority=40: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                               (0x06, _                ) : a_params(6); // priority=50
+            const(0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=40
+                  priority = 40 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6); // priority=50
         }
     }
     table t2 {
@@ -101,7 +109,10 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         largest_priority_wins = false;
         priority_delta = 10;
@@ -109,12 +120,12 @@ control ingressImpl(
         // and 4th entries have a different priority order than their
         // source code order.
         entries = {
-            const priority=11: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                               (0x02, 0x1181           ) : a_params(2); // priority=21
+            const priority = 11 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // priority=21
                                (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority=31
-            const              (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=41
-                  priority=40: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                               (0x06, _                ) : a_params(6); // priority=50
+            const(0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=41
+                  priority = 40 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6); // priority=50
         }
     }
     table t2b {
@@ -122,7 +133,10 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         largest_priority_wins = false;
         priority_delta = 10;
@@ -132,12 +146,12 @@ control ingressImpl(
         // priority order.
         @noWarn("entries-out-of-priority-order")
         entries = {
-            const priority=11: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                               (0x02, 0x1181           ) : a_params(2); // priority=21
+            const priority = 11 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // priority=21
                                (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority=31
-            const              (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=41
-                  priority=40: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                               (0x06, _                ) : a_params(6); // priority=50
+            const(0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=41
+                  priority = 40 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6); // priority=50
         }
     }
     table t3 {
@@ -145,7 +159,10 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         largest_priority_wins = false;
         // t3 should cause warnings that there are both entries with
@@ -153,12 +170,12 @@ control ingressImpl(
         // entries), and entries out of priority order (the 3rd and
         // 4th).
         entries = {
-            const priority=11: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                               (0x02, 0x1181           ) : a_params(2); // priority=12
+            const priority = 11 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // priority=12
                                (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority=13
-            const              (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=14
-                  priority=13: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                               (0x06, _                ) : a_params(6); // priority=14
+            const(0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=14
+                  priority = 13 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6); // priority=14
         }
     }
     table t3b {
@@ -166,7 +183,10 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         largest_priority_wins = false;
         // t3b is same as t3, but because it has both noWarn
@@ -175,12 +195,12 @@ control ingressImpl(
  	@noWarn("duplicate-priorities")
         @noWarn("entries-out-of-priority-order")
         entries = {
-            const priority=11: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                               (0x02, 0x1181           ) : a_params(2); // priority=12
+            const priority = 11 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // priority=12
                                (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority=13
-            const              (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=14
-                  priority=13: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                               (0x06, _                ) : a_params(6); // priority=14
+            const(0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=14
+                  priority = 13 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6); // priority=14
         }
     }
     table t4 {
@@ -188,19 +208,22 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         largest_priority_wins = false;
         // There should definitely be at least one warning about
         // entries with duplicate priorities for this table, where all
         // entries are explicitly given the same priority.
         entries = {
-            const priority=2001: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                  priority=2001: (0x02, 0x1181           ) : a_params(2);
-                  priority=2001: (0x03, 0x1000 &&& 0xF000) : a_params(3);
-                  priority=2001: (0x04, 0x0210 &&& 0x02F0) : a_params(4);
-            const priority=2001: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                  priority=2001: (0x06, _                ) : a_params(6);
+            const priority = 2001 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            priority = 2001 :(0x02, 0x1181) : a_params(2);
+            priority = 2001 :(0x03, 0x1000 &&& 0xF000) : a_params(3);
+            priority = 2001 :(0x04, 0x0210 &&& 0x02F0) : a_params(4);
+            const priority = 2001 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            priority = 2001 :(0x06, _) : a_params(6);
         }
     }
     table t4b {
@@ -208,7 +231,10 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         largest_priority_wins = false;
         // t4b is same as t4, but because it has
@@ -216,12 +242,12 @@ control ingressImpl(
         // should be created for it about duplicate priorities.
  	@noWarn("duplicate-priorities")
         entries = {
-            const priority=2001: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                  priority=2001: (0x02, 0x1181           ) : a_params(2);
-                  priority=2001: (0x03, 0x1000 &&& 0xF000) : a_params(3);
-                  priority=2001: (0x04, 0x0210 &&& 0x02F0) : a_params(4);
-            const priority=2001: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                  priority=2001: (0x06, _                ) : a_params(6);
+            const priority = 2001 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            priority = 2001 :(0x02, 0x1181) : a_params(2);
+            priority = 2001 :(0x03, 0x1000 &&& 0xF000) : a_params(3);
+            priority = 2001 :(0x04, 0x0210 &&& 0x02F0) : a_params(4);
+            const priority = 2001 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            priority = 2001 :(0x06, _) : a_params(6);
         }
     }
     table t5 {
@@ -229,7 +255,10 @@ control ingressImpl(
             hdr.ethernet.src_addr : exact;
             hdr.ethernet.ether_type : ternary;
         }
-        actions = { a; a_params; }
+        actions = {
+            a;
+            a_params;
+        }
         default_action = a;
         priority_delta = 100;
         // According to the language spec, the priority values as
@@ -238,12 +267,12 @@ control ingressImpl(
         // should be a warning because the 3rd and 4th entries are out
         // of priority order.
         entries = {
-            priority=1000: (0x01, 0x1111 &&& 0xF   ) : a_params(1);
-                           (0x02, 0x1181           ) : a_params(2); // prio 900
+            priority = 1000 :(0x01, 0x1111 &&& 0xF) : a_params(1);
+            (0x02, 0x1181) : a_params(2); // prio 900
                            (0x03, 0x1000 &&& 0xF000) : a_params(3); // prio 800
                            (0x04, 0x0210 &&& 0x02F0) : a_params(4); // prio 700
-            priority= 901: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
-                           (0x06, _                ) : a_params(6); // prio 801
+            priority = 901 :(0x04, 0x0010 &&& 0x02F0) : a_params(5);
+            (0x06, _) : a_params(6); // prio 801
         }
     }
     apply {
@@ -264,14 +293,16 @@ control egressImpl(
     inout metadata_t umd,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t umd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control egressDeparserImpl(

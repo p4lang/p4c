@@ -6,4 +6,3 @@ parser p(out bool hu) {
         hu = (HU){#};
     }
 }
-

@@ -88,7 +88,7 @@ control caller(inout headers hdr) {
     }
     @name("caller.calculate") table calculate_0 {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op");
+            hdr.p4calc.op : exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -107,18 +107,18 @@ control caller(inout headers hdr) {
         }
         const default_action = NoAction_1();
         const entries = {
-                        24w0x2b : operation_add();
-                        24w0x2d : operation_sub();
-                        24w0x2a : operation_mul();
-                        24w0x2f : operation_div();
-                        24w0x25 : operation_mod();
-                        24w0x26 : operation_band();
-                        24w0x7c : operation_bor();
-                        24w0x5e : operation_bxor();
-                        24w0x3c3c : operation_shl();
-                        24w0x3e3e : operation_shr();
-                        24w0x7c2b7c : operation_addsat();
-                        24w0x7c2d7c : operation_subsat();
+            24w0x2b : operation_add();
+            24w0x2d : operation_sub();
+            24w0x2a : operation_mul();
+            24w0x2f : operation_div();
+            24w0x25 : operation_mod();
+            24w0x26 : operation_band();
+            24w0x7c : operation_bor();
+            24w0x5e : operation_bxor();
+            24w0x3c3c : operation_shl();
+            24w0x3e3e : operation_shr();
+            24w0x7c2b7c : operation_addsat();
+            24w0x7c2d7c : operation_subsat();
         }
     }
     apply {
@@ -128,6 +128,6 @@ control caller(inout headers hdr) {
     }
 }
 
-control Ingress<H>(inout H hdr);
-package s<H>(Ingress<H> ig);
-s<headers>(caller()) main;
+control Ingress < H >(inout H hdr);
+package s < H >(Ingress<H> ig);
+s < headers >(caller()) main;

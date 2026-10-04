@@ -11,19 +11,19 @@ header next_header {
 
 struct Headers_t {
     first_header first;
-    next_header  next;
+    next_header next;
 }
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<first_header>(headers.first);
-        transition select(p.length()) {
-            32w16: parse_next;
-            default: reject;
+        p.extract < first_header >(headers.first);
+        transition select (p.length()) {
+            32w16 : parse_next;
+            default : reject;
         }
     }
     state parse_next {
-        p.extract<next_header>(headers.next);
+        p.extract < next_header >(headers.next);
         transition accept;
     }
 }
@@ -34,4 +34,4 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

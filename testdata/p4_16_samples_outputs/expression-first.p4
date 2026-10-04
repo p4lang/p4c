@@ -33,4 +33,3 @@ control p() {
         d = false;
     }
 }
-

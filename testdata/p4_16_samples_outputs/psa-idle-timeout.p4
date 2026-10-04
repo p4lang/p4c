@@ -10,7 +10,7 @@ header ethernet_t {
     EthernetAddress srcAddr;
     EthernetAddress srcAddr2;
     EthernetAddress srcAddr3;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -39,7 +39,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl_idle_timeout {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;
@@ -50,7 +50,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl_no_idle_timeout {
         key = {
-            hdr.ethernet.srcAddr2: exact;
+            hdr.ethernet.srcAddr2 : exact;
         }
         actions = {
             NoAction;
@@ -61,7 +61,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     }
     table tbl_no_idle_timeout_prop {
         key = {
-            hdr.ethernet.srcAddr2: exact;
+            hdr.ethernet.srcAddr2 : exact;
         }
         actions = {
             NoAction;

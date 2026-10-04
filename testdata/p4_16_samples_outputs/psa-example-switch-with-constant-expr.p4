@@ -20,7 +20,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct metadata {
@@ -43,7 +43,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
 control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     table tbl {
         key = {
-            a.srcAddr: exact;
+            a.srcAddr : exact;
         }
         actions = {
             NoAction;
@@ -51,17 +51,17 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     }
     apply {
         switch (16w2) {
-            1: {
-                b.meta = 48w5;
+            1 : {
+            b.meta = 48w5;
             }
-            2: 
-            3: 
-            4: {
-                b.meta = 48w7;
+            2 :
+            3 :
+            4 : {
+            b.meta = 48w7;
             }
-            5: 
-            default: {
-                b.meta = 48w9;
+            5 :
+            default : {
+            b.meta = 48w9;
             }
         }
         if (b.meta == 48w7) {

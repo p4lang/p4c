@@ -5,4 +5,3 @@ control cIngress() {
         random<bit<8>>(rand_val, 8w0);
     }
 }
-

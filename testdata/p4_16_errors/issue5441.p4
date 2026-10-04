@@ -5,8 +5,8 @@ package SimpleArch(MAPipe p);
 
 control MyMAPipe(out bit<16> a, in bit<32> b) {
     apply {
-        a = b[-1+:16];
-        a = b[4294967293+:16];
+        a = b[- 1 +: 16];
+        a = b[4294967293 +: 16];
     }
 }
 

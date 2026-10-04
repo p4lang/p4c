@@ -11,28 +11,28 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 struct mystruct1_t {
     bit<16> hash1;
-    bool    hash_drop;
+    bool hash_drop;
 }
 
 struct metadata {
@@ -42,9 +42,9 @@ struct metadata {
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -60,7 +60,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table guh {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             hash_drop_decision;
@@ -69,8 +69,8 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table debug_table {
         key = {
-            meta.mystruct1.hash1    : exact;
-            meta.mystruct1.hash_drop: exact;
+            meta.mystruct1.hash1 : exact;
+            meta.mystruct1.hash_drop : exact;
         }
         actions = {
             NoAction;
@@ -82,9 +82,9 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             guh.apply();
             debug_table.apply();
             if (meta.mystruct1.hash_drop) {
-                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++ (bit<1>)meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xdead;
+                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++(bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xdead;
             } else {
-                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++ (bit<1>)meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xc001;
+                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++(bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xc001;
             }
         }
     }
@@ -112,4 +112,4 @@ control DeparserI(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;
+V1Switch < headers, metadata >(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;

@@ -1,5 +1,5 @@
 parser-unroll-uninitialized-slice-read.p4(12): [--Wwarn=uninitialized-use] warning: f may be uninitialized
-        g = f[3:0];
+        g = f[3 : 0];
             ^
 parser-unroll-uninitialized-slice-read.p4(10): [--Wwarn=uninitialized-out-param] warning: out parameter 'f' may be uninitialized when 'p' terminates
 parser p(packet_in packet, out bit<8> f, out bit<4> g) {
@@ -8,5 +8,5 @@ parser-unroll-uninitialized-slice-read.p4(10)
 parser p(packet_in packet, out bit<8> f, out bit<4> g) {
        ^
 parser-unroll-uninitialized-slice-read.p4(12): [--Wwarn=ignore-prop] warning: Result of 'g = f[3:0]' is not defined: Error: Uninitialized
-        g = f[3:0];
+        g = f[3 : 0];
           ^

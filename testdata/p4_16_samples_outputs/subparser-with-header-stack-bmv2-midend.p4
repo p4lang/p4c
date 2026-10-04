@@ -27,9 +27,9 @@ header h3_t {
 }
 
 struct headers {
-    h1_t    h1;
+    h1_t h1;
     h2_t[5] h2;
-    h3_t    h3;
+    h3_t h3;
 }
 
 struct metadata {
@@ -37,34 +37,34 @@ struct metadata {
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<h1_t>(hdr.h1);
+        pkt.extract < h1_t >(hdr.h1);
         verify(hdr.h1.hdr_type == 8w1, error.BadHeaderType);
-        transition select(hdr.h1.next_hdr_type) {
-            8w2: parse_first_h2;
-            8w3: parse_h3;
-            default: accept;
+        transition select (hdr.h1.next_hdr_type) {
+            8w2 : parse_first_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
     state parse_first_h2 {
-        pkt.extract<h2_t>(hdr.h2.next);
+        pkt.extract < h2_t >(hdr.h2.next);
         verify(hdr.h2.last.hdr_type == 8w2, error.BadHeaderType);
-        transition select(hdr.h2.last.next_hdr_type) {
-            8w2: parse_other_h2;
-            8w3: parse_h3;
-            default: accept;
+        transition select (hdr.h2.last.next_hdr_type) {
+            8w2 : parse_other_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
     state parse_other_h2 {
-        pkt.extract<h2_t>(hdr.h2.next);
+        pkt.extract < h2_t >(hdr.h2.next);
         verify(hdr.h2.last.hdr_type == 8w2, error.BadHeaderType);
-        transition select(hdr.h2.last.next_hdr_type) {
-            8w2: parse_other_h2;
-            8w3: parse_h3;
-            default: accept;
+        transition select (hdr.h2.last.next_hdr_type) {
+            8w2 : parse_other_h2;
+            8w3 : parse_h3;
+            default : accept;
         }
     }
     state parse_h3 {
-        pkt.extract<h3_t>(hdr.h3);
+        pkt.extract < h3_t >(hdr.h3);
         verify(hdr.h3.hdr_type == 8w3, error.BadHeaderType);
         transition accept;
     }
@@ -72,22 +72,22 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @hidden action subparserwithheaderstackbmv2l108() {
-        hdr.h1.h2_valid_bits[0:0] = 1w1;
+        hdr.h1.h2_valid_bits[0 : 0] = 1w1;
     }
     @hidden action subparserwithheaderstackbmv2l106() {
         hdr.h1.h2_valid_bits = 8w0;
     }
     @hidden action subparserwithheaderstackbmv2l111() {
-        hdr.h1.h2_valid_bits[1:1] = 1w1;
+        hdr.h1.h2_valid_bits[1 : 1] = 1w1;
     }
     @hidden action subparserwithheaderstackbmv2l114() {
-        hdr.h1.h2_valid_bits[2:2] = 1w1;
+        hdr.h1.h2_valid_bits[2 : 2] = 1w1;
     }
     @hidden action subparserwithheaderstackbmv2l117() {
-        hdr.h1.h2_valid_bits[3:3] = 1w1;
+        hdr.h1.h2_valid_bits[3 : 3] = 1w1;
     }
     @hidden action subparserwithheaderstackbmv2l120() {
-        hdr.h1.h2_valid_bits[4:4] = 1w1;
+        hdr.h1.h2_valid_bits[4 : 4] = 1w1;
     }
     @hidden table tbl_subparserwithheaderstackbmv2l106 {
         actions = {
@@ -162,14 +162,14 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control DeparserI(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<h1_t>(hdr.h1);
-        packet.emit<h2_t>(hdr.h2[0]);
-        packet.emit<h2_t>(hdr.h2[1]);
-        packet.emit<h2_t>(hdr.h2[2]);
-        packet.emit<h2_t>(hdr.h2[3]);
-        packet.emit<h2_t>(hdr.h2[4]);
-        packet.emit<h3_t>(hdr.h3);
+        packet.emit < h1_t >(hdr.h1);
+        packet.emit < h2_t >(hdr.h2[0]);
+        packet.emit < h2_t >(hdr.h2[1]);
+        packet.emit < h2_t >(hdr.h2[2]);
+        packet.emit < h2_t >(hdr.h2[3]);
+        packet.emit < h2_t >(hdr.h2[4]);
+        packet.emit < h3_t >(hdr.h3);
     }
 }
 
-V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < headers, metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

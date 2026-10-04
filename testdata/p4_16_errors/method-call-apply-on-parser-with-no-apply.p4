@@ -1,10 +1,11 @@
 // generated from direct-call1.p4
 
 parser p()() {
-  state start {}
+    state start {
+    }
 }
 parser q()() {
-  state start {
-    p.apply(_);
-  }
+    state start {
+        p.apply(_);
+    }
 }

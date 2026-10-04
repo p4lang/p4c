@@ -6,4 +6,3 @@ control I() {
         H h = {b = 1};
     }
 }
-

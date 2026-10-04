@@ -57,7 +57,7 @@ control ProtComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control ProtDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 

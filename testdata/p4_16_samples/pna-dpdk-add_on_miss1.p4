@@ -21,12 +21,12 @@ const int IPV4_HOST_SIZE = 65536;
 /*  Define all the headers the program will recognize             */
 /*  The actual sets of headers processed by each gress can differ */
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 typedef bit<128> IPv6Address;
 
 typedef bit<16> etype_t;
-const etype_t ETYPE_IPV4      = 0x0800; /* IPv4 */
+const etype_t ETYPE_IPV4 = 0x0800; /* IPv4 */
 
 typedef bit<8> ipproto_t;
 const ipproto_t IPPROTO_TCP = 6;       /* Transmission Control Protocol */
@@ -43,12 +43,12 @@ header ethernet_h {
 // https://en.wikipedia.org/wiki/IPv4
 // https://tools.ietf.org/html/rfc791
 header ipv4_h {
-    bit<8>  version_ihl;        // version always 4 for IPv4, ihl=header length
-    bit<8>  diffserv;           // 6 bits of DSCP followed by 2-bit ECN
+    bit<8> version_ihl;        // version always 4 for IPv4, ihl=header length
+    bit<8> diffserv;           // 6 bits of DSCP followed by 2-bit ECN
     bit<16> total_len;          // in bytes, including IPv4 header
     bit<16> identification;
     bit<16> flags_frag_offset;
-    bit<8>  ttl;                // time to live
+    bit<8> ttl;                // time to live
     ipproto_t protocol;
     bit<16> hdr_checksum;
     IPv4Address src_addr;
@@ -63,9 +63,9 @@ header tcp_h {
     bit<16> dst_port;
     bit<32> seq_no;
     bit<32> ack_no;
-    bit<4>  data_offset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> data_offset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgent_ptr;
@@ -92,10 +92,10 @@ header udp_h {
 
 // Define names for different expire time profile id values.
 
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW    = (ExpireTimeProfileId_t) 0;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW    = (ExpireTimeProfileId_t) 1;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t) 2;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER  = (ExpireTimeProfileId_t) 3;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW =(ExpireTimeProfileId_t) 0;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW =(ExpireTimeProfileId_t) 1;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED =(ExpireTimeProfileId_t) 2;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER =(ExpireTimeProfileId_t) 3;
 
 /*************************************************************************
  **************  I N G R E S S   P R O C E S S I N G   *******************
@@ -104,10 +104,10 @@ const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER  = (ExpireTimeProfileI
     /***********************  H E A D E R S  ************************/
 
 struct headers_t {
-    ethernet_h   ethernet;
-    ipv4_h       ipv4;
-    tcp_h        tcp;
-    udp_h        udp;
+    ethernet_h ethernet;
+    ipv4_h ipv4;
+    tcp_h tcp;
+    udp_h udp;
 }
 
     /******  G L O B A L   I N G R E S S   M E T A D A T A  *********/
@@ -128,24 +128,24 @@ parser MainParserImpl(
     inout metadata_t meta,
     in    pna_main_parser_input_metadata_t istd)
 {
-     state start {
+    state start {
         transition parse_ethernet;
     }
 
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
         transition select (hdr.ethernet.ether_type) {
-            ETYPE_IPV4:  parse_ipv4;
-            default: accept;
+            ETYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
 
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
         transition select (hdr.ipv4.protocol) {
-            IPPROTO_TCP: parse_tcp;
-            IPPROTO_UDP: parse_udp;
-            default: accept;
+            IPPROTO_TCP : parse_tcp;
+            IPPROTO_UDP : parse_udp;
+            default : accept;
         }
     }
 
@@ -176,7 +176,7 @@ control PreControlImpl(
     /***************** M A T C H - A C T I O N  *********************/
 
 
-IPv4Address directionNeutralAddr (
+IPv4Address directionNeutralAddr(
     in direction_t direction,
     in IPv4Address outbound_address,
     in IPv4Address inbound_address)
@@ -188,7 +188,7 @@ IPv4Address directionNeutralAddr (
     }
 }
 
-bit<16> directionNeutralPort (
+bit<16> directionNeutralPort(
     in direction_t direction,
     in bit<16> outbound_port,
     in bit<16> inbound_port)
@@ -208,12 +208,12 @@ control conntrack(inout headers_t  hdr, inout metadata_t meta) {
     // code) that can modify the behavior of actions of ct_tcp_table.
     ExpireTimeProfileId_t new_expire_time_profile_id;
 
-    action ct_tcp_table_hit () {
+    action ct_tcp_table_hit() {
         // Make a change to the packet that is visible in the packet
         // output by the device, for debug purposes only.  I cannot
         // imagine any reason why someone would want to make a change
         // like this to a packet in a production P4 program.
-        hdr.ethernet.src_addr[7:0] = 0xf1;
+        hdr.ethernet.src_addr[7 : 0] = 0xf1;
     }
 
     action ct_tcp_table_miss() {
@@ -221,7 +221,7 @@ control conntrack(inout headers_t  hdr, inout metadata_t meta) {
         // output by the device, for debug purposes only.  I cannot
         // imagine any reason why someone would want to make a change
         // like this to a packet in a production P4 program.
-        hdr.ethernet.src_addr[7:0] = 0xa5;
+        hdr.ethernet.src_addr[7 : 0] = 0xa5;
         add_entry(action_name = "ct_tcp_table_hit",  // name of action
             action_params = (ct_tcp_table_hit_params_t) {},
             expire_time_profile_id = new_expire_time_profile_id);
@@ -229,18 +229,18 @@ control conntrack(inout headers_t  hdr, inout metadata_t meta) {
 
     table ct_tcp_table {
         key = {
-          directionNeutralAddr(meta.direction, hdr.ipv4.src_addr, hdr.ipv4.dst_addr):
-              exact @name("ipv4_addr1");
-          directionNeutralAddr(meta.direction, hdr.ipv4.dst_addr, hdr.ipv4.src_addr):
-              exact @name("ipv4_addr2");
-          hdr.ipv4.protocol : exact;
-          directionNeutralPort(meta.direction, hdr.tcp.src_port, hdr.tcp.dst_port):
-              exact @name("tcp_port1");
-          directionNeutralPort(meta.direction, hdr.tcp.dst_port, hdr.tcp.src_port):
-              exact @name("tcp_port2");
-       }
+            directionNeutralAddr(meta.direction, hdr.ipv4.src_addr, hdr.ipv4.dst_addr) :
+            exact @name("ipv4_addr1");
+            directionNeutralAddr(meta.direction, hdr.ipv4.dst_addr, hdr.ipv4.src_addr) :
+            exact @name("ipv4_addr2");
+            hdr.ipv4.protocol : exact;
+            directionNeutralPort(meta.direction, hdr.tcp.src_port, hdr.tcp.dst_port) :
+            exact @name("tcp_port1");
+            directionNeutralPort(meta.direction, hdr.tcp.dst_port, hdr.tcp.src_port) :
+            exact @name("tcp_port2");
+        }
         actions = {
-            @tableonly   ct_tcp_table_hit;
+            @tableonly ct_tcp_table_hit;
             @defaultonly ct_tcp_table_miss;
         }
 
@@ -255,10 +255,10 @@ control conntrack(inout headers_t  hdr, inout metadata_t meta) {
         pna_idle_timeout = PNA_IdleTimeout_t.NOTIFY_CONTROL;
         const default_action = ct_tcp_table_miss;
     }
-   apply {
-       new_expire_time_profile_id = EXPIRE_TIME_PROFILE_TCP_NEW;
-       ct_tcp_table.apply();
-   }
+    apply {
+        new_expire_time_profile_id = EXPIRE_TIME_PROFILE_TCP_NEW;
+        ct_tcp_table.apply();
+    }
 }
 
 control inbound(
@@ -266,8 +266,8 @@ control inbound(
     inout metadata_t meta)
 {
     apply {
-      meta.direction = direction_t.INBOUND; 
-      conntrack.apply(hdr, meta);
+        meta.direction = direction_t.INBOUND;
+        conntrack.apply(hdr, meta);
     }
 }
 
@@ -276,8 +276,8 @@ control outbound(
     inout metadata_t meta)
 {
     apply {
-      meta.direction = direction_t.OUTBOUND; 
-      conntrack.apply(hdr, meta);
+        meta.direction = direction_t.OUTBOUND;
+        conntrack.apply(hdr, meta);
     }
 }
 
@@ -287,15 +287,13 @@ control MainControlImpl(
     in    pna_main_input_metadata_t  istd,
     inout pna_main_output_metadata_t ostd)
 {
-    action drop () {
+    action drop() {
         drop_packet();
     }
 
-    
     action send(PortId_t port) {
         send_to_port(port);
     }
-
 
     table ipv4_host {
         key = {
@@ -312,10 +310,10 @@ control MainControlImpl(
 
     apply {
         if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
-           if (istd.direction == PNA_Direction_t.HOST_TO_NET)
-               outbound.apply(hdr, meta); 
-           else              
-               inbound.apply(hdr, meta); 
+            if (istd.direction == PNA_Direction_t.HOST_TO_NET)
+            outbound.apply(hdr, meta);
+            else
+            inbound.apply(hdr, meta); 
             //ct_tcp_table.apply();
         }
         if (hdr.ipv4.isValid()) {

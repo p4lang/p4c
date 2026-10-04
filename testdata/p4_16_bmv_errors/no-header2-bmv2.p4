@@ -8,8 +8,11 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct H { bit<32> x; };
-struct M { };
+struct H {
+    bit<32> x;
+};
+struct M {
+};
 
 parser ParserI(packet_in b, out H parsedHdr, inout M meta,
               inout standard_metadata_t standard_metadata) {
@@ -18,39 +21,37 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta,
     }
 }
 
-
 control VerifyChecksumI(inout H hdr,
                         inout M meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 control IngressI(inout H hdr,
                  inout M meta,
                  inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
-
 
 control EgressI(inout H hdr,
                 inout M meta,
                 inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
-
 
 control ComputeChecksumI(inout H hdr,
                          inout M meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 control DeparserI(packet_out b, in H hdr) {
     apply {
         b.emit(hdr);  // illegal data type
     }
 }
-
 
 V1Switch(ParserI(),
          VerifyChecksumI(),

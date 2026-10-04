@@ -10,28 +10,28 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 struct mystruct1_t {
     bit<16> hash1;
-    bool    hash_drop;
+    bool hash_drop;
 }
 
 struct metadata {
@@ -40,14 +40,14 @@ struct metadata {
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        pkt.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
+        pkt.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -56,12 +56,12 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("cIngress.hash_drop_decision") action hash_drop_decision() {
-        hash<bit<16>, bit<16>, tuple<bit<32>, bit<32>, bit<8>>, bit<32>>(meta.mystruct1.hash1, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol }, 32w0xffff);
-        meta.mystruct1.hash_drop = meta.mystruct1.hash1 < 16w0x8000;
+        hash < bit<16>, bit<16>, tuple < bit<32>, bit<32>, bit<8 >>, bit<32 >>(meta.mystruct1.hash1, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol }, 32w0xffff);
+        meta.mystruct1.hash_drop = meta.mystruct1.hash1 <16w0x8000;
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             hash_drop_decision();
@@ -70,8 +70,8 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.debug_table") table debug_table_0 {
         key = {
-            meta.mystruct1.hash1    : exact @name("meta.mystruct1.hash1");
-            meta.mystruct1.hash_drop: exact @name("meta.mystruct1.hash_drop");
+            meta.mystruct1.hash1 : exact @name("meta.mystruct1.hash1");
+            meta.mystruct1.hash_drop : exact @name("meta.mystruct1.hash_drop");
         }
         actions = {
             NoAction_1();
@@ -83,9 +83,9 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             guh_0.apply();
             debug_table_0.apply();
             if (meta.mystruct1.hash_drop) {
-                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++ (bit<1>)meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xdead;
+                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++(bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xdead;
             } else {
-                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++ (bit<1>)meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xc001;
+                hdr.ethernet.dstAddr = meta.mystruct1.hash1 ++ 7w0 ++(bit<1>) meta.mystruct1.hash_drop ++ 8w0 ++ 16w0xc001;
             }
         }
     }
@@ -108,9 +108,9 @@ control updateChecksum(inout headers hdr, inout metadata meta) {
 
 control DeparserI(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
     }
 }
 
-V1Switch<headers, metadata>(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;
+V1Switch < headers, metadata >(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;

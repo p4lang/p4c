@@ -13,7 +13,7 @@ typedef bit<48> mac_addr_t;
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 header ml_hdr_t {
@@ -27,7 +27,7 @@ header vec_e_t {
 
 struct headers {
     ethernet_t ethernet;
-    ml_hdr_t   ml;
+    ml_hdr_t ml;
     vec_e_t[8] vector;
 }
 
@@ -47,7 +47,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
         packet.extract(hdr.vector[5]);
         packet.extract(hdr.vector[6]);
         packet.extract(hdr.vector[7]);
-	transition accept;
+        transition accept;
     }
 }
 
@@ -56,30 +56,33 @@ control ingress(inout headers hdr, inout metadata_t meta,
     apply {
         // Test runtime index with arithmetic expression as index, as
         // L-value.
-        hdr.vector[hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1)].e =
-            hdr.ethernet.etherType[15:8] + 7;
+        hdr.vector[hdr.ml.idx1 -(hdr.ml.idx2 >> 8w1)].e =
+        hdr.ethernet.etherType[15 : 8] + 7;
         // similar, but with runtime index as R-value.
-        hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 8w0x07) & 8w0x7].e;
+        hdr.ethernet.etherType[7 : 0] = hdr.vector[(hdr.ml.idx2 ^ 8w0x07) & 8w0x7].e;
 
         // Test runtime index with arithmetic expression as index,
         // where that arithmetic expression includes another header
         // stack index with a runtime variable value.
-        hdr.vector[hdr.vector[hdr.ethernet.dstAddr[39:32] & 0x7].e & 0x7].e =
-            hdr.ethernet.dstAddr[47:40];
+        hdr.vector[hdr.vector[hdr.ethernet.dstAddr[39 : 32] & 0x7].e & 0x7].e =
+        hdr.ethernet.dstAddr[47 : 40];
     }
 }
 
 control egress(inout headers hdr, inout metadata_t meta,
                inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+    }
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {

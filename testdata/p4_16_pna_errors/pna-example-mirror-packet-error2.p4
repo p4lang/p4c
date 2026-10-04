@@ -7,30 +7,30 @@
 #include <core.p4>
 #include <pna.p4>
 
-const MirrorSlotId_t MIRROR_SLOT_ID = (MirrorSlotId_t) 3;
+const MirrorSlotId_t MIRROR_SLOT_ID =(MirrorSlotId_t) 3;
 
-const MirrorSessionId_t MIRROR_SESSION1 = (MirrorSessionId_t) 58;
-const MirrorSessionId_t MIRROR_SESSION2 = (MirrorSessionId_t) 62;
-const MirrorSessionId_t MIRROR_SESSION3 = (MirrorSessionId_t) 6;
+const MirrorSessionId_t MIRROR_SESSION1 =(MirrorSessionId_t) 58;
+const MirrorSessionId_t MIRROR_SESSION2 =(MirrorSessionId_t) 62;
+const MirrorSessionId_t MIRROR_SESSION3 =(MirrorSessionId_t) 6;
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -63,15 +63,15 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
         transition select (hdr.ipv4.protocol) {
-            default: accept;
+            default : accept;
         }
     }
 }
@@ -83,15 +83,15 @@ control MainControlImpl(
     inout pna_main_output_metadata_t ostd)
 {
     MirrorSessionId_t mirror_session;
-    MirrorSlotId_t mirror_slot; 
-    action send_with_mirror (PortId_t vport) {
-	send_to_port(vport);
-	mirror_packet(mirror_slot, mirror_session);
+    MirrorSlotId_t mirror_slot;
+    action send_with_mirror(PortId_t vport) {
+        send_to_port(vport);
+        mirror_packet(mirror_slot, mirror_session);
     }
 
     action drop_with_mirror() {
-	drop_packet();
-	mirror_packet(mirror_slot, mirror_session);
+        drop_packet();
+        mirror_packet(mirror_slot, mirror_session);
     }
 
     table flowTable {
@@ -109,12 +109,15 @@ control MainControlImpl(
     }
 
     apply {
-                mirror_slot = MIRROR_SLOT_ID;
-                switch (flowTable.apply().action_run){
-                    send_with_mirror: { mirror_session = MIRROR_SESSION1;}
-                    drop_with_mirror: { mirror_session = MIRROR_SESSION2;}
-                    default: {mirror_session = MIRROR_SESSION3;}
-                }
+        mirror_slot = MIRROR_SLOT_ID;
+        switch (flowTable.apply().action_run) {
+            send_with_mirror : { mirror_session = MIRROR_SESSION1;
+            }
+            drop_with_mirror : { mirror_session = MIRROR_SESSION2;
+            }
+            default : { mirror_session = MIRROR_SESSION3;
+            }
+        }
     }
 }
 
@@ -136,4 +139,3 @@ PNA_NIC(
     MainControlImpl(),
     MainDeparserImpl()
     ) main;
-

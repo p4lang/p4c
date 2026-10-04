@@ -28,31 +28,40 @@ parser p(packet_in b, out Headers h,
         b.extract(h.hs.next);
         m.v = h.hs.last.f2;
         m.v = m.v + h.hs.last.f2;
-        transition select(h.hs.last.f1) {
-            0: start;
-            _: accept;
+        transition select (h.hs.last.f1) {
+            0 : start;
+            _ : accept;
         }
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
-control update(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {}
+    apply {
+    }
 }
 
 control deparser(packet_out b, in Headers h) {
-    apply { b.emit(h.hs); }
+    apply {
+        b.emit(h.hs);
+    }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         // Compiler should give error for out of bounds index,
         // if due to compile-time known value index.
-        h.hs[-1].setValid();
-        h.hs[-1].f1 = 5;
-        h.hs[-1].f2 = 8;
+        h.hs[- 1].setValid();
+        h.hs[- 1].f1 = 5;
+        h.hs[- 1].f2 = 8;
 
         // No error or warning for these -- they are good.
         h.hs[0].setValid();

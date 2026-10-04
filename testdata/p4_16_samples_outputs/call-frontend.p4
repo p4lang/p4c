@@ -5,4 +5,3 @@ extern Ix {
     void g();
     int<32> h();
 }
-

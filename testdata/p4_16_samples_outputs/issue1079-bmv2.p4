@@ -15,7 +15,7 @@ struct cksum_t {
 
 struct metadata_t {
     cksum_t cksum;
-    bit<1>  b;
+    bit<1> b;
 }
 
 parser EmptyParser(packet_in b, out headers_t headers, inout metadata_t meta, inout standard_metadata_t standard_metadata) {

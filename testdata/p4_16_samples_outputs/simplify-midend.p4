@@ -10,7 +10,7 @@ control c(out bool x) {
     }
     @name("c.t1") table t1_0 {
         key = {
-            x: exact @name("x");
+            x : exact @name("x");
         }
         actions = {
             NoAction_1();
@@ -19,7 +19,7 @@ control c(out bool x) {
     }
     @name("c.t2") table t2_0 {
         key = {
-            x: exact @name("x");
+            x : exact @name("x");
         }
         actions = {
             NoAction_2();
@@ -32,7 +32,7 @@ control c(out bool x) {
     @hidden action act_0() {
         tmp = false;
     }
-    @hidden action simplify22() {
+    @hidden action simplify30() {
         x = true;
     }
     @hidden action act_1() {
@@ -41,20 +41,20 @@ control c(out bool x) {
     @hidden action act_2() {
         tmp_1 = false;
     }
-    @hidden action simplify23() {
+    @hidden action simplify31() {
         tmp_0 = tmp_1;
     }
-    @hidden action simplify23_0() {
+    @hidden action simplify31_0() {
         tmp_0 = false;
     }
-    @hidden action simplify24() {
+    @hidden action simplify32() {
         x = false;
     }
-    @hidden table tbl_simplify22 {
+    @hidden table tbl_simplify30 {
         actions = {
-            simplify22();
+            simplify30();
         }
-        const default_action = simplify22();
+        const default_action = simplify30();
     }
     @hidden table tbl_act {
         actions = {
@@ -80,26 +80,26 @@ control c(out bool x) {
         }
         const default_action = act_2();
     }
-    @hidden table tbl_simplify23 {
+    @hidden table tbl_simplify31 {
         actions = {
-            simplify23();
+            simplify31();
         }
-        const default_action = simplify23();
+        const default_action = simplify31();
     }
-    @hidden table tbl_simplify23_0 {
+    @hidden table tbl_simplify31_0 {
         actions = {
-            simplify23_0();
+            simplify31_0();
         }
-        const default_action = simplify23_0();
+        const default_action = simplify31_0();
     }
-    @hidden table tbl_simplify24 {
+    @hidden table tbl_simplify32 {
         actions = {
-            simplify24();
+            simplify32();
         }
-        const default_action = simplify24();
+        const default_action = simplify32();
     }
     apply {
-        tbl_simplify22.apply();
+        tbl_simplify30.apply();
         if (t1_0.apply().hit) {
             tbl_act.apply();
         } else {
@@ -111,12 +111,12 @@ control c(out bool x) {
             } else {
                 tbl_act_2.apply();
             }
-            tbl_simplify23.apply();
+            tbl_simplify31.apply();
         } else {
-            tbl_simplify23_0.apply();
+            tbl_simplify31_0.apply();
         }
         if (tmp_0) {
-            tbl_simplify24.apply();
+            tbl_simplify32.apply();
         }
     }
 }

@@ -42,7 +42,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".my_register") register<bit<32>, bit<14>>(32w16384) my_register;
+@name(".my_register") register < bit<32>, bit<14 >>(32w16384) my_register;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".m_action") action m_action(bit<14> register_idx) {
         my_register.read(meta.meta.register_tmp, (bit<14>)register_idx);
@@ -55,7 +55,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         size = 16384;
     }

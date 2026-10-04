@@ -19,9 +19,9 @@ struct metadata {
 
 struct headers {
     @name(".hdr1")
-    hdr1_t        hdr1;
+    hdr1_t hdr1;
     @name(".hdr2")
-    hdr2_t        hdr2;
+    hdr2_t hdr2;
     @name(".byte_hdr")
     byte_hdr_t[3] byte_hdr;
 }
@@ -42,11 +42,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".start") state start {
         packet.extract(hdr.hdr1);
         packet.extract(hdr.hdr2);
-        transition select(hdr.hdr1.totalLen) {
-            2 + 1: accept;
-            2 + 1 + 1: parse_1bytes;
-            2 + 1 + 2: parse_2bytes;
-            2 + 1 + 3: parse_3bytes;
+        transition select (hdr.hdr1.totalLen) {
+            2 + 1 : accept;
+            2 + 1 + 1 : parse_1bytes;
+            2 + 1 + 2 : parse_2bytes;
+            2 + 1 + 3 : parse_3bytes;
         }
     }
 }

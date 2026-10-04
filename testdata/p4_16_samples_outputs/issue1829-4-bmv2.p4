@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -31,12 +31,12 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<2> da_meter_result1;
     bit<2> da_meter_result2;
-    direct_meter<bit<2>>(MeterType.packets) da_meter;
+    direct_meter < bit<2 >>(MeterType.packets) da_meter;
     action do_meter() {
     }
     table mac_da {
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         actions = {
             do_meter;

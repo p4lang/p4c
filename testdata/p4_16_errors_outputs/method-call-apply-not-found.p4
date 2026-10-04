@@ -9,4 +9,3 @@ control ingress(inout bit<8> a) {
         x.apply();
     }
 }
-

@@ -13,7 +13,7 @@ struct intrinsic_metadata_t {
 }
 
 struct meta_t {
-    bit<1>  do_forward;
+    bit<1> do_forward;
     bit<32> ipv4_sa;
     bit<32> ipv4_da;
     bit<16> tcp_sp;
@@ -21,16 +21,16 @@ struct meta_t {
     bit<32> nhop_ipv4;
     bit<32> if_ipv4_addr;
     bit<48> if_mac_addr;
-    bit<1>  is_ext_if;
+    bit<1> is_ext_if;
     bit<16> tcpLength;
-    bit<8>  if_index;
+    bit<8> if_index;
 }
 
 header cpu_header_t {
     bit<64> preamble;
-    bit<8>  device;
-    bit<8>  reason;
-    bit<8>  if_index;
+    bit<8> device;
+    bit<8> reason;
+    bit<8> if_index;
 }
 
 header ethernet_t {
@@ -40,15 +40,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -59,9 +59,9 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> dataOffset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -76,47 +76,47 @@ struct headers {
     @name(".cpu_header")
     cpu_header_t cpu_header;
     @name(".ethernet")
-    ethernet_t   ethernet;
+    ethernet_t ethernet;
     @name(".ipv4")
-    ipv4_t       ipv4;
+    ipv4_t ipv4;
     @name(".tcp")
-    tcp_t        tcp;
+    tcp_t tcp;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract(hdr.cpu_header);
-        meta.meta.if_index = (bit<8>)hdr.cpu_header.if_index;
+        meta.meta.if_index =(bit<8>) hdr.cpu_header.if_index;
         transition parse_ethernet;
     }
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        meta.meta.ipv4_sa = (bit<32>)hdr.ipv4.srcAddr;
-        meta.meta.ipv4_da = (bit<32>)hdr.ipv4.dstAddr;
-        meta.meta.tcpLength = (bit<16>)(hdr.ipv4.totalLen - 16w20);
-        transition select(hdr.ipv4.protocol) {
-            8w0x6: parse_tcp;
-            default: accept;
+        meta.meta.ipv4_sa =(bit<32>) hdr.ipv4.srcAddr;
+        meta.meta.ipv4_da =(bit<32>) hdr.ipv4.dstAddr;
+        meta.meta.tcpLength =(bit<16>)(hdr.ipv4.totalLen - 16w20);
+        transition select (hdr.ipv4.protocol) {
+            8w0x6 : parse_tcp;
+            default : accept;
         }
     }
     @name(".parse_tcp") state parse_tcp {
         packet.extract(hdr.tcp);
-        meta.meta.tcp_sp = (bit<16>)hdr.tcp.srcPort;
-        meta.meta.tcp_dp = (bit<16>)hdr.tcp.dstPort;
+        meta.meta.tcp_sp =(bit<16>) hdr.tcp.srcPort;
+        meta.meta.tcp_dp =(bit<16>) hdr.tcp.dstPort;
         transition accept;
     }
     @name(".start") state start {
-        meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
-        transition select((packet.lookahead<bit<64>>())[63:0]) {
-            64w0: parse_cpu_header;
-            default: parse_ethernet;
+        meta.meta.if_index =(bit<8>) standard_metadata.ingress_port;
+        transition select ((packet.lookahead < bit<64 >>())[63 : 0]) {
+            64w0 : parse_cpu_header;
+            default : parse_ethernet;
         }
     }
 }
@@ -125,10 +125,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".do_rewrites") action do_rewrites(bit<48> smac) {
         hdr.cpu_header.setInvalid();
         hdr.ethernet.srcAddr = smac;
-        hdr.ipv4.srcAddr = (bit<32>)meta.meta.ipv4_sa;
-        hdr.ipv4.dstAddr = (bit<32>)meta.meta.ipv4_da;
-        hdr.tcp.srcPort = (bit<16>)meta.meta.tcp_sp;
-        hdr.tcp.dstPort = (bit<16>)meta.meta.tcp_dp;
+        hdr.ipv4.srcAddr =(bit<32>) meta.meta.ipv4_sa;
+        hdr.ipv4.dstAddr =(bit<32>) meta.meta.ipv4_da;
+        hdr.tcp.srcPort =(bit<16>) meta.meta.tcp_sp;
+        hdr.tcp.dstPort =(bit<16>) meta.meta.tcp_dp;
     }
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -138,7 +138,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.cpu_header.preamble = 64w0;
         hdr.cpu_header.device = 8w0;
         hdr.cpu_header.reason = 8w0xab;
-        hdr.cpu_header.if_index = (bit<8>)meta.meta.if_index;
+        hdr.cpu_header.if_index =(bit<8>) meta.meta.if_index;
     }
     @name(".send_frame") table send_frame {
         actions = {
@@ -146,7 +146,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _drop;
         }
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port : exact;
         }
         size = 256;
     }
@@ -207,7 +207,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _drop;
         }
         key = {
-            meta.meta.nhop_ipv4: exact;
+            meta.meta.nhop_ipv4 : exact;
         }
         size = 512;
     }
@@ -217,7 +217,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_if_info;
         }
         key = {
-            meta.meta.if_index: exact;
+            meta.meta.if_index : exact;
         }
     }
     @name(".ipv4_lpm") table ipv4_lpm {
@@ -226,7 +226,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _drop;
         }
         key = {
-            meta.meta.ipv4_da: lpm;
+            meta.meta.ipv4_da : lpm;
         }
         size = 1024;
     }
@@ -240,13 +240,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nat_no_nat;
         }
         key = {
-            meta.meta.is_ext_if: exact;
+            meta.meta.is_ext_if : exact;
             hdr.ipv4.isValid() : exact;
-            hdr.tcp.isValid()  : exact;
-            hdr.ipv4.srcAddr   : ternary;
-            hdr.ipv4.dstAddr   : ternary;
-            hdr.tcp.srcPort    : ternary;
-            hdr.tcp.dstPort    : ternary;
+            hdr.tcp.isValid() : exact;
+            hdr.ipv4.srcAddr : ternary;
+            hdr.ipv4.dstAddr : ternary;
+            hdr.tcp.srcPort : ternary;
+            hdr.tcp.dstPort : ternary;
         }
         size = 128;
     }

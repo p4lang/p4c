@@ -5,11 +5,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-control test()
-{
-    action Set_dmac() {}
-    action drop() {}
-
+control test() {
+    action Set_dmac() {
+    }
+    action drop() {
+    }
     table unit {
         actions = {
             @tableOnly Set_dmac;
@@ -17,6 +17,6 @@ control test()
         }
         default_action = drop;
     }
-
-    apply {}
+    apply {
+    }
 }

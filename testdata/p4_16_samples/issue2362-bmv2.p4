@@ -38,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
     table sub_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name") ;
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
         }
@@ -46,7 +46,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
     table simple_table {
         key = {
-            sub_table.apply().hit: exact @name("dummy_name") ;
+            sub_table.apply().hit : exact @name("dummy_name");
         }
         actions = {
         }
@@ -56,12 +56,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

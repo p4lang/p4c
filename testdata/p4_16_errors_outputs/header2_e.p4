@@ -14,4 +14,3 @@ header_union u {
     s      field;
     bit<1> field1;
 }
-

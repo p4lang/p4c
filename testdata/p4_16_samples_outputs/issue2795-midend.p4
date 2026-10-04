@@ -12,11 +12,11 @@ control c(packet_out p) {
         tmp.setValid();
         tmp.a = 32w0;
         tmp.b = 32w1;
-        p.emit<H>(tmp);
+        p.emit < H >(tmp);
         tmp_0.setValid();
         tmp_0.a = 32w0;
         tmp_0.b = 32w1;
-        p.emit<H>(tmp_0);
+        p.emit < H >(tmp_0);
     }
     @hidden table tbl_issue2795l16 {
         actions = {

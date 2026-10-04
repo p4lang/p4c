@@ -5,7 +5,7 @@ struct S {
     bit<16> f;
 }
 
-struct G<T> {
+struct G < T > {
     T b;
 }
 
@@ -30,31 +30,31 @@ enum myEnum1 {
 }
 
 header H1 {
-    int<8>  i;
-    bool    b;
+    int<8> i;
+    bool b;
     bit<14> l;
-    bit<1>  b1;
+    bit<1> b1;
 }
 
 struct S1 {
-    bit<8>  val;
+    bit<8> val;
     myEnum1 val1;
-    error   errorNoOne;
-    H1      h;
-    bit<1>  z;
-    bool    b;
-    int<8>  i;
+    error errorNoOne;
+    H1 h;
+    bit<1> z;
+    bool b;
+    int<8> i;
 }
 
-extern void f<D>(in D data);
+extern void f < D >(in D data);
 struct tuple_0 {
-    int<8>  f0;
-    bool    f1;
-    error   f2;
+    int<8> f0;
+    bool f1;
+    error f2;
     myEnum1 f3;
-    bit<8>  f4;
-    H1      f5;
-    S1      f6;
+    bit<8> f4;
+    H1 f5;
+    S1 f6;
 }
 
 control C(out bit<32> x) {
@@ -63,7 +63,7 @@ control C(out bit<32> x) {
     @name("C.stack") H[2] stack_0;
     @name("C.hustack") HU[2] hustack_0;
     H1 sa_0_h;
-    @hidden action defaultinitializer61() {
+    @hidden action defaultinitializer65() {
         ih.setInvalid();
         ih_0.setInvalid();
         stack_0[0].setInvalid();
@@ -74,16 +74,16 @@ control C(out bit<32> x) {
         hustack_0[1].i.setInvalid();
         sa_0_h.setInvalid();
         x = 32w0;
-        f<tuple_0>((tuple_0){f0 = 8s0,f1 = true,f2 = error.NoError,f3 = myEnum1.e1,f4 = 8w0,f5 = ih,f6 = (S1){val = 8w0,val1 = myEnum1.e1,errorNoOne = error.NoError,h = ih_0,z = 1w0,b = false,i = 8s0}});
+        f < tuple_0 >((tuple_0){f0 = 8s0,f1 = true,f2 = error.NoError,f3 = myEnum1.e1,f4 = 8w0,f5 = ih,f6 = (S1){val = 8w0,val1 = myEnum1.e1,errorNoOne = error.NoError,h = ih_0,z = 1w0,b = false,i = 8s0}});
     }
-    @hidden table tbl_defaultinitializer61 {
+    @hidden table tbl_defaultinitializer65 {
         actions = {
-            defaultinitializer61();
+            defaultinitializer65();
         }
-        const default_action = defaultinitializer61();
+        const default_action = defaultinitializer65();
     }
     apply {
-        tbl_defaultinitializer61.apply();
+        tbl_defaultinitializer65.apply();
     }
 }
 

@@ -1,7 +1,7 @@
 issue2905.p4(9): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
-issue2905.p4(11): [--Wwarn=unused] warning: table 't' is unused
+issue2905.p4(12): [--Wwarn=unused] warning: table 't' is unused
     table t {
           ^
 issue2905.p4(9): [--Winfo=removed] info: removing control 'c'

@@ -1,7 +1,7 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 enum bit<2> foo_t {
     A = 2w0,
     B = 2w1,
@@ -20,7 +20,7 @@ control c(inout meta_t m) {
     }
     @name("c.t") table t_0 {
         key = {
-            m.y: exact @name("m.y");
+            m.y : exact @name("m.y");
         }
         actions = {
             set_x();
@@ -32,4 +32,4 @@ control c(inout meta_t m) {
     }
 }
 
-top<meta_t>(c()) main;
+top < meta_t >(c()) main;

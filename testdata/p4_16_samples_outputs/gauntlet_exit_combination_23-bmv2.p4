@@ -32,7 +32,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("key");
+            h.eth_hdr.eth_type : exact @name("key");
         }
         actions = {
             simple_action();
@@ -40,8 +40,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            simple_action: {
-                exit;
+            simple_action : {
+            exit;
             }
         }
         h.eth_hdr.dst_addr = h.eth_hdr.src_addr + h.eth_hdr.dst_addr;

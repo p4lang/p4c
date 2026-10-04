@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -29,7 +29,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout 
 
 control cIngress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     apply {
-        digest<tuple<bit<48>>>(32w5, { hdr.ethernet.srcAddr });
+        digest < tuple < bit<48 >>>(32w5, { hdr.ethernet.srcAddr });
         hdr.ethernet.srcAddr = 48w0;
     }
 }
@@ -49,4 +49,4 @@ control uc(inout Parsed_packet hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Parsed_packet, Metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, Metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

@@ -19,4 +19,3 @@ extern E {
     void set3(out H h, out bit<32> y);
     void set4(out S x, out bit<32> y);
 }
-

@@ -1,7 +1,7 @@
-issue1932-1.p4(16): [--Werror=duplicate] error: foo: Duplicates declaration foo
-    action foo (inout bit<8> x) { x = (x >> 3); }
+issue1932-1.p4(23): [--Werror=duplicate] error: foo: Duplicates declaration foo
+    action foo(inout bit<8> x) {
            ^^^
-issue1932-1.p4(15)
-    action foo (in bit<8> x, out bit<8> y) { y = (x >> 2); }
+issue1932-1.p4(20)
+    action foo(in bit<8> x, out bit<8> y) {
            ^^^
 [--Werror=overlimit] error: 1 errors encountered, aborting compilation

@@ -4,14 +4,20 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-action b() {}
-
+action b() {
+}
 control c() {
-    action a() {}
-    action b() {}
+    action a() {
+    }
+    action b() {
+    }
     table t {
-        actions = { a; b; }
+        actions = {
+            a;
+            b;
+        }
         default_action = .b();  // not the same b
     }
-    apply {}
+    apply {
+    }
 }

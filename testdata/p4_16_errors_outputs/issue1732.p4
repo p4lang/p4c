@@ -6,4 +6,3 @@ struct pvs_t {
     @match(1 + 1)
     bit<16> f16;
 }
-

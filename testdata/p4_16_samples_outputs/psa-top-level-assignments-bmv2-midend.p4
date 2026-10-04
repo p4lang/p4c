@@ -19,7 +19,7 @@ struct headers_t {
 
 parser ingressParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -52,35 +52,35 @@ control egressImpl(inout headers_t hdr, inout metadata_t meta, in psa_egress_inp
 }
 
 control ingressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psatoplevelassignmentsbmv2l78() {
-        packet.emit<ethernet_t>(hdr.ethernet);
+    @hidden action psatoplevelassignmentsbmv2l79() {
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
-    @hidden table tbl_psatoplevelassignmentsbmv2l78 {
+    @hidden table tbl_psatoplevelassignmentsbmv2l79 {
         actions = {
-            psatoplevelassignmentsbmv2l78();
+            psatoplevelassignmentsbmv2l79();
         }
-        const default_action = psatoplevelassignmentsbmv2l78();
+        const default_action = psatoplevelassignmentsbmv2l79();
     }
     apply {
-        tbl_psatoplevelassignmentsbmv2l78.apply();
+        tbl_psatoplevelassignmentsbmv2l79.apply();
     }
 }
 
 control egressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psatoplevelassignmentsbmv2l78_0() {
-        packet.emit<ethernet_t>(hdr.ethernet);
+    @hidden action psatoplevelassignmentsbmv2l79_0() {
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
-    @hidden table tbl_psatoplevelassignmentsbmv2l78_0 {
+    @hidden table tbl_psatoplevelassignmentsbmv2l79_0 {
         actions = {
-            psatoplevelassignmentsbmv2l78_0();
+            psatoplevelassignmentsbmv2l79_0();
         }
-        const default_action = psatoplevelassignmentsbmv2l78_0();
+        const default_action = psatoplevelassignmentsbmv2l79_0();
     }
     apply {
-        tbl_psatoplevelassignmentsbmv2l78_0.apply();
+        tbl_psatoplevelassignmentsbmv2l79_0.apply();
     }
 }
 
-IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ingressParserImpl(), ingressImpl(), ingressDeparserImpl()) ip;
-EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(egressParserImpl(), egressImpl(), egressDeparserImpl()) ep;
-PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ingressParserImpl(), ingressImpl(), ingressDeparserImpl()) ip;
+EgressPipeline < headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(egressParserImpl(), egressImpl(), egressDeparserImpl()) ep;
+PSA_Switch < headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

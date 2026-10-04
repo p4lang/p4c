@@ -1,9 +1,9 @@
-issue2454.p4(11): [--Wwarn=unused] warning: control 'D' is unused
+issue2454.p4(14): [--Wwarn=unused] warning: control 'D' is unused
 control D() {
         ^
-issue2454.p4(14): [--Werror=type-error] error: c: argument cannot have type control C
+issue2454.p4(17): [--Werror=type-error] error: c: argument cannot have type control C
         f(c);
           ^
 issue2454.p4(7)
-control C() { apply { } }
+control C() {
         ^

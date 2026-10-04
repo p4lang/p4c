@@ -8,45 +8,47 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> totalLen;
     bit<16> identification;
-    bit<1>  flag_rsvd;
-    bit<1>  flag_noFrag;
-    bit<1>  flag_more;
+    bit<1> flag_rsvd;
+    bit<1> flag_noFrag;
+    bit<1> flag_more;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 struct Parsed_packet {
-    Ethernet_h    ethernet;
-    ipv4_t        ipv4;
+    Ethernet_h ethernet;
+    ipv4_t ipv4;
 }
 
 struct mystruct1 {
-    bit<4>  a;
-    bit<4>  b;
+    bit<4> a;
+    bit<4> b;
 }
 
 control DeparserI(packet_out packet,
                   in Parsed_packet hdr) {
-    apply { packet.emit(hdr.ethernet); }
+    apply {
+        packet.emit(hdr.ethernet);
+    }
 }
 
 parser parserI(packet_in pkt,
@@ -56,18 +58,18 @@ parser parserI(packet_in pkt,
     state start {
         bit<8> my_local = 1;
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-        16w0x0800: parse_ipv4;
-        default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         bit<16> my_local = 2;
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.version, hdr.ipv4.protocol) {
-        (4w0x4, 8w0x06): accept;
-        (4w0x4, 8w0x17): accept;
-        default: accept;
+        transition select (hdr.ipv4.version, hdr.ipv4.protocol) {
+            (4w0x4, 8w0x06) : accept;
+            (4w0x4, 8w0x17) : accept;
+            default : accept;
         }
     }
 }
@@ -79,8 +81,12 @@ control cIngress(inout Parsed_packet hdr,
         meta.b = meta.b + 5;
     }
     table guh {
-        key = { hdr.ethernet.srcAddr : exact; }
-        actions = { foo; }
+        key = {
+            hdr.ethernet.srcAddr : exact;
+        }
+        actions = {
+            foo;
+        }
         default_action = foo;
     }
 
@@ -92,20 +98,23 @@ control cIngress(inout Parsed_packet hdr,
 control cEgress(inout Parsed_packet hdr,
                 inout mystruct1 meta,
                 inout standard_metadata_t stdmeta) {
-    apply { }
+    apply {
+    }
 }
 
 control vc(inout Parsed_packet hdr,
            inout mystruct1 meta) {
-    apply { }
+    apply {
+    }
 }
 
 control uc(inout Parsed_packet hdr,
            inout mystruct1 meta) {
-    apply { }
+    apply {
+    }
 }
 
-V1Switch<Parsed_packet, mystruct1>(parserI(),
+V1Switch < Parsed_packet, mystruct1 >(parserI(),
                                    vc(),
                                    cIngress(),
                                    cEgress(),

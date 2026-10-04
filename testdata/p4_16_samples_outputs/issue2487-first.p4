@@ -16,7 +16,7 @@ struct Headers {
 
 control ingress(inout Headers h) {
     apply {
-        h.eth_hdr = (h.eth_hdr.eth_type == 16w1 ? (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1} : (ethernet_t){dst_addr = 48w2,src_addr = 48w2,eth_type = 16w2});
+        h.eth_hdr =(h.eth_hdr.eth_type == 16w1 ?(ethernet_t) { dst_addr = 48w1, src_addr = 48w1, eth_type = 16w1 } :(ethernet_t) { dst_addr = 48w2, src_addr = 48w2, eth_type = 16w2 });
     }
 }
 

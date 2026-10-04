@@ -7,18 +7,19 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 parser MyIP(
@@ -54,7 +55,7 @@ control MyIC(
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
 
-    DirectCounter<bit<12>>(PSA_CounterType_t.PACKETS) counter0;
+    DirectCounter < bit<12 >>(PSA_CounterType_t.PACKETS) counter0;
     action execute() {
         counter0.count();
     }
@@ -62,14 +63,20 @@ control MyIC(
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; execute; }
+        actions = {
+            NoAction;
+            execute;
+        }
         psa_direct_counter = counter0;
     }
     table tbl2 {
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; execute; }
+        actions = {
+            NoAction;
+            execute;
+        }
         psa_direct_counter = counter0;
     }
 
@@ -84,7 +91,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -95,7 +103,8 @@ control MyID(
     inout headers_t hdr,
     in EMPTY e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 control MyED(
@@ -106,7 +115,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

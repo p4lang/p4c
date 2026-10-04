@@ -18,9 +18,9 @@ enum E {
 parser p(out bit<32> v) {
     state start {
         transition select (32w1) {
-            0: zero;
-            1: one;
-            2: two;
+            0 : zero;
+            1 : one;
+            2 : two;
         }
     }
 
@@ -43,9 +43,9 @@ parser p(out bit<32> v) {
 parser p1(out bit<32> v) {
     state start {
         transition select (X.A, E.A, 32w0) {
-            (X.A, E.B, _): zero;
-            (X.A, E.A, 1): one;
-            (X.A, _,   _): two;
+            (X.A, E.B, _) : zero;
+            (X.A, E.A, 1) : one;
+            (X.A, _, _) : two;
         }
     }
 
@@ -68,38 +68,50 @@ parser p1(out bit<32> v) {
 control c(out bit<32> v) {
     apply {
         switch (32w1) {
-            0: { v = 0; }
-            1: { v = 1; }
-            2:
+            0 : { v = 0;
+            }
+            1 : { v = 1;
+            }
+            2 :
         }
 
         switch (32w1) {
-            X.A: { v = v + 20; }
-            X.B: { v = v + 10; }
-            2:
+            X.A : { v = v + 20;
+            }
+            X.B : { v = v + 10;
+            }
+            2 :
         }
 
         switch (E.C) {
-            E.A: { v = v + 200; }
-            default: { v = v + 100; }
+            E.A : { v = v + 200;
+            }
+            default : { v = v + 100;
+            }
         }
 
         switch (E.B) {
-            E.B: { v = v + 1000; }
-            default: { v = v + 2000; }
+            E.B : { v = v + 1000;
+            }
+            default : { v = v + 2000;
+            }
         }
 
         switch (X.B) {
-            X.A: { v = v + 20000; }
-            X.B: { v = v + 10000; }
+            X.A : { v = v + 20000;
+            }
+            X.B : { v = v + 10000;
+            }
         }
 
 #if 0
         // typechecking currently disallows this, and we have an error check in
         // p4_16_errors/issue3623-2.p4
         switch (X.B) {
-            0: { v = v + 200000; }
-            32w1: { v = v + 100000; }
+            0 : { v = v + 200000;
+            }
+            32w1 : { v = v + 100000;
+            }
         }
 #endif
     }

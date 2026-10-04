@@ -9,8 +9,8 @@ struct mystruct1 {
 
 struct mystruct2 {
     mystruct1 foo;
-    bit<4>    a;
-    bit<4>    b;
+    bit<4> a;
+    bit<4> b;
 }
 
 header Ethernet_h {
@@ -20,10 +20,9 @@ header Ethernet_h {
 }
 
 header MyHeader1 {
-    bit<8>    x1;
-    int<8>    x2;
-    bit<48>   x3;
-    int<32>   x4;
+    bit<8> x1;
+    int<8> x2;
+    bit<48> x3;
+    int<32> x4;
     varbit<8> x5;
 }
-

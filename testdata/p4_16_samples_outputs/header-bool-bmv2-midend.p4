@@ -4,7 +4,7 @@
 
 header Hdr1 {
     bit<7> a;
-    bool   x;
+    bool x;
 }
 
 header Hdr2 {
@@ -22,18 +22,18 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<Hdr1>(h.h1);
-        transition select(h.h1.a) {
-            7w0: getH1;
-            default: getH2;
+        b.extract < Hdr1 >(h.h1);
+        transition select (h.h1.a) {
+            7w0 : getH1;
+            default : getH2;
         }
     }
     state getH1 {
-        b.extract<Hdr1>(h.u_h1);
+        b.extract < Hdr1 >(h.u_h1);
         transition accept;
     }
     state getH2 {
-        b.extract<Hdr2>(h.u_h2);
+        b.extract < Hdr2 >(h.u_h2);
         transition accept;
     }
 }
@@ -49,43 +49,43 @@ control update(inout Headers h, inout Meta m) {
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action headerboolbmv2l57() {
+    @hidden action headerboolbmv2l64() {
         h.u_h1.x = true;
     }
-    @hidden table tbl_headerboolbmv2l57 {
+    @hidden table tbl_headerboolbmv2l64 {
         actions = {
-            headerboolbmv2l57();
+            headerboolbmv2l64();
         }
-        const default_action = headerboolbmv2l57();
+        const default_action = headerboolbmv2l64();
     }
     apply {
-        tbl_headerboolbmv2l57.apply();
+        tbl_headerboolbmv2l64.apply();
     }
 }
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<Hdr1>(h.h1);
-        b.emit<Hdr1>(h.u_h1);
-        b.emit<Hdr2>(h.u_h2);
+        b.emit < Hdr1 >(h.h1);
+        b.emit < Hdr1 >(h.u_h1);
+        b.emit < Hdr2 >(h.u_h2);
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action headerboolbmv2l71() {
+    @hidden action headerboolbmv2l78() {
         h.u_h2.setInvalid();
     }
-    @hidden table tbl_headerboolbmv2l71 {
+    @hidden table tbl_headerboolbmv2l78 {
         actions = {
-            headerboolbmv2l71();
+            headerboolbmv2l78();
         }
-        const default_action = headerboolbmv2l71();
+        const default_action = headerboolbmv2l78();
     }
     apply {
         if (h.u_h2.isValid()) {
-            tbl_headerboolbmv2l71.apply();
+            tbl_headerboolbmv2l78.apply();
         }
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

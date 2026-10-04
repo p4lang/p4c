@@ -11,23 +11,26 @@ struct B8 {
     bit<(8 * 8)> bits;
 }
 
-struct headers {}
+struct headers {
+}
 
-struct metadata {}
+struct metadata {
+}
 
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
     state start {
-        packet.lookahead<B8>();
+        packet.lookahead < B8 >();
         transition accept;
     }
 }
 
 control MyVerifyChecksum(inout headers hdr,
                          inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control MyIngress(inout headers hdr,
@@ -35,22 +38,25 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
     apply {
         if (standard_metadata.parser_error != error.NoError)
-            mark_to_drop(standard_metadata);
+        mark_to_drop(standard_metadata);
     }
 }
 
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(

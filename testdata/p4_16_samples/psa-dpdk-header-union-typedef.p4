@@ -7,10 +7,14 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
 
-header EMPTY_H {};
-struct EMPTY_RESUB {};
-struct EMPTY_BRIDGE {};
-struct EMPTY_RECIRC {};
+header EMPTY_H {
+};
+struct EMPTY_RESUB {
+};
+struct EMPTY_BRIDGE {
+};
+struct EMPTY_RECIRC {
+};
 
 header clone_0_t {
     bit<16> data;
@@ -26,18 +30,18 @@ header_union clone_union_t {
 }
 
 struct clone_metadata_t {
-    bit<3>        type;
+    bit<3> type;
     clone_union_t data;
 }
 
 typedef clone_metadata_t clone_t;
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct metadata {
@@ -93,7 +97,7 @@ control MyIC(
     bit<8> Op1 = 0x2;
     bit<16> Op2 = 0x23;
     action forward() {
-        b.meta = 32w0x1 << (PortIdUint_t)c.ingress_port;
+        b.meta = 32w0x1 <<(PortIdUint_t) c.ingress_port;
     }
 
     table tbl {
@@ -116,7 +120,8 @@ control MyEC(
     inout metadata b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -140,7 +145,8 @@ control MyED(
     in metadata d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

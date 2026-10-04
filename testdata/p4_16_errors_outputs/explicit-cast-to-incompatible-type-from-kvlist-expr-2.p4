@@ -5,4 +5,3 @@ control c0() {
         test((tuple<>){x = 0,y = 0});
     }
 }
-

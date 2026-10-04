@@ -38,7 +38,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -61,7 +61,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_egress_port;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     @name(".smac_filter") table smac_filter {
@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ing_drop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {

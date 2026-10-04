@@ -69,8 +69,8 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        PARSE_ETHERTYPE;
+    return select (latest.etherType) {
+    PARSE_ETHERTYPE;
     }
 }
 
@@ -79,8 +79,8 @@ header vlan_tag_t vlan_tag_[VLAN_DEPTH];
 
 parser parse_vlan {
     extract(vlan_tag_[next]);
-    return select(latest.etherType) {
-        PARSE_ETHERTYPE;
+    return select (latest.etherType) {
+    PARSE_ETHERTYPE;
     }
 }
 
@@ -89,9 +89,9 @@ header mpls_t mpls[MPLS_DEPTH];
 
 parser parse_mpls {
     extract(mpls[next]);
-    return select(latest.bos) {
-        0 : parse_mpls;
-        default: ingress;
+    return select (latest.bos) {
+    0 : parse_mpls;
+    default : ingress;
     }
 }
 
@@ -120,17 +120,17 @@ parser parse_mpls {
 header ipv4_t ipv4;
 
 field_list ipv4_checksum_list {
-        ipv4.version;
-        ipv4.ihl;
-        ipv4.diffserv;
-        ipv4.totalLen;
-        ipv4.identification;
-        ipv4.flags;
-        ipv4.fragOffset;
-        ipv4.ttl;
-        ipv4.protocol;
-        ipv4.srcAddr;
-        ipv4.dstAddr;
+    ipv4.version;
+    ipv4.ihl;
+    ipv4.diffserv;
+    ipv4.totalLen;
+    ipv4.identification;
+    ipv4.flags;
+    ipv4.fragOffset;
+    ipv4.ttl;
+    ipv4.protocol;
+    ipv4.srcAddr;
+    ipv4.dstAddr;
 }
 
 field_list_calculation ipv4_checksum {
@@ -141,19 +141,19 @@ field_list_calculation ipv4_checksum {
     output_width : 16;
 }
 
-calculated_field ipv4.hdrChecksum  {
+calculated_field ipv4.hdrChecksum {
     verify ipv4_checksum if (ipv4.ihl == 5);
     update ipv4_checksum if (ipv4.ihl == 5);
 }
 
 parser parse_ipv4 {
     extract(ipv4);
-    return select(latest.fragOffset, latest.ihl, latest.protocol) {
-        IP_PROTOCOLS_IPHL_ICMP : parse_icmp;
-        IP_PROTOCOLS_IPHL_TCP : parse_tcp;
-        IP_PROTOCOLS_IPHL_UDP : parse_udp;
-        IP_PROTOCOLS_IPHL_GRE : parse_gre;
-        default: ingress;
+    return select (latest.fragOffset, latest.ihl, latest.protocol) {
+    IP_PROTOCOLS_IPHL_ICMP : parse_icmp;
+    IP_PROTOCOLS_IPHL_TCP : parse_tcp;
+    IP_PROTOCOLS_IPHL_UDP : parse_udp;
+    IP_PROTOCOLS_IPHL_GRE : parse_gre;
+    default : ingress;
     }
 }
 
@@ -161,12 +161,12 @@ header ipv6_t ipv6;
 
 parser parse_ipv6 {
     extract(ipv6);
-    return select(latest.nextHdr) {
-        IP_PROTOCOLS_ICMPV6 : parse_icmp;
-        IP_PROTOCOLS_TCP : parse_tcp;
-        IP_PROTOCOLS_UDP : parse_udp;
-        IP_PROTOCOLS_GRE : parse_gre;
-        default: ingress;
+    return select (latest.nextHdr) {
+    IP_PROTOCOLS_ICMPV6 : parse_icmp;
+    IP_PROTOCOLS_TCP : parse_tcp;
+    IP_PROTOCOLS_UDP : parse_udp;
+    IP_PROTOCOLS_GRE : parse_gre;
+    default : ingress;
     }
 }
 
@@ -264,7 +264,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -349,11 +349,11 @@ action set_vrf(vrf) {
     modify_field(hop_metadata.vrf, vrf);
 }
 
-action set_ipv6_prefix_ucast(ipv6_prefix){
+action set_ipv6_prefix_ucast(ipv6_prefix) {
     modify_field(hop_metadata.ipv6_prefix, ipv6_prefix);
 }
 
-action set_ipv6_prefix_xcast(ipv6_prefix){
+action set_ipv6_prefix_xcast(ipv6_prefix) {
     modify_field(hop_metadata.ipv6_prefix, ipv6_prefix);
 }
 
@@ -641,7 +641,6 @@ table acl {
     }
     size : ACL_SIZE;
 }
-
 
 control process_ip {
     apply(vrf);

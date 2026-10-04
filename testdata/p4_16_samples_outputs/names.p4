@@ -9,4 +9,3 @@ control p() {
         a.d = c.d;
     }
 }
-

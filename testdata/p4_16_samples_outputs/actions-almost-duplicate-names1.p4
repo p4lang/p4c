@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -44,7 +44,7 @@ control c1(inout headers_t hdr, inout bit<8> tmp1, inout bit<8> tmp2) {
             suba1;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         size = 32;
     }
@@ -89,17 +89,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             foo3;
         }
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType : exact;
         }
         default_action = NoAction();
         size = 512;
     }
     apply {
-        tmp1 = hdr.ethernet.srcAddr[7:0];
-        tmp2 = hdr.ethernet.dstAddr[7:0];
+        tmp1 = hdr.ethernet.srcAddr[7 : 0];
+        tmp2 = hdr.ethernet.dstAddr[7 : 0];
         c1.apply(hdr, tmp1, tmp2);
         t1.apply();
-        hdr.ethernet.etherType = (bit<16>)(tmp1 - tmp2);
+        hdr.ethernet.etherType =(bit<16>)(tmp1 - tmp2);
     }
 }
 

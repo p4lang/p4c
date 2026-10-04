@@ -20,7 +20,7 @@ struct headers_t {
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        buffer.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -43,8 +43,8 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
-            b.data              : selector @name("b.data");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
+            b.data : selector @name("b.data");
         }
         actions = {
             NoAction_1();
@@ -65,17 +65,17 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_t e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaactionselector1l95() {
-        buffer.emit<ethernet_t>(hdr.ethernet);
+    @hidden action psaactionselector1l105() {
+        buffer.emit < ethernet_t >(hdr.ethernet);
     }
-    @hidden table tbl_psaactionselector1l95 {
+    @hidden table tbl_psaactionselector1l105 {
         actions = {
-            psaactionselector1l95();
+            psaactionselector1l105();
         }
-        const default_action = psaactionselector1l95();
+        const default_action = psaactionselector1l105();
     }
     apply {
-        tbl_psaactionselector1l95.apply();
+        tbl_psaactionselector1l105.apply();
     }
 }
 
@@ -84,6 +84,6 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
     }
 }
 
-IngressPipeline<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

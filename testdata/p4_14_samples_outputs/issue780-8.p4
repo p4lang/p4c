@@ -29,7 +29,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nop;
         }
         key = {
-            hdr.h.f: ternary;
+            hdr.h.f : ternary;
         }
         size = 256;
     }

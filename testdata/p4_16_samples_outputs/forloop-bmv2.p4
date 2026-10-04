@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header hdr_t {
-    bit<8>  count;
+    bit<8> count;
     bit<32> sum;
     bit<32> product;
 }
@@ -47,46 +47,46 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action sum_loop() {
         h.h.sum = 0;
         for (bit<8> i = 1; i <= h.h.count; i = i + 1) {
-            h.h.sum = h.h.sum + (bit<32>)i;
+        h.h.sum = h.h.sum +(bit<32>) i;
         }
     }
     action nested_loop() {
         h.h.product = 0;
         for (bit<8> i = 0; i < h.h.count; i = i + 1) {
-            for (bit<8> j = 0; j < h.h.count; j = j + 1) {
-                h.h.product = h.h.product + 1;
-            }
+        for (bit<8> j = 0; j < h.h.count; j = j + 1) {
+        h.h.product = h.h.product + 1;
+        }
         }
     }
     action conditional_loop() {
         h.h.sum = 0;
         for (bit<8> i = 0; i < 10; i = i + 1) {
-            if (i < 5) {
-                h.h.sum = h.h.sum + 1;
-            }
+        if (i < 5) {
+        h.h.sum = h.h.sum + 1;
+        }
         }
     }
     action break_loop() {
         h.h.sum = 0;
         for (bit<8> i = 0; i < h.h.count; i = i + 1) {
-            if (i == 5) {
-                break;
-            }
-            h.h.sum = h.h.sum + 1;
+        if (i == 5) {
+        break;
+        }
+        h.h.sum = h.h.sum + 1;
         }
     }
     action continue_loop() {
         h.h.sum = 0;
         for (bit<8> i = 0; i < 10; i = i + 1) {
-            if ((bit<8>)(i & 1) == 0) {
-                continue;
-            }
-            h.h.sum = h.h.sum + 1;
+        if ((bit<8>)(i & 1) == 0) {
+        continue;
+        }
+        h.h.sum = h.h.sum + 1;
         }
     }
     table t {
         key = {
-            h.h.count: exact;
+            h.h.count : exact;
         }
         actions = {
             sum_loop;

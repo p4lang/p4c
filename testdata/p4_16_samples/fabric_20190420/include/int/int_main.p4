@@ -22,21 +22,21 @@
 #include "int_report.p4"
 #endif // WITH_INT_SINK
 
-control process_set_source_sink (
+control process_set_source_sink(
     inout parsed_headers_t hdr,
     inout fabric_metadata_t fabric_metadata,
     inout standard_metadata_t standard_metadata) {
 
     direct_counter(CounterType.packets_and_bytes) counter_set_source;
 
-    action int_set_source () {
+    action int_set_source() {
         fabric_metadata.int_meta.source = _TRUE;
         counter_set_source.count();
     }
 
     table tb_set_source {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port");
+            standard_metadata.ingress_port : exact @name("ig_port");
         }
         actions = {
             int_set_source;
@@ -50,14 +50,14 @@ control process_set_source_sink (
 #ifdef WITH_INT_SINK
     direct_counter(CounterType.packets_and_bytes) counter_set_sink;
 
-    action int_set_sink () {
+    action int_set_sink() {
         fabric_metadata.int_meta.sink = _TRUE;
         counter_set_sink.count();
     }
 
     table tb_set_sink {
         key = {
-            standard_metadata.egress_spec: exact @name("eg_spec");
+            standard_metadata.egress_spec : exact @name("eg_spec");
         }
         actions = {
             int_set_sink;
@@ -74,7 +74,7 @@ control process_set_source_sink (
 
 #ifdef WITH_INT_SINK
         tb_set_sink.apply();
-        if(fabric_metadata.int_meta.sink == _TRUE) {
+        if (fabric_metadata.int_meta.sink == _TRUE) {
             // FIXME: this works only on BMv2
             #ifdef __TARGET_BMV2__
             clone(CloneType.I2E, REPORT_MIRROR_SESSION_ID);
@@ -84,21 +84,21 @@ control process_set_source_sink (
     }
 }
 
-control process_int_main (
+control process_int_main(
     inout parsed_headers_t hdr,
     inout fabric_metadata_t fabric_metadata,
     inout standard_metadata_t standard_metadata) {
 
     apply {
         if (standard_metadata.ingress_port != CPU_PORT &&
-            standard_metadata.egress_port != CPU_PORT &&
-            (hdr.udp.isValid() || hdr.tcp.isValid())) {
+        standard_metadata.egress_port != CPU_PORT &&
+        (hdr.udp.isValid() || hdr.tcp.isValid())) {
 #ifdef WITH_INT_SOURCE
             if (fabric_metadata.int_meta.source == _TRUE) {
                 process_int_source.apply(hdr, fabric_metadata, standard_metadata);
             }
 #endif // WITH_INT_SOURCE
-            if(hdr.int_header.isValid()) {
+            if (hdr.int_header.isValid()) {
 #ifdef WITH_INT_TRANSIT
                 process_int_transit.apply(hdr, fabric_metadata, standard_metadata);
 #endif // WITH_INT_TRANSIT

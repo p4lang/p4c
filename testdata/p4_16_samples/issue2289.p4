@@ -18,7 +18,7 @@ header simple_struct {
 }
 
 struct nested_struct {
-    simple_struct  s;
+    simple_struct s;
 }
 
 struct Headers {
@@ -29,9 +29,9 @@ struct Meta {
 }
 
 bit<16> function_1() {
-    nested_struct tmp_struct = {{1}};
+    nested_struct tmp_struct = { { 1 } };
     tmp_struct.s.a = 1;
-    return (bit<16>)(1);
+    return(bit<16>)(1);
 }
 bit<16> function_2(in bit<16> val) {
     return function_1();
@@ -54,16 +54,28 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         function_1();
         simple_action(h.eth_hdr.eth_type);
 
-
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

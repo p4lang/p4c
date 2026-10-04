@@ -1,6 +1,6 @@
 parser_pragma2.p4(24): [--Wwarn=parser-transition] warning: SelectCase: unreachable
-        0xAB00 : Cowles;
-        ^^^^^^
+    0xAB00 : Cowles;
+    ^^^^^^
 parser_pragma2.p4(22): [--Wwarn=parser-transition] warning: '{ tmp }': transition does not depend on select argument
-    return select(current(0, 32)) {
-                  ^^^^^^^^^^^^^^
+    return select (current(0, 32)) {
+                   ^^^^^^^^^^^^^^

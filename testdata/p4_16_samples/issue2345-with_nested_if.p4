@@ -11,7 +11,6 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-
 struct Meta {
 }
 
@@ -26,29 +25,29 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 action dummy(inout Headers val) {
-	bool c = true;
-	bool c1 = false;
-	bool c2 = true;
-	if(c) {
-		val.eth_hdr.eth_type = 16w0;
-		if(c1) {
-			val.eth_hdr.eth_type = val.eth_hdr.eth_type + 1;
-		}
-		else {
-			val.eth_hdr.eth_type = val.eth_hdr.eth_type + 2;
-		}
-		val.eth_hdr.eth_type = val.eth_hdr.eth_type + 3;
-	}
-	else if (c2) {
-		val.eth_hdr.eth_type = val.eth_hdr.eth_type + 4;
-	} else {
-		val.eth_hdr.eth_type = val.eth_hdr.eth_type + 5;
-	}
+    bool c = true;
+    bool c1 = false;
+    bool c2 = true;
+    if (c) {
+        val.eth_hdr.eth_type = 16w0;
+        if (c1) {
+            val.eth_hdr.eth_type = val.eth_hdr.eth_type + 1;
+        }
+        else {
+            val.eth_hdr.eth_type = val.eth_hdr.eth_type + 2;
+        }
+        val.eth_hdr.eth_type = val.eth_hdr.eth_type + 3;
+    }
+    else if (c2) {
+        val.eth_hdr.eth_type = val.eth_hdr.eth_type + 4;
+    } else {
+        val.eth_hdr.eth_type = val.eth_hdr.eth_type + 5;
+    }
 }
 
-action dummy2(inout Headers val1) { 
-	dummy(val1);  
-	val1.eth_hdr.dst_addr = 48w3; 
+action dummy2(inout Headers val1) {
+    dummy(val1);
+    val1.eth_hdr.dst_addr = 48w3;
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
@@ -69,12 +68,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         simple_action();
     }
 }
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
-control deparser(packet_out b, in Headers h) { apply {b.emit(h);} }
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit(h);
+    }
+}
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

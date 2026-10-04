@@ -23,9 +23,11 @@ struct metadata_t {
 }
 
 parser p(packet_in packet, out metadata_t metadata) {
-    state start { transition s0; }
+    state start {
+        transition s0;
+    }
     state s0 {
-        transition select(packet.lookahead<bit<8>>()) {
+        transition select (packet.lookahead < bit<8 >>()) {
             1 : s1;
             default : accept;
         }

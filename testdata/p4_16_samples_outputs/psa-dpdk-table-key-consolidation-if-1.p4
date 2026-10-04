@@ -13,19 +13,19 @@ struct user_meta_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -37,10 +37,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -48,24 +48,24 @@ header tcp_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
         buffer.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x800 &&& 0xf00: parse_ipv4;
-            16w0xd00: parse_tcp;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x800 &&& 0xf00 : parse_ipv4;
+            16w0xd00 : parse_tcp;
+            default : accept;
         }
     }
     state parse_ipv4 {
         buffer.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            8w4 .. 8w7: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            8w4 .. 8w7 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -92,9 +92,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
-            b.data              : exact;
-            b.data1             : lpm;
+            hdr.ethernet.srcAddr : exact;
+            b.data : exact;
+            b.data1 : lpm;
         }
         actions = {
             NoAction;
@@ -104,9 +104,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     table foo {
         key = {
-            hdr.ethernet.dstAddr: exact;
-            b.data              : exact;
-            b.data1             : lpm;
+            hdr.ethernet.dstAddr : exact;
+            b.data : exact;
+            b.data1 : lpm;
         }
         actions = {
             NoAction;

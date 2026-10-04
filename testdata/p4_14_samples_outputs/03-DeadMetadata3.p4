@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             a2;
         }
         key = {
-            meta.m.f1: exact;
+            meta.m.f1 : exact;
         }
     }
     apply {

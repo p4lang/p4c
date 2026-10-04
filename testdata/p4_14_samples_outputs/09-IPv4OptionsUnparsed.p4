@@ -1,20 +1,19 @@
 header ipv4_t_1 {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<1>  reserved_0;
-    bit<1>  df;
-    bit<1>  mf;
+    bit<1> reserved_0;
+    bit<1> df;
+    bit<1> mf;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
-
 #include <core.p4>
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
@@ -26,26 +25,26 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<1>      reserved_0;
-    bit<1>      df;
-    bit<1>      mf;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    bit<32>     srcAddr;
-    bit<32>     dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<1> reserved_0;
+    bit<1> df;
+    bit<1> mf;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
     varbit<352> options;
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vlan_id;
     bit<16> ethertype;
 }
@@ -55,9 +54,9 @@ struct metadata {
 
 struct headers {
     @name(".ethernet")
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     @name(".ipv4")
-    ipv4_t        ipv4;
+    ipv4_t ipv4;
     @name(".vlan_tag")
     vlan_tag_t[2] vlan_tag;
 }
@@ -66,23 +65,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     ipv4_t_1 tmp_hdr;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.ethertype) {
+            16w0x8100 &&& 16w0xefff : parse_vlan_tag;
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     @name(".parse_ipv4") state parse_ipv4 {
-        tmp_hdr = packet.lookahead<ipv4_t_1>();
+        tmp_hdr = packet.lookahead < ipv4_t_1 >();
         packet.extract(hdr.ipv4, (bit<32>)((bit<32>)tmp_hdr.ihl * 32w4 * 8 - 160));
         transition accept;
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {
         packet.extract(hdr.vlan_tag.next);
-        transition select(hdr.vlan_tag.last.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.vlan_tag.last.ethertype) {
+            16w0x8100 &&& 16w0xefff : parse_vlan_tag;
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     @name(".start") state start {
@@ -98,7 +97,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -114,7 +113,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nop;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     apply {

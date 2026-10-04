@@ -44,9 +44,11 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
 
     table tbl_a {
-        actions = { RejectConditional();
-                    act_return();
-                    act_exit();}
+        actions = {
+            RejectConditional();
+            act_return();
+            act_exit();
+        }
         default_action = RejectConditional(0);
     }
 
@@ -59,7 +61,8 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    apply { }
+    apply {
+    }
 }
 
 ubpf(prs(), pipe(), dprs()) main;

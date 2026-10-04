@@ -9,4 +9,3 @@ control C(bit<1> meta) {
         }
     }
 }
-

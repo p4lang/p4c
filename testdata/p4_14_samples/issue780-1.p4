@@ -5,15 +5,16 @@
  */
 
 header_type headers {
-  fields {
-    counterrevolution : 32;
-  }
+    fields {
+        counterrevolution : 32;
+    }
 }
 header headers heartlands;
 parser start {
-  return ingress;
+    return ingress;
 }
 action add_heartlands() {
-  add_header(heartlands);
+    add_header(heartlands);
 }
-control ingress { }
+control ingress {
+}

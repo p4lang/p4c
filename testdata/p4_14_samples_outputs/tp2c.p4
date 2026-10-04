@@ -53,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1 : ternary;
         }
     }
     @name(".A2") table A2 {
@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.b1: ternary;
+            hdr.data.b1 : ternary;
         }
     }
     @name(".A3") table A3 {
@@ -71,7 +71,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             on_miss;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".A4") table A4 {
@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             on_miss;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".B1") table B1 {
@@ -89,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2: ternary;
+            hdr.data.f2 : ternary;
         }
     }
     @name(".B2") table B2 {
@@ -98,7 +98,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.b2: ternary;
+            hdr.data.b2 : ternary;
         }
     }
     apply {
@@ -107,8 +107,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             A2.apply();
             if (hdr.data.f1 == 32w0) {
                 switch (A3.apply().action_run) {
-                    on_hit: {
-                        A4.apply();
+                    on_hit : {
+                    A4.apply();
                     }
                 }
             }

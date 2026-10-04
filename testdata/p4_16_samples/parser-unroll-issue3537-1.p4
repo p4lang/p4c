@@ -3,9 +3,11 @@
 
 @command_line("--loopsUnroll")
 
-struct H { }
+struct H {
+}
 
-struct M { }
+struct M {
+}
 
 parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
@@ -18,7 +20,7 @@ parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadat
 
     state s1 {
         packet.advance(16);
-        transition select(packet.lookahead<bit<16>>()) {
+        transition select (packet.lookahead < bit<16 >>()) {
             0 : s1;
             default : s2;
         }
@@ -30,7 +32,7 @@ parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadat
 
     state s3 {
         packet.advance(16);
-        transition select(packet.lookahead<bit<16>>()) {
+        transition select (packet.lookahead < bit<16 >>()) {
             0 : s1;
             1 : s2;
             default : s4;
@@ -53,21 +55,24 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 }
 
 control EgressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out pk, in H hdr) {
-    apply { }
+    apply {
+    }
 }
 
 control VerifyChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(),
          ComputeChecksumI(), DeparserI()) main;

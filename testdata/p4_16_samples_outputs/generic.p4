@@ -24,4 +24,3 @@ control z<D1, T1>(X<D1> x, in D1 v, in T1 t) {
         T1 r2 = x.f(v, t);
     }
 }
-

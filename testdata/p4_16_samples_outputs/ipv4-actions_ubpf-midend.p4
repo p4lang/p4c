@@ -8,15 +8,15 @@ header Ethernet_h {
 }
 
 header IPv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -24,7 +24,7 @@ header IPv4_h {
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 struct metadata {
@@ -32,14 +32,14 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ipv4;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ipv4;
+            default : reject;
         }
     }
     state ipv4 {
-        p.extract<IPv4_h>(headers.ipv4);
+        p.extract < IPv4_h >(headers.ipv4);
         transition accept;
     }
 }
@@ -102,7 +102,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.filter_tbl") table filter_tbl_0 {
         key = {
-            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr");
+            headers.ipv4.srcAddr : exact @name("headers.ipv4.srcAddr");
         }
         actions = {
             set_ipv4_version();
@@ -131,19 +131,19 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action ipv4actions_ubpf162() {
-        packet.emit<Ethernet_h>(headers.ethernet);
-        packet.emit<IPv4_h>(headers.ipv4);
+    @hidden action ipv4actions_ubpf163() {
+        packet.emit < Ethernet_h >(headers.ethernet);
+        packet.emit < IPv4_h >(headers.ipv4);
     }
-    @hidden table tbl_ipv4actions_ubpf162 {
+    @hidden table tbl_ipv4actions_ubpf163 {
         actions = {
-            ipv4actions_ubpf162();
+            ipv4actions_ubpf163();
         }
-        const default_action = ipv4actions_ubpf162();
+        const default_action = ipv4actions_ubpf163();
     }
     apply {
-        tbl_ipv4actions_ubpf162.apply();
+        tbl_ipv4actions_ubpf163.apply();
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;

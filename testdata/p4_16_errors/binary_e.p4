@@ -4,11 +4,13 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-struct S {}
-header hdr {}
+struct S {
+}
 
-control p()
-{
+header hdr {
+}
+
+control p() {
     apply {
         int<2> a;
         int<4> c;
@@ -16,10 +18,8 @@ control p()
         bit<2> e;
         bit<4> f;
         hdr[5] stack;
-
         S g;
         S h;
-
         c = a[2];   // not an array
         c = stack[d];   // indexing with bool
 

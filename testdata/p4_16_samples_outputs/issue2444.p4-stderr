@@ -2,13 +2,13 @@ issue2444.p4(17): [--Wwarn=overflow] warning: 2s3: signed value does not fit in 
 const int z3 = 2s3
                ^^^
 issue2444.p4(8): [--Wwarn=unused] warning: 'b' is unused
-const bool b = (bool)a;
+const bool b =(bool) a;
            ^
 issue2444.p4(11): [--Wwarn=unused] warning: 'w' is unused
-const bool w = (bool)z;
+const bool w =(bool) z;
            ^
 issue2444.p4(14): [--Wwarn=unused] warning: 'w1' is unused
-const bool w1 = (bool)z1;
+const bool w1 =(bool) z1;
            ^^
 issue2444.p4(16): [--Wwarn=unused] warning: 'z2' is unused
 const int z2 = 2w3;

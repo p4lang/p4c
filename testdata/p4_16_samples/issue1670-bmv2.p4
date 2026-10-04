@@ -25,35 +25,39 @@ struct local_metadata_t {
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata,
              inout standard_metadata_t standard_metadata) {
     state start {
-	transition accept;
+        transition accept;
     }
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata,
                 inout standard_metadata_t standard_metadata) {
     apply {
-	h.mirrored_md.setValid();
-	h.mirrored_md.meta = { 0 };
+        h.mirrored_md.setValid();
+        h.mirrored_md.meta = { 0 };
     }
 }
 
 control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
                inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control deparser(packet_out b, in parsed_packet_t h) {
-    apply { }
+    apply {
+    }
 }
 
 control verifyChecksum(inout parsed_packet_t hdr,
 inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control compute_checksum(inout parsed_packet_t hdr,
                          inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(parse(), verifyChecksum(), ingress(), egress(),

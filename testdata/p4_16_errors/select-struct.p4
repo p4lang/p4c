@@ -15,7 +15,7 @@ parser prs(packet_in p) {
         H h1 = { 0 };
         H h2 = { 1 };
         transition select (h1) {
-            h2: accept;
+            h2 : accept;
             _ : reject;
         }
     }

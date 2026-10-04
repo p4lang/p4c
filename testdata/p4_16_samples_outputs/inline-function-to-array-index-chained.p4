@@ -1,7 +1,7 @@
 #include <core.p4>
 
 bit<3> max(in bit<3> val, in bit<3> bound) {
-    return (val < bound ? val : bound);
+    return(val < bound ? val : bound);
 }
 header inner_t {
     bit<8> f2;
@@ -17,7 +17,7 @@ struct mid_t {
 
 struct Headers {
     outer_t[1] outer_arr;
-    mid_t[1]   mid_arr;
+    mid_t[1] mid_arr;
 }
 
 control proto(inout Headers h);

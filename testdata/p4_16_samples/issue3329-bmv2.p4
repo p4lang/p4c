@@ -46,7 +46,8 @@ control egress(inout headers_t hdr,
                inout metadata_t meta,
                inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {

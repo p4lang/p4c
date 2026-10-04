@@ -6,20 +6,20 @@ typedef bit<32> IPv4Address;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLength;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLength;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
@@ -29,9 +29,9 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> dataOffset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -43,32 +43,32 @@ const bit<8> TCP_PSH_MASK = 0x8;
 const bit<8> TCP_RST_MASK = 0x4;
 const bit<8> TCP_SYN_MASK = 0x2;
 const bit<8> TCP_FIN_MASK = 0x1;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW = (ExpireTimeProfileId_t)0;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW = (ExpireTimeProfileId_t)1;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t)2;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER = (ExpireTimeProfileId_t)3;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW =(ExpireTimeProfileId_t) 0;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW =(ExpireTimeProfileId_t) 1;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED =(ExpireTimeProfileId_t) 2;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER =(ExpireTimeProfileId_t) 3;
 struct metadata_t {
 }
 
 struct headers_t {
     ethernet_t eth;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     state start {
         pkt.extract(hdr.eth);
-        transition select(hdr.eth.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.eth.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            6: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -112,7 +112,7 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
     }
     table set_ct_options {
         key = {
-            hdr.tcp.flags: ternary;
+            hdr.tcp.flags : ternary;
         }
         actions = {
             tcp_syn_packet;
@@ -120,9 +120,9 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
             tcp_other_packets;
         }
         const entries = {
-                        TCP_SYN_MASK &&& TCP_SYN_MASK : tcp_syn_packet;
-                        TCP_FIN_MASK &&& TCP_FIN_MASK : tcp_fin_or_rst_packet;
-                        TCP_RST_MASK &&& TCP_RST_MASK : tcp_fin_or_rst_packet;
+            TCP_SYN_MASK &&& TCP_SYN_MASK : tcp_syn_packet;
+            TCP_FIN_MASK &&& TCP_FIN_MASK : tcp_fin_or_rst_packet;
+            TCP_RST_MASK &&& TCP_RST_MASK : tcp_fin_or_rst_packet;
         }
         const default_action = tcp_other_packets;
     }
@@ -145,11 +145,11 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
     }
     table ct_tcp_table {
         key = {
-            SelectByDirection(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr): exact @name("ipv4_addr_0");
-            SelectByDirection(istd.direction, hdr.ipv4.dstAddr, hdr.ipv4.srcAddr): exact @name("ipv4_addr_1");
-            hdr.ipv4.protocol                                                    : exact;
-            SelectByDirection(istd.direction, hdr.tcp.srcPort, hdr.tcp.dstPort)  : exact @name("tcp_port_0");
-            SelectByDirection(istd.direction, hdr.tcp.dstPort, hdr.tcp.srcPort)  : exact @name("tcp_port_1");
+            SelectByDirection(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr) : exact @name("ipv4_addr_0");
+            SelectByDirection(istd.direction, hdr.ipv4.dstAddr, hdr.ipv4.srcAddr) : exact @name("ipv4_addr_1");
+            hdr.ipv4.protocol : exact;
+            SelectByDirection(istd.direction, hdr.tcp.srcPort, hdr.tcp.dstPort) : exact @name("tcp_port_0");
+            SelectByDirection(istd.direction, hdr.tcp.dstPort, hdr.tcp.srcPort) : exact @name("tcp_port_1");
         }
         actions = {
             @tableonly ct_tcp_table_hit;

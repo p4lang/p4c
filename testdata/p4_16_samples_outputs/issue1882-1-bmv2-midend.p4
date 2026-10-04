@@ -44,18 +44,18 @@ extern ExternCounter {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.extr") ExternCounter(5) extr_0;
-    @hidden action issue18821bmv2l39() {
+    @hidden action issue18821bmv2l53() {
         extr_0.increment();
     }
-    @hidden table tbl_issue18821bmv2l39 {
+    @hidden table tbl_issue18821bmv2l53 {
         actions = {
-            issue18821bmv2l39();
+            issue18821bmv2l53();
         }
-        const default_action = issue18821bmv2l39();
+        const default_action = issue18821bmv2l53();
     }
     apply {
-        tbl_issue18821bmv2l39.apply();
+        tbl_issue18821bmv2l53.apply();
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

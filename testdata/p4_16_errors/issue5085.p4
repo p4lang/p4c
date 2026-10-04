@@ -3,10 +3,10 @@
 // See https://github.com/p4lang/p4c/issues/5085
 
 match_kind {
-  foo,
-  bar
+    foo,
+    bar
 }
 
 match_kind {
-  foo
+    foo
 }

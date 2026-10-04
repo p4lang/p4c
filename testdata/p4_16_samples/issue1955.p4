@@ -8,24 +8,24 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -33,9 +33,9 @@ header ipv4_t {
 
 struct headers_t {
     ethernet_t ethernet_1;
-    ipv4_t     ipv4_1;
+    ipv4_t ipv4_1;
     ethernet_t ethernet_2;
-    ipv4_t     ipv4_2;
+    ipv4_t ipv4_2;
 }
 
 struct metadata_t {
@@ -50,12 +50,12 @@ parser subParser(packet_in packet,
                  inout ethernet_t eth,
                  inout ipv4_t ipv4)
 {
-    value_set<bit<16>>(8) ipv4_ethertypes;
+    value_set < bit<16 >>(8) ipv4_ethertypes;
     state start {
         packet.extract(eth);
         transition select (eth.etherType) {
-            ipv4_ethertypes: parse_ipv4;
-            default: accept;
+            ipv4_ethertypes : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -79,7 +79,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(inout headers_t hdr,
@@ -94,11 +95,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

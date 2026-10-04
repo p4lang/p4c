@@ -9,7 +9,7 @@ parser p0(packet_in p, out Header h) {
         transition next;
     }
     state next {
-        p.extract<Header>(h);
+        p.extract < Header >(h);
         transition accept;
     }
 }

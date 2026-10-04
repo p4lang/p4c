@@ -8,15 +8,14 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct headers { }
+struct headers {
+}
 
 struct metadata {
     bit<8> test;
 }
 
-
 typedef bit<8> test_t;
-
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
@@ -24,20 +23,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action act(test_t a) { }    // did not work before PR #1792 was merged
+    action act(test_t a) {
+    }    // did not work before PR #1792 was merged
     // action act(bit<8> a) { } // worked before and after PR #1792 was merged
 
     table test_table {
         key = {
-            meta.test: exact;
+            meta.test : exact;
         }
         actions = {
             act;
         }
         const entries = {
-            1: act(1);
+            1 : act(1);
         }
     }
 
@@ -46,26 +45,25 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     }
 }
 
-
 control VerifyChecksumImpl(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 control EgressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
-
 
 control ComputeChecksumImpl(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
-
 
 control DeparserImpl(packet_out packet, in headers hdr) {
-    apply { }
+    apply {
+    }
 }
-
 
 V1Switch(
     ParserImpl(),

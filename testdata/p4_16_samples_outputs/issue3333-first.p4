@@ -13,4 +13,3 @@ parser MyParser1(in myenum a) {
         transition accept;
     }
 }
-

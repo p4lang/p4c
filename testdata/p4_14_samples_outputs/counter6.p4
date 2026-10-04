@@ -6,13 +6,13 @@
     bit<32> f1;
     bit<32> f2;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 @name("B_t") header B_t_0 {
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
     bit<16> h1;
     bit<32> f1;
     bit<32> f2;
@@ -27,9 +27,9 @@ struct metadata {
 
 struct headers {
     @name(".hdrA")
-    A_t_0  hdrA;
+    A_t_0 hdrA;
     @name(".hdrB")
-    B_t_0  hdrB;
+    B_t_0 hdrB;
     @name(".packet_type")
     type_t packet_type;
 }
@@ -45,9 +45,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         packet.extract(hdr.packet_type);
-        transition select(hdr.packet_type.type) {
-            16w0xa &&& 16w0xf: parseA;
-            16w0xb &&& 16w0xf: parseB;
+        transition select (hdr.packet_type.type) {
+            16w0xa &&& 16w0xf : parseA;
+            16w0xb &&& 16w0xf : parseB;
         }
     }
 }
@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".cntDum") @min_width(64) counter<bit<12>>(32w4096, CounterType.packets) cntDum;
+@name(".cntDum") @min_width(64) counter < bit<12 >>(32w4096, CounterType.packets) cntDum;
 control processA(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".act") action act(bit<9> port, bit<12> idx) {
         standard_metadata.egress_spec = port;
@@ -68,7 +68,7 @@ control processA(inout headers hdr, inout metadata meta, inout standard_metadata
             act;
         }
         key = {
-            hdr.hdrA.f1: exact;
+            hdr.hdrA.f1 : exact;
         }
     }
     apply {
@@ -86,7 +86,7 @@ control processB(inout headers hdr, inout metadata meta, inout standard_metadata
             act;
         }
         key = {
-            hdr.hdrB.f1: exact;
+            hdr.hdrB.f1 : exact;
         }
     }
     apply {

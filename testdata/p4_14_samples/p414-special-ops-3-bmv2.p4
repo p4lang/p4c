@@ -18,7 +18,6 @@
 #define ETHERTYPE_MAX_RECIRCULATE       0xec14
 #define ETHERTYPE_MAX_CLONE_E2E         0xce2e
 
-
 header_type ethernet_t {
     fields {
         dstAddr : 48;
@@ -100,27 +99,43 @@ action _nop() {
         ethernet.etherType: exact;
 
 table t_ing_debug_table1 {
-    reads { DEBUG_FIELD_LIST }
-    actions { _nop; }
-    default_action: _nop;
+    reads {
+        DEBUG_FIELD_LIST
+    }
+    actions {
+        _nop;
+    }
+    default_action : _nop;
 }
 
 table t_ing_debug_table2 {
-    reads { DEBUG_FIELD_LIST }
-    actions { _nop; }
-    default_action: _nop;
+    reads {
+        DEBUG_FIELD_LIST
+    }
+    actions {
+        _nop;
+    }
+    default_action : _nop;
 }
 
 table t_egr_debug_table1 {
-    reads { DEBUG_FIELD_LIST }
-    actions { _nop; }
-    default_action: _nop;
+    reads {
+        DEBUG_FIELD_LIST
+    }
+    actions {
+        _nop;
+    }
+    default_action : _nop;
 }
 
 table t_egr_debug_table2 {
-    reads { DEBUG_FIELD_LIST }
-    actions { _nop; }
-    default_action: _nop;
+    reads {
+        DEBUG_FIELD_LIST
+    }
+    actions {
+        _nop;
+    }
+    default_action : _nop;
 }
 #endif  // ENABLE_DEBUG_TABLE
 
@@ -147,19 +162,25 @@ action do_resubmit() {
 }
 
 table t_do_resubmit {
-    reads { }
-    actions { do_resubmit; }
-    default_action: do_resubmit;
+    reads {
+    }
+    actions {
+        do_resubmit;
+    }
+    default_action : do_resubmit;
 }
 
-action mark_max_resubmit_packet () {
+action mark_max_resubmit_packet() {
     modify_field(ethernet.etherType, ETHERTYPE_MAX_RESUBMIT);
 }
 
 table t_mark_max_resubmit_packet {
-    reads { }
-    actions { mark_max_resubmit_packet; }
-    default_action: mark_max_resubmit_packet;
+    reads {
+    }
+    actions {
+        mark_max_resubmit_packet;
+    }
+    default_action : mark_max_resubmit_packet;
 }
 
 action set_port_to_mac_da_lsbs() {
@@ -167,20 +188,26 @@ action set_port_to_mac_da_lsbs() {
 }
 
 table t_ing_mac_da {
-    reads { }
-    actions { set_port_to_mac_da_lsbs; }
-    default_action: set_port_to_mac_da_lsbs;
+    reads {
+    }
+    actions {
+        set_port_to_mac_da_lsbs;
+    }
+    default_action : set_port_to_mac_da_lsbs;
 }
 
-action save_ing_instance_type () {
+action save_ing_instance_type() {
     modify_field(mymeta.last_ing_instance_type,
         standard_metadata.instance_type);
 }
 
 table t_save_ing_instance_type {
-    reads { }
-    actions { save_ing_instance_type; }
-    default_action: save_ing_instance_type;
+    reads {
+    }
+    actions {
+        save_ing_instance_type;
+    }
+    default_action : save_ing_instance_type;
 }
 
 action ing_inc_mymeta_counts() {
@@ -188,9 +215,12 @@ action ing_inc_mymeta_counts() {
 }
 
 table t_ing_inc_mymeta_counts {
-    reads { }
-    actions { ing_inc_mymeta_counts; }
-    default_action: ing_inc_mymeta_counts;
+    reads {
+    }
+    actions {
+        ing_inc_mymeta_counts;
+    }
+    default_action : ing_inc_mymeta_counts;
 }
 
 control ingress {
@@ -220,7 +250,7 @@ control ingress {
 #endif  // ENABLE_DEBUG_TABLE
 }
 
-action put_debug_vals_in_eth_dstaddr () {
+action put_debug_vals_in_eth_dstaddr() {
     // By copying values of selected metadata fields into the output
     // packet, we enable an automated STF test that checks the output
     // packet contents, to also check that the values of these
@@ -244,17 +274,20 @@ action put_debug_vals_in_eth_dstaddr () {
     //bit_or(ethernet.dstAddr, ethernet.dstAddr, temporaries.temp1);
 }
 
-action mark_egr_resubmit_packet () {
+action mark_egr_resubmit_packet() {
     put_debug_vals_in_eth_dstaddr();
 }
 
 table t_egr_mark_resubmit_packet {
-    reads { }
-    actions { mark_egr_resubmit_packet; }
-    default_action: mark_egr_resubmit_packet;
+    reads {
+    }
+    actions {
+        mark_egr_resubmit_packet;
+    }
+    default_action : mark_egr_resubmit_packet;
 }
 
-action do_recirculate () {
+action do_recirculate() {
     subtract_from_field(ethernet.srcAddr, 19);
     add_to_field(mymeta.f1, 19);
     add_to_field(mymeta.recirculate_count, 1);
@@ -262,23 +295,29 @@ action do_recirculate () {
 }
 
 table t_do_recirculate {
-    reads { }
-    actions { do_recirculate; }
-    default_action: do_recirculate;
+    reads {
+    }
+    actions {
+        do_recirculate;
+    }
+    default_action : do_recirculate;
 }
 
-action mark_max_recirculate_packet () {
+action mark_max_recirculate_packet() {
     put_debug_vals_in_eth_dstaddr();
     modify_field(ethernet.etherType, ETHERTYPE_MAX_RECIRCULATE);
 }
 
 table t_mark_max_recirculate_packet {
-    reads { }
-    actions { mark_max_recirculate_packet; }
-    default_action: mark_max_recirculate_packet;
+    reads {
+    }
+    actions {
+        mark_max_recirculate_packet;
+    }
+    default_action : mark_max_recirculate_packet;
 }
 
-action do_clone_e2e () {
+action do_clone_e2e() {
     subtract_from_field(ethernet.srcAddr, 23);
     add_to_field(mymeta.f1, 23);
     add_to_field(mymeta.clone_e2e_count, 1);
@@ -286,31 +325,40 @@ action do_clone_e2e () {
 }
 
 table t_do_clone_e2e {
-    reads { }
-    actions { do_clone_e2e; }
-    default_action: do_clone_e2e;
+    reads {
+    }
+    actions {
+        do_clone_e2e;
+    }
+    default_action : do_clone_e2e;
 }
 
-action mark_max_clone_e2e_packet () {
+action mark_max_clone_e2e_packet() {
     put_debug_vals_in_eth_dstaddr();
     modify_field(ethernet.etherType, ETHERTYPE_MAX_CLONE_E2E);
 }
 
 table t_mark_max_clone_e2e_packet {
-    reads { }
-    actions { mark_max_clone_e2e_packet; }
-    default_action: mark_max_clone_e2e_packet;
+    reads {
+    }
+    actions {
+        mark_max_clone_e2e_packet;
+    }
+    default_action : mark_max_clone_e2e_packet;
 }
 
-action mark_vanilla_packet () {
+action mark_vanilla_packet() {
     put_debug_vals_in_eth_dstaddr();
     modify_field(ethernet.etherType, ETHERTYPE_VANILLA);
 }
 
 table t_mark_vanilla_packet {
-    reads { }
-    actions { mark_vanilla_packet; }
-    default_action: mark_vanilla_packet;
+    reads {
+    }
+    actions {
+        mark_vanilla_packet;
+    }
+    default_action : mark_vanilla_packet;
 }
 
 action egr_inc_mymeta_counts() {
@@ -319,9 +367,12 @@ action egr_inc_mymeta_counts() {
 }
 
 table t_egr_inc_mymeta_counts {
-    reads { }
-    actions { egr_inc_mymeta_counts; }
-    default_action: egr_inc_mymeta_counts;
+    reads {
+    }
+    actions {
+        egr_inc_mymeta_counts;
+    }
+    default_action : egr_inc_mymeta_counts;
 }
 
 control egress {

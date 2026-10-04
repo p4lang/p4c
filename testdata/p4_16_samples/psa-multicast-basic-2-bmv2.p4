@@ -8,13 +8,12 @@
 #include <core.p4>
 #include "bmv2/psa.p4"
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -31,11 +30,11 @@ struct metadata_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
-    output_data_t    output_data;
+    ethernet_t ethernet;
+    output_data_t output_data;
 }
 
-control packet_path_to_int (in PSA_PacketPath_t packet_path,
+control packet_path_to_int(in PSA_PacketPath_t packet_path,
                             out bit<32> ret)
 {
     apply {
@@ -84,9 +83,9 @@ control cIngress(inout headers_t hdr,
                  inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-	multicast(ostd,
+        multicast(ostd,
             (MulticastGroup_t) (MulticastGroupUint_t) hdr.ethernet.dstAddr);
-        ostd.class_of_service = (ClassOfService_t) ((ClassOfServiceUint_t) hdr.ethernet.srcAddr[0:0]);
+        ostd.class_of_service =(ClassOfService_t)((ClassOfServiceUint_t) hdr.ethernet.srcAddr[0 : 0]);
     }
 }
 
@@ -111,10 +110,10 @@ control cEgress(inout headers_t hdr,
                 inout psa_egress_output_metadata_t ostd)
 {
     apply {
-        hdr.output_data.word0 = (bit<32>) istd.egress_port;
-        hdr.output_data.word1 = (bit<32>) ((EgressInstanceUint_t) istd.instance);
+        hdr.output_data.word0 =(bit<32>) istd.egress_port;
+        hdr.output_data.word1 =(bit<32>)((EgressInstanceUint_t) istd.instance);
         packet_path_to_int.apply(istd.packet_path, hdr.output_data.word2);
-        hdr.output_data.word3 = (bit<32>) ((ClassOfServiceUint_t) istd.class_of_service);
+        hdr.output_data.word3 =(bit<32>)((ClassOfServiceUint_t) istd.class_of_service);
     }
 }
 

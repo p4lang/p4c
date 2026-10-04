@@ -5,10 +5,10 @@ struct EMPTY {
 }
 
 header ethernet_t {
-    bit<8>  x0;
-    bit<4>  x1;
-    bit<8>  x2;
-    bit<4>  x3;
+    bit<8> x0;
+    bit<4> x1;
+    bit<8> x2;
+    bit<4> x3;
     bit<48> dst_addr;
     bit<48> src_addr;
     bit<16> ether_type;
@@ -20,8 +20,8 @@ struct headers_t {
 
 struct user_meta_data_t {
     bit<48> addr;
-    bit<8>  x2;
-    bit<8>  flg;
+    bit<8> x2;
+    bit<8> flg;
 }
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
@@ -50,7 +50,7 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
     }
     apply {
         m.flg = 0x2;
-        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 1);
+        d.egress_port =(PortId_t)((bit<32>) c.ingress_port ^ 1);
         stub.apply();
     }
 }

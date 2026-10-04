@@ -20,7 +20,7 @@ bit<16> produce_val() {
 }
 
 Headers produce_hdr() {
-    return { { 1, 1, produce_val() }};
+    return { { 1, 1, produce_val() } };
 }
 
 control ingress(inout Headers h) {
@@ -32,4 +32,3 @@ control ingress(inout Headers h) {
 control Ingress(inout Headers hdr);
 package top(Ingress ig);
 top(ingress()) main;
-

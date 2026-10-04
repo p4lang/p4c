@@ -9,4 +9,3 @@ control c() {
         static_assert(3 == 1);
     }
 }
-

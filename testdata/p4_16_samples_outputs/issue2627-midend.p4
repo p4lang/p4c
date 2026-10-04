@@ -13,4 +13,3 @@ struct tuple_0 {
 struct H3_S {
     tuple_0 t;
 }
-

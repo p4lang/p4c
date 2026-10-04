@@ -8,9 +8,11 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct headers_t { }
+struct headers_t {
+}
 
-struct metadata_t { }
+struct metadata_t {
+}
 
 parser parserImpl(packet_in packet,
                   out headers_t hdr,
@@ -23,7 +25,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(inout headers_t hdr,
@@ -38,18 +41,19 @@ control ingressImpl(inout headers_t hdr,
     }
 #define TEXT_CONST "hello"
 #define NUM_CONST 6
-    @MixedExprList[1,TEXT_CONST,true,1==2,5+NUM_CONST]
-    @MixedKV[label="text", my_bool=true, int_val=2*3]
+    @MixedExprList[1, TEXT_CONST, true, 1 == 2, 5 + NUM_CONST]
+    @MixedKV[label = "text", my_bool = true, int_val = 2 * 3]
     table t {
-        key = { }
-        actions = {
-            @myid[1]
-            redirect;
-            @myid[2]
-            my_drop;
-            NoAction;
-        }
-        default_action = NoAction;
+    key = {
+    }
+    actions = {
+        @myid[1]
+        redirect;
+        @myid[2]
+        my_drop;
+        NoAction;
+    }
+    default_action = NoAction;
     }
     apply {
         t.apply();
@@ -60,11 +64,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

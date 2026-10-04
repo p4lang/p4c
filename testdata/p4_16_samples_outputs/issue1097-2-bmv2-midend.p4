@@ -17,49 +17,49 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<myhdr_t>(h.myhdr);
+        b.extract < myhdr_t >(h.myhdr);
         transition accept;
     }
 }
 
-register<bit<8>>(32w256) r;
+register < bit<8 >>(32w256) r;
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue10972bmv2l43() {
+    @hidden action issue10972bmv2l44() {
         r.write((bit<32>)h.myhdr.reg_idx_to_update, 8w0x2a);
     }
-    @hidden table tbl_issue10972bmv2l43 {
+    @hidden table tbl_issue10972bmv2l44 {
         actions = {
-            issue10972bmv2l43();
+            issue10972bmv2l44();
         }
-        const default_action = issue10972bmv2l43();
+        const default_action = issue10972bmv2l44();
     }
     apply {
-        tbl_issue10972bmv2l43.apply();
+        tbl_issue10972bmv2l44.apply();
     }
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("egress.tmp") bit<8> tmp_0;
-    @hidden action issue10972bmv2l53() {
+    @hidden action issue10972bmv2l54() {
         r.read(tmp_0, (bit<32>)h.myhdr.reg_idx_to_update);
         tmp_0 = tmp_0 + h.myhdr.value_to_add;
         r.write((bit<32>)h.myhdr.reg_idx_to_update, tmp_0);
         h.myhdr.debug_last_reg_value_written = tmp_0;
     }
-    @hidden table tbl_issue10972bmv2l53 {
+    @hidden table tbl_issue10972bmv2l54 {
         actions = {
-            issue10972bmv2l53();
+            issue10972bmv2l54();
         }
-        const default_action = issue10972bmv2l53();
+        const default_action = issue10972bmv2l54();
     }
     apply {
-        tbl_issue10972bmv2l53.apply();
+        tbl_issue10972bmv2l54.apply();
     }
 }
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<myhdr_t>(h.myhdr);
+        b.emit < myhdr_t >(h.myhdr);
     }
 }
 
@@ -73,4 +73,4 @@ control update(inout Headers h, inout Meta m) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch <Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

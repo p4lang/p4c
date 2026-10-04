@@ -17,10 +17,13 @@ parser start {
     return ingress;
 }
 
-action x() {}
+action x() {
+}
 
 table t {
-    actions { x; }
+    actions {
+        x;
+    }
 }
 
 control c {

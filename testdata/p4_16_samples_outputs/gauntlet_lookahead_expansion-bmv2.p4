@@ -17,9 +17,9 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        transition select((pkt.lookahead<ethernet_t>()).eth_type) {
-            0xdead: parse_hdrs;
-            default: accept;
+        transition select ((pkt.lookahead < ethernet_t >()).eth_type) {
+            0xdead : parse_hdrs;
+            default : accept;
         }
     }
     state parse_hdrs {

@@ -15,7 +15,7 @@ header_type intrinsic_metadata_t {
 
 header_type meta_t {
     fields {
-        register_tmp : 32 (signed);
+        register_tmp : 32(signed);
     }
 }
 
@@ -41,10 +41,10 @@ action _nop() {
 }
 
 register my_register {
-    width: 32;
-    static: m_table;
-    instance_count: 16384;
-    attributes: signed;
+    width : 32;
+    static : m_table;
+    instance_count : 16384;
+    attributes : signed;
 }
 
 action m_action(register_idx) {
@@ -59,7 +59,8 @@ table m_table {
         ethernet.srcAddr : exact;
     }
     actions {
-        m_action; _nop;
+        m_action;
+        _nop;
     }
     size : 16384;
 }

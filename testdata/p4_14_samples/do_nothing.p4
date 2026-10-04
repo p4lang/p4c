@@ -25,17 +25,17 @@ parser parse_ethernet {
     return ingress;
 }
 
-action action_0(){
+action action_0() {
     no_op();
 }
 
 table table_0 {
-   reads {
-      ethernet.etherType : ternary;
-   }
-   actions {
-      action_0;
-   }
+    reads {
+        ethernet.etherType : ternary;
+    }
+    actions {
+        action_0;
+    }
 }
 
 control ingress {

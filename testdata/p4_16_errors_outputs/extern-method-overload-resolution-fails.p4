@@ -15,4 +15,3 @@ parser p(packet_in b, out Headers h) {
         b.extract(h.h);
     }
 }
-

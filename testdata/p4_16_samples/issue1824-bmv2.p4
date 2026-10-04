@@ -15,8 +15,8 @@ struct headers {
 }
 
 struct mystruct1_t {
-    bit<4>  a;
-    bit<4>  b;
+    bit<4> a;
+    bit<4> b;
 }
 
 struct metadata {
@@ -35,7 +35,7 @@ parser MyParser(packet_in pkt,
                inout metadata meta,
                inout standard_metadata_t stdmeta)
 {
-   state start {
+    state start {
         pkt.extract(hdr.h1);
         verify(false, error.IPv4BadPacket);
         verify(false, error.IPv4HeaderTooShort);
@@ -58,19 +58,22 @@ control MyEgress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control MyVerifyChecksum(inout headers hdr,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control MyComputeChecksum(inout headers hdr,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control MyDeparser(packet_out packet,

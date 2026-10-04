@@ -15,7 +15,7 @@ control compute(inout hdr h) {
     }
     table t {
         key = {
-            h.key: exact;
+            h.key : exact;
         }
         actions = {
             add;

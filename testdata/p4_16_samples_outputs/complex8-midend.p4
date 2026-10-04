@@ -5,9 +5,9 @@ parser p() {
     @name("p.tmp_0") bit<32> tmp_0;
     state start {
         tmp_0 = f(32w2);
-        transition select(tmp_0) {
-            32w0: accept;
-            default: reject;
+        transition select (tmp_0) {
+            32w0 : accept;
+            default : reject;
         }
     }
 }

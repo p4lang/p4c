@@ -7,27 +7,27 @@ typedef bit<32> IPv4Address;
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     packet_length;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> packet_length;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
 }
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 struct metadata {
@@ -47,7 +47,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ingress_tbl {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             actTbl;
@@ -55,7 +55,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         const default_action = drop;
         const entries = {
-                        8w0x20 ++ 8w0x2 ++ 8w0x4 ++ 8w0x20 : actTbl(24w42, 8w0x20 ++ 8w0x2 ++ 8w0x42 ++ 8w0x0);
+            8w0x20 ++ 8w0x2 ++ 8w0x4 ++ 8w0x20 : actTbl(24w42, 8w0x20 ++ 8w0x2 ++ 8w0x42 ++ 8w0x0);
         }
     }
     apply {

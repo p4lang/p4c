@@ -7,8 +7,10 @@
 #include <core.p4>
 #include <v1model.p4>
 
-header header_t {}
-struct metadata {}
+header header_t {
+}
+struct metadata {
+}
 
 parser MyParser(packet_in packet,
                 out header_t hdr,
@@ -22,9 +24,9 @@ parser MyParser(packet_in packet,
 control C1(int a, inout bit<8> b) {
     apply {
         if (b == a) {
-            b = a+8w1;
+            b = a + 8w1;
         } else {
-            b = 1+a;
+            b = 1 + a;
         }
     }
 }
@@ -38,11 +40,23 @@ control MyIngress(inout header_t hdr,
     }
 }
 
-control MyVerifyChecksum(inout header_t hdr, inout metadata meta) { apply { } }
+control MyVerifyChecksum(inout header_t hdr, inout metadata meta) {
+    apply {
+    }
+}
 control MyEgress(inout header_t hdr, inout metadata meta,
-                 inout standard_metadata_t standard_metadata) { apply {  } }
-control MyDeparser(packet_out packet, in header_t hdr) { apply { } }
-control MyComputeChecksum(inout header_t hdr, inout metadata meta) { apply { } }
+                 inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
+control MyDeparser(packet_out packet, in header_t hdr) {
+    apply {
+    }
+}
+control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
+    apply {
+    }
+}
 
 V1Switch(
 MyParser(),

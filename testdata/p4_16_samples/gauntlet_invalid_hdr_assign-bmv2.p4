@@ -20,12 +20,14 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H     h;
+    H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
-void reset_function(out H tmp) {}
+void reset_function(out H tmp) {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -42,7 +44,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
     apply {
         reset_function(h.h);
-        h.eth_hdr.eth_type = (bit<16>)h.h.a;
+        h.eth_hdr.eth_type =(bit<16>) h.h.a;
 
     }
 }
@@ -69,4 +71,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

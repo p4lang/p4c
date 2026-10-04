@@ -7,9 +7,9 @@
 #include <core.p4>
 
 // Architecture
-parser P<H>(packet_in pkt, out H hdr);
+parser P < H >(packet_in pkt, out H hdr);
 control C();
-package S<H>(P<H> p, C c);
+package S < H >(P<H> p, C c);
 
 // User Program
 header data_h {

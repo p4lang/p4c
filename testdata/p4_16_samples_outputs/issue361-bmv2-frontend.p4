@@ -17,13 +17,13 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
     @name("MyParser.bv") bool bv_0;
     state start {
         bv_0 = true;
-        transition select(bv_0) {
-            false: next;
-            true: accept;
+        transition select (bv_0) {
+            false : next;
+            true : accept;
         }
     }
     state next {
-        b.extract<H>(p.h);
+        b.extract < H >(p.h);
         transition accept;
     }
 }
@@ -53,4 +53,4 @@ control MyDeparser(packet_out b, in my_packet p) {
     }
 }
 
-V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < my_packet, my_metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

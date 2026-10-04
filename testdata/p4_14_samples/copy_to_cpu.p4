@@ -22,17 +22,17 @@ header_type intrinsic_metadata_t {
 
 header_type cpu_header_t {
     fields {
-        device: 8;
-        reason: 8;
+        device : 8;
+        reason : 8;
     }
 }
 
 header cpu_header_t cpu_header;
 
 parser start {
-    return select(current(0, 64)) {
-        0 : parse_cpu_header;
-        default: parse_ethernet;
+    return select (current(0, 64)) {
+    0 : parse_cpu_header;
+    default : parse_ethernet;
     }
 }
 
@@ -67,7 +67,9 @@ action do_copy_to_cpu() {
 }
 
 table copy_to_cpu {
-    actions {do_copy_to_cpu;}
+    actions {
+        do_copy_to_cpu;
+    }
     size : 1;
 }
 
@@ -82,8 +84,13 @@ action do_cpu_encap() {
 }
 
 table redirect {
-    reads { standard_metadata.instance_type : exact; }
-    actions { _drop; do_cpu_encap; }
+    reads {
+        standard_metadata.instance_type : exact;
+    }
+    actions {
+        _drop;
+        do_cpu_encap;
+    }
     size : 16;
 }
 

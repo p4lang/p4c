@@ -1,26 +1,29 @@
 // generated from table-entries-range-bmv2.p4
 
 match_kind {
-  range,
-  optional,
-  selector
+    range,
+    optional,
+    selector
 }
 header hdr {
-  bit<8> r;
+    bit<8> r;
 }
 struct Header_t {
-  hdr h;
+    hdr h;
 }
 control ingress(inout Header_t h)() {
-  action a_with_control_params(bit<9> x) {}
-  table t_range {
-    key = {
-      h.h.r : range;
+    action a_with_control_params(bit<9> x) {
     }
-    actions = {}
-    const entries = {
-      (true) : a_with_control_params(22);
+    table t_range {
+        key = {
+            h.h.r : range;
+        }
+        actions = {
+        }
+        const entries = {
+            (true) : a_with_control_params(22);
+        }
     }
-  }
-  apply {}
+    apply {
+    }
 }

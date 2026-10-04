@@ -22,7 +22,7 @@ header clone_1_t {
 }
 
 struct clone_metadata_t {
-    bit<3>    type;
+    bit<3> type;
     clone_0_t data_h0;
     clone_1_t data_h1;
 }
@@ -46,7 +46,7 @@ struct metadata {
 
 parser MyIP(packet_in buffer, out ethernet_t h, inout metadata b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
     state start {
-        buffer.extract<ethernet_t>(h);
+        buffer.extract < ethernet_t >(h);
         transition accept;
     }
 }
@@ -62,16 +62,16 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
         clone_md_data_h1_0.setValid();
         clone_md_data_h1_0.data = 32w0;
         clone_md_data_h0_0.setInvalid();
-        transition select((bit<1>)(b.meta == 32w1)) {
-            1w1: start_true;
-            1w0: start_join;
-            default: noMatch;
+        transition select ((bit<1>)(b.meta == 32w1)) {
+            1w1 : start_true;
+            1w0 : start_join;
+            default : noMatch;
         }
     }
     state start_true {
-        transition select(e.data_h0.isValid()) {
-            true: start_true_true;
-            false: start_true_false;
+        transition select (e.data_h0.isValid()) {
+            true : start_true_true;
+            false : start_true_false;
         }
     }
     state start_true_true {
@@ -85,9 +85,9 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
         transition start_true_join;
     }
     state start_true_join {
-        transition select(e.data_h1.isValid()) {
-            true: start_true_true_0;
-            false: start_true_false_0;
+        transition select (e.data_h1.isValid()) {
+            true : start_true_true_0;
+            false : start_true_false_0;
         }
     }
     state start_true_true_0 {
@@ -117,11 +117,11 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("MyIC.forward") action forward() {
-        b.meta = 32w0x1 << (bit<32>)c.ingress_port;
+        b.meta = 32w0x1 <<(bit<32>) c.ingress_port;
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            a.srcAddr: exact @name("a.srcAddr");
+            a.srcAddr : exact @name("a.srcAddr");
         }
         actions = {
             NoAction_0();
@@ -140,17 +140,17 @@ control MyEC(inout EMPTY_H a, inout metadata b, in psa_egress_input_metadata_t c
 }
 
 control MyID(packet_out buffer, out clone_metadata_t a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout ethernet_t d, in metadata e, in psa_ingress_output_metadata_t f) {
-    @hidden @name("psadpdkheaderuniontypedef131") action psadpdkheaderuniontypedef131_0() {
-        buffer.emit<ethernet_t>(d);
+    @hidden @name("psadpdkheaderuniontypedef136") action psadpdkheaderuniontypedef136_0() {
+        buffer.emit < ethernet_t >(d);
     }
-    @hidden @name("tbl_psadpdkheaderuniontypedef131") table tbl_psadpdkheaderuniontypedef131_0 {
+    @hidden @name("tbl_psadpdkheaderuniontypedef136") table tbl_psadpdkheaderuniontypedef136_0 {
         actions = {
-            psadpdkheaderuniontypedef131_0();
+            psadpdkheaderuniontypedef136_0();
         }
-        const default_action = psadpdkheaderuniontypedef131_0();
+        const default_action = psadpdkheaderuniontypedef136_0();
     }
     apply {
-        tbl_psadpdkheaderuniontypedef131_0.apply();
+        tbl_psadpdkheaderuniontypedef136_0.apply();
     }
 }
 
@@ -159,6 +159,6 @@ control MyED(packet_out buffer, out clone_metadata_t a, out EMPTY_RECIRC b, inou
     }
 }
 
-IngressPipeline<ethernet_t, metadata, EMPTY_BRIDGE, clone_metadata_t, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
-EgressPipeline<EMPTY_H, metadata, EMPTY_BRIDGE, clone_metadata_t, clone_metadata_t, EMPTY_RECIRC>(MyEP(), MyEC(), MyED()) ep;
-PSA_Switch<ethernet_t, metadata, EMPTY_H, metadata, EMPTY_BRIDGE, clone_metadata_t, clone_metadata_t, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < ethernet_t, metadata, EMPTY_BRIDGE, clone_metadata_t, EMPTY_RESUB, EMPTY_RECIRC >(MyIP(), MyIC(), MyID()) ip;
+EgressPipeline < EMPTY_H, metadata, EMPTY_BRIDGE, clone_metadata_t, clone_metadata_t, EMPTY_RECIRC >(MyEP(), MyEC(), MyED()) ep;
+PSA_Switch < ethernet_t, metadata, EMPTY_H, metadata, EMPTY_BRIDGE, clone_metadata_t, clone_metadata_t, EMPTY_RESUB, EMPTY_RECIRC >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

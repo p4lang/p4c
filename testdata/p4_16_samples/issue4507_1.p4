@@ -6,10 +6,10 @@
 
 extern void __e(in bit<28> arg);
 extern void __e2(in bit<28> arg);
-
 control C() {
     action bar(bool a, bool b) {
-        bit<28> x; bit<28> y;
+        bit<28> x;
+        bit<28> y;
         if (a) {
             if (b) {
                 __e(x);
@@ -20,16 +20,15 @@ control C() {
             }
         }
     }
-
     action foo() {
         bar(true, false);
     }
-
     table t {
-        actions = { foo; }
+        actions = {
+            foo;
+        }
         default_action = foo;
     }
-
     apply {
         t.apply();
     }
@@ -37,5 +36,4 @@ control C() {
 
 control proto();
 package top(proto p);
-
 top(C()) main;

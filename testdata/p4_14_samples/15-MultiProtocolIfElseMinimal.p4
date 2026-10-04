@@ -35,28 +35,28 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
 header ethernet_t ethernet;
 header vlan_tag_t vlan_tag;
-header ipv4_t     ipv4;
+header ipv4_t ipv4;
 
 parser start {
     extract(ethernet);
-    return select(latest.etherType) {
-        0x8100, 0x9100 : parse_vlan_tag;
-        0x0800         : parse_ipv4;
-        default        : ingress;
+    return select (latest.etherType) {
+    0x8100, 0x9100 : parse_vlan_tag;
+    0x0800 : parse_ipv4;
+    default : ingress;
     }
 }
 
 parser parse_vlan_tag {
     extract(vlan_tag);
-    return select(latest.etherType) {
-        0x0800         : parse_ipv4;
-        default        : ingress;
+    return select (latest.etherType) {
+    0x0800 : parse_ipv4;
+    default : ingress;
     }
 }
 
@@ -71,7 +71,7 @@ header_type ingress_metadata_t {
         egress_port : 8;
         packet_type : 4;
     }
-} 
+}
 
 metadata ingress_metadata_t ing_metadata;
 

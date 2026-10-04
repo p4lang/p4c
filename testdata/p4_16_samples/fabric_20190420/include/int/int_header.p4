@@ -11,11 +11,11 @@
 #include "../define.p4"
 
 struct int_metadata_t {
-    _BOOL   source;
-    _BOOL   transit;
-    _BOOL   sink;
+    _BOOL source;
+    _BOOL transit;
+    _BOOL sink;
     bit<32> switch_id;
-    bit<8>  new_words;
+    bit<8> new_words;
     bit<16> new_bytes;
     bit<32> ig_tstamp;
     bit<32> eg_tstamp;
@@ -23,18 +23,18 @@ struct int_metadata_t {
 
 // INT headers - 8 bytes
 header int_header_t {
-    bit<2>  ver;
-    bit<2>  rep;
-    bit<1>  c;
-    bit<1>  e;
-    bit<5>  rsvd1;
-    bit<5>  ins_cnt;
-    bit<8>  max_hop_cnt;
-    bit<8>  total_hop_cnt;
-    bit<4>  instruction_mask_0003; /* split the bits for lookup */
-    bit<4>  instruction_mask_0407;
-    bit<4>  instruction_mask_0811;
-    bit<4>  instruction_mask_1215;
+    bit<2> ver;
+    bit<2> rep;
+    bit<1> c;
+    bit<1> e;
+    bit<5> rsvd1;
+    bit<5> ins_cnt;
+    bit<8> max_hop_cnt;
+    bit<8> total_hop_cnt;
+    bit<4> instruction_mask_0003; /* split the bits for lookup */
+    bit<4> instruction_mask_0407;
+    bit<4> instruction_mask_0811;
+    bit<4> instruction_mask_1215;
     bit<16> rsvd2;
 }
 
@@ -96,13 +96,13 @@ header int_egress_port_tx_util_t {
 #ifdef WITH_INT_SINK
 // Report Telemetry Headers
 header report_fixed_header_t {
-    bit<4>  ver;
-    bit<4>  nproto;
-    bit<1>  d;
-    bit<1>  q;
-    bit<1>  f;
+    bit<4> ver;
+    bit<4> nproto;
+    bit<1> d;
+    bit<1> q;
+    bit<1> f;
     bit<15> rsvd;
-    bit<6>  hw_id;
+    bit<6> hw_id;
     bit<32> seq_no;
     bit<32> ingress_tstamp;
 }
@@ -112,8 +112,8 @@ header drop_report_header_t {
     bit<32> switch_id;
     bit<16> ingress_port_id;
     bit<16> egress_port_id;
-    bit<8>  queue_id;
-    bit<8>  drop_reason;
+    bit<8> queue_id;
+    bit<8> drop_reason;
     bit<16> pad;
 }
 
@@ -122,7 +122,7 @@ header local_report_header_t {
     bit<32> switch_id;
     bit<16> ingress_port_id;
     bit<16> egress_port_id;
-    bit<8>  queue_id;
+    bit<8> queue_id;
     bit<24> queue_occupancy;
     bit<32> egress_tstamp;
 }

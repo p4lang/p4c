@@ -17,7 +17,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -36,31 +36,31 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name("ingressImpl.lpm1") table lpm1_0 {
         key = {
-            hdr.ethernet.dstAddr: lpm @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.dstAddr : lpm @name("hdr.ethernet.dstAddr");
         }
         actions = {
             act_miss();
             act_hit();
         }
         const entries = {
-                        48w0xa0102030000 : act_hit(48w1);
-                        48w0xa0000000000 &&& 48w0xff0000000000 : act_hit(48w2);
-                        48w0x0 &&& 48w0x0 : act_hit(48w3);
+            48w0xa0102030000 : act_hit(48w1);
+            48w0xa0000000000 &&& 48w0xff0000000000 : act_hit(48w2);
+            48w0x0 &&& 48w0x0 : act_hit(48w3);
         }
         const default_action = act_miss();
     }
-    @hidden action v1modelconstentriesbmv2l68() {
+    @hidden action v1modelconstentriesbmv2l69() {
         stdmeta.egress_spec = 9w1;
     }
-    @hidden table tbl_v1modelconstentriesbmv2l68 {
+    @hidden table tbl_v1modelconstentriesbmv2l69 {
         actions = {
-            v1modelconstentriesbmv2l68();
+            v1modelconstentriesbmv2l69();
         }
-        const default_action = v1modelconstentriesbmv2l68();
+        const default_action = v1modelconstentriesbmv2l69();
     }
     apply {
         lpm1_0.apply();
-        tbl_v1modelconstentriesbmv2l68.apply();
+        tbl_v1modelconstentriesbmv2l69.apply();
     }
 }
 
@@ -76,8 +76,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

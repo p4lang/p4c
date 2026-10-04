@@ -19,14 +19,14 @@ header data_t {
     bit<16> h4;
     bit<16> h5;
     bit<16> h6;
-    bit<8>  color_1;
+    bit<8> color_1;
 }
 
 struct metadata {
     @name(".counter_metadata")
     counter_metadata_t counter_metadata;
     @name(".meter_metadata")
-    meter_metadata_t   meter_metadata;
+    meter_metadata_t meter_metadata;
 }
 
 struct headers {
@@ -41,12 +41,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-@name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
-@name(".meter1") meter<bit<10>>(32w1024, MeterType.bytes) meter1;
+@name(".count1") @min_width(32) counter < bit<14 >>(32w16384, CounterType.packets) count1;
+@name(".meter1") meter <bit<10 >>(32w1024, MeterType.bytes) meter1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
-        meta.meter_metadata.meter_index = (bit<16>)index;
+        meta.meter_metadata.meter_index =(bit<16>) index;
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
@@ -58,8 +58,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_index;
         }
         key = {
-            hdr.data.f1: exact;
-            hdr.data.f2: exact;
+            hdr.data.f1 : exact;
+            hdr.data.f2 : exact;
         }
         size = 2048;
     }

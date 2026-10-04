@@ -17,12 +17,12 @@ struct m {
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
     state start {
         h l;
-        l = b.lookahead<h>();
-        transition select(l.h[0].f1, l.h[1].f1, l.h[2].f1) {
-            (1, default, default): one;
-            (0, 1, default): two;
-            (0, 0, 1): three;
-            default: many;
+        l = b.lookahead < h >();
+        transition select (l.h[0].f1, l.h[1].f1, l.h[2].f1) {
+            (1, default, default) : one;
+            (0, 1, default) : two;
+            (0, 0, 1) : three;
+            default : many;
         }
     }
     state one {

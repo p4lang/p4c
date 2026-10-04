@@ -10,8 +10,8 @@ struct meta_t {
 
 header hdr0_t {
     bit<16> a;
-    bit<8>  b;
-    bit<8>  c;
+    bit<8> b;
+    bit<8> c;
 }
 
 struct metadata {
@@ -47,10 +47,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.meta.y = 16w2;
     }
     @name(".action_1") action action_1(bit<8> p) {
-        meta.meta.z = (bit<16>)meta.meta.y + (bit<16>)meta.meta.x;
+        meta.meta.z =(bit<16>) meta.meta.y +(bit<16>) meta.meta.x;
     }
     @name(".action_2") action action_2(bit<8> p) {
-        hdr.hdr0.a = (bit<16>)meta.meta.z;
+        hdr.hdr0.a =(bit<16>) meta.meta.z;
     }
     @name(".t0") table t0 {
         actions = {
@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             action_0;
         }
         key = {
-            hdr.hdr0.a: ternary;
+            hdr.hdr0.a : ternary;
         }
         size = 512;
     }
@@ -68,7 +68,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             action_1;
         }
         key = {
-            hdr.hdr0.a: ternary;
+            hdr.hdr0.a : ternary;
         }
         size = 512;
     }
@@ -78,8 +78,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             action_2;
         }
         key = {
-            meta.meta.y: ternary;
-            meta.meta.z: exact;
+            meta.meta.y : ternary;
+            meta.meta.z : exact;
         }
         size = 512;
     }
@@ -89,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             action_1;
         }
         key = {
-            hdr.hdr0.a: ternary;
+            hdr.hdr0.a : ternary;
         }
         size = 512;
     }

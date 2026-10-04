@@ -7,4 +7,3 @@ struct T {
     S a;
     S b;
 }
-

@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct empty_metadata_t {
@@ -26,7 +26,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    Register<EthernetAddress, bit<32>>(128) regfile;
+    Register < EthernetAddress, bit<32 >>(128) regfile;
     apply {
         regfile.write(1, 3);
         regfile.write(2, 4);

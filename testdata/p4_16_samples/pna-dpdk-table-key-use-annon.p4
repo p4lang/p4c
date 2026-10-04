@@ -8,25 +8,24 @@
 #include <core.p4>
 #include "dpdk/pna.p4"
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -56,7 +55,7 @@ const bit<32> NUM_PORTS = 4;
 //////////////////////////////////////////////////////////////////////
 
 struct main_metadata_t {
-bit<32> key;
+    bit<32> key;
     ExpireTimeProfileId_t timeout;
 }
 
@@ -104,9 +103,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -131,7 +130,7 @@ control MainControlImpl(
     }
     table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact @name("ipv4_addr_0");
+            hdr.ipv4.dstAddr : exact @name("ipv4_addr_0");
         }
         actions = {
             @tableonly next_hop;
@@ -150,8 +149,8 @@ control MainControlImpl(
     table ipv4_da2 {
         key = {
 
-user_meta.key:
-                exact;
+            user_meta.key :
+            exact;
         }
         actions = {
             @tableonly next_hop2;

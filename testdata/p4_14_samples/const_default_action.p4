@@ -38,15 +38,15 @@ metadata ingress_metadata_t ingress_metadata;
 
 parser start {
     extract(ethernet);
-    return select(latest.etherType) {
-	default: parse_vlan;
+    return select (latest.etherType) {
+    default : parse_vlan;
     }
 }
 
 parser parse_vlan {
     extract(vlan_tag_[0]);
-    return select(latest.etherType) {
-        0x800 : ingress;
+    return select (latest.etherType) {
+    0x800 : ingress;
     }
 }
 
@@ -67,15 +67,16 @@ action_profile bd_action_profile {
     size : 1024;
 }
 
-action no_op(){}
+action no_op() {
+}
 
 table port_vlan_to_bd_mapping {
     reads {
         vlan_tag_[0] : valid;
         vlan_tag_[0].vid : ternary;
     }
-    action_profile: bd_action_profile;
-    const default_action: no_op();
+    action_profile : bd_action_profile;
+    const default_action : no_op();
     size : 1024;
 }
 
@@ -83,14 +84,16 @@ table vlan_to_bd_mapping {
     reads {
         vlan_tag_[0].vid : exact;
     }
-    action_profile: bd_action_profile;
-    const default_action: no_op();
+    action_profile : bd_action_profile;
+    const default_action : no_op();
     size : 1024;
 }
 
 control process_port_vlan_mapping {
     apply(port_vlan_to_bd_mapping) {
-	    miss { apply(vlan_to_bd_mapping); }
+        miss {
+            apply(vlan_to_bd_mapping);
+        }
     }
 }
 
@@ -99,4 +102,5 @@ control ingress {
     process_port_vlan_mapping();
 }
 
-control egress {}
+control egress {
+}

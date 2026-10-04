@@ -225,7 +225,7 @@ table port_vlan_mapping {
         vlan_tag_[1].vid : exact;
     }
 
-    action_profile: bd_action_profile;
+    action_profile : bd_action_profile;
     size : PORT_VLAN_TABLE_SIZE;
 }
 
@@ -313,7 +313,7 @@ table lag_group {
     reads {
         ingress_metadata.egress_ifindex : exact;
     }
-    action_profile: lag_action_profile;
+    action_profile : lag_action_profile;
     size : LAG_SELECT_TABLE_SIZE;
 }
 
@@ -346,7 +346,7 @@ action egress_port_type_cpu(ifindex) {
 
 table egress_port_mapping {
     reads {
-	egress_egress_port : exact;
+        egress_egress_port : exact;
     }
     actions {
         egress_port_type_normal;
@@ -382,7 +382,7 @@ action set_egress_packet_vlan_untagged() {
 
 table egress_vlan_xlate {
     reads {
-        egress_metadata.ifindex: exact;
+        egress_metadata.ifindex : exact;
         egress_metadata.bd : exact;
     }
     actions {

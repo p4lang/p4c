@@ -16,9 +16,9 @@ parser p(inout HU hu) {
     @name("ih_e") E ih_e_0;
     @name("ih_h") H ih_h_0;
     state start {
-        transition select(ih_e_0.isValid()) {
-            true: start_true;
-            false: start_false;
+        transition select (ih_e_0.isValid()) {
+            true : start_true;
+            false : start_false;
         }
     }
     state start_true {
@@ -32,9 +32,9 @@ parser p(inout HU hu) {
         transition start_join;
     }
     state start_join {
-        transition select(ih_h_0.isValid()) {
-            true: start_true_0;
-            false: start_false_0;
+        transition select (ih_h_0.isValid()) {
+            true : start_true_0;
+            false : start_false_0;
         }
     }
     state start_true_0 {
@@ -56,7 +56,7 @@ control c(inout HU hu) {
     @name("c.h") H h_1;
     @name("c.a") action a_0() {
     }
-    @hidden @name("invalidunion27") action invalidunion27_0() {
+    @hidden @name("invalidunion28") action invalidunion28_0() {
         h_1.setValid();
         h_1.f = 32w0;
         if (h_1.isValid()) {
@@ -73,11 +73,11 @@ control c(inout HU hu) {
         }
         const default_action = a_0();
     }
-    @hidden @name("tbl_invalidunion27") table tbl_invalidunion27_0 {
+    @hidden @name("tbl_invalidunion28") table tbl_invalidunion28_0 {
         actions = {
-            invalidunion27_0();
+            invalidunion28_0();
         }
-        const default_action = invalidunion27_0();
+        const default_action = invalidunion28_0();
     }
     @name("tmp") bit<32> tmp_0;
     apply {
@@ -92,7 +92,7 @@ control c(inout HU hu) {
         if (tmp_0 == 32w1) {
             ;
         } else {
-            tbl_invalidunion27_0.apply();
+            tbl_invalidunion28_0.apply();
         }
     }
 }

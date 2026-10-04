@@ -7,4 +7,3 @@ struct data {
     bit<8> f;
     bit<8> foo;
 }
-

@@ -14,4 +14,3 @@ parser MyParser(packet_in b, out my_packet p) {
         transition accept;
     }
 }
-

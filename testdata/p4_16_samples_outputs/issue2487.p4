@@ -16,7 +16,7 @@ struct Headers {
 
 control ingress(inout Headers h) {
     apply {
-        h.eth_hdr = (h.eth_hdr.eth_type == 1 ? { 48w1, 48w1, 16w1 } : { 48w2, 48w2, 16w2 });
+        h.eth_hdr =(h.eth_hdr.eth_type == 1 ? { 48w1, 48w1, 16w1 } : { 48w2, 48w2, 16w2 });
     }
 }
 

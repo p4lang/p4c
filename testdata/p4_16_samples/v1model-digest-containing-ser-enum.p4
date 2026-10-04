@@ -4,7 +4,7 @@
 // EtherTypes
 const bit<16> TYPE_IPV4 = 0x800;
 
-typedef bit<9>  egressSpec_t;
+typedef bit<9> egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<32> ip4Addr_t;
 typedef bit<32> switchID_t;
@@ -19,20 +19,20 @@ typedef bit<32> timedelta_t;
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -50,7 +50,7 @@ enum bit<8> MySerEnum1 {
 
 struct test_digest_t {
     macAddr_t in_mac_srcAddr;
-    error   my_parser_error;
+    error my_parser_error;
     MyPacketTypes pkt_type;
     //CounterType cntr_type;
 }
@@ -65,18 +65,20 @@ struct test_digest3_t {
 }
 
 struct metadata {
-    test_digest_t       test_digest;
-    test_digest2_t      test_digest2;
-    test_digest3_t      test_digest3;
+    test_digest_t test_digest;
+    test_digest2_t test_digest2;
+    test_digest3_t test_digest3;
 }
 
 struct headers {
-	ethernet_t ethernet;
-	ipv4_t ipv4;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
 }
 
 /* error necessary? */
-error { UnreachableState }
+error {
+    UnreachableState
+}
 
 /*************************************************************************
 *********************** P A R S E R  ***********************************
@@ -93,9 +95,9 @@ parser MyParser(packet_in packet,
 
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            TYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
 
@@ -110,7 +112,8 @@ parser MyParser(packet_in packet,
 *************************************************************************/
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {  }
+    apply {
+    }
 }
 
 
@@ -127,11 +130,12 @@ control MyIngress(inout headers hdr,
     action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;
     }
-    action drop() {}
-    
+    action drop() {
+    }
+
     table forward {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             set_dmac;
@@ -149,7 +153,7 @@ control MyIngress(inout headers hdr,
 
     table ipv4_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             set_nhop;
@@ -199,7 +203,7 @@ control MyEgress(inout headers hdr,
 
     table send_frame {
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port : exact;
         }
         actions = {
             rewrite_mac;
@@ -211,8 +215,7 @@ control MyEgress(inout headers hdr,
 
     apply {
         send_frame.apply();
-}
-
+    }
 
 }
 
@@ -221,8 +224,8 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-     apply {
-	update_checksum(
+    apply {
+        update_checksum(
 	    hdr.ipv4.isValid(),
             { hdr.ipv4.version,
 	      hdr.ipv4.ihl,
@@ -255,7 +258,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
 ***********************  S W I T C H  *******************************
 *************************************************************************/
 
-V1Switch<headers, metadata>(
+V1Switch < headers, metadata >(
 MyParser(),
 MyVerifyChecksum(),
 MyIngress(),
@@ -263,4 +266,3 @@ MyEgress(),
 MyComputeChecksum(),
 MyDeparser()
 ) main;
-

@@ -19,4 +19,3 @@ control p(in bit<1> y_0) {
         }
     }
 }
-

@@ -22,7 +22,8 @@ struct H {
     Union u2;
 }
 
-struct M { }
+struct M {
+}
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
@@ -36,8 +37,8 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u1.h3.data = 1;
 
         transition select (hdr.u1.h1.data) {
-            0: next;
-            default: last;
+            0 : next;
+            default : last;
         }
     }
 
@@ -106,4 +107,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

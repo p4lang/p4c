@@ -2,4 +2,3 @@ parser Parser() {
     state start {
     }
 }
-

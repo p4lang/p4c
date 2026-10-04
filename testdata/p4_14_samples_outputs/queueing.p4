@@ -19,7 +19,7 @@ header queueing_metadata_t_padded {
     bit<19> enq_qdepth;
     bit<32> deq_timedelta;
     bit<19> deq_qdepth;
-    bit<2>  pad;
+    bit<2> pad;
 }
 
 struct metadata {
@@ -27,7 +27,7 @@ struct metadata {
 
 struct headers {
     @name(".hdr1")
-    hdr1_t                     hdr1;
+    hdr1_t hdr1;
     @name(".queueing_hdr")
     queueing_metadata_t_padded queueing_hdr;
 }
@@ -39,9 +39,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         packet.extract(hdr.hdr1);
-        transition select(standard_metadata.packet_length) {
-            32w0: queueing_dummy;
-            default: accept;
+        transition select (standard_metadata.packet_length) {
+            32w0 : queueing_dummy;
+            default : accept;
         }
     }
 }
@@ -49,10 +49,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
-        hdr.queueing_hdr.enq_timestamp = (bit<32>)standard_metadata.enq_timestamp;
-        hdr.queueing_hdr.enq_qdepth = (bit<19>)standard_metadata.enq_qdepth;
-        hdr.queueing_hdr.deq_timedelta = (bit<32>)standard_metadata.deq_timedelta;
-        hdr.queueing_hdr.deq_qdepth = (bit<19>)standard_metadata.deq_qdepth;
+        hdr.queueing_hdr.enq_timestamp =(bit<32>) standard_metadata.enq_timestamp;
+        hdr.queueing_hdr.enq_qdepth =(bit<19>) standard_metadata.enq_qdepth;
+        hdr.queueing_hdr.deq_timedelta =(bit<32>) standard_metadata.deq_timedelta;
+        hdr.queueing_hdr.deq_qdepth =(bit<19>) standard_metadata.deq_qdepth;
         hdr.queueing_hdr.pad = 2w0;
     }
     @name(".t_egress") table t_egress {
@@ -78,7 +78,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _drop;
         }
         key = {
-            hdr.hdr1.f1: exact;
+            hdr.hdr1.f1 : exact;
         }
         size = 128;
     }

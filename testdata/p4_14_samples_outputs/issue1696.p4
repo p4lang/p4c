@@ -17,9 +17,9 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
         packet.extract(hdr.stack.next);
-        transition select(hdr.stack.last.f) {
-            16w0xffff: start;
-            default: accept;
+        transition select (hdr.stack.last.f) {
+            16w0xffff : start;
+            default : accept;
         }
     }
 }

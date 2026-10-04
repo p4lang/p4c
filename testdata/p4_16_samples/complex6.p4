@@ -10,10 +10,10 @@ extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     apply {
         if (f(2) > 0)
-            if (f(2) < 2)
-               r = 1;
-            else
-               r = 3;
+        if (f(2) < 2)
+        r = 1;
+        else
+        r = 3;
         else {
             r = 2;
         }

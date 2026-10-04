@@ -48,7 +48,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_e;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     @name(".B") table B {
@@ -78,16 +78,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         switch (A.apply().action_run) {
-            do_b: {
-                B.apply();
-                C.apply();
+            do_b : {
+            B.apply();
+            C.apply();
             }
-            do_d: {
-                D.apply();
-                C.apply();
+            do_d : {
+            D.apply();
+            C.apply();
             }
-            do_e: {
-                E.apply();
+            do_e : {
+            E.apply();
             }
         }
         F.apply();

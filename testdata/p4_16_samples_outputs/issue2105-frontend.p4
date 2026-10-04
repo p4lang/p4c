@@ -13,6 +13,6 @@ control c() {
     }
 }
 
-control e<T>();
-package top<T>(e<T> e);
-top<_>(c()) main;
+control e < T >();
+package top < T >(e<T> e);
+top < _ >(c()) main;

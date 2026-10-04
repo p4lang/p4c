@@ -5,8 +5,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-extern Checksum16 
-{
+extern Checksum16 {
     // prepare unit
     void reset();
     // append data to be checksummed

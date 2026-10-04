@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -22,7 +22,7 @@ struct metadata_t {
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     output_data_t output_data;
 }
 
@@ -58,10 +58,10 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     bit<32> int_packet_path;
     action record_ingress_ports_in_pkt() {
-        hdr.output_data.word1 = (bit<32>)(PortIdUint_t)istd.ingress_port;
+        hdr.output_data.word1 =(bit<32>)(PortIdUint_t) istd.ingress_port;
     }
     apply {
-        if (hdr.ethernet.dstAddr[3:0] >= 4) {
+        if (hdr.ethernet.dstAddr[3 : 0] >= 4) {
             record_ingress_ports_in_pkt();
             send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
         } else {

@@ -21,7 +21,8 @@ enum E {
 const E e = E.X;
 const int eew = e.minWidthInBits();
 control c() {
-    apply {}
+    apply {
+    }
 }
 
 c() ctr;

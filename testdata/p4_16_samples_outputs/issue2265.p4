@@ -9,4 +9,3 @@ control c<T>(inout T data) {
         data = tmp;
     }
 }
-

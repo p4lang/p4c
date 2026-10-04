@@ -14,8 +14,8 @@ header my_tag_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vlan_id;
     bit<16> ethertype;
 }
@@ -27,7 +27,7 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".my_tag")
-    my_tag_t   my_tag;
+    my_tag_t my_tag;
     @name(".vlan_tag")
     vlan_tag_t vlan_tag;
 }
@@ -35,26 +35,26 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_my_tag") state parse_my_tag {
         packet.extract(hdr.my_tag);
-        transition select(hdr.my_tag.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
-            16w0x9000: parse_my_tag;
-            default: accept;
+        transition select (hdr.my_tag.ethertype) {
+            16w0x8100 &&& 16w0xefff : parse_vlan_tag;
+            16w0x9000 : parse_my_tag;
+            default : accept;
         }
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {
         packet.extract(hdr.vlan_tag);
-        transition select(hdr.vlan_tag.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
-            16w0x9000: parse_my_tag;
-            default: accept;
+        transition select (hdr.vlan_tag.ethertype) {
+            16w0x8100 &&& 16w0xefff : parse_vlan_tag;
+            16w0x9000 : parse_my_tag;
+            default : accept;
         }
     }
     @name(".start") state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.ethertype) {
-            16w0x8100 &&& 16w0xefff: parse_vlan_tag;
-            16w0x9000: parse_my_tag;
-            default: accept;
+        transition select (hdr.ethernet.ethertype) {
+            16w0x8100 &&& 16w0xefff : parse_vlan_tag;
+            16w0x9000 : parse_my_tag;
+            default : accept;
         }
     }
 }
@@ -67,7 +67,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -83,7 +83,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             nop;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     apply {

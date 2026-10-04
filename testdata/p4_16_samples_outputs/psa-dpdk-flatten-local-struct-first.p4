@@ -8,17 +8,17 @@ typedef bit<48> ethernet_addr_t;
 header ethernet_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
-    bit<16>         ether_type;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
-    bit<8>  ver_ihl;
-    bit<8>  diffserv;
+    bit<8> ver_ihl;
+    bit<8> diffserv;
     bit<16> total_len;
     bit<16> identification;
     bit<16> flags_offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdr_checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
@@ -26,9 +26,9 @@ header ipv4_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
     ethernet_t outer_ethernet;
-    ipv4_t     outer_ipv4;
+    ipv4_t outer_ipv4;
 }
 
 struct host_info_rx_bytes_t2 {
@@ -42,22 +42,22 @@ struct host_info_rx_bytes_t2 {
 
 struct host_info_rx_bytes_t1 {
     host_info_rx_bytes_t2 flex_up1;
-    bit<16>               flex_0;
-    bit<16>               flex_1;
-    bit<16>               flex_2;
-    bit<16>               flex_3;
-    bit<16>               flex_4;
-    bit<16>               flex_5;
+    bit<16> flex_0;
+    bit<16> flex_1;
+    bit<16> flex_2;
+    bit<16> flex_3;
+    bit<16> flex_4;
+    bit<16> flex_5;
 }
 
 struct host_info_rx_bytes_t {
     host_info_rx_bytes_t1 flex_up;
-    bit<16>               flex_0;
-    bit<16>               flex_1;
-    bit<16>               flex_2;
-    bit<16>               flex_3;
-    bit<16>               flex_4;
-    bit<16>               flex_5;
+    bit<16> flex_0;
+    bit<16> flex_1;
+    bit<16> flex_2;
+    bit<16> flex_3;
+    bit<16> flex_4;
+    bit<16> flex_5;
 }
 
 struct local_metadata_t {
@@ -87,11 +87,11 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
         headers.outer_ethernet.ether_type = host_info_rx_bytes.flex_up.flex_up1.flex_0;
     }
     action drop() {
-        ostd.egress_port = (PortId_t)32w4;
+        ostd.egress_port =(PortId_t) 32w4;
     }
     table table1 {
         key = {
-            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr");
+            headers.ethernet.dst_addr : exact @name("headers.ethernet.dst_addr");
         }
         actions = {
             action1();
@@ -121,6 +121,6 @@ control egress_deparser(packet_out packet, out empty_metadata_t clone_e2e_meta, 
     }
 }
 
-IngressPipeline<headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(packet_parser(), ingress(), packet_deparser()) ip;
-EgressPipeline<headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(egress_parser(), egress(), egress_deparser()) ep;
-PSA_Switch<headers_t, local_metadata_t, headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(packet_parser(), ingress(), packet_deparser()) ip;
+EgressPipeline < headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(egress_parser(), egress(), egress_deparser()) ep;
+PSA_Switch < headers_t, local_metadata_t, headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

@@ -1,7 +1,7 @@
 #include <core.p4>
 
-package Ingress<IH>();
-package Switch<IH>(Ingress<IH> ingress);
+package Ingress < IH >();
+package Switch < IH >(Ingress<IH> ingress);
 struct H {
 }
 
@@ -11,5 +11,5 @@ parser ing_parse(out H hdr) {
     }
 }
 
-Ingress<H>(ing_parse()) ig1;
-Switch<H>(ig1) main;
+Ingress < H >(ing_parse()) ig1;
+Switch < H >(ig1) main;

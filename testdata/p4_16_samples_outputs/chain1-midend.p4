@@ -7,18 +7,18 @@ header Header {
 parser p1(packet_in p, out Header h) {
     @name("p1.x") bit<1> x_0;
     state start {
-        transition select(x_0) {
-            1w0: chain1;
-            1w1: chain2;
-            default: noMatch;
+        transition select (x_0) {
+            1w0 : chain1;
+            1w1 : chain2;
+            default : noMatch;
         }
     }
     state chain1 {
-        p.extract<Header>(h);
+        p.extract < Header >(h);
         transition endchain;
     }
     state chain2 {
-        p.extract<Header>(h);
+        p.extract < Header >(h);
         transition endchain;
     }
     state endchain {

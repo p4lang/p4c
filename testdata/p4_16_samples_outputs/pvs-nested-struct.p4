@@ -20,17 +20,17 @@ struct inner_value_set_t {
 }
 
 struct value_set_t {
-    bit<32>           field;
+    bit<32> field;
     inner_value_set_t inner;
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    value_set<value_set_t>(4) pvs;
+    value_set < value_set_t >(4) pvs;
     state start {
         b.extract(p.data);
-        transition select(p.data.da, p.data.da) {
-            pvs: accept;
-            (0x810, 0x810): foo;
+        transition select (p.data.da, p.data.da) {
+            pvs : accept;
+            (0x810, 0x810) : foo;
         }
     }
     state foo {
@@ -51,7 +51,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             set_data;
         }
         key = {
-            meta.data[0].da: exact;
+            meta.data[0].da : exact;
         }
     }
     apply {

@@ -15,7 +15,7 @@
 header_type data_t {
     fields {
 #define F32(A,B) f##A##_##B : 32;
-REP8(REP5,F32)
+        REP8(REP5,F32)
     }
 }
 header data_t data;
@@ -25,7 +25,8 @@ parser start {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 #define MF(A,B) modify_field(data.f##A##_##B, v##B);
 #define SET(_,A) action set##A(v1,v2,v3,v4,v5) { REP5(MF,A) }
 REP8(SET)

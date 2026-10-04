@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1_1: exact;
+            hdr.data.f1_1 : exact;
         }
     }
     @name(".tbl2") table tbl2 {
@@ -134,7 +134,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f2_1: exact;
+            hdr.data.f2_1 : exact;
         }
     }
     @name(".tbl3") table tbl3 {
@@ -143,7 +143,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f3_1: exact;
+            hdr.data.f3_1 : exact;
         }
     }
     @name(".tbl4") table tbl4 {
@@ -152,7 +152,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f4_1: exact;
+            hdr.data.f4_1 : exact;
         }
     }
     @name(".tbl5") table tbl5 {
@@ -161,7 +161,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f5_1: exact;
+            hdr.data.f5_1 : exact;
         }
     }
     @name(".tbl6") table tbl6 {
@@ -170,7 +170,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f6_1: exact;
+            hdr.data.f6_1 : exact;
         }
     }
     @name(".tbl7") table tbl7 {
@@ -179,7 +179,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f7_1: exact;
+            hdr.data.f7_1 : exact;
         }
     }
     @name(".tbl8") table tbl8 {
@@ -188,7 +188,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f8_1: exact;
+            hdr.data.f8_1 : exact;
         }
     }
     apply {

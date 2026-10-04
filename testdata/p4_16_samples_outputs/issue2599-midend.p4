@@ -1,17 +1,17 @@
 extern void __semaphore_write(in bit<32> data=0);
 control c() {
-    @hidden action issue2599l11() {
+    @hidden action issue2599l10() {
         __semaphore_write(data = 32w0);
         __semaphore_write(data = 32w0);
     }
-    @hidden table tbl_issue2599l11 {
+    @hidden table tbl_issue2599l10 {
         actions = {
-            issue2599l11();
+            issue2599l10();
         }
-        const default_action = issue2599l11();
+        const default_action = issue2599l10();
     }
     apply {
-        tbl_issue2599l11.apply();
+        tbl_issue2599l10.apply();
     }
 }
 

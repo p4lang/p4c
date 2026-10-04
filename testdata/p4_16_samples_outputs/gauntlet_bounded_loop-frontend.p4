@@ -9,7 +9,7 @@ header padding {
 }
 
 struct headers {
-    H       nop;
+    H nop;
     padding p;
 }
 
@@ -25,25 +25,25 @@ parser p(packet_in packet, out headers hdr) {
         transition sub_parser_next;
     }
     state sub_parser_next {
-        transition select(sub_parser_tracker == 8w1) {
-            true: sub_parser_next_true;
-            false: sub_parser_next_join;
+        transition select (sub_parser_tracker == 8w1) {
+            true : sub_parser_next_true;
+            false : sub_parser_next_join;
         }
     }
     state sub_parser_next_true {
-        packet.extract<padding>(hdr.p);
+        packet.extract < padding >(hdr.p);
         hdr.p.p = 8w1;
         transition sub_parser_next_join;
     }
     state sub_parser_next_join {
-        transition select(hdr.p.p) {
-            8w0: sub_parser_parse_hdr;
-            default: start_0;
+        transition select (hdr.p.p) {
+            8w0 : sub_parser_parse_hdr;
+            default : start_0;
         }
     }
     state sub_parser_parse_hdr {
         sub_parser_tracker = sub_parser_tracker + 8w1;
-        packet.extract<H>(hdr.nop);
+        packet.extract < H >(hdr.nop);
         transition sub_parser_next;
     }
     state start_0 {

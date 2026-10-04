@@ -2,6 +2,8 @@
 
 package X();
 control t()() {
-  X() c1_x = {};
-  apply {}
+    X() c1_x = {
+    };
+    apply {
+    }
 }

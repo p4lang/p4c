@@ -34,8 +34,8 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     @name("Eg.done") bool done_0;
     @name("Eg.ok") bool ok_0;
     @name("Eg.test") action test() {
-        inKey_0 = (Key){field1 = 32w1};
-        defaultKey_0 = (Key){field1 = 32w0};
+        inKey_0 =(Key) { field1 = 32w1 };
+        defaultKey_0 =(Key) { field1 = 32w0 };
         same_0 = inKey_0 == defaultKey_0;
         done_0 = false;
         ok_0 = !done_0 && same_0;
@@ -60,4 +60,4 @@ control Compute(inout Headers hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
+V1Switch < Headers, Metadata >(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;

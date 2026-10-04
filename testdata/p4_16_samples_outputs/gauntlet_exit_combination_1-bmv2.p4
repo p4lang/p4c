@@ -38,7 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            32w1: exact @name("akSTMF");
+            32w1 : exact @name("akSTMF");
         }
         actions = {
             dummy();
@@ -48,10 +48,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            dummy: {
+            dummy : {
             }
-            default: {
-                return;
+            default : {
+            return;
             }
         }
         do_action();

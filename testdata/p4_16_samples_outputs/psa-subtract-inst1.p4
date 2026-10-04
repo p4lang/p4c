@@ -19,18 +19,18 @@ header udp_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    udp_t[2]   udp;
+    udp_t[2] udp;
 }
 
 struct user_meta_data_t {
     bit<48> addr;
-    bit<3>  depth1;
-    bit<5>  depth2;
-    bit<5>  depth3;
-    bit<5>  depth4;
-    bit<5>  depth5;
-    bit<5>  depth6;
-    bit<5>  depth7;
+    bit<3> depth1;
+    bit<5> depth2;
+    bit<5> depth3;
+    bit<5> depth4;
+    bit<5> depth5;
+    bit<5> depth6;
+    bit<5> depth7;
 }
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
@@ -67,7 +67,7 @@ control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in p
     }
     apply {
         meta.depth4 = meta.depth2 - 4;
-        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 1);
+        d.egress_port =(PortId_t)((bit<32>) c.ingress_port ^ 1);
         stub.apply();
     }
 }

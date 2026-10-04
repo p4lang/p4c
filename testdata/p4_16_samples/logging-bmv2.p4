@@ -36,7 +36,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         log_msg("Logging values {} and {}", {b, d});
     }
     table t {
-        actions = { a(h.eth_hdr.dst_addr , h.eth_hdr.src_addr); }
+        actions = {
+            a(h.eth_hdr.dst_addr , h.eth_hdr.src_addr);
+        }
     }
     apply {
         t.apply();
@@ -63,6 +65,5 @@ control deparser(packet_out pkt, in Headers h) {
         pkt.emit(h);
     }
 }
-
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

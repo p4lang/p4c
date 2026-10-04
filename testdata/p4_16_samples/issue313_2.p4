@@ -10,7 +10,7 @@ header header_h {
 }
 
 struct struct_t {
-    header_h[4]     stack;
+    header_h[4] stack;
 }
 
 control ctrl(inout struct_t input, out bit<8> output) {
@@ -27,6 +27,6 @@ control ctrl(inout struct_t input, out bit<8> output) {
     }
 }
 
-control MyControl<S,H>(inout S data, out H output);
-package MyPackage<S,H>(MyControl<S,H> ctrl);
+control MyControl<S, H>(inout S data, out H output);
+package MyPackage<S, H>(MyControl<S, H> ctrl);
 MyPackage(ctrl()) main;

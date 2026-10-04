@@ -11,4 +11,3 @@ control c(out bit<8> result) {
         result = result + e.minSizeInBits();
     }
 }
-

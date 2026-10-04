@@ -1,9 +1,9 @@
-issue803-2.p4(146): [--Wwarn=unused] warning: 'ig2' is unused
-    (ing_parse(), ingress(), ing_deparse()) ig2;
-                                            ^^^
-issue803-2.p4(150): [--Wwarn=unused] warning: 'eg2' is unused
-    (egr_parse(), egress(), egr_deparse()) eg2;
-                                           ^^^
+issue803-2.p4(150): [--Wwarn=unused] warning: 'ig2' is unused
+(ing_parse(), ingress(), ing_deparse()) ig2;
+                                        ^^^
+issue803-2.p4(154): [--Wwarn=unused] warning: 'eg2' is unused
+(egr_parse(), egress(), egr_deparse()) eg2;
+                                       ^^^
 issue803-2.p4(86): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'ing_parse' terminates
                  out ing_in_headers parsed_hdr)
                                     ^^^^^^^^^^
@@ -16,15 +16,15 @@ issue803-2.p4(96): [--Wwarn=uninitialized-out-param] warning: out parameter 'ohd
 issue803-2.p4(94)
 control ingress(in ing_in_headers ihdr,
         ^^^^^^^
-issue803-2.p4(114): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'egr_parse' terminates
+issue803-2.p4(116): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'egr_parse' terminates
                  out egr_in_headers parsed_hdr)
                                     ^^^^^^^^^^
-issue803-2.p4(113)
+issue803-2.p4(115)
 parser egr_parse(packet_in buffer,
        ^^^^^^^^^
-issue803-2.p4(125): [--Wwarn=uninitialized-out-param] warning: out parameter 'ohdr' may be uninitialized when 'egress' terminates
+issue803-2.p4(127): [--Wwarn=uninitialized-out-param] warning: out parameter 'ohdr' may be uninitialized when 'egress' terminates
                out egr_out_headers ohdr,
                                    ^^^^
-issue803-2.p4(122)
+issue803-2.p4(124)
 control egress(in egr_in_headers ihdr,
         ^^^^^^

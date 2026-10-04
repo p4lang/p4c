@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header H {
@@ -31,8 +31,8 @@ H[1] h() {
 }
 struct headers_t {
     ethernet_t ethernet;
-    H          h1;
-    U          u1;
+    H h1;
+    U u1;
 }
 
 struct metadata_t {

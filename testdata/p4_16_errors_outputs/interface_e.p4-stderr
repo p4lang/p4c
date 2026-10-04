@@ -1,8 +1,8 @@
 interface_e.p4(7): [--Wwarn=unused] warning: 'T' is unused
-extern X<T> { }
+extern X<T> {
          ^
-interface_e.p4(9): [--Wwarn=unused] warning: parser 'p' is unused
-parser p()
+interface_e.p4(10): [--Wwarn=unused] warning: parser 'p' is unused
+parser p() {
        ^
 interface_e.p4(12): [--Wwarn=unused] warning: 'x' is unused
     X() x;
@@ -11,5 +11,5 @@ interface_e.p4(12): [--Werror=type-error] error: x: type X has no matching const
     X() x;
         ^
 interface_e.p4(7)
-extern X<T> { }
+extern X<T> {
        ^

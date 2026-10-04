@@ -1,12 +1,12 @@
 // generated from issue313.p4
 
 struct struct_t {
-  error stack;
+    error stack;
 }
 control ctrl(inout struct_t input, out bit<8> output)() {
-  action act() {
-    input.stack.pop_front(1);
-  }
-  apply {
-  }
+    action act() {
+        input.stack.pop_front(1);
+    }
+    apply {
+    }
 }

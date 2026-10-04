@@ -65,7 +65,8 @@ table t_ingress_1 {
         mymeta.f1 : exact;
     }
     actions {
-        _nop; set_port;
+        _nop;
+        set_port;
     }
     size : 128;
 }
@@ -75,7 +76,8 @@ table t_ingress_2 {
         mymeta.f1 : exact;
     }
     actions {
-        _nop; _resubmit;
+        _nop;
+        _resubmit;
     }
     size : 128;
 }

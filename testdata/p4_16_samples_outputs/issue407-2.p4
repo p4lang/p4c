@@ -11,8 +11,8 @@ struct mystruct1 {
 
 struct mystruct2 {
     mystruct1 foo;
-    bit<4>    a;
-    bit<4>    b;
+    bit<4> a;
+    bit<4> b;
 }
 
 enum myenum1 {
@@ -24,16 +24,15 @@ enum myenum1 {
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
-typedef tuple<bit<8>, bit<16>> myTuple0;
-typedef tuple<bit<7>, int<33>, EthernetAddress, MySignedInt, varbit<56>, varbit<104>, error, bool, myenum1, Ethernet_h, Ethernet_h[4], mystruct1, mystruct2, myTuple0> myTuple1;
+typedef tuple < bit<8>, bit<16 >> myTuple0;
+typedef tuple <bit<7>, int<33>, EthernetAddress, MySignedInt, varbit<56>, varbit<104>, error, bool, myenum1, Ethernet_h, Ethernet_h[4], mystruct1, mystruct2, myTuple0> myTuple1;
 header MyHeader1 {
-    bit<8>          x1;
-    int<8>          x2;
+    bit<8> x1;
+    int<8> x2;
     EthernetAddress x3;
-    MySignedInt     x4;
-    varbit<8>       x5;
+    MySignedInt x4;
+    varbit<8> x5;
 }
-

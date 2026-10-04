@@ -6,4 +6,3 @@ control C() {
         S s8 = (bool){b = 2,...};
     }
 }
-

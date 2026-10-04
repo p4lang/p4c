@@ -14,8 +14,11 @@ header ethernet_t {
     bit<16> etherType;
 }
 
-struct headers_t { ethernet_t ethernet; }
-struct user_metadata_t { }
+struct headers_t {
+    ethernet_t ethernet;
+}
+struct user_metadata_t {
+}
 
 parser myParser(packet_in pk, out headers_t hdr,
                 inout user_metadata_t meta,
@@ -27,7 +30,9 @@ parser myParser(packet_in pk, out headers_t hdr,
 }
 
 control MyDeparser(packet_out pk, in headers_t hdr) {
-    apply { pk.emit(hdr.ethernet); }
+    apply {
+        pk.emit(hdr.ethernet);
+    }
 }
 
 control ingress(inout headers_t hdr, inout user_metadata_t meta,
@@ -43,7 +48,7 @@ control ingress(inout headers_t hdr, inout user_metadata_t meta,
     }
     table t1 {
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType : exact;
         }
         actions = {
             @tableonly a1;
@@ -66,15 +71,18 @@ control ingress(inout headers_t hdr, inout user_metadata_t meta,
 
 control egress(inout headers_t hdr, inout user_metadata_t meta,
                inout standard_metadata_t stdmeta) {
-    apply { }
+    apply {
+    }
 }
 
 control verifyChecksum(inout headers_t hdr, inout user_metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control computeChecksum(inout headers_t hdr, inout user_metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(myParser(), verifyChecksum(), ingress(), egress(),

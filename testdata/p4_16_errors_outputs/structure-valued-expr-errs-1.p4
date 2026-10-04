@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h0_t {
@@ -47,9 +47,9 @@ header hstructs_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    h0_t       h0;
-    h1_t       h1;
-    h2_t       h2;
+    h0_t h0;
+    h1_t h1;
+    h2_t h2;
     hstructs_t hstructs;
 }
 
@@ -70,7 +70,7 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 extern Checksum {
     Checksum(HashAlgorithm hash);
-    void update<T>(in T data);
+    void update < T >(in T data);
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
@@ -78,20 +78,20 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     apply {
         if (hdr.ethernet.isValid()) {
             hdr.hstructs.setValid();
-            hdr.h1 = {  };
-            hdr.h2 = {  };
+            hdr.h1 = { };
+            hdr.h2 = { };
             hdr.h0 = { 4 };
             hdr.h1 = { 1, 2 };
             hdr.h2 = { 3 };
             hdr.hstructs.s0 = { 1 };
             hdr.hstructs.s1 = { 1, 2 };
             hdr.hstructs.s2 = { 3 };
-            hdr.h1 = {f2 = 5,f1 = 2};
-            hdr.h1 = {f2 = 5};
-            hdr.hstructs.s1 = {f2 = 5,f1 = 2};
-            hdr.hstructs.s1 = {f2 = 5};
-            hdr.h2 = {f2 = 5};
-            hdr.hstructs.s2 = {f2 = 5};
+            hdr.h1 = { f2 = 5, f1 = 2 };
+            hdr.h1 = { f2 = 5 };
+            hdr.hstructs.s1 = { f2 = 5, f1 = 2 };
+            hdr.hstructs.s1 = { f2 = 5 };
+            hdr.h2 = { f2 = 5 };
+            hdr.hstructs.s2 = { f2 = 5 };
             checksum_crc32.update((tuple_0){f0 = hdr.ethernet.srcAddr,f1 = hdr.ethernet.dstAddr,f2147483647 = hdr.ethernet.etherType});
         }
     }

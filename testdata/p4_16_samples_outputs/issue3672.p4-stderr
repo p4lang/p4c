@@ -2,11 +2,11 @@ issue3672.p4(13): [--Wwarn=unused] warning: control 'c' is unused
 control c()
         ^
 issue3672.p4(16): [--Wwarn=unused] warning: 'a' is unused
-  action a(in bit v1, in bit v2) { tt = v1++v2; }
-         ^
-issue3672.p4(18): [--Wwarn=unused] warning: table 't' is unused
-  table t
-        ^
+    action a(in bit v1, in bit v2) {
+           ^
+issue3672.p4(22): [--Wwarn=unused] warning: table 't' is unused
+    table t
+          ^
 issue3672.p4(13): [--Winfo=removed] info: removing control 'c'
 control c()
         ^

@@ -1,7 +1,7 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 struct meta_t {
     bit<2> x;
     bit<6> y;
@@ -13,7 +13,7 @@ control c(inout meta_t m) {
     }
     @name("c.t") table t_0 {
         key = {
-            m.y: exact @name("m.y");
+            m.y : exact @name("m.y");
         }
         actions = {
             set_x();
@@ -25,4 +25,4 @@ control c(inout meta_t m) {
     }
 }
 
-top<meta_t>(c()) main;
+top < meta_t >(c()) main;

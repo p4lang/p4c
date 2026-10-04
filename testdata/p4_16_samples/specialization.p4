@@ -6,7 +6,6 @@
  */
 
 extern void f<T>(in T data);
-
 struct S {
     bit<32> f;
 }
@@ -19,9 +18,8 @@ struct S1 {
 action a() {
     S x;
     S1 y;
-
-    f<S>( { 32w0 } );
+    f<S>({ 32w0 });
     f<S>(x);
     f<S1>(y);
-    f<S1>( { 32w0, 32w1 } );
+    f<S1>({ 32w0, 32w1 });
 }

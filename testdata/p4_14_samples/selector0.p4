@@ -44,7 +44,8 @@ action_selector sel {
     selection_mode : fair;
 }
 
-action noop() { }
+action noop() {
+}
 
 action_profile sel_profile {
     actions {

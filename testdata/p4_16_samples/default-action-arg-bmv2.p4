@@ -20,11 +20,17 @@ control compute(inout hdr h) {
         h.b = h.b + vb;
     }
     table t {
-        key = { h.key : exact; }
-        actions = { add; }
+        key = {
+            h.key : exact;
+        }
+        actions = {
+            add;
+        }
         const default_action = add(10, 0);
     }
-    apply { t.apply(); }
+    apply {
+        t.apply();
+    }
 }
 
 #include "arith-inline-skeleton.p4"

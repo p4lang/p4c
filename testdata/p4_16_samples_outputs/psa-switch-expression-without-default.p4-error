@@ -1,4 +1,4 @@
-psa-switch-expression-without-default.p4(126): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
-            92:
+psa-switch-expression-without-default.p4(141): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
+            92 :
             ^^
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata

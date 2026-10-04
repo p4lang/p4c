@@ -11,7 +11,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -37,14 +37,14 @@ control foo2(inout headers_t my_headers, inout metadata_t meta, register<bit<8>>
     bit<32> idx;
     bit<8> val;
     action foo2_action() {
-        idx = (bit<32>)my_headers.ethernet.srcAddr[7:0];
+        idx =(bit<32>) my_headers.ethernet.srcAddr[7 : 0];
         my_reg.read(val, idx);
         val = val - 7;
         my_reg.write(idx, val);
     }
     table foo2_table {
         key = {
-            my_headers.ethernet.srcAddr: exact;
+            my_headers.ethernet.srcAddr : exact;
         }
         actions = {
             foo2_action;
@@ -58,7 +58,7 @@ control foo2(inout headers_t my_headers, inout metadata_t meta, register<bit<8>>
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    register<bit<8>>(256) reg1;
+    register < bit<8 >>(256) reg1;
     foo2() foo2_inst;
     apply {
         stdmeta.egress_spec = 0;

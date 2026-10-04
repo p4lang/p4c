@@ -7,9 +7,10 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 struct user_meta_t {
     bit<16> data;
@@ -18,11 +19,11 @@ struct user_meta_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 parser MyIP(
@@ -59,19 +60,22 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
     action execute() {
         bit<16> tmp = 0;
-        tmp = (b.data != 0) ? 16w0 : 16w1 ;
+        tmp =(b.data != 0) ? 16w0 : 16w1;
         b.data = tmp + 1;
     }
     table tbl {
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; execute; }
+        actions = {
+            NoAction;
+            execute;
+        }
     }
     apply {
         bit<16> tmp1 = 0;
-        tmp1 = (b.data != 0) ? 16w2 : 16w5 ;
-        b.data = tmp1+5;
+        tmp1 =(b.data != 0) ? 16w2 : 16w5;
+        b.data = tmp1 + 5;
         tbl.apply();
     }
 }
@@ -81,7 +85,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -92,7 +97,8 @@ control MyID(
     inout headers_t hdr,
     in user_meta_t e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 control MyED(
@@ -103,7 +109,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

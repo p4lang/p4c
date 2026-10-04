@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header custom_var_len_t {
@@ -14,7 +14,7 @@ header custom_var_len_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
     custom_var_len_t custom_var_len;
 }
 
@@ -58,7 +58,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         } else {
             error_as_int = 7;
         }
-        hdr.ethernet.dstAddr[7:0] = error_as_int;
+        hdr.ethernet.dstAddr[7 : 0] = error_as_int;
     }
 }
 

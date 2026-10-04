@@ -7,7 +7,6 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-
 struct Headers {
     ethernet_t eth_hdr;
 }

@@ -19,17 +19,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     @name("p.e") ethernet_t e_0;
     state start {
         e_0.setInvalid();
-        pkt.extract<ethernet_t>(e_0);
-        transition select(e_0.eth_type) {
-            16w0x800: accept;
-            16w0x806: accept;
-            default: reject;
+        pkt.extract < ethernet_t >(e_0);
+        transition select (e_0.eth_type) {
+            16w0x800 : accept;
+            16w0x806 : accept;
+            default : reject;
         }
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.reg") register<bit<16>>(32w1) reg_0;
+    @name("ingress.reg") register < bit<16 >>(32w1) reg_0;
     @hidden action registerserenumbmv2l50() {
         reg_0.write(32w0, h.eth_hdr.eth_type);
     }
@@ -61,8 +61,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

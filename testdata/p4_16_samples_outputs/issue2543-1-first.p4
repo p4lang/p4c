@@ -14,15 +14,15 @@ bit<16> give_val() {
     return 16w1;
 }
 ethernet_t give_hdr() {
-    return (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
+    return(ethernet_t) { dst_addr = 48w1, src_addr = 48w1, eth_type = 16w1 };
     bit<16> dummy = 16w1;
-    return (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = dummy};
+    return(ethernet_t) { dst_addr = 48w1, src_addr = 48w1, eth_type = dummy };
 }
 control ingress(inout Headers h) {
-    Headers foo = (Headers){eth_hdr = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = give_val()}};
+    Headers foo =(Headers) { eth_hdr =(ethernet_t) { dst_addr = 48w1, src_addr = 48w1, eth_type = give_val() } };
     apply {
         give_hdr();
-        foo.eth_hdr.eth_type[3:0] = 4w1;
+        foo.eth_hdr.eth_type[3 : 0] = 4w1;
     }
 }
 

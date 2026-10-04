@@ -10,7 +10,9 @@ control c(inout bit<32> x) {
         b = d;
     }
     table t {
-        actions = { a(x); }
+        actions = {
+            a(x);
+        }
         default_action = a(x, 0);
     }
     apply {
@@ -20,5 +22,4 @@ control c(inout bit<32> x) {
 
 control proto(inout bit<32> x);
 package top(proto p);
-
 top(c()) main;

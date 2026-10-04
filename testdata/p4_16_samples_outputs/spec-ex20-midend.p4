@@ -8,13 +8,12 @@ header Ethernet_h {
 
 header Mpls_h {
     bit<20> label;
-    bit<3>  tc;
-    bit<1>  bos;
-    bit<8>  ttl;
+    bit<3> tc;
+    bit<1> bos;
+    bit<8> ttl;
 }
 
 struct Pkthdr {
     Ethernet_h ethernet;
-    Mpls_h[3]  mpls_vec;
+    Mpls_h[3] mpls_vec;
 }
-

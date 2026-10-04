@@ -5,4 +5,3 @@ control p() {
         b = (int<2>)a;
     }
 }
-

@@ -14,7 +14,7 @@ bit<16> produce_val() {
     return 16w9;
 }
 Headers produce_hdr() {
-    return (Headers){eth_hdr = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = produce_val()}};
+    return(Headers) { eth_hdr =(ethernet_t) { dst_addr = 48w1, src_addr = 48w1, eth_type = produce_val() } };
 }
 control ingress(inout Headers h) {
     apply {

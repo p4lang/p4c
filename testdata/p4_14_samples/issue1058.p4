@@ -48,17 +48,16 @@ parser parse_ethernet {
     return ingress;
 }
 
-
 action test_action() {
     generate_digest(0x666, test1_digest);
 }
 
 table tbl0 {
     actions {
-		test_action;
+        test_action;
     }
 }
 
 control ingress {
-	apply(tbl0);
+    apply(tbl0);
 }

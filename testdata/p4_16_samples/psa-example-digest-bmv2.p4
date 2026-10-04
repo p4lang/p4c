@@ -26,33 +26,33 @@ enum bit<16> EthTypes {
     IPv6 = 0x86DD
 }
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 struct headers {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
-    EthTypes         type;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
+    EthTypes type;
 }
 
 struct empty_metadata_t {
@@ -61,11 +61,11 @@ struct empty_metadata_t {
 // BEGIN:Digest_Example_Part1
 struct mac_learn_digest_t {
     EthernetAddress srcAddr;
-    PortId_t        ingress_port;
+    PortId_t ingress_port;
 }
 
 struct metadata {
-    bool               send_mac_learn_msg;
+    bool send_mac_learn_msg;
     mac_learn_digest_t mac_learn_msg;
 }
 // END:Digest_Example_Part1
@@ -80,9 +80,9 @@ parser CommonParser(
     }
     state parse_ethernet {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (parsed_hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -155,7 +155,7 @@ control ingress(inout headers hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
-    action unknown_source () {
+    action unknown_source() {
         meta.send_mac_learn_msg = true;
         meta.mac_learn_msg.srcAddr = hdr.ethernet.srcAddr;
         meta.mac_learn_msg.ingress_port = istd.ingress_port;
@@ -163,32 +163,47 @@ control ingress(inout headers hdr,
         // IngressDeparser control block
     }
     table learned_sources {
-        key = { hdr.ethernet.srcAddr : exact; }
-        actions = { NoAction; unknown_source; }
+        key = {
+            hdr.ethernet.srcAddr : exact;
+        }
+        actions = {
+            NoAction;
+            unknown_source;
+        }
         default_action = unknown_source();
     }
 
-    action do_L2_forward (PortId_t egress_port) {
+    action do_L2_forward(PortId_t egress_port) {
         send_to_port(ostd, egress_port);
     }
-    action do_tst (PortId_t egress_port, EthTypes serEnumT) {
-        send_to_port(ostd, egress_port);        
+    action do_tst(PortId_t egress_port, EthTypes serEnumT) {
+        send_to_port(ostd, egress_port);
     }
     table l2_tbl {
-        key = { hdr.ethernet.dstAddr : exact; }
-        actions = { do_L2_forward; NoAction; }
+        key = {
+            hdr.ethernet.dstAddr : exact;
+        }
+        actions = {
+            do_L2_forward;
+            NoAction;
+        }
         default_action = NoAction();
     }
     table tst_tbl {
-        key = { meta.mac_learn_msg.ingress_port : exact; }
-        actions = { do_tst; NoAction; }
+        key = {
+            meta.mac_learn_msg.ingress_port : exact;
+        }
+        actions = {
+            do_tst;
+            NoAction;
+        }
         default_action = NoAction();
     }
     apply {
         meta.send_mac_learn_msg = false;
         learned_sources.apply();
         l2_tbl.apply();
-        tst_tbl.apply();	
+        tst_tbl.apply();
     }
 }
 // END:Digest_Example_Part2
@@ -221,7 +236,7 @@ control IngressDeparserImpl(packet_out packet,
                             in psa_ingress_output_metadata_t istd)
 {
     CommonDeparserImpl() common_deparser;
-    Digest<mac_learn_digest_t>() mac_learn_digest;
+    Digest < mac_learn_digest_t >() mac_learn_digest;
     apply {
         if (meta.send_mac_learn_msg) {
             mac_learn_digest.pack(meta.mac_learn_msg);

@@ -18,17 +18,17 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue10011bmv2l30() {
+    @hidden action issue10011bmv2l31() {
         clone_preserving_field_list(CloneType.I2E, 32w64, 8w1);
     }
-    @hidden table tbl_issue10011bmv2l30 {
+    @hidden table tbl_issue10011bmv2l31 {
         actions = {
-            issue10011bmv2l30();
+            issue10011bmv2l31();
         }
-        const default_action = issue10011bmv2l30();
+        const default_action = issue10011bmv2l31();
     }
     apply {
-        tbl_issue10011bmv2l30.apply();
+        tbl_issue10011bmv2l31.apply();
     }
 }
 
@@ -52,4 +52,4 @@ control deparser(packet_out b, in Headers h) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

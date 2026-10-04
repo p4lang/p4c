@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header H {
-    bit<8>     s;
+    bit<8> s;
     varbit<32> v;
 }
 
@@ -15,16 +15,16 @@ struct metadata {
 }
 
 struct headers {
-    H    h;
+    H h;
     H[2] a;
     Same same;
 }
 
 parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        b.extract<H>(hdr.h, 32w32);
-        b.extract<H>(hdr.a.next, 32w32);
-        b.extract<H>(hdr.a.next, 32w32);
+        b.extract < H >(hdr.h, 32w32);
+        b.extract < H >(hdr.a.next, 32w32);
+        b.extract < H >(hdr.a.next, 32w32);
         transition accept;
     }
 }
@@ -69,8 +69,8 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control deparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
-V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
+V1Switch < headers, metadata >(p(), vc(), ingress(), egress(), uc(), deparser()) main;

@@ -14,4 +14,3 @@ control MainControlImpl(inout parsed_headers_t hdrs) {
     apply {
     }
 }
-

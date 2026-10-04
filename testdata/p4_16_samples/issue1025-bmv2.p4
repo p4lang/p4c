@@ -7,8 +7,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 header ethernet_t {
     bit<48> dstAddr;
@@ -18,23 +18,23 @@ header ethernet_t {
 
 // IPv4 header _with_ options
 header ipv4_t {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
     // This is significantly shorter than the IPv4 specification
     // allows for options.  It is written this way specifically to
     // make it easier to write an STF test case that exhibits the bug
     // described in p4c issue #1025.
-    varbit<32>   options;
+    varbit<32> options;
 }
 
 header tcp_t {
@@ -42,24 +42,24 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
 }
 
 header IPv4_up_to_ihl_only_h {
-    bit<4>       version;
-    bit<4>       ihl;
+    bit<4> version;
+    bit<4> ihl;
 }
 
 struct headers {
-    ethernet_t    ethernet;
-    ipv4_t        ipv4;
-    tcp_t         tcp;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 struct metadata {
@@ -78,9 +78,9 @@ parser parserI(packet_in pkt,
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -102,8 +102,8 @@ parser parserI(packet_in pkt,
         // WARNING WARNING WARNING
         ////////////////////////////////////////////////////////////
         transition select (hdr.ipv4.protocol) {
-            6: parse_tcp;
-            default: accept;
+            6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -120,13 +120,13 @@ control cIngress(inout headers hdr,
     bit<1> ipv4_valid;
     bit<1> tcp_valid;
     apply {
-        eth_valid = (bit<1>) hdr.ethernet.isValid();
-        ipv4_valid = (bit<1>) hdr.ipv4.isValid();
-        tcp_valid = (bit<1>) hdr.tcp.isValid();
-        hdr.ethernet.dstAddr = (24w0 ++
-                                7w0 ++ eth_valid ++
-                                7w0 ++ ipv4_valid ++
-                                7w0 ++ tcp_valid);
+        eth_valid =(bit<1>) hdr.ethernet.isValid();
+        ipv4_valid =(bit<1>) hdr.ipv4.isValid();
+        tcp_valid =(bit<1>) hdr.tcp.isValid();
+        hdr.ethernet.dstAddr =(24w0 ++
+        7w0 ++ eth_valid ++
+        7w0 ++ ipv4_valid ++
+        7w0 ++ tcp_valid);
     }
 }
 
@@ -134,19 +134,22 @@ control cEgress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control verifyChecksum(inout headers hdr,
                        inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers hdr,
                        inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out packet,

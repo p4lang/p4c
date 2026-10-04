@@ -1,7 +1,7 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header t1 {
     bit<32> x;
     bit<32> y;
@@ -21,7 +21,7 @@ control c(inout headers_t hdrs) {
         breakFlag = false;
         if (m_1 == 8w0) {
             breakFlag = true;
-        } else if (m_1[0:0] != 1w0) {
+        } else if (m_1[0 : 0] != 1w0) {
             result_0 = hdrs.t1.y & 32w0xf;
         }
         if (breakFlag) {
@@ -31,11 +31,11 @@ control c(inout headers_t hdrs) {
                 breakFlag = true;
             } else if (breakFlag) {
                 ;
-            } else if (m_1[1:1] != 1w0) {
+            } else if (m_1[1 : 1] != 1w0) {
                 if (breakFlag) {
                     ;
                 } else {
-                    result_0 = result_0 + (hdrs.t1.y >> 8w4 & 32w0xf);
+                    result_0 = result_0 +(hdrs.t1.y >> 8w4 & 32w0xf);
                 }
             }
             if (breakFlag) {
@@ -45,11 +45,11 @@ control c(inout headers_t hdrs) {
                     breakFlag = true;
                 } else if (breakFlag) {
                     ;
-                } else if (m_1[2:2] != 1w0) {
+                } else if (m_1[2 : 2] != 1w0) {
                     if (breakFlag) {
                         ;
                     } else {
-                        result_0 = result_0 + (hdrs.t1.y >> 8w8 & 32w0xf);
+                        result_0 = result_0 +(hdrs.t1.y >> 8w8 & 32w0xf);
                     }
                 }
                 if (breakFlag) {
@@ -59,11 +59,11 @@ control c(inout headers_t hdrs) {
                         breakFlag = true;
                     } else if (breakFlag) {
                         ;
-                    } else if (m_1[3:3] != 1w0) {
+                    } else if (m_1[3 : 3] != 1w0) {
                         if (breakFlag) {
                             ;
                         } else {
-                            result_0 = result_0 + (hdrs.t1.y >> 8w12 & 32w0xf);
+                            result_0 = result_0 +(hdrs.t1.y >> 8w12 & 32w0xf);
                         }
                     }
                     if (breakFlag) {
@@ -73,11 +73,11 @@ control c(inout headers_t hdrs) {
                             breakFlag = true;
                         } else if (breakFlag) {
                             ;
-                        } else if (m_1[4:4] != 1w0) {
+                        } else if (m_1[4 : 4] != 1w0) {
                             if (breakFlag) {
                                 ;
                             } else {
-                                result_0 = result_0 + (hdrs.t1.y >> 8w16 & 32w0xf);
+                                result_0 = result_0 +(hdrs.t1.y >> 8w16 & 32w0xf);
                             }
                         }
                         if (breakFlag) {
@@ -87,11 +87,11 @@ control c(inout headers_t hdrs) {
                                 breakFlag = true;
                             } else if (breakFlag) {
                                 ;
-                            } else if (m_1[5:5] != 1w0) {
+                            } else if (m_1[5 : 5] != 1w0) {
                                 if (breakFlag) {
                                     ;
                                 } else {
-                                    result_0 = result_0 + (hdrs.t1.y >> 8w20 & 32w0xf);
+                                    result_0 = result_0 +(hdrs.t1.y >> 8w20 & 32w0xf);
                                 }
                             }
                             if (breakFlag) {
@@ -101,11 +101,11 @@ control c(inout headers_t hdrs) {
                                     breakFlag = true;
                                 } else if (breakFlag) {
                                     ;
-                                } else if (m_1[6:6] != 1w0) {
+                                } else if (m_1[6 : 6] != 1w0) {
                                     if (breakFlag) {
                                         ;
                                     } else {
-                                        result_0 = result_0 + (hdrs.t1.y >> 8w24 & 32w0xf);
+                                        result_0 = result_0 +(hdrs.t1.y >> 8w24 & 32w0xf);
                                     }
                                 }
                                 if (breakFlag) {
@@ -114,11 +114,11 @@ control c(inout headers_t hdrs) {
                                     breakFlag = true;
                                 } else if (breakFlag) {
                                     ;
-                                } else if (m_1[7:7] != 1w0) {
+                                } else if (m_1[7 : 7] != 1w0) {
                                     if (breakFlag) {
                                         ;
                                     } else {
-                                        result_0 = result_0 + (hdrs.t1.y >> 8w28 & 32w0xf);
+                                        result_0 = result_0 +(hdrs.t1.y >> 8w28 & 32w0xf);
                                     }
                                 }
                             }
@@ -131,7 +131,7 @@ control c(inout headers_t hdrs) {
     }
     @name("c.test") table test_0 {
         key = {
-            hdrs.t1.x: exact @name("hdrs.t1.x");
+            hdrs.t1.x : exact @name("hdrs.t1.x");
         }
         actions = {
             a0();
@@ -144,4 +144,4 @@ control c(inout headers_t hdrs) {
     }
 }
 
-top<headers_t>(c()) main;
+top < headers_t >(c()) main;

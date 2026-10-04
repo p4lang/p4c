@@ -13,7 +13,7 @@ struct Headers {
 extern bit<16> do_extern(bit<32> val);
 parser p(packet_in pkt, out Headers hdr) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }

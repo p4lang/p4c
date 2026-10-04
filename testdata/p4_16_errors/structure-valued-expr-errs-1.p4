@@ -8,12 +8,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h0_t {
@@ -47,17 +47,17 @@ struct tuple_0 {
 }
 
 header hstructs_t {
-    s0_t   s0;
-    s1_t   s1;
-    s2_t   s2;
+    s0_t s0;
+    s1_t s1;
+    s2_t s2;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
-    h0_t          h0;
-    h1_t          h1;
-    h2_t          h2;
-    hstructs_t    hstructs;
+    ethernet_t ethernet;
+    h0_t h0;
+    h1_t h1;
+    h2_t h2;
+    hstructs_t hstructs;
 }
 
 struct metadata_t {
@@ -79,7 +79,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 extern Checksum {
@@ -87,7 +88,7 @@ extern Checksum {
   Checksum(HashAlgorithm hash);
 
   /// Add data to checksum
-  void update<T>(in T data);
+  void update < T >(in T data);
 }
 
 control ingressImpl(
@@ -103,28 +104,30 @@ control ingressImpl(
             // lines, because the number of fields in the list
             // expressions does not match the number of fields in the
             // header or struct they are being assigned to.
-            hdr.h1 = {};
-            hdr.h2 = {};
-            hdr.h0 = {4};
-            hdr.h1 = {1, 2};
-            hdr.h2 = {3};
-            hdr.hstructs.s0 = {1};
-            hdr.hstructs.s1 = {1, 2};
-            hdr.hstructs.s2 = {3};
+            hdr.h1 = {
+            };
+            hdr.h2 = {
+            };
+            hdr.h0 = { 4 };
+            hdr.h1 = { 1, 2 };
+            hdr.h2 = { 3 };
+            hdr.hstructs.s0 = { 1 };
+            hdr.hstructs.s1 = { 1, 2 };
+            hdr.hstructs.s2 = { 3 };
 
             // There should be an error for the following lines,
             // because hdr.h1 and hdr.hstructs.s1 have no field named
             // f2.
-            hdr.h1 = {f2=5, f1=2};
-            hdr.h1 = {f2=5};
-            hdr.hstructs.s1 = {f2=5, f1=2};
-            hdr.hstructs.s1 = {f2=5};
+            hdr.h1 = { f2 = 5, f1 = 2 };
+            hdr.h1 = { f2 = 5 };
+            hdr.hstructs.s1 = { f2 = 5, f1 = 2 };
+            hdr.hstructs.s1 = { f2 = 5 };
 
             // There should be an error for the following lines,
             // because not all fields of hdr.h2 nor hdr.hstructs.s2
             // are given a value in the structure-valued expression.
-            hdr.h2 = {f2=5};
-            hdr.hstructs.s2 = {f2=5};
+            hdr.h2 = { f2 = 5 };
+            hdr.hstructs.s2 = { f2 = 5 };
 
             checksum_crc32.update((tuple_0){f0 = hdr.ethernet.srcAddr, f1 = hdr.ethernet.dstAddr, f2147483647 = hdr.ethernet.etherType});
         }
@@ -136,14 +139,16 @@ control egressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(

@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-header t<tt>
-{
-  tt y;
+header t<tt> {
+    tt y;
 }
 
 typedef t ty;

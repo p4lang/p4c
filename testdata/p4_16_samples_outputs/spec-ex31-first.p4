@@ -10,7 +10,7 @@ header IPv4 {
 
 struct Packet_header {
     EthernetHeader ethernet;
-    IPv4           ipv4;
+    IPv4 ipv4;
 }
 
 parser EthernetParser(packet_in b, out EthernetHeader h) {
@@ -23,21 +23,21 @@ parser GenericParser(packet_in b, out Packet_header p)(bool udpSupport) {
     EthernetParser() ethParser;
     state start {
         ethParser.apply(b, p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: ipv4;
+        transition select (p.ethernet.etherType) {
+            16w0x800 : ipv4;
         }
     }
     state ipv4 {
-        b.extract<IPv4>(p.ipv4);
-        transition select(p.ipv4.protocol) {
-            16w6: tryudp;
-            16w17: tcp;
+        b.extract < IPv4 >(p.ipv4);
+        transition select (p.ipv4.protocol) {
+            16w6 : tryudp;
+            16w17 : tcp;
         }
     }
     state tryudp {
-        transition select(udpSupport) {
-            false: reject;
-            true: udp;
+        transition select (udpSupport) {
+            false : reject;
+            true : udp;
         }
     }
     state udp {
@@ -47,4 +47,3 @@ parser GenericParser(packet_in b, out Packet_header p)(bool udpSupport) {
         transition accept;
     }
 }
-

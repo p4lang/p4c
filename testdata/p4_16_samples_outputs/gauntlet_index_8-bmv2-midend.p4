@@ -19,8 +19,8 @@ header I {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[3]       h;
-    I          i;
+    H[3] h;
+    I i;
 }
 
 struct Meta {
@@ -28,27 +28,27 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<I>(hdr.i);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < I >(hdr.i);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action gauntlet_index_8bmv2l57() {
+    @hidden action gauntlet_index_8bmv2l58() {
         h.h[1w0].a = 8w1;
     }
-    @hidden table tbl_gauntlet_index_8bmv2l57 {
+    @hidden table tbl_gauntlet_index_8bmv2l58 {
         actions = {
-            gauntlet_index_8bmv2l57();
+            gauntlet_index_8bmv2l58();
         }
-        const default_action = gauntlet_index_8bmv2l57();
+        const default_action = gauntlet_index_8bmv2l58();
     }
     apply {
-        tbl_gauntlet_index_8bmv2l57.apply();
+        tbl_gauntlet_index_8bmv2l58.apply();
     }
 }
 
@@ -69,12 +69,12 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h[0]);
-        pkt.emit<H>(h.h[1]);
-        pkt.emit<H>(h.h[2]);
-        pkt.emit<I>(h.i);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h[0]);
+        pkt.emit < H >(h.h[1]);
+        pkt.emit < H >(h.h[2]);
+        pkt.emit < I >(h.i);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

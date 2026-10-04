@@ -9,19 +9,19 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -39,7 +39,7 @@ struct metadata_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers_t parsed_hdr, inout metadata_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
@@ -48,9 +48,9 @@ parser IngressParserImpl(packet_in buffer, out headers_t parsed_hdr, inout metad
     }
     state parse_ethernet {
         buffer.extract(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (parsed_hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -60,7 +60,7 @@ parser IngressParserImpl(packet_in buffer, out headers_t parsed_hdr, inout metad
 }
 
 control ingress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    Hash<bit<16>>(PSA_HashAlgorithm_t.CRC16) h;
+    Hash < bit<16 >>(PSA_HashAlgorithm_t.CRC16) h;
     bit<12> a = 0x456;
     apply {
         send_to_port(ostd, istd.ingress_port);
@@ -80,7 +80,7 @@ parser EgressParserImpl(packet_in buffer, out headers_t parsed_hdr, inout metada
 }
 
 control egress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    Hash<bit<16>>(PSA_HashAlgorithm_t.CRC16) h;
+    Hash < bit<16 >>(PSA_HashAlgorithm_t.CRC16) h;
     bit<4> base = 0x6;
     bit<4> max = 0xa;
     apply {

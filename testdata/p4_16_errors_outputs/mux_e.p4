@@ -8,4 +8,3 @@ control p() {
         d = (d ? a : d);
     }
 }
-

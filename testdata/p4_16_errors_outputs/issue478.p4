@@ -1,7 +1,7 @@
 #include <core.p4>
 
 header h_t {
-    bit<8>    f;
+    bit<8> f;
     varbit<8> g;
 }
 
@@ -15,4 +15,3 @@ parser MyParser(packet_in b, out my_packet p) {
         transition accept;
     }
 }
-

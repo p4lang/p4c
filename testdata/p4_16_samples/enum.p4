@@ -5,17 +5,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-enum X
-{
+enum X {
     Field,
     Field1,
     Field2
 }
 
-control c()
-{
+control c() {
     apply {
         X v = X.Field;
     }
 }
-

@@ -19,7 +19,9 @@ control C(in bit<16> x) {
     }
 
     table t {
-        actions = { a; }
+        actions = {
+            a;
+        }
         default_action = a;
     }
 

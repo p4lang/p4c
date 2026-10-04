@@ -2,7 +2,7 @@
 
 package c();
 control d()() {
-  apply {
-    c.apply();
-  }
+    apply {
+        c.apply();
+    }
 }

@@ -13,9 +13,9 @@ parser p(in HU hu, out bool b) {
     @name("tmp") bit<32> tmp_0;
     state start {
         tmp_0 = 32w0;
-        transition select(hu.h1.isValid()) {
-            true: start_true;
-            false: start_join;
+        transition select (hu.h1.isValid()) {
+            true : start_true;
+            false : start_join;
         }
     }
     state start_true {
@@ -23,9 +23,9 @@ parser p(in HU hu, out bool b) {
         transition start_join;
     }
     state start_join {
-        transition select(hu.h2.isValid()) {
-            true: start_true_0;
-            false: start_join_0;
+        transition select (hu.h2.isValid()) {
+            true : start_true_0;
+            false : start_join_0;
         }
     }
     state start_true_0 {

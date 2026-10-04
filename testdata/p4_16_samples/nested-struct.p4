@@ -9,13 +9,13 @@ struct S {
 }
 
 struct Header {
-    S   data;
+    S data;
     bit valid;
 }
 
 const Header h = {
-    data = { b = 0 },
-    valid = 0
+data = { b = 0 },
+valid = 0
 };
 
 struct H2 {
@@ -24,8 +24,8 @@ struct H2 {
 }
 
 const H2 h1 = {
-    g = { data = { b = 0 }, valid = 1 },
-    invalid = 1
+g = { data = { b = 0 }, valid = 1 },
+invalid = 1
 };
 
 const H2 h2 = { { { 0 }, 1 }, 1 };

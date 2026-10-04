@@ -10,7 +10,8 @@ parser start {
 }
 
 table empty {
-    actions {}
+    actions {
+    }
 }
 
 control ingress {

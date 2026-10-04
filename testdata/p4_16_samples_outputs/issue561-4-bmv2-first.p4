@@ -20,7 +20,7 @@ header_union U {
 }
 
 struct headers {
-    S    base;
+    S base;
     U[2] u;
 }
 
@@ -29,33 +29,33 @@ struct metadata {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<S>(hdr.base);
-        transition select(hdr.base.t) {
-            8w0: parseO1O1;
-            8w1: parseO1O2;
-            8w2: parseO2O1;
-            8w3: parseO2O2;
-            default: accept;
+        packet.extract < S >(hdr.base);
+        transition select (hdr.base.t) {
+            8w0 : parseO1O1;
+            8w1 : parseO1O2;
+            8w2 : parseO2O1;
+            8w3 : parseO2O2;
+            default : accept;
         }
     }
     state parseO1O1 {
-        packet.extract<O1>(hdr.u[0].byte);
-        packet.extract<O1>(hdr.u[1].byte);
+        packet.extract < O1 >(hdr.u[0].byte);
+        packet.extract < O1 >(hdr.u[1].byte);
         transition accept;
     }
     state parseO1O2 {
-        packet.extract<O1>(hdr.u[0].byte);
-        packet.extract<O2>(hdr.u[1].short);
+        packet.extract < O1 >(hdr.u[0].byte);
+        packet.extract < O2 >(hdr.u[1].short);
         transition accept;
     }
     state parseO2O1 {
-        packet.extract<O2>(hdr.u[0].short);
-        packet.extract<O1>(hdr.u[1].byte);
+        packet.extract < O2 >(hdr.u[0].short);
+        packet.extract < O1 >(hdr.u[1].byte);
         transition accept;
     }
     state parseO2O2 {
-        packet.extract<O2>(hdr.u[0].short);
-        packet.extract<O2>(hdr.u[1].short);
+        packet.extract < O2 >(hdr.u[0].short);
+        packet.extract < O2 >(hdr.u[1].short);
         transition accept;
     }
 }
@@ -63,11 +63,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     table debug_hdr {
         key = {
-            hdr.base.t              : exact @name("hdr.base.t");
+            hdr.base.t : exact @name("hdr.base.t");
             hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$");
-            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$");
+            hdr.u[0].short.isValid() : exact @name("hdr.u[0].short.$valid$");
             hdr.u[1].byte.isValid() : exact @name("hdr.u[1].byte.$valid$");
-            hdr.u[1].short.isValid(): exact @name("hdr.u[1].short.$valid$");
+            hdr.u[1].short.isValid() : exact @name("hdr.u[1].short.$valid$");
         }
         actions = {
             NoAction();
@@ -98,7 +98,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(hdr);
+        packet.emit < headers >(hdr);
     }
 }
 
@@ -112,4 +112,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

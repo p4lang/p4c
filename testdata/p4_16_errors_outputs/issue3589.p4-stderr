@@ -1,18 +1,18 @@
-issue3589.p4(14): [--Wwarn=unused] warning: 'b' is unused
-    bool b = t == t; // { dg-error "" }
-         ^
-issue3589.p4(23): [--Wwarn=unused] warning: 'b' is unused
-    bool b = t != t; // { dg-error "" }
-         ^
-issue3589.p4(14): [--Werror=type-error] error: t and t: tables cannot be compared
-    bool b = t == t; // { dg-error "" }
+issue3589.p4(16): [--Wwarn=unused] warning: 'b' is unused
+        bool b = t == t; // { dg-error "" }
              ^
-issue3589.p4(14)
-    bool b = t == t; // { dg-error "" }
-                  ^
-issue3589.p4(23): [--Werror=type-error] error: t and t: tables cannot be compared
-    bool b = t != t; // { dg-error "" }
+issue3589.p4(27): [--Wwarn=unused] warning: 'b' is unused
+        bool b = t != t; // { dg-error "" }
              ^
-issue3589.p4(23)
-    bool b = t != t; // { dg-error "" }
-                  ^
+issue3589.p4(16): [--Werror=type-error] error: t and t: tables cannot be compared
+        bool b = t == t; // { dg-error "" }
+                 ^
+issue3589.p4(16)
+        bool b = t == t; // { dg-error "" }
+                      ^
+issue3589.p4(27): [--Werror=type-error] error: t and t: tables cannot be compared
+        bool b = t != t; // { dg-error "" }
+                 ^
+issue3589.p4(27)
+        bool b = t != t; // { dg-error "" }
+                      ^

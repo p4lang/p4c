@@ -14,8 +14,8 @@ header H {
 
 struct headers_t {
     ethernet_t ethernet;
-    H          h1;
-    H          u1_h;
+    H h1;
+    H u1_h;
 }
 
 struct metadata_t {
@@ -23,7 +23,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -40,26 +40,26 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.h") H h_0;
     H u_0_h;
     @name("ingressImpl.s") H[1] s_0;
-    @hidden action issue30011l75() {
+    @hidden action issue30011l76() {
         log_msg("hdr.ethernet is valid");
     }
-    @hidden action issue30011l77() {
+    @hidden action issue30011l78() {
         log_msg("hdr.ethernet is invalid");
     }
-    @hidden action issue30011l90() {
+    @hidden action issue30011l91() {
         log_msg("f() returned a valid header");
     }
-    @hidden action issue30011l92() {
+    @hidden action issue30011l93() {
         log_msg("f() returned an invalid header");
     }
     @hidden action issue30011l31() {
         h_0.setInvalid();
         tmp = h_0;
     }
-    @hidden action issue30011l95() {
+    @hidden action issue30011l96() {
         log_msg("g() returned a header_union with valid member h");
     }
-    @hidden action issue30011l97() {
+    @hidden action issue30011l98() {
         log_msg("g() returned a header_union with invalid member h");
     }
     @hidden action issue30011l36() {
@@ -71,27 +71,27 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             tmp_1_h.setInvalid();
         }
     }
-    @hidden action issue30011l100() {
+    @hidden action issue30011l101() {
         log_msg("h() returned a header stack with valid element 0");
     }
-    @hidden action issue30011l102() {
+    @hidden action issue30011l103() {
         log_msg("h() returned a header stack with invalid element 0");
     }
     @hidden action issue30011l41() {
         s_0[0].setInvalid();
         tmp_3[0] = s_0[0];
     }
-    @hidden table tbl_issue30011l75 {
+    @hidden table tbl_issue30011l76 {
         actions = {
-            issue30011l75();
+            issue30011l76();
         }
-        const default_action = issue30011l75();
+        const default_action = issue30011l76();
     }
-    @hidden table tbl_issue30011l77 {
+    @hidden table tbl_issue30011l78 {
         actions = {
-            issue30011l77();
+            issue30011l78();
         }
-        const default_action = issue30011l77();
+        const default_action = issue30011l78();
     }
     @hidden table tbl_issue30011l31 {
         actions = {
@@ -99,17 +99,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = issue30011l31();
     }
-    @hidden table tbl_issue30011l90 {
+    @hidden table tbl_issue30011l91 {
         actions = {
-            issue30011l90();
+            issue30011l91();
         }
-        const default_action = issue30011l90();
+        const default_action = issue30011l91();
     }
-    @hidden table tbl_issue30011l92 {
+    @hidden table tbl_issue30011l93 {
         actions = {
-            issue30011l92();
+            issue30011l93();
         }
-        const default_action = issue30011l92();
+        const default_action = issue30011l93();
     }
     @hidden table tbl_issue30011l36 {
         actions = {
@@ -117,17 +117,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = issue30011l36();
     }
-    @hidden table tbl_issue30011l95 {
+    @hidden table tbl_issue30011l96 {
         actions = {
-            issue30011l95();
+            issue30011l96();
         }
-        const default_action = issue30011l95();
+        const default_action = issue30011l96();
     }
-    @hidden table tbl_issue30011l97 {
+    @hidden table tbl_issue30011l98 {
         actions = {
-            issue30011l97();
+            issue30011l98();
         }
-        const default_action = issue30011l97();
+        const default_action = issue30011l98();
     }
     @hidden table tbl_issue30011l41 {
         actions = {
@@ -135,41 +135,41 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = issue30011l41();
     }
-    @hidden table tbl_issue30011l100 {
+    @hidden table tbl_issue30011l101 {
         actions = {
-            issue30011l100();
+            issue30011l101();
         }
-        const default_action = issue30011l100();
+        const default_action = issue30011l101();
     }
-    @hidden table tbl_issue30011l102 {
+    @hidden table tbl_issue30011l103 {
         actions = {
-            issue30011l102();
+            issue30011l103();
         }
-        const default_action = issue30011l102();
+        const default_action = issue30011l103();
     }
     apply {
         if (hdr.ethernet.isValid()) {
-            tbl_issue30011l75.apply();
+            tbl_issue30011l76.apply();
         } else {
-            tbl_issue30011l77.apply();
+            tbl_issue30011l78.apply();
         }
         tbl_issue30011l31.apply();
         if (tmp.isValid()) {
-            tbl_issue30011l90.apply();
+            tbl_issue30011l91.apply();
         } else {
-            tbl_issue30011l92.apply();
+            tbl_issue30011l93.apply();
         }
         tbl_issue30011l36.apply();
         if (tmp_1_h.isValid()) {
-            tbl_issue30011l95.apply();
+            tbl_issue30011l96.apply();
         } else {
-            tbl_issue30011l97.apply();
+            tbl_issue30011l98.apply();
         }
         tbl_issue30011l41.apply();
         if (tmp_3[0].isValid()) {
-            tbl_issue30011l100.apply();
+            tbl_issue30011l101.apply();
         } else {
-            tbl_issue30011l102.apply();
+            tbl_issue30011l103.apply();
         }
     }
 }
@@ -186,8 +186,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

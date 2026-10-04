@@ -17,7 +17,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -36,14 +36,14 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         mark_to_drop(stdmeta);
     }
     @name("ingressImpl.foo") action foo(@name("out_port") bit<9> out_port) {
-        hdr.ethernet.dstAddr[22:18] = hdr.ethernet.srcAddr[5:1];
+        hdr.ethernet.dstAddr[22 : 18] = hdr.ethernet.srcAddr[5 : 1];
         stdmeta.egress_spec = out_port;
     }
     @name("ingressImpl.t1") table t1_0 {
         key = {
-            hdr.ethernet.srcAddr[22:18]: exact @name("hdr.ethernet.srcAddr[22:18]");
-            key_1                      : exact @name("hdr.ethernet.dstAddr & 0x10101010101");
-            key_2                      : exact @name("etherType_less_10");
+            hdr.ethernet.srcAddr[22 : 18] : exact @name("hdr.ethernet.srcAddr[22:18]");
+            key_1 : exact @name("hdr.ethernet.dstAddr & 0x10101010101");
+            key_2 : exact @name("etherType_less_10");
         }
         actions = {
             foo();
@@ -52,18 +52,18 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = NoAction_1();
     }
-    @hidden action matchonexprs2bmv2l55() {
+    @hidden action matchonexprs2bmv2l56() {
         key_1 = hdr.ethernet.dstAddr & 48w0x10101010101;
         key_2 = hdr.ethernet.etherType + 16w65526;
     }
-    @hidden table tbl_matchonexprs2bmv2l55 {
+    @hidden table tbl_matchonexprs2bmv2l56 {
         actions = {
-            matchonexprs2bmv2l55();
+            matchonexprs2bmv2l56();
         }
-        const default_action = matchonexprs2bmv2l55();
+        const default_action = matchonexprs2bmv2l56();
     }
     apply {
-        tbl_matchonexprs2bmv2l55.apply();
+        tbl_matchonexprs2bmv2l56.apply();
         t1_0.apply();
     }
 }
@@ -80,8 +80,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

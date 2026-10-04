@@ -4,26 +4,29 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-extern If<T>
+extern If < T >
 {
     T id(in T d);
 }
 
 control p1(If x) // missing type parameter
 {
-    apply {}
+    apply {
+    }
 }
 
 control p2(If<int<32>, int<32>> x) // too many type parameters
 {
-    apply {}
+    apply {
+    }
 }
 
-header h {}
+header h {
+}
 
 control p()
 {
     apply {
-        h<bit> x;     // no type parameter
+        h < bit > x;     // no type parameter
     }
 }

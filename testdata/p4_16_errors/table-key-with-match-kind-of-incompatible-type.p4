@@ -1,22 +1,24 @@
 // generated from table-entries-lpm-bmv2.p4
 
 match_kind {
-  exact,
-  ternary,
-  lpm
+    exact,
+    ternary,
+    lpm
 }
 header hdr {
-  bool l;
+    bool l;
 }
 struct Header_t {
-  hdr h;
+    hdr h;
 }
 control ingress(inout Header_t h)() {
-  table t_lpm {
-    key = {
-      h.h.l : lpm;
+    table t_lpm {
+        key = {
+            h.h.l : lpm;
+        }
+        actions = {
+        }
     }
-    actions = {}
-  }
-  apply {}
+    apply {
+    }
 }

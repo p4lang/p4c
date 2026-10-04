@@ -1,9 +1,9 @@
-issue2525.p4(55): [--Werror=invalid] error: switch has multiple 'default' labels:
+issue2525.p4(59): [--Werror=invalid] error: switch has multiple 'default' labels:
         switch (t.apply().action_run) {
         ^^^^^^
-issue2525.p4(57)
-            default: { stdmeta.egress_port = 2; }
+issue2525.p4(62)
+            default : { stdmeta.egress_port = 2;
             ^^^^^^^
-issue2525.p4(58)
-            default: { stdmeta.egress_port = 3; } // duplicate default label
+issue2525.p4(64)
+            default : { stdmeta.egress_port = 3;
             ^^^^^^^

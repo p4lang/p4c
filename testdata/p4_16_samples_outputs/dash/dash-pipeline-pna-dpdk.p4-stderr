@@ -77,10 +77,10 @@ dash-pipeline-pna-dpdk.p4(645): [--Wwarn=invalid-header] warning: accessing a fi
         hdr.u0_ipv6.hop_limit = hdr.u0_ipv4.ttl;
                                 ^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(646): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        hdr.u0_ipv6.dst_addr = (IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_data.dip_mask | ...
+        hdr.u0_ipv6.dst_addr =(IPv6Address) hdr.u0_ipv4.dst_addr & ~meta.overlay_data.dip_mask | ...
                                             ^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(647): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        hdr.u0_ipv6.src_addr = (IPv6Address)hdr.u0_ipv4.src_addr & ~meta.overlay_data.sip_mask | ...
+        hdr.u0_ipv6.src_addr =(IPv6Address) hdr.u0_ipv4.src_addr & ~meta.overlay_data.sip_mask | ...
                                             ^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(649): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
         hdr.u0_ethernet.ether_type = 0x86dd;
@@ -98,11 +98,11 @@ dash-pipeline-pna-dpdk.p4(679): [--Wwarn=invalid-header] warning: accessing a fi
         hdr.u0_ethernet.ether_type = 0x800;
         ^^^^^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(1226): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
+        meta.dst_ip_addr =(bit<128>) hdr.u0_ipv4.dst_addr;
                                      ^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(1229): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-            hdr.u0_ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
+            hdr.u0_ipv4.diffserv =(bit<8>) meta.eni_data.dscp;
             ^^^^^^^^^^^
 dash-pipeline-pna-dpdk.p4(942): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-            hdr.u0_ipv4.dst_addr: ternary @SaiVal[name="dip", type="sai_ip_address_t"];
-            ^^^^^^^^^^^
+        hdr.u0_ipv4.dst_addr : ternary @SaiVal[name = "dip", type = "sai_ip_address_t"];
+        ^^^^^^^^^^^

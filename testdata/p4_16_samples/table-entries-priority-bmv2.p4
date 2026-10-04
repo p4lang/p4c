@@ -9,17 +9,18 @@
 #include <v1model.p4>
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
+    bit<8> l;
     bit<8> r;
-    bit<8>  v;
+    bit<8> v;
 }
 
 struct Header_t {
     hdr h;
 }
-struct Meta_t {}
+struct Meta_t {
+}
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
     state start {
@@ -28,29 +29,45 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(inout Header_t h, inout Meta_t m) { apply {} }
-control update(inout Header_t h, inout Meta_t m) { apply {} }
-control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) { apply {} }
-control deparser(packet_out b, in Header_t h) { apply { b.emit(h.h); } }
+control vrfy(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control update(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+control deparser(packet_out b, in Header_t h) {
+    apply {
+        b.emit(h.h);
+    }
+}
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
 
-    action a() { standard_meta.egress_spec = 0; }
-    action a_with_control_params(bit<9> x) { standard_meta.egress_spec = x; }
-
+    action a() {
+        standard_meta.egress_spec = 0;
+    }
+    action a_with_control_params(bit<9> x) {
+        standard_meta.egress_spec = x;
+    }
 
     table t_ternary {
 
-  	key = {
+        key = {
             h.h.t : ternary;
         }
 
-	actions = {
+        actions = {
             a;
             a_with_control_params;
         }
 
-	default_action = a;
+        default_action = a;
 
         // test for priority swap
         // Note that here the matching entry with the _smallest_
@@ -65,8 +82,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         // is implemented by p4c and used by BMv2 simple_switch to
         // determine the winning entry.
         const entries = {
-            0x1111 &&& 0xF    : a_with_control_params(1) @priority(3);
-            0x1181            : a_with_control_params(2);
+            0x1111 &&& 0xF : a_with_control_params(1) @priority(3);
+            0x1181 : a_with_control_params(2);
             0x1181 &&& 0xF00F : a_with_control_params(3) @priority(1);
         }
     }
@@ -75,6 +92,5 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         t_ternary.apply();
     }
 }
-
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

@@ -3,7 +3,7 @@
 typedef bit<9> BParamType;
 struct TArg1 {
     bit<9> field1;
-    bool   drop;
+    bool drop;
 }
 
 struct TArg2 {
@@ -12,7 +12,7 @@ struct TArg2 {
 
 struct PArg1 {
     bit<32> f0;
-    bool    drop;
+    bool drop;
 }
 
 typedef bit<32> PArg2;
@@ -39,8 +39,8 @@ control T_host(inout TArg1 tArg1, in TArg2 aArg2)(bit<32> t2Size) {
     }
     table T {
         key = {
-            tArg1.field1: ternary @name("tArg1.field1");
-            aArg2.field2: exact @name("aArg2.field2");
+            tArg1.field1 : ternary @name("tArg1.field1");
+            aArg2.field2 : exact @name("aArg2.field2");
         }
         actions = {
             B_action(tArg1.field1);
@@ -61,7 +61,7 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     }
     table Tinner {
         key = {
-            pArg1.field1: ternary @name("pArg1.field1");
+            pArg1.field1 : ternary @name("pArg1.field1");
         }
         actions = {
             Drop();

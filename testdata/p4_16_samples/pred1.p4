@@ -17,12 +17,12 @@ control Ing() {
     action cond() {
         b = true;
         if (b)
-           a = 5;
+        a = 5;
         else {
             if (b && a == 5)
-                a = 10;
+            a = 10;
             else
-                a = 20;
+            a = 20;
         }
     }
 

@@ -13,4 +13,3 @@ control c() {
         h_t h3 = (h_t){f = h.f};
     }
 }
-

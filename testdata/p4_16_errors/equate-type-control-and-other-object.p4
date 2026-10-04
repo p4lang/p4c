@@ -3,6 +3,7 @@
 parser P();
 package V1Switch(P p);
 control MyC()() {
-  apply {}
+    apply {
+    }
 }
 V1Switch(MyC()) main;

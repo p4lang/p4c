@@ -2,7 +2,7 @@
 #include <dpdk/pna.p4>
 
 bit<3> max(in bit<3> val, in bit<3> bound) {
-    return (val < bound ? val : bound);
+    return(val < bound ? val : bound);
 }
 header ethernet_t {
     bit<16> eth_type;
@@ -13,7 +13,7 @@ header priceX {
 
 struct Headers {
     ethernet_t eth_hdr;
-    priceX[4]  heal;
+    priceX[4] heal;
 }
 
 struct main_metadata_t {
@@ -48,7 +48,7 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
         default_action = NoAction();
     }
     apply {
-        hdr.eth_hdr.eth_type = (greatY.apply().hit ? 16w48951 : 16w0);
+        hdr.eth_hdr.eth_type =(greatY.apply().hit ? 16w48951 : 16w0);
     }
 }
 
@@ -57,4 +57,4 @@ control MainDeparserImpl(packet_out pkt, in Headers hdr, in main_metadata_t user
     }
 }
 
-PNA_NIC<Headers, main_metadata_t, Headers, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < Headers, main_metadata_t, Headers, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

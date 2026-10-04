@@ -14,13 +14,13 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 parser p(packet_in pkt, out Headers hdr) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -30,7 +30,7 @@ control ingress(inout Headers h) {
     apply {
         tmp_0 = 0;
         h.h.a = tmp_0;
-        h.h.b = (bit<1>)h.h.a;
+        h.h.b =(bit<1>) h.h.a;
         h.h.c = h.h.a;
     }
 }

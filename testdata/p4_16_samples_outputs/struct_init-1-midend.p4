@@ -12,19 +12,19 @@ struct metadata_t {
 
 control I(inout metadata_t meta) {
     @name("I.h") H h_0;
-    @hidden action struct_init1l21() {
+    @hidden action struct_init1l25() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
         h_0.setValid();
     }
-    @hidden table tbl_struct_init1l21 {
+    @hidden table tbl_struct_init1l25 {
         actions = {
-            struct_init1l21();
+            struct_init1l25();
         }
-        const default_action = struct_init1l21();
+        const default_action = struct_init1l25();
     }
     apply {
         if (meta._foo__v0 == 9w192) {
-            tbl_struct_init1l21.apply();
+            tbl_struct_init1l25.apply();
         }
     }
 }

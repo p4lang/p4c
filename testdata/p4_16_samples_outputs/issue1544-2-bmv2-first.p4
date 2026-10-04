@@ -30,7 +30,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -41,7 +41,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table mac_da {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             set_port();
@@ -51,7 +51,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         mac_da.apply();
-        hdr.ethernet.srcAddr[15:0] = sometimes_dec(hdr.ethernet.srcAddr[15:0]);
+        hdr.ethernet.srcAddr[15 : 0] = sometimes_dec(hdr.ethernet.srcAddr[15:0]);
     }
 }
 
@@ -62,7 +62,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -76,4 +76,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

@@ -8,13 +8,12 @@
 #include <core.p4>
 #include "bmv2/psa.p4"
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct empty_metadata_t {
@@ -24,7 +23,7 @@ struct metadata_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 parser IngressParserImpl(packet_in pkt,
@@ -47,18 +46,18 @@ control cIngress(inout headers_t hdr,
 {
     action clone() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 8;
+        ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 8;
     }
 
     apply {
         clone();
 
-        if (hdr.ethernet.dstAddr == (EthernetAddress) 9) {
+        if (hdr.ethernet.dstAddr ==(EthernetAddress) 9) {
             // PROPERTY - dropped packets are still cloned
             ingress_drop(ostd);
         } else {
             // mark the original packet so stf can tell the difference btwn this and clones
-            hdr.ethernet.srcAddr = (EthernetAddress) 0xcafe;
+            hdr.ethernet.srcAddr =(EthernetAddress) 0xcafe;
             // GENERAL CASE - all other packets are sent to port number from packet
             send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
         }

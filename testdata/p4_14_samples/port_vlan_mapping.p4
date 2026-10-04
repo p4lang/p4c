@@ -124,7 +124,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -219,7 +219,7 @@ header_type erspan_header_v1_t {
         priority : 6;
         span_id : 10;
         direction : 8;
-        truncated: 8;
+        truncated : 8;
     }
 }
 
@@ -293,7 +293,7 @@ header_type nsh_t {
         context : 1;
         flags : 6;
         reserved : 8;
-        protoType: 16;
+        protoType : 16;
         spath : 24;
         sindex : 8;
     }
@@ -311,58 +311,58 @@ header_type nsh_context_t {
 /* GENEVE HEADERS 
    3 possible options with known type, known length */ 
  
-header_type genv_t { 
-    fields { 
-        ver : 2; 
-        optLen : 6; 
-        oam : 1; 
-        critical : 1; 
-        reserved : 6; 
-        protoType : 16; 
-        vni : 24; 
-        reserved2 : 8; 
-    } 
+header_type genv_t {
+    fields {
+        ver : 2;
+        optLen : 6;
+        oam : 1;
+        critical : 1;
+        reserved : 6;
+        protoType : 16;
+        vni : 24;
+        reserved2 : 8;
+    }
 } 
  
 #define GENV_OPTION_A_TYPE 0x000001 
 /* TODO: Would it be convenient to have some kind of sizeof macro ? */ 
 #define GENV_OPTION_A_LENGTH 2 /* in bytes */ 
- 
-header_type genv_opt_A_t { 
-    fields { 
-        optClass : 16; 
-        optType : 8; 
-        reserved : 3; 
-        optLen : 5; 
-        data : 32; 
-    } 
+
+header_type genv_opt_A_t {
+    fields {
+        optClass : 16;
+        optType : 8;
+        reserved : 3;
+        optLen : 5;
+        data : 32;
+    }
 } 
  
 #define GENV_OPTION_B_TYPE 0x000002 
 #define GENV_OPTION_B_LENGTH 3 /* in bytes */ 
- 
-header_type genv_opt_B_t { 
-    fields { 
-        optClass : 16; 
-        optType : 8; 
-        reserved : 3; 
-        optLen : 5; 
-        data : 64; 
-    } 
+
+header_type genv_opt_B_t {
+    fields {
+        optClass : 16;
+        optType : 8;
+        reserved : 3;
+        optLen : 5;
+        data : 64;
+    }
 } 
  
 #define GENV_OPTION_C_TYPE 0x000003 
 #define GENV_OPTION_C_LENGTH 2 /* in bytes */ 
- 
-header_type genv_opt_C_t { 
-    fields { 
-        optClass : 16; 
-        optType : 8; 
-        reserved : 3; 
-        optLen : 5; 
-        data : 32; 
-    } 
-} 
+
+header_type genv_opt_C_t {
+    fields {
+        optClass : 16;
+        optType : 8;
+        reserved : 3;
+        optLen : 5;
+        data : 32;
+    }
+}
 parser start {
     return parse_input_port;
 }
@@ -376,7 +376,7 @@ header_type input_port_hdr_t {
 header input_port_hdr_t input_port_hdr;
 
 parser parse_input_port {
-    extract (input_port_hdr);
+    extract(input_port_hdr);
     return parse_ethernet;
 }
 
@@ -408,19 +408,19 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        0 mask 0xf800: parse_snap_header; /* < 1536 */
+    return select (latest.etherType) {
+    0 mask 0xf800 : parse_snap_header; /* < 1536 */
         ETHERTYPE_CPU : parse_cpu_header;
-        ETHERTYPE_VLAN : parse_vlan;
-        ETHERTYPE_MPLS : parse_mpls;
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
-        ETHERTYPE_ARP : parse_arp_rarp;
-        ETHERTYPE_RARP : parse_arp_rarp;
-        ETHERTYPE_NSH : parse_nsh;
-        ETHERTYPE_ROCE: parse_roce;
-        ETHERTYPE_FCOE: parse_fcoe;
-        default: ingress;
+    ETHERTYPE_VLAN : parse_vlan;
+    ETHERTYPE_MPLS : parse_mpls;
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
+    ETHERTYPE_ARP : parse_arp_rarp;
+    ETHERTYPE_RARP : parse_arp_rarp;
+    ETHERTYPE_NSH : parse_nsh;
+    ETHERTYPE_ROCE : parse_roce;
+    ETHERTYPE_FCOE : parse_fcoe;
+    default : ingress;
     }
 }
 
@@ -449,18 +449,18 @@ header cpu_header_t cpu_header;
 
 parser parse_cpu_header {
     extract(cpu_header);
-    return select(latest.etherType) {
-        0 mask 0xf800: parse_snap_header; /* < 1536 */
+    return select (latest.etherType) {
+    0 mask 0xf800 : parse_snap_header; /* < 1536 */
         ETHERTYPE_VLAN : parse_vlan;
-        ETHERTYPE_MPLS : parse_mpls;
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
-        ETHERTYPE_ARP : parse_arp_rarp;
-        ETHERTYPE_RARP : parse_arp_rarp;
-        ETHERTYPE_NSH : parse_nsh;
-        ETHERTYPE_ROCE: parse_roce;
-        ETHERTYPE_FCOE: parse_fcoe;
-        default: ingress;
+    ETHERTYPE_MPLS : parse_mpls;
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
+    ETHERTYPE_ARP : parse_arp_rarp;
+    ETHERTYPE_RARP : parse_arp_rarp;
+    ETHERTYPE_NSH : parse_nsh;
+    ETHERTYPE_ROCE : parse_roce;
+    ETHERTYPE_FCOE : parse_fcoe;
+    default : ingress;
     }
 }
 
@@ -471,14 +471,14 @@ header vlan_tag_5b_t vlan_tag_5b[VLAN_DEPTH];
 
 parser parse_vlan {
     extract(vlan_tag_[next]);
-    return select(latest.etherType) {
-        ETHERTYPE_VLAN : parse_vlan;
-        ETHERTYPE_MPLS : parse_mpls;
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
-        ETHERTYPE_ARP : parse_arp_rarp;
-        ETHERTYPE_RARP : parse_arp_rarp;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_VLAN : parse_vlan;
+    ETHERTYPE_MPLS : parse_mpls;
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
+    ETHERTYPE_ARP : parse_arp_rarp;
+    ETHERTYPE_RARP : parse_arp_rarp;
+    default : ingress;
     }
 }
 
@@ -492,10 +492,10 @@ header mpls_t mpls_bos;
 /* TODO: this will be optimized when pushed to the chip ? */
 
 parser parse_mpls {
-    return select(current(23, 1)) {
-        0 : parse_mpls_not_bos;
-        1 : parse_mpls_bos;
-        default: ingress;
+    return select (current(23, 1)) {
+    0 : parse_mpls_not_bos;
+    1 : parse_mpls_bos;
+    default : ingress;
     }
 }
 
@@ -506,11 +506,11 @@ parser parse_mpls_not_bos {
 
 parser parse_mpls_bos {
     extract(mpls_bos);
-    return select(current(0, 4)) {
-        0x4 : parse_inner_ipv4;
-        0x6 : parse_inner_ipv6;
-        default : parse_eompls;
-    }    
+    return select (current(0, 4)) {
+    0x4 : parse_inner_ipv4;
+    0x6 : parse_inner_ipv6;
+    default : parse_eompls;
+    }
 }
 
 #define IP_PROTOCOLS_ICMP 1
@@ -525,17 +525,17 @@ parser parse_mpls_bos {
 header ipv4_t ipv4;
 
 field_list ipv4_checksum_list {
-        ipv4.version;
-        ipv4.ihl;
-        ipv4.diffserv;
-        ipv4.totalLen;
-        ipv4.identification;
-        ipv4.flags;
-        ipv4.fragOffset;
-        ipv4.ttl;
-        ipv4.protocol;
-        ipv4.srcAddr;
-        ipv4.dstAddr;
+    ipv4.version;
+    ipv4.ihl;
+    ipv4.diffserv;
+    ipv4.totalLen;
+    ipv4.identification;
+    ipv4.flags;
+    ipv4.fragOffset;
+    ipv4.ttl;
+    ipv4.protocol;
+    ipv4.srcAddr;
+    ipv4.dstAddr;
 }
 
 field_list_calculation ipv4_checksum {
@@ -546,20 +546,20 @@ field_list_calculation ipv4_checksum {
     output_width : 16;
 }
 
-calculated_field ipv4.hdrChecksum  {
-    verify ipv4_checksum if(ipv4.ihl == 5);
-    update ipv4_checksum if(ipv4.ihl == 5);
+calculated_field ipv4.hdrChecksum {
+    verify ipv4_checksum if (ipv4.ihl == 5);
+    update ipv4_checksum if (ipv4.ihl == 5);
 }
 
 parser parse_ipv4 {
     extract(ipv4);
-    return select(latest.fragOffset, latest.protocol) {
-        IP_PROTOCOLS_ICMP : parse_icmp;
-        IP_PROTOCOLS_TCP : parse_tcp;
-        IP_PROTOCOLS_UDP : parse_udp;
-        IP_PROTOCOLS_GRE : parse_gre;
+    return select (latest.fragOffset, latest.protocol) {
+    IP_PROTOCOLS_ICMP : parse_icmp;
+    IP_PROTOCOLS_TCP : parse_tcp;
+    IP_PROTOCOLS_UDP : parse_udp;
+    IP_PROTOCOLS_GRE : parse_gre;
 //        IP_PROTOCOLS_SCTP : parse_sctp;
-        default: ingress;
+        default : ingress;
     }
 }
 
@@ -567,13 +567,13 @@ header ipv6_t ipv6;
 
 parser parse_ipv6 {
     extract(ipv6);
-    return select(latest.nextHdr) {
-        IP_PROTOCOLS_ICMPV6 : parse_icmpv6;
-        IP_PROTOCOLS_TCP : parse_tcp;
-        IP_PROTOCOLS_UDP : parse_udp;
-        IP_PROTOCOLS_GRE : parse_gre;
+    return select (latest.nextHdr) {
+    IP_PROTOCOLS_ICMPV6 : parse_icmpv6;
+    IP_PROTOCOLS_TCP : parse_tcp;
+    IP_PROTOCOLS_UDP : parse_udp;
+    IP_PROTOCOLS_GRE : parse_gre;
 //        IP_PROTOCOLS_SCTP : parse_sctp;
-        default: ingress;
+        default : ingress;
     }
 }
 
@@ -614,11 +614,11 @@ parser parse_roce_v2 {
 
 parser parse_udp {
     extract(udp);
-    return select(latest.dstPort) {
-        UDP_PORT_VXLAN : parse_vxlan;
-        UDP_PORT_GENV: parse_geneve;
-        UDP_PORT_ROCE_V2: parse_roce_v2;
-        default: ingress;
+    return select (latest.dstPort) {
+    UDP_PORT_VXLAN : parse_vxlan;
+    UDP_PORT_GENV : parse_geneve;
+    UDP_PORT_ROCE_V2 : parse_roce_v2;
+    default : ingress;
     }
 }
 
@@ -680,15 +680,15 @@ parser parse_gre_opt3 {
 }
 
 parser parse_gre_opts {
-    return select(latest.C, latest.S, latest.K) {
-        1 mask 0x0000 :  parse_gre_key;
-        2 mask 0x0000 :  parse_gre_opt1;
-        3 mask 0x0000 :  parse_gre_key2;
-        4 mask 0x0000 :  parse_gre_opt1;
-        5 mask 0x0000 :  parse_gre_key22;
-        6 mask 0x0000 :  parse_gre_opt2;
-        7 mask 0x0000 :  parse_gre_opt3;
-        default: ingress;
+    return select (latest.C, latest.S, latest.K) {
+    1 mask 0x0000 : parse_gre_key;
+    2 mask 0x0000 : parse_gre_opt1;
+    3 mask 0x0000 : parse_gre_key2;
+    4 mask 0x0000 : parse_gre_opt1;
+    5 mask 0x0000 : parse_gre_key22;
+    6 mask 0x0000 : parse_gre_opt2;
+    7 mask 0x0000 : parse_gre_opt3;
+    default : ingress;
     }
 }
 #endif
@@ -696,13 +696,13 @@ parser parse_gre_opts {
 parser parse_gre {
     extract(gre);
 //    parse_gre_opts;
-    return select(latest.K, latest.proto) {
-        GRE_PROTOCOLS_NVGRE : parse_nvgre;
+    return select (latest.K, latest.proto) {
+    GRE_PROTOCOLS_NVGRE : parse_nvgre;
 //        GRE_PROTOCOLS_GRE : parse_gre;
         GRE_PROTOCOLS_ERSPAN_V1 : parse_erspan_v1;
-        GRE_PROTOCOLS_ERSPAN_V2 : parse_erspan_v2;
-        ETHERTYPE_NSH : parse_nsh;
-        default: ingress;
+    GRE_PROTOCOLS_ERSPAN_V2 : parse_erspan_v2;
+    ETHERTYPE_NSH : parse_nsh;
+    default : ingress;
     }
 }
 
@@ -715,17 +715,17 @@ header ipv4_t outer_ipv4;
 header ipv6_t outer_ipv6;
 
 field_list inner_ipv4_checksum_list {
-        inner_ipv4.version;
-        inner_ipv4.ihl;
-        inner_ipv4.diffserv;
-        inner_ipv4.totalLen;
-        inner_ipv4.identification;
-        inner_ipv4.flags;
-        inner_ipv4.fragOffset;
-        inner_ipv4.ttl;
-        inner_ipv4.protocol;
-        inner_ipv4.srcAddr;
-        inner_ipv4.dstAddr;
+    inner_ipv4.version;
+    inner_ipv4.ihl;
+    inner_ipv4.diffserv;
+    inner_ipv4.totalLen;
+    inner_ipv4.identification;
+    inner_ipv4.flags;
+    inner_ipv4.fragOffset;
+    inner_ipv4.ttl;
+    inner_ipv4.protocol;
+    inner_ipv4.srcAddr;
+    inner_ipv4.dstAddr;
 }
 
 field_list_calculation inner_ipv4_checksum {
@@ -737,8 +737,8 @@ field_list_calculation inner_ipv4_checksum {
 }
 
 calculated_field inner_ipv4.hdrChecksum {
-    verify inner_ipv4_checksum if(valid(ipv4));
-    update inner_ipv4_checksum if(valid(ipv4));
+    verify inner_ipv4_checksum if (valid(ipv4));
+    update inner_ipv4_checksum if (valid(ipv4));
 }
 
 header udp_t outer_udp;
@@ -768,9 +768,9 @@ header arp_rarp_t arp_rarp;
 
 parser parse_arp_rarp {
     extract(arp_rarp);
-    return select(latest.protoType) {
-        ARP_PROTOTYPES_ARP_RARP_IPV4 : parse_arp_rarp_ipv4;
-        default: ingress;
+    return select (latest.protoType) {
+    ARP_PROTOTYPES_ARP_RARP_IPV4 : parse_arp_rarp_ipv4;
+    default : ingress;
     }
 }
 
@@ -818,47 +818,47 @@ parser parse_geneve {
 
 parser parse_genv_opts {
     /* switching on combined class and type */
-    return select(current(0, 24)) {
-        GENV_OPTION_A_TYPE: parse_genv_opt_A;
-        GENV_OPTION_B_TYPE: parse_genv_opt_B;
-        GENV_OPTION_C_TYPE: parse_genv_opt_C;
+    return select (current(0, 24)) {
+    GENV_OPTION_A_TYPE : parse_genv_opt_A;
+    GENV_OPTION_B_TYPE : parse_genv_opt_B;
+    GENV_OPTION_C_TYPE : parse_genv_opt_C;
     }
 }
 
 parser parse_genv_opt_A {
     extract(genv_opt_A);
     counter_decrement(counter_1, GENV_OPTION_A_LENGTH);
-    return select(counter_1) {
-        0 : parse_genv_inner;
-        default : parse_genv_opts;
+    return select (counter_1) {
+    0 : parse_genv_inner;
+    default : parse_genv_opts;
     }
 }
 
 parser parse_genv_opt_B {
     extract(genv_opt_B);
     counter_decrement(counter_1, GENV_OPTION_B_LENGTH);
-    return select(counter_1) {
-        0 : parse_genv_inner;
-        default : parse_genv_opts;
+    return select (counter_1) {
+    0 : parse_genv_inner;
+    default : parse_genv_opts;
     }
 }
 
 parser parse_genv_opt_C {
     extract(genv_opt_C);
     counter_decrement(counter_1, GENV_OPTION_C_LENGTH);
-    return select(counter_1) {
-        0 : parse_genv_inner;
-        default : parse_genv_opts;
+    return select (counter_1) {
+    0 : parse_genv_inner;
+    default : parse_genv_opts;
     }
 }
 #endif
 
 parser parse_genv_inner {
-    return select(genv.protoType) {
-        ETHERTYPE_ETHERNET : parse_inner_ethernet;
-        ETHERTYPE_IPV4 : parse_inner_ipv4;
-        ETHERTYPE_IPV6 : parse_inner_ipv6;
-        default : ingress;
+    return select (genv.protoType) {
+    ETHERTYPE_ETHERNET : parse_inner_ethernet;
+    ETHERTYPE_IPV4 : parse_inner_ipv4;
+    ETHERTYPE_IPV6 : parse_inner_ipv6;
+    default : ingress;
     }
 }
 
@@ -868,22 +868,22 @@ header nsh_context_t nsh_context;
 parser parse_nsh {
     extract(nsh);
     extract(nsh_context);
-    return select(nsh.protoType) {
-        ETHERTYPE_IPV4 : parse_inner_ipv4;
-        ETHERTYPE_IPV6 : parse_inner_ipv6;
-        ETHERTYPE_ETHERNET : parse_inner_ethernet;
-        default: ingress;
+    return select (nsh.protoType) {
+    ETHERTYPE_IPV4 : parse_inner_ipv4;
+    ETHERTYPE_IPV6 : parse_inner_ipv6;
+    ETHERTYPE_ETHERNET : parse_inner_ethernet;
+    default : ingress;
     }
 }
 
 parser parse_inner_ipv4 {
     extract(inner_ipv4);
-    return select(latest.fragOffset, latest.protocol) {
-        IP_PROTOCOLS_ICMP : parse_inner_icmp;
-        IP_PROTOCOLS_TCP : parse_inner_tcp;
-        IP_PROTOCOLS_UDP : parse_inner_udp;
+    return select (latest.fragOffset, latest.protocol) {
+    IP_PROTOCOLS_ICMP : parse_inner_icmp;
+    IP_PROTOCOLS_TCP : parse_inner_tcp;
+    IP_PROTOCOLS_UDP : parse_inner_udp;
 //        IP_PROTOCOLS_SCTP : parse_inner_sctp;
-        default: ingress;
+        default : ingress;
     }
 }
 
@@ -905,7 +905,7 @@ header udp_t inner_udp;
 
 parser parse_inner_udp {
     extract(inner_udp);
-    return ingress;    
+    return ingress;
 }
 
 header sctp_t inner_sctp;
@@ -917,12 +917,12 @@ parser parse_inner_sctp {
 
 parser parse_inner_ipv6 {
     extract(inner_ipv6);
-    return select(latest.nextHdr) {
-        IP_PROTOCOLS_ICMPV6 : parse_inner_icmpv6;
-        IP_PROTOCOLS_TCP : parse_inner_tcp;
-        IP_PROTOCOLS_UDP : parse_inner_udp;
+    return select (latest.nextHdr) {
+    IP_PROTOCOLS_ICMPV6 : parse_inner_icmpv6;
+    IP_PROTOCOLS_TCP : parse_inner_tcp;
+    IP_PROTOCOLS_UDP : parse_inner_udp;
 //        IP_PROTOCOLS_SCTP : parse_inner_sctp;
-        default: ingress;
+        default : ingress;
     }
 }
 
@@ -935,10 +935,10 @@ parser parse_inner_icmpv6 {
 
 parser parse_inner_ethernet {
     extract(inner_ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_IPV4 : parse_inner_ipv4;
-        ETHERTYPE_IPV6 : parse_inner_ipv6;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_IPV4 : parse_inner_ipv4;
+    ETHERTYPE_IPV6 : parse_inner_ipv6;
+    default : ingress;
     }
 }
 
@@ -1153,9 +1153,9 @@ header_type ingress_metadata_t {
         igmp_snooping_enabled : 1;             /* is IGMP snooping enabled on BD */
         mld_snooping_enabled : 1;              /* is MLD snooping enabled on BD */
         mpls_enabled : 1;                      /* is mpls enabled on BD */
-        mpls_label: 20;                        /* Mpls label */
-        mpls_exp: 3;                           /* Mpls Traffic Class */
-        mpls_ttl: 8;                           /* Mpls Ttl */
+        mpls_label : 20;                        /* Mpls label */
+        mpls_exp : 3;                           /* Mpls Traffic Class */
+        mpls_ttl : 8;                           /* Mpls Ttl */
         ipv4_urpf_mode : 2;                    /* 0: none, 1: strict, 3: loose */
         ipv6_urpf_mode : 2;                    /* 0: none, 1: strict, 3: loose */
         urpf_mode : 2;                         /* urpf mode for current lookup */
@@ -1174,7 +1174,7 @@ header_type ingress_metadata_t {
         multicast_bridge_mc_index : 16;        /* multicast index from igmp/mld snoop */
         storm_control_color : 1;               /* 0 : pass, 1 : fail */
         urpf_hit : 1;                          /* hit in urpf table */
-        urpf_check_fail :1;                    /* urpf check failed */
+        urpf_check_fail : 1;                    /* urpf check failed */
         urpf_bd_group : BD_BIT_WIDTH;          /* urpf bd group */
         routed : 1;                            /* is packet routed */
 
@@ -1187,7 +1187,7 @@ header_type ingress_metadata_t {
         acl_deny : 1;                          /* ifacl/vacl deny action */
         racl_deny : 1;                         /* racl deny action */
         l2_redirect : 1;                       /* l2 redirect action */
-        acl_redirect :   1;                    /* ifacl/vacl redirect action */
+        acl_redirect : 1;                    /* ifacl/vacl redirect action */
         racl_redirect : 1;                     /* racl redirect action */
         fib_hit : 1;                           /* fib hit */
         nat_hit : 1;                           /* fwd and rewrite info from nat */
@@ -1224,10 +1224,10 @@ header_type ingress_metadata_t {
         ipv4_dstaddr_24b : 24;                 /* first 24b of ipv4 dst addr */
         drop_0 : 1;                            /* dummy */
         drop_reason : 8;                       /* drop reason for negative mirroring */
-        stp_group: 10;                         /* spanning tree group id */
+        stp_group : 10;                         /* spanning tree group id */
         stp_state : 3;                         /* spanning tree port state */
-        control_frame: 1;                      /* control frame */
-        header_count: 4;                       /* Number of headers */
+        control_frame : 1;                      /* control frame */
+        header_count : 4;                       /* Number of headers */
     }
 }
 
@@ -1242,7 +1242,7 @@ table port_vlan_mapping {
         vlan_tag_[1].vid : exact;
     }
 
-    action_profile: outer_bd_action_profile;
+    action_profile : outer_bd_action_profile;
     size : PORT_VLAN_TABLE_SIZE;
 }
 
@@ -1407,6 +1407,6 @@ action_profile outer_bd_action_profile {
 
 control ingress {
 
-        apply(port_vlan_mapping);
+    apply(port_vlan_mapping);
 
 }

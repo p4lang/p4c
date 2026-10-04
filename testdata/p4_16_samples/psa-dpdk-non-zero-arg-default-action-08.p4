@@ -3,7 +3,8 @@
 #include <dpdk/psa.p4>
 
 /************ H E A D E R S ******************************/
-struct EMPTY {};
+struct EMPTY {
+};
 
 header ethernet_t {
     bit<48> dst_addr;
@@ -12,12 +13,12 @@ header ethernet_t {
 }
 
 struct headers_t {
-    ethernet_t  ethernet;
+    ethernet_t ethernet;
 }
 
 struct user_meta_data_t {
     bit<48> addr;
-    bit <32> flag;
+    bit<32> flag;
 }
 
 /*************************************************************************
@@ -48,26 +49,27 @@ control MyIngressControl(
         hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
         hdr.ethernet.src_addr = m.addr;
     }
-	action macswp(inout bit<32> tmp1, bit<32> tmp2) {
-		if (tmp1 == 0x1 && tmp2 == 0x2) {
-			m.addr = hdr.ethernet.dst_addr;
-			hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
-			hdr.ethernet.src_addr = m.addr;
-		}
-	}
+    action macswp(inout bit<32> tmp1, bit<32> tmp2) {
+        if (tmp1 == 0x1 && tmp2 == 0x2) {
+            m.addr = hdr.ethernet.dst_addr;
+            hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
+            hdr.ethernet.src_addr = m.addr;
+        }
+    }
     table stub {
-        key = {}
+        key = {
+        }
 
         actions = {
             macswp(m.flag);
             nonDefAct;
         }
         default_action = macswp(m.flag, 3);
-        size=1000000;
+        size = 1000000;
     }
 
     apply {
-        d.egress_port = (PortId_t) ((bit <32>) c.ingress_port ^ 1);
+        d.egress_port =(PortId_t)((bit<32>) c.ingress_port ^ 1);
         stub.apply();
     }
 }
@@ -107,7 +109,8 @@ control MyEgressControl(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply {}
+    apply {
+    }
 }
 control MyEgressDeparser(
     packet_out pkt,
@@ -117,7 +120,8 @@ control MyEgressDeparser(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply {}
+    apply {
+    }
 }
 
 /************ F I N A L   P A C K A G E ******************************/

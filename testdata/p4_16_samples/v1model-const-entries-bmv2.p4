@@ -8,16 +8,16 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -35,7 +35,8 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ingressImpl(inout headers_t hdr,
@@ -50,16 +51,16 @@ control ingressImpl(inout headers_t hdr,
     }
     table lpm1 {
         key = {
-            hdr.ethernet.dstAddr: lpm;
+            hdr.ethernet.dstAddr : lpm;
         }
         actions = {
             act_miss;
             act_hit;
         }
         const entries = {
-            0x0a0102030000 &&& 0xffffffffffff: act_hit(1);
-            0x0a0000000000 &&& 0xff0000000000: act_hit(2);
-            0x000000000000 &&& 0x000000000000: act_hit(3);
+            0x0a0102030000 &&& 0xffffffffffff : act_hit(1);
+            0x0a0000000000 &&& 0xff0000000000 : act_hit(2);
+            0x000000000000 &&& 0x000000000000 : act_hit(3);
         }
         const default_action = act_miss();
     }
@@ -73,11 +74,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

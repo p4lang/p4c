@@ -15,15 +15,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -35,18 +35,18 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state parse_ethernet {
         packet.extract(hdr = hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x806 .. 0x800: parse_ipv4;
-            2054 .. 2048: parse_ipv4;
-            hdr.ipv4.totalLen .. 0x800: parse_ipv4;
-            0x800 .. hdr.ipv4.totalLen: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x806 .. 0x800 : parse_ipv4;
+            2054 .. 2048 : parse_ipv4;
+            hdr.ipv4.totalLen .. 0x800 : parse_ipv4;
+            0x800 .. hdr.ipv4.totalLen : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {

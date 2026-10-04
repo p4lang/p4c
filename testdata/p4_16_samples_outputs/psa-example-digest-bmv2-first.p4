@@ -15,19 +15,19 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -35,8 +35,8 @@ header ipv4_t {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    EthTypes   type;
+    ipv4_t ipv4;
+    EthTypes type;
 }
 
 struct empty_metadata_t {
@@ -44,11 +44,11 @@ struct empty_metadata_t {
 
 struct mac_learn_digest_t {
     EthernetAddress srcAddr;
-    PortId_t        ingress_port;
+    PortId_t ingress_port;
 }
 
 struct metadata {
-    bool               send_mac_learn_msg;
+    bool send_mac_learn_msg;
     mac_learn_digest_t mac_learn_msg;
 }
 
@@ -57,14 +57,14 @@ parser CommonParser(packet_in buffer, out headers parsed_hdr, inout metadata met
         transition parse_ethernet;
     }
     state parse_ethernet {
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        buffer.extract < ethernet_t >(parsed_hdr.ethernet);
+        transition select (parsed_hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
+        buffer.extract < ipv4_t >(parsed_hdr.ipv4);
         transition accept;
     }
 }
@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table learned_sources {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction();
@@ -115,7 +115,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table l2_tbl {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             do_L2_forward();
@@ -125,7 +125,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     table tst_tbl {
         key = {
-            meta.mac_learn_msg.ingress_port: exact @name("meta.mac_learn_msg.ingress_port");
+            meta.mac_learn_msg.ingress_port : exact @name("meta.mac_learn_msg.ingress_port");
         }
         actions = {
             do_tst();
@@ -148,14 +148,14 @@ control egress(inout headers hdr, inout metadata meta, in psa_egress_input_metad
 
 control CommonDeparserImpl(packet_out packet, inout headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
     }
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
     CommonDeparserImpl() common_deparser;
-    Digest<mac_learn_digest_t>() mac_learn_digest;
+    Digest < mac_learn_digest_t >() mac_learn_digest;
     apply {
         if (meta.send_mac_learn_msg) {
             mac_learn_digest.pack(meta.mac_learn_msg);
@@ -171,6 +171,6 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
     }
 }
 
-IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
+EgressPipeline < headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
+PSA_Switch < headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

@@ -8,18 +8,18 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 struct Headers {
 }
 
 struct Key {
-	bit<32> field1;
+    bit<32> field1;
 }
 
 struct Value {
-	bit<32> field1;
+    bit<32> field1;
 }
 
 struct Metadata {
@@ -38,24 +38,24 @@ control Ing(inout Headers headers,
             inout Metadata meta,
             inout standard_metadata_t standard_meta) {
 
-    apply {}
+    apply {
+    }
 }
 
 control Eg(inout Headers hdrs,
            inout Metadata meta,
            inout standard_metadata_t standard_meta) {
 
-
     action update(inout Value val) {
         val.field1 = 32w8;
     }
 
     action test() {
-        Key inKey = {1};
-        Key defaultKey = {0};
+        Key inKey = { 1 };
+        Key defaultKey = { 0 };
 
-        bool same = (inKey == defaultKey);
-        Value val = {0};
+        bool same =(inKey == defaultKey);
+        Value val = { 0 };
         bool done = false;
         bool ok = !done && same;
         if (ok) {
@@ -64,20 +64,23 @@ control Eg(inout Headers hdrs,
     }
 
     apply {
-		test();
+        test();
     }
 }
 
 control DP(packet_out b, in Headers p) {
-    apply {}
+    apply {
+    }
 }
 
 control Verify(inout Headers hdrs, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control Compute(inout Headers hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 V1Switch(P(),

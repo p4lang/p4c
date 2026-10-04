@@ -20,36 +20,36 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, in pna_main_parser_input_metadata_t istd) {
     state start {
-        b.extract<Hdr1>(h.h1);
-        transition select(h.h1.a) {
-            8w0: getH1;
-            default: getH2;
+        b.extract < Hdr1 >(h.h1);
+        transition select (h.h1.a) {
+            8w0 : getH1;
+            default : getH2;
         }
     }
     state getH1 {
-        b.extract<Hdr1>(h.u_h1);
+        b.extract < Hdr1 >(h.u_h1);
         transition accept;
     }
     state getH2 {
-        b.extract<Hdr2>(h.u_h2);
+        b.extract < Hdr2 >(h.u_h2);
         transition accept;
     }
 }
 
 control deparser(packet_out b, in Headers h, in Meta m, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkunionbmv2l55() {
-        b.emit<Hdr1>(h.h1);
-        b.emit<Hdr1>(h.u_h1);
-        b.emit<Hdr2>(h.u_h2);
+    @hidden action pnadpdkunionbmv2l56() {
+        b.emit < Hdr1 >(h.h1);
+        b.emit < Hdr1 >(h.u_h1);
+        b.emit < Hdr2 >(h.u_h2);
     }
-    @hidden table tbl_pnadpdkunionbmv2l55 {
+    @hidden table tbl_pnadpdkunionbmv2l56 {
         actions = {
-            pnadpdkunionbmv2l55();
+            pnadpdkunionbmv2l56();
         }
-        const default_action = pnadpdkunionbmv2l55();
+        const default_action = pnadpdkunionbmv2l56();
     }
     apply {
-        tbl_pnadpdkunionbmv2l55.apply();
+        tbl_pnadpdkunionbmv2l56.apply();
     }
 }
 
@@ -63,4 +63,4 @@ control PreControlImpl(in Headers hdr, inout Meta meta, in pna_pre_input_metadat
     }
 }
 
-PNA_NIC<Headers, Meta, Headers, Meta>(p(), PreControlImpl(), ingress(), deparser()) main;
+PNA_NIC < Headers, Meta, Headers, Meta >(p(), PreControlImpl(), ingress(), deparser()) main;

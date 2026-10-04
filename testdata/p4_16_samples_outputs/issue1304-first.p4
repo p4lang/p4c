@@ -2,12 +2,12 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-package Pipeline<H, M>(Parser<H, M> p, Ingress<H, M> ig, Egress<H, M> eg, Deparser<H> dp);
-package Switch<H0, M0, H1, M1>(Pipeline<H0, M0> p0, @optional Pipeline<H1, M1> p1);
+package Pipeline < H, M >(Parser<H, M> p, Ingress<H, M> ig, Egress<H, M> eg, Deparser<H> dp);
+package Switch < H0, M0, H1, M1 >(Pipeline<H0, M0> p0, @optional Pipeline<H1, M1> p1);
 const bit<8> CONST_VAL = 8w10;
 header data_h {
     bit<24> da;
-    bit<8>  db;
+    bit<8> db;
 }
 
 struct my_packet {
@@ -16,14 +16,14 @@ struct my_packet {
 
 struct my_metadata {
     bit<32> data;
-    error   err;
+    error err;
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     state start {
-        b.extract<data_h>(p.hdr);
-        transition select(p.hdr.da) {
-            default: accept;
+        b.extract < data_h >(p.hdr);
+        transition select (p.hdr.da) {
+            default : accept;
         }
     }
 }
@@ -42,7 +42,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction();
         }
         key = {
-            meta.err: exact @name("meta.err");
+            meta.err : exact @name("meta.err");
         }
         default_action = NoAction();
     }
@@ -66,5 +66,5 @@ control MyDeparser(packet_out b, in my_packet p) {
     }
 }
 
-Pipeline<my_packet, my_metadata>(MyParser(), MyIngress(), MyEgress(), MyDeparser()) p0;
-Switch<my_packet, my_metadata, _, _>(p0) main;
+Pipeline < my_packet, my_metadata >(MyParser(), MyIngress(), MyEgress(), MyDeparser()) p0;
+Switch < my_packet, my_metadata, _, _ >(p0) main;

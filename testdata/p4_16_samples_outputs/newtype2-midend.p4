@@ -9,7 +9,7 @@ control Ingress(inout M sm);
 package V1Switch(Ingress ig);
 control FabricIngress(inout M sm) {
     @hidden action newtype2l22() {
-        sm.es = (bit<9>)sm.e;
+        sm.es =(bit<9>) sm.e;
     }
     @hidden table tbl_newtype2l22 {
         actions = {

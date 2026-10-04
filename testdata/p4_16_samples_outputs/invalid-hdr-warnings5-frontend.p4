@@ -18,8 +18,8 @@ header_union Union {
 
 struct H {
     Header1 h1;
-    Union   u1;
-    Union   u2;
+    Union u1;
+    Union u2;
 }
 
 struct M {
@@ -28,17 +28,17 @@ struct M {
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
         hdr.u1.h1.setValid();
-        pkt.extract<Header1>(hdr.u1.h3);
+        pkt.extract < Header1 >(hdr.u1.h3);
         hdr.u1.h3.data = 32w1;
         hdr.u1.h1 = hdr.u1.h3;
         hdr.u1.h1.data = 32w1;
-        transition select(hdr.u1.h1.data) {
-            32w0: next;
-            default: last;
+        transition select (hdr.u1.h1.data) {
+            32w0 : next;
+            default : last;
         }
     }
     state next {
-        pkt.extract<Header2>(hdr.u1.h2);
+        pkt.extract < Header2 >(hdr.u1.h2);
         transition last;
     }
     state last {
@@ -60,7 +60,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u2_0.h2.setInvalid();
         u2_0.h3.setInvalid();
         u1_0.h1.setValid();
-        u1_0.h1 = (Header1){data = 32w1};
+        u1_0.h1 =(Header1) { data = 32w1 };
         u1_0.h2.setValid();
         u2_0 = u1_0;
         u2_0.h2.data = 16w1;
@@ -93,4 +93,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

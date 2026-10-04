@@ -26,10 +26,10 @@ parser start {
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        pvs0 : ingress;
-        pvs1 : parse_inner_ethernet;
-        default : ingress;
+    return select (latest.etherType) {
+    pvs0 : ingress;
+    pvs1 : parse_inner_ethernet;
+    default : ingress;
     }
 }
 

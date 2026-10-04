@@ -36,10 +36,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta,
     in    pna_main_parser_input_metadata_t istd) {
     state start {
         packet.extract(hdr.base);
-        transition select(hdr.base.t) {
-            0: parseO1;
-            1: parseO2;
-            default: accept;
+        transition select (hdr.base.t) {
+            0 : parseO1;
+            1 : parseO2;
+            default : accept;
         }
     }
     state parseO1 {
@@ -57,8 +57,8 @@ control ingress(inout headers hdr, inout metadata meta,
     inout pna_main_output_metadata_t ostd) {
     table debug_hdr {
         key = {
-            hdr.base.t           : exact;
-            hdr.u.short.isValid(): exact;
+            hdr.base.t : exact;
+            hdr.u.short.isValid() : exact;
             hdr.u.byte.isValid() : exact;
         }
         actions = {
@@ -95,4 +95,3 @@ control PreControlImpl(
 }
 
 PNA_NIC(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
-

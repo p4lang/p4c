@@ -17,26 +17,26 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<16> tmp;
-    @hidden action gauntlet_side_effect_order_4bmv2l23() {
+    @hidden action gauntlet_side_effect_order_4bmv2l24() {
         tmp = 16w0;
     }
-    @hidden action gauntlet_side_effect_order_4bmv2l23_0() {
+    @hidden action gauntlet_side_effect_order_4bmv2l24_0() {
         tmp = 16w3;
     }
     @hidden action act() {
         h.eth_hdr.eth_type = tmp;
     }
-    @hidden table tbl_gauntlet_side_effect_order_4bmv2l23 {
+    @hidden table tbl_gauntlet_side_effect_order_4bmv2l24 {
         actions = {
-            gauntlet_side_effect_order_4bmv2l23();
+            gauntlet_side_effect_order_4bmv2l24();
         }
-        const default_action = gauntlet_side_effect_order_4bmv2l23();
+        const default_action = gauntlet_side_effect_order_4bmv2l24();
     }
-    @hidden table tbl_gauntlet_side_effect_order_4bmv2l23_0 {
+    @hidden table tbl_gauntlet_side_effect_order_4bmv2l24_0 {
         actions = {
-            gauntlet_side_effect_order_4bmv2l23_0();
+            gauntlet_side_effect_order_4bmv2l24_0();
         }
-        const default_action = gauntlet_side_effect_order_4bmv2l23_0();
+        const default_action = gauntlet_side_effect_order_4bmv2l24_0();
     }
     @hidden table tbl_act {
         actions = {
@@ -46,9 +46,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         if (h.eth_hdr.eth_type < 16w6) {
-            tbl_gauntlet_side_effect_order_4bmv2l23.apply();
+            tbl_gauntlet_side_effect_order_4bmv2l24.apply();
         } else {
-            tbl_gauntlet_side_effect_order_4bmv2l23_0.apply();
+            tbl_gauntlet_side_effect_order_4bmv2l24_0.apply();
         }
         tbl_act.apply();
     }
@@ -56,7 +56,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -78,8 +78,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

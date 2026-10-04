@@ -6,9 +6,9 @@
 
 header_type ethernet_t {
     fields {
-        dst_addr        : 48; // width in bits
-        src_addr        : 48;
-        etherType       : 16;
+        dst_addr : 48; // width in bits
+        src_addr : 48;
+        etherType : 16;
     }
 }
 header ethernet_t ethernet;
@@ -21,8 +21,8 @@ parser start {
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        pvs0 mask 0x0ff0 : ingress;       //  <--- this is the most significant line of the example
+    return select (latest.etherType) {
+    pvs0 mask 0x0ff0 : ingress;       //  <--- this is the most significant line of the example
         default : ingress;
     }
 }

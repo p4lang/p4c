@@ -6,6 +6,6 @@
 
 void func()
 {
-  bit t;
-  t = this;
+    bit t;
+    t = this;
 }

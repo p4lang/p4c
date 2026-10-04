@@ -8,37 +8,37 @@
 #include <v1model.p4>
 
 #define IPV4_ETHTYPE 0x0800
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 typedef bit<128> IPv6Address;
 typedef bit<128> IPv4ORv6Address;
 
 header ethernet_t {
     EthernetAddress dst_addr;
     EthernetAddress src_addr;
-    bit<16>         ether_type;
+    bit<16> ether_type;
 }
 
-const bit<16> ETHER_HDR_SIZE=112/8;
+const bit<16> ETHER_HDR_SIZE = 112 / 8;
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdr_checksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> frag_offset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdr_checksum;
     IPv4Address src_addr;
     IPv4Address dst_addr;
 }
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 enum bit<16> direction_t {
@@ -62,9 +62,9 @@ parser test_parser(packet_in packet,
 {
     state start {
         packet.extract(hd.ethernet);
-        transition select(hd.ethernet.ether_type) {
-            IPV4_ETHTYPE:  parse_ipv4;
-            default: accept;
+        transition select (hd.ethernet.ether_type) {
+            IPV4_ETHTYPE : parse_ipv4;
+            default : accept;
         }
     }
 
@@ -79,21 +79,23 @@ control test_deparser(packet_out packet,
                    in headers_t hdr)
 {
     apply {
-	packet.emit(hdr.ethernet);
-    packet.emit(hdr.ipv4);
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
     }
 }
 
 control test_verify_checksum(inout headers_t hdr,
                          inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control test_compute_checksum(inout headers_t hdr,
                           inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control test_ingress(inout headers_t hdr,
@@ -167,9 +169,9 @@ control test_ingress(inout headers_t hdr,
         standard_metadata.egress_spec = standard_metadata.ingress_port;
 
         switch (pre_tbl1.apply().action_run) {
-            action1:             // Fall-through
-            action2: {
-                in_tbl2.apply();
+            action1 :             // Fall-through
+            action2 : {
+            in_tbl2.apply();
             }
         }
         post_tbl3.apply();
@@ -183,7 +185,8 @@ control test_egress(inout headers_t hdr,
                  inout metadata_t meta,
                  inout standard_metadata_t standard_metadata)
 {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(test_parser(),

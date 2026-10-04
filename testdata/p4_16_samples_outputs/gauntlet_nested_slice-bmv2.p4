@@ -16,7 +16,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -36,7 +36,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<8> n = 8w0b11111111;
-        n[7:4][3:0][3:0] = 4w0;
+        n[7 : 4][3 : 0][3 : 0] = 4w0;
         h.h.a = n;
     }
 }

@@ -3,4 +3,3 @@
 extern ActionProfile {
     ActionProfile(bit<32> size);
 }
-

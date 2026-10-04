@@ -14,18 +14,18 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    bit<32>     srcAddr;
-    bit<32>     dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
     varbit<320> options;
 }
 
@@ -34,10 +34,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -50,8 +50,8 @@ header IPv4_up_to_ihl_only_h {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 struct mystruct1_t {
@@ -60,8 +60,8 @@ struct mystruct1_t {
 }
 
 struct metadata {
-    bit<4>  _mystruct1_a0;
-    bit<4>  _mystruct1_b1;
+    bit<4> _mystruct1_a0;
+    bit<4> _mystruct1_b1;
     bit<16> _hash12;
 }
 
@@ -69,27 +69,27 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
     bit<8> tmp_4;
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        pkt.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        tmp_4 = pkt.lookahead<bit<8>>();
+        tmp_4 = pkt.lookahead < bit<8 >>();
         tmp.setValid();
-        tmp.version = tmp_4[7:4];
-        tmp.ihl = tmp_4[3:0];
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_4[3:0] << 2) + 9w492 << 3));
+        tmp.version = tmp_4[7 : 4];
+        tmp.ihl = tmp_4[3 : 0];
+        pkt.extract <ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_4[3:0] << 2) + 9w492 << 3));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
-        transition select(hdr.ipv4.protocol) {
-            8w6: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            8w6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
-        pkt.extract<tcp_t>(hdr.tcp);
+        pkt.extract < tcp_t >(hdr.tcp);
         transition accept;
     }
 }
@@ -121,7 +121,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.t0") table t0_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
+            hdr.tcp.dstPort : exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo1();
@@ -133,7 +133,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.t1") table t1_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
+            hdr.tcp.dstPort : exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo1_1();
@@ -150,14 +150,14 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.tcp.srcPort       : exact @name("hdr.tcp.srcPort");
-            hdr.ipv4.dstAddr[15:0]: selector @name("meta.hash1");
+            hdr.tcp.srcPort : exact @name("hdr.tcp.srcPort");
+            hdr.ipv4.dstAddr[15 : 0] : selector @name("meta.hash1");
         }
         size = 16;
         default_action = NoAction_3();
     }
     @hidden action issue1560bmv2l181() {
-        meta._hash12 = hdr.ipv4.dstAddr[15:0];
+        meta._hash12 = hdr.ipv4.dstAddr[15 : 0];
     }
     @hidden table tbl_issue1560bmv2l181 {
         actions = {
@@ -190,10 +190,10 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control DeparserI(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
 }
 
-V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < headers, metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

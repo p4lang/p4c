@@ -15,7 +15,7 @@ struct metadata {
 
 parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<payload_t>(hdr.payload);
+        packet.extract < payload_t >(hdr.payload);
         transition accept;
     }
 }
@@ -23,17 +23,17 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
 control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
         switch (hdr.payload.x) {
-            8w1: {
-                switch (hdr.payload.x) {
-                    8w1: {
-                    }
-                }
+            8w1 : {
+            switch (hdr.payload.x) {
+            8w1 : {
             }
-            8w0: {
-                switch (hdr.payload.x) {
-                    8w1: {
-                    }
-                }
+            }
+            }
+            8w0 : {
+            switch (hdr.payload.x) {
+            8w1 : {
+            }
+            }
             }
         }
     }
@@ -59,4 +59,4 @@ control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
     }
 }
 
-V1Switch<header_t, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < header_t, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

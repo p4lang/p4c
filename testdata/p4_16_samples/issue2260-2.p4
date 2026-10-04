@@ -14,4 +14,5 @@ control MyC() {
         bit<8> y = f((bit<8>)255);
     }
 }
+
 S(MyC()) main;

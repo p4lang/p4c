@@ -12,4 +12,3 @@ control ctrl(inout struct_t input, out bit<8> output) {
     apply {
     }
 }
-

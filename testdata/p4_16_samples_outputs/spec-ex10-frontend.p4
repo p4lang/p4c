@@ -20,4 +20,3 @@ struct Parsed_headers {
     Ip_h       ip;
     L4_h       tcpudp;
 }
-

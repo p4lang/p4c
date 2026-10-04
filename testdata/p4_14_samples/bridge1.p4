@@ -28,7 +28,8 @@ parser start {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 action setb1(val, port) {
     modify_field(meta.val, val);
     modify_field(standard_metadata.egress_spec, port);
@@ -45,8 +46,12 @@ table test1 {
 }
 
 table test2 {
-    reads { meta.val : exact; }
-    actions { noop; }
+    reads {
+        meta.val : exact;
+    }
+    actions {
+        noop;
+    }
 }
 
 control ingress {
@@ -59,11 +64,12 @@ action copyb1() {
 }
 
 table output {
-    actions { copyb1; }
-    default_action: copyb1;
+    actions {
+        copyb1;
+    }
+    default_action : copyb1;
 }
 
 control egress {
     apply(output);
 }
-

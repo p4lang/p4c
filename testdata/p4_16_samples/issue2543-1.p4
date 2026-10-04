@@ -20,20 +20,19 @@ bit<16> give_val() {
 }
 
 ethernet_t give_hdr() {
-    return {1, 1, 1};
+    return { 1, 1, 1 };
     bit<16> dummy = 16w1;
-    return {1, 1, dummy };
+    return { 1, 1, dummy };
 }
 
 control ingress(inout Headers h) {
-    Headers foo = { { 1, 1, give_val() }};
+    Headers foo = { { 1, 1, give_val() } };
     apply {
         give_hdr();
-        foo.eth_hdr.eth_type[3:0] = 4w1;
+        foo.eth_hdr.eth_type[3 : 0] = 4w1;
     }
 }
 
 control Ingress(inout Headers hdr);
 package top(Ingress ig);
 top(ingress()) main;
-

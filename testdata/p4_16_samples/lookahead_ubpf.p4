@@ -7,11 +7,11 @@ header header_one {
     bit<8> data;
 }
 header header_two {
-    bit<8>  type;
+    bit<8> type;
     bit<16> data;
 }
 header header_four {
-    bit<8>  type;
+    bit<8> type;
     bit<32> data;
 }
 
@@ -30,11 +30,11 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
     }
 
     state parse_headers {
-        transition select(p.lookahead<bit<8>>()) {
-            1: parse_one;
-            2: parse_two;
-            4: parse_four;
-            default: accept;
+        transition select (p.lookahead < bit<8 >>()) {
+            1 : parse_one;
+            2 : parse_two;
+            4 : parse_four;
+            default : accept;
         }
     }
 
@@ -53,7 +53,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    apply { }
+    apply {
+    }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {

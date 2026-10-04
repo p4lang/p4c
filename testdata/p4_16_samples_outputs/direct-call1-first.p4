@@ -11,4 +11,3 @@ parser q() {
         transition accept;
     }
 }
-

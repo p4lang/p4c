@@ -1,3 +1,3 @@
 extern E {
-  void method(E e);
+    void method(E e);
 }

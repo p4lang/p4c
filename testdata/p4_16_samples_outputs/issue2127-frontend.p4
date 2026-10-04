@@ -6,11 +6,11 @@ header H {
 
 parser p(packet_in packet, out H h) {
     state start {
-        packet.extract<H>(h);
+        packet.extract < H >(h);
         transition accept;
     }
 }
 
-parser proto<T>(packet_in p, out T t);
-package top<T>(proto<T> p);
-top<H>(p()) main;
+parser proto < T >(packet_in p, out T t);
+package top < T >(proto<T> p);
+top < H >(p()) main;

@@ -13,9 +13,9 @@ parser prs(packet_in p, out Headers h) {
     state start {
         p.extract(h.h1, 12);
         p.extract(h.h2, 12);
-        transition select(h.h1.v) {
-            h.h2.v: accept;
-            default: reject;
+        transition select (h.h1.v) {
+            h.h2.v : accept;
+            default : reject;
         }
     }
 }

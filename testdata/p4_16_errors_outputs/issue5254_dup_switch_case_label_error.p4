@@ -24,43 +24,43 @@ extern s f4();
 control c() {
     action a() {
         switch (f0()) {
-            (int<8>)1: {
+            (int<8>) 1 : {
             }
-            (int<8>)1: {
+            (int<8>) 1 : {
             }
-            default: {
+            default : {
             }
         }
         switch (f1()) {
-            (bit<8>)1: {
+            (bit<8>) 1 : {
             }
-            (bit<8>)1: {
+            (bit<8>) 1 : {
             }
-            default: {
+            default : {
             }
         }
         switch (f2()) {
-            error.Error1: {
+            error.Error1 : {
             }
-            error.Error1: {
+            error.Error1 : {
             }
-            default: {
+            default : {
             }
         }
         switch (f3()) {
-            e.e1: {
+            e.e1 : {
             }
-            e.e1: {
+            e.e1 : {
             }
-            default: {
+            default : {
             }
         }
         switch (f4()) {
-            s.s1: {
+            s.s1 : {
             }
-            s.s1: {
+            s.s1 : {
             }
-            default: {
+            default : {
             }
         }
     }
@@ -71,11 +71,11 @@ control c() {
     }
     apply {
         switch (t.apply().action_run) {
-            a: {
+            a : {
             }
-            a: {
+            a : {
             }
-            default: {
+            default : {
             }
         }
     }

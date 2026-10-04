@@ -10,7 +10,7 @@
 
 #include "../header.p4"
 
-control Filtering (inout parsed_headers_t hdr,
+control Filtering(inout parsed_headers_t hdr,
                    inout fabric_metadata_t fabric_metadata,
                    inout standard_metadata_t standard_metadata) {
 
@@ -41,9 +41,9 @@ control Filtering (inout parsed_headers_t hdr,
 
     table ingress_port_vlan {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port");
-            hdr.vlan_tag.isValid(): exact @name("vlan_is_valid");
-            hdr.vlan_tag.vlan_id: ternary @name("vlan_id");
+            standard_metadata.ingress_port : exact @name("ig_port");
+            hdr.vlan_tag.isValid() : exact @name("vlan_is_valid");
+            hdr.vlan_tag.vlan_id : ternary @name("vlan_id");
         }
         actions = {
             deny();
@@ -77,9 +77,9 @@ control Filtering (inout parsed_headers_t hdr,
 
     table fwd_classifier {
         key = {
-            standard_metadata.ingress_port: exact @name("ig_port");
-            hdr.ethernet.dst_addr: ternary @name("eth_dst");
-            fabric_metadata.eth_type: exact @name("eth_type");
+            standard_metadata.ingress_port : exact @name("ig_port");
+            hdr.ethernet.dst_addr : ternary @name("eth_dst");
+            fabric_metadata.eth_type : exact @name("eth_type");
         }
         actions = {
             set_forwarding_type;

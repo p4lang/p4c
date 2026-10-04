@@ -4,10 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-action NoAction(in bit t) {}
+action NoAction(in bit t) {
+}
 control c() {
     table t {
-        actions = {}
+        actions = {
+        }
     }
-    apply {}
+    apply {
+    }
 }

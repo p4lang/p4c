@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -37,16 +37,16 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     table lpm1 {
         key = {
-            hdr.ethernet.dstAddr: lpm;
+            hdr.ethernet.dstAddr : lpm;
         }
         actions = {
             act_miss;
             act_hit;
         }
         const entries = {
-                        0xa0102030000 &&& 0xffffffffffff : act_hit(1);
-                        0xa0000000000 &&& 0xff0000000000 : act_hit(2);
-                        0x0 &&& 0x0 : act_hit(3);
+            0xa0102030000 &&& 0xffffffffffff : act_hit(1);
+            0xa0000000000 &&& 0xff0000000000 : act_hit(2);
+            0x0 &&& 0x0 : act_hit(3);
         }
         const default_action = act_miss();
     }

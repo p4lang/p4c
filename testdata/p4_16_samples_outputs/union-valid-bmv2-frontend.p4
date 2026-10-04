@@ -17,7 +17,7 @@ header_union U {
 
 struct Headers {
     Hdr1 h1;
-    U    u;
+    U u;
 }
 
 struct Meta {
@@ -25,14 +25,14 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<Hdr1>(h.h1);
-        transition select(h.h1.a) {
-            32w0: getH1;
-            default: getH1;
+        b.extract < Hdr1 >(h.h1);
+        transition select (h.h1.a) {
+            32w0 : getH1;
+            default : getH1;
         }
     }
     state getH1 {
-        b.extract<Hdr1>(h.u.h1);
+        b.extract < Hdr1 >(h.u.h1);
         transition accept;
     }
 }
@@ -54,8 +54,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<Hdr1>(h.h1);
-        b.emit<U>(h.u);
+        b.emit < Hdr1 >(h.h1);
+        b.emit < U >(h.u);
     }
 }
 
@@ -64,7 +64,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.u.isValid(): exact @name("h.u.$valid$");
+            h.u.isValid() : exact @name("h.u.$valid$");
         }
         actions = {
             a_1();
@@ -76,4 +76,4 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

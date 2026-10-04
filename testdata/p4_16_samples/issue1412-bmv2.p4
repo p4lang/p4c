@@ -6,35 +6,46 @@
 
 #include <v1model.p4>
 
-struct headers_t { }
+struct headers_t {
+}
 
 struct metadata {
     bool cond;
     bit<8> field;
 }
 
-parser ParserImpl (
+parser ParserImpl(
     packet_in buffer,
     out headers_t parsed_hdr,
     inout metadata meta,
     inout standard_metadata_t ostd
     )
-{ state start { transition accept; } }
+{
+    state start {
+        transition accept;
+    }
+}
 
-control VerifyChecksumImpl (
+control VerifyChecksumImpl(
     inout headers_t hdr,
     inout metadata meta
     )
-{ apply { } }
+{
+    apply {
+    }
+}
 
-control IngressImpl (
+control IngressImpl(
     inout headers_t hdr,
     inout metadata meta,
     inout standard_metadata_t ostd
     )
-{ apply { } }
+{
+    apply {
+    }
+}
 
-control EgressImpl (
+control EgressImpl(
     inout headers_t hdr,
     inout metadata meta,
     inout standard_metadata_t ostd
@@ -47,8 +58,12 @@ control EgressImpl (
     }
 
     table change_cond {
-        key = { ostd.egress_spec: exact; }
-        actions = { set_true; }
+        key = {
+            ostd.egress_spec : exact;
+        }
+        actions = {
+            set_true;
+        }
     }
 
     apply {
@@ -56,15 +71,21 @@ control EgressImpl (
     }
 }
 
-control ComputeChecksumImpl (
+control ComputeChecksumImpl(
     inout headers_t hdr,
     inout metadata meta)
-{ apply { } }
+{
+    apply {
+    }
+}
 
-control DeparserImpl (
+control DeparserImpl(
     packet_out buffer,
     in headers_t hdr)
-{ apply { } }
+{
+    apply {
+    }
+}
 
 V1Switch(
     ParserImpl(),

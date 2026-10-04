@@ -16,26 +16,26 @@ struct M {
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
-        pkt.extract<Header>(hdr.h1[0]);
+        pkt.extract < Header >(hdr.h1[0]);
         hdr.h1[0].data = 32w1;
         hdr.h1[1].data = 32w1;
         transition init;
     }
     state init {
-        pkt.extract<Header>(hdr.h1[1]);
+        pkt.extract < Header >(hdr.h1[1]);
         hdr.h1[0].data = 32w1;
         hdr.h1[1].data = 32w1;
         transition next;
     }
     state next {
         hdr.h1[0].setInvalid();
-        pkt.extract<Header>(hdr.h1.next);
+        pkt.extract < Header >(hdr.h1.next);
         hdr.h1[0].data = 32w1;
         hdr.h1[1].data = 32w1;
         hdr.h1[0].setInvalid();
-        transition select(hdr.h1[1].data) {
-            32w0: init;
-            default: accept;
+        transition select (hdr.h1[1].data) {
+            32w0 : init;
+            default : accept;
         }
     }
 }
@@ -68,7 +68,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         h_copy.h2[0].data = 32w1;
         h_copy.h2[1].data = 32w1;
         invalidateHeader(h.h2[0]);
-        h_copy2 = (H){h1 = h.h1,h2 = h.h2};
+        h_copy2 =(H) { h1 = h.h1, h2 = h.h2 };
         h_copy2.h1[0].data = 32w1;
         h_copy2.h1[1].data = 32w1;
         h_copy2.h2[0].data = 32w1;
@@ -116,4 +116,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

@@ -3,14 +3,14 @@
 
 header test_t {
     bit<16> sa;
-    bit<8>  da;
+    bit<8> da;
 }
 
 header test1_t {
-    bit<8>  a;
+    bit<8> a;
     bit<16> b;
     bit<16> c;
-    bit<8>  d;
+    bit<8> d;
 }
 
 header test2_t {
@@ -18,7 +18,7 @@ header test2_t {
 }
 
 struct Headers_t {
-    test_t  test;
+    test_t test;
     test1_t test1;
     test2_t test2;
 }

@@ -1,2 +1,3 @@
-header H {}
+header H {
+}
 const H h = { # };

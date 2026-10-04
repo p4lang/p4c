@@ -31,7 +31,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     table simple_table_2 {
         key = {
-            h.eth_hdr.src_addr: exact @name("key");
+            h.eth_hdr.src_addr : exact @name("key");
         }
         actions = {
             exit_action();
@@ -39,7 +39,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         bool simple_eq = h.eth_hdr.eth_type == 1;
-        bit<16> assign = (simple_eq || simple_table_2.apply().hit ? 16w2 : 16w3);
+        bit<16> assign =(simple_eq || simple_table_2.apply().hit ? 16w2 : 16w3);
         h.eth_hdr.eth_type = assign;
     }
 }

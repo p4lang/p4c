@@ -8,7 +8,7 @@
 #include <v1model.p4>
 
 header hdr {
-  bit<32> a;
+    bit<32> a;
 }
 
 control compute(inout hdr h) {

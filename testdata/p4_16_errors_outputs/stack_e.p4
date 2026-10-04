@@ -14,4 +14,3 @@ control p() {
         s e = stack1.next;
     }
 }
-

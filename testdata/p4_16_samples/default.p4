@@ -15,17 +15,17 @@ parser p0(packet_in p, out Header h) {
     bool b = true;
     state start {
         p.extract(h);
-        transition select(h.data, b) {
-            (_, true):    next;
-            (_, _): reject;
+        transition select (h.data, b) {
+            (_, true) : next;
+            (_, _) : reject;
         }
     }
     state next {
         p.extract(h);
-        transition select(h.data, b) {
-            (default, true):    accept;
-            (default, default): reject;
-            default: reject;
+        transition select (h.data, b) {
+            (default, true) : accept;
+            (default, default) : reject;
+            default : reject;
         }
     }
 }

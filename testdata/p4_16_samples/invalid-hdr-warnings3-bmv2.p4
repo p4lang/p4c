@@ -11,7 +11,8 @@ struct H {
     Header h2;
 }
 
-struct M { }
+struct M {
+}
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
@@ -32,8 +33,10 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 
         switch (hdr.h1.data)
         {
-            0: { h1.setValid(); h2.setInvalid(); }
-            default: { h1.setValid(); h2.setInvalid(); }
+            0 : { h1.setValid(); h2.setInvalid();
+            }
+            default : { h1.setValid(); h2.setInvalid();
+            }
         }
 
         hdr.h1.data = h1.data;
@@ -41,8 +44,10 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 
         switch (hdr.h1.data)
         {
-            0: { h1.setValid(); h2.setValid(); }
-            default: { h1.setInvalid(); h2.setInvalid(); }
+            0 : { h1.setValid(); h2.setValid();
+            }
+            default : { h1.setInvalid(); h2.setInvalid();
+            }
         }
 
         hdr.h1.data = h1.data;

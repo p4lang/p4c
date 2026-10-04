@@ -5,4 +5,3 @@ control cIngress() {
         random(rand_val, 0);
     }
 }
-

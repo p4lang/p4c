@@ -14,20 +14,20 @@
 #ifdef INT_ENABLE
 header_type int_metadata_t {
     fields {
-        switch_id           : 32;
-        insert_cnt          : 8;
-        insert_byte_cnt     : 16;
-        gpe_int_hdr_len     : 16;
-        gpe_int_hdr_len8    : 8;
-        instruction_cnt     : 16;
+        switch_id : 32;
+        insert_cnt : 8;
+        insert_byte_cnt : 16;
+        gpe_int_hdr_len : 16;
+        gpe_int_hdr_len8 : 8;
+        instruction_cnt : 16;
     }
 }
 metadata int_metadata_t int_metadata;
 
 header_type int_metadata_i2e_t {
     fields {
-        sink    : 1;
-        source  : 1;
+        sink : 1;
+        source : 1;
     }
 }
 metadata int_metadata_i2e_t int_metadata_i2e;
@@ -316,11 +316,11 @@ action int_set_header_7_bos() { //egress_port_tx_utilization
 
 table int_bos {
     reads {
-        int_header.total_hop_cnt            : ternary;
-        int_header.instruction_mask_0003    : ternary;
-        int_header.instruction_mask_0407    : ternary;
-        int_header.instruction_mask_0811    : ternary;
-        int_header.instruction_mask_1215    : ternary;
+        int_header.total_hop_cnt : ternary;
+        int_header.instruction_mask_0003 : ternary;
+        int_header.instruction_mask_0407 : ternary;
+        int_header.instruction_mask_0811 : ternary;
+        int_header.instruction_mask_1215 : ternary;
     }
     actions {
         int_set_header_0_bos;
@@ -362,11 +362,11 @@ table int_meta_header_update {
 #endif
 
 #ifdef INT_EP_ENABLE
-action int_set_src () {
+action int_set_src() {
     modify_field(int_metadata_i2e.source, 1);
 }
 
-action int_set_no_src () {
+action int_set_no_src() {
     modify_field(int_metadata_i2e.source, 0);
 }
 
@@ -380,16 +380,16 @@ table int_source {
     //      1, x, x => mis-config, transient error, int_src=0
     //      miss => int_src=0
     reads {
-        int_header                  : valid;
+        int_header : valid;
         // use outer ipv4/6 header when VTEP src
-        ipv4                        : valid;
-        ipv4_metadata.lkp_ipv4_da   : ternary;
-        ipv4_metadata.lkp_ipv4_sa   : ternary;
+        ipv4 : valid;
+        ipv4_metadata.lkp_ipv4_da : ternary;
+        ipv4_metadata.lkp_ipv4_sa : ternary;
 
         // use inner_ipv4 header when not VTEP src
-        inner_ipv4                  : valid;
-        inner_ipv4.dstAddr          : ternary;
-        inner_ipv4.srcAddr          : ternary;
+        inner_ipv4 : valid;
+        inner_ipv4.dstAddr : ternary;
+        inner_ipv4.srcAddr : ternary;
     }
     actions {
         int_set_src;
@@ -403,7 +403,7 @@ field_list int_i2e_mirror_info {
     i2e_metadata.mirror_session_id;
 }
 
-action int_sink (mirror_id) {
+action int_sink(mirror_id) {
     modify_field(int_metadata_i2e.sink, 1);
 
     // If this is sink, need to send the INT information to the
@@ -440,7 +440,7 @@ action int_sink (mirror_id) {
     remove_header(int_val[23]);
 }
 
-action int_sink_gpe (mirror_id) {
+action int_sink_gpe(mirror_id) {
     // convert the word len from gpe-shim header to byte_cnt
     shift_left(int_metadata.insert_byte_cnt, int_metadata.gpe_int_hdr_len, 2);
     int_sink(mirror_id);
@@ -467,14 +467,14 @@ table int_terminate {
     //  (one entry per dst_addr)
     //  miss => no_sink
     reads {
-        int_header                  : valid;
-        vxlan_gpe_int_header        : valid;
+        int_header : valid;
+        vxlan_gpe_int_header : valid;
         // when configured based on tunnel IPs
-        ipv4                        : valid;
-        ipv4_metadata.lkp_ipv4_da   : ternary;
+        ipv4 : valid;
+        ipv4_metadata.lkp_ipv4_da : ternary;
         // when configured based on client IPs
-        inner_ipv4                  : valid;
-        inner_ipv4.dstAddr          : ternary;
+        inner_ipv4 : valid;
+        inner_ipv4.dstAddr : ternary;
     }
     actions {
         int_sink_gpe;
@@ -498,9 +498,9 @@ table int_sink_update_outer {
     // 1, 1 => update ipv4 and udp headers
     // miss => nop
     reads {
-        vxlan_gpe_int_header        : valid;
-        ipv4                        : valid;
-        int_metadata_i2e.sink       : exact;
+        vxlan_gpe_int_header : valid;
+        ipv4 : valid;
+        int_metadata_i2e.sink : exact;
     }
     actions {
         int_sink_update_vxlan_gpe_v4;
@@ -580,9 +580,9 @@ table int_insert {
     //      1, 0, 1 => nop (error) (reset) => insert_cnt = 0
     //      miss (0,0,0) => nop (reset)
     reads {
-        int_metadata_i2e.source       : ternary;
-        int_metadata_i2e.sink         : ternary;
-        int_header                    : valid;
+        int_metadata_i2e.source : ternary;
+        int_metadata_i2e.sink : ternary;
+        int_header : valid;
     }
     actions {
 #ifdef INT_TRANSIT_ENABLE
@@ -652,10 +652,10 @@ table int_outer_encap {
     //      1, 1, X : add_update_vxlan_gpe_int
     //      miss => nop
     reads {
-        ipv4                                : valid;
-        vxlan_gpe                           : valid;
-        int_metadata_i2e.source             : exact;
-        tunnel_metadata.egress_tunnel_type  : ternary;
+        ipv4 : valid;
+        vxlan_gpe : valid;
+        int_metadata_i2e.source : exact;
+        tunnel_metadata.egress_tunnel_type : ternary;
     }
     actions {
 #ifdef INT_TRANSIT_ENABLE

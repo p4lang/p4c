@@ -14,7 +14,7 @@ header_union HU {
 
 parser p(inout HU hu) {
     state start {
-        hu = (HU){#};
+        hu =(HU) {#};
         transition accept;
     }
 }

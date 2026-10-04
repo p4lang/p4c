@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            key_0: exact @name("QIqvRY");
+            key_0 : exact @name("QIqvRY");
         }
         actions = {
             dummy_action();
@@ -39,33 +39,33 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_exit_combination_16bmv2l49() {
+    @hidden action gauntlet_exit_combination_16bmv2l50() {
         h.eth_hdr.eth_type = 16w1;
         hasReturned = true;
     }
-    @hidden action gauntlet_exit_combination_16bmv2l38() {
+    @hidden action gauntlet_exit_combination_16bmv2l39() {
         hasReturned = false;
         key_0 = 8w255;
     }
-    @hidden table tbl_gauntlet_exit_combination_16bmv2l38 {
+    @hidden table tbl_gauntlet_exit_combination_16bmv2l39 {
         actions = {
-            gauntlet_exit_combination_16bmv2l38();
+            gauntlet_exit_combination_16bmv2l39();
         }
-        const default_action = gauntlet_exit_combination_16bmv2l38();
+        const default_action = gauntlet_exit_combination_16bmv2l39();
     }
-    @hidden table tbl_gauntlet_exit_combination_16bmv2l49 {
+    @hidden table tbl_gauntlet_exit_combination_16bmv2l50 {
         actions = {
-            gauntlet_exit_combination_16bmv2l49();
+            gauntlet_exit_combination_16bmv2l50();
         }
-        const default_action = gauntlet_exit_combination_16bmv2l49();
+        const default_action = gauntlet_exit_combination_16bmv2l50();
     }
     apply {
-        tbl_gauntlet_exit_combination_16bmv2l38.apply();
+        tbl_gauntlet_exit_combination_16bmv2l39.apply();
         switch (simple_table_0.apply().action_run) {
-            dummy_action: {
-                tbl_gauntlet_exit_combination_16bmv2l49.apply();
+            dummy_action : {
+            tbl_gauntlet_exit_combination_16bmv2l50.apply();
             }
-            default: {
+            default : {
             }
         }
     }
@@ -88,8 +88,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

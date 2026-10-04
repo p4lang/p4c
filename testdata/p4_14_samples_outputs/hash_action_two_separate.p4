@@ -33,8 +33,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-@name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
-@name(".count2") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count2;
+@name(".count1") @min_width(32) counter < bit<14 >>(32w16384, CounterType.packets) count1;
+@name(".count2") @min_width(32) counter <bit<14 >>(32w16384, CounterType.packets) count2;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_index") action set_index(bit<16> index1, bit<16> index2, bit<9> port) {
         meta.counter_metadata.counter_index_first = index1;
@@ -52,8 +52,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_index;
         }
         key = {
-            hdr.data.f1: exact;
-            hdr.data.f2: exact;
+            hdr.data.f1 : exact;
+            hdr.data.f2 : exact;
         }
         size = 2048;
     }

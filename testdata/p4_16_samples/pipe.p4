@@ -32,12 +32,14 @@ struct QArg2 {
     bit<32> f2;
 }
 
-extern bs {}
-struct Packet_data {}
+extern bs {
+}
+struct Packet_data {
+}
 
 control T_host(inout TArg1 tArg1, in TArg2 aArg2)(bit<32> t2Size) {
     action B_action(out bit<9> barg, BParamType bData) {
-        barg = (bit<9>)bData;
+        barg =(bit<9>) bData;
     }
 
     action C_action(bit<9> cData) {
@@ -46,8 +48,8 @@ control T_host(inout TArg1 tArg1, in TArg2 aArg2)(bit<32> t2Size) {
 
     table T {
         key = {
-           tArg1.field1 : ternary;
-           aArg2.field2 : exact;
+            tArg1.field1 : ternary;
+            aArg2.field2 : exact;
         }
         actions = {
             B_action(tArg1.field1); // invoked binding tArg1.field1 to barg
@@ -71,9 +73,12 @@ control P_pipe(inout TArg1 pArg1, inout TArg2 pArg2)(bit<32> t2Size) {
     }
 
     table Tinner {
-        key = { pArg1.field1 : ternary; }
+        key = {
+            pArg1.field1 : ternary;
+        }
         actions = {
-            Drop; NoAction;
+            Drop;
+            NoAction;
         }
         const default_action = NoAction;
     }
@@ -98,6 +103,10 @@ control pp(inout TArg1 arg1, inout TArg2 arg2);
 
 package myswitch(prs prser, pp pipe);
 
-parser my_parser(bs b, out Packet_data p) { state start { transition accept; } }
+parser my_parser(bs b, out Packet_data p) {
+    state start {
+        transition accept;
+    }
+}
 
 myswitch(my_parser(), Q_pipe()) main;

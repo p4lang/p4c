@@ -7,13 +7,16 @@
 #include <core.p4>
 
 control c() {
-    action a() {}
+    action a() {
+    }
     table t {
-        key = {}
+        key = {
+        }
         actions = {
             a;
         }
-        const entries = {}
+        const entries = {
+        }
     }
 
     apply {

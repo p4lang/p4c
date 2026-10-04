@@ -7,25 +7,25 @@
 #include <core.p4>
 #include <tc/pna.p4>
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     IPv4Address srcAddr;
     IPv4Address dstAddr;
@@ -36,18 +36,18 @@ header tcp_t {
     @tc_type("be16") bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> dataOffset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
 }
 
 // Define names for different expire time profile id values.
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW    = (ExpireTimeProfileId_t) 0;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW    = (ExpireTimeProfileId_t) 1;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t) 2;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW =(ExpireTimeProfileId_t) 0;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW =(ExpireTimeProfileId_t) 1;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED =(ExpireTimeProfileId_t) 2;
 
 //////////////////////////////////////////////////////////////////////
 // Struct types for holding user-defined collections of headers and
@@ -68,8 +68,8 @@ struct metadata_t {
 // main parser.
 struct headers_t {
     ethernet_t eth;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 parser MainParserImpl(
@@ -80,15 +80,15 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.eth);
-        transition select(hdr.eth.etherType) {
-            0x0800  : parse_ipv4;
+        transition select (hdr.eth.etherType) {
+            0x0800 : parse_ipv4;
             default : accept;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            6       : parse_tcp;
+        transition select (hdr.ipv4.protocol) {
+            6 : parse_tcp;
             default : accept;
         }
     }
@@ -142,8 +142,8 @@ control MainControlImpl(
     apply {
         do_add_on_miss = false;
         update_expire_time = false;
-        if (((bit<32>)(PortId_t)istd.input_port == 2) &&
-            hdr.ipv4.isValid() && hdr.tcp.isValid()) {
+        if (((bit<32>)(PortId_t) istd.input_port == 2) &&
+        hdr.ipv4.isValid() && hdr.tcp.isValid()) {
             set_ct_options.apply();
         }
     }

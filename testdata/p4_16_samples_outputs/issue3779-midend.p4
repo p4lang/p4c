@@ -2,17 +2,17 @@ header h {
 }
 
 control c(out bool b) {
-    @hidden action issue3779l16() {
+    @hidden action issue3779l15() {
         b = true;
     }
-    @hidden table tbl_issue3779l16 {
+    @hidden table tbl_issue3779l15 {
         actions = {
-            issue3779l16();
+            issue3779l15();
         }
-        const default_action = issue3779l16();
+        const default_action = issue3779l15();
     }
     apply {
-        tbl_issue3779l16.apply();
+        tbl_issue3779l15.apply();
     }
 }
 

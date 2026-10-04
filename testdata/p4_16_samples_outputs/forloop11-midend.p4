@@ -1,17 +1,17 @@
 #include <core.p4>
 
-control generic<M>(inout M m);
-package top<M>(generic<M> c);
+control generic < M >(inout M m);
+package top < M >(generic<M> c);
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> frag_offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdr_checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
@@ -32,7 +32,7 @@ control c(inout headers_t headers) {
     }
     @hidden table switch_0_table {
         key = {
-            switch_0_key: exact;
+            switch_0_key : exact;
         }
         actions = {
             switch_0_case();
@@ -41,8 +41,8 @@ control c(inout headers_t headers) {
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        const 32w0 : switch_0_case();
-                        const 32w1 : switch_0_case_0();
+            const 32w0 : switch_0_case();
+            const 32w1 : switch_0_case_0();
         }
     }
     @hidden action switch_1_case() {
@@ -51,7 +51,7 @@ control c(inout headers_t headers) {
     }
     @hidden table switch_1_table {
         key = {
-            headers.ipv4.src_addr[15:0]: exact;
+            headers.ipv4.src_addr[15 : 0] : exact;
         }
         actions = {
             switch_1_case();
@@ -59,7 +59,7 @@ control c(inout headers_t headers) {
         }
         const default_action = switch_1_case_0();
         const entries = {
-                        const 16w1 : switch_1_case();
+            const 16w1 : switch_1_case();
         }
     }
     @hidden action forloop11l38() {
@@ -695,214 +695,214 @@ control c(inout headers_t headers) {
     }
     apply {
         switch (switch_1_table.apply().action_run) {
-            switch_1_case: {
-                tbl_forloop11l35.apply();
-                switch (switch_0_table.apply().action_run) {
-                    switch_0_case: {
-                        tbl_forloop11l38.apply();
-                    }
-                    switch_0_case_0: {
-                        tbl_forloop11l43.apply();
-                        tbl_act.apply();
-                    }
-                    switch_0_case_1: {
-                        tbl_act_0.apply();
-                    }
-                }
-                if (breakFlag) {
-                    ;
-                } else {
-                    tbl_forloop11l35_0.apply();
-                    switch (switch_0_table.apply().action_run) {
-                        switch_0_case: {
-                            tbl_forloop11l38_0.apply();
-                        }
-                        switch_0_case_0: {
-                            tbl_forloop11l43_0.apply();
-                            tbl_act_1.apply();
-                        }
-                        switch_0_case_1: {
-                            if (breakFlag) {
-                                ;
-                            } else {
-                                tbl_act_2.apply();
-                            }
-                        }
-                    }
-                    if (breakFlag) {
-                        ;
-                    } else {
-                        tbl_forloop11l35_1.apply();
-                        switch (switch_0_table.apply().action_run) {
-                            switch_0_case: {
-                                tbl_forloop11l38_1.apply();
-                            }
-                            switch_0_case_0: {
-                                tbl_forloop11l43_1.apply();
-                                tbl_act_3.apply();
-                            }
-                            switch_0_case_1: {
-                                if (breakFlag) {
-                                    ;
-                                } else {
-                                    tbl_act_4.apply();
-                                }
-                            }
-                        }
-                        if (breakFlag) {
-                            ;
-                        } else {
-                            tbl_forloop11l35_2.apply();
-                            switch (switch_0_table.apply().action_run) {
-                                switch_0_case: {
-                                    tbl_forloop11l38_2.apply();
-                                }
-                                switch_0_case_0: {
-                                    tbl_forloop11l43_2.apply();
-                                    tbl_act_5.apply();
-                                }
-                                switch_0_case_1: {
-                                    if (breakFlag) {
-                                        ;
-                                    } else {
-                                        tbl_act_6.apply();
-                                    }
-                                }
-                            }
-                            if (breakFlag) {
-                                ;
-                            } else {
-                                tbl_forloop11l35_3.apply();
-                                switch (switch_0_table.apply().action_run) {
-                                    switch_0_case: {
-                                        tbl_forloop11l38_3.apply();
-                                    }
-                                    switch_0_case_0: {
-                                        tbl_forloop11l43_3.apply();
-                                        tbl_act_7.apply();
-                                    }
-                                    switch_0_case_1: {
-                                        if (breakFlag) {
-                                            ;
-                                        } else {
-                                            tbl_act_8.apply();
-                                        }
-                                    }
-                                }
-                                if (breakFlag) {
-                                    ;
-                                } else {
-                                    tbl_forloop11l35_4.apply();
-                                    switch (switch_0_table.apply().action_run) {
-                                        switch_0_case: {
-                                            tbl_forloop11l38_4.apply();
-                                        }
-                                        switch_0_case_0: {
-                                            tbl_forloop11l43_4.apply();
-                                            tbl_act_9.apply();
-                                        }
-                                        switch_0_case_1: {
-                                            if (breakFlag) {
-                                                ;
-                                            } else {
-                                                tbl_act_10.apply();
-                                            }
-                                        }
-                                    }
-                                    if (breakFlag) {
-                                        ;
-                                    } else {
-                                        tbl_forloop11l35_5.apply();
-                                        switch (switch_0_table.apply().action_run) {
-                                            switch_0_case: {
-                                                tbl_forloop11l38_5.apply();
-                                            }
-                                            switch_0_case_0: {
-                                                tbl_forloop11l43_5.apply();
-                                                tbl_act_11.apply();
-                                            }
-                                            switch_0_case_1: {
-                                                if (breakFlag) {
-                                                    ;
-                                                } else {
-                                                    tbl_act_12.apply();
-                                                }
-                                            }
-                                        }
-                                        if (breakFlag) {
-                                            ;
-                                        } else {
-                                            tbl_forloop11l35_6.apply();
-                                            switch (switch_0_table.apply().action_run) {
-                                                switch_0_case: {
-                                                    tbl_forloop11l38_6.apply();
-                                                }
-                                                switch_0_case_0: {
-                                                    tbl_forloop11l43_6.apply();
-                                                    tbl_act_13.apply();
-                                                }
-                                                switch_0_case_1: {
-                                                    if (breakFlag) {
-                                                        ;
-                                                    } else {
-                                                        tbl_act_14.apply();
-                                                    }
-                                                }
-                                            }
-                                            if (breakFlag) {
-                                                ;
-                                            } else {
-                                                tbl_forloop11l35_7.apply();
-                                                switch (switch_0_table.apply().action_run) {
-                                                    switch_0_case: {
-                                                        tbl_forloop11l38_7.apply();
-                                                    }
-                                                    switch_0_case_0: {
-                                                        tbl_forloop11l43_7.apply();
-                                                        tbl_act_15.apply();
-                                                    }
-                                                    switch_0_case_1: {
-                                                        if (breakFlag) {
-                                                            ;
-                                                        } else {
-                                                            tbl_act_16.apply();
-                                                        }
-                                                    }
-                                                }
-                                                if (breakFlag) {
-                                                    ;
-                                                } else {
-                                                    tbl_forloop11l35_8.apply();
-                                                    switch (switch_0_table.apply().action_run) {
-                                                        switch_0_case: {
-                                                            tbl_forloop11l38_8.apply();
-                                                        }
-                                                        switch_0_case_0: {
-                                                            tbl_forloop11l43_8.apply();
-                                                            tbl_act_17.apply();
-                                                        }
-                                                        switch_0_case_1: {
-                                                            if (breakFlag) {
-                                                                ;
-                                                            } else {
-                                                                tbl_act_18.apply();
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            switch_1_case : {
+            tbl_forloop11l35.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38.apply();
             }
-            switch_1_case_0: {
+            switch_0_case_0 : {
+            tbl_forloop11l43.apply();
+            tbl_act.apply();
+            }
+            switch_0_case_1 : {
+            tbl_act_0.apply();
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_0.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_0.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_0.apply();
+            tbl_act_1.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_2.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_1.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_1.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_1.apply();
+            tbl_act_3.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_4.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_2.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_2.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_2.apply();
+            tbl_act_5.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_6.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_3.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_3.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_3.apply();
+            tbl_act_7.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_8.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_4.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_4.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_4.apply();
+            tbl_act_9.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_10.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_5.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_5.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_5.apply();
+            tbl_act_11.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_12.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_6.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_6.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_6.apply();
+            tbl_act_13.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_14.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_7.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_7.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_7.apply();
+            tbl_act_15.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_16.apply();
+            }
+            }
+            }
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_forloop11l35_8.apply();
+            switch (switch_0_table.apply().action_run) {
+            switch_0_case : {
+            tbl_forloop11l38_8.apply();
+            }
+            switch_0_case_0 : {
+            tbl_forloop11l43_8.apply();
+            tbl_act_17.apply();
+            }
+            switch_0_case_1 : {
+            if (breakFlag) {
+            ;
+            } else {
+            tbl_act_18.apply();
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            }
+            switch_1_case_0 : {
             }
         }
     }
 }
 
-top<headers_t>(c()) main;
+top < headers_t >(c()) main;

@@ -22,6 +22,6 @@ parser P(packet_in p, out Headers h) {
     }
 }
 
-parser Simple<T>(packet_in p, out T t);
-package top<T>(Simple<T> prs);
+parser Simple < T >(packet_in p, out T t);
+package top < T >(Simple<T> prs);
 top(P()) main;

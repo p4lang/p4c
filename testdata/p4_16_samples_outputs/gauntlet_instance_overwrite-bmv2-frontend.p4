@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.BfyXpa") table BfyXpa_0 {
         key = {
-            val_0: exact @name("eJPEfW");
+            val_0 : exact @name("eJPEfW");
         }
         actions = {
             do_action();
@@ -41,7 +41,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tmp.setValid();
-        tmp = (H){a = 8w3,b = 8w1,c = 8w1};
+        tmp =(H) { a = 8w3, b = 8w1, c = 8w1 };
         val_0 = tmp.a;
         BfyXpa_0.apply();
     }
@@ -64,8 +64,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

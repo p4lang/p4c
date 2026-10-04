@@ -18,7 +18,7 @@ control spgw_normalizer(
         in    udp_t  inner_udp
     ) {
     apply {
-        if (! is_gtpu_encapped) return;
+        if (!is_gtpu_encapped) return;
         gtpu_ipv4 = ipv4;
         ipv4 = inner_ipv4;
         gtpu_udp = udp;
@@ -97,12 +97,12 @@ control spgw_ingress(
 
     table sdf_rule_lookup {
         key = {
-            fabric_meta.spgw.direction   : exact @name("spgw_direction");
-            ipv4.src_addr                : ternary @name("ipv4_src");
-            ipv4.dst_addr                : ternary @name("ipv4_dst");
-            ipv4.protocol                : ternary @name("ip_proto");
-            fabric_meta.l4_sport         : ternary @name("l4_sport");
-            fabric_meta.l4_dport         : ternary @name("l4_dport");
+            fabric_meta.spgw.direction : exact @name("spgw_direction");
+            ipv4.src_addr : ternary @name("ipv4_src");
+            ipv4.dst_addr : ternary @name("ipv4_dst");
+            ipv4.protocol : ternary @name("ip_proto");
+            fabric_meta.l4_sport : ternary @name("l4_sport");
+            fabric_meta.l4_dport : ternary @name("l4_dport");
         }
         actions = {
             set_sdf_rule_id();
@@ -167,7 +167,6 @@ control spgw_ingress(
     }
 }
 
-
 control spgw_egress(
         in    ipv4_t              ipv4,
         inout ipv4_t              gtpu_ipv4,
@@ -185,7 +184,7 @@ control spgw_egress(
         gtpu_ipv4.dscp = 0;
         gtpu_ipv4.ecn = 0;
         gtpu_ipv4.total_len = ipv4.total_len
-                + (IPV4_HDR_SIZE + UDP_HDR_SIZE + GTP_HDR_SIZE);
+        +(IPV4_HDR_SIZE + UDP_HDR_SIZE + GTP_HDR_SIZE);
         gtpu_ipv4.identification = 0x1513; /* From NGIC */
         gtpu_ipv4.flags = 0;
         gtpu_ipv4.frag_offset = 0;
@@ -199,7 +198,7 @@ control spgw_egress(
         gtpu_udp.sport = UDP_PORT_GTPU;
         gtpu_udp.dport = UDP_PORT_GTPU;
         gtpu_udp.len = fabric_meta.spgw.ipv4_len
-                + (UDP_HDR_SIZE + GTP_HDR_SIZE);
+        +(UDP_HDR_SIZE + GTP_HDR_SIZE);
         gtpu_udp.checksum = 0; // Updated later
 
         gtpu.setValid();
@@ -220,7 +219,6 @@ control spgw_egress(
         }
     }
 }
-
 
 control update_gtpu_checksum(
         inout ipv4_t gtpu_ipv4,

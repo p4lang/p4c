@@ -14,7 +14,7 @@ struct mid_t {
 
 struct Headers {
     outer_t[1] outer_arr;
-    mid_t[1]   mid_arr;
+    mid_t[1] mid_arr;
 }
 
 control proto(inout Headers h);

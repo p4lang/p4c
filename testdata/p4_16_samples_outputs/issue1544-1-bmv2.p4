@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table mac_da {
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         actions = {
             set_port;
@@ -53,7 +53,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         mac_da.apply();
-        hdr.ethernet.srcAddr[15:0] = sometimes_dec(hdr.ethernet.srcAddr[15:0]);
+        hdr.ethernet.srcAddr[15 : 0] = sometimes_dec(hdr.ethernet.srcAddr[15:0]);
     }
 }
 

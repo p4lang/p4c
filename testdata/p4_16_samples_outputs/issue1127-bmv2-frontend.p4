@@ -17,7 +17,7 @@ struct metadata {
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<h1_t>(hdr.h1);
+        pkt.extract < h1_t >(hdr.h1);
         transition accept;
     }
 }
@@ -33,7 +33,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         op_0 = tmp;
         if (op_0 == 8w0x0) {
             ;
-        } else if (op_0[7:4] == 4w1) {
+        } else if (op_0[7 : 4] == 4w1) {
             hdr_0.h1.out1 = 8w4;
         }
         hdr = hdr_0;
@@ -42,7 +42,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         op_0 = tmp_0;
         if (op_0 == 8w0x0) {
             ;
-        } else if (op_0[7:4] == 4w1) {
+        } else if (op_0[7 : 4] == 4w1) {
             hdr_0.h1.out1 = 8w4;
         }
         hdr = hdr_0;
@@ -66,8 +66,8 @@ control uc(inout headers hdr, inout metadata meta) {
 
 control DeparserI(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<h1_t>(hdr.h1);
+        packet.emit < h1_t >(hdr.h1);
     }
 }
 
-V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < headers, metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

@@ -16,10 +16,10 @@ parser MyParser(packet_in packet, out header_t hdr, inout metadata meta, inout s
 
 control C1(int a, inout bit<8> b) {
     apply {
-        if (b == (bit<8>)a) {
-            b = (bit<8>)a + 8w1;
+        if (b ==(bit<8>) a) {
+            b =(bit<8>) a + 8w1;
         } else {
-            b = (bit<8>)(a + 1);
+            b =(bit<8>)(a + 1);
         }
     }
 }
@@ -52,4 +52,4 @@ control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
     }
 }
 
-V1Switch<header_t, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < header_t, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

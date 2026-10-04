@@ -7,14 +7,15 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -25,8 +26,8 @@ header output_data_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
-    output_data_t    output_data;
+    ethernet_t ethernet;
+    output_data_t output_data;
 }
 
 struct metadata_t {
@@ -67,7 +68,7 @@ control MyIC(
     in    psa_ingress_input_metadata_t istd,
     inout psa_ingress_output_metadata_t ostd)
 {
-    Register<bit<16>, bit<8>>(6) reg;
+    Register < bit<16>, bit<8 >>(6) reg;
 
     bit<8> idx;
     bit<8> action_type;
@@ -76,16 +77,16 @@ control MyIC(
 
     apply {
         if (hdr.ethernet.isValid()) {
-            idx = hdr.ethernet.dstAddr[7:0];
-            action_type = hdr.ethernet.dstAddr[15:8];
-            bool validAction = (action_type >= 1) && (action_type <= 3);
+            idx = hdr.ethernet.dstAddr[7 : 0];
+            action_type = hdr.ethernet.dstAddr[15 : 8];
+            bool validAction =(action_type >= 1) &&(action_type <= 3);
 
             if (validAction) {
                 orig_data = reg.read(idx);
             }
             if (action_type == 1) {
                 // store a value into the register from packet header
-                next_data = hdr.ethernet.dstAddr[47:32];
+                next_data = hdr.ethernet.dstAddr[47 : 32];
             } else if (action_type == 2) {
                 // read register, without changing its current value
                 next_data = orig_data;
@@ -98,8 +99,8 @@ control MyIC(
             }
             reg.write(idx, next_data);
 
-            hdr.output_data.word0 = (bit<32>) orig_data;
-            hdr.output_data.word1 = (bit<32>) next_data;
+            hdr.output_data.word0 =(bit<32>) orig_data;
+            hdr.output_data.word1 =(bit<32>) next_data;
         }
         send_to_port(ostd, (PortId_t) 1);
     }
@@ -111,7 +112,8 @@ control MyEC(
     in    psa_egress_input_metadata_t  istd,
     inout psa_egress_output_metadata_t ostd)
 {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -138,7 +140,8 @@ control MyED(
     in psa_egress_output_metadata_t istd,
     in psa_egress_deparser_input_metadata_t edstd)
 {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

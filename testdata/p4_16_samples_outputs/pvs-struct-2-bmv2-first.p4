@@ -17,16 +17,16 @@ struct my_metadata {
 
 struct value_set_t {
     bit<16> field;
-    bit<3>  field2;
+    bit<3> field2;
 }
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    value_set<value_set_t>(4) pvs;
+    value_set < value_set_t >(4) pvs;
     state start {
-        b.extract<data_h>(p.data);
-        transition select(p.data.da[15:0], p.data.db[7:5]) {
-            pvs: accept;
-            (16w0x810, 3w0x1): foo;
+        b.extract < data_h >(p.data);
+        transition select (p.data.da[15 : 0], p.data.db[7 : 5]) {
+            pvs : accept;
+            (16w0x810, 3w0x1) : foo;
         }
     }
     state foo {
@@ -48,7 +48,7 @@ control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_meta
             @defaultonly NoAction();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da");
+            meta.data[0].da : exact @name("meta.data[0].da");
         }
         default_action = NoAction();
     }
@@ -72,4 +72,4 @@ control MyDeparser(packet_out b, in my_packet p) {
     }
 }
 
-V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < my_packet, my_metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

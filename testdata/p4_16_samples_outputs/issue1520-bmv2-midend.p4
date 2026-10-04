@@ -26,19 +26,19 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("MyIngress.h.c1.r") register<bit<16>>(32w8) h_c1_r;
-    @name("MyIngress.h.c2.r") register<bit<16>>(32w8) h_c2_r;
-    @hidden action issue1520bmv2l39() {
+    @name("MyIngress.h.c1.r") register < bit<16 >>(32w8) h_c1_r;
+    @name("MyIngress.h.c2.r") register <bit<16 >>(32w8) h_c2_r;
+    @hidden action issue1520bmv2l40() {
         h_c2_r.read(hdr.h.x, 32w0);
     }
-    @hidden table tbl_issue1520bmv2l39 {
+    @hidden table tbl_issue1520bmv2l40 {
         actions = {
-            issue1520bmv2l39();
+            issue1520bmv2l40();
         }
-        const default_action = issue1520bmv2l39();
+        const default_action = issue1520bmv2l40();
     }
     apply {
-        tbl_issue1520bmv2l39.apply();
+        tbl_issue1520bmv2l40.apply();
     }
 }
 
@@ -57,4 +57,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

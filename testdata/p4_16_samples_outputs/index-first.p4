@@ -8,10 +8,10 @@ parser P(packet_in p, out H[2] h) {
     bit<32> x;
     H tmp;
     state start {
-        p.extract<H>(tmp);
-        transition select(tmp.field) {
-            32w0: n1;
-            default: n2;
+        p.extract < H >(tmp);
+        transition select (tmp.field) {
+            32w0 : n1;
+            default : n2;
         }
     }
     state n1 {
@@ -27,11 +27,11 @@ parser P(packet_in p, out H[2] h) {
         transition n4;
     }
     state n4 {
-        p.extract<H>(h[x]);
+        p.extract < H >(h[x]);
         transition accept;
     }
 }
 
-parser Simple<T>(packet_in p, out T t);
-package top<T>(Simple<T> prs);
-top<H[2]>(P()) main;
+parser Simple < T >(packet_in p, out T t);
+package top < T >(Simple<T> prs);
+top < H[2] >(P()) main;

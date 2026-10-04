@@ -16,12 +16,12 @@ struct cksum_t {
 
 struct metadata_t {
     bit<16> _cksum_result0;
-    bit<1>  _b1;
+    bit<1> _b1;
 }
 
 parser EmptyParser(packet_in b, out headers_t headers, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     state start {
-        b.extract<empty>(headers.e);
+        b.extract < empty >(headers.e);
         verify(headers.e.j == 8w10 || headers.e.j == 8w18 || headers.e.j == 8w26 || headers.e.j == 8w34, error.NoError);
         transition accept;
     }
@@ -38,17 +38,17 @@ control EmptyIngress(inout headers_t headers, inout metadata_t meta, inout stand
 }
 
 control EmptyEgress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action verify_disjunction54() {
+    @hidden action verify_disjunction55() {
         mark_to_drop(standard_metadata);
     }
-    @hidden table tbl_verify_disjunction54 {
+    @hidden table tbl_verify_disjunction55 {
         actions = {
-            verify_disjunction54();
+            verify_disjunction55();
         }
-        const default_action = verify_disjunction54();
+        const default_action = verify_disjunction55();
     }
     apply {
-        tbl_verify_disjunction54.apply();
+        tbl_verify_disjunction55.apply();
     }
 }
 
@@ -62,4 +62,4 @@ control EmptyDeparser(packet_out b, in headers_t hdr) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(EmptyParser(), EmptyVerify(), EmptyIngress(), EmptyEgress(), EmptyCompute(), EmptyDeparser()) main;
+V1Switch < headers_t, metadata_t >(EmptyParser(), EmptyVerify(), EmptyIngress(), EmptyEgress(), EmptyCompute(), EmptyDeparser()) main;

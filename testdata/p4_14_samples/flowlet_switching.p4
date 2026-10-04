@@ -82,7 +82,9 @@ action lookup_flowlet_map() {
 }
 
 table flowlet {
-    actions { lookup_flowlet_map; }
+    actions {
+        lookup_flowlet_map;
+    }
 }
 
 action update_flowlet_id() {
@@ -92,7 +94,9 @@ action update_flowlet_id() {
 }
 
 table new_flowlet {
-    actions { update_flowlet_id; }
+    actions {
+        update_flowlet_id;
+    }
 }
 
 field_list flowlet_l3_hash_fields {
@@ -155,7 +159,7 @@ table forward {
         set_dmac;
         _drop;
     }
-    size: 512;
+    size : 512;
 }
 
 action rewrite_mac(smac) {
@@ -164,13 +168,13 @@ action rewrite_mac(smac) {
 
 table send_frame {
     reads {
-        standard_metadata.egress_port: exact;
+        standard_metadata.egress_port : exact;
     }
     actions {
         rewrite_mac;
         _drop;
     }
-    size: 256;
+    size : 256;
 }
 
 control ingress {

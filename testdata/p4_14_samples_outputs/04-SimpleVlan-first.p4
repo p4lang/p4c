@@ -9,8 +9,8 @@ header ethernet_t {
 }
 
 header vlan_tag_t {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vlan_id;
     bit<16> ethertype;
 }
@@ -27,15 +27,15 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.ethertype) {
-            16w0x8100: parse_vlan_tag;
-            16w0x9100: parse_vlan_tag;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.ethertype) {
+            16w0x8100 : parse_vlan_tag;
+            16w0x9100 : parse_vlan_tag;
+            default : accept;
         }
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag);
+        packet.extract < vlan_tag_t >(hdr.vlan_tag);
         transition accept;
     }
     @name(".start") state start {
@@ -52,7 +52,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("ethernet.srcAddr");
         }
         default_action = NoAction();
     }
@@ -70,7 +70,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("ethernet.dstAddr");
         }
         default_action = NoAction();
     }
@@ -81,8 +81,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<vlan_tag_t>(hdr.vlan_tag);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < vlan_tag_t >(hdr.vlan_tag);
     }
 }
 
@@ -96,4 +96,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

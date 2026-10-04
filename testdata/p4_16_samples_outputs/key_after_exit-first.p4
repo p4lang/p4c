@@ -15,7 +15,7 @@ parser p(packet_in pkt, out Headers hdr) {
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     table simple_table {
         key = {
-            16w1: exact @name("key");
+            16w1 : exact @name("key");
         }
         actions = {
             @defaultonly NoAction();

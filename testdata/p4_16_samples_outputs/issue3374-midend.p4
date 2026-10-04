@@ -9,37 +9,37 @@ header ethernet_t {
 }
 
 header vlan_tag_h {
-    bit<3>  pcp;
-    bit<1>  cfi;
+    bit<3> pcp;
+    bit<1> cfi;
     bit<12> vid;
     bit<16> ether_type;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     vlan_tag_h[2] vlan_tag;
 }
 
 struct main_metadata_t {
-    bit<2>  depth;
+    bit<2> depth;
     bit<16> ethType;
 }
 
 parser parserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
         meta.depth = 2w1;
-        pkt.extract<ethernet_t>(hdrs.ethernet);
-        transition select(hdrs.ethernet.etherType) {
-            16w0x8100: parse_vlan_tag;
-            default: accept;
+        pkt.extract < ethernet_t >(hdrs.ethernet);
+        transition select (hdrs.ethernet.etherType) {
+            16w0x8100 : parse_vlan_tag;
+            default : accept;
         }
     }
     state parse_vlan_tag {
-        pkt.extract<vlan_tag_h>(hdrs.vlan_tag.next);
+        pkt.extract < vlan_tag_h >(hdrs.vlan_tag.next);
         meta.depth = meta.depth + 2w3;
-        transition select(hdrs.vlan_tag.last.ether_type) {
-            16w0x8100: parse_vlan_tag;
-            default: accept;
+        transition select (hdrs.vlan_tag.last.ether_type) {
+            16w0x8100 : parse_vlan_tag;
+            default : accept;
         }
     }
 }
@@ -71,9 +71,9 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
         }
         hsiVar = meta.depth;
         if (hsiVar == 2w0) {
-            hdrs.vlan_tag[2w0].vid = (bit<12>)hdrs.vlan_tag[2w0].cfi;
+            hdrs.vlan_tag[2w0].vid =(bit<12>) hdrs.vlan_tag[2w0].cfi;
         } else if (hsiVar == 2w1) {
-            hdrs.vlan_tag[2w1].vid = (bit<12>)hdrs.vlan_tag[2w1].cfi;
+            hdrs.vlan_tag[2w1].vid =(bit<12>) hdrs.vlan_tag[2w1].cfi;
         }
         hsiVar = meta.depth;
         if (hsiVar == 2w0) {
@@ -102,7 +102,7 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     bit<12> key_0;
     @name("ingressImpl.stub") table stub_0 {
         key = {
-            key_0: exact @name("hdrs.vlan_tag[meta.depth].vid");
+            key_0 : exact @name("hdrs.vlan_tag[meta.depth].vid");
         }
         actions = {
             execute();
@@ -112,7 +112,7 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     }
     @name("ingressImpl.stub1") table stub1_0 {
         key = {
-            hdrs.ethernet.etherType: exact @name("hdrs.ethernet.etherType");
+            hdrs.ethernet.etherType : exact @name("hdrs.ethernet.etherType");
         }
         actions = {
             execute_1();
@@ -129,7 +129,7 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
     bit<12> key_1;
     @hidden table switch_0_table {
         key = {
-            key_1: exact;
+            key_1 : exact;
         }
         actions = {
             switch_0_case();
@@ -138,121 +138,121 @@ control ingressImpl(inout headers_t hdrs, inout main_metadata_t meta, inout stan
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        const 12w1 : switch_0_case();
-                        const 12w2 : switch_0_case_0();
+            const 12w1 : switch_0_case();
+            const 12w2 : switch_0_case_0();
         }
     }
-    @hidden action issue3374l117() {
+    @hidden action issue3374l118() {
         key_1 = hdrs.vlan_tag[2w0].vid;
     }
-    @hidden action issue3374l117_0() {
+    @hidden action issue3374l118_0() {
         key_1 = hdrs.vlan_tag[2w1].vid;
     }
-    @hidden action issue3374l117_1() {
+    @hidden action issue3374l118_1() {
         key_1 = hsVar;
     }
-    @hidden action issue3374l117_2() {
+    @hidden action issue3374l118_2() {
         hsiVar = meta.depth;
     }
-    @hidden action issue3374l95() {
+    @hidden action issue3374l96() {
         key_0 = hdrs.vlan_tag[2w0].vid;
     }
-    @hidden action issue3374l95_0() {
+    @hidden action issue3374l96_0() {
         key_0 = hdrs.vlan_tag[2w1].vid;
     }
-    @hidden action issue3374l95_1() {
+    @hidden action issue3374l96_1() {
         key_0 = hsVar;
     }
-    @hidden action issue3374l95_2() {
+    @hidden action issue3374l96_2() {
         hsiVar = meta.depth;
     }
-    @hidden action issue3374l121() {
+    @hidden action issue3374l123() {
         hsiVar = meta.depth;
     }
-    @hidden table tbl_issue3374l117 {
+    @hidden table tbl_issue3374l118 {
         actions = {
-            issue3374l117_2();
+            issue3374l118_2();
         }
-        const default_action = issue3374l117_2();
+        const default_action = issue3374l118_2();
     }
-    @hidden table tbl_issue3374l117_0 {
+    @hidden table tbl_issue3374l118_0 {
         actions = {
-            issue3374l117();
+            issue3374l118();
         }
-        const default_action = issue3374l117();
+        const default_action = issue3374l118();
     }
-    @hidden table tbl_issue3374l117_1 {
+    @hidden table tbl_issue3374l118_1 {
         actions = {
-            issue3374l117_0();
+            issue3374l118_0();
         }
-        const default_action = issue3374l117_0();
+        const default_action = issue3374l118_0();
     }
-    @hidden table tbl_issue3374l117_2 {
+    @hidden table tbl_issue3374l118_2 {
         actions = {
-            issue3374l117_1();
+            issue3374l118_1();
         }
-        const default_action = issue3374l117_1();
+        const default_action = issue3374l118_1();
     }
-    @hidden table tbl_issue3374l95 {
+    @hidden table tbl_issue3374l96 {
         actions = {
-            issue3374l95_2();
+            issue3374l96_2();
         }
-        const default_action = issue3374l95_2();
+        const default_action = issue3374l96_2();
     }
-    @hidden table tbl_issue3374l95_0 {
+    @hidden table tbl_issue3374l96_0 {
         actions = {
-            issue3374l95();
+            issue3374l96();
         }
-        const default_action = issue3374l95();
+        const default_action = issue3374l96();
     }
-    @hidden table tbl_issue3374l95_1 {
+    @hidden table tbl_issue3374l96_1 {
         actions = {
-            issue3374l95_0();
+            issue3374l96_0();
         }
-        const default_action = issue3374l95_0();
+        const default_action = issue3374l96_0();
     }
-    @hidden table tbl_issue3374l95_2 {
+    @hidden table tbl_issue3374l96_2 {
         actions = {
-            issue3374l95_1();
+            issue3374l96_1();
         }
-        const default_action = issue3374l95_1();
+        const default_action = issue3374l96_1();
     }
-    @hidden table tbl_issue3374l121 {
+    @hidden table tbl_issue3374l123 {
         actions = {
-            issue3374l121();
+            issue3374l123();
         }
-        const default_action = issue3374l121();
+        const default_action = issue3374l123();
     }
     apply {
-        tbl_issue3374l117.apply();
+        tbl_issue3374l118.apply();
         if (hsiVar == 2w0) {
-            tbl_issue3374l117_0.apply();
+            tbl_issue3374l118_0.apply();
         } else if (hsiVar == 2w1) {
-            tbl_issue3374l117_1.apply();
+            tbl_issue3374l118_1.apply();
         } else if (hsiVar >= 2w1) {
-            tbl_issue3374l117_2.apply();
+            tbl_issue3374l118_2.apply();
         }
         switch (switch_0_table.apply().action_run) {
-            switch_0_case: {
-                tbl_issue3374l95.apply();
-                if (hsiVar == 2w0) {
-                    tbl_issue3374l95_0.apply();
-                } else if (hsiVar == 2w1) {
-                    tbl_issue3374l95_1.apply();
-                } else if (hsiVar >= 2w1) {
-                    tbl_issue3374l95_2.apply();
-                }
-                stub_0.apply();
+            switch_0_case : {
+            tbl_issue3374l96.apply();
+            if (hsiVar == 2w0) {
+            tbl_issue3374l96_0.apply();
+            } else if (hsiVar == 2w1) {
+            tbl_issue3374l96_1.apply();
+            } else if (hsiVar >= 2w1) {
+            tbl_issue3374l96_2.apply();
             }
-            switch_0_case_0: {
-                tbl_issue3374l121.apply();
-                if (hsiVar == 2w0 && hdrs.vlan_tag[2w0].ether_type == hdrs.ethernet.etherType) {
-                    stub1_0.apply();
-                } else if (hsiVar == 2w1 && hdrs.vlan_tag[2w1].ether_type == hdrs.ethernet.etherType) {
-                    stub1_0.apply();
-                }
+            stub_0.apply();
             }
-            switch_0_case_1: {
+            switch_0_case_0 : {
+            tbl_issue3374l123.apply();
+            if (hsiVar == 2w0 && hdrs.vlan_tag[2w0].ether_type == hdrs.ethernet.etherType) {
+            stub1_0.apply();
+            } else if (hsiVar == 2w1 && hdrs.vlan_tag[2w1].ether_type == hdrs.ethernet.etherType) {
+            stub1_0.apply();
+            }
+            }
+            switch_0_case_1 : {
             }
         }
     }
@@ -270,8 +270,8 @@ control updateChecksum(inout headers_t hdr, inout main_metadata_t meta) {
 
 control deparserImpl(packet_out pkt, in headers_t hdr) {
     apply {
-        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, main_metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, main_metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

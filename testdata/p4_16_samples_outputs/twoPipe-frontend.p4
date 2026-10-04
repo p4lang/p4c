@@ -9,4 +9,3 @@ struct inControl {
 
 struct outControl {
 }
-

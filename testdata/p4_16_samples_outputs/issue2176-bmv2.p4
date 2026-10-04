@@ -15,7 +15,7 @@ header H {
 
 struct Parsed_packet {
     ethernet_t eth;
-    H          h;
+    H h;
 }
 
 struct Metadata {

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-@IllegalMixing[key=4, 5]
+@IllegalMixing[key = 4, 5]
 controld d() {
-    apply {}
+apply { }
 }

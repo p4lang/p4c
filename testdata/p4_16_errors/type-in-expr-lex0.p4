@@ -2,8 +2,8 @@
 
 #include <core.p4>
 
-control ctrl<H>(bool val);
+control ctrl < H >(bool val);
 
-package pkg<H>(
+package pkg < H >(
     ctrl<H> val = ctrl(H > 3)
 );

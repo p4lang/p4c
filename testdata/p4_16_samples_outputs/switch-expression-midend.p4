@@ -9,7 +9,7 @@ control c(inout bit<32> b) {
     }
     @hidden table switch_0_table {
         key = {
-            b: exact;
+            b : exact;
         }
         actions = {
             switch_0_case();
@@ -18,19 +18,19 @@ control c(inout bit<32> b) {
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        const 32w16 : switch_0_case();
-                        const 32w32 : switch_0_case();
-                        const 32w64 : switch_0_case_0();
-                        const 32w92 : switch_0_case_1();
+            const 32w16 : switch_0_case();
+            const 32w32 : switch_0_case();
+            const 32w64 : switch_0_case_0();
+            const 32w92 : switch_0_case_1();
         }
     }
     @hidden action switchexpression13() {
         b = 32w1;
     }
-    @hidden action switchexpression14() {
+    @hidden action switchexpression15() {
         b = 32w2;
     }
-    @hidden action switchexpression16() {
+    @hidden action switchexpression18() {
         b = 32w3;
     }
     @hidden table tbl_switchexpression13 {
@@ -39,28 +39,28 @@ control c(inout bit<32> b) {
         }
         const default_action = switchexpression13();
     }
-    @hidden table tbl_switchexpression14 {
+    @hidden table tbl_switchexpression15 {
         actions = {
-            switchexpression14();
+            switchexpression15();
         }
-        const default_action = switchexpression14();
+        const default_action = switchexpression15();
     }
-    @hidden table tbl_switchexpression16 {
+    @hidden table tbl_switchexpression18 {
         actions = {
-            switchexpression16();
+            switchexpression18();
         }
-        const default_action = switchexpression16();
+        const default_action = switchexpression18();
     }
     apply {
         switch (switch_0_table.apply().action_run) {
-            switch_0_case: {
-                tbl_switchexpression13.apply();
+            switch_0_case : {
+            tbl_switchexpression13.apply();
             }
-            switch_0_case_0: {
-                tbl_switchexpression14.apply();
+            switch_0_case_0 : {
+            tbl_switchexpression15.apply();
             }
-            switch_0_case_1: {
-                tbl_switchexpression16.apply();
+            switch_0_case_1 : {
+            tbl_switchexpression18.apply();
             }
         }
     }

@@ -7,7 +7,7 @@
 
 // In arch file
 struct data {
-    bit<16>     a;
+    bit<16> a;
 };
 extern Virtual {
     Virtual();
@@ -21,10 +21,10 @@ extern Virtual {
 control c(inout bit<16> p) {
     Virtual() cntr = {  // implementation
         bit<16> f(in bit<16> ix) {  // abstract method implementation
-            return (ix + 1);
-        }
-        void g(inout data x) {
-        }
+            return(ix + 1);
+    }
+    void g(inout data x) {
+    }
     };
 
     apply {

@@ -1,6 +1,6 @@
-psa-meter2.p4(63): [--Werror=type-error] error: '(bit<16>)meter0.execute(index, PSA_MeterColor_t.GREEN)'
-        b.data = (bit<16>)meter0.execute(index, PSA_MeterColor_t.GREEN);
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psa-meter2.p4(64): [--Werror=type-error] error: '(bit<16>)meter0.execute(index, PSA_MeterColor_t.GREEN)'
+        b.data =(bit<16>) meter0.execute(index, PSA_MeterColor_t.GREEN);
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
 psa.p4(623): Cannot unify type 'PSA_MeterColor_t' with type 'bit<16>'
   enum PSA_MeterColor_t { RED, GREEN, YELLOW }

@@ -1,13 +1,13 @@
 #include <core.p4>
 
-extern Register<T> {
+extern Register < T > {
     Register(bit<32> size);
     void read(in bit<32> index, out T value);
     void write(in bit<32> index, in T value);
 }
 
-control proto<P, M>(inout P packet, in M meta);
-package top<P, M>(proto<P, M> _p);
+control proto < P, M >(inout P packet, in M meta);
+package top < P, M >(proto<P, M> _p);
 header H {
     bit<32> rtt;
 }
@@ -18,9 +18,9 @@ struct Metadata {
 
 const bit<32> MAX_ALLOWABLE_RTT = 2500;
 control ingress(inout H pkt_hdr, in Metadata metadata) {
-    Register<bit<32>>(1) input_traffic_bytes;
-    Register<bit<32>>(1) sum_rtt_Tr;
-    Register<bit<32>>(1) num_pkts_with_rtt;
+    Register < bit<32 >>(1) input_traffic_bytes;
+    Register <bit<32 >>(1) sum_rtt_Tr;
+    Register <bit<32 >>(1) num_pkts_with_rtt;
     apply {
         @atomic {
             bit<32> input_traffic_bytes_tmp;

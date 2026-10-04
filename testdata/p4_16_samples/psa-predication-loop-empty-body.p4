@@ -19,14 +19,15 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY { }
+struct EMPTY {
+}
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -79,7 +80,7 @@ control MyIC(
             // replaced with EmptyStatement. Without the fix,
             // EmptyStatementRemover would set loop body to nullptr.
             for (bit<32> i = 0; i < 10; i = i + 1) {
-                meta.counter = meta.counter + 1;
+            meta.counter = meta.counter + 1;
             }
         }
     }
@@ -88,7 +89,10 @@ control MyIC(
         key = {
             hdr.ethernet.srcAddr : exact;
         }
-        actions = { NoAction; increment_in_loop; }
+        actions = {
+            NoAction;
+            increment_in_loop;
+        }
     }
 
     apply {
@@ -101,7 +105,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -125,7 +130,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

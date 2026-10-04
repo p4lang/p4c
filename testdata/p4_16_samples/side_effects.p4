@@ -8,10 +8,12 @@
 extern bit f(inout bit x, in bit y);
 extern bit g(inout bit x);
 
-header H { bit z; }
+header H {
+    bit z;
+}
 
-control c<T>(inout T t);
-package top<T>(c<T> _c);
+control c < T >(inout T t);
+package top < T >(c<T> _c);
 
 control my(inout H[2] s) {
     apply {
@@ -21,7 +23,7 @@ control my(inout H[2] s) {
         a = f(s[a].z, g(a));
         a = f(s[g(a)].z, a);
         a = g(a);
-        a[0:0] = g(a[0:0]);
+        a[0 : 0] = g(a[0:0]);
         s[a].z = g(a);
     }
 }

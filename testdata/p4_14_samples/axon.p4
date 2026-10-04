@@ -78,9 +78,9 @@ metadata my_metadata_t my_metadata;
 
 parser start {
     /* Enable if compatibility with EasyRoute is desired. */
-    return select(current(0, 64)) {
-        0: parse_head;
-        default: ingress;
+    return select (current(0, 64)) {
+    0 : parse_head;
+    default : ingress;
     }
 
     /* Enable if EasyRoute is being ignored */
@@ -92,17 +92,17 @@ parser parse_head {
     set_metadata(my_metadata.fwdHopCount, latest.fwdHopCount);
     set_metadata(my_metadata.revHopCount, latest.revHopCount);
     set_metadata(my_metadata.headerLen, 2 + axon_head.fwdHopCount + axon_head.revHopCount);
-    return select(latest.fwdHopCount) {
-        0: ingress;             // Drop packets with no forward hop
-        default: parse_next_fwdHop;
+    return select (latest.fwdHopCount) {
+    0 : ingress;             // Drop packets with no forward hop
+        default : parse_next_fwdHop;
     }
 }
 
 parser parse_next_fwdHop {
     // Parse fwdHops until we have parsed them all
-    return select(my_metadata.fwdHopCount) {
-        0x0 : parse_next_revHop;
-        default : parse_fwdHop;
+    return select (my_metadata.fwdHopCount) {
+    0x0 : parse_next_revHop;
+    default : parse_fwdHop;
     }
 }
 
@@ -115,9 +115,9 @@ parser parse_fwdHop {
 
 parser parse_next_revHop {
     // Parse revHops until we have parsed them all
-    return select(my_metadata.revHopCount) {
-        0x0 : ingress;
-        default : parse_revHop;
+    return select (my_metadata.revHopCount) {
+    0x0 : ingress;
+    default : parse_revHop;
     }
 }
 
@@ -153,7 +153,7 @@ table drop_pkt {
     actions {
         _drop;
     }
-    size: 1;
+    size : 1;
 }
 
 /* Question: will this drop packets that did not have a forward hop? */
@@ -161,15 +161,15 @@ table route_pkt {
     reads {
         /* Technically axon_head is only written, not read.  Is this still
          * correct then? */
-        axon_head: valid;
+        axon_head : valid;
 
-        axon_fwdHop[0]: valid;  // Is using axon_fwdHop[0] correct?
+        axon_fwdHop[0] : valid;  // Is using axon_fwdHop[0] correct?
     }
     actions {
         _drop;
         route;
     }
-    size: 1;
+    size : 1;
 }
 
 control ingress {

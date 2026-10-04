@@ -14,9 +14,9 @@ header stack_t stack[4];
 
 parser start {
     extract(stack[0]);
-    return select(latest.f) {
-        0xffff : p1;
-        default: p2;
+    return select (latest.f) {
+    0xffff : p1;
+    default : p2;
     }
 }
 
@@ -32,4 +32,5 @@ parser p2 {
     return ingress;
 }
 
-control ingress { }
+control ingress {
+}

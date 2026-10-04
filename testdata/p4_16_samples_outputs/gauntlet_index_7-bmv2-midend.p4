@@ -19,8 +19,8 @@ header I {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
-    I          i;
+    H[2] h;
+    I i;
 }
 
 struct Meta {
@@ -28,50 +28,50 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<H>(hdr.h.next);
-        pkt.extract<I>(hdr.i);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < H >(hdr.h.next);
+        pkt.extract < I >(hdr.i);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") bit<1> tmp_0;
-    @hidden action gauntlet_index_7bmv2l57() {
+    @hidden action gauntlet_index_7bmv2l58() {
         h.h[1w0].a = 8w1;
     }
-    @hidden action gauntlet_index_7bmv2l57_0() {
+    @hidden action gauntlet_index_7bmv2l58_0() {
         h.h[1w1].a = 8w1;
     }
-    @hidden action gauntlet_index_7bmv2l57_1() {
+    @hidden action gauntlet_index_7bmv2l58_1() {
         tmp_0 = h.i.id;
         h.i.id = 1w0;
     }
-    @hidden table tbl_gauntlet_index_7bmv2l57 {
+    @hidden table tbl_gauntlet_index_7bmv2l58 {
         actions = {
-            gauntlet_index_7bmv2l57_1();
+            gauntlet_index_7bmv2l58_1();
         }
-        const default_action = gauntlet_index_7bmv2l57_1();
+        const default_action = gauntlet_index_7bmv2l58_1();
     }
-    @hidden table tbl_gauntlet_index_7bmv2l57_0 {
+    @hidden table tbl_gauntlet_index_7bmv2l58_0 {
         actions = {
-            gauntlet_index_7bmv2l57();
+            gauntlet_index_7bmv2l58();
         }
-        const default_action = gauntlet_index_7bmv2l57();
+        const default_action = gauntlet_index_7bmv2l58();
     }
-    @hidden table tbl_gauntlet_index_7bmv2l57_1 {
+    @hidden table tbl_gauntlet_index_7bmv2l58_1 {
         actions = {
-            gauntlet_index_7bmv2l57_0();
+            gauntlet_index_7bmv2l58_0();
         }
-        const default_action = gauntlet_index_7bmv2l57_0();
+        const default_action = gauntlet_index_7bmv2l58_0();
     }
     apply {
-        tbl_gauntlet_index_7bmv2l57.apply();
+        tbl_gauntlet_index_7bmv2l58.apply();
         if (tmp_0 == 1w0) {
-            tbl_gauntlet_index_7bmv2l57_0.apply();
+            tbl_gauntlet_index_7bmv2l58_0.apply();
         } else if (tmp_0 == 1w1) {
-            tbl_gauntlet_index_7bmv2l57_1.apply();
+            tbl_gauntlet_index_7bmv2l58_1.apply();
         }
     }
 }
@@ -93,11 +93,11 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<H>(h.h[0]);
-        pkt.emit<H>(h.h[1]);
-        pkt.emit<I>(h.i);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < H >(h.h[0]);
+        pkt.emit < H >(h.h[1]);
+        pkt.emit < I >(h.i);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

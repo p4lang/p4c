@@ -8,17 +8,17 @@ typedef bit<48> ethernet_addr_t;
 header ethernet_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
-    bit<16>         ether_type;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
-    bit<8>  ver_ihl_ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd_k;
-    bit<8>  diffserv_dpdk_dpdk_dpdk_dpdk_dpdk;
+    bit<8> ver_ihl_ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd_k;
+    bit<8> diffserv_dpdk_dpdk_dpdk_dpdk_dpdk;
     bit<16> total_len;
     bit<16> identification;
     bit<16> flags_offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdr_checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
@@ -32,26 +32,26 @@ header udp_t {
 }
 
 header vxlan_t {
-    bit<8>  flags;
+    bit<8> flags;
     bit<24> reserved;
     bit<24> vni;
-    bit<8>  reserved2;
+    bit<8> reserved2;
 }
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    vxlan_t    vxlan;
+    ipv4_t ipv4;
+    vxlan_t vxlan;
     ethernet_t outer_ethernet;
-    ipv4_t     outer_ipv4_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk;
-    udp_t      outer_udp;
-    vxlan_t    outer_vxlan;
+    ipv4_t outer_ipv4_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk;
+    udp_t outer_udp;
+    vxlan_t outer_vxlan;
 }
 
 struct local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
-    bit<8>          tmp;
+    bit<8> tmp;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
@@ -103,18 +103,18 @@ control ingress(inout headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dp
         headers.vxlan.reserved = vxlan_reserved;
         headers.vxlan.vni = vxlan_vni;
         headers.vxlan.reserved2 = vxlan_reserved2;
-        ostd.egress_port = (PortId_t)port_out;
+        ostd.egress_port =(PortId_t) port_out;
         csum.add({ headers.outer_ipv4_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk.hdr_checksum, headers.ipv4.total_len });
         headers.outer_ipv4_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk.hdr_checksum = csum.get();
         headers.outer_ipv4_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk.total_len = headers.outer_ipv4_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk.total_len + headers.ipv4.total_len;
         headers.outer_udp.length = headers.outer_udp.length + headers.ipv4.total_len;
     }
     action drop() {
-        ostd.egress_port = (PortId_t)4;
+        ostd.egress_port =(PortId_t) 4;
     }
     table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk {
         key = {
-            headers.ethernet.dst_addr: exact;
+            headers.ethernet.dst_addr : exact;
         }
         actions = {
             vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk;
@@ -125,8 +125,8 @@ control ingress(inout headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dp
     }
     apply {
         switch (vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk.apply().action_run) {
-            vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk: {
-                local_metadata1.tmp = 8w0;
+            vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk : {
+            local_metadata1.tmp = 8w0;
             }
         }
     }

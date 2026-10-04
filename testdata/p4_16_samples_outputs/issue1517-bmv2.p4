@@ -28,7 +28,7 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     apply {
         bit<16> rand_int;
-        random<bit<16>>(rand_int, 0, 48 * 1024 - 1);
+        random < bit<16 >>(rand_int, 0, 48 * 1024 - 1);
         if (rand_int < 32 * 1024) {
             mark_to_drop(standard_metadata);
         }

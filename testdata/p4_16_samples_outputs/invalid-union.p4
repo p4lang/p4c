@@ -14,7 +14,7 @@ header_union HU {
 
 parser p(inout HU hu) {
     state start {
-        hu = (HU){#};
+        hu =(HU) {#};
         transition accept;
     }
 }
@@ -23,7 +23,7 @@ control c(inout HU hu) {
     action a() {
     }
     apply {
-        H h = (H){#};
+        H h =(H) {#};
         a();
         if (!hu.isValid()) {
             h.setValid();

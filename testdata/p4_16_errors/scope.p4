@@ -4,11 +4,15 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-extern X { X(); bit<8> get(); }
+extern X {
+    X();
+    bit<8> get();
+}
 
 control q() {
     X() x;
-    apply {}
+    apply {
+    }
 }
 
 control r() {

@@ -15,7 +15,7 @@ header H {
 
 struct Parsed_packet {
     ethernet_t eth;
-    H          h;
+    H h;
 }
 
 struct Metadata {
@@ -23,15 +23,15 @@ struct Metadata {
 
 control deparser(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.eth);
-        packet.emit<H>(hdr.h);
+        packet.emit < ethernet_t >(hdr.eth);
+        packet.emit < H >(hdr.h);
     }
 }
 
 parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
@@ -45,7 +45,7 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            hdr.h.b: exact @name("hdr.h.b");
+            hdr.h.b : exact @name("hdr.h.b");
         }
         actions = {
             NoAction_1();
@@ -83,10 +83,10 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     apply {
         tbl_act.apply();
         switch (simple_table_0.apply().action_run) {
-            NoAction_1: {
-                tbl_issue2170bmv2l64.apply();
+            NoAction_1 : {
+            tbl_issue2170bmv2l64.apply();
             }
-            default: {
+            default : {
             }
         }
         if (hasReturned) {
@@ -112,4 +112,4 @@ control update(inout Parsed_packet hdr, inout Metadata meta) {
     }
 }
 
-V1Switch<Parsed_packet, Metadata>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Parsed_packet, Metadata >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

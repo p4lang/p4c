@@ -12,4 +12,3 @@ struct S {
     T s1;
     T s2;
 }
-

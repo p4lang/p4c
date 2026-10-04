@@ -16,7 +16,7 @@ struct metadata {
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.advance(32w8);
-        packet.extract<H>(hdr.byte);
+        packet.extract < H >(hdr.byte);
         packet.advance((bit<32>)(hdr.byte.byte << 3));
         transition accept;
     }
@@ -47,4 +47,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

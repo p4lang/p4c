@@ -44,7 +44,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
-            key_0: exact @name("key");
+            key_0 : exact @name("key");
         }
         actions = {
             other_action();
@@ -55,7 +55,7 @@ control ingress(inout Headers h) {
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
-            key_1: exact @name("key");
+            key_1 : exact @name("key");
         }
         actions = {
             dummy_action_1();
@@ -63,87 +63,87 @@ control ingress(inout Headers h) {
         }
         default_action = NoAction_2();
     }
-    @hidden action elimActRun2l26() {
+    @hidden action elimActRun2l29() {
         hasReturned = false;
         key_0 = 48w1;
     }
-    @hidden action elimActRun2l35() {
+    @hidden action elimActRun2l38() {
         key_1 = 48w1;
     }
-    @hidden action elimActRun2l46() {
+    @hidden action elimActRun2l49() {
         h.eth_hdr.src_addr = 48w4;
         hasReturned = true;
     }
-    @hidden action elimActRun2l35_0() {
+    @hidden action elimActRun2l38_0() {
         h.eth_hdr.dst_addr = h.eth_hdr.dst_addr | 48w2;
         key_1 = 48w1;
     }
-    @hidden action elimActRun2l55() {
+    @hidden action elimActRun2l58() {
         h.eth_hdr.src_addr = 48w5;
         hasReturned = true;
     }
-    @hidden table tbl_elimActRun2l26 {
+    @hidden table tbl_elimActRun2l29 {
         actions = {
-            elimActRun2l26();
+            elimActRun2l29();
         }
-        const default_action = elimActRun2l26();
+        const default_action = elimActRun2l29();
     }
-    @hidden table tbl_elimActRun2l35 {
+    @hidden table tbl_elimActRun2l38 {
         actions = {
-            elimActRun2l35();
+            elimActRun2l38();
         }
-        const default_action = elimActRun2l35();
+        const default_action = elimActRun2l38();
     }
-    @hidden table tbl_elimActRun2l46 {
+    @hidden table tbl_elimActRun2l49 {
         actions = {
-            elimActRun2l46();
+            elimActRun2l49();
         }
-        const default_action = elimActRun2l46();
+        const default_action = elimActRun2l49();
     }
-    @hidden table tbl_elimActRun2l35_0 {
+    @hidden table tbl_elimActRun2l38_0 {
         actions = {
-            elimActRun2l35_0();
+            elimActRun2l38_0();
         }
-        const default_action = elimActRun2l35_0();
+        const default_action = elimActRun2l38_0();
     }
-    @hidden table tbl_elimActRun2l55 {
+    @hidden table tbl_elimActRun2l58 {
         actions = {
-            elimActRun2l55();
+            elimActRun2l58();
         }
-        const default_action = elimActRun2l55();
+        const default_action = elimActRun2l58();
     }
     apply {
-        tbl_elimActRun2l26.apply();
+        tbl_elimActRun2l29.apply();
         simple_table.apply();
         switch (simple_table_action_run) {
-            simple_table_action_run_t.simple_table_dummy_action: {
-                tbl_elimActRun2l35.apply();
-                simple_table_0.apply();
-                switch (simple_table_0_action_run) {
-                    simple_table_0_action_run_t.simple_table_0_dummy_action: {
-                        tbl_elimActRun2l46.apply();
-                    }
-                    default: {
-                    }
-                }
+            simple_table_action_run_t.simple_table_dummy_action : {
+            tbl_elimActRun2l38.apply();
+            simple_table_0.apply();
+            switch (simple_table_0_action_run) {
+            simple_table_0_action_run_t.simple_table_0_dummy_action : {
+            tbl_elimActRun2l49.apply();
             }
-            simple_table_action_run_t.simple_table_other_action: {
-                tbl_elimActRun2l35_0.apply();
-                simple_table_0.apply();
-                switch (simple_table_0_action_run) {
-                    simple_table_0_action_run_t.simple_table_0_dummy_action: {
-                        tbl_elimActRun2l55.apply();
-                    }
-                    default: {
-                    }
-                }
+            default : {
             }
-            default: {
+            }
+            }
+            simple_table_action_run_t.simple_table_other_action : {
+            tbl_elimActRun2l38_0.apply();
+            simple_table_0.apply();
+            switch (simple_table_0_action_run) {
+            simple_table_0_action_run_t.simple_table_0_dummy_action : {
+            tbl_elimActRun2l58.apply();
+            }
+            default : {
+            }
+            }
+            }
+            default : {
             }
         }
     }
 }
 
-control c<H>(inout H h);
-package top<H>(c<H> c);
-top<Headers>(ingress()) main;
+control c < H >(inout H h);
+package top < H >(c<H> c);
+top < Headers >(ingress()) main;

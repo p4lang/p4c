@@ -17,47 +17,47 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<3> tmp;
-    @hidden action gauntlet_mux_typecastingbmv2l35() {
+    @hidden action gauntlet_mux_typecastingbmv2l36() {
         tmp = 3w2;
     }
-    @hidden action gauntlet_mux_typecastingbmv2l35_0() {
+    @hidden action gauntlet_mux_typecastingbmv2l36_0() {
         tmp = 3w1;
     }
-    @hidden action gauntlet_mux_typecastingbmv2l35_1() {
-        h.eth_hdr.eth_type = (bit<16>)-tmp;
+    @hidden action gauntlet_mux_typecastingbmv2l36_1() {
+        h.eth_hdr.eth_type =(bit<16>) - tmp;
     }
-    @hidden table tbl_gauntlet_mux_typecastingbmv2l35 {
+    @hidden table tbl_gauntlet_mux_typecastingbmv2l36 {
         actions = {
-            gauntlet_mux_typecastingbmv2l35();
+            gauntlet_mux_typecastingbmv2l36();
         }
-        const default_action = gauntlet_mux_typecastingbmv2l35();
+        const default_action = gauntlet_mux_typecastingbmv2l36();
     }
-    @hidden table tbl_gauntlet_mux_typecastingbmv2l35_0 {
+    @hidden table tbl_gauntlet_mux_typecastingbmv2l36_0 {
         actions = {
-            gauntlet_mux_typecastingbmv2l35_0();
+            gauntlet_mux_typecastingbmv2l36_0();
         }
-        const default_action = gauntlet_mux_typecastingbmv2l35_0();
+        const default_action = gauntlet_mux_typecastingbmv2l36_0();
     }
-    @hidden table tbl_gauntlet_mux_typecastingbmv2l35_1 {
+    @hidden table tbl_gauntlet_mux_typecastingbmv2l36_1 {
         actions = {
-            gauntlet_mux_typecastingbmv2l35_1();
+            gauntlet_mux_typecastingbmv2l36_1();
         }
-        const default_action = gauntlet_mux_typecastingbmv2l35_1();
+        const default_action = gauntlet_mux_typecastingbmv2l36_1();
     }
     apply {
         if (h.eth_hdr.src_addr == 48w1) {
-            tbl_gauntlet_mux_typecastingbmv2l35.apply();
+            tbl_gauntlet_mux_typecastingbmv2l36.apply();
         } else {
-            tbl_gauntlet_mux_typecastingbmv2l35_0.apply();
+            tbl_gauntlet_mux_typecastingbmv2l36_0.apply();
         }
-        tbl_gauntlet_mux_typecastingbmv2l35_1.apply();
+        tbl_gauntlet_mux_typecastingbmv2l36_1.apply();
     }
 }
 
@@ -78,8 +78,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<ethernet_t>(h.eth_hdr);
+        b.emit < ethernet_t >(h.eth_hdr);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

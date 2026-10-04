@@ -12,24 +12,24 @@
 #include <v1model.p4>
 #include "ml-headers.p4"
 
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION   = 5;
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION = 5;
 #define IS_REPLICATED(std_meta) (std_meta.instance_type == BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION)
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
                 inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            TYPE_IPV6: ipv6;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_IPV6 : ipv6;
+            default : accept;
         }
     }
     state ipv6 {
         packet.extract(hdr.ipv6);
-        transition select(hdr.ipv6.nextHdr) {
-            PROTO_UDP: parse_udp;
-            PROTO_ICMP6: icmp6;
-            default: accept;
+        transition select (hdr.ipv6.nextHdr) {
+            PROTO_UDP : parse_udp;
+            PROTO_ICMP6 : icmp6;
+            default : accept;
         }
     }
     state icmp6 {
@@ -38,7 +38,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
     }
     state parse_udp {
         packet.extract(hdr.udp);
-        transition accept;	
+        transition accept;
     }
 }
 
@@ -48,33 +48,37 @@ control ingress(inout headers hdr, inout metadata_t meta,
                 inout standard_metadata_t standard_metadata) {
     action set_mcast_grp(bit<16> mcast_grp, bit<9> port) {
         standard_metadata.mcast_grp = mcast_grp;
-	meta.egress_port = port;
+        meta.egress_port = port;
     }
     table ipv6_tbl {
-	key = {
-            (hdr.ipv6.dstAddr[127:120] == 8w0xff) : exact @name("mcast_key");
-	}
-	actions = {set_mcast_grp;}
+        key = {
+            (hdr.ipv6.dstAddr[127 : 120] == 8w0xff) : exact @name("mcast_key");
+        }
+        actions = {
+            set_mcast_grp;
+        }
     }
 
     apply {
         if (hdr.ipv6.isValid()) {
-	    ipv6_tbl.apply();
+            ipv6_tbl.apply();
         }
     }
 }
 
 control egress(inout headers hdr, inout metadata_t meta,
                inout standard_metadata_t standard_metadata) {
-    action set_out_bd (bit<24> bd) {
+    action set_out_bd(bit<24> bd) {
         meta.fwd.out_bd = bd;
     }
     table get_multicast_copy_out_bd {
         key = {
-            standard_metadata.mcast_grp  : exact;
+            standard_metadata.mcast_grp : exact;
             standard_metadata.egress_rid : exact;
         }
-        actions = { set_out_bd; }
+        actions = {
+            set_out_bd;
+        }
     }
 
     action drop() {
@@ -85,17 +89,20 @@ control egress(inout headers hdr, inout metadata_t meta,
     }
     table send_frame {
         key = {
-            meta.fwd.out_bd: exact;
+            meta.fwd.out_bd : exact;
         }
-        actions = {rewrite_mac; drop;}
+        actions = {
+            rewrite_mac;
+            drop;
+        }
         default_action = drop;
     }
 
     apply {
         if (IS_REPLICATED(standard_metadata)) {
             get_multicast_copy_out_bd.apply();
-	    send_frame.apply();
-	}
+            send_frame.apply();
+        }
     }
 }
 

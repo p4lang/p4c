@@ -4,8 +4,8 @@
 
 header data_t {
     bit<128> f4;
-    bit<8>   b1;
-    bit<8>   b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 header data1_t {
@@ -25,7 +25,7 @@ struct metadata {
 
 struct headers {
     @name(".data")
-    data_t  data;
+    data_t data;
     @name(".data1")
     data1_t data1;
     @name(".data2")
@@ -36,19 +36,19 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".d2") state d2 {
-        packet.extract<data2_t>(hdr.data2);
+        packet.extract < data2_t >(hdr.data2);
         transition d3;
     }
     @name(".d3") state d3 {
-        packet.extract<data3_t>(hdr.data3);
+        packet.extract < data3_t >(hdr.data3);
         transition more;
     }
     @name(".more") state more {
-        packet.extract<data_t>(hdr.data);
+        packet.extract < data_t >(hdr.data);
         transition accept;
     }
     @name(".start") state start {
-        packet.extract<data1_t>(hdr.data1);
+        packet.extract < data1_t >(hdr.data1);
         transition d2;
     }
 }
@@ -69,9 +69,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.data1.f1: exact @name("data1.f1");
-            hdr.data2.f2: exact @name("data2.f2");
-            hdr.data3.f3: exact @name("data3.f3");
+            hdr.data1.f1 : exact @name("data1.f1");
+            hdr.data2.f2 : exact @name("data2.f2");
+            hdr.data3.f3 : exact @name("data3.f3");
         }
         default_action = NoAction_1();
     }
@@ -87,10 +87,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data1_t>(hdr.data1);
-        packet.emit<data2_t>(hdr.data2);
-        packet.emit<data3_t>(hdr.data3);
-        packet.emit<data_t>(hdr.data);
+        packet.emit < data1_t >(hdr.data1);
+        packet.emit < data2_t >(hdr.data2);
+        packet.emit < data3_t >(hdr.data3);
+        packet.emit < data_t >(hdr.data);
     }
 }
 
@@ -104,4 +104,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

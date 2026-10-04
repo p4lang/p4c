@@ -32,8 +32,11 @@ parser start {
     return ingress;
 }
 
-action noop() { }
-action addf2() { add(meta.sum, data.f2, 100); }
+action noop() {
+}
+action addf2() {
+    add(meta.sum, data.f2, 100);
+}
 
 table test1 {
     reads {

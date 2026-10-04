@@ -21,8 +21,8 @@ header ethernet_t {
 header arp_t {
     bit<16> htype;
     bit<16> ptype;
-    bit<8>  hlen;
-    bit<8>  plen;
+    bit<8> hlen;
+    bit<8> plen;
     bit<16> oper;
 }
 
@@ -34,9 +34,9 @@ header arp_ipv4_t {
 }
 
 struct my_ingress_headers_t {
-    ethernet_t   ethernet;
-    arp_t        arp;
-    arp_ipv4_t   arp_ipv4;
+    ethernet_t ethernet;
+    arp_t arp;
+    arp_ipv4_t arp_ipv4;
 }
 
 const bit<16> ETHERTYPE_ARP = 0x0806;
@@ -56,19 +56,19 @@ parser Ingress_Parser(
 
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-	    ETHERTYPE_ARP: parse_arp;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_ARP : parse_arp;
+            default : accept;
         }
     }
 
     state parse_arp {
-	pkt.extract(hdr.arp);
-	pkt.extract(hdr.arp_ipv4);
-	transition select(hdr.arp.oper) {
-	    ARP_REQ: accept;
-            default: reject;
-	}
+        pkt.extract(hdr.arp);
+        pkt.extract(hdr.arp_ipv4);
+        transition select (hdr.arp.oper) {
+            ARP_REQ : accept;
+            default : reject;
+        }
     }
 }
 
@@ -85,18 +85,18 @@ control ingress(
 {
    /* Generate a grat ARP */
    action arp_reply(@tc_type("macaddr") bit<48> rmac) {
-	hdr.arp.oper = ARP_REPLY;
-	hdr.arp_ipv4.tha = hdr.arp_ipv4.sha;
-	hdr.arp_ipv4.sha = rmac;
-	hdr.arp_ipv4.spa = hdr.arp_ipv4.tpa;
-	hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
-	hdr.ethernet.srcAddr = rmac;
+        hdr.arp.oper = ARP_REPLY;
+        hdr.arp_ipv4.tha = hdr.arp_ipv4.sha;
+        hdr.arp_ipv4.sha = rmac;
+        hdr.arp_ipv4.spa = hdr.arp_ipv4.tpa;
+        hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
+        hdr.ethernet.srcAddr = rmac;
         send_to_port(istd.input_port);
-   }
+    }
 
-   action drop() {
+    action drop() {
         drop_packet();
-   }
+    }
 
     table arp_table {
         key = {
@@ -125,8 +125,8 @@ control Ingress_Deparser(
 {
     apply {
         pkt.emit(hdr.ethernet);
-	pkt.emit(hdr.arp);
-	pkt.emit(hdr.arp_ipv4);
+        pkt.emit(hdr.arp);
+        pkt.emit(hdr.arp_ipv4);
     }
 }
 

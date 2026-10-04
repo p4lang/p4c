@@ -8,27 +8,27 @@ header Ethernet_t {
 }
 
 header IPv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  tos;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> tos;
     bit<16> length;
     bit<16> id;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> checksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
 
 header IPv6_t {
-    bit<4>  version;
-    bit<8>  trafficClass;
+    bit<4> version;
+    bit<8> trafficClass;
     bit<20> flowLabel;
     bit<16> payloadLength;
-    bit<8>  nextHeader;
-    bit<8>  hopLimit;
+    bit<8> nextHeader;
+    bit<8> hopLimit;
     bit<128> srcAddr;
     bit<128> dstAddr;
 }
@@ -40,12 +40,12 @@ struct headers {
 }
 
 struct metadata {
-    bit<9>  ingress_port;
-    bit<8>  priority;
+    bit<9> ingress_port;
+    bit<8> priority;
     bit<16> var1;
     bit<32> var2;
-    bit<8>  var3;
-    bit<8>  unused1;
+    bit<8> var3;
+    bit<8> unused1;
     bit<16> unused2;
 }
 
@@ -66,18 +66,18 @@ void useless_function2(bit<8> param) {
     bit<8> temp = param + 1;
 }
 
-bit<9> used_function(inout bit<9> param){
-    if(param > 2){
+bit<9> used_function(inout bit<9> param) {
+    if (param > 2) {
         param = param + 50 * 2;
     }
-    else{
+    else {
         param = param + 20 * 5;
-        }
+    }
     return param;
 }
 
 // Useless
-action unused_action(){
+action unused_action() {
 }
 
 parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -90,10 +90,10 @@ parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout stand
         meta.var2 = 1000;
         meta.var3 = 5;
 
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            0x86DD: parse_ipv6;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            0x86DD : parse_ipv6;
+            default : accept;
         }
     }
 
@@ -101,8 +101,8 @@ parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout stand
         pkt.extract(hdr.ipv4);
         hdr.ipv4.setValid();
         hdr.ipv4.ttl = 64;
-        transition select(hdr.ipv4.protocol) {
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            default : accept;
         }
     }
 
@@ -123,9 +123,14 @@ parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout stand
     }
 }
 
-
-control MyVerifyChecksum(inout headers hdr, inout metadata meta) { apply { } }
-control MyComputeChecksum(inout headers hdr, inout metadata meta) { apply { } }
+control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
+    apply {
+    }
+}
+control MyComputeChecksum(inout headers hdr, inout metadata meta) {
+    apply {
+    }
+}
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action forward(bit<9> port) {
@@ -133,7 +138,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
 
     action set_ttl(bit<8> new_ttl) {
-            hdr.ipv4.ttl = new_ttl;
+        hdr.ipv4.ttl = new_ttl;
     }
 
     action drop() {
@@ -141,30 +146,33 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         set_ttl(2);
     }
 
-
     action useless_action() { // Useless
-        bit<8> x = +1;
-        bit<8> y = -x;
+        bit<8> x = + 1;
+        bit<8> y = - x;
         bit<8> z = ~y;
         return;  // Useless
     }
 
     apply {
         {
-        bit<32> temp = 10; // Useless
+            bit<32> temp = 10; // Useless
         }
         if (hdr.ipv4.isValid()) {
             bit<9> temp_2 = 8;
-            if (meta.var1 == 0) { }// Useless
-            else {}                // Useless              
+            if (meta.var1 == 0) {
+            }// Useless
+            else {
+            }                // Useless              
             forward(used_function(temp_2));
 
-            if (hdr.ipv4.ihl == 0){ }// Useless
+            if (hdr.ipv4.ihl == 0) {
+            }// Useless
 
         } else if (hdr.ipv6.isValid()) {
             drop();
         } else {
-            if (hdr.ipv6.version == 8) { }  // Useless
+            if (hdr.ipv6.version == 8) {
+            }  // Useless
             drop();
         }
 
@@ -192,4 +200,3 @@ control MyDeparser(packet_out pkt, in headers hdr) {
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

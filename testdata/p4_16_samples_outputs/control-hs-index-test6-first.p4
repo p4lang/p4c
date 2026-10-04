@@ -21,7 +21,7 @@ header h_index {
 struct headers {
     ethernet_t eth_hdr;
     h_stack[2] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {
@@ -32,10 +32,10 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<h_stack>(hdr.h[0]);
-        pkt.extract<h_stack>(hdr.h[1]);
-        pkt.extract<h_index>(hdr.i);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < h_stack >(hdr.h[0]);
+        pkt.extract < h_stack >(hdr.h[1]);
+        pkt.extract < h_index >(hdr.i);
         transition accept;
     }
 }
@@ -49,7 +49,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             @defaultonly NoAction();
         }
         key = {
-            h.h[h.i.index].a: exact @name("h.h[h.i.index].a");
+            h.h[h.i.index].a : exact @name("h.h[h.i.index].a");
         }
         default_action = NoAction();
     }
@@ -75,11 +75,11 @@ control egress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-        pkt.emit<h_stack>(h.h[0]);
-        pkt.emit<h_stack>(h.h[1]);
-        pkt.emit<h_index>(h.i);
+        pkt.emit < ethernet_t >(h.eth_hdr);
+        pkt.emit < h_stack >(h.h[0]);
+        pkt.emit < h_stack >(h.h[1]);
+        pkt.emit < h_index >(h.i);
     }
 }
 
-V1Switch<headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

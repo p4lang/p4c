@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header hdrA_t {
-    bit<8>  f1;
+    bit<8> f1;
     bit<64> f2;
 }
 
@@ -17,7 +17,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<hdrA_t>(hdr.hdrA);
+        packet.extract < hdrA_t >(hdr.hdrA);
         transition accept;
     }
 }
@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.hdrA.f1: exact @name("hdrA.f1");
+            hdr.hdrA.f1 : exact @name("hdrA.f1");
         }
         size = 128;
         default_action = NoAction_1();
@@ -55,7 +55,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<hdrA_t>(hdr.hdrA);
+        packet.emit < hdrA_t >(hdr.hdrA);
     }
 }
 
@@ -69,4 +69,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

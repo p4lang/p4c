@@ -17,7 +17,8 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -31,7 +32,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     ethernet_t tmp;
-    bit<16> dummy =  !false ? tmp.eth_type : 16w1;
+    bit<16> dummy = !false ? tmp.eth_type : 16w1;
     apply {
         tmp.setValid();
         h.eth_hdr.src_addr = tmp.src_addr;
@@ -60,4 +61,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

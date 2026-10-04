@@ -23,10 +23,10 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
+    default : ingress;
     }
 }
 
@@ -43,7 +43,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 header ipv4_t ipv4;
@@ -82,7 +82,7 @@ header_type egress_metadata_t {
         routed : 1;                            /* is this replica routed */
         same_bd_check : 16;                    /* ingress bd xor egress bd */
 
-        header_count: 4;                       /* Number of headers */
+        header_count : 4;                       /* Number of headers */
 
         drop_reason : 8;                       /* drop reason for negative mirroring */
         egress_bypass : 1;                     /* skip the entire egress pipeline */
@@ -98,8 +98,12 @@ action do_setup(idx, routed) {
 }
 
 table setup {
-    reads { ethernet: valid; }
-    actions { do_setup; }
+    reads {
+        ethernet : valid;
+    }
+    actions {
+        do_setup;
+    }
 }
 
 control ingress {
@@ -107,7 +111,8 @@ control ingress {
     process_mac_rewrite();
 }
 
-action nop() { }
+action nop() {
+}
 
 action rewrite_ipv4_unicast_mac(smac) {
     modify_field(ethernet.srcAddr, smac);

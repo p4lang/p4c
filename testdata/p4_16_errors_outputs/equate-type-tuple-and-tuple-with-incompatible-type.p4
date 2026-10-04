@@ -7,4 +7,3 @@ control c0() {
     apply {
     }
 }
-

@@ -14,7 +14,7 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<test_header>(headers.skip);
+        p.extract < test_header >(headers.skip);
         p.advance((bit<32>)headers.skip.bits_to_skip);
         transition accept;
     }
@@ -27,8 +27,8 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 
 control dprs(packet_out packet, in Headers_t headers) {
     apply {
-        packet.emit<test_header>(headers.skip);
+        packet.emit < test_header >(headers.skip);
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;

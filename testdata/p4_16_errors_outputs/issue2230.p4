@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header h1_t {
@@ -26,9 +26,9 @@ struct s1_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    h1_t       h1;
-    h1_t       h1b;
-    h2_t       h2;
+    h1_t h1;
+    h1_t h1b;
+    h2_t h2;
 }
 
 struct metadata_t {
@@ -42,4 +42,3 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         s1 = hdr.h1;
     }
 }
-

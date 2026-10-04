@@ -4,15 +4,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-typedef tuple<> emptyTuple;
+typedef tuple < > emptyTuple;
 
 control c(out bool b) {
     apply {
-        emptyTuple t = {};
-        if (t == {})
-           b = true;
+        emptyTuple t = {
+        };
+        if (t == {
+        })
+        b = true;
         else
-           b = false;
+        b = false;
     }
 }
 

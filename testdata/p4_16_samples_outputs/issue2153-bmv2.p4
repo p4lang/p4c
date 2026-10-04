@@ -15,7 +15,7 @@ header H {
 
 struct Parsed_packet {
     ethernet_t eth;
-    H          h;
+    H h;
 }
 
 struct Metadata {
@@ -44,7 +44,7 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     }
     table simple_table {
         key = {
-            hdr.h.b: exact;
+            hdr.h.b : exact;
         }
         actions = {
             NoAction();
@@ -56,8 +56,8 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
         bit<8> tmp_condition = 8w0;
         stdmeta.egress_spec = 9w0;
         switch (simple_table.apply().action_run) {
-            do_something: {
-                tmp_condition = 8w1;
+            do_something : {
+            tmp_condition = 8w1;
             }
         }
         if (tmp_condition > 0) {

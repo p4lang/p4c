@@ -14,7 +14,7 @@ header h_index {
 
 struct headers {
     h_stack[2] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {
@@ -22,46 +22,46 @@ struct Meta {
 
 parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<h_index>(hdr.i);
+        pkt.extract < h_index >(hdr.i);
         hdr.i.counter = 8w0;
         transition start_loops;
     }
     state start_loops {
         hdr.i.counter = hdr.i.counter + 8w1;
-        transition select(hdr.i.index) {
-            8w0: mixed_finite_loop;
-            8w1: mixed_infinite_loop;
-            8w2: infinite_loop;
-            8w3: finite_loop;
-            default: reject;
+        transition select (hdr.i.index) {
+            8w0 : mixed_finite_loop;
+            8w1 : mixed_infinite_loop;
+            8w2 : infinite_loop;
+            8w3 : finite_loop;
+            default : reject;
         }
     }
     state finite_loop {
         hdr.i.counter = hdr.i.counter + 8w1;
-        pkt.extract<h_stack>(hdr.h.next);
-        transition select(hdr.h.last.i1) {
-            8w2: accept;
-            default: finite_loop;
+        pkt.extract < h_stack >(hdr.h.next);
+        transition select (hdr.h.last.i1) {
+            8w2 : accept;
+            default : finite_loop;
         }
     }
     state mixed_finite_loop {
-        pkt.extract<h_stack>(hdr.h.next);
-        transition select(hdr.h.last.i2) {
-            8w1: start_loops;
-            8w2: accept;
+        pkt.extract < h_stack >(hdr.h.next);
+        transition select (hdr.h.last.i2) {
+            8w1 : start_loops;
+            8w2 : accept;
         }
     }
     state mixed_infinite_loop {
-        transition select(hdr.i.counter) {
-            8w3: accept;
-            default: start_loops;
+        transition select (hdr.i.counter) {
+            8w3 : accept;
+            default : start_loops;
         }
     }
     state infinite_loop {
         hdr.i.counter = hdr.i.counter + 8w1;
-        transition select(hdr.i.counter) {
-            8w3: accept;
-            default: infinite_loop;
+        transition select (hdr.i.counter) {
+            8w3 : accept;
+            default : infinite_loop;
         }
     }
 }
@@ -88,9 +88,9 @@ control egress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in headers h) {
     apply {
-        pkt.emit<h_stack[2]>(h.h);
-        pkt.emit<h_index>(h.i);
+        pkt.emit < h_stack[2] >(h.h);
+        pkt.emit < h_index >(h.i);
     }
 }
 
-V1Switch<headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

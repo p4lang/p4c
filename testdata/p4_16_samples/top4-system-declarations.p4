@@ -8,7 +8,8 @@
 // System-only error and match_kind declarations must not add blank lines.
 control C();
 control CImpl() {
-    apply { }
+    apply {
+    }
 }
 
 package P(C c);

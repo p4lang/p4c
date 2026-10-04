@@ -8,7 +8,7 @@ header hdr_t {
 
 control MyDeparser_0(packet_out packet) {
     apply {
-        packet.emit<hdr_t>((hdr_t){f0 = 8w0});
+        packet.emit < hdr_t >((hdr_t){f0 = 8w0});
     }
 }
 

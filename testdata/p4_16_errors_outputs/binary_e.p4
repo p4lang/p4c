@@ -22,4 +22,3 @@ control p() {
         d = a > c;
     }
 }
-

@@ -14,13 +14,13 @@ struct row_t {
 
 header Hdr1 {
     bit<8> a;
-    row_t  row0;
-    row_t  row1;
+    row_t row0;
+    row_t row1;
 }
 
 header Hdr2 {
     bit<16> b;
-    row_t   row;
+    row_t row;
 }
 
 header_union U {
@@ -30,7 +30,7 @@ header_union U {
 
 struct Headers {
     Hdr1 h1;
-    U    u;
+    U u;
 }
 
 struct Meta {
@@ -39,9 +39,9 @@ struct Meta {
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
         b.extract(h.h1);
-        transition select(h.h1.a) {
-            0: getH1;
-            default: getH2;
+        transition select (h.h1.a) {
+            0 : getH1;
+            default : getH2;
         }
     }
     state getH1 {

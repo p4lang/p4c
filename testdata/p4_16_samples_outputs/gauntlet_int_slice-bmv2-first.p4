@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -25,19 +25,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    ethernet_t tmp = (ethernet_t){dst_addr = 48w1024,src_addr = 48w1,eth_type = 16w1};
+    ethernet_t tmp =(ethernet_t) { dst_addr = 48w1024, src_addr = 48w1, eth_type = 16w1 };
     action simple_action() {
         tmp.src_addr = 48w1;
     }
     apply {
-        h.h.a = tmp.dst_addr[16:9];
+        h.h.a = tmp.dst_addr[16 : 9];
     }
 }
 
@@ -58,8 +58,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

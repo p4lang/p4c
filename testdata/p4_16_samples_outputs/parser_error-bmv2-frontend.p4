@@ -17,7 +17,7 @@ struct local_metadata_t {
 
 parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        pk.extract<Ethernet>(hdr.eth);
+        pk.extract < Ethernet >(hdr.eth);
         transition accept;
     }
 }
@@ -41,7 +41,7 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 
 control deparser(packet_out b, in parsed_packet_t hdr) {
     apply {
-        b.emit<parsed_packet_t>(hdr);
+        b.emit < parsed_packet_t >(hdr);
     }
 }
 
@@ -55,4 +55,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch<parsed_packet_t, local_metadata_t>(parse(), verify_checks(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch < parsed_packet_t, local_metadata_t >(parse(), verify_checks(), ingress(), egress(), compute_checksum(), deparser()) main;

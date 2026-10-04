@@ -9,17 +9,18 @@
 #include <v1model.p4>
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
+    bit<8> l;
     bit<8> r;
-    bit<8>  v;
+    bit<8> v;
 }
 
 struct Header_t {
     hdr h;
 }
-struct Meta_t {}
+struct Meta_t {
+}
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
     state start {
@@ -28,33 +29,50 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(inout Header_t h, inout Meta_t m) { apply {} }
-control update(inout Header_t h, inout Meta_t m) { apply {} }
-control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) { apply {} }
-control deparser(packet_out b, in Header_t h) { apply { b.emit(h.h); } }
+control vrfy(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control update(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+control deparser(packet_out b, in Header_t h) {
+    apply {
+        b.emit(h.h);
+    }
+}
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
 
-    action a() { standard_meta.egress_spec = 0; }
-    action a_with_control_params(bit<9> x) { standard_meta.egress_spec = x; }
+    action a() {
+        standard_meta.egress_spec = 0;
+    }
+    action a_with_control_params(bit<9> x) {
+        standard_meta.egress_spec = x;
+    }
 
     table t_lpm {
 
-  	key = {
+        key = {
             h.h.l : lpm;
         }
 
-	actions = {
+        actions = {
             a;
             a_with_control_params;
         }
 
-	default_action = a;
+        default_action = a;
 
         const entries = {
             0x11 &&& 0xF0 : a_with_control_params(11);
-            0x12          : a_with_control_params(12);
-            _             : a_with_control_params(13);
+            0x12 : a_with_control_params(12);
+            _ : a_with_control_params(13);
         }
     }
 
@@ -62,6 +80,5 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         t_lpm.apply();
     }
 }
-
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

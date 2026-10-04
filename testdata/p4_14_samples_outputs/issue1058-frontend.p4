@@ -28,7 +28,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
     @name(".start") state start {
@@ -38,7 +38,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name("test1_digest") struct test1_digest {
-    bit<48>             dstAddr;
+    bit<48> dstAddr;
     standard_metadata_t standard_metadata;
 }
 
@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".test_action") action test_action() {
-        digest<test1_digest>(32w0x666, (test1_digest){dstAddr = hdr.ethernet.dstAddr,standard_metadata = standard_metadata});
+        digest < test1_digest >(32w0x666, (test1_digest){dstAddr = hdr.ethernet.dstAddr,standard_metadata = standard_metadata});
     }
     @name(".tbl0") table tbl0_0 {
         actions = {
@@ -67,7 +67,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -81,4 +81,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

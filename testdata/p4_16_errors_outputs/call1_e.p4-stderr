@@ -1,5 +1,5 @@
-call1_e.p4(9): [--Wwarn=unused] warning: control 'p' is unused
-control p()
+call1_e.p4(10): [--Wwarn=unused] warning: control 'p' is unused
+control p() {
         ^
 call1_e.p4(11): [--Wwarn=unused] warning: 's' is unused
     S() s; // structs have no constructors
@@ -8,5 +8,5 @@ call1_e.p4(11): [--Werror=type-error] error: s: cannot allocate objects of type 
     S() s; // structs have no constructors
         ^
 call1_e.p4(7)
-struct S { }
+struct S {
        ^

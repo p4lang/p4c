@@ -30,7 +30,7 @@ header_type l3_metadata_t {
         rmac_hit : 1;                          /* dst mac is the router's mac */
         urpf_mode : 2;                         /* urpf mode for current lookup */
         urpf_hit : 1;                          /* hit in urpf table */
-        urpf_check_fail :1;                    /* urpf check failed */
+        urpf_check_fail : 1;                    /* urpf check failed */
         urpf_bd_group : BD_BIT_WIDTH;          /* urpf bd group */
         fib_hit : 1;                           /* fib hit */
         fib_nexthop : 16;                      /* next hop from fib */
@@ -41,7 +41,7 @@ header_type l3_metadata_t {
         outer_routed : 1;                      /* is outer packet routed? */
         mtu_index : 8;                         /* index into mtu table */
         l3_copy : 1;                           /* copy packet to CPU */
-        l3_mtu_check : 16 (saturating);        /* result of mtu check */
+        l3_mtu_check : 16(saturating);        /* result of mtu check */
     }
 }
 
@@ -116,7 +116,7 @@ table urpf_bd {
 control process_urpf_bd {
 #if !defined(L3_DISABLE) && !defined(URPF_DISABLE)
     if ((l3_metadata.urpf_mode == URPF_MODE_STRICT) and
-        (l3_metadata.urpf_hit == TRUE)) {
+    (l3_metadata.urpf_hit == TRUE)) {
         apply(urpf_bd);
     }
 #endif /* L3_DISABLE && URPF_DISABLE */
@@ -139,7 +139,6 @@ table smac_rewrite {
     }
     size : MAC_REWRITE_TABLE_SIZE;
 }
-
 
 action ipv4_unicast_rewrite() {
     modify_field(ethernet.dstAddr, egress_metadata.mac_da);

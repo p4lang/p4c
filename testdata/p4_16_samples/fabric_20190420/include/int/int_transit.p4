@@ -8,7 +8,7 @@
 /* -*- P4_16 -*- */
 #ifndef __INT_TRANSIT__
 #define __INT_TRANSIT__
-control process_int_transit (
+control process_int_transit(
     inout parsed_headers_t hdr,
     inout fabric_metadata_t fmeta,
     inout standard_metadata_t smeta) {
@@ -36,14 +36,14 @@ control process_int_transit (
     @hidden
     action int_set_header_1() {
         hdr.int_port_ids.setValid();
-        hdr.int_port_ids.ingress_port_id = (bit<16>) smeta.ingress_port;
-        hdr.int_port_ids.egress_port_id = (bit<16>) smeta.egress_port;
+        hdr.int_port_ids.ingress_port_id =(bit<16>) smeta.ingress_port;
+        hdr.int_port_ids.egress_port_id =(bit<16>) smeta.egress_port;
     }
     // Hop latency.
     @hidden
     action int_set_header_2() {
         hdr.int_hop_latency.setValid();
-        hdr.int_hop_latency.hop_latency = (bit<32>) smeta.deq_timedelta;
+        hdr.int_hop_latency.hop_latency =(bit<32>) smeta.deq_timedelta;
     }
     // Queue occupancy.
     @hidden
@@ -51,19 +51,19 @@ control process_int_transit (
         hdr.int_q_occupancy.setValid();
         // TODO: support queues in BMv2. ATM we assume only one.
         hdr.int_q_occupancy.q_id = 8w0;
-        hdr.int_q_occupancy.q_occupancy = (bit<24>) smeta.deq_qdepth;
+        hdr.int_q_occupancy.q_occupancy =(bit<24>) smeta.deq_qdepth;
     }
     // Ingress timestamp.
     @hidden
     action int_set_header_4() {
         hdr.int_ingress_tstamp.setValid();
-        hdr.int_ingress_tstamp.ingress_tstamp = (bit<32>) smeta.enq_timestamp;
+        hdr.int_ingress_tstamp.ingress_tstamp =(bit<32>) smeta.enq_timestamp;
     }
     // Egress timestamp.
     @hidden
     action int_set_header_5() {
         hdr.int_egress_tstamp.setValid();
-        hdr.int_egress_tstamp.egress_tstamp = (bit<32>) smeta.enq_timestamp + (bit<32>) smeta.deq_timedelta;
+        hdr.int_egress_tstamp.egress_tstamp =(bit<32>) smeta.enq_timestamp +(bit<32>) smeta.deq_timedelta;
     }
     // Queue congestion.
     @hidden
@@ -307,7 +307,7 @@ control process_int_transit (
         // We don't really need a key here, however we add a dummy one as a
         // workaround to ONOS inability to properly support default actions.
         key = {
-            hdr.int_header.isValid(): exact @name("int_is_valid");
+            hdr.int_header.isValid() : exact @name("int_is_valid");
         }
         actions = {
             init_metadata;

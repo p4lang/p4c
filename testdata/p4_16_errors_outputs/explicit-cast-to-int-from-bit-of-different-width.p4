@@ -5,4 +5,3 @@ control p() {
         a = (bit<0>)b;
     }
 }
-

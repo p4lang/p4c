@@ -15,7 +15,7 @@ control ctrl() {
     }
     apply {
         switch (t.apply().action_run) {
-            a: 
+            a:
             b: {
                 return;
             }
@@ -24,4 +24,3 @@ control ctrl() {
         }
     }
 }
-

@@ -17,4 +17,3 @@ control ingress(inout Header_t h) {
     apply {
     }
 }
-

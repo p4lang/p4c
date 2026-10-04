@@ -9,7 +9,7 @@
 header_type pkt_t {
     fields {
         field_a_32 : 32;
-        field_b_32 : 32 (signed);
+        field_b_32 : 32(signed);
         field_c_32 : 32;
         field_d_32 : 32;
 
@@ -23,7 +23,7 @@ header_type pkt_t {
         field_k_8 : 8;
         field_l_8 : 8;
 
-        field_x_32 : 32 (signed);
+        field_x_32 : 32(signed);
     }
 }
 
@@ -38,58 +38,59 @@ parser parse_ethernet {
     return ingress;
 }
 
-action action_0(){
+action action_0() {
     bit_nor(pkt.field_a_32, pkt.field_b_32, pkt.field_c_32);
 }
-action action_1(param0){
+action action_1(param0) {
     bit_nand(pkt.field_a_32, param0, pkt.field_c_32);
 }
-action action_2(param0){
+action action_2(param0) {
     bit_xnor(pkt.field_a_32, pkt.field_b_32, param0);
 }
-action action_3(){
+action action_3() {
     bit_not(pkt.field_a_32, pkt.field_d_32);
 }
-action action_4(param0){
+action action_4(param0) {
     min(pkt.field_a_32, pkt.field_d_32, param0);
 }
-action action_5(param0){
+action action_5(param0) {
     max(pkt.field_a_32, param0, pkt.field_d_32);
 }
-action action_6(){
+action action_6() {
     min(pkt.field_b_32, pkt.field_d_32, 7);
 }
-action action_7(param0){
+action action_7(param0) {
     max(pkt.field_b_32, param0, pkt.field_d_32);
 }
-action action_8(param0){
+action action_8(param0) {
     max(pkt.field_x_32, pkt.field_x_32, param0);
 }
-action action_9(){
+action action_9() {
     shift_right(pkt.field_x_32, pkt.field_x_32, 7);
 }
 
-action action_10(param0){
+action action_10(param0) {
      //bit_andca(pkt.field_a_32, pkt.field_a_32, param0);
      bit_andca(pkt.field_a_32, param0, pkt.field_a_32);
 }
 
-action action_11(param0){
+action action_11(param0) {
      //bit_andcb(pkt.field_a_32, pkt.field_a_32, param0);
      bit_andcb(pkt.field_a_32, param0, pkt.field_a_32);
 }
 
-action action_12(param0){
+action action_12(param0) {
      //bit_orca(pkt.field_a_32, pkt.field_a_32, param0);
      bit_orca(pkt.field_a_32, param0, pkt.field_a_32);
 }
 
-action action_13(param0){
+action action_13(param0) {
      //bit_orcb(pkt.field_a_32, pkt.field_a_32, param0);
      bit_orcb(pkt.field_a_32, param0, pkt.field_a_32);
 }
 
-action do_nothing(){}
+action do_nothing() {
+}
 
 table table_0 {
     reads {

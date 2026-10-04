@@ -27,7 +27,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        h.eth_hdr.eth_type = (bit<16>)-(h.eth_hdr.src_addr == 1 ? 2 : 3w1);
+        h.eth_hdr.eth_type =(bit<16>) -(h.eth_hdr.src_addr == 1 ? 2 : 3w1);
     }
 }
 

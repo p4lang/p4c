@@ -22,7 +22,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action hash() {
-        hash<bit<3>, bit<3>, tuple<>, bit<3>>(meta.x, HashAlgorithm.crc16, 3w0, {  }, 3w7);
+        hash < bit<3>, bit<3>, tuple < >, bit<3 >>(meta.x, HashAlgorithm.crc16, 3w0, {  }, 3w7);
     }
     apply {
     }
@@ -43,4 +43,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

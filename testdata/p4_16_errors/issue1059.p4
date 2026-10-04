@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-struct X {}
+struct X {
+}
 
 control c() {
     action a(in bit<32> z) {
     }
-
     apply {
         X x;
         a(x.x);

@@ -5,24 +5,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-control qp()
-{
-    action drop() {}
-
+control qp() {
+    action drop() {
+    }
     table m {
         actions = {
             drop;
         }
         default_action = drop;
     }
-
     apply {
         m.apply();
     }
 }
 
-extern Ix
-{
+extern Ix {
     Ix();
     void f();
     void f1(in int<32> x);
@@ -30,14 +27,11 @@ extern Ix
     int<32> h();
 }
 
-control p()
-{
+control p() {
     Ix() x;
     Ix() y;
-
-    action b(in bit<32> arg2)
-    {}
-
+    action b(in bit<32> arg2) {
+    }
     apply {
         x.f();
         x.f1(32s1);

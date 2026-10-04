@@ -1,5 +1,5 @@
 {
-  "lines_of_code" : 4,
+  "lines_of_code" : 6,
   "cyclomatic_complexity" : {
     "MyIngress" : 1
   },

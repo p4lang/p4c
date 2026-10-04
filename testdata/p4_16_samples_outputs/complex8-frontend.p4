@@ -7,9 +7,9 @@ parser p() {
     state start {
         tmp_0 = f(32w2);
         tmp = tmp_0;
-        transition select(tmp) {
-            32w0: accept;
-            default: reject;
+        transition select (tmp) {
+            32w0 : accept;
+            default : reject;
         }
     }
 }

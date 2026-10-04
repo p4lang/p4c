@@ -16,12 +16,18 @@ header hdr {
 
 control compute(inout hdr h) {
     action add()
-    { h.c = (bit<64>)(h.a + h.b); }
+    {
+        h.c =(bit<64>)(h.a + h.b);
+    }
     table t {
-        actions = { add; }
+        actions = {
+            add;
+        }
         const default_action = add;
     }
-    apply { t.apply(); }
+    apply {
+        t.apply();
+    }
 }
 
 #include "arith-inline-skeleton.p4"

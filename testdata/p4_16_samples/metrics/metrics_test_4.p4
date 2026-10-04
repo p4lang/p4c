@@ -2,22 +2,22 @@
 #include <v1model.p4>
 
 typedef bit<48> EthD_t;
-type    bit<48> EthT_t;
+type bit<48> EthT_t;
 
-typedef bit<8>     CustomD_t;
-type    bit<8>     CustomT_t;
-typedef CustomD_t  CustomDD_t;
-type    CustomD_t  CustomDT_t;
-typedef CustomT_t  CustomTD_t;
-type    CustomT_t  CustomTT_t;
+typedef bit<8> CustomD_t;
+type bit<8> CustomT_t;
+typedef CustomD_t CustomDD_t;
+type CustomD_t CustomDT_t;
+typedef CustomT_t CustomTD_t;
+type CustomT_t CustomTT_t;
 typedef CustomDD_t CustomDDD_t;
-type    CustomDD_t CustomDDT_t;
+type CustomDD_t CustomDDT_t;
 typedef CustomDT_t CustomDTD_t;
-type    CustomDT_t CustomDTT_t;
+type CustomDT_t CustomDTT_t;
 typedef CustomTD_t CustomTDD_t;
-type    CustomTD_t CustomTDT_t;
+type CustomTD_t CustomTDT_t;
 typedef CustomTT_t CustomTTD_t;
-type    CustomTT_t CustomTTT_t;
+type CustomTT_t CustomTTT_t;
 
 struct nested_t {
     bit<8> f1;
@@ -25,19 +25,19 @@ struct nested_t {
 }
 
 header ethernet_t {
-    EthD_t  dstAddr;
-    EthT_t  srcAddr;
+    EthD_t dstAddr;
+    EthT_t srcAddr;
     bit<16> etherType;
 }
 
 header custom_t {
-    bit<8>      e;
-    CustomD_t   ed;
-    CustomT_t   et;
-    CustomDD_t  edd;
-    CustomDT_t  edt;
-    CustomTD_t  etd;
-    CustomTT_t  ett;
+    bit<8> e;
+    CustomD_t ed;
+    CustomT_t et;
+    CustomDD_t edd;
+    CustomDT_t edt;
+    CustomTD_t etd;
+    CustomTT_t ett;
     CustomDDD_t eddd;
     CustomDDT_t eddt;
     CustomDTD_t edtd;
@@ -46,14 +46,14 @@ header custom_t {
     CustomTDT_t etdt;
     CustomTTD_t ettd;
     CustomTTT_t ettt;
-    bit<16>     checksum;
+    bit<16> checksum;
 }
 
 header ipv4_new_t {
     bit<32> srcAddr;
     bit<32> dstAddr;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> length;
 }
 
@@ -64,12 +64,12 @@ header stack_elem_t {
 
 header bar_t {
     nested_t duo;
-    bit<8>  val;
+    bit<8> val;
 }
 
 header_union u_hdr_t {
     ipv4_new_t v4;
-    bar_t      s;
+    bar_t s;
 }
 
 enum MyEnum {
@@ -83,20 +83,20 @@ enum bit<8> MySerEnum {
 }
 
 struct meta_t {
-        MySerEnum   ser_enum_field; // enum bit<8>
-        MyEnum      enum_field;     // enum
-        bool        flag;           // Boolean
-        int<32>     i32;            // signed integer
-        error       err_field;      // error code
+    MySerEnum ser_enum_field; // enum bit<8>
+        MyEnum enum_field;     // enum
+        bool flag;           // Boolean
+        int<32> i32;            // signed integer
+        error err_field;      // error code
 }
 
 struct headers_t {
-        ethernet_t  ethernet;
-        custom_t    custom;
-        ipv4_new_t  ipv4;
-        stack_elem_t[2] stack_hdr;
-        bar_t       bar;
-        u_hdr_t     u_hdr;
+    ethernet_t ethernet;
+    custom_t custom;
+    ipv4_new_t ipv4;
+    stack_elem_t[2] stack_hdr;
+    bar_t bar;
+    u_hdr_t u_hdr;
 }
 
 //――――――――――――――――――――――――――――――――――――――――――――――――
@@ -116,9 +116,9 @@ parser ParserImpl(
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_CUSTOM: parse_custom;
-            default:            parse_done;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_CUSTOM : parse_custom;
+            default : parse_done;
         }
     }
     state parse_custom {
@@ -156,13 +156,13 @@ control ingress(
     {
         headers_t tmp;
         tmp.custom.setValid();
-        tmp.custom.e    = e;
-        tmp.custom.ed   = ed;
-        tmp.custom.et   = et;
-        tmp.custom.edd  = edd;
-        tmp.custom.edt  = edt;
-        tmp.custom.etd  = etd;
-        tmp.custom.ett  = ett;
+        tmp.custom.e = e;
+        tmp.custom.ed = ed;
+        tmp.custom.et = et;
+        tmp.custom.edd = edd;
+        tmp.custom.edt = edt;
+        tmp.custom.etd = etd;
+        tmp.custom.ett = ett;
         tmp.custom.eddd = eddd;
         tmp.custom.eddt = eddt;
         tmp.custom.edtd = edtd;
@@ -171,22 +171,23 @@ control ingress(
         tmp.custom.etdt = etdt;
         tmp.custom.ettd = ettd;
         tmp.custom.ettt = ettt;
-        hdr.custom      = tmp.custom;
+        hdr.custom = tmp.custom;
     }
-    action my_drop() { }
+    action my_drop() {
+    }
 
     table custom_table {
         key = {
             hdr.ethernet.srcAddr : exact;
             hdr.ethernet.dstAddr : exact;
-            hdr.custom.e         : exact;
-            hdr.custom.etdd      : exact;
-            hdr.custom.ettt      : exact;
-            meta.i32             : exact;
-            meta.flag            : exact;
-            meta.ser_enum_field  : lpm;
-            meta.enum_field      : exact;
-            meta.err_field       : ternary;
+            hdr.custom.e : exact;
+            hdr.custom.etdd : exact;
+            hdr.custom.ettt : exact;
+            meta.i32 : exact;
+            meta.flag : exact;
+            meta.ser_enum_field : lpm;
+            meta.enum_field : exact;
+            meta.err_field : ternary;
         }
         actions = {
             set_output;
@@ -200,13 +201,13 @@ control ingress(
         if (hdr.custom.isValid()) {
             custom_table.apply();
 
-            hdr.ipv4.ttl        = hdr.ipv4.ttl - 1;
-            hdr.ipv4.protocol   = hdr.ipv4.protocol + 2;
-            hdr.ipv4.srcAddr    = hdr.ipv4.srcAddr + 32w0x01010101;
-            hdr.stack_hdr[0].a  = hdr.stack_hdr[0].a + hdr.stack_hdr[1].b;
-            hdr.bar.val         = hdr.bar.duo.f2 - hdr.stack_hdr[0].a;
-            hdr.u_hdr.v4.ttl    = hdr.ipv4.ttl >> 1;
-            hdr.u_hdr.s.val     = (hdr.bar.val * 2) & 8w0x0F;
+            hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+            hdr.ipv4.protocol = hdr.ipv4.protocol + 2;
+            hdr.ipv4.srcAddr = hdr.ipv4.srcAddr + 32w0x01010101;
+            hdr.stack_hdr[0].a = hdr.stack_hdr[0].a + hdr.stack_hdr[1].b;
+            hdr.bar.val = hdr.bar.duo.f2 - hdr.stack_hdr[0].a;
+            hdr.u_hdr.v4.ttl = hdr.ipv4.ttl >> 1;
+            hdr.u_hdr.s.val =(hdr.bar.val * 2) & 8w0x0F;
         }
     }
 }
@@ -216,7 +217,8 @@ control egress(
     inout meta_t              meta,
     inout standard_metadata_t standard_metadata)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {

@@ -51,12 +51,12 @@ struct tst_t {
 parser parse(packet_in pk, out parsed_packet_t h,
              inout local_metadata_t local_metadata,
              inout standard_metadata_t standard_metadata) {
-  state start {
-    pk.extract(h.bvh0);
-    pk.extract(h.bvh1);
-    pk.extract(local_metadata.col.bvh);
-    transition accept;
-  }
+    state start {
+        pk.extract(h.bvh0);
+        pk.extract(h.bvh1);
+        pk.extract(local_metadata.col.bvh);
+        transition accept;
+    }
 }
 
 control ingress(inout parsed_packet_t h,
@@ -75,7 +75,7 @@ control ingress(inout parsed_packet_t h,
             h.bvh1.row.alt1.valid : exact;
             local_metadata.col.bvh.row.alt0.valid : exact;
         }
-	actions = {
+        actions = {
             do_act;
         }
     }
@@ -109,7 +109,8 @@ control ingress(inout parsed_packet_t h,
 control egress(inout parsed_packet_t hdr,
                inout local_metadata_t local_metadata,
 	       inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control deparser(packet_out b, in parsed_packet_t h) {
@@ -121,12 +122,14 @@ control deparser(packet_out b, in parsed_packet_t h) {
 
 control verifyChecksum(inout parsed_packet_t hdr,
                         inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control compute_checksum(inout parsed_packet_t hdr,
                          inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(parse(), verifyChecksum(), ingress(), egress(),

@@ -17,14 +17,12 @@ struct metadata_t {
     mystruct2_t s2;
 }
 
-control ingressImpl(inout metadata_t meta)
-{
+control ingressImpl(inout metadata_t meta) {
     apply {
-        meta.s2 = {s1={f1=2}};
+        meta.s2 = {s1 = {f1 = 2}};
     }
 }
 
 control c(inout metadata_t meta);
 package top(c _c);
-
 top(ingressImpl()) main;

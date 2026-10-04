@@ -4,6 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-match_kind { exact }
+match_kind {
+    exact
+}
 
-const tuple<match_kind> exact_once = {exact};
+const tuple<match_kind> exact_once = { exact };

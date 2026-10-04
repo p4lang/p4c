@@ -17,7 +17,7 @@ header_type can_data_t {
         len : 16;  // length of value
         value : *;
     }
-    length : 4+len;
+    length : 4 + len;
     max_length : 12;
 }
 header can_data_t can_data;
@@ -41,9 +41,11 @@ action value_add() {
 
 table t_can {
     reads {
-        can_data.id: exact;
+        can_data.id : exact;
     }
-    actions {value_add;}
+    actions {
+        value_add;
+    }
 }
 
 control ingress {

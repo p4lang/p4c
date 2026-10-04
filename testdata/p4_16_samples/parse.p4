@@ -5,17 +5,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-struct bs {}
+struct bs {
+}
 
-parser p(in bs b, out bool matches)
-{
-    state start
-    {
+parser p(in bs b, out bool matches) {
+    state start {
         transition next;
     }
-    
-    state next 
-    {
+    state next {
         transition accept;
     }
 }

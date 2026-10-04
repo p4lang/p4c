@@ -16,4 +16,3 @@ struct Parsed_headers {
     Tcp_h      tcpudp_tcp;
     Udp_h      tcpudp_udp;
 }
-

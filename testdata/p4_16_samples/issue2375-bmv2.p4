@@ -13,14 +13,12 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-
 struct Headers {
     ethernet_t eth_hdr;
 }
 
 struct Meta {
 }
-
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {

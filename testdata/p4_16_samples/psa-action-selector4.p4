@@ -7,9 +7,10 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 struct user_meta_t {
     bit<16> data;
@@ -18,7 +19,7 @@ struct user_meta_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -59,19 +60,29 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
 
     ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as;
-    action a1(bit<48> param) { hdr.ethernet.dstAddr = param; }
-    action a2(bit<16> param) { hdr.ethernet.etherType = param; }
+    action a1(bit<48> param) {
+        hdr.ethernet.dstAddr = param;
+    }
+    action a2(bit<16> param) {
+        hdr.ethernet.etherType = param;
+    }
     table tbl {
         key = {
             hdr.ethernet.srcAddr : exact;
             b.data : selector;
         }
-        actions = { NoAction; a1; a2; }
+        actions = {
+            NoAction;
+            a1;
+            a2;
+        }
         psa_implementation = as;
     }
 
     table foo {
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
     }
 
     apply {
@@ -98,7 +109,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -122,7 +134,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

@@ -9,16 +9,16 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> total_len;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> frag_offset;
-    bit<8>  ttl;
-    bit<8>  proto;
+    bit<8> ttl;
+    bit<8> proto;
     bit<16> checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
@@ -29,10 +29,10 @@ header tcp_t {
     bit<16> dport;
     bit<32> seq_no;
     bit<32> ack_no;
-    bit<4>  data_offset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> data_offset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgent_ptr;
@@ -46,8 +46,8 @@ header udp_t {
 }
 
 header icmp_t {
-    bit<8>  icmp_type;
-    bit<8>  icmp_code;
+    bit<8> icmp_type;
+    bit<8> icmp_code;
     bit<16> checksum;
     bit<16> identifier;
     bit<16> sequence_number;
@@ -55,21 +55,21 @@ header icmp_t {
 }
 
 header gtpu_t {
-    bit<3>  version;
-    bit<1>  pt;
-    bit<1>  spare;
-    bit<1>  ex_flag;
-    bit<1>  seq_flag;
-    bit<1>  npdu_flag;
-    bit<8>  msgtype;
+    bit<3> version;
+    bit<1> pt;
+    bit<1> spare;
+    bit<1> ex_flag;
+    bit<1> seq_flag;
+    bit<1> npdu_flag;
+    bit<8> msgtype;
     bit<16> msglen;
     bit<32> teid;
 }
 
 header gtpu_options_t {
     bit<16> seq_num;
-    bit<8>  n_pdu_num;
-    bit<8>  next_ext;
+    bit<8> n_pdu_num;
+    bit<8> next_ext;
 }
 
 header gtpu_ext_psc_t {
@@ -92,20 +92,20 @@ header gtpu_ext_psc_t {
 }
 
 struct parsed_headers_t {
-    packet_out_t   packet_out;
-    packet_in_t    packet_in;
-    ethernet_t     ethernet;
-    ipv4_t         ipv4;
-    udp_t          udp;
-    tcp_t          tcp;
-    icmp_t         icmp;
-    gtpu_t         gtpu;
+    packet_out_t packet_out;
+    packet_in_t packet_in;
+    ethernet_t ethernet;
+    ipv4_t ipv4;
+    udp_t udp;
+    tcp_t tcp;
+    icmp_t icmp;
+    gtpu_t gtpu;
     gtpu_options_t gtpu_options;
     gtpu_ext_psc_t gtpu_ext_psc;
-    ipv4_t         inner_ipv4;
-    udp_t          inner_udp;
-    tcp_t          inner_tcp;
-    icmp_t         inner_icmp;
+    ipv4_t inner_ipv4;
+    udp_t inner_udp;
+    tcp_t inner_tcp;
+    icmp_t inner_icmp;
 }
 
 struct ddn_digest_t {
@@ -113,10 +113,10 @@ struct ddn_digest_t {
 }
 
 struct local_metadata_t {
-    bit<8>  direction;
+    bit<8> direction;
     bit<32> teid;
-    bit<4>  slice_id;
-    bit<2>  tc;
+    bit<4> slice_id;
+    bit<2> tc;
     bit<32> next_hop_ip;
     bit<32> ue_addr;
     bit<32> inet_addr;
@@ -124,28 +124,28 @@ struct local_metadata_t {
     bit<16> inet_l4_port;
     bit<16> l4_sport;
     bit<16> l4_dport;
-    bit<8>  ip_proto;
-    bit<8>  application_id;
-    bit<8>  src_iface;
-    bool    needs_gtpu_decap;
-    bool    needs_tunneling;
-    bool    needs_buffering;
-    bool    needs_dropping;
-    bool    terminations_hit;
+    bit<8> ip_proto;
+    bit<8> application_id;
+    bit<8> src_iface;
+    bool needs_gtpu_decap;
+    bool needs_tunneling;
+    bool needs_buffering;
+    bool needs_dropping;
+    bool terminations_hit;
     bit<32> ctr_idx;
-    bit<8>  tunnel_peer_id;
+    bit<8> tunnel_peer_id;
     bit<32> tunnel_out_src_ipv4_addr;
     bit<32> tunnel_out_dst_ipv4_addr;
     bit<16> tunnel_out_udp_sport;
     bit<32> tunnel_out_teid;
-    bit<6>  tunnel_out_qfi;
+    bit<6> tunnel_out_qfi;
     bit<32> session_meter_idx_internal;
     bit<32> app_meter_idx_internal;
-    bit<2>  session_color;
-    bit<2>  app_color;
-    bit<2>  slice_tc_color;
+    bit<2> session_color;
+    bit<2> app_color;
+    bit<2> slice_tc_color;
     @field_list(0)
-    bit<9>  preserved_ingress_port;
+    bit<9> preserved_ingress_port;
 }
 
 parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
@@ -153,156 +153,156 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout local_metada
     @name("ParserImpl.gtpu_ext_len") bit<8> gtpu_ext_len_0;
     bit<64> tmp;
     state start {
-        transition select(std_meta.ingress_port) {
-            9w255: parse_packet_out;
-            default: parse_ethernet;
+        transition select (std_meta.ingress_port) {
+            9w255 : parse_packet_out;
+            default : parse_ethernet;
         }
     }
     state parse_packet_out {
-        packet.extract<packet_out_t>(hdr.packet_out);
+        packet.extract < packet_out_t >(hdr.packet_out);
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.ether_type) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.ether_type) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
-        transition select(hdr.ipv4.proto) {
-            8w17: parse_udp;
-            8w6: parse_tcp;
-            8w1: parse_icmp;
-            default: accept;
+        packet.extract < ipv4_t >(hdr.ipv4);
+        transition select (hdr.ipv4.proto) {
+            8w17 : parse_udp;
+            8w6 : parse_tcp;
+            8w1 : parse_icmp;
+            default : accept;
         }
     }
     state parse_udp {
-        packet.extract<udp_t>(hdr.udp);
+        packet.extract < udp_t >(hdr.udp);
         local_meta.l4_sport = hdr.udp.sport;
         local_meta.l4_dport = hdr.udp.dport;
-        tmp = packet.lookahead<bit<64>>();
+        tmp = packet.lookahead < bit<64 >>();
         gtpu_0.setValid();
-        gtpu_0.version = tmp[63:61];
-        gtpu_0.pt = tmp[60:60];
-        gtpu_0.spare = tmp[59:59];
-        gtpu_0.ex_flag = tmp[58:58];
-        gtpu_0.seq_flag = tmp[57:57];
-        gtpu_0.npdu_flag = tmp[56:56];
-        gtpu_0.msgtype = tmp[55:48];
-        gtpu_0.msglen = tmp[47:32];
-        gtpu_0.teid = tmp[31:0];
-        transition select(hdr.udp.dport, tmp[63:61], tmp[55:48]) {
-            (16w9875, default, default): parse_inner_ipv4;
-            (16w2152, 3w0x1, 8w255): parse_gtpu;
-            default: accept;
+        gtpu_0.version = tmp[63 : 61];
+        gtpu_0.pt = tmp[60 : 60];
+        gtpu_0.spare = tmp[59 : 59];
+        gtpu_0.ex_flag = tmp[58 : 58];
+        gtpu_0.seq_flag = tmp[57 : 57];
+        gtpu_0.npdu_flag = tmp[56 : 56];
+        gtpu_0.msgtype = tmp[55 : 48];
+        gtpu_0.msglen = tmp[47 : 32];
+        gtpu_0.teid = tmp[31 : 0];
+        transition select (hdr.udp.dport, tmp[63 : 61], tmp[55 : 48]) {
+            (16w9875, default, default) : parse_inner_ipv4;
+            (16w2152, 3w0x1, 8w255) : parse_gtpu;
+            default : accept;
         }
     }
     state parse_tcp {
-        packet.extract<tcp_t>(hdr.tcp);
+        packet.extract < tcp_t >(hdr.tcp);
         local_meta.l4_sport = hdr.tcp.sport;
         local_meta.l4_dport = hdr.tcp.dport;
         transition accept;
     }
     state parse_icmp {
-        packet.extract<icmp_t>(hdr.icmp);
+        packet.extract < icmp_t >(hdr.icmp);
         transition accept;
     }
     state parse_gtpu {
-        packet.extract<gtpu_t>(hdr.gtpu);
+        packet.extract < gtpu_t >(hdr.gtpu);
         local_meta.teid = hdr.gtpu.teid;
-        transition select(hdr.gtpu.ex_flag, hdr.gtpu.seq_flag, hdr.gtpu.npdu_flag) {
-            (1w0, 1w0, 1w0): parse_inner_ipv4;
-            default: parse_gtpu_options;
+        transition select (hdr.gtpu.ex_flag, hdr.gtpu.seq_flag, hdr.gtpu.npdu_flag) {
+            (1w0, 1w0, 1w0) : parse_inner_ipv4;
+            default : parse_gtpu_options;
         }
     }
     state parse_gtpu_options {
-        packet.extract<gtpu_options_t>(hdr.gtpu_options);
-        gtpu_ext_len_0 = packet.lookahead<bit<8>>();
-        transition select(hdr.gtpu_options.next_ext, gtpu_ext_len_0) {
-            (8w0x85, 8w1): parse_gtpu_ext_psc;
-            default: accept;
+        packet.extract < gtpu_options_t >(hdr.gtpu_options);
+        gtpu_ext_len_0 = packet.lookahead < bit<8 >>();
+        transition select (hdr.gtpu_options.next_ext, gtpu_ext_len_0) {
+            (8w0x85, 8w1) : parse_gtpu_ext_psc;
+            default : accept;
         }
     }
     state parse_gtpu_ext_psc {
-        packet.extract<gtpu_ext_psc_t>(hdr.gtpu_ext_psc);
-        transition select(hdr.gtpu_ext_psc.next_ext) {
-            8w0x0: parse_inner_ipv4;
-            default: accept;
+        packet.extract < gtpu_ext_psc_t >(hdr.gtpu_ext_psc);
+        transition select (hdr.gtpu_ext_psc.next_ext) {
+            8w0x0 : parse_inner_ipv4;
+            default : accept;
         }
     }
     state parse_inner_ipv4 {
-        packet.extract<ipv4_t>(hdr.inner_ipv4);
-        transition select(hdr.inner_ipv4.proto) {
-            8w17: parse_inner_udp;
-            8w6: parse_inner_tcp;
-            8w1: parse_inner_icmp;
-            default: accept;
+        packet.extract < ipv4_t >(hdr.inner_ipv4);
+        transition select (hdr.inner_ipv4.proto) {
+            8w17 : parse_inner_udp;
+            8w6 : parse_inner_tcp;
+            8w1 : parse_inner_icmp;
+            default : accept;
         }
     }
     state parse_inner_udp {
-        packet.extract<udp_t>(hdr.inner_udp);
+        packet.extract < udp_t >(hdr.inner_udp);
         local_meta.l4_sport = hdr.inner_udp.sport;
         local_meta.l4_dport = hdr.inner_udp.dport;
         transition accept;
     }
     state parse_inner_tcp {
-        packet.extract<tcp_t>(hdr.inner_tcp);
+        packet.extract < tcp_t >(hdr.inner_tcp);
         local_meta.l4_sport = hdr.inner_tcp.sport;
         local_meta.l4_dport = hdr.inner_tcp.dport;
         transition accept;
     }
     state parse_inner_icmp {
-        packet.extract<icmp_t>(hdr.inner_icmp);
+        packet.extract < icmp_t >(hdr.inner_icmp);
         transition accept;
     }
 }
 
 control DeparserImpl(packet_out packet, in parsed_headers_t hdr) {
     apply {
-        packet.emit<packet_in_t>(hdr.packet_in);
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<udp_t>(hdr.udp);
-        packet.emit<tcp_t>(hdr.tcp);
-        packet.emit<icmp_t>(hdr.icmp);
-        packet.emit<gtpu_t>(hdr.gtpu);
-        packet.emit<gtpu_options_t>(hdr.gtpu_options);
-        packet.emit<gtpu_ext_psc_t>(hdr.gtpu_ext_psc);
-        packet.emit<ipv4_t>(hdr.inner_ipv4);
-        packet.emit<udp_t>(hdr.inner_udp);
-        packet.emit<tcp_t>(hdr.inner_tcp);
-        packet.emit<icmp_t>(hdr.inner_icmp);
+        packet.emit < packet_in_t >(hdr.packet_in);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < udp_t >(hdr.udp);
+        packet.emit < tcp_t >(hdr.tcp);
+        packet.emit < icmp_t >(hdr.icmp);
+        packet.emit < gtpu_t >(hdr.gtpu);
+        packet.emit < gtpu_options_t >(hdr.gtpu_options);
+        packet.emit < gtpu_ext_psc_t >(hdr.gtpu_ext_psc);
+        packet.emit < ipv4_t >(hdr.inner_ipv4);
+        packet.emit < udp_t >(hdr.inner_udp);
+        packet.emit < tcp_t >(hdr.inner_tcp);
+        packet.emit < icmp_t >(hdr.inner_icmp);
     }
 }
 
 struct tuple_0 {
-    bit<4>  f0;
-    bit<4>  f1;
-    bit<6>  f2;
-    bit<2>  f3;
+    bit<4> f0;
+    bit<4> f1;
+    bit<6> f2;
+    bit<2> f3;
     bit<16> f4;
     bit<16> f5;
-    bit<3>  f6;
+    bit<3> f6;
     bit<13> f7;
-    bit<8>  f8;
-    bit<8>  f9;
+    bit<8> f8;
+    bit<8> f9;
     bit<32> f10;
     bit<32> f11;
 }
 
 control VerifyChecksumImpl(inout parsed_headers_t hdr, inout local_metadata_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.proto,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.checksum, HashAlgorithm.csum16);
-        verify_checksum<tuple_0, bit<16>>(hdr.inner_ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.dscp,f3 = hdr.inner_ipv4.ecn,f4 = hdr.inner_ipv4.total_len,f5 = hdr.inner_ipv4.identification,f6 = hdr.inner_ipv4.flags,f7 = hdr.inner_ipv4.frag_offset,f8 = hdr.inner_ipv4.ttl,f9 = hdr.inner_ipv4.proto,f10 = hdr.inner_ipv4.src_addr,f11 = hdr.inner_ipv4.dst_addr}, hdr.inner_ipv4.checksum, HashAlgorithm.csum16);
+        verify_checksum < tuple_0, bit<16 >>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.proto,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.checksum, HashAlgorithm.csum16);
+        verify_checksum <tuple_0, bit<16 >>(hdr.inner_ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.dscp,f3 = hdr.inner_ipv4.ecn,f4 = hdr.inner_ipv4.total_len,f5 = hdr.inner_ipv4.identification,f6 = hdr.inner_ipv4.flags,f7 = hdr.inner_ipv4.frag_offset,f8 = hdr.inner_ipv4.ttl,f9 = hdr.inner_ipv4.proto,f10 = hdr.inner_ipv4.src_addr,f11 = hdr.inner_ipv4.dst_addr}, hdr.inner_ipv4.checksum, HashAlgorithm.csum16);
     }
 }
 
 control ComputeChecksumImpl(inout parsed_headers_t hdr, inout local_metadata_t local_meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.proto,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.checksum, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(hdr.inner_ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.dscp,f3 = hdr.inner_ipv4.ecn,f4 = hdr.inner_ipv4.total_len,f5 = hdr.inner_ipv4.identification,f6 = hdr.inner_ipv4.flags,f7 = hdr.inner_ipv4.frag_offset,f8 = hdr.inner_ipv4.ttl,f9 = hdr.inner_ipv4.proto,f10 = hdr.inner_ipv4.src_addr,f11 = hdr.inner_ipv4.dst_addr}, hdr.inner_ipv4.checksum, HashAlgorithm.csum16);
+        update_checksum < tuple_0, bit<16 >>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.proto,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.checksum, HashAlgorithm.csum16);
+        update_checksum <tuple_0, bit<16 >>(hdr.inner_ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.dscp,f3 = hdr.inner_ipv4.ecn,f4 = hdr.inner_ipv4.total_len,f5 = hdr.inner_ipv4.identification,f6 = hdr.inner_ipv4.flags,f7 = hdr.inner_ipv4.frag_offset,f8 = hdr.inner_ipv4.ttl,f9 = hdr.inner_ipv4.proto,f10 = hdr.inner_ipv4.src_addr,f11 = hdr.inner_ipv4.dst_addr}, hdr.inner_ipv4.checksum, HashAlgorithm.csum16);
     }
 }
 
@@ -317,10 +317,10 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @name("PreQosPipe.pre_qos_counter") counter<bit<32>>(32w1024, CounterType.packets_and_bytes) pre_qos_counter_0;
-    @name("PreQosPipe.app_meter") meter<bit<32>>(32w1024, MeterType.bytes) app_meter_0;
-    @name("PreQosPipe.session_meter") meter<bit<32>>(32w1024, MeterType.bytes) session_meter_0;
-    @name("PreQosPipe.slice_tc_meter") meter<bit<6>>(32w64, MeterType.bytes) slice_tc_meter_0;
+    @name("PreQosPipe.pre_qos_counter") counter < bit<32 >>(32w1024, CounterType.packets_and_bytes) pre_qos_counter_0;
+    @name("PreQosPipe.app_meter") meter <bit<32 >>(32w1024, MeterType.bytes) app_meter_0;
+    @name("PreQosPipe.session_meter") meter <bit<32 >>(32w1024, MeterType.bytes) session_meter_0;
+    @name("PreQosPipe.slice_tc_meter") meter <bit<6 >>(32w64, MeterType.bytes) slice_tc_meter_0;
     @name("PreQosPipe._initialize_metadata") action _initialize_metadata() {
         local_meta.session_meter_idx_internal = 32w0;
         local_meta.app_meter_idx_internal = 32w0;
@@ -329,7 +329,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.my_station") table my_station_0 {
         key = {
-            hdr.ethernet.dst_addr: exact @name("dst_mac");
+            hdr.ethernet.dst_addr : exact @name("dst_mac");
         }
         actions = {
             NoAction_1();
@@ -343,7 +343,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.interfaces") table interfaces_0 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("ipv4_dst_prefix");
+            hdr.ipv4.dst_addr : lpm @name("ipv4_dst_prefix");
         }
         actions = {
             set_source_iface();
@@ -364,7 +364,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         hdr.gtpu_ext_psc.setInvalid();
     }
     @hidden @name("PreQosPipe.do_buffer") action do_buffer() {
-        digest<ddn_digest_t>(32w1, (ddn_digest_t){ue_address = local_meta.ue_addr});
+        digest < ddn_digest_t >(32w1, (ddn_digest_t){ue_address = local_meta.ue_addr});
         mark_to_drop(std_meta);
         hasExited = true;
     }
@@ -408,8 +408,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.sessions_uplink") table sessions_uplink_0 {
         key = {
-            hdr.ipv4.dst_addr: exact @name("n3_address");
-            local_meta.teid  : exact @name("teid");
+            hdr.ipv4.dst_addr : exact @name("n3_address");
+            local_meta.teid : exact @name("teid");
         }
         actions = {
             set_session_uplink();
@@ -420,7 +420,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.sessions_downlink") table sessions_downlink_0 {
         key = {
-            hdr.ipv4.dst_addr: exact @name("ue_address");
+            hdr.ipv4.dst_addr : exact @name("ue_address");
         }
         actions = {
             set_session_downlink();
@@ -464,8 +464,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.terminations_uplink") table terminations_uplink_0 {
         key = {
-            local_meta.ue_addr       : exact @name("ue_address");
-            local_meta.application_id: exact @name("app_id");
+            local_meta.ue_addr : exact @name("ue_address");
+            local_meta.application_id : exact @name("app_id");
         }
         actions = {
             uplink_term_fwd();
@@ -476,8 +476,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.terminations_downlink") table terminations_downlink_0 {
         key = {
-            local_meta.ue_addr       : exact @name("ue_address");
-            local_meta.application_id: exact @name("app_id");
+            local_meta.ue_addr : exact @name("ue_address");
+            local_meta.application_id : exact @name("app_id");
         }
         actions = {
             downlink_term_fwd();
@@ -491,10 +491,10 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.applications") table applications_0 {
         key = {
-            local_meta.slice_id    : exact @name("slice_id");
-            local_meta.inet_addr   : lpm @name("app_ip_addr");
-            local_meta.inet_l4_port: range @name("app_l4_port");
-            local_meta.ip_proto    : ternary @name("app_ip_proto");
+            local_meta.slice_id : exact @name("slice_id");
+            local_meta.inet_addr : lpm @name("app_ip_addr");
+            local_meta.inet_l4_port : range @name("app_l4_port");
+            local_meta.ip_proto : ternary @name("app_ip_proto");
         }
         actions = {
             set_app_id();
@@ -509,7 +509,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.tunnel_peers") table tunnel_peers_0 {
         key = {
-            local_meta.tunnel_peer_id: exact @name("tunnel_peer_id");
+            local_meta.tunnel_peer_id : exact @name("tunnel_peer_id");
         }
         actions = {
             load_tunnel_param();
@@ -623,11 +623,11 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.Routing.routes_v4") table Routing_routes_v4 {
         key = {
-            hdr.ipv4.dst_addr  : lpm @name("dst_prefix");
-            hdr.ipv4.src_addr  : selector @name("hdr.ipv4.src_addr");
-            hdr.ipv4.proto     : selector @name("hdr.ipv4.proto");
-            local_meta.l4_sport: selector @name("local_meta.l4_sport");
-            local_meta.l4_dport: selector @name("local_meta.l4_dport");
+            hdr.ipv4.dst_addr : lpm @name("dst_prefix");
+            hdr.ipv4.src_addr : selector @name("hdr.ipv4.src_addr");
+            hdr.ipv4.proto : selector @name("hdr.ipv4.proto");
+            local_meta.l4_sport : selector @name("local_meta.l4_sport");
+            local_meta.l4_dport : selector @name("local_meta.l4_dport");
         }
         actions = {
             Routing_route_0();
@@ -652,16 +652,16 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.Acl.acls") table Acl_acls {
         key = {
-            std_meta.ingress_port  : ternary @name("inport");
-            local_meta.src_iface   : ternary @name("src_iface");
-            hdr.ethernet.src_addr  : ternary @name("eth_src");
-            hdr.ethernet.dst_addr  : ternary @name("eth_dst");
-            hdr.ethernet.ether_type: ternary @name("eth_type");
-            hdr.ipv4.src_addr      : ternary @name("ipv4_src");
-            hdr.ipv4.dst_addr      : ternary @name("ipv4_dst");
-            hdr.ipv4.proto         : ternary @name("ipv4_proto");
-            local_meta.l4_sport    : ternary @name("l4_sport");
-            local_meta.l4_dport    : ternary @name("l4_dport");
+            std_meta.ingress_port : ternary @name("inport");
+            local_meta.src_iface : ternary @name("src_iface");
+            hdr.ethernet.src_addr : ternary @name("eth_src");
+            hdr.ethernet.dst_addr : ternary @name("eth_dst");
+            hdr.ethernet.ether_type : ternary @name("eth_type");
+            hdr.ipv4.src_addr : ternary @name("ipv4_src");
+            hdr.ipv4.dst_addr : ternary @name("ipv4_dst");
+            hdr.ipv4.proto : ternary @name("ipv4_proto");
+            local_meta.l4_sport : ternary @name("l4_sport");
+            local_meta.l4_dport : ternary @name("l4_dport");
         }
         actions = {
             Acl_set_port_0();
@@ -707,13 +707,13 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         local_meta.needs_dropping = true;
     }
     @hidden action up4l726() {
-        slice_tc_meter_0.execute_meter<bit<2>>(local_meta.slice_id ++ local_meta.tc, local_meta.slice_tc_color);
+        slice_tc_meter_0.execute_meter < bit<2 >>(local_meta.slice_id ++ local_meta.tc, local_meta.slice_tc_color);
     }
     @hidden action up4l722() {
-        session_meter_0.execute_meter<bit<2>>(local_meta.session_meter_idx_internal, local_meta.session_color);
+        session_meter_0.execute_meter < bit<2 >>(local_meta.session_meter_idx_internal, local_meta.session_color);
     }
     @hidden action up4l718() {
-        app_meter_0.execute_meter<bit<2>>(local_meta.app_meter_idx_internal, local_meta.app_color);
+        app_meter_0.execute_meter < bit<2 >>(local_meta.app_meter_idx_internal, local_meta.app_color);
     }
     @hidden action up4l690() {
         hasReturned_0 = true;
@@ -938,7 +938,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
 }
 
 control PostQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
-    @name("PostQosPipe.post_qos_counter") counter<bit<32>>(32w1024, CounterType.packets_and_bytes) post_qos_counter_0;
+    @name("PostQosPipe.post_qos_counter") counter < bit<32 >>(32w1024, CounterType.packets_and_bytes) post_qos_counter_0;
     @hidden action up4l760() {
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port = local_meta.preserved_ingress_port;
@@ -966,4 +966,4 @@ control PostQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_met
     }
 }
 
-V1Switch<parsed_headers_t, local_metadata_t>(ParserImpl(), VerifyChecksumImpl(), PreQosPipe(), PostQosPipe(), ComputeChecksumImpl(), DeparserImpl()) main;
+V1Switch < parsed_headers_t, local_metadata_t >(ParserImpl(), VerifyChecksumImpl(), PreQosPipe(), PostQosPipe(), ComputeChecksumImpl(), DeparserImpl()) main;

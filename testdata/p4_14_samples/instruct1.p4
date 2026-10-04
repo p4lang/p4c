@@ -30,16 +30,16 @@ header data2_t hdr2;
 
 parser start {
     extract(data);
-    return select(data.b1) {
-    0x00: parse_data2;
-    default: ingress;
+    return select (data.b1) {
+    0x00 : parse_data2;
+    default : ingress;
     }
 }
 parser parse_data2 {
     extract(hdr1);
-    return select(hdr1.x1) {
-    1 mask 1: parse_hdr2;
-    default: ingress;
+    return select (hdr1.x1) {
+    1 mask 1 : parse_hdr2;
+    default : ingress;
     }
 }
 parser parse_hdr2 {
@@ -47,7 +47,8 @@ parser parse_hdr2 {
     return ingress;
 }
 
-action noop() { }
+action noop() {
+}
 action decap() {
     copy_header(hdr1, hdr2);
     remove_header(hdr2);

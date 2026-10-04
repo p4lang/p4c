@@ -12,4 +12,3 @@ control ingress(inout Headers h) {
         h.eth_hdr.eth_type = tmp_hdr.eth_type |-| false;
     }
 }
-

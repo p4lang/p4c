@@ -15,7 +15,6 @@ struct Headers {
     Hdr[2] h2;
 }
 
-
 parser P(packet_in p, out Headers h) {
     state start {
         p.extract(h.h1.next);
@@ -28,6 +27,6 @@ parser P(packet_in p, out Headers h) {
     }
 }
 
-parser Simple<T>(packet_in p, out T t);
-package top<T>(Simple<T> prs);
+parser Simple < T >(packet_in p, out T t);
+package top < T >(Simple<T> prs);
 top(P()) main;

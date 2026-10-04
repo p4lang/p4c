@@ -23,7 +23,7 @@ header h_stack {
 struct headers {
     ethernet_t eth_hdr;
     h_stack[3] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {

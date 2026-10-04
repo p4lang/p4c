@@ -1,10 +1,10 @@
 #include <core.p4>
 
-extern Stack<T> {
+extern Stack < T > {
     Stack(int size);
 }
 
-extern StackAction<T, U> {
+extern StackAction < T, U > {
     StackAction(Stack<T> stack);
     U push();
     U pop();
@@ -17,8 +17,8 @@ header data_t {
     bit<32> f1;
     bit<32> f2;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 struct headers {
@@ -30,22 +30,22 @@ control ingress(inout headers hdr) {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name("ingress.stack") Stack<bit<16>>(2048) stack_0;
-    @name("ingress.write") StackAction<bit<16>, bit<16>>(stack_0) write_0 = {
-        void apply(inout bit<16> value) {
-            value = hdr.data.h1;
-        }
-        void overflow(inout bit<16> value, out bit<16> rv) {
-            rv = 16w0xf0f;
-        }
+    @name("ingress.stack") Stack < bit<16 >>(2048) stack_0;
+    @name("ingress.write") StackAction <bit<16>, bit<16 >>(stack_0) write_0 = {
+    void apply(inout bit<16> value) {
+    value = hdr.data.h1;
+    }
+    void overflow(inout bit<16> value, out bit<16> rv) {
+    rv = 16w0xf0f;
+    }
     };
-    @name("ingress.read") StackAction<bit<16>, bit<16>>(stack_0) read_0 = {
-        void apply(inout bit<16> value, out bit<16> rv) {
-            rv = value;
-        }
-        void underflow(inout bit<16> value, out bit<16> rv) {
-            rv = 16w0xf0f0;
-        }
+    @name("ingress.read") StackAction <bit<16>, bit<16 >>(stack_0) read_0 = {
+    void apply(inout bit<16> value, out bit<16> rv) {
+    rv = value;
+    }
+    void underflow(inout bit<16> value, out bit<16> rv) {
+    rv = 16w0xf0f0;
+    }
     };
     @name("ingress.push") action push_1() {
         hdr.data.b1 = 8w0xff;
@@ -57,7 +57,7 @@ control ingress(inout headers hdr) {
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: ternary @name("hdr.data.f1");
+            hdr.data.f1 : ternary @name("hdr.data.f1");
         }
         default_action = NoAction_1();
     }
@@ -71,7 +71,7 @@ control ingress(inout headers hdr) {
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.data.f1: exact @name("hdr.data.f1");
+            hdr.data.f1 : exact @name("hdr.data.f1");
         }
         default_action = NoAction_2();
     }
@@ -84,6 +84,6 @@ control ingress(inout headers hdr) {
     }
 }
 
-control ctr<H>(inout H hdr);
-package top<H>(ctr<H> ctrl);
-top<headers>(ingress()) main;
+control ctr < H >(inout H hdr);
+package top < H >(ctr<H> ctrl);
+top < headers >(ingress()) main;

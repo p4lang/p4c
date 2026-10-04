@@ -10,18 +10,18 @@
 
 // IPv4 header without options
 header ipv4_t {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    bit<32>      srcAddr;
-    bit<32>      dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct H {
@@ -29,7 +29,8 @@ struct H {
     ipv4_t ipv4;
 }
 
-struct M {}
+struct M {
+}
 
 parser P(packet_in b,
          out H p,
@@ -43,16 +44,19 @@ parser P(packet_in b,
 control Ing(inout H headers,
             inout M meta,
             inout standard_metadata_t standard_meta) {
-    apply {}
+    apply {
+    }
 }
 
 control Eg(inout H hdrs,
            inout M meta,
            inout standard_metadata_t standard_meta) {
-    apply {}
+    apply {
+    }
 }
 
-action drop() {}
+action drop() {
+}
 
 control VerifyChecksumI(inout H hdr, inout M meta) {
     apply {
@@ -122,7 +126,8 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 
 // deparser section
 control DP(packet_out b, in H p) {
-    apply {}
+    apply {
+    }
 }
 
 // Instantiate the top-level V1 Model package.

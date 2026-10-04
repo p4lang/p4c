@@ -1,5 +1,6 @@
 #include <core.p4>
-header h { }
+header h {
+}
 control c(out bit<32> x) {
     apply {
         h[4] stack;

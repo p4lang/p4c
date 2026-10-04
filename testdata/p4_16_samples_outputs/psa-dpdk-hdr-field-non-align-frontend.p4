@@ -5,10 +5,10 @@ struct EMPTY {
 }
 
 header ethernet_t {
-    bit<8>  x0;
-    bit<4>  x1;
-    bit<8>  x2;
-    bit<4>  x3;
+    bit<8> x0;
+    bit<4> x1;
+    bit<8> x2;
+    bit<4> x3;
     bit<48> dst_addr;
     bit<48> src_addr;
     bit<16> ether_type;
@@ -20,13 +20,13 @@ struct headers_t {
 
 struct user_meta_data_t {
     bit<48> addr;
-    bit<8>  x2;
-    bit<8>  flg;
+    bit<8> x2;
+    bit<8> flg;
 }
 
 parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t m, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -52,14 +52,14 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
     }
     apply {
         m.flg = 8w0x2;
-        d.egress_port = (PortId_t)((bit<32>)c.ingress_port ^ 32w1);
+        d.egress_port =(PortId_t)((bit<32>) c.ingress_port ^ 32w1);
         stub_0.apply();
     }
 }
 
 control MyIngressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_data_t e, in psa_ingress_output_metadata_t f) {
     apply {
-        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -79,6 +79,6 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
     }
 }
 
-IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY >(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
+EgressPipeline < EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
+PSA_Switch < headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

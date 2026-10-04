@@ -11,7 +11,7 @@ header_type data_t {
         h6 : 16;
         color_1 : 8;
     }
-} 
+}
 
 header data_t data;
 
@@ -47,7 +47,7 @@ table index_setter {
         data.f2 : exact;
     }
     actions {
-        set_index;    
+        set_index;
     }
     size : 2048;
 }

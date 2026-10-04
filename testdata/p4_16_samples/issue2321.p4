@@ -8,16 +8,16 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -35,12 +35,13 @@ parser parserImpl(packet_in packet,
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 bit<16> bump_val(inout bit<16> x) {
     x = x | 7;
-    return (x >> 1);
+    return(x >> 1);
 }
 
 control ingressImpl(inout headers_t hdr,
@@ -55,7 +56,7 @@ control ingressImpl(inout headers_t hdr,
         x = x - 7;
     }
     action a2(in bit<16> y, in bit<16> z) {
-        hdr.ethernet.srcAddr[15:0] = y + z;
+        hdr.ethernet.srcAddr[15 : 0] = y + z;
     }
     table t1 {
         key = {
@@ -78,11 +79,13 @@ control egressImpl(inout headers_t hdr,
                    inout metadata_t meta,
                    inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(packet_out packet,

@@ -9,10 +9,10 @@ enum meter_color_t {
 }
 
 struct test_metadata_t {
-    bit<32>       color;
+    bit<32> color;
     meter_color_t enum_color;
-    bit<32>       other_metadata;
-    bit<16>       smaller_metadata;
+    bit<32> other_metadata;
+    bit<16> smaller_metadata;
 }
 
 header ethernet_t {
@@ -22,8 +22,8 @@ header ethernet_t {
 }
 
 struct headers {
-    ethernet_t    ethernet;
-    ethernet_t    ethernet2;
+    ethernet_t ethernet;
+    ethernet_t ethernet2;
     ethernet_t[2] ethernet_stack;
 }
 
@@ -67,7 +67,7 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
             assign_non_const_array_index;
         }
         key = {
-            hdr.ethernet.etherType: exact;
+            hdr.ethernet.etherType : exact;
         }
     }
     apply {

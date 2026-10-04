@@ -8,4 +8,3 @@ control p() {
         g<bit<1>, bit<1>>();
     }
 }
-

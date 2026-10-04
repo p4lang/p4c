@@ -8,10 +8,8 @@ extern X {
     X();
 }
 
-control p()
-{
+control p() {
     X() x;
-
     apply {
         x.f();
     }

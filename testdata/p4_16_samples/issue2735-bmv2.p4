@@ -7,12 +7,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header Ethernet_h {
     EthernetAddress dst;
     EthernetAddress src;
-    bit<16>         type;
+    bit<16> type;
 }
 
 struct metadata {
@@ -28,17 +28,18 @@ parser SnvsParser(packet_in packet,
 		  inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract(hdr.eth);
-	transition accept;
+        transition accept;
     }
 }
 
 control SnvsVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 typedef bit<(48 + 12 + 9)> Mac_entry;
 const bit<32> N_MAC_ENTRIES = 4096;
-typedef register<Mac_entry> Mac_table;
+typedef register < Mac_entry > Mac_table;
 
 control SnvsIngress(inout headers hdr,
 		    inout metadata meta,
@@ -46,19 +47,21 @@ control SnvsIngress(inout headers hdr,
     Mac_table(N_MAC_ENTRIES) mac_table;
 
     apply {
-	Mac_entry b0;
-	mac_table.read(b0, 0);
+        Mac_entry b0;
+        mac_table.read(b0, 0);
     }
 }
 
 control SnvsEgress(inout headers hdr,
 		   inout metadata meta,
 		   inout standard_metadata_t standard_metadata) {
-    apply {}
+    apply {
+    }
 }
 
 control SnvsComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control SnvsDeparser(packet_out packet, in headers hdr) {
@@ -67,7 +70,7 @@ control SnvsDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch (
+V1Switch(
     SnvsParser(),
     SnvsVerifyChecksum(),
     SnvsIngress(),

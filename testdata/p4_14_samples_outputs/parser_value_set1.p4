@@ -9,15 +9,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -32,19 +32,19 @@ struct headers {
     @name(".inner_ethernet")
     ethernet_t inner_ethernet;
     @name(".ipv4")
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".pvs0") value_set<bit<16>>(4) pvs0;
-    @name(".pvs1") value_set<bit<16>>(4) pvs1;
+    @name(".pvs0") value_set < bit<16 >>(4) pvs0;
+    @name(".pvs1") value_set <bit<16 >>(4) pvs1;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            pvs0: accept;
-            16w0x800: parse_ipv4;
-            pvs1: parse_inner_ethernet;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            pvs0 : accept;
+            16w0x800 : parse_ipv4;
+            pvs1 : parse_inner_ethernet;
+            default : accept;
         }
     }
     @name(".parse_inner_ethernet") state parse_inner_ethernet {
@@ -69,7 +69,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         size = 512;
     }

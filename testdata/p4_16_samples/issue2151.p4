@@ -14,10 +14,8 @@ control c() {
         exit; // the exit comes before the action call
         a();
     }
-
 }
 
 control e();
 package top(e e);
-
 top(c()) main;

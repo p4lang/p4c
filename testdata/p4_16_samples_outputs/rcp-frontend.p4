@@ -1,13 +1,13 @@
 #include <core.p4>
 
-extern Register<T> {
+extern Register < T > {
     Register(bit<32> size);
     void read(in bit<32> index, out T value);
     void write(in bit<32> index, in T value);
 }
 
-control proto<P, M>(inout P packet, in M meta);
-package top<P, M>(proto<P, M> _p);
+control proto < P, M >(inout P packet, in M meta);
+package top < P, M >(proto<P, M> _p);
 header H {
     bit<32> rtt;
 }
@@ -20,9 +20,9 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     @name("ingress.input_traffic_bytes_tmp") bit<32> input_traffic_bytes_tmp_0;
     @name("ingress.sum_rtt_Tr_tmp") bit<32> sum_rtt_Tr_tmp_0;
     @name("ingress.num_pkts_with_rtt_tmp") bit<32> num_pkts_with_rtt_tmp_0;
-    @name("ingress.input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes_0;
-    @name("ingress.sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr_0;
-    @name("ingress.num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt_0;
+    @name("ingress.input_traffic_bytes") Register < bit<32 >>(32w1) input_traffic_bytes_0;
+    @name("ingress.sum_rtt_Tr") Register <bit<32 >>(32w1) sum_rtt_Tr_0;
+    @name("ingress.num_pkts_with_rtt") Register <bit<32 >>(32w1) num_pkts_with_rtt_0;
     apply {
         @atomic {
             input_traffic_bytes_0.read(32w0, input_traffic_bytes_tmp_0);
@@ -40,4 +40,4 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     }
 }
 
-top<H, Metadata>(ingress()) main;
+top < H, Metadata >(ingress()) main;

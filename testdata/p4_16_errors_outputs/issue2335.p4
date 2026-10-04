@@ -4,4 +4,3 @@ control C() {
         int<8> y = x + 8s1;
     }
 }
-

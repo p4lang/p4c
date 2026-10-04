@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -20,13 +20,13 @@ struct metadata_t {
 
 control DeparserI(packet_out packet, in Parsed_packet hdr) {
     apply {
-        packet.emit<Ethernet_h>(hdr.ethernet);
+        packet.emit < Ethernet_h >(hdr.ethernet);
     }
 }
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<Ethernet_h>(hdr.ethernet);
+        pkt.extract < Ethernet_h >(hdr.ethernet);
         transition accept;
     }
 }
@@ -38,17 +38,17 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
         hdr.ethernet.srcAddr = 48w1;
     }
     @name("cIngress.a2") action a2() {
-        hdr.ethernet.srcAddr[47:40] = 8w2;
+        hdr.ethernet.srcAddr[47 : 40] = 8w2;
     }
     @name("cIngress.a3") action a3() {
-        hdr.ethernet.srcAddr[47:40] = 8w3;
+        hdr.ethernet.srcAddr[47 : 40] = 8w3;
     }
     @name("cIngress.a4") action a4() {
-        hdr.ethernet.srcAddr[47:40] = 8w4;
+        hdr.ethernet.srcAddr[47 : 40] = 8w4;
     }
     @name("cIngress.t1") table t1_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             a1();
@@ -61,19 +61,19 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
     }
     apply {
         switch (t1_0.apply().action_run) {
-            a1: {
+            a1 : {
             }
-            a2: {
-                hdr.ethernet.srcAddr[39:32] = 8w2;
+            a2 : {
+            hdr.ethernet.srcAddr[39 : 32] = 8w2;
             }
-            a3: {
-                hdr.ethernet.srcAddr[39:32] = 8w3;
+            a3 : {
+            hdr.ethernet.srcAddr[39 : 32] = 8w3;
             }
-            a4: {
-                hdr.ethernet.srcAddr[39:32] = 8w4;
+            a4 : {
+            hdr.ethernet.srcAddr[39 : 32] = 8w4;
             }
-            NoAction_1: {
-                hdr.ethernet.srcAddr[39:32] = 8w5;
+            NoAction_1 : {
+            hdr.ethernet.srcAddr[39 : 32] = 8w5;
             }
         }
     }
@@ -94,4 +94,4 @@ control uc(inout Parsed_packet hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<Parsed_packet, metadata_t>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, metadata_t >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

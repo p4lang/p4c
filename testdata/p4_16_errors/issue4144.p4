@@ -1,3 +1,4 @@
 #include <core.p4>
 
-extern main {}
+extern main {
+}

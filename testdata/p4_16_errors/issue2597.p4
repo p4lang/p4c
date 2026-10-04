@@ -6,7 +6,6 @@
 
 #include <core.p4>
 
-
 header ethernet_t {
     bit<48> dst_addr;
     bit<48> src_addr;
@@ -28,7 +27,7 @@ parser p(packet_in pkt, out Headers hdr) {
 }
 
 control SubCtrl() {
-        apply {
+    apply {
     }
 }
 

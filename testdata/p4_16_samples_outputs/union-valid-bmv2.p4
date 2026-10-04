@@ -17,7 +17,7 @@ header_union U {
 
 struct Headers {
     Hdr1 h1;
-    U    u;
+    U u;
 }
 
 struct Meta {
@@ -26,9 +26,9 @@ struct Meta {
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
         b.extract(h.h1);
-        transition select(h.h1.a) {
-            0: getH1;
-            default: getH1;
+        transition select (h.h1.a) {
+            0 : getH1;
+            default : getH1;
         }
     }
     state getH1 {
@@ -68,7 +68,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table t {
         key = {
-            h.u.isValid(): exact;
+            h.u.isValid() : exact;
         }
         actions = {
             a;

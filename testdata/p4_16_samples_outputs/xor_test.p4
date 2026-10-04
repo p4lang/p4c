@@ -9,20 +9,20 @@ typedef bit<32> ip4Addr_t;
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -40,7 +40,7 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -49,8 +49,8 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            TYPE_IPV4: parse_ipv4;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_IPV4 : parse_ipv4;
         }
     }
     state parse_ipv4 {
@@ -98,27 +98,27 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ipv4_lpm {
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port : exact;
         }
         actions = {
             forward_and_do_something;
             NoAction;
         }
         const entries = {
-                        1 : forward_and_do_something(2);
-                        2 : forward_and_do_something(1);
+            1 : forward_and_do_something(2);
+            2 : forward_and_do_something(1);
         }
         default_action = NoAction();
     }
     table debug {
         key = {
-            meta.before1: exact;
+            meta.before1 : exact;
             meta.after1 : exact;
-            meta.before2: exact;
+            meta.before2 : exact;
             meta.after2 : exact;
-            meta.before3: exact;
+            meta.before3 : exact;
             meta.after3 : exact;
-            meta.before4: exact;
+            meta.before4 : exact;
             meta.after4 : exact;
         }
         actions = {

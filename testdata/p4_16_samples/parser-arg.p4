@@ -25,8 +25,9 @@ parser Parser2()(Parser p) {
 }
 
 parser Inside() {
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }
-
 
 Package(Parser1(Inside()), Parser2(Inside())) main;

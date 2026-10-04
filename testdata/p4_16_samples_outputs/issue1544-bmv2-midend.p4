@@ -17,7 +17,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.dstAddr : exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             set_port();
@@ -73,41 +73,41 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = my_drop_0();
     }
-    @hidden action issue1544bmv2l15() {
-        retval = hdr.ethernet.srcAddr[15:0] + 16w65535;
+    @hidden action issue1544bmv2l14() {
+        retval = hdr.ethernet.srcAddr[15 : 0] + 16w65535;
     }
-    @hidden action issue1544bmv2l17() {
-        retval = hdr.ethernet.srcAddr[15:0];
+    @hidden action issue1544bmv2l16() {
+        retval = hdr.ethernet.srcAddr[15 : 0];
     }
-    @hidden action issue1544bmv2l72() {
-        hdr.ethernet.srcAddr[15:0] = retval;
+    @hidden action issue1544bmv2l70() {
+        hdr.ethernet.srcAddr[15 : 0] = retval;
     }
-    @hidden table tbl_issue1544bmv2l15 {
+    @hidden table tbl_issue1544bmv2l14 {
         actions = {
-            issue1544bmv2l15();
+            issue1544bmv2l14();
         }
-        const default_action = issue1544bmv2l15();
+        const default_action = issue1544bmv2l14();
     }
-    @hidden table tbl_issue1544bmv2l17 {
+    @hidden table tbl_issue1544bmv2l16 {
         actions = {
-            issue1544bmv2l17();
+            issue1544bmv2l16();
         }
-        const default_action = issue1544bmv2l17();
+        const default_action = issue1544bmv2l16();
     }
-    @hidden table tbl_issue1544bmv2l72 {
+    @hidden table tbl_issue1544bmv2l70 {
         actions = {
-            issue1544bmv2l72();
+            issue1544bmv2l70();
         }
-        const default_action = issue1544bmv2l72();
+        const default_action = issue1544bmv2l70();
     }
     apply {
         mac_da_0.apply();
-        if (hdr.ethernet.srcAddr[15:0] > 16w5) {
-            tbl_issue1544bmv2l15.apply();
+        if (hdr.ethernet.srcAddr[15 : 0] > 16w5) {
+            tbl_issue1544bmv2l14.apply();
         } else {
-            tbl_issue1544bmv2l17.apply();
+            tbl_issue1544bmv2l16.apply();
         }
-        tbl_issue1544bmv2l72.apply();
+        tbl_issue1544bmv2l70.apply();
     }
 }
 
@@ -118,7 +118,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
@@ -132,4 +132,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

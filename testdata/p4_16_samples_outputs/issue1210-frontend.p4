@@ -25,7 +25,7 @@ control IngressImpl(inout parsed_headers_t hdr, inout metadata_t meta, inout sta
         if (meta.foo == meta.bar) {
             meta.foo._v = meta.foo._v + 9w1;
         }
-        if (meta.foo == (PortId_t){_v = 9w192}) {
+        if (meta.foo ==(PortId_t) { _v = 9w192 }) {
             meta.foo._v = meta.foo._v + 9w1;
         }
     }
@@ -51,4 +51,4 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<parsed_headers_t, metadata_t>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
+V1Switch < parsed_headers_t, metadata_t >(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;

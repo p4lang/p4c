@@ -11,17 +11,17 @@ struct headers {
 
 parser IParser(packet_in packet, inout headers hdr) {
     state start {
-        packet.extract<h_t>(hdr.h1);
-        transition select(hdr.h1.f) {
-            16w1: s1;
-            default: s2;
+        packet.extract < h_t >(hdr.h1);
+        transition select (hdr.h1.f) {
+            16w1 : s1;
+            default : s2;
         }
     }
     state s1 {
         transition accept;
     }
     state s2 {
-        packet.extract<h_t>(hdr.h2);
+        packet.extract < h_t >(hdr.h2);
         transition accept;
     }
 }

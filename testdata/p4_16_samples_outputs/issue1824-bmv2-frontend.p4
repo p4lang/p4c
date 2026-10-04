@@ -28,7 +28,7 @@ struct metadata {
 
 parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<test_header>(hdr.h1);
+        pkt.extract < test_header >(hdr.h1);
         verify(false, error.IPv4BadPacket);
         verify(false, error.IPv4HeaderTooShort);
         transition accept;
@@ -60,8 +60,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<test_header>(hdr.h1);
+        packet.emit < test_header >(hdr.h1);
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

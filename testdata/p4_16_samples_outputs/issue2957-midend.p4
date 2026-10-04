@@ -12,7 +12,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
+    H[2] h;
 }
 
 extern bit<8> extern_call(inout H val);
@@ -22,8 +22,8 @@ parser p(packet_in pkt, out Headers hdr) {
         tmp_3 = hdr.h[3w1];
         extern_call(tmp_3);
         hdr.h[3w1] = tmp_3;
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
+        pkt.extract < H >(hdr.h.next);
         transition accept;
     }
 }

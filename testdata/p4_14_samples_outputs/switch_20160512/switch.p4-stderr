@@ -40,6 +40,6 @@ action meter_deny() {
 fabric.p4(201): [--Wwarn=unused] warning: 'fabric_mgid' is unused
 action set_fabric_multicast(fabric_mgid) {
                             ^^^^^^^^^^^
-parser.p4(478): [--Wwarn=parser-transition] warning: SelectCase: unreachable
-        default: parse_all_int_meta_value_heders;
+parser.p4(477): [--Wwarn=parser-transition] warning: SelectCase: unreachable
+        default : parse_all_int_meta_value_heders;
         ^^^^^^^

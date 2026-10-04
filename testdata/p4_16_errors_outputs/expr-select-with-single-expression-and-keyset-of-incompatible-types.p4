@@ -5,4 +5,3 @@ parser p(in bit<16> x) {
         }
     }
 }
-

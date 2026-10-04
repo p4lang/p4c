@@ -5,4 +5,3 @@ control c() {
         h[f(2)].setValid();
     }
 }
-

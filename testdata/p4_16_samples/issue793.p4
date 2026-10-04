@@ -6,7 +6,8 @@
 
 #include <core.p4>
 
-struct standard_metadata_t {}
+struct standard_metadata_t {
+}
 
 header data_h {
     bit<32> da;
@@ -21,12 +22,16 @@ control c(in my_packet hdr) {
     action nop() {
     }
     table t {
-        actions = { nop; }
-        key = { hdr.data.db : exact; }
+        actions = {
+            nop;
+        }
+        key = {
+            hdr.data.db : exact;
+        }
     }
     apply {
         if (hdr.data.da == 32w1)
-            t.apply();
+        t.apply();
     }
 }
 

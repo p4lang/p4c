@@ -17,7 +17,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in pkt, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -41,7 +41,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             foo2_0();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
+            hdr.ethernet.etherType : exact @name("hdr.ethernet.etherType");
         }
         default_action = NoAction_1();
         size = 512;
@@ -63,8 +63,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out pkt, in headers_t hdr) {
     apply {
-        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

@@ -13,12 +13,12 @@ struct headers_t {
 }
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
-    value_set<bit<16>>(4) pvs;
+    value_set < bit<16 >>(4) pvs;
     state start {
         buffer.extract(hdr.h1);
-        transition select(hdr.h1.field) {
-            pvs: accept;
-            default: accept;
+        transition select (hdr.h1.field) {
+            pvs : accept;
+            default : accept;
         }
     }
 }

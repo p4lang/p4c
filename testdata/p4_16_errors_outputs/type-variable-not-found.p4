@@ -10,4 +10,3 @@ control c() {
     apply {
     }
 }
-

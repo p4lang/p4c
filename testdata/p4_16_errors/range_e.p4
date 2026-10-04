@@ -4,11 +4,10 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-parser p()
-{
+parser p() {
     state start {
-        transition select (2w0) {
-            2w2 .. 3w3 : reject;  // different widths
+        transition select(2w0) {
+            2w2 .. 3w3: reject;  // different widths
         }
     }
 }

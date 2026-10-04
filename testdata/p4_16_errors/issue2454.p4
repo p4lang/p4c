@@ -4,10 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-control C() { apply { } }
+control C() {
+    apply {
+    }
+}
 
-void f<T>(T t) {}
-
+void f<T>(T t) {
+}
 control D() {
     C() c;
     apply {

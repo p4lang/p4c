@@ -5,21 +5,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-action nop() {}
-
-control x()
-{
+action nop() {
+}
+control x() {
     table t {
-        actions = { nop; }
+        actions = {
+            nop;
+        }
         default_action = nop;
     }
-
     apply {
-        if (t.apply().hit) {}
-
+        if (t.apply().hit) {
+        }
         switch (t.apply().action_run) {
-            nop: {}
-            default: {}
+            nop: {
+            }
+            default: {
+            }
         }
     }
 }

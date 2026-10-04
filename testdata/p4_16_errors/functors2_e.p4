@@ -4,12 +4,10 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-control p()
-{
-    action a()
-    {
+control p() {
+    action a() {
         p.apply();
     }
-
-    apply {}
+    apply {
+    }
 }

@@ -22,8 +22,8 @@ header I {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[3]       h;
-    I          i;
+    H[3] h;
+    I i;
 }
 
 bit<1> simple_fun(inout bit<8> val) {

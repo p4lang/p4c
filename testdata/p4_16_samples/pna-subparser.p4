@@ -15,13 +15,13 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<8>  version_ihl;
-    bit<8>  diffserv;
+    bit<8> version_ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
     bit<16> flags_fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -32,7 +32,7 @@ struct main_metadata_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser CommonParser(packet_in pkt,
@@ -44,9 +44,9 @@ parser CommonParser(packet_in pkt,
     }
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -79,7 +79,8 @@ control PreControlImpl(
     in    pna_pre_input_metadata_t  istd,
     inout pna_pre_output_metadata_t ostd)
 {
-    apply {}
+    apply {
+    }
 }
 
 control MainControlImpl(

@@ -7,14 +7,15 @@
 #include <core.p4>
 #include <bmv2/psa.p4>
 
-struct EMPTY { };
+struct EMPTY {
+};
 
 header hdr_t {
     bit<16> field;
 }
 
 struct headers_t {
-    hdr_t       h1;
+    hdr_t h1;
 }
 
 parser MyIP(
@@ -25,10 +26,10 @@ parser MyIP(
     in EMPTY d,
     in EMPTY e) {
 
-    value_set<bit<16>>(4) pvs;
+    value_set < bit<16 >>(4) pvs;
     state start {
         buffer.extract(hdr.h1);
-        transition select(hdr.h1.field) {
+        transition select (hdr.h1.field) {
             pvs : accept;
             default : accept;
         }
@@ -53,7 +54,8 @@ control MyIC(
     inout EMPTY b,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyEC(
@@ -61,7 +63,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -72,7 +75,8 @@ control MyID(
     inout headers_t hdr,
     in EMPTY e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 control MyED(
@@ -83,7 +87,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;

@@ -33,7 +33,8 @@ table t_ingress {
         hdrA.f1 : exact;
     }
     actions {
-        _nop; _truncate;
+        _nop;
+        _truncate;
     }
     size : 128;
 }

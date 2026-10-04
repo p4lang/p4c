@@ -22,10 +22,10 @@ switch1(f()) main2;
 module.p4(35): [--Wwarn=unused] warning: 'main7' is unused
 switch4(f2()) main7;
               ^^^^^
-module.p4(14): [--Winfo=removed] info: removing parser 'f'
-parser f(out bool x)
+module.p4(11): [--Winfo=removed] info: removing parser 'f'
+parser f(out bool x) {
        ^
 module.p4(17): [--Winfo=removed] info: removing parser 'f2'
-parser f2(out bool x, out bool y)
+parser f2(out bool x, out bool y) {
        ^^
 [--Wwarn=missing] warning: Program does not contain a `main' module

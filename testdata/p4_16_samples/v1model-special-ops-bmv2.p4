@@ -16,13 +16,13 @@
 
 // https://github.com/p4lang/behavioral-model/blob/main/targets/simple_switch/simple_switch.h#L126-L134
 
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_NORMAL        = 0;
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_NORMAL = 0;
 const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_INGRESS_CLONE = 1;
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_EGRESS_CLONE  = 2;
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_COALESCED     = 3;
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_RECIRC        = 4;
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION   = 5;
-const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT      = 6;
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_EGRESS_CLONE = 2;
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_COALESCED = 3;
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_RECIRC = 4;
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_REPLICATION = 5;
+const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT = 6;
 
 #define IS_RESUBMITTED(std_meta) (std_meta.instance_type == BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT)
 #define IS_RECIRCULATED(std_meta) (std_meta.instance_type == BMV2_V1MODEL_INSTANCE_TYPE_RECIRC)
@@ -33,7 +33,6 @@ const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT      = 6;
 const bit<32> I2E_CLONE_SESSION_ID = 5;
 const bit<32> E2E_CLONE_SESSION_ID = 11;
 
-
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -41,15 +40,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -72,7 +71,7 @@ struct meta_t {
 struct headers_t {
     switch_to_cpu_header_t switch_to_cpu;
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 action my_drop(inout standard_metadata_t smeta) {
@@ -91,9 +90,9 @@ parser ParserImpl(packet_in packet,
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -130,7 +129,9 @@ control debug_std_meta(in standard_metadata_t standard_metadata)
             standard_metadata.checksum_error : exact;
             //standard_metadata.parser_error : exact;
         }
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
         const default_action = NoAction();
     }
     apply {
@@ -146,7 +147,9 @@ control my_debug_1(in headers_t hdr, in meta_t meta)
             meta.fwd.l2ptr : exact;
             meta.fwd.out_bd : exact;
         }
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
         const default_action = NoAction();
     }
     apply {
@@ -154,7 +157,6 @@ control my_debug_1(in headers_t hdr, in meta_t meta)
     }
 }
 #endif  // ENABLE_DEBUG_TABLES
-
 
 control fill_ipv4_address(out bit<32> ipv4_address,
                           in bit<8> byte0,    // most significant byte
@@ -166,7 +168,6 @@ control fill_ipv4_address(out bit<32> ipv4_address,
         ipv4_address = byte0 ++ byte1 ++ byte2 ++ byte3;
     }
 }
-
 
 control ingress(inout headers_t hdr,
                 inout meta_t meta,
@@ -219,7 +220,7 @@ control ingress(inout headers_t hdr,
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             set_l2ptr;
@@ -239,7 +240,7 @@ control ingress(inout headers_t hdr,
     }
     table mac_da {
         key = {
-            meta.fwd.l2ptr: exact;
+            meta.fwd.l2ptr : exact;
         }
         actions = {
             set_bd_dmac_intf;
@@ -306,15 +307,17 @@ control egress(inout headers_t hdr,
     debug_std_meta() debug_std_meta_egress_end;
 #endif  // ENABLE_DEBUG_TABLES
 
-    action set_out_bd (bit<24> bd) {
+    action set_out_bd(bit<24> bd) {
         meta.fwd.out_bd = bd;
     }
     table get_multicast_copy_out_bd {
         key = {
-            standard_metadata.mcast_grp  : exact;
+            standard_metadata.mcast_grp : exact;
             standard_metadata.egress_rid : exact;
         }
-        actions = { set_out_bd; }
+        actions = {
+            set_out_bd;
+        }
     }
 
     action rewrite_mac(bit<48> smac) {
@@ -337,7 +340,7 @@ control egress(inout headers_t hdr,
     }
     table send_frame {
         key = {
-            meta.fwd.out_bd: exact;
+            meta.fwd.out_bd : exact;
         }
         actions = {
             rewrite_mac;

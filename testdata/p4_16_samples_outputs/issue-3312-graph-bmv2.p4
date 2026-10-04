@@ -45,11 +45,11 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action add() {
-        h.h.c = (bit<64>)(h.h.a + h.h.b);
+        h.h.c =(bit<64>)(h.h.a + h.h.b);
         sm.egress_spec = 0;
     }
     action sub() {
-        h.h.c = (bit<64>)(h.h.a - h.h.b);
+        h.h.c =(bit<64>)(h.h.a - h.h.b);
         sm.egress_spec = 0;
     }
     table t {
@@ -73,10 +73,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         switch (t.apply().action_run) {
-            add: {
+            add : {
             }
-            default: {
-                t1.apply();
+            default : {
+            t1.apply();
             }
         }
         t2.apply();

@@ -31,7 +31,8 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    apply { }
+    apply {
+    }
 }
 
 ubpf(prs(), pipe(), dprs()) main;

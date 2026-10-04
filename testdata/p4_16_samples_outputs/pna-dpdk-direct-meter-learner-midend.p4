@@ -8,15 +8,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -26,13 +26,13 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
-    bit<8>  timeout;
+    bit<8> timeout;
     bit<32> port_out;
 }
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
@@ -42,14 +42,14 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        pkt.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
+        pkt.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -75,11 +75,11 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             tmp_0 = 32w0;
         }
         user_meta.port_out = tmp_0;
-        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
+        add_entry < bit<32 >>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             @tableonly next_hop();
@@ -94,11 +94,11 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr.ipv4.srcAddr = newAddr;
     }
     @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple_0>(action_name = "next_hop2", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
+        add_entry < tuple_0 >(action_name = "next_hop2", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr : exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             @tableonly next_hop2();
@@ -107,17 +107,17 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action2();
     }
-    @hidden action pnadpdkdirectmeterlearner88() {
+    @hidden action pnadpdkdirectmeterlearner87() {
         color_in_0 = PNA_MeterColor_t.RED;
     }
-    @hidden table tbl_pnadpdkdirectmeterlearner88 {
+    @hidden table tbl_pnadpdkdirectmeterlearner87 {
         actions = {
-            pnadpdkdirectmeterlearner88();
+            pnadpdkdirectmeterlearner87();
         }
-        const default_action = pnadpdkdirectmeterlearner88();
+        const default_action = pnadpdkdirectmeterlearner87();
     }
     apply {
-        tbl_pnadpdkdirectmeterlearner88.apply();
+        tbl_pnadpdkdirectmeterlearner87.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_da_0.apply();
             ipv4_da2_0.apply();
@@ -126,19 +126,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkdirectmeterlearner147() {
-        pkt.emit<ethernet_t>(hdr.ethernet);
-        pkt.emit<ipv4_t>(hdr.ipv4);
+    @hidden action pnadpdkdirectmeterlearner146() {
+        pkt.emit < ethernet_t >(hdr.ethernet);
+        pkt.emit < ipv4_t >(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkdirectmeterlearner147 {
+    @hidden table tbl_pnadpdkdirectmeterlearner146 {
         actions = {
-            pnadpdkdirectmeterlearner147();
+            pnadpdkdirectmeterlearner146();
         }
-        const default_action = pnadpdkdirectmeterlearner147();
+        const default_action = pnadpdkdirectmeterlearner146();
     }
     apply {
-        tbl_pnadpdkdirectmeterlearner147.apply();
+        tbl_pnadpdkdirectmeterlearner146.apply();
     }
 }
 
-PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, main_metadata_t, headers_t, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

@@ -23,8 +23,8 @@ parser p(packet_in p, out Headers h) {
     state start {
         p.extract(h.h);
         transition select (h.h.s) {
-            ({b = 0}): reject;
-            ({b = 1}): accept;
+            ({ b = 0 }) : reject;
+            ({ b = 1 }) : accept;
         }
     }
 }

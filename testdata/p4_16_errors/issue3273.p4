@@ -10,8 +10,7 @@ extern e {
 }
 
 e() t = {
-    int f()
-    {
+    int f() {
         return 1;
     }
 };

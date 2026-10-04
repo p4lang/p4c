@@ -260,4 +260,3 @@ header genv_opt_C_h {
     bit<5>  optLen;
     bit<32> dt;
 }
-

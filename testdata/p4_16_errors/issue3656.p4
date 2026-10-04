@@ -4,9 +4,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-action a() {}
+action a() {
+}
 control c() {
     apply {
-        a<bit>();
+        a < bit >();
     }
 }

@@ -23,10 +23,10 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
+    default : ingress;
     }
 }
 
@@ -43,22 +43,22 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 header ipv4_t ipv4;
 field_list ipv4_checksum_list {
-        ipv4.version;
-        ipv4.ihl;
-        ipv4.diffserv;
-        ipv4.totalLen;
-        ipv4.identification;
-        ipv4.flags;
-        ipv4.fragOffset;
-        ipv4.ttl;
-        ipv4.protocol;
-        ipv4.srcAddr;
-        ipv4.dstAddr;
+    ipv4.version;
+    ipv4.ihl;
+    ipv4.diffserv;
+    ipv4.totalLen;
+    ipv4.identification;
+    ipv4.flags;
+    ipv4.fragOffset;
+    ipv4.ttl;
+    ipv4.protocol;
+    ipv4.srcAddr;
+    ipv4.dstAddr;
 }
 
 field_list_calculation ipv4_checksum {
@@ -69,7 +69,7 @@ field_list_calculation ipv4_checksum {
     output_width : 16;
 }
 
-calculated_field ipv4.hdrChecksum  {
+calculated_field ipv4.hdrChecksum {
     verify ipv4_checksum;
     update ipv4_checksum;
 }
@@ -102,8 +102,12 @@ action do_setup() {
 }
 
 table setup {
-    reads { ethernet: valid; }
-    actions { do_setup; }
+    reads {
+        ethernet : valid;
+    }
+    actions {
+        do_setup;
+    }
 }
 
 action drop() {
@@ -114,7 +118,9 @@ action forward(to) {
 }
 
 table route {
-    reads { ipv4.dstAddr : ternary; }
+    reads {
+        ipv4.dstAddr : ternary;
+    }
     actions {
         drop;
         forward;

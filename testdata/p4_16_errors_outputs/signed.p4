@@ -5,4 +5,3 @@ control c() {
         signed_int1[7:0] = signed_int2;
     }
 }
-

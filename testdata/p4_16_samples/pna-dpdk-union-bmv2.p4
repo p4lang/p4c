@@ -26,15 +26,16 @@ struct Headers {
     U u;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in b, out Headers h, inout Meta m,
     in    pna_main_parser_input_metadata_t istd) {
     state start {
         b.extract(h.h1);
-        transition select(h.h1.a) {
-            0: getH1;
-            default: getH2;
+        transition select (h.h1.a) {
+            0 : getH1;
+            default : getH2;
         }
     }
 
@@ -60,7 +61,8 @@ control deparser(packet_out b, in Headers h, in Meta m,
 control ingress(inout Headers h, inout Meta m,
     in    pna_main_input_metadata_t  istd,
     inout pna_main_output_metadata_t ostd) {
-    apply {}
+    apply {
+    }
 }
 
 control PreControlImpl(
@@ -72,6 +74,5 @@ control PreControlImpl(
     apply {
     }
 }
-
 
 PNA_NIC(p(), PreControlImpl(), ingress(), deparser()) main;

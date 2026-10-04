@@ -2,7 +2,7 @@ serenum-type.p4(14): [--Werror=type-error] error: EthT: Illegal type for enum; o
 enum EthT EthTypes {
      ^^^^
 serenum-type.p4(40): [--Werror=type-error] error: 'SelectExpression'
-        transition select(e.type) {
+        transition select (e.type) {
                    ^
   ---- Actual error:
 serenum-type.p4(14): Cannot cast implicitly type 'EthTypes' to type 'EthT'
@@ -13,7 +13,7 @@ serenum-type.p4(12)
                ^^^^
   ---- Originating from:
 serenum-type.p4(41): 'match' case label 'EthTypes.IPv4' has type 'EthTypes' which does not match the expected type 'EthT'
-              EthTypes.IPv4: accept;
+              EthTypes.IPv4 : accept;
               ^^^^^^^^^^^^^
 serenum-type.p4(14)
   enum EthT EthTypes {
@@ -22,8 +22,8 @@ serenum-type.p4(12)
   type Base2_t EthT;
                ^^^^
 serenum-type.p4(55): [--Werror=type-error] error: '(EthTypes)16w0'
-            h.eth.type = (EthTypes)(bit<16>)0;
-                         ^^^^^^^^^^^^^^^^^^^^
+        h.eth.type =(EthTypes)(bit<16>) 0;
+                    ^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
 serenum-type.p4(14): Cannot unify type 'bit<16>' with type 'EthTypes'
   enum EthT EthTypes {

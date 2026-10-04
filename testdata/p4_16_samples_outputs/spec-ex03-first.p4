@@ -4,4 +4,3 @@ control dp() {
         bi t;
     }
 }
-

@@ -7,17 +7,17 @@
 
 header_type ethernet_t {
     fields {
-        dstAddr   : 48;
-        srcAddr   : 48;
+        dstAddr : 48;
+        srcAddr : 48;
         ethertype : 16;
     }
 }
 
 header_type vlan_tag_t {
     fields {
-        pcp       : 3;
-        cfi       : 1;
-        vlan_id   : 12;
+        pcp : 3;
+        cfi : 1;
+        vlan_id : 12;
         ethertype : 16;
     }
 }
@@ -37,10 +37,10 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
-        options: *;
+        dstAddr : 32;
+        options : *;
     }
-    length     : ihl*4;
+    length : ihl * 4;
     max_length : 64;
 }
 
@@ -48,7 +48,7 @@ header_type ipv4_t {
 
 header ethernet_t ethernet;
 header vlan_tag_t vlan_tag[N_TAGS];
-header ipv4_t     ipv4;
+header ipv4_t ipv4;
 
 parser start {
     return parse_ethernet;
@@ -56,19 +56,19 @@ parser start {
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.ethertype) {
-        0x8100 mask 0xEFFF: parse_vlan_tag;
-        0x0800:             parse_ipv4;
-        default: ingress;
+    return select (latest.ethertype) {
+    0x8100 mask 0xEFFF : parse_vlan_tag;
+    0x0800 : parse_ipv4;
+    default : ingress;
     }
 }
 
 parser parse_vlan_tag {
     extract(vlan_tag[next]);
-    return select(latest.ethertype) {
-        0x8100 mask 0xEFFF: parse_vlan_tag;
-        0x0800:             parse_ipv4;
-        default: ingress;
+    return select (latest.ethertype) {
+    0x8100 mask 0xEFFF : parse_vlan_tag;
+    0x0800 : parse_ipv4;
+    default : ingress;
     }
 }
 

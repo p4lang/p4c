@@ -7,27 +7,27 @@
 #include <core.p4>
 #include <tc/pna.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    @tc_type("ipv4") bit<32> srcAddr;
+    @tc_type("ipv4") bit<32> dstAddr;
 }
 
 header tcp_t {
@@ -35,9 +35,9 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> dataOffset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -47,8 +47,8 @@ header tcp_t {
 const bit<8> TCP_RST_MASK = 0x04;
 const bit<8> TCP_FIN_MASK = 0x01;
 
-const PortId_t hport = (PortId_t) 0;
-const PortId_t nport = (PortId_t) 1;
+const PortId_t hport =(PortId_t) 0;
+const PortId_t nport =(PortId_t) 1;
 
 //////////////////////////////////////////////////////////////////////
 // Struct types for holding user-defined collections of headers and
@@ -69,8 +69,8 @@ struct main_metadata_t {
 // main parser.
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 parser MainParserImpl(
@@ -81,15 +81,15 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800  : parse_ipv4;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
             default : accept;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            6       : parse_tcp;
+        transition select (hdr.ipv4.protocol) {
+            6 : parse_tcp;
             default : accept;
         }
     }
@@ -121,16 +121,16 @@ control MainControlImpl(
     action drop() {
         drop_packet();
     }
-    action tcp_syn_packet () {
+    action tcp_syn_packet() {
         do_add_on_miss = true;
         update_aging_info = true;
         update_expire_time = true;
     }
-    action tcp_fin_or_rst_packet () {
+    action tcp_fin_or_rst_packet() {
         update_aging_info = true;
         update_expire_time = true;
     }
-    action tcp_other_packets () {
+    action tcp_other_packets() {
         do_add_on_miss = true;
         update_expire_time = true;
     }
@@ -147,8 +147,8 @@ control MainControlImpl(
     }
     table ipv4_tbl_2 {
         key = {
-            hdr.ipv4.dstAddr  : exact;
-            hdr.ipv4.srcAddr  : exact;
+            hdr.ipv4.dstAddr : exact;
+            hdr.ipv4.srcAddr : exact;
             hdr.ipv4.protocol : exact;
         }
         actions = {
@@ -159,9 +159,9 @@ control MainControlImpl(
     }
     table ipv4_tbl_3 {
         key = {
-            hdr.ipv4.dstAddr  : exact;
-            hdr.ipv4.srcAddr  : exact;
-            hdr.ipv4.flags    : exact;
+            hdr.ipv4.dstAddr : exact;
+            hdr.ipv4.srcAddr : exact;
+            hdr.ipv4.flags : exact;
         }
         actions = {
             sendtoport;
@@ -171,8 +171,8 @@ control MainControlImpl(
     }
     table ipv4_tbl_4 {
         key = {
-            hdr.ipv4.dstAddr    : exact;
-            hdr.ipv4.srcAddr    : exact;
+            hdr.ipv4.dstAddr : exact;
+            hdr.ipv4.srcAddr : exact;
             hdr.ipv4.fragOffset : exact;
         }
         actions = {
@@ -210,8 +210,8 @@ control MainControlImpl(
     }
     table set_all_options {
         key = {
-            hdr.ipv4.srcAddr    : exact;
-            hdr.ipv4.flags      : exact;
+            hdr.ipv4.srcAddr : exact;
+            hdr.ipv4.flags : exact;
             hdr.ipv4.fragOffset : exact;
         }
         actions = {

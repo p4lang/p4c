@@ -18,8 +18,8 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_extirpations") state parse_extirpations {
         packet.extract(hdr.extirpations);
-        transition select(hdr.extirpations.khans) {
-            16s1024: accept;
+        transition select (hdr.extirpations.khans) {
+            16s1024 : accept;
         }
     }
     @name(".start") state start {

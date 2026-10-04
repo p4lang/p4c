@@ -31,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.BfyXpa") table BfyXpa_0 {
         key = {
-            val_0: exact @name("eJPEfW");
+            val_0 : exact @name("eJPEfW");
         }
         actions = {
             do_action();
@@ -39,21 +39,21 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_instance_overwritebmv2l29() {
+    @hidden action gauntlet_instance_overwritebmv2l30() {
         tmp.setValid();
         tmp.a = 8w3;
         tmp.b = 8w1;
         tmp.c = 8w1;
         val_0 = 8w3;
     }
-    @hidden table tbl_gauntlet_instance_overwritebmv2l29 {
+    @hidden table tbl_gauntlet_instance_overwritebmv2l30 {
         actions = {
-            gauntlet_instance_overwritebmv2l29();
+            gauntlet_instance_overwritebmv2l30();
         }
-        const default_action = gauntlet_instance_overwritebmv2l29();
+        const default_action = gauntlet_instance_overwritebmv2l30();
     }
     apply {
-        tbl_gauntlet_instance_overwritebmv2l29.apply();
+        tbl_gauntlet_instance_overwritebmv2l30.apply();
         BfyXpa_0.apply();
     }
 }
@@ -75,8 +75,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<H>(h.h);
+        pkt.emit < H >(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

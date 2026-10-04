@@ -1,7 +1,7 @@
 #include <core.p4>
 #include <tc/pna.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     @tc_type("macaddr") EthernetAddress dstAddr;
@@ -10,29 +10,29 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    @tc_type("ipv4") bit<32> srcAddr;
+    @tc_type("ipv4") bit<32> dstAddr;
 }
 
 header ipv6_t {
-    bit<4>   version;
-    bit<8>   trafficClass;
-    bit<20>  flowLabel;
-    bit<16>  payloadLength;
-    bit<8>   nextHeader;
-    bit<8>   hopLimit;
-    @tc_type ("ipv6") bit<128> srcAddr;
-    @tc_type ("ipv6") bit<128> dstAddr;
+    bit<4> version;
+    bit<8> trafficClass;
+    bit<20> flowLabel;
+    bit<16> payloadLength;
+    bit<8> nextHeader;
+    bit<8> hopLimit;
+    @tc_type("ipv6") bit<128> srcAddr;
+    @tc_type("ipv6") bit<128> dstAddr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ struct main_metadata_t {
 // main parser.
 struct headers_t {
     ethernet_t ethernet;
-    ipv6_t     ipv6;
+    ipv6_t ipv6;
 }
 
 parser MainParserImpl(
@@ -65,9 +65,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x86DD: parse_ipv6;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x86DD : parse_ipv6;
+            default : accept;
         }
     }
 
@@ -93,7 +93,10 @@ control MainControlImpl(
         key = {
             hdr.ipv6.srcAddr : exact;
         }
-        actions = { set_dst; NoAction; }
+        actions = {
+            set_dst;
+            NoAction;
+        }
         default_action = set_dst(128w0xffff_1111_2222_3333_4444_5555_6666_aaaa);
         size = 100;
     }

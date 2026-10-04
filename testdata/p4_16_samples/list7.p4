@@ -14,8 +14,7 @@ struct S {
 }
 
 control c() {
-    E<S>({ f = 5 }) e;
-
+    E<S>({f = 5}) e;
     apply {
         e.run();
     }
@@ -23,5 +22,4 @@ control c() {
 
 control C();
 package top(C _c);
-
 top(c()) main;

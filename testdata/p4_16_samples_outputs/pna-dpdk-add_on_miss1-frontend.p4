@@ -8,18 +8,18 @@ typedef bit<8> ipproto_t;
 header ethernet_h {
     EthernetAddress dst_addr;
     EthernetAddress src_addr;
-    etype_t         ether_type;
+    etype_t ether_type;
 }
 
 header ipv4_h {
-    bit<8>      version_ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<16>     flags_frag_offset;
-    bit<8>      ttl;
-    ipproto_t   protocol;
-    bit<16>     hdr_checksum;
+    bit<8> version_ihl;
+    bit<8> diffserv;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<16> flags_frag_offset;
+    bit<8> ttl;
+    ipproto_t protocol;
+    bit<16> hdr_checksum;
     IPv4Address src_addr;
     IPv4Address dst_addr;
 }
@@ -29,9 +29,9 @@ header tcp_h {
     bit<16> dst_port;
     bit<32> seq_no;
     bit<32> ack_no;
-    bit<4>  data_offset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> data_offset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgent_ptr;
@@ -46,9 +46,9 @@ header udp_h {
 
 struct headers_t {
     ethernet_h ethernet;
-    ipv4_h     ipv4;
-    tcp_h      tcp;
-    udp_h      udp;
+    ipv4_h ipv4;
+    tcp_h tcp;
+    udp_h udp;
 }
 
 enum bit<16> direction_t {
@@ -63,26 +63,26 @@ struct metadata_t {
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<ethernet_h>(hdr.ethernet);
-        transition select(hdr.ethernet.ether_type) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        pkt.extract < ethernet_h >(hdr.ethernet);
+        transition select (hdr.ethernet.ether_type) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_h>(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            8w6: parse_tcp;
-            8w17: parse_udp;
-            default: accept;
+        pkt.extract < ipv4_h >(hdr.ipv4);
+        transition select (hdr.ipv4.protocol) {
+            8w6 : parse_tcp;
+            8w17 : parse_udp;
+            default : accept;
         }
     }
     state parse_tcp {
-        pkt.extract<tcp_h>(hdr.tcp);
+        pkt.extract < tcp_h >(hdr.tcp);
         transition accept;
     }
     state parse_udp {
-        pkt.extract<udp_h>(hdr.udp);
+        pkt.extract < udp_h >(hdr.udp);
         transition accept;
     }
 }
@@ -158,7 +158,7 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
     }
     @name("MainControlImpl.ipv4_host") table ipv4_host_0 {
         key = {
-            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr");
+            hdr.ipv4.dst_addr : exact @name("hdr.ipv4.dst_addr");
         }
         actions = {
             send();
@@ -169,19 +169,19 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
         size = 65536;
     }
     @name("MainControlImpl.outbound.conntrack.ct_tcp_table_hit") action outbound_conntrack_ct_tcp_table_hit_0() {
-        hdr.ethernet.src_addr[7:0] = 8w0xf1;
+        hdr.ethernet.src_addr[7 : 0] = 8w0xf1;
     }
     @name("MainControlImpl.outbound.conntrack.ct_tcp_table_miss") action outbound_conntrack_ct_tcp_table_miss_0() {
-        hdr.ethernet.src_addr[7:0] = 8w0xa5;
-        add_entry<ct_tcp_table_hit_params_t>(action_name = "ct_tcp_table_hit", action_params = (ct_tcp_table_hit_params_t){}, expire_time_profile_id = outbound_conntrack_new_expire_time_profile_id);
+        hdr.ethernet.src_addr[7 : 0] = 8w0xa5;
+        add_entry < ct_tcp_table_hit_params_t >(action_name = "ct_tcp_table_hit", action_params = (ct_tcp_table_hit_params_t){}, expire_time_profile_id = outbound_conntrack_new_expire_time_profile_id);
     }
     @name("MainControlImpl.outbound.conntrack.ct_tcp_table") table outbound_conntrack_ct_tcp_table {
         key = {
-            outbound_conntrack_key  : exact @name("ipv4_addr1");
-            outbound_conntrack_key_0: exact @name("ipv4_addr2");
-            outbound_conntrack_key_1: exact @name("hdr.ipv4.protocol");
-            outbound_conntrack_key_2: exact @name("tcp_port1");
-            outbound_conntrack_key_3: exact @name("tcp_port2");
+            outbound_conntrack_key : exact @name("ipv4_addr1");
+            outbound_conntrack_key_0 : exact @name("ipv4_addr2");
+            outbound_conntrack_key_1 : exact @name("hdr.ipv4.protocol");
+            outbound_conntrack_key_2 : exact @name("tcp_port1");
+            outbound_conntrack_key_3 : exact @name("tcp_port2");
         }
         actions = {
             @tableonly outbound_conntrack_ct_tcp_table_hit_0();
@@ -192,19 +192,19 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
         const default_action = outbound_conntrack_ct_tcp_table_miss_0();
     }
     @name("MainControlImpl.inbound.conntrack.ct_tcp_table_hit") action inbound_conntrack_ct_tcp_table_hit_0() {
-        hdr.ethernet.src_addr[7:0] = 8w0xf1;
+        hdr.ethernet.src_addr[7 : 0] = 8w0xf1;
     }
     @name("MainControlImpl.inbound.conntrack.ct_tcp_table_miss") action inbound_conntrack_ct_tcp_table_miss_0() {
-        hdr.ethernet.src_addr[7:0] = 8w0xa5;
-        add_entry<ct_tcp_table_hit_params_t>(action_name = "ct_tcp_table_hit", action_params = (ct_tcp_table_hit_params_t){}, expire_time_profile_id = inbound_conntrack_new_expire_time_profile_id);
+        hdr.ethernet.src_addr[7 : 0] = 8w0xa5;
+        add_entry < ct_tcp_table_hit_params_t >(action_name = "ct_tcp_table_hit", action_params = (ct_tcp_table_hit_params_t){}, expire_time_profile_id = inbound_conntrack_new_expire_time_profile_id);
     }
     @name("MainControlImpl.inbound.conntrack.ct_tcp_table") table inbound_conntrack_ct_tcp_table {
         key = {
-            inbound_conntrack_key  : exact @name("ipv4_addr1");
-            inbound_conntrack_key_0: exact @name("ipv4_addr2");
-            inbound_conntrack_key_1: exact @name("hdr.ipv4.protocol");
-            inbound_conntrack_key_2: exact @name("tcp_port1");
-            inbound_conntrack_key_3: exact @name("tcp_port2");
+            inbound_conntrack_key : exact @name("ipv4_addr1");
+            inbound_conntrack_key_0 : exact @name("ipv4_addr2");
+            inbound_conntrack_key_1 : exact @name("hdr.ipv4.protocol");
+            inbound_conntrack_key_2 : exact @name("tcp_port1");
+            inbound_conntrack_key_3 : exact @name("tcp_port2");
         }
         actions = {
             @tableonly inbound_conntrack_ct_tcp_table_hit_0();
@@ -218,7 +218,7 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
         if (hdr.ipv4.isValid() && hdr.tcp.isValid()) {
             if (istd.direction == PNA_Direction_t.HOST_TO_NET) {
                 meta.direction = direction_t.OUTBOUND;
-                outbound_conntrack_new_expire_time_profile_id = (ExpireTimeProfileId_t)8w1;
+                outbound_conntrack_new_expire_time_profile_id =(ExpireTimeProfileId_t) 8w1;
                 direction_8 = meta.direction;
                 outbound_address = hdr.ipv4.src_addr;
                 inbound_address = hdr.ipv4.dst_addr;
@@ -263,7 +263,7 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 outbound_conntrack_ct_tcp_table.apply();
             } else {
                 meta.direction = direction_t.INBOUND;
-                inbound_conntrack_new_expire_time_profile_id = (ExpireTimeProfileId_t)8w1;
+                inbound_conntrack_new_expire_time_profile_id =(ExpireTimeProfileId_t) 8w1;
                 direction_12 = meta.direction;
                 outbound_address_5 = hdr.ipv4.src_addr;
                 inbound_address_5 = hdr.ipv4.dst_addr;
@@ -316,8 +316,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
     apply {
-        pkt.emit<headers_t>(hdr);
+        pkt.emit < headers_t >(hdr);
     }
 }
 
-PNA_NIC<headers_t, metadata_t, headers_t, metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, metadata_t, headers_t, metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

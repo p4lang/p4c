@@ -8,18 +8,18 @@ header eth_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> length;
     bit<16> identification;
-    bit<1>  rsvd;
-    bit<1>  df;
-    bit<1>  mf;
+    bit<1> rsvd;
+    bit<1> df;
+    bit<1> mf;
     bit<13> frag_off;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> csum;
     bit<32> src_ip;
     bit<32> dst_ip;
@@ -37,24 +37,24 @@ header tcp_t {
     bit<16> dport;
     bit<32> seqno;
     bit<32> ackno;
-    bit<4>  offset;
-    bit<6>  reserved;
-    bit<1>  urg;
-    bit<1>  ack;
-    bit<1>  psh;
-    bit<1>  rst;
-    bit<1>  syn;
-    bit<1>  fin;
+    bit<4> offset;
+    bit<6> reserved;
+    bit<1> urg;
+    bit<1> ack;
+    bit<1> psh;
+    bit<1> rst;
+    bit<1> syn;
+    bit<1> fin;
     bit<16> window;
     bit<16> csum;
     bit<16> urgptr;
 }
 
 struct parsed_headers_t {
-    eth_t     mac;
+    eth_t mac;
     ipv4_t[4] ipv4;
-    udp_t     udp;
-    tcp_t     tcp;
+    udp_t udp;
+    tcp_t tcp;
 }
 
 struct user_meta_t {
@@ -68,44 +68,44 @@ control PreControlImpl(in parsed_headers_t hdrs, inout user_meta_t umeta, in pna
 
 parser MainParserImpl(packet_in pkt, out parsed_headers_t hdrs, inout user_meta_t umeta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        pkt.extract<eth_t>(hdrs.mac);
-        transition select(hdrs.mac.type) {
-            16w0x800: Parse_IPv4_Depth0;
-            default: accept;
+        pkt.extract < eth_t >(hdrs.mac);
+        transition select (hdrs.mac.type) {
+            16w0x800 : Parse_IPv4_Depth0;
+            default : accept;
         }
     }
     state Parse_IPv4_Depth0 {
-        pkt.extract<ipv4_t>(hdrs.ipv4[0]);
-        transition select(hdrs.ipv4[0].protocol) {
-            8w4: Parse_IPv4_Depth1;
-            8w17: Parse_UDP;
-            8w6: Parse_TCP;
-            default: accept;
+        pkt.extract < ipv4_t >(hdrs.ipv4[0]);
+        transition select (hdrs.ipv4[0].protocol) {
+            8w4 : Parse_IPv4_Depth1;
+            8w17 : Parse_UDP;
+            8w6 : Parse_TCP;
+            default : accept;
         }
     }
     state Parse_IPv4_Depth1 {
-        pkt.extract<ipv4_t>(hdrs.ipv4[1]);
-        transition select(hdrs.ipv4[1].protocol) {
-            8w4: Parse_IPv4_Depth2;
-            8w17: Parse_UDP;
-            8w6: Parse_TCP;
-            default: accept;
+        pkt.extract < ipv4_t >(hdrs.ipv4[1]);
+        transition select (hdrs.ipv4[1].protocol) {
+            8w4 : Parse_IPv4_Depth2;
+            8w17 : Parse_UDP;
+            8w6 : Parse_TCP;
+            default : accept;
         }
     }
     state Parse_IPv4_Depth2 {
-        pkt.extract<ipv4_t>(hdrs.ipv4[2]);
-        transition select(hdrs.ipv4[2].protocol) {
-            8w17: Parse_UDP;
-            8w6: Parse_TCP;
-            default: accept;
+        pkt.extract < ipv4_t >(hdrs.ipv4[2]);
+        transition select (hdrs.ipv4[2].protocol) {
+            8w17 : Parse_UDP;
+            8w6 : Parse_TCP;
+            default : accept;
         }
     }
     state Parse_TCP {
-        pkt.extract<tcp_t>(hdrs.tcp);
+        pkt.extract < tcp_t >(hdrs.tcp);
         transition accept;
     }
     state Parse_UDP {
-        pkt.extract<udp_t>(hdrs.udp);
+        pkt.extract < udp_t >(hdrs.udp);
         transition accept;
     }
 }
@@ -142,7 +142,7 @@ control MainControlImpl(inout parsed_headers_t hdrs, inout user_meta_t umeta, in
     }
     @name("MainControlImpl.header_mod") table header_mod_0 {
         key = {
-            hdrs.mac.da: exact @name("hdrs.mac.da");
+            hdrs.mac.da : exact @name("hdrs.mac.da");
         }
         actions = {
             @tableonly encap_one_tunnel_layer_ipv4();
@@ -161,14 +161,14 @@ control MainControlImpl(inout parsed_headers_t hdrs, inout user_meta_t umeta, in
 
 control MainDeparserImpl(packet_out pkt, in parsed_headers_t hdrs, in user_meta_t umeta, in pna_main_output_metadata_t ostd) {
     apply {
-        pkt.emit<eth_t>(hdrs.mac);
-        pkt.emit<ipv4_t>(hdrs.ipv4[0]);
-        pkt.emit<ipv4_t>(hdrs.ipv4[1]);
-        pkt.emit<ipv4_t>(hdrs.ipv4[2]);
-        pkt.emit<ipv4_t>(hdrs.ipv4[3]);
-        pkt.emit<tcp_t>(hdrs.tcp);
-        pkt.emit<udp_t>(hdrs.udp);
+        pkt.emit < eth_t >(hdrs.mac);
+        pkt.emit < ipv4_t >(hdrs.ipv4[0]);
+        pkt.emit < ipv4_t >(hdrs.ipv4[1]);
+        pkt.emit < ipv4_t >(hdrs.ipv4[2]);
+        pkt.emit < ipv4_t >(hdrs.ipv4[3]);
+        pkt.emit < tcp_t >(hdrs.tcp);
+        pkt.emit < udp_t >(hdrs.udp);
     }
 }
 
-PNA_NIC<parsed_headers_t, user_meta_t, parsed_headers_t, user_meta_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < parsed_headers_t, user_meta_t, parsed_headers_t, user_meta_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

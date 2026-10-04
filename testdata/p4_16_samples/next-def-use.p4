@@ -9,14 +9,15 @@
  */
 #include <v1model.p4>
 
-struct metadata { }
+struct metadata {
+}
 
 header data_t {
     bit<8> f;
 }
 
 struct headers {
-    data_t[3]   hs;
+    data_t[3] hs;
 }
 
 parser ParserImpl(      packet_in           packet,
@@ -29,7 +30,7 @@ parser ParserImpl(      packet_in           packet,
     }
 
     state p0 {
-        hdr.hs.next = {8w0};
+        hdr.hs.next = { 8w0 };
         transition accept;
     }
 }

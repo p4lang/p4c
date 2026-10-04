@@ -28,7 +28,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action simple_action() {
         if (h.eth_hdr.eth_type != 0) {
-            bit<48> tmp_val = (h.eth_hdr.src_addr != 0 ? 48w1 : 48w2);
+            bit<48> tmp_val =(h.eth_hdr.src_addr != 0 ? 48w1 : 48w2);
             h.eth_hdr.dst_addr = tmp_val;
         }
     }

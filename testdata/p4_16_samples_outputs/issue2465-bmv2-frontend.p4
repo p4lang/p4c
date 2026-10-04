@@ -20,29 +20,29 @@ parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t
         l_0.h[0].setInvalid();
         l_0.h[1].setInvalid();
         l_0.h[2].setInvalid();
-        l_0 = b.lookahead<h>();
-        transition select(l_0.h[0].f1, l_0.h[1].f1, l_0.h[2].f1) {
-            (8w1, default, default): one;
-            (8w0, 8w1, default): two;
-            (8w0, 8w0, 8w1): three;
-            default: many;
+        l_0 = b.lookahead < h >();
+        transition select (l_0.h[0].f1, l_0.h[1].f1, l_0.h[2].f1) {
+            (8w1, default, default) : one;
+            (8w0, 8w1, default) : two;
+            (8w0, 8w0, 8w1) : three;
+            default : many;
         }
     }
     state one {
-        b.extract<h1>(hdrs.h.next);
+        b.extract < h1 >(hdrs.h.next);
         meta.h_count = 8w1;
         transition accept;
     }
     state two {
-        b.extract<h1>(hdrs.h.next);
-        b.extract<h1>(hdrs.h.next);
+        b.extract < h1 >(hdrs.h.next);
+        b.extract < h1 >(hdrs.h.next);
         meta.h_count = 8w2;
         transition accept;
     }
     state three {
-        b.extract<h1>(hdrs.h.next);
-        b.extract<h1>(hdrs.h.next);
-        b.extract<h1>(hdrs.h.next);
+        b.extract < h1 >(hdrs.h.next);
+        b.extract < h1 >(hdrs.h.next);
+        b.extract < h1 >(hdrs.h.next);
         meta.h_count = 8w2;
         transition accept;
     }
@@ -77,4 +77,4 @@ control MyDeparser(packet_out b, in h hdr) {
     }
 }
 
-V1Switch<h, m>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < h, m >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

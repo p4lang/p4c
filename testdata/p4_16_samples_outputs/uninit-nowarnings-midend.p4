@@ -26,10 +26,10 @@ extern bit<32> g(inout bit<32> v, in bit<32> w);
     }
     @noWarn("invalid-header") state next {
         h.data2 = h.data3 + 32w1;
-        transition select((bit<1>)h.isValid()) {
-            1w1: next1;
-            1w0: next2;
-            default: noMatch;
+        transition select ((bit<1>) h.isValid()) {
+            1w1 : next1;
+            1w0 : next2;
+            default : noMatch;
         }
     }
     state next1 {
@@ -62,23 +62,23 @@ control c(out bit<32> v) {
         }
         default_action = a1();
     }
-    @hidden action uninitnowarnings84() {
+    @hidden action uninitnowarnings91() {
         e_0 = 32w1;
     }
-    @hidden action uninitnowarnings89() {
+    @hidden action uninitnowarnings96() {
         e_0 = e_0 + 32w1;
     }
-    @hidden table tbl_uninitnowarnings84 {
+    @hidden table tbl_uninitnowarnings91 {
         actions = {
-            uninitnowarnings84();
+            uninitnowarnings91();
         }
-        const default_action = uninitnowarnings84();
+        const default_action = uninitnowarnings91();
     }
-    @hidden table tbl_uninitnowarnings89 {
+    @hidden table tbl_uninitnowarnings96 {
         actions = {
-            uninitnowarnings89();
+            uninitnowarnings96();
         }
-        const default_action = uninitnowarnings89();
+        const default_action = uninitnowarnings96();
     }
     @hidden table tbl_a1 {
         actions = {
@@ -88,15 +88,15 @@ control c(out bit<32> v) {
     }
     apply @noWarn("uninitialized-use") {
         if (e_0 > 32w0) {
-            tbl_uninitnowarnings84.apply();
+            tbl_uninitnowarnings91.apply();
         } else {
             ;
         }
-        tbl_uninitnowarnings89.apply();
+        tbl_uninitnowarnings96.apply();
         switch (t_0.apply().action_run) {
-            a1: {
+            a1 : {
             }
-            default: {
+            default : {
             }
         }
         if (e_0 > 32w0) {

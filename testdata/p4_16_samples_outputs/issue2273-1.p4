@@ -1,10 +1,10 @@
 #include <core.p4>
 
-extern Stack<T> {
+extern Stack < T > {
     Stack(int size);
 }
 
-extern StackAction<T, U> {
+extern StackAction < T, U > {
     StackAction(Stack<T> stack);
     U push();
     U pop();
@@ -17,8 +17,8 @@ header data_t {
     bit<32> f1;
     bit<32> f2;
     bit<16> h1;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 struct headers {
@@ -26,22 +26,22 @@ struct headers {
 }
 
 control ingress(inout headers hdr) {
-    Stack<bit<16>>(2048) stack;
-    StackAction<bit<16>, bit<16>>(stack) write = {
-        void apply(inout bit<16> value) {
-            value = hdr.data.h1;
-        }
-        void overflow(inout bit<16> value, out bit<16> rv) {
-            rv = 0xf0f;
-        }
+    Stack < bit<16 >>(2048) stack;
+    StackAction <bit<16>, bit<16 >>(stack) write = {
+    void apply(inout bit<16> value) {
+    value = hdr.data.h1;
+    }
+    void overflow(inout bit<16> value, out bit<16> rv) {
+    rv = 0xf0f;
+    }
     };
-    StackAction<bit<16>, bit<16>>(stack) read = {
-        void apply(inout bit<16> value, out bit<16> rv) {
-            rv = value;
-        }
-        void underflow(inout bit<16> value, out bit<16> rv) {
-            rv = 0xf0f0;
-        }
+    StackAction <bit<16>, bit<16 >>(stack) read = {
+    void apply(inout bit<16> value, out bit<16> rv) {
+    rv = value;
+    }
+    void underflow(inout bit<16> value, out bit<16> rv) {
+    rv = 0xf0f0;
+    }
     };
     action push() {
         hdr.data.b1 = 0xff;
@@ -52,7 +52,7 @@ control ingress(inout headers hdr) {
             push;
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1 : ternary;
         }
     }
     action pop() {
@@ -64,7 +64,7 @@ control ingress(inout headers hdr) {
             pop;
         }
         key = {
-            hdr.data.f1: exact;
+            hdr.data.f1 : exact;
         }
     }
     apply {
@@ -76,6 +76,6 @@ control ingress(inout headers hdr) {
     }
 }
 
-control ctr<H>(inout H hdr);
-package top<H>(ctr<H> ctrl);
+control ctr < H >(inout H hdr);
+package top < H >(ctr<H> ctrl);
 top(ingress()) main;

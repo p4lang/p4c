@@ -13,13 +13,13 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-
 struct Headers {
     ethernet_t eth_hdr1;
     ethernet_t eth_hdr2;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -42,9 +42,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
         // Version 2
         tmp2.setValid();
-        tmp2.dst_addr =  48w1;
-        tmp2.src_addr =  48w1;
-        tmp2.eth_type =  16w1;
+        tmp2.dst_addr = 48w1;
+        tmp2.src_addr = 48w1;
+        tmp2.eth_type = 16w1;
         h.eth_hdr2 = tmp2;
     }
 }
@@ -71,4 +71,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

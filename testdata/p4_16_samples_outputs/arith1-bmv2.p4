@@ -5,7 +5,7 @@
 header hdr {
     int<32> a;
     int<32> b;
-    bit<8>  c;
+    bit<8> c;
 }
 
 struct Headers {
@@ -45,7 +45,7 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action compare() {
-        h.h.c = (bit<8>)(bit<1>)(h.h.a < h.h.b);
+        h.h.c =(bit<8>)(bit<1>)(h.h.a < h.h.b);
         sm.egress_spec = 0;
     }
     table t {

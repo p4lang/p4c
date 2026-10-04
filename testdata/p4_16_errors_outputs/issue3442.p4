@@ -14,7 +14,7 @@ control myc() {
             a;
         }
         const entries = {
-                        default : a();
+            default : a();
         }
     }
     apply {

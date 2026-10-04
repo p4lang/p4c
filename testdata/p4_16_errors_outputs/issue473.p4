@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -14,8 +14,8 @@ struct Parsed_packet {
 }
 
 struct mystruct1 {
-    bit<4>  a;
-    bit<4>  b;
+    bit<4> a;
+    bit<4> b;
     bit<32> c;
     bit<32> d;
 }
@@ -35,15 +35,15 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
     action a1(in bit<32> x) {
-        meta.b = meta.b + (bit<4>)x;
-        meta.b = (bit<4>)((bit<32>)meta.b + x);
+        meta.b = meta.b +(bit<4>) x;
+        meta.b =(bit<4>)((bit<32>) meta.b + x);
     }
     action b(inout bit<32> x, bit<8> data) {
-        meta.a = meta.a ^ (bit<4>)x ^ (bit<4>)data;
+        meta.a = meta.a ^(bit<4>) x ^(bit<4>) data;
     }
     table t1 {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             a1((bit<32>)meta.a);
@@ -71,4 +71,4 @@ control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
     }
 }
 
-V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, mystruct1 >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

@@ -15,7 +15,7 @@ parser p(packet_in pkt, out Headers hdr) {
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -26,7 +26,7 @@ control ingress(inout Headers h) {
     }
     table dummy_table {
         key = {
-            h.eth_hdr.src_addr: exact @name("key");
+            h.eth_hdr.src_addr : exact @name("key");
         }
         actions = {
             NoAction();
@@ -36,10 +36,10 @@ control ingress(inout Headers h) {
     }
     apply {
         switch (dummy_table.apply().action_run) {
-            simple_assign: {
-                simple_assign();
+            simple_assign : {
+            simple_assign();
             }
-            NoAction: {
+            NoAction : {
             }
         }
         simple_assign();

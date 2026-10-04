@@ -15,4 +15,3 @@ struct S {
 
 struct Empty {
 }
-

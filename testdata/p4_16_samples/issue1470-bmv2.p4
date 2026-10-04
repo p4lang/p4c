@@ -6,7 +6,8 @@
 
 #include "v1model.p4"
 
-struct meta_t {}
+struct meta_t {
+}
 
 header eth_h
 {
@@ -16,18 +17,18 @@ header eth_h
 }
 
 header ipv4_h {
-  	bit<4>   version;
-  	bit<4>   ihl;
-  	bit<8>   tos;
-  	bit<16>  len;
-  	bit<16>  id;
-  	bit<3>   flags;
-  	bit<13>  frag;
-  	bit<8>   ttl;
-  	bit<8>   proto;
-  	bit<16>  chksum;
-  	bit<32>  src;
-  	bit<32>  dst;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> tos;
+    bit<16> len;
+    bit<16> id;
+    bit<3> flags;
+    bit<13> frag;
+    bit<8> ttl;
+    bit<8> proto;
+    bit<16> chksum;
+    bit<32> src;
+    bit<32> dst;
 }
 
 struct headers_t {
@@ -43,9 +44,9 @@ parser InnerParser(packet_in pkt, out headers_t hdr) {
 
     state parse_eth {
         pkt.extract(hdr.eth);
-        transition select(hdr.eth.type) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.eth.type) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
 
@@ -55,7 +56,6 @@ parser InnerParser(packet_in pkt, out headers_t hdr) {
     }
 }
 
-
 parser OuterParser(packet_in pkt, out headers_t hdr,
                 inout meta_t m, inout standard_metadata_t meta) {
     state start {
@@ -64,13 +64,25 @@ parser OuterParser(packet_in pkt, out headers_t hdr,
     }
 }
 
-control NoVerify(inout headers_t hdr, inout meta_t m) { apply {} }
+control NoVerify(inout headers_t hdr, inout meta_t m) {
+    apply {
+    }
+}
 
-control NoCheck(inout headers_t hdr, inout meta_t m) { apply {} }
+control NoCheck(inout headers_t hdr, inout meta_t m) {
+    apply {
+    }
+}
 
-control NoIngress(inout headers_t hdr, inout meta_t m, inout standard_metadata_t meta) { apply {} }
+control NoIngress(inout headers_t hdr, inout meta_t m, inout standard_metadata_t meta) {
+    apply {
+    }
+}
 
-control NoEgress(inout headers_t hdr, inout meta_t m, inout standard_metadata_t meta) { apply {} }
+control NoEgress(inout headers_t hdr, inout meta_t m, inout standard_metadata_t meta) {
+    apply {
+    }
+}
 
 control SimpleDeparser(packet_out pkt, in headers_t hdr) {
     apply {

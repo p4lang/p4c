@@ -23,10 +23,14 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
 
     action add(bit<32> data)
-        { headers.h.b = headers.h.a + data; }
+    {
+        headers.h.b = headers.h.a + data;
+    }
 
     table tbl_a {
-        actions = { add; }
+        actions = {
+            add;
+        }
         default_action = add(10);
     }
 
@@ -37,7 +41,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    apply { packet.emit(headers.h); }
+    apply {
+        packet.emit(headers.h);
+    }
 }
 
 ubpf(prs(), pipe(), dprs()) main;

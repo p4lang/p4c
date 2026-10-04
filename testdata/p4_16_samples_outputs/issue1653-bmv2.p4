@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header bitvec_hdr {
-    bool   x;
+    bool x;
     bit<7> pp;
 }
 

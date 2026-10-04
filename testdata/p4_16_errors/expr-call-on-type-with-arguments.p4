@@ -1,7 +1,7 @@
 // generated from issue2795.p4
 
 control c()() {
-  apply {
-    c.c(_)
-  }
+    apply {
+        c.c(_)
+    }
 }

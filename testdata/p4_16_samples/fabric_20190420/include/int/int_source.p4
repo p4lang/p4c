@@ -10,7 +10,7 @@
 #define __INT_SOURCE__
 
 // Insert INT header to the packet
-control process_int_source (
+control process_int_source(
     inout parsed_headers_t hdr,
     inout fabric_metadata_t fabric_metadata,
     inout standard_metadata_t standard_metadata) {
@@ -56,10 +56,10 @@ control process_int_source (
 
     table tb_int_source {
         key = {
-            hdr.ipv4.src_addr: ternary @name("ipv4_src");
-            hdr.ipv4.dst_addr: ternary @name("ipv4_dst");
-            fabric_metadata.l4_sport: ternary @name("l4_sport");
-            fabric_metadata.l4_dport: ternary @name("l4_dport");
+            hdr.ipv4.src_addr : ternary @name("ipv4_src");
+            hdr.ipv4.dst_addr : ternary @name("ipv4_dst");
+            fabric_metadata.l4_sport : ternary @name("l4_sport");
+            fabric_metadata.l4_dport : ternary @name("l4_dport");
         }
         actions = {
             int_source_dscp;

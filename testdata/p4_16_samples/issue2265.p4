@@ -9,7 +9,6 @@ T f<T>(T data) {
     tmp = data;
     return tmp;
 }
-
 control c<T>(inout T data) {
     apply {
         T tmp;

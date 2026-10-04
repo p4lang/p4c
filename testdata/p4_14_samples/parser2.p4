@@ -44,7 +44,7 @@ header_type ipv4_t {
         protocol : 8;
         hdrChecksum : 16;
         srcAddr : 32;
-        dstAddr: 32;
+        dstAddr : 32;
     }
 }
 
@@ -133,12 +133,12 @@ header ethernet_t ethernet;
 
 parser parse_ethernet {
     extract(ethernet);
-    return select(latest.etherType) {
-        ETHERTYPE_VLAN : parse_vlan;
-        ETHERTYPE_MPLS : parse_mpls;
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_VLAN : parse_vlan;
+    ETHERTYPE_MPLS : parse_mpls;
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
+    default : ingress;
     }
 }
 
@@ -147,12 +147,12 @@ header vlan_tag_t vlan_tag_[VLAN_DEPTH];
 
 parser parse_vlan {
     extract(vlan_tag_[next]);
-    return select(latest.etherType) {
-        ETHERTYPE_VLAN : parse_vlan;
-        ETHERTYPE_MPLS : parse_mpls;
-        ETHERTYPE_IPV4 : parse_ipv4;
-        ETHERTYPE_IPV6 : parse_ipv6;
-        default: ingress;
+    return select (latest.etherType) {
+    ETHERTYPE_VLAN : parse_vlan;
+    ETHERTYPE_MPLS : parse_mpls;
+    ETHERTYPE_IPV4 : parse_ipv4;
+    ETHERTYPE_IPV6 : parse_ipv6;
+    default : ingress;
     }
 }
 
@@ -166,10 +166,10 @@ header mpls_t mpls_bos;
 /* TODO: this will be optimized when pushed to the chip ? */
 
 parser parse_mpls {
-    return select(current(23, 1)) {
-        0 : parse_mpls_not_bos;
-        1 : parse_mpls_bos;
-        default: ingress;
+    return select (current(23, 1)) {
+    0 : parse_mpls_not_bos;
+    1 : parse_mpls_bos;
+    default : ingress;
     }
 }
 
@@ -180,11 +180,11 @@ parser parse_mpls_not_bos {
 
 parser parse_mpls_bos {
     extract(mpls_bos);
-    return select(current(0, 4)) {
-        0x4 : parse_ipv4;
-        0x6 : parse_ipv6;
-        default : ingress;
-    }    
+    return select (current(0, 4)) {
+    0x4 : parse_ipv4;
+    0x6 : parse_ipv6;
+    default : ingress;
+    }
 }
 
 #define IP_PROTOCOLS_ICMP 1
@@ -200,11 +200,11 @@ header ipv4_t ipv4;
 
 parser parse_ipv4 {
     extract(ipv4);
-    return select(latest.fragOffset, latest.protocol) {
-        IP_PROTOCOLS_ICMP : parse_icmp;
-        IP_PROTOCOLS_TCP : parse_tcp;
-        IP_PROTOCOLS_UDP : parse_udp;
-        default: ingress;
+    return select (latest.fragOffset, latest.protocol) {
+    IP_PROTOCOLS_ICMP : parse_icmp;
+    IP_PROTOCOLS_TCP : parse_tcp;
+    IP_PROTOCOLS_UDP : parse_udp;
+    default : ingress;
     }
 }
 
@@ -212,11 +212,11 @@ header ipv6_t ipv6;
 
 parser parse_ipv6 {
     extract(ipv6);
-    return select(latest.nextHdr) {
-        IP_PROTOCOLS_ICMPV6 : parse_icmpv6;
-        IP_PROTOCOLS_TCP : parse_tcp;
-        IP_PROTOCOLS_UDP : parse_udp;
-        default: ingress;
+    return select (latest.nextHdr) {
+    IP_PROTOCOLS_ICMPV6 : parse_icmpv6;
+    IP_PROTOCOLS_TCP : parse_tcp;
+    IP_PROTOCOLS_UDP : parse_udp;
+    default : ingress;
     }
 }
 
@@ -248,7 +248,8 @@ parser parse_udp {
     return ingress;
 }
 
-action do_noop() { }
+action do_noop() {
+}
 
 table do_nothing {
     reads {
@@ -259,4 +260,6 @@ table do_nothing {
     }
 }
 
-control ingress { apply(do_nothing); }
+control ingress {
+    apply(do_nothing);
+}

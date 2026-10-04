@@ -12,42 +12,42 @@ const vlan_id_t NO_VLAN_ID = 0x0;
 header ethernet_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
-    ether_type_t    ether_type;
+    ether_type_t ether_type;
 }
 
 header vlan_t {
-    bit<3>       priority_code_point;
-    bit<1>       drop_eligible_indicator;
-    vlan_id_t    vlan_id;
+    bit<3> priority_code_point;
+    bit<1> drop_eligible_indicator;
+    vlan_id_t vlan_id;
     ether_type_t ether_type;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<6>      dscp;
-    bit<2>      ecn;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<1>      reserved;
-    bit<1>      do_not_fragment;
-    bit<1>      more_fragments;
-    bit<13>     frag_offset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     header_checksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<1> reserved;
+    bit<1> do_not_fragment;
+    bit<1> more_fragments;
+    bit<13> frag_offset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> header_checksum;
     ipv4_addr_t src_addr;
     ipv4_addr_t dst_addr;
 }
 
 header ipv6_t {
-    bit<4>      version;
-    bit<6>      dscp;
-    bit<2>      ecn;
-    bit<20>     flow_label;
-    bit<16>     payload_length;
-    bit<8>      next_header;
-    bit<8>      hop_limit;
+    bit<4> version;
+    bit<6> dscp;
+    bit<2> ecn;
+    bit<20> flow_label;
+    bit<16> payload_length;
+    bit<8> next_header;
+    bit<8> hop_limit;
     ipv6_addr_t src_addr;
     ipv6_addr_t dst_addr;
 }
@@ -64,17 +64,17 @@ header tcp_t {
     bit<16> dst_port;
     bit<32> seq_no;
     bit<32> ack_no;
-    bit<4>  data_offset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> data_offset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgent_ptr;
 }
 
 header icmp_t {
-    bit<8>  type;
-    bit<8>  code;
+    bit<8> type;
+    bit<8> code;
     bit<16> checksum;
     bit<32> rest_of_header;
 }
@@ -82,8 +82,8 @@ header icmp_t {
 header arp_t {
     bit<16> hw_type;
     bit<16> proto_type;
-    bit<8>  hw_addr_len;
-    bit<8>  proto_addr_len;
+    bit<8> hw_addr_len;
+    bit<8> proto_addr_len;
     bit<16> opcode;
     bit<48> sender_hw_addr;
     bit<32> sender_proto_addr;
@@ -92,15 +92,15 @@ header arp_t {
 }
 
 header gre_t {
-    bit<1>  checksum_present;
-    bit<1>  routing_present;
-    bit<1>  key_present;
-    bit<1>  sequence_present;
-    bit<1>  strict_source_route;
-    bit<3>  recursion_control;
-    bit<1>  acknowledgement_present;
-    bit<4>  flags;
-    bit<3>  version;
+    bit<1> checksum_present;
+    bit<1> routing_present;
+    bit<1> key_present;
+    bit<1> sequence_present;
+    bit<1> strict_source_route;
+    bit<3> recursion_control;
+    bit<1> acknowledgement_present;
+    bit<4> flags;
+    bit<3> version;
     bit<16> protocol;
 }
 
@@ -122,8 +122,8 @@ header psamp_extended_t {
     bit<16> ingress_port;
     bit<16> egress_port;
     bit<16> user_meta_field;
-    bit<8>  dlb_id;
-    bit<8>  variable_length;
+    bit<8> dlb_id;
+    bit<8> variable_length;
     bit<16> packet_sampled_length;
 }
 
@@ -162,92 +162,92 @@ enum bit<2> MeterColor_t {
     @id(1)
     port_id_t egress_port;
     @id(2)
-    bit<1>    submit_to_ingress;
+    bit<1> submit_to_ingress;
     @id(3) @padding
-    bit<6>    unused_pad;
+    bit<6> unused_pad;
 }
 
 struct headers_t {
     packet_out_header_t packet_out_header;
-    ethernet_t          mirror_encap_ethernet;
-    vlan_t              mirror_encap_vlan;
-    ipv6_t              mirror_encap_ipv6;
-    udp_t               mirror_encap_udp;
-    ipfix_t             ipfix;
-    psamp_extended_t    psamp_extended;
-    ethernet_t          ethernet;
-    vlan_t              vlan;
-    ipv6_t              tunnel_encap_ipv6;
-    gre_t               tunnel_encap_gre;
-    ipv4_t              ipv4;
-    ipv6_t              ipv6;
-    ipv4_t              inner_ipv4;
-    ipv6_t              inner_ipv6;
-    icmp_t              icmp;
-    tcp_t               tcp;
-    udp_t               udp;
-    arp_t               arp;
+    ethernet_t mirror_encap_ethernet;
+    vlan_t mirror_encap_vlan;
+    ipv6_t mirror_encap_ipv6;
+    udp_t mirror_encap_udp;
+    ipfix_t ipfix;
+    psamp_extended_t psamp_extended;
+    ethernet_t ethernet;
+    vlan_t vlan;
+    ipv6_t tunnel_encap_ipv6;
+    gre_t tunnel_encap_gre;
+    ipv4_t ipv4;
+    ipv6_t ipv6;
+    ipv4_t inner_ipv4;
+    ipv6_t inner_ipv6;
+    icmp_t icmp;
+    tcp_t tcp;
+    udp_t udp;
+    arp_t arp;
 }
 
 struct packet_rewrites_t {
     ethernet_addr_t src_mac;
     ethernet_addr_t dst_mac;
-    vlan_id_t       vlan_id;
+    vlan_id_t vlan_id;
 }
 
 struct local_metadata_t {
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    bool                enable_vlan_checks;
-    vlan_id_t           vlan_id;
-    bool                admit_to_l3;
-    vrf_id_t            vrf_id;
-    bool                enable_decrement_ttl;
-    bool                enable_src_mac_rewrite;
-    bool                enable_dst_mac_rewrite;
-    bool                enable_vlan_rewrite;
-    packet_rewrites_t   packet_rewrites;
-    bit<16>             l4_src_port;
-    bit<16>             l4_dst_port;
-    bit<8>              wcmp_selector_input;
-    bool                apply_tunnel_decap_at_end_of_pre_ingress;
-    bool                apply_tunnel_encap_at_egress;
-    ipv6_addr_t         tunnel_encap_src_ipv6;
-    ipv6_addr_t         tunnel_encap_dst_ipv6;
-    bool                marked_to_copy;
-    bool                marked_to_mirror;
+    bool enable_vlan_checks;
+    vlan_id_t vlan_id;
+    bool admit_to_l3;
+    vrf_id_t vrf_id;
+    bool enable_decrement_ttl;
+    bool enable_src_mac_rewrite;
+    bool enable_dst_mac_rewrite;
+    bool enable_vlan_rewrite;
+    packet_rewrites_t packet_rewrites;
+    bit<16> l4_src_port;
+    bit<16> l4_dst_port;
+    bit<8> wcmp_selector_input;
+    bool apply_tunnel_decap_at_end_of_pre_ingress;
+    bool apply_tunnel_encap_at_egress;
+    ipv6_addr_t tunnel_encap_src_ipv6;
+    ipv6_addr_t tunnel_encap_dst_ipv6;
+    bool marked_to_copy;
+    bool marked_to_mirror;
     mirror_session_id_t mirror_session_id;
-    port_id_t           mirror_egress_port;
+    port_id_t mirror_egress_port;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    ethernet_addr_t     mirror_encap_src_mac;
+    ethernet_addr_t mirror_encap_src_mac;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    ethernet_addr_t     mirror_encap_dst_mac;
+    ethernet_addr_t mirror_encap_dst_mac;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    vlan_id_t           mirror_encap_vlan_id;
+    vlan_id_t mirror_encap_vlan_id;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    ipv6_addr_t         mirror_encap_src_ip;
+    ipv6_addr_t mirror_encap_src_ip;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    ipv6_addr_t         mirror_encap_dst_ip;
+    ipv6_addr_t mirror_encap_dst_ip;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    bit<16>             mirror_encap_udp_src_port;
+    bit<16> mirror_encap_udp_src_port;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    bit<16>             mirror_encap_udp_dst_port;
+    bit<16> mirror_encap_udp_dst_port;
     @field_list(PreservedFieldList.RECIRCULATE)
-    bit<9>              loopback_port;
+    bit<9> loopback_port;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    bit<9>              packet_in_ingress_port;
+    bit<9> packet_in_ingress_port;
     @field_list(PreservedFieldList.MIRROR_AND_PACKET_IN_COPY)
-    bit<9>              packet_in_target_egress_port;
-    MeterColor_t        color;
-    port_id_t           ingress_port;
-    route_metadata_t    route_metadata;
-    acl_metadata_t      acl_metadata;
-    bool                bypass_ingress;
-    bool                wcmp_group_id_valid;
-    wcmp_group_id_t     wcmp_group_id_value;
-    bool                nexthop_id_valid;
-    nexthop_id_t        nexthop_id_value;
-    bool                ipmc_table_hit;
-    bool                acl_drop;
+    bit<9> packet_in_target_egress_port;
+    MeterColor_t color;
+    port_id_t ingress_port;
+    route_metadata_t route_metadata;
+    acl_metadata_t acl_metadata;
+    bool bypass_ingress;
+    bool wcmp_group_id_valid;
+    wcmp_group_id_t wcmp_group_id_value;
+    bool nexthop_id_valid;
+    nexthop_id_t nexthop_id_value;
+    bool ipmc_table_hit;
+    bool acl_drop;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
@@ -283,13 +283,13 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
         local_metadata.ipmc_table_hit = false;
         local_metadata.acl_drop = false;
         if (standard_metadata.instance_type == 4) {
-            local_metadata.ingress_port = (port_id_t)local_metadata.loopback_port;
+            local_metadata.ingress_port =(port_id_t) local_metadata.loopback_port;
         } else {
-            local_metadata.ingress_port = (port_id_t)standard_metadata.ingress_port;
+            local_metadata.ingress_port =(port_id_t) standard_metadata.ingress_port;
         }
-        transition select(standard_metadata.ingress_port) {
-            510: parse_packet_out_header;
-            default: parse_ethernet;
+        transition select (standard_metadata.ingress_port) {
+            510 : parse_packet_out_header;
+            default : parse_ethernet;
         }
     }
     state parse_packet_out_header {
@@ -298,61 +298,61 @@ parser packet_parser(packet_in packet, out headers_t headers, inout local_metada
     }
     state parse_ethernet {
         packet.extract(headers.ethernet);
-        transition select(headers.ethernet.ether_type) {
-            0x800: parse_ipv4;
-            0x86dd: parse_ipv6;
-            0x806: parse_arp;
-            0x8100: parse_8021q_vlan;
-            default: accept;
+        transition select (headers.ethernet.ether_type) {
+            0x800 : parse_ipv4;
+            0x86dd : parse_ipv6;
+            0x806 : parse_arp;
+            0x8100 : parse_8021q_vlan;
+            default : accept;
         }
     }
     state parse_8021q_vlan {
         packet.extract(headers.vlan);
-        transition select(headers.vlan.ether_type) {
-            0x800: parse_ipv4;
-            0x86dd: parse_ipv6;
-            0x806: parse_arp;
-            default: accept;
+        transition select (headers.vlan.ether_type) {
+            0x800 : parse_ipv4;
+            0x86dd : parse_ipv6;
+            0x806 : parse_arp;
+            default : accept;
         }
     }
     state parse_ipv4 {
         packet.extract(headers.ipv4);
-        transition select(headers.ipv4.protocol) {
-            0x4: parse_ipv4_in_ip;
-            0x29: parse_ipv6_in_ip;
-            0x1: parse_icmp;
-            0x6: parse_tcp;
-            0x11: parse_udp;
-            default: accept;
+        transition select (headers.ipv4.protocol) {
+            0x4 : parse_ipv4_in_ip;
+            0x29 : parse_ipv6_in_ip;
+            0x1 : parse_icmp;
+            0x6 : parse_tcp;
+            0x11 : parse_udp;
+            default : accept;
         }
     }
     state parse_ipv4_in_ip {
         packet.extract(headers.inner_ipv4);
-        transition select(headers.inner_ipv4.protocol) {
-            0x1: parse_icmp;
-            0x6: parse_tcp;
-            0x11: parse_udp;
-            default: accept;
+        transition select (headers.inner_ipv4.protocol) {
+            0x1 : parse_icmp;
+            0x6 : parse_tcp;
+            0x11 : parse_udp;
+            default : accept;
         }
     }
     state parse_ipv6 {
         packet.extract(headers.ipv6);
-        transition select(headers.ipv6.next_header) {
-            0x4: parse_ipv4_in_ip;
-            0x29: parse_ipv6_in_ip;
-            0x3a: parse_icmp;
-            0x6: parse_tcp;
-            0x11: parse_udp;
-            default: accept;
+        transition select (headers.ipv6.next_header) {
+            0x4 : parse_ipv4_in_ip;
+            0x29 : parse_ipv6_in_ip;
+            0x3a : parse_icmp;
+            0x6 : parse_tcp;
+            0x11 : parse_udp;
+            default : accept;
         }
     }
     state parse_ipv6_in_ip {
         packet.extract(headers.inner_ipv6);
-        transition select(headers.inner_ipv6.next_header) {
-            0x3a: parse_icmp;
-            0x6: parse_tcp;
-            0x11: parse_udp;
-            default: accept;
+        transition select (headers.inner_ipv6.next_header) {
+            0x3a : parse_icmp;
+            0x6 : parse_tcp;
+            0x11 : parse_udp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -409,7 +409,7 @@ control packet_in_encap(inout headers_t headers, inout local_metadata_t local_me
 control packet_out_decap(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     apply {
         if (headers.packet_out_header.isValid() && headers.packet_out_header.submit_to_ingress == 0) {
-            standard_metadata.egress_spec = (bit<9>)headers.packet_out_header.egress_port;
+            standard_metadata.egress_spec =(bit<9>) headers.packet_out_header.egress_port;
             local_metadata.bypass_ingress = true;
         }
         headers.packet_out_header.setInvalid();
@@ -432,7 +432,7 @@ control routing_lookup(in headers_t headers, inout local_metadata_t local_metada
     vrf_id != 0;
   ") @p4runtime_role("sdn_controller") @id(0x0200004A) table vrf_table {
         key = {
-            local_metadata.vrf_id: exact @id(1) @name("vrf_id");
+            local_metadata.vrf_id : exact @id(1) @name("vrf_id");
         }
         actions = {
             @proto_id(1) no_action;
@@ -468,8 +468,8 @@ control routing_lookup(in headers_t headers, inout local_metadata_t local_metada
     }
     @p4runtime_role("sdn_controller") @id(0x02000044) table ipv4_table {
         key = {
-            local_metadata.vrf_id: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
-            headers.ipv4.dst_addr: lpm @id(2) @name("ipv4_dst") @format(IPV4_ADDRESS);
+            local_metadata.vrf_id : exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv4.dst_addr : lpm @id(2) @name("ipv4_dst") @format(IPV4_ADDRESS);
         }
         actions = {
             @proto_id(1) drop;
@@ -484,8 +484,8 @@ control routing_lookup(in headers_t headers, inout local_metadata_t local_metada
     }
     @p4runtime_role("sdn_controller") @id(0x02000045) table ipv6_table {
         key = {
-            local_metadata.vrf_id: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
-            headers.ipv6.dst_addr: lpm @id(2) @name("ipv6_dst") @format(IPV6_ADDRESS);
+            local_metadata.vrf_id : exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv6.dst_addr : lpm @id(2) @name("ipv6_dst") @format(IPV6_ADDRESS);
         }
         actions = {
             @proto_id(1) drop;
@@ -500,8 +500,8 @@ control routing_lookup(in headers_t headers, inout local_metadata_t local_metada
     }
     @p4runtime_role("sdn_controller") @id(0x0200004E) table ipv4_multicast_table {
         key = {
-            local_metadata.vrf_id: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
-            headers.ipv4.dst_addr: exact @id(2) @name("ipv4_dst") @format(IPV4_ADDRESS);
+            local_metadata.vrf_id : exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv4.dst_addr : exact @id(2) @name("ipv4_dst") @format(IPV4_ADDRESS);
         }
         actions = {
             @proto_id(1) set_multicast_group_id;
@@ -510,8 +510,8 @@ control routing_lookup(in headers_t headers, inout local_metadata_t local_metada
     }
     @p4runtime_role("sdn_controller") @id(0x0200004F) table ipv6_multicast_table {
         key = {
-            local_metadata.vrf_id: exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
-            headers.ipv6.dst_addr: exact @id(2) @name("ipv6_dst") @format(IPV6_ADDRESS);
+            local_metadata.vrf_id : exact @id(1) @name("vrf_id") @refers_to(vrf_table , vrf_id);
+            headers.ipv6.dst_addr : exact @id(2) @name("ipv6_dst") @format(IPV6_ADDRESS);
         }
         actions = {
             @proto_id(1) set_multicast_group_id;
@@ -547,8 +547,8 @@ control routing_resolution(in headers_t headers, inout local_metadata_t local_me
     }
     @p4runtime_role("sdn_controller") @id(0x02000040) table neighbor_table {
         key = {
-            router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(router_interface_table , router_interface_id);
-            neighbor_id_value        : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
+            router_interface_id_value : exact @id(1) @name("router_interface_id") @refers_to(router_interface_table , router_interface_id);
+            neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
         }
         actions = {
             @proto_id(1) set_dst_mac;
@@ -560,7 +560,7 @@ control routing_resolution(in headers_t headers, inout local_metadata_t local_me
     @id(0x0100001B) @unsupported @action_restriction("
     // Disallow reserved VLAN IDs with implementation-defined semantics.
     vlan_id != 0 && vlan_id != 4095") action set_port_and_src_mac_and_vlan_id(@id(1) port_id_t port, @id(2) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(3) vlan_id_t vlan_id) {
-        standard_metadata.egress_spec = (bit<9>)port;
+        standard_metadata.egress_spec =(bit<9>) port;
         local_metadata.packet_rewrites.src_mac = src_mac;
         local_metadata.packet_rewrites.vlan_id = vlan_id;
     }
@@ -569,7 +569,7 @@ control routing_resolution(in headers_t headers, inout local_metadata_t local_me
     }
     @p4runtime_role("sdn_controller") @id(0x02000041) table router_interface_table {
         key = {
-            router_interface_id_value: exact @id(1) @name("router_interface_id");
+            router_interface_id_value : exact @id(1) @name("router_interface_id");
         }
         actions = {
             @proto_id(1) set_port_and_src_mac;
@@ -584,10 +584,10 @@ control routing_resolution(in headers_t headers, inout local_metadata_t local_me
         router_interface_id_value = router_interface_id;
         neighbor_id_valid = true;
         neighbor_id_value = neighbor_id;
-        local_metadata.enable_decrement_ttl = !(bool)disable_decrement_ttl;
-        local_metadata.enable_src_mac_rewrite = !(bool)disable_src_mac_rewrite;
-        local_metadata.enable_dst_mac_rewrite = !(bool)disable_dst_mac_rewrite;
-        local_metadata.enable_vlan_rewrite = !(bool)disable_vlan_rewrite;
+        local_metadata.enable_decrement_ttl = !(bool) disable_decrement_ttl;
+        local_metadata.enable_src_mac_rewrite = !(bool) disable_src_mac_rewrite;
+        local_metadata.enable_dst_mac_rewrite = !(bool) disable_dst_mac_rewrite;
+        local_metadata.enable_vlan_rewrite = !(bool) disable_vlan_rewrite;
     }
     @id(0x01000014) action set_ip_nexthop(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) router_interface_id_t router_interface_id, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) ipv6_addr_t neighbor_id) {
         set_ip_nexthop_and_disable_rewrites(router_interface_id, neighbor_id, 0x0, 0x0, 0x0, 0x0);
@@ -601,7 +601,7 @@ control routing_resolution(in headers_t headers, inout local_metadata_t local_me
     }
     @p4runtime_role("sdn_controller") @id(0x02000042) table nexthop_table {
         key = {
-            local_metadata.nexthop_id_value: exact @id(1) @name("nexthop_id");
+            local_metadata.nexthop_id_value : exact @id(1) @name("nexthop_id");
         }
         actions = {
             @proto_id(1) set_nexthop;
@@ -621,7 +621,7 @@ control routing_resolution(in headers_t headers, inout local_metadata_t local_me
     }
     @p4runtime_role("sdn_controller") @id(0x02000050) table tunnel_table {
         key = {
-            tunnel_id_value: exact @id(1) @name("tunnel_id");
+            tunnel_id_value : exact @id(1) @name("tunnel_id");
         }
         actions = {
             @proto_id(1) mark_for_p2p_tunnel_encap;
@@ -633,8 +633,8 @@ control routing_resolution(in headers_t headers, inout local_metadata_t local_me
     @max_group_size(512) @id(0x11DC4EC8) action_selector(HashAlgorithm.identity, 49152, 8) wcmp_group_selector;
     @p4runtime_role("sdn_controller") @id(0x02000043) @oneshot table wcmp_group_table {
         key = {
-            local_metadata.wcmp_group_id_value: exact @id(1) @name("wcmp_group_id");
-            local_metadata.wcmp_selector_input: selector;
+            local_metadata.wcmp_group_id_value : exact @id(1) @name("wcmp_group_id");
+            local_metadata.wcmp_selector_input : selector;
         }
         actions = {
             @proto_id(1) set_nexthop_id(local_metadata);
@@ -692,9 +692,9 @@ control ingress_cloning(inout headers_t headers, inout local_metadata_t local_me
     marked_to_mirror == 0 -> mirror_egress_port::mask == 0;
   ") table ingress_clone_table {
         key = {
-            local_metadata.marked_to_copy    : exact @id(1) @name("marked_to_copy");
-            local_metadata.marked_to_mirror  : exact @id(2) @name("marked_to_mirror");
-            local_metadata.mirror_egress_port: optional @id(3) @name("mirror_egress_port");
+            local_metadata.marked_to_copy : exact @id(1) @name("marked_to_copy");
+            local_metadata.marked_to_mirror : exact @id(2) @name("marked_to_mirror");
+            local_metadata.mirror_egress_port : optional @id(3) @name("mirror_egress_port");
         }
         actions = {
             @proto_id(1) ingress_clone;
@@ -720,7 +720,7 @@ control mirror_session_lookup(inout headers_t headers, inout local_metadata_t lo
     }
     @p4runtime_role("sdn_controller") @id(0x02000046) table mirror_session_table {
         key = {
-            local_metadata.mirror_session_id: exact @id(1) @name("mirror_session_id");
+            local_metadata.mirror_session_id : exact @id(1) @name("mirror_session_id");
         }
         actions = {
             @proto_id(1) mirror_as_ipv4_erspan;
@@ -753,7 +753,7 @@ control mirroring_encap(inout headers_t headers, inout local_metadata_t local_me
             headers.mirror_encap_ipv6.ecn = 0;
             headers.mirror_encap_ipv6.hop_limit = 16;
             headers.mirror_encap_ipv6.flow_label = 0;
-            headers.mirror_encap_ipv6.payload_length = (bit<16>)standard_metadata.packet_length + 8 + 16 + 28;
+            headers.mirror_encap_ipv6.payload_length =(bit<16>) standard_metadata.packet_length + 8 + 16 + 28;
             headers.mirror_encap_ipv6.next_header = 0x11;
             headers.mirror_encap_ipv6.src_addr = local_metadata.mirror_encap_src_ip;
             headers.mirror_encap_ipv6.dst_addr = local_metadata.mirror_encap_dst_ip;
@@ -774,8 +774,8 @@ control l3_admit(in headers_t headers, inout local_metadata_t local_metadata, in
     }
     @p4runtime_role("sdn_controller") @id(0x02000047) table l3_admit_table {
         key = {
-            headers.ethernet.dst_addr  : ternary @name("dst_mac") @id(1) @format(MAC_ADDRESS);
-            local_metadata.ingress_port: optional @name("in_port") @id(2);
+            headers.ethernet.dst_addr : ternary @name("dst_mac") @id(1) @format(MAC_ADDRESS);
+            local_metadata.ingress_port : optional @name("in_port") @id(2);
         }
         actions = {
             @proto_id(1) admit_to_l3;
@@ -811,7 +811,7 @@ control gre_tunnel_encap(inout headers_t headers, in local_metadata_t local_meta
             headers.tunnel_encap_ipv6.version = 4w6;
             headers.tunnel_encap_ipv6.src_addr = local_metadata.tunnel_encap_src_ipv6;
             headers.tunnel_encap_ipv6.dst_addr = local_metadata.tunnel_encap_dst_ipv6;
-            headers.tunnel_encap_ipv6.payload_length = (bit<16>)standard_metadata.packet_length + 4 - 14;
+            headers.tunnel_encap_ipv6.payload_length =(bit<16>) standard_metadata.packet_length + 4 - 14;
             headers.tunnel_encap_ipv6.next_header = 0x2f;
             if (headers.ipv4.isValid()) {
                 headers.tunnel_encap_ipv6.dscp = headers.ipv4.dscp;
@@ -835,7 +835,7 @@ control vlan_untag(inout headers_t headers, inout local_metadata_t local_metadat
     dummy_match::mask == 0;
   ") table disable_vlan_checks_table {
         key = {
-            1w1: ternary @id(1) @name("dummy_match");
+            1w1 : ternary @id(1) @name("dummy_match");
         }
         actions = {
             @proto_id(1) disable_vlan_checks;
@@ -901,14 +901,14 @@ const ethernet_addr_t MAC_MULTICAST_MASK = 0x10000000000;
 const ethernet_addr_t MAC_MULTICAST_VALUE = 0x10000000000;
 control drop_martians(in headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     apply {
-        if (headers.ipv6.isValid() && (headers.ipv6.src_addr & IPV6_MULTICAST_MASK == IPV6_MULTICAST_VALUE || headers.ipv6.dst_addr & IPV6_MULTICAST_MASK == IPV6_MULTICAST_VALUE || headers.ipv6.src_addr & IPV6_LOOPBACK_MASK == IPV6_LOOPBACK_VALUE || headers.ipv6.dst_addr & IPV6_LOOPBACK_MASK == IPV6_LOOPBACK_VALUE) || headers.ipv4.isValid() && (headers.ipv4.src_addr & IPV4_MULTICAST_MASK == IPV4_MULTICAST_VALUE || headers.ipv4.src_addr == IPV4_BROADCAST_VALUE || (headers.ipv4.dst_addr & IPV4_MULTICAST_MASK == IPV4_MULTICAST_VALUE || headers.ipv4.dst_addr == IPV4_BROADCAST_VALUE) || headers.ipv4.src_addr & IPV4_LOOPBACK_MASK == IPV4_LOOPBACK_VALUE || headers.ipv4.dst_addr & IPV4_LOOPBACK_MASK == IPV4_LOOPBACK_VALUE) || headers.ethernet.isValid() && headers.ethernet.dst_addr & MAC_MULTICAST_MASK == MAC_MULTICAST_VALUE) {
+        if (headers.ipv6.isValid() &&(headers.ipv6.src_addr & IPV6_MULTICAST_MASK == IPV6_MULTICAST_VALUE || headers.ipv6.dst_addr & IPV6_MULTICAST_MASK == IPV6_MULTICAST_VALUE || headers.ipv6.src_addr & IPV6_LOOPBACK_MASK == IPV6_LOOPBACK_VALUE || headers.ipv6.dst_addr & IPV6_LOOPBACK_MASK == IPV6_LOOPBACK_VALUE) || headers.ipv4.isValid() &&(headers.ipv4.src_addr & IPV4_MULTICAST_MASK == IPV4_MULTICAST_VALUE || headers.ipv4.src_addr == IPV4_BROADCAST_VALUE ||(headers.ipv4.dst_addr & IPV4_MULTICAST_MASK == IPV4_MULTICAST_VALUE || headers.ipv4.dst_addr == IPV4_BROADCAST_VALUE) || headers.ipv4.src_addr & IPV4_LOOPBACK_MASK == IPV4_LOOPBACK_VALUE || headers.ipv4.dst_addr & IPV4_LOOPBACK_MASK == IPV4_LOOPBACK_VALUE) || headers.ethernet.isValid() && headers.ethernet.dst_addr & MAC_MULTICAST_MASK == MAC_MULTICAST_VALUE) {
             mark_to_drop(standard_metadata);
         }
     }
 }
 
 control multicast_rewrites(inout local_metadata_t local_metadata, in standard_metadata_t standard_metadata) {
-    port_id_t multicast_replica_port = (port_id_t)standard_metadata.egress_port;
+    port_id_t multicast_replica_port =(port_id_t) standard_metadata.egress_port;
     replica_instance_t multicast_replica_instance = standard_metadata.egress_rid;
     @id(0x01000019) action set_multicast_src_mac(@id(1) @format(MAC_ADDRESS) ethernet_addr_t src_mac) {
         local_metadata.enable_src_mac_rewrite = true;
@@ -916,8 +916,8 @@ control multicast_rewrites(inout local_metadata_t local_metadata, in standard_me
     }
     @p4runtime_role("sdn_controller") @id(0x0200004C) table multicast_router_interface_table {
         key = {
-            multicast_replica_port    : exact @referenced_by(builtin : : multicast_group_table , replica . port) @id(1);
-            multicast_replica_instance: exact @referenced_by(builtin : : multicast_group_table , replica . instance) @id(2);
+            multicast_replica_port : exact @referenced_by(builtin : : multicast_group_table , replica . port) @id(1);
+            multicast_replica_instance : exact @referenced_by(builtin : : multicast_group_table , replica . instance) @id(2);
         }
         actions = {
             @proto_id(1) set_multicast_src_mac;
@@ -970,8 +970,8 @@ control tunnel_termination_lookup(in headers_t headers, inout local_metadata_t l
     }
     @unsupported @p4runtime_role("sdn_controller") @id(0x0200004B) table ipv6_tunnel_termination_table {
         key = {
-            headers.ipv6.dst_addr: ternary @id(1) @name("dst_ipv6") @format(IPV6_ADDRESS);
-            headers.ipv6.src_addr: ternary @id(2) @name("src_ipv6") @format(IPV6_ADDRESS);
+            headers.ipv6.dst_addr : ternary @id(1) @name("dst_ipv6") @format(IPV6_ADDRESS);
+            headers.ipv6.src_addr : ternary @id(2) @name("src_ipv6") @format(IPV6_ADDRESS);
         }
         actions = {
             @proto_id(1) mark_for_tunnel_decap_and_set_vrf;
@@ -1042,12 +1042,12 @@ control acl_egress(in headers_t headers, inout local_metadata_t local_metadata, 
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
   ") table acl_egress_table {
         key = {
-            ip_protocol                                     : ternary @id(2) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
-            (port_id_t)standard_metadata.egress_port        : optional @id(4) @name("out_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUT_PORT);
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(5) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(6) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(7) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.src_addr                       : ternary @id(10) @name("src_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_MAC) @format(MAC_ADDRESS);
+            ip_protocol : ternary @id(2) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            (port_id_t) standard_metadata.egress_port : optional @id(4) @name("out_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUT_PORT);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(5) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(6) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(7) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.src_addr : ternary @id(10) @name("src_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_MAC) @format(MAC_ADDRESS);
         }
         actions = {
             @proto_id(1) acl_drop(local_metadata);
@@ -1071,12 +1071,12 @@ control acl_egress(in headers_t headers, inout local_metadata_t local_metadata, 
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
   ") table acl_egress_dhcp_to_host_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            ip_protocol                                     : ternary @id(5) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
-            local_metadata.l4_dst_port                      : ternary @id(6) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
-            (port_id_t)standard_metadata.egress_port        : optional @id(7) @name("out_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUT_PORT);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            ip_protocol : ternary @id(5) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            local_metadata.l4_dst_port : ternary @id(6) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
+            (port_id_t) standard_metadata.egress_port : optional @id(7) @name("out_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUT_PORT);
         }
         actions = {
             @proto_id(1) acl_drop(local_metadata);
@@ -1109,8 +1109,8 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
     bit<2> ecn = 0;
     bit<8> ip_protocol = 0;
     bool cancel_copy = false;
-    @id(0x15000100) @mode(single_rate_two_color) direct_meter<MeterColor_t>(MeterType.bytes) acl_ingress_meter;
-    @id(0x15000102) @mode(single_rate_two_color) direct_meter<MeterColor_t>(MeterType.bytes) acl_ingress_qos_meter;
+    @id(0x15000100) @mode(single_rate_two_color) direct_meter < MeterColor_t >(MeterType.bytes) acl_ingress_meter;
+    @id(0x15000102) @mode(single_rate_two_color) direct_meter < MeterColor_t >(MeterType.bytes) acl_ingress_qos_meter;
     @id(0x13000102) direct_counter(CounterType.packets_and_bytes) acl_ingress_counter;
     @id(0x13000107) direct_counter(CounterType.packets_and_bytes) acl_ingress_qos_counter;
     @id(0x13000109) direct_counter(CounterType.packets_and_bytes) acl_ingress_counting_counter;
@@ -1189,23 +1189,23 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
   ") table acl_ingress_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.ether_type                     : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
-            headers.ethernet.dst_addr                       : ternary @id(5) @name("dst_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_MAC) @format(MAC_ADDRESS);
-            headers.ipv4.src_addr                           : ternary @id(6) @name("src_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_IP) @format(IPV4_ADDRESS);
-            headers.ipv4.dst_addr                           : ternary @id(7) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
-            headers.ipv6.src_addr[127:64]                   : ternary @id(8) @name("src_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD2 )) @format(IPV6_ADDRESS);
-            headers.ipv6.dst_addr[127:64]                   : ternary @id(9) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
-            ttl                                             : ternary @id(10) @name("ttl") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_TTL);
-            dscp                                            : ternary @id(11) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
-            ecn                                             : ternary @id(12) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
-            ip_protocol                                     : ternary @id(13) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
-            headers.icmp.type                               : ternary @id(14) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
-            local_metadata.l4_src_port                      : ternary @id(20) @name("l4_src_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_SRC_PORT);
-            local_metadata.l4_dst_port                      : ternary @id(15) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
-            headers.arp.target_proto_addr                   : ternary @id(16) @name("arp_tpa") @composite_field(@ sai_udf ( base = SAI_UDF_BASE_L3 , offset = 24 , length = 2 ) , @ sai_udf ( base = SAI_UDF_BASE_L3 , offset = 26 , length = 2 )) @format(IPV4_ADDRESS);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.ether_type : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
+            headers.ethernet.dst_addr : ternary @id(5) @name("dst_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_MAC) @format(MAC_ADDRESS);
+            headers.ipv4.src_addr : ternary @id(6) @name("src_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_IP) @format(IPV4_ADDRESS);
+            headers.ipv4.dst_addr : ternary @id(7) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
+            headers.ipv6.src_addr[127 : 64] : ternary @id(8) @name("src_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            headers.ipv6.dst_addr[127 : 64] : ternary @id(9) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            ttl : ternary @id(10) @name("ttl") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_TTL);
+            dscp : ternary @id(11) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            ecn : ternary @id(12) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
+            ip_protocol : ternary @id(13) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            headers.icmp.type : ternary @id(14) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
+            local_metadata.l4_src_port : ternary @id(20) @name("l4_src_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_SRC_PORT);
+            local_metadata.l4_dst_port : ternary @id(15) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
+            headers.arp.target_proto_addr : ternary @id(16) @name("arp_tpa") @composite_field(@ sai_udf ( base = SAI_UDF_BASE_L3 , offset = 24 , length = 2 ) , @ sai_udf ( base = SAI_UDF_BASE_L3 , offset = 26 , length = 2 )) @format(IPV4_ADDRESS);
         }
         actions = {
             @proto_id(1) acl_copy();
@@ -1240,14 +1240,14 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
 # 369 " .. / .. / .. / .. / pins - infra / sai_p4 / instantiations / google / acl_ingress . p4 "
   ") table acl_ingress_qos_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.ether_type                     : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
-            ttl                                             : ternary @id(7) @name("ttl") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_TTL);
-            ip_protocol                                     : ternary @id(8) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
-            headers.icmp.type                               : ternary @id(9) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
-            local_metadata.l4_dst_port                      : ternary @id(10) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.ether_type : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
+            ttl : ternary @id(7) @name("ttl") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_TTL);
+            ip_protocol : ternary @id(8) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            headers.icmp.type : ternary @id(9) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
+            local_metadata.l4_dst_port : ternary @id(10) @name("l4_dst_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_L4_DST_PORT);
         }
         actions = {
             @proto_id(1) set_qos_queue_and_cancel_copy_above_rate_limit();
@@ -1275,11 +1275,11 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
   ") table acl_ingress_counting_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            dscp                                            : ternary @id(11) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
-            local_metadata.route_metadata                   : ternary @id(18) @name("route_metadata") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ROUTE_DST_USER_META);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            dscp : ternary @id(11) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            local_metadata.route_metadata : ternary @id(18) @name("route_metadata") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ROUTE_DST_USER_META);
         }
         actions = {
             @proto_id(3) acl_count();
@@ -1316,13 +1316,13 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
   ") table acl_ingress_mirror_and_redirect_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(2) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(3) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(4) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ipv4.dst_addr                           : ternary @id(10) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
-            headers.ipv6.dst_addr[127:64]                   : ternary @id(5) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
-            local_metadata.vrf_id                           : optional @id(8) @name("vrf_id") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_VRF_ID);
-            local_metadata.ipmc_table_hit                   : optional @id(9) @name("ipmc_table_hit") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IPMC_NPU_META_DST_HIT);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(2) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(3) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(4) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ipv4.dst_addr : ternary @id(10) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
+            headers.ipv6.dst_addr[127 : 64] : ternary @id(5) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            local_metadata.vrf_id : optional @id(8) @name("vrf_id") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_VRF_ID);
+            local_metadata.ipmc_table_hit : optional @id(9) @name("ipmc_table_hit") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IPMC_NPU_META_DST_HIT);
         }
         actions = {
             @proto_id(4) acl_forward();
@@ -1361,13 +1361,13 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
     is_ipv6::mask != 0 -> (is_ipv6 == 1);
   ") table acl_ingress_security_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.ether_type                     : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
-            headers.ipv4.src_addr                           : ternary @id(5) @name("src_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_IP) @format(IPV4_ADDRESS);
-            headers.ipv4.dst_addr                           : ternary @id(6) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
-            headers.ipv6.src_addr[127:64]                   : ternary @id(7) @name("src_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.ether_type : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
+            headers.ipv4.src_addr : ternary @id(5) @name("src_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_IP) @format(IPV4_ADDRESS);
+            headers.ipv4.dst_addr : ternary @id(6) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
+            headers.ipv6.src_addr[127 : 64] : ternary @id(7) @name("src_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_SRC_IPV6_WORD2 )) @format(IPV6_ADDRESS);
         }
         actions = {
             @proto_id(1) acl_forward();
@@ -1441,15 +1441,15 @@ control acl_pre_ingress(in headers_t headers, inout local_metadata_t local_metad
     ::priority < 0x7fffffff;
   ") table acl_pre_ingress_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.src_addr                       : ternary @id(4) @name("src_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_MAC) @format(MAC_ADDRESS);
-            headers.ipv4.dst_addr                           : ternary @id(5) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
-            headers.ipv6.dst_addr[127:64]                   : ternary @id(6) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
-            dscp                                            : ternary @id(7) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
-            ecn                                             : ternary @id(10) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
-            local_metadata.ingress_port                     : optional @id(8) @name("in_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IN_PORT);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.src_addr : ternary @id(4) @name("src_mac") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_SRC_MAC) @format(MAC_ADDRESS);
+            headers.ipv4.dst_addr : ternary @id(5) @name("dst_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DST_IP) @format(IPV4_ADDRESS);
+            headers.ipv6.dst_addr[127 : 64] : ternary @id(6) @name("dst_ipv6") @composite_field(@ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD3 ) , @ sai_field ( SAI_ACL_TABLE_ATTR_FIELD_DST_IPV6_WORD2 )) @format(IPV6_ADDRESS);
+            dscp : ternary @id(7) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            ecn : ternary @id(10) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
+            local_metadata.ingress_port : optional @id(8) @name("in_port") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IN_PORT);
         }
         actions = {
             @proto_id(1) set_vrf;
@@ -1474,11 +1474,11 @@ control acl_pre_ingress(in headers_t headers, inout local_metadata_t local_metad
     // TODO: Disallow setting to reserved VLAN IDs when supported.
   ") table acl_pre_ingress_vlan_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            headers.ethernet.ether_type                     : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
-            local_metadata.vlan_id                          : ternary @id(5) @name("vlan_id") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUTER_VLAN_ID);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            headers.ethernet.ether_type : ternary @id(4) @name("ether_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ETHER_TYPE);
+            local_metadata.vlan_id : ternary @id(5) @name("vlan_id") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_OUTER_VLAN_ID);
         }
         actions = {
             @proto_id(1) set_outer_vlan_id;
@@ -1503,13 +1503,13 @@ control acl_pre_ingress(in headers_t headers, inout local_metadata_t local_metad
     icmpv6_type::mask != 0 -> ip_protocol == 58;
   ") table acl_pre_ingress_metadata_table {
         key = {
-            headers.ipv4.isValid() || headers.ipv6.isValid(): optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
-            headers.ipv4.isValid()                          : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
-            headers.ipv6.isValid()                          : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
-            ip_protocol                                     : ternary @id(4) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
-            headers.icmp.type                               : ternary @id(5) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
-            dscp                                            : ternary @id(6) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
-            ecn                                             : ternary @id(7) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
+            headers.ipv4.isValid() || headers.ipv6.isValid() : optional @id(1) @name("is_ip") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IP);
+            headers.ipv4.isValid() : optional @id(2) @name("is_ipv4") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV4ANY);
+            headers.ipv6.isValid() : optional @id(3) @name("is_ipv6") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ACL_IP_TYPE / IPV6ANY);
+            ip_protocol : ternary @id(4) @name("ip_protocol") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_IP_PROTOCOL);
+            headers.icmp.type : ternary @id(5) @name("icmpv6_type") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ICMPV6_TYPE);
+            dscp : ternary @id(6) @name("dscp") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_DSCP);
+            ecn : ternary @id(7) @name("ecn") @sai_field(SAI_ACL_TABLE_ATTR_FIELD_ECN);
         }
         actions = {
             @proto_id(1) set_acl_metadata;

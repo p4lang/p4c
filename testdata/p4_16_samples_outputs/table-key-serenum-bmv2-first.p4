@@ -13,8 +13,8 @@ enum bit<16> EthTypes {
 }
 
 header ethernet_t {
-    bit<48>  dst_addr;
-    bit<48>  src_addr;
+    bit<48> dst_addr;
+    bit<48> src_addr;
     EthTypes eth_type;
 }
 
@@ -28,11 +28,11 @@ struct Meta {
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     ethernet_t e;
     state start {
-        pkt.extract<ethernet_t>(e);
-        transition select(e.eth_type) {
-            EthTypes.IPv4: accept;
-            EthTypes.ARP: accept;
-            default: reject;
+        pkt.extract < ethernet_t >(e);
+        transition select (e.eth_type) {
+            EthTypes.IPv4 : accept;
+            EthTypes.ARP : accept;
+            default : reject;
         }
     }
 }
@@ -43,15 +43,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table tns {
         key = {
-            h.eth_hdr.eth_type: exact @name("h.eth_hdr.eth_type");
+            h.eth_hdr.eth_type : exact @name("h.eth_hdr.eth_type");
         }
         actions = {
             do_act();
             @defaultonly NoAction();
         }
         const entries = {
-                        EthTypes.IPv4 : do_act(32w0x800);
-                        EthTypes.VLAN : do_act(32w0x8100);
+            EthTypes.IPv4 : do_act(32w0x800);
+            EthTypes.VLAN : do_act(32w0x8100);
         }
         default_action = NoAction();
     }
@@ -77,8 +77,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

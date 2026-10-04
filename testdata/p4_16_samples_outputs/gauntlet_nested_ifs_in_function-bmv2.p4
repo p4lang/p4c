@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -26,7 +26,7 @@ bit<8> do_function() {
         if (true) {
         } else {
         }
-        return -68;
+        return - 68;
     }
     return 8w1;
 }

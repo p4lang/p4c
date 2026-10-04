@@ -6,4 +6,3 @@ parser MyParser10() {
         }
     }
 }
-

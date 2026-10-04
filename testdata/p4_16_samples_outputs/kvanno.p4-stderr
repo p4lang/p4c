@@ -1,4 +1,4 @@
-kvanno.p4(11): [--Wwarn=unused] warning: 'x' is unused
-const bit<32> x = 0;
-              ^
+kvanno.p4(7): [--Wwarn=unused] warning: 'x' is unused
+@pkginfo(name = "x" , value = 0) const bit<32> x = 0;
+                                               ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

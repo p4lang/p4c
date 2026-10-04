@@ -6,13 +6,17 @@
  */
 
 control c() {
-    action a() {}
+    action a() {
+    }
     table t {
-        actions = { a(); }
+        actions = {
+            a();
+        }
         default_action = a();
     }
     action b() {
         t.apply();  // cannot invoke table from action
     }
-    apply {}
+    apply {
+    }
 }

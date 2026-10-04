@@ -13,15 +13,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -36,15 +36,15 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".ipv4")
-    ipv4_t     ipv4;
+    ipv4_t ipv4;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     @name(".parse_ipv4") state parse_ipv4 {
@@ -69,7 +69,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _drop;
         }
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port : exact;
         }
         size = 256;
     }
@@ -105,7 +105,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _drop;
         }
         key = {
-            meta.routing_metadata.nhop_ipv4: exact;
+            meta.routing_metadata.nhop_ipv4 : exact;
         }
         size = 512;
     }
@@ -115,7 +115,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _drop;
         }
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         size = 1024;
         const default_action = _drop();

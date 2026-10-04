@@ -9,4 +9,3 @@ control d() {
         c_inst.apply();
     }
 }
-

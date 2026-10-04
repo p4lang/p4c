@@ -35,7 +35,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             exit;
         }
         ret = ret + 8;
-        h.eth_hdr.src_addr[7:0] = ret;
+        h.eth_hdr.src_addr[7 : 0] = ret;
     }
     action top_a1(bit<16> y) {
         sub_a1(y);
@@ -49,7 +49,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table t1 {
         key = {
-            h.eth_hdr.dst_addr: exact;
+            h.eth_hdr.dst_addr : exact;
         }
         actions = {
             top_a1;
@@ -61,7 +61,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         if (h.eth_hdr.isValid()) {
             t1.apply();
-            h.eth_hdr.src_addr[7:0] = ret;
+            h.eth_hdr.src_addr[7 : 0] = ret;
         }
     }
 }

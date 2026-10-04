@@ -2,17 +2,17 @@ struct tuple_0 {
 }
 
 control c(out bool b) {
-    @hidden action emptyTuple13() {
+    @hidden action emptyTuple15() {
         b = true;
     }
-    @hidden table tbl_emptyTuple13 {
+    @hidden table tbl_emptyTuple15 {
         actions = {
-            emptyTuple13();
+            emptyTuple15();
         }
-        const default_action = emptyTuple13();
+        const default_action = emptyTuple15();
     }
     apply {
-        tbl_emptyTuple13.apply();
+        tbl_emptyTuple15.apply();
     }
 }
 

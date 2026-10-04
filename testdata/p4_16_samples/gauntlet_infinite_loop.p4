@@ -26,9 +26,9 @@ parser sub_parser(packet_in b, out headers hdr, out padding padding) {
     }
 
     state next {
-        transition select(padding.p) {
-            0: parse_hdr;
-            default: accept;
+        transition select (padding.p) {
+            0 : parse_hdr;
+            default : accept;
         }
     }
     state parse_hdr {

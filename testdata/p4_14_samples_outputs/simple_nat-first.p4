@@ -13,7 +13,7 @@ struct intrinsic_metadata_t {
 }
 
 struct meta_t {
-    bit<1>  do_forward;
+    bit<1> do_forward;
     bit<32> ipv4_sa;
     bit<32> ipv4_da;
     bit<16> tcp_sp;
@@ -21,16 +21,16 @@ struct meta_t {
     bit<32> nhop_ipv4;
     bit<32> if_ipv4_addr;
     bit<48> if_mac_addr;
-    bit<1>  is_ext_if;
+    bit<1> is_ext_if;
     bit<16> tcpLength;
-    bit<8>  if_index;
+    bit<8> if_index;
 }
 
 header cpu_header_t {
     bit<64> preamble;
-    bit<8>  device;
-    bit<8>  reason;
-    bit<8>  if_index;
+    bit<8> device;
+    bit<8> reason;
+    bit<8> if_index;
 }
 
 header ethernet_t {
@@ -40,15 +40,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -59,9 +59,9 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> dataOffset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -76,47 +76,47 @@ struct headers {
     @name(".cpu_header")
     cpu_header_t cpu_header;
     @name(".ethernet")
-    ethernet_t   ethernet;
+    ethernet_t ethernet;
     @name(".ipv4")
-    ipv4_t       ipv4;
+    ipv4_t ipv4;
     @name(".tcp")
-    tcp_t        tcp;
+    tcp_t tcp;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".parse_cpu_header") state parse_cpu_header {
-        packet.extract<cpu_header_t>(hdr.cpu_header);
+        packet.extract < cpu_header_t >(hdr.cpu_header);
         meta.meta.if_index = hdr.cpu_header.if_index;
         transition parse_ethernet;
     }
     @name(".parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     @name(".parse_ipv4") state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract < ipv4_t >(hdr.ipv4);
         meta.meta.ipv4_sa = hdr.ipv4.srcAddr;
         meta.meta.ipv4_da = hdr.ipv4.dstAddr;
         meta.meta.tcpLength = hdr.ipv4.totalLen + 16w65516;
-        transition select(hdr.ipv4.protocol) {
-            8w0x6: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            8w0x6 : parse_tcp;
+            default : accept;
         }
     }
     @name(".parse_tcp") state parse_tcp {
-        packet.extract<tcp_t>(hdr.tcp);
+        packet.extract < tcp_t >(hdr.tcp);
         meta.meta.tcp_sp = hdr.tcp.srcPort;
         meta.meta.tcp_dp = hdr.tcp.dstPort;
         transition accept;
     }
     @name(".start") state start {
-        meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
-        transition select(packet.lookahead<bit<64>>()) {
-            64w0: parse_cpu_header;
-            default: parse_ethernet;
+        meta.meta.if_index =(bit<8>) standard_metadata.ingress_port;
+        transition select (packet.lookahead < bit<64 >>()) {
+            64w0 : parse_cpu_header;
+            default : parse_ethernet;
         }
     }
 }
@@ -147,7 +147,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
+            standard_metadata.egress_port : exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction();
@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.nhop_ipv4: exact @name("meta.nhop_ipv4");
+            meta.meta.nhop_ipv4 : exact @name("meta.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction();
@@ -224,7 +224,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.if_index: exact @name("meta.if_index");
+            meta.meta.if_index : exact @name("meta.if_index");
         }
         default_action = NoAction();
     }
@@ -235,7 +235,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.ipv4_da: lpm @name("meta.ipv4_da");
+            meta.meta.ipv4_da : lpm @name("meta.ipv4_da");
         }
         size = 1024;
         default_action = NoAction();
@@ -251,13 +251,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.meta.is_ext_if: exact @name("meta.is_ext_if");
+            meta.meta.is_ext_if : exact @name("meta.is_ext_if");
             hdr.ipv4.isValid() : exact @name("ipv4.$valid$");
-            hdr.tcp.isValid()  : exact @name("tcp.$valid$");
-            hdr.ipv4.srcAddr   : ternary @name("ipv4.srcAddr");
-            hdr.ipv4.dstAddr   : ternary @name("ipv4.dstAddr");
-            hdr.tcp.srcPort    : ternary @name("tcp.srcPort");
-            hdr.tcp.dstPort    : ternary @name("tcp.dstPort");
+            hdr.tcp.isValid() : exact @name("tcp.$valid$");
+            hdr.ipv4.srcAddr : ternary @name("ipv4.srcAddr");
+            hdr.ipv4.dstAddr : ternary @name("ipv4.dstAddr");
+            hdr.tcp.srcPort : ternary @name("tcp.srcPort");
+            hdr.tcp.dstPort : ternary @name("tcp.dstPort");
         }
         size = 128;
         default_action = NoAction();
@@ -274,25 +274,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<cpu_header_t>(hdr.cpu_header);
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
-        packet.emit<tcp_t>(hdr.tcp);
+        packet.emit < cpu_header_t >(hdr.cpu_header);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < ipv4_t >(hdr.ipv4);
+        packet.emit < tcp_t >(hdr.tcp);
     }
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
-        verify_checksum_with_payload<tuple<bit<32>, bit<32>, bit<8>, bit<8>, bit<16>, bit<16>, bit<16>, bit<32>, bit<32>, bit<4>, bit<4>, bit<8>, bit<16>, bit<16>>, bit<16>>(hdr.tcp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr }, hdr.tcp.checksum, HashAlgorithm.csum16);
+        verify_checksum < tuple < bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32 >>, bit<16 >>(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum_with_payload <tuple <bit<32>, bit<32>, bit<8>, bit<8>, bit<16>, bit<16>, bit<16>, bit<32>, bit<32>, bit<4>, bit<4>, bit<8>, bit<16>, bit<16 >>, bit<16 >>(hdr.tcp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr }, hdr.tcp.checksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
-        update_checksum_with_payload<tuple<bit<32>, bit<32>, bit<8>, bit<8>, bit<16>, bit<16>, bit<16>, bit<32>, bit<32>, bit<4>, bit<4>, bit<8>, bit<16>, bit<16>>, bit<16>>(hdr.tcp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr }, hdr.tcp.checksum, HashAlgorithm.csum16);
+        update_checksum < tuple < bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32 >>, bit<16 >>(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum_with_payload <tuple <bit<32>, bit<32>, bit<8>, bit<8>, bit<16>, bit<16>, bit<16>, bit<32>, bit<32>, bit<4>, bit<4>, bit<8>, bit<16>, bit<16 >>, bit<16 >>(hdr.tcp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta.meta.tcpLength, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.flags, hdr.tcp.window, hdr.tcp.urgentPtr }, hdr.tcp.checksum, HashAlgorithm.csum16);
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

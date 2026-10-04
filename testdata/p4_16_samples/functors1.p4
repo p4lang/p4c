@@ -10,7 +10,7 @@
 parser p00()
 {
     state start {
-        bit<1> z = (1w0 & 1w1);
+        bit<1> z =(1w0 & 1w1);
         transition accept;
     }
 }

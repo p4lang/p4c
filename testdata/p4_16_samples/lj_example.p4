@@ -35,18 +35,20 @@ control LjPipe(inout Parsed_rep p,
         port = DROP_PORT;
     }
 
-    action Drop_1 ()
+    action Drop_1()
     {
-       outCtrl.outputPort = DROP_PORT;
+        outCtrl.outputPort = DROP_PORT;
     }
 
     action Forward(PortId outPort)
     {
-       outCtrl.outputPort = outPort;
+        outCtrl.outputPort = outPort;
     }
 
     table Enet_lkup {
-        key = { p.arpa_pak.dest : exact; }
+        key = {
+            p.arpa_pak.dest : exact;
+        }
 
         actions = {
             Drop_action(outCtrl.outputPort);
@@ -60,14 +62,14 @@ control LjPipe(inout Parsed_rep p,
     apply {
         outCtrl.outputPort = DROP_PORT;
         if (p.arpa_pak.isValid())
-            Enet_lkup.apply();
+        Enet_lkup.apply();
     }
 }
 
 control LJdeparse(inout Parsed_rep p, packet_out b)
 {
     apply {
-        b.emit<ARPA_hdr>(p.arpa_pak);
+        b.emit < ARPA_hdr >(p.arpa_pak);
     }
 }
 

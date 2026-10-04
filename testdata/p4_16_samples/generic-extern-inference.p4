@@ -8,32 +8,32 @@ extern PlainExtern {
     PlainExtern(bit<16> arg);
 }
 
-extern ParametrizedExtern<ArgT> {
+extern ParametrizedExtern < ArgT > {
     ParametrizedExtern(ArgT arg);
     ArgT get();
 }
 
 extern OtherExtern {
     OtherExtern();
-    void apply_any<CatchAllT>(CatchAllT arg);
+    void apply_any < CatchAllT >(CatchAllT arg);
 }
 
-extern AbstractExtern<AbsT> {
+extern AbstractExtern < AbsT > {
     AbstractExtern(AbsT arg);
     abstract void handle(in AbsT v);
     AbsT get();
 }
 
 // A name which is not generic itself, but stands for a specialized generic type.
-typedef ParametrizedExtern<bit<32>> ParametrizedExtern32;
+typedef ParametrizedExtern < bit<32 >> ParametrizedExtern32;
 
 parser Parser(out bit<16> result) {
     PlainExtern(16w1) plain;
     ParametrizedExtern(16w1) inferred;            // ArgT is inferred to be bit<16>
-    ParametrizedExtern<bit<8>>(8w2) specialized;  // ArgT is supplied explicitly
+    ParametrizedExtern < bit<8 >>(8w2) specialized;  // ArgT is supplied explicitly
     ParametrizedExtern32(32w3) aliased;
     ParametrizedExtern(16w4) inferredArray[2];
-    ParametrizedExtern<bit<16>>(16w5) specializedArray[2];
+    ParametrizedExtern <bit<16 >>(16w5) specializedArray[2];
     OtherExtern() ctrl;
 
     state start {
@@ -49,9 +49,9 @@ parser Parser(out bit<16> result) {
 control Control(inout bit<16> result) {
     // The abstract method is implemented for the inferred type argument bit<16>.
     AbstractExtern(16w6) abstractInferred = {
-        void handle(in bit<16> v) {
-            result = result + v;
-        }
+    void handle(in bit<16> v) {
+    result = result + v;
+    }
     };
 
     apply {

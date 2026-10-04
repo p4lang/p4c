@@ -22,8 +22,11 @@ parser start {
     return ingress;
 }
 
-action noop() { }
-action output(port) { modify_field(standard_metadata.egress_spec, port); }
+action noop() {
+}
+action output(port) {
+    modify_field(standard_metadata.egress_spec, port);
+}
 
 table test1 {
     reads {

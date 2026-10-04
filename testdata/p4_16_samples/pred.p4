@@ -17,9 +17,9 @@ control Ing() {
     action cond() {
         b = true;
         if (b)
-           a = 5;
+        a = 5;
         else
-           a = 10;
+        a = 10;
     }
 
     apply {

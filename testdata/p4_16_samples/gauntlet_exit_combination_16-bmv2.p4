@@ -17,7 +17,8 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -35,7 +36,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            8w255: exact @name("QIqvRY") ;
+            8w255 : exact @name("QIqvRY");
         }
         actions = {
             dummy_action();
@@ -45,9 +46,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (false) {
         } else {
             switch (simple_table.apply().action_run) {
-                dummy_action: {
-                    h.eth_hdr.eth_type = 1;
-                    return;
+                dummy_action : {
+                h.eth_hdr.eth_type = 1;
+                return;
                 }
             }
         }
@@ -56,11 +57,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -68,4 +78,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

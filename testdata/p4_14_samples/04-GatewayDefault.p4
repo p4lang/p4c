@@ -7,8 +7,8 @@
 
 header_type ethernet_t {
     fields {
-        dstAddr   : 48;
-        srcAddr   : 48;
+        dstAddr : 48;
+        srcAddr : 48;
         ethertype : 16;
     }
 }
@@ -27,7 +27,7 @@ header_type ingress_metadata_t {
         f1 : 8;
         f2 : 16;
         f3 : 32;
-        f4 : 64;     
+        f4 : 64;
     }
 }
 
@@ -99,13 +99,13 @@ control ingress {
     apply(i_t1) {
         nop {
             apply(i_t2);
-            }
+        }
         set_egress_port {
             apply(i_t3);
-            }
+        }
         default {
             apply(i_t4);
-            }
+        }
     }
 }
 

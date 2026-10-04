@@ -62,16 +62,16 @@ dash-pipeline-v1model-bmv2.p4(707): [--Wwarn=invalid-header] warning: accessing 
 ...ask | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr, sip_mask = 0xfffffffffffffffff...
                                              ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(371): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
-    hdr.u0_ethernet.dst_addr = (overlay_dmac == 0 ? hdr.u0_ethernet.dst_addr : overlay_dmac);
-                                                    ^^^^^^^^^^^^^^^
+    hdr.u0_ethernet.dst_addr =(overlay_dmac == 0 ? hdr.u0_ethernet.dst_addr : overlay_dmac);
+                                                   ^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(371): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
-    hdr.u0_ethernet.dst_addr = (overlay_dmac == 0 ? hdr.u0_ethernet.dst_addr : overlay_dmac);
+    hdr.u0_ethernet.dst_addr =(overlay_dmac == 0 ? hdr.u0_ethernet.dst_addr : overlay_dmac);
     ^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(377): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr....
+    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len *(bit<16>)(bit<1>) hdr.u0_ipv4.isValid() + hdr....
                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(377): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv6
-... (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0...
+...(bit<16>)(bit<1>) hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length *(bit<16>)(bit<1>) hdr.u0...
                                              ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(622): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
         hdr.u0_ipv6.payload_length = hdr.u0_ipv4.total_len - IPV4_HDR_SIZE;
@@ -83,10 +83,10 @@ dash-pipeline-v1model-bmv2.p4(624): [--Wwarn=invalid-header] warning: accessing 
         hdr.u0_ipv6.hop_limit = hdr.u0_ipv4.ttl;
                                 ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(625): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        hdr.u0_ipv6.dst_addr = (IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_data.dip_mask | ...
+        hdr.u0_ipv6.dst_addr =(IPv6Address) hdr.u0_ipv4.dst_addr & ~meta.overlay_data.dip_mask | ...
                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(626): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        hdr.u0_ipv6.src_addr = (IPv6Address)hdr.u0_ipv4.src_addr & ~meta.overlay_data.sip_mask | ...
+        hdr.u0_ipv6.src_addr =(IPv6Address) hdr.u0_ipv4.src_addr & ~meta.overlay_data.sip_mask | ...
                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(628): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
         hdr.u0_ethernet.ether_type = 0x86dd;
@@ -104,11 +104,11 @@ dash-pipeline-v1model-bmv2.p4(658): [--Wwarn=invalid-header] warning: accessing 
         hdr.u0_ethernet.ether_type = 0x800;
         ^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(1218): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        meta.dst_ip_addr = (bit<128>)hdr.u0_ipv4.dst_addr;
+        meta.dst_ip_addr =(bit<128>) hdr.u0_ipv4.dst_addr;
                                      ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(1221): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-            hdr.u0_ipv4.diffserv = (bit<8>)meta.eni_data.dscp;
+            hdr.u0_ipv4.diffserv =(bit<8>) meta.eni_data.dscp;
             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(926): [--Wwarn=invalid-header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-            hdr.u0_ipv4.dst_addr: ternary @SaiVal[name="dip", type="sai_ip_address_t"];
-            ^^^^^^^^^^^
+        hdr.u0_ipv4.dst_addr : ternary @SaiVal[name = "dip", type = "sai_ip_address_t"];
+        ^^^^^^^^^^^

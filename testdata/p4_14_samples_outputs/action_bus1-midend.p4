@@ -55,7 +55,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        packet.extract<data_t>(hdr.data);
+        packet.extract < data_t >(hdr.data);
         transition accept;
     }
 }
@@ -156,7 +156,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1_1: exact @name("data.f1_1");
+            hdr.data.f1_1 : exact @name("data.f1_1");
         }
         default_action = NoAction_1();
     }
@@ -167,7 +167,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.data.f2_1: exact @name("data.f2_1");
+            hdr.data.f2_1 : exact @name("data.f2_1");
         }
         default_action = NoAction_2();
     }
@@ -178,7 +178,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            hdr.data.f3_1: exact @name("data.f3_1");
+            hdr.data.f3_1 : exact @name("data.f3_1");
         }
         default_action = NoAction_3();
     }
@@ -189,7 +189,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            hdr.data.f4_1: exact @name("data.f4_1");
+            hdr.data.f4_1 : exact @name("data.f4_1");
         }
         default_action = NoAction_4();
     }
@@ -200,7 +200,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_5();
         }
         key = {
-            hdr.data.f5_1: exact @name("data.f5_1");
+            hdr.data.f5_1 : exact @name("data.f5_1");
         }
         default_action = NoAction_5();
     }
@@ -211,7 +211,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            hdr.data.f6_1: exact @name("data.f6_1");
+            hdr.data.f6_1 : exact @name("data.f6_1");
         }
         default_action = NoAction_6();
     }
@@ -222,7 +222,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_7();
         }
         key = {
-            hdr.data.f7_1: exact @name("data.f7_1");
+            hdr.data.f7_1 : exact @name("data.f7_1");
         }
         default_action = NoAction_7();
     }
@@ -233,7 +233,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_8();
         }
         key = {
-            hdr.data.f8_1: exact @name("data.f8_1");
+            hdr.data.f8_1 : exact @name("data.f8_1");
         }
         default_action = NoAction_8();
     }
@@ -256,7 +256,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<data_t>(hdr.data);
+        packet.emit < data_t >(hdr.data);
     }
 }
 
@@ -270,4 +270,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch < headers, metadata >(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

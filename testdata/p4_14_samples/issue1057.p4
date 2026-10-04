@@ -45,10 +45,10 @@ action ethernet() {
 
 table ethernet {
     actions {
-		ethernet;
+        ethernet;
     }
 }
 
 control ingress {
-	apply(ethernet);
+    apply(ethernet);
 }

@@ -8,25 +8,24 @@
 #include <core.p4>
 #include <pna.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -75,9 +74,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -100,7 +99,7 @@ control MainControlImpl(
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             next_hop;
@@ -110,7 +109,7 @@ control MainControlImpl(
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            if (SelectByDirection(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr) == hdr.ipv4.dstAddr) {            
+            if (SelectByDirection(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr) == hdr.ipv4.dstAddr) {
                 ipv4_da_lpm.apply();
             }
         }

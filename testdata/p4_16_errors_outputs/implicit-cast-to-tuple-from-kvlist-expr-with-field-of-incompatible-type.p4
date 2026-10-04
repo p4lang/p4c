@@ -3,4 +3,3 @@ control C0() {
         tuple<bool, int<8>, bool, error> x = { 0, true, ... };
     }
 }
-

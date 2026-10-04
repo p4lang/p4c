@@ -15,16 +15,16 @@ struct Headers_t {
 }
 
 parser prs(packet_in p, out Headers_t headers) {
-    value_set<bit<8>>(4) pvs;
+    value_set < bit<8 >>(4) pvs;
     state start {
-        p.extract<test_header>(headers.first);
-        transition select(headers.first.value) {
-            pvs: parse_next;
-            default: accept;
+        p.extract < test_header >(headers.first);
+        transition select (headers.first.value) {
+            pvs : parse_next;
+            default : accept;
         }
     }
     state parse_next {
-        p.extract<next_header>(headers.next);
+        p.extract < next_header >(headers.next);
         transition accept;
     }
 }
@@ -39,4 +39,4 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

@@ -5,7 +5,7 @@
 header ethernet_h {
     eth_addr_t dstAddr;
     eth_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 header vlan_h {
@@ -18,24 +18,24 @@ struct empty_t {
 
 struct headers_t {
     ethernet_h ethernet;
-    vlan_h     vlan;
+    vlan_h vlan;
 }
 
 parser in_parser(packet_in pkt, out headers_t hdr, inout empty_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x8100: parse_vlan1;
-            0x88a8: parse_vlan2;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x8100 : parse_vlan1;
+            0x88a8 : parse_vlan2;
+            default : accept;
         }
     }
     state parse_vlan2 {
         pkt.extract(hdr.vlan);
         hdr.ethernet.etherType = 0x8100;
-        transition select(hdr.vlan.etherType) {
-            0x8100: parse_vlan1;
-            default: reject;
+        transition select (hdr.vlan.etherType) {
+            0x8100 : parse_vlan1;
+            default : reject;
         }
     }
     state parse_vlan1 {

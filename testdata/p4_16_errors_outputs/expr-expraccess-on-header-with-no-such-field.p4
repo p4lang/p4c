@@ -12,4 +12,3 @@ control ingress(inout H hdr) {
     apply {
     }
 }
-

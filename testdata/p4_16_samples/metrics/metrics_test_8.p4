@@ -14,15 +14,15 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -33,10 +33,10 @@ header tcp_t {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> dataOffset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgentPtr;
@@ -48,8 +48,8 @@ struct metadata {
 
 struct headers {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    tcp_t      tcp;
+    ipv4_t ipv4;
+    tcp_t tcp;
 }
 
 /*************************************************************************
@@ -65,16 +65,16 @@ parser MyParser(packet_in packet,
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            6: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -88,7 +88,8 @@ parser MyParser(packet_in packet,
 *************************************************************************/
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply { }
+    apply {
+    }
 }
 
 /*************************************************************************
@@ -114,7 +115,7 @@ control MyIngress(inout headers hdr,
     }
     table ecmp_group {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr : lpm;
         }
         actions = {
             drop;
@@ -124,7 +125,7 @@ control MyIngress(inout headers hdr,
     }
     table ecmp_nhop {
         key = {
-            meta.ecmp_select: exact;
+            meta.ecmp_select : exact;
         }
         actions = {
             drop;
@@ -157,7 +158,7 @@ control MyEgress(inout headers hdr,
     }
     table send_frame {
         key = {
-            standard_metadata.egress_port: exact;
+            standard_metadata.egress_port : exact;
         }
         actions = {
             rewrite_mac;
@@ -175,7 +176,7 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-     apply {
+    apply {
         update_checksum(
             hdr.ipv4.isValid(),
             { hdr.ipv4.version,

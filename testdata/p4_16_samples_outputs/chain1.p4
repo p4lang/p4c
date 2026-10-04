@@ -7,9 +7,9 @@ header Header {
 parser p1(packet_in p, out Header h) {
     bit<1> x;
     state start {
-        transition select(x) {
-            0: chain1;
-            1: chain2;
+        transition select (x) {
+            0 : chain1;
+            1 : chain2;
         }
     }
     state chain1 {

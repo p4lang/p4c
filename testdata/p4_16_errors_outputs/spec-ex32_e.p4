@@ -6,4 +6,3 @@ header Hdr {
     varbit<256> data2;
     int<32>     size2;
 }
-

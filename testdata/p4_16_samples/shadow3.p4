@@ -5,10 +5,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-header H {}
+header H {
+}
 
 control MyIngress(inout H p) {
-  bit<8> p = 0;
-  apply {
-  }
+    bit<8> p = 0;
+    apply {
+    }
 }

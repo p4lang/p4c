@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else {
             new_val_1 = 32w232;
         }
-        retval_1 = (bit<16>)new_val_1;
+        retval_1 =(bit<16>) new_val_1;
         inlinedRetval_2 = retval_1;
         h.h.a = inlinedRetval_2;
         do_thing_action();
@@ -63,4 +63,4 @@ control deparser(packet_out b, in Headers h) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

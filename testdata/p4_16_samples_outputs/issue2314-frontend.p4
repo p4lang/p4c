@@ -18,8 +18,8 @@ header I {
 
 struct h {
     ethernet_t ether;
-    H          h;
-    I          i;
+    H h;
+    I i;
 }
 
 struct m {
@@ -28,7 +28,7 @@ struct m {
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
     @name("MyParser.l3.etherType") bit<16> l3_etherType;
     state start {
-        b.extract<ethernet_t>(hdr.ether);
+        b.extract < ethernet_t >(hdr.ether);
         transition L3_start;
     }
     state L3_start {
@@ -36,18 +36,18 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
         transition L3_start_0;
     }
     state L3_start_0 {
-        transition select(l3_etherType) {
-            16w0x800: L3_h0;
-            16w0x8100: L3_i;
-            default: start_1;
+        transition select (l3_etherType) {
+            16w0x800 : L3_h0;
+            16w0x8100 : L3_i;
+            default : start_1;
         }
     }
     state L3_h0 {
-        b.extract<H>(hdr.h);
+        b.extract < H >(hdr.h);
         transition start_1;
     }
     state L3_i {
-        b.extract<I>(hdr.i);
+        b.extract < I >(hdr.i);
         l3_etherType = hdr.i.etherType;
         transition L3_start_0;
     }
@@ -78,8 +78,8 @@ control MyComputeChecksum(inout h hdr, inout m meta) {
 
 control MyDeparser(packet_out b, in h hdr) {
     apply {
-        b.emit<h>(hdr);
+        b.emit < h >(hdr);
     }
 }
 
-V1Switch<h, m>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < h, m >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

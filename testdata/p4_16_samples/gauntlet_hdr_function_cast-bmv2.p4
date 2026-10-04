@@ -13,7 +13,6 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-
 struct Headers {
     ethernet_t eth_hdr1;
     ethernet_t eth_hdr2;
@@ -22,18 +21,17 @@ struct Headers {
 struct Meta {
 }
 
-
 ethernet_t do_function_1(inout bit<16> val) {
     if (val == 1) {
         return { 48w1, 48w1, 16w1 };
     } else if (val == 2) {
-        return  {2, 2, 2};
+        return { 2, 2, 2 };
     }
-    return  {3, 3, 3};
+    return { 3, 3, 3 };
 }
 
 ethernet_t do_function_2() {
-    return  {1, 1, 1};
+    return { 1, 1, 1 };
 }
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
@@ -78,4 +76,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

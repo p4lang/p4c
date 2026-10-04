@@ -49,7 +49,7 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     }
     table simple_table {
         key = {
-            hdr.h.b: exact;
+            hdr.h.b : exact;
         }
         actions = {
             NoAction();
@@ -60,8 +60,8 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
     apply {
         bit<8> tmp_condition = 8w0;
         switch (simple_table.apply().action_run) {
-            NoAction: {
-                return;
+            NoAction : {
+            return;
             }
         }
 
@@ -70,15 +70,18 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
 }
 
 control egress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    apply {}
+    apply {
+    }
 }
 
 control vrfy(inout Parsed_packet hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control update(inout Parsed_packet hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

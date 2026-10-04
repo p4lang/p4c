@@ -85,7 +85,9 @@ table t_ingress_1 {
         metaA.f1 : exact;
     }
     actions {
-        _nop; _set_port; _multicast;
+        _nop;
+        _set_port;
+        _multicast;
     }
     size : 128;
 }
@@ -96,7 +98,9 @@ table t_ingress_2 {
         standard_metadata.instance_type : ternary;
     }
     actions {
-        _nop; _resubmit; _clone_i2e;
+        _nop;
+        _resubmit;
+        _clone_i2e;
     }
     size : 128;
 }
@@ -107,7 +111,9 @@ table t_egress {
         standard_metadata.instance_type : ternary;
     }
     actions {
-        _nop; _recirculate; _clone_e2e;
+        _nop;
+        _recirculate;
+        _clone_e2e;
     }
     size : 128;
 }

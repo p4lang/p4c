@@ -23,12 +23,14 @@ action local_recirc(local_port) {
     resubmit( local_port );
 }
 table do_local_recirc {
-    actions { local_recirc; }
+    actions {
+        local_recirc;
+    }
 }
 
 control ingress {
-  apply(do_local_recirc);
+    apply(do_local_recirc);
 }
 
-
-control egress { }
+control egress {
+}

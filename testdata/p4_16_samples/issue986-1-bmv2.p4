@@ -8,8 +8,11 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct Meta { bit b; }
-struct Headers {}
+struct Meta {
+    bit b;
+}
+struct Headers {
+}
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -17,17 +20,33 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
-control update(inout Headers h, inout Meta m) { apply {} }
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
-control deparser(packet_out b, in Headers h) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+control deparser(packet_out b, in Headers h) {
+    apply {
+    }
+}
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     table t1 {
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
     }
     table t2 {
-        actions = { NoAction; }
+        actions = {
+            NoAction;
+        }
     }
 
     apply {

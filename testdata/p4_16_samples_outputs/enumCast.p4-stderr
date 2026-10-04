@@ -1,8 +1,8 @@
 enumCast.p4(37): [--Wwarn=unused] warning: 'x' is unused
-        X x = (X)0;
+        X x =(X) 0;
           ^
 enumCast.p4(38): [--Wwarn=unused] warning: 'z' is unused
-        bit<32> z = (bit<32>)X.One;
+        bit<32> z =(bit<32>) X.One;
                 ^
 enumCast.p4(39): [--Wwarn=unused] warning: 'z1' is unused
         bit<32> z1 = X.One;

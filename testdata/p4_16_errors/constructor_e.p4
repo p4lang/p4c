@@ -4,7 +4,6 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-extern X
-{
+extern X {
     void X();  // no return type allowed
 }

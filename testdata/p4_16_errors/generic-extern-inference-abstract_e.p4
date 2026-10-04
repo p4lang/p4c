@@ -9,7 +9,9 @@ extern AbstractExtern<AbsT> {
 control c() {
     // AbsT is inferred to be bit<16>, so the implementation must not take a bit<8>.
     AbstractExtern(16w1) wrongAbstractType = {
-        void handle(in bit<8> v) {}
+        void handle(in bit<8> v) {
+        }
     };
-    apply {}
+    apply {
+    }
 }

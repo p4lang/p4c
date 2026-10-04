@@ -23,7 +23,9 @@ header_type B {
 header A A;
 metadata B meta;
 
-parser start { return A; }
+parser start {
+    return A;
+}
 
 parser A {
     extract(A);
@@ -31,17 +33,20 @@ parser A {
 }
 
 counter B {
-    type: packets_and_bytes;
-    instance_count: 1024;
+    type : packets_and_bytes;
+    instance_count : 1024;
 }
 
-action noop() { }
+action noop() {
+}
 action A(val, port, idx) {
     modify_field(A.b1, val);
     modify_field(standard_metadata.egress_spec, port);
     modify_field(meta.B, idx);
 }
-action B() { count(B, meta.B); }
+action B() {
+    count(B, meta.B);
+}
 
 table A {
     reads {
@@ -54,8 +59,10 @@ table A {
 }
 
 table B {
-    actions { B; }
-    default_action: B();
+    actions {
+        B;
+    }
+    default_action : B();
 }
 
 control ingress {

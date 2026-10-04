@@ -12,4 +12,3 @@ control c(packet_out p) {
         p.emit<int>((H){ 0, 1 });
     }
 }
-

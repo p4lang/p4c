@@ -9,32 +9,32 @@ control ctrl(out bit<32> c) {
         }
         default_action = e();
     }
-    @hidden action exit3l24() {
+    @hidden action exit3l23() {
         hasExited = false;
         c = 32w2;
     }
-    @hidden action exit3l34() {
+    @hidden action exit3l33() {
         c = 32w5;
     }
-    @hidden table tbl_exit3l24 {
+    @hidden table tbl_exit3l23 {
         actions = {
-            exit3l24();
+            exit3l23();
         }
-        const default_action = exit3l24();
+        const default_action = exit3l23();
     }
-    @hidden table tbl_exit3l34 {
+    @hidden table tbl_exit3l33 {
         actions = {
-            exit3l34();
+            exit3l33();
         }
-        const default_action = exit3l34();
+        const default_action = exit3l33();
     }
     apply {
-        tbl_exit3l24.apply();
+        tbl_exit3l23.apply();
         t_0.apply();
         if (hasExited) {
             ;
         } else {
-            tbl_exit3l34.apply();
+            tbl_exit3l33.apply();
         }
     }
 }

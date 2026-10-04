@@ -10,8 +10,7 @@ parser p() {
     }
 }
 
-void func()
-{
+void func() {
     p() t;
     t();
 }

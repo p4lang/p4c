@@ -33,8 +33,8 @@ header B {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
-    B          b;
+    H h;
+    B b;
 }
 
 struct Meta {
@@ -73,7 +73,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         dummy_var = 8w255 + function_with_side_effect(h.h.j);
         dummy_var = 8w255 | function_with_side_effect(h.h.k);
         dummy_var = 8w0 - function_with_side_effect(h.h.l);
-        dummy_var = (16w1 ++ function_with_side_effect(h.h.m))[15:8];
+        dummy_var =(16w1 ++ function_with_side_effect(h.h.m))[15 : 8];
         dummy_bool = true || bool_with_side_effect(h.b.a);
         dummy_bool = false && bool_with_side_effect(h.b.b);
         dummy_bool = function_with_side_effect(h.b.c) != function_with_side_effect(h.b.c);

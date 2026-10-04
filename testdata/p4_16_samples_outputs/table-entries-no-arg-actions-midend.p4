@@ -11,7 +11,7 @@ control MyC(inout bit<2> x) {
     }
     @name("MyC.t") table t_0 {
         key = {
-            x: exact @name("x");
+            x : exact @name("x");
         }
         actions = {
             a();
@@ -19,10 +19,10 @@ control MyC(inout bit<2> x) {
             @defaultonly NoAction_1();
         }
         const entries = {
-                        2w0 : a();
-                        2w1 : b();
-                        2w2 : a();
-                        2w3 : b();
+            2w0 : a();
+            2w1 : b();
+            2w2 : a();
+            2w3 : b();
         }
         default_action = NoAction_1();
     }

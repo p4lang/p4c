@@ -7,10 +7,10 @@ header data_t {
     bit<32> f2;
     bit<32> f3;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
-    bit<8>  b3;
-    bit<8>  b4;
+    bit<8> b1;
+    bit<8> b2;
+    bit<8> b3;
+    bit<8> b4;
 }
 
 struct metadata {
@@ -30,9 +30,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         packet.extract(hdr.data);
-        transition select(hdr.data.f2) {
-            32w0xf0000000 &&& 32w0xf0000000: parse_data2;
-            default: accept;
+        transition select (hdr.data.f2) {
+            32w0xf0000000 &&& 32w0xf0000000 : parse_data2;
+            default : accept;
         }
     }
 }
@@ -51,7 +51,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         key = {
             hdr.data.isValid() : exact;
-            hdr.data2.isValid(): exact;
+            hdr.data2.isValid() : exact;
         }
     }
     apply {

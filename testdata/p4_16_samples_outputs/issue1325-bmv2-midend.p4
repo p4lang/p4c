@@ -23,18 +23,18 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action issue1325bmv2l37() {
+    @hidden action issue1325bmv2l38() {
         mark_to_drop(standard_metadata);
     }
-    @hidden table tbl_issue1325bmv2l37 {
+    @hidden table tbl_issue1325bmv2l38 {
         actions = {
-            issue1325bmv2l37();
+            issue1325bmv2l38();
         }
-        const default_action = issue1325bmv2l37();
+        const default_action = issue1325bmv2l38();
     }
     apply {
         if (local_metadata._test_test_error0 == error.Unused) {
-            tbl_issue1325bmv2l37.apply();
+            tbl_issue1325bmv2l38.apply();
         }
     }
 }
@@ -59,4 +59,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch<parsed_packet_t, local_metadata_t>(parse(), verify_checks(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch < parsed_packet_t, local_metadata_t >(parse(), verify_checks(), ingress(), egress(), compute_checksum(), deparser()) main;

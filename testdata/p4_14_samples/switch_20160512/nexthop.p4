@@ -144,7 +144,7 @@ table fwd_result {
 }
 
 control process_fwd_results {
-    if (not (BYPASS_ALL_LOOKUPS)) {
+    if (not(BYPASS_ALL_LOOKUPS)) {
         apply(fwd_result);
     }
 }
@@ -208,7 +208,7 @@ table ecmp_group {
     reads {
         l3_metadata.nexthop_index : exact;
     }
-    action_profile: ecmp_action_profile;
+    action_profile : ecmp_action_profile;
     size : ECMP_GROUP_TABLE_SIZE;
 }
 

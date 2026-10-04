@@ -17,7 +17,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ports_t>(hdr.ports);
+        pkt.extract < ports_t >(hdr.ports);
         transition accept;
     }
 }
@@ -32,9 +32,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.ports.port1: exact @name("h.ports.port1");
-            h.ports.port2: exact @name("h.ports.port2");
-            h.ports.port3: exact @name("h.ports.port3");
+            h.ports.port1 : exact @name("h.ports.port1");
+            h.ports.port2 : exact @name("h.ports.port2");
+            h.ports.port3 : exact @name("h.ports.port3");
         }
         actions = {
             NoAction_1();
@@ -58,8 +58,8 @@ control update(inout Headers h, inout Meta m) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<ports_t>(h.ports);
+        b.emit < ports_t >(h.ports);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

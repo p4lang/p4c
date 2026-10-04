@@ -14,15 +14,16 @@ header ethernet_t {
 }
 
 header H {
-    bit<8>  a;
+    bit<8> a;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H    h;
+    H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<128> tmp_key = 128w2;
@@ -30,7 +31,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (val > 8w10) {
             val = 8w2;
             return;
-        } else{
+        } else {
             val = 8w3;
         }
 
@@ -39,7 +40,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table simple_table {
         key = {
-            tmp_key             : exact @name("bKiScA") ;
+            tmp_key : exact @name("bKiScA");
         }
         actions = {
             do_action(h.h.a);
@@ -61,11 +62,20 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -73,4 +83,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

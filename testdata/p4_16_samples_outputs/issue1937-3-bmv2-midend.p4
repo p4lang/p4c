@@ -15,18 +15,18 @@ struct metadata_t {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @hidden action issue19373bmv2l17() {
+    @hidden action issue19373bmv2l23() {
         hdr.h1.f1 = hdr.h1.f1 >> 2;
         hdr.h1.f2 = 8w1;
     }
-    @hidden table tbl_issue19373bmv2l17 {
+    @hidden table tbl_issue19373bmv2l23 {
         actions = {
-            issue19373bmv2l17();
+            issue19373bmv2l23();
         }
-        const default_action = issue19373bmv2l17();
+        const default_action = issue19373bmv2l23();
     }
     apply {
-        tbl_issue19373bmv2l17.apply();
+        tbl_issue19373bmv2l23.apply();
     }
 }
 
@@ -56,4 +56,4 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

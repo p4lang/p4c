@@ -22,13 +22,13 @@ header ml_hdr_t {
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 struct headers {
-    ethernet_t      ethernet;
-    ml_hdr_t        ml;
-    vec_e_t[3]      vector;
+    ethernet_t ethernet;
+    ml_hdr_t ml;
+    vec_e_t[3] vector;
     aggregator_t[3] pool;
 }
 

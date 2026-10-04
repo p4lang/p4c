@@ -24,10 +24,18 @@ parser start {
     return ingress;
 }
 
-action do_xor() { bit_xor(data.b1, data.b2, data.b3); }
-action do_and() { bit_and(data.b2, data.b3, data.b4); }
-action do_or() { bit_or(data.b4, data.b3, data.b1); }
-action do_add() { add(data.b3, data.b1, data.b2); }
+action do_xor() {
+    bit_xor(data.b1, data.b2, data.b3);
+}
+action do_and() {
+    bit_and(data.b2, data.b3, data.b4);
+}
+action do_or() {
+    bit_or(data.b4, data.b3, data.b1);
+}
+action do_add() {
+    add(data.b3, data.b1, data.b2);
+}
 
 table test1 {
     reads {

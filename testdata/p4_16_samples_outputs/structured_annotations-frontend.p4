@@ -28,13 +28,13 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.redirect") action redirect() {
         stdmeta.egress_spec = stdmeta.ingress_port;
     }
-    @MixedExprList[1, "hello", true, false, 11] @MixedKV[label="text", my_bool=true, int_val=6] @name("ingressImpl.t") table t_0 {
-        actions = {
-            @myid[1] redirect();
-            @myid[2] my_drop();
-            NoAction_1();
-        }
-        default_action = NoAction_1();
+    @MixedExprList[1, "hello", true, false, 11] @MixedKV[label = "text", my_bool = true, int_val = 6] @name("ingressImpl.t") table t_0 {
+    actions = {
+        @myid[1] redirect();
+        @myid[2] my_drop();
+        NoAction_1();
+    }
+    default_action = NoAction_1();
     }
     apply {
         t_0.apply();
@@ -53,8 +53,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<headers_t>(hdr);
+        packet.emit < headers_t >(hdr);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

@@ -8,31 +8,31 @@ typedef bit<128> IPv6Address;
 header ethernet_h {
     MacAddress dst;
     MacAddress src;
-    bit<16>    type;
+    bit<16> type;
 }
 
 header ipv6_h {
-    bit<4>      version;
-    bit<8>      tc;
-    bit<20>     fl;
-    bit<16>     plen;
-    bit<8>      nh;
-    bit<8>      hl;
+    bit<4> version;
+    bit<8> tc;
+    bit<20> fl;
+    bit<16> plen;
+    bit<8> nh;
+    bit<8> hl;
     IPv6Address src;
     IPv6Address dst;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -42,9 +42,9 @@ header tcp_h {
     bit<16> dport;
     bit<32> seq;
     bit<32> ack;
-    bit<4>  dataofs;
-    bit<4>  reserved;
-    bit<8>  flags;
+    bit<4> dataofs;
+    bit<4> reserved;
+    bit<8> flags;
     bit<16> window;
     bit<16> chksum;
     bit<16> urgptr;
@@ -60,10 +60,10 @@ header udp_h {
 struct headers {
     ethernet_h ethernet;
     ethernet_h ethernet2;
-    ipv4_t     ipv4;
-    ipv6_h     ipv6;
-    udp_h      udp;
-    tcp_h      tcp;
+    ipv4_t ipv4;
+    ipv6_h ipv6;
+    udp_h udp;
+    tcp_h tcp;
 }
 
 struct metadata {
@@ -73,32 +73,32 @@ struct metadata {
 parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata)(bool test) {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.type) {
-            0x800: parse_ipv4;
-            0x86dd: parse_ipv6;
-            default: accept;
+        transition select (hdr.ethernet.type) {
+            0x800 : parse_ipv4;
+            0x86dd : parse_ipv6;
+            default : accept;
         }
     }
     state parse_ipv6 {
         pkt.extract(hdr.ipv6);
-        transition select(hdr.ipv6.nh) {
-            0x11: parseOther;
-            6: parse_tcp;
-            default: accept;
+        transition select (hdr.ipv6.nh) {
+            0x11 : parseOther;
+            6 : parse_tcp;
+            default : accept;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            6: parse_tcp;
-            0x11: parseOther;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            6 : parse_tcp;
+            0x11 : parseOther;
+            default : accept;
         }
     }
     state parseOther {
-        transition select(test) {
-            false: accept;
-            true: parse_udp;
+        transition select (test) {
+            false : accept;
+            true : parse_udp;
         }
     }
     state parse_udp {

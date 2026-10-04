@@ -9,29 +9,29 @@
  * Standard ethernet header
  */
 header ethernet_t {
-    @tc_type ("macaddr") bit<48> dstAddr;
-    @tc_type ("macaddr") bit<48> srcAddr;
+    @tc_type("macaddr") bit<48> dstAddr;
+    @tc_type("macaddr") bit<48> srcAddr;
     bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    @tc_type("ipv4") bit<32> srcAddr;
+    @tc_type("ipv4") bit<32> dstAddr;
 }
 
 header crc_t {
-    bit<4>  f1;
-    bit<4>  f2;
+    bit<4> f1;
+    bit<4> f2;
     bit<32> f3;
     bit<32> f4;
 
@@ -40,8 +40,8 @@ header crc_t {
 
 struct my_ingress_headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    crc_t     crc;
+    ipv4_t ipv4;
+    crc_t crc;
 }
 
 /******  G L O B A L   I N G R E S S   M E T A D A T A  *********/
@@ -67,9 +67,9 @@ parser Ingress_Parser(
     }
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
+        transition select (hdr.ethernet.etherType) {
             ETHERTYPE_IPV4 : parse_ipv4;
-            default        : reject;
+            default : reject;
         }
     }
     state parse_ipv4 {
@@ -87,7 +87,7 @@ control ingress(
     inout pna_main_output_metadata_t ostd
 )
 {
-    Hash<bit<16>>(PNA_HashAlgorithm_t.CRC16) h;
+    Hash < bit<16 >>(PNA_HashAlgorithm_t.CRC16) h;
     const bit<16> base = 15;
     const bit<16> max = 32;
     apply {

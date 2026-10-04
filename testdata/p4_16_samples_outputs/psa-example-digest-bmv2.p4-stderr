@@ -1,6 +1,6 @@
-psa-example-digest-bmv2.p4(174): [--Wwarn=unused] warning: 'serEnumT' is unused
-    action do_tst (PortId_t egress_port, EthTypes serEnumT) {
-                                                  ^^^^^^^^
+psa-example-digest-bmv2.p4(179): [--Wwarn=unused] warning: 'serEnumT' is unused
+    action do_tst(PortId_t egress_port, EthTypes serEnumT) {
+                                                 ^^^^^^^^
 psa-example-digest-bmv2.p4(75): [--Wwarn=uninitialized-out-param] warning: out parameter 'parsed_hdr' may be uninitialized when 'CommonParser' terminates
     out headers parsed_hdr,
                 ^^^^^^^^^^

@@ -48,14 +48,14 @@ action _nop() {
 }
 
 counter my_indirect_counter {
-    type: packets;
-    static: m_table;
-    instance_count: 16384;
+    type : packets;
+    static : m_table;
+    instance_count : 16384;
 }
 
 counter my_direct_counter {
-    type: bytes;
-    direct: m_table;
+    type : bytes;
+    direct : m_table;
 }
 
 action m_action(idx) {
@@ -68,7 +68,8 @@ table m_table {
         ethernet.srcAddr : exact;
     }
     actions {
-        m_action; _nop;
+        m_action;
+        _nop;
     }
     size : 16384;
 }

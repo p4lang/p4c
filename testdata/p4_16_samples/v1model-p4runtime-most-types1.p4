@@ -55,55 +55,55 @@
 
 // All ways to have a single type or typedef on a bit<8>
 typedef bit<48> Eth0_t;
-type    bit<48> Eth1_t;
+type bit<48> Eth1_t;
 @p4runtime_translation("mycompany.com/EthernetAddress", 49)
-type    bit<48> Eth2_t;
+type bit<48> Eth2_t;
 
 // All possible ways to have a second type or typedef on top of any of
 // the 3 above.
 
-typedef bit<8>     Custom0_t;
-type    bit<8>     Custom1_t;
+typedef bit<8> Custom0_t;
+type bit<8> Custom1_t;
 @p4runtime_translation("mycompany.com/My_Byte2", 12)
-type    bit<8>     Custom2_t;
+type bit<8> Custom2_t;
 
-typedef Custom0_t  Custom00_t;
-type    Custom0_t  Custom01_t;
+typedef Custom0_t Custom00_t;
+type Custom0_t Custom01_t;
 @p4runtime_translation("mycompany.com/My_Byte3", 13)
-type    Custom0_t  Custom02_t;
+type Custom0_t Custom02_t;
 
-typedef Custom1_t  Custom10_t;
-type    Custom1_t  Custom11_t;
+typedef Custom1_t Custom10_t;
+type Custom1_t Custom11_t;
 @p4runtime_translation("mycompany.com/My_Byte4", 14)
-type    Custom1_t  Custom12_t;
+type Custom1_t Custom12_t;
 
-typedef Custom2_t  Custom20_t;
-type    Custom2_t  Custom21_t;
+typedef Custom2_t Custom20_t;
+type Custom2_t Custom21_t;
 @p4runtime_translation("mycompany.com/My_Byte5", 15)
-type    Custom2_t  Custom22_t;
+type Custom2_t Custom22_t;
 
 // Starting here I will not exhaustively enumerate all possible
 // 'stackings', but pick a few selected ones.
 
-type    Custom00_t Custom001_t;
+type Custom00_t Custom001_t;
 @p4runtime_translation("mycompany.com/My_Byte6", 16)
-type    Custom00_t Custom002_t;
+type Custom00_t Custom002_t;
 
-type    Custom10_t Custom101_t;
+type Custom10_t Custom101_t;
 @p4runtime_translation("mycompany.com/My_Byte7", 17)
-type    Custom10_t Custom102_t;
+type Custom10_t Custom102_t;
 
-type    Custom20_t Custom201_t;
+type Custom20_t Custom201_t;
 @p4runtime_translation("mycompany.com/My_Byte8", 18)
-type    Custom20_t Custom202_t;
+type Custom20_t Custom202_t;
 
 typedef Custom22_t Custom220_t;
 
-typedef Custom002_t  Custom0020_t;
+typedef Custom002_t Custom0020_t;
 typedef Custom0020_t Custom00200_t;
-type    Custom00200_t Custom002001_t;
+type Custom00200_t Custom002001_t;
 @p4runtime_translation("mycompany.com/My_Byte9", 19)
-type    Custom00200_t Custom002002_t;
+type Custom00200_t Custom002002_t;
 
 typedef Custom002001_t Custom0020010_t;
 typedef Custom002002_t Custom0020020_t;
@@ -137,8 +137,8 @@ typedef serenum_t serenum0_t;
 
 
 header ethernet_t {
-    Eth0_t  dstAddr;
-    Eth1_t  srcAddr;
+    Eth0_t dstAddr;
+    Eth1_t srcAddr;
     bit<16> etherType;
 }
 
@@ -165,43 +165,43 @@ struct struct1_t {
 }
 
 header custom_t {
-    Eth0_t      addr0;
-    Eth1_t      addr1;
-    Eth2_t      addr2;
-    bit<8>      e;
+    Eth0_t addr0;
+    Eth1_t addr1;
+    Eth2_t addr2;
+    bit<8> e;
 
-    Custom0_t   e0;
-    Custom1_t   e1;
-    Custom2_t   e2;
+    Custom0_t e0;
+    Custom1_t e1;
+    Custom2_t e2;
 
-    Custom00_t  e00;
-    Custom01_t  e01;
-    Custom02_t  e02;
+    Custom00_t e00;
+    Custom01_t e01;
+    Custom02_t e02;
 
-    Custom10_t  e10;
-    Custom11_t  e11;
-    Custom12_t  e12;
+    Custom10_t e10;
+    Custom11_t e11;
+    Custom12_t e12;
 
-    Custom20_t  e20;
-    Custom21_t  e21;
-    Custom22_t  e22;
+    Custom20_t e20;
+    Custom21_t e21;
+    Custom22_t e22;
 
-    Custom001_t  e001;
-    Custom002_t  e002;
-    Custom101_t  e101;
-    Custom102_t  e102;
-    Custom201_t  e201;
-    Custom202_t  e202;
-    Custom220_t  e220;
+    Custom001_t e001;
+    Custom002_t e002;
+    Custom101_t e101;
+    Custom102_t e102;
+    Custom201_t e201;
+    Custom202_t e202;
+    Custom220_t e220;
 
     Custom0020010_t e0020010;
     Custom0020020_t e0020020;
 
     struct1_t my_nested_struct1;
 
-    bit<16>     checksum;
+    bit<16> checksum;
 
-    serenum0_t   s0;
+    serenum0_t s0;
 }
 
 @controller_header("packet_in")
@@ -211,40 +211,40 @@ header packet_in_header_t {
 
 @controller_header("packet_out")
 header packet_out_header_t {
-    Eth0_t      addr0;
-    Eth1_t      addr1;
-    Eth2_t      addr2;
-    bit<8>      e;
+    Eth0_t addr0;
+    Eth1_t addr1;
+    Eth2_t addr2;
+    bit<8> e;
 
-    Custom0_t   e0;
-    Custom1_t   e1;
-    Custom2_t   e2;
+    Custom0_t e0;
+    Custom1_t e1;
+    Custom2_t e2;
 
-    Custom00_t  e00;
-    Custom01_t  e01;
-    Custom02_t  e02;
+    Custom00_t e00;
+    Custom01_t e01;
+    Custom02_t e02;
 
-    Custom10_t  e10;
-    Custom11_t  e11;
-    Custom12_t  e12;
+    Custom10_t e10;
+    Custom11_t e11;
+    Custom12_t e12;
 
-    Custom20_t  e20;
-    Custom21_t  e21;
-    Custom22_t  e22;
+    Custom20_t e20;
+    Custom21_t e21;
+    Custom22_t e22;
 
-    Custom001_t  e001;
-    Custom002_t  e002;
-    Custom101_t  e101;
-    Custom102_t  e102;
-    Custom201_t  e201;
-    Custom202_t  e202;
-    Custom220_t  e220;
+    Custom001_t e001;
+    Custom002_t e002;
+    Custom101_t e101;
+    Custom102_t e102;
+    Custom201_t e201;
+    Custom202_t e202;
+    Custom220_t e220;
 
     Custom0020010_t e0020010;
     Custom0020020_t e0020020;
 
 #ifdef PROBLEM_SERENUM_FIELD
-    serenum0_t   s0;
+    serenum0_t s0;
 #endif  // PROBLEM_SERENUM_FIELD
 }
 
@@ -252,7 +252,7 @@ struct headers_t {
     packet_in_header_t packet_in;
     packet_out_header_t packet_out;
     ethernet_t ethernet;
-    custom_t   custom;
+    custom_t custom;
 }
 
 // Note: When I uncomment the #define PROBLEM_VALUE_SET_FIELD_TYPE
@@ -275,49 +275,48 @@ struct headers_t {
 
 
 struct valueset1_t {
-    Eth0_t      addr0;
+    Eth0_t addr0;
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
-    Eth1_t      addr1;
-    Eth2_t      addr2;
+    Eth1_t addr1;
+    Eth2_t addr2;
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
-    bit<8>      e;
+    bit<8> e;
 
-    Custom0_t   e0;
+    Custom0_t e0;
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
-    Custom1_t   e1;
-    Custom2_t   e2;
+    Custom1_t e1;
+    Custom2_t e2;
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
 
-    Custom00_t  e00;
+    Custom00_t e00;
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
-    Custom01_t  e01;
-    Custom02_t  e02;
+    Custom01_t e01;
+    Custom02_t e02;
 
-    Custom10_t  e10;
-    Custom11_t  e11;
-    Custom12_t  e12;
+    Custom10_t e10;
+    Custom11_t e11;
+    Custom12_t e12;
 
-    Custom20_t  e20;
-    Custom21_t  e21;
-    Custom22_t  e22;
+    Custom20_t e20;
+    Custom21_t e21;
+    Custom22_t e22;
 
-    Custom001_t  e001;
-    Custom002_t  e002;
-    Custom101_t  e101;
-    Custom102_t  e102;
-    Custom201_t  e201;
-    Custom202_t  e202;
-    Custom220_t  e220;
+    Custom001_t e001;
+    Custom002_t e002;
+    Custom101_t e101;
+    Custom102_t e102;
+    Custom201_t e201;
+    Custom202_t e202;
+    Custom220_t e220;
 
     Custom0020010_t e0020010;
     Custom0020020_t e0020020;
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
 
 #ifdef PROBLEM_SERENUM_FIELD
-    serenum0_t   s0;
+    serenum0_t s0;
 #endif  // PROBLEM_SERENUM_FIELD
 }
-
 
 struct metadata_t {
 }
@@ -328,68 +327,68 @@ parser ParserImpl(packet_in packet,
                   inout standard_metadata_t stdmeta)
 {
     const bit<16> ETHERTYPE_CUSTOM = 0xdead;
-    value_set<valueset1_t>(4) valueset1;
+    value_set < valueset1_t >(4) valueset1;
 
     state start {
         transition select (stdmeta.ingress_port) {
-            0: parse_packet_out_header;
-            default: parse_ethernet;
+            0 : parse_packet_out_header;
+            default : parse_ethernet;
         }
     }
     state parse_packet_out_header {
         packet.extract(hdr.packet_out);
         transition select (
-            hdr.packet_out.addr0
+        hdr.packet_out.addr0
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
-            , hdr.packet_out.addr1
-            , hdr.packet_out.addr2
+        , hdr.packet_out.addr1
+        , hdr.packet_out.addr2
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
-            , hdr.packet_out.e
+        , hdr.packet_out.e
 
-            , hdr.packet_out.e0
+        , hdr.packet_out.e0
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
-            , hdr.packet_out.e1
-            , hdr.packet_out.e2
+        , hdr.packet_out.e1
+        , hdr.packet_out.e2
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
 
-            , hdr.packet_out.e00
+        , hdr.packet_out.e00
 #ifdef PROBLEM_VALUE_SET_FIELD_TYPE
-            , hdr.packet_out.e01
-            , hdr.packet_out.e02
+        , hdr.packet_out.e01
+        , hdr.packet_out.e02
 
-            , hdr.packet_out.e10
-            , hdr.packet_out.e11
-            , hdr.packet_out.e12
+        , hdr.packet_out.e10
+        , hdr.packet_out.e11
+        , hdr.packet_out.e12
 
-            , hdr.packet_out.e20
-            , hdr.packet_out.e21
-            , hdr.packet_out.e22
+        , hdr.packet_out.e20
+        , hdr.packet_out.e21
+        , hdr.packet_out.e22
 
-            , hdr.packet_out.e001
-            , hdr.packet_out.e002
-            , hdr.packet_out.e101
-            , hdr.packet_out.e102
-            , hdr.packet_out.e201
-            , hdr.packet_out.e202
-            , hdr.packet_out.e220
+        , hdr.packet_out.e001
+        , hdr.packet_out.e002
+        , hdr.packet_out.e101
+        , hdr.packet_out.e102
+        , hdr.packet_out.e201
+        , hdr.packet_out.e202
+        , hdr.packet_out.e220
 
-            , hdr.packet_out.e0020010
-            , hdr.packet_out.e0020020
+        , hdr.packet_out.e0020010
+        , hdr.packet_out.e0020020
 #endif // PROBLEM_VALUE_SET_FIELD_TYPE
 
 #ifdef PROBLEM_SERENUM_FIELD
-            , hdr.packet_out.s0
+        , hdr.packet_out.s0
 #endif  // PROBLEM_SERENUM_FIELD
         ) {
-            valueset1: accept;
-            default: parse_ethernet;
+            valueset1 : accept;
+            default : parse_ethernet;
         }
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            ETHERTYPE_CUSTOM: parse_custom;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            ETHERTYPE_CUSTOM : parse_custom;
+            default : accept;
         }
     }
     state parse_custom {
@@ -474,7 +473,8 @@ control ingress(inout headers_t hdr,
 
         hdr.custom.s0 = s0;
     }
-    action my_drop() {}
+    action my_drop() {
+    }
 
     table custom_table {
         key = {
@@ -531,7 +531,8 @@ control egress(inout headers_t hdr,
                inout metadata_t meta,
                inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr) {

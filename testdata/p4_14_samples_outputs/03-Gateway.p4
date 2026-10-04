@@ -3,9 +3,9 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<1>  drop;
-    bit<8>  egress_port;
-    bit<8>  f1;
+    bit<1> drop;
+    bit<8> egress_port;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
     bit<64> f4;
@@ -18,7 +18,7 @@ header ethernet_t {
 }
 
 header vag_t {
-    bit<8>  f1;
+    bit<8> f1;
     bit<16> f2;
     bit<32> f3;
     bit<64> f4;
@@ -33,7 +33,7 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".vag")
-    vag_t      vag;
+    vag_t vag;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -52,7 +52,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -89,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f1;
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1 : exact;
         }
         size = 1024;
     }
@@ -99,7 +99,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f2;
         }
         key = {
-            hdr.vag.f2: exact;
+            hdr.vag.f2 : exact;
         }
         size = 1024;
     }
@@ -109,7 +109,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f3;
         }
         key = {
-            hdr.vag.f3: exact;
+            hdr.vag.f3 : exact;
         }
         size = 1024;
     }
@@ -119,15 +119,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f4;
         }
         key = {
-            hdr.vag.f4: exact;
+            hdr.vag.f4 : exact;
         }
         size = 1024;
     }
     apply {
         i_t1.apply();
-        if ((bit<8>)meta.ing_metadata.f1 == hdr.vag.f1) {
+        if ((bit<8>) meta.ing_metadata.f1 == hdr.vag.f1) {
             i_t2.apply();
-            if ((bit<16>)meta.ing_metadata.f2 == hdr.vag.f2) {
+            if ((bit<16>) meta.ing_metadata.f2 == hdr.vag.f2) {
                 i_t3.apply();
             }
         } else {

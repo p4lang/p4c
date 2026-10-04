@@ -2,14 +2,14 @@
 
 typedef bit<1> t;
 extern e {
-  e();
+    e();
 }
 parser MyParser()() {
-  e() ee = {
+    e() ee = {
     t f(in .e a) {
-      return a;
+    return a;
     }
-  };
-  state start {
-  }
+    };
+    state start {
+    }
 }

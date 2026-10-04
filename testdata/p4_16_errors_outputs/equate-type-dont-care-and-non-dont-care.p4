@@ -4,4 +4,3 @@ control cIngress() {
         random(_, 0);
     }
 }
-

@@ -30,7 +30,7 @@ control ingress(inout Headers h) {
     }
     table simple_table {
         key = {
-            h.eth_hdr.eth_type: exact @name("tyhSfv");
+            h.eth_hdr.eth_type : exact @name("tyhSfv");
         }
         actions = {
             do_action();
@@ -38,8 +38,8 @@ control ingress(inout Headers h) {
     }
     apply {
         switch (simple_table.apply().action_run) {
-            do_action: {
-                h.eth_hdr.eth_type = 0xdead;
+            do_action : {
+            h.eth_hdr.eth_type = 0xdead;
             }
         }
     }

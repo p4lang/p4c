@@ -6,7 +6,7 @@ struct S {
 
 header H {
     bit<8> b;
-    S      s;
+    S s;
 }
 
 struct Headers {
@@ -16,10 +16,9 @@ struct Headers {
 parser p(packet_in p, out Headers h) {
     state start {
         p.extract(h.h);
-        transition select(h.h.s) {
-            {b = 0}: reject;
-            {b = 1}: accept;
+        transition select (h.h.s) {
+            { b = 0 } : reject;
+            { b = 1 } : accept;
         }
     }
 }
-

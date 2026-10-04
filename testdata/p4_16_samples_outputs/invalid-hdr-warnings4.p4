@@ -33,9 +33,9 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.h1[0].data = 1;
         hdr.h1[1].data = 1;
         hdr.h1[0].setInvalid();
-        transition select(hdr.h1[1].data) {
-            0: init;
-            default: accept;
+        transition select (hdr.h1[1].data) {
+            0 : init;
+            default : accept;
         }
     }
 }

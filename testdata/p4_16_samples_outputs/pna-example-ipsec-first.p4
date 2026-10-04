@@ -8,16 +8,16 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<6>  dscp;
-    bit<2>  ecn;
+    bit<4> version;
+    bit<4> ihl;
+    bit<6> dscp;
+    bit<2> ecn;
     bit<16> total_length;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragment_offset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> header_checksum;
     bit<32> src_addr;
     bit<32> dst_addr;
@@ -30,13 +30,13 @@ header esp_t {
 
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
-    esp_t      esp;
+    ipv4_t ipv4;
+    esp_t esp;
 }
 
 struct metadata_t {
     bit<32> next_hop_id;
-    bool    bypass;
+    bool bypass;
 }
 
 ipsec_accelerator() ipsec;
@@ -45,27 +45,27 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout metadata_t meta, 
     ipsec_status status;
     state start {
         from_ipsec = ipsec.from_ipsec(status);
-        transition select(from_ipsec) {
-            true: parse_ipv4;
-            default: parse_ethernet;
+        transition select (from_ipsec) {
+            true : parse_ipv4;
+            default : parse_ethernet;
         }
     }
     state parse_ethernet {
-        pkt.extract<ethernet_t>(hdrs.ethernet);
-        transition select(hdrs.ethernet.ether_type) {
-            16w0x800: parse_ipv4;
-            default: accept;
+        pkt.extract < ethernet_t >(hdrs.ethernet);
+        transition select (hdrs.ethernet.ether_type) {
+            16w0x800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdrs.ipv4);
-        transition select(hdrs.ipv4.protocol) {
-            8w0x32: parse_esp;
-            default: accept;
+        pkt.extract < ipv4_t >(hdrs.ipv4);
+        transition select (hdrs.ipv4.protocol) {
+            8w0x32 : parse_esp;
+            default : accept;
         }
     }
     state parse_esp {
-        pkt.extract<esp_t>(hdrs.esp);
+        pkt.extract < esp_t >(hdrs.esp);
         transition accept;
     }
 }
@@ -78,7 +78,7 @@ control PreControlImpl(in headers_t hdr, inout metadata_t meta, in pna_pre_input
 control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     action ipsec_enable(bit<32> sa_index) {
         ipsec.enable();
-        ipsec.set_sa_index<bit<32>>(sa_index);
+        ipsec.set_sa_index < bit<32 >>(sa_index);
         hdrs.ethernet.setInvalid();
     }
     action ipsec_bypass() {
@@ -90,9 +90,9 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     table inbound_table {
         key = {
-            hdrs.ipv4.src_addr: exact @name("hdrs.ipv4.src_addr");
-            hdrs.ipv4.dst_addr: exact @name("hdrs.ipv4.dst_addr");
-            hdrs.esp.spi      : exact @name("hdrs.esp.spi");
+            hdrs.ipv4.src_addr : exact @name("hdrs.ipv4.src_addr");
+            hdrs.ipv4.dst_addr : exact @name("hdrs.ipv4.dst_addr");
+            hdrs.esp.spi : exact @name("hdrs.esp.spi");
         }
         actions = {
             ipsec_enable();
@@ -103,8 +103,8 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     table outbound_table {
         key = {
-            hdrs.ipv4.src_addr: exact @name("hdrs.ipv4.src_addr");
-            hdrs.ipv4.dst_addr: exact @name("hdrs.ipv4.dst_addr");
+            hdrs.ipv4.src_addr : exact @name("hdrs.ipv4.src_addr");
+            hdrs.ipv4.dst_addr : exact @name("hdrs.ipv4.dst_addr");
         }
         actions = {
             ipsec_enable();
@@ -118,7 +118,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     table routing_table {
         key = {
-            hdrs.ipv4.dst_addr: lpm @name("hdrs.ipv4.dst_addr");
+            hdrs.ipv4.dst_addr : lpm @name("hdrs.ipv4.dst_addr");
         }
         actions = {
             next_hop_id_set();
@@ -135,7 +135,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     table next_hop_table {
         key = {
-            meta.next_hop_id: exact @name("meta.next_hop_id");
+            meta.next_hop_id : exact @name("meta.next_hop_id");
         }
         actions = {
             next_hop_set();
@@ -187,10 +187,10 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdrs, in metadata_t meta, in pna_main_output_metadata_t ostd) {
     apply {
-        pkt.emit<ethernet_t>(hdrs.ethernet);
-        pkt.emit<ipv4_t>(hdrs.ipv4);
-        pkt.emit<esp_t>(hdrs.esp);
+        pkt.emit < ethernet_t >(hdrs.ethernet);
+        pkt.emit < ipv4_t >(hdrs.ipv4);
+        pkt.emit < esp_t >(hdrs.esp);
     }
 }
 
-PNA_NIC<headers_t, metadata_t, headers_t, metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < headers_t, metadata_t, headers_t, metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

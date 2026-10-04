@@ -7,7 +7,7 @@ package SimpleArch(SimplePipeline p0);
 control MyIngress() {
     table t0 {
         key = {
-            get_some_data(): exact @name("data");
+            get_some_data() : exact @name("data");
         }
         actions = {
             NoAction;

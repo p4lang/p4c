@@ -7,8 +7,8 @@ header data_t {
     bit<32> f2;
     bit<32> f3;
     bit<32> f4;
-    bit<8>  b1;
-    bit<8>  b2;
+    bit<8> b1;
+    bit<8> b2;
     bit<16> h1;
 }
 
@@ -29,7 +29,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copy2") action copy2(inout bit<8> dest, bit<8> val) {
-        dest = (bit<8>)val;
+        dest =(bit<8>) val;
     }
     @name(".copy") action copy(inout bit<8> dest, bit<8> val) {
         copy2(dest, val);
@@ -49,7 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data.f1: ternary;
+            hdr.data.f1 : ternary;
         }
     }
     apply {

@@ -15,7 +15,7 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<hdr_t>(headers.h);
+        p.extract < hdr_t >(headers.h);
         transition accept;
     }
 }
@@ -36,18 +36,18 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action default_action_ubpf40() {
-        packet.emit<hdr_t>(headers.h);
+    @hidden action default_action_ubpf45() {
+        packet.emit < hdr_t >(headers.h);
     }
-    @hidden table tbl_default_action_ubpf40 {
+    @hidden table tbl_default_action_ubpf45 {
         actions = {
-            default_action_ubpf40();
+            default_action_ubpf45();
         }
-        const default_action = default_action_ubpf40();
+        const default_action = default_action_ubpf45();
     }
     apply {
-        tbl_default_action_ubpf40.apply();
+        tbl_default_action_ubpf45.apply();
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;

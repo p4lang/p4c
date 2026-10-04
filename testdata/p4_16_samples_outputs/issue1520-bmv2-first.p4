@@ -26,7 +26,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control C(inout headers hdr, inout metadata meta)(bool b) {
-    register<bit<16>>(32w8) r;
+    register < bit<16 >>(32w8) r;
     apply {
         r.read(hdr.h.x, 32w0);
     }
@@ -63,4 +63,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

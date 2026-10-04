@@ -8,12 +8,12 @@
 #include <core.p4>
 #include "bmv2/psa.p4"
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct empty_metadata_t {
@@ -23,7 +23,7 @@ struct metadata_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 parser IngressParserImpl(packet_in pkt,
@@ -45,7 +45,7 @@ control cIngress(inout headers_t hdr,
                  inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-        if (hdr.ethernet.dstAddr == (EthernetAddress) 8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
+        if (hdr.ethernet.dstAddr ==(EthernetAddress) 8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
             send_to_port(ostd, PSA_PORT_RECIRCULATE);
         } else {
             send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
@@ -75,7 +75,7 @@ control cEgress(inout headers_t hdr,
 
     action clone() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 8;
+        ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 8;
     }
 
     apply {
@@ -85,21 +85,21 @@ control cEgress(inout headers_t hdr,
         } else {
             clone();
             // property - dropped packets are still cloned
-            if (hdr.ethernet.dstAddr == (EthernetAddress) 9) {
+            if (hdr.ethernet.dstAddr ==(EthernetAddress) 9) {
                 egress_drop(ostd);
-                ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 9;
+                ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 9;
             }
             if (istd.egress_port == PSA_PORT_RECIRCULATE) {
-                hdr.ethernet.srcAddr = (EthernetAddress) 0xbeef;
-                ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 10;
+                hdr.ethernet.srcAddr =(EthernetAddress) 0xbeef;
+                ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 10;
             } else {
-                if (hdr.ethernet.dstAddr == (EthernetAddress) 8) {
-                    ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 11;
+                if (hdr.ethernet.dstAddr ==(EthernetAddress) 8) {
+                    ostd.clone_session_id =(CloneSessionId_t)(CloneSessionIdUint_t) 11;
                 }
                 // property - clone packets are copies of the packet as output by
                 //            the egress deparser. this value should appear in
                 //            all packets that leave the switch.
-                hdr.ethernet.srcAddr = (EthernetAddress) 0xcafe;
+                hdr.ethernet.srcAddr =(EthernetAddress) 0xcafe;
             }
         }
     }

@@ -8,4 +8,3 @@ struct InControl {
 struct OutControl {
     PortId outputPort;
 }
-

@@ -8,7 +8,8 @@ header payload_t {
 struct header_t {
     payload_t payload;
 }
-struct metadata {}
+struct metadata {
+}
 
 parser MyParser(packet_in packet,
                 out header_t hdr,
@@ -29,8 +30,12 @@ control MyIngress(inout header_t hdr,
     }
 
     table t1 {
-        key = { hdr.payload.x : exact; }
-        actions = { a1; }
+        key = {
+            hdr.payload.x : exact;
+        }
+        actions = {
+            a1;
+        }
         size = 1024;
     }
 
@@ -45,15 +50,24 @@ control MyIngress(inout header_t hdr,
     }
 }
 
-control MyVerifyChecksum(inout header_t hdr, inout metadata meta) { apply { } }
+control MyVerifyChecksum(inout header_t hdr, inout metadata meta) {
+    apply {
+    }
+}
 control MyEgress(inout header_t hdr, inout metadata meta,
-                 inout standard_metadata_t standard_metadata) { apply {  } }
+                 inout standard_metadata_t standard_metadata) {
+    apply {
+    }
+}
 control MyDeparser(packet_out packet, in header_t hdr) {
     apply {
         packet.emit(hdr);
     }
 }
-control MyComputeChecksum(inout header_t hdr, inout metadata meta) { apply { } }
+control MyComputeChecksum(inout header_t hdr, inout metadata meta) {
+    apply {
+    }
+}
 
 V1Switch(
 MyParser(),

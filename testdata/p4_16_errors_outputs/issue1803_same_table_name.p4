@@ -23,7 +23,7 @@ control MyC(inout standard_metadata_t smeta) {
     }
     @name(".t0") table t0 {
         key = {
-            smeta.ingress_port: exact;
+            smeta.ingress_port : exact;
         }
         actions = {
             drop;

@@ -25,26 +25,26 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         }
         pkt.extract(hdr.h1);
         hdr.h2.setInvalid();
-        transition select(hdr.h1.data) {
-            0: state0;
-            1: state1;
-            default: accept;
+        transition select (hdr.h1.data) {
+            0 : state0;
+            1 : state1;
+            default : accept;
         }
     }
     state state0 {
         hdr.h1.setInvalid();
-        transition select(hdr.h2.data) {
-            2: state1;
-            default: next;
+        transition select (hdr.h2.data) {
+            2 : state1;
+            default : next;
         }
     }
     state state1 {
         hdr.h2.data = hdr.h2.data + 1;
         hdr.h2.setValid();
-        transition select(hdr.h2.data) {
-            1: state1;
-            2: state0;
-            default: accept;
+        transition select (hdr.h2.data) {
+            1 : state1;
+            2 : state0;
+            default : accept;
         }
     }
 }

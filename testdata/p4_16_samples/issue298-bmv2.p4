@@ -48,11 +48,10 @@ header udp_t {
 #define ROUND_SIZE      16
 #define INSTANCE_COUNT  65536
 
-
 header myhdr_t {
-    bit<MSGTYPE_SIZE>   msgtype;
-    bit<INSTANCE_SIZE>  inst;
-    bit<ROUND_SIZE>     rnd;
+    bit<MSGTYPE_SIZE> msgtype;
+    bit<INSTANCE_SIZE> inst;
+    bit<ROUND_SIZE> rnd;
 }
 
 struct headers {
@@ -73,7 +72,7 @@ struct ingress_metadata_t {
 
 struct metadata {
     @name("ingress_metadata")
-    ingress_metadata_t   local_metadata;
+    ingress_metadata_t local_metadata;
 }
 
 #define ETHERTYPE_IPV4 16w0x0800
@@ -87,14 +86,14 @@ parser TopParser(packet_in b, out headers p, inout metadata meta, inout standard
 
     state parse_ethernet {
         b.extract(p.ethernet);
-        transition select(p.ethernet.etherType) {
+        transition select (p.ethernet.etherType) {
             ETHERTYPE_IPV4 : parse_ipv4;
         }
     }
 
     state parse_ipv4 {
         b.extract(p.ipv4);
-        transition select(p.ipv4.protocol) {
+        transition select (p.ipv4.protocol) {
             UDP_PROTOCOL : parse_udp;
             default : accept;
         }
@@ -102,7 +101,7 @@ parser TopParser(packet_in b, out headers p, inout metadata meta, inout standard
 
     state parse_udp {
         b.extract(p.udp);
-        transition select(p.udp.dstPort) {
+        transition select (p.udp.dstPort) {
             myhdr_PROTOCOL : parse_myhdr;
             default : accept;
         }
@@ -142,29 +141,32 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 
     table drop_tbl {
-        key = { meta.local_metadata.set_drop : exact; }
+        key = {
+            meta.local_metadata.set_drop : exact;
+        }
         actions = {
             _drop;
-             NoAction;
+            NoAction;
         }
         size = 2;
-        default_action =  NoAction();
+        default_action = NoAction();
     }
 
     apply {
-      drop_tbl.apply();
+        drop_tbl.apply();
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    register<bit<ROUND_SIZE>>(INSTANCE_COUNT) registerRound;
+    register < bit<ROUND_SIZE >>(INSTANCE_COUNT) registerRound;
 
     action read_round() {
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
 
     table round_tbl {
-        key = {}
+        key = {
+        }
         actions = {
             read_round;
         }

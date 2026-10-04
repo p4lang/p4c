@@ -6,4 +6,3 @@ parser p(inout tuple<> hu) {
         hu = (HU){#};
     }
 }
-

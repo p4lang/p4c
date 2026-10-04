@@ -5,7 +5,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-header H { bit<32> x; }
+header H {
+    bit<32> x;
+}
 
 control c() {
     tuple<bit<32>> t = { 0 };

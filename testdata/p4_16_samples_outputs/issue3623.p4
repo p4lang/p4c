@@ -6,10 +6,9 @@ control c(in bit<4> v) {
     apply {
         bool b = v == e.a;
         switch (v) {
-            e.a: 
+            e.a:
             default: {
             }
         }
     }
 }
-

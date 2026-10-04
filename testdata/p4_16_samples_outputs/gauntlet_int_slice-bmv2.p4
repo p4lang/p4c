@@ -14,7 +14,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -37,7 +37,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp.src_addr = 1;
     }
     apply {
-        h.h.a = tmp.dst_addr[16:9];
+        h.h.a = tmp.dst_addr[16 : 9];
     }
 }
 

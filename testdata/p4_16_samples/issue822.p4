@@ -22,8 +22,9 @@ extern ActionSelector {
 BoolRegister() r;
 
 control MyC1() {
-  ActionSelector(r) action_selector;
-  apply {}
+    ActionSelector(r) action_selector;
+    apply {
+    }
 }
 
 S(MyC1()) main;

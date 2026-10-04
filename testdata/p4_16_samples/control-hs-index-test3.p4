@@ -19,7 +19,7 @@ header h_stack {
 struct headers {
     ethernet_t eth_hdr;
     h_stack[3] h;
-    h_index    i;
+    h_index i;
 }
 
 struct Meta {
@@ -74,4 +74,3 @@ control deparser(packet_out pkt, in headers h) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

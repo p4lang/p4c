@@ -9,10 +9,10 @@ header ethernet_t {
 }
 
 header p4calc_t {
-    bit<8>  p;
-    bit<8>  four;
-    bit<8>  ver;
-    bit<8>  op;
+    bit<8> p;
+    bit<8> four;
+    bit<8> ver;
+    bit<8> op;
     bit<32> operand_a;
     bit<32> operand_b;
     bit<32> res;
@@ -20,7 +20,7 @@ header p4calc_t {
 
 struct headers {
     ethernet_t ethernet;
-    p4calc_t   p4calc;
+    p4calc_t p4calc;
 }
 
 struct metadata {
@@ -34,26 +34,26 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     @name("MyParser.tmp_4") bit<8> tmp_3;
     @name("MyParser.tmp_5") p4calc_t tmp_4;
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x1234: check_p4calc;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x1234 : check_p4calc;
+            default : accept;
         }
     }
     state check_p4calc {
-        tmp_0 = packet.lookahead<p4calc_t>();
+        tmp_0 = packet.lookahead < p4calc_t >();
         tmp = tmp_0.p;
-        tmp_2 = packet.lookahead<p4calc_t>();
+        tmp_2 = packet.lookahead < p4calc_t >();
         tmp_1 = tmp_2.four;
-        tmp_4 = packet.lookahead<p4calc_t>();
+        tmp_4 = packet.lookahead < p4calc_t >();
         tmp_3 = tmp_4.ver;
-        transition select(tmp, tmp_1, tmp_3) {
-            (8w0x50, 8w0x34, 8w0x1): parse_p4calc;
-            default: accept;
+        transition select (tmp, tmp_1, tmp_3) {
+            (8w0x50, 8w0x34, 8w0x1) : parse_p4calc;
+            default : accept;
         }
     }
     state parse_p4calc {
-        packet.extract<p4calc_t>(hdr.p4calc);
+        packet.extract < p4calc_t >(hdr.p4calc);
         transition accept;
     }
 }
@@ -108,7 +108,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         nbase_0 = hdr.p4calc.operand_b;
         ncount_0 = 64w8589934592;
         ninput_0 = hdr.p4calc.operand_a;
-        hash<bit<32>, bit<32>, tuple<bit<32>>, bit<64>>(nselect_0, HashAlgorithm.crc32, nbase_0, { ninput_0 }, ncount_0);
+        hash < bit<32>, bit<32>, tuple < bit<32 >>, bit<64 >>(nselect_0, HashAlgorithm.crc32, nbase_0, { ninput_0 }, ncount_0);
         hdr.p4calc.res = nselect_0;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
@@ -123,7 +123,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.calculate") table calculate_0 {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op");
+            hdr.p4calc.op : exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -136,12 +136,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         const default_action = operation_drop();
         const entries = {
-                        8w0x2b : operation_add();
-                        8w0x2d : operation_sub();
-                        8w0x26 : operation_and();
-                        8w0x7c : operation_or();
-                        8w0x5e : operation_xor();
-                        8w0x3e : operation_crc();
+            8w0x2b : operation_add();
+            8w0x2d : operation_sub();
+            8w0x26 : operation_and();
+            8w0x7c : operation_or();
+            8w0x5e : operation_xor();
+            8w0x3e : operation_crc();
         }
     }
     apply {
@@ -160,15 +160,15 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple<bit<32>>, bit<32>>(hdr.p4calc.isValid(), { hdr.p4calc.operand_a }, hdr.p4calc.res, HashAlgorithm.crc32);
+        update_checksum < tuple < bit<32 >>, bit<32 >>(hdr.p4calc.isValid(), { hdr.p4calc.operand_a }, hdr.p4calc.res, HashAlgorithm.crc32);
     }
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<p4calc_t>(hdr.p4calc);
+        packet.emit < ethernet_t >(hdr.ethernet);
+        packet.emit < p4calc_t >(hdr.p4calc);
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < headers, metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

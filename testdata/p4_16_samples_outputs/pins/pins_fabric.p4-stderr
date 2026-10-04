@@ -68,7 +68,7 @@ pins_fabric.p4(609)
 ...ted("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table...
                                              ^^^^^^^^^^^
 pins_fabric.p4(852): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
-            1w1: ternary @id(1) @name("dummy_match");
+            1w1 : ternary @id(1) @name("dummy_match");
             ^^^
 pins_fabric.p4(1088): [--Winfo=removed] info: removing table 'acl_egress_dhcp_to_host_table'
   ") table acl_egress_dhcp_to_host_table {
@@ -86,19 +86,19 @@ pins_fabric.p4(1532): [--Winfo=removed] info: removing table 'acl_pre_ingress_me
   ") table acl_pre_ingress_metadata_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_fabric.p4(638): [--Wwarn=uninitialized-use] warning: tunnel_id_value may not be completely initialized
-            tunnel_id_value: exact @id(1) @name("tunnel_id");
+            tunnel_id_value : exact @id(1) @name("tunnel_id");
             ^^^^^^^^^^^^^^^
 pins_fabric.p4(586): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
-            router_interface_id_value: exact @id(1) @name("router_interface_id");
+            router_interface_id_value : exact @id(1) @name("router_interface_id");
             ^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_fabric.p4(564): [--Wwarn=uninitialized-use] warning: router_interface_id_value may not be completely initialized
-            router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(route...
+            router_interface_id_value : exact @id(1) @name("router_interface_id") @refers_to(rout...
             ^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_fabric.p4(565): [--Wwarn=uninitialized-use] warning: neighbor_id_value may be uninitialized
             neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
             ^^^^^^^^^^^^^^^^^
 pins_fabric.p4(852): [--Wwarn=mismatch] warning: 1w1: Constant key field
-            1w1: ternary @id(1) @name("dummy_match");
+            1w1 : ternary @id(1) @name("dummy_match");
             ^^^
 pins_fabric.p4(1578): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
 ... local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;

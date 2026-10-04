@@ -6,7 +6,8 @@
 
 #include <core.p4>
 
-struct standard_metadata_t {}
+struct standard_metadata_t {
+}
 
 header Ethernet {
     bit<48> src;
@@ -29,9 +30,9 @@ control c(inout Headers h, inout standard_metadata_t sm) {
     }
     table tns {
         key = {
-            h.eth.tst[13:4] : exact;
+            h.eth.tst[13 : 4] : exact;
         }
-	actions = {
+        actions = {
             do_act;
         }
     }
@@ -42,8 +43,8 @@ control c(inout Headers h, inout standard_metadata_t sm) {
 
 }
 
-parser p<H>(packet_in _p, out H h);
-control ctr<H, SM>(inout H h, inout SM sm);
-package top<H, SM>(p<H> _p, ctr<H, SM> _c);
+parser p < H >(packet_in _p, out H h);
+control ctr < H, SM >(inout H h, inout SM sm);
+package top < H, SM >(p<H> _p, ctr<H, SM> _c);
 
 top(prs(), c()) main;

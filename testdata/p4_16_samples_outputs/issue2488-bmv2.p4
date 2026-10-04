@@ -35,7 +35,7 @@ bit<48> set(inout bit<48> s) {
 }
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     Headers tmp = { { h.eth_hdr.dst_addr, set(h.eth_hdr.dst_addr), 1 } };
-    tuple<bit<48>, bit<48>> t = { h.eth_hdr.dst_addr, set(h.eth_hdr.dst_addr) };
+    tuple < bit<48>, bit<48 >> t = { h.eth_hdr.dst_addr, set(h.eth_hdr.dst_addr) };
     apply {
         h = tmp;
     }

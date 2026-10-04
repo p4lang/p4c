@@ -4,8 +4,8 @@
 
 header data_t {
     bit<128> f4;
-    bit<8>   b1;
-    bit<8>   b2;
+    bit<8> b1;
+    bit<8> b2;
 }
 
 header data1_t {
@@ -25,7 +25,7 @@ struct metadata {
 
 struct headers {
     @name(".data")
-    data_t  data;
+    data_t data;
     @name(".data1")
     data1_t data1;
     @name(".data2")
@@ -66,9 +66,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             noop;
         }
         key = {
-            hdr.data1.f1: exact;
-            hdr.data2.f2: exact;
-            hdr.data3.f3: exact;
+            hdr.data1.f1 : exact;
+            hdr.data2.f2 : exact;
+            hdr.data3.f3 : exact;
         }
         size = 100000;
     }

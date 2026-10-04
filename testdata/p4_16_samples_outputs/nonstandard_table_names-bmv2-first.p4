@@ -20,7 +20,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
         transition parse_hdrs;
     }
     state parse_hdrs {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -31,7 +31,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("prefix|simple_table_1") table simple_table_1 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction();
@@ -41,7 +41,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("@prefix@simple_table_2") table simple_table_2 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction();
@@ -51,7 +51,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("<>]{]prefix/simple_table_3") table simple_table_3 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction();
@@ -61,7 +61,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("!@#$%^&*()_+=-prefix^simple_table_1") table simple_table_4 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction();
@@ -71,7 +71,7 @@ control tables(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
     @name("prefix◕‿◕😀ツsimple_table_1") table simple_table_5 {
         key = {
-            h.eth_hdr.eth_type: exact @name("dummy_name");
+            h.eth_hdr.eth_type : exact @name("dummy_name");
         }
         actions = {
             NoAction();
@@ -112,8 +112,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
-        pkt.emit<Headers>(h);
+        pkt.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

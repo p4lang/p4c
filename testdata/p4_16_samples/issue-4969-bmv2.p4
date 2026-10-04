@@ -8,16 +8,16 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
 }
 
 struct metadata_t {
@@ -39,7 +39,8 @@ control verifyChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 action foo1() {
@@ -55,8 +56,14 @@ control ingressImpl(
 
 {
     table t1 {
-        actions = { NoAction; foo1; foo2; }
-        key = { hdr.ethernet.etherType: exact; }
+        actions = {
+            NoAction;
+            foo1;
+            foo2;
+        }
+        key = {
+            hdr.ethernet.etherType : exact;
+        }
         default_action = NoAction();
         size = 512;
     }
@@ -70,14 +77,16 @@ control egressImpl(
     inout metadata_t meta,
     inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control updateChecksum(
     inout headers_t hdr,
     inout metadata_t meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control deparserImpl(

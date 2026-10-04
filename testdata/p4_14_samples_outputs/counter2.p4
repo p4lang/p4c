@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             act_0;
         }
         key = {
-            hdr.ethernet.dstAddr: ternary;
+            hdr.ethernet.dstAddr : ternary;
         }
         size = 6100;
         counters = cnt;

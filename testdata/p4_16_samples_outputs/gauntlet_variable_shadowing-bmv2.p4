@@ -11,12 +11,12 @@ header ethernet_t {
 header H {
     bit<32> a;
     bit<32> b;
-    bit<8>  c;
+    bit<8> c;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
+    H h;
 }
 
 struct Meta {
@@ -29,7 +29,7 @@ control compute(inout H h) {
     }
     @name("t") table t_0 {
         key = {
-            h.a + h.a: exact @name("e");
+            h.a + h.a : exact @name("e");
         }
         actions = {
             a_0();
@@ -48,7 +48,7 @@ control compute(inout H h) {
 parser p(packet_in pkt, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
         pkt.extract(h.eth_hdr);
-        pkt.extract<H>(h.h);
+        pkt.extract < H >(h.h);
         transition accept;
     }
 }

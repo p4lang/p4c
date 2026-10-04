@@ -5,20 +5,20 @@ header h_t {
 }
 
 struct meta_t {
-    h_t    h;
+    h_t h;
     bit<8> f;
 }
 
 control C(inout meta_t meta) {
     action a() {
-        meta.h = (h_t){#};
-        if (meta.h == (h_t){#}) {
+        meta.h =(h_t) {#};
+        if (meta.h ==(h_t) {#}) {
             meta.f = 8w1;
         }
-        if (meta.h != (h_t){#}) {
+        if (meta.h !=(h_t) {#}) {
             meta.f = 8w2;
         }
-        meta.h = (h_t){#};
+        meta.h =(h_t) {#};
         if (meta.h.isValid()) {
             ;
         } else {

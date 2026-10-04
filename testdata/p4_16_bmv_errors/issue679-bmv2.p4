@@ -8,33 +8,49 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct H { };
+struct H {
+};
 struct M {
     bit<32> hash1;
     bit<32> hash2;
 }
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 
-    action drop() { mark_to_drop(smeta); }
+    action drop() {
+        mark_to_drop(smeta);
+    }
 
-    action_selector (HashAlgorithm.identity, 32w1024, 32w10) as;
+    action_selector(HashAlgorithm.identity, 32w1024, 32w10) as;
 
     table indirect_ws {
-        key = { meta.hash2 : selector; meta.hash1 : selector; }
-        actions = { drop; NoAction; }
+        key = {
+            meta.hash2 : selector;
+            meta.hash1 : selector;
+        }
+        actions = {
+            drop;
+            NoAction;
+        }
         const default_action = NoAction();
         @name("ap_ws") implementation = as;
     }
 
-
     table indirect_ws_1 {
-        key = { meta.hash1 : selector; meta.hash2 : selector; }
-        actions = { drop; NoAction; }
+        key = {
+            meta.hash1 : selector;
+            meta.hash2 : selector;
+        }
+        actions = {
+            drop;
+            NoAction;
+        }
         const default_action = NoAction();
         @name("ap_ws") implementation = as;
     }
@@ -47,19 +63,23 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 };
 
 control EgressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    apply { }
+    apply {
+    }
 };
 
 control DeparserI(packet_out pk, in H hdr) {
-    apply { }
+    apply {
+    }
 }
 
 control VerifyChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(),

@@ -19,21 +19,21 @@ struct S {
 
 extern E {
     E();
-    bit<32> get<T>(in T b);
+    bit<32> get < T >(in T b);
 }
 
 control c(inout S s) {
     E() e;
     apply {
         if (s.h.isValid())
-            s.h.data3 = 0;
+        s.h.data3 = 0;
         if (s.h.data2 == 0)
-            s.h.data1 = e.get(s.h.data2);
+        s.h.data1 = e.get(s.h.data2);
     }
 }
 
 parser proto(packet_in p, out Header h);
-control cproto<T>(inout T v);
+control cproto < T >(inout T v);
 package top(cproto<_> _c);
 
 top(c()) main;

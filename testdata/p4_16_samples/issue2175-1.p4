@@ -6,7 +6,7 @@
  */
 
 struct data {
-    bit<16>     a;
+    bit<16> a;
 };
 
 extern Virtual {
@@ -18,11 +18,11 @@ extern Virtual {
 // User code
 control c(inout bit<16> p) {
     Virtual() cntr = {
-        bit<16> f() {
-            return 1;
-        }
-        void g(inout data x) {
-        }
+    bit<16> f() {
+    return 1;
+    }
+    void g(inout data x) {
+    }
     };
 
     apply {

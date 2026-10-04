@@ -44,8 +44,11 @@ action_selector sel {
     selection_mode : fair;
 }
 
-action noop() { }
-action setf1(val) { modify_field(data.f1, val); }
+action noop() {
+}
+action setf1(val) {
+    modify_field(data.f1, val);
+}
 
 action_profile sel_profile {
     actions {

@@ -40,7 +40,7 @@ parser ParserImpl(packet_in packet,
 
 control bar() {
     apply {
-        const foo_t FOO = (foo_t) 1;
+        const foo_t FOO =(foo_t) 1;
         // uncommenting this line causes 'typechecker mutated program' error
         foo_t tmp = FOO;
 

@@ -18,4 +18,3 @@ header IPv4_h {
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
-

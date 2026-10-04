@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 header H {
-    bit<8>     s;
+    bit<8> s;
     varbit<32> v;
 }
 
@@ -52,4 +52,4 @@ control deparser(packet_out packet, in headers hdr) {
     }
 }
 
-V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
+V1Switch < headers, metadata >(p(), vc(), ingress(), egress(), uc(), deparser()) main;

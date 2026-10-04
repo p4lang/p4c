@@ -13,7 +13,7 @@
 struct Headers_t
 {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 parser prs(packet_in p, out Headers_t headers)
@@ -21,7 +21,7 @@ parser prs(packet_in p, out Headers_t headers)
     state start
     {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType)
+        transition select (headers.ethernet.etherType)
         {
             16w0x800 : ip;
             default : reject;
@@ -46,7 +46,7 @@ control pipe(inout Headers_t headers, out bool pass)
             pass = true;
         }
         else
-            pass = false;
+        pass = false;
     }
 }
 

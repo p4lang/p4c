@@ -25,8 +25,8 @@ bit<8> do_function(out bit<8> val) {
 }
 struct Headers {
     ethernet_t eth_hdr;
-    H          h;
-    B          b;
+    H h;
+    B b;
 }
 
 struct Meta {
@@ -52,7 +52,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         dummy_bool = false || true || bool_with_side_effect(h.h.b);
         dummy_bool = false && bool_with_side_effect(h.h.c);
         dummy_bool = true && false && bool_with_side_effect(h.h.d);
-        h.b.a = (8w1 != do_function(h.b.b) || false ? 8w1 : 8w2);
+        h.b.a =(8w1 != do_function(h.b.b) || false ? 8w1 : 8w2);
     }
 }
 

@@ -13,18 +13,18 @@ const ipproto_t IPPROTO_UDP = 17;
 header ethernet_h {
     EthernetAddress dst_addr;
     EthernetAddress src_addr;
-    etype_t         ether_type;
+    etype_t ether_type;
 }
 
 header ipv4_h {
-    bit<8>      version_ihl;
-    bit<8>      diffserv;
-    bit<16>     total_len;
-    bit<16>     identification;
-    bit<16>     flags_frag_offset;
-    bit<8>      ttl;
-    ipproto_t   protocol;
-    bit<16>     hdr_checksum;
+    bit<8> version_ihl;
+    bit<8> diffserv;
+    bit<16> total_len;
+    bit<16> identification;
+    bit<16> flags_frag_offset;
+    bit<8> ttl;
+    ipproto_t protocol;
+    bit<16> hdr_checksum;
     IPv4Address src_addr;
     IPv4Address dst_addr;
 }
@@ -34,9 +34,9 @@ header tcp_h {
     bit<16> dst_port;
     bit<32> seq_no;
     bit<32> ack_no;
-    bit<4>  data_offset;
-    bit<4>  res;
-    bit<8>  flags;
+    bit<4> data_offset;
+    bit<4> res;
+    bit<8> flags;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgent_ptr;
@@ -55,15 +55,15 @@ header udp_h {
     bit<16> checksum;
 }
 
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW = (ExpireTimeProfileId_t)0;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW = (ExpireTimeProfileId_t)1;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED = (ExpireTimeProfileId_t)2;
-const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER = (ExpireTimeProfileId_t)3;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NOW =(ExpireTimeProfileId_t) 0;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEW =(ExpireTimeProfileId_t) 1;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_ESTABLISHED =(ExpireTimeProfileId_t) 2;
+const ExpireTimeProfileId_t EXPIRE_TIME_PROFILE_TCP_NEVER =(ExpireTimeProfileId_t) 3;
 struct headers_t {
     ethernet_h ethernet;
-    ipv4_h     ipv4;
-    tcp_h      tcp;
-    udp_h      udp;
+    ipv4_h ipv4;
+    tcp_h tcp;
+    udp_h udp;
 }
 
 struct metadata_t {
@@ -75,17 +75,17 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t meta, i
     }
     state parse_ethernet {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.ether_type) {
-            ETYPE_IPV4: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.ether_type) {
+            ETYPE_IPV4 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         pkt.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            IPPROTO_TCP: parse_tcp;
-            IPPROTO_UDP: parse_udp;
-            default: accept;
+        transition select (hdr.ipv4.protocol) {
+            IPPROTO_TCP : parse_tcp;
+            IPPROTO_UDP : parse_udp;
+            default : accept;
         }
     }
     state parse_tcp {
@@ -112,17 +112,17 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
     }
     ExpireTimeProfileId_t new_expire_time_profile_id;
     action ct_tcp_table_hit() {
-        hdr.ethernet.src_addr[7:0] = 0xf1;
+        hdr.ethernet.src_addr[7 : 0] = 0xf1;
     }
     action ct_tcp_table_miss() {
-        hdr.ethernet.src_addr[7:0] = 0xa5;
+        hdr.ethernet.src_addr[7 : 0] = 0xa5;
         add_entry(action_name = "ct_tcp_table_hit", action_params = (ct_tcp_table_hit_params_t){  }, expire_time_profile_id = new_expire_time_profile_id);
     }
     table ct_tcp_table {
         key = {
-            hdr.ipv4.src_addr: exact;
-            hdr.ipv4.dst_addr: exact;
-            hdr.ipv4.protocol: exact;
+            hdr.ipv4.src_addr : exact;
+            hdr.ipv4.dst_addr : exact;
+            hdr.ipv4.protocol : exact;
             hdr.tcp.src_port : exact;
             hdr.tcp.dst_port : exact;
         }
@@ -139,7 +139,7 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
     }
     table ipv4_host {
         key = {
-            hdr.ipv4.dst_addr: exact;
+            hdr.ipv4.dst_addr : exact;
         }
         actions = {
             send;

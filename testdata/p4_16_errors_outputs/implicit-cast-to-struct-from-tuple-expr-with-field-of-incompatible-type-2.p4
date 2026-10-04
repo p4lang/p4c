@@ -8,4 +8,3 @@ control c() {
         f({ true });
     }
 }
-

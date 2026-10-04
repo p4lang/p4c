@@ -5,7 +5,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct empty_metadata_t {
@@ -28,7 +28,7 @@ parser ingressParserImpl(packet_in packet, out headers_t hdr, inout metadata_t m
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
         ostd.drop = false;
-        ostd.egress_port = (PortId_t)3;
+        ostd.egress_port =(PortId_t) 3;
     }
 }
 

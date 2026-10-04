@@ -28,7 +28,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".c1") counter<bit<10>>(32w1024, CounterType.packets) c1;
+@name(".c1") counter < bit<10 >>(32w1024, CounterType.packets) c1;
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".count_c1_1") action count_c1_1() {
         c1.count((bit<10>)10w1);
@@ -38,7 +38,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             count_c1_1;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
     }
     @name(".t2") table t2 {
@@ -46,7 +46,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             count_c1_1;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {

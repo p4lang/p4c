@@ -6,7 +6,8 @@
 
 #include <v1model.p4>
 
-struct metadata { }
+struct metadata {
+}
 
 header data_t {
     bit<8> f;
@@ -34,14 +35,20 @@ parser ParserImpl(      packet_in           packet,
     state start {
         packet.extract(hdr.h1);
         packet.extract(hdr.h2);
-        transition select(standard_metadata.ingress_port) {
-            0: p0;
-            default: p1;
+        transition select (standard_metadata.ingress_port) {
+            0 : p0;
+            default : p1;
         }
     }
 
-    state p0 { p.apply(packet, hdr.h1); transition accept; }
-    state p1 { p.apply(packet, hdr.h2); transition accept; }
+    state p0 {
+        p.apply(packet, hdr.h1);
+        transition accept;
+    }
+    state p1 {
+        p.apply(packet, hdr.h2);
+        transition accept;
+    }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {

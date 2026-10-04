@@ -6,7 +6,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -33,7 +33,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -55,10 +55,10 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     hu1_t[2] au1;
     hu1_t[2] au1b;
     apply {
-        hu1b.h1 = (h1_t){f1 = hdr.ethernet.dstAddr[45:38],f2 = hdr.ethernet.dstAddr[44:37]};
+        hu1b.h1 =(h1_t) { f1 = hdr.ethernet.dstAddr[45 : 38], f2 = hdr.ethernet.dstAddr[44 : 37] };
         hu1 = hu1b;
-        au1b[0].h1 = (h1_t){f1 = hdr.ethernet.dstAddr[37:30],f2 = hdr.ethernet.dstAddr[36:29]};
-        au1b[1].h2 = (h2_t){f1 = hdr.ethernet.dstAddr[35:28],f2 = hdr.ethernet.dstAddr[34:27]};
+        au1b[0].h1 =(h1_t) { f1 = hdr.ethernet.dstAddr[37 : 30], f2 = hdr.ethernet.dstAddr[36 : 29] };
+        au1b[1].h2 =(h2_t) { f1 = hdr.ethernet.dstAddr[35 : 28], f2 = hdr.ethernet.dstAddr[34 : 27] };
         au1 = au1b;
         a1 = a1b;
     }
@@ -76,8 +76,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

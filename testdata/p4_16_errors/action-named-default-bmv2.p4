@@ -49,7 +49,7 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
     }
     table simple_table {
         key = {
-            hdr.h.b: exact;
+            hdr.h.b : exact;
         }
         actions = {
             a1();
@@ -61,11 +61,11 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
         bit<8> tmp_condition = 0;
         stdmeta.egress_spec = 0;
         switch (simple_table.apply().action_run) {
-            a1: {
-                tmp_condition = 1;
+            a1 : {
+            tmp_condition = 1;
             }
-            default: {
-                tmp_condition = 2;
+            default : {
+            tmp_condition = 2;
             }
         }
 
@@ -76,15 +76,18 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
 }
 
 control egress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    apply {}
+    apply {
+    }
 }
 
 control vrfy(inout headers_t hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 control update(inout headers_t hdr, inout metadata_t meta) {
-    apply {}
+    apply {
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

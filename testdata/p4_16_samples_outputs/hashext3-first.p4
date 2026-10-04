@@ -26,4 +26,3 @@ control test(inout hdrs hdr) {
         hdr.hash = Hash<bit<16>>(random_hash(false, false)).get<h1_t>(hdr.h1);
     }
 }
-

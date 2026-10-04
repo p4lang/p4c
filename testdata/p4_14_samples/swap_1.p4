@@ -32,7 +32,8 @@ table t_ingress_1 {
         hdr1.f1 : exact;
     }
     actions {
-        a11; a12;
+        a11;
+        a12;
     }
     size : 128;
 }

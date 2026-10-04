@@ -21,7 +21,7 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract < ethernet_t >(hdr.eth_hdr);
         transition accept;
     }
 }
@@ -43,8 +43,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_2 = tmp_3;
         tmp_4 = 16w1;
         tmp_0.setValid();
-        tmp_0 = (ethernet_t){dst_addr = tmp_1,src_addr = tmp_2,eth_type = tmp_4};
-        tmp = (Headers){eth_hdr = tmp_0};
+        tmp_0 =(ethernet_t) { dst_addr = tmp_1, src_addr = tmp_2, eth_type = tmp_4 };
+        tmp =(Headers) { eth_hdr = tmp_0 };
         h = tmp;
     }
 }
@@ -66,8 +66,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<Headers>(h);
+        b.emit < Headers >(h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

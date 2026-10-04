@@ -7,22 +7,22 @@
  struct intrinsic_metadata_t {
     bit<8> f0;
     bit<8> f1;
- }
+}
 
- struct empty_t {}
+struct empty_t {
+}
 
- control nothing<H>(inout H hdr, inout empty_t meta, in intrinsic_metadata_t imeta) {
-    apply {}
- }
+control nothing<H>(inout H hdr, inout empty_t meta, in intrinsic_metadata_t imeta) {
+    apply {
+    }
+}
 
- control C<H, M>(
-     inout H hdr,
-     inout M meta,
-     in intrinsic_metadata_t intr_md);
+control C<H, M>(inout H hdr, inout M meta, in intrinsic_metadata_t intr_md);
+package P<H, M>(C<H, M> c=nothing<H>());
+struct hdr_t {
+}
 
- package P<H, M>(C<H, M> c = nothing<H>());
+struct meta_t {
+}
 
- struct hdr_t { }
- struct meta_t { }
-
- P() main;
+P() main;

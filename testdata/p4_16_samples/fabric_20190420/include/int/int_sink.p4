@@ -9,12 +9,12 @@
 #ifndef __INT_SINK__
 #define __INT_SINK__
 
-control process_int_sink (
+control process_int_sink(
     inout parsed_headers_t hdr,
     inout fabric_metadata_t fabric_metadata) {
 
     @hidden
-    action restore_header () {
+    action restore_header() {
         hdr.udp.dport = hdr.intl4_tail.dest_port;
         hdr.ipv4.dscp = hdr.intl4_tail.dscp;
     }
@@ -22,7 +22,7 @@ control process_int_sink (
     @hidden
     action int_sink() {
         // restore length fields of IPv4 header and UDP header
-        bit<16> len_bytes = (bit<16>) (hdr.intl4_shim.len_words << 5w2);
+        bit<16> len_bytes =(bit<16>)(hdr.intl4_shim.len_words << 5w2);
         hdr.ipv4.total_len = hdr.ipv4.total_len - len_bytes;
         hdr.udp.len = hdr.udp.len - len_bytes;
         // remove all the INT information from the packet

@@ -3,4 +3,3 @@ parser p() {
         transition reject;
     }
 }
-

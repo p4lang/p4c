@@ -9,4 +9,3 @@ parser p(in bs b, out bool matches) {
         transition accept;
     }
 }
-

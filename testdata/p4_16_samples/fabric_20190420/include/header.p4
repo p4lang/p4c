@@ -76,10 +76,10 @@ header tcp_t {
     bit<16> dport;
     bit<32> seq_no;
     bit<32> ack_no;
-    bit<4>  data_offset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
+    bit<4> data_offset;
+    bit<3> res;
+    bit<3> ecn;
+    bit<6> ctrl;
     bit<16> window;
     bit<16> checksum;
     bit<16> urgent_ptr;
@@ -104,54 +104,54 @@ header icmp_t {
 #ifdef WITH_SPGW
 // GTPU v1
 header gtpu_t {
-    bit<3>  version;    /* version */
-    bit<1>  pt;         /* protocol type */
-    bit<1>  spare;      /* reserved */
-    bit<1>  ex_flag;    /* next extension hdr present? */
-    bit<1>  seq_flag;   /* sequence no. */
-    bit<1>  npdu_flag;  /* n-pdn number present ? */
-    bit<8>  msgtype;    /* message type */
+    bit<3> version;    /* version */
+    bit<1> pt;         /* protocol type */
+    bit<1> spare;      /* reserved */
+    bit<1> ex_flag;    /* next extension hdr present? */
+    bit<1> seq_flag;   /* sequence no. */
+    bit<1> npdu_flag;  /* n-pdn number present ? */
+    bit<8> msgtype;    /* message type */
     bit<16> msglen;     /* message length */
     bit<32> teid;       /* tunnel endpoint id */
 }
 
 struct spgw_meta_t {
-    direction_t       direction;
-    bit<16>           ipv4_len;
-    bit<32>           teid;
-    bit<32>           s1u_enb_addr;
-    bit<32>           s1u_sgw_addr;
+    direction_t direction;
+    bit<16> ipv4_len;
+    bit<32> teid;
+    bit<32> s1u_enb_addr;
+    bit<32> s1u_sgw_addr;
 #ifdef WITH_SPGW_PCC_GATING
-    bit<16>           l4_sport;
-    bit<16>           l4_dport;
+    bit<16> l4_sport;
+    bit<16> l4_dport;
     pcc_gate_status_t pcc_gate_status;
-    sdf_rule_id_t     sdf_rule_id;
-    pcc_rule_id_t     pcc_rule_id;
+    sdf_rule_id_t sdf_rule_id;
+    pcc_rule_id_t pcc_rule_id;
 #endif // WITH_SPGW_PCC_GATING
 }
 #endif // WITH_SPGW
 
 //Custom metadata definition
 struct fabric_metadata_t {
-    bit<16>       eth_type;
-    bit<16>       ip_eth_type;
-    vlan_id_t     vlan_id;
-    bit<3>        vlan_pri;
-    bit<1>        vlan_cfi;
-    mpls_label_t  mpls_label;
-    bit<8>        mpls_ttl;
-    _BOOL         skip_forwarding;
-    _BOOL         skip_next;
-    fwd_type_t    fwd_type;
-    next_id_t     next_id;
-    _BOOL         is_multicast;
-    _BOOL         is_controller_packet_out;
-    _BOOL         clone_to_cpu;
-    bit<8>        ip_proto;
-    bit<16>       l4_sport;
-    bit<16>       l4_dport;
+    bit<16> eth_type;
+    bit<16> ip_eth_type;
+    vlan_id_t vlan_id;
+    bit<3> vlan_pri;
+    bit<1> vlan_cfi;
+    mpls_label_t mpls_label;
+    bit<8> mpls_ttl;
+    _BOOL skip_forwarding;
+    _BOOL skip_next;
+    fwd_type_t fwd_type;
+    next_id_t next_id;
+    _BOOL is_multicast;
+    _BOOL is_controller_packet_out;
+    _BOOL clone_to_cpu;
+    bit<8> ip_proto;
+    bit<16> l4_sport;
+    bit<16> l4_dport;
 #ifdef WITH_SPGW
-    spgw_meta_t   spgw;
+    spgw_meta_t spgw;
 #endif // WITH_SPGW
 #ifdef WITH_INT
     int_metadata_t int_meta;

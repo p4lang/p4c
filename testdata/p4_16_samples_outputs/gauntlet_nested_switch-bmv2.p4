@@ -41,8 +41,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             return;
         } else {
             switch (simple_table.apply().action_run) {
-                default: {
-                    h.eth_hdr.dst_addr = 48w32;
+                default : {
+                h.eth_hdr.dst_addr = 48w32;
                 }
             }
         }

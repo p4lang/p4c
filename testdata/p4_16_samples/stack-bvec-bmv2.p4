@@ -25,12 +25,12 @@ header hdr {
 
 control compute(inout hdr h) {
     apply {
-	hdr[1] tmp;
-	tmp[0].row.alt1.valid = 1;
-	tmp[0].f = h.f + 1;
-	h.f = tmp[0].f;
-	tmp[0].row.alt0.port = h.row.alt0.port + 1;
-	h.row.alt1.valid = tmp[0].row.alt1.valid;
+        hdr[1] tmp;
+        tmp[0].row.alt1.valid = 1;
+        tmp[0].f = h.f + 1;
+        h.f = tmp[0].f;
+        tmp[0].row.alt0.port = h.row.alt0.port + 1;
+        h.row.alt1.valid = tmp[0].row.alt1.valid;
     }
 }
 

@@ -21,17 +21,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action issue2190l34() {
+    @hidden action issue2190l33() {
         h.h.a = h.h.b >> h.h.b >> 1;
     }
-    @hidden table tbl_issue2190l34 {
+    @hidden table tbl_issue2190l33 {
         actions = {
-            issue2190l34();
+            issue2190l33();
         }
-        const default_action = issue2190l34();
+        const default_action = issue2190l33();
     }
     apply {
-        tbl_issue2190l34.apply();
+        tbl_issue2190l33.apply();
     }
 }
 
@@ -55,4 +55,4 @@ control deparser(packet_out b, in Headers h) {
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch < Headers, Meta >(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

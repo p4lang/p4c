@@ -25,7 +25,7 @@ parser P(packet_in pkt, out headers_t hdrs, inout meta_t m);
 package top(P p);
 parser myp(packet_in pkt, out headers_t hdrs, inout meta_t m) {
     state start {
-        pkt.extract<h1>(hdrs.hus[m.idx].x);
+        pkt.extract < h1 >(hdrs.hus[m.idx].x);
         transition accept;
     }
 }

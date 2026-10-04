@@ -23,10 +23,10 @@ parser TestParser(packet_in pkt, out header_t hdr, inout metadata_t meta, inout 
 
 control DefaultDeparser(packet_out pkt, in header_t hdr) {
     apply {
-        pkt.emit<test_h>(hdr.hs[0]);
-        pkt.emit<test_h>(hdr.hs[1]);
-        pkt.emit<test_h>(hdr.hs[2]);
-        pkt.emit<test_h>(hdr.hs[3]);
+        pkt.emit < test_h >(hdr.hs[0]);
+        pkt.emit < test_h >(hdr.hs[1]);
+        pkt.emit < test_h >(hdr.hs[2]);
+        pkt.emit < test_h >(hdr.hs[3]);
     }
 }
 
@@ -40,4 +40,4 @@ control EmptyChecksum(inout header_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<header_t, metadata_t>(TestParser(), EmptyChecksum(), EmptyControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;
+V1Switch < header_t, metadata_t >(TestParser(), EmptyChecksum(), EmptyControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;

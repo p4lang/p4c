@@ -14,7 +14,7 @@ struct row_t {
 
 header hdr {
     bit<32> f;
-    row_t   row;
+    row_t row;
 }
 
 control compute(inout hdr h) {

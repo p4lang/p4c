@@ -25,11 +25,11 @@ action set_egress_port(port) {
 
 table t1 {
     reads {
-         ethernet.dstAddr : lpm;
-         ethernet.srcAddr : lpm;
+        ethernet.dstAddr : lpm;
+        ethernet.srcAddr : lpm;
     }
     actions {
-         set_egress_port;
+        set_egress_port;
     }
 }
 

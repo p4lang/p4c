@@ -8,4 +8,3 @@ control C() {
         stack = { h0, ... };
     }
 }
-

@@ -8,24 +8,24 @@
 #include <v1model.p4>
 
 header h1_t {
-    bit<8>  hdr_type;
-    bit<8>  op1;
-    bit<8>  op2;
-    bit<8>  op3;
-    bit<8>  h2_valid_bits;
-    bit<8>  next_hdr_type;
+    bit<8> hdr_type;
+    bit<8> op1;
+    bit<8> op2;
+    bit<8> op3;
+    bit<8> h2_valid_bits;
+    bit<8> next_hdr_type;
 }
 
 header h2_t {
-    bit<8>  hdr_type;
-    bit<8>  f1;
-    bit<8>  f2;
-    bit<8>  next_hdr_type;
+    bit<8> hdr_type;
+    bit<8> f1;
+    bit<8> f2;
+    bit<8> next_hdr_type;
 }
 
 header h3_t {
-    bit<8>  hdr_type;
-    bit<8>  data;
+    bit<8> hdr_type;
+    bit<8> data;
 }
 
 #define MAX_H2_HEADERS 5
@@ -65,27 +65,27 @@ parser parserI(packet_in pkt,
     state start {
         pkt.extract(hdr.h1);
         verify(hdr.h1.hdr_type == 1, error.BadHeaderType);
-        transition select(hdr.h1.next_hdr_type) {
-            2: parse_first_h2;
-            3: parse_h3;
-            default: accept;
+        transition select (hdr.h1.next_hdr_type) {
+            2 : parse_first_h2;
+            3 : parse_h3;
+            default : accept;
         }
     }
     state parse_first_h2 {
         subp.apply(pkt, hdr, my_next_hdr_type);
-        transition select(my_next_hdr_type) {
-            2: parse_other_h2;
-            3: parse_h3;
-            default: accept;
+        transition select (my_next_hdr_type) {
+            2 : parse_other_h2;
+            3 : parse_h3;
+            default : accept;
         }
     }
     state parse_other_h2 {
         pkt.extract(hdr.h2.next);
         verify(hdr.h2.last.hdr_type == 2, error.BadHeaderType);
-        transition select(hdr.h2.last.next_hdr_type) {
-            2: parse_other_h2;
-            3: parse_h3;
-            default: accept;
+        transition select (hdr.h2.last.next_hdr_type) {
+            2 : parse_other_h2;
+            3 : parse_h3;
+            default : accept;
         }
     }
     state parse_h3 {
@@ -105,19 +105,19 @@ control cIngress(inout headers hdr,
         // check whether they have the expected values.
         hdr.h1.h2_valid_bits = 0;
         if (hdr.h2[0].isValid()) {
-            hdr.h1.h2_valid_bits[0:0] = 1;
+            hdr.h1.h2_valid_bits[0 : 0] = 1;
         }
         if (hdr.h2[1].isValid()) {
-            hdr.h1.h2_valid_bits[1:1] = 1;
+            hdr.h1.h2_valid_bits[1 : 1] = 1;
         }
         if (hdr.h2[2].isValid()) {
-            hdr.h1.h2_valid_bits[2:2] = 1;
+            hdr.h1.h2_valid_bits[2 : 2] = 1;
         }
         if (hdr.h2[3].isValid()) {
-            hdr.h1.h2_valid_bits[3:3] = 1;
+            hdr.h1.h2_valid_bits[3 : 3] = 1;
         }
         if (hdr.h2[4].isValid()) {
-            hdr.h1.h2_valid_bits[4:4] = 1;
+            hdr.h1.h2_valid_bits[4 : 4] = 1;
         }
     }
 }
@@ -126,19 +126,22 @@ control cEgress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control vc(inout headers hdr,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control uc(inout headers hdr,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out packet,

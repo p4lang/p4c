@@ -10,4 +10,3 @@ control c() {
         x.method1<bit<8>>(x.method2<bit<12>>(12w1), 8w0);
     }
 }
-

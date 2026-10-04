@@ -1,7 +1,7 @@
 #include <core.p4>
 
 bit<3> max(in bit<3> val, in bit<3> bound) {
-    return (val < bound ? val : bound);
+    return(val < bound ? val : bound);
 }
 header ethernet_t {
     bit<48> dst_addr;
@@ -15,7 +15,7 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H[2]       h;
+    H[2] h;
 }
 
 extern bit<8> extern_call(inout H val);

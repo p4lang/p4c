@@ -17,7 +17,7 @@ H f() {
 control c()
 {
     apply {
-        if (f().isValid()) ;
+        if (f().isValid());
     }
 }
 

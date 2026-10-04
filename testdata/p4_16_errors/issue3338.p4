@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-parser MyParser1(){
+parser MyParser1() {
     state not_start {
         transition accept;
     }

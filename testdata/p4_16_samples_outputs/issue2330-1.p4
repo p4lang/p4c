@@ -35,7 +35,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             return;
         }
         do_function(h.eth_hdr.eth_type, h.eth_hdr.src_addr);
-        h.eth_hdr.src_addr = (pointless_bool ? 48w1 : 48w2);
+        h.eth_hdr.src_addr =(pointless_bool ? 48w1 : 48w2);
     }
     apply {
         do_action();

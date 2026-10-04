@@ -17,10 +17,10 @@ typedef int<16> Sat_t;
 /// oprX_8 - unsigned 8-bit operands, res_8 contains the result
 /// oprX_16 - signed 16-bit operands, res_16 contains the result
 header hdr {
-    bit<8>  op;
-    USat_t  opr1_8;
-    USat_t  opr2_8;
-    USat_t  res_8;
+    bit<8> op;
+    USat_t opr1_8;
+    USat_t opr2_8;
+    USat_t res_8;
     Sat_t opr1_16;
     Sat_t opr2_16;
     Sat_t res_16;
@@ -29,7 +29,8 @@ header hdr {
 struct Header_t {
     hdr h;
 }
-struct Meta_t {}
+struct Meta_t {
+}
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
     state start {
@@ -38,10 +39,23 @@ parser p(packet_in b, out Header_t h, inout Meta_t m, inout standard_metadata_t 
     }
 }
 
-control vrfy(inout Header_t h, inout Meta_t m) { apply {} }
-control update(inout Header_t h, inout Meta_t m) { apply {} }
-control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) { apply {} }
-control deparser(packet_out b, in Header_t h) { apply { b.emit(h.h); } }
+control vrfy(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control update(inout Header_t h, inout Meta_t m) {
+    apply {
+    }
+}
+control egress(inout Header_t h, inout Meta_t m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+control deparser(packet_out b, in Header_t h) {
+    apply {
+        b.emit(h.h);
+    }
+}
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
 
@@ -62,18 +76,20 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         h.h.res_16 = h.h.opr1_16 |-| h.h.opr2_16;
     }
 
-    action drop() { mark_to_drop(standard_meta); }
+    action drop() {
+        mark_to_drop(standard_meta);
+    }
 
     USat_t ru;
     Sat_t r;
 
     table t {
 
-  	key = {
+        key = {
             h.h.op : exact;
         }
 
-	actions = {
+        actions = {
             usat_plus;
             usat_minus;
             sat_plus;
@@ -81,7 +97,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
             drop;
         }
 
-	default_action = drop;
+        default_action = drop;
 
         const entries = {
             0x01 : usat_plus();
@@ -95,6 +111,5 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         t.apply();
     }
 }
-
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

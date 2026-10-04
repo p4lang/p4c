@@ -20,7 +20,8 @@ struct row_t {
     alt_t alt1;
 };
 
-struct parsed_packet_t {};
+struct parsed_packet_t {
+};
 
 struct local_metadata_t {
     short s;
@@ -52,21 +53,25 @@ control ingress(inout parsed_packet_t hdr,
 control egress(inout parsed_packet_t hdr,
                inout local_metadata_t local_metadata,
                inout standard_metadata_t standard_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control deparser(packet_out b, in parsed_packet_t hdr) {
-    apply { }
+    apply {
+    }
 }
 
 control verifyChecksum(inout parsed_packet_t hdr,
                         inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 control compute_checksum(inout parsed_packet_t hdr,
                          inout local_metadata_t local_metadata) {
-    apply { }
+    apply {
+    }
 }
 
 V1Switch(parse(), verifyChecksum(), ingress(), egress(),

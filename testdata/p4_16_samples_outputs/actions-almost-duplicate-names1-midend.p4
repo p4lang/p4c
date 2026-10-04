@@ -17,7 +17,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in pkt, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract < ethernet_t >(hdr.ethernet);
         transition accept;
     }
 }
@@ -73,7 +73,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             foo3_0();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
+            hdr.ethernet.etherType : exact @name("hdr.ethernet.etherType");
         }
         default_action = NoAction_1();
         size = 512;
@@ -88,35 +88,35 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.srcAddr : exact @name("hdr.ethernet.srcAddr");
         }
         size = 32;
         default_action = NoAction_2();
     }
-    @hidden action actionsalmostduplicatenames1l124() {
-        tmp1_0 = hdr.ethernet.srcAddr[7:0];
-        tmp2_0 = hdr.ethernet.dstAddr[7:0];
+    @hidden action actionsalmostduplicatenames1l147() {
+        tmp1_0 = hdr.ethernet.srcAddr[7 : 0];
+        tmp2_0 = hdr.ethernet.dstAddr[7 : 0];
     }
-    @hidden action actionsalmostduplicatenames1l131() {
-        hdr.ethernet.etherType = (bit<16>)(tmp1_0 - tmp2_0);
+    @hidden action actionsalmostduplicatenames1l154() {
+        hdr.ethernet.etherType =(bit<16>)(tmp1_0 - tmp2_0);
     }
-    @hidden table tbl_actionsalmostduplicatenames1l124 {
+    @hidden table tbl_actionsalmostduplicatenames1l147 {
         actions = {
-            actionsalmostduplicatenames1l124();
+            actionsalmostduplicatenames1l147();
         }
-        const default_action = actionsalmostduplicatenames1l124();
+        const default_action = actionsalmostduplicatenames1l147();
     }
-    @hidden table tbl_actionsalmostduplicatenames1l131 {
+    @hidden table tbl_actionsalmostduplicatenames1l154 {
         actions = {
-            actionsalmostduplicatenames1l131();
+            actionsalmostduplicatenames1l154();
         }
-        const default_action = actionsalmostduplicatenames1l131();
+        const default_action = actionsalmostduplicatenames1l154();
     }
     apply {
-        tbl_actionsalmostduplicatenames1l124.apply();
+        tbl_actionsalmostduplicatenames1l147.apply();
         c1_t2.apply();
         t1_0.apply();
-        tbl_actionsalmostduplicatenames1l131.apply();
+        tbl_actionsalmostduplicatenames1l154.apply();
     }
 }
 
@@ -132,8 +132,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out pkt, in headers_t hdr) {
     apply {
-        pkt.emit<ethernet_t>(hdr.ethernet);
+        pkt.emit < ethernet_t >(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
+V1Switch < headers_t, metadata_t >(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;

@@ -11,25 +11,25 @@ typedef bit<32> ip4Addr_t;
 header ethernet_t {
     macAddr_t dstAddr;
     macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<16> etherType;
 }
 
 header srcRoute_t {
-    bit<2>  bos;
+    bit<2> bos;
     bit<15> port;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
 }
@@ -38,10 +38,10 @@ struct metadata {
 }
 
 struct headers {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
     srcRoute_t[16w4] srcRoutes;
-    ipv4_t           ipv4;
-    bit<32>          index;
+    ipv4_t ipv4;
+    bit<32> index;
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -50,25 +50,25 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         transition parse_ethernet;
     }
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x1234: parse_srcRouting;
-            default: accept;
+        packet.extract < ethernet_t >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x1234 : parse_srcRouting;
+            default : accept;
         }
     }
     state parse_srcRouting {
-        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
-        transition select(hdr.srcRoutes.last.bos) {
-            2w1: parse_ipv4;
-            2w2: callMidle;
-            default: callMidle;
+        packet.extract < srcRoute_t >(hdr.srcRoutes.next);
+        transition select (hdr.srcRoutes.last.bos) {
+            2w1 : parse_ipv4;
+            2w2 : callMidle;
+            default : callMidle;
         }
     }
     state callLast {
-        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
-        transition select(hdr.srcRoutes.last.bos) {
-            2w1: parse_ipv4;
-            default: parse_srcRouting;
+        packet.extract < srcRoute_t >(hdr.srcRoutes.next);
+        transition select (hdr.srcRoutes.last.bos) {
+            2w1 : parse_ipv4;
+            default : parse_srcRouting;
         }
     }
     state callMidle {
@@ -76,7 +76,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         transition callLast;
     }
     state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract < ipv4_t >(hdr.ipv4);
         transition accept;
     }
 }
@@ -101,4 +101,4 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;
+V1Switch < headers, metadata >(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;

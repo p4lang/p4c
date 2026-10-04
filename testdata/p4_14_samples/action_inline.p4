@@ -6,7 +6,11 @@
  */
 
 
-header_type ht { fields { b : 1; } }
+header_type ht {
+    fields {
+        b : 1;
+    }
+}
 metadata ht md;
 
 parser start {
@@ -14,15 +18,19 @@ parser start {
 }
 
 action a(y0)
-{ add_to_field(y0, 1); }
-    
+{
+    add_to_field(y0, 1);
+}
+
 action b() {
     a(md.b);
     a(md.b);
 }
 
 table t {
-    actions { b; }
+    actions {
+        b;
+    }
 }
 
 control ingress {

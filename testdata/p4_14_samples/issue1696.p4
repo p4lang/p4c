@@ -14,10 +14,11 @@ header stack_t stack[4];
 
 parser start {
     extract(stack[next]);
-    return select(latest.f) {
-        0xffff : start;
-        default: ingress;
+    return select (latest.f) {
+    0xffff : start;
+    default : ingress;
     }
 }
 
-control ingress { }
+control ingress {
+}

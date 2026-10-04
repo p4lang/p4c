@@ -3,12 +3,12 @@
 const int A = 5;
 const bit<16> B = 16w5;
 @metadata @name("standard_metadata") struct standard_metadata_t {
-    bit<9>  ingress_port;
-    bit<9>  egress_spec;
-    bit<9>  egress_port;
+    bit<9> ingress_port;
+    bit<9> egress_spec;
+    bit<9> egress_port;
     bit<32> clone_spec;
     bit<32> instance_type;
-    bit<1>  drop;
+    bit<1> drop;
     bit<16> recirculate_port;
     bit<16> packet_length;
 }
@@ -28,7 +28,7 @@ control c(in hdr h, inout standard_metadata_t standard_meta) {
     }
     table t {
         key = {
-            h.e: exact @name("h.e");
+            h.e : exact @name("h.e");
         }
         actions = {
             a();
@@ -36,8 +36,8 @@ control c(in hdr h, inout standard_metadata_t standard_meta) {
         }
         default_action = a();
         const entries = {
-                        8w0x1 : a();
-                        8w0x2 : b();
+            8w0x1 : a();
+            8w0x2 : b();
         }
     }
     apply {

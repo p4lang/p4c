@@ -28,8 +28,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control bar() {
     apply {
-        const foo_t FOO = (foo_t)1;
+        const foo_t FOO =(foo_t) 1;
         foo_t tmp = FOO;
     }
 }
-

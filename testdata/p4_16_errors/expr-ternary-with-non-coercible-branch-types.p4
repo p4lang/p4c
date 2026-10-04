@@ -1,8 +1,9 @@
 // generated from default-initializer.p4
 
-struct S {}
+struct S {
+}
 control C()() {
-  apply {
-    S s = (false ? { ... } : true);
-  }
+    apply {
+        S s =(false ? { ... } : true);
+    }
 }

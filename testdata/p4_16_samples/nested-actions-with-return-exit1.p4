@@ -30,20 +30,20 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> ret = 0;
-    action sub_a1 (in bit<16> x) {
-        if (h.eth_hdr.eth_type >= (x + 10)) {
+    action sub_a1(in bit<16> x) {
+        if (h.eth_hdr.eth_type >=(x + 10)) {
             ret = ret + 1;
             return;
-        } else if (h.eth_hdr.eth_type >= (x + 5)) {
+        } else if (h.eth_hdr.eth_type >=(x + 5)) {
             ret = ret + 2;
         } else if (h.eth_hdr.eth_type == x) {
             ret = ret + 4;
             exit;
         }
         ret = ret + 8;
-        h.eth_hdr.src_addr[7:0] = ret;
+        h.eth_hdr.src_addr[7 : 0] = ret;
     }
-    action top_a1 (bit<16> y) {
+    action top_a1(bit<16> y) {
         sub_a1(y);
         if (h.eth_hdr.src_addr == h.eth_hdr.dst_addr) {
             ret = ret + 16;
@@ -55,7 +55,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     table t1 {
         key = {
-            h.eth_hdr.dst_addr: exact;
+            h.eth_hdr.dst_addr : exact;
         }
         actions = {
             top_a1;
@@ -67,7 +67,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         if (h.eth_hdr.isValid()) {
             t1.apply();
-            h.eth_hdr.src_addr[7:0] = ret;
+            h.eth_hdr.src_addr[7 : 0] = ret;
         }
     }
 }
@@ -92,6 +92,5 @@ control deparser(packet_out pkt, in Headers h) {
         pkt.emit(h.eth_hdr);
     }
 }
-
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;

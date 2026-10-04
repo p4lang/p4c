@@ -1,5 +1,5 @@
 // generated from issue1544-2.p4
 
 bit<32> min(in bit<32> a, in bit<32> b) {
-  return (a > { false, {#} }) ? b : a;
+    return(a > { false, {#} }) ? b : a;
 }

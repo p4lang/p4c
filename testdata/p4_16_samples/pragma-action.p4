@@ -7,8 +7,10 @@
 
 control test()
 {
-    action Set_dmac() {}
-    action drop() {}
+    action Set_dmac() {
+    }
+    action drop() {
+    }
 
     table unit {
         actions = {
@@ -21,5 +23,6 @@ control test()
         default_action = drop;
     }
 
-    apply {}
+    apply {
+    }
 }

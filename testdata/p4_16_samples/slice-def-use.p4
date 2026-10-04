@@ -12,30 +12,30 @@
 // an IPv4 header, performing forwarding based on the
 // destination IP address
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
 
 // standard Ethernet header
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 // IPv4 header without options
 header Ipv4_h {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
 }
 
 // Parser section
@@ -43,7 +43,7 @@ header Ipv4_h {
 // List of all recognized headers
 struct Headers {
     Ethernet_h ethernet;
-    Ipv4_h     ip;
+    Ipv4_h ip;
 }
 
 struct Metadata {
@@ -64,12 +64,12 @@ control Ing(inout Headers headers,
             inout Metadata meta,
             inout standard_metadata_t standard_meta) {
 
-    register<bit<8>>(32w2) debug;
+    register < bit<8 >>(32w2) debug;
 
     apply {
         bit<8> n = 8w0b11111111;
         //debug.write(0, n);
-        n[7:4] = 4w0;
+        n[7 : 4] = 4w0;
         debug.write(1, n);
         standard_meta.egress_spec = 0;
     }
@@ -93,11 +93,13 @@ control DP(packet_out b, in Headers p) {
 
 // Fillers
 control Verify(inout Headers hdrs, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 control Compute(inout Headers hdr, inout Metadata meta) {
-    apply {}
+    apply {
+    }
 }
 
 // Instantiate the top-level V1 Model package.

@@ -9,7 +9,7 @@
 #include <core.p4>
 
 typedef bit<48> EthernetAddress;
-typedef bit<32>     IPv4Address;
+typedef bit<32> IPv4Address;
 
 // standard Ethernet header
 header Ethernet_h
@@ -21,56 +21,56 @@ header Ethernet_h
 
 // IPv4 header without options
 header IPv4_h {
-    bit<4>       version;
-    bit<4>       ihl;
-    bit<8>       diffserv;
-    bit<16>      totalLen;
-    bit<16>      identification;
-    bit<3>       flags;
-    bit<13>      fragOffset;
-    bit<8>       ttl;
-    bit<8>       protocol;
-    bit<16>      hdrChecksum;
-    IPv4Address  srcAddr;
-    IPv4Address  dstAddr;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3> flags;
+    bit<13> fragOffset;
+    bit<8> ttl;
+    bit<8> protocol;
+    bit<16> hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
 }
 
 header mpls_h {
     bit<20> label;
-    bit<3>  tc;
-    bit<1>  stack;
-    bit<8>  ttl;
+    bit<3> tc;
+    bit<1> stack;
+    bit<8> ttl;
 }
 
 struct Headers_t
 {
     Ethernet_h ethernet;
-    mpls_h     mpls;
-    IPv4_h     ipv4;
+    mpls_h mpls;
+    IPv4_h ipv4;
 }
 
-struct metadata {}
+struct metadata {
+}
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
+        transition select (headers.ethernet.etherType) {
             16w0x800 : ipv4;
-            0x8847   : mpls;
+            0x8847 : mpls;
             default : reject;
         }
     }
 
     state mpls {
-            p.extract(headers.mpls);
-            transition ipv4;
+        p.extract(headers.mpls);
+        transition ipv4;
     }
 
     state ipv4 {
         p.extract(headers.ipv4);
         transition accept;
     }
-
 
 }
 
@@ -98,8 +98,8 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
 
     action mpls_set_label_decrement_ttl(bit<20> label) {
-            headers.mpls.label = label;
-            mpls_decrement_ttl();
+        headers.mpls.label = label;
+        mpls_decrement_ttl();
     }
 
     action mpls_modify_stack(bit<1> stack) {
@@ -151,6 +151,5 @@ control dprs(packet_out packet, in Headers_t headers) {
         packet.emit(headers.ipv4);
     }
 }
-
 
 ubpf(prs(), pipe(), dprs()) main;

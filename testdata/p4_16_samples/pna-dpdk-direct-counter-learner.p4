@@ -7,25 +7,24 @@
 #include <core.p4>
 #include <pna.p4>
 
-
-typedef bit<48>  EthernetAddress;
+typedef bit<48> EthernetAddress;
 
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -69,9 +68,9 @@ parser MainParserImpl(
 {
     state start {
         pkt.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800: parse_ipv4;
-            default: accept;
+        transition select (hdr.ethernet.etherType) {
+            0x0800 : parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
@@ -87,7 +86,7 @@ control MainControlImpl(
     in    pna_main_input_metadata_t  istd,
     inout pna_main_output_metadata_t ostd)
 {
-    DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count;
+    DirectCounter < PacketByteCounter_t >(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count;
 
     action next_hop(PortId_t vport) {
         send_to_port(vport);
@@ -95,12 +94,12 @@ control MainControlImpl(
 
     action add_on_miss_action() {
         bit<32> tmp = 0;
-	per_prefix_pkt_bytes_count.count(1024);
+        per_prefix_pkt_bytes_count.count(1024);
         add_entry(action_name="next_hop", action_params = tmp, expire_time_profile_id = user_meta.timeout);
     }
     table ipv4_da {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             @tableonly next_hop;
@@ -119,7 +118,7 @@ control MainControlImpl(
     }
     table ipv4_da2 {
         key = {
-            hdr.ipv4.dstAddr: exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             @tableonly next_hop2;

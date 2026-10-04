@@ -16,9 +16,9 @@ struct my_metadata {
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     bool bv = true;
     state start {
-        transition select(bv) {
-            false: next;
-            true: accept;
+        transition select (bv) {
+            false : next;
+            true : accept;
         }
     }
     state next {

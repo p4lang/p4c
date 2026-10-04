@@ -16,13 +16,13 @@ struct my_metadata {
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     bool bv = true;
     state start {
-        transition select(bv) {
-            false: next;
-            true: accept;
+        transition select (bv) {
+            false : next;
+            true : accept;
         }
     }
     state next {
-        b.extract<H>(p.h);
+        b.extract < H >(p.h);
         transition accept;
     }
 }
@@ -57,4 +57,4 @@ control MyDeparser(packet_out b, in my_packet p) {
     }
 }
 
-V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
+V1Switch < my_packet, my_metadata >(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;

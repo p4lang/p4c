@@ -11,23 +11,23 @@ enum bit<16> ether_type_t {
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 header vlan_tag_h {
-    bit<3>       pcp;
-    bit<1>       cfi;
-    bit<12>      vid;
+    bit<3> pcp;
+    bit<1> cfi;
+    bit<12> vid;
     ether_type_t ether_type;
 }
 
 struct headers_t {
-    ethernet_t    ethernet;
+    ethernet_t ethernet;
     vlan_tag_h[2] vlan_tag;
 }
 
 struct main_metadata_t {
-    bit<2>  depth;
+    bit<2> depth;
     bit<16> ethType;
 }
 
@@ -40,17 +40,17 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t m
     state start {
         meta.depth = 2 - 1;
         pkt.extract(hdrs.ethernet);
-        transition select(hdrs.ethernet.etherType) {
-            ether_type_t.TPID: parse_vlan_tag;
-            default: accept;
+        transition select (hdrs.ethernet.etherType) {
+            ether_type_t.TPID : parse_vlan_tag;
+            default : accept;
         }
     }
     state parse_vlan_tag {
         pkt.extract(hdrs.vlan_tag.next);
         meta.depth = meta.depth - 1;
-        transition select(hdrs.vlan_tag.last.ether_type) {
-            ether_type_t.TPID: parse_vlan_tag;
-            default: accept;
+        transition select (hdrs.vlan_tag.last.ether_type) {
+            ether_type_t.TPID : parse_vlan_tag;
+            default : accept;
         }
     }
 }
@@ -58,8 +58,8 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t m
 control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     action execute() {
         meta.ethType = hdrs.vlan_tag[meta.depth - 1].ether_type;
-        hdrs.vlan_tag[meta.depth - 1].ether_type = (ether_type_t)16w2;
-        hdrs.vlan_tag[meta.depth].vid = (bit<12>)hdrs.vlan_tag[meta.depth].cfi;
+        hdrs.vlan_tag[meta.depth - 1].ether_type =(ether_type_t) 16w2;
+        hdrs.vlan_tag[meta.depth].vid =(bit<12>) hdrs.vlan_tag[meta.depth].cfi;
         hdrs.vlan_tag[meta.depth].vid = hdrs.vlan_tag[1].vid;
     }
     action execute_1() {
@@ -67,7 +67,7 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
     }
     table stub {
         key = {
-            hdrs.vlan_tag[meta.depth].vid: exact;
+            hdrs.vlan_tag[meta.depth].vid : exact;
         }
         actions = {
             execute;

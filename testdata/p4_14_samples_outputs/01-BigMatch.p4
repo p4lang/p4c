@@ -3,12 +3,12 @@
 #include <v1model.p4>
 
 struct ingress_metadata_t {
-    bit<1>    drop;
-    bit<8>    egress_port;
+    bit<1> drop;
+    bit<8> egress_port;
     bit<1024> f1;
-    bit<512>  f2;
-    bit<256>  f3;
-    bit<128>  f4;
+    bit<512> f2;
+    bit<256> f3;
+    bit<128> f4;
 }
 
 header ethernet_t {
@@ -19,9 +19,9 @@ header ethernet_t {
 
 header vag_t {
     bit<1024> f1;
-    bit<512>  f2;
-    bit<256>  f3;
-    bit<128>  f4;
+    bit<512> f2;
+    bit<256> f3;
+    bit<128> f4;
 }
 
 struct metadata {
@@ -33,7 +33,7 @@ struct headers {
     @name(".ethernet")
     ethernet_t ethernet;
     @name(".vag")
-    vag_t      vag;
+    vag_t vag;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -51,7 +51,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             nop;
         }
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
     }
     apply {
@@ -80,7 +80,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f1;
         }
         key = {
-            hdr.vag.f1: exact;
+            hdr.vag.f1 : exact;
         }
     }
     @name(".i_t2") table i_t2 {
@@ -89,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f2;
         }
         key = {
-            hdr.vag.f2: exact;
+            hdr.vag.f2 : exact;
         }
     }
     @name(".i_t3") table i_t3 {
@@ -98,7 +98,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f3;
         }
         key = {
-            hdr.vag.f3: exact;
+            hdr.vag.f3 : exact;
         }
     }
     @name(".i_t4") table i_t4 {
@@ -107,7 +107,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_f4;
         }
         key = {
-            hdr.vag.f4: ternary;
+            hdr.vag.f4 : ternary;
         }
     }
     apply {

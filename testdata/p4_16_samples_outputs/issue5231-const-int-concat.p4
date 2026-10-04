@@ -10,11 +10,11 @@ void positive() {
     static_assert(c == e);
 }
 void negative() {
-    const int<7> a = -7s0b11001;
-    const int<9> b = -9s0b11101;
+    const int<7> a = - 7s0b11001;
+    const int<9> b = - 9s0b11101;
     const int<16> c = a ++ b;
-    const int<16> d = -7s0b11001 ++ -9s0b11101;
-    const int<16> e = -16s0b11000000011101;
+    const int<16> d = - 7s0b11001 ++ - 9s0b11101;
+    const int<16> e = - 16s0b11000000011101;
     static_assert(c == d);
     static_assert(c == e);
 }

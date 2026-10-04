@@ -21,7 +21,7 @@ header_type l2_metadata_t {
         l2_redirect : 1;                       /* l2 redirect action */
         l2_src_miss : 1;                       /* l2 source miss */
         l2_src_move : IFINDEX_BIT_WIDTH;       /* l2 source interface mis-match */
-        stp_group: 10;                         /* spanning tree group id */
+        stp_group : 10;                         /* spanning tree group id */
         stp_state : 3;                         /* spanning tree port state */
         bd_stats_idx : 16;                     /* ingress BD stats index */
         learning_enabled : 1;                  /* is learning enabled */
@@ -43,7 +43,7 @@ action set_stp_state(stp_state) {
 table spanning_tree {
     reads {
         ingress_metadata.ifindex : exact;
-        l2_metadata.stp_group: exact;
+        l2_metadata.stp_group : exact;
     }
     actions {
         set_stp_state;
@@ -55,7 +55,7 @@ table spanning_tree {
 control process_spanning_tree {
 #ifndef L2_DISABLE
     if ((ingress_metadata.port_type == PORT_TYPE_NORMAL) and
-        (l2_metadata.stp_group != STP_GROUP_NONE)) {
+    (l2_metadata.stp_group != STP_GROUP_NONE)) {
         apply(spanning_tree);
     }
 #endif /* L2_DISABLE */
@@ -143,7 +143,7 @@ table dmac {
         dmac_drop;
     }
     size : MAC_TABLE_SIZE;
-    support_timeout: true;
+    support_timeout : true;
 }
 #endif /* L2_DISABLE */
 
@@ -272,7 +272,7 @@ counter egress_bd_stats {
 table egress_bd_stats {
     reads {
         egress_metadata.bd : exact;
-        l2_metadata.lkp_pkt_type: exact;
+        l2_metadata.lkp_pkt_type : exact;
     }
     actions {
         nop;
@@ -330,7 +330,7 @@ table vlan_decap {
         remove_vlan_single_tagged;
         remove_vlan_double_tagged;
     }
-    size: VLAN_DECAP_TABLE_SIZE;
+    size : VLAN_DECAP_TABLE_SIZE;
 }
 
 control process_vlan_decap {

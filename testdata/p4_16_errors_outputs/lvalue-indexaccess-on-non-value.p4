@@ -11,4 +11,3 @@ parser P(in Headers h) {
         h.h2[1] = 0;
     }
 }
-

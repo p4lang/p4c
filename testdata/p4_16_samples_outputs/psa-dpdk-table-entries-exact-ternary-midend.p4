@@ -17,11 +17,11 @@ struct EMPTY_RECIRC {
 }
 
 header hdr {
-    bit<8>  e;
+    bit<8> e;
     bit<16> t;
-    bit<8>  l;
-    bit<8>  r;
-    bit<8>  v;
+    bit<8> l;
+    bit<8> r;
+    bit<8> v;
 }
 
 struct Header_t {
@@ -33,7 +33,7 @@ struct Meta_t {
 
 parser p(packet_in b, out Header_t h, inout Meta_t m, in psa_ingress_parser_input_metadata_t x, in EMPTY_RESUB resub_meta, in EMPTY_RECIRC recirc_meta) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract < hdr >(h.h);
         transition accept;
     }
 }
@@ -49,12 +49,12 @@ control ingress(inout Header_t h, inout Meta_t m, in psa_ingress_input_metadata_
         ostd.egress_port = 32w0;
     }
     @name("ingress.a_with_control_params") action a_with_control_params(@name("x") bit<9> x_1) {
-        ostd.egress_port = (bit<32>)x_1;
+        ostd.egress_port =(bit<32>) x_1;
     }
     @name("ingress.t_exact_ternary") table t_exact_ternary_0 {
         key = {
-            h.h.e: exact @name("h.h.e");
-            h.h.t: ternary @name("h.h.t");
+            h.h.e : exact @name("h.h.e");
+            h.h.t : ternary @name("h.h.t");
         }
         actions = {
             a_1();
@@ -62,10 +62,10 @@ control ingress(inout Header_t h, inout Meta_t m, in psa_ingress_input_metadata_
         }
         default_action = a_1();
         const entries = {
-                        (8w0x1, 16w0x1111 &&& 16w0xf) : a_with_control_params(9w1);
-                        (8w0x2, 16w0x1181) : a_with_control_params(9w2);
-                        (8w0x3, 16w0x1111 &&& 16w0xf000) : a_with_control_params(9w3);
-                        (8w0x4, default) : a_with_control_params(9w4);
+            (8w0x1, 16w0x1111 &&& 16w0xf) : a_with_control_params(9w1);
+            (8w0x2, 16w0x1181) : a_with_control_params(9w2);
+            (8w0x3, 16w0x1111 &&& 16w0xf000) : a_with_control_params(9w3);
+            (8w0x4, default) : a_with_control_params(9w4);
         }
     }
     apply {
@@ -79,17 +79,17 @@ control egressControlImpl(inout EMPTY_H h, inout Meta_t meta, in psa_egress_inpu
 }
 
 control deparser(packet_out b, out EMPTY_CLONE clone_i2e_meta, out EMPTY_RESUB resubmit_meta, out EMPTY_BRIDGE normal_meta, inout Header_t h, in Meta_t local_metadata, in psa_ingress_output_metadata_t istd) {
-    @hidden action psadpdktableentriesexactternary100() {
-        b.emit<hdr>(h.h);
+    @hidden action psadpdktableentriesexactternary112() {
+        b.emit < hdr >(h.h);
     }
-    @hidden table tbl_psadpdktableentriesexactternary100 {
+    @hidden table tbl_psadpdktableentriesexactternary112 {
         actions = {
-            psadpdktableentriesexactternary100();
+            psadpdktableentriesexactternary112();
         }
-        const default_action = psadpdktableentriesexactternary100();
+        const default_action = psadpdktableentriesexactternary112();
     }
     apply {
-        tbl_psadpdktableentriesexactternary100.apply();
+        tbl_psadpdktableentriesexactternary112.apply();
     }
 }
 
@@ -98,6 +98,6 @@ control egressDeparserImpl(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIR
     }
 }
 
-IngressPipeline<Header_t, Meta_t, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(p(), ingress(), deparser()) ip;
-EgressPipeline<EMPTY_H, Meta_t, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC>(egressParserImpl(), egressControlImpl(), egressDeparserImpl()) ep;
-PSA_Switch<Header_t, Meta_t, EMPTY_H, Meta_t, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+IngressPipeline < Header_t, Meta_t, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(p(), ingress(), deparser()) ip;
+EgressPipeline < EMPTY_H, Meta_t, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC >(egressParserImpl(), egressControlImpl(), egressDeparserImpl()) ep;
+PSA_Switch < Header_t, Meta_t, EMPTY_H, Meta_t, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC >(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;

@@ -9,7 +9,7 @@ enum bit<8> FieldLists {
 
 struct intrinsic_metadata_t {
     bit<16> mcast_grp;
-    bit<4>  egress_rid;
+    bit<4> egress_rid;
     bit<64> ingress_global_timestamp;
 }
 
@@ -65,8 +65,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _clone_e2e;
         }
         key = {
-            hdr.hdrA.f1                    : exact;
-            standard_metadata.instance_type: ternary;
+            hdr.hdrA.f1 : exact;
+            standard_metadata.instance_type : ternary;
         }
         size = 128;
     }
@@ -98,8 +98,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _multicast;
         }
         key = {
-            hdr.hdrA.f1  : exact;
-            meta.metaA.f1: exact;
+            hdr.hdrA.f1 : exact;
+            meta.metaA.f1 : exact;
         }
         size = 128;
     }
@@ -110,8 +110,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _clone_i2e;
         }
         key = {
-            hdr.hdrA.f1                    : exact;
-            standard_metadata.instance_type: ternary;
+            hdr.hdrA.f1 : exact;
+            standard_metadata.instance_type : ternary;
         }
         size = 128;
     }

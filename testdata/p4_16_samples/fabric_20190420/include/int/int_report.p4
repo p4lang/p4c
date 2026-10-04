@@ -9,7 +9,7 @@
 #ifndef __INT_REPORT__
 #define __INT_REPORT__
 
-control process_int_report (
+control process_int_report(
     inout parsed_headers_t hdr,
     inout fabric_metadata_t fabric_metadata,
     inout standard_metadata_t standard_metadata) {
@@ -32,7 +32,7 @@ control process_int_report (
         // TODO how save a variable and increment
         hdr.report_fixed_header.seq_no = 0;
         //TODO how to get timestamp from ingress ns
-        hdr.report_fixed_header.ingress_tstamp = (bit<32>) standard_metadata.enq_timestamp;
+        hdr.report_fixed_header.ingress_tstamp =(bit<32>) standard_metadata.enq_timestamp;
     }
 
     action do_report_encapsulation(mac_addr_t src_mac, mac_addr_t mon_mac, ipv4_addr_t src_ip,
@@ -50,8 +50,8 @@ control process_int_report (
         hdr.report_ipv4.dscp = 6w0;
         hdr.report_ipv4.ecn = 2w0;
         /* Total Len is report_ipv4_len + report_udp_len + report_fixed_hdr_len + ethernet_len + ipv4_totalLen */
-        hdr.report_ipv4.total_len = (bit<16>) IPV4_MIN_HEAD_LEN + (bit<16>) UDP_HEADER_LEN +
-                                (bit<16>) REPORT_FIXED_HEADER_LEN +  (bit<16>) ETH_HEADER_LEN + hdr.ipv4.total_len;
+        hdr.report_ipv4.total_len =(bit<16>) IPV4_MIN_HEAD_LEN +(bit<16>) UDP_HEADER_LEN +
+        (bit<16>) REPORT_FIXED_HEADER_LEN +(bit<16>) ETH_HEADER_LEN + hdr.ipv4.total_len;
         /* Dont Fragment bit should be set */
         hdr.report_ipv4.identification = 0;
         hdr.report_ipv4.flags = 0;
@@ -65,8 +65,8 @@ control process_int_report (
         hdr.report_udp.setValid();
         hdr.report_udp.sport = 0;
         hdr.report_udp.dport = mon_port;
-        hdr.report_udp.len =  (bit<16>) UDP_HEADER_LEN + (bit<16>) REPORT_FIXED_HEADER_LEN +
-                                    (bit<16>) ETH_HEADER_LEN + hdr.ipv4.total_len;
+        hdr.report_udp.len =(bit<16>) UDP_HEADER_LEN +(bit<16>) REPORT_FIXED_HEADER_LEN +
+        (bit<16>) ETH_HEADER_LEN + hdr.ipv4.total_len;
 
         add_report_fixed_header();
     }

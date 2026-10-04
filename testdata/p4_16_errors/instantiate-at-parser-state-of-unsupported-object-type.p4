@@ -2,7 +2,7 @@
 
 package p();
 parser q()() {
-  state start {
-    p.apply();
-  }
+    state start {
+        p.apply();
+    }
 }

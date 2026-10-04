@@ -7,12 +7,12 @@ header Header {
 parser p(packet_in pckt, out Header h) {
     state start {
         h.data = 32w0;
-        h.data[3:0] = 4w2;
+        h.data[3 : 0] = 4w2;
         h.data = 32w7;
-        h.data[7:0] = 8w4;
-        h.data[7:0] = 8w3;
-        h.data[15:0] = 16w8;
-        h.data[31:16] = 16w5;
+        h.data[7 : 0] = 8w4;
+        h.data[7 : 0] = 8w3;
+        h.data[15 : 0] = 16w8;
+        h.data[31 : 16] = 16w5;
         transition accept;
     }
 }

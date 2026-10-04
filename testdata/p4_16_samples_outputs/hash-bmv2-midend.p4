@@ -40,7 +40,7 @@ struct tuple_0 {
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t std_meta) {
     @name("IngressI.a") action a() {
-        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.hash.hash, HashAlgorithm.crc16, 16w0, (tuple_0){f0 = meta.ipv4.lkp_ipv4_sa}, 32w65536);
+        hash < bit<16>, bit<16>, tuple_0, bit<32 >>(meta.hash.hash, HashAlgorithm.crc16, 16w0, (tuple_0){f0 = meta.ipv4.lkp_ipv4_sa}, 32w65536);
     }
     @hidden table tbl_a {
         actions = {
@@ -63,4 +63,4 @@ control DeparserI(packet_out b, in H hdr) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

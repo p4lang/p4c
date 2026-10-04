@@ -2,11 +2,11 @@
 #include <ebpf_model.p4>
 
 header X {
-    bit<1>  dc;
-    bit<3>  cpd;
-    bit<2>  snpadding;
+    bit<1> dc;
+    bit<3> cpd;
+    bit<2> snpadding;
     bit<16> sn;
-    bit<2>  e;
+    bit<2> e;
 }
 
 struct Headers_t {

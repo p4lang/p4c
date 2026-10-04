@@ -5,7 +5,7 @@
 header Ethernet_h {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct Headers_t {
@@ -18,7 +18,7 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
+        p.extract < Ethernet_h >(headers.ethernet);
         transition accept;
     }
 }
@@ -29,7 +29,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     table tbl {
         key = {
-            headers.ethernet.etherType: exact @name("headers.ethernet.etherType");
+            headers.ethernet.etherType : exact @name("headers.ethernet.etherType");
         }
         actions = {
             fill_metadata();
@@ -42,7 +42,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     table meta_based_tbl {
         key = {
-            meta.etherType: exact @name("meta.etherType");
+            meta.etherType : exact @name("meta.etherType");
         }
         actions = {
             change_etherType();
@@ -58,8 +58,8 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 
 control DeparserImpl(packet_out packet, in Headers_t headers) {
     apply {
-        packet.emit<Ethernet_h>(headers.ethernet);
+        packet.emit < Ethernet_h >(headers.ethernet);
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), DeparserImpl()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), DeparserImpl()) main;

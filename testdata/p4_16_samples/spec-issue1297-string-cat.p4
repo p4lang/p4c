@@ -8,7 +8,8 @@
 
 // test constant-folding concat in @deprecated
 @deprecated("function " ++ STR(DEPR_NAME) ++ " is deprecated")
-void DEPR_NAME (int<4> x) { }
+void DEPR_NAME(int<4> x) {
+}
 
 extern void log(string msg);
 
@@ -16,23 +17,32 @@ control c() {
 
     // constant-folded (unstructured, but with a special meaning defined in P4C)
     @name("foo" ++ BBB ++ "bar" ++ AAA)
-    action foo() { }
+    action foo() {
+    }
 
     // constant-folded
-    @DummyVendor_Structured[a="X_" ++ "Y", b="Y" ++ "_" ++ "z"]
-    action bar() { }
+    @DummyVendor_Structured[a = "X_" ++ "Y", b = "Y" ++ "_" ++ "z"]
+    action bar() {
+    }
 
     // constant-folded
     @DummyVendor_Structured2["X_" ++ "Y", "Y" ++ "_" ++ "z"]
-    action baz() { }
+    action baz() {
+    }
 
     // NOT constant-folded (unstructured with no special meaning)
     @DummyVendor_Unstructured(a="X_" ++ "Y", b="Y" ++ "_" ++ "z")
-    action tmp() { }
+    action tmp() {
+    }
 
     @name("table" ++ "_" ++ "a")
     table a {
-        actions = { foo; bar; baz; tmp; }
+        actions = {
+            foo;
+            bar;
+            baz;
+            tmp;
+        }
     }
 
     apply {
@@ -42,7 +52,7 @@ control c() {
             ++ "multiple lines");
         a.apply();
         depr(4);
-     }
+    }
 }
 
 control proto();

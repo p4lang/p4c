@@ -26,7 +26,7 @@ control DeparserI(packet_out packet, in Parsed_packet hdr) {
 
 parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata m, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract<X>(hdr.x);
+        pkt.extract < X >(hdr.x);
         transition accept;
     }
 }
@@ -37,27 +37,27 @@ control cIngress(inout Parsed_packet hdr, inout metadata m, inout standard_metad
     }
     @name("cIngress.t") table t_0 {
         key = {
-            hdr.x.add1: exact @name("hdr.x.add1");
-            m._x_add20: exact @name("m.x.add2");
-            m._z1     : exact @name("m.z");
-            z_0       : exact @name("z");
+            hdr.x.add1 : exact @name("hdr.x.add1");
+            m._x_add20 : exact @name("m.x.add2");
+            m._z1 : exact @name("m.z");
+            z_0 : exact @name("z");
         }
         actions = {
             foo();
         }
         default_action = foo();
     }
-    @hidden action issue486bmv2l49() {
+    @hidden action issue486bmv2l50() {
         z_0 = 32w5;
     }
-    @hidden table tbl_issue486bmv2l49 {
+    @hidden table tbl_issue486bmv2l50 {
         actions = {
-            issue486bmv2l49();
+            issue486bmv2l50();
         }
-        const default_action = issue486bmv2l49();
+        const default_action = issue486bmv2l50();
     }
     apply {
-        tbl_issue486bmv2l49.apply();
+        tbl_issue486bmv2l50.apply();
         t_0.apply();
     }
 }
@@ -77,4 +77,4 @@ control uc(inout Parsed_packet hdr, inout metadata m) {
     }
 }
 
-V1Switch<Parsed_packet, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
+V1Switch < Parsed_packet, metadata >(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

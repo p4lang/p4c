@@ -18,7 +18,7 @@ control c(inout meta_t m) {
     }
     table t {
         key = {
-            m.y: exact;
+            m.y : exact;
         }
         actions = {
             set_x;
@@ -29,4 +29,3 @@ control c(inout meta_t m) {
         t.apply();
     }
 }
-

@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-struct t1<t>{}
+struct t1<t> {
+}
 
 extern t1 f();

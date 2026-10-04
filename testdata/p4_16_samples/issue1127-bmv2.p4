@@ -8,9 +8,9 @@
 #include <v1model.p4>
 
 header h1_t {
-    bit<8>  op1;
-    bit<8>  op2;
-    bit<8>  out1;
+    bit<8> op1;
+    bit<8> op2;
+    bit<8> out1;
 }
 
 struct headers {
@@ -40,7 +40,7 @@ control cDoOneOp(inout headers hdr,
             // _Uncomment_ the next line and the compiler error disappears
             //hdr.h1.out1 = 7;
         } else
-        if (op[7:4] == 1) {
+        if (op[7 : 4] == 1) {
             hdr.h1.out1 = 4;
         }
     }
@@ -62,19 +62,22 @@ control cEgress(inout headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t stdmeta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control vc(inout headers hdr,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control uc(inout headers hdr,
            inout metadata meta)
 {
-    apply { }
+    apply {
+    }
 }
 
 control DeparserI(packet_out packet,

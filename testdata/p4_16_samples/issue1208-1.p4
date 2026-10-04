@@ -6,7 +6,8 @@
 
 #include <core.p4>
 #include <bmv2/psa.p4>
-struct EMPTY { };
+struct EMPTY {
+};
 
 parser MyIP(
     packet_in buffer,
@@ -38,7 +39,8 @@ control MyIC(
     inout EMPTY b,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyEC(
@@ -46,7 +48,8 @@ control MyEC(
     inout EMPTY b,
     in psa_egress_input_metadata_t c,
     inout psa_egress_output_metadata_t d) {
-    apply { }
+    apply {
+    }
 }
 
 control MyID(
@@ -57,7 +60,8 @@ control MyID(
     inout EMPTY d,
     in EMPTY e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 control MyED(
@@ -68,7 +72,8 @@ control MyED(
     in EMPTY d,
     in psa_egress_output_metadata_t e,
     in psa_egress_deparser_input_metadata_t f) {
-    apply { }
+    apply {
+    }
 }
 
 PSA_Switch(

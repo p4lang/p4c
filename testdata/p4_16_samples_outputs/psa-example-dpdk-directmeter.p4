@@ -8,7 +8,7 @@ typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<16> etherType;
 }
 
 struct headers_t {
@@ -39,11 +39,11 @@ control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metad
     DirectMeter(PSA_MeterType_t.PACKETS) meter0;
     action execute_meter() {
         color_out = meter0.dpdk_execute(color_in, 32w1024);
-        b.port_out = (color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        b.port_out =(color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;

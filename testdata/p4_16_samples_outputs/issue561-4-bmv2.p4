@@ -20,7 +20,7 @@ header_union U {
 }
 
 struct headers {
-    S    base;
+    S base;
     U[2] u;
 }
 
@@ -30,12 +30,12 @@ struct metadata {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract(hdr.base);
-        transition select(hdr.base.t) {
-            0: parseO1O1;
-            1: parseO1O2;
-            2: parseO2O1;
-            3: parseO2O2;
-            default: accept;
+        transition select (hdr.base.t) {
+            0 : parseO1O1;
+            1 : parseO1O2;
+            2 : parseO2O1;
+            3 : parseO2O2;
+            default : accept;
         }
     }
     state parseO1O1 {
@@ -63,11 +63,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     table debug_hdr {
         key = {
-            hdr.base.t              : exact;
+            hdr.base.t : exact;
             hdr.u[0].byte.isValid() : exact;
-            hdr.u[0].short.isValid(): exact;
+            hdr.u[0].short.isValid() : exact;
             hdr.u[1].byte.isValid() : exact;
-            hdr.u[1].short.isValid(): exact;
+            hdr.u[1].short.isValid() : exact;
         }
         actions = {
             NoAction;

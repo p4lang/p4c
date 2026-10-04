@@ -2,11 +2,11 @@
 #include <ebpf_model.p4>
 
 header X {
-    bit<1>  dc;
-    bit<3>  cpd;
-    bit<2>  snpadding;
+    bit<1> dc;
+    bit<3> cpd;
+    bit<2> snpadding;
     bit<16> sn;
-    bit<2>  e;
+    bit<2> e;
 }
 
 struct Headers_t {
@@ -15,7 +15,7 @@ struct Headers_t {
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
-        p.extract<X>(headers.x);
+        p.extract < X >(headers.x);
         transition accept;
     }
 }
@@ -49,4 +49,4 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 }
 
-ebpfFilter<Headers_t>(prs(), pipe()) main;
+ebpfFilter < Headers_t >(prs(), pipe()) main;

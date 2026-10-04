@@ -4,12 +4,13 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-extern X<T> { }
+extern X<T> {
+}
 
-parser p()
-{
+parser p() {
     // no type arguments
     X() x;
-
-    state start { transition accept; }
+    state start {
+        transition accept;
+    }
 }

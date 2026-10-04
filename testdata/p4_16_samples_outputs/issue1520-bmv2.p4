@@ -26,7 +26,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control C(inout headers hdr, inout metadata meta)(bool b) {
-    register<bit<16>>(32w8) r;
+    register < bit<16 >>(32w8) r;
     apply {
         r.read(hdr.h.x, 0);
     }

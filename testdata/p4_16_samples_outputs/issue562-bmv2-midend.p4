@@ -33,21 +33,21 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action issue562bmv2l38() {
+    @hidden action issue562bmv2l39() {
         local_metadata._row_alt0_valid0 = local_metadata._row_alt1_valid2;
         local_metadata._row_alt0_port1 = local_metadata._row_alt1_port3;
         local_metadata._row_alt0_valid0 = 1w1;
         local_metadata._row_alt1_port3 = local_metadata._row_alt1_port3 + 7w1;
         clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
-    @hidden table tbl_issue562bmv2l38 {
+    @hidden table tbl_issue562bmv2l39 {
         actions = {
-            issue562bmv2l38();
+            issue562bmv2l39();
         }
-        const default_action = issue562bmv2l38();
+        const default_action = issue562bmv2l39();
     }
     apply {
-        tbl_issue562bmv2l38.apply();
+        tbl_issue562bmv2l39.apply();
     }
 }
 
@@ -71,4 +71,4 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch < parsed_packet_t, local_metadata_t >(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;

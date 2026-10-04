@@ -16,9 +16,9 @@ header_union Union {
 }
 
 struct H {
-    Header1    h1;
+    Header1 h1;
     Header2[2] h2;
-    Union[2]   u;
+    Union[2] u;
 }
 
 struct M {
@@ -27,18 +27,18 @@ struct M {
 parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_input_metadata_t istd) {
     state start {
         hdr.u[0].h1.setValid();
-        pkt.extract<Header1>(hdr.u[0].h3);
+        pkt.extract < Header1 >(hdr.u[0].h3);
         hdr.u[0].h3.data = 32w1;
         hdr.u[0].h1 = hdr.u[0].h3;
         hdr.u[0].h1.data = 32w1;
         hdr.h2[0].data = 16w1;
-        transition select(hdr.u[0].h1.data) {
-            32w0: next;
-            default: last;
+        transition select (hdr.u[0].h1.data) {
+            32w0 : next;
+            default : last;
         }
     }
     state next {
-        pkt.extract<Header2>(hdr.u[0].h2);
+        pkt.extract < Header2 >(hdr.u[0].h2);
         transition last;
     }
     state last {
@@ -52,7 +52,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
 control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     apply {
         hdr.u[0].h1.setValid();
-        hdr.u[0].h1 = (Header1){data = 32w1};
+        hdr.u[0].h1 =(Header1) { data = 32w1 };
         hdr.u[0].h2.setValid();
         hdr.u[1] = hdr.u[0];
         hdr.u[1].h1.data = 32w1;
@@ -79,4 +79,4 @@ control PreControlImpl(in H hdr, inout M meta, in pna_pre_input_metadata_t istd,
     }
 }
 
-PNA_NIC<H, M, H, M>(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;
+PNA_NIC < H, M, H, M >(ParserImpl(), PreControlImpl(), ingress(), DeparserImpl()) main;

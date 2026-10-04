@@ -22,13 +22,13 @@ header ml_hdr_t {
 header ethernet_t {
     mac_addr_t dstAddr;
     mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 struct headers {
-    ethernet_t      ethernet;
-    ml_hdr_t        ml;
-    vec_e_t[3]      vector;
+    ethernet_t ethernet;
+    ml_hdr_t ml;
+    vec_e_t[3] vector;
     aggregator_t[3] pool;
 }
 
@@ -61,7 +61,7 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     apply {
         meta.counter = meta.counter + 1;
         hdr.vector[0].e = hdr.pool[1].val + 1;
-        Index_t i = (Index_t)hdr.ml.idx;
+        Index_t i =(Index_t) hdr.ml.idx;
         hdr.pool[i].val = hdr.vector[0].e;
         hdr.pool[i].base2 = hdr.vector[0].e;
         hdr.vector[1].e = hdr.pool[i].base0;

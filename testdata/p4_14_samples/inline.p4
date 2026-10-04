@@ -17,14 +17,19 @@ parser start {
     return ingress;
 }
 
-action x() {}
+action x() {
+}
 
 table t {
-    actions { x; }
+    actions {
+        x;
+    }
 }
 
 control c {
-    if (m.b == 1) { apply(t); }
+    if (m.b == 1) {
+        apply(t);
+    }
 }
 
 control d {

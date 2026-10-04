@@ -5,7 +5,7 @@
 header ethernet_h {
     eth_addr_t dstAddr;
     eth_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<16> etherType;
 }
 
 header vlan_h {
@@ -18,28 +18,28 @@ struct empty_t {
 
 struct headers_t {
     ethernet_h ethernet;
-    vlan_h     vlan;
+    vlan_h vlan;
 }
 
 parser in_parser(packet_in pkt, out headers_t hdr, inout empty_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
     state start {
-        pkt.extract<ethernet_h>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x8100: parse_vlan1;
-            16w0x88a8: parse_vlan2;
-            default: accept;
+        pkt.extract < ethernet_h >(hdr.ethernet);
+        transition select (hdr.ethernet.etherType) {
+            16w0x8100 : parse_vlan1;
+            16w0x88a8 : parse_vlan2;
+            default : accept;
         }
     }
     state parse_vlan2 {
-        pkt.extract<vlan_h>(hdr.vlan);
+        pkt.extract < vlan_h >(hdr.vlan);
         hdr.ethernet.etherType = 16w0x8100;
-        transition select(hdr.vlan.etherType) {
-            16w0x8100: parse_vlan1;
-            default: reject;
+        transition select (hdr.vlan.etherType) {
+            16w0x8100 : parse_vlan1;
+            default : reject;
         }
     }
     state parse_vlan1 {
-        pkt.extract<vlan_h>(hdr.vlan);
+        pkt.extract < vlan_h >(hdr.vlan);
         transition accept;
     }
 }
@@ -51,7 +51,7 @@ control in_cntrl(inout headers_t hdr, inout empty_t user_meta, in psa_ingress_in
 
 control in_deparser(packet_out packet, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers_t hdr, in empty_t meta, in psa_ingress_output_metadata_t istd) {
     apply {
-        packet.emit<headers_t>(hdr);
+        packet.emit < headers_t >(hdr);
     }
 }
 
@@ -71,4 +71,4 @@ control e_deparser(packet_out packet, out empty_t clone_e2e_meta, out empty_t re
     }
 }
 
-PSA_Switch<headers_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t>(IngressPipeline<headers_t, empty_t, empty_t, empty_t, empty_t, empty_t>(in_parser(), in_cntrl(), in_deparser()), PacketReplicationEngine(), EgressPipeline<empty_t, empty_t, empty_t, empty_t, empty_t, empty_t>(e_parser(), e_cntrl(), e_deparser()), BufferingQueueingEngine()) main;
+PSA_Switch < headers_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t >(IngressPipeline<headers_t, empty_t, empty_t, empty_t, empty_t, empty_t>(in_parser(), in_cntrl(), in_deparser()), PacketReplicationEngine(), EgressPipeline<empty_t, empty_t, empty_t, empty_t, empty_t, empty_t>(e_parser(), e_cntrl(), e_deparser()), BufferingQueueingEngine()) main;

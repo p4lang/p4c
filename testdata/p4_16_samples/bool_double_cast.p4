@@ -8,9 +8,9 @@
 control SetAndFwd()
 {
     apply {
-        bit     a;
-        bit     b;
-    
-        a = (bit)(bool)(bool)b;
+        bit a;
+        bit b;
+
+        a =(bit)(bool)(bool) b;
     }
 }

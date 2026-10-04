@@ -6,4 +6,3 @@ control c() {
         f(z = b, y = b);
     }
 }
-

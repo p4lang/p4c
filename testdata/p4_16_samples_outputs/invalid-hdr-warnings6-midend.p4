@@ -17,7 +17,7 @@ header_union Union {
 }
 
 struct H {
-    Header1  h1;
+    Header1 h1;
     Union[2] u;
 }
 
@@ -29,14 +29,14 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u[0].h1.setValid();
         hdr.u[0].h2.setInvalid();
         hdr.u[0].h3.setInvalid();
-        pkt.extract<Header1>(hdr.u[0].h3);
+        pkt.extract < Header1 >(hdr.u[0].h3);
         hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h2.setInvalid();
-        transition select(hdr.u[0].h3.isValid()) {
-            true: start_true;
-            false: start_false;
+        transition select (hdr.u[0].h3.isValid()) {
+            true : start_true;
+            false : start_false;
         }
     }
     state start_true {
@@ -76,7 +76,7 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("IngressI.u") Union[2] u_1;
-    @hidden @name("invalidhdrwarnings6l57") action invalidhdrwarnings6l57_0() {
+    @hidden @name("invalidhdrwarnings6l58") action invalidhdrwarnings6l58_0() {
         u_1[0].h1.setInvalid();
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
@@ -142,14 +142,14 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u_1[1w0].h2.setInvalid();
         u_1[1w0].h3.setInvalid();
     }
-    @hidden @name("tbl_invalidhdrwarnings6l57") table tbl_invalidhdrwarnings6l57_0 {
+    @hidden @name("tbl_invalidhdrwarnings6l58") table tbl_invalidhdrwarnings6l58_0 {
         actions = {
-            invalidhdrwarnings6l57_0();
+            invalidhdrwarnings6l58_0();
         }
-        const default_action = invalidhdrwarnings6l57_0();
+        const default_action = invalidhdrwarnings6l58_0();
     }
     apply {
-        tbl_invalidhdrwarnings6l57_0.apply();
+        tbl_invalidhdrwarnings6l58_0.apply();
     }
 }
 
@@ -173,4 +173,4 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
     }
 }
 
-V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
+V1Switch < H, M >(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;

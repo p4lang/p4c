@@ -36,7 +36,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
             discard;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         size = 1024;
     }
@@ -46,7 +46,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
             discard;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         size = 1024;
     }
@@ -78,7 +78,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             discard;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         size = 1024;
     }
@@ -88,7 +88,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             discard;
         }
         key = {
-            hdr.ethernet.dstAddr: exact;
+            hdr.ethernet.dstAddr : exact;
         }
         size = 1024;
     }

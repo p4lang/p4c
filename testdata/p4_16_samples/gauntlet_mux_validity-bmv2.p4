@@ -19,10 +19,11 @@ header H {
 
 struct Headers {
     ethernet_t eth_hdr;
-    H     h;
+    H h;
 }
 
-struct Meta {}
+struct Meta {
+}
 
 bit<16> simple_fun(inout H dummy) {
     return 16w1;
@@ -43,7 +44,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool b = false;
 
     action dummy() {
-        h.eth_hdr.eth_type = (!b ? 16w1 : simple_fun(h.h));
+        h.eth_hdr.eth_type =(!b ? 16w1 : simple_fun(h.h));
     }
 
     apply {
@@ -51,11 +52,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control update(inout Headers h, inout Meta m) { apply {} }
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) { apply {} }
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
 
 control deparser(packet_out pkt, in Headers h) {
     apply {
@@ -63,4 +73,3 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -10,7 +10,7 @@ header priceX {
 
 struct Headers {
     ethernet_t eth_hdr;
-    priceX[4]  heal;
+    priceX[4] heal;
 }
 
 struct main_metadata_t {
@@ -43,7 +43,7 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
     @name("MainControlImpl.revie") action revie(@name("orde") bit<128> orde, @name("priv") bit<128> priv) {
         retval = 8w0;
         inlinedRetval_1 = retval;
-        val = (bit<3>)inlinedRetval_1;
+        val =(bit<3>) inlinedRetval_1;
         bound = 3w3;
         if (val < bound) {
             tmp_1 = val;
@@ -77,4 +77,4 @@ control MainDeparserImpl(packet_out pkt, in Headers hdr, in main_metadata_t user
     }
 }
 
-PNA_NIC<Headers, main_metadata_t, Headers, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC < Headers, main_metadata_t, Headers, main_metadata_t >(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

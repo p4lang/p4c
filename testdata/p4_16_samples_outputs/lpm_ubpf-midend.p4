@@ -8,15 +8,15 @@ header Ethernet_h {
 }
 
 header IPv4_h {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
+    bit<4> version;
+    bit<4> ihl;
+    bit<8> diffserv;
     bit<16> totalLen;
     bit<16> identification;
-    bit<3>  flags;
+    bit<3> flags;
     bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
+    bit<8> ttl;
+    bit<8> protocol;
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
@@ -24,7 +24,7 @@ header IPv4_h {
 
 struct Headers_t {
     Ethernet_h ethernet;
-    IPv4_h     ipv4;
+    IPv4_h ipv4;
 }
 
 struct metadata {
@@ -32,14 +32,14 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
-        p.extract<Ethernet_h>(headers.ethernet);
-        transition select(headers.ethernet.etherType) {
-            16w0x800: ip;
-            default: reject;
+        p.extract < Ethernet_h >(headers.ethernet);
+        transition select (headers.ethernet.etherType) {
+            16w0x800 : ip;
+            default : reject;
         }
     }
     state ip {
-        p.extract<IPv4_h>(headers.ipv4);
+        p.extract < IPv4_h >(headers.ipv4);
         transition accept;
     }
 }
@@ -54,7 +54,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
             headers.ipv4.srcAddr : lpm @name("headers.ipv4.srcAddr");
-            headers.ipv4.protocol: exact @name("headers.ipv4.protocol");
+            headers.ipv4.protocol : exact @name("headers.ipv4.protocol");
         }
         actions = {
             Reject();
@@ -62,40 +62,40 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         default_action = Reject(32w0);
     }
-    @hidden action lpm_ubpf59() {
+    @hidden action lpm_ubpf60() {
         headers.ipv4.setInvalid();
         headers.ipv4.setValid();
         mark_to_drop();
     }
-    @hidden table tbl_lpm_ubpf59 {
+    @hidden table tbl_lpm_ubpf60 {
         actions = {
-            lpm_ubpf59();
+            lpm_ubpf60();
         }
-        const default_action = lpm_ubpf59();
+        const default_action = lpm_ubpf60();
     }
     apply {
         if (headers.ipv4.isValid()) {
             Check_src_ip_0.apply();
         } else {
-            tbl_lpm_ubpf59.apply();
+            tbl_lpm_ubpf60.apply();
         }
     }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action lpm_ubpf71() {
-        packet.emit<Ethernet_h>(headers.ethernet);
-        packet.emit<IPv4_h>(headers.ipv4);
+    @hidden action lpm_ubpf72() {
+        packet.emit < Ethernet_h >(headers.ethernet);
+        packet.emit < IPv4_h >(headers.ipv4);
     }
-    @hidden table tbl_lpm_ubpf71 {
+    @hidden table tbl_lpm_ubpf72 {
         actions = {
-            lpm_ubpf71();
+            lpm_ubpf72();
         }
-        const default_action = lpm_ubpf71();
+        const default_action = lpm_ubpf72();
     }
     apply {
-        tbl_lpm_ubpf71.apply();
+        tbl_lpm_ubpf72.apply();
     }
 }
 
-ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+ubpf < Headers_t, metadata >(prs(), pipe(), dprs()) main;
