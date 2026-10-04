@@ -55,6 +55,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/nethash.cpp
   gtest/visitor.cpp
   gtest/metrics_test.cpp
+  gtest/toP4_system_declarations_test.cpp
 )
 
 if (ENABLE_CONTROL_PLANE)
