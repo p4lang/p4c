@@ -8,7 +8,9 @@
 #include <bmv2/psa.p4>
 
 header EMPTY_H {};
-struct EMPTY_M {};
+struct EMPTY_M {
+    bit<16> vlan_ether_type;
+};
 struct EMPTY_RESUB {};
 struct EMPTY_CLONE {};
 struct EMPTY_BRIDGE {};
@@ -91,7 +93,7 @@ control MyIC(
     table tbl {
         key = {
             a.ethernet.srcAddr : exact;
-            a.vlan_tag[0].ether_type : exact;
+            b.vlan_ether_type : exact;
         }
         actions = {
             forward;
@@ -101,6 +103,7 @@ control MyIC(
 
     apply {
         if (a.ethernet.isValid()) {
+            b.vlan_ether_type = (bit<16>)a.vlan_tag[0].ether_type;
             tbl.apply();
         }
     }
