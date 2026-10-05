@@ -2063,7 +2063,7 @@ var annotated_dup =
       [ "StructInitializers", "class_p4_1_1_struct_initializers.html", null ],
       [ "StructLocation", "class_p4_1_1_struct_location.html", null ],
       [ "StructTypeReplacement", "struct_p4_1_1_struct_type_replacement.html", "struct_p4_1_1_struct_type_replacement" ],
-      [ "SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
+      [ "SubstituteParameters", "class_p4_1_1_substitute_parameters.html", "class_p4_1_1_substitute_parameters" ],
       [ "SubstituteStructures", "class_p4_1_1_substitute_structures.html", null ],
       [ "SwitchAddDefault", "class_p4_1_1_switch_add_default.html", null ],
       [ "SymBitMatrix", "class_p4_1_1_sym_bit_matrix.html", null ],
