@@ -18,6 +18,31 @@ namespace P4::P4Tools::Test {
 using namespace P4::literals;
 using ConstraintVector = const std::vector<const Constraint *>;
 
+TEST(Z3SolverOwnership, ClearMemoryPreservesAssertionsAndOtherSolvers) {
+    const IR::SymbolicVariable *value =
+        P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8), "reset_value"_cs);
+    ConstraintVector constraints = {
+        new IR::Equ(value, IR::Constant::get(IR::Type_Bits::get(8), 42))};
+    Z3Solver other;
+    ASSERT_EQ(other.checkSat(constraints), true);
+    for (bool incremental : {false, true}) {
+        Z3Solver solver(incremental);
+        ASSERT_EQ(solver.checkSat(constraints), true);
+        for (int iteration = 0; iteration < 3; ++iteration) {
+            solver.clearMemory();
+            EXPECT_EQ(solver.getAssertions().size(), 1U);
+            ASSERT_EQ(solver.checkSat(constraints), true);
+            auto model = solver.getSymbolicMapping();
+            ASSERT_EQ(model.size(), 1U);
+            EXPECT_EQ(model.at(value)->checkedTo<IR::Constant>()->value, 42);
+            EXPECT_EQ(other.checkSat(constraints), true);
+        }
+        solver.reset();
+        EXPECT_TRUE(solver.getAssertions().empty());
+        EXPECT_EQ(solver.checkSat(constraints), true);
+    }
+}
+
 class Z3SolverSatisfiabilityChecks : public testing::Test {
     P4Tools::Z3Solver solver;
 
