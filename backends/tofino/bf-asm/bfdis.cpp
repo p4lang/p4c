@@ -21,11 +21,12 @@
 #include <string.h>
 
 #include <fstream>
+#include <memory>
 #include <string>
 
 #include "bson.h"
 #include "disasm.h"
-#include "fdstream.h"
+#include "lib/fdstream.h"
 
 Disasm *disasm = nullptr;
 
@@ -169,9 +170,9 @@ int main(int ac, char **av) {
                 error |= read_bin(in);
             } else if (magic[0] == 0x1f && magic[1] == 0x8b) {
                 if (auto *pipe = popen((std::string("zcat < ") + av[i]).c_str(), "r")) {
-                    fdstream in(fileno(pipe));
+                    std::unique_ptr<FILE, int (*)(FILE *)> pipeOwner(pipe, &pclose);
+                    P4::FdStream in(pipe);
                     error |= read_bin(in);
-                    pclose(pipe);
                 } else {
                     fprintf(stderr, "%s: Cannot open pipe to read\n", av[i]);
                 }
