@@ -20,9 +20,8 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta,
 }
 
 
-control VerifyChecksumI(in H hdr,
-                        inout M meta,
-                        inout standard_metadata_t standard_metadata) {
+control VerifyChecksumI(inout H hdr,
+                        inout M meta) {
     apply { }
 }
 
@@ -42,8 +41,7 @@ control EgressI(inout H hdr,
 
 
 control ComputeChecksumI(inout H hdr,
-                         inout M meta,
-                         inout standard_metadata_t standard_metadata) {
+                         inout M meta) {
     apply { }
 }
 

@@ -1,0 +1,14 @@
+issue383-err-bmv2.p4(46): [--Werror=type-error] error: macDA_t: cast not supported
+        sip.macDA = (macDA_t) mac;
+                     ^^^^^^^
+issue383-err-bmv2.p4(47): [--Werror=type-error] error: '(bit<48>)sip.macDA'
+        mac = (bit<48>) sip.macDA;
+              ^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+issue383-err-bmv2.p4(17): Cannot unify type 'struct mac_t' with type 'bit<48>'
+  struct mac_t
+         ^^^^^
+  ---- Originating from:
+issue383-err-bmv2.p4(17): Cannot cast from 'struct mac_t' to 'bit<48>'
+  struct mac_t
+         ^^^^^

@@ -1,0 +1,9 @@
+basic-bmv2.p4(3): [--Wwarn=unused] warning: 'TYPE_IPV4' is unused
+const bit<16> TYPE_IPV4 = 0x800;
+              ^^^^^^^^^
+basic-bmv2.p4(9): [--Wwarn=unused] warning: 'egressSpec_t' is unused
+typedef bit<9> egressSpec_t;
+               ^^^^^^^^^^^^
+basic-bmv2.p4(81): [--Werror=unsupported] error: multiple LPM keys in table MyIngress.ipv4_lpm not supported
+    table ipv4_lpm {
+          ^^^^^^^^

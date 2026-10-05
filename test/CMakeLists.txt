@@ -23,6 +23,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/equiv_test.cpp
   gtest/exception_test.cpp
   gtest/expr_uses_test.cpp
+  gtest/fdstream.cpp
   gtest/flat_map.cpp
   gtest/format_test.cpp
   gtest/helpers.cpp
@@ -34,6 +35,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/ir-splitter.cpp
   gtest/ir-traversal.cpp
   gtest/json_test.cpp
+  gtest/log_test.cpp
   gtest/map.cpp
   gtest/midend_def_use.cpp
   gtest/midend_pass.cpp

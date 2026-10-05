@@ -41,17 +41,17 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
         }
         default_action = NoAction_1();
     }
-    @hidden action act() {
+    @hidden action psameter3l65() {
         tmp = meter0_0.execute(12w0);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_psameter3l65 {
         actions = {
-            act();
+            psameter3l65();
         }
-        const default_action = act();
+        const default_action = psameter3l65();
     }
     apply {
-        tbl_act.apply();
+        tbl_psameter3l65.apply();
         if (tmp == PSA_MeterColor_t.GREEN) {
             tbl_0.apply();
         }

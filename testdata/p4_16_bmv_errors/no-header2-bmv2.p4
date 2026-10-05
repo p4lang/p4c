@@ -19,7 +19,7 @@ parser ParserI(packet_in b, out H parsedHdr, inout M meta,
 }
 
 
-control VerifyChecksumI(in H hdr,
+control VerifyChecksumI(inout H hdr,
                         inout M meta) {
     apply { }
 }

@@ -26,7 +26,7 @@ parser p(packet_in b, out Headers h,
     }
 }
 
-control vrfy(in Headers h, inout Meta m) { apply {} }
+control vrfy(inout Headers h, inout Meta m) { apply {} }
 control update(inout Headers h, inout Meta m) { apply {} }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
@@ -40,7 +40,7 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     direct_counter(CounterType.packets) c;
 
-    action my_action(bit<32> a) { sm.egress_spec = a; }
+    action my_action(bit<9> a) { sm.egress_spec = a; }
     table t1 {
         actions = { my_action; }
         const default_action = my_action(0);

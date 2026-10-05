@@ -1,10 +1,12 @@
 #include <core.p4>
+
 #include <bmv2/psa.p4>
 
 header EMPTY_H {
 }
 
 struct EMPTY_M {
+    bit<16> vlan_ether_type;
 }
 
 struct EMPTY_RESUB {
@@ -63,20 +65,34 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
+    @name("MyIC.forward") action forward() {
+        d.drop = false;
+        d.multicast_group = 32w0;
+        d.egress_port = 32w1;
+    }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            a.ethernet.srcAddr      : exact @name("a.ethernet.srcAddr");
-            a.vlan_tag[0].ether_type: exact @name("a.vlan_tag[0].ether_type");
+            a.ethernet.srcAddr: exact @name("a.ethernet.srcAddr");
+            b.vlan_ether_type : exact @name("b.vlan_ether_type");
         }
         actions = {
+            forward();
             NoAction_1();
         }
         default_action = NoAction_1();
     }
+    @hidden action psaheaderstack106() {
+        b.vlan_ether_type = (bit<16>)a.vlan_tag[0].ether_type;
+    }
+    @hidden table tbl_psaheaderstack106 {
+        actions = {
+            psaheaderstack106();
+        }
+        const default_action = psaheaderstack106();
+    }
     apply {
         if (a.ethernet.isValid()) {
-            ;
-        } else {
+            tbl_psaheaderstack106.apply();
             tbl_0.apply();
         }
     }
@@ -88,19 +104,19 @@ control MyEC(inout EMPTY_H a, inout EMPTY_M b, in psa_egress_input_metadata_t c,
 }
 
 control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout header_t d, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaheaderstack125() {
+    @hidden action psaheaderstack129() {
         buffer.emit<ethernet_t>(d.ethernet);
         buffer.emit<vlan_tag_h>(d.vlan_tag[0]);
         buffer.emit<vlan_tag_h>(d.vlan_tag[1]);
     }
-    @hidden table tbl_psaheaderstack125 {
+    @hidden table tbl_psaheaderstack129 {
         actions = {
-            psaheaderstack125();
+            psaheaderstack129();
         }
-        const default_action = psaheaderstack125();
+        const default_action = psaheaderstack129();
     }
     apply {
-        tbl_psaheaderstack125.apply();
+        tbl_psaheaderstack129.apply();
     }
 }
 

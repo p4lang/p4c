@@ -34,9 +34,10 @@ struct EMPTY_M {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<16> psa_ingress_input_metadata_parser_error
 	bit<8> psa_ingress_output_metadata_drop
+	bit<32> psa_ingress_output_metadata_multicast_group
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> MyIC_tbl_ethernet_srcAddr
-	bit<16> MyIC_tbl_key
+	bit<16> MyIC_tbl_local_metadata_vlan_ether_type
 }
 metadata instanceof EMPTY_M
 
@@ -49,12 +50,20 @@ action NoAction args none {
 	return
 }
 
+action forward args none {
+	mov m.psa_ingress_output_metadata_drop 0
+	mov m.psa_ingress_output_metadata_multicast_group 0x0
+	mov m.psa_ingress_output_metadata_egress_port 0x1
+	return
+}
+
 table tbl {
 	key {
 		m.MyIC_tbl_ethernet_srcAddr exact
-		m.MyIC_tbl_key exact
+		m.MyIC_tbl_local_metadata_vlan_ether_type exact
 	}
 	actions {
+		forward
 		NoAction
 	}
 	default_action NoAction args none 
@@ -75,10 +84,9 @@ apply {
 	jmpeq MYIP_PARSE_VLAN_TAG2 h.vlan_tag_1.ether_type 0x8100
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_VLAN_TAG2 :	mov m.psa_ingress_input_metadata_parser_error 0x3
-	MYIP_ACCEPT :	jmpnv LABEL_FALSE h.ethernet
-	jmp LABEL_END_0
-	LABEL_FALSE :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	mov m.MyIC_tbl_key h.vlan_tag_0.ether_type
+	MYIP_ACCEPT :	jmpnv LABEL_END_0 h.ethernet
+	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.MyIC_tbl_local_metadata_vlan_ether_type h.vlan_tag_0.ether_type
 	table tbl
 	LABEL_END_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

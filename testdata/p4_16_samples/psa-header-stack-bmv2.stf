@@ -1,0 +1,23 @@
+# Exercise the no-tag, one-tag, and full two-element VLAN header stack paths.
+setdefault tbl NoAction()
+
+# Forward only packets with an explicitly installed table entry.  For a
+# packet without a VLAN tag, the copied invalid vlan_tag[0].ether_type key is zero.
+add tbl a.ethernet.srcAddr:0x000000000002 b.vlan_ether_type:0x0000 forward()
+add tbl a.ethernet.srcAddr:0x000000000004 b.vlan_ether_type:0x0800 forward()
+add tbl a.ethernet.srcAddr:0x000000000006 b.vlan_ether_type:0x8100 forward()
+
+# No VLAN headers are extracted or emitted.
+packet 0  000000000001 000000000002 0800
+expect 1  000000000001 000000000002 0800
+
+# One VLAN header is extracted and emitted.
+packet 0  000000000003 000000000004 8100 1234 0800
+expect 1  000000000003 000000000004 8100 1234 0800
+
+# Both elements of the two-element VLAN header stack are extracted and emitted.
+packet 0  000000000005 000000000006 8100 1234 8100 5678 0800
+expect 1  000000000005 000000000006 8100 1234 8100 5678 0800
+
+# This packet misses the table and is dropped by the NoAction default.
+packet 0  000000000007 000000000008 0800
