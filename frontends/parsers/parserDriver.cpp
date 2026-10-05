@@ -13,56 +13,7 @@
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "lib/error.h"
-
-#ifdef HAVE_LIBBOOST_IOSTREAMS
-
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-
-namespace {
-
-/// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
-/// is the efficient implementation for users with boost::iostreams installed.
-struct AutoStdioInputStream {
-    explicit AutoStdioInputStream(FILE *in)
-        : source(fileno(in), boost::iostreams::never_close_handle),
-          buffer(source),
-          stream(&buffer) {}
-
-    std::istream &get() { return stream; }
-
- private:
-    AutoStdioInputStream(const AutoStdioInputStream &) = delete;
-    AutoStdioInputStream(AutoStdioInputStream &&) = delete;
-
-    boost::iostreams::file_descriptor_source source;
-    boost::iostreams::stream_buffer<boost::iostreams::file_descriptor_source> buffer;
-    std::istream stream;
-};
-
-}  // namespace
-
-#else
-
-namespace {
-
-/// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
-/// is an inefficient fallback implementation.
-struct AutoStdioInputStream {
-    explicit AutoStdioInputStream(FILE *in) {
-        char buffer[512];
-        while (fgets(buffer, sizeof(buffer), in)) stream << buffer;
-    }
-
-    std::istream &get() { return stream; }
-
- private:
-    std::stringstream stream;
-};
-
-}  // namespace
-
-#endif
+#include "lib/fdstream.h"
 
 namespace P4 {
 
@@ -148,8 +99,8 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
 
 /* static */ const IR::P4Program *P4ParserDriver::parse(FILE *in, std::string_view sourceFile,
                                                         unsigned sourceLine /* = 1 */) {
-    AutoStdioInputStream inputStream(in);
-    return parse(inputStream.get(), sourceFile, sourceLine);
+    FdStream inputStream(in);
+    return parse(inputStream, sourceFile, sourceLine);
 }
 
 /* static */ std::pair<const IR::P4Program *, const Util::InputSources *>
@@ -171,8 +122,8 @@ P4ParserDriver::parseProgramSources(std::istream &in, std::string_view sourceFil
 /*static */ std::pair<const IR::P4Program *, const Util::InputSources *>
 P4ParserDriver::parseProgramSources(FILE *in, std::string_view sourceFile,
                                     unsigned sourceLine /* = 1 */) {
-    AutoStdioInputStream inputStream(in);
-    return parseProgramSources(inputStream.get(), sourceFile, sourceLine);
+    FdStream inputStream(in);
+    return parseProgramSources(inputStream, sourceFile, sourceLine);
 }
 
 template <typename T>

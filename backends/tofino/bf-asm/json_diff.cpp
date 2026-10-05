@@ -18,10 +18,11 @@
 #include <cstring>
 #include <fstream>
 #include <iomanip>
+#include <memory>
 #include <set>
 
 #include "backends/tofino/bf-asm/json.h"
-#include "fdstream.h"
+#include "lib/fdstream.h"
 #include "lib/ordered_map.h"
 
 static bool show_deletion = true;
@@ -587,7 +588,8 @@ int main(int ac, char **av) {
                         error = 2;
                 }
         } else {
-            std::istream *in = nullptr;
+            std::unique_ptr<FILE, int (*)(FILE *)> pipe(nullptr, &pclose);
+            std::unique_ptr<std::istream> in;
             if (auto ext = strrchr(av[i], '.')) {
                 std::string cmd;
                 if (!strcmp(ext, ".gz") || !strcmp(ext, ".Z"))
@@ -597,15 +599,13 @@ int main(int ac, char **av) {
                 if (!cmd.empty()) {
                     cmd += av[i];
                     cmd = "2>/dev/null; " + cmd;  // ignore errors (Broken Pipe in particular)
-                    auto *pipe = popen(cmd.c_str(), "r");
+                    pipe.reset(popen(cmd.c_str(), "r"));
                     if (pipe) {
-                        auto *pstream = new fdstream(fileno(pipe));
-                        pstream->setclose([pipe]() { pclose(pipe); });
-                        in = pstream;
+                        in = std::make_unique<P4::FdStream>(pipe.get());
                     }
                 }
             }
-            if (!in) in = new std::ifstream(av[i]);
+            if (!in) in = std::make_unique<std::ifstream>(av[i]);
             if (!in || !*in) {
                 std::cerr << "Can't open " << av[i] << " for reading" << std::endl;
                 error = 2;
@@ -621,7 +621,6 @@ int main(int ac, char **av) {
                 error = 2;
             } else
                 file1_name = av[i];
-            delete in;
         }
     if (error & 2) std::cerr << "usage: " << av[0] << " [-adi:l:] file1 file2" << std::endl;
     return error;

@@ -14,6 +14,7 @@ set(LIBP4CTOOLKIT_SRCS
     error_catalog.cpp
     error_message.cpp
     exename.cpp
+    fdstream.cpp
     format.cpp
     gc.cpp
     big_int_util.cpp
@@ -50,6 +51,7 @@ set(LIBP4CTOOLKIT_HDRS
     error_reporter.h
     exceptions.h
     exename.h
+    fdstream.h
     format.h
     gc.h
     big_int_util.h
@@ -87,11 +89,16 @@ add_library(p4ctoolkit STATIC ${LIBP4CTOOLKIT_SRCS})
 # Disable libcall (realloc, malloc) optimizations which may cause infinite loops.
 set_target_properties(p4ctoolkit PROPERTIES COMPILE_FLAGS -fno-builtin)
 target_link_libraries(p4ctoolkit
+  PRIVATE absl::node_hash_set
   PRIVATE absl::stacktrace
   PRIVATE absl::symbolize
   # These libraries are exposed by a header.
   PUBLIC absl::bits
+  PUBLIC absl::flat_hash_map
   PUBLIC absl::strings
   PUBLIC absl::str_format
   PUBLIC ${LIBGC_LIBRARIES}
 )
+if (HAVE_LIBBACKTRACE)
+  target_link_libraries(p4ctoolkit PRIVATE backtrace)
+endif ()
