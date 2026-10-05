@@ -126,8 +126,6 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
         } else if (ft->is<IR::Type_Array>()) {
             LOG5("Field is Type_Array " << ft->toString());
             auto stack = ft->to<IR::Type_Array>();
-            // auto stack_name = f->controlPlaneName();
-            // auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>(),
                       "%1% not a header nor header union type", stack->elementType);
@@ -144,20 +142,6 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
                 addHeaderType(ht);
                 addHeaderUnionStackInstance(f, stack);
             }
-            // Dunno why addHeaderInstance is called heare for each element of the stack.
-            // As far as I can figure out, the code block from line 83 to 103 should add
-            // those stack element into the JSON file as singular headers.
-            // With addHeaderStackInstance implemented, these elements are exported TWICE !
-            // For now, by commenting the following code block, the JSON file is correct.
-
-            // std::vector<unsigned> ids;
-            // for (unsigned i = 0; i < stack_size; i++) {
-            //     cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
-            //     /* TODO */
-            //     // auto id = json->add_header(stack_type, hdrName);
-            //     addHeaderInstance(stack_type, hdrName);
-            //     // ids.push_back(id);
-            // }
         } else {
             // Treat this field like a scalar local variable
             cstring newName = refMap->newName(type->getName() + "." + f->name);
