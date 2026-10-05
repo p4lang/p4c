@@ -995,6 +995,10 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *k
             }
             return Result::Yes;
         } else {
+            if (keySet->type->width_bits() == 0 && list->components.empty()) {
+                if (keySet->type->is<IR::Type_Set>()) return Result::DontKnow;
+                return Result::Yes;
+            }
             BUG_CHECK(list->components.size() == 1, "%1%: mismatch in list size", list);
             return setContains(keySet, list->components.at(0));
         }

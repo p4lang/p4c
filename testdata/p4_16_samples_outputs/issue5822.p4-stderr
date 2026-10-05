@@ -1,0 +1,6 @@
+issue5822.p4(23): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: accept;
+            ^^^^^^^^^^^^^^^
+issue5822.p4(31): [--Wwarn=parser-transition] warning: SelectCase: unreachable case
+            default: accept;
+            ^^^^^^^^^^^^^^^
