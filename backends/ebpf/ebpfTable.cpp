@@ -232,7 +232,7 @@ void EBPFTable::emitActionArguments(CodeBuilder *builder, const IR::P4Action *ac
     builder->append("struct ");
     builder->blockStart();
 
-    for (auto p : *action->parameters->getEnumerator()) {
+    for (auto p : action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(p->type);
         type->declare(builder, p->externalName(), false);
@@ -618,7 +618,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat(".u = {.%s = {", name.c_str());
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         arg->apply(cg);
         builder->append(",");
@@ -690,7 +690,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
 
         builder->emitIndent();
         builder->appendFormat(".u = {.%s = {", name.c_str());
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto arg = mi->substitution.lookup(p);
             arg->apply(cg);
             builder->append(",");

@@ -71,7 +71,7 @@ interface IApply {
 
 /// base class for namespaces
 interface INamespace {
-    virtual Util::Enumerator<IDeclaration> *getDeclarations() const = 0;
+    virtual Util::EnumeratorPtr<IDeclaration>getDeclarations() const = 0;
 }
 
 /// Does not allow two declarations with the same name
@@ -83,7 +83,7 @@ interface ISimpleNamespace : INamespace {
 /// A general namespace can have multiple declarations with the same name
 /// E.g., an extern can have multiple methods with the same name.
 interface IGeneralNamespace : INamespace {
-    virtual Util::Enumerator<IDeclaration>* getDeclsByName(cstring name) const;
+    virtual Util::EnumeratorPtr<IDeclaration> getDeclsByName(cstring name) const;
     /// prints an error if it finds duplicate names
     void checkDuplicateDeclarations() const;
     validate{ checkDuplicateDeclarations(); }
@@ -93,7 +93,7 @@ interface IGeneralNamespace : INamespace {
 // Note that it might also contain a Simple or General namespace nested in these
 interface INestedNamespace : INamespace {
     virtual std::vector<INamespace> getNestedNamespaces() const = 0;
-    Util::Enumerator<IDeclaration> *getDeclarations() const override;
+    Util::EnumeratorPtr<IDeclaration>getDeclarations() const override;
 }
 
 /// Interface implemented by something that can be called

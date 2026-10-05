@@ -222,7 +222,7 @@ void ValidateParsedProgram::postorder(const IR::ExitStatement *statement) {
 
 void ValidateParsedProgram::postorder(const IR::P4Program *program) {
     IR::IndexedVector<IR::Node> declarations;
-    for (auto decl : *program->getDeclarations()) {
+    for (auto decl : program->getDeclarations()) {
         cstring name = decl->getName();
         auto existing = declarations.getDeclaration(name);
         if (existing != nullptr) {

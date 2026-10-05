@@ -379,7 +379,7 @@ void ActionConverter::convertActionBodyTop(const IR::Vector<IR::StatOrDecl> *bod
 
 void ActionConverter::convertActionParams(const IR::ParameterList *parameters,
                                           Util::JsonArray *params) {
-    for (auto p : *parameters->getEnumerator()) {
+    for (auto p : parameters->getEnumerator()) {
         if (!ctxt->refMap->isUsed(p))
             warn(ErrorType::WARN_UNUSED, "Unused action parameter %1%", p);
 
