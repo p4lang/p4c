@@ -15,30 +15,31 @@
 
 namespace P4 {
 
-cstring DoSimplifyExpressions::createTemporary(const IR::Type *type) {
+IR::ID DoSimplifyExpressions::createTemporary(Util::SourceInfo srcInfo, const IR::Type *type) {
     type = type->getP4Type();
     BUG_CHECK(type && !type->is<IR::Type_Dontcare>(), "Can't create don't-care temps");
-    auto tmp = nameGen.newName("tmp");
-    auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
+    auto tmp = IR::ID(srcInfo, nameGen.newName("tmp"), nullptr);
+    auto decl = new IR::Declaration_Variable(srcInfo, tmp, type);
     toInsert.push_back(decl);
     return tmp;
 }
 
 /** Add ```@varName = @expression``` to the vector of statements.
  *
- * @return A copy of the l-value expression created for varName.
+ * @return A reference to varName representing the replaced expression. For conditionals, the
+ * assignment uses the branch's location; the returned reference uses the whole expression's
+ * location.
  */
-const IR::Expression *DoSimplifyExpressions::addAssignment(Util::SourceInfo srcInfo,
-                                                           cstring varName,
-                                                           const IR::Expression *expression) {
-    const IR::PathExpression *left;
+const IR::Expression *DoSimplifyExpressions::addAssignment(Util::SourceInfo srcInfo, IR::ID varName,
+                                                           const IR::Expression *expression,
+                                                           Util::SourceInfo resultSrcInfo) {
     if (auto pe = expression->to<IR::PathExpression>())
-        left = new IR::PathExpression(IR::ID(varName, pe->path->name.originalName));
-    else
-        left = new IR::PathExpression(IR::ID(varName, nullptr));
+        varName.originalName = pe->path->name.originalName;
+    auto left = new IR::PathExpression(srcInfo, new IR::Path(varName));
     auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
     statements.push_back(stat);
-    auto result = left->clone();
+    if (!resultSrcInfo.isValid()) resultSrcInfo = srcInfo;
+    auto result = new IR::PathExpression(resultSrcInfo, new IR::Path(varName));
     added->emplace(result);
     return result;
 }
@@ -72,8 +73,9 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::ArrayIndex *expression) {
             // Otherwise this can lead to an infinite loop.
             if (!expression->right->is<IR::Constant>()) {
                 auto indexType = typeMap->getType(expression->right, true);
-                auto tmp = createTemporary(indexType);
-                expression->right = addAssignment(expression->srcInfo, tmp, expression->right);
+                auto srcInfo = getOriginal<IR::ArrayIndex>()->right->srcInfo;
+                auto tmp = createTemporary(srcInfo, indexType);
+                expression->right = addAssignment(srcInfo, tmp, expression->right);
                 typeMap->setType(expression->right, indexType);
             }
         }
@@ -110,13 +112,12 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Member *expression) {
                 /* already assigning it somewhere -- no need to add another copy */
             } else {
                 BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
-                auto tmp = createTemporary(type);
-                auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
-                auto stat = new IR::AssignmentStatement(path, expression);
+                auto tmp = createTemporary(expression->srcInfo, type);
+                auto path = new IR::PathExpression(tmp);
+                auto stat = new IR::AssignmentStatement(expression->srcInfo, path, expression);
                 statements.push_back(stat);
                 typeMap->setType(expression, type);
                 rv = path->clone();
-                ;
             }
         }
     }
@@ -159,12 +160,14 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::StructExpression *expression
     LOG3("Dismantling " << dbp(expression));
     for (auto &v : expression->components) {
         auto t = typeMap->getType(v->expression, true);
-        auto tmp = createTemporary(t);
+        auto srcInfo = v->expression->srcInfo;
+        auto componentSrcInfo = v->srcInfo;
+        auto tmp = createTemporary(srcInfo, t);
         visit(v);
-        auto path = addAssignment(expression->srcInfo, tmp, v->expression);
+        auto path = addAssignment(srcInfo, tmp, v->expression);
         typeMap->setType(path, t);
         // We cannot directly mutate v, because of https://github.com/p4lang/p4c/issues/43
-        vec.push_back(new IR::NamedExpression(v->name, path));
+        vec.push_back(new IR::NamedExpression(componentSrcInfo, v->name, path));
     }
     expression->components = std::move(vec);
     prune();
@@ -186,9 +189,10 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::ListExpression *expression) 
     LOG3("Dismantling " << dbp(expression));
     for (auto &v : expression->components) {
         auto t = typeMap->getType(v, true);
-        auto tmp = createTemporary(t);
+        auto srcInfo = v->srcInfo;
+        auto tmp = createTemporary(srcInfo, t);
         visit(v);
-        auto path = addAssignment(expression->srcInfo, tmp, v);
+        auto path = addAssignment(srcInfo, tmp, v);
         v = path;
         typeMap->setType(path, t);
     }
@@ -207,9 +211,9 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Operation_Binary *expression
             // val + f(val);
             // We must save val before the evaluation of f
             auto ltype = typeMap->getType(original->left, true);
-            auto leftTmp = createTemporary(ltype);
+            auto leftTmp = createTemporary(original->left->srcInfo, ltype);
             visit(expression->left);
-            auto leftPath = addAssignment(expression->srcInfo, leftTmp, expression->left);
+            auto leftPath = addAssignment(original->left->srcInfo, leftTmp, expression->left);
             expression->left = leftPath;
             typeMap->setType(leftPath, ltype);
         } else {
@@ -218,7 +222,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Operation_Binary *expression
         CHECK_NULL(expression->left);
         visit(expression->right);
         typeMap->setType(expression, type);
-        auto tmp = createTemporary(type);
+        auto tmp = createTemporary(expression->srcInfo, type);
         auto path = addAssignment(expression->srcInfo, tmp, expression);
         typeMap->setType(path, type);
         prune();
@@ -231,8 +235,9 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Operation_Binary *expression
 
 const IR::Node *DoSimplifyExpressions::shortCircuit(IR::Operation_Binary *expression) {
     LOG3("Visiting " << dbp(expression));
-    auto type = typeMap->getType(getOriginal(), true);
-    if (SideEffects::check(getOriginal<IR::Expression>(), this, typeMap)) {
+    auto original = getOriginal<IR::Operation_Binary>();
+    auto type = typeMap->getType(original, true);
+    if (SideEffects::check(original, this, typeMap)) {
         visit(expression->left);
         CHECK_NULL(expression->left);
 
@@ -244,24 +249,25 @@ const IR::Node *DoSimplifyExpressions::shortCircuit(IR::Operation_Binary *expres
         //    tmp = simplify(e2);
 
         bool land = expression->is<IR::LAnd>();
-        auto constant = new IR::BoolLiteral(!land);
-        auto tmp = createTemporary(type);
-        auto ifTrue = new IR::AssignmentStatement(
-            expression->srcInfo, new IR::PathExpression(IR::ID(tmp, nullptr)), constant);
+        auto constant = new IR::BoolLiteral(original->left->srcInfo, !land);
+        auto tmp = createTemporary(expression->srcInfo, type);
+        auto ifTrue =
+            new IR::AssignmentStatement(expression->srcInfo, new IR::PathExpression(tmp), constant);
 
         auto save = statements;
         statements.clear();
         visit(expression->right);
-        auto path = addAssignment(expression->srcInfo, tmp, expression->right);
+        auto path =
+            addAssignment(original->right->srcInfo, tmp, expression->right, expression->srcInfo);
         auto ifFalse = statements;
         statements = save;
         if (land) {
-            expression->left = new IR::LNot(expression->left);
+            expression->left = new IR::LNot(original->left->srcInfo, expression->left);
             typeMap->setType(expression->left, type);
         }
-        auto block = new IR::BlockStatement(ifFalse);
+        auto block = new IR::BlockStatement(original->right->srcInfo, ifFalse);
         auto ifStatement =
-            new IR::IfStatement(expression->srcInfo, expression->left, ifTrue, block);
+            new IR::IfStatement(original->left->srcInfo, expression->left, ifTrue, block);
         statements.push_back(ifStatement);
         typeMap->setType(path, type);
         prune();
@@ -275,25 +281,27 @@ const IR::Node *DoSimplifyExpressions::shortCircuit(IR::Operation_Binary *expres
 const IR::Node *DoSimplifyExpressions::preorder(IR::Mux *expression) {
     // We always dismantle muxes - some architectures may not support them
     LOG3("Visiting " << dbp(expression));
-    auto type = typeMap->getType(getOriginal(), true);
+    auto original = getOriginal<IR::Mux>();
+    auto type = typeMap->getType(original, true);
     visit(expression->e0);
     CHECK_NULL(expression->e0);
-    auto tmp = createTemporary(type);
+    auto tmp = createTemporary(expression->srcInfo, type);
 
     auto save = statements;
     statements.clear();
     visit(expression->e1);
-    (void)addAssignment(expression->srcInfo, tmp, expression->e1);
+    (void)addAssignment(original->e1->srcInfo, tmp, expression->e1);
     auto ifTrue = statements;
 
     statements.clear();
     visit(expression->e2);
-    auto path = addAssignment(expression->srcInfo, tmp, expression->e2);
+    auto path = addAssignment(original->e2->srcInfo, tmp, expression->e2, expression->srcInfo);
     auto ifFalse = statements;
     statements = save;
 
-    auto ifStatement = new IR::IfStatement(expression->e0, new IR::BlockStatement(ifTrue),
-                                           new IR::BlockStatement(ifFalse));
+    auto ifStatement = new IR::IfStatement(expression->srcInfo, expression->e0,
+                                           new IR::BlockStatement(original->e1->srcInfo, ifTrue),
+                                           new IR::BlockStatement(original->e2->srcInfo, ifFalse));
     statements.push_back(ifStatement);
     typeMap->setType(path, type);
     prune();
@@ -483,6 +491,8 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
                              << "temporary");
 
         const IR::Expression *argValue = nullptr;
+        auto argSrcInfo = arg->srcInfo;
+        auto expressionSrcInfo = arg->expression->srcInfo;
         visit(arg);  // May mutate arg!  Recursively simplifies arg.
         auto argex = arg->expression;
         CHECK_NULL(argex);
@@ -494,13 +504,13 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
                 LOG3("Not a temporary " << argex);
                 auto paramtype = typeMap->getType(p, true);
                 if (paramtype->is<IR::Type_Dontcare>()) paramtype = typeMap->getType(arg, true);
-                auto tmp = createTemporary(paramtype);
-                argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
+                auto tmp = createTemporary(expressionSrcInfo, paramtype);
+                argValue = new IR::PathExpression(tmp);
                 typeMap->setType(argValue, paramtype);
                 typeMap->setLeftValue(argValue);
                 if (p->direction != IR::Direction::Out) {
                     auto clone = argValue->clone();
-                    auto stat = new IR::AssignmentStatement(argex->srcInfo, clone, argex);
+                    auto stat = new IR::AssignmentStatement(expressionSrcInfo, clone, argex);
                     LOG3(clone << " = " << argex);
                     statements.push_back(stat);
                     typeMap->setType(clone, paramtype);
@@ -514,12 +524,13 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
             argValue = argex;
         }
         if (p->direction != IR::Direction::In && useTemp) {
-            auto assign = new IR::AssignmentStatement(cloner.clone<IR::Expression>(argex),
-                                                      cloner.clone<IR::Expression>(argValue));
+            auto assign =
+                new IR::AssignmentStatement(expressionSrcInfo, cloner.clone<IR::Expression>(argex),
+                                            cloner.clone<IR::Expression>(argValue));
             copyBack.push_back(assign);
             LOG3("Will copy out value " << dbp(assign));
         }
-        args->push_back(new IR::Argument(arg->name, argValue));
+        args->push_back(new IR::Argument(argSrcInfo, arg->name, argValue));
     }
 
     // Special handling for table.apply(...).X; we cannot generate
@@ -552,9 +563,9 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         typeMap->setType(mce, type);
         rv = mce;
     } else {
-        auto tmp = createTemporary(type);
-        auto left = new IR::PathExpression(IR::ID(tmp, nullptr));
-        auto stat = new IR::AssignmentStatement(left, mce);
+        auto tmp = createTemporary(mce->srcInfo, type);
+        auto left = new IR::PathExpression(tmp);
+        auto stat = new IR::AssignmentStatement(mce->srcInfo, left, mce);
         statements.push_back(stat);
         rv = left->clone();
         LOG3("Is temporary " << rv);
@@ -611,7 +622,7 @@ const IR::Node *DoSimplifyExpressions::postorder(IR::ParserState *state) {
 const IR::Node *DoSimplifyExpressions::postorder(IR::BaseAssignmentStatement *statement) {
     if (statements.empty()) return statement;
     statements.push_back(statement);
-    auto block = new IR::BlockStatement(statements);
+    auto block = new IR::BlockStatement(statement->srcInfo, statements);
     statements.clear();
     return block;
 }
@@ -627,7 +638,7 @@ const IR::Node *DoSimplifyExpressions::postorder(IR::MethodCallStatement *statem
         statements.clear();
         return rv;
     }
-    auto block = new IR::BlockStatement(statements);
+    auto block = new IR::BlockStatement(statement->srcInfo, statements);
     statements.clear();
     return block;
 }
@@ -635,7 +646,7 @@ const IR::Node *DoSimplifyExpressions::postorder(IR::MethodCallStatement *statem
 const IR::Node *DoSimplifyExpressions::postorder(IR::ReturnStatement *statement) {
     if (statements.empty()) return statement;
     statements.push_back(statement);
-    auto block = new IR::BlockStatement(statements);
+    auto block = new IR::BlockStatement(statement->srcInfo, statements);
     statements.clear();
     return block;
 }
@@ -645,7 +656,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::IfStatement *statement) {
     visit(statement->condition, "condition");
     if (!statements.empty()) {
         statements.push_back(statement);
-        rv = new IR::BlockStatement(statements);
+        rv = new IR::BlockStatement(statement->srcInfo, statements);
         statements.clear();
     }
     visit(statement->ifTrue, "ifTrue");
@@ -659,7 +670,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::SwitchStatement *statement) 
     visit(statement->expression, "expression");
     if (!statements.empty()) {
         statements.push_back(statement);
-        rv = new IR::BlockStatement(statements);
+        rv = new IR::BlockStatement(statement->srcInfo, statements);
         statements.clear();
     }
     visit(statement->cases, "cases");
@@ -689,7 +700,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::ForInStatement *statement) {
     visit(statement->collection, "collection");
     if (!statements.empty()) {
         statements.push_back(statement);
-        rv = new IR::BlockStatement(statements);
+        rv = new IR::BlockStatement(statement->srcInfo, statements);
         statements.clear();
     }
     visit(statement->body, "body");
@@ -749,14 +760,16 @@ const IR::Node *KeySideEffect::postorder(IR::KeyElement *element) {
 
     auto tmp = nameGen.newName("key");
     auto type = typeMap->getType(element->expression, true);
-    auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
+    auto srcInfo = element->expression->srcInfo;
+    auto name = IR::ID(srcInfo, tmp);
+    auto decl = new IR::Declaration_Variable(srcInfo, name, type, nullptr);
     insertions->declarations.push_back(decl);
-    auto left = new IR::PathExpression(tmp);
+    auto left = new IR::PathExpression(name);
     auto right = element->expression;
     auto assign = new IR::AssignmentStatement(element->expression->srcInfo, left, right);
     insertions->statements.push_back(assign);
 
-    auto path = new IR::PathExpression(tmp);
+    auto path = new IR::PathExpression(name);
     // This preserves annotations on the key
     element->expression = path;
     LOG2("Created new key expression " << element);
@@ -801,7 +814,7 @@ const IR::Node *KeySideEffect::doStatement(const IR::Statement *statement,
         result.push_back(assign->clone());
     }
     result.push_back(statement);
-    return new IR::BlockStatement(std::move(result));
+    return new IR::BlockStatement(statement->srcInfo, std::move(result));
 }
 
 }  // namespace P4

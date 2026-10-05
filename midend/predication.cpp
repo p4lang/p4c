@@ -225,14 +225,14 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
 
     // Push statement which now contains a Mux expression in the statement->right.
     // ExpressionReplacer is applied here which takes care of correct transforming.
-    liveAssignments[statementName] =
-        new IR::AssignmentStatement(statement->left, clone(statement->right)->apply(replacer));
+    liveAssignments[statementName] = new IR::AssignmentStatement(
+        statement->srcInfo, statement->left, clone(statement->right)->apply(replacer));
     liveAssigns.push_back(liveAssignments[statementName]);
     LOG2("Finished visiting statement");
     LOG3("Pushed into liveAssigns statement: " << *(liveAssigns.back()));
 
     // Later removed by the emptyStatementRemover
-    return new IR::EmptyStatement();
+    return new IR::EmptyStatement(statement->srcInfo);
 }
 
 const IR::Node *Predication::preorder(IR::OpAssignmentStatement *statement) {
@@ -268,19 +268,23 @@ const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
         // Creates a new variable that has the value of the original index when the
         // condition is fulfilled, and in any other case it has a default value of '1w0'
         cstring indexName = generator.newName("index");
-        auto indexDecl = new IR::Declaration_Variable(indexName, arrInd->right->type->getP4Type());
-        auto index = new IR::PathExpression(IR::ID(indexName));
-        auto indexAssignment = new IR::AssignmentStatement(index, clone(arrInd->right));
+        auto srcInfo = arrInd->right->srcInfo;
+        auto name = IR::ID(srcInfo, indexName);
+        auto indexDecl =
+            new IR::Declaration_Variable(srcInfo, name, arrInd->right->type->getP4Type());
+        auto index = new IR::PathExpression(name);
+        auto indexAssignment = new IR::AssignmentStatement(srcInfo, index, clone(arrInd->right));
         ExpressionReplacer replacer(clone(indexAssignment), traversalPath, conditions);
         // Creates the initial Mux expression
         replacer.setVisitingIndex(true);
         indexAssignment->right =
-            new IR::Mux(conditions.back(), new IR::Constant(arrInd->right->type->getP4Type(), 0),
-                        new IR::Constant(arrInd->right->type->getP4Type(), 0));
+            new IR::Mux(srcInfo, conditions.back(),
+                        new IR::Constant(srcInfo, arrInd->right->type->getP4Type(), 0),
+                        new IR::Constant(srcInfo, arrInd->right->type->getP4Type(), 0));
         // Applies the replacer and adds the declaration and assignment to vectors
         indexDeclarations.push_back(indexDecl);
         liveAssignments[indexName] = new IR::AssignmentStatement(
-            indexAssignment->left, indexAssignment->right->apply(replacer));
+            srcInfo, indexAssignment->left, indexAssignment->right->apply(replacer));
         liveAssigns.push_back(liveAssignments[indexName]);
 
         arrInd->right = index;
@@ -297,15 +301,18 @@ const IR::Node *Predication::preorder(IR::IfStatement *statement) {
     LOG2(*statement);
     // rv block is the actual output of this preorder, it contains all of the newly
     // transformed statements, every new IF block has a new 'rv' block
-    auto rv = new IR::BlockStatement;
+    auto rv = new IR::BlockStatement(statement->srcInfo);
     // If the condition is of composite nature then an 'alias' needs to be made. It's declaration
     // can be pushed onto 'rv' immediately, while it's assignment of value needs to be pushed
     // onto 'liveAssigns', delaying it's placement on the 'rv' block and avoiding ordering issues.
     if (!statement->condition->is<IR::PathExpression>()) {
         cstring conditionName = generator.newName("cond");
-        rv->push_back(new IR::Declaration_Variable(conditionName, IR::Type::Boolean::get()));
-        auto condition = new IR::PathExpression(IR::ID(conditionName));
-        liveAssigns.push_back(new IR::AssignmentStatement(clone(condition), statement->condition));
+        auto srcInfo = statement->condition->srcInfo;
+        auto name = IR::ID(srcInfo, conditionName);
+        rv->push_back(new IR::Declaration_Variable(srcInfo, name, IR::Type::Boolean::get()));
+        auto condition = new IR::PathExpression(name);
+        liveAssigns.push_back(
+            new IR::AssignmentStatement(srcInfo, clone(condition), statement->condition));
         LOG1("Composite condition alias created: " << conditionName);
         LOG2(" " << statement->condition);
         statement->condition = condition;  // replace with variable cond
