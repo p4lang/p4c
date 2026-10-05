@@ -31,10 +31,12 @@ class PortableProgramStructure : public P4::ProgramStructure {
     ordered_map<cstring, const IR::Type_Header *> header_types;
     ordered_map<cstring, const IR::Type_Struct *> metadata_types;
     ordered_map<cstring, const IR::Type_HeaderUnion *> header_union_types;
+    ordered_map<cstring, std::vector<std::pair<cstring, cstring>>> header_union_fields;
     ordered_map<cstring, const IR::Declaration_Variable *> headers;
     ordered_map<cstring, const IR::Declaration_Variable *> metadata;
     ordered_map<cstring, const IR::Declaration_Variable *> header_stacks;
     ordered_map<cstring, const IR::Declaration_Variable *> header_unions;
+    ordered_map<cstring, const IR::Declaration_Variable *> header_union_stacks;
     ordered_map<cstring, const IR::Type_Error *> errors;
     ordered_map<cstring, const IR::Type_Enum *> enums;
     ordered_map<cstring, const IR::P4Parser *> parsers;
