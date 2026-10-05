@@ -5,7 +5,7 @@ var searchData=
   ['faketable_2',['FakeTable',['../class_fake_table.html',1,'']]],
   ['false_3',['False',['../classjson_1_1_false.html',1,'json']]],
   ['fdentry_4',['FDEntry',['../struct_deparser_1_1_f_d_entry.html',1,'Deparser']]],
-  ['fdstream_5',['fdstream',['../classfdstream.html',1,'']]],
+  ['fdstream_5',['FdStream',['../class_p4_1_1_fd_stream.html',1,'P4']]],
   ['feature_20requests_6',['Feature Requests',['../contribute.html#feature-requests',1,'']]],
   ['features_7',['Features',['../p4testgen.html#features',1,'Features'],['../dpdk_backend.html#unsupported-language-features',1,'Unsupported Language Features']]],
   ['features_8',['features',['../ebpf_backend.html#planned-features',1,'Planned features'],['../behavioral_model_backend.html#unsupported-p4_16-language-features',1,'Unsupported P4_16 language features'],['../dpdk_backend.html#unsupported-psa-externs-and-features',1,'Unsupported PSA externs and features']]],

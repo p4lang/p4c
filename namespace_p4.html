@@ -560,6 +560,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:struct_p4_1_1_extern_metrics" id="r_struct_p4_1_1_extern_metrics"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_p4_1_1_extern_metrics">ExternMetrics</a></td></tr>
 <tr class="separator:struct_p4_1_1_extern_metrics"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_fd_stream.html">FdStream</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_fill_enum_map.html">FillEnumMap</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_filter_likely_annot.html">FilterLikelyAnnot</a></td></tr>
@@ -2478,12 +2480,12 @@ const <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td cl
 <p>Given these tradeoffs, the general rule of thumb to follow is that you should try to convert strings to cstrings early and keep them in that form. That way, you benefit from cheaper copying, assignment, and equality testing in as many places as possible, and you avoid paying the cost of repeated conversion.</p>
 <p>However, when you're building or mutating a string, you should use std::string. Convert to a cstring only when the string is in its final form. This ensures that you don't pay the time and space cost of interning every intermediate version of the string.</p>
 <p>Note that cstring has implicit conversions to and from other string types. This is convenient, but in performance-sensitive code it's good to be aware that mixing the two types of strings can trigger a lot of implicit copies.</p>
-<p>Shouldn't happen as cmake will not try to build this backend if the boost graph headers couldn't be found.</p>
 <p>Copyright (C) 2024 Intel Corporation</p>
 <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p>
 <p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
 <p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>
 <p>SPDX-License-Identifier: Apache-2.0</p>
+<p>Shouldn't happen as cmake will not try to build this backend if the boost graph headers couldn't be found.</p>
 <p>Copyright (C) 2024 Intel Corporation</p>
 <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p>
 <p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>

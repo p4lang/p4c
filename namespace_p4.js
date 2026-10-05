@@ -195,6 +195,7 @@ var namespace_p4 =
     [ "ExternInstantiation", "class_p4_1_1_extern_instantiation.html", null ],
     [ "ExternMethod", "class_p4_1_1_extern_method.html", "class_p4_1_1_extern_method" ],
     [ "ExternMetrics", "namespace_p4.html#struct_p4_1_1_extern_metrics", null ],
+    [ "FdStream", "class_p4_1_1_fd_stream.html", null ],
     [ "FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],
     [ "FilterLikelyAnnot", "class_p4_1_1_filter_likely_annot.html", null ],
     [ "FindActionParameters", "class_p4_1_1_find_action_parameters.html", null ],

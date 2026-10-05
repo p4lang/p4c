@@ -4059,7 +4059,7 @@ var hierarchy =
       ] ]
     ] ],
     [ "std::iostream", null, [
-      [ "fdstream", "classfdstream.html", null ]
+      [ "P4::FdStream", "class_p4_1_1_fd_stream.html", null ]
     ] ],
     [ "std::is_base_of", null, [
       [ "P4::RTTI::has_rtti< T >", "struct_p4_1_1_r_t_t_i_1_1has__rtti.html", null ]
