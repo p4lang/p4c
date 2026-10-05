@@ -194,8 +194,8 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
         // headers in the union.  Each instance will be named with
         // a prefix including the union name, e.g., "u.h"
         Util::JsonArray *fields = new Util::JsonArray();
-        for (auto field_info : structure->header_union_fields.at(
-                 kv.second->to<IR::Type_HeaderUnion>()->getName())) {
+        for (auto field_info :
+             structure->header_union_fields.at(kv.second->to<IR::Type_HeaderUnion>()->getName())) {
             auto h_name = header_name + "." + field_info.first;
             unsigned id = ctxt->json->add_header(field_info.second, h_name);
             fields->append(id);
