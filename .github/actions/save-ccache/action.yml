@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+name: Save ccache
+description: Save changed cache files after a successful build.
+inputs:
+  prefix:
+    description: Key prefix from restore-ccache.
+    required: true
+  save-main:
+    description: Allow this job to update the main cache.
+    default: "true"
+  pr-max-size:
+    description: Maximum size in bytes of a PR's additional objects.
+    default: "200000000"
+runs:
+  using: composite
+  steps:
+    - name: Prepare cache files
+      id: snapshot
+      shell: bash
+      env:
+        CACHE_SAVE_MAIN: ${{ inputs.save-main }}
+        CACHE_PR_MAX_BYTES: ${{ inputs.pr-max-size }}
+      run: python3 .github/scripts/ccache_snapshot.py prepare
+    - name: Save main cache
+      if: steps.snapshot.outputs.main == 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: .ccache
+        key: ${{ inputs.prefix }}-main-${{ github.run_id }}-${{ github.run_attempt }}
+    - name: Save PR additions
+      if: steps.snapshot.outputs.pr == 'true'
+      uses: actions/cache/save@v6
+      with:
+        path: .ccache-pr
+        key: ${{ inputs.prefix }}-pr-${{ github.event.pull_request.number }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
