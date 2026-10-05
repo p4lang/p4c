@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Both structs must expose distinct keys through the control plane.
+add IngressImpl.t hdr.u.x.a:0x11 hdr.hus$0.x.a:0x22 hdr.hus$1.y.b:0x3344 meta.u.x.a:0x01 meta.hus$0.x.a:0x02 meta.hus$1.y.b:0x0304 IngressImpl.rewrite(a:0x55, b:0x66, c:0x7788)
+
+# The action reads B and writes A; only A is emitted, followed by the payload.
+packet 0 11 22 3344 01 02 0304 deadbeef
+expect 1 56 68 7a8c deadbeef$
+
+# Changing just B's union field must miss, despite the matching fields in A.
+packet 0 11 22 3344 02 02 0304 cafebabe
+expect 1 11 22 3344 cafebabe$
+
+# Changing just A's stack field must also miss.
+packet 0 11 23 3344 01 02 0304 01234567
+expect 1 11 23 3344 01234567$
