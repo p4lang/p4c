@@ -24,7 +24,7 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
         auto field = new Util::JsonArray();
         auto ftype = structure->typeMap->getType(f, true);
         // This change was somehow made during the implementation of header stack support
-        // for PSA BMv2 (commit 7869d966fdd8a86519a64116314c16dd12cfce00). 
+        // for PSA BMv2 (commit 7869d966fdd8a86519a64116314c16dd12cfce00).
         // However, now that I looked at it again, I don't think of why this is needed,
         // and reverting it back seems to work fine, so back with the original line
         // right above.

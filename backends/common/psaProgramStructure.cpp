@@ -127,7 +127,7 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
             LOG5("Field is Type_Array " << ft->toString());
             auto stack = ft->to<IR::Type_Array>();
             auto type = typeMap->getTypeType(stack->elementType, true);
-            
+
             // The check now also allow elements of Type_HeaderUnion to pass
             BUG_CHECK(type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>(),
                       "%1% not a header nor header union type", stack->elementType);
