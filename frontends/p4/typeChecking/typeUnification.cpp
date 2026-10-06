@@ -451,6 +451,8 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
         return true;
     } else if (auto dstack = dest->to<IR::Type_Array>()) {
         if (auto sstack = src->to<IR::Type_Array>()) {
+            if (!dstack->sizeKnown() || !sstack->sizeKnown()) return false;
+
             if (dstack->getSize() != sstack->getSize())
                 return constraint->reportError(
                     constraints->getCurrentSubstitution(),

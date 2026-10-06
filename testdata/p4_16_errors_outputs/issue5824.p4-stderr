@@ -1,0 +1,7 @@
+issue5824.p4(8): [--Werror=type-error] error: true > 0: not defined on bool and int
+    h_t[1 < 32 > 0] h;
+        ^^^^^^^^^^
+issue5824.p4(8): [--Werror=type-error] error: header h_t[?]: Size of header stack type should be a constant
+    h_t[1 < 32 > 0] h;
+    ^^^^^^^^^^^^^^^
+[--Werror=type-error] error: Error while analyzing Parser
