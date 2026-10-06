@@ -1,2 +1,26 @@
 packet 0 01 00
 expect 1 01 00 $
+
+# Each member of the header union.
+packet 0 00
+expect 1 00 $
+
+packet 0 01
+expect 1 01 $
+
+packet 0 02 11223344
+expect 1 02 11223344 $
+
+packet 0 03 aabbcc
+expect 1 03 aabbcc $
+
+packet 0 05 06 deadbeef
+expect 1 05 06 deadbeef $
+
+# Several different union members in one stack.
+packet 0 00 01 02 01020304 03 050607 05 06 11223344
+expect 1 00 01 02 01020304 03 050607 05 06 11223344 $
+
+# A full ten-element header-union stack.
+packet 0 00 01 02 11223344 03 aabbcc 05 06 deadbeef 01 00 02 55667788 03 010203 05 06 12345678
+expect 1 00 01 02 11223344 03 aabbcc 05 06 deadbeef 01 00 02 55667788 03 010203 05 06 12345678 $
