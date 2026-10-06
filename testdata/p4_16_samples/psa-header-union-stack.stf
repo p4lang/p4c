@@ -1,0 +1,2 @@
+packet 0 01 00
+expect 1 01 00 $
