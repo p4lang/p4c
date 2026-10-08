@@ -27,8 +27,7 @@ class EBPFRegisterPSA : public EBPFTableBase {
 
     bool shouldUseArrayMap();
     void emitAssignment(CodeBuilder *builder, EBPFType *type, cstring name,
-                        const IR::Expression *expression,
-                        ControlBodyTranslatorPSA *translator);
+                        const IR::Expression *expression, ControlBodyTranslatorPSA *translator);
 
  public:
     EBPFRegisterPSA(const EBPFProgram *program, cstring instanceName,
