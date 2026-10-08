@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #include <pna.p4>
 
 typedef bit<48> EthernetAddress;
@@ -55,12 +56,13 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
+    @name("MainControlImpl.tmp") bit<32> tmp;
     @name("MainControlImpl.addr") bit<32> addr_0;
     @name("MainControlImpl.forward") action forward(@name("addr") bit<32> addr) {
         user_meta.meta = addr;
     }
     @name("MainControlImpl.forward") action forward_1() {
-        addr_0 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
+        addr_0 = tmp;
         user_meta.meta = addr_0;
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
@@ -78,6 +80,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         if (hdr.ipv4.isValid()) {
+            tmp = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
             forward_1();
             if (user_meta.meta == hdr.ipv4.dstAddr) {
                 ipv4_da_lpm_0.apply();

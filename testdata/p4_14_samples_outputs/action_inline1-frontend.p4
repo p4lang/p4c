@@ -29,10 +29,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ingress.dest") bit<8> dest;
+    @name("ingress.val") bit<8> val_1;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".setb1") action setb1(@name("val") bit<8> val, @name("port") bit<9> port) {
-        dest = val;
+        val_1 = val;
+        dest = val_1;
         hdr.data.b1 = dest;
         standard_metadata.egress_spec = port;
     }
