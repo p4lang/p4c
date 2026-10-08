@@ -141,7 +141,18 @@ bool ToP4::preorder(const IR::P4Program *program) {
     for (auto a : program->objects) {
         // Check where this declaration originates
         auto sourceFileOpt = ifSystemFile(a);
-        // Errors and match_kinds can come from multiple files
+        // Errors and match_kinds can come from multiple files.
+        // Do not print a system-defined declaration whose members are also all system-defined.
+        if (sourceFileOpt.has_value() &&
+            (a->is<IR::Type_Error>() || a->is<IR::Declaration_MatchKind>())) {
+            const bool hasUserDecls = a->checkedTo<IR::ISimpleNamespace>()
+                                          ->getDeclarations()
+                                          ->where([this](const IR::IDeclaration *e) {
+                                              return !ifSystemFile(e->getNode()).has_value();
+                                          })
+                                          ->any();
+            if (!hasUserDecls) continue;
+        }
         if (!a->is<IR::Type_Error>() && !a->is<IR::Declaration_MatchKind>() &&
             sourceFileOpt.has_value()) {
             /* FIXME -- when including a user header file (sourceFile !=

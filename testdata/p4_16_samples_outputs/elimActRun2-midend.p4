@@ -8,7 +8,6 @@ enum simple_table_0_action_run_t {
     simple_table_0_dummy_action,
     simple_table_0_NoAction
 }
-
 #include <core.p4>
 
 @command_line("--preferSwitch") header ethernet_t {
