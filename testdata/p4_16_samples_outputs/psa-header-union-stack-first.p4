@@ -11,7 +11,7 @@ header Mpls_h {
 
 control p() {
     apply {
-        Mpls_h[10] mpls_vec;
+        @name("mpls_vec") Mpls_h[10] mpls_vec_0;
     }
 }
 
@@ -51,10 +51,18 @@ typedef Tcp_option_h[10] Tcp_option_stack;
 header empty_t {
 }
 
+header parse_report_t {
+    bit<8> parsed_count;
+    bit<8> first_member;
+}
+
 struct metadata_t {
+    bit<8> parsed_count;
+    bit<8> first_member;
 }
 
 struct headers_t {
+    parse_report_t   report;
     Tcp_option_stack options;
 }
 
@@ -76,28 +84,87 @@ parser HeaderUnionIngressParser(packet_in packet, out headers_t hdr, inout metad
     }
     state parse_end {
         packet.extract<Tcp_option_end_h>(hdr.options.next.end);
+        transition select(meta.parsed_count == 8w0) {
+            true: parse_end_true;
+            false: parse_end_join;
+        }
+    }
+    state parse_end_true {
+        meta.first_member = 8w0;
+        transition parse_end_join;
+    }
+    state parse_end_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition accept;
     }
     state parse_nop {
         packet.extract<Tcp_option_nop_h>(hdr.options.next.nop);
+        transition select(meta.parsed_count == 8w0) {
+            true: parse_nop_true;
+            false: parse_nop_join;
+        }
+    }
+    state parse_nop_true {
+        meta.first_member = 8w1;
+        transition parse_nop_join;
+    }
+    state parse_nop_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
     }
     state parse_ss {
         packet.extract<Tcp_option_ss_h>(hdr.options.next.ss);
+        transition select(meta.parsed_count == 8w0) {
+            true: parse_ss_true;
+            false: parse_ss_join;
+        }
+    }
+    state parse_ss_true {
+        meta.first_member = 8w2;
+        transition parse_ss_join;
+    }
+    state parse_ss_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
     }
     state parse_s {
         packet.extract<Tcp_option_s_h>(hdr.options.next.s);
+        transition select(meta.parsed_count == 8w0) {
+            true: parse_s_true;
+            false: parse_s_join;
+        }
+    }
+    state parse_s_true {
+        meta.first_member = 8w3;
+        transition parse_s_join;
+    }
+    state parse_s_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
     }
     state parse_sack {
         packet.extract<Tcp_option_sack_h>(hdr.options.next.sack, (bit<32>)(((packet.lookahead<TcpOptionSackLength>()).length << 3) + 8w240));
+        transition select(meta.parsed_count == 8w0) {
+            true: parse_sack_true;
+            false: parse_sack_join;
+        }
+    }
+    state parse_sack_true {
+        meta.first_member = 8w5;
+        transition parse_sack_join;
+    }
+    state parse_sack_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
     }
 }
 
 parser HeaderUnionEgressParser(packet_in packet, out headers_t hdr, inout metadata_t meta, in psa_egress_parser_input_metadata_t estd, in empty_t normal, in empty_t clone_i2e, in empty_t clone_e2e) {
     state start {
+        packet.extract<parse_report_t>(hdr.report);
+        transition parse_options;
+    }
+    state parse_options {
         transition select(packet.lookahead<bit<8>>()) {
             8w0x0: parse_end;
             8w0x1: parse_nop;
@@ -131,6 +198,9 @@ parser HeaderUnionEgressParser(packet_in packet, out headers_t hdr, inout metada
 
 control HeaderUnionIngress(inout headers_t hdr, inout metadata_t meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
+        hdr.report.setValid();
+        hdr.report.parsed_count = meta.parsed_count;
+        hdr.report.first_member = meta.first_member;
         send_to_port(ostd, (PortId_t)32w1);
     }
 }
@@ -142,12 +212,14 @@ control HeaderUnionEgress(inout headers_t hdr, inout metadata_t meta, in psa_egr
 
 control HeaderUnionIngressDeparser(packet_out packet, out empty_t clone_i2e, out empty_t resubmit, out empty_t normal, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
     apply {
+        packet.emit<parse_report_t>(hdr.report);
         packet.emit<Tcp_option_h[10]>(hdr.options);
     }
 }
 
 control HeaderUnionEgressDeparser(packet_out packet, out empty_t clone_e2e, out empty_t recirculate, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t ostd, in psa_egress_deparser_input_metadata_t edstd) {
     apply {
+        packet.emit<parse_report_t>(hdr.report);
         packet.emit<Tcp_option_h[10]>(hdr.options);
     }
 }

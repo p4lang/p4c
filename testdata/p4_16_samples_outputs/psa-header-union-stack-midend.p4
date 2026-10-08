@@ -44,10 +44,18 @@ header_union Tcp_option_h {
 header empty_t {
 }
 
+header parse_report_t {
+    bit<8> parsed_count;
+    bit<8> first_member;
+}
+
 struct metadata_t {
+    bit<8> parsed_count;
+    bit<8> first_member;
 }
 
 struct headers_t {
+    parse_report_t   report;
     Tcp_option_h[10] options;
 }
 
@@ -72,24 +80,88 @@ parser HeaderUnionIngressParser(packet_in packet, out headers_t hdr, inout metad
     }
     state parse_end {
         packet.extract<Tcp_option_end_h>(hdr.options.next.end);
+        transition select((bit<1>)(meta.parsed_count == 8w0)) {
+            1w1: parse_end_true;
+            1w0: parse_end_join;
+            default: noMatch;
+        }
+    }
+    state parse_end_true {
+        meta.first_member = 8w0;
+        transition parse_end_join;
+    }
+    state parse_end_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition accept;
     }
     state parse_nop {
         packet.extract<Tcp_option_nop_h>(hdr.options.next.nop);
+        transition select((bit<1>)(meta.parsed_count == 8w0)) {
+            1w1: parse_nop_true;
+            1w0: parse_nop_join;
+            default: noMatch;
+        }
+    }
+    state parse_nop_true {
+        meta.first_member = 8w1;
+        transition parse_nop_join;
+    }
+    state parse_nop_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
     }
     state parse_ss {
         packet.extract<Tcp_option_ss_h>(hdr.options.next.ss);
+        transition select((bit<1>)(meta.parsed_count == 8w0)) {
+            1w1: parse_ss_true;
+            1w0: parse_ss_join;
+            default: noMatch;
+        }
+    }
+    state parse_ss_true {
+        meta.first_member = 8w2;
+        transition parse_ss_join;
+    }
+    state parse_ss_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
     }
     state parse_s {
         packet.extract<Tcp_option_s_h>(hdr.options.next.s);
+        transition select((bit<1>)(meta.parsed_count == 8w0)) {
+            1w1: parse_s_true;
+            1w0: parse_s_join;
+            default: noMatch;
+        }
+    }
+    state parse_s_true {
+        meta.first_member = 8w3;
+        transition parse_s_join;
+    }
+    state parse_s_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
     }
     state parse_sack {
         tmp_11 = packet.lookahead<bit<16>>();
         packet.extract<Tcp_option_sack_h>(hdr.options.next.sack, (bit<32>)((tmp_11[7:0] << 3) + 8w240));
+        transition select((bit<1>)(meta.parsed_count == 8w0)) {
+            1w1: parse_sack_true;
+            1w0: parse_sack_join;
+            default: noMatch;
+        }
+    }
+    state parse_sack_true {
+        meta.first_member = 8w5;
+        transition parse_sack_join;
+    }
+    state parse_sack_join {
+        meta.parsed_count = meta.parsed_count + 8w1;
         transition start;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
 }
 
@@ -97,6 +169,7 @@ parser HeaderUnionEgressParser(packet_in packet, out headers_t hdr, inout metada
     @name("HeaderUnionEgressParser.tmp_6") bit<8> tmp_6;
     bit<16> tmp_12;
     state start {
+        packet.extract<parse_report_t>(hdr.report);
         tmp_6 = packet.lookahead<bit<8>>();
         transition select(tmp_6) {
             8w0x0: parse_end;
@@ -136,6 +209,17 @@ control HeaderUnionIngress(inout headers_t hdr, inout metadata_t meta, in psa_in
         ostd.multicast_group = 32w0;
         ostd.egress_port = 32w1;
     }
+    @hidden action psaheaderunionstack154() {
+        hdr.report.setValid();
+        hdr.report.parsed_count = meta.parsed_count;
+        hdr.report.first_member = meta.first_member;
+    }
+    @hidden table tbl_psaheaderunionstack154 {
+        actions = {
+            psaheaderunionstack154();
+        }
+        const default_action = psaheaderunionstack154();
+    }
     @hidden table tbl_send_to_port {
         actions = {
             send_to_port_0();
@@ -143,6 +227,7 @@ control HeaderUnionIngress(inout headers_t hdr, inout metadata_t meta, in psa_in
         const default_action = send_to_port_0();
     }
     apply {
+        tbl_psaheaderunionstack154.apply();
         tbl_send_to_port.apply();
     }
 }
@@ -153,7 +238,8 @@ control HeaderUnionEgress(inout headers_t hdr, inout metadata_t meta, in psa_egr
 }
 
 control HeaderUnionIngressDeparser(packet_out packet, out empty_t clone_i2e, out empty_t resubmit, out empty_t normal, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaheaderunionstack142() {
+    @hidden action psaheaderunionstack178() {
+        packet.emit<parse_report_t>(hdr.report);
         packet.emit<Tcp_option_end_h>(hdr.options[0].end);
         packet.emit<Tcp_option_nop_h>(hdr.options[0].nop);
         packet.emit<Tcp_option_ss_h>(hdr.options[0].ss);
@@ -205,19 +291,20 @@ control HeaderUnionIngressDeparser(packet_out packet, out empty_t clone_i2e, out
         packet.emit<Tcp_option_s_h>(hdr.options[9].s);
         packet.emit<Tcp_option_sack_h>(hdr.options[9].sack);
     }
-    @hidden table tbl_psaheaderunionstack142 {
+    @hidden table tbl_psaheaderunionstack178 {
         actions = {
-            psaheaderunionstack142();
+            psaheaderunionstack178();
         }
-        const default_action = psaheaderunionstack142();
+        const default_action = psaheaderunionstack178();
     }
     apply {
-        tbl_psaheaderunionstack142.apply();
+        tbl_psaheaderunionstack178.apply();
     }
 }
 
 control HeaderUnionEgressDeparser(packet_out packet, out empty_t clone_e2e, out empty_t recirculate, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t ostd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaheaderunionstack155() {
+    @hidden action psaheaderunionstack192() {
+        packet.emit<parse_report_t>(hdr.report);
         packet.emit<Tcp_option_end_h>(hdr.options[0].end);
         packet.emit<Tcp_option_nop_h>(hdr.options[0].nop);
         packet.emit<Tcp_option_ss_h>(hdr.options[0].ss);
@@ -269,14 +356,14 @@ control HeaderUnionEgressDeparser(packet_out packet, out empty_t clone_e2e, out 
         packet.emit<Tcp_option_s_h>(hdr.options[9].s);
         packet.emit<Tcp_option_sack_h>(hdr.options[9].sack);
     }
-    @hidden table tbl_psaheaderunionstack155 {
+    @hidden table tbl_psaheaderunionstack192 {
         actions = {
-            psaheaderunionstack155();
+            psaheaderunionstack192();
         }
-        const default_action = psaheaderunionstack155();
+        const default_action = psaheaderunionstack192();
     }
     apply {
-        tbl_psaheaderunionstack155.apply();
+        tbl_psaheaderunionstack192.apply();
     }
 }
 

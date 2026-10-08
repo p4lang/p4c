@@ -10,8 +10,16 @@
 #include "spec-ex09.p4"
 
 header empty_t {}
-struct metadata_t {}
+header parse_report_t {
+    bit<8> parsed_count;
+    bit<8> first_member;
+}
+struct metadata_t {
+    bit<8> parsed_count;
+    bit<8> first_member;
+}
 struct headers_t {
+    parse_report_t report;
     Tcp_option_stack options;
 }
 struct TcpOptionSackLength {
@@ -39,21 +47,37 @@ parser HeaderUnionIngressParser(
 
     state parse_end {
         packet.extract(hdr.options.next.end);
+        if (meta.parsed_count == 0) {
+            meta.first_member = 0;
+        }
+        meta.parsed_count = meta.parsed_count + 1;
         transition accept;
     }
 
     state parse_nop {
         packet.extract(hdr.options.next.nop);
+        if (meta.parsed_count == 0) {
+            meta.first_member = 1;
+        }
+        meta.parsed_count = meta.parsed_count + 1;
         transition start;
     }
 
     state parse_ss {
         packet.extract(hdr.options.next.ss);
+        if (meta.parsed_count == 0) {
+            meta.first_member = 2;
+        }
+        meta.parsed_count = meta.parsed_count + 1;
         transition start;
     }
 
     state parse_s {
         packet.extract(hdr.options.next.s);
+        if (meta.parsed_count == 0) {
+            meta.first_member = 3;
+        }
+        meta.parsed_count = meta.parsed_count + 1;
         transition start;
     }
 
@@ -61,6 +85,10 @@ parser HeaderUnionIngressParser(
         packet.extract(
             hdr.options.next.sack,
             (bit<32>)(8 * packet.lookahead<TcpOptionSackLength>().length - 16));
+        if (meta.parsed_count == 0) {
+            meta.first_member = 5;
+        }
+        meta.parsed_count = meta.parsed_count + 1;
         transition start;
     }
 }
@@ -74,6 +102,11 @@ parser HeaderUnionEgressParser(
     in empty_t clone_i2e,
     in empty_t clone_e2e) {
     state start {
+        packet.extract(hdr.report);
+        transition parse_options;
+    }
+
+    state parse_options {
         transition select(packet.lookahead<bit<8>>()) {
             8w0x00: parse_end;
             8w0x01: parse_nop;
@@ -118,6 +151,9 @@ control HeaderUnionIngress(
     in psa_ingress_input_metadata_t istd,
     inout psa_ingress_output_metadata_t ostd) {
     apply {
+        hdr.report.setValid();
+        hdr.report.parsed_count = meta.parsed_count;
+        hdr.report.first_member = meta.first_member;
         send_to_port(ostd, (PortId_t)1);
     }
 }
@@ -139,6 +175,7 @@ control HeaderUnionIngressDeparser(
     in metadata_t meta,
     in psa_ingress_output_metadata_t istd) {
     apply {
+        packet.emit(hdr.report);
         packet.emit(hdr.options);
     }
 }
@@ -152,6 +189,7 @@ control HeaderUnionEgressDeparser(
     in psa_egress_output_metadata_t ostd,
     in psa_egress_deparser_input_metadata_t edstd) {
     apply {
+        packet.emit(hdr.report);
         packet.emit(hdr.options);
     }
 }
