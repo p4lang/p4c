@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -424,6 +425,8 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @name("ingress.acl_pre_ingress.ecn") bit<2> acl_pre_ingress_ecn;
     @name("ingress.hashing.seed") bit<32> hashing_seed;
     @name("ingress.hashing.offset") bit<8> hashing_offset;
+    @id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("ingress.wcmp_group_id") wcmp_group_id_t wcmp_group_id_0;
+    @id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("ingress.wcmp_group_id") wcmp_group_id_t wcmp_group_id_1;
     @name("ingress.acl_ingress.ttl") bit<8> acl_ingress_ttl;
     @name("ingress.acl_ingress.dscp") bit<6> acl_ingress_dscp;
     @name("ingress.acl_ingress.ecn") bit<2> acl_ingress_ecn;
@@ -435,6 +438,31 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @name("ingress.routing_resolution.router_interface_id_value") router_interface_id_t routing_resolution_router_interface_id_value;
     @name("ingress.routing_resolution.neighbor_id_valid") bool routing_resolution_neighbor_id_valid;
     @name("ingress.routing_resolution.neighbor_id_value") ipv6_addr_t routing_resolution_neighbor_id_value;
+    @id(1) @name("ingress.port") port_id_t port_0;
+    @id(2) @format(MAC_ADDRESS) @name("ingress.src_mac") ethernet_addr_t src_mac_0;
+    @id(3) @name("ingress.vlan_id") vlan_id_t vlan_id_0;
+    @id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("ingress.router_interface_id") router_interface_id_t router_interface_id_0;
+    @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("ingress.neighbor_id") ipv6_addr_t neighbor_id_0;
+    @id(3) @name("ingress.disable_decrement_ttl") bit<1> disable_decrement_ttl_0;
+    @id(4) @name("ingress.disable_src_mac_rewrite") bit<1> disable_src_mac_rewrite_0;
+    @id(5) @name("ingress.disable_dst_mac_rewrite") bit<1> disable_dst_mac_rewrite_0;
+    @id(6) @name("ingress.disable_vlan_rewrite") bit<1> disable_vlan_rewrite_0;
+    @id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("ingress.router_interface_id") router_interface_id_t router_interface_id_1;
+    @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("ingress.neighbor_id") ipv6_addr_t neighbor_id_1;
+    @id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("ingress.router_interface_id") router_interface_id_t router_interface_id_2;
+    @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("ingress.neighbor_id") ipv6_addr_t neighbor_id_2;
+    @id(3) @name("ingress.disable_decrement_ttl") bit<1> disable_decrement_ttl_4;
+    @id(4) @name("ingress.disable_src_mac_rewrite") bit<1> disable_src_mac_rewrite_4;
+    @id(5) @name("ingress.disable_dst_mac_rewrite") bit<1> disable_dst_mac_rewrite_4;
+    @id(6) @name("ingress.disable_vlan_rewrite") bit<1> disable_vlan_rewrite_4;
+    @id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("ingress.router_interface_id") router_interface_id_t router_interface_id_3;
+    @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("ingress.neighbor_id") ipv6_addr_t neighbor_id_10;
+    @id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("ingress.router_interface_id") router_interface_id_t router_interface_id_12;
+    @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("ingress.neighbor_id") ipv6_addr_t neighbor_id_11;
+    @id(3) @name("ingress.disable_decrement_ttl") bit<1> disable_decrement_ttl_5;
+    @id(4) @name("ingress.disable_src_mac_rewrite") bit<1> disable_src_mac_rewrite_5;
+    @id(5) @name("ingress.disable_dst_mac_rewrite") bit<1> disable_dst_mac_rewrite_5;
+    @id(6) @name("ingress.disable_vlan_rewrite") bit<1> disable_vlan_rewrite_5;
     @name("ingress.local_metadata") local_metadata_t local_metadata_0;
     @name("ingress.local_metadata") local_metadata_t local_metadata_1;
     @name("ingress.local_metadata") local_metadata_t local_metadata_8;
@@ -642,21 +670,23 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata.wcmp_group_id_valid = true;
         local_metadata.wcmp_group_id_value = wcmp_group_id;
     }
-    @id(0x01000004) @name("ingress.routing_lookup.set_wcmp_group_id") action routing_lookup_set_wcmp_group_id_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") wcmp_group_id_t wcmp_group_id_2) {
+    @id(0x01000004) @name("ingress.routing_lookup.set_wcmp_group_id") action routing_lookup_set_wcmp_group_id_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") wcmp_group_id_t wcmp_group_id_4) {
         local_metadata.wcmp_group_id_valid = true;
-        local_metadata.wcmp_group_id_value = wcmp_group_id_2;
+        local_metadata.wcmp_group_id_value = wcmp_group_id_4;
     }
-    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") wcmp_group_id_t wcmp_group_id_3, @name("route_metadata") route_metadata_t route_metadata_3) {
+    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") wcmp_group_id_t wcmp_group_id_5, @name("route_metadata") route_metadata_t route_metadata_3) {
         @id(0x01000004) @inlinedFrom("routing_lookup_set_wcmp_group_id") {
+            wcmp_group_id_0 = wcmp_group_id_5;
             local_metadata.wcmp_group_id_valid = true;
-            local_metadata.wcmp_group_id_value = wcmp_group_id_3;
+            local_metadata.wcmp_group_id_value = wcmp_group_id_0;
         }
         local_metadata.route_metadata = route_metadata_3;
     }
-    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") wcmp_group_id_t wcmp_group_id_4, @name("route_metadata") route_metadata_t route_metadata_4) {
+    @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") wcmp_group_id_t wcmp_group_id_6, @name("route_metadata") route_metadata_t route_metadata_4) {
         @id(0x01000004) @inlinedFrom("routing_lookup_set_wcmp_group_id") {
+            wcmp_group_id_1 = wcmp_group_id_6;
             local_metadata.wcmp_group_id_valid = true;
-            local_metadata.wcmp_group_id_value = wcmp_group_id_4;
+            local_metadata.wcmp_group_id_value = wcmp_group_id_1;
         }
         local_metadata.route_metadata = route_metadata_4;
     }
@@ -965,13 +995,16 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata.packet_rewrites.src_mac = src_mac_4;
         local_metadata.packet_rewrites.vlan_id = vlan_id_1;
     }
-    @id(0x01000002) @name("ingress.routing_resolution.set_port_and_src_mac") action routing_resolution_set_port_and_src_mac_0(@id(1) @name("port") port_id_t port_3, @id(2) @format(MAC_ADDRESS) @name("src_mac") ethernet_addr_t src_mac_5) {
+    @id(0x01000002) @name("ingress.routing_resolution.set_port_and_src_mac") action routing_resolution_set_port_and_src_mac_0(@id(1) @name("port") port_id_t port_4, @id(2) @format(MAC_ADDRESS) @name("src_mac") ethernet_addr_t src_mac_6) {
         @id(0x0100001B) @unsupported @action_restriction("
     // Disallow reserved VLAN IDs with implementation-defined semantics.
     vlan_id != 0 && vlan_id != 4095") @inlinedFrom("routing_resolution_set_port_and_src_mac_and_vlan_id") {
-            standard_metadata.egress_spec = (bit<9>)port_3;
-            local_metadata.packet_rewrites.src_mac = src_mac_5;
-            local_metadata.packet_rewrites.vlan_id = 12w0xfff;
+            port_0 = port_4;
+            src_mac_0 = src_mac_6;
+            vlan_id_0 = 12w0xfff;
+            standard_metadata.egress_spec = (bit<9>)port_0;
+            local_metadata.packet_rewrites.src_mac = src_mac_0;
+            local_metadata.packet_rewrites.vlan_id = vlan_id_0;
         }
     }
     @p4runtime_role("sdn_controller") @id(0x02000041) @name("ingress.routing_resolution.router_interface_table") table routing_resolution_router_interface_table {
@@ -998,27 +1031,41 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     }
     @id(0x01000014) @name("ingress.routing_resolution.set_ip_nexthop") action routing_resolution_set_ip_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") router_interface_id_t router_interface_id_4, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") ipv6_addr_t neighbor_id_3) {
         @id(0x01000017) @inlinedFrom("routing_resolution_set_ip_nexthop_and_disable_rewrites") {
+            router_interface_id_0 = router_interface_id_4;
+            neighbor_id_0 = neighbor_id_3;
+            disable_decrement_ttl_0 = 1w0x0;
+            disable_src_mac_rewrite_0 = 1w0x0;
+            disable_dst_mac_rewrite_0 = 1w0x0;
+            disable_vlan_rewrite_0 = 1w0x0;
             routing_resolution_router_interface_id_valid = true;
-            routing_resolution_router_interface_id_value = router_interface_id_4;
+            routing_resolution_router_interface_id_value = router_interface_id_0;
             routing_resolution_neighbor_id_valid = true;
-            routing_resolution_neighbor_id_value = neighbor_id_3;
-            local_metadata.enable_decrement_ttl = true;
-            local_metadata.enable_src_mac_rewrite = true;
-            local_metadata.enable_dst_mac_rewrite = true;
-            local_metadata.enable_vlan_rewrite = true;
+            routing_resolution_neighbor_id_value = neighbor_id_0;
+            local_metadata.enable_decrement_ttl = !(bool)disable_decrement_ttl_0;
+            local_metadata.enable_src_mac_rewrite = !(bool)disable_src_mac_rewrite_0;
+            local_metadata.enable_dst_mac_rewrite = !(bool)disable_dst_mac_rewrite_0;
+            local_metadata.enable_vlan_rewrite = !(bool)disable_vlan_rewrite_0;
         }
     }
     @id(0x01000003) @deprecated("Use set_ip_nexthop instead.") @name("ingress.routing_resolution.set_nexthop") action routing_resolution_set_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") router_interface_id_t router_interface_id_5, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") ipv6_addr_t neighbor_id_4) {
         @id(0x01000014) @inlinedFrom("routing_resolution_set_ip_nexthop") {
+            router_interface_id_1 = router_interface_id_5;
+            neighbor_id_1 = neighbor_id_4;
             @id(0x01000017) @inlinedFrom("routing_resolution_set_ip_nexthop_and_disable_rewrites") {
+                router_interface_id_2 = router_interface_id_1;
+                neighbor_id_2 = neighbor_id_1;
+                disable_decrement_ttl_4 = 1w0x0;
+                disable_src_mac_rewrite_4 = 1w0x0;
+                disable_dst_mac_rewrite_4 = 1w0x0;
+                disable_vlan_rewrite_4 = 1w0x0;
                 routing_resolution_router_interface_id_valid = true;
-                routing_resolution_router_interface_id_value = router_interface_id_5;
+                routing_resolution_router_interface_id_value = router_interface_id_2;
                 routing_resolution_neighbor_id_valid = true;
-                routing_resolution_neighbor_id_value = neighbor_id_4;
-                local_metadata.enable_decrement_ttl = true;
-                local_metadata.enable_src_mac_rewrite = true;
-                local_metadata.enable_dst_mac_rewrite = true;
-                local_metadata.enable_vlan_rewrite = true;
+                routing_resolution_neighbor_id_value = neighbor_id_2;
+                local_metadata.enable_decrement_ttl = !(bool)disable_decrement_ttl_4;
+                local_metadata.enable_src_mac_rewrite = !(bool)disable_src_mac_rewrite_4;
+                local_metadata.enable_dst_mac_rewrite = !(bool)disable_dst_mac_rewrite_4;
+                local_metadata.enable_vlan_rewrite = !(bool)disable_vlan_rewrite_4;
             }
         }
     }
@@ -1040,20 +1087,28 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         const default_action = NoAction_13();
         size = 1024;
     }
-    @id(0x01000013) @name("ingress.routing_resolution.mark_for_p2p_tunnel_encap") action routing_resolution_mark_for_p2p_tunnel_encap_0(@id(1) @format(IPV6_ADDRESS) @name("encap_src_ip") ipv6_addr_t encap_src_ip, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("encap_dst_ip") ipv6_addr_t encap_dst_ip, @id(3) @refers_to(neighbor_table , router_interface_id) @refers_to(router_interface_table , router_interface_id) @name("router_interface_id") router_interface_id_t router_interface_id_6) {
+    @id(0x01000013) @name("ingress.routing_resolution.mark_for_p2p_tunnel_encap") action routing_resolution_mark_for_p2p_tunnel_encap_0(@id(1) @format(IPV6_ADDRESS) @name("encap_src_ip") ipv6_addr_t encap_src_ip, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("encap_dst_ip") ipv6_addr_t encap_dst_ip, @id(3) @refers_to(neighbor_table , router_interface_id) @refers_to(router_interface_table , router_interface_id) @name("router_interface_id") router_interface_id_t router_interface_id_11) {
         local_metadata.tunnel_encap_src_ipv6 = encap_src_ip;
         local_metadata.tunnel_encap_dst_ipv6 = encap_dst_ip;
         local_metadata.apply_tunnel_encap_at_egress = true;
         @id(0x01000014) @inlinedFrom("routing_resolution_set_ip_nexthop") {
+            router_interface_id_3 = router_interface_id_11;
+            neighbor_id_10 = encap_dst_ip;
             @id(0x01000017) @inlinedFrom("routing_resolution_set_ip_nexthop_and_disable_rewrites") {
+                router_interface_id_12 = router_interface_id_3;
+                neighbor_id_11 = neighbor_id_10;
+                disable_decrement_ttl_5 = 1w0x0;
+                disable_src_mac_rewrite_5 = 1w0x0;
+                disable_dst_mac_rewrite_5 = 1w0x0;
+                disable_vlan_rewrite_5 = 1w0x0;
                 routing_resolution_router_interface_id_valid = true;
-                routing_resolution_router_interface_id_value = router_interface_id_6;
+                routing_resolution_router_interface_id_value = router_interface_id_12;
                 routing_resolution_neighbor_id_valid = true;
-                routing_resolution_neighbor_id_value = encap_dst_ip;
-                local_metadata.enable_decrement_ttl = true;
-                local_metadata.enable_src_mac_rewrite = true;
-                local_metadata.enable_dst_mac_rewrite = true;
-                local_metadata.enable_vlan_rewrite = true;
+                routing_resolution_neighbor_id_value = neighbor_id_11;
+                local_metadata.enable_decrement_ttl = !(bool)disable_decrement_ttl_5;
+                local_metadata.enable_src_mac_rewrite = !(bool)disable_src_mac_rewrite_5;
+                local_metadata.enable_dst_mac_rewrite = !(bool)disable_dst_mac_rewrite_5;
+                local_metadata.enable_vlan_rewrite = !(bool)disable_vlan_rewrite_5;
             }
         }
     }
@@ -1082,7 +1137,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         implementation = routing_resolution_wcmp_group_selector;
         size = 3968;
     }
-    @id(0x01000007) @name("ingress.mirror_session_lookup.mirror_as_ipv4_erspan") action mirror_session_lookup_mirror_as_ipv4_erspan_0(@id(1) @name("port") port_id_t port_4, @id(2) @format(IPV4_ADDRESS) @name("src_ip") ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) @name("dst_ip") ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) @name("src_mac") ethernet_addr_t src_mac_6, @id(5) @format(MAC_ADDRESS) @name("dst_mac") ethernet_addr_t dst_mac_3, @id(6) @name("ttl") bit<8> ttl_1, @id(7) @name("tos") bit<8> tos) {
+    @id(0x01000007) @name("ingress.mirror_session_lookup.mirror_as_ipv4_erspan") action mirror_session_lookup_mirror_as_ipv4_erspan_0(@id(1) @name("port") port_id_t port_5, @id(2) @format(IPV4_ADDRESS) @name("src_ip") ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) @name("dst_ip") ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) @name("src_mac") ethernet_addr_t src_mac_7, @id(5) @format(MAC_ADDRESS) @name("dst_mac") ethernet_addr_t dst_mac_3, @id(6) @name("ttl") bit<8> ttl_1, @id(7) @name("tos") bit<8> tos) {
     }
     @id(0x0100001D) @unsupported @name("ingress.mirror_session_lookup.mirror_with_vlan_tag_and_ipfix_encapsulation") action mirror_session_lookup_mirror_with_vlan_tag_and_ipfix_encapsulation_0(@id(1) @name("monitor_port") port_id_t monitor_port, @id(2) @name("monitor_failover_port") port_id_t monitor_failover_port, @id(3) @format(MAC_ADDRESS) @name("mirror_encap_src_mac") ethernet_addr_t mirror_encap_src_mac_1, @id(4) @format(MAC_ADDRESS) @name("mirror_encap_dst_mac") ethernet_addr_t mirror_encap_dst_mac_1, @id(6) @name("mirror_encap_vlan_id") vlan_id_t mirror_encap_vlan_id_1, @id(7) @format(IPV6_ADDRESS) @name("mirror_encap_dst_ip") ipv6_addr_t mirror_encap_dst_ip_1, @id(8) @format(IPV6_ADDRESS) @name("mirror_encap_src_ip") ipv6_addr_t mirror_encap_src_ip_1, @id(9) @name("mirror_encap_udp_src_port") bit<16> mirror_encap_udp_src_port_1, @id(10) @name("mirror_encap_udp_dst_port") bit<16> mirror_encap_udp_dst_port_1) {
         local_metadata.mirror_egress_port = monitor_port;
@@ -1281,9 +1336,9 @@ control egress(inout headers_t headers, inout local_metadata_t local_metadata, i
         local_metadata_11.acl_drop = true;
         local_metadata = local_metadata_11;
     }
-    @id(0x01000019) @name("egress.packet_rewrites.multicast_rewrites.set_multicast_src_mac") action packet_rewrites_multicast_rewrites_set_multicast_src_mac_0(@id(1) @format(MAC_ADDRESS) @name("src_mac") ethernet_addr_t src_mac_7) {
+    @id(0x01000019) @name("egress.packet_rewrites.multicast_rewrites.set_multicast_src_mac") action packet_rewrites_multicast_rewrites_set_multicast_src_mac_0(@id(1) @format(MAC_ADDRESS) @name("src_mac") ethernet_addr_t src_mac_8) {
         local_metadata.enable_src_mac_rewrite = true;
-        local_metadata.packet_rewrites.src_mac = src_mac_7;
+        local_metadata.packet_rewrites.src_mac = src_mac_8;
     }
     @p4runtime_role("sdn_controller") @id(0x0200004C) @name("egress.packet_rewrites.multicast_rewrites.multicast_router_interface_table") table packet_rewrites_multicast_rewrites_multicast_router_interface_table {
         key = {
