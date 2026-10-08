@@ -65,6 +65,28 @@ bool EBPFRegisterPSA::shouldUseArrayMap() {
     return false;
 }
 
+void EBPFRegisterPSA::emitAssignment(CodeBuilder *builder, EBPFType *type, cstring name,
+                                     const IR::Expression *expression,
+                                     ControlBodyTranslatorPSA *translator) {
+    auto width = type->to<IHasWidth>();
+    bool isWide =
+        width != nullptr && !EBPFScalarType::generatesScalar(width->implementationWidthInBits());
+
+    builder->emitIndent();
+    if (isWide) {
+        builder->appendFormat("__builtin_memcpy(&%s, &", name.c_str());
+        if (expression->is<IR::Constant>()) {
+            builder->appendFormat("(u8[%u])", width->implementationWidthInBits() / 8);
+        }
+        translator->visit(expression);
+        builder->appendFormat(", %u)", width->implementationWidthInBits() / 8);
+    } else {
+        builder->appendFormat("%s = ", name.c_str());
+        translator->visit(expression);
+    }
+    builder->endOfStatement(true);
+}
+
 void EBPFRegisterPSA::emitTypes(CodeBuilder *builder) {
     emitKeyType(builder);
     emitValueType(builder);
@@ -151,11 +173,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
     builder->emitIndent();
     this->keyType->declare(builder, keyName, false);
     builder->endOfStatement(true);
-
-    builder->emitIndent();
-    builder->appendFormat("%s = ", keyName.c_str());
-    translator->visit(index);
-    builder->endOfStatement(true);
+    emitAssignment(builder, keyType, keyName, index, translator);
 
     builder->emitIndent();
     this->valueType->declare(builder, valueName, true);
@@ -230,10 +248,7 @@ void EBPFRegisterPSA::emitRegisterReadExpression(CodeBuilder *builder,
     builder->emitIndent();
     this->keyType->declare(builder, keyName, false);
     builder->endOfStatement(true);
-    builder->emitIndent();
-    builder->appendFormat("%s = ", keyName.c_str());
-    translator->visit(index);
-    builder->endOfStatement(true);
+    emitAssignment(builder, keyType, keyName, index, translator);
 
     builder->emitIndent();
     this->valueType->declare(builder, pointerName, true);
@@ -244,11 +259,7 @@ void EBPFRegisterPSA::emitRegisterReadExpression(CodeBuilder *builder,
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    this->valueType->declare(builder, valueName, false);
-    builder->endOfStatement(true);
-    builder->emitIndent();
-    builder->appendFormat("%s = ", valueName.c_str());
-    this->valueType->emitInitializer(builder);
+    this->valueType->declareInit(builder, valueName, false);
     builder->endOfStatement(true);
 
     builder->emitIndent();
@@ -281,18 +292,12 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMe
     builder->emitIndent();
     this->keyType->declare(builder, keyName, false);
     builder->endOfStatement(true);
-    builder->emitIndent();
-    builder->appendFormat("%s = ", keyName.c_str());
-    translator->visit(key);
-    builder->endOfStatement(true);
+    emitAssignment(builder, keyType, keyName, key, translator);
 
     builder->emitIndent();
     this->valueType->declare(builder, valueName, false);
     builder->endOfStatement(true);
-    builder->emitIndent();
-    builder->appendFormat("%s = ", valueName.c_str());
-    translator->visit(value);
-    builder->endOfStatement(true);
+    emitAssignment(builder, valueType, valueName, value, translator);
 
     builder->emitIndent();
     auto ret = program->refMap->newName("ret");
