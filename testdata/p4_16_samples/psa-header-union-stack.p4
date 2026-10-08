@@ -139,16 +139,7 @@ control HeaderUnionIngressDeparser(
     in metadata_t meta,
     in psa_ingress_output_metadata_t istd) {
     apply {
-        packet.emit(hdr.options[0]);
-        packet.emit(hdr.options[1]);
-        packet.emit(hdr.options[2]);
-        packet.emit(hdr.options[3]);
-        packet.emit(hdr.options[4]);
-        packet.emit(hdr.options[5]);
-        packet.emit(hdr.options[6]);
-        packet.emit(hdr.options[7]);
-        packet.emit(hdr.options[8]);
-        packet.emit(hdr.options[9]);
+        packet.emit(hdr.options);
     }
 }
 
