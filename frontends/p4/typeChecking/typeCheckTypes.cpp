@@ -261,6 +261,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Var *typeVar) {
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_List *type) {
+    for (auto field : type->components) {
+        auto fieldType = getTypeType(field);
+        if (auto spec = fieldType->to<IR::Type_SpecializedCanonical>()) fieldType = spec->baseType;
+        if (fieldType->is<IR::Type_Void>()) {
+            typeError("%1%: not supported as a list field", field);
+            return type;
+        }
+    }
     (void)setTypeType(type);
     return type;
 }
@@ -270,7 +278,9 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Tuple *type) {
         auto fieldType = getTypeType(field);
         if (auto spec = fieldType->to<IR::Type_SpecializedCanonical>()) fieldType = spec->baseType;
         if (fieldType->is<IR::IContainer>() || fieldType->is<IR::Type_ArchBlock>() ||
-            fieldType->is<IR::Type_Extern>()) {
+            fieldType->is<IR::Type_Extern>() || fieldType->is<IR::Type_InfInt>() ||
+            fieldType->is<IR::Type_MatchKind>() || fieldType->is<IR::Type_String>() ||
+            fieldType->is<IR::Type_Void>()) {
             typeError("%1%: not supported as a tuple field", field);
             return type;
         }
