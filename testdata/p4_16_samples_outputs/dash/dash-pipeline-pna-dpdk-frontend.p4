@@ -320,8 +320,14 @@ control dash_deparser(packet_out packet, in headers_t hdr, in metadata_t meta, i
 
 control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("dash_ingress.meta") metadata_t meta_0;
+    @name("dash_ingress.meter_policy_en") bit<1> meter_policy_en_1;
+    @name("dash_ingress.meter_class") bit<16> meter_class_2;
     @name("dash_ingress.meta") metadata_t meta_5;
+    @name("dash_ingress.meter_policy_en") bit<1> meter_policy_en_2;
+    @name("dash_ingress.meter_class") bit<16> meter_class_3;
     @name("dash_ingress.meta") metadata_t meta_6;
+    @name("dash_ingress.meter_policy_en") bit<1> meter_policy_en_3;
+    @name("dash_ingress.meter_class") bit<16> meter_class_4;
     @name("dash_ingress.tmp_5") bit<32> tmp;
     @name("dash_ingress.tmp_6") bit<32> tmp_0;
     @name("dash_ingress.meta") metadata_t meta_7;
@@ -344,6 +350,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     @name("dash_ingress.tmp_3") bit<32> tmp_5;
     @name("dash_ingress.tmp_4") bit<48> tmp_6;
     @name("dash_ingress.meta") metadata_t meta_9;
+    @name("dash_ingress.meter_policy_en") bit<1> meter_policy_en_4;
+    @name("dash_ingress.meter_class") bit<16> meter_class_5;
     @name("dash_ingress.meta") metadata_t meta_10;
     @name("dash_ingress.encap") dash_encapsulation_t encap_1;
     @name("dash_ingress.vni") bit<24> vni_3;
@@ -359,7 +367,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     @name("dash_ingress.tmp_3") bit<32> tmp_33;
     @name("dash_ingress.tmp_4") bit<48> tmp_34;
     @name("dash_ingress.meta") metadata_t meta_11;
-    @name("dash_ingress.meter_class") bit<16> meter_class_2;
+    @name("dash_ingress.meter_class") bit<16> meter_class_6;
     @name("dash_ingress.meter_class_override") bit<1> meter_class_override_1;
     @name("dash_ingress.tmp_7") bit<32> tmp_35;
     @name("dash_ingress.tmp_8") bit<128> tmp_36;
@@ -383,7 +391,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
     @name("dash_ingress.dip") IPv6Address dip_2;
     @name("dash_ingress.dip_mask") IPv6Address dip_mask_2;
     @name("dash_ingress.meta") metadata_t meta_32;
-    @name("dash_ingress.meter_class") bit<16> meter_class_3;
+    @name("dash_ingress.meter_class") bit<16> meter_class_7;
     @name("dash_ingress.meter_class_override") bit<1> meter_class_override_2;
     @name("dash_ingress.customer_ip_len") bit<16> customer_ip_len_0;
     @name("dash_ingress.customer_ip_len") bit<16> customer_ip_len_3;
@@ -511,19 +519,21 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr = hdr_2;
         meta = meta_35;
     }
-    @name(".route_vnet") action route_vnet_0(@SaiVal[type="sai_object_id_t"] @name("dst_vnet_id") bit<16> dst_vnet_id_2, @name("meter_policy_en") bit<1> meter_policy_en_0, @name("meter_class") bit<16> meter_class_9) {
+    @name(".route_vnet") action route_vnet_0(@SaiVal[type="sai_object_id_t"] @name("dst_vnet_id") bit<16> dst_vnet_id_2, @name("meter_policy_en") bit<1> meter_policy_en_5, @name("meter_class") bit<16> meter_class_9) {
         hdr_5 = hdr;
         meta_36 = meta;
         meta_36.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
         meta_36.dst_vnet_id = dst_vnet_id_2;
         meta_0 = meta_36;
-        meta_0.meter_policy_en = meter_policy_en_0;
-        meta_0.route_meter_class = meter_class_9;
+        meter_policy_en_1 = meter_policy_en_5;
+        meter_class_2 = meter_class_9;
+        meta_0.meter_policy_en = meter_policy_en_1;
+        meta_0.route_meter_class = meter_class_2;
         meta_36 = meta_0;
         hdr = hdr_5;
         meta = meta_36;
     }
-    @name(".route_vnet_direct") action route_vnet_direct_0(@name("dst_vnet_id") bit<16> dst_vnet_id_3, @name("overlay_ip_is_v6") bit<1> overlay_ip_is_v6, @SaiVal[type="sai_ip_address_t"] @name("overlay_ip") IPv4ORv6Address overlay_ip, @name("meter_policy_en") bit<1> meter_policy_en_5, @name("meter_class") bit<16> meter_class_10) {
+    @name(".route_vnet_direct") action route_vnet_direct_0(@name("dst_vnet_id") bit<16> dst_vnet_id_3, @name("overlay_ip_is_v6") bit<1> overlay_ip_is_v6, @SaiVal[type="sai_ip_address_t"] @name("overlay_ip") IPv4ORv6Address overlay_ip, @name("meter_policy_en") bit<1> meter_policy_en_6, @name("meter_class") bit<16> meter_class_10) {
         hdr_6 = hdr;
         meta_37 = meta;
         meta_37.target_stage = dash_pipeline_stage_t.OUTBOUND_MAPPING;
@@ -531,24 +541,28 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         meta_37.lkup_dst_ip_addr = overlay_ip;
         meta_37.is_lkup_dst_ip_v6 = overlay_ip_is_v6;
         meta_5 = meta_37;
-        meta_5.meter_policy_en = meter_policy_en_5;
-        meta_5.route_meter_class = meter_class_10;
+        meter_policy_en_2 = meter_policy_en_6;
+        meter_class_3 = meter_class_10;
+        meta_5.meter_policy_en = meter_policy_en_2;
+        meta_5.route_meter_class = meter_class_3;
         meta_37 = meta_5;
         hdr = hdr_6;
         meta = meta_37;
     }
-    @name(".route_direct") action route_direct_0(@name("meter_policy_en") bit<1> meter_policy_en_6, @name("meter_class") bit<16> meter_class_11) {
+    @name(".route_direct") action route_direct_0(@name("meter_policy_en") bit<1> meter_policy_en_7, @name("meter_class") bit<16> meter_class_11) {
         hdr_7 = hdr;
         meta_38 = meta;
         meta_38.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
         meta_6 = meta_38;
-        meta_6.meter_policy_en = meter_policy_en_6;
-        meta_6.route_meter_class = meter_class_11;
+        meter_policy_en_3 = meter_policy_en_7;
+        meter_class_4 = meter_class_11;
+        meta_6.meter_policy_en = meter_policy_en_3;
+        meta_6.route_meter_class = meter_class_4;
         meta_38 = meta_6;
         hdr = hdr_7;
         meta = meta_38;
     }
-    @name(".route_service_tunnel") action route_service_tunnel_0(@name("overlay_dip_is_v6") bit<1> overlay_dip_is_v6, @name("overlay_dip") IPv4ORv6Address overlay_dip, @name("overlay_dip_mask_is_v6") bit<1> overlay_dip_mask_is_v6, @name("overlay_dip_mask") IPv4ORv6Address overlay_dip_mask, @name("overlay_sip_is_v6") bit<1> overlay_sip_is_v6, @name("overlay_sip") IPv4ORv6Address overlay_sip, @name("overlay_sip_mask_is_v6") bit<1> overlay_sip_mask_is_v6, @name("overlay_sip_mask") IPv4ORv6Address overlay_sip_mask, @name("underlay_dip_is_v6") bit<1> underlay_dip_is_v6, @name("underlay_dip") IPv4ORv6Address underlay_dip_6, @name("underlay_sip_is_v6") bit<1> underlay_sip_is_v6, @name("underlay_sip") IPv4ORv6Address underlay_sip_4, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] @name("dash_encapsulation") dash_encapsulation_t dash_encapsulation_2, @name("tunnel_key") bit<24> tunnel_key, @name("meter_policy_en") bit<1> meter_policy_en_7, @name("meter_class") bit<16> meter_class_12) {
+    @name(".route_service_tunnel") action route_service_tunnel_0(@name("overlay_dip_is_v6") bit<1> overlay_dip_is_v6, @name("overlay_dip") IPv4ORv6Address overlay_dip, @name("overlay_dip_mask_is_v6") bit<1> overlay_dip_mask_is_v6, @name("overlay_dip_mask") IPv4ORv6Address overlay_dip_mask, @name("overlay_sip_is_v6") bit<1> overlay_sip_is_v6, @name("overlay_sip") IPv4ORv6Address overlay_sip, @name("overlay_sip_mask_is_v6") bit<1> overlay_sip_mask_is_v6, @name("overlay_sip_mask") IPv4ORv6Address overlay_sip_mask, @name("underlay_dip_is_v6") bit<1> underlay_dip_is_v6, @name("underlay_dip") IPv4ORv6Address underlay_dip_6, @name("underlay_sip_is_v6") bit<1> underlay_sip_is_v6, @name("underlay_sip") IPv4ORv6Address underlay_sip_4, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] @name("dash_encapsulation") dash_encapsulation_t dash_encapsulation_2, @name("tunnel_key") bit<24> tunnel_key, @name("meter_policy_en") bit<1> meter_policy_en_8, @name("meter_class") bit<16> meter_class_12) {
         hdr_8 = hdr;
         meta_39 = meta;
         meta_39.target_stage = dash_pipeline_stage_t.ROUTING_ACTION_APPLY;
@@ -622,8 +636,10 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         meta_8.overlay_data.dmac = tmp_6;
         meta_39 = meta_8;
         meta_9 = meta_39;
-        meta_9.meter_policy_en = meter_policy_en_7;
-        meta_9.route_meter_class = meter_class_12;
+        meter_policy_en_4 = meter_policy_en_8;
+        meter_class_5 = meter_class_12;
+        meta_9.meter_policy_en = meter_policy_en_4;
+        meta_9.route_meter_class = meter_class_5;
         meta_39 = meta_9;
         hdr = hdr_8;
         meta = meta_39;
@@ -695,9 +711,9 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         meta_10.overlay_data.dmac = tmp_34;
         meta_42 = meta_10;
         meta_11 = meta_42;
-        meter_class_2 = meter_class_13;
+        meter_class_6 = meter_class_13;
         meter_class_override_1 = meter_class_override;
-        meta_11.mapping_meter_class = meter_class_2;
+        meta_11.mapping_meter_class = meter_class_6;
         meta_11.mapping_meter_class_override = meter_class_override_1;
         meta_42 = meta_11;
         hdr = hdr_9;
@@ -769,9 +785,9 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         meta_31.overlay_data.dip_mask = dip_mask_2;
         meta_43 = meta_31;
         meta_32 = meta_43;
-        meter_class_3 = meter_class_14;
+        meter_class_7 = meter_class_14;
         meter_class_override_2 = meter_class_override_3;
-        meta_32.mapping_meter_class = meter_class_3;
+        meta_32.mapping_meter_class = meter_class_7;
         meta_32.mapping_meter_class_override = meter_class_override_2;
         meta_43 = meta_32;
         hdr = hdr_10;
@@ -1470,8 +1486,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         }
         default_action = NoAction_5();
     }
-    @name("dash_ingress.metering_update_stage.set_policy_meter_class") action metering_update_stage_set_policy_meter_class_0(@name("meter_class") bit<16> meter_class_15) {
-        meta.policy_meter_class = meter_class_15;
+    @name("dash_ingress.metering_update_stage.set_policy_meter_class") action metering_update_stage_set_policy_meter_class_0(@name("meter_class") bit<16> meter_class_19) {
+        meta.policy_meter_class = meter_class_19;
     }
     @SaiTable[name="meter_rule", api="dash_meter", order=2, isobject="true"] @name("dash_ingress.metering_update_stage.meter_rule") table metering_update_stage_meter_rule {
         key = {
