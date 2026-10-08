@@ -40,6 +40,8 @@ class EBPFRegisterPSA : public EBPFTableBase {
     void emitRegisterRead(CodeBuilder *builder, const P4::ExternMethod *method,
                           ControlBodyTranslatorPSA *translator,
                           const IR::Expression *leftExpression);
+    void emitRegisterReadExpression(CodeBuilder *builder, const P4::ExternMethod *method,
+                                    ControlBodyTranslatorPSA *translator);
     void emitRegisterWrite(CodeBuilder *builder, const P4::ExternMethod *method,
                            ControlBodyTranslatorPSA *translator);
 };
