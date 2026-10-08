@@ -23,7 +23,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_side_effect_order_4bmv2l23_0() {
         tmp = 16w3;
     }
-    @hidden action act() {
+    @hidden action gauntlet_side_effect_order_4bmv2l28() {
         h.eth_hdr.eth_type = tmp;
     }
     @hidden table tbl_gauntlet_side_effect_order_4bmv2l23 {
@@ -38,11 +38,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_side_effect_order_4bmv2l23_0();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_gauntlet_side_effect_order_4bmv2l28 {
         actions = {
-            act();
+            gauntlet_side_effect_order_4bmv2l28();
         }
-        const default_action = act();
+        const default_action = gauntlet_side_effect_order_4bmv2l28();
     }
     apply {
         if (h.eth_hdr.eth_type < 16w6) {
@@ -50,7 +50,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else {
             tbl_gauntlet_side_effect_order_4bmv2l23_0.apply();
         }
-        tbl_act.apply();
+        tbl_gauntlet_side_effect_order_4bmv2l28.apply();
     }
 }
 

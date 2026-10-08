@@ -21,6 +21,10 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor, public Reso
  protected:
     const DeclarationLookup *refMap;     // input
     const ParameterSubstitution *subst;  // input
+
+    /// Use the parameter's location for compiler temporaries or arguments with no source location.
+    bool useParameterSourceInfo(const IR::Expression *replacement) const;
+
  public:
     SubstituteParameters(const DeclarationLookup *refMap, const ParameterSubstitution *subst,
                          const TypeVariableSubstitution *tvs)

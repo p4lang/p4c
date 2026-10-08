@@ -46,7 +46,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "fedora-test"
+          ccache-key: "fedora-gcc-unity"
           custom-build-command: |
             ./bootstrap.sh -DCMAKE_BUILD_TYPE=Release -DCMAKE_UNITY_BUILD=ON --build-generator "Ninja"
             cmake --build build -- -j $(nproc)

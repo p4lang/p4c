@@ -46,14 +46,14 @@ control c() {
     @hidden action issue4661_non_pure_extern_function_const_args21() {
         bar();
     }
-    @hidden action act() {
+    @hidden action issue4661_non_pure_extern_function_const_args19() {
         tmp = baz();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue4661_non_pure_extern_function_const_args19 {
         actions = {
-            act();
+            issue4661_non_pure_extern_function_const_args19();
         }
-        const default_action = act();
+        const default_action = issue4661_non_pure_extern_function_const_args19();
     }
     @hidden table tbl_issue4661_non_pure_extern_function_const_args20 {
         actions = {
@@ -68,7 +68,7 @@ control c() {
         const default_action = issue4661_non_pure_extern_function_const_args21();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue4661_non_pure_extern_function_const_args19.apply();
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
                 tbl_issue4661_non_pure_extern_function_const_args20.apply();

@@ -7,5 +7,6 @@ bit<8> do_function(out bit<8> val) {
 gauntlet_short_circuit-bmv2.p4(28)
 bit<8> do_function(out bit<8> val) {
        ^^^^^^^^^^^
-[--Wwarn=uninitialized-use] warning: val_0 may be uninitialized
-[--Wwarn=uninitialized-use] warning: val_0 may be uninitialized
+gauntlet_short_circuit-bmv2.p4(61): [--Wwarn=uninitialized-use] warning: val_0 may be uninitialized
+        h.b.a = (8w1 != do_function(h.b.b) || false) ? 8w1 : 8w2;
+                                    ^^^^^

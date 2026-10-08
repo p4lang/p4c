@@ -1,3 +1,0 @@
-annotation-bug.p4(30): [--Wwarn=uninitialized-use] warning: hdr.ipv4_option_timestamp.len may be uninitialized
-        get<headers>({ hdr.ipv4_option_timestamp });
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^

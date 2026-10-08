@@ -5,14 +5,14 @@ equate-type-package-and-package-with-incompatible-type.p4(5): [--Werror=type-err
 package Switch<IH>(Ingress<IH> ingress);
         ^^^^^^
   ---- Actual error:
-equate-type-package-and-package-with-incompatible-type.p4(4): Cannot cast implicitly type 'IH' to type 'tuple<>'
-  package Ingress<IH>(Parser<IH> p);
-                  ^^
+equate-type-package-and-package-with-incompatible-type.p4(6): Cannot cast implicitly type 'struct H' to type 'tuple<>'
+  struct H {}
+         ^
 equate-type-package-and-package-with-incompatible-type.p4(11)
   Switch<tuple<>>(ig1) main;
          ^^^^^^^
   ---- Originating from:
-equate-type-package-and-package-with-incompatible-type.p4(11): Type of argument 'ig1' (package Ingress) does not match type of parameter 'ingress' (package Ingress<...>)
+equate-type-package-and-package-with-incompatible-type.p4(11): Type of argument 'ig1' (package Ingress<...>) does not match type of parameter 'ingress' (package Ingress<...>)
   Switch<tuple<>>(ig1) main;
                   ^^^
 equate-type-package-and-package-with-incompatible-type.p4(4)

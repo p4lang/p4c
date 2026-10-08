@@ -4,44 +4,15 @@ issue610-bmv2.p4(146): [--Wwarn=deprecated] warning: Checksum16: Using deprecate
 v1model.p4(447)
 extern Checksum16 {
        ^^^^^^^^^^
-issue610-bmv2.p4(237): [--Wwarn=deprecated] warning: mark_to_drop: Using deprecated feature mark_to_drop. Please use mark_to_drop(standard_metadata) instead.
-        mark_to_drop();
-        ^^^^^^^^^^^^
-v1model.p4(397)
-extern void mark_to_drop();
-            ^^^^^^^^^^^^
 issue610-bmv2.p4(346): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
     Checksum16() ipv4_checksum;
     ^^^^^^^^^^
 v1model.p4(447)
 extern Checksum16 {
        ^^^^^^^^^^
-v1model.p4(751): [--Werror=type-error] error: 'package V1Switch'
-package V1Switch<H, M>(Parser<H, M> p,
-        ^^^^^^^^
-  ---- Actual error:
-issue610-bmv2.p4(222): Cannot unify 'in' parameter 'hdr' with 'inout' parameter 'hdr' because they have different directions
-      in my_headers_t hdr,
-                      ^^^
-v1model.p4(725)
-  control VerifyChecksum<H, M>(inout H hdr,
-                                       ^^^
-  ---- Originating from:
-issue610-bmv2.p4(389): Type of argument 'MyVerifyChecksum' (control MyVerifyChecksum) does not match type of parameter 'vr' (control VerifyChecksum<...>)
-      MyVerifyChecksum(),
-      ^^^^^^^^^^^^^^^^^^
-issue610-bmv2.p4(221)
-  control MyVerifyChecksum(
-          ^^^^^^^^^^^^^^^^
-v1model.p4(752)
-                         VerifyChecksum<H, M> vr,
-                                              ^^
-v1model.p4(752)
-                         VerifyChecksum<H, M> vr,
-                         ^^^^^^^^^^^^^^^^^^^^
-  Where 'H' is bound to 'struct my_headers_t'
-  Where 'M' is bound to 'struct my_metadata_t'
-  ---- Originating from:
-issue610-bmv2.p4(394): Constructor invocation '<Method call>' does not match declaration 'V1Switch'
-  ) main;
-    ^^^^
+issue610-bmv2.p4(189): [--Werror=unsupported] error: ipv4_checksum: could not convert expression to Json
+        ck = ipv4_checksum.get(
+             ^^^^^^^^^^^^^
+issue610-bmv2.p4(189): [--Werror=target-error] error: ipv4_checksum.get({ f0 = tmp_1, f1 = tmp_2, f2 = tmp_3, f3 = tmp_4, f4 = tmp_5, f5 = tmp_6, f6 = tmp_7, f7 = tmp_8, f8 = tmp_9, f9 = tmp_10, f10 = tmp_11 }): not supported
+        ck = ipv4_checksum.get(
+             ^

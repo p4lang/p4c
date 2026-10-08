@@ -2,18 +2,18 @@ extern bit<32> f(in bit<32> x, out bit<16> y);
 control c(out bit<32> r) {
     @name("c.arg") bit<16> arg;
     @name("c.tmp") bit<32> tmp;
-    @hidden action issue3274l15() {
+    @hidden action issue3274l10() {
         tmp = f(x = 32w1, y = arg);
         r = tmp;
     }
-    @hidden table tbl_issue3274l15 {
+    @hidden table tbl_issue3274l10 {
         actions = {
-            issue3274l15();
+            issue3274l10();
         }
-        const default_action = issue3274l15();
+        const default_action = issue3274l10();
     }
     apply {
-        tbl_issue3274l15.apply();
+        tbl_issue3274l10.apply();
     }
 }
 
