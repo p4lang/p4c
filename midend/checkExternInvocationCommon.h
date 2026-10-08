@@ -10,7 +10,7 @@
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #include "lib/bitvec.h"
 

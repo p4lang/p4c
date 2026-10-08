@@ -9,7 +9,7 @@
 #define FRONTENDS_P4_CORELIBRARY_H_
 
 #include "frontends/common/model.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/cstring.h"
 
 namespace P4 {

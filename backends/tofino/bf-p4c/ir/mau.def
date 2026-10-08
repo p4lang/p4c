@@ -19,6 +19,14 @@
 
 /* -*-C++-*- */
 
+#include "backends/tofino/bf-p4c/ir/tofino.def"
+#include "backends/tofino/bf-p4c/ir/arch.def"
+#include_impl "backends/tofino/bf-p4c/ir/tofino.def"
+#include_impl "backends/tofino/bf-p4c/ir/arch.def"
+#include_impl "backends/tofino/bf-p4c/ir/mau.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde-lowered.def"
+
 #emit
 struct TableResourceAlloc;
 #include <optional>

@@ -45,7 +45,7 @@
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/error.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"

@@ -13,7 +13,7 @@
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/ordered_set.h"
 
 namespace P4 {

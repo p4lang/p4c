@@ -8,6 +8,9 @@
 #ifndef FRONTENDS_PARSERS_PARSERDRIVER_H_
 #define FRONTENDS_PARSERS_PARSERDRIVER_H_
 
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include <cstdio>
 #include <iostream>
 #include <string>
@@ -16,7 +19,7 @@
 #include "frontends/p4/symbol_table.h"
 #include "frontends/parsers/p4/abstractP4Lexer.hpp"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 

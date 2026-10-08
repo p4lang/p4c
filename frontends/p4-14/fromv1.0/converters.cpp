@@ -9,6 +9,7 @@
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/p4-14/header_type.h"
+#include "frontends/p4-14/ir-v1.def.h"
 #include "frontends/p4-14/typecheck.h"
 #include "frontends/p4/coreLibrary.h"
 #include "lib/big_int_util.h"

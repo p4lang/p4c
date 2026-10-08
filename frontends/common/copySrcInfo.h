@@ -8,7 +8,7 @@
 #ifndef FRONTENDS_COMMON_COPYSRCINFO_H_
 #define FRONTENDS_COMMON_COPYSRCINFO_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

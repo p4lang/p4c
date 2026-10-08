@@ -9,7 +9,7 @@
 #define MIDEND_VALIDATEPROPERTIES_H_
 
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 
 namespace P4 {

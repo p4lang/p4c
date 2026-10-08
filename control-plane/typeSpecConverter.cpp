@@ -13,7 +13,7 @@
 #include "flattenHeader.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"

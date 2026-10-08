@@ -19,6 +19,14 @@
 
 /* -*-C++-*- */
 
+#include "backends/tofino/bf-p4c/ir/mau.def"
+#include_impl "lib/hex.h"
+#include_impl "backends/tofino/bf-p4c/ir/tofino.def"
+#include_impl "backends/tofino/bf-p4c/ir/arch.def"
+#include_impl "backends/tofino/bf-p4c/ir/mau.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde-lowered.def"
+
 #emit
 #include "lib/match.h"
 #include <optional>
@@ -518,15 +526,6 @@ class ParserState : Unit {
     inline Vector<ParserPrimitive> statements;
     inline Vector<Select> selects;
     inline Vector<Transition> transitions;
-}
-
-/// The supertype for all BFN IR parsers.
-abstract AbstractParser : Unit {
-#apply
-    int stage() const override { return -1; }
-    gress_t thread() const override { return gress; }
-
-    gress_t gress;
 }
 
 /// The high-level representation of a parser in backend.

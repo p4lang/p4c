@@ -12,7 +12,7 @@ function call too.
 #include <set>
 
 #include "frontends/p4/metrics/metricsStructure.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

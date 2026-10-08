@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* -*-C++-*- */
+
+#include "ir/base.def"
+#include_impl "ir/ir.def"
 /** \addtogroup irdefs
   * @{
   */

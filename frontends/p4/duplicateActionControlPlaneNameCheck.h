@@ -10,7 +10,7 @@
 
 #include <vector>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 
 namespace P4 {

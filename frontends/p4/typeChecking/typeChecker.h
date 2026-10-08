@@ -8,10 +8,13 @@
 #ifndef FRONTENDS_P4_TYPECHECKING_TYPECHECKER_H_
 #define FRONTENDS_P4_TYPECHECKING_TYPECHECKER_H_
 
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"
 

@@ -6,9 +6,10 @@
 #include <cstdio>
 #include <map>
 
+#include "frontends/p4-14/ir-v1.def.h"
+#include "ir/core.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir.h"
 #include "ir/namemap.h"
 #include "ir/node.h"
 #include "ir/vector.h"

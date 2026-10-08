@@ -20,7 +20,7 @@
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 
 namespace P4 {

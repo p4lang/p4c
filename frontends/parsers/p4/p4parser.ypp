@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0
 
 #include "frontends/common/constantParsing.h"
 #include "frontends/common/options.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 

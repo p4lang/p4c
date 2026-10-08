@@ -10,7 +10,7 @@
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/cstring.h"
 
 namespace P4::P4V1 {

@@ -3,10 +3,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include <ostream>
 
 #include "dbprint.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/namemap.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"

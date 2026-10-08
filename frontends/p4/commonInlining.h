@@ -15,7 +15,7 @@
 #include "frontends/p4/toP4/toP4.h"
 #endif
 #include "frontends/p4/callGraph.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 /**
   This file has common data structures used for inlining functions and actions.

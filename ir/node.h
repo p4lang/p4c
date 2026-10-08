@@ -108,8 +108,16 @@ class Node : public virtual INode {
     virtual bool equiv(const Node &a) const { return this->typeId() == a.typeId(); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }
-    IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
+    IRNODE_ALL_NON_TEMPLATE_SUBCLASSES(DEFINE_OPEQ_FUNC)
 #undef DEFINE_OPEQ_FUNC
+    // Keep container specializations out of ordinary equality overload resolution:
+    // considering Vector<BackendNode> as a conversion candidate can instantiate
+    // its virtual methods and require BackendNode to be complete in core code.
+#define DEFINE_TEMPLATE_EQ(CLASS, BASE) \
+    virtual bool equalsContainer(const CLASS &) const { return false; }
+    IRNODE_ALL_SUBCLASSES_AND_DIRECT_AND_INDIRECT_BASES(IR_TREE_IGNORE, DEFINE_TEMPLATE_EQ,
+                                                        IR_TREE_COPY, IR_TREE_IGNORE)
+#undef DEFINE_TEMPLATE_EQ
     virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) {}
     virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) const {}
 

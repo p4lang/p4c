@@ -12,7 +12,7 @@ and retrieving it's size at the end.
 #include <unordered_set>
 
 #include "frontends/p4/metrics/metricsStructure.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

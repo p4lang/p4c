@@ -4,7 +4,7 @@
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 // Removes assert and assume statements if it is not in debug mode

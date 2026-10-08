@@ -12,9 +12,10 @@
 #include <vector>
 
 #include "backends/bmv2/common/v1model.h"
+#include "frontends/p4-14/ir-v1.def.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/coreLibrary.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
 

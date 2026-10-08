@@ -13,7 +13,7 @@
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "p4RuntimeArchHandler.h"
 
 namespace p4configv1 = ::p4::config::v1;

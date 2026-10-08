@@ -15,7 +15,7 @@ compiled program name (programName_metrics.txt/json).
 #include <unordered_set>
 
 #include "frontends/p4/metrics/metricsStructure.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/json.h"
 
 using namespace P4::literals;

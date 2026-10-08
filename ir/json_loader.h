@@ -18,7 +18,7 @@
 #include <variant>
 
 #include "absl/container/flat_hash_set.h"
-#include "ir.h"
+#include "ir/core.h"
 #include "json_parser.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"

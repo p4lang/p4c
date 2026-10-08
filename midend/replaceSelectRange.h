@@ -10,7 +10,7 @@
 #include <set>
 #include <vector>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

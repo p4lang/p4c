@@ -12,7 +12,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/map.h"  // IWYU pragma: keep

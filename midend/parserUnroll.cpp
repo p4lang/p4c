@@ -5,7 +5,7 @@
 #include "parserUnroll.h"
 
 #include "interpreter.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/hash.h"
 #include "lib/stringify.h"
 

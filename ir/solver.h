@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "ir/compare.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
 #include "lib/flat_map.h"

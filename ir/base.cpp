@@ -3,9 +3,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include "ir/core.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
-#include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/error.h"

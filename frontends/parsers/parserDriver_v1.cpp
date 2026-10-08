@@ -14,6 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <sstream>

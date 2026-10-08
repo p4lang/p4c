@@ -23,8 +23,9 @@
 #endif
 
 #include "dbprint.h"
+#include "ir/core.h"
 #include "ir/id.h"
-#include "ir/ir.h"
+#include "ir/ir-generated.h"  // Definitions for dispatch to every registered node.
 #include "ir/vector.h"
 #include "lib/algorithm.h"
 #include "lib/error_catalog.h"

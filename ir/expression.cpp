@@ -6,9 +6,9 @@
 #include <ostream>
 
 #include "absl/container/flat_hash_map.h"
+#include "ir/core.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/error.h"
 #include "lib/error_catalog.h"

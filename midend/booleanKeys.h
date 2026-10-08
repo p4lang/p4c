@@ -7,7 +7,7 @@
 #ifndef MIDEND_BOOLEANKEYS_H_
 #define MIDEND_BOOLEANKEYS_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/node.h"
 #include "ir/visitor.h"
 

@@ -6,7 +6,7 @@
 #include <ostream>
 
 #include "dbprint.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/node.h"
 #include "lib/cstring.h"
 #include "lib/indent.h"

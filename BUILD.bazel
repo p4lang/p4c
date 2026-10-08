@@ -4,6 +4,7 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_license//rules:license.bzl", "license")
 load("//bazel:bison.bzl", "genyacc")
 load("//bazel:flex.bzl", "flex_lexer_h", "genlex")
+load("//bazel:ir_generator.bzl", "ir_generated_files")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -182,27 +183,28 @@ filegroup(
     }),
 )
 
-genrule(
+ir_generated_files(
     name = "ir_generated_files",
-    srcs = glob(["ir/*.def"]) + [":ir_extra_defs"],
-    outs = [
-        "ir/gen-tree-macro.h",
-        "ir/ir-generated.cpp",
-        "ir/ir-generated.h",
+    core_defs = [
+        "ir/base.def",
+        "ir/type.def",
+        "ir/expression.def",
+        "ir/ir.def",
     ],
-    cmd = """
-        $(location :ir_generator) \
-            -t $(RULEDIR)/ir/gen-tree-macro.h \
-            -i $(RULEDIR)/ir/ir-generated.cpp \
-            -o $(RULEDIR)/ir/ir-generated.h \
-            $(location ir/base.def) \
-            $(location ir/type.def) \
-            $(location ir/expression.def) \
-            $(location ir/ir.def) \
-            $(locations :ir_extra_defs)
-    """,
-    tools = [":ir_generator"],
-    visibility = ["//visibility:private"],
+    extra_defs = [":ir_extra_defs"],
+    generator = ":ir_generator",
+)
+
+filegroup(
+    name = "ir_generated_headers",
+    srcs = [":ir_generated_files"],
+    output_group = "headers",
+)
+
+filegroup(
+    name = "ir_generated_sources",
+    srcs = [":ir_generated_files"],
+    output_group = "sources",
 )
 
 # It would be better to build these modules separately, but they have cyclic
@@ -227,7 +229,7 @@ cc_library(
         "backends/dpdk/spec.cpp",
         "frontends/parsers/p4/p4lexer.cc",
         "frontends/parsers/p4/p4parser.cc",
-        "ir/ir-generated.cpp",
+        ":ir_generated_sources",
     ] + select({
         ":p4_14_enabled": [
             "frontends/p4-14/fromv1.0/converters.cpp",
@@ -256,7 +258,7 @@ cc_library(
     ]) + [
         ":p4_parser_yacc",
         ":p4lexer",
-        ":ir_generated_files",
+        ":ir_generated_headers",
     ] + select({
         ":p4_14_enabled": [
             ":v1_parser_yacc",

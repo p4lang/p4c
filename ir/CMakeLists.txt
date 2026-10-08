@@ -30,6 +30,7 @@ set (IR_SRCS
 set (IR_HDRS
   annotations.h
   configuration.h
+  core.h
   dbprint.h
   dump.h
   id.h
@@ -61,10 +62,11 @@ set (BASE_IR_DEF_FILES
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
 
+# Visitor dispatch needs all backend definitions. Keep that dependency out of
+# the other core sources even when unity compilation is enabled.
+set_source_files_properties(visitor.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 add_library (ir STATIC ${IR_SRCS})
 target_link_libraries(ir PRIVATE absl::flat_hash_map ${LIBGC_LIBRARIES})
 
 
 add_dependencies(ir genIR)
-
-

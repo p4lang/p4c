@@ -8,7 +8,8 @@
 #ifndef FRONTENDS_P4_14_TYPECHECK_H_
 #define FRONTENDS_P4_14_TYPECHECK_H_
 
-#include "ir/ir.h"
+#include "frontends/p4-14/ir-v1.def.h"
+#include "ir/core.h"
 #include "ir/pass_manager.h"
 
 namespace P4 {

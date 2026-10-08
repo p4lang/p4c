@@ -9,7 +9,7 @@
 #define FRONTENDS_P4_TYPECHECKING_TYPEUNIFICATION_H_
 
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

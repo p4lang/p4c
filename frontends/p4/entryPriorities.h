@@ -10,7 +10,7 @@
 
 #include "coreLibrary.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/pass_manager.h"
 
 namespace P4 {

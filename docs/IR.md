@@ -257,8 +257,44 @@ definition into .h and .cpp parts as needed.
 
 The bulk of the "normal" IR is defined in the ir subdirectory, with some frontends
 and backends having their own extensions to the IR defined in their own ir subdirectories.
-The ir-generator tool takes reads all the .def files in the tree and constructs a single
-.h and .cpp file with all the IR class definition code.
+The ir-generator resolves all enabled `.def` files together, then emits a header and
+implementation for each input. Paths are preserved relative to the source root:
+`backends/bmv2/bmv2.def` produces `backends/bmv2/bmv2.def.h` and `.cpp` in the build
+directory. Each generated implementation is compiled separately, including in unity
+builds. Outputs whose contents have not changed retain their timestamps.
+
+Definition files declare dependencies using source-root-relative paths:
+
+```C++
+#include "ir/ir.def"
+#include_impl "backends/example/other.def"
+```
+
+These directives include the corresponding generated header; they do not parse
+additional inputs. Register every definition file with the build system. Header
+dependencies must be acyclic and provide complete types for base classes, embedded
+fields, and inline code. The generator diagnoses cycles and missing inheritance
+dependencies. Pointer fields can refer to forward-declared types. Dependencies needed
+only by method bodies belong in `#include_impl`, which can point back to a dependent
+header. Ordinary C++ includes keep their existing meaning.
+
+Core compiler code includes `ir/core.h`. Backend code can include its generated
+header together with `ir/core.h`; `ir/ir.h` remains a compatibility umbrella for all
+enabled IR definitions. The core definitions are layered from `base.def` through
+`type.def` and `expression.def` to `ir.def`. Statement classes, including compound
+assignments, live with their base classes in `ir.def`.
+
+`ir/gen-tree-macro.h` remains shared: node kinds, forward declarations, and the visitor
+hierarchy must agree across every translation unit. The JSON factory registry also
+remains a single generated implementation. Changing a backend method or a field that
+uses existing container specializations need not rebuild the frontend or midend.
+Adding nodes, changing inheritance, or introducing container specializations changes
+the shared metadata and still requires a broader rebuild. Template equality dispatch
+uses a separate overload family so comparisons in core code do not instantiate
+containers whose backend element types are only forward-declared.
+
+For standalone generation, use `irgenerator -r <source-root> -d <output-root> <inputs>`.
+The legacy `-o`, `-i`, and `-t` options still produce combined outputs.
 
 All references to IR class objects from other IR class object MUST be as `const` pointers,
 to maintain the write-only invariants.  Where that is too onerous, IR classes may be

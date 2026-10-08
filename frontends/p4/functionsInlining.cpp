@@ -3,11 +3,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "functionsInlining.h"
-
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "functionsInlining.h"
 #include "lib/rtti_utils.h"
 
 namespace P4 {

@@ -8,7 +8,7 @@ and collecting the number of states of each encountered parser
 
 #include "frontends/p4/metrics/cyclomaticComplexity.h"
 #include "frontends/p4/metrics/metricsStructure.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

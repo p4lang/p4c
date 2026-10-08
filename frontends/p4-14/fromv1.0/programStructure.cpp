@@ -10,6 +10,7 @@
 
 #include "converters.h"
 #include "frontends/common/options.h"
+#include "frontends/p4-14/ir-v1.def.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/reservedWords.h"
 #include "frontends/p4/tableKeyNames.h"

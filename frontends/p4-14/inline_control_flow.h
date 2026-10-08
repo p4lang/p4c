@@ -8,8 +8,9 @@
 #ifndef FRONTENDS_P4_14_INLINE_CONTROL_FLOW_H_
 #define FRONTENDS_P4_14_INLINE_CONTROL_FLOW_H_
 
+#include "frontends/p4-14/ir-v1.def.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

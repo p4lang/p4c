@@ -9,7 +9,7 @@ each key field and extracting its bit width.
 
 #include "frontends/p4/metrics/metricsStructure.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

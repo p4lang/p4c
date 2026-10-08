@@ -11,7 +11,7 @@
 #include <optional>
 #include <vector>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 

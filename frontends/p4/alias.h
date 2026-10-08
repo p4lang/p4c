@@ -18,7 +18,7 @@
  */
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

@@ -4,6 +4,8 @@
 
 /* -*-C++-*- */
 
+#include_impl "ir/ir.def"
+
 /** \defgroup irdefs Intermediate Representation */
 /** \addtogroup irdefs
   * @{

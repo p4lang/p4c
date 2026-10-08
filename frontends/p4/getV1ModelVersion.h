@@ -9,7 +9,7 @@
 
 #include "absl/strings/numbers.h"
 #include "backends/bmv2/common/v1model.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 
 namespace P4::P4V1 {

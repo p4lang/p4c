@@ -7,7 +7,7 @@
 
 #include <set>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"

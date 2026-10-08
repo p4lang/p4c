@@ -11,7 +11,7 @@
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/uniqueNames.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

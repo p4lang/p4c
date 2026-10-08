@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 

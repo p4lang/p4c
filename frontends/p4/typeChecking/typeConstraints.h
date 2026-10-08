@@ -8,7 +8,7 @@
 #ifndef FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
 #define FRONTENDS_P4_TYPECHECKING_TYPECONSTRAINTS_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/castable.h"
 #include "lib/error_helper.h"
 #include "typeSubstitution.h"

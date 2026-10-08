@@ -22,6 +22,8 @@ void usage(const char *progname) {
     fprintf(stderr, "usage:\n");
     fprintf(stderr, "%s [options] file.def file2.def ... >ir.h\n", progname);
     fprintf(stderr, "options supported:\n");
+    fprintf(stderr, "     -d directory: generate separate files under this directory\n");
+    fprintf(stderr, "     -r directory: source root for split output and .def includes\n");
     fprintf(stderr, "     -o file: file where the header code is written\n");
     fprintf(stderr, "     -i file: file where implementation code is written\n");
     fprintf(stderr, "     -t file: file where the tree macro is written\n");
@@ -34,23 +36,34 @@ int main(int argc, char *argv[]) {
     std::unique_ptr<std::ostream> header = std::make_unique<nullstream>();
     std::unique_ptr<std::ostream> impl = std::make_unique<nullstream>();
 
+    std::string outputDirectory, sourceRoot = ".";
+    bool legacyOutput = false;
     while (true) {
-        int opt = getopt(argc, argv, "o:i:t:hP");
+        int opt = getopt(argc, argv, "o:i:t:d:r:hP");
         if (opt == -1) break;
 
         switch (opt) {
             case 'h':
                 usage(argv[0]);
                 return 1;
+            case 'd':
+                outputDirectory = optarg;
+                break;
+            case 'r':
+                sourceRoot = optarg;
+                break;
             case 'o':
+                legacyOutput = true;
                 header = openFile(optarg, false);
                 if (header == nullptr) return 1;
                 break;
             case 'i':
+                legacyOutput = true;
                 impl = openFile(optarg, false);
                 if (impl == nullptr) return 1;
                 break;
             case 't':
+                legacyOutput = true;
                 t = openFile(optarg, false);
                 if (t == nullptr) return 1;
                 break;
@@ -64,11 +77,25 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    if (!outputDirectory.empty() && legacyOutput) {
+        std::cerr << "-d cannot be combined with -o, -i, or -t\n";
+        return 1;
+    }
     IrDefinitions *defs = parse(argv + optind, argc - optind);
     if (defs == nullptr) return 1;
 
     defs->resolve();
-    defs->generate(*t, *header, *impl);
+    try {
+        if (outputDirectory.empty()) {
+            defs->generate(*t, *header, *impl);
+        } else {
+            defs->generateSplit(sourceRoot, outputDirectory,
+                                std::vector<std::string>(argv + optind, argv + argc));
+        }
+    } catch (const std::exception &error) {
+        std::cerr << "IR generation failed: " << error.what() << '\n';
+        return 1;
+    }
     t->flush();
     return 0;
 }

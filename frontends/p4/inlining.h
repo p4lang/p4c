@@ -15,7 +15,7 @@
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/ordered_map.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.

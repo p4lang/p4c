@@ -8,7 +8,7 @@
 #ifndef FRONTENDS_P4_SIMPLIFYPARSERS_H_
 #define FRONTENDS_P4_SIMPLIFYPARSERS_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

@@ -6,7 +6,7 @@
 #include "createBuiltins.h"
 
 #include "frontends/p4/coreLibrary.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/error.h"
 
 namespace P4 {

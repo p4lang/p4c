@@ -3,9 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "ir/ir.h"
-
-#include <strings.h>
+#include <strings.h>  // NOLINT(build/include): use core.h instead of the ir.h umbrella.
 
 #include <functional>
 #include <list>
@@ -14,6 +12,7 @@
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "ir/core.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"

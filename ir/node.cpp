@@ -12,8 +12,8 @@
 // use in combination with "raise" below
 // #include <csignal>
 
+#include "ir/core.h"
 #include "ir/declaration.h"
-#include "ir/ir.h"
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
 #include "lib/indent.h"

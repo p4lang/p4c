@@ -8,7 +8,7 @@
 #ifndef IR_SPLITTER_H_
 #define IR_SPLITTER_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 
 namespace P4 {

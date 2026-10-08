@@ -8,7 +8,7 @@
 #ifndef FRONTENDS_P4_CREATEBUILTINS_H_
 #define FRONTENDS_P4_CREATEBUILTINS_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 
 /*

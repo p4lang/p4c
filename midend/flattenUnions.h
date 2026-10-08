@@ -12,7 +12,7 @@
 #include "./frontends/p4/simplifyDefUse.h"
 #include "./frontends/p4/unusedDeclarations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 namespace P4 {
 
 /**

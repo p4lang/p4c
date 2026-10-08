@@ -17,7 +17,8 @@ limitations under the License.
 #ifndef FRONTENDS_P4_14_ACTIONSINLINING_H_
 #define FRONTENDS_P4_14_ACTIONSINLINING_H_
 
-#include "ir/ir.h"
+#include "frontends/p4-14/ir-v1.def.h"
+#include "ir/core.h"
 
 namespace P4::P4_14 {
 

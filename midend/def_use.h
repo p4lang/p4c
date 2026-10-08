@@ -9,7 +9,7 @@
 #define MIDEND_DEF_USE_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/bitrange.h"
 #include "lib/hvec_map.h"
 #include "lib/hvec_set.h"

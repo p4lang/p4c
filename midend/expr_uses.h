@@ -8,7 +8,10 @@
 #ifndef MIDEND_EXPR_USES_H_
 #define MIDEND_EXPR_USES_H_
 
-#include "ir/ir.h"
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
+#include "ir/core.h"
 
 namespace P4 {
 

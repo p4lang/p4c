@@ -7,7 +7,7 @@
 
 #include "control-plane/typeSpecConverter.h"
 #include "frontends/p4/enumInstance.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/algorithm.h"
 
 namespace P4::ControlPlaneAPI {

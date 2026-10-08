@@ -27,7 +27,10 @@ SPDX-License-Identifier: Apache-2.0
 
 // Declare dependencies.
 %code requires {
-#include "ir/ir.h"
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
+#include "ir/core.h"
 
 namespace P4 {
 namespace V1 {
@@ -114,7 +117,7 @@ typedef const IR::Type ConstType;
 #include "frontends/parsers/parserDriver.h"
 #include "frontends/parsers/v1/v1lexer.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 using namespace P4;
 

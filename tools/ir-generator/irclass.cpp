@@ -5,6 +5,11 @@
 
 #include "irclass.h"
 
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <sstream>
+
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
@@ -124,23 +129,9 @@ Util::Enumerator<IrClass *> *IrDefinitions::getClasses() const {
         [](IrClass *e) { return e != nullptr; });
 }
 
-void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &impl) const {
-    std::string macroname = "IR_GENERATED_H_";
-    out << "#ifndef " << macroname << "\n"
-        << "#define " << macroname << "\n"
-        << std::endl;
+namespace {
 
-    impl << "#include \"ir/ir-generated.h\"    // IWYU pragma: keep\n\n"
-         << "#include \"ir/ir-inline.h\"       // IWYU pragma: keep\n"
-         << "#include \"ir/json_generator.h\"  // IWYU pragma: keep\n"
-         << "#include \"ir/json_loader.h\"     // IWYU pragma: keep\n"
-         << "#include \"ir/visitor.h\"         // IWYU pragma: keep\n"
-         << "#include \"lib/algorithm.h\"      // IWYU pragma: keep\n"
-         << "#include \"lib/log.h\"            // IWYU pragma: keep\n"
-         << std::endl
-         << "using namespace P4;\n"
-         << std::endl;
-
+void generateHeaderPreamble(std::ostream &out) {
     out << "#include <functional>\n"
         << "#include <map>\n\n"
         << "#include \"lib/big_int.h\"        // IWYU pragma: keep\n"
@@ -164,6 +155,38 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "using namespace P4::literals;\n"
         << "}\n";
 
+    out << "extern template class IR::Vector<IR::Node>;\n"
+        << "extern template class IR::IndexedVector<IR::Node>;\n"
+        << "}  // namespace P4\n";
+}
+
+void generateImplementationPreamble(std::ostream &out, const std::string &header) {
+    out << "#include \"" << header << "\"\n"
+        << "#include \"ir/ir-inline.h\"\n"
+        << "#include \"ir/json_loader.h\"\n"
+        << "#include \"lib/algorithm.h\"\n"
+        << "#include \"lib/log.h\"\n\n"
+        << "using namespace P4;\n";
+}
+
+void generateTemplates(const IrClass *cls, std::ostream &out, std::ostream &impl) {
+    if (cls->needVector || cls->needIndexedVector) {
+        impl << "template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
+             << std::endl;
+        out << "extern template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
+            << std::endl;
+    }
+    if (cls->needIndexedVector) {
+        impl << "template class IR::IndexedVector<IR::" << cls->containedIn << cls->name << ">;"
+             << std::endl;
+        out << "extern template class IR::IndexedVector<IR::" << cls->containedIn << cls->name
+            << ">;" << std::endl;
+    }
+}
+
+}  // namespace
+
+void IrDefinitions::generateFactory(std::ostream &impl) const {
     impl << "std::map<cstring, NodeFactoryFn> IR::unpacker_table = {\n";
 
     bool first = true;
@@ -180,35 +203,27 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
     }
     impl << " };\n" << std::endl;
 
-    impl << "template class IR::Vector<IR::Node>;" << std::endl;
-    out << "extern template class IR::Vector<IR::Node>;" << std::endl;
-    impl << "template class IR::IndexedVector<IR::Node>;" << std::endl;
-    out << "extern template class IR::IndexedVector<IR::Node>;" << std::endl;
-    for (auto cls : *getClasses()) {
-        if (cls->needVector || cls->needIndexedVector) {
-            impl << "template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
-                 << std::endl;
-            out << "extern template class IR::Vector<IR::" << cls->containedIn << cls->name << ">;"
-                << std::endl;
-        }
-        if (cls->needIndexedVector) {
-            impl << "template class IR::IndexedVector<IR::" << cls->containedIn << cls->name << ">;"
-                 << std::endl;
-            out << "extern template class IR::IndexedVector<IR::" << cls->containedIn << cls->name
-                << ">;" << std::endl;
-        }
-    }
-    out << "}  // namespace P4" << std::endl;
+    impl << "template class IR::Vector<IR::Node>;\n"
+         << "template class IR::IndexedVector<IR::Node>;\n";
+}
 
+void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &impl) const {
+    out << "#ifndef IR_GENERATED_H_\n#define IR_GENERATED_H_\n";
+    generateHeaderPreamble(out);
+    generateImplementationPreamble(impl, "ir/ir-generated.h");
+    generateFactory(impl);
+    out << "namespace P4 {\n";
+    for (auto cls : *getClasses()) generateTemplates(cls, out, impl);
+    out << "}  // namespace P4\n";
     for (auto e : elements) {
         e->generate_hdr(out);
         e->generate_impl(impl);
     }
+    out << "#endif  // IR_GENERATED_H_\n";
+    generateTree(t);
+}
 
-    out << "#endif /* " << macroname << " */" << std::endl;
-
-    ///////////////////////////////// tree
-
+void IrDefinitions::generateTree(std::ostream &t) const {
     t << "#pragma once\n"
       << "#include <cstdint>\n"
       << "#include \"lib/rtti.h\"\n";
@@ -296,6 +311,150 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
       << " inline bool operator!=(NodeDiscriminator lhs, RTTI::TypeId rhs) { return "
          "RTTI::TypeId(lhs) != rhs; }\n";
     t << "}  // namespace P4::IR" << std::endl;
+}
+
+namespace {
+
+// Each definition file owns its declarations and explicit template instantiations.
+// Keep the path (not just its basename): extensions may use the same file names.
+struct GeneratedPart {
+    std::ostringstream header;
+    std::ostringstream implementation;
+    std::set<std::string> dependencies;
+};
+
+std::filesystem::path absolutePath(const std::filesystem::path &path) {
+    return std::filesystem::absolute(path).lexically_normal();
+}
+
+void writeGeneratedFile(const std::filesystem::path &path, const std::string &contents) {
+    // Resolve reset directives in the final file, rather than in a concatenated
+    // temporary file. Otherwise an edit in one input shifts other files' #lines.
+    std::istringstream input(contents);
+    std::ostringstream output;
+    std::string line;
+    unsigned lineNumber = 1;
+    while (std::getline(input, line)) {
+        if (line == "#")
+            output << "#line " << lineNumber + 1 << " \"" << path.generic_string() << "\"\n";
+        else
+            output << line << '\n';
+        ++lineNumber;
+    }
+    auto text = output.str();
+    std::ifstream previous(path, std::ios::binary);
+    if (previous && std::string(std::istreambuf_iterator<char>(previous), {}) == text) return;
+    previous.close();
+
+    std::filesystem::create_directories(path.parent_path());
+    auto temporary = path;
+    temporary += ".tmp";
+    std::ofstream file;
+    file.exceptions(std::ios::failbit | std::ios::badbit);
+    file.open(temporary, std::ios::binary | std::ios::trunc);
+    file << text;
+    file.close();
+    std::filesystem::rename(temporary, path);
+}
+
+}  // namespace
+
+void IrDefinitions::generateSplit(const std::string &sourceRoot, const std::string &outputRoot,
+                                  const std::vector<std::string> &inputs) const {
+    const auto root = absolutePath(sourceRoot);
+    const auto output = absolutePath(outputRoot);
+    std::map<std::string, GeneratedPart> parts;
+    std::vector<std::string> order;
+    auto relativeName = [&](const std::filesystem::path &path) {
+        auto relative = absolutePath(path).lexically_relative(root);
+        if (relative.empty() || *relative.begin() == "..")
+            throw std::runtime_error("IR input is outside the source root: " + path.string());
+        return relative.generic_string();
+    };
+    for (const auto &input : inputs) {
+        auto name = relativeName(input);
+        if (!parts.try_emplace(name).second)
+            throw std::runtime_error("Duplicate IR input: " + name);
+        order.push_back(name);
+    }
+    auto owner = [&](const IrElement *element) {
+        return relativeName(element->srcInfo.toPosition().fileName.c_str());
+    };
+
+    for (const auto &name : order) {
+        auto &part = parts.at(name);
+        part.header << "#pragma once\n#include \"ir/ir-generated-common.h\"\n";
+        generateImplementationPreamble(part.implementation, name + ".h");
+    }
+    for (const auto *element : elements) {
+        if (auto *include = element->to<IrInclude>()) {
+            auto name = relativeName(root / include->file.c_str());
+            if (!parts.count(name))
+                throw std::runtime_error(owner(element) +
+                                         ": included IR file is not an input: " + name);
+            auto &part = parts.at(owner(element));
+            auto &stream = include->impl ? part.implementation : part.header;
+            stream << "#include \"" << name << ".h\"\n";
+            if (!include->impl) part.dependencies.insert(name);
+        }
+    }
+
+    // A header dependency cycle cannot be fixed by sorting classes in the
+    // combined input. Diagnose it before producing partially updated outputs.
+    std::set<std::string> visiting, visited;
+    auto visit = [&](const auto &self, const std::string &name) -> void {
+        if (visited.count(name)) return;
+        if (!visiting.insert(name).second)
+            throw std::runtime_error("Cyclic IR header dependency involving " + name);
+        for (const auto &dependency : parts.at(name).dependencies) self(self, dependency);
+        visiting.erase(name);
+        visited.insert(name);
+    };
+    for (const auto &name : order) visit(visit, name);
+
+    // Inheritance requires complete types. Catch missing dependency declarations
+    // here instead of reporting confusing errors in the generated C++.
+    auto dependsOn = [&](const auto &self, const std::string &name,
+                         const std::string &dependency) -> bool {
+        if (name == dependency) return true;
+        for (const auto &direct : parts.at(name).dependencies)
+            if (self(self, direct, dependency)) return true;
+        return false;
+    };
+    for (auto *cls : *getClasses()) {
+        for (const auto *parent : cls->parentClasses) {
+            if (parent->srcInfo.isValid() && !dependsOn(dependsOn, owner(cls), owner(parent)))
+                throw std::runtime_error(owner(cls) + ": missing IR header dependency on " +
+                                         owner(parent));
+        }
+        auto &part = parts.at(owner(cls));
+        part.header << "namespace P4 {\n";
+        generateTemplates(cls, part.header, part.implementation);
+        part.header << "}  // namespace P4\n";
+    }
+    for (const auto *element : elements) {
+        auto &part = parts.at(owner(element));
+        element->generate_hdr(part.header);
+        element->generate_impl(part.implementation);
+    }
+
+    std::ostringstream common, umbrella, registry, tree;
+    common << "#pragma once\n";
+    generateHeaderPreamble(common);
+    umbrella << "#pragma once\n";
+    for (const auto &name : order) umbrella << "#include \"" << name << ".h\"\n";
+    generateImplementationPreamble(registry, "ir/ir-generated.h");
+    generateFactory(registry);
+    generateTree(tree);
+    for (const auto &name : order) {
+        const auto &part = parts.at(name);
+        writeGeneratedFile(output / (name + ".h"), part.header.str());
+        writeGeneratedFile(output / (name + ".cpp"), part.implementation.str());
+    }
+    writeGeneratedFile(output / "ir/ir-generated-common.h", common.str());
+    writeGeneratedFile(output / "ir/ir-generated.h", umbrella.str());
+    writeGeneratedFile(output / "ir/ir-generated.cpp", registry.str());
+    writeGeneratedFile(output / "ir/gen-tree-macro.h", tree.str());
 }
 
 void IrClass::generateTreeMacro(std::ostream &out) const {

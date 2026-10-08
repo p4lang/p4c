@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include "ir/ir.def"
+
 // Represent a signed integer value using just 'width' bits.
 // Special operation provided by BMv2
 class IntMod : Operation_Unary {

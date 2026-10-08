@@ -19,6 +19,13 @@
 
 /* -*-C++-*- */
 
+#include "ir/ir.def"
+#include_impl "backends/tofino/bf-p4c/ir/tofino.def"
+#include_impl "backends/tofino/bf-p4c/ir/arch.def"
+#include_impl "backends/tofino/bf-p4c/ir/mau.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde-lowered.def"
+
 #emit
 #include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/ordered_map.h"

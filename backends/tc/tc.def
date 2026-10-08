@@ -1,6 +1,8 @@
 /*
 SPDX-FileCopyrightText: 2023 Intel Corporation
 
+#include "ir/ir.def"
+
 SPDX-License-Identifier: Apache-2.0
 */
 

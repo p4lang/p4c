@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
 
@@ -60,4 +60,27 @@ TEST(IR, OperatorEq) {
     EXPECT_NE(*static_cast<IR::Node *>(p1), *p3);
     EXPECT_NE(*static_cast<IR::Node *>(p1), *static_cast<IR::Vector<IR::Node> *>(p3));
     EXPECT_NE(*static_cast<IR::Node *>(p1), *static_cast<IR::Node *>(p3));
+}
+
+TEST(IR, ContainerEqualityDispatch) {
+    auto *value = new IR::Constant(1);
+    IR::Vector<IR::Node> nodes{value};
+    IR::Vector<IR::Node> sameNodes{value};
+    IR::Vector<IR::Expression> expressions{value};
+    IR::IndexedVector<IR::Node> indexed{value};
+    IR::IndexedVector<IR::Node> sameIndexed{value};
+    const IR::Node &node = nodes;
+    const IR::Node &expression = expressions;
+    const IR::Node &index = indexed;
+
+    EXPECT_EQ(node, sameNodes);
+    EXPECT_EQ(nodes, static_cast<const IR::Node &>(sameNodes));
+    EXPECT_EQ(index, sameIndexed);
+    EXPECT_EQ(indexed, static_cast<const IR::Node &>(sameIndexed));
+    EXPECT_NE(node, expression);
+    EXPECT_NE(expression, node);
+    EXPECT_NE(node, index);
+    EXPECT_NE(index, node);
+    EXPECT_NE(node, *value);
+    EXPECT_NE(*value, node);
 }

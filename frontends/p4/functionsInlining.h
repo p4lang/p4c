@@ -13,7 +13,7 @@
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 using FunctionCallInfo = SimpleCallInfo<IR::Node, IR::Statement>;

@@ -29,7 +29,7 @@ statements in C)
 #include <vector>
 
 #include "frontends/p4/metrics/metricsStructure.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/log.h"
 
 using namespace P4::literals;

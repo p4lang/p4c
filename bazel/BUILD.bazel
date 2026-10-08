@@ -27,3 +27,8 @@ bzl_library(
     srcs = ["p4_library.bzl"],
     deps = ["@rules_cc//cc:find_cc_toolchain.bzl"],
 )
+
+bzl_library(
+    name = "ir_generator",
+    srcs = ["ir_generator.bzl"],
+)

@@ -14,7 +14,7 @@ limitations under the License.
 
 #include "annotations.h"
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/algorithm.h"
 #include "lib/cstring.h"
 

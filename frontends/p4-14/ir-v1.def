@@ -4,6 +4,8 @@
 
 /* -*-C++-*- */
 
+#include "ir/ir.def"
+
 /*
   This file contains IR classes needed just for the P4 v1.0/v1.1 front-end.
 */

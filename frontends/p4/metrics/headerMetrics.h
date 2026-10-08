@@ -9,7 +9,7 @@ its type, until the field's bit width can be extracted.
 
 #include "frontends/p4/metrics/metricsStructure.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

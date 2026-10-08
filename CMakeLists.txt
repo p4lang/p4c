@@ -484,11 +484,9 @@ foreach (ext ${p4c_extensions})
   endif()
 endforeach(ext)
 
-# With the current implementation of ir-generator, all targets share the
-# same ir-generated.h and ir-generated.cpp file, which means all targets
-# share the same set of IR classes (frontend and backend). Backends such as the DPDK backend
-# can introduce additional IR classes and cpp sources which need to be added to
-# EXTENSION_IR_SOURCES.
+# Backends contribute definition files to the common IR registry. Generated
+# declarations and implementations are split by input; handwritten IR methods
+# are added through EXTENSION_IR_SOURCES.
 add_subdirectory(backends/common)
 if (ENABLE_BMV2)
     add_subdirectory (backends/bmv2)
@@ -526,44 +524,36 @@ endif ()
 
 ####################################### IR Generation Begin #######################################
 
-set (IR_GENERATED_SRCS
+# One compilation unit per definition file; shared outputs contain only the
+# class registry and visitor metadata. irgenerator preserves unchanged files.
+set(IR_GENERATED_SRCS
   ${P4C_BINARY_DIR}/ir/ir-generated.h
+  ${P4C_BINARY_DIR}/ir/ir-generated-common.h
   ${P4C_BINARY_DIR}/ir/ir-generated.cpp
   ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
+foreach(def IN LISTS IR_DEF_FILES)
+  file(RELATIVE_PATH relative_def "${P4C_SOURCE_DIR}" "${def}")
+  list(APPEND IR_GENERATED_SRCS
+    "${P4C_BINARY_DIR}/${relative_def}.h"
+    "${P4C_BINARY_DIR}/${relative_def}.cpp")
+endforeach()
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
-# Fixup #line directives in the generated IR files
-# This is a vestige of automake. CMake handles dependencies correctly,
-# so we should output the line directives directly from the generator
-#
-# Moreover, we generate these files to a temporary location and update the
-# build files only if they have changed. This avoids rebuilding the whole
-# tree when small changes to the .def files affect only the .cpp file and
-# not the headers.
-set (fixup_file "${P4C_BINARY_DIR}/irgen-fixup.awk")
-file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${P4C_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
-set(temp_ir_genfiles
-  ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
-  ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
-  ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
-)
-
-add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
-  COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
-  COMMAND awk -v name=ir-generated.cpp -f ${fixup_file} ir/ir-generated.cpp.tmp > ir/ir-generated.cpp.fixup
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/ir-generated.cpp.fixup ir/ir-generated.cpp
-  COMMAND awk -v name=ir-generated.h   -f ${fixup_file} ir/ir-generated.h.tmp > ir/ir-generated.h.fixup
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/ir-generated.h.fixup ir/ir-generated.h
-  COMMAND awk -v name=gen-tree-macro.h -f ${fixup_file} ir/gen-tree-macro.h.tmp > ir/gen-tree-macro.h.fixup
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/gen-tree-macro.h.fixup ir/gen-tree-macro.h
-  MAIN_DEPENDENCY ${IR_GENERATOR}
+# Use a stamp so unchanged outputs do not cause repeated generation with Make.
+# Ninja tracks the individual byproducts and avoids rebuilding their consumers.
+set(IR_GENERATED_STAMP "${P4C_BINARY_DIR}/ir/generated.stamp")
+add_custom_command(OUTPUT ${IR_GENERATED_STAMP}
+  BYPRODUCTS ${IR_GENERATED_SRCS}
+  COMMAND ${IR_GENERATOR} -r "${P4C_SOURCE_DIR}" -d "${P4C_BINARY_DIR}" ${IR_DEF_FILES}
+  COMMAND ${CMAKE_COMMAND} -E touch "${IR_GENERATED_STAMP}"
   DEPENDS irgenerator ${IR_DEF_FILES}
   COMMENT "Generating IR class files"
-)
-
-add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
-set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+  VERBATIM)
+add_custom_target(genIR DEPENDS ${IR_GENERATED_STAMP})
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
+# Unity builds would combine unrelated .def files and undo the incremental-build
+# benefit of separate translation units.
+set_target_properties(ir-generated PROPERTIES UNITY_BUILD OFF)
 add_dependencies(ir-generated ir genIR)
 target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS} ${EXTENSION_IR_LIBS})
 

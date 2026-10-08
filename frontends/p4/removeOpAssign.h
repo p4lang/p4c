@@ -9,7 +9,7 @@
 #define FRONTENDS_P4_REMOVEOPASSIGN_H_
 
 #include "cloner.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "sideEffects.h"
 
 namespace P4 {

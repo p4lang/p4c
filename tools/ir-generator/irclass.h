@@ -237,6 +237,19 @@ class EmitBlock : public IrElement {
     void generate_impl(std::ostream &out) const override;
 };
 
+/// A dependency on another definition file. All inputs are still parsed together;
+/// split generation turns this into an include of the corresponding C++ header.
+class IrInclude : public IrElement {
+ public:
+    cstring file;
+    bool impl;
+    IrInclude(Util::SourceInfo info, cstring file, bool impl)
+        : IrElement(info), file(file), impl(impl) {}
+    cstring toString() const override { return file; }
+    void generate_hdr(std::ostream &) const override {}
+    void generate_impl(std::ostream &) const override {}
+};
+
 class CommentBlock : public IrElement {
     cstring body;
 
@@ -378,6 +391,14 @@ class IrDefinitions {
         toposort();
     }
     void generate(std::ostream &t, std::ostream &out, std::ostream &impl) const;
+    /// Generate a .h/.cpp pair for each input, plus the shared tree and JSON registry.
+    /// Paths in includes and output filenames are relative to sourceRoot.
+    void generateSplit(const std::string &sourceRoot, const std::string &outputRoot,
+                       const std::vector<std::string> &inputs) const;
+
+ private:
+    void generateTree(std::ostream &) const;
+    void generateFactory(std::ostream &) const;
 };
 
 class LineDirective {

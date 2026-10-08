@@ -9,7 +9,7 @@
 #define FRONTENDS_P4_UNUSEDDECLARATIONS_H_
 
 #include "../common/resolveReferences/resolveReferences.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/pass_manager.h"
 #include "lib/stringify.h"
 

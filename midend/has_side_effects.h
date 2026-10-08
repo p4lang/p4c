@@ -8,9 +8,12 @@
 #ifndef MIDEND_HAS_SIDE_EFFECTS_H_
 #define MIDEND_HAS_SIDE_EFFECTS_H_
 
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

@@ -9,7 +9,7 @@
 #define FRONTENDS_P4_MOVECONSTRUCTORS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #include "lib/ordered_map.h"
 

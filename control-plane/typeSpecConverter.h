@@ -11,7 +11,7 @@
 #include <map>
 #include <string>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

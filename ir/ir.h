@@ -8,7 +8,8 @@
 #ifndef IR_IR_H_
 #define IR_IR_H_
 
-// generated ir file
+// Compatibility umbrella for all enabled IR extensions. Core compiler code
+// should include ir/core.h to avoid dependencies on backend class definitions.
 #include "ir/ir-generated.h"  // IWYU pragma: export
 #include "ir/ir-inline.h"     // IWYU pragma: export
 

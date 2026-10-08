@@ -3,9 +3,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "resolveReferences.h"
-
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include "frontends/common/parser_options.h"
+#include "resolveReferences.h"
 
 namespace P4 {
 

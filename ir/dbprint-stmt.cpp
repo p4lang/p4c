@@ -6,7 +6,7 @@
 #include <ostream>
 
 #include "dbprint.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/indent.h"
 #include "lib/log.h"
 

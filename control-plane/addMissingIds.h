@@ -9,7 +9,7 @@
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "p4RuntimeSymbolTable.h"
 
 namespace P4 {

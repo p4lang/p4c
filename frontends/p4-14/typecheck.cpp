@@ -5,6 +5,7 @@
 
 #include "typecheck.h"
 
+#include "frontends/p4-14/ir-v1.def.h"
 #include "ir/dump.h"
 #include "lib/log.h"
 

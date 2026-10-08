@@ -11,7 +11,7 @@
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/bindVariables.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/nullstream.h"
 // Passes
 #include "actionsInlining.h"

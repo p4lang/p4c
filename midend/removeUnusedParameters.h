@@ -9,7 +9,7 @@
 #define MIDEND_REMOVEUNUSEDPARAMETERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

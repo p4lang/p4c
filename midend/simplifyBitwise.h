@@ -1,7 +1,7 @@
 #ifndef MIDEND_SIMPLIFYBITWISE_H_
 #define MIDEND_SIMPLIFYBITWISE_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #include "lib/ordered_set.h"
 

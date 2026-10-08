@@ -24,7 +24,7 @@ as well.
 #include "frontends/p4/metrics/nestingDepthMetric.h"
 #include "frontends/p4/metrics/parserMetrics.h"
 #include "frontends/p4/metrics/unusedCodeMetric.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 using namespace P4::literals;
 

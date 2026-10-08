@@ -150,22 +150,14 @@ class Vector : public VectorBase {
 
     IRNODE_SUBCLASS(Vector)
     IRNODE_DECLARE_APPLY_OVERLOAD(Vector)
-    bool operator==(const Node &a) const override { return a == *this; }
-    bool operator==(const Vector &a) const override { return vec == a.vec; }
-    /* DANGER -- if you get an error on the above line
-     *       operator== ... marked ‘override’, but does not override
-     * that mean you're trying to create an instantiation of IR::Vector that
-     * does not appear anywhere in any .def file, which won't work.
-     * To make double-dispatch comparisons work, the IR generator must know
-     * about ALL instantiations of IR class templates, which it does by scanning
-     * all the .def files for instantiations.  This could in theory be fixed by
-     * having the IR generator scan all C++ header and source files for
-     * instantiations, but that is currently not done.
-     *
-     * To avoid this problem, you need to have your code ONLY use instantiations
-     * of IR::Vector that appear somewhere in a .def file -- you can usually make
-     * it work by using an instantiation with an (abstract) base class rather
-     * than a concrete class, as most of those appear in .def files. */
+    bool operator==(const Node &a) const override {
+        using Equal = bool (Node::*)(const Vector &) const;
+        return (a.*static_cast<Equal>(&Node::equalsContainer))(*this);
+    }
+    bool equalsContainer(const Vector &a) const override { return operator==(a); }
+    virtual bool operator==(const Vector &a) const { return vec == a.vec; }
+    // equalsContainer must override a generated overload in Node. Only use
+    // container instantiations registered by fields in the .def inputs.
     bool equiv(const Node &a_) const override {
         if (static_cast<const Node *>(this) == &a_) return true;
         if (this->typeId() != a_.typeId()) return false;

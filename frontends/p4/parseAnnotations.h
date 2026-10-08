@@ -10,7 +10,7 @@
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/parsers/parserDriver.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 /*
  * Parses known/predefined annotations used by the compiler.

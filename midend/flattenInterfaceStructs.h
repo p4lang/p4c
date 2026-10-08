@@ -11,7 +11,7 @@
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/annotations.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/cstring.h"
 
 namespace P4 {

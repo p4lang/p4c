@@ -26,7 +26,7 @@ and "ethernet-ipv4-tcp").
 #include "frontends/p4/metrics/metricsStructure.h"
 #include "frontends/p4/parserCallGraph.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 using namespace P4::literals;
 

@@ -177,8 +177,15 @@ element
         global.push_back(new EmitBlock(@1, $1.impl, $1.block)); }
     | INCLUDE {
         pushCurrentComment();
-        if ($1.startsWith("#include_impl")) {
-            global.push_back(new EmitBlock(@1, true, $1.substr(0, 7) + $1.substr(13)));
+        std::string_view directive($1.c_str());
+        auto begin = directive.find('"');
+        auto end = begin == std::string_view::npos ? begin : directive.find('"', begin + 1);
+        auto file = end == std::string_view::npos
+                        ? cstring() : cstring(directive.substr(begin + 1, end - begin - 1));
+        if (file.endsWith(".def")) {
+            global.push_back(new IrInclude(@1, file, $1.startsWith("#include_impl")));
+        } else if ($1.startsWith("#include_impl")) {
+            global.push_back(new EmitBlock(@1, true, $1.substr(0, 8) + $1.substr(13)));
         } else {
             global.push_back(new EmitBlock(@1, false, $1)); } }
     | NAMESPACE { BEGIN(PARSE_BRACKET); }
@@ -455,6 +462,7 @@ IrDefinitions *parse(char** files, int count) {
             yyrestart(fp);
             BEGIN(NORMAL);
             errors |= yyparse();
+            pushCurrentComment();
             fclose(fp);
             if (errors & 2) {
                 error(ErrorType::ERR_OVERLIMIT, "out of memory");
@@ -468,4 +476,3 @@ IrDefinitions *parse(char** files, int count) {
 }
 
 }  // namespace P4
-

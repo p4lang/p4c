@@ -9,8 +9,8 @@
 
 #include "frontends/common/parser_options.h"
 #include "ir/configuration.h"
+#include "ir/core.h"
 #include "ir/id.h"
-#include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/error.h"

@@ -16,7 +16,7 @@ limitations under the License.
 #define FRONTENDS_P4_VALIDATESTRINGANNOTATIONS_H_
 
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/error.h"
 
 /// @file

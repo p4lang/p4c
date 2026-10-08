@@ -9,7 +9,7 @@
 #define CONTROL_PLANE_P4RUNTIMEANNOTATIONS_H_
 
 #include "frontends/p4/parseAnnotations.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

@@ -11,9 +11,9 @@
 #include <utility>
 #include <vector>
 
+#include "ir/core.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
-#include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"

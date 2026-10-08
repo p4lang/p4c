@@ -12,7 +12,7 @@
 #include "absl/container/inlined_vector.h"
 #include "absl/container/node_hash_set.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/alloc_trace.h"
 #include "lib/flat_map.h"
 #include "lib/hash.h"

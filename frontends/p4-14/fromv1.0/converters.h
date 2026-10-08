@@ -11,9 +11,10 @@
 #include <typeindex>
 #include <typeinfo>
 
+#include "frontends/p4-14/ir-v1.def.h"
 #include "frontends/p4/coreLibrary.h"
+#include "ir/core.h"
 #include "ir/dump.h"
-#include "ir/ir.h"
 #include "ir/pass_manager.h"
 #include "lib/safe_vector.h"
 #include "programStructure.h"

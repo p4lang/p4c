@@ -7,7 +7,7 @@
 #ifndef IR_COMPARE_H_
 #define IR_COMPARE_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4::IR {
 

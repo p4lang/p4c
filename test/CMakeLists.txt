@@ -83,6 +83,9 @@ set (GTESTP4C_SOURCES ${GTEST_SOURCES} ${GTEST_BASE_SOURCES})
 # `GTEST_LDADD`.
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/test)
 configure_file(gtest/env.h.in ${CMAKE_CURRENT_BINARY_DIR}/gtest/env.h)
+# Compile equality tests without an umbrella from another unity source.
+# This also checks that core comparisons work with incomplete backend IR types.
+set_source_files_properties(gtest/opeq_test.cpp PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
 target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
 

@@ -6,7 +6,7 @@
 #include "constantParsing.h"
 
 #include "frontends/common/options.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
 #include "lib/big_int_util.h"

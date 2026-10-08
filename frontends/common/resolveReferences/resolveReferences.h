@@ -11,7 +11,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
 #include "frontends/common/parser_options.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/pass_manager.h"
 #include "lib/cstring.h"
 #include "lib/iterator_range.h"

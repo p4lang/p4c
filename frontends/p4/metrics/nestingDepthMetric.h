@@ -9,7 +9,7 @@ statements, select statements and parser states.
 #define FRONTENDS_P4_METRICS_NESTINGDEPTHMETRIC_H_
 
 #include "frontends/p4/metrics/metricsStructure.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

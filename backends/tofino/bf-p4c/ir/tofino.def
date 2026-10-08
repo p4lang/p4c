@@ -19,6 +19,14 @@
 
 /* -*-C++-*- */
 
+#include "ir/ir.def"
+#include "frontends/p4-14/ir-v1.def"
+#include_impl "backends/tofino/bf-p4c/ir/tofino.def"
+#include_impl "backends/tofino/bf-p4c/ir/arch.def"
+#include_impl "backends/tofino/bf-p4c/ir/mau.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde.def"
+#include_impl "backends/tofino/bf-p4c/ir/parde-lowered.def"
+
 #emit
 
 #include "lib/bitvec.h"
@@ -223,6 +231,15 @@ abstract BFN::Unit {
        are associated with a particular Unit.  */
     virtual gress_t thread() const = 0;
     virtual int stage() const = 0;
+}
+
+/// The supertype for all BFN IR parsers.
+abstract BFN::AbstractParser : BFN::Unit {
+#apply
+    int stage() const override { return -1; }
+    gress_t thread() const override { return gress; }
+
+    gress_t gress;
 }
 
 class InstanceRef : HeaderRef {

@@ -8,7 +8,7 @@
 #ifndef MIDEND_CHECKSIZE_H_
 #define MIDEND_CHECKSIZE_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

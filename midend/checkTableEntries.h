@@ -18,7 +18,7 @@
 #ifndef MIDEND_CHECKTABLEENTRIES_H_
 #define MIDEND_CHECKTABLEENTRIES_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 
 namespace P4 {

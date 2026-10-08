@@ -11,7 +11,7 @@
 #include <map>
 #include <sstream>
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/exceptions.h"
 
 namespace P4 {

@@ -8,13 +8,16 @@
 #ifndef FRONTENDS_P4_TOP4_TOP4_H_
 #define FRONTENDS_P4_TOP4_TOP4_H_
 
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include <filesystem>
 #include <iostream>
 #include <optional>
 #include <vector>
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "ir/visitor.h"
 #include "lib/sourceCodeBuilder.h"
 

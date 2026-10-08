@@ -9,7 +9,7 @@
 #define MIDEND_UNROLLLOOPS_H_
 
 #include "def_use.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

@@ -11,7 +11,7 @@
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

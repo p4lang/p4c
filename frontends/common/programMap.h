@@ -8,7 +8,7 @@
 #ifndef FRONTENDS_COMMON_PROGRAMMAP_H_
 #define FRONTENDS_COMMON_PROGRAMMAP_H_
 
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "lib/log.h"
 
 namespace P4 {

@@ -9,7 +9,7 @@
 #define FRONTENDS_P4_FRONTEND_H_
 
 #include "../common/options.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "parseAnnotations.h"
 #include "unusedDeclarations.h"
 

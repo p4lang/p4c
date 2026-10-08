@@ -3,15 +3,17 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-#include "local_copyprop.h"
-
+#if SUPPORT_P4_14
+#include "frontends/p4-14/ir-v1.def.h"
+#endif
 #include <unordered_set>
 
 #include "expr_uses.h"
 #include "frontends/common/copySrcInfo.h"
 #include "frontends/p4/methodInstance.h"
 #include "has_side_effects.h"
-#include "ir/ir-generated.h"
+#include "ir/core.h"
+#include "local_copyprop.h"
 
 namespace P4 {
 

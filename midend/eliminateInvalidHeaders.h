@@ -9,7 +9,7 @@
 #define MIDEND_ELIMINATEINVALIDHEADERS_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 namespace P4 {
 

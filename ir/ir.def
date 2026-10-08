@@ -4,6 +4,8 @@
 
 /* -*-C++-*- */
 
+#include "ir/expression.def"
+
 
 /** \addtogroup irdefs
   * @{
@@ -492,6 +494,104 @@ abstract OpAssignmentStatement : BaseAssignmentStatement {
     virtual cstring getStringOp() const = 0;
     toString{ return absl::StrCat(left, " ", getStringOp(), "= ", right); }
     dbprint;
+}
+
+// Compound assignments are statements; keep them with their base class so
+// expression.def does not depend on the statement definitions in this file.
+class MulAssign : OpAssignmentStatement {
+#emit
+    typedef Mul BinOp;
+#end
+    stringOp = "*";
+#nodbprint
+}
+
+class DivAssign : OpAssignmentStatement {
+#emit
+    typedef Div BinOp;
+#end
+    stringOp = "/";
+#nodbprint
+}
+
+class ModAssign : OpAssignmentStatement {
+#emit
+    typedef Mod BinOp;
+#end
+    stringOp = "%";
+#nodbprint
+}
+
+class AddAssign : OpAssignmentStatement {
+#emit
+    typedef Add BinOp;
+#end
+    stringOp = "+";
+#nodbprint
+}
+
+class SubAssign : OpAssignmentStatement {
+#emit
+    typedef Sub BinOp;
+#end
+    stringOp = "-";
+#nodbprint
+}
+
+class AddSatAssign : OpAssignmentStatement {
+#emit
+    typedef AddSat BinOp;
+#end
+    stringOp = "|+|";
+#nodbprint
+}
+
+class SubSatAssign : OpAssignmentStatement {
+#emit
+    typedef SubSat BinOp;
+#end
+    stringOp = "|-|";
+#nodbprint
+}
+
+class ShlAssign : OpAssignmentStatement {
+#emit
+    typedef Shl BinOp;
+#end
+    stringOp = "<<";
+#nodbprint
+}
+
+class ShrAssign : OpAssignmentStatement {
+#emit
+    typedef Shr BinOp;
+#end
+    stringOp = ">>";
+#nodbprint
+}
+
+class BAndAssign : OpAssignmentStatement {
+#emit
+    typedef BAnd BinOp;
+#end
+    stringOp = "&";
+#nodbprint
+}
+
+class BOrAssign : OpAssignmentStatement {
+#emit
+    typedef BOr BinOp;
+#end
+    stringOp = "|";
+#nodbprint
+}
+
+class BXorAssign : OpAssignmentStatement {
+#emit
+    typedef BXor BinOp;
+#end
+    stringOp = "^";
+#nodbprint
 }
 
 class IfStatement : Statement {

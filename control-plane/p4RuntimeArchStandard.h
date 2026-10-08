@@ -11,7 +11,7 @@
 #include "backends/bmv2/common/v1model.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 #include "p4RuntimeArchHandler.h"
 
 namespace p4configv1 = ::p4::config::v1;

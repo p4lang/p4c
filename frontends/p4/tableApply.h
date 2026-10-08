@@ -10,7 +10,7 @@
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/core.h"
 
 // helps resolve complex expressions involving a table apply
 // such as table.apply().action_run
