@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
@@ -347,6 +348,25 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout local_metadata_t l
 }
 
 control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
+    @name("PreQosPipe.ctr_idx") counter_index_t ctr_idx_1;
+    @name("PreQosPipe.ctr_idx") counter_index_t ctr_idx_2;
+    @name("PreQosPipe.ctr_idx") counter_index_t ctr_idx_3;
+    @name("PreQosPipe.ctr_idx") counter_index_t ctr_idx_4;
+    @name("PreQosPipe.src_addr") ipv4_addr_t src_addr_0;
+    @name("PreQosPipe.dst_addr") ipv4_addr_t dst_addr_0;
+    @name("PreQosPipe.udp_sport") l4_port_t udp_sport;
+    @name("PreQosPipe.udp_dport") L4Port udp_dport;
+    @name("PreQosPipe.ipv4_total_len") bit<16> ipv4_total_len;
+    @name("PreQosPipe.udp_len") bit<16> udp_len;
+    @name("PreQosPipe.teid") teid_t teid_0;
+    @name("PreQosPipe.src_addr") ipv4_addr_t src_addr_3;
+    @name("PreQosPipe.dst_addr") ipv4_addr_t dst_addr_3;
+    @name("PreQosPipe.udp_sport") l4_port_t udp_sport_1;
+    @name("PreQosPipe.udp_dport") L4Port udp_dport_1;
+    @name("PreQosPipe.ipv4_total_len") bit<16> ipv4_total_len_1;
+    @name("PreQosPipe.udp_len") bit<16> udp_len_1;
+    @name("PreQosPipe.teid") teid_t teid_3;
+    @name("PreQosPipe.port") PortId_t port_0;
     @name("PreQosPipe.hasReturned_0") bool hasReturned_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -469,34 +489,38 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         }
         const default_action = do_drop_1();
     }
-    @name("PreQosPipe.uplink_term_fwd") action uplink_term_fwd(@name("ctr_idx") counter_index_t ctr_idx_0, @name("tc") TrafficClass tc_2, @name("app_meter_idx") app_meter_idx_t app_meter_idx) {
+    @name("PreQosPipe.uplink_term_fwd") action uplink_term_fwd(@name("ctr_idx") counter_index_t ctr_idx_5, @name("tc") TrafficClass tc_2, @name("app_meter_idx") app_meter_idx_t app_meter_idx) {
         @hidden @inlinedFrom("common_term") {
-            local_meta.ctr_idx = ctr_idx_0;
+            ctr_idx_1 = ctr_idx_5;
+            local_meta.ctr_idx = ctr_idx_1;
             local_meta.terminations_hit = true;
         }
         local_meta.app_meter_idx_internal = app_meter_idx;
         local_meta.tc = tc_2;
     }
-    @name("PreQosPipe.uplink_term_drop") action uplink_term_drop(@name("ctr_idx") counter_index_t ctr_idx_5) {
+    @name("PreQosPipe.uplink_term_drop") action uplink_term_drop(@name("ctr_idx") counter_index_t ctr_idx_6) {
         @hidden @inlinedFrom("common_term") {
-            local_meta.ctr_idx = ctr_idx_5;
+            ctr_idx_2 = ctr_idx_6;
+            local_meta.ctr_idx = ctr_idx_2;
             local_meta.terminations_hit = true;
         }
         local_meta.needs_dropping = true;
     }
-    @name("PreQosPipe.downlink_term_fwd") action downlink_term_fwd(@name("ctr_idx") counter_index_t ctr_idx_6, @name("teid") teid_t teid_1, @name("qfi") qfi_t qfi_1, @name("tc") TrafficClass tc_3, @name("app_meter_idx") app_meter_idx_t app_meter_idx_2) {
+    @name("PreQosPipe.downlink_term_fwd") action downlink_term_fwd(@name("ctr_idx") counter_index_t ctr_idx_7, @name("teid") teid_t teid_2, @name("qfi") qfi_t qfi_1, @name("tc") TrafficClass tc_3, @name("app_meter_idx") app_meter_idx_t app_meter_idx_2) {
         @hidden @inlinedFrom("common_term") {
-            local_meta.ctr_idx = ctr_idx_6;
+            ctr_idx_3 = ctr_idx_7;
+            local_meta.ctr_idx = ctr_idx_3;
             local_meta.terminations_hit = true;
         }
-        local_meta.tunnel_out_teid = teid_1;
+        local_meta.tunnel_out_teid = teid_2;
         local_meta.tunnel_out_qfi = qfi_1;
         local_meta.app_meter_idx_internal = app_meter_idx_2;
         local_meta.tc = tc_3;
     }
-    @name("PreQosPipe.downlink_term_drop") action downlink_term_drop(@name("ctr_idx") counter_index_t ctr_idx_7) {
+    @name("PreQosPipe.downlink_term_drop") action downlink_term_drop(@name("ctr_idx") counter_index_t ctr_idx_8) {
         @hidden @inlinedFrom("common_term") {
-            local_meta.ctr_idx = ctr_idx_7;
+            ctr_idx_4 = ctr_idx_8;
+            local_meta.ctr_idx = ctr_idx_4;
             local_meta.terminations_hit = true;
         }
         local_meta.needs_dropping = true;
@@ -540,9 +564,9 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         }
         const default_action = set_app_id(8w0);
     }
-    @name("PreQosPipe.load_tunnel_param") action load_tunnel_param(@name("src_addr") ipv4_addr_t src_addr_1, @name("dst_addr") ipv4_addr_t dst_addr_1, @name("sport") l4_port_t sport_1) {
-        local_meta.tunnel_out_src_ipv4_addr = src_addr_1;
-        local_meta.tunnel_out_dst_ipv4_addr = dst_addr_1;
+    @name("PreQosPipe.load_tunnel_param") action load_tunnel_param(@name("src_addr") ipv4_addr_t src_addr_2, @name("dst_addr") ipv4_addr_t dst_addr_2, @name("sport") l4_port_t sport_1) {
+        local_meta.tunnel_out_src_ipv4_addr = src_addr_2;
+        local_meta.tunnel_out_dst_ipv4_addr = dst_addr_2;
         local_meta.tunnel_out_udp_sport = sport_1;
         local_meta.needs_tunneling = true;
     }
@@ -558,6 +582,12 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @name("PreQosPipe.do_gtpu_tunnel") action do_gtpu_tunnel() {
         @hidden @inlinedFrom("_udp_encap") {
+            src_addr_0 = local_meta.tunnel_out_src_ipv4_addr;
+            dst_addr_0 = local_meta.tunnel_out_dst_ipv4_addr;
+            udp_sport = local_meta.tunnel_out_udp_sport;
+            udp_dport = L4Port.GTP_GPDU;
+            ipv4_total_len = hdr.ipv4.total_len + 16w36;
+            udp_len = hdr.ipv4.total_len + 16w16;
             hdr.inner_udp = hdr.udp;
             hdr.udp.setInvalid();
             hdr.inner_tcp = hdr.tcp;
@@ -565,9 +595,9 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.inner_icmp = hdr.icmp;
             hdr.icmp.setInvalid();
             hdr.udp.setValid();
-            hdr.udp.sport = local_meta.tunnel_out_udp_sport;
-            hdr.udp.dport = L4Port.GTP_GPDU;
-            hdr.udp.len = hdr.ipv4.total_len + 16w16;
+            hdr.udp.sport = udp_sport;
+            hdr.udp.dport = udp_dport;
+            hdr.udp.len = udp_len;
             hdr.udp.checksum = 16w0;
             hdr.inner_ipv4 = hdr.ipv4;
             hdr.ipv4.setValid();
@@ -575,17 +605,18 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.ipv4.ihl = 4w5;
             hdr.ipv4.dscp = 6w0;
             hdr.ipv4.ecn = 2w0;
-            hdr.ipv4.total_len = hdr.ipv4.total_len + 16w36;
+            hdr.ipv4.total_len = ipv4_total_len;
             hdr.ipv4.identification = 16w0x1513;
             hdr.ipv4.flags = 3w0;
             hdr.ipv4.frag_offset = 13w0;
             hdr.ipv4.ttl = 8w64;
             hdr.ipv4.proto = IpProtocol.UDP;
-            hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
-            hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
+            hdr.ipv4.src_addr = src_addr_0;
+            hdr.ipv4.dst_addr = dst_addr_0;
             hdr.ipv4.checksum = 16w0;
         }
         @hidden @inlinedFrom("_gtpu_encap") {
+            teid_0 = local_meta.tunnel_out_teid;
             hdr.gtpu.setValid();
             hdr.gtpu.version = 3w0x1;
             hdr.gtpu.pt = 1w0x1;
@@ -595,11 +626,17 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.gtpu.npdu_flag = 1w0;
             hdr.gtpu.msgtype = GTPUMessageType.GPDU;
             hdr.gtpu.msglen = hdr.inner_ipv4.total_len;
-            hdr.gtpu.teid = local_meta.tunnel_out_teid;
+            hdr.gtpu.teid = teid_0;
         }
     }
     @name("PreQosPipe.do_gtpu_tunnel_with_psc") action do_gtpu_tunnel_with_psc() {
         @hidden @inlinedFrom("_udp_encap") {
+            src_addr_3 = local_meta.tunnel_out_src_ipv4_addr;
+            dst_addr_3 = local_meta.tunnel_out_dst_ipv4_addr;
+            udp_sport_1 = local_meta.tunnel_out_udp_sport;
+            udp_dport_1 = L4Port.GTP_GPDU;
+            ipv4_total_len_1 = hdr.ipv4.total_len + 16w44;
+            udp_len_1 = hdr.ipv4.total_len + 16w24;
             hdr.inner_udp = hdr.udp;
             hdr.udp.setInvalid();
             hdr.inner_tcp = hdr.tcp;
@@ -607,9 +644,9 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.inner_icmp = hdr.icmp;
             hdr.icmp.setInvalid();
             hdr.udp.setValid();
-            hdr.udp.sport = local_meta.tunnel_out_udp_sport;
-            hdr.udp.dport = L4Port.GTP_GPDU;
-            hdr.udp.len = hdr.ipv4.total_len + 16w24;
+            hdr.udp.sport = udp_sport_1;
+            hdr.udp.dport = udp_dport_1;
+            hdr.udp.len = udp_len_1;
             hdr.udp.checksum = 16w0;
             hdr.inner_ipv4 = hdr.ipv4;
             hdr.ipv4.setValid();
@@ -617,17 +654,18 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.ipv4.ihl = 4w5;
             hdr.ipv4.dscp = 6w0;
             hdr.ipv4.ecn = 2w0;
-            hdr.ipv4.total_len = hdr.ipv4.total_len + 16w44;
+            hdr.ipv4.total_len = ipv4_total_len_1;
             hdr.ipv4.identification = 16w0x1513;
             hdr.ipv4.flags = 3w0;
             hdr.ipv4.frag_offset = 13w0;
             hdr.ipv4.ttl = 8w64;
             hdr.ipv4.proto = IpProtocol.UDP;
-            hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
-            hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
+            hdr.ipv4.src_addr = src_addr_3;
+            hdr.ipv4.dst_addr = dst_addr_3;
             hdr.ipv4.checksum = 16w0;
         }
         @hidden @inlinedFrom("_gtpu_encap") {
+            teid_3 = local_meta.tunnel_out_teid;
             hdr.gtpu.setValid();
             hdr.gtpu.version = 3w0x1;
             hdr.gtpu.pt = 1w0x1;
@@ -635,7 +673,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.gtpu.seq_flag = 1w0;
             hdr.gtpu.npdu_flag = 1w0;
             hdr.gtpu.msgtype = GTPUMessageType.GPDU;
-            hdr.gtpu.teid = local_meta.tunnel_out_teid;
+            hdr.gtpu.teid = teid_3;
         }
         hdr.gtpu.msglen = hdr.inner_ipv4.total_len + 16w8;
         hdr.gtpu.ex_flag = 1w1;
@@ -680,7 +718,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         std_meta.egress_spec = port;
     }
     @name("PreQosPipe.Acl.punt") action Acl_punt_0() {
-        std_meta.egress_spec = 9w255;
+        port_0 = 9w255;
+        std_meta.egress_spec = port_0;
     }
     @name("PreQosPipe.Acl.clone_to_cpu") action Acl_clone_to_cpu_0() {
         clone_preserving_field_list(CloneType.I2E, 32w99, 8w0);

@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -69,36 +70,47 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.ncount") bit<64> ncount_0;
     @name("MyIngress.nselect") bit<32> nselect_0;
     @name("MyIngress.ninput") bit<32> ninput_0;
+    @name("MyIngress.result") bit<32> result_1;
+    @name("MyIngress.result") bit<32> result_2;
+    @name("MyIngress.result") bit<32> result_3;
+    @name("MyIngress.result") bit<32> result_4;
+    @name("MyIngress.result") bit<32> result_5;
+    @name("MyIngress.result") bit<32> result_6;
     @name("MyIngress.operation_add") action operation_add() {
-        hdr.p4calc.res = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
+        result_1 = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_1;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @name("MyIngress.operation_sub") action operation_sub() {
-        hdr.p4calc.res = hdr.p4calc.operand_a - hdr.p4calc.operand_b;
+        result_2 = hdr.p4calc.operand_a - hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_2;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @name("MyIngress.operation_and") action operation_and() {
-        hdr.p4calc.res = hdr.p4calc.operand_a & hdr.p4calc.operand_b;
+        result_3 = hdr.p4calc.operand_a & hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_3;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @name("MyIngress.operation_or") action operation_or() {
-        hdr.p4calc.res = hdr.p4calc.operand_a | hdr.p4calc.operand_b;
+        result_4 = hdr.p4calc.operand_a | hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_4;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @name("MyIngress.operation_xor") action operation_xor() {
-        hdr.p4calc.res = hdr.p4calc.operand_a ^ hdr.p4calc.operand_b;
+        result_5 = hdr.p4calc.operand_a ^ hdr.p4calc.operand_b;
+        hdr.p4calc.res = result_5;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;
@@ -109,7 +121,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         ncount_0 = 64w8589934592;
         ninput_0 = hdr.p4calc.operand_a;
         hash<bit<32>, bit<32>, tuple<bit<32>>, bit<64>>(nselect_0, HashAlgorithm.crc32, nbase_0, { ninput_0 }, ncount_0);
-        hdr.p4calc.res = nselect_0;
+        result_6 = nselect_0;
+        hdr.p4calc.res = result_6;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
         hdr.ethernet.srcAddr = tmp_5;

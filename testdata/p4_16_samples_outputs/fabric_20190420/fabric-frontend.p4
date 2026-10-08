@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -334,6 +335,28 @@ control FabricDeparser(packet_out packet, in parsed_headers_t hdr) {
 }
 
 control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
+    @name("FabricIngress.next_id") next_id_t next_id_1;
+    @name("FabricIngress.next_id") next_id_t next_id_2;
+    @name("FabricIngress.next_id") next_id_t next_id_3;
+    @name("FabricIngress.port_num") port_num_t port_num_3;
+    @name("FabricIngress.port_num") port_num_t port_num_4;
+    @name("FabricIngress.port_num") port_num_t port_num_5;
+    @name("FabricIngress.smac") mac_addr_t smac_3;
+    @name("FabricIngress.dmac") mac_addr_t dmac_3;
+    @name("FabricIngress.smac") mac_addr_t smac_4;
+    @name("FabricIngress.dmac") mac_addr_t dmac_4;
+    @name("FabricIngress.port_num") port_num_t port_num_6;
+    @name("FabricIngress.port_num") port_num_t port_num_10;
+    @name("FabricIngress.smac") mac_addr_t smac_6;
+    @name("FabricIngress.dmac") mac_addr_t dmac_6;
+    @name("FabricIngress.label") mpls_label_t label_2;
+    @name("FabricIngress.label") mpls_label_t label_4;
+    @name("FabricIngress.port_num") port_num_t port_num_11;
+    @name("FabricIngress.smac") mac_addr_t smac_7;
+    @name("FabricIngress.dmac") mac_addr_t dmac_7;
+    @name("FabricIngress.smac") mac_addr_t smac_10;
+    @name("FabricIngress.dmac") mac_addr_t dmac_10;
+    @name("FabricIngress.port_num") port_num_t port_num_16;
     @name("FabricIngress.spgw_ingress.hasReturned_0") bool spgw_ingress_hasReturned;
     @name(".nop") action nop_2() {
     }
@@ -400,9 +423,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.forwarding.bridging_counter") direct_counter(CounterType.packets_and_bytes) forwarding_bridging_counter;
-    @name("FabricIngress.forwarding.set_next_id_bridging") action forwarding_set_next_id_bridging_0(@name("next_id") next_id_t next_id_0) {
+    @name("FabricIngress.forwarding.set_next_id_bridging") action forwarding_set_next_id_bridging_0(@name("next_id") next_id_t next_id_6) {
         @hidden @inlinedFrom("forwarding_set_next_id") {
-            fabric_metadata.next_id = next_id_0;
+            next_id_1 = next_id_6;
+            fabric_metadata.next_id = next_id_1;
         }
         forwarding_bridging_counter.count();
     }
@@ -420,10 +444,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.forwarding.mpls_counter") direct_counter(CounterType.packets_and_bytes) forwarding_mpls_counter;
-    @name("FabricIngress.forwarding.pop_mpls_and_next") action forwarding_pop_mpls_and_next_0(@name("next_id") next_id_t next_id_6) {
+    @name("FabricIngress.forwarding.pop_mpls_and_next") action forwarding_pop_mpls_and_next_0(@name("next_id") next_id_t next_id_7) {
         fabric_metadata.mpls_label = 20w0;
         @hidden @inlinedFrom("forwarding_set_next_id") {
-            fabric_metadata.next_id = next_id_6;
+            next_id_2 = next_id_7;
+            fabric_metadata.next_id = next_id_2;
         }
         forwarding_mpls_counter.count();
     }
@@ -440,9 +465,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.forwarding.routing_v4_counter") direct_counter(CounterType.packets_and_bytes) forwarding_routing_v4_counter;
-    @name("FabricIngress.forwarding.set_next_id_routing_v4") action forwarding_set_next_id_routing_v4_0(@name("next_id") next_id_t next_id_7) {
+    @name("FabricIngress.forwarding.set_next_id_routing_v4") action forwarding_set_next_id_routing_v4_0(@name("next_id") next_id_t next_id_8) {
         @hidden @inlinedFrom("forwarding_set_next_id") {
-            fabric_metadata.next_id = next_id_7;
+            next_id_3 = next_id_8;
+            fabric_metadata.next_id = next_id_3;
         }
         forwarding_routing_v4_counter.count();
     }
@@ -463,8 +489,8 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         size = 1024;
     }
     @name("FabricIngress.acl.acl_counter") direct_counter(CounterType.packets_and_bytes) acl_acl_counter;
-    @name("FabricIngress.acl.set_next_id_acl") action acl_set_next_id_acl_0(@name("next_id") next_id_t next_id_8) {
-        fabric_metadata.next_id = next_id_8;
+    @name("FabricIngress.acl.set_next_id_acl") action acl_set_next_id_acl_0(@name("next_id") next_id_t next_id_11) {
+        fabric_metadata.next_id = next_id_11;
         acl_acl_counter.count();
     }
     @name("FabricIngress.acl.punt_to_cpu") action acl_punt_to_cpu_0() {
@@ -530,12 +556,13 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @name("FabricIngress.next.xconnect_counter") direct_counter(CounterType.packets_and_bytes) next_xconnect_counter;
     @name("FabricIngress.next.output_xconnect") action next_output_xconnect_0(@name("port_num") port_num_t port_num) {
         @hidden @inlinedFrom("next_output") {
-            standard_metadata.egress_spec = port_num;
+            port_num_3 = port_num;
+            standard_metadata.egress_spec = port_num_3;
         }
         next_xconnect_counter.count();
     }
-    @name("FabricIngress.next.set_next_id_xconnect") action next_set_next_id_xconnect_0(@name("next_id") next_id_t next_id_9) {
-        fabric_metadata.next_id = next_id_9;
+    @name("FabricIngress.next.set_next_id_xconnect") action next_set_next_id_xconnect_0(@name("next_id") next_id_t next_id_12) {
+        fabric_metadata.next_id = next_id_12;
         next_xconnect_counter.count();
     }
     @name("FabricIngress.next.xconnect") table next_xconnect {
@@ -554,40 +581,58 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @max_group_size(16) @name("FabricIngress.next.hashed_selector") action_selector(HashAlgorithm.crc16, 32w1024, 32w16) next_hashed_selector;
     @name("FabricIngress.next.hashed_counter") direct_counter(CounterType.packets_and_bytes) next_hashed_counter;
-    @name("FabricIngress.next.output_hashed") action next_output_hashed_0(@name("port_num") port_num_t port_num_0) {
+    @name("FabricIngress.next.output_hashed") action next_output_hashed_0(@name("port_num") port_num_t port_num_7) {
         @hidden @inlinedFrom("next_output") {
-            standard_metadata.egress_spec = port_num_0;
+            port_num_4 = port_num_7;
+            standard_metadata.egress_spec = port_num_4;
         }
         next_hashed_counter.count();
     }
-    @name("FabricIngress.next.routing_hashed") action next_routing_hashed_0(@name("port_num") port_num_t port_num_1, @name("smac") mac_addr_t smac, @name("dmac") mac_addr_t dmac) {
+    @name("FabricIngress.next.routing_hashed") action next_routing_hashed_0(@name("port_num") port_num_t port_num_8, @name("smac") mac_addr_t smac, @name("dmac") mac_addr_t dmac) {
         @hidden @inlinedFrom("next_routing") {
+            port_num_5 = port_num_8;
+            smac_3 = smac;
+            dmac_3 = dmac;
             @hidden @inlinedFrom("next_rewrite_smac") {
-                hdr.ethernet.src_addr = smac;
+                smac_4 = smac_3;
+                hdr.ethernet.src_addr = smac_4;
             }
             @hidden @inlinedFrom("next_rewrite_dmac") {
-                hdr.ethernet.dst_addr = dmac;
+                dmac_4 = dmac_3;
+                hdr.ethernet.dst_addr = dmac_4;
             }
             @hidden @inlinedFrom("next_output") {
-                standard_metadata.egress_spec = port_num_1;
+                port_num_6 = port_num_5;
+                standard_metadata.egress_spec = port_num_6;
             }
         }
         next_hashed_counter.count();
     }
-    @name("FabricIngress.next.mpls_routing_hashed") action next_mpls_routing_hashed_0(@name("port_num") port_num_t port_num_2, @name("smac") mac_addr_t smac_0, @name("dmac") mac_addr_t dmac_0, @name("label") mpls_label_t label_0) {
+    @name("FabricIngress.next.mpls_routing_hashed") action next_mpls_routing_hashed_0(@name("port_num") port_num_t port_num_9, @name("smac") mac_addr_t smac_5, @name("dmac") mac_addr_t dmac_5, @name("label") mpls_label_t label_3) {
         @hidden @inlinedFrom("next_mpls_routing") {
+            port_num_10 = port_num_9;
+            smac_6 = smac_5;
+            dmac_6 = dmac_5;
+            label_2 = label_3;
             @hidden @inlinedFrom("next_set_mpls_label") {
-                fabric_metadata.mpls_label = label_0;
+                label_4 = label_2;
+                fabric_metadata.mpls_label = label_4;
             }
             @hidden @inlinedFrom("next_routing") {
+                port_num_11 = port_num_10;
+                smac_7 = smac_6;
+                dmac_7 = dmac_6;
                 @hidden @inlinedFrom("next_rewrite_smac") {
-                    hdr.ethernet.src_addr = smac_0;
+                    smac_10 = smac_7;
+                    hdr.ethernet.src_addr = smac_10;
                 }
                 @hidden @inlinedFrom("next_rewrite_dmac") {
-                    hdr.ethernet.dst_addr = dmac_0;
+                    dmac_10 = dmac_7;
+                    hdr.ethernet.dst_addr = dmac_10;
                 }
                 @hidden @inlinedFrom("next_output") {
-                    standard_metadata.egress_spec = port_num_2;
+                    port_num_16 = port_num_11;
+                    standard_metadata.egress_spec = port_num_16;
                 }
             }
         }
