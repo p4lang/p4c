@@ -1294,8 +1294,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::PathExpression *expressio
     if (done()) return expression;
     auto decl = getDeclaration(expression->path);
     if (decl == nullptr) {
-        if (errorOnNullDecls)
-            typeError("%1%: Cannot resolve declaration", expression);
+        if (errorOnNullDecls) typeError("%1%: Cannot resolve declaration", expression);
         return expression;
     }
     const IR::Type *type = nullptr;
