@@ -65,6 +65,28 @@ bool EBPFRegisterPSA::shouldUseArrayMap() {
     return false;
 }
 
+void EBPFRegisterPSA::emitAssignment(CodeBuilder *builder, EBPFType *type, cstring name,
+                                     const IR::Expression *expression,
+                                     ControlBodyTranslatorPSA *translator) {
+    auto width = type->to<IHasWidth>();
+    bool isWide =
+        width != nullptr && !EBPFScalarType::generatesScalar(width->implementationWidthInBits());
+
+    builder->emitIndent();
+    if (isWide) {
+        builder->appendFormat("__builtin_memcpy(&%s, &", name.c_str());
+        if (expression->is<IR::Constant>()) {
+            builder->appendFormat("(u8[%u])", width->implementationWidthInBits() / 8);
+        }
+        translator->visit(expression);
+        builder->appendFormat(", %u)", width->implementationWidthInBits() / 8);
+    } else {
+        builder->appendFormat("%s = ", name.c_str());
+        translator->visit(expression);
+    }
+    builder->endOfStatement(true);
+}
+
 void EBPFRegisterPSA::emitTypes(CodeBuilder *builder) {
     emitKeyType(builder);
     emitValueType(builder);
@@ -143,7 +165,15 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
                                        ControlBodyTranslatorPSA *translator,
                                        const IR::Expression *leftExpression) {
     auto index = method->expr->arguments->at(0)->expression;
+    cstring keyName = program->refMap->newName("key");
     cstring valueName = program->refMap->newName("value");
+
+    // Map helpers require an addressable key; materialize the P4 index instead of
+    // taking the address of a literal or computed expression.
+    builder->emitIndent();
+    this->keyType->declare(builder, keyName, false);
+    builder->endOfStatement(true);
+    emitAssignment(builder, keyType, keyName, index, translator);
 
     builder->emitIndent();
     this->valueType->declare(builder, valueName, true);
@@ -155,7 +185,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
     builder->emitIndent();
     builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &", valueName.c_str(),
                           instanceName.c_str());
-    translator->visit(index);
+    builder->append(keyName);
     builder->append(")");
     builder->endOfStatement(true);
 
@@ -202,18 +232,77 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
     builder->blockEnd(true);
 }
 
+void EBPFRegisterPSA::emitRegisterReadExpression(CodeBuilder *builder,
+                                                 const P4::ExternMethod *method,
+                                                 ControlBodyTranslatorPSA *translator) {
+    auto index = method->expr->arguments->at(0)->expression;
+    cstring keyName = program->refMap->newName("key");
+    cstring pointerName = program->refMap->newName("value");
+    cstring valueName = program->refMap->newName("read_value");
+
+    // A Register.read() can occur inside another expression. Keep its temporary
+    // declarations and lookup together as a GNU C expression statement.
+    builder->append("({");
+    builder->newline();
+
+    builder->emitIndent();
+    this->keyType->declare(builder, keyName, false);
+    builder->endOfStatement(true);
+    emitAssignment(builder, keyType, keyName, index, translator);
+
+    builder->emitIndent();
+    this->valueType->declare(builder, pointerName, true);
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &%s)", pointerName.c_str(),
+                          instanceName.c_str(), keyName.c_str());
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    this->valueType->declareInit(builder, valueName, false);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s != NULL) ", pointerName.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("__builtin_memcpy(&%s, %s, sizeof(%s))", valueName.c_str(),
+                          pointerName.c_str(), valueTypeName.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+
+    builder->emitIndent();
+    builder->append(valueName);
+    builder->endOfStatement(true);
+    builder->append("})");
+}
+
 void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMethod *method,
                                         ControlBodyTranslatorPSA *translator) {
     auto msgStr = absl::StrFormat("Register: writing %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
+    auto key = method->expr->arguments->at(0)->expression;
+    auto value = method->expr->arguments->at(1)->expression;
+    cstring keyName = program->refMap->newName("key");
+    cstring valueName = program->refMap->newName("value");
+
+    // Both map-helper arguments must have stable storage, including constant and
+    // compound P4 expressions such as write(0, counter + 1).
+    builder->emitIndent();
+    this->keyType->declare(builder, keyName, false);
+    builder->endOfStatement(true);
+    emitAssignment(builder, keyType, keyName, key, translator);
+
+    builder->emitIndent();
+    this->valueType->declare(builder, valueName, false);
+    builder->endOfStatement(true);
+    emitAssignment(builder, valueType, valueName, value, translator);
+
     builder->emitIndent();
     auto ret = program->refMap->newName("ret");
-    builder->appendFormat("int %s = BPF_MAP_UPDATE_ELEM(%s, &", ret.c_str(), instanceName.c_str());
-    translator->visit(method->expr->arguments->at(0)->expression);
-    builder->append(", &");
-    translator->visit(method->expr->arguments->at(1)->expression);
-    builder->append(", BPF_ANY)");
+    builder->appendFormat("int %s = BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY)", ret.c_str(),
+                          instanceName.c_str(), keyName.c_str(), valueName.c_str());
     builder->endOfStatement(true);
 
     builder->emitIndent();

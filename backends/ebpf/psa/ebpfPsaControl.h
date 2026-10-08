@@ -18,11 +18,15 @@ namespace P4::EBPF {
 class EBPFControlPSA;
 
 class ControlBodyTranslatorPSA : public ControlBodyTranslator {
+    // Register reads need expression-specific lowering when nested in an assignment.
+    bool emittingExpression = false;
+
  public:
     explicit ControlBodyTranslatorPSA(const EBPFControlPSA *control);
 
     bool preorder(const IR::BaseAssignmentStatement *a) override { return notSupported(a); }
     bool preorder(const IR::AssignmentStatement *a) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
 
     void processMethod(const P4::ExternMethod *method) override;
 
