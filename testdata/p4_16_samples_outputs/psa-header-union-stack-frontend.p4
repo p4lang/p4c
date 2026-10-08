@@ -170,31 +170,13 @@ control HeaderUnionEgress(inout headers_t hdr, inout metadata_t meta, in psa_egr
 
 control HeaderUnionIngressDeparser(packet_out packet, out empty_t clone_i2e, out empty_t resubmit, out empty_t normal, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
     apply {
-        packet.emit<Tcp_option_h>(hdr.options[0]);
-        packet.emit<Tcp_option_h>(hdr.options[1]);
-        packet.emit<Tcp_option_h>(hdr.options[2]);
-        packet.emit<Tcp_option_h>(hdr.options[3]);
-        packet.emit<Tcp_option_h>(hdr.options[4]);
-        packet.emit<Tcp_option_h>(hdr.options[5]);
-        packet.emit<Tcp_option_h>(hdr.options[6]);
-        packet.emit<Tcp_option_h>(hdr.options[7]);
-        packet.emit<Tcp_option_h>(hdr.options[8]);
-        packet.emit<Tcp_option_h>(hdr.options[9]);
+        packet.emit<Tcp_option_h[10]>(hdr.options);
     }
 }
 
 control HeaderUnionEgressDeparser(packet_out packet, out empty_t clone_e2e, out empty_t recirculate, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t ostd, in psa_egress_deparser_input_metadata_t edstd) {
     apply {
-        packet.emit<Tcp_option_h>(hdr.options[0]);
-        packet.emit<Tcp_option_h>(hdr.options[1]);
-        packet.emit<Tcp_option_h>(hdr.options[2]);
-        packet.emit<Tcp_option_h>(hdr.options[3]);
-        packet.emit<Tcp_option_h>(hdr.options[4]);
-        packet.emit<Tcp_option_h>(hdr.options[5]);
-        packet.emit<Tcp_option_h>(hdr.options[6]);
-        packet.emit<Tcp_option_h>(hdr.options[7]);
-        packet.emit<Tcp_option_h>(hdr.options[8]);
-        packet.emit<Tcp_option_h>(hdr.options[9]);
+        packet.emit<Tcp_option_h[10]>(hdr.options);
     }
 }
 

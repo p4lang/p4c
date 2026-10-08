@@ -217,7 +217,7 @@ control HeaderUnionIngressDeparser(packet_out packet, out empty_t clone_i2e, out
 }
 
 control HeaderUnionEgressDeparser(packet_out packet, out empty_t clone_e2e, out empty_t recirculate, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t ostd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaheaderunionstack164() {
+    @hidden action psaheaderunionstack155() {
         packet.emit<Tcp_option_end_h>(hdr.options[0].end);
         packet.emit<Tcp_option_nop_h>(hdr.options[0].nop);
         packet.emit<Tcp_option_ss_h>(hdr.options[0].ss);
@@ -269,14 +269,14 @@ control HeaderUnionEgressDeparser(packet_out packet, out empty_t clone_e2e, out 
         packet.emit<Tcp_option_s_h>(hdr.options[9].s);
         packet.emit<Tcp_option_sack_h>(hdr.options[9].sack);
     }
-    @hidden table tbl_psaheaderunionstack164 {
+    @hidden table tbl_psaheaderunionstack155 {
         actions = {
-            psaheaderunionstack164();
+            psaheaderunionstack155();
         }
-        const default_action = psaheaderunionstack164();
+        const default_action = psaheaderunionstack155();
     }
     apply {
-        tbl_psaheaderunionstack164.apply();
+        tbl_psaheaderunionstack155.apply();
     }
 }
 
