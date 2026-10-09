@@ -138,7 +138,7 @@ class DoGlobalCopyPropagation final : public Transform {
     const IR::Expression *preorder(IR::Member *) override;
     const IR::P4Action *preorder(IR::P4Action *) override;
     const IR::P4Action *postorder(IR::P4Action *) override;
-    IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
+    IR::MethodCallExpression *preorder(IR::MethodCallExpression *) override;
 };
 
 class GlobalCopyPropagation : public PassManager {
