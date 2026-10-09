@@ -1,9 +1,6 @@
 issue5830.p4(3): [--Wwarn=unused] warning: 'mul' is unused
 int<8> mul(in int<8> a, int<8> b = 2, in int<8> c) {
        ^^^
-issue5830.p4(13): [--Wwarn=unused] warning: 'x' is unused
-        int<8> x = mul(2, 3);
-        ^^^^^^^^^^^^^^^^^^^^
 issue5830.p4(13): [--Werror=duplicate] error: mul: multiple matching declarations
         int<8> x = mul(2, 3);
                    ^^^
