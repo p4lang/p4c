@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+# SPDX-License-Identifier: Apache-2.0
+
+# Matching destination and case: return from ingress and forward on port 1.
+packet 0 00112233445566778899aabb0800
+expect 1 00112233445566778899aabb0800
+
+# Matching destination, unmatched case: continue after switch and drop.
+packet 0 00112233445566778899aabb86dd
+
+# Nonmatching destination: continue after if and drop.
+packet 0 00112233445666778899aabb0800
