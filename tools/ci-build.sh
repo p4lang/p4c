@@ -88,13 +88,21 @@ pushd ${P4C_DIR}
 
 . /etc/lsb-release
 
+# Preserve the legacy CI environment variable unless a CPM override was supplied.
+if [[ -z "${CPM_DOWNLOAD_multiprecision+x}" && -n "${P4C_USE_PREINSTALLED_MULTIPRECISION+x}" ]]; then
+  case "${P4C_USE_PREINSTALLED_MULTIPRECISION^^}" in
+    ON|YES|TRUE|1) CPM_DOWNLOAD_multiprecision=OFF ;;
+    *) CPM_DOWNLOAD_multiprecision=ON ;;
+  esac
+fi
+
 # Ubuntu 22.04's Boost predates standalone Multiprecision. Use its matching
 # Multiprecision headers when building against the distro's backend dependencies.
 # FIXME: Remove this override once all Ubuntu 22.04 CI builds migrate to Ubuntu 24.04.
 if [[ "${DISTRIB_RELEASE}" == "22.04" ]]; then
-  : "${P4C_USE_PREINSTALLED_MULTIPRECISION:=ON}"
+  : "${CPM_DOWNLOAD_multiprecision:=OFF}"
 else
-  : "${P4C_USE_PREINSTALLED_MULTIPRECISION:=OFF}"
+  : "${CPM_DOWNLOAD_multiprecision:=ON}"
 fi
 
 # In Docker builds, sudo is not available. So make it a noop.
@@ -122,7 +130,7 @@ P4C_DEPS="bison \
           tcpdump"
 
 if [[ "${ENABLE_P4C_GRAPHS:-ON}" == "ON" || "${ENABLE_TOFINO:-OFF}" == "ON" ||
-      "${P4C_USE_PREINSTALLED_MULTIPRECISION}" == "ON" ]]; then
+      "${CPM_DOWNLOAD_multiprecision}" == "OFF" ]]; then
   P4C_DEPS+=" libboost-dev"
 fi
 
@@ -412,7 +420,10 @@ fi
 export CXXFLAGS="${CXXFLAGS} -O3"
 # Toggle unity compilation.
 CMAKE_FLAGS+="-DCMAKE_UNITY_BUILD=${CMAKE_UNITY_BUILD} "
-CMAKE_FLAGS+="-DP4C_USE_PREINSTALLED_MULTIPRECISION=${P4C_USE_PREINSTALLED_MULTIPRECISION} "
+CMAKE_FLAGS+="-DCPM_DOWNLOAD_multiprecision=${CPM_DOWNLOAD_multiprecision} "
+if [[ -n "${P4C_USE_PREINSTALLED_MULTIPRECISION+x}" ]]; then
+  CMAKE_FLAGS+="-DP4C_USE_PREINSTALLED_MULTIPRECISION=${P4C_USE_PREINSTALLED_MULTIPRECISION} "
+fi
 # Toggle static builds.
 CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_GLIBC=${STATIC_BUILD_WITH_DYNAMIC_GLIBC} "
 CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_STDLIB=${STATIC_BUILD_WITH_DYNAMIC_STDLIB} "

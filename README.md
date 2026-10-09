@@ -232,12 +232,13 @@ sudo dpkg -i /path/to/package.deb
        library. Default is ON.
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
-     - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
-     - `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF`. Use installed Multiprecision headers and their matching Boost dependencies instead of fetching standalone Multiprecision. Default is OFF.
-     - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.
-     - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable the use of static abseil libraries. Default is ON. Only has an effect when `P4C_USE_PREINSTALLED_ABSEIL` is enabled.
-     - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
-       Only has an effect when `P4C_USE_PREINSTALLED_PROTOBUF` is enabled.
+     - `-DCPM_DOWNLOAD_<name>=OFF`. Prefer an installed dependency, falling back to the pinned source if unavailable. See the package names below.
+     - `-DCPM_USE_LOCAL_PACKAGES=ON`. Prefer installed versions of all library dependencies.
+     - `-DCPM_LOCAL_PACKAGES_ONLY=ON`. Require installed versions of all library dependencies.
+     - `-DCPM_SOURCE_CACHE=<path>`. Reuse downloaded dependency sources across build directories (also available as an environment variable).
+     - `-DCPM_<name>_SOURCE=<path>`. Build a library dependency from a local source checkout.
+     - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable static installed Abseil libraries. Default is ON.
+     - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable static installed Protobuf libraries. Default is ON.
      - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
        OFF.
      - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
@@ -245,6 +246,53 @@ sudo dpkg -i /path/to/package.deb
      - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
      - `-DENABLE_WERROR=ON|OFF`. Treat warnings as errors.  Default is OFF.
      - `-DCMAKE_UNITY_BUILD=ON|OFF `. Enable [unity builds](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html) for faster compilation.  Default is OFF.
+
+    P4C uses [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake) with pinned source dependencies by default (`CPM_DOWNLOAD_ALL=ON`). Package names are case-sensitive:
+
+    | Dependency | CPM name | Deprecated option |
+    | --- | --- | --- |
+    | Abseil | `absl` | `P4C_USE_PREINSTALLED_ABSEIL` |
+    | Protobuf | `Protobuf` | `P4C_USE_PREINSTALLED_PROTOBUF` |
+    | Boehm GC | `LibGc` | `P4C_USE_PREINSTALLED_BDWGC` |
+    | Multiprecision | `multiprecision` | `P4C_USE_PREINSTALLED_MULTIPRECISION` |
+    | Z3 | `Z3` | `USE_PREINSTALLED_Z3` |
+    | GoogleTest | `GTest` | — |
+    | Inja | `inja` | — |
+    | spdlog | `spdlog` | — |
+    | P4Runtime schemas | `p4runtime` | — |
+
+    Explicitly setting a deprecated option emits a deprecation warning. `ON` requires the installed package, as before; `OFF` selects the source build. An explicitly supplied `CPM_DOWNLOAD_<name>` takes precedence. For example, replace `-DP4C_USE_PREINSTALLED_ABSEIL=ON` with `-DCPM_DOWNLOAD_absl=OFF`; unlike the legacy flag, CPM permits a source fallback unless `CPM_LOCAL_PACKAGES_ONLY=ON` is also set.
+
+    Installed Multiprecision uses its matching Boost headers; fetched Multiprecision uses standalone mode and the pinned Boost.Config headers. Installed Z3 retains the existing version restrictions required by the garbage collector. bpftool sources and Boost.Config for standalone Multiprecision are source-only inputs, so they are fetched even in local-library mode. bpftool remains in the runtime source directory required by the eBPF build scripts.
+
+    Installed P4Runtime requires the original schemas, since P4C generates bindings with its selected Protobuf version. An upstream CMake package is used when available, with a fallback for older schema-only installations. Use `-DCPM_DOWNLOAD_p4runtime=OFF -Dp4runtime_ROOT=/opt/p4runtime` to search an installation prefix (`share/p4runtime/proto`, `share/p4runtime`, `include`, or `proto`), or set `p4runtime_PROTO_DIR` directly to the directory containing `p4/`. The schema tree must include `p4info.proto`, `p4types.proto`, `p4runtime.proto`, and `p4data.proto` in their standard subdirectories, plus `google/rpc/status.proto`. Inja and spdlog use their upstream CMake package configurations, located through `CMAKE_PREFIX_PATH` or `inja_DIR`/`spdlog_DIR`. These dependencies use CPM's native options; no new deprecated `USE_PREINSTALLED_*` flags are needed.
+
+    Common dependency configurations:
+
+    ```sh
+    # Reuse sources across build directories and checkouts.
+    export CPM_SOURCE_CACHE="$HOME/.cache/CPM"
+    cmake -B build
+
+    # Prefer an installed Protobuf, with the default source fallback.
+    cmake -B build -DCPM_DOWNLOAD_Protobuf=OFF -DCMAKE_PREFIX_PATH=/opt/protobuf
+
+    # Develop against an Abseil checkout using the default source mode.
+    cmake -B build -DCPM_absl_SOURCE=/path/to/abseil-cpp
+    ```
+
+    `CPM_USE_LOCAL_PACKAGES` and `CPM_LOCAL_PACKAGES_ONLY` also affect source requests made through `CPM_DOWNLOAD_ALL` or `CPM_DOWNLOAD_<name>`; leave those local-package options off when you want pinned source builds. To configure offline, first populate the source cache in an online build with the same backends enabled. CPM's bootstrap is cached there too. eBPF additionally needs its bpftool checkout at the fixed runtime path. Source caches contain no reusable compiled libraries; use ccache to reuse compilation results. Dependency options are scoped to their CPM package rather than written into P4C's global CMake cache.
+
+    When reusing an older build directory, configure once with `-DFETCHCONTENT_FULLY_DISCONNECTED=OFF` to populate dependencies whose CPM names changed. Offline mode can be restored after that initial fetch.
+
+    When embedding P4C with `add_subdirectory`, a parent project's already-loaded CPM instance, options, source cache, and registered packages with the names listed above are reused. Explicit `CPM_<name>_SOURCE` checkouts take priority over installed-package discovery. The first provider of a shared dependency controls its build options; P4C does not reconfigure or patch a dependency already supplied by the parent. In particular, a parent-provided Z3 must be compatible with P4C's garbage collector. P4C adds standalone developer targets (`check`, `uninstall`, linters) and CPack configuration only when it is the top-level project. Backend-specific test environments still need their usual setup.
+
+    The CPM integration can be checked independently of a compiler build:
+
+    ```sh
+    cmake -S cmake/tests -B build/cpm-tests -DCPM_SOURCE_CACHE="$CPM_SOURCE_CACHE"
+    ctest --test-dir build/cpm-tests --output-on-failure
+    ```
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).
@@ -338,7 +386,7 @@ git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
 3.0 or higher, so the packaged version provided in Ubuntu 22.04 **should**
-work. However, P4C typically installs its own version of Protobuf using CMake's `FetchContent` module
+work. However, P4C typically installs its own version of Protobuf using CPM.cmake
 (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions
 [here](https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md).
 After cloning Protobuf and before you build, check-out version 3.25.3:
@@ -349,7 +397,7 @@ Please note that while all Protobuf versions newer than 3.0 should work for
 P4C itself, you may run into trouble with Abseil, some extensions and other p4lang
 projects unless you install version 3.25.3.
 
-P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CMake's `FetchContent` module (Abseil LTS 20240722.1 at the moment).
+P4C also depends on Google Abseil library. This library is also a pre-requisite for Protobuf of any version newer than 3.21. Therefore the use of Protobuf of suitable version automatically fulfils Abseil dependency. P4C typically installs its own version of Abseil using CPM.cmake (Abseil LTS 20240722.1 at the moment).
 
 #### CMake
 P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`, but there is no guarantee that this will lead to a successful build.
@@ -438,7 +486,7 @@ Installing on macOS:
 
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should
   work for P4C itself but may cause problems with some extensions. It's
-  preferable to use the version of Protobuf which is supplied with CMake's fetchcontent (3.25.3).
+  preferable to use the version of Protobuf which is supplied with CPM.cmake (3.25.3).
 
   The `protobuf` formula requires the following CMake variables to be set,
   otherwise CMake does not find the libraries or fails in linking. It is likely

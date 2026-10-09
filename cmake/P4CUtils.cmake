@@ -401,15 +401,6 @@ macro(p4c_add_xfail_reason tag reason)
   endforeach()
 endmacro(p4c_add_xfail_reason)
 
-# Effectively emulates fetchcontent_makeavailable but does not add the module to install.
-macro(fetchcontent_makeavailable_but_exclude_install content)
-  FetchContent_GetProperties(${content})
-  if(NOT ${content}_POPULATED)
-    FetchContent_Populate(${content})
-    add_subdirectory(${${content}_SOURCE_DIR} ${${content}_BINARY_DIR} EXCLUDE_FROM_ALL)
-  endif()
-endmacro(fetchcontent_makeavailable_but_exclude_install)
-
 # Collect all currently added targets in all subdirectories
 #
 # Parameters: - _result the list containing all found targets - _dir root directory to start
