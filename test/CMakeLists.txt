@@ -85,7 +85,7 @@ set (GTESTP4C_SOURCES ${GTEST_SOURCES} ${GTEST_BASE_SOURCES})
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/test)
 configure_file(gtest/env.h.in ${CMAKE_CURRENT_BINARY_DIR}/gtest/env.h)
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
-target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
+target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} GTest::gtest ${P4C_LIB_DEPS})
 
 # The load_ir_from_json test needs this file. Easier to copy to build directory
 # rather than pass absolute path in the case where build/ isn't located in the
