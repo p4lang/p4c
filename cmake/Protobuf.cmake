@@ -4,97 +4,57 @@
 
 macro(p4c_obtain_protobuf)
   set(P4C_PROTOBUF_VERSION 25.3)
-  option(
-    P4C_USE_PREINSTALLED_PROTOBUF
-    "Look for a preinstalled version of Protobuf in the system instead of installing a prebuilt binary using FetchContent."
-    OFF
+  p4c_dependency_compat(P4C_USE_PREINSTALLED_PROTOBUF Protobuf)
+  if(ENABLE_PROTOBUF_STATIC)
+    set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  endif()
+  if(APPLE)
+    set(P4C_PROTOBUF_PATHS PATHS /usr/local/opt/protobuf /opt/homebrew/opt/protobuf)
+  endif()
+  string(JOIN " " P4C_PROTOBUF_FIND_ARGUMENTS CONFIG ${P4C_Protobuf_FIND_ARGUMENTS} ${P4C_PROTOBUF_PATHS})
+  p4c_find_package(
+    NAME Protobuf
+    URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protobuf-${P4C_PROTOBUF_VERSION}.tar.gz
+    URL_HASH SHA256=d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e
+    FIND_PACKAGE_ARGUMENTS "${P4C_PROTOBUF_FIND_ARGUMENTS}"
+    EXCLUDE_FROM_ALL YES
+    SYSTEM YES
+    OPTIONS
+      "CMAKE_UNITY_BUILD OFF"
+      "CMAKE_POSITION_INDEPENDENT_CODE ON"
+      "protobuf_BUILD_TESTS OFF"
+      "protobuf_BUILD_PROTOC_BINARIES ON"
+      # Linking with a local shared Protobuf may mix incompatible versions.
+      "protobuf_BUILD_SHARED_LIBS OFF"
+      "protobuf_INSTALL OFF"
+      "protobuf_ABSL_PROVIDER package"
+      "utf8_range_ENABLE_INSTALL OFF"
   )
 
-  # If P4C_USE_PREINSTALLED_PROTOBUF is ON just try to find a preinstalled version of Protobuf.
-  if(P4C_USE_PREINSTALLED_PROTOBUF)
-    if(ENABLE_PROTOBUF_STATIC)
-      set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-      set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  if(Protobuf_SOURCE_DIR)
+    if(Protobuf_ADDED)
+      foreach(target libprotobuf-lite libprotobuf libprotoc)
+        target_compile_options(${target} PRIVATE "-Wno-error" "-w")
+      endforeach()
     endif()
-    # For MacOS, we may need to look for Protobuf in additional folders.
-    if(APPLE)
-      set(P4C_PROTOBUF_PATHS PATHS /usr/local/opt/protobuf /opt/homebrew/opt/protobuf)
-    endif()
-    # We do not set a minimum version here because Protobuf does not accept mismatched major versions.
-    # We recommend the current P4C_PROTOBUF_VERSION.
-    find_package(Protobuf ${P4C_PROTOBUF_VERSION} CONFIG ${P4C_PROTOBUF_PATHS})
+    # Test scripts need a concrete protoc path rather than a generator expression.
+    set(Protobuf_PROTOC_EXECUTABLE ${Protobuf_BINARY_DIR}/protoc)
+    include(${Protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
+    set(Protobuf_INCLUDE_DIRS ${Protobuf_SOURCE_DIR}/src)
+  else()
+    # CPM exports targets, but not find_package's result variables or functions.
+    find_package(Protobuf ${P4C_PROTOBUF_VERSION} CONFIG QUIET ${P4C_PROTOBUF_PATHS})
     if(NOT Protobuf_FOUND)
       find_package(Protobuf REQUIRED CONFIG ${P4C_PROTOBUF_PATHS})
-      message(
-        WARNING
-          "Major Protobuf version does not match with the expected ${P4C_PROTOBUF_VERSION} version."
-          " You may experience compatibility problems."
-      )
+      message(WARNING
+        "Major Protobuf version does not match with the expected ${P4C_PROTOBUF_VERSION} version."
+        " You may experience compatibility problems.")
     endif()
-
-    # Protobuf sets the protoc binary to a generator expression "$<TARGET_FILE:protoc>", but we many
-    # not be able to use this generator expression in some text-based test scripts. The reason is
-    # that protoc is only evaluated at build time, not during generation of the test scripts. TODO:
-    # Maybe we can improve these scripts somehow?
     find_program(Protobuf_PROTOC_EXECUTABLE protoc)
-
-    if(ENABLE_PROTOBUF_STATIC)
-      set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
-    endif()
-  else()
-    message(STATUS "Fetching Protobuf version ${P4C_PROTOBUF_VERSION} for P4C...")
-
-    # Unity builds do not work for Protobuf...
-    set(CMAKE_UNITY_BUILD_PREV ${CMAKE_UNITY_BUILD})
-    set(CMAKE_UNITY_BUILD OFF)
-    # Print out download state while setting up Protobuf.
-    set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-    set(FETCHCONTENT_QUIET OFF)
-    # Build Protobuf with position-independent code.
-    set(CMAKE_POSITION_INDEPENDENT_CODE_PREV ${CMAKE_POSITION_INDEPENDENT_CODE})
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-    set(protobuf_BUILD_TESTS OFF CACHE BOOL "Build tests.")
-    set(protobuf_BUILD_PROTOC_BINARIES ON CACHE BOOL "Build libprotoc and protoc compiler.")
-    # Only ever build the static library. It is not safe to link with a local dynamic version.
-    set(protobuf_BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libraries")
-    # Exclude Protobuf from the main make install step. We only want to use it locally.
-    set(protobuf_INSTALL OFF CACHE BOOL "Install Protobuf")
-    set(protobuf_ABSL_PROVIDER "package" CACHE STRING "Use system-provided abseil")
-    set(protobuf_BUILD_EXPORT OFF)
-    set(utf8_range_ENABLE_INSTALL OFF)
-
-    fetchcontent_declare(
-      protobuf
-      URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protobuf-${P4C_PROTOBUF_VERSION}.tar.gz
-      URL_HASH SHA256=d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e
-      USES_TERMINAL_DOWNLOAD TRUE
-      GIT_PROGRESS TRUE
-      DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    )
-    fetchcontent_makeavailable(protobuf)
-
-    # Protobuf and protoc source code may trigger warnings which we ignore.
-    set_target_properties(libprotobuf-lite PROPERTIES COMPILE_FLAGS "-Wno-error -w")
-    set_target_properties(libprotobuf PROPERTIES COMPILE_FLAGS "-Wno-error -w")
-    set_target_properties(libprotoc PROPERTIES COMPILE_FLAGS "-Wno-error -w")
-
-    # Set some Protobuf variables manually until we are able to call FindPackage directly. This
-    # should be possible with CMake 3.24. Protobuf sets the protoc binary to a generator expression
-    # "$<TARGET_FILE:protoc>", but we many not be able to use this generator expression in some
-    # text-based test scripts. The reason is that protoc is only evaluated at build time, not during
-    # generation of the test scripts. TODO: Maybe we can improve these scripts somehow?
-    set(Protobuf_PROTOC_EXECUTABLE ${protobuf_BINARY_DIR}/protoc)
-    include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
-    # Protobuf does not seem to set Protobuf_INCLUDE_DIRS correctly when used as a module, but we
-    # need this variable for generating code.
-    list(APPEND Protobuf_INCLUDE_DIRS "${protobuf_SOURCE_DIR}/src/")
-
-    # Reset temporary variable modifications.
-    set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
-    set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-    set(CMAKE_POSITION_INDEPENDENT_CODE ${CMAKE_POSITION_INDEPENDENT_CODE_PREV})
   endif()
-
+  if(ENABLE_PROTOBUF_STATIC)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
+  endif()
   message(STATUS "Done with setting up Protobuf for P4C.")
-endmacro(p4c_obtain_protobuf)
+endmacro()

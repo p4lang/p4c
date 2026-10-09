@@ -536,14 +536,12 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
   add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
+target_link_libraries(tofinobackend PUBLIC spdlog::spdlog_header_only PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
 target_include_directories(
   tofinobackend
   # We also export Z3's includes with the common library.
   # This is necessary because the z3 target itself does not export its includes.
   SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
-  # FIXME: This should be pulled with FetchContent.
-  PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
 )
 add_dependencies(tofinobackend frontend genLogging bfn_p4runtime)
 
@@ -594,15 +592,13 @@ else()
   # here explictly as well as their dependencies
   add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
-  target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+  target_link_libraries(p4c-barefoot spdlog::spdlog_header_only ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
   # FIXME: These includes should be exported by earlier libraries.
   target_include_directories(
       p4c-barefoot
       # We also export Z3's includes with the common library.
       # This is necessary because the z3 target itself does not export its includes.
       SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
-      # FIXME: This should be pulled with FetchContent.
-      PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
     )
 endif()
 
