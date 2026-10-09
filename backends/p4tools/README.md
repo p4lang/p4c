@@ -62,7 +62,7 @@ make
     * With garbage collection enabled, system Z3 4.12 or newer requires glibc.
       On other platforms, disable garbage collection.
 
-These dependencies are automatically installed via CMakelist's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module.
+These dependencies are automatically installed via [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake).
 
 ## Development Style
 Currently, each C++ source directory has a few subdirectories, including:
