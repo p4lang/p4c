@@ -3,71 +3,66 @@
 # SPDX-License-Identifier: Apache-2.0
 
 macro(p4c_obtain_bdwgc)
-  option(
-    P4C_USE_PREINSTALLED_BDWGC
-    "Look for a preinstalled version of BDWGC in the system instead of installing a prebuilt binary using FetchContent."
-    OFF
+  p4c_dependency_compat(P4C_USE_PREINSTALLED_BDWGC LibGc)
+  p4c_find_package(
+    NAME LibGc
+    # Accept installed releases from 7.2.0 onward; source builds use the pinned revision.
+    VERSION 7.2.0
+    GIT_REPOSITORY https://github.com/ivmai/bdwgc.git
+    GIT_TAG 7f1503dbfe254e77678666a0e09b735add064b57 # 8.2.6
+    FIND_PACKAGE_ARGUMENTS "MODULE ${P4C_LibGc_FIND_ARGUMENTS}"
+    EXCLUDE_FROM_ALL YES
+    SYSTEM YES
+    OPTIONS
+      "BUILD_SHARED_LIBS OFF"
+      # P4C uses the collector's C++ allocation interfaces.
+      "enable_cplusplus ON"
+      "install_headers OFF"
+      "enable_docs ${ENABLE_DOCS}"
+      # Compiling large P4 programs can require a large heap and root set.
+      "enable_large_config ON"
+      # lib/gc.cpp supplies P4C's malloc overrides.
+      "enable_redirect_malloc OFF"
+      # Thread-local allocation reduces contention in the collector.
+      "enable_thread_local_alloc ON"
+      # Use compiler atomic operations where BDWGC supports them.
+      "without_libatomic_ops OFF"
+      # Keep support for BDWGC's alternative finalization interface.
+      "enable_disclaim ON"
+      # Keep the collector usable in child processes after fork().
+      "enable_handle_fork ON"
   )
   set(LIBGC_LIBRARIES gc gctba cord)
   set(HAVE_LIBGC 1)
 
-  if(P4C_USE_PREINSTALLED_BDWGC)
+  if(NOT LibGc_SOURCE_DIR)
     option(ENABLE_MULTITHREAD "Use multithreading" OFF)
+    # Reload the library paths because CPM does not export find-module variables.
     find_package(LibGc 7.2.0 REQUIRED)
-    check_function_exists (GC_print_stats HAVE_GC_PRINT_STATS)
-  else()
-    # Print out download state while setting up BDWGC.
-    set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-    set(BUILD_SHARED_LIBS_PREV ${BUILD_SHARED_LIBS})
-    set(FETCHCONTENT_QUIET OFF)
+    check_function_exists(GC_print_stats HAVE_GC_PRINT_STATS)
+  elseif(LibGc_ADDED)
+    # Suppress dependency warnings only for targets that this call created.
+    # Parent-provided targets retain the parent's settings.
+    foreach(target gc gccpp cord)
+      target_compile_options(${target} PRIVATE "-Wno-error" "-w")
+    endforeach()
 
-    # BDWGC options.
-    set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
-    # Turn on C++ support.
-    set(enable_cplusplus ON CACHE BOOL "C++ support")
-    set(install_headers OFF CACHE BOOL "Install header and pkg-config metadata files.")
-    set(enable_docs ${ENABLE_DOCS} CACHE BOOL "Build and install documentation.")
-    # We may have to compile very large programs which allocate a lot on the heap.
-    set(enable_large_config ON CACHE BOOL "Optimize for large heap or root set.")
-    # Redirect all malloc calls in the program.
-    set(enable_redirect_malloc OFF CACHE BOOL "Redirect malloc and friends to GC routines.")
-    # Try to enable thread-local-storage for better performance.
-    set(enable_thread_local_alloc ON CACHE BOOL "Turn on thread-local allocation optimization")
-    # Other BDWGC options to avoid crashes.
-    set(without_libatomic_ops OFF CACHE BOOL "Use atomic_ops.h in libatomic_ops/src")
-    set(enable_disclaim ON CACHE BOOL "Support alternative finalization interface")
-    set(enable_handle_fork ON CACHE BOOL "Attempt to ensure a usable collector after fork()")
+    # SKIP_CPP_DEFINITIONS avoids duplicate C++ allocation symbols when linking
+    # statically with P4C's overrides. GC_USE_DLOPEN_WRAP preserves the collector's
+    # handling of dynamic loading in threaded programs; BDWGC normally enables
+    # it with enable_redirect_malloc, which P4C disables above.
+    foreach(target gc gccpp)
+      target_compile_definitions(${target} PUBLIC GC_USE_DLOPEN_WRAP SKIP_CPP_DEFINITIONS _GNU_SOURCE)
+    endforeach()
 
-    fetchcontent_declare(
-      bdwgc
-      GIT_REPOSITORY https://github.com/ivmai/bdwgc.git
-      GIT_TAG 7f1503dbfe254e77678666a0e09b735add064b57 # 8.2.6, 2024-08-03
-      GIT_PROGRESS TRUE
-    )
-    fetchcontent_makeavailable_but_exclude_install(bdwgc)
-
-    # Bdwgc source code may trigger warnings which we need to ignore.
-    target_compile_options(gc PRIVATE "-Wno-error" "-w")
-    target_compile_options(gccpp PRIVATE "-Wno-error" "-w")
-    target_compile_options(cord PRIVATE "-Wno-error" "-w")
-
-    # Add some extra compile definitions which allow us to use our customizations.
-    # SKIP_CPP_DEFINITIONS to enable static linking without producing duplicate symbol errors.
-    # GC_USE_DLOPEN_WRAP needs to be enabled to handle threads correctly. This option is usually active with "enable_redirect_malloc" but we currently supply our own malloc overrides.
-    target_compile_definitions(gc PUBLIC GC_USE_DLOPEN_WRAP SKIP_CPP_DEFINITIONS _GNU_SOURCE)
-    target_compile_definitions(gccpp PUBLIC GC_USE_DLOPEN_WRAP SKIP_CPP_DEFINITIONS _GNU_SOURCE)
-
-    # Set up temporary variable modifications for check_symbol_exists.
-    set(CMAKE_REQUIRED_INCLUDES_PREV ${CMAKE_REQUIRED_INCLUDES})
-    set(CMAKE_REQUIRED_LIBRARIES_PREV ${CMAKE_REQUIRED_LIBRARIES})
-    set(CMAKE_REQUIRED_INCLUDES ${gc_SOURCE_DIR}/include)
+    # GC_print_stats is declared in a private header in source builds.
+    # Keep this probe's include paths and libraries out of subsequent checks.
+    include(CMakePushCheckState)
+    cmake_push_check_state()
+    set(CMAKE_REQUIRED_INCLUDES ${LibGc_SOURCE_DIR}/include)
     set(CMAKE_REQUIRED_LIBRARIES ${LIBGC_LIBRARIES})
     check_symbol_exists(GC_print_stats private/gc_priv.h HAVE_GC_PRINT_STATS)
-    # Reset all temporary variable modifications.
-    set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-    set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_PREV})
-    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_PREV})
-    set(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_PREV} CACHE BOOL "")
+    cmake_pop_check_state()
 
     message(STATUS "Done with setting up BDWGC for P4C.")
   endif()
