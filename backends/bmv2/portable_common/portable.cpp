@@ -72,7 +72,7 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
         fields->append(field);
     }
 
-    unsigned max_length_bytes = (max_length + padding) / 8;
+    unsigned max_length_bytes = max_length / 8 + (padding != 0);
     if (!varbitFound) {
         // ignore
         max_length = 0;
