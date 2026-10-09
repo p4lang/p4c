@@ -21,9 +21,6 @@
 #include <algorithm>
 #include <set>
 
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-
 #include "ir/ir.h"
 // #include "lib/path.h"
 #include "backends/tofino/bf-p4c/common/parse_annotations.h"

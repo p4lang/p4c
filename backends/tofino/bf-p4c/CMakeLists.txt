@@ -23,7 +23,6 @@ MESSAGE("-- Adding p4c-barefoot")
 set(BF_P4C_UNIFIED_SOURCE_CHUNK_SIZE "5" CACHE STRING
     "Target unified compilation chunk size for bf-p4c (an integer or ALL)")
 
-find_package (Boost REQUIRED COMPONENTS graph)
 if (ENABLE_BAREFOOT_INTERNAL)
   add_definitions("-DBAREFOOT_INTERNAL=1")
 endif()
@@ -83,9 +82,8 @@ get_schema_version(resources_schema RESOURCES_SCHEMA_VERSION)
 MESSAGE(STATUS "Found source info schema version ${RESOURCES_SCHEMA_VERSION}")
 add_definitions("-DRESOURCES_SCHEMA_VERSION=\"${RESOURCES_SCHEMA_VERSION}\"")
 
-set (HAVE_LIBBOOST_GRAPH 1)
-
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${Z3_LIB}")
+# The Boost.Graph algorithms used here are header-only.
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};Boost::headers;${Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
