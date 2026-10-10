@@ -62,6 +62,8 @@ using namespace P4::literals;
 SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
     : MidEnd(options) {
     auto *evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    auto *strengthReductionPolicy = new P4::StrengthReductionPolicy();
+    strengthReductionPolicy->enablePlusSliceToShiftTransform = true;
     if (!BMV2::SimpleSwitchContext::get().options().loadIRFromJson) {
         auto *convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits("v1model.p4"_cs));
         ParserConfig config;
@@ -83,12 +85,12 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::SimplifyKey(&typeMap,
                                  new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
              new P4::ConstantFolding(&typeMap),
-             new P4::StrengthReduction(&typeMap),
+             new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
              new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
              new P4::ExpandLookahead(&typeMap),
              new P4::ExpandEmit(&typeMap),
              new P4::SimplifyParsers(),
-             new P4::StrengthReduction(&typeMap),
+             new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
              new P4::EliminateTuples(&typeMap),
              new P4::SimplifyComparisons(&typeMap),
              new P4::CopyStructures(&typeMap),
@@ -103,7 +105,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::LocalCopyPropagation(&typeMap),
              new PassRepeated({
                  new P4::ConstantFolding(&typeMap),
-                 new P4::StrengthReduction(&typeMap),
+                 new P4::StrengthReduction(&typeMap, strengthReductionPolicy),
              }),
              new P4::SimplifyKey(&typeMap,
                                  new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),

@@ -90,6 +90,12 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
+  "with type .* is not a Constant"
+  issue5558-bmv2.p4  # Variable-offset slices are not supported by P4Testgen.
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
   "Computations are not supported in update_checksum"
 )
 
