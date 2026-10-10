@@ -5,6 +5,7 @@
 
 #include "ebpfOptions.h"
 
+#include "lib/error.h"
 #include "midend.h"
 
 namespace P4 {
@@ -55,8 +56,14 @@ EbpfOptions::EbpfOptions() {
     registerOption(
         "--max-ternary-masks", "MAX_TERNARY_MASKS",
         [this](const char *arg) {
-            unsigned int parsed_val = std::strtoul(arg, nullptr, 0);
-            if (parsed_val >= 2) this->maxTernaryMasks = parsed_val;
+            char *end = nullptr;
+            long parsed_val = std::strtol(arg, &end, 0);
+            if (end == arg || *end != '\0' || parsed_val < 0) {
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "--max-ternary-masks expects a non-negative integer, got '%1%'", arg);
+                return false;
+            }
+            if (parsed_val >= 2) this->maxTernaryMasks = static_cast<unsigned int>(parsed_val);
             return true;
         },
         "Set number of maximum possible masks for a ternary key"
@@ -70,6 +77,11 @@ EbpfOptions::EbpfOptions() {
                 xdp2tcMode = XDP2TC_HEAD;
             } else if (!strcmp(arg, "cpumap")) {
                 xdp2tcMode = XDP2TC_CPUMAP;
+            } else {
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "Unknown --xdp2tc mode '%1%'; expected one of: meta, head, cpumap",
+                            arg);
+                return false;
             }
             return true;
         },
