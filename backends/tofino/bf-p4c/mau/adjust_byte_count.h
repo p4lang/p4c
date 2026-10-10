@@ -40,7 +40,7 @@ class AdjustByteCountSetup : public PassManager {
 
      public:
         explicit Scan(AdjustByteCountSetup &self) : self(self) {}
-        bool preorder(const IR::MAU::Primitive *prim) override;
+        bool preorder(const IR::MAU::MauPrimitive *prim) override;
     };
 
     class Update : public MauTransform {

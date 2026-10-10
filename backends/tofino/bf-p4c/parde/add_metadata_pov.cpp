@@ -51,12 +51,13 @@ IR::BFN::Digest *AddMetadataPOV::postorder(IR::BFN::Digest *digest) {
     return digest;
 }
 
-IR::MAU::Primitive *AddMetadataPOV::create_pov_write(const IR::Expression *povBit, bool validate) {
-    return new IR::MAU::Primitive("modify_field"_cs, povBit,
-                                  new IR::Constant(IR::Type::Bits::get(1), (unsigned)validate));
+IR::MAU::MauPrimitive *AddMetadataPOV::create_pov_write(const IR::Expression *povBit,
+                                                        bool validate) {
+    return new IR::MAU::MauPrimitive("modify_field"_cs, povBit,
+                                     new IR::Constant(IR::Type::Bits::get(1), (unsigned)validate));
 }
 
-IR::Node *AddMetadataPOV::insert_deparser_param_pov_write(const IR::MAU::Primitive *p,
+IR::Node *AddMetadataPOV::insert_deparser_param_pov_write(const IR::MAU::MauPrimitive *p,
                                                           bool validate) {
     Log::TempIndent indent;
     LOG5("Insert deparser param for pov write : " << p << ", validate: " << (validate ? "Y" : "N")
@@ -67,7 +68,7 @@ IR::Node *AddMetadataPOV::insert_deparser_param_pov_write(const IR::MAU::Primiti
             auto pov_write = create_pov_write(param->povBit->field, validate);
             LOG5("Inserting param for pov write: " << pov_write);
             if (validate)
-                return new IR::Vector<IR::MAU::Primitive>({p, pov_write});
+                return new IR::Vector<IR::MAU::MauPrimitive>({p, pov_write});
             else
                 return pov_write;
         }
@@ -76,7 +77,7 @@ IR::Node *AddMetadataPOV::insert_deparser_param_pov_write(const IR::MAU::Primiti
     return nullptr;
 }
 
-IR::Node *AddMetadataPOV::insert_deparser_digest_pov_write(const IR::MAU::Primitive *p,
+IR::Node *AddMetadataPOV::insert_deparser_digest_pov_write(const IR::MAU::MauPrimitive *p,
                                                            bool validate) {
     auto *dest = p->operands.at(0);
     for (auto &item : dp->digests) {
@@ -84,7 +85,7 @@ IR::Node *AddMetadataPOV::insert_deparser_digest_pov_write(const IR::MAU::Primit
         if (equiv(dest, digest->selector->field)) {
             auto pov_write = create_pov_write(digest->povBit->field, validate);
             if (validate)
-                return new IR::Vector<IR::MAU::Primitive>({p, pov_write});
+                return new IR::Vector<IR::MAU::MauPrimitive>({p, pov_write});
             else
                 return pov_write;
         }
@@ -98,7 +99,7 @@ IR::Node *AddMetadataPOV::insert_deparser_digest_pov_write(const IR::MAU::Primit
  * @param p represents the method call to is_validated()
  * @return reference to <field>.$valid
  */
-IR::Node *AddMetadataPOV::insert_field_pov_read(const IR::MAU::Primitive *p) {
+IR::Node *AddMetadataPOV::insert_field_pov_read(const IR::MAU::MauPrimitive *p) {
     if (p->is<IR::MAU::TypedPrimitive>()) {
         return new IR::TempVar(IR::Type::Bits::get(1), true,
                                p->operands.at(0)->toString() + ".$valid");
@@ -106,7 +107,7 @@ IR::Node *AddMetadataPOV::insert_field_pov_read(const IR::MAU::Primitive *p) {
     return nullptr;
 }
 
-IR::Node *AddMetadataPOV::postorder(IR::MAU::Primitive *p) {
+IR::Node *AddMetadataPOV::postorder(IR::MAU::MauPrimitive *p) {
     if (p->name == "modify_field") {
         if (auto rv = insert_deparser_param_pov_write(p, true)) return rv;
         if (auto rv = insert_deparser_digest_pov_write(p, true)) return rv;
