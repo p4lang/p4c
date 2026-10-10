@@ -69,7 +69,7 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
 # Set up uv for Python dependency management.
-uv sync
+uv sync --no-cache
 
 # Install BMv2 from source via the shared CMake-based helper.
 THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
