@@ -37,11 +37,11 @@ struct lookahead_tmp_hdr_0 {
 }
 
 struct lookahead_tmp_hdr_1 {
-	bit<16> f
+	bit<8> f
 }
 
 struct lookahead_tmp_hdr_2 {
-	bit<8> f
+	bit<16> f
 }
 
 struct psa_ingress_output_metadata_t {
