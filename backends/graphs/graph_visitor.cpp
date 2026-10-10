@@ -101,7 +101,7 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
 
             const auto &vinfo = subg[*vit];
 
-            node->emplace("name", vinfo.name.escapeJson());
+            node->emplace("name", vinfo.name);
             node->emplace("type", getType(vinfo.type));
             node->emplace("type_enum", (unsigned)vinfo.type);
         }
@@ -118,7 +118,7 @@ void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node
             edge->emplace("from", from);
             edge->emplace("to", to);
 
-            edge->emplace("cond", boost::get(boost::edge_name, subg, *eit).escapeJson());
+            edge->emplace("cond", boost::get(boost::edge_name, subg, *eit));
         }
     }
 }
