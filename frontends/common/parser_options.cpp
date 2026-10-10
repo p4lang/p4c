@@ -297,7 +297,8 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             char *end = nullptr;
             errno = 0;
             unsigned long maxError = strtoul(arg, &end, 10);
-            if (!isdigit(static_cast<unsigned char>(arg[0])) || *end != '\0' ||
+            if (!isdigit(static_cast<unsigned char>(arg[0])) ||
+                *end != '\0' ||
                 errno == ERANGE ||
                 maxError > std::numeric_limits<unsigned>::max()) {
                 ::P4::error(ErrorType::ERR_INVALID,
