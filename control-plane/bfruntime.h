@@ -59,7 +59,7 @@ static inline Util::JsonObject *transformAnnotation(const cstring &annotation) {
     auto *annotationJson = new Util::JsonObject();
     // TODO(antonin): annotation string will need to be parsed so we can have it
     // in key/value format here.
-    annotationJson->emplace("name", annotation.escapeJson());
+    annotationJson->emplace("name", annotation);
     return annotationJson;
 }
 
