@@ -127,17 +127,18 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bo
             LOG5("Field is Type_Array " << ft->toString());
             auto stack = ft->to<IR::Type_Array>();
             auto type = typeMap->getTypeType(stack->elementType, true);
+
+            // The check now also allow elements of Type_HeaderUnion to pass
             BUG_CHECK(type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>(),
                       "%1% not a header nor header union type", stack->elementType);
 
             if (type->is<IR::Type_Header>()) {
-                // I have yet to consider Union Stacks. As of this commit, a bug check
-                // will reject a Union Stack as it's not a header instance whenever
-                // is declared in the P4 code.
                 auto ht = type->to<IR::Type_Header>();
                 addHeaderType(ht);
                 addHeaderStackInstance(f, stack);
             } else {
+                // This should be the case which the type of the stack element is a header union
+                // since anything else would have been caught by the previous bug check.
                 auto ht = type->to<IR::Type_HeaderUnion>();
                 addHeaderType(ht);
                 addHeaderUnionStackInstance(f, stack);
