@@ -12,7 +12,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <cctype>
+#include <cerrno>
 #include <filesystem>
+#include <limits>
 #include <memory>
 #include <regex>
 #include <unordered_set>
@@ -290,7 +293,16 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
     registerOption(
         "--maxErrorCount", "errorCount",
         [](const char *arg) {
-            auto maxError = strtoul(arg, nullptr, 10);
+            // Make sure the argument is valid before using strtoul.
+            char *end = nullptr;
+            errno = 0;
+            unsigned long maxError = strtoul(arg, &end, 10);
+            if (!isdigit(static_cast<unsigned char>(arg[0])) || *end != '\0' || errno == ERANGE ||
+                maxError > std::numeric_limits<unsigned>::max()) {
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "--maxErrorCount expects a non-negative integer, got '%1%'", arg);
+                return false;
+            }
             P4CContext::get().errorReporter().setMaxErrorCount(maxError);
             return true;
         },
