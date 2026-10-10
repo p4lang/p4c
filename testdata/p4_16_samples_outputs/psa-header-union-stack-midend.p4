@@ -170,6 +170,9 @@ parser HeaderUnionEgressParser(packet_in packet, out headers_t hdr, inout metada
     bit<16> tmp_12;
     state start {
         packet.extract<parse_report_t>(hdr.report);
+        transition parse_options;
+    }
+    state parse_options {
         tmp_6 = packet.lookahead<bit<8>>();
         transition select(tmp_6) {
             8w0x0: parse_end;
@@ -186,20 +189,20 @@ parser HeaderUnionEgressParser(packet_in packet, out headers_t hdr, inout metada
     }
     state parse_nop {
         packet.extract<Tcp_option_nop_h>(hdr.options.next.nop);
-        transition start;
+        transition parse_options;
     }
     state parse_ss {
         packet.extract<Tcp_option_ss_h>(hdr.options.next.ss);
-        transition start;
+        transition parse_options;
     }
     state parse_s {
         packet.extract<Tcp_option_s_h>(hdr.options.next.s);
-        transition start;
+        transition parse_options;
     }
     state parse_sack {
         tmp_12 = packet.lookahead<bit<16>>();
         packet.extract<Tcp_option_sack_h>(hdr.options.next.sack, (bit<32>)((tmp_12[7:0] << 3) + 8w240));
-        transition start;
+        transition parse_options;
     }
 }
 

@@ -145,19 +145,19 @@ parser HeaderUnionEgressParser(packet_in packet, out headers_t hdr, inout metada
     }
     state parse_nop {
         packet.extract(hdr.options.next.nop);
-        transition start;
+        transition parse_options;
     }
     state parse_ss {
         packet.extract(hdr.options.next.ss);
-        transition start;
+        transition parse_options;
     }
     state parse_s {
         packet.extract(hdr.options.next.s);
-        transition start;
+        transition parse_options;
     }
     state parse_sack {
         packet.extract(hdr.options.next.sack, (bit<32>)(8 * (packet.lookahead<TcpOptionSackLength>()).length - 16));
-        transition start;
+        transition parse_options;
     }
 }
 
