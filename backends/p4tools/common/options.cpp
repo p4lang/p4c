@@ -4,8 +4,12 @@
 
 #include "backends/p4tools/common/options.h"
 
+#include <cctype>
+#include <cerrno>
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -61,7 +65,20 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(std::string_view toolName, std::s
     registerOption(
         "--seed", "seed",
         [this](const char *arg) {
-            seed = std::stoul(arg);
+            // Validate the seed before converting it to uint32_t.
+            char *end = nullptr;
+            errno = 0;
+            unsigned long parsed = std::strtoul(arg, &end, 10);
+
+            if (!std::isdigit(static_cast<unsigned char>(arg[0])) || *end != '\0' ||
+                errno == ERANGE || parsed > std::numeric_limits<uint32_t>::max()) {
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "--seed expects an unsigned 32-bit integer, got '%1%'", arg);
+                return false;
+            }
+
+            seed = static_cast<uint32_t>(parsed);
+
             // Initialize the global seed for randomness.
             Utils::setRandomSeed(*seed);
             return true;
