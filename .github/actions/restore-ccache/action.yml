@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+name: Restore ccache
+description: Restore the main cache and any files saved by this PR.
+inputs:
+  key:
+    description: Key for builds using the same compiler and settings.
+    required: true
+  max-size:
+    description: Maximum working cache size.
+    default: "750M"
+outputs:
+  prefix:
+    description: Key prefix used by the save action.
+    value: ${{ steps.keys.outputs.prefix }}
+runs:
+  using: composite
+  steps:
+    - name: Select cache key
+      id: keys
+      shell: bash
+      env:
+        CACHE_KEY: ${{ inputs.key }}
+        CACHE_PLATFORM: ${{ runner.os }}-${{ runner.arch }}
+      run: echo "prefix=ccache-v2-${CACHE_PLATFORM}-${CACHE_KEY}" >> "$GITHUB_OUTPUT"
+    # Always restore main so GitHub sees that this cache is still being used.
+    - name: Restore main cache
+      uses: actions/cache/restore@v6
+      with:
+        path: .ccache
+        key: ${{ steps.keys.outputs.prefix }}-main-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: ${{ steps.keys.outputs.prefix }}-main-
+    - name: Record main cache files
+      shell: bash
+      run: python3 .github/scripts/ccache_snapshot.py record-main
+    - name: Restore PR additions
+      if: github.event_name == 'pull_request'
+      uses: actions/cache/restore@v6
+      with:
+        path: .ccache-pr
+        key: ${{ steps.keys.outputs.prefix }}-pr-${{ github.event.pull_request.number }}-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: ${{ steps.keys.outputs.prefix }}-pr-${{ github.event.pull_request.number }}-${{ github.job }}-
+    - name: Apply PR additions
+      shell: bash
+      run: python3 .github/scripts/ccache_snapshot.py apply-pr
+    - name: Configure ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        restore: false
+        save: false
+        max-size: ${{ inputs.max-size }}
+        update-package-index: ${{ env.ACT == 'true' }}
+    - name: Keep cache files independent
+      shell: bash
+      env:
+        CACHE_MAX_SIZE: ${{ inputs.max-size }}
+      run: |
+        # PR caches must contain complete files, not links to other cache files.
+        ccache --set-config=file_clone=false
+        ccache --set-config=hard_link=false
+        # Environment settings survive ci-build.sh and dependency setup.
+        echo "CCACHE_MAXSIZE=$CACHE_MAX_SIZE" >> "$GITHUB_ENV"
+        echo "CCACHE_COMPILERCHECK=content" >> "$GITHUB_ENV"

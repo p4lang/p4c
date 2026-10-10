@@ -45,22 +45,22 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_exit_combination_19bmv2l49() {
         tmp = true;
     }
-    @hidden action act() {
+    @hidden action gauntlet_exit_combination_19bmv2l49_0() {
         tmp_0 = true;
     }
-    @hidden action act_0() {
+    @hidden action gauntlet_exit_combination_19bmv2l49_1() {
         tmp_0 = false;
     }
-    @hidden action gauntlet_exit_combination_19bmv2l49_0() {
+    @hidden action gauntlet_exit_combination_19bmv2l49_2() {
         tmp = tmp_0;
     }
-    @hidden action act_1() {
+    @hidden action act() {
         hasExited = false;
     }
-    @hidden action gauntlet_exit_combination_19bmv2l49_1() {
+    @hidden action gauntlet_exit_combination_19bmv2l49_3() {
         tmp_1 = 16w2;
     }
-    @hidden action gauntlet_exit_combination_19bmv2l49_2() {
+    @hidden action gauntlet_exit_combination_19bmv2l49_4() {
         tmp_1 = 16w3;
     }
     @hidden action gauntlet_exit_combination_19bmv2l50() {
@@ -68,27 +68,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_act {
         actions = {
-            act_1();
+            act();
         }
-        const default_action = act_1();
+        const default_action = act();
     }
     @hidden table tbl_gauntlet_exit_combination_19bmv2l49 {
         actions = {
             gauntlet_exit_combination_19bmv2l49();
         }
         const default_action = gauntlet_exit_combination_19bmv2l49();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_act_1 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
     }
     @hidden table tbl_gauntlet_exit_combination_19bmv2l49_0 {
         actions = {
@@ -108,6 +96,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_exit_combination_19bmv2l49_2();
     }
+    @hidden table tbl_gauntlet_exit_combination_19bmv2l49_3 {
+        actions = {
+            gauntlet_exit_combination_19bmv2l49_3();
+        }
+        const default_action = gauntlet_exit_combination_19bmv2l49_3();
+    }
+    @hidden table tbl_gauntlet_exit_combination_19bmv2l49_4 {
+        actions = {
+            gauntlet_exit_combination_19bmv2l49_4();
+        }
+        const default_action = gauntlet_exit_combination_19bmv2l49_4();
+    }
     @hidden table tbl_gauntlet_exit_combination_19bmv2l50 {
         actions = {
             gauntlet_exit_combination_19bmv2l50();
@@ -120,23 +120,23 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             tbl_gauntlet_exit_combination_19bmv2l49.apply();
         } else {
             if (simple_table.apply().hit) {
-                tbl_act_0.apply();
+                tbl_gauntlet_exit_combination_19bmv2l49_0.apply();
             } else {
-                tbl_act_1.apply();
+                tbl_gauntlet_exit_combination_19bmv2l49_1.apply();
             }
             if (hasExited) {
                 ;
             } else {
-                tbl_gauntlet_exit_combination_19bmv2l49_0.apply();
+                tbl_gauntlet_exit_combination_19bmv2l49_2.apply();
             }
         }
         if (hasExited) {
             ;
         } else {
             if (tmp) {
-                tbl_gauntlet_exit_combination_19bmv2l49_1.apply();
+                tbl_gauntlet_exit_combination_19bmv2l49_3.apply();
             } else {
-                tbl_gauntlet_exit_combination_19bmv2l49_2.apply();
+                tbl_gauntlet_exit_combination_19bmv2l49_4.apply();
             }
             tbl_gauntlet_exit_combination_19bmv2l50.apply();
         }

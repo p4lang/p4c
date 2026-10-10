@@ -40,6 +40,8 @@ class DoFlattenHeaderUnion : public Transform {
  protected:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+    // A field name is only unique within its declaring struct.
+    std::map<std::pair<cstring, cstring>, std::map<cstring, cstring>> structReplacementMap;
     std::map<cstring, std::map<cstring, cstring>> replacementMap;
     // Replacement map needed to add element-wise header declaration in right context
     std::map<IR::Declaration_Variable *, IR::IndexedVector<IR::Declaration>> replaceDVMap;
@@ -83,6 +85,7 @@ class DoFlattenHeaderUnion : public Transform {
  *
  */
 class DoFlattenHeaderUnionStack : public DoFlattenHeaderUnion {
+    std::map<std::pair<cstring, cstring>, std::vector<cstring>> stackFieldMap;
     std::map<cstring, std::vector<cstring>> stackMap;
 
  public:

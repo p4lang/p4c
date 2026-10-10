@@ -128,6 +128,7 @@ set (P4_16_SUITES
 # PTF tests for DPDK are only enabled when both infrap4d and dpdk-target are installed.
 set(DPDK_PTF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-add_on_miss0.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-mux-concat.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-small_sample.p4"
 )
 

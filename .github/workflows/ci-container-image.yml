@@ -31,20 +31,25 @@ jobs:
           submodules: recursive
 
       - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1
+        id: ccache
+        uses: ./.github/actions/restore-ccache
         with:
-          key: "container-image-${{ runner.os }}"
-          max-size: 1000M
+          key: container-image
 
       - name: Build Docker test image
         run: |
-          docker build --network host -t p4c-test --build-arg IMAGE_TYPE=test .
+          docker build --network host -t p4c-test --build-arg IMAGE_TYPE=test \
+            --build-arg CCACHE_MAXSIZE --build-arg CCACHE_COMPILERCHECK .
       - name: Run p4c tests (Docker image)
         run: |
           sudo -E docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c-test \
             uv run ctest --output-on-failure --schedule-random
       - name: Export ccache
         run: ./tools/export_ccache.sh p4c-test
+      - name: Save compiler cache
+        uses: ./.github/actions/save-ccache
+        with:
+          prefix: ${{ steps.ccache.outputs.prefix }}
       - name: Free disk space
         run: docker rmi p4c-test || true
       - name: Determine Docker image tag
@@ -78,7 +83,7 @@ jobs:
           tags: p4lang/p4c:${{ steps.get-tag.outputs.tag }}
           cache-from: type=gha
           # A cache write must not fail the build.
-          cache-to: type=gha,mode=max,ignore-error=true
+          cache-to: ${{ github.ref == 'refs/heads/main' && 'type=gha,mode=min,ignore-error=true' || '' }}
 
       - name: Smoke test production image
         run: |

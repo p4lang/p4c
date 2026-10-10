@@ -23,14 +23,14 @@
 
 namespace P4::P4Tools {
 
-std::tuple<int, char **> AbstractP4cToolOptions::convertArgs(
-    const std::vector<const char *> &args) {
-    int argc = 0;
-    char **argv = new char *[args.size()];
+std::vector<char *> AbstractP4cToolOptions::convertArgs(const std::vector<const char *> &args) {
+    std::vector<char *> argv;
+    argv.reserve(args.size());
     for (const char *arg : args) {
-        argv[argc++] = strdup(arg);
+        argumentStorage.push_back(std::make_shared<std::string>(arg));
+        argv.push_back(argumentStorage.back()->data());
     }
-    return {argc, argv};
+    return argv;
 }
 
 int AbstractP4cToolOptions::process(const std::vector<const char *> &args) {
@@ -38,12 +38,10 @@ int AbstractP4cToolOptions::process(const std::vector<const char *> &args) {
     compilerArgs.push_back(args.at(0));
 
     // Convert to the standard (argc, argv) pair.
-    int argc = 0;
-    char **argv = nullptr;
-    std::tie(argc, argv) = convertArgs(args);
+    auto argv = convertArgs(args);
 
     // Delegate to the hook.
-    auto *remainingArgs = process(argc, argv);
+    auto *remainingArgs = process(static_cast<int>(argv.size()), argv.data());
     if ((remainingArgs == nullptr) || errorCount() > 0) {
         return EXIT_FAILURE;
     }

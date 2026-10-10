@@ -24,19 +24,22 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
   }
 }
 
-control MyVerifyChecksum(in h hdr, inout m meta) {
+control MyVerifyChecksum(inout h hdr, inout m meta) {
   apply {}
 }
 control MyIngress(inout h hdr, inout m meta, inout standard_metadata_t std) {
+  bit<8> b;
   action Nop() { }
-  table t(inout bit<8> b) {
+  table t {
     key = { b : exact; }
     actions = { Nop; }
     default_action = Nop;
   }
   apply {
-      t.apply(hdr.p.fst);
-      t.apply(hdr.p.snd);
+      b = hdr.p.fst;
+      t.apply();
+      b = hdr.p.snd;
+      t.apply();
   }
 }
 

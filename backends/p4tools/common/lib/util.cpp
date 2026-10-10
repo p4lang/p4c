@@ -4,6 +4,7 @@
 
 #include "backends/p4tools/common/lib/util.h"
 
+#include <bit>
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
 #include <cstdint>
 #include <ctime>
@@ -15,7 +16,6 @@
 #include <boost/multiprecision/cpp_int/add.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
 
 #include "ir/id.h"
 #include "ir/irutils.h"
@@ -31,7 +31,7 @@ namespace P4::P4Tools {
 
 std::optional<uint32_t> Utils::currentSeed = std::nullopt;
 
-boost::random::mt19937 Utils::rng(0);
+std::mt19937 Utils::rng(0);
 
 std::string Utils::getTimeStamp() {
     // get current time
@@ -64,17 +64,17 @@ uint64_t Utils::getRandInt(uint64_t max) {
     if (!currentSeed) {
         return 0;
     }
-    boost::random::uniform_int_distribution<uint64_t> dist(0, max);
+    std::uniform_int_distribution<uint64_t> dist(0, max);
     return dist(rng);
 }
 
 int64_t Utils::getRandInt(int64_t min, int64_t max) {
-    boost::random::uniform_int_distribution<int64_t> distribution(min, max);
+    std::uniform_int_distribution<int64_t> distribution(min, max);
     return distribution(rng);
 }
 
 int64_t Utils::getRandInt(const std::vector<int64_t> &percent) {
-    int sum = std::accumulate(percent.begin(), percent.end(), 0);
+    const auto sum = std::accumulate(percent.begin(), percent.end(), int64_t{0});
 
     // Do not pick zero since that conflicts with zero percentage values.
     auto randNum = getRandInt(1, sum);
@@ -91,20 +91,35 @@ int64_t Utils::getRandInt(const std::vector<int64_t> &percent) {
     return ret;
 }
 
-big_int Utils::getRandBigInt(const big_int &max) {
-    if (!currentSeed) {
-        return 0;
-    }
-    boost::random::uniform_int_distribution<big_int> dist(0, max);
-    return dist(rng);
-}
+big_int Utils::getRandBigInt(const big_int &max) { return getRandBigInt(0, max); }
 
 big_int Utils::getRandBigInt(const big_int &min, const big_int &max) {
     if (!currentSeed) {
         return 0;
     }
-    boost::random::uniform_int_distribution<big_int> dist(min, max);
-    return dist(rng);
+    BUG_CHECK(min <= max, "Invalid random integer range [%1%, %2%]", min, max);
+    const big_int range = max - min;
+    if (range == 0) {
+        return min;
+    }
+
+    // Generate enough random bits to cover the range, then reject out-of-range
+    // values. Reducing modulo the range would bias non-power-of-two intervals.
+    // Use the engine word size.
+    using RngResult = decltype(rng)::result_type;
+    constexpr auto rngBits = static_cast<unsigned>(std::bit_width(decltype(rng)::max()));
+    const unsigned bits = boost::multiprecision::msb(range) + 1;
+    big_int value;
+    do {
+        value = 0;
+        for (unsigned offset = 0; offset < bits;) {
+            const unsigned chunkBits = std::min(rngBits, bits - offset);
+            const auto chunk = static_cast<RngResult>(rng()) >> (rngBits - chunkBits);
+            value |= big_int(chunk) << offset;
+            offset += chunkBits;
+        }
+    } while (value > range);
+    return min + value;
 }
 
 const IR::Constant *Utils::getRandConstantForWidth(int bitWidth) {

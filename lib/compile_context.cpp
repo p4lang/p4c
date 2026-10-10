@@ -45,6 +45,11 @@ AutoCompileContext::AutoCompileContext(ICompileContext *context) {
     CompileContextStack::push(context);
 }
 
+AutoCompileContext::AutoCompileContext(std::unique_ptr<ICompileContext> context)
+    : ownedContext(std::move(context)) {
+    CompileContextStack::push(ownedContext.get());
+}
+
 AutoCompileContext::~AutoCompileContext() { CompileContextStack::pop(); }
 
 /* static */ BaseCompileContext &BaseCompileContext::get() {

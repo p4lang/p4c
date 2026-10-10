@@ -1,0 +1,6 @@
+packet_in-bmv2.p4(15): [--Werror=type-error] error: p: type packet_in has no matching constructor
+    packet_in() p;
+                ^
+core.p4(25)
+extern packet_in {
+       ^^^^^^^^^
