@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Google Inc.
+#
+# SPDX-License-Identifier: Apache-2.0
+
 """Module extension for p4c IR extensions.
 
 This extension allows users to register custom IR definitions by providing a list
