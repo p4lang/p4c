@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 header hdr_t {
   bit<8> v;
 }

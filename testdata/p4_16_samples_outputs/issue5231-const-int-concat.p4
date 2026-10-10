@@ -1,5 +1,6 @@
 #include <core.p4>
 
+
 void positive() {
     const int<7> a = 7s0b100111;
     const int<9> b = 9s0b11100011;

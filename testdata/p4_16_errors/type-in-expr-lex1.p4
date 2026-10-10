@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // tests problems related to https://github.com/p4lang/p4c/pull/4411
 
 #include <core.p4>
