@@ -46,5 +46,6 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
-          uv run ctest --output-on-failure --schedule-random -E "ubpf|testgen|smith"
+          # Avoid re-syncing dependencies skipped during macOS setup.
+          uv run --no-sync ctest --output-on-failure --schedule-random -E "ubpf|testgen|smith"
         working-directory: ./build

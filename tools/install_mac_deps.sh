@@ -68,8 +68,13 @@ fi
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
-# Set up uv for Python dependency management.
-uv sync
+# Skip pynng on macOS; BMv2 PTF tests use veth.
+if uv sync --help | grep -q -- "--no-install-package"; then
+  uv sync --no-install-package pynng
+else
+  echo "ERROR: uv does not support --no-install-package." >&2
+  exit 1
+fi
 
 # Install BMv2 from source via the shared CMake-based helper.
 THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )

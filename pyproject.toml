@@ -38,6 +38,10 @@ extend-ignore = "E203"
 
 [tool.uv]
 package = false
+# Use a compatible pynng version on macOS if installation is required.
+override-dependencies = [
+    "pynng==0.8.1; sys_platform == 'darwin'",
+]
 
 [tool.uv.sources]
 # FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Python.
