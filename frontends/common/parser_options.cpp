@@ -293,8 +293,7 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
     registerOption(
         "--maxErrorCount", "errorCount",
         [](const char *arg) {
-           // strtoul accepts a leading '-' and silently returns 0 for
-           // non-numeric input, so check the argument explicitly.
+           // Make sure the argument is valid before using strtoul.
            char *end = nullptr;
            errno = 0;
            unsigned long maxError = strtoul(arg, &end, 10);
