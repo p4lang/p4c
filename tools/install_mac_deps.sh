@@ -68,8 +68,11 @@ fi
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
+# Try separately installing pynng to see if it fails by itself, too.
+uv venv
+uv pip install --no-cache pynng==0.9.0
 # Set up uv for Python dependency management.
-uv sync
+uv sync --no-cache
 
 # Install BMv2 from source via the shared CMake-based helper.
 THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
