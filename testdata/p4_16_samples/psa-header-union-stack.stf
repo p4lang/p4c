@@ -10,8 +10,7 @@ packet 0 01
 expect 1 01 01 01 $
 
 # 02 = ss -> 1 headers parsed (parsed count = 1), first member = 1, 1 option being 1
-# Again, without a proper end (option 00), it should be the same as the previous
-# option 01 test
+# Again, without a proper end (option 00), it should be the same as the previous option 01 test
 packet 0 02 11223344
 expect 1 01 02 02 11223344 $
 
@@ -29,12 +28,12 @@ expect 1 02 01 01 00 $
 
 # Early end with 00 as the third option
 # Several different union members in one stack.
-packet 0 01 01 00 01020304 03 050607 05 06 11223344 00
-expect 1 03 01 01 01 00 01020304 03 050607 05 06 11223344 00 $
+packet 0 01 00 01020304 03 050607 05 06 11223344 00
+expect 1 02 01 01 00 01020304 03 050607 05 06 11223344 00 $
 
 # Several different union members in one stack.
-packet 0 01 01 02 01020304 03 050607 05 06 11223344 00
-expect 1 06 01 01 01 02 01020304 03 050607 05 06 11223344 00 $
+packet 0 01 02 01020304 03 050607 05 06 11223344 00
+expect 1 05 01 01 02 01020304 03 050607 05 06 11223344 00 $
 
 # A full ten-element header-union stack.
 packet 0 01 02 11223344 03 aabbcc 05 06 deadbeef 01 02 55667788 03 010203 05 06 12345678 03 ccbbaa 00
