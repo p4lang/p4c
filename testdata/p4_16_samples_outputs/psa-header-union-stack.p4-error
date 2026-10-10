@@ -1,9 +1,9 @@
- psa-header-union-stack.p4(76): [--Wwarn=multi-header-extract] warning: packet.extract(hdr.options.next.s): Performing an extraction more than once on the same header will nearly always cause all but the last extracted header to be deleted from the packet. It may be preferable to replace previous extractions with lookaheads instead.
-         packet.extract(hdr.options.next.s);
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
--psa-header-union-stack.p4(105): [--Wwarn=multi-header-extract] warning: packet.extract(hdr.report): Performing an extraction more than once on the same header will nearly always cause all but the last extracted header to be deleted from the packet. It may be preferable to replace previous extractions with lookaheads instead.
--        packet.extract(hdr.report);
--        ^^^^^^^^^^^^^^^^^^^^^^^^^^
- psa-header-union-stack.p4(141): [--Wwarn=multi-header-extract] warning: packet.extract(hdr.options.next.sack, (bit<32>)tmp_9): Performing an extraction more than once on the same header will nearly always cause all but the last extracted header to be deleted from the packet. It may be preferable to replace previous extractions with lookaheads instead.
-         packet.extract(
-         ^
+testdata/p4_16_samples/spec-ex09.p4(15): [--Wwarn=unused] warning: control 'p' is unused
+control p()
+        ^
+testdata/p4_16_samples/spec-ex09.p4(18): [--Wwarn=unused] warning: 'mpls_vec' is unused
+        Mpls_h[10] mpls_vec;
+                   ^^^^^^^^
+testdata/p4_16_samples/spec-ex09.p4(15): [--Winfo=removed] info: removing control 'p'
+control p()
+        ^
