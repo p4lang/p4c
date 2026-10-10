@@ -18,20 +18,8 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
     @name("parserImpl.tmp") bit<8> tmp;
     state start {
         tmp = hdr.h1.f1;
-        transition foo_start;
-    }
-    state foo_start {
         hdr.h1.f1 = tmp >> 2;
-        transition start_0;
-    }
-    state start_0 {
-        transition foo_start_0;
-    }
-    state foo_start_0 {
         hdr.h1.f2 = 8w1;
-        transition start_1;
-    }
-    state start_1 {
         transition accept;
     }
 }

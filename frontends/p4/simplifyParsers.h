@@ -25,8 +25,13 @@ namespace P4 {
  * with same-named state-local variables in the same state.
  */
 class SimplifyParsers : public Transform {
+    bool warnUnreachableStates;
+
  public:
-    SimplifyParsers() { setName("SimplifyParsers"); }
+    explicit SimplifyParsers(bool warnUnreachableStates = true)
+        : warnUnreachableStates(warnUnreachableStates) {
+        setName("SimplifyParsers");
+    }
 
     const IR::Node *preorder(IR::P4Parser *parser) override;
     const IR::Node *preorder(IR::P4Control *control) override {

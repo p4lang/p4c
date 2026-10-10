@@ -339,8 +339,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
             // more ifs may have been added to parsers
             new RemoveParserControlFlow(&typeMap),
-            new UniqueNames(),       // needed again after inlining
-            new MoveDeclarations(),  // needed again after inlining
+            new UniqueNames(),           // needed again after inlining
+            new SimplifyParsers(false),  // remove newly unreachable states
+            new MoveDeclarations(),      // needed again after inlining
             new SimplifyDefUse(&typeMap),
             new RemoveAllUnusedDeclarations(*policy, true),
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),

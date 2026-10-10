@@ -18,9 +18,6 @@ parser p(packet_in packet, out headers hdr) {
     state start {
         hdr.nop.setInvalid();
         hdr.p.setInvalid();
-        transition sub_parser_start;
-    }
-    state sub_parser_start {
         sub_parser_tracker = 8w0;
         transition sub_parser_next;
     }

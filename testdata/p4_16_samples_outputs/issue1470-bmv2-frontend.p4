@@ -35,9 +35,6 @@ parser OuterParser(packet_in pkt, out headers_t hdr, inout meta_t m, inout stand
     state start {
         hdr.eth.setInvalid();
         hdr.ipv4.setInvalid();
-        transition InnerParser_start;
-    }
-    state InnerParser_start {
         pkt.extract<eth_h>(hdr.eth);
         transition select(hdr.eth.type) {
             16w0x800: InnerParser_parse_ipv4;

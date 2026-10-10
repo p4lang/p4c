@@ -29,9 +29,6 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
     @name("MyParser.l3.etherType") bit<16> l3_etherType;
     state start {
         b.extract<ethernet_t>(hdr.ether);
-        transition L3_start;
-    }
-    state L3_start {
         l3_etherType = hdr.ether.etherType;
         transition L3_start_0;
     }
