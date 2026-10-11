@@ -73,9 +73,9 @@ TEST(JSON, std_map) {
 TEST(IR, SourceInfoJsonEscaping) {
     // No quotes: quoted lines take a separate path in getBriefSourceFragment.
     Util::InputSources sources;
-    sources.appendToLastLine("foo(a\\b);");
+    sources.appendText("foo(a\\b);");
     sources.mapLine("test.p4", 1);
-    sources.appendNewline("\n");
+    sources.appendText("\n");
     sources.seal();
 
     Util::SourceInfo si(&sources, Util::SourcePosition(1, 0), Util::SourcePosition(1, 9));
@@ -85,7 +85,7 @@ TEST(IR, SourceInfoJsonEscaping) {
     std::unique_ptr<Util::JsonObject> obj(c.sourceInfoJsonObj());
     ASSERT_NE(obj, nullptr);
 
-    const cstring raw = "foo(a\\b);";
+    const cstring raw = "foo(a\\b);"_cs;
     EXPECT_EQ(raw, obj->getAs<Util::JsonValue>("source_fragment")->getString());
 
     const std::string serialized = obj->toString().string();
