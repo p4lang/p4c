@@ -16,13 +16,8 @@ header ethernet_t {
     bit<16> ether_type;
 }
 
-header reader_t {
-    bit<32> value;
-}
-
 struct headers_t {
     ethernet_t ethernet;
-    reader_t reader;
 }
 
 struct metadata_t {
@@ -81,9 +76,6 @@ control RegisterIngress(
         register_array.write(1, user_meta.element1 - 1);
         register_array.write(2, user_meta.element2 - 1);
         register_array.write(3, user_meta.element3 - 1);
-
-        headers.reader.setValid();
-        headers.reader.value = user_meta.element0 + user_meta.element1 + user_meta.element2 + user_meta.element3;
     }
 }
 
