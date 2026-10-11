@@ -2113,7 +2113,7 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
 
 TEST(BfRuntime, AnnotationJsonEscaping) {
     // Quotes and backslashes must be escaped exactly once, at serialization time.
-    const cstring annotation = "@my_anno(\"a\\b\")";
+    const cstring annotation = "@my_anno(\"a\\b\")"_cs;
     std::unique_ptr<P4::Util::JsonObject> obj(P4::BFRT::transformAnnotation(annotation));
     ASSERT_NE(obj, nullptr);
     EXPECT_EQ(annotation, obj->getAs<P4::Util::JsonValue>("name")->getString());
