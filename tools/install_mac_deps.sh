@@ -44,10 +44,12 @@ brew update
 
 # Pin python to version 3.14, since pynng seems to fail building with
 # python 3.15.
+echo "----------------------------------------"
 brew list
 brew install python@3.14
 brew pin python@3.14
 brew list
+echo "----------------------------------------"
 
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
@@ -76,6 +78,10 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
 # Set up uv for Python dependency management.
+find /opt/homebrew -name python3
+/opt/homebrew/opt/python@3.14/libexec/bin/python3 -V
+uv venv --seed --python /opt/homebrew/opt/python@3.14/libexec/bin/python3 ~/.venv
+source ~/.venv/bin/activate
 uv sync
 
 # Install BMv2 from source via the shared CMake-based helper.
