@@ -56,6 +56,7 @@ set(
   test/lib/format_int.cpp
   test/lib/logging.cpp
   test/lib/taint.cpp
+  test/lib/random.cpp
   test/small-step/util.cpp
   test/z3-solver/constraints.cpp
 )
