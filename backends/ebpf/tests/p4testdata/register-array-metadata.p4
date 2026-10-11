@@ -83,7 +83,7 @@ control RegisterIngress(
         register_array.write(3, user_meta.element3 - 1);
 
         headers.reader.setValid();
-        headers.reader.value = metadata.element0 + metadata.element1 + metadata.element2 + metadata.element3;
+        headers.reader.value = user_meta.element0 + user_meta.element1 + user_meta.element2 + user_meta.element3;
     }
 }
 
