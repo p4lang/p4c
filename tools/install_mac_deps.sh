@@ -39,6 +39,11 @@ if ! which brew > /dev/null 2>&1; then
 fi
 HOMEBREW_PREFIX=$(brew --prefix)
 
+# Pin python to version 3.14, since pynng seems to fail building with
+# python 3.15.
+brew install python@3.14
+brew pin python@3.14
+
 # Fetch the latest formulae
 brew update
 
