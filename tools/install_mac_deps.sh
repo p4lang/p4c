@@ -42,14 +42,11 @@ HOMEBREW_PREFIX=$(brew --prefix)
 # Fetch the latest formulae
 brew update
 
-# Pin python to version 3.14, since pynng seems to fail building with
-# python 3.15.
-echo "----------------------------------------"
-brew list
+# FIXME: As of 2026-Oct-11, brew update removes python@3.14 and
+# installs python@3.15, which gives errors when trying to install the
+# pynng package.  Install python@3.14 and use it later below in
+# creating a Python venv so package install succeeds.
 brew install python@3.14
-brew pin python@3.14
-brew list
-echo "----------------------------------------"
 
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
@@ -78,8 +75,8 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
 # Set up uv for Python dependency management.
-find /opt/homebrew -name python3
-/opt/homebrew/opt/python@3.14/libexec/bin/python3 -V
+# FIXME: See earlier FIXME for why we force the use of python@3.14
+# here.
 uv venv --seed --python /opt/homebrew/opt/python@3.14/libexec/bin/python3 ~/.venv
 source ~/.venv/bin/activate
 uv sync
