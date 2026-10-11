@@ -9,6 +9,18 @@
 
 namespace P4::EBPF {
 
+namespace {
+
+bool isStructType(const EBPFType *type) {
+    if (type->is<EBPFStructType>()) return true;
+    if (auto typeName = type->to<EBPFTypeName>()) {
+        return typeName->canonicalTypeIs<EBPFStructType>();
+    }
+    return false;
+}
+
+}  // namespace
+
 EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceName,
                                  const IR::Declaration_Instance *di, CodeGenInspector *codeGen)
     : EBPFTableBase(program, instanceName, codeGen) {
@@ -71,7 +83,7 @@ void EBPFRegisterPSA::emitAssignment(CodeBuilder *builder, EBPFType *type, cstri
     auto width = type->to<IHasWidth>();
     bool isWide =
         width != nullptr && !EBPFScalarType::generatesScalar(width->implementationWidthInBits());
-    bool isStruct = type->type->is<IR::Type_StructLike>();
+    bool isStruct = isStructType(type);
 
     builder->emitIndent();
     if (isStruct) {
@@ -170,15 +182,18 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
                                        ControlBodyTranslatorPSA *translator,
                                        const IR::Expression *leftExpression) {
     auto index = method->expr->arguments->at(0)->expression;
+    bool structKey = isStructType(keyType);
     cstring keyName = program->refMap->newName("key");
     cstring valueName = program->refMap->newName("value");
 
     // Map helpers require an addressable key; materialize the P4 index instead of
     // taking the address of a literal or computed expression.
-    builder->emitIndent();
-    this->keyType->declare(builder, keyName, false);
-    builder->endOfStatement(true);
-    emitAssignment(builder, keyType, keyName, index, translator);
+    if (!structKey) {
+        builder->emitIndent();
+        this->keyType->declare(builder, keyName, false);
+        builder->endOfStatement(true);
+        emitAssignment(builder, keyType, keyName, index, translator);
+    }
 
     builder->emitIndent();
     this->valueType->declare(builder, valueName, true);
@@ -190,7 +205,11 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
     builder->emitIndent();
     builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &", valueName.c_str(),
                           instanceName.c_str());
-    builder->append(keyName);
+    if (structKey) {
+        translator->visit(index);
+    } else {
+        builder->append(keyName);
+    }
     builder->append(")");
     builder->endOfStatement(true);
 
@@ -289,6 +308,29 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMe
 
     auto key = method->expr->arguments->at(0)->expression;
     auto value = method->expr->arguments->at(1)->expression;
+    bool structKey = isStructType(keyType);
+    bool structValue = isStructType(valueType);
+
+    if (structKey || structValue) {
+        builder->emitIndent();
+        auto ret = program->refMap->newName("ret");
+        builder->appendFormat("int %s = BPF_MAP_UPDATE_ELEM(%s, &", ret.c_str(),
+                              instanceName.c_str());
+        translator->visit(key);
+        builder->append(", &");
+        translator->visit(value);
+        builder->append(", BPF_ANY)");
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->appendFormat("if (%s) ", ret.c_str());
+        builder->blockStart();
+        msgStr = absl::StrFormat("Register: Error while map (%v) update, code: %s", instanceName, "%d");
+        builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, ret.c_str());
+        builder->blockEnd(true);
+        return;
+    }
+
     cstring keyName = program->refMap->newName("key");
     cstring valueName = program->refMap->newName("value");
 
