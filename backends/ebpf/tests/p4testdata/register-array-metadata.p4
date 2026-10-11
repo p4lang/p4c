@@ -16,8 +16,13 @@ header ethernet_t {
     bit<16> ether_type;
 }
 
+header reader_t {
+    bit<32> value;
+}
+
 struct headers_t {
     ethernet_t ethernet;
+    reader_t reader;
 }
 
 struct metadata_t {
@@ -61,18 +66,24 @@ control RegisterIngress(
     in psa_ingress_input_metadata_t istd,
     inout psa_ingress_output_metadata_t ostd
 ) {
-    Register<bit<32>, PortId_t>(4) register_array;
+    Register<bit<32>, bit<2>>(4) register_array;
 
     apply {
-        user_meta.element0 = register_array.read((PortId_t)0);
-        user_meta.element1 = register_array.read((PortId_t)1);
-        user_meta.element2 = register_array.read((PortId_t)2);
-        user_meta.element3 = register_array.read((PortId_t)3);
+        // The current main branch of P4C would create invalid syntax in the generated C code.
+        // which results in a compilation error when compile this to .o programme.
+        user_meta.element0 = register_array.read(0) + 2;
+        user_meta.element1 = register_array.read(1) + 2;
+        user_meta.element2 = register_array.read(2) + 2;
+        user_meta.element3 = register_array.read(3) + 2;
 
-        register_array.write((PortId_t)0, user_meta.element0 + 1);
-        register_array.write((PortId_t)1, user_meta.element1 + 1);
-        register_array.write((PortId_t)2, user_meta.element2 + 1);
-        register_array.write((PortId_t)3, user_meta.element3 + 1);
+        // These nested expressions should work fine.
+        register_array.write(0, user_meta.element0 - 1);
+        register_array.write(1, user_meta.element1 - 1);
+        register_array.write(2, user_meta.element2 - 1);
+        register_array.write(3, user_meta.element3 - 1);
+
+        headers.reader.setValid();
+        headers.reader.value = metadata.element0 + metadata.element1 + metadata.element2 + metadata.element3;
     }
 }
 
@@ -97,6 +108,7 @@ control RegisterIngressDeparser(
 ) {
     apply {
         packet.emit(headers.ethernet);
+        packet.emit(headers.reader);
     }
 }
 
