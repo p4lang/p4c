@@ -1,0 +1,3 @@
+loop-bmv2.p4(33): [--Werror=invalid] error: Program can not be implemented on this target since it contains a path from table MyIngress.t back to itself
+  table t {
+        ^

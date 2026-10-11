@@ -58,4 +58,4 @@ jobs:
           tags: p4lang/p4c:${{ env.VERSION }}
           cache-from: type=gha
           # A cache write must not fail the build.
-          cache-to: type=gha,mode=max,ignore-error=true
+          cache-to: type=gha,mode=min,ignore-error=true

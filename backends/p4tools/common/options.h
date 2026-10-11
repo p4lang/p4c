@@ -25,6 +25,9 @@ class AbstractP4cToolOptions : public CompilerOptions {
     /// The name of the tool associated with these options.
     std::string _toolName;
 
+    // Keep argument buffers alive while option fields and compilerArgs borrow them.
+    std::vector<std::shared_ptr<std::string>> argumentStorage;
+
  public:
     virtual ~AbstractP4cToolOptions() = default;
     /// A seed for the PRNG.
@@ -56,7 +59,7 @@ class AbstractP4cToolOptions : public CompilerOptions {
     [[nodiscard]] const std::string &getToolName() const;
 
     /// Converts a vector of command-line arguments into the traditional (argc, argv) format.
-    static std::tuple<int, char **> convertArgs(const std::vector<const char *> &args);
+    std::vector<char *> convertArgs(const std::vector<const char *> &args);
 
     explicit AbstractP4cToolOptions(std::string_view toolName, std::string_view message);
 };

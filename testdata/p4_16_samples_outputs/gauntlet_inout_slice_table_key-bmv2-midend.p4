@@ -43,7 +43,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_inout_slice_table_keybmv2l47() {
         h.eth_hdr.eth_type = 16w1;
     }
-    @hidden action act() {
+    @hidden action gauntlet_inout_slice_table_keybmv2l45() {
         tmp_val_0[7:4] = 4w0;
     }
     @hidden table tbl_gauntlet_inout_slice_table_keybmv2l33 {
@@ -58,11 +58,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = simple_action();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_gauntlet_inout_slice_table_keybmv2l45 {
         actions = {
-            act();
+            gauntlet_inout_slice_table_keybmv2l45();
         }
-        const default_action = act();
+        const default_action = gauntlet_inout_slice_table_keybmv2l45();
     }
     @hidden table tbl_gauntlet_inout_slice_table_keybmv2l47 {
         actions = {
@@ -73,7 +73,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         tbl_gauntlet_inout_slice_table_keybmv2l33.apply();
         tbl_simple_action.apply();
-        tbl_act.apply();
+        tbl_gauntlet_inout_slice_table_keybmv2l45.apply();
         if (simple_table_0.apply().hit) {
             tbl_gauntlet_inout_slice_table_keybmv2l47.apply();
         }

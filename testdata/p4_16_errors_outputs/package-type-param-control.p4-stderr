@@ -1,0 +1,21 @@
+package-type-param-control.p4(16): [--Werror=type-error] error: 'package Pipeline'
+package Pipeline<Ctrl>(Ctrl c);
+        ^^^^^^^^
+  ---- Actual error:
+package-type-param-control.p4(12): Cannot cast implicitly type 'control MyC' to type 'bit<8>'
+  control MyC(inout header_t h) {
+          ^^^
+  ---- Originating from:
+package-type-param-control.p4(18): Type of argument 'MyC' (control MyC) does not match type of parameter 'c' (bit<8>)
+  Pipeline<bit<8>>(MyC()) main;
+                   ^^^^^
+package-type-param-control.p4(12)
+  control MyC(inout header_t h) {
+          ^^^
+package-type-param-control.p4(16)
+  package Pipeline<Ctrl>(Ctrl c);
+                              ^
+  ---- Originating from:
+package-type-param-control.p4(18): Constructor invocation '<Method call>' does not match declaration 'Pipeline'
+  Pipeline<bit<8>>(MyC()) main;
+                          ^^^^

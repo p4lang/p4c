@@ -113,6 +113,36 @@ TEST_F(P4CConstantFoldingValidation, no_filter) {
     ASSERT_TRUE(ts_2->size->is<IR::Constant>());
 }
 
+TEST_F(P4CConstantFoldingValidation, struct_cast_preserves_type) {
+    createPasses(nullptr);
+
+    std::string code = P4_SOURCE(R"(
+        struct S {
+            bit<8> x;
+        }
+
+        const S value = (S){x = 1};
+    )");
+
+    auto *program = parseAndProcess(code)->to<IR::P4Program>();
+    ASSERT_TRUE(program);
+
+    const IR::Declaration_Constant *constant = nullptr;
+    for (const auto *declaration : *program->getDeclarations()) {
+        const auto *candidate = declaration->to<IR::Declaration_Constant>();
+        if (candidate != nullptr && candidate->name == "value") {
+            constant = candidate;
+            break;
+        }
+    }
+    ASSERT_TRUE(constant);
+
+    const auto *initializer = constant->initializer->to<IR::StructExpression>();
+    ASSERT_TRUE(initializer);
+    ASSERT_TRUE(initializer->structType);
+    EXPECT_TRUE(initializer->structType->is<IR::Type_Name>());
+}
+
 // Constant folding with filtering active
 TEST_F(P4CConstantFoldingValidation, filter) {
     // Create the passes with a filter to skip processing of some structs

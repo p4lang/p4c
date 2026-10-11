@@ -71,7 +71,7 @@ class P4TestgenTest : public testing::Test {
         if (!ctxOpt.has_value()) {
             return nullptr;
         }
-        return std::make_unique<AutoCompileContext>(ctxOpt.value());
+        return std::make_unique<AutoCompileContext>(std::move(ctxOpt.value()));
     }
 };
 

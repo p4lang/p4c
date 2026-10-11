@@ -8,6 +8,7 @@
 #ifndef LIB_COMPILE_CONTEXT_H_
 #define LIB_COMPILE_CONTEXT_H_
 
+#include <memory>
 #include <typeinfo>
 #include <vector>
 
@@ -21,7 +22,7 @@ namespace P4 {
 /// options which apply to the translation unit or errors and warnings generated
 /// by it.
 class ICompileContext {
- protected:
+ public:
     virtual ~ICompileContext() = 0;
 };
 
@@ -66,7 +67,16 @@ struct CompileContextStack final {
 /// is always nested correctly, this is the only interface for pushing or popping
 /// compilation contexts.
 struct AutoCompileContext {
+ private:
+    std::unique_ptr<ICompileContext> ownedContext;
+
+ public:
+    /// Borrow a context which outlives this stack entry.
     explicit AutoCompileContext(ICompileContext *context);
+    /// Own a context and release it after removing it from the stack.
+    explicit AutoCompileContext(std::unique_ptr<ICompileContext> context);
+    AutoCompileContext(const AutoCompileContext &) = delete;
+    AutoCompileContext &operator=(const AutoCompileContext &) = delete;
     ~AutoCompileContext();
 };
 
