@@ -3,6 +3,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include <cerrno>
+#include <limits>
+
 #include "ebpfOptions.h"
 
 #include "lib/error.h"
@@ -57,8 +60,10 @@ EbpfOptions::EbpfOptions() {
         "--max-ternary-masks", "MAX_TERNARY_MASKS",
         [this](const char *arg) {
             char *end = nullptr;
+            errno = 0;
             long parsed_val = std::strtol(arg, &end, 0);
-            if (end == arg || *end != '\0' || parsed_val < 0) {
+            if (end == arg || *end != '\0' || errno == ERANGE || parsed_val < 0 ||
+                parsed_val > std::numeric_limits<unsigned int>::max()) {
                 ::P4::error(ErrorType::ERR_INVALID,
                             "--max-ternary-masks expects a non-negative integer, got '%1%'", arg);
                 return false;
