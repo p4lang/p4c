@@ -41,6 +41,13 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
     this->valueArg = ts->arguments->at(0);
     this->keyType = EBPFTypeFactory::instance->create(keyArg);
     this->valueType = EBPFTypeFactory::instance->create(valueArg);
+    if (auto width = this->keyType->to<IHasWidth>();
+        width != nullptr && width->widthInBits() <= 32 && !isStructType(this->keyType)) {
+        // BPF array maps require a four-byte key. Use the same representation for
+        // generated lookups and updates as for the map declaration.
+        this->keyType =
+            EBPFTypeFactory::instance->create(IR::Type_Bits::get(32, false));
+    }
 
     if (di->arguments->size() < 1) {
         ::P4::error(ErrorType::ERR_MODEL, "Expected at least 1 argument: %1%", di);
