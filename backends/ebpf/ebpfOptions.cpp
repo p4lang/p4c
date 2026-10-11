@@ -3,10 +3,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+#include "ebpfOptions.h"
+
 #include <cerrno>
 #include <limits>
-
-#include "ebpfOptions.h"
 
 #include "lib/error.h"
 #include "midend.h"
