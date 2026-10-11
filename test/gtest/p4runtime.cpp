@@ -8,6 +8,7 @@
 #include <google/protobuf/util/message_differencer.h>
 #include <gtest/gtest.h>
 
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -18,6 +19,7 @@
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
+#include "control-plane/bfruntime.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "control-plane/p4infoApi.h"
 #include "control-plane/typeSpecConverter.h"
@@ -31,6 +33,7 @@
 #include "helpers.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
+#include "lib/json.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
@@ -2106,6 +2109,17 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
             EXPECT_EQ(translation.sdn_bitwidth(), 32);
         }
     }
+}
+
+TEST(BfRuntime, AnnotationJsonEscaping) {
+    // Quotes and backslashes must be escaped exactly once, at serialization time.
+    const cstring annotation = "@my_anno(\"a\\b\")";
+    std::unique_ptr<P4::Util::JsonObject> obj(P4::BFRT::transformAnnotation(annotation));
+    ASSERT_NE(obj, nullptr);
+    EXPECT_EQ(annotation, obj->getAs<P4::Util::JsonValue>("name")->getString());
+    const std::string serialized = obj->toString().string();
+    EXPECT_NE(std::string::npos, serialized.find("\"@my_anno(\\\"a\\\\b\\\")\""));
+    EXPECT_EQ(std::string::npos, serialized.find("\"@my_anno(\\\\\\\"a\\\\\\\\b\\\\\\\")\""));
 }
 
 }  // namespace P4::Test
