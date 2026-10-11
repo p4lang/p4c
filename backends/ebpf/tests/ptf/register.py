@@ -70,6 +70,41 @@ class RegisterApplyPSATest(P4EbpfTest):
         self.register_verify(name="ingress_reg", index=["0x5"], expected_value=["0xf"])
 
 
+class RegisterArrayMetadataPSATest(P4EbpfTest):
+    """
+    Test reading a four-element register array into user metadata and writing
+    the incremented values back to the same register elements.
+    """
+
+    p4_file_path = "p4testdata/register-array-metadata.p4"
+
+    def runTest(self):
+        register_name = "RegisterIngress_register_array"
+
+        for index in range(4):
+            self.register_set(
+                name=register_name,
+                index=[index],
+                value=["0x0"],
+            )
+
+        for index in range(4):
+            self.register_verify(
+                name=register_name,
+                index=[index],
+                expected_value=["0x0"],
+            )
+
+        testutils.send_packet(self, PORT0, testutils.simple_eth_packet())
+
+        for index in range(4):
+            self.register_verify(
+                name=register_name,
+                index=[index],
+                expected_value=["0x1"],
+            )
+
+
 class RegisterDefaultPSATest(P4EbpfTest):
     """
     Test register used with default value.
