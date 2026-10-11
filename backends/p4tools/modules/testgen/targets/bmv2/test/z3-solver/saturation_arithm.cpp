@@ -244,6 +244,15 @@ class Z3SolverSubSat05 : public Z3SolverSatTests {
 
 TEST_F(Z3SolverSubSat05, SubSat05) { test(expression, variableValue); }
 
+class Z3SolverSubSat06 : public Z3SolverSatTests {
+ public:
+    Z3SolverSubSat06()
+        : Z3SolverSatTests("hdr.h.ai == 0 && hdr.h.bi == hdr.h.ai |-| (-8)",
+                           "hdr.h.bi = (int<4>)0 |-| (-8)") {}
+};
+
+TEST_F(Z3SolverSubSat06, SubSat06) { test(expression, variableValue); }
+
 }  // namespace ArithmTest
 
 }  // namespace P4::P4Tools::Test
