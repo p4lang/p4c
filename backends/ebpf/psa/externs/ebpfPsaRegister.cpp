@@ -71,9 +71,14 @@ void EBPFRegisterPSA::emitAssignment(CodeBuilder *builder, EBPFType *type, cstri
     auto width = type->to<IHasWidth>();
     bool isWide =
         width != nullptr && !EBPFScalarType::generatesScalar(width->implementationWidthInBits());
+    bool isStruct = type->type->is<IR::Type_StructLike>();
 
     builder->emitIndent();
-    if (isWide) {
+    if (isStruct) {
+        builder->appendFormat("__builtin_memcpy(&%s, &", name.c_str());
+        translator->visit(expression);
+        builder->appendFormat(", sizeof(%s))", name.c_str());
+    } else if (isWide) {
         builder->appendFormat("__builtin_memcpy(&%s, &", name.c_str());
         if (expression->is<IR::Constant>()) {
             builder->appendFormat("(u8[%u])", width->implementationWidthInBits() / 8);
