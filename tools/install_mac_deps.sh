@@ -52,7 +52,7 @@ brew list
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake jsoncpp libtool
-    openssl coreutils bison grep ninja virtualenv uv
+    openssl coreutils bison grep ninja uv
     libevent nanomsg thrift xxhash
     ${BOOST_LIB}
 )
