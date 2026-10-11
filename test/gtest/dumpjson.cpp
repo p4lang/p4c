@@ -6,10 +6,14 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
+#include <memory>
+#include <string>
 
 #include "ir/ir.h"
 #include "ir/json_loader.h"
 #include "ir/visitor.h"
+#include "lib/json.h"
+#include "lib/source_file.h"
 
 using namespace P4;
 using namespace P4::literals;
@@ -64,6 +68,29 @@ TEST(JSON, std_map) {
     JSONLoader(ss) >> copy;
 
     EXPECT_EQ(data, copy);
+}
+
+TEST(IR, SourceInfoJsonEscaping) {
+    // No quotes: quoted lines take a separate path in getBriefSourceFragment.
+    Util::InputSources sources;
+    sources.appendToLastLine("foo(a\\b);");
+    sources.mapLine("test.p4", 1);
+    sources.appendNewline("\n");
+    sources.seal();
+
+    Util::SourceInfo si(&sources, Util::SourcePosition(1, 0), Util::SourcePosition(1, 9));
+    ASSERT_TRUE(si.isValid());
+    IR::Constant c(si, big_int(2));
+
+    std::unique_ptr<Util::JsonObject> obj(c.sourceInfoJsonObj());
+    ASSERT_NE(obj, nullptr);
+
+    const cstring raw = "foo(a\\b);";
+    EXPECT_EQ(raw, obj->getAs<Util::JsonValue>("source_fragment")->getString());
+
+    const std::string serialized = obj->toString().string();
+    EXPECT_NE(std::string::npos, serialized.find("\"foo(a\\\\b);\""));
+    EXPECT_EQ(std::string::npos, serialized.find("\"foo(a\\\\\\\\b);\""));
 }
 
 TEST(JSON, variant) {
