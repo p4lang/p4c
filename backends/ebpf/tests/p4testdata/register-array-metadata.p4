@@ -100,7 +100,6 @@ control RegisterIngressDeparser(
 ) {
     apply {
         packet.emit(headers.ethernet);
-        packet.emit(headers.reader);
     }
 }
 
