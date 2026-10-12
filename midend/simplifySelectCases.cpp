@@ -101,7 +101,7 @@ const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression
     }
 
     if (changes) {
-        if (cases.size() == 1) {
+        if (cases.size() == 1 && cases.at(0)->keyset->is<IR::DefaultExpression>()) {
             // just one default label
             warn(ErrorType::WARN_PARSER_TRANSITION,
                  "'%1%': transition does not depend on select argument", expression->select);
