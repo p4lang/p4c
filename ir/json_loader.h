@@ -344,7 +344,8 @@ class JSONLoader {
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>> unpack_json(T &v) {
-        v = as<JsonNumber>();
+        // Use the full-precision value to avoid truncation through int.
+        v = static_cast<T>(as<JsonNumber>().val);
     }
     void unpack_json(big_int &v) { v = as<JsonNumber>().val; }
     void unpack_json(std::string &v) {
