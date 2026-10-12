@@ -9,6 +9,7 @@
 
 #include <functional>
 #include <iosfwd>
+#include <map>
 #include <vector>
 
 #include "ir/solver.h"
@@ -63,6 +64,14 @@ class SymbolicExecutor {
     /// Update the set of visited nodes. Returns true if there was an update.
     [[nodiscard]] bool updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes);
 
+    /// Records a path the executor abandoned because the target does not model a feature that
+    /// the path reaches. @p message names the feature.
+    void recordPrunedPath(cstring message);
+
+    /// @returns the number of paths the executor abandoned, one entry per message. The
+    /// container is empty when the executor followed every path it started.
+    [[nodiscard]] const std::map<cstring, size_t> &getPrunedPaths() const;
+
  protected:
     /// Target-specific information about the P4 program.
     const ProgramInfo &programInfo;
@@ -75,6 +84,9 @@ class SymbolicExecutor {
 
     /// Set of all nodes executed in any testcase that has been outputted.
     P4::Coverage::CoverageSet visitedNodes;
+
+    /// The paths the executor abandoned, one entry per message of TestgenUnimplemented.
+    std::map<cstring, size_t> prunedPaths;
 
     /// Handles processing at the end of a P4 program.
     ///

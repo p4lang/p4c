@@ -54,8 +54,29 @@ SymbolicExecutor *pickExecutionEngine(const TestgenOptions &testgenOptions,
     return new DepthFirstSearch(solver, programInfo);
 }
 
+/// Reports the paths the executor abandoned, so a reader sees how much of the program the run
+/// left out and which feature stopped it.
+void reportPrunedPaths(const SymbolicExecutor &symbolicExecutor) {
+    const auto &prunedPaths = symbolicExecutor.getPrunedPaths();
+    if (prunedPaths.empty()) {
+        return;
+    }
+    size_t total = 0;
+    for (const auto &prunedPath : prunedPaths) {
+        total += prunedPath.second;
+    }
+    warning(
+        "The run left %1% path(s) out, because the P4Testgen target does yet not model a feature.",
+        total);
+    for (const auto &[message, count] : prunedPaths) {
+        warning("%1% path(s): %2%", count, message);
+    }
+}
+
 /// Analyse the results of the symbolic execution and generate diagnostic messages.
-int postProcess(const TestgenOptions &testgenOptions, const TestBackEnd &testBackend) {
+int postProcess(const TestgenOptions &testgenOptions, const TestBackEnd &testBackend,
+                const SymbolicExecutor &symbolicExecutor) {
+    reportPrunedPaths(symbolicExecutor);
     // Do not print this warning if assertion mode is enabled.
     if (testBackend.getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {
         warning(
@@ -96,7 +117,7 @@ std::optional<AbstractTestList> generateAndCollectAbstractTests(
     symbolicExecutor->run([testBackend](auto &&finalState) {
         return testBackend->run(std::forward<decltype(finalState)>(finalState));
     });
-    auto result = postProcess(testgenOptions, *testBackend);
+    auto result = postProcess(testgenOptions, *testBackend, *symbolicExecutor);
     if (result != EXIT_SUCCESS) {
         return std::nullopt;
     }
@@ -144,7 +165,7 @@ int generateAndWriteAbstractTests(const TestgenOptions &testgenOptions,
     symbolicExecutor->run([testBackend](auto &&finalState) {
         return testBackend->run(std::forward<decltype(finalState)>(finalState));
     });
-    return postProcess(testgenOptions, *testBackend);
+    return postProcess(testgenOptions, *testBackend, *symbolicExecutor);
 }
 
 std::optional<AbstractTestList> generateTestsImpl(std::optional<std::string_view> program,

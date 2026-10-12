@@ -114,6 +114,10 @@ bool SymbolicExecutor::updateVisitedNodes(const P4::Coverage::CoverageSet &newNo
 
 const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedNodes() { return visitedNodes; }
 
+void SymbolicExecutor::recordPrunedPath(cstring message) { ++prunedPaths[message]; }
+
+const std::map<cstring, size_t> &SymbolicExecutor::getPrunedPaths() const { return prunedPaths; }
+
 void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out,
                                                     const ExecutionState &executionState) {
     const auto &branchesList = executionState.getSelectedBranches();

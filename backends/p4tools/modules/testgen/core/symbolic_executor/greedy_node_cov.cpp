@@ -113,6 +113,7 @@ void GreedyNodeSelection::runImpl(const Callback &callBack,
                 throw;
             }
             // Otherwise we try to roll back as we typically do.
+            recordPrunedPath(cstring(e.what()));
             warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
         }
 
