@@ -8,9 +8,7 @@
 #include <bmv2/psa.p4>
 
 header EMPTY_H {};
-struct EMPTY_M {
-    bit<16> vlan_ether_type;
-};
+struct EMPTY_M {};
 struct EMPTY_RESUB {};
 struct EMPTY_CLONE {};
 struct EMPTY_BRIDGE {};
@@ -87,23 +85,21 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
 
     action forward() {
-        send_to_port(d, (PortId_t)1);
+        d.egress_port = (PortId_t)1;
     }
 
     table tbl {
         key = {
             a.ethernet.srcAddr : exact;
-            b.vlan_ether_type : exact;
+            a.vlan_tag[0].ether_type : exact;
         }
         actions = {
             NoAction;
-            forward;
         }
     }
 
     apply {
-        if (a.ethernet.isValid()) {
-            b.vlan_ether_type = (bit<16>)a.vlan_tag[0].ether_type;
+        if (!a.ethernet.isValid()) {
             tbl.apply();
         }
     }
