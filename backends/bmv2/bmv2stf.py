@@ -68,6 +68,7 @@ class Options:
     switch_target_options: List[str] = []
     has_bmv2: bool = False  # Is the behavioral model installed?
     use_psa: bool = False  # Use the psa switch behavioral model?
+    use_pna: bool = False  # Use the pna nic behavioral model?
     run_debugger: str = ""
     # Log packets produced by the BMV2 model if path to log is supplied
     observation_log: Optional[Path] = None
@@ -522,10 +523,9 @@ class RunBMV2(object):
             self.json = json.load(jf)
         for a in self.json["actions"]:
             self.actions.append(BMV2Action(a))
-        for t in self.json["pipelines"][0]["tables"]:
-            self.tables.append(BMV2Table(t))
-        for t in self.json["pipelines"][1]["tables"]:
-            self.tables.append(BMV2Table(t))
+        for pipeline in self.json["pipelines"]:
+            for t in pipeline["tables"]:
+                self.tables.append(BMV2Table(t))
 
     def filename(self, interface: str, direction: str) -> Path:
         return self.folder.joinpath(f"{self.pcapPrefix}{interface}_{direction}.pcap")
@@ -729,6 +729,9 @@ class RunBMV2(object):
         if self.options.use_psa:
             switch = "psa_switch"
             switch_cli = "psa_switch_CLI"
+        elif self.options.use_pna:
+            switch = "pna_nic"
+            switch_cli = "pna_nic_CLI"
         else:
             switch = "simple_switch"
             switch_cli = "simple_switch_CLI"
