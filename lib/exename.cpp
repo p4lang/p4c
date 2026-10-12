@@ -11,6 +11,8 @@
 #include <filesystem>
 #include <system_error>
 
+#include "lib/cstring.h"
+
 #ifdef __APPLE__
 #include <unistd.h>
 
@@ -81,8 +83,8 @@ const char *exename(const char *argv0) {
     if (path.empty()) {
         return nullptr;
     }
-    // TODO: There is a potential leak here.
-    return strdup(path.c_str());
+    // Intern the path so repeated calls share storage and the pointer stays valid.
+    return cstring(path.string()).c_str();
 }
 
 }  // namespace P4

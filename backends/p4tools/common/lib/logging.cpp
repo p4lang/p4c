@@ -38,7 +38,7 @@ void printPerformanceReport(const std::optional<std::filesystem::path> &basePath
             auto timePerInvocation =
                 static_cast<float>(c.milliseconds) / static_cast<float>(c.invocations);
             printFeature("tools_performance", 4,
-                         "%s: %i ms (%i ms per invocation, %0.2f %% of parent)", c.timerName,
+                         "%s: %i ms (%s ms per invocation, %0.2f %% of parent)", c.timerName,
                          c.milliseconds, timePerInvocation, c.relativeToParent * 100);
             auto prunedName = c.timerName;
             prunedName.erase(remove_if(prunedName.begin(), prunedName.end(), isspace),

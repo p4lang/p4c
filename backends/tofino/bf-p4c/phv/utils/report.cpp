@@ -20,6 +20,8 @@
 
 #include <numeric>
 
+#include <boost/format.hpp>
+
 #include "backends/tofino/bf-p4c/common/table_printer.h"
 
 using ContainerAllocStatus = PHV::Allocation::ContainerAllocStatus;

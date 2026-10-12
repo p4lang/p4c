@@ -12,7 +12,7 @@ control c(out bool b) {
     }
     @name("c.a") action a_1() {
     }
-    @hidden action act() {
+    @hidden action namedarg1l48() {
         b = true;
     }
     @hidden table tbl_a {
@@ -27,16 +27,16 @@ control c(out bool b) {
         }
         const default_action = a_1();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_namedarg1l48 {
         actions = {
-            act();
+            namedarg1l48();
         }
-        const default_action = act();
+        const default_action = namedarg1l48();
     }
     apply {
         tbl_a.apply();
         tbl_a_0.apply();
-        tbl_act.apply();
+        tbl_namedarg1l48.apply();
     }
 }
 

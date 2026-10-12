@@ -22,7 +22,12 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
     LOG5("In createStructLike with struct " << st->toString());
     for (auto f : st->fields) {
         auto field = new Util::JsonArray();
-        auto ftype = structure->typeMap->getType(f, true);
+        auto ftype = structure->typeMap->getType(f, false);
+        if (ftype == nullptr) {
+            auto typeName = f->type->to<IR::Type_Name>();
+            CHECK_NULL(typeName);
+            ftype = structure->refMap->getDeclaration(typeName->path, true)->to<IR::Type>();
+        }
         LOG5("Iterating field with field " << f << " and type " << ftype->toString());
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
@@ -83,13 +88,11 @@ void PortableCodeGenerator::createTypes(ConversionContext *ctxt,
     for (auto kv : structure->header_union_types) {
         auto st = kv.second;
         auto fields = new Util::JsonArray();
-        for (auto f : st->fields) {
+        for (auto field_info : structure->header_union_fields.at(kv.first)) {
             auto field = new Util::JsonArray();
-            auto ftype = structure->typeMap->getType(f, true);
-            auto ht = ftype->to<IR::Type_Header>();
-            CHECK_NULL(ht);
-            field->append(f->name.name);
-            field->append(ht->name.name);
+            field->append(field_info.first);
+            field->append(field_info.second);
+            fields->append(field);
         }
         ctxt->json->add_union_type(st->name, fields);
     }
@@ -161,10 +164,29 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
         auto type = kv.second->type->to<IR::Type_StructLike>();
         ctxt->json->add_metadata(type->controlPlaneName(), kv.second->name);
     }
-    /* TODO */
-    // for (auto kv : header_stacks) {
-    //     json->add_header_stack(stack_type, stack_name, stack_size, ids);
-    // }
+    for (auto kv : structure->header_stacks) {
+        auto stack_decl = kv.second;
+        auto stack = structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
+        CHECK_NULL(stack);
+
+        auto element_type =
+            structure->typeMap->getTypeType(stack->elementType, true)->to<IR::Type_Header>();
+        CHECK_NULL(element_type);
+
+        const auto stack_name = stack_decl->controlPlaneName();
+        const auto header_type = element_type->controlPlaneName();
+
+        std::vector<unsigned> ids;
+        ids.reserve(stack->getSize());
+
+        for (unsigned index = 0; index < stack->getSize(); ++index) {
+            cstring element_name = stack_name + "[" + Util::toString(index) + "]";
+
+            ids.push_back(ctxt->json->add_header(header_type, element_name));
+        }
+
+        ctxt->json->add_header_stack(header_type, stack_name, stack->getSize(), ids);
+    }
     for (auto kv : structure->header_unions) {
         auto header_name = kv.first;
         auto header_type = kv.second->to<IR::Type_StructLike>()->controlPlaneName();
@@ -172,14 +194,38 @@ void PortableCodeGenerator::createHeaders(ConversionContext *ctxt,
         // headers in the union.  Each instance will be named with
         // a prefix including the union name, e.g., "u.h"
         Util::JsonArray *fields = new Util::JsonArray();
-        for (auto uf : kv.second->to<IR::Type_HeaderUnion>()->fields) {
-            auto uft = structure->typeMap->getType(uf, true);
-            auto h_name = header_name + "." + uf->controlPlaneName();
-            auto h_type = uft->to<IR::Type_StructLike>()->controlPlaneName();
-            unsigned id = ctxt->json->add_header(h_type, h_name);
+        for (auto field_info :
+             structure->header_union_fields.at(kv.second->to<IR::Type_HeaderUnion>()->getName())) {
+            auto h_name = header_name + "." + field_info.first;
+            unsigned id = ctxt->json->add_header(field_info.second, h_name);
             fields->append(id);
         }
         ctxt->json->add_union(header_type, fields, header_name);
+    }
+    for (auto kv : structure->header_union_stacks) {
+        auto stack_decl = kv.second;
+        auto stack = structure->typeMap->getType(stack_decl, true)->to<IR::Type_Array>();
+        CHECK_NULL(stack);
+        auto union_type =
+            structure->typeMap->getTypeType(stack->elementType, true)->to<IR::Type_HeaderUnion>();
+        CHECK_NULL(union_type);
+        const auto stack_name = stack_decl->controlPlaneName();
+        const auto union_type_name = union_type->controlPlaneName();
+        std::vector<unsigned> union_ids;
+        union_ids.reserve(stack->getSize());
+
+        for (unsigned index = 0; index < stack->getSize(); ++index) {
+            cstring union_name = stack_name + "[" + Util::toString(index) + "]";
+            auto fields = new Util::JsonArray();
+            for (auto field_info : structure->header_union_fields.at(union_type->getName())) {
+                cstring header_name = union_name + "." + field_info.first;
+                fields->append(ctxt->json->add_header(field_info.second, header_name));
+            }
+            union_ids.push_back(ctxt->json->add_union(union_type_name, fields, union_name));
+        }
+
+        ctxt->json->add_header_union_stack(union_type_name, stack_name, stack->getSize(),
+                                           union_ids);
     }
 }
 

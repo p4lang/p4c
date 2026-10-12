@@ -44,7 +44,7 @@ control ingress(inout Parsed_packet h, inout Metadata m, inout standard_metadata
     @hidden action issue2176bmv2l51() {
         h.h.a = 8w1;
     }
-    @hidden action act() {
+    @hidden action issue2176bmv2l49() {
         h.h.b = tmp_1;
     }
     @hidden table tbl_do_action {
@@ -53,11 +53,11 @@ control ingress(inout Parsed_packet h, inout Metadata m, inout standard_metadata
         }
         const default_action = do_action_0();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue2176bmv2l49 {
         actions = {
-            act();
+            issue2176bmv2l49();
         }
-        const default_action = act();
+        const default_action = issue2176bmv2l49();
     }
     @hidden table tbl_issue2176bmv2l51 {
         actions = {
@@ -67,7 +67,7 @@ control ingress(inout Parsed_packet h, inout Metadata m, inout standard_metadata
     }
     apply {
         tbl_do_action.apply();
-        tbl_act.apply();
+        tbl_issue2176bmv2l49.apply();
         if (tmp_1 > 8w1) {
             tbl_issue2176bmv2l51.apply();
         }

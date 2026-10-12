@@ -20,18 +20,17 @@ std::string render(const T &container) {
 }
 }  // namespace
 
-TEST(FormatContainer, NonEmptyVectorIsUnchanged) {
-    EXPECT_EQ("[ 1, 2, 3 ]", render(std::vector<int>{1, 2, 3}));
-    EXPECT_EQ("[ 42 ]", render(std::vector<int>{42}));
+TEST(FormatContainer, EmptyContainerHasNoInnerPadding) {
+    EXPECT_EQ("[]", render(std::vector<int>{}));
+    EXPECT_EQ("()", render(std::set<int>{}));
 }
 
-TEST(FormatContainer, NonEmptySetIsUnchanged) {
-    EXPECT_EQ("( 5, 6, 7 )", render(std::set<int>{5, 6, 7}));
-}
-
-TEST(FormatContainer, EmptyContainerMatchesNonEmptyBracketStyle) {
-    EXPECT_EQ("[ ]", render(std::vector<int>{}));
-    EXPECT_EQ("( )", render(std::set<int>{}));
+TEST(FormatContainer, NonEmptyContainerHasNoOuterPadding) {
+    // Spaces separate elements from each other, but not from the
+    // delimiters: "[1, 2, 3]", not "[ 1, 2, 3 ]".
+    EXPECT_EQ("[1, 2, 3]", render(std::vector<int>{1, 2, 3}));
+    EXPECT_EQ("[42]", render(std::vector<int>{42}));
+    EXPECT_EQ("(5, 6, 7)", render(std::set<int>{5, 6, 7}));
 }
 
 }  // namespace P4::Test

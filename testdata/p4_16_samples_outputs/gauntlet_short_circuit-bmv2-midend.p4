@@ -47,44 +47,44 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_short_circuitbmv2l61_0() {
         tmp_2 = 8w2;
     }
-    @hidden action act() {
+    @hidden action gauntlet_short_circuitbmv2l61_1() {
         h.b.b = val;
     }
-    @hidden action gauntlet_short_circuitbmv2l61_1() {
+    @hidden action gauntlet_short_circuitbmv2l61_2() {
         h.b.a = tmp_2;
     }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     @hidden table tbl_gauntlet_short_circuitbmv2l61 {
-        actions = {
-            gauntlet_short_circuitbmv2l61();
-        }
-        const default_action = gauntlet_short_circuitbmv2l61();
-    }
-    @hidden table tbl_gauntlet_short_circuitbmv2l61_0 {
-        actions = {
-            gauntlet_short_circuitbmv2l61_0();
-        }
-        const default_action = gauntlet_short_circuitbmv2l61_0();
-    }
-    @hidden table tbl_gauntlet_short_circuitbmv2l61_1 {
         actions = {
             gauntlet_short_circuitbmv2l61_1();
         }
         const default_action = gauntlet_short_circuitbmv2l61_1();
     }
-    apply {
-        tbl_act.apply();
-        if (8w1 != val) {
-            tbl_gauntlet_short_circuitbmv2l61.apply();
-        } else {
-            tbl_gauntlet_short_circuitbmv2l61_0.apply();
+    @hidden table tbl_gauntlet_short_circuitbmv2l61_0 {
+        actions = {
+            gauntlet_short_circuitbmv2l61();
         }
-        tbl_gauntlet_short_circuitbmv2l61_1.apply();
+        const default_action = gauntlet_short_circuitbmv2l61();
+    }
+    @hidden table tbl_gauntlet_short_circuitbmv2l61_1 {
+        actions = {
+            gauntlet_short_circuitbmv2l61_0();
+        }
+        const default_action = gauntlet_short_circuitbmv2l61_0();
+    }
+    @hidden table tbl_gauntlet_short_circuitbmv2l61_2 {
+        actions = {
+            gauntlet_short_circuitbmv2l61_2();
+        }
+        const default_action = gauntlet_short_circuitbmv2l61_2();
+    }
+    apply {
+        tbl_gauntlet_short_circuitbmv2l61.apply();
+        if (8w1 != val) {
+            tbl_gauntlet_short_circuitbmv2l61_0.apply();
+        } else {
+            tbl_gauntlet_short_circuitbmv2l61_1.apply();
+        }
+        tbl_gauntlet_short_circuitbmv2l61_2.apply();
     }
 }
 

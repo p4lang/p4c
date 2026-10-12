@@ -4,12 +4,6 @@ equality.p4(28): [--Wwarn=uninitialized-use] warning: a may be uninitialized
 equality.p4(28): [--Wwarn=uninitialized-use] warning: b may be uninitialized
         if (a == b) {
                  ^
-equality.p4(30): [--Wwarn=uninitialized-use] warning: h1.a may be uninitialized
-        } else if (h1 == h2) {
-                   ^^
-equality.p4(30): [--Wwarn=uninitialized-use] warning: h2.a may be uninitialized
-        } else if (h1 == h2) {
-                         ^^
 equality.p4(32): [--Wwarn=uninitialized-use] warning: s1.a may be uninitialized
         } else if (s1 == s2) {
                    ^^

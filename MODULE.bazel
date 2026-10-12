@@ -6,7 +6,6 @@ module(
 bazel_dep(name = "abseil-cpp", version = "20260107.1")
 bazel_dep(name = "bazel_skylib", version = "1.9.0")
 bazel_dep(name = "boost.algorithm", version = "1.90.0.bcr.1")
-bazel_dep(name = "boost.format", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.functional", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.graph", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.iostreams", version = "1.90.0.bcr.1")
