@@ -74,7 +74,7 @@ class TCOptions : public CompilerOptions {
             "--num-timer-profiles", "profiles",
             [this](const char *arg) {
                 char *end = nullptr;
-                long value = strtol(arg, &end, 10);
+                long value = strtol(arg, &end, 0);
                 if (*end != 0 || value <= 0 ||
                     static_cast<unsigned long>(value) >
                         static_cast<unsigned long>(std::numeric_limits<unsigned>::max())) {
