@@ -1,5 +1,7 @@
 var NAVTREEINDEX39 =
 {
+"struct_p4_1_1_util_1_1_hasher_3_01cstring_01_4.html":[13,0,12,25,23],
+"struct_p4_1_1_util_1_1_hasher_3_01double_01_4.html":[13,0,12,25,24],
 "struct_p4_1_1_util_1_1_hasher_3_01float_01_4.html":[13,0,12,25,25],
 "struct_p4_1_1_util_1_1_hasher_3_01signed_01char_01_4.html":[13,0,12,25,30],
 "struct_p4_1_1_util_1_1_hasher_3_01signed_01int_01_4.html":[13,0,12,25,31],
@@ -247,7 +249,5 @@ var NAVTREEINDEX39 =
 "struct_stateful_alu_1_1_alu_o_p.html#a5a36f3375ba3e70f8a984bd9acbcd4dc":[13,0,18,0,1],
 "struct_stateful_alu_1_1_alu_o_p.html#a5a36f3375ba3e70f8a984bd9acbcd4dc":[13,0,18,0,2],
 "struct_stateful_alu_1_1_alu_o_p_1_1_decode.html":[12,0,20,0,0],
-"struct_stateful_alu_1_1_alu_o_p_1_1_decode.html":[13,0,18,0,0],
-"struct_stateful_alu_1_1_bit_o_p.html":[12,0,20,1],
-"struct_stateful_alu_1_1_bit_o_p.html":[13,0,18,1]
+"struct_stateful_alu_1_1_alu_o_p_1_1_decode.html":[13,0,18,0,0]
 };

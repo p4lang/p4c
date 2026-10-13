@@ -3302,6 +3302,7 @@ var hierarchy =
         [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
         [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ],
         [ "P4::DoSimplifyExpressions", "class_p4_1_1_do_simplify_expressions.html", null ],
+        [ "P4::DoStrengthReduction", "class_p4_1_1_do_strength_reduction.html", null ],
         [ "P4::P4V1::CollectBridgedFields", "class_p4_1_1_p4_v1_1_1_collect_bridged_fields.html", null ],
         [ "P4::ReplaceHeaders", "class_p4_1_1_replace_headers.html", null ],
         [ "P4::ReplaceIndexRefs", "class_p4_1_1_replace_index_refs.html", null ],

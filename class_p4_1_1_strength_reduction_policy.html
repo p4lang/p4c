@@ -136,14 +136,16 @@ $(function(){initNavTree('class_p4_1_1_strength_reduction_policy.html',''); init
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a0dff415bea2b1f5a74295857981b6526" id="r_a0dff415bea2b1f5a74295857981b6526"><td class="memItemLeft" align="right" valign="top"><a id="a0dff415bea2b1f5a74295857981b6526" name="a0dff415bea2b1f5a74295857981b6526"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>StrengthReductionPolicy</b> (bool <a class="el" href="#a7bbc9d18dd49069b8aea853e7d455f91">enableSubConstToAddTransform</a>, bool <a class="el" href="#a7565b0cb44742f80cead3e20ce7a744d">enableNarrowingCastToSliceTransform</a>)</td></tr>
-<tr class="separator:a0dff415bea2b1f5a74295857981b6526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7295e2445a8b79a32bd704b6dc29afde" id="r_a7295e2445a8b79a32bd704b6dc29afde"><td class="memItemLeft" align="right" valign="top"><a id="a7295e2445a8b79a32bd704b6dc29afde" name="a7295e2445a8b79a32bd704b6dc29afde"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StrengthReductionPolicy</b> (bool <a class="el" href="#a7bbc9d18dd49069b8aea853e7d455f91">enableSubConstToAddTransform</a>, bool <a class="el" href="#a7565b0cb44742f80cead3e20ce7a744d">enableNarrowingCastToSliceTransform</a>, bool <a class="el" href="#a44968cd3060e3512f38867ea7253cd27">enablePlusSliceToShiftTransform</a>=false)</td></tr>
+<tr class="separator:a7295e2445a8b79a32bd704b6dc29afde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a7565b0cb44742f80cead3e20ce7a744d" id="r_a7565b0cb44742f80cead3e20ce7a744d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7565b0cb44742f80cead3e20ce7a744d">enableNarrowingCastToSliceTransform</a> = false</td></tr>
 <tr class="separator:a7565b0cb44742f80cead3e20ce7a744d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44968cd3060e3512f38867ea7253cd27" id="r_a44968cd3060e3512f38867ea7253cd27"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a44968cd3060e3512f38867ea7253cd27">enablePlusSliceToShiftTransform</a> = false</td></tr>
+<tr class="separator:a44968cd3060e3512f38867ea7253cd27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7bbc9d18dd49069b8aea853e7d455f91" id="r_a7bbc9d18dd49069b8aea853e7d455f91"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7bbc9d18dd49069b8aea853e7d455f91">enableSubConstToAddTransform</a> = true</td></tr>
 <tr class="separator:a7bbc9d18dd49069b8aea853e7d455f91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -160,6 +162,21 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Replace narrowing casts with slices. i.e. replaces (bit&lt;n&gt;)(expr) with expr[n-1:0] when n is smaller than the width of expr. </p>
+
+</div>
+</div>
+<a id="a44968cd3060e3512f38867ea7253cd27" name="a44968cd3060e3512f38867ea7253cd27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a44968cd3060e3512f38867ea7253cd27">&#9670;&#160;</a></span>enablePlusSliceToShiftTransform</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool P4::StrengthReductionPolicy::enablePlusSliceToShiftTransform = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Replace slices with a variable offset with a shift followed by a constant slice. i.e. replaces expr[offset+:width] with (expr &gt;&gt; offset)[width-1:0]. </p>
 
 </div>
 </div>
