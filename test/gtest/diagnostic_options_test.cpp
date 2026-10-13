@@ -3,6 +3,8 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "frontends/common/parser_options.h"
 #include "lib/error_reporter.h"
 #include "test/gtest/helpers.h"
@@ -57,6 +59,23 @@ TEST_F(DiagnosticOptions, WwarnCommaSeparatedDiagnostics) {
     auto &reporter = processOption("--Wwarn=first-error,second-error");
     EXPECT_EQ(DiagnosticAction::Warn, actionFor(reporter, "first-error"_cs));
     EXPECT_EQ(DiagnosticAction::Warn, actionFor(reporter, "second-error"_cs));
+}
+
+TEST_F(DiagnosticOptions, MaxErrorCountRejectsInvalidValues) {
+    auto &options = GTestContext::get().options();
+    const char *invalid[] = {"abc", "", "-1", "10xyz", "4294967296", "99999999999999999999"};
+    for (auto arg : invalid) {
+        std::string opt = std::string("--maxErrorCount=") + arg;
+        const char *argv[] = {"test", opt.c_str()};
+        EXPECT_EQ(nullptr, options.process(2, const_cast<char *const *>(argv))) << "arg: " << arg;
+    }
+}
+
+TEST_F(DiagnosticOptions, MaxErrorCountAcceptsValidValue) {
+    auto &options = GTestContext::get().options();
+    const char *argv[] = {"test", "--maxErrorCount=10"};
+    EXPECT_NE(nullptr, options.process(2, const_cast<char *const *>(argv)));
+    EXPECT_EQ(10u, GTestContext::get().errorReporter().getMaxErrorCount());
 }
 
 }  // namespace P4::Test
