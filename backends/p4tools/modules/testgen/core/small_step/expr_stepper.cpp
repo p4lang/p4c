@@ -38,21 +38,6 @@
 
 namespace P4::P4Tools::P4Testgen {
 
-namespace {
-
-/// @returns true when @p type describes an extern object.
-bool isExternType(const IR::Type *type) {
-    if (type->is<IR::Type_Extern>()) {
-        return true;
-    }
-    if (const auto *specialized = type->to<IR::Type_SpecializedCanonical>()) {
-        return specialized->baseType->is<IR::Type_Extern>();
-    }
-    return false;
-}
-
-}  // namespace
-
 ExprStepper::ExprStepper(ExecutionState &state, AbstractSolver &solver,
                          const ProgramInfo &programInfo)
     : AbstractStepper(state, solver, programInfo) {}
@@ -151,11 +136,9 @@ bool ExprStepper::resolveMethodCallArguments(const IR::MethodCallExpression *cal
         const auto *param = methodParams.at(idx);
         const auto *argExpr = arg->expression;
         // Avoid resolving externs because they do not actually exist in the symbolic environment.
-        // An instance of a generic extern carries a specialized type, which names the extern in
-        // its base type.
         // Do not resolve out parameters because we do not care about their content.
         // Skip symbolic values since they have already been resolved.
-        if (isExternType(argExpr->type) || param->direction == IR::Direction::Out ||
+        if (IR::getExternType(argExpr->type) != nullptr || param->direction == IR::Direction::Out ||
             SymbolicEnv::isSymbolicValue(argExpr)) {
             continue;
         }
@@ -220,9 +203,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 return false;
             }
 
-            // Handle extern calls. They may also be of Type_SpecializedCanonical.
-            if (method->expr->type->is<IR::Type_Extern>() ||
-                method->expr->type->is<IR::Type_SpecializedCanonical>()) {
+            // Handle extern calls.
+            if (IR::getExternType(method->expr->type) != nullptr) {
                 evalExternMethodCall({*call, *method->expr->checkedTo<IR::PathExpression>(),
                                       method->member, *call->arguments});
                 return false;

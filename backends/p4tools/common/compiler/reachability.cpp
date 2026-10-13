@@ -10,6 +10,7 @@
 #include "backends/p4tools/common/lib/table_utils.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
+#include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
@@ -86,9 +87,8 @@ bool P4ProgramDCGCreator::preorder(const IR::MethodCallExpression *call) {
                 return false;
             }
 
-            // Handle extern calls. They may also be of Type_SpecializedCanonical.
-            if (method->expr->type->is<IR::Type_Extern>() ||
-                method->expr->type->is<IR::Type_SpecializedCanonical>()) {
+            // Handle extern calls.
+            if (IR::getExternType(method->expr->type) != nullptr) {
                 // TODO: This is the wrong place to analyze parser value sets.
                 // They should be handled in the select expression.
                 if (method->member.originalName == "index") {
