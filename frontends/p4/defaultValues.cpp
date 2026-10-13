@@ -26,7 +26,7 @@ const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expres
         type = typeMap->getSubstitution(anyType->to<IR::Type_Any>());
         if (type == nullptr) {
             ::P4::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not find default value", expression);
-            return expression;
+            return nullptr;
         }
     }
     return IR::getDefaultValue(type, expression->srcInfo, false);
