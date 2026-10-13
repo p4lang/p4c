@@ -46,7 +46,7 @@ class BackendDriver:
     def __str__(self):
         return self._backend
 
-    def add_command(self, cmd_name, cmd):
+    def add_command(self, cmd_name: str, cmd: str) -> None:
         """Add a command
 
         If the command was previously set, it is overwritten
@@ -350,12 +350,8 @@ class BackendDriver:
             return  # nothing to do
 
         cmds = self._postCmds[cmd_name]
-        rc = 0
         for c in cmds:
-            # Run all cleanup commands even if one fails; use `or` (not sum)
-            # to track failure, since summed codes aren't valid exit codes.
-            rc = rc or self.runCmd(cmd_name, c)
-        return rc  # \TODO should we fail the whole run() on cleanup failure?
+            self.runCmd(cmd_name, c)
 
     def run(self):
         """
@@ -379,7 +375,7 @@ class BackendDriver:
             rc = self.runCmd(c, cmd)
 
             # run the cleanup whether the command succeeded or failed
-            postrc = self.postRun(c)
+            self.postRun(c)
 
             # if the main command failed, stop and return its error code so that
             # backends that override run can chose what to do on error

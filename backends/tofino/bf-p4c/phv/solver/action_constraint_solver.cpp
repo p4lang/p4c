@@ -22,6 +22,7 @@
 #include <sstream>
 #include <unordered_set>
 
+#include <boost/format.hpp>
 #include <boost/format/format_fwd.hpp>
 
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
@@ -109,7 +110,7 @@ void assign_input_bug_check(const ordered_map<ContainerID, ContainerSpec> &specs
                             const Assign &assign) {
     for (const auto op : {assign.src, assign.dst}) {
         if (op.is_ad_or_const) {
-            BUG_CHECK(op.container == "", "action data or const must have nil container", op);
+            BUG_CHECK(op.container == "", "%1%: action data or const must have nil container", op);
             continue;
         }
         BUG_CHECK(op.container != "", "empty container string not allowed unless ad_or_const: %1%",

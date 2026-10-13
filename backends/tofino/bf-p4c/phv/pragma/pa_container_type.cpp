@@ -84,7 +84,7 @@ bool PragmaContainerType::add_constraint(const IR::BFN::Pipe *pipe, const IR::Ex
     } else if (kind == PHV::Kind::tagalong) {
         warning(
             "@prama pa_container_type currently does not support tagalong containers, "
-            "skipped",
+            "skipped: %1%",
             field_name);
         return false;
     }

@@ -20,7 +20,9 @@ using namespace literals;
 /* helper function to get the 'outermost' containing expression in an lvalue */
 static const IR::Expression *lvalue_out(const IR::Expression *exp) {
     if (auto ai = exp->to<IR::ArrayIndex>()) return lvalue_out(ai->left);
+#ifdef SUPPORT_P4_14
     if (auto hsr = exp->to<IR::HeaderStackItemRef>()) return lvalue_out(hsr->base());
+#endif
     if (auto sl = exp->to<IR::AbstractSlice>()) return lvalue_out(sl->e0);
     if (auto mem = exp->to<IR::Member>()) return lvalue_out(mem->expr);
     return exp;
@@ -125,6 +127,16 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
             return nullptr;
         }
         return act;
+    }
+    IR::ForStatement *postorder(IR::ForStatement *fstmt) override {
+        if (!fstmt->body)
+            fstmt->body = new IR::EmptyStatement(getOriginal<IR::ForStatement>()->body->srcInfo);
+        return fstmt;
+    }
+    IR::ForInStatement *postorder(IR::ForInStatement *fstmt) override {
+        if (!fstmt->body)
+            fstmt->body = new IR::EmptyStatement(getOriginal<IR::ForInStatement>()->body->srcInfo);
+        return fstmt;
     }
 
  public:

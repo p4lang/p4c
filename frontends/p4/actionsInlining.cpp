@@ -79,12 +79,14 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     for (const auto *param : callee->parameters->parameters) {
         const auto *argument = substitution.lookup(param);
         cstring newName = nameGen->newName(param->name.name.string_view());
+        IR::ID parameterName(newName, param->name.originalName);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
             const auto *vardecl = new IR::Declaration_Variable(
                 argument->srcInfo, newName, param->annotations, param->type, argument->expression);
             body.push_back(vardecl);
-            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
+            subst.add(param,
+                      new IR::Argument(argument->name, new IR::PathExpression(parameterName)));
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
@@ -98,7 +100,8 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
             // uninitialized variable
             const auto *vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
                                                                param->annotations, param->type);
-            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
+            subst.add(param,
+                      new IR::Argument(argument->name, new IR::PathExpression(parameterName)));
             body.push_back(vardecl);
         }
     }

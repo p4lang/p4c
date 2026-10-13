@@ -3558,7 +3558,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
             // Ideally, this check should never fail as an empty action is validated in
             // 'CheckStatefulAlu' earlier in backend.
             BUG_CHECK((act->action.size() > 0),
-                      " Stateful %1% must have instructions assigned for action '%1%'."
+                      " Stateful %1% must have instructions assigned for action '%2%'."
                       " Please verify the action is valid.",
                       salu, act);
             act->apply(EmitAction(self, out, tbl, indent));

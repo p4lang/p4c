@@ -38,7 +38,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "validation"
+          ccache-key: "ubuntu-22.04-gcc-unity-validation"
 
       - name: Validate
         run: |

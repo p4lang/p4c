@@ -23,7 +23,6 @@
 #include "backends/bmv2/common/sharedActionSelectorCheck.h"
 #include "backends/common/programStructure.h"
 #include "frontends/common/constantFolding.h"
-#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
@@ -119,18 +118,18 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
 
 class ParseV1Architecture : public Inspector {
     V1ProgramStructure *structure;
-    P4V1::V1Model &v1model;
+    const P4V1::V1Model &v1model;
 
  public:
     explicit ParseV1Architecture(V1ProgramStructure *structure)
-        : structure(structure), v1model(P4V1::V1Model::instance) {}
+        : structure(structure), v1model(P4V1::V1Model::instance()) {}
     void modelError(const char *format, const IR::Node *node);
     bool preorder(const IR::PackageBlock *block) override;
 };
 
 class SimpleSwitchBackend : public Backend {
     BMV2Options &options;
-    P4V1::V1Model &v1model;
+    const P4V1::V1Model &v1model;
     V1ProgramStructure *structure = nullptr;
     ExpressionConverter *conv = nullptr;
 
@@ -151,7 +150,7 @@ class SimpleSwitchBackend : public Backend {
                         P4::ConvertEnums::EnumMapping *enumMap)
         : Backend(options, refMap, typeMap, enumMap),
           options(options),
-          v1model(P4V1::V1Model::instance) {}
+          v1model(P4V1::V1Model::instance()) {}
 };
 
 EXTERN_CONVERTER_W_FUNCTION(clone)

@@ -1,0 +1,6 @@
+issue1829-2-bmv2.p4(46): [--Wwarn=unused] warning: 'da_meter_result2' is unused
+    bit<2> da_meter_result2;
+           ^^^^^^^^^^^^^^^^
+issue1829-2-bmv2.p4(48): [--Werror=invalid] error: ingressImpl.da_meter: direct meter is not associated with any table via 'meters' table property
+    direct_meter<bit<2> >(MeterType.packets) da_meter;
+                                             ^^^^^^^^

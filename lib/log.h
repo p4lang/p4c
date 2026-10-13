@@ -173,13 +173,13 @@ std::ostream &format_container(std::ostream &out, const Cont &container, char lb
             out << Log::unindent;
         }
     } else {
-        const char *sep = " ";
         out << lbrace;
+        const char *sep = "";
         for (auto &el : elems) {
             out << sep << el;
             sep = ", ";
         }
-        out << (sep + 1) << rbrace;
+        out << rbrace;
     }
 
     return out;

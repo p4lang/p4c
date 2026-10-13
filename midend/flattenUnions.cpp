@@ -257,7 +257,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Type_Struct *s) {
                     fields.push_back(new IR::StructField(IR::ID(uName), hus->at(i)->getP4Type()));
                     indexVec.push_back(uName);
                 }
-                stackMap.emplace(sf->name.name, indexVec);
+                stackFieldMap.emplace(std::make_pair(s->name.name, sf->name.name), indexVec);
                 indexVec.clear();
             } else {
                 fields.push_back(sf);
@@ -311,9 +311,13 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
             if (cst >= stackSize)
                 ::P4::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
             if (auto mem = e->left->to<IR::Member>()) {
-                auto uName = stackMap[mem->member.name];
-                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1%", e);
-                auto member = new IR::Member(stack->elementType, mem->expr, IR::ID(uName[cst]));
+                auto ownerType = mem->expr->type->checkedTo<IR::Type_Struct>();
+                auto key = std::make_pair(ownerType->name.name, mem->member.name);
+                auto names = stackFieldMap.find(key);
+                BUG_CHECK(names != stackFieldMap.end() && names->second.size() > cst,
+                          "Header stack element mapping not found for %1%", e);
+                auto member =
+                    new IR::Member(stack->elementType, mem->expr, IR::ID(names->second[cst]));
                 return member;
             } else if (auto path = e->left->to<IR::PathExpression>()) {
                 auto uName = stackMap[path->path->name.name];
@@ -355,7 +359,7 @@ const IR::Node *DoFlattenHeaderUnion::postorder(IR::Type_Struct *s) {
                     fieldMap.emplace(sfu->name.name, uName);
                     fields.push_back(new IR::StructField(IR::ID(uName), uType));
                 }
-                replacementMap.emplace(sf->name.name, fieldMap);
+                structReplacementMap.emplace(std::make_pair(s->name.name, sf->name.name), fieldMap);
             } else {
                 fields.push_back(sf);
             }
@@ -385,10 +389,15 @@ const IR::Node *DoFlattenHeaderUnion::postorder(IR::Declaration_Variable *dv) {
 const IR::Node *DoFlattenHeaderUnion::postorder(IR::Member *m) {
     if (m->expr->type->to<IR::Type_HeaderUnion>()) {
         if (auto huf = m->expr->to<IR::Member>()) {
-            if (replacementMap.count(huf->member.name)) {
-                if (replacementMap.at(huf->member.name).count(m->member.name)) {
-                    auto newHuName = replacementMap.at(huf->member.name).at(m->member.name);
-                    return new IR::Member(huf->expr, IR::ID(newHuName));
+            auto ownerType = huf->expr->type->to<IR::Type_Struct>();
+            if (ownerType != nullptr) {
+                auto key = std::make_pair(ownerType->name.name, huf->member.name);
+                auto fields = structReplacementMap.find(key);
+                if (fields != structReplacementMap.end()) {
+                    auto replacement = fields->second.find(m->member.name);
+                    if (replacement != fields->second.end()) {
+                        return new IR::Member(huf->expr, IR::ID(replacement->second));
+                    }
                 }
             }
             return m;

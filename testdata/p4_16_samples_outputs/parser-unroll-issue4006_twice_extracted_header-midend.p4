@@ -49,18 +49,18 @@ control in_cntrl(inout headers_t hdr, inout empty_t user_meta, in psa_ingress_in
 }
 
 control in_deparser(packet_out packet, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers_t hdr, in empty_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action parserunrollissue4006_twice_extracted_header55() {
+    @hidden action parserunrollissue4006_twice_extracted_header61() {
         packet.emit<ethernet_h>(hdr.ethernet);
         packet.emit<vlan_h>(hdr.vlan);
     }
-    @hidden table tbl_parserunrollissue4006_twice_extracted_header55 {
+    @hidden table tbl_parserunrollissue4006_twice_extracted_header61 {
         actions = {
-            parserunrollissue4006_twice_extracted_header55();
+            parserunrollissue4006_twice_extracted_header61();
         }
-        const default_action = parserunrollissue4006_twice_extracted_header55();
+        const default_action = parserunrollissue4006_twice_extracted_header61();
     }
     apply {
-        tbl_parserunrollissue4006_twice_extracted_header55.apply();
+        tbl_parserunrollissue4006_twice_extracted_header61.apply();
     }
 }
 

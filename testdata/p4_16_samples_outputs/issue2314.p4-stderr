@@ -1,3 +1,0 @@
-issue2314.p4(62): [--Wwarn=uninitialized-use] warning: hdr.h may be uninitialized
-    l3.apply(b, hdr);
-                ^^^

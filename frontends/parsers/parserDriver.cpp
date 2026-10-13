@@ -6,66 +6,14 @@
 #include <sstream>
 #include <string_view>
 
-#include <boost/format.hpp>
-
+#include "absl/strings/str_format.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
-#include "frontends/parsers/v1/v1lexer.hpp"
-#include "frontends/parsers/v1/v1parser.hpp"
 #include "lib/error.h"
-
-#ifdef HAVE_LIBBOOST_IOSTREAMS
-
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
-
-namespace {
-
-/// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
-/// is the efficient implementation for users with boost::iostreams installed.
-struct AutoStdioInputStream {
-    explicit AutoStdioInputStream(FILE *in)
-        : source(fileno(in), boost::iostreams::never_close_handle),
-          buffer(source),
-          stream(&buffer) {}
-
-    std::istream &get() { return stream; }
-
- private:
-    AutoStdioInputStream(const AutoStdioInputStream &) = delete;
-    AutoStdioInputStream(AutoStdioInputStream &&) = delete;
-
-    boost::iostreams::file_descriptor_source source;
-    boost::iostreams::stream_buffer<boost::iostreams::file_descriptor_source> buffer;
-    std::istream stream;
-};
-
-}  // namespace
-
-#else
-
-namespace {
-
-/// A RAII helper class that provides an istream wrapper for a stdio FILE*. This
-/// is an inefficient fallback implementation.
-struct AutoStdioInputStream {
-    explicit AutoStdioInputStream(FILE *in) {
-        char buffer[512];
-        while (fgets(buffer, sizeof(buffer), in)) stream << buffer;
-    }
-
-    std::istream &get() { return stream; }
-
- private:
-    std::stringstream stream;
-};
-
-}  // namespace
-
-#endif
+#include "lib/fdstream.h"
 
 namespace P4 {
 
@@ -108,7 +56,8 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
     auto &context = BaseCompileContext::get();
     if (message == unexpectedIdentifierError) {
         context.errorReporter().parser_error(
-            location, boost::format("%s \"%s\"") % unexpectedIdentifierError % lastIdentifier);
+            location,
+            absl::StrFormat("%s \"%s\"", unexpectedIdentifierError, lastIdentifier.c_str()));
     } else {
         context.errorReporter().parser_error(location, message);
     }
@@ -150,8 +99,8 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
 
 /* static */ const IR::P4Program *P4ParserDriver::parse(FILE *in, std::string_view sourceFile,
                                                         unsigned sourceLine /* = 1 */) {
-    AutoStdioInputStream inputStream(in);
-    return parse(inputStream.get(), sourceFile, sourceLine);
+    FdStream inputStream(in);
+    return parse(inputStream, sourceFile, sourceLine);
 }
 
 /* static */ std::pair<const IR::P4Program *, const Util::InputSources *>
@@ -173,8 +122,8 @@ P4ParserDriver::parseProgramSources(std::istream &in, std::string_view sourceFil
 /*static */ std::pair<const IR::P4Program *, const Util::InputSources *>
 P4ParserDriver::parseProgramSources(FILE *in, std::string_view sourceFile,
                                     unsigned sourceLine /* = 1 */) {
-    AutoStdioInputStream inputStream(in);
-    return parseProgramSources(inputStream.get(), sourceFile, sourceLine);
+    FdStream inputStream(in);
+    return parseProgramSources(inputStream, sourceFile, sourceLine);
 }
 
 template <typename T>
@@ -316,61 +265,3 @@ bool P4ParserDriver::onReadMatchKindDeclaration(IR::Declaration_MatchKind *match
 }
 
 }  // namespace P4
-
-namespace P4::V1 {
-
-V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
-
-/* static */ const IR::V1Program *V1ParserDriver::parse(std::istream &in,
-                                                        std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
-    LOG1("Parsing P4-14 program " << sourceFile);
-
-    // Create and configure the parser and lexer.
-    V1ParserDriver driver;
-    V1Lexer lexer(in);
-    V1Parser parser(driver, lexer);
-
-#ifdef YYDEBUG
-    if (const char *p = getenv("YYDEBUG")) parser.set_debug_level(atoi(p));
-#endif
-
-    // Provide an initial source location.
-    driver.sources->mapLine(sourceFile, sourceLine);
-
-    // Parse.
-    if (parser.parse() != 0) return nullptr;
-    return driver.global;
-}
-
-/* static */ const IR::V1Program *V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
-    AutoStdioInputStream inputStream(in);
-    return parse(inputStream.get(), sourceFile, sourceLine);
-}
-
-IR::Constant *V1ParserDriver::constantFold(IR::Expression *expr) {
-    IR::Node *node(expr);
-    auto rv = node->apply(P4::DoConstantFolding())->to<IR::Constant>();
-    return rv ? new IR::Constant(rv->srcInfo, rv->type, rv->value, rv->base) : nullptr;
-}
-
-IR::Vector<IR::Expression> V1ParserDriver::makeExpressionList(const IR::NameList *list) {
-    IR::Vector<IR::Expression> rv;
-    for (auto &name : list->names) rv.push_back(new IR::StringLiteral(name));
-    return rv;
-}
-
-void V1ParserDriver::clearPragmas() { currentPragmas.clear(); }
-
-void V1ParserDriver::addPragma(IR::Annotation *pragma) {
-    if (!P4CContext::get().options().isAnnotationDisabled(pragma)) currentPragmas.push_back(pragma);
-}
-
-IR::Vector<IR::Annotation> V1ParserDriver::takePragmasAsVector() {
-    IR::Vector<IR::Annotation> pragmas;
-    std::swap(pragmas, currentPragmas);
-    return pragmas;
-}
-
-}  // namespace P4::V1

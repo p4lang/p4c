@@ -18,6 +18,8 @@
 
 #include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
 
+#include <functional>
+
 #include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_iterator.h"
 
 namespace PHV {
@@ -78,9 +80,8 @@ PHV::Slicing::IteratorInterface *PhvKit::make_slicing_ctx(const PHV::SuperCluste
         phv, field_to_parser_states, parser_info, sc,
         pragmas.pa_container_sizes().field_to_layout(), *packing_validator,
         *parser_packing_validator,
-        boost::bind(&PhvKit::has_pack_conflict, this, boost::placeholders::_1,
-                    boost::placeholders::_2),
-        boost::bind(&PhvKit::is_referenced, this, boost::placeholders::_1));
+        std::bind(&PhvKit::has_pack_conflict, this, std::placeholders::_1, std::placeholders::_2),
+        std::bind(&PhvKit::is_referenced, this, std::placeholders::_1));
 }
 
 bool PhvKit::can_logical_liverange_be_overlaid(const PHV::AllocSlice &a,

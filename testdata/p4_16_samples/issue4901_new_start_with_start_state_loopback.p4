@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 parser Parser1() {
   bit<8> l = 0;
   state start {

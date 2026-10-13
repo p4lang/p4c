@@ -217,6 +217,9 @@ void FindSpecializations::postorder(const IR::ConstructorCallExpression *express
 
 void FindSpecializations::postorder(const IR::Declaration_Instance *decl) {
     if (decl->arguments->size() == 0 && !decl->type->is<IR::Type_Specialized>()) return;
+    // Only extern instances can be declared as arrays, and this pass only specializes
+    // parsers and controls.
+    if (decl->type->is<IR::Type_Array>()) return;
 
     auto type = specMap->typeMap->getType(decl, true);
     if (type->is<IR::Type_SpecializedCanonical>()) {

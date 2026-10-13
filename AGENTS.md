@@ -63,6 +63,13 @@ Optional tools:
 - Expected outputs live under `testdata/*_outputs/`; refresh them with `P4TEST_REPLACE=1 cmake --build build --target check`.
 - Pass compiler flags via `P4C_ARGS`, e.g. `P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG" cmake --build build --target check`.
 
+### Contributing a Test
+- Every language or compiler fix needs a P4 program under `testdata/p4_16_samples/` (use `testdata/p4_16_errors/` for programs that must be rejected).
+- Name the file after the GitHub issue it covers (`issue1234.p4`) or after the feature under test (`generic-extern-inference.p4`); add the `-bmv2`, `_ebpf`, `_ubpf`, or `psa-`/`pna-` markers only when the program targets that backend.
+- If it targets a particular backend and compiles, add a packet test (PTF/STF) to ensure compilation behaves as expected.
+- Suites are globbed at configure time, so re-run cmake after adding a file, otherwise `ctest` will not see the new test.
+- Generate the reference outputs and commit them together with the test: `P4TEST_REPLACE=1 ctest --test-dir build -R <test-name>`. This writes `<name>{,-first,-frontend,-midend}.p4` and `<name>.p4-stderr` into `testdata/p4_16_samples_outputs/`.
+
 ## Commit & Pull Request Guidelines
 - Use DCO sign-off for every commit (`git commit --signoff`).
 - Use a ~50-character summary plus a body explaining why/how and linking issues.

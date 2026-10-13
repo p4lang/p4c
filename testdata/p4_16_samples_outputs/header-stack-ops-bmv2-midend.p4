@@ -149,7 +149,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     @hidden action headerstackopsbmv2l156() {
         hdr_0_h2[4].setInvalid();
     }
-    @hidden action act() {
+    @hidden action headerstackopsbmv2l168() {
         hdr_0_h2[0] = hdr.h2[0];
         hdr_0_h2[1] = hdr.h2[1];
         hdr_0_h2[2] = hdr.h2[2];
@@ -242,7 +242,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     @hidden action headerstackopsbmv2l156_0() {
         hdr_0_h2[4].setInvalid();
     }
-    @hidden action act_0() {
+    @hidden action headerstackopsbmv2l168_0() {
         hdr.h2[0] = hdr_0_h2[0];
         hdr.h2[1] = hdr_0_h2[1];
         hdr.h2[2] = hdr_0_h2[2];
@@ -335,7 +335,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     @hidden action headerstackopsbmv2l156_1() {
         hdr_0_h2[4].setInvalid();
     }
-    @hidden action act_1() {
+    @hidden action headerstackopsbmv2l169() {
         hdr.h2[0] = hdr_0_h2[0];
         hdr.h2[1] = hdr_0_h2[1];
         hdr.h2[2] = hdr_0_h2[2];
@@ -345,7 +345,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     @hidden action headerstackopsbmv2l177() {
         hdr.h1.h2_valid_bits[0:0] = 1w1;
     }
-    @hidden action headerstackopsbmv2l175() {
+    @hidden action headerstackopsbmv2l170() {
         hdr.h2[0] = hdr_0_h2[0];
         hdr.h2[1] = hdr_0_h2[1];
         hdr.h2[2] = hdr_0_h2[2];
@@ -365,11 +365,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     @hidden action headerstackopsbmv2l189() {
         hdr.h1.h2_valid_bits[4:4] = 1w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_headerstackopsbmv2l168 {
         actions = {
-            act();
+            headerstackopsbmv2l168();
         }
-        const default_action = act();
+        const default_action = headerstackopsbmv2l168();
     }
     @hidden table tbl_headerstackopsbmv2l85 {
         actions = {
@@ -503,11 +503,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         const default_action = headerstackopsbmv2l156();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_headerstackopsbmv2l168_0 {
         actions = {
-            act_0();
+            headerstackopsbmv2l168_0();
         }
-        const default_action = act_0();
+        const default_action = headerstackopsbmv2l168_0();
     }
     @hidden table tbl_headerstackopsbmv2l85_0 {
         actions = {
@@ -641,11 +641,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         const default_action = headerstackopsbmv2l156_0();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_headerstackopsbmv2l169 {
         actions = {
-            act_1();
+            headerstackopsbmv2l169();
         }
-        const default_action = act_1();
+        const default_action = headerstackopsbmv2l169();
     }
     @hidden table tbl_headerstackopsbmv2l85_1 {
         actions = {
@@ -779,11 +779,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         const default_action = headerstackopsbmv2l156_1();
     }
-    @hidden table tbl_headerstackopsbmv2l175 {
+    @hidden table tbl_headerstackopsbmv2l170 {
         actions = {
-            headerstackopsbmv2l175();
+            headerstackopsbmv2l170();
         }
-        const default_action = headerstackopsbmv2l175();
+        const default_action = headerstackopsbmv2l170();
     }
     @hidden table tbl_headerstackopsbmv2l177 {
         actions = {
@@ -816,7 +816,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         const default_action = headerstackopsbmv2l189();
     }
     apply {
-        tbl_act.apply();
+        tbl_headerstackopsbmv2l168.apply();
         if (hdr.h1.op1 == 8w0x0) {
             ;
         } else if (hdr.h1.op1[7:4] == 4w1) {
@@ -872,7 +872,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
                 tbl_headerstackopsbmv2l156.apply();
             }
         }
-        tbl_act_0.apply();
+        tbl_headerstackopsbmv2l168_0.apply();
         if (hdr.h1.op2 == 8w0x0) {
             ;
         } else if (hdr.h1.op2[7:4] == 4w1) {
@@ -928,7 +928,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
                 tbl_headerstackopsbmv2l156_0.apply();
             }
         }
-        tbl_act_1.apply();
+        tbl_headerstackopsbmv2l169.apply();
         if (hdr.h1.op3 == 8w0x0) {
             ;
         } else if (hdr.h1.op3[7:4] == 4w1) {
@@ -984,7 +984,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
                 tbl_headerstackopsbmv2l156_1.apply();
             }
         }
-        tbl_headerstackopsbmv2l175.apply();
+        tbl_headerstackopsbmv2l170.apply();
         if (hdr.h2[0].isValid()) {
             tbl_headerstackopsbmv2l177.apply();
         }

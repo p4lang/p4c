@@ -12,7 +12,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <cctype>
+#include <cerrno>
 #include <filesystem>
+#include <limits>
 #include <memory>
 #include <regex>
 #include <unordered_set>
@@ -33,7 +36,9 @@ namespace P4 {
  * machine, the 'p4includePath' would contain the path on the original machine.
  */
 std::filesystem::path p4includePath = std::filesystem::path(CONFIG_PKGDATADIR) / "p4include";
+#ifdef SUPPORT_P4_14
 std::filesystem::path p4_14includePath = std::filesystem::path(CONFIG_PKGDATADIR) / "p4_14include";
+#endif
 
 using namespace P4::literals;
 
@@ -42,6 +47,22 @@ bool isSystemFile(const std::filesystem::path &file) {
 }
 
 bool isSystemFile(cstring file) { return isSystemFile(std::filesystem::path(file.c_str())); }
+
+/// Sets the diagnostic action for a comma-separated list of diagnostic names.
+/// Returns false if any named diagnostic is a registered error.
+bool applyDiagnosticAction(const char *diagnostic, DiagnosticAction action) {
+    auto copy = strdup(diagnostic);
+    bool success = true;
+    while (auto name = strsep(&copy, ",")) {
+        if (ErrorCatalog::getCatalog().isError(name)) {
+            ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", name);
+            success = false;
+            continue;
+        }
+        P4CContext::get().setDiagnosticAction(name, action);
+    }
+    return success;
+}
 
 void ParserOptions::closeFile(FILE *file) {
     if (file == nullptr) {
@@ -162,13 +183,15 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             return true;
         },
         "Specify warning flag (passed to preprocessor)");
-
     registerOption(
         "--p4v", "{14|16}",
         [this](const char *arg) {
+#ifdef SUPPORT_P4_14
             if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
                 langVersion = ParserOptions::FrontendVersion::P4_14;
-            } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
+            } else
+#endif
+                if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
                 langVersion = ParserOptions::FrontendVersion::P4_16;
             } else {
                 ::P4::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
@@ -180,9 +203,12 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
     registerOption(
         "--std", "{p4-14|p4-16}",
         [this](const char *arg) {
+#ifdef SUPPORT_P4_14
             if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
                 langVersion = ParserOptions::FrontendVersion::P4_14;
-            } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
+            } else
+#endif
+                if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
                 langVersion = ParserOptions::FrontendVersion::P4_16;
             } else {
                 ::P4::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
@@ -214,69 +240,69 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         "--Wdisable", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
-                    return false;
-                }
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Ignore);
+                return applyDiagnosticAction(diagnostic, DiagnosticAction::Ignore);
             } else {
                 auto action = DiagnosticAction::Ignore;
                 P4CContext::get().setDefaultWarningDiagnosticAction(action);
             }
             return true;
         },
-        "Disable a compiler diagnostic, or disable all warnings if no "
-        "diagnostic is specified.",
+        "Disable a compiler diagnostic or comma-separated list of diagnostics. "
+        "Disables all warnings if omitted.",
         OptionFlags::OptionalArgument);
     registerOption(
         "--Winfo", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
-                    return false;
-                }
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Info);
+                return applyDiagnosticAction(diagnostic, DiagnosticAction::Info);
             }
             return true;
         },
-        "Report an info message for a compiler diagnostic.", OptionFlags::OptionalArgument);
+        "Report an info message for a diagnostic or comma-separated list of diagnostics.",
+        OptionFlags::OptionalArgument);
     registerOption(
         "--Wwarn", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::P4::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
-                    return false;
-                }
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Warn);
+                return applyDiagnosticAction(diagnostic, DiagnosticAction::Warn);
             } else {
                 auto action = DiagnosticAction::Warn;
                 P4CContext::get().setDefaultInfoDiagnosticAction(action);
             }
             return true;
         },
-        "Report a warning for a compiler diagnostic, or treat all info messages as "
-        "warnings if no diagnostic is specified.",
+        "Report a warning for a diagnostic or comma-separated list of diagnostics. "
+        "Promotes all info messages to warnings if omitted. ",
         OptionFlags::OptionalArgument);
     registerOption(
         "--Werror", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Error);
+                auto copy = strdup(diagnostic);
+                while (auto name = strsep(&copy, ","))
+                    P4CContext::get().setDiagnosticAction(name, DiagnosticAction::Error);
             } else {
                 auto action = DiagnosticAction::Error;
                 P4CContext::get().setDefaultWarningDiagnosticAction(action);
             }
             return true;
         },
-        "Report an error for a compiler diagnostic, or treat all warnings as "
-        "errors if no diagnostic is specified.",
+        "Report an error for a diagnostic or comma-separated list of diagnostics. "
+        "Promotes all warnings to errors if omitted. ",
         OptionFlags::OptionalArgument);
     registerOption(
         "--maxErrorCount", "errorCount",
         [](const char *arg) {
-            auto maxError = strtoul(arg, nullptr, 10);
+            // Make sure the argument is valid before using strtoul.
+            char *end = nullptr;
+            errno = 0;
+            unsigned long maxError = strtoul(arg, &end, 10);
+            if (!isdigit(static_cast<unsigned char>(arg[0])) || *end != '\0' || errno == ERANGE ||
+                maxError > std::numeric_limits<unsigned>::max()) {
+                ::P4::error(ErrorType::ERR_INVALID,
+                            "--maxErrorCount expects a non-negative integer, got '%1%'", arg);
+                return false;
+            }
             P4CContext::get().errorReporter().setMaxErrorCount(maxError);
             return true;
         },
@@ -377,9 +403,11 @@ std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) 
     }
     this->exe_name = cstring(executablePath.stem().c_str());
 
+#ifdef SUPPORT_P4_14
     searchForIncludePath(p4_14includePath,
                          {"p4_14include"_cs, "../p4_14include"_cs, "../../p4_14include"_cs},
                          executablePath);
+#endif
     searchForIncludePath(p4includePath, {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs},
                          executablePath);
 
@@ -397,11 +425,17 @@ const char *ParserOptions::getIncludePath() const {
     // the p4c driver sets environment variables for include
     // paths.  check the environment and add these to the command
     // line for the preprocessor
+#ifdef SUPPORT_P4_14
     char *driverP4IncludePath =
         isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
-    if (driverP4IncludePath != nullptr) path += (" -I"_cs + cstring(driverP4IncludePath));
     path += " -I"_cs + (isv1() ? p4_14includePath.string() : p4includePath.string());
-    if (!isv1()) path += " -I"_cs + (p4includePath / "bmv2").string();
+    if (!isv1()) path += " -I"_cs + p4includePath.string() + "/bmv2"_cs;
+#else
+    char *driverP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
+    path += " -I"_cs + p4includePath.string();
+    path += " -I"_cs + p4includePath.string() + "/bmv2"_cs;
+#endif
+    if (driverP4IncludePath != nullptr) path += (" -I"_cs + cstring(driverP4IncludePath));
     return path.c_str();
 }
 
@@ -454,7 +488,9 @@ static std::filesystem::path makeFileName(const std::filesystem::path &folder,
     return folder / newName;
 }
 
+#ifdef SUPPORT_P4_14
 bool ParserOptions::isv1() const { return langVersion == ParserOptions::FrontendVersion::P4_14; }
+#endif
 
 void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass,
                              const IR::Node *node) const {

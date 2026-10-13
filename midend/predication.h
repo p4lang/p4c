@@ -36,6 +36,8 @@ class Predication final : public Transform {
     class EmptyStatementRemover final : public Transform {
      public:
         EmptyStatementRemover() {}
+        const IR::Node *postorder(IR::ForStatement *) override;
+        const IR::Node *postorder(IR::ForInStatement *) override;
         const IR::Node *postorder(IR::EmptyStatement *statement) override;
         const IR::Node *postorder(IR::BlockStatement *statement) override;
     };

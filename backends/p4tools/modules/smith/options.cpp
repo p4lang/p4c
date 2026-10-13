@@ -5,7 +5,6 @@
 #include "backends/p4tools/modules/smith/options.h"
 
 #include <cstdlib>
-#include <tuple>
 #include <vector>
 
 #include "backends/p4tools/common/options.h"
@@ -22,9 +21,7 @@ SmithOptions &SmithOptions::get() {
 
 void SmithOptions::processArgs(const std::vector<const char *> &args) {
     // Convert to the standard (argc, argv) pair.
-    int argc = 0;
-    char **argv = nullptr;
-    std::tie(argc, argv) = convertArgs(args);
+    auto argv = convertArgs(args);
 
     // Establish a dummy compilation context so that we can use error to report errors while
     // processing command-line options.
@@ -33,7 +30,8 @@ void SmithOptions::processArgs(const std::vector<const char *> &args) {
     AutoCompileContext autoDummyContext(&dummyContext);
 
     // Delegate to the hook.
-    auto *remainingArgs = P4Tools::AbstractP4cToolOptions::process(argc, argv);
+    auto *remainingArgs =
+        P4Tools::AbstractP4cToolOptions::process(static_cast<int>(argv.size()), argv.data());
     if ((remainingArgs == nullptr) || errorCount() > 0) {
         return;
     }

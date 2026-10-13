@@ -252,7 +252,7 @@ struct DelayDefs : public ParserModifier {
 
                 BUG_CHECK(!seen || shift == trans->shift,
                           "Multiple transitions seen from %1% to %2% with different shift amounts: "
-                          "%1% %2%",
+                          "%3% %4%",
                           state->name, trans->next->name, shift, trans->shift);
                 shift = trans->shift;
                 seen = true;
@@ -1406,7 +1406,11 @@ class MatcherAllocator : public Visitor {
 
             // Map scratch register with match register allocated by scratch groups.
             for (const auto &reg_slice : reg_slices) {
-                if (!is_scratch_register(reg_slice.first)) continue;
+                if (!is_scratch_register(reg_slice.first)) {
+                    serializable_reg_slices.emplace_back(MatchRegister(reg_slice.first),
+                                                         reg_slice.second);
+                    continue;
+                }
 
                 cstring name = reg_slice.first.name;
 

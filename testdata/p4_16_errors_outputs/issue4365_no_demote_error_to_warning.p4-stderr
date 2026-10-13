@@ -1,8 +1,8 @@
 [--Werror=invalid] error: Error type-error cannot be demoted.
 Use '--help' to see all available options.
-issue4365_no_demote_error_to_warning.p4(4): [--Werror=invalid] error: Invalid parser state: accept should not be implemented, it is built-in
+issue4365_no_demote_error_to_warning.p4(10): [--Werror=invalid] error: Invalid parser state: accept should not be implemented, it is built-in
     state accept {
           ^^^^^^
-issue4365_no_demote_error_to_warning.p4(3): [--Werror=invalid] error: Parser p has no 'start' state
+issue4365_no_demote_error_to_warning.p4(9): [--Werror=invalid] error: Parser p has no 'start' state
 parser p() {
        ^

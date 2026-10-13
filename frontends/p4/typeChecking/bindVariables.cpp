@@ -41,6 +41,41 @@ class HasInfInt : public Inspector {
     }
 };
 
+/// The type arguments of @p type as they can be written in the P4 program.
+/// Returns nullptr if any of them cannot be represented as a P4 type.
+const IR::Vector<IR::Type> *p4TypeArguments(const IR::Type_SpecializedCanonical *type) {
+    auto typeArgs = new IR::Vector<IR::Type>();
+    for (auto arg : *type->arguments) {
+        auto p4type = arg->getP4Type();
+        if (p4type == nullptr) return nullptr;
+        typeArgs->push_back(p4type);
+    }
+    return typeArgs;
+}
+
+/// Given the type written in a declaration or in a constructor call (a type name, possibly
+/// wrapped in array types) whose type arguments have been inferred to be @p type, return that
+/// type with the inferred arguments written out explicitly.
+///
+/// Returns nullptr if the arguments cannot be inserted, which is the case when the written name
+/// does not refer to the generic type declaration itself: a name which is a typedef for an
+/// already specialized type must not be given type arguments.
+const IR::Type *addTypeArguments(const IR::Type *declaredType,
+                                 const IR::Type_SpecializedCanonical *type) {
+    if (auto at = declaredType->to<IR::Type_Array>()) {
+        auto elementType = addTypeArguments(at->elementType, type);
+        if (elementType == nullptr) return nullptr;
+        return new IR::Type_Array(at->srcInfo, elementType, at->size);
+    }
+    auto tn = declaredType->to<IR::Type_Name>();
+    if (tn == nullptr) return nullptr;
+    auto baseType = type->baseType->to<IR::Type_Declaration>();
+    if (baseType == nullptr || tn->path->name != baseType->name) return nullptr;
+    auto typeArgs = p4TypeArguments(type);
+    if (typeArgs == nullptr) return nullptr;
+    return new IR::Type_Specialized(tn->srcInfo, tn, typeArgs);
+}
+
 }  // namespace
 
 /// Validate the type of a type variable.  The type must not contain
@@ -84,7 +119,16 @@ const IR::Node *DoBindTypeVariables::postorder(IR::Declaration_Instance *decl) {
     if (decl->type->is<IR::Type_Specialized>()) return decl;
     auto type = typeMap->getType(getOriginal(), true);
     while (auto at = type->to<IR::Type_Array>()) type = at->elementType;
-    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) type = tsc->substituted;
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) {
+        // The declaration did not supply explicit type arguments, but they have all been
+        // inferred: make them explicit in the program, just as if they had been written in the
+        // first place.
+        if (auto newType = addTypeArguments(decl->type, tsc)) {
+            decl->type = newType;
+            return decl;
+        }
+        type = tsc->substituted;
+    }
     BUG_CHECK(type->is<IR::IMayBeGenericType>(), "%1%: unexpected type %2% for declaration", decl,
               type);
     auto mt = type->to<IR::IMayBeGenericType>();
@@ -124,6 +168,14 @@ const IR::Node *DoBindTypeVariables::postorder(IR::MethodCallExpression *express
 const IR::Node *DoBindTypeVariables::postorder(IR::ConstructorCallExpression *expression) {
     if (expression->constructedType->is<IR::Type_Specialized>()) return expression;
     auto type = typeMap->getType(getOriginal(), true);
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>()) {
+        // The type arguments of the generic type have been inferred: make them explicit.
+        if (auto newType = addTypeArguments(expression->constructedType, tsc)) {
+            expression->constructedType = newType;
+            return expression;
+        }
+        type = tsc->substituted;
+    }
     BUG_CHECK(type->is<IR::IMayBeGenericType>(), "%1%: unexpected type %2% for expression",
               expression, type);
     auto mt = type->to<IR::IMayBeGenericType>();

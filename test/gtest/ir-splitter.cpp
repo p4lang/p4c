@@ -29,7 +29,7 @@ struct SplitterTest : public ::testing::Test {
             "extern void f4(); extern void f5(); extern void f6(); extern void bar(); ",
             "control c() { bit<4> a; bit<4> b; bit<4> c; bit<4> d; bool bvar; ", decs, "apply {",
             code, "} }");
-        const auto *prog = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+        const auto *prog = P4::parseP4String(program);
         CHECK_NULL(prog);
         P4::TypeInference ti(&typeMap, false, false, false);
         prog = prog->apply(ti);

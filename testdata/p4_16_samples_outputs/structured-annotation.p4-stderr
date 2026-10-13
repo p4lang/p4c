@@ -1,6 +1,9 @@
 structured-annotation.p4(16): [--Wwarn=unused] warning: control 'c' is unused
 control c() {
         ^
+structured-annotation.p4(26): [--Wwarn=unused] warning: 'fn' is unused
+void fn() { }
+     ^^
 structured-annotation.p4(16): [--Winfo=removed] info: removing control 'c'
 control c() {
         ^

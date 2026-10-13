@@ -1,0 +1,13 @@
+issue5464-bmv2.p4(31): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+    state start { }
+          ^^^^^
+issue5464-bmv2.p4(29): [--Wwarn=unreachable] warning: accept state in parser EmptyParser is unreachable
+parser EmptyParser(packet_in b, headers_t headers, metadata_t meta,
+       ^^^^^^^^^^^
+issue5464-bmv2.p4(29): [--Wwarn=unreachable] warning: accept state in parser EmptyParser is unreachable
+parser EmptyParser(packet_in b, headers_t headers, metadata_t meta,
+       ^^^^^^^^^^^
+[--Wwarn=unsupported] warning: Explicit transition to reject not supported on this target
+issue5464-bmv2.p4(36): [--Werror=Target model error] error: 32w0: expected a HashAlgorithm member
+        verify_checksum(false, { }, meta.result, HashAlgorithm.csum16);
+                                                 ^^^^^^^^^^^^^

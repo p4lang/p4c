@@ -58,14 +58,20 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${ENABLE_EBPF:=ON}"
 # P4TC is enabled by default.
 : "${ENABLE_P4TC:=ON}"
+# P4-14 is disabled by default.
+: "${SUPPORT_P4_14:=OFF}"
 # P4TC STF is only enabled when running p4tc tagged PRs.
 : "${INSTALL_STF_P4TC_DEPENDENCIES:=OFF}"
 # This is the list of back ends that can be enabled.
 # Back ends can be enabled from the command line with "ENABLE_[backend]=TRUE/FALSE"
-ENABLE_BACKENDS=("TOFINO" "BMV2" "EBPF" "UBPF" "DPDK"
+UNAME_MACHINE=`uname --machine`
+ENABLE_BACKENDS=("BMV2" "EBPF" "UBPF" "DPDK"
                  "P4TC" "P4FMT" "P4TEST" "P4C_GRAPHS"
                  "TEST_TOOLS"
 )
+if [ ${UNAME_MACHINE} == "x86_64" ]; then
+  ENABLE_BACKENDS+=("TOFINO")
+fi
 function build_cmake_enabled_backend_string() {
   CMAKE_ENABLE_BACKENDS=""
   for backend in "${ENABLE_BACKENDS[@]}";
@@ -107,10 +113,6 @@ P4C_DEPS="bison \
           libboost-iostreams-dev \
           libfl-dev \
           pkg-config \
-          python3 \
-          python3-dev \
-          python3-pip \
-          python3-setuptools \
           tcpdump"
 
 # TODO: Remove this check once 18.04 is deprecated.
@@ -120,12 +122,18 @@ fi
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-# Set up uv for Python dependency management.
-# TODO: Consider using a system-provided package here.
-sudo apt-get install -y python3-venv curl
-curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
-# Ensure uv is in the PATH
-export PATH="${PATH}:$HOME/.local/bin"
+if ! command -v uv &> /dev/null; then
+  # Set up uv for Python dependency management.
+  sudo apt-get install -y python3-dev curl ca-certificates
+  curl -LsSf https://astral.sh/uv/0.6.12/install.sh | sh
+  # Ensure uv is in the PATH
+  export PATH="${PATH}:$HOME/.local/bin"
+  export VIRTUAL_ENV=$HOME/p4-python-venv
+  uv venv --seed $VIRTUAL_ENV
+fi
+# Set this variable to enable `uv sync` and other commands to use the
+# venv.
+export UV_PROJECT_ENVIRONMENT="${VIRTUAL_ENV}"
 uv sync
 uv tool update-shell
 
@@ -137,13 +145,16 @@ fi
 
 # ! ------  END CORE -----------------------------------------------
 
-  # TODO: Remove this check once 18.04 is deprecated.
+if [[ "$IN_DOCKER" == "TRUE" ]] ; then
+  # Use an absolute path for the cache directory.
+  ccache --set-config cache_dir=${P4C_DIR}/.ccache
+fi
+
+# TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-  ccache --set-config cache_dir=.ccache
   # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
   uv pip install cmake==3.16.3
 fi
-ccache --set-config max_size=1G
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
@@ -251,10 +262,12 @@ function build_ebpf() {
 }
 
 function install_ptf_ebpf_test_deps() (
-    P4C_PTF_PACKAGES="gcc-multilib \
-                             python3-six \
+    P4C_PTF_PACKAGES="python3-six \
                              libgmp-dev \
                              libjansson-dev"
+    if [ "${UNAME_MACHINE}" == "x86_64" ]; then
+        P4C_PTF_PACKAGES="gcc-multilib ${P4C_PTF_PACKAGES}"
+    fi
     sudo apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
 
     git clone --depth 1 --recursive --branch v0.3.1 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
@@ -303,7 +316,6 @@ function build_p4tc() {
   P4TC_DEPS="libpcap-dev \
              libelf-dev \
              zlib1g-dev \
-             gcc-multilib \
              net-tools \
              flex \
              libelf-dev \
@@ -316,10 +328,13 @@ function build_p4tc() {
              software-properties-common \
              gnupg \
              python3-argcomplete"
+  if [ "${UNAME_MACHINE}" == "x86_64" ]; then
+    P4TC_DEPS="gcc-multilib ${P4TC_DEPS}"
+  fi
 
   sudo apt-get install -y --no-install-recommends ${P4TC_DEPS}
 
-if [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
+if [[ "${DISTRIB_RELEASE}" != "24.04" && "${DISTRIB_RELEASE}" != "26.04" ]] ; then
   wget https://apt.llvm.org/llvm.sh
   sudo chmod +x llvm.sh
   sudo ./llvm.sh 15
@@ -404,6 +419,8 @@ CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
 # Enable auto var initialization with pattern.
 CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
+# Enable P4-14 support.
+CMAKE_FLAGS+="-DSUPPORT_P4_14=${SUPPORT_P4_14} "
 # Assemble the enabled back ends as a single CMake variable.
 build_cmake_enabled_backend_string
 CMAKE_FLAGS+="${CMAKE_ENABLE_BACKENDS} "

@@ -352,7 +352,7 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node *node) {
                 ctxt->json->add_header_union_stack(union_type, v->name, stack->getSize(),
                                                    union_ids);
             } else {
-                BUG("%1: unexpected stack element type", type);
+                BUG("%1%: unexpected stack element type", type);
             }
         } else if (type->is<IR::Type_Varbits>()) {
             // For each varbit variable we synthesize a separate header instance,

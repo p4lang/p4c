@@ -26,6 +26,8 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
+      SUPPORT_P4_14: ON
+
     steps:
       - uses: actions/checkout@v7
         with:
@@ -35,7 +37,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-ubuntu24"
+          ccache-key: "ubuntu-24.04-gcc-unity-p4-14"
 
       - name: Run tests (Ubuntu 24.04)
         # Need to use sudo for the eBPF kernel tests.
@@ -71,7 +73,9 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-${{ matrix.unity }}"
+          ccache-key: ${{ matrix.unity == 'ON' && 'ubuntu-22.04-gcc-unity-core' || 'ubuntu-22.04-gcc-nounity' }}
+          max-size: ${{ matrix.unity == 'ON' && '2G' || '750M' }}
+          save-main: ${{ matrix.unity != 'ON' }}
 
       - name: Run tests (Ubuntu 22.04)
         run: |
@@ -106,7 +110,7 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-tofino"
+          ccache-key: "ubuntu-22.04-gcc-unity-tofino"
 
       - name: Run tests (Ubuntu 22.04)
         run: uv run ctest --output-on-failure --schedule-random -R tofino

@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <optional>
 
+#include <boost/format.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/range/join.hpp>
 

@@ -39,7 +39,7 @@ TEST_F(P4CMidend, convertEnums_pass) {
         extern C { C(E e); }
         control m() { C(E.A) ctr; apply{} }
     )");
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm != nullptr && ::P4::errorCount() == 0);
 
     // Example to enable logging in source
@@ -58,7 +58,7 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
         enum E { A, B, C, D };
     )");
     P4CContext::get().options().langVersion = CompilerOptions::FrontendVersion::P4_16;
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm && ::P4::errorCount() == 0);
 
     ReferenceMap refMap;
@@ -76,7 +76,7 @@ TEST_F(P4CMidend, getEnumMapping) {
         enum E { A, B, C, D };
         const bool a = E.A == E.B;
     )");
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap refMap;
@@ -142,7 +142,7 @@ static void testReplaceSelectRange(std::vector<Bound> ranges, ExtraTests extraTe
     auto codeStr = code.str();
     SCOPED_TRACE(codeStr);
     std::string program = P4_SOURCE(codeStr.c_str());
-    auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    auto pgm = P4::parseP4String(program);
     ASSERT_TRUE(pgm != nullptr);
 
     ReferenceMap refMap;

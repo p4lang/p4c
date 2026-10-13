@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     @hidden action pnaexampleheaderunion1l58() {
         retval = false;
     }
-    @hidden action act() {
+    @hidden action pnaexampleheaderunion1l78() {
         hdr_1_base = hdr.base;
         if (hdr.u_byte.isValid()) {
             hdr_1_u_byte.setValid();
@@ -95,11 +95,11 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         hdr.u_byte.data = 8w0xff;
         hdr.u_short.setInvalid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_pnaexampleheaderunion1l78 {
         actions = {
-            act();
+            pnaexampleheaderunion1l78();
         }
-        const default_action = act();
+        const default_action = pnaexampleheaderunion1l78();
     }
     @hidden table tbl_pnaexampleheaderunion1l57 {
         actions = {
@@ -133,7 +133,7 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     }
     apply {
         debug_hdr_0.apply();
-        tbl_act.apply();
+        tbl_pnaexampleheaderunion1l78.apply();
         if (hdr_1_base.isValid() && hdr_1_u_short.isValid()) {
             tbl_pnaexampleheaderunion1l57.apply();
         } else {
