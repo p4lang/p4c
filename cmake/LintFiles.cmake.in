@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Configured by Linters.cmake and run by the lint targets.
+cmake_minimum_required(VERSION 3.16.3)
+# Bracket arguments preserve paths and regexes without another expansion.
+set(P4C_SOURCE_DIR [====[@P4C_SOURCE_DIR@]====])
+set(P4C_BINARY_DIR [====[@P4C_BINARY_DIR@]====])
+
+function(p4c_collect_lint_files output patterns extensions excludes)
+  list(TRANSFORM patterns PREPEND "${P4C_SOURCE_DIR}/")
+  file(GLOB_RECURSE files FOLLOW_SYMLINKS ${patterns})
+  if(NOT "${extensions}" STREQUAL "")
+    list(FILTER files INCLUDE REGEX "${extensions}")
+  endif()
+  foreach(pattern IN LISTS excludes)
+    list(FILTER files EXCLUDE REGEX "${pattern}")
+  endforeach()
+  set(${output} "${files}" PARENT_SCOPE)
+endfunction()
+
+if(LINT_KIND STREQUAL "CPP")
+  p4c_collect_lint_files(P4C_LINT_LIST
+    [====[@P4C_LINT_PATTERNS@]====]
+    [====[@P4C_LINT_EXTENSIONS@]====]
+    [====[@P4C_LINT_EXCLUDES@]====])
+
+  set(CPPLINT_FILES [====[@CPPLINT_FILES@]====])
+  list(APPEND CPPLINT_FILES ${P4C_LINT_LIST})
+  list(REMOVE_DUPLICATES CPPLINT_FILES)
+  file(WRITE "${P4C_BINARY_DIR}/cpplint_files.txt" "${CPPLINT_FILES}")
+
+  set(CLANG_FORMAT_FILES [====[@CLANG_FORMAT_FILES@]====])
+  list(APPEND CLANG_FORMAT_FILES ${P4C_LINT_LIST})
+  list(REMOVE_DUPLICATES CLANG_FORMAT_FILES)
+  list(SORT CLANG_FORMAT_FILES)
+  file(WRITE "${P4C_BINARY_DIR}/clang_format_files.txt" "${CLANG_FORMAT_FILES}")
+elseif(LINT_KIND STREQUAL "PYTHON")
+  p4c_collect_lint_files(P4C_PYTHON_LINT_LIST
+    [====[@P4C_PYTHON_LINT_PATTERNS@]====] ""
+    [====[@P4C_PYTHON_LINT_EXCLUDES@]====])
+
+  set(BLACK_FILES [====[@BLACK_FILES@]====])
+  list(APPEND BLACK_FILES ${P4C_PYTHON_LINT_LIST})
+  list(REMOVE_DUPLICATES BLACK_FILES)
+  list(SORT BLACK_FILES)
+  file(WRITE "${P4C_BINARY_DIR}/BLACK_files.txt" "${BLACK_FILES}")
+else()
+  message(FATAL_ERROR "Unknown lint file kind: ${LINT_KIND}")
+endif()
