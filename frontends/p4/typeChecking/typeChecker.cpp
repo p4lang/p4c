@@ -777,8 +777,17 @@ TypeInferenceBase::checkExternConstructor(const IR::Node *errorPosition, const I
 
         if (paramType->is<IR::Type_Control>() || paramType->is<IR::Type_Parser>() ||
             paramType->is<IR::P4Control>() || paramType->is<IR::P4Parser>() ||
-            paramType->is<IR::Type_Package>())
+            paramType->is<IR::Type_Package>()) {
             typeError("%1%: parameter cannot have type %2%", pi, paramType);
+        } else {
+            auto checkArgType = argType;
+            if (auto sc = argType->to<IR::Type_SpecializedCanonical>()) checkArgType = sc->baseType;
+            if (checkArgType->is<IR::Type_Control>() || checkArgType->is<IR::Type_Parser>() ||
+                checkArgType->is<IR::Type_Package>() || checkArgType->is<IR::P4Parser>() ||
+                checkArgType->is<IR::P4Control>()) {
+                typeError("%1%: argument cannot have type %2%", arg, checkArgType);
+            }
+        }
 
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg->expression, true, argType, arg);
         args->push_back(argInfo);
