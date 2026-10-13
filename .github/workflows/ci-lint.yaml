@@ -36,6 +36,7 @@ jobs:
         with:
           ccache-key: "ubuntu-24.04-gcc-unity-lint"
           use-ccache: "false"
+          use-cpm-cache: "false"
 
       - name: Run cpplint on C/C++ files.
         run: uv run cmake --build build --target cpplint

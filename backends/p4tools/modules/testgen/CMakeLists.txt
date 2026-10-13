@@ -66,22 +66,22 @@ if(ENABLE_CONTROL_PLANE)
 endif()
 
 # Inja is needed to produce test templates.
-set(INJA_BUILD_TESTS OFF CACHE BOOL "Build unit tests when BUILD_TESTING is enabled.")
-set(BUILD_BENCHMARK OFF CACHE BOOL "Build benchmark.")
-FetchContent_Declare(
-  inja
+p4c_find_package(
+  NAME inja
+  VERSION 3.4.0
   GIT_REPOSITORY https://github.com/pantor/inja.git
-  GIT_TAG        3741c73ba78babd2ed88f2acf2fcd6dafdb878e8
-  GIT_PROGRESS TRUE
+  GIT_TAG 3741c73ba78babd2ed88f2acf2fcd6dafdb878e8
+  EXCLUDE_FROM_ALL YES
+  SYSTEM YES
+  OPTIONS "INJA_BUILD_TESTS OFF" "BUILD_BENCHMARK OFF" "INJA_EXPORT OFF"
 )
-fetchcontent_makeavailable_but_exclude_install(inja)
 
 # Testgen libraries and includes. Defined here such that targets can extend them.
 set(
   TESTGEN_LIBS
   PRIVATE p4tools-common
   # Make sure the testgen library and anything that links to it see both the Inja includes.
-  PUBLIC inja
+  PUBLIC pantor::inja
 )
 set(TESTGEN_INCLUDES)
 
