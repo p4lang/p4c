@@ -4,7 +4,8 @@
 #include <v1model.p4>
 
 header Hdr {
-    bit<8> a;
+    bit<8> offset;
+    bit<8> result;
 }
 
 struct Headers {
@@ -16,6 +17,7 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
+        b.extract<Hdr>(h.op);
         transition accept;
     }
 }
@@ -33,8 +35,8 @@ control update(inout Headers h, inout Meta m) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.x") bit<8> x_0;
     apply {
-        x_0 = 8w0x0;
-        h.op.a[3:0] = x_0[h.op.a+:4];
+        x_0 = 8w0xd6;
+        h.op.result[3:0] = x_0[h.op.offset+:4];
     }
 }
 
