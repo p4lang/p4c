@@ -123,7 +123,6 @@ set (P4_16_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_pna_errors/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/dash/dash-pipeline-pna-dpdk.p4")
 p4c_find_test_names("${P4_16_SUITES}" DPDK_P4_16_TESTS)
-list(FILTER DPDK_P4_16_TESTS EXCLUDE REGEX "psa-varbit-max-length-parser-error-bmv2\\.p4$")
 p4c_add_test_list("dpdk" ${DPDK_COMPILER_DRIVER} "${DPDK_P4_16_TESTS}" "" "--bfrt")
 
 #### DPDK-PTF Tests

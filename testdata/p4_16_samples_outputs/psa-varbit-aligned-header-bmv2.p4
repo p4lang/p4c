@@ -3,7 +3,7 @@
 #include <bmv2/psa.p4>
 
 header variable_t {
-    bit<1>     tag;
+    bit<8>     tag;
     varbit<64> data;
 }
 
@@ -16,7 +16,7 @@ struct empty_t {
 
 parser ingress_parser(packet_in packet, out headers_t hdr, inout empty_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
     state start {
-        packet.extract<variable_t>(hdr.variable, 32w64);
+        packet.extract(hdr.variable, 64);
         transition accept;
     }
 }
@@ -24,16 +24,16 @@ parser ingress_parser(packet_in packet, out headers_t hdr, inout empty_t user_me
 control ingress(inout headers_t hdr, inout empty_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
         if (istd.parser_error == error.NoError && hdr.variable.isValid()) {
-            send_to_port(ostd, (PortId_t)32w0);
+            send_to_port(ostd, (PortId_t)0);
         } else {
-            send_to_port(ostd, (PortId_t)32w1);
+            send_to_port(ostd, (PortId_t)1);
         }
     }
 }
 
 control ingress_deparser(packet_out packet, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers_t hdr, in empty_t user_meta, in psa_ingress_output_metadata_t istd) {
     apply {
-        packet.emit<variable_t>(hdr.variable);
+        packet.emit(hdr.variable);
     }
 }
 
@@ -53,6 +53,6 @@ control egress_deparser(packet_out packet, out empty_t clone_e2e_meta, out empty
     }
 }
 
-IngressPipeline<headers_t, empty_t, empty_t, empty_t, empty_t, empty_t>(ingress_parser(), ingress(), ingress_deparser()) ingress_pipe;
-EgressPipeline<empty_t, empty_t, empty_t, empty_t, empty_t, empty_t>(egress_parser(), egress(), egress_deparser()) egress_pipe;
-PSA_Switch<headers_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t, empty_t>(ingress_pipe, PacketReplicationEngine(), egress_pipe, BufferingQueueingEngine()) main;
+IngressPipeline(ingress_parser(), ingress(), ingress_deparser()) ingress_pipe;
+EgressPipeline(egress_parser(), egress(), egress_deparser()) egress_pipe;
+PSA_Switch(ingress_pipe, PacketReplicationEngine(), egress_pipe, BufferingQueueingEngine()) main;

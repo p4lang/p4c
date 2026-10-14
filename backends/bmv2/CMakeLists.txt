@@ -287,12 +287,18 @@ endif()
 
 if (HAVE_PSA_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PSA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlagsPSA})
+  p4c_add_tests("bmv2" ${BMV2_DRIVER}
+    "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/psa-varbit-unaligned-header.p4"
+    "" ${testExtraFlagsPSA})
 else()
   MESSAGE(WARNING "BMv2 PSA switch is not available, not adding PSA BMv2 tests")
 endif()
 
 if (HAVE_PNA_NIC)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_PNA_TEST_SUITES}" "${XFAIL_TESTS}" ${testExtraFlagsPNA})
+  p4c_add_tests("bmv2" ${BMV2_DRIVER}
+    "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/pna-varbit-unaligned-header.p4"
+    "" ${testExtraFlagsPNA})
 else()
   MESSAGE(WARNING "BMv2 PNA switch is not available, not adding PNA BMv2 tests")
 endif()

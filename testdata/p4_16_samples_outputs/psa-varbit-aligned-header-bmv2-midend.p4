@@ -3,7 +3,7 @@
 #include <bmv2/psa.p4>
 
 header variable_t {
-    bit<1>     tag;
+    bit<8>     tag;
     varbit<64> data;
 }
 
@@ -22,38 +22,49 @@ parser ingress_parser(packet_in packet, out headers_t hdr, inout empty_t user_me
 }
 
 control ingress(inout headers_t hdr, inout empty_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_0;
-    @name("ingress.egress_port") PortId_t egress_port_0;
-    @name("ingress.meta") psa_ingress_output_metadata_t meta_3;
-    @name("ingress.egress_port") PortId_t egress_port_3;
     @noWarn("unused") @name(".send_to_port") action send_to_port_1() {
-        meta_0 = ostd;
-        egress_port_0 = (PortId_t)32w0;
-        meta_0.drop = false;
-        meta_0.multicast_group = (MulticastGroup_t)32w0;
-        meta_0.egress_port = egress_port_0;
-        ostd = meta_0;
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = 32w0;
     }
     @noWarn("unused") @name(".send_to_port") action send_to_port_2() {
-        meta_3 = ostd;
-        egress_port_3 = (PortId_t)32w1;
-        meta_3.drop = false;
-        meta_3.multicast_group = (MulticastGroup_t)32w0;
-        meta_3.egress_port = egress_port_3;
-        ostd = meta_3;
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = 32w1;
+    }
+    @hidden table tbl_send_to_port {
+        actions = {
+            send_to_port_1();
+        }
+        const default_action = send_to_port_1();
+    }
+    @hidden table tbl_send_to_port_0 {
+        actions = {
+            send_to_port_2();
+        }
+        const default_action = send_to_port_2();
     }
     apply {
         if (istd.parser_error == error.NoError && hdr.variable.isValid()) {
-            send_to_port_1();
+            tbl_send_to_port.apply();
         } else {
-            send_to_port_2();
+            tbl_send_to_port_0.apply();
         }
     }
 }
 
 control ingress_deparser(packet_out packet, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers_t hdr, in empty_t user_meta, in psa_ingress_output_metadata_t istd) {
-    apply {
+    @hidden action psavarbitalignedheaderbmv2l51() {
         packet.emit<variable_t>(hdr.variable);
+    }
+    @hidden table tbl_psavarbitalignedheaderbmv2l51 {
+        actions = {
+            psavarbitalignedheaderbmv2l51();
+        }
+        const default_action = psavarbitalignedheaderbmv2l51();
+    }
+    apply {
+        tbl_psavarbitalignedheaderbmv2l51.apply();
     }
 }
 
