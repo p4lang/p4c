@@ -65,7 +65,7 @@ TEST_F(UtilEnumerator, Simple) {
 TEST_F(UtilEnumerator, Range) {
     EnumeratorPtr<int> enumerator = Util::enumerate(vec);
     int sum = 0;
-    for (auto a : *enumerator) sum += a;
+    for (auto a : enumerator) sum += a;
     EXPECT_EQ(6, sum);
 }
 

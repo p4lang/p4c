@@ -44,7 +44,10 @@ class EnumeratorHandle {
  private:
     Enumerator<T> *enumerator = nullptr;  // when nullptr it represents end()
     explicit EnumeratorHandle(Enumerator<T> *enumerator) : enumerator(enumerator) {}
-    friend class Enumerator<T>;
+    template <typename U>
+    friend EnumeratorHandle<U> begin(const EnumeratorPtr<U> &enumerator);
+    template <typename U>
+    friend EnumeratorHandle<U> end(const EnumeratorPtr<U> &enumerator);
 
  public:
     using iterator_category = std::input_iterator_tag;
@@ -87,12 +90,6 @@ class Enumerator : public std::enable_shared_from_this<Enumerator<T>> {
     virtual T getCurrent() const = 0;
     /// Move back to the beginning of the collection
     virtual void reset() { this->state = EnumeratorState::NotStarted; }
-
-    EnumeratorHandle<T> begin() {
-        this->moveNext();
-        return EnumeratorHandle<T>(this);
-    }
-    EnumeratorHandle<T> end() { return EnumeratorHandle<T>(nullptr); }
 
     const char *stateName() const {
         switch (this->state) {
@@ -665,15 +662,17 @@ auto concat(Args &&...inputs) {
     return concat(init);
 }
 
-/// Iterate over the handle directly to keep the enumerator alive until the loop finishes.
+/// Only the owning pointer supports range iteration. Iterating over a dereferenced temporary
+/// would destroy its owner before the loop begins.
 template <typename T>
 EnumeratorHandle<T> begin(const EnumeratorPtr<T> &enumerator) {
-    return enumerator->begin();
+    enumerator->moveNext();
+    return EnumeratorHandle<T>(enumerator.get());
 }
 
 template <typename T>
-EnumeratorHandle<T> end(const EnumeratorPtr<T> &enumerator) {
-    return enumerator->end();
+EnumeratorHandle<T> end(const EnumeratorPtr<T> &) {
+    return EnumeratorHandle<T>(nullptr);
 }
 
 }  // namespace P4::Util
