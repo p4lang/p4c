@@ -20,13 +20,11 @@ const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarati
     std::vector<const IR::IDeclaration *> decls;
     if (const auto *nest = ns->to<IR::INestedNamespace>()) {
         for (const auto *nn : nest->getNestedNamespaces()) {
-            auto nnDecls = nn->getDeclarations();
-            decls.insert(decls.end(), nnDecls->begin(), nnDecls->end());
+            for (const auto *decl : nn->getDeclarations()) decls.push_back(decl);
         }
     }
 
-    auto nsDecls = ns->getDeclarations();
-    decls.insert(decls.end(), nsDecls->begin(), nsDecls->end());
+    for (const auto *decl : ns->getDeclarations()) decls.push_back(decl);
 
     return (namespaceDecls[ns] = std::move(decls));
 }
