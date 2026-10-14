@@ -14,6 +14,7 @@
 #include <iosfwd>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "ir/ir.h"
@@ -214,6 +215,14 @@ class Z3Translator : public virtual Inspector {
     z3::expr translate(const IR::Expression *expression);
 
  private:
+    /// Reuse translations of shared IR nodes only within one traversal. The key must be
+    /// pointer identity: structurally equivalent symbolic nodes may have different types.
+    std::unordered_map<const IR::Expression *, z3::expr> translations;
+
+    profile_t init_apply(const IR::Node *root) override;
+    void end_apply() override;
+    z3::expr translateChild(const IR::Expression *expression);
+
     /// Function type for a unary operator.
     using Z3UnaryOp = z3::expr (*)(const z3::expr &);
 

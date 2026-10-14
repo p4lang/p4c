@@ -366,16 +366,33 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
 
 Z3Translator::Z3Translator(Z3Solver &solver) : result(solver.mutableContext()), _solver(solver) {}
 
+Visitor::profile_t Z3Translator::init_apply(const IR::Node *root) {
+    translations.clear();
+    return Inspector::init_apply(root);
+}
+
+void Z3Translator::end_apply() {
+    translations.clear();
+    Inspector::end_apply();
+}
+
+z3::expr Z3Translator::translateChild(const IR::Expression *expression) {
+    if (auto it = translations.find(expression); it != translations.end()) return it->second;
+    // Translation handlers recurse explicitly and never use visitor context. Dispatch without
+    // starting a fresh traversal, so all children share this invocation's translation cache.
+    expression->apply_visitor_preorder(*this);
+    translations.emplace(expression, result);
+    return result;
+}
+
 bool Z3Translator::preorder(const IR::Node *node) {
     BUG("%1%: Unhandled node type: %2%", node, node->node_type_name());
 }
 
 bool Z3Translator::preorder(const IR::Cast *cast) {
-    Z3Translator tCast(solver());
-    cast->expr->apply(tCast);
+    auto castExpr = translateChild(cast->expr);
     uint64_t exprSize = 0;
     const auto *const castExtrType = cast->expr->type;
-    auto castExpr = tCast.result;
     if (const auto *tb = cast->destType->to<IR::Type_Bits>()) {
         uint64_t destSize = tb->width_bits();
         if (const auto *exprType = castExtrType->to<IR::Type_Bits>()) {
@@ -491,9 +508,7 @@ const ShiftType *Z3Translator::rewriteShift(const ShiftType *shift) const {
 /// General function for unary operations.
 bool Z3Translator::recurseUnary(const IR::Operation_Unary *unary, Z3UnaryOp f) {
     BUG_CHECK(unary, "Z3Translator: encountered null node during translation");
-    Z3Translator tExpr(solver());
-    unary->expr->apply(tExpr);
-    result = f(tExpr.result);
+    result = f(translateChild(unary->expr));
     return false;
 }
 
@@ -576,11 +591,9 @@ bool Z3Translator::preorder(const IR::Concat *op) { return recurseBinary(op, z3:
 /// general function for binary operations
 bool Z3Translator::recurseBinary(const IR::Operation_Binary *binary, Z3BinaryOp f) {
     BUG_CHECK(binary, "Z3Translator: encountered null node during translation");
-    Z3Translator tLeft(solver());
-    Z3Translator tRight(solver());
-    binary->left->apply(tLeft);
-    binary->right->apply(tRight);
-    result = f(tLeft.result, tRight.result);
+    auto left = translateChild(binary->left);
+    auto right = translateChild(binary->right);
+    result = f(left, right);
     return false;
 }
 
@@ -596,13 +609,10 @@ bool Z3Translator::preorder(const IR::Slice *op) {
 /// general function for ternary operations
 bool Z3Translator::recurseTernary(const IR::Operation_Ternary *ternary, Z3TernaryOp f) {
     BUG_CHECK(ternary, "Z3Translator: encountered null node during translation");
-    Z3Translator t0(solver());
-    Z3Translator t1(solver());
-    Z3Translator t2(solver());
-    ternary->e0->apply(t0);
-    ternary->e1->apply(t1);
-    ternary->e2->apply(t2);
-    result = f(t0.result, t1.result, t2.result);
+    auto e0 = translateChild(ternary->e0);
+    auto e1 = translateChild(ternary->e1);
+    auto e2 = translateChild(ternary->e2);
+    result = f(e0, e1, e2);
     return false;
 }
 

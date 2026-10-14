@@ -193,4 +193,56 @@ TEST_F(Z3SolverSatisfiabilityChecks, Bools) {
     }
 }
 
+namespace {
+
+class CountedTranslationVariable : public IR::SymbolicVariable {
+    unsigned &visits;
+
+ public:
+    explicit CountedTranslationVariable(unsigned &visits)
+        : IR::SymbolicVariable(IR::Type_Boolean::get(), "shared"_cs), visits(visits) {}
+
+    bool apply_visitor_preorder(Inspector &visitor) const override {
+        ++visits;
+        return IR::SymbolicVariable::apply_visitor_preorder(visitor);
+    }
+};
+
+TEST(Z3Translator, TranslatesSharedDagOncePerInvocation) {
+    unsigned visits = 0;
+    const IR::Expression *expression = new CountedTranslationVariable(visits);
+    for (unsigned depth = 0; depth < 14; ++depth) {
+        expression = new IR::LOr(expression, expression);
+    }
+    Z3Solver solver;
+    Z3Translator translator(solver);
+    auto translated = translator.translate(expression).simplify();
+    EXPECT_TRUE(translated.is_const());
+    EXPECT_EQ(visits, 1U);
+
+    // Solver declarations and IR types can change between applications. A cache from the
+    // preceding traversal must not suppress declarations after a solver reset.
+    solver.reset();
+    solver.push();
+    expression->apply(translator);
+    EXPECT_TRUE(z3::eq(translated, translator.getResult().simplify()));
+    EXPECT_EQ(visits, 2U);
+}
+
+TEST(Z3Translator, KeepsDistinctSymbolTypesSeparate) {
+    const auto *bits8 = IR::Type_Bits::get(8);
+    const auto *bits16 = IR::Type_Bits::get(16);
+    const auto *small = new IR::SymbolicVariable(bits8, "same_label"_cs);
+    const auto *large = new IR::SymbolicVariable(bits16, "same_label"_cs);
+    const auto *expression = new IR::Equ(new IR::Cast(bits16, small), large);
+    Z3Solver solver;
+    Z3Translator translator(solver);
+    const auto translated = translator.translate(expression);
+    EXPECT_EQ(translated.arg(0).get_sort().bv_size(), 16U);
+    EXPECT_EQ(translated.arg(0).arg(0).get_sort().bv_size(), 8U);
+    EXPECT_EQ(translated.arg(1).get_sort().bv_size(), 16U);
+}
+
+}  // namespace
+
 }  // namespace P4::P4Tools::Test
