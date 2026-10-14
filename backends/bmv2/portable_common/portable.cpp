@@ -61,15 +61,29 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
         }
         fields->append(field);
     }
-    // must add padding
+    // Only metadata can be padded without changing packet layout.
     unsigned padding = max_length % 8;
     if (padding != 0) {
-        cstring name = structure->refMap->newName("_padding");
-        auto field = new Util::JsonArray();
-        field->append(name);
-        field->append(8 - padding);
-        field->append(false);
-        fields->append(field);
+        if (st->is<IR::Type_Header>()) {
+            ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: Found header with fields totaling %2% bits."
+                        "  BMv2 target only supports headers with fields"
+                        " totaling a multiple of 8 bits.",
+                        st, max_length);
+        } else if (st->is<IR::Type_Struct>()) {
+            cstring name = structure->refMap->newName("_padding");
+            auto field = new Util::JsonArray();
+            field->append(name);
+            field->append(8 - padding);
+            field->append(false);
+            fields->append(field);
+        } else {
+            BUG("%1%: Found struct-like object with fields totaling %2% bits."
+                "  This type is not expected here.  Add a case to handle it."
+                "  BMv2 target only supports headers with fields"
+                " totaling a multiple of 8 bits.",
+                st, max_length);
+        }
     }
 
     unsigned max_length_bytes = max_length / 8 + (padding != 0);

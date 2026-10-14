@@ -5,7 +5,7 @@
 #include <bmv2/psa.p4>
 
 header variable_t {
-    bit<1> tag;
+    bit<8> tag;
     varbit<64> data;
 }
 
