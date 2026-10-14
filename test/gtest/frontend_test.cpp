@@ -50,7 +50,7 @@ TEST_F(P4CFrontend, ParseStdioAcrossBufferBoundaries) {
     std::rewind(input.get());
     ASSERT_EQ(std::fgetc(input.get()), 'x');
 
-    const auto *program = P4ParserDriver::parse(input.get(), "stdio.p4");
+    const auto program = P4ParserDriver::parse(input.get(), "stdio.p4");
     ASSERT_NE(program, nullptr);
     ASSERT_EQ(program->objects.size(), 1U);
     const auto *constant = program->objects.at(0)->to<IR::Declaration_Constant>();
@@ -67,7 +67,7 @@ TEST_F(P4CFrontend, ParseStdioAcrossBufferBoundaries) {
 TEST_F(P4CFrontend, ParseEmptyStdio) {
     std::unique_ptr<FILE, int (*)(FILE *)> input(std::tmpfile(), &std::fclose);
     ASSERT_NE(input, nullptr);
-    const auto *program = P4ParserDriver::parse(input.get(), "empty.p4");
+    const auto program = P4ParserDriver::parse(input.get(), "empty.p4");
     ASSERT_NE(program, nullptr);
     EXPECT_TRUE(program->objects.empty());
     EXPECT_EQ(errorCount(), 0U);
