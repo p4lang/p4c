@@ -1,11 +1,11 @@
-v1model.p4(751): [--Werror=type-error] error: 'package V1Switch'
+v1model.p4(754): [--Werror=type-error] error: 'package V1Switch'
 package V1Switch<H, M>(Parser<H, M> p,
         ^^^^^^^^
   ---- Actual error:
 issue376-bmv2.p4(34): Cannot unify 'in' parameter 'hdrs' with 'inout' parameter 'hdr' because they have different directions
   control vc(in headers_t hdrs, inout meta_t meta) { apply { } }
                           ^^^^
-v1model.p4(725)
+v1model.p4(728)
   control VerifyChecksum<H, M>(inout H hdr,
                                        ^^^
   ---- Originating from:
@@ -15,10 +15,10 @@ issue376-bmv2.p4(37): Type of argument 'vc' (control vc) does not match type of 
 issue376-bmv2.p4(34)
   control vc(in headers_t hdrs, inout meta_t meta) { apply { } }
           ^^
-v1model.p4(752)
+v1model.p4(755)
                          VerifyChecksum<H, M> vr,
                                               ^^
-v1model.p4(752)
+v1model.p4(755)
                          VerifyChecksum<H, M> vr,
                          ^^^^^^^^^^^^^^^^^^^^
   Where 'H' is bound to 'struct headers_t'
