@@ -138,7 +138,7 @@ bool ExprStepper::resolveMethodCallArguments(const IR::MethodCallExpression *cal
         // Avoid resolving externs because they do not actually exist in the symbolic environment.
         // Do not resolve out parameters because we do not care about their content.
         // Skip symbolic values since they have already been resolved.
-        if (argExpr->type->is<IR::Type_Extern>() || param->direction == IR::Direction::Out ||
+        if (IR::getExternType(argExpr->type) != nullptr || param->direction == IR::Direction::Out ||
             SymbolicEnv::isSymbolicValue(argExpr)) {
             continue;
         }
@@ -203,9 +203,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 return false;
             }
 
-            // Handle extern calls. They may also be of Type_SpecializedCanonical.
-            if (method->expr->type->is<IR::Type_Extern>() ||
-                method->expr->type->is<IR::Type_SpecializedCanonical>()) {
+            // Handle extern calls.
+            if (IR::getExternType(method->expr->type) != nullptr) {
                 evalExternMethodCall({*call, *method->expr->checkedTo<IR::PathExpression>(),
                                       method->member, *call->arguments});
                 return false;

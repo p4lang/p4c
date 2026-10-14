@@ -27,6 +27,20 @@ const Type_Bits *getBitTypeToFit(int value) {
     return Type_Bits::get(width);
 }
 
+const Type_Extern *getExternType(const Type *type) {
+    CHECK_NULL(type);
+    if (const auto *externType = type->to<Type_Extern>()) {
+        return externType;
+    }
+    if (const auto *specialized = type->to<Type_SpecializedCanonical>()) {
+        if (!specialized->baseType->is<Type_Extern>()) {
+            return nullptr;
+        }
+        return specialized->substituted->checkedTo<Type_Extern>();
+    }
+    return nullptr;
+}
+
 /* =============================================================================================
  *  Expressions
  * ============================================================================================= */
