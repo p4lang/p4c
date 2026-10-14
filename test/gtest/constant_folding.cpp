@@ -128,7 +128,7 @@ TEST_F(P4CConstantFoldingValidation, struct_cast_preserves_type) {
     ASSERT_TRUE(program);
 
     const IR::Declaration_Constant *constant = nullptr;
-    for (const auto *declaration : *program->getDeclarations()) {
+    for (const auto *declaration : program->getDeclarations()) {
         const auto *candidate = declaration->to<IR::Declaration_Constant>();
         if (candidate != nullptr && candidate->name == "value") {
             constant = candidate;

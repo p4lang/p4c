@@ -64,7 +64,7 @@ class Vector : public VectorBase {
     template <class InputIt>
     Vector(InputIt first, InputIt last) : vec(first, last) {}
     Vector(Util::EnumeratorPtr<const T *> e)  // NOLINT(runtime/explicit)
-        : vec(e->begin(), e->end()) {}
+        : vec(Util::begin(e), Util::end(e)) {}
     static Node *fromJSON(JSONLoader &json);
 
     using iterator = typename safe_vector<const T *>::iterator;
