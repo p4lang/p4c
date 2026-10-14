@@ -399,14 +399,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This pass analyzes reachability of select cases.</p><ul>
-<li>If there is just one case label, the select statement is eliminated.</li>
+<li>If only a default case label remains, the select statement is eliminated.</li>
 <li>If a case label appears after the default label, the case is unreachable and therefore eliminated.</li>
 <li>If all select case labels are compile-time constants, and if multiple different states match a given case label, then all but the first select case with this label are eliminated.</li>
 <li>If all select case labels are compile-time constants, then all non-default transitions to state s are eliminated if the select statement contains a default transition to state s.</li>
 </ul>
 <p>If requireConstants is true this pass requires that all select labels evaluate to constants.</p>
 <dl class="section pre"><dt>Precondition</dt><dd>Assumes that there are no side-effects in the evaluation of select labels. </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd>Unreachable case labels are removed. Case statement with a single label is replaced with a direct transition </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>Unreachable case labels are removed. A select expression with only a default case label is replaced with a direct transition. </dd></dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!--
