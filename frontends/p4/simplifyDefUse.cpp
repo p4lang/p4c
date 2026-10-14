@@ -1091,7 +1091,7 @@ class FindUninitialized : public Inspector {
                     auto fieldLoc = read->getField(field->name);
                     bool uninitialized = false;
                     for (auto storage : *fieldLoc)
-                        uninitialized |= hasUninitializedFields(storage, currentDefinitions);
+                        uninitialized |= hasUninitializedFields(storage, currentDefinitions.get());
                     if (uninitialized) {
                         warn(ErrorType::WARN_UNINITIALIZED_USE, "%1%.%2% may be uninitialized",
                              expression, field->name.toString());
@@ -1240,7 +1240,7 @@ class FindUninitialized : public Inspector {
     void reportWarningIfInvalidHeader(const IR::Member *expression) {
         if (!reportInvalidHeaders) return;
 
-        const auto *header = expression->expr;
+        const IR::Expression *header = expression->expr;
         LOG3("Checking if [" << header->id << "]: " << header << " is valid");
         auto valid = headerDefs->find(header);
         if (valid == TernaryBool::Yes) {
