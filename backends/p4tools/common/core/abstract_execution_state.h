@@ -95,8 +95,7 @@ class AbstractExecutionState {
      * ========================================================================================= */
  protected:
     /// Convert the input reference into a complex expression such as a HeaderExpression,
-    /// StructExpression, or ArrayExpression. @returns nullptr if the expression is not
-    /// complex.
+    /// StructExpression, ArrayExpression, or ListExpression. Requires an aggregate type.
     const IR::Expression *convertToComplexExpression(const IR::StateVariable &parent) const;
 
     /// Takes in a complex expression as a StructExpression, ListExpression, or
@@ -107,8 +106,9 @@ class AbstractExecutionState {
         const IR::Expression *inputExpression, std::vector<const IR::Expression *> &flatValids);
 
  public:
-    /// Takes an input struct type @ts and a prefix @parent and returns a vector of references to
-    /// members of the struct. The vector contains all the Type_Base (bit and bool) members in
+    /// Flattens a struct, array, or tuple reference into its scalar state references.
+    /// Tuple elements use constant indices and retain their individual types.
+    /// The vector contains all the Type_Base (bit and bool) members in
     /// canonical representation (e.g.,
     /// {"prefix.h.ethernet.dst_address", "prefix.h.ethernet.src_address", ...}). If @arg
     /// validVector is provided, this function also collects the validity bits of the headers.

@@ -351,7 +351,8 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState,
                                              const IR::StateVariable &ref, bool forceTaint) const {
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *refType = nextState.resolveType(ref->type);
-    if (refType->is<const IR::Type_StructLike>()) {
+    if (refType->is<IR::Type_StructLike>() || refType->is<IR::Type_Array>() ||
+        refType->is<IR::Type_BaseList>()) {
         std::vector<IR::StateVariable> validFields;
         auto fields = nextState.getFlatFields(ref, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
