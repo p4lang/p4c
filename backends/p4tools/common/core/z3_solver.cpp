@@ -47,15 +47,15 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
     BUG_CHECK(type, "Z3Solver::toSort with empty pointer");
 
     if (type->is<IR::Type_Boolean>()) {
-        return ctx().bool_sort();
+        return mutableContext().bool_sort();
     }
 
     if (const auto *bits = type->to<IR::Type_Bits>()) {
-        return ctx().bv_sort(bits->width_bits());
+        return mutableContext().bv_sort(bits->width_bits());
     }
 
     if (type->is<IR::Type_String>()) {
-        return ctx().string_sort();
+        return mutableContext().string_sort();
     }
 
     BUG("Z3Solver: unimplemented type %1%: %2% ", type->node_type_name(), type);
@@ -69,7 +69,7 @@ std::string Z3Solver::generateName(const IR::SymbolicVariable &var) {
 
 z3::expr Z3Solver::declareVar(const IR::SymbolicVariable &var) {
     auto sort = toSort(var.type);
-    auto expr = ctx().constant(generateName(var).c_str(), sort);
+    auto expr = mutableContext().constant(generateName(var).c_str(), sort);
     BUG_CHECK(
         !declaredVarsById.empty(),
         "DeclaredVarsById should have at least one entry! Check if push() was used correctly.");
@@ -326,14 +326,16 @@ void Z3Solver::addZ3Pushes(size_t &chkIndex, size_t asrtIndex) {
 
 const z3::solver &Z3Solver::getZ3Solver() const { return z3solver; }
 
-const z3::context &Z3Solver::getZ3Ctx() const { return z3solver.ctx(); }
+z3::solver &Z3Solver::mutableSolver() { return z3solver; }
 
-z3::context &Z3Solver::ctx() const { return z3solver.ctx(); }
+const z3::context &Z3Solver::context() const { return z3solver.ctx(); }
+
+z3::context &Z3Solver::mutableContext() const { return z3solver.ctx(); }
 
 bool Z3Solver::isInIncrementalMode() const { return isIncremental; }
 
 Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
-    : z3solver(*new z3::context), isIncremental(isIncremental), z3Assertions(ctx()) {
+    : z3solver(*new z3::context), isIncremental(isIncremental), z3Assertions(mutableContext()) {
     // Add a top-level set to declaration vars that we can insert variables.
     // TODO: Think about whether this is necessary or it is not better to remove it.
     declaredVarsById.emplace_back();
@@ -362,14 +364,14 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     addZ3Pushes(chkIndex, assertions.size());
 }
 
-Z3Translator::Z3Translator(Z3Solver &solver) : result(solver.ctx()), solver(solver) {}
+Z3Translator::Z3Translator(Z3Solver &solver) : result(solver.mutableContext()), _solver(solver) {}
 
 bool Z3Translator::preorder(const IR::Node *node) {
     BUG("%1%: Unhandled node type: %2%", node, node->node_type_name());
 }
 
 bool Z3Translator::preorder(const IR::Cast *cast) {
-    Z3Translator tCast(solver);
+    Z3Translator tCast(solver());
     cast->expr->apply(tCast);
     uint64_t exprSize = 0;
     const auto *const castExtrType = cast->expr->type;
@@ -380,8 +382,8 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
             exprSize = exprType->width_bits();
         } else if (castExtrType->is<IR::Type_Boolean>()) {
             exprSize = 1;
-            auto trueVal = solver.get().ctx().bv_val(1, exprSize);
-            auto falseVal = solver.get().ctx().bv_val(0, exprSize);
+            auto trueVal = solver().mutableContext().bv_val(1, exprSize);
+            auto falseVal = solver().mutableContext().bv_val(0, exprSize);
             castExpr = z3::ite(castExpr, trueVal, falseVal);
         } else if (const auto *exprType = castExtrType->to<IR::Extracted_Varbits>()) {
             exprSize = exprType->width_bits();
@@ -405,7 +407,7 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
     if (cast->destType->is<IR::Type_Boolean>()) {
         if (const auto *exprType = castExtrType->to<IR::Type_Bits>()) {
             if (exprType->width_bits() == 1) {
-                castExpr = z3::operator==(castExpr, solver.get().ctx().bv_val(1, 1));
+                castExpr = z3::operator==(castExpr, solver().mutableContext().bv_val(1, 1));
             } else {
                 BUG("Cast expression type %1% is not bit<1> : %2%", exprType, castExpr);
             }
@@ -423,18 +425,19 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
 bool Z3Translator::preorder(const IR::Constant *constant) {
     // Handle infinite-integer constants.
     if (constant->type->is<IR::Type_InfInt>()) {
-        result = solver.get().ctx().int_val(constant->value.str().c_str());
+        result = solver().mutableContext().int_val(constant->value.str().c_str());
         return false;
     }
 
     // Handle bit<n> constants.
     if (const auto *bits = constant->type->to<IR::Type_Bits>()) {
-        result = solver.get().ctx().bv_val(constant->value.str().c_str(), bits->size);
+        result = solver().mutableContext().bv_val(constant->value.str().c_str(), bits->size);
         return false;
     }
 
     if (const auto *bits = constant->type->to<IR::Extracted_Varbits>()) {
-        result = solver.get().ctx().bv_val(constant->value.str().c_str(), bits->width_bits());
+        result =
+            solver().mutableContext().bv_val(constant->value.str().c_str(), bits->width_bits());
         return false;
     }
 
@@ -442,17 +445,17 @@ bool Z3Translator::preorder(const IR::Constant *constant) {
 }
 
 bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
-    result = solver.get().ctx().bool_val(boolLiteral->value);
+    result = solver().mutableContext().bool_val(boolLiteral->value);
     return false;
 }
 
 bool Z3Translator::preorder(const IR::StringLiteral *stringLiteral) {
-    result = solver.get().ctx().string_val(stringLiteral->value.c_str());
+    result = solver().mutableContext().string_val(stringLiteral->value.c_str());
     return false;
 }
 
 bool Z3Translator::preorder(const IR::SymbolicVariable *var) {
-    result = solver.get().declareVar(*var);
+    result = solver().declareVar(*var);
     return false;
 }
 
@@ -488,7 +491,7 @@ const ShiftType *Z3Translator::rewriteShift(const ShiftType *shift) const {
 /// General function for unary operations.
 bool Z3Translator::recurseUnary(const IR::Operation_Unary *unary, Z3UnaryOp f) {
     BUG_CHECK(unary, "Z3Translator: encountered null node during translation");
-    Z3Translator tExpr(solver);
+    Z3Translator tExpr(solver());
     unary->expr->apply(tExpr);
     result = f(tExpr.result);
     return false;
@@ -573,8 +576,8 @@ bool Z3Translator::preorder(const IR::Concat *op) { return recurseBinary(op, z3:
 /// general function for binary operations
 bool Z3Translator::recurseBinary(const IR::Operation_Binary *binary, Z3BinaryOp f) {
     BUG_CHECK(binary, "Z3Translator: encountered null node during translation");
-    Z3Translator tLeft(solver);
-    Z3Translator tRight(solver);
+    Z3Translator tLeft(solver());
+    Z3Translator tRight(solver());
     binary->left->apply(tLeft);
     binary->right->apply(tRight);
     result = f(tLeft.result, tRight.result);
@@ -593,9 +596,9 @@ bool Z3Translator::preorder(const IR::Slice *op) {
 /// general function for ternary operations
 bool Z3Translator::recurseTernary(const IR::Operation_Ternary *ternary, Z3TernaryOp f) {
     BUG_CHECK(ternary, "Z3Translator: encountered null node during translation");
-    Z3Translator t0(solver);
-    Z3Translator t1(solver);
-    Z3Translator t2(solver);
+    Z3Translator t0(solver());
+    Z3Translator t1(solver());
+    Z3Translator t2(solver());
     ternary->e0->apply(t0);
     ternary->e1->apply(t1);
     ternary->e2->apply(t2);
@@ -613,5 +616,7 @@ z3::expr Z3Translator::translate(const IR::Expression *expression) {
     }
     return result;
 }
+
+Z3Solver &Z3Translator::solver() { return _solver; }
 
 }  // namespace P4::P4Tools

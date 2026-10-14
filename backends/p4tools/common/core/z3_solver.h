@@ -68,8 +68,14 @@ class Z3Solver : public AbstractSolver {
     /// Get the actual Z3 solver backing this class.
     [[nodiscard]] const z3::solver &getZ3Solver() const;
 
+    /// Return a version of the solver that is mutable.
+    [[nodiscard]] z3::solver &mutableSolver();
+
     /// Get the actual Z3 context that this class uses.
-    [[nodiscard]] const z3::context &getZ3Ctx() const;
+    [[nodiscard]] const z3::context &context() const;
+
+    /// Get the actual Z3 context that this class uses. This context can be manipulated.
+    [[nodiscard]] z3::context &mutableContext() const;
 
     /// @returns the list of active assertions on this solver.
     [[nodiscard]] safe_vector<const Constraint *> getAssertions() const;
@@ -97,9 +103,6 @@ class Z3Solver : public AbstractSolver {
  private:
     /// Converts a P4 type to a Z3 sort.
     z3::sort toSort(const IR::Type *type);
-
-    /// Get the actual Z3 context that this class uses. This context can be manipulated.
-    [[nodiscard]] z3::context &ctx() const;
 
     /// Declares the given symbolic variable to Z3.
     ///
@@ -248,7 +251,10 @@ class Z3Translator : public virtual Inspector {
     z3::expr result;
 
     /// The Z3 solver instance, to which variables will be declared as they are encountered.
-    std::reference_wrapper<Z3Solver> solver;
+    std::reference_wrapper<Z3Solver> _solver;
+
+    /// @returns the mutable reference to Z3 solver instance.
+    [[nodiscard]] Z3Solver &solver();
 };
 
 }  // namespace P4::P4Tools
