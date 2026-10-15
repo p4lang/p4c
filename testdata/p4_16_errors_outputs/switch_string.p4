@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 control generic<M>(inout M m);
 package top<M>(generic<M> c);
 header t1 {
