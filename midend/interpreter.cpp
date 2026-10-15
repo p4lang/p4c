@@ -788,7 +788,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary *expression) {
     }
     auto r = get(expression->right);
     if (r->is<SymbolicError>()) {
-        set(expression, l);
+        set(expression, r);
         return;
     }
     auto clone = expression->clone();
@@ -912,7 +912,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation *expression) {
     }
     auto r = get(expression->right);
     if (r->is<SymbolicError>()) {
-        set(expression, l);
+        set(expression, r);
         return;
     }
     BUG_CHECK(l->is<ScalarValue>(), "%1%: expected a scalar", l);

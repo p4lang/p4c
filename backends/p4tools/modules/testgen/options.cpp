@@ -48,7 +48,7 @@ TestgenOptions::TestgenOptions()
                 if (maxTests < 0) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument &) {
+            } catch (const std::logic_error &) {
                 error("Invalid input value %1% for --max-tests. Expected positive integer.", arg);
                 return false;
             }
@@ -94,7 +94,7 @@ TestgenOptions::TestgenOptions()
                         "least the size of the minimum packet size.",
                         minPktSize, maxPktSize);
                 }
-            } catch (std::invalid_argument &) {
+            } catch (const std::logic_error &) {
                 error(
                     "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
                     "and [max] are integers.",
@@ -138,7 +138,7 @@ TestgenOptions::TestgenOptions()
                             loPortRange, hiPortRange);
                     }
                     permittedPortRanges.emplace_back(loPortRange, hiPortRange);
-                } catch (std::invalid_argument &) {
+                } catch (const std::logic_error &) {
                     error(
                         "Invalid permitted port range %1%. Expected format is [lo]:[hi], where "
                         "[lo] "
@@ -336,7 +336,7 @@ TestgenOptions::TestgenOptions()
                 if (minCoverage < 0 || minCoverage > 1) {
                     throw std::invalid_argument("Invalid input.");
                 }
-            } catch (std::invalid_argument &) {
+            } catch (const std::logic_error &) {
                 error(
                     "Invalid input value %1% for --assert-min-coverage. "
                     "Expected float in range [0, 1].",

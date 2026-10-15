@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# (0xD6 >> 2)[3:0] = 0x5; preserve the upper nibble of result.
+packet 0 02 A0
+expect 0 02 A5
+
+# (0xD6 >> 4)[3:0] = 0xD.
+packet 0 04 B0
+expect 0 04 BD
+
+# Shifting an 8-bit value by its width produces zero.
+packet 0 08 C7
+expect 0 08 C0
