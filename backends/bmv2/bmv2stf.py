@@ -26,6 +26,7 @@ import subprocess
 import sys
 import time
 from collections import OrderedDict
+from dataclasses import dataclass
 from glob import glob
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -50,6 +51,20 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGALRM, signal_handler)
 
 
+@dataclass(frozen=True)
+class Bmv2Target:
+    compiler: str
+    switch: str
+    switch_cli: str
+
+
+BMV2_TARGETS: Dict[Tuple[str, str], Bmv2Target] = {
+    ("bmv2", "v1model"): Bmv2Target("p4c-bm2-ss", "simple_switch", "simple_switch_CLI"),
+    ("bmv2", "psa"): Bmv2Target("p4c-bm2-psa", "psa_switch", "psa_switch_CLI"),
+    ("bmv2", "pna"): Bmv2Target("p4c-bm2-pna", "pna_nic", "pna_nic_CLI"),
+}
+
+
 class Options:
     # File that is being compiled.
     p4_file: Path = Path(".")
@@ -67,12 +82,16 @@ class Options:
     switch_options: List[str] = []
     switch_target_options: List[str] = []
     has_bmv2: bool = False  # Is the behavioral model installed?
-    use_psa: bool = False  # Use the psa switch behavioral model?
-    use_pna: bool = False  # Use the pna nic behavioral model?
+    target: str = "bmv2"
+    arch: str = "v1model"
     run_debugger: str = ""
     # Log packets produced by the BMV2 model if path to log is supplied
     observation_log: Optional[Path] = None
     init_commands: List[str] = []
+
+    @property
+    def bmv2_target(self) -> Bmv2Target:
+        return BMV2_TARGETS[(self.target, self.arch)]
 
 
 def ByteToHex(byteStr):
@@ -726,15 +745,8 @@ class RunBMV2(object):
         testutils.log.info("Running model")
         wait = 0  # Time to wait before model starts running
 
-        if self.options.use_psa:
-            switch = "psa_switch"
-            switch_cli = "psa_switch_CLI"
-        elif self.options.use_pna:
-            switch = "pna_nic"
-            switch_cli = "pna_nic_CLI"
-        else:
-            switch = "simple_switch"
-            switch_cli = "simple_switch_CLI"
+        switch = self.options.bmv2_target.switch
+        switch_cli = self.options.bmv2_target.switch_cli
 
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()
