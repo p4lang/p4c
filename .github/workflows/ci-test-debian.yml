@@ -8,7 +8,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, fruffy/memory-05-solver]
   merge_group:
     branches: [main]
 
@@ -16,6 +16,11 @@ on:
 concurrency:
   group: test-p4c-debian-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# TEMPORARY: validate system Z3, including all tests that use P4Testgen.
+env:
+  USE_PREINSTALLED_Z3: ON
+  ENABLE_TEST_TOOLS: ON
 
 jobs:
 
@@ -87,6 +92,11 @@ jobs:
 
   # Build with GCC and test Tofino backend on Ubuntu 22.04.
   test-ubuntu22-tofino:
+    name: tofino (system Z3 ${{ matrix.z3 }})
+    strategy:
+      fail-fast: false
+      matrix:
+        z3: [native, "20.04"]
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
@@ -95,6 +105,7 @@ jobs:
       ENABLE_GTESTS: ON
       ENABLE_TOFINO: ON
       ENABLE_TEST_TOOLS: ON
+      Z3_UBUNTU_RELEASE: ${{ matrix.z3 }}
       ENABLE_BMV2: OFF
       ENABLE_EBPF: OFF
       ENABLE_UBPF: OFF
@@ -115,5 +126,5 @@ jobs:
           ccache-key: "ubuntu-22.04-gcc-unity-tofino"
 
       - name: Run tests (Ubuntu 22.04)
-        run: uv run ctest --output-on-failure --schedule-random -R tofino
+        run: uv run ctest --output-on-failure --schedule-random -R 'tofino|^gtestp4c$|^testgen-gtest$'
         working-directory: ./build
