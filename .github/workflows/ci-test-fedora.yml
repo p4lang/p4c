@@ -43,7 +43,8 @@ jobs:
           tools/install_fedora_deps.sh
           # TEMPORARY: exercise a newer, unpatched system Z3 with GC enabled.
           dnf install -y z3-devel rapidjson-devel
-          uv pip install jsl==0.2.4 pyinstaller==6.11.0 jsonschema==4.23.0 pyyaml==6.0.2
+          # Fedora uses Python 3.14; the older PyInstaller pin cannot read its bytecode.
+          uv pip install jsl==0.2.4 pyinstaller==6.16.0 jsonschema==4.23.0 pyyaml==6.0.2
           rpm -q z3-libs z3-devel
 
       # Custom integration to maintain specific bootstrap/cmake parameters for the Fedora target container environment
