@@ -8,7 +8,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, fruffy/memory-05-solver]
   merge_group:
     branches: [main]
 
@@ -20,12 +20,19 @@ concurrency:
 jobs:
   # Build and test p4tools on Ubuntu 22.04.
   build-and-test-tools:
+    name: tools (system Z3 ${{ matrix.z3 }})
+    strategy:
+      fail-fast: false
+      matrix:
+        z3: [native, "20.04"]
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
       ENABLE_TEST_TOOLS: ON
+      USE_PREINSTALLED_Z3: ON
+      Z3_UBUNTU_RELEASE: ${{ matrix.z3 }}
       BUILD_GENERATOR: Ninja
       # This pins BMv2 to current upstream main.
       BMV2_REF: 7f4e1daca12b7fe52897687764b7e74ded7dab55
@@ -42,5 +49,5 @@ jobs:
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E env PATH="$PATH" uv run ctest -R "testgen|smith" --output-on-failure --schedule-random
+        run: sudo -E env PATH="$PATH" uv run ctest --output-on-failure --schedule-random
         working-directory: ./build
