@@ -6,20 +6,30 @@ macro(obtain_z3)
   option(USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)
 
   if(USE_PREINSTALLED_Z3)
-    # We need a fairly recent version of Z3.
-    set(Z3_MIN_VERSION "4.8.14")
-    # Anything above 4.12+ does not work with libGC and causes crashes. The reason is
-    # that malloc_usable_size() does not seem to be supported in libgc.
-    # https://github.com/Z3Prover/z3/blob/b0fef6429fb29a33eb14adf9a61353b59f0f7fd0/src/util/memory_manager.cpp#L319
-    # Without being able to patch Z3 we have to limit the maximum version.
-    set(Z3_MAX_VERSION_EXCL "4.12")
+    # TEMPORARY: exercise Ubuntu 20.04's Z3 in CI before deciding whether to
+    # lower the supported minimum. Drop this change with the validation commit.
+    set(Z3_MIN_VERSION "4.8.7")
     find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
 
-    if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
-      message(FATAL_ERROR "The minimum required Z3 version is ${Z3_MIN_VERSION}. Has ${Z3_VERSION_STRING}.")
-    endif()
-    if(${Z3_VERSION_STRING} VERSION_GREATER_EQUAL ${Z3_MAX_VERSION_EXCL})
-      message(FATAL_ERROR "The Z3 version has to be lower than ${Z3_MAX_VERSION_EXCL} (the latter currently does no work with libGC). Has ${Z3_VERSION_STRING}.")
+    if(ENABLE_GC)
+      include(CheckCXXSourceCompiles)
+      include(CMakePushCheckState)
+      cmake_push_check_state(RESET)
+      check_cxx_source_compiles("
+        #include <cstdlib>
+        #ifndef __GLIBC__
+        #error Not using glibc
+        #endif
+        int main() { return 0; }
+      " Z3_USES_GLIBC)
+      cmake_pop_check_state()
+      # Z3 4.12 and newer query allocation sizes. With GC enabled, these
+      # queries must use the GC allocator rather than the system allocator.
+      # lib/gc.cpp handles this on glibc. Other platforms still need the
+      # bundled Z3 patch, which disables these queries.
+      if(NOT Z3_USES_GLIBC AND Z3_VERSION_STRING VERSION_GREATER_EQUAL "4.12")
+        message(FATAL_ERROR "System Z3 ${Z3_VERSION_STRING} is not supported with GC on this platform. Use bundled Z3 or disable ENABLE_GC.")
+      endif()
     endif()
     # Set variables for later consumption.
     set(Z3_LIB z3::z3)
