@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include <iostream>
-#include <vector>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ir/ir.h"
 #include "ir/json_loader.h"
