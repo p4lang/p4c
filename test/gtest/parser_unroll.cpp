@@ -10,6 +10,7 @@
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "ir/ir.h"
+#include "midend/interpreter.h"
 #include "test/gtest/env.h"
 #include "test/gtest/helpers.h"
 #include "test/gtest/midend_pass.h"
@@ -152,6 +153,28 @@ TEST_F(P4CParserUnroll, stringTypes) {
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size());
+}
+
+TEST_F(P4CParserUnroll, ErrorOperandPropagation) {
+    // An error on either side must propagate; it must not be replaced by the other side's value.
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
+    P4::ValueMap valueMap;
+    auto *type = IR::Type_Bits::get(8);
+    auto *decl = new IR::Declaration_Variable(IR::ID("e"), type);
+    auto *errPath = new IR::PathExpression(new IR::Path("e"));
+    refMap.setDeclaration(errPath->path, decl);
+    typeMap.setType(errPath, type);
+    SymbolicValue *err = new SymbolicStaticError(errPath, "Reading field from invalid header");
+    valueMap.set(decl, err);
+    auto *one = new IR::Constant(IR::Type_Bits::get(8), 1);
+
+    ExpressionEvaluator ev(&refMap, &typeMap, &valueMap);
+    EXPECT_EQ(err, ev.evaluate(new IR::Add(type, one, errPath), false));
+    EXPECT_EQ(err, ev.evaluate(new IR::Add(type, errPath, one), false));
+    EXPECT_EQ(err,
+              ev.evaluate(new IR::Equ(IR::Type_Boolean::get(), IR::BoolLiteral::get(true), errPath),
+                          false));
 }
 
 }  // namespace P4::Test
