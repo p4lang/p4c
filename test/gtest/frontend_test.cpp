@@ -1,11 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <cstdio>
+#include <memory>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/parsers/parserDriver.h"
 #include "helpers.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -36,6 +40,38 @@ struct P4CFrontendEnumValidation : P4CFrontend {
 
     P4::TypeMap typeMap;
 };
+
+TEST_F(P4CFrontend, ParseStdioAcrossBufferBoundaries) {
+    std::unique_ptr<FILE, int (*)(FILE *)> input(std::tmpfile(), &std::fclose);
+    ASSERT_NE(input, nullptr);
+    // Start after a stdio read to exercise buffering on the caller's FILE*.
+    const std::string source = "x/*" + std::string(16384, ' ') + "*/\nconst bit<8> value = 42;";
+    ASSERT_EQ(std::fwrite(source.data(), 1, source.size(), input.get()), source.size());
+    std::rewind(input.get());
+    ASSERT_EQ(std::fgetc(input.get()), 'x');
+
+    const auto *program = P4ParserDriver::parse(input.get(), "stdio.p4");
+    ASSERT_NE(program, nullptr);
+    ASSERT_EQ(program->objects.size(), 1U);
+    const auto *constant = program->objects.at(0)->to<IR::Declaration_Constant>();
+    ASSERT_NE(constant, nullptr);
+    EXPECT_EQ(constant->name, "value");
+    EXPECT_EQ(constant->initializer->checkedTo<IR::Constant>()->value, 42);
+    EXPECT_EQ(errorCount(), 0U);
+
+    // Parsing must not close the caller's FILE*.
+    std::rewind(input.get());
+    EXPECT_EQ(std::fgetc(input.get()), 'x');
+}
+
+TEST_F(P4CFrontend, ParseEmptyStdio) {
+    std::unique_ptr<FILE, int (*)(FILE *)> input(std::tmpfile(), &std::fclose);
+    ASSERT_NE(input, nullptr);
+    const auto *program = P4ParserDriver::parse(input.get(), "empty.p4");
+    ASSERT_NE(program, nullptr);
+    EXPECT_TRUE(program->objects.empty());
+    EXPECT_EQ(errorCount(), 0U);
+}
 
 TEST_F(P4CFrontendEnumValidation, Bit) {
     std::string program = P4_SOURCE(R"(

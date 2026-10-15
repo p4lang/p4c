@@ -45,7 +45,8 @@ jobs:
       - name: Setup and baseline build
         uses: ./.github/actions/setup-p4c-build
         with:
-          ccache-key: "test-static"
+          ccache-key: "ubuntu-22.04-gcc-unity-static-${{ matrix.dynamic.glibc == 'ON' && 'glibc' || 'stdlib' }}"
+          max-size: 1000M
 
       - shell: bash
         name: Post-build static verification tests

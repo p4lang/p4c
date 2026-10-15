@@ -269,7 +269,7 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
-        decl->name = newName;
+        decl->name = IR::ID(decl->name.srcInfo, newName, decl->name.originalName);
         IR::Annotations::addOrReplace(decl->annotations, IR::Annotation::nameAnnotation,
                                       new IR::StringLiteral(extName));
         return decl;
@@ -279,8 +279,22 @@ class Substitutions : public SubstituteParameters {
         auto decl = refMap->getDeclaration(expression->path, true);
         auto param = decl->to<IR::Parameter>();
         if (param != nullptr && subst->contains(param)) {
-            // This path is the same as in SubstituteParameters
-            auto value = subst->lookup(param)->expression;
+            auto value = subst->lookup(param)->expression->clone();
+            // Keep the argument's source location unless it is a compiler temporary.
+            // For temporaries, use the location and original name of the parameter reference.
+            if (useParameterSourceInfo(value)) {
+                value->srcInfo = expression->srcInfo;
+                if (auto path = value->to<IR::PathExpression>()) {
+                    auto oldPath = path->path;
+                    auto newPath = oldPath->clone();
+                    // Keep the identifier's location: name resolution uses it to check
+                    // declaration order.
+                    newPath->name.originalName = expression->path->name.originalName;
+                    path->path = newPath;
+                    if (auto replacementDecl = refMap->getDeclaration(oldPath, false))
+                        refMap->setDeclaration(newPath, replacementDecl);
+                }
+            }
             LOG3("(Substitutions) Replaced " << dbp(expression) << " for parameter " << decl
                                              << " with " << dbp(value));
             return value;
@@ -293,7 +307,7 @@ class Substitutions : public SubstituteParameters {
             newName = expression->path->name;
         IR::ID newid(expression->path->srcInfo, newName, expression->path->name.originalName);
         auto newpath = new IR::Path(newid, expression->path->absolute);
-        auto result = new IR::PathExpression(newpath);
+        auto result = new IR::PathExpression(expression->srcInfo, newpath);
         refMap->setDeclaration(newpath, decl);
         LOG3("(Substitutions) replaced " << dbp(getOriginal()) << " with " << dbp(result));
         return result;
@@ -554,12 +568,14 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 } else {
                     // use a temporary variable
                     cstring newName = refMap->newName(param->name.name.string_view());
-                    auto path = new IR::PathExpression(
-                        param->srcInfo, new IR::Path(param->srcInfo, IR::ID(newName)));
+                    // Use the parameter declaration as a fallback for generated copies.
+                    // Substitution gives references in the callee their use-site locations.
+                    auto path = new IR::PathExpression(param->srcInfo,
+                                                       new IR::Path(IR::ID(newName, nullptr)));
                     substs->paramSubst.add(param, new IR::Argument(path));
                     LOG3("Replacing " << param->name << " with " << newName);
-                    auto vardecl =
-                        new IR::Declaration_Variable(newName, param->annotations, param->type);
+                    auto vardecl = new IR::Declaration_Variable(IR::ID(newName, nullptr),
+                                                                param->annotations, param->type);
                     locals.push_back(vardecl);
                 }
             }
@@ -619,7 +635,8 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
         auto arg = mi->substitution.lookup(param);
         if ((param->direction == IR::Direction::In || param->direction == IR::Direction::InOut)) {
             if (!initializer->expression->equiv(*arg->expression)) {
-                auto stat = new IR::AssignmentStatement(initializer->expression, arg->expression);
+                auto stat = new IR::AssignmentStatement(arg->srcInfo, initializer->expression,
+                                                        arg->expression);
                 body.push_back(stat);
             }
         } else if (param->direction == IR::Direction::Out) {
@@ -652,8 +669,8 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
             auto left = mi->substitution.lookup(param);
             auto arg = substs->paramSubst.lookupByName(param->name);
             if (!left->expression->equiv(*arg->expression)) {
-                auto copyout =
-                    new IR::AssignmentStatement(left->expression, arg->expression->clone());
+                auto copyout = new IR::AssignmentStatement(left->srcInfo, left->expression,
+                                                           arg->expression->clone());
                 body.push_back(copyout);
             }
         }
@@ -783,8 +800,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
             if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
                 if (!arg->expression->equiv(*initializer->expression)) {
-                    auto stat =
-                        new IR::AssignmentStatement(arg->expression, initializer->expression);
+                    auto stat = new IR::AssignmentStatement(initializer->srcInfo, arg->expression,
+                                                            initializer->expression);
                     current.push_back(stat);
                 }
             } else if (param->direction == IR::Direction::Out) {
@@ -880,7 +897,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
                 param->direction == IR::Direction::Out) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
                 if (!left->equiv(*arg->expression)) {
-                    auto copyout = new IR::AssignmentStatement(left, arg->expression->clone());
+                    auto copyout =
+                        new IR::AssignmentStatement(left->srcInfo, left, arg->expression->clone());
                     current.push_back(copyout);
                 }
             }

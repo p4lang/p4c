@@ -22,6 +22,7 @@
 #include <sstream>
 #include <unordered_set>
 
+#include <boost/format.hpp>
 #include <boost/format/format_fwd.hpp>
 
 #include "backends/tofino/bf-p4c/ir/bitrange.h"

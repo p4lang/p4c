@@ -12,10 +12,9 @@
 #include <iterator>
 #include <optional>
 #include <ostream>
+#include <random>
 #include <string>
 #include <vector>
-
-#include <boost/random/mersenne_twister.hpp>
 
 #include "ir/ir.h"
 
@@ -28,7 +27,7 @@ class Utils {
      * ========================================================================================= */
  private:
     /// The random generator of this project. It is initialized with the input seed.
-    static boost::random::mt19937 rng;
+    static std::mt19937 rng;
 
     /// Stores the state of the PRNG.
     static std::optional<uint32_t> currentSeed;
@@ -40,7 +39,7 @@ class Utils {
     static std::string getTimeStamp();
 
     /// Initialize the random generator with an integer seed. This also seeds @var currentSeed.
-    /// Uses boost's mersenne twister.
+    /// Uses the standard Mersenne Twister engine.
     static void setRandomSeed(int seed);
 
     /// @returns currentSeed.

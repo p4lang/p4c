@@ -155,7 +155,6 @@ if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
   # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
   uv pip install cmake==3.16.3
 fi
-ccache --set-config max_size=1G
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
@@ -335,7 +334,7 @@ function build_p4tc() {
 
   sudo apt-get install -y --no-install-recommends ${P4TC_DEPS}
 
-if [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
+if [[ "${DISTRIB_RELEASE}" != "24.04" && "${DISTRIB_RELEASE}" != "26.04" ]] ; then
   wget https://apt.llvm.org/llvm.sh
   sudo chmod +x llvm.sh
   sudo ./llvm.sh 15

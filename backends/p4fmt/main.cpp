@@ -10,7 +10,7 @@
 using namespace P4;
 
 int main(int argc, char *const argv[]) {
-    AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
+    AutoCompileContext autoP4FmtContext(std::make_unique<P4Fmt::P4FmtContext>());
     auto &options = P4Fmt::P4FmtContext::get().options();
     if (options.process(argc, argv) == nullptr) {
         return EXIT_FAILURE;

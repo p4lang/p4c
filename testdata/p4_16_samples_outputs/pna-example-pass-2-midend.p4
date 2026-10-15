@@ -74,18 +74,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
-    @hidden action act() {
+    @hidden action pnaexamplepass2l116() {
         tmp = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_pnaexamplepass2l116 {
         actions = {
-            act();
+            pnaexamplepass2l116();
         }
-        const default_action = act();
+        const default_action = pnaexamplepass2l116();
     }
     apply {
         if (hdr.ipv4.isValid()) {
-            tbl_act.apply();
+            tbl_pnaexamplepass2l116.apply();
             if (tmp == hdr.ipv4.dstAddr) {
                 ipv4_da_lpm_0.apply();
             }

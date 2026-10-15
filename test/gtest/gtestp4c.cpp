@@ -11,7 +11,7 @@ using namespace P4;
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
-    AutoCompileContext autoGTestContext(new GTestContext);
+    AutoCompileContext autoGTestContext(std::make_unique<GTestContext>());
 
     // Initialize the global test environment.
     (void)P4CTestEnvironment::get();

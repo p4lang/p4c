@@ -60,15 +60,15 @@ control deparser(packet_out b, in parsed_packet_t h) {
    }
 }
 
-control verify_checksum(inout parsed_packet_t hdr,
+control VerifyChecksumI(inout parsed_packet_t hdr,
                         inout local_metadata_t local_metadata) {
   apply { }
 }
 
-control compute_checksum(inout parsed_packet_t hdr,
+control ComputeChecksumI(inout parsed_packet_t hdr,
                          inout local_metadata_t local_metadata) {
   apply { }
 }
 
-V1Switch(parse(), verify_checksum(), ingress(), egress(),
-         compute_checksum(), deparser()) main;
+V1Switch(parse(), VerifyChecksumI(), ingress(), egress(),
+         ComputeChecksumI(), deparser()) main;

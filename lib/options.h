@@ -10,6 +10,7 @@
 
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <string>
@@ -60,7 +61,7 @@ class Options {
     cstring buildDate;
     std::ostream *outStream = &std::cerr;
 
-    std::map<cstring, const Option *> options;
+    std::map<cstring, std::shared_ptr<const Option>> options;
     std::vector<cstring> optionOrder;
     std::vector<const char *> additionalUsage;
     std::vector<const char *> remainingOptions;  // produced as output
