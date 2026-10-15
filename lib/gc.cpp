@@ -24,6 +24,10 @@
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
 
+#ifdef __GLIBC__
+#include <malloc.h>
+#endif
+
 #include <cstddef>
 #include <cstring>
 #include <new>
@@ -249,6 +253,26 @@ void *malloc(size_t size) {
     TRACE_ALLOC(size)
     return GC_malloc(size);
 }
+
+#ifdef __GLIBC__
+// P4C replaces malloc with garbage-collected allocation. Replace the size query
+// too: glibc's malloc_usable_size reads allocation headers that GC memory does
+// not have. Libraries such as Z3 call this function to track memory use.
+size_t malloc_usable_size(void *ptr) noexcept {
+    if (ptr == nullptr) return 0;
+    if (done_init) {
+        if (auto *base = GC_base(ptr)) {
+            // Aligned allocations can start after the base. Report only the
+            // bytes available from the returned pointer to the end.
+            return GC_size(base) - (static_cast<char *>(ptr) - static_cast<char *>(base));
+        }
+    }
+    // malloc uses mmap while GC_INIT is running. Those allocations store their
+    // size in our own header and can remain alive after GC initialization.
+    return raw_size(ptr);
+}
+#endif
+
 void free(void *ptr) {
     if (done_init && GC_is_heap_ptr(ptr)) GC_free(ptr);
 }
