@@ -79,7 +79,7 @@ source ~/.bash_profile
 # here.
 uv venv --seed --python /opt/homebrew/opt/python@3.14/libexec/bin/python3 ~/.venv
 source ~/.venv/bin/activate
-uv sync
+uv sync --python /opt/homebrew/opt/python@3.14/libexec/bin/python3
 
 # Install BMv2 from source via the shared CMake-based helper.
 THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
