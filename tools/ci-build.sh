@@ -431,9 +431,40 @@ if [ "$ENABLE_SANITIZERS" == "ON" ]; then
   echo "Warning: building with ASAN and UBSAN sanitizers, GC must be disabled."
 fi
 
+if [[ "${USE_PREINSTALLED_Z3:-OFF}" == "ON" ]]; then
+  # TEMPORARY: test distribution Z3 binaries instead of the patched source build.
+  sudo apt-get install -y --no-install-recommends libz3-dev
+  z3_include=/usr/include
+  z3_library=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/libz3.so
+  dpkg-query -W libz3-dev libz3-4
+
+  if [[ "${Z3_UBUNTU_RELEASE:-native}" == "20.04" ]]; then
+    # Use Ubuntu 20.04's unmodified packages on the newer CI runner. Extract
+    # them separately so we do not downgrade libraries needed by other tools.
+    z3_packages=$(mktemp -d)
+    docker run --rm -v "${z3_packages}:/out" -w /out ubuntu:20.04 bash -ec '
+      apt-get update -qq
+      apt-get download libz3-dev libz3-4
+    '
+    for package in "${z3_packages}"/*.deb; do
+      dpkg-deb -f "${package}" Package Version
+      dpkg-deb -x "${package}" "${z3_packages}/root"
+    done
+    z3_include=${z3_packages}/root/usr/include
+    z3_library=${z3_packages}/root/usr/lib/x86_64-linux-gnu/libz3.so
+  fi
+
+  CMAKE_FLAGS+=" -DUSE_PREINSTALLED_Z3=ON -DZ3_INCLUDE_DIR=${z3_include} -DZ3_LIBRARY=${z3_library} "
+fi
+
 # Run CMake in the build folder.
 mkdir -p ${P4C_DIR}/build
 uv run cmake -B ${P4C_DIR}/build ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" .
+
+if [[ "${USE_PREINSTALLED_Z3:-OFF}" == "ON" ]]; then
+  grep -E '^(USE_PREINSTALLED_Z3|Z3_INCLUDE_DIR|Z3_LIBRARY):' build/CMakeCache.txt
+  test ! -d build/_deps/z3-src
+fi
 
 # If CMAKE_ONLY is active, only run CMake. Do not build.
 if [ "$CMAKE_ONLY" == "OFF" ]; then
