@@ -92,8 +92,9 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
             const auto *vardecl = new IR::Declaration_Variable(
                 argument->srcInfo, newName, param->annotations, param->type, argument->expression);
             body.push_back(vardecl);
-            subst.add(param,
-                      new IR::Argument(argument->name, new IR::PathExpression(parameterName)));
+            auto *parameterPath =
+                new IR::PathExpression(argument->expression->srcInfo, new IR::Path(parameterName));
+            subst.add(param, new IR::Argument(argument->name, parameterPath));
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
             const auto *vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
