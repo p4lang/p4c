@@ -46,14 +46,14 @@ control c() {
     @hidden action issue4656_const_fold_generic_switch_label_expr21() {
         bar();
     }
-    @hidden action act() {
+    @hidden action issue4656_const_fold_generic_switch_label_expr19() {
         tmp = baz();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue4656_const_fold_generic_switch_label_expr19 {
         actions = {
-            act();
+            issue4656_const_fold_generic_switch_label_expr19();
         }
-        const default_action = act();
+        const default_action = issue4656_const_fold_generic_switch_label_expr19();
     }
     @hidden table tbl_issue4656_const_fold_generic_switch_label_expr20 {
         actions = {
@@ -68,7 +68,7 @@ control c() {
         const default_action = issue4656_const_fold_generic_switch_label_expr21();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue4656_const_fold_generic_switch_label_expr19.apply();
         switch (switch_0_table.apply().action_run) {
             switch_0_case: {
                 tbl_issue4656_const_fold_generic_switch_label_expr20.apply();

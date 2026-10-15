@@ -433,7 +433,7 @@ class Slice : AbstractSlice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
     // make a slice, folding slices on slices and slices on constants automatically
-    static Expression make(Expression a, unsigned hi, unsigned lo);
+    static Expression make(Expression a, unsigned lo, unsigned hi);
 }
 
 class PlusSlice : AbstractSlice {

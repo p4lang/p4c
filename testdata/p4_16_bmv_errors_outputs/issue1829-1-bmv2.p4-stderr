@@ -1,0 +1,12 @@
+issue1829-1-bmv2.p4(45): [--Wwarn=unused] warning: 'da_meter_result1' is unused
+    bit<2> da_meter_result1;
+           ^^^^^^^^^^^^^^^^
+issue1829-1-bmv2.p4(46): [--Wwarn=unused] warning: 'da_meter_result2' is unused
+    bit<2> da_meter_result2;
+           ^^^^^^^^^^^^^^^^
+issue1829-1-bmv2.p4(57): [--Werror=invalid] error: ingressImpl.mac_da: table with direct meter ingressImpl.da_meter must have at least one action with a read method call
+    table mac_da {
+          ^^^^^^
+issue1829-1-bmv2.p4(48)
+    direct_meter<bit<2> >(MeterType.packets) da_meter;
+                                             ^^^^^^^^

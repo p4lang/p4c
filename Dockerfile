@@ -6,6 +6,9 @@ LABEL maintainer="P4 Developers <p4-dev@lists.p4.org>"
 # building locally or you know there are more cores available, you may want to
 # override this.
 ARG MAKEFLAGS=-j2
+# Allow CI to apply the same ccache policy inside and outside the image.
+ARG CCACHE_MAXSIZE=1G
+ARG CCACHE_COMPILERCHECK=content
 # Useful environment variable for scripts.
 ARG IN_DOCKER=TRUE
 # Select the type of image we're building. Use `build` for a normal build, which

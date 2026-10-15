@@ -78,11 +78,10 @@ class Target {
 
     /// Initializes the global target device and architecture to @deviceName and @archName.
     /// Returns 0 on success. If initialization fails, returns -1.
-    static std::optional<ICompileContext *> initializeTarget(std::string_view toolName,
-                                                             const std::vector<const char *> &args);
-    static std::optional<ICompileContext *> initializeTarget(std::string_view toolName,
-                                                             std::string_view target,
-                                                             std::string_view arch);
+    static std::optional<std::unique_ptr<ICompileContext>> initializeTarget(
+        std::string_view toolName, const std::vector<const char *> &args);
+    static std::optional<std::unique_ptr<ICompileContext>> initializeTarget(
+        std::string_view toolName, std::string_view target, std::string_view arch);
 
  protected:
     /// Creates and registers a new Target instance for the given @toolName, @deviceName, and

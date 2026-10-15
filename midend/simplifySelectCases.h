@@ -15,7 +15,7 @@ namespace P4 {
 
 /**
  * This pass analyzes reachability of select cases.
- * - If there is just one case label, the select statement is eliminated.
+ * - If only a default case label remains, the select statement is eliminated.
  * - If a case label appears after the default label, the case is
  *   unreachable and therefore eliminated.
  * - If all select case labels are compile-time constants, and if multiple different
@@ -28,8 +28,8 @@ namespace P4 {
  * all select labels evaluate to constants.
  *
  * @pre Assumes that there are no side-effects in the evaluation of select labels.
- * @post Unreachable case labels are removed. Case statement with
- *       a single label is replaced with a direct transition
+ * @post Unreachable case labels are removed. A select expression with only
+ *       a default case label is replaced with a direct transition.
  */
 class DoSimplifySelectCases : public Transform, ResolutionContext {
     const TypeMap *typeMap;

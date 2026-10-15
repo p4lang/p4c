@@ -1,0 +1,12 @@
+package-type-param-package.p4(11): [--Wwarn=unused] warning: 'T' is unused
+struct S<T> {
+         ^
+package-type-param-package.p4(15): [--Wwarn=unused] warning: 's' is unused
+const S<Inner> s = { x = 0 };
+               ^
+package-type-param-package.p4(15): [--Werror=type-error] error: S<Inner>: Cannot use package Inner as a type parameter
+const S<Inner> s = { x = 0 };
+      ^^^^^^^^
+package-type-param-package.p4(9)
+package Inner();
+        ^^^^^
