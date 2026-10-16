@@ -1,0 +1,22 @@
+# Set the table miss behavior.
+setdefault tbl NoAction()
+
+# Install exact-match entries through the BMv2 thrift/CLI interface.
+add tbl a.ethernet.srcAddr:0x000000000002 b.vlan_ether_type:0x0000 forward()
+add tbl a.ethernet.srcAddr:0x000000000004 b.vlan_ether_type:0x00000800 forward()
+add tbl a.ethernet.srcAddr:0x000000000006 b.vlan_ether_type:0x00008100 forward()
+
+# No VLAN: key is srcAddr=2, vlan_ether_type=0.
+packet 0 000000000001 000000000002 0800
+expect 1 000000000001 000000000002 0800
+
+# One VLAN: key is srcAddr=4, vlan_ether_type=0x0800.
+packet 0 000000000003 000000000004 8100 1234 0800
+expect 1 000000000003 000000000004 8100 1234 0800
+
+# Two VLANs: key is srcAddr=6, vlan_ether_type=0x8100.
+packet 0 000000000005 000000000006 8100 1234 8100 5678 0800
+expect 1 000000000005 000000000006 8100 1234 8100 5678 0800
+
+# Miss: no matching entry, so NoAction drops the packet.
+packet 0 000000000007 000000000008 0800

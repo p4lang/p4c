@@ -22,12 +22,7 @@ void PortableCodeGenerator::createStructLike(ConversionContext *ctxt, const IR::
     LOG5("In createStructLike with struct " << st->toString());
     for (auto f : st->fields) {
         auto field = new Util::JsonArray();
-        auto ftype = structure->typeMap->getType(f, false);
-        if (ftype == nullptr) {
-            auto typeName = f->type->to<IR::Type_Name>();
-            CHECK_NULL(typeName);
-            ftype = structure->refMap->getDeclaration(typeName->path, true)->to<IR::Type>();
-        }
+        auto ftype = structure->typeMap->getType(f, true);
         LOG5("Iterating field with field " << f << " and type " << ftype->toString());
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
