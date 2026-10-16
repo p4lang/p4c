@@ -60,7 +60,7 @@ const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
 
     bool changes = false;
     IR::IndexedVector<IR::Parameter> vec;
-    for (auto p : *params->getEnumerator()) {
+    for (auto p : params->getEnumerator()) {
         auto paramType = getTypeType(p->type);
         if (paramType == nullptr) return nullptr;
         BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: Unexpected parameter type", paramType);

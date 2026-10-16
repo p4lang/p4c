@@ -43,7 +43,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                       << parent->qualified_name(cl->containedIn) << " &>(a))";
               first = false;
           }
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
                   continue;  // FIXME -- deal with SourcInfo
               if (!first) buf << std::endl << cl->indent << cl->indent << "&& ";
@@ -89,7 +89,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               buf << LineDirective(srcInfo, true) << body;
           } else {
               bool first = true;
-              for (auto f : *cl->getFields()) {
+              for (auto f : cl->getFields()) {
                   if (f->type && *f->type == NamedType::SourceInfo())
                       continue;  // FIXME -- deal with SourcInfo
                   if (first) {
@@ -97,7 +97,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                           << " &>(a_);\n";
                       // See, if we are having any variant fields and therefore need to generate
                       // equiv visitors
-                      for (const auto *f : *cl->getFields()) {
+                      for (const auto *f : cl->getFields()) {
                           if (f->type) continue;
                           const auto *varF = f->to<IrVariantField>();
                           buf << cl->indent << cl->indent << "auto " << f->name
@@ -177,7 +177,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           if (auto parent = cl->getParent())
               buf << cl->indent << parent->qualified_name(cl->containedIn)
                   << "::visit_children(v, n);" << std::endl;
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type) {
                   if (f->type->resolve(cl->containedIn) == nullptr)
                       // This is not an IR pointer
@@ -223,7 +223,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           bool needed = false;
           std::stringstream buf;
           buf << "{" << LineDirective(true);
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type) {
                   if (f->type->resolve(cl->containedIn) == nullptr)
                       // This is not an IR pointer
@@ -300,7 +300,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               }
           };
 
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
                   continue;  // FIXME -- deal with SourcInfo
               if (f->type) {
@@ -338,7 +338,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           if (auto parent = cl->getParent())
               buf << cl->indent << parent->qualified_name(cl->containedIn) << "::toJSON(json);"
                   << std::endl;
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
                   continue;  // FIXME -- deal with SourcInfo
               buf << cl->indent;
@@ -357,7 +357,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           if (auto parent = cl->getParent())
               buf << ": " << parent->qualified_name(cl->containedIn) << "(json)";
           buf << " {" << std::endl;
-          for (auto f : *cl->getFields()) {
+          for (auto f : cl->getFields()) {
               if (f->type && *f->type == NamedType::SourceInfo())
                   continue;  // FIXME -- deal with SourceInfo
               buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ")";
@@ -447,7 +447,7 @@ void IrClass::generateMethods() {
     }
     IrMethod *ctor = nullptr;
     bool user_defined_default_ctor = false;
-    for (auto m : *getUserMethods()) {
+    for (auto m : getUserMethods()) {
         if (m->rtype) {
             m->rtype->resolve(&local);
             continue;

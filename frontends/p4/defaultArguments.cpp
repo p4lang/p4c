@@ -44,7 +44,7 @@ static const IR::Vector<IR::Argument> *fillDefaults(const TypeMap *typeMap,
                                                     const TypeVariableSubstitution *tsv) {
     auto args = new IR::Vector<IR::Argument>();
     bool changed = false;
-    for (auto param : *subst->getParametersInOrder()) {
+    for (auto param : subst->getParametersInOrder()) {
         auto arg = subst->lookup(param);
         if (arg != nullptr) {
             // there is a matching argument

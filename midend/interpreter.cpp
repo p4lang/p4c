@@ -1229,7 +1229,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
 
     // For all other methods we act conservatively:
     // in arguments are unchanged, and the out arguments have an unknown value.
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
             auto arg = mi->substitution.lookup(p);
             auto val = get(arg->expression);

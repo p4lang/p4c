@@ -288,7 +288,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression *expression) {
     visit(expression->method);
     builder->append("(");
     bool first = true;
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (!first) builder->append(", ");
         expressionPrecedence = DBPrint::Prec_Low;
         first = false;
@@ -320,7 +320,7 @@ bool CodeGenInspector::preorder(const IR::Type_Enum *type) {
     builder->append(type->name);
     builder->spc();
     builder->blockStart();
-    for (auto e : *type->getDeclarations()) {
+    for (auto e : type->getDeclarations()) {
         builder->emitIndent();
         builder->append(e->getName().name);
         builder->appendLine(",");
