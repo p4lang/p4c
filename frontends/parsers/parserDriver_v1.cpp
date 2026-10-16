@@ -29,9 +29,9 @@ namespace P4::V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(std::istream &in,
-                                                        std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::V1Program> V1ParserDriver::parse(std::istream &in,
+                                                          std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     LOG1("Parsing P4-14 program " << sourceFile);
 
     // Create and configure the parser and lexer.
@@ -51,17 +51,17 @@ V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
     return driver.global;
 }
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::V1Program> V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     std::stringstream stream;
     char buffer[512];
     while (fgets(buffer, sizeof(buffer), in)) stream << buffer;
     return parse(stream, sourceFile, sourceLine);
 }
 
-IR::Constant *V1ParserDriver::constantFold(IR::Expression *expr) {
+IR::MutablePtr<IR::Constant> V1ParserDriver::constantFold(IR::Expression *expr) {
     IR::Node *node(expr);
-    auto rv = node->apply(P4::DoConstantFolding())->to<IR::Constant>();
+    IR::Ptr<IR::Constant> rv = node->apply(P4::DoConstantFolding())->to<IR::Constant>();
     return rv ? new IR::Constant(rv->srcInfo, rv->type, rv->value, rv->base) : nullptr;
 }
 
@@ -73,7 +73,7 @@ IR::Vector<IR::Expression> V1ParserDriver::makeExpressionList(const IR::NameList
 
 void V1ParserDriver::clearPragmas() { currentPragmas.clear(); }
 
-void V1ParserDriver::addPragma(IR::Annotation *pragma) {
+void V1ParserDriver::addPragma(IR::MutablePtr<IR::Annotation> pragma) {
     if (!P4CContext::get().options().isAnnotationDisabled(pragma)) currentPragmas.push_back(pragma);
 }
 

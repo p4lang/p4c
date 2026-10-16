@@ -86,7 +86,6 @@ class HSIndexContretizer : public Transform {
           generatedVariables(generatedVariables),
           maxExpansion(maxExpansion) {
         id = ++idCtr;
-        if (generatedVariables == nullptr) generatedVariables = new GeneratedVariablesMap();
         LOG5("HSIndexContretizer(" << id << ") maxExpansion = " << maxExpansion);
     }
     Visitor::profile_t init_apply(const IR::Node *node) override {

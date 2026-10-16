@@ -24,7 +24,7 @@ namespace P4 {
 
 const IR::Expression *SimplifyExternMethodCalls::preorder(IR::MethodCallExpression *mce) {
     if (getParent<IR::Statement>()) return mce;
-    auto *mi = MethodInstance::resolve(mce, this, typeMap);
+    auto mi = MethodInstance::resolve(mce, this, typeMap);
     if (mi && mi->is<P4::ExternCall>()) {
         // could do P4::FunctionCall as well, but I don't think bmv2 supports those at all
         auto tmp = nameGen.newName("tmp");

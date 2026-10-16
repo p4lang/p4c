@@ -46,11 +46,11 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
     }
 
     // Replace var with substitution everywhere
-    TypeVariableSubstitution *tvs = new TypeVariableSubstitution();
-    bool success = tvs->setBinding(var, substitution);
+    TypeVariableSubstitution tvs;
+    bool success = tvs.setBinding(var, substitution);
     if (!success) BUG("Cannot set binding");
 
-    TypeVariableSubstitutionVisitor visitor(tvs);
+    TypeVariableSubstitutionVisitor visitor(&tvs);
     bool cycle = false;  // set if we detect X -> V and V -> X substitutions.
     for (auto &bound : binding) {
         const IR::Type *type = bound.second;

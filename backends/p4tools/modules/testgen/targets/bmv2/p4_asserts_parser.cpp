@@ -96,8 +96,8 @@ std::ostream &operator<<(std::ostream &os, const Token::Kind &kind) {
 /// expression. For example, at the input we have a vector of expressions: [IR::Expression, IR::LOr
 /// with name "(tmp", IR::Expression, IR::LAnd, IR::Expression] The result will be an IR::Expression
 /// equal to !IR::Expression || (IR::Expression && IR::Expression)
-const IR::Expression *makeSingleExpr(std::vector<const IR::Expression *> input) {
-    const IR::Expression *expr = nullptr;
+IR::Ptr<IR::Expression> makeSingleExpr(std::vector<IR::Ptr<IR::Expression>> input) {
+    IR::Ptr<IR::Expression> expr = nullptr;
     for (uint64_t idx = 0; idx < input.size(); idx++) {
         if (input[idx]->is<IR::LOr>()) {
             if (idx + 1 == input.size()) {
@@ -241,8 +241,8 @@ const IR::Expression *pickBinaryExpr(const Token &token, const IR::Expression *l
 /// For example, at the input we have a vector of tokens:
 /// [key1(Text), ->(Implication), key2(Text), &&(Conjunction), key3(Text)] The result will be an
 /// IR::Expression equal to !IR::Expression || (IR::Expression && IR::Expression)
-const IR::Expression *getIR(std::vector<Token> tokens, const IdenitifierTypeMap &typeMap) {
-    std::vector<const IR::Expression *> exprVec;
+IR::Ptr<IR::Expression> getIR(std::vector<Token> tokens, const IdenitifierTypeMap &typeMap) {
+    std::vector<IR::Ptr<IR::Expression>> exprVec;
 
     for (size_t idx = 0; idx < tokens.size(); idx++) {
         auto token = tokens.at(idx);
@@ -251,8 +251,8 @@ const IR::Expression *getIR(std::vector<Token> tokens, const IdenitifierTypeMap 
                           Token::Kind::GreaterEqual, Token::Kind::LessThan, Token::Kind::LessEqual,
                           Token::Kind::Slash, Token::Kind::Percent, Token::Kind::Shr,
                           Token::Kind::Shl, Token::Kind::Mul, Token::Kind::NotEqual)) {
-            const IR::Expression *leftL = nullptr;
-            const IR::Expression *rightL = nullptr;
+            IR::Ptr<IR::Expression> leftL = nullptr;
+            IR::Ptr<IR::Expression> rightL = nullptr;
             leftL = makeConstant(tokens[idx - 1], typeMap, nullptr);
             if (tokens[idx + 1].isOneOf(Token::Kind::Text, Token::Kind::Number)) {
                 rightL = makeConstant(tokens[idx + 1], typeMap, leftL->type);
@@ -274,13 +274,13 @@ const IR::Expression *getIR(std::vector<Token> tokens, const IdenitifierTypeMap 
         } else if (token.is(Token::Kind::LNot)) {
             if (!tokens[idx + 1].isOneOf(Token::Kind::Text, Token::Kind::Number)) {
                 auto rightPart = findRightPart(tokens, idx);
-                const IR::Expression *exprLNot = getIR(rightPart.first, typeMap);
+                auto exprLNot = getIR(rightPart.first, typeMap);
                 idx = rightPart.second;
                 exprVec.push_back(new IR::LNot(exprLNot));
             }
         } else if (token.isOneOf(Token::Kind::Disjunction, Token::Kind::Implication)) {
             if (token.is(Token::Kind::Implication)) {
-                const auto *tmp = exprVec[exprVec.size() - 1];
+                auto tmp = exprVec[exprVec.size() - 1];
                 exprVec.pop_back();
                 exprVec.push_back(new IR::LNot(tmp));
             }
@@ -482,9 +482,8 @@ std::vector<Token> removeComments(const std::vector<Token> &input) {
 /// A function that calls the beginning of the transformation of restrictions from a string into an
 /// IR::Expression. Internally calls all other necessary functions, for example combineTokensToNames
 /// and the like, to eventually get an IR expression that meets the string constraint
-std::vector<const IR::Expression *> AssertsParser::genIRStructs(cstring tableName,
-                                                                cstring restrictionString,
-                                                                const IdenitifierTypeMap &typeMap) {
+std::vector<IR::Ptr<IR::Expression>> AssertsParser::genIRStructs(
+    cstring tableName, cstring restrictionString, const IdenitifierTypeMap &typeMap) {
     Lexer lex(restrictionString.c_str());
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.isOneOf(Token::Kind::End, Token::Kind::Unknown);
@@ -492,7 +491,7 @@ std::vector<const IR::Expression *> AssertsParser::genIRStructs(cstring tableNam
         tmp.push_back(token);
     }
 
-    std::vector<const IR::Expression *> result;
+    std::vector<IR::Ptr<IR::Expression>> result;
 
     tmp = combineTokensToNames(tmp);
     tmp = combineTokensToNumbers(tmp);
@@ -501,12 +500,12 @@ std::vector<const IR::Expression *> AssertsParser::genIRStructs(cstring tableNam
     std::vector<Token> tokens;
     for (uint64_t i = 0; i < tmp.size(); i++) {
         if (tmp[i].is(Token::Kind::Semicolon)) {
-            const auto *expr = getIR(tokens, typeMap);
+            auto expr = getIR(tokens, typeMap);
             result.push_back(expr);
             tokens.clear();
         } else if (i == tmp.size() - 1) {
             tokens.push_back(tmp[i]);
-            const auto *expr = getIR(tokens, typeMap);
+            auto expr = getIR(tokens, typeMap);
             result.push_back(expr);
             tokens.clear();
         } else {
@@ -518,17 +517,17 @@ std::vector<const IR::Expression *> AssertsParser::genIRStructs(cstring tableNam
 }
 
 const IR::Node *AssertsParser::postorder(IR::P4Action *actionContext) {
-    const auto *annotation = actionContext->getAnnotation("action_restriction"_cs);
+    auto annotation = actionContext->getAnnotation("action_restriction"_cs);
     if (annotation == nullptr) {
         return actionContext;
     }
 
     IdenitifierTypeMap typeMap;
-    for (const auto *arg : actionContext->parameters->parameters) {
+    for (auto arg : actionContext->parameters->parameters) {
         typeMap[arg->controlPlaneName()] = arg->type;
     }
 
-    for (const auto *restrStr : annotation->getUnparsed()) {
+    for (auto restrStr : annotation->getUnparsed()) {
         auto restrictions =
             genIRStructs(actionContext->controlPlaneName(), restrStr->text, typeMap);
         // Using Z3Solver, we check the feasibility of restrictions, if they are not
@@ -540,22 +539,22 @@ const IR::Node *AssertsParser::postorder(IR::P4Action *actionContext) {
 }
 
 const IR::Node *AssertsParser::postorder(IR::P4Table *tableContext) {
-    const auto *annotation = tableContext->getAnnotation("entry_restriction"_cs);
-    const auto *key = tableContext->getKey();
+    auto annotation = tableContext->getAnnotation("entry_restriction"_cs);
+    auto key = tableContext->getKey();
     if (annotation == nullptr || key == nullptr) {
         return tableContext;
     }
 
     IdenitifierTypeMap typeMap;
-    for (const auto *keyElement : tableContext->getKey()->keyElements) {
-        const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
+    for (auto keyElement : tableContext->getKey()->keyElements) {
+        auto nameAnnot = keyElement->getAnnotation("name"_cs);
         BUG_CHECK(nameAnnot != nullptr, "%1% table key without a name annotation",
                   annotation->name.name);
         typeMap[nameAnnot->getName()] = keyElement->expression->type;
     }
 
     Z3Solver solver;
-    for (const auto *restrStr : annotation->getUnparsed()) {
+    for (auto restrStr : annotation->getUnparsed()) {
         auto restrictions = genIRStructs(tableContext->controlPlaneName(), restrStr->text, typeMap);
         // Using Z3Solver, we check the feasibility of restrictions, if they are not
         // feasible, we delete keys and entries from the table to execute
@@ -574,7 +573,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Table *tableContext) {
         auto *cloneTable = tableContext->clone();
         auto *cloneProperties = tableContext->properties->clone();
         IR::IndexedVector<IR::Property> properties;
-        for (const auto *property : cloneProperties->properties) {
+        for (auto property : cloneProperties->properties) {
             if (property->name.name != "key" && property->name.name != "entries") {
                 properties.push_back(property);
             }

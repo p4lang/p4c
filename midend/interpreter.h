@@ -20,7 +20,13 @@ namespace P4 {
 class SymbolicValueFactory;
 
 // Base class for all abstract values
-class SymbolicValue : public IHasDbPrint, public ICastable {
+class SymbolicValue : public IHasDbPrint,
+                      public ICastable
+#if !HAVE_LIBGC
+    ,
+                      public IR::shared_ptr_base
+#endif
+{
     static unsigned crtid;
 
  protected:
@@ -28,9 +34,9 @@ class SymbolicValue : public IHasDbPrint, public ICastable {
 
  public:
     const unsigned id;
-    const IR::Type *type;
+    IR::Ptr<IR::Type> type;
     virtual bool isScalar() const = 0;
-    virtual SymbolicValue *clone() const = 0;
+    virtual IR::MutablePtr<SymbolicValue> clone() const = 0;
     virtual void setAllUnknown() = 0;
     virtual void assign(const SymbolicValue *other) = 0;
     // Merging two symbolic values; values should form a lattice.
@@ -51,7 +57,7 @@ class SymbolicValueFactory {
     explicit SymbolicValueFactory(const TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
     }
-    SymbolicValue *create(const IR::Type *type, bool uninitialized) const;
+    IR::MutablePtr<SymbolicValue> create(const IR::Type *type, bool uninitialized) const;
     // True if type has a fixed width, i.e., it does not contain a Varbit.
     bool isFixedWidth(const IR::Type *type) const;
     // If type has a fixed width return width in bits.
@@ -62,24 +68,25 @@ class SymbolicValueFactory {
 
 class ValueMap final : public IHasDbPrint {
  public:
-    std::map<const IR::IDeclaration *, SymbolicValue *> map;
-    ValueMap *clone() const {
-        auto result = new ValueMap();
+    std::map<IR::Ptr<IR::IDeclaration>, IR::MutablePtr<SymbolicValue>> map;
+    std::shared_ptr<ValueMap> clone() const {
+        auto result = std::make_shared<ValueMap>();
         for (auto v : map) result->map.emplace(v.first, v.second->clone());
         return result;
     }
-    ValueMap *filter(std::function<bool(const IR::IDeclaration *, const SymbolicValue *)> filter) {
-        auto result = new ValueMap();
+    std::shared_ptr<ValueMap> filter(
+        std::function<bool(const IR::IDeclaration *, const SymbolicValue *)> filter) {
+        auto result = std::make_shared<ValueMap>();
         for (auto v : map)
             if (filter(v.first, v.second)) result->map.emplace(v.first, v.second);
         return result;
     }
-    void set(const IR::IDeclaration *left, SymbolicValue *right) {
+    void set(const IR::IDeclaration *left, IR::MutablePtr<SymbolicValue> right) {
         CHECK_NULL(left);
         CHECK_NULL(right);
         map[left] = right;
     }
-    SymbolicValue *get(const IR::IDeclaration *left) const {
+    IR::MutablePtr<SymbolicValue> get(const IR::IDeclaration *left) const {
         CHECK_NULL(left);
         return ::P4::get(map, left);
     }
@@ -116,13 +123,14 @@ class ValueMap final : public IHasDbPrint {
 class ExpressionEvaluator : public Inspector {
     ReferenceMap *refMap;
     TypeMap *typeMap;  // updated if constant folding happens
-    ValueMap *valueMap;
-    const SymbolicValueFactory *factory;
+    std::shared_ptr<ValueMap> valueMap;
+    std::shared_ptr<const SymbolicValueFactory> factory;
     bool evaluatingLeftValue = false;
 
-    std::map<const IR::Expression *, SymbolicValue *> value;
+    std::map<IR::Ptr<IR::Expression>, IR::MutablePtr<SymbolicValue>> value;
 
-    SymbolicValue *set(const IR::Expression *expression, SymbolicValue *v) {
+    IR::MutablePtr<SymbolicValue> set(const IR::Expression *expression,
+                                      IR::MutablePtr<SymbolicValue> v) {
         LOG2("Symbolic evaluation of " << expression << " is " << v);
         value.emplace(expression, v);
         return v;
@@ -146,19 +154,19 @@ class ExpressionEvaluator : public Inspector {
     void setNonConstant(const IR::Expression *expression);
 
  public:
-    ExpressionEvaluator(ReferenceMap *refMap, TypeMap *typeMap, ValueMap *valueMap)
+    ExpressionEvaluator(ReferenceMap *refMap, TypeMap *typeMap, std::shared_ptr<ValueMap> valueMap)
         : refMap(refMap), typeMap(typeMap), valueMap(valueMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         CHECK_NULL(valueMap);
-        factory = new SymbolicValueFactory(typeMap);
+        factory = std::make_shared<SymbolicValueFactory>(typeMap);
     }
 
     // May mutate the valueMap, when evaluating expression with side-effects.
     // If leftValue is true we are returning a leftValue.
-    SymbolicValue *evaluate(const IR::Expression *expression, bool leftValue);
+    IR::MutablePtr<SymbolicValue> evaluate(const IR::Expression *expression, bool leftValue);
 
-    SymbolicValue *get(const IR::Expression *expression) const {
+    IR::MutablePtr<SymbolicValue> get(const IR::Expression *expression) const {
         auto r = ::P4::get(value, expression);
         BUG_CHECK(r != nullptr, "no evaluation for %1%", expression);
         return r;
@@ -170,7 +178,7 @@ class ExpressionEvaluator : public Inspector {
 // produced when evaluation gives a static error
 class SymbolicError : public SymbolicValue {
  public:
-    const IR::Node *errorPosition;
+    IR::Ptr<IR::Node> errorPosition;
     explicit SymbolicError(const IR::Node *errorPosition)
         : SymbolicValue(nullptr), errorPosition(errorPosition) {}
     void setAllUnknown() override {}
@@ -191,7 +199,9 @@ class SymbolicException : public SymbolicError {
     const P4::StandardExceptions exc;
     SymbolicException(const IR::Node *errorPosition, P4::StandardExceptions exc)
         : SymbolicError(errorPosition), exc(exc) {}
-    SymbolicValue *clone() const override { return new SymbolicException(errorPosition, exc); }
+    IR::MutablePtr<SymbolicValue> clone() const override {
+        return new SymbolicException(errorPosition, exc);
+    }
     void dbprint(std::ostream &out) const override { out << "Exception: " << exc; }
     cstring message() const override {
         std::stringstream str;
@@ -208,7 +218,9 @@ class SymbolicStaticError : public SymbolicError {
     const std::string msg;
     SymbolicStaticError(const IR::Node *errorPosition, std::string_view message)
         : SymbolicError(errorPosition), msg(message) {}
-    SymbolicValue *clone() const override { return new SymbolicStaticError(errorPosition, msg); }
+    IR::MutablePtr<SymbolicValue> clone() const override {
+        return new SymbolicStaticError(errorPosition, msg);
+    }
     void dbprint(std::ostream &out) const override { out << "Error: " << msg; }
     cstring message() const override { return msg; }
     bool equals(const SymbolicValue *other) const override;
@@ -259,7 +271,7 @@ class ScalarValue : public SymbolicValue {
 
 class SymbolicVoid : public SymbolicValue {
     SymbolicVoid() : SymbolicValue(IR::Type_Void::get()) {}
-    static SymbolicVoid *instance;
+    static IR::MutablePtr<SymbolicVoid> instance;
 
  public:
     void dbprint(std::ostream &out) const override { out << "void"; }
@@ -267,7 +279,7 @@ class SymbolicVoid : public SymbolicValue {
     bool isScalar() const override { return false; }
     void assign(const SymbolicValue *) override { BUG("assign to void"); }
     static SymbolicVoid *get() { return instance; }
-    SymbolicValue *clone() const override { return instance; }
+    IR::MutablePtr<SymbolicValue> clone() const override { return instance; }
     bool merge(const SymbolicValue *other) override {
         BUG_CHECK(other->is<SymbolicVoid>(), "%1%: expected void", other);
         return false;
@@ -297,7 +309,7 @@ class SymbolicBool final : public ScalarValue {
         if (!isKnown()) return;
         out << (value ? "true" : "false");
     }
-    SymbolicValue *clone() const override {
+    IR::MutablePtr<SymbolicValue> clone() const override {
         auto result = new SymbolicBool();
         result->state = state;
         result->value = value;
@@ -312,7 +324,7 @@ class SymbolicBool final : public ScalarValue {
 
 class SymbolicInteger final : public ScalarValue {
  public:
-    const IR::Constant *constant;
+    IR::Ptr<IR::Constant> constant;
     explicit SymbolicInteger(const IR::Type_Bits *type)
         : ScalarValue(ScalarValue::ValueState::Uninitialized, type), constant(nullptr) {}
     SymbolicInteger(ScalarValue::ValueState state, const IR::Type_Bits *type)
@@ -324,7 +336,7 @@ class SymbolicInteger final : public ScalarValue {
         ScalarValue::dbprint(out);
         if (isKnown()) out << constant->value;
     }
-    SymbolicValue *clone() const override {
+    IR::MutablePtr<SymbolicValue> clone() const override {
         auto result = new SymbolicInteger(type->to<IR::Type_Bits>());
         result->state = state;
         result->constant = constant;
@@ -339,7 +351,7 @@ class SymbolicInteger final : public ScalarValue {
 
 class SymbolicString final : public ScalarValue {
  public:
-    const IR::StringLiteral *string;
+    IR::Ptr<IR::StringLiteral> string;
     explicit SymbolicString(const IR::Type_String *type)
         : ScalarValue(ScalarValue::ValueState::Uninitialized, type), string(nullptr) {}
     SymbolicString(ScalarValue::ValueState state, const IR::Type_String *type)
@@ -351,7 +363,7 @@ class SymbolicString final : public ScalarValue {
         ScalarValue::dbprint(out);
         if (isKnown()) out << string->value;
     }
-    SymbolicValue *clone() const override {
+    IR::MutablePtr<SymbolicValue> clone() const override {
         auto result = new SymbolicString(type->to<IR::Type_String>());
         result->state = state;
         result->string = string;
@@ -372,7 +384,7 @@ class SymbolicVarbit final : public ScalarValue {
         : ScalarValue(state, type) {}
     SymbolicVarbit(const SymbolicVarbit &other) = default;
     void dbprint(std::ostream &out) const override { ScalarValue::dbprint(out); }
-    SymbolicValue *clone() const override {
+    IR::MutablePtr<SymbolicValue> clone() const override {
         return new SymbolicVarbit(state, type->to<IR::Type_Varbits>());
     }
     void assign(const SymbolicValue *other) override;
@@ -398,7 +410,9 @@ class SymbolicEnum final : public ScalarValue {
         ScalarValue::dbprint(out);
         if (isKnown()) out << value;
     }
-    SymbolicValue *clone() const override { return new SymbolicEnum(state, type, value); }
+    IR::MutablePtr<SymbolicValue> clone() const override {
+        return new SymbolicEnum(state, type, value);
+    }
     void assign(const SymbolicValue *other) override;
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
@@ -411,21 +425,21 @@ class SymbolicStruct : public SymbolicValue {
     explicit SymbolicStruct(const IR::Type_StructLike *type) : SymbolicValue(type) {
         CHECK_NULL(type);
     }
-    std::map<cstring, SymbolicValue *> fieldValue;
+    std::map<cstring, IR::MutablePtr<SymbolicValue>> fieldValue;
     SymbolicStruct(const IR::Type_StructLike *type, bool uninitialized,
                    const SymbolicValueFactory *factory);
-    virtual SymbolicValue *get(const IR::Node *, cstring field) const {
+    virtual IR::MutablePtr<SymbolicValue> get(const IR::Node *, cstring field) const {
         auto r = ::P4::get(fieldValue, field);
         CHECK_NULL(r);
         return r;
     }
-    void set(cstring field, SymbolicValue *value) {
+    void set(cstring field, IR::MutablePtr<SymbolicValue> value) {
         CHECK_NULL(value);
         fieldValue[field] = value;
     }
     void dbprint(std::ostream &out) const override;
     bool isScalar() const override { return false; }
-    SymbolicValue *clone() const override;
+    IR::MutablePtr<SymbolicValue> clone() const override;
     void setAllUnknown() override;
     void assign(const SymbolicValue *other) override;
     bool merge(const SymbolicValue *other) override;
@@ -438,12 +452,12 @@ class SymbolicStruct : public SymbolicValue {
 class SymbolicHeader : public SymbolicStruct {
  public:
     explicit SymbolicHeader(const IR::Type_Header *type) : SymbolicStruct(type) {}
-    SymbolicBool *valid = nullptr;
+    IR::MutablePtr<SymbolicBool> valid = nullptr;
     SymbolicHeader(const IR::Type_Header *type, bool uninitialized,
                    const SymbolicValueFactory *factory);
     virtual void setValid(bool v);
-    SymbolicValue *clone() const override;
-    SymbolicValue *get(const IR::Node *node, cstring field) const override;
+    IR::MutablePtr<SymbolicValue> clone() const override;
+    IR::MutablePtr<SymbolicValue> get(const IR::Node *node, cstring field) const override;
     void setAllUnknown() override;
     void assign(const SymbolicValue *other) override;
     void dbprint(std::ostream &out) const override;
@@ -458,9 +472,9 @@ class SymbolicHeaderUnion : public SymbolicStruct {
     explicit SymbolicHeaderUnion(const IR::Type_HeaderUnion *type) : SymbolicStruct(type) {}
     SymbolicHeaderUnion(const IR::Type_HeaderUnion *type, bool uninitialized,
                         const SymbolicValueFactory *factory);
-    SymbolicBool *isValid() const;
-    SymbolicValue *clone() const override;
-    SymbolicValue *get(const IR::Node *node, cstring field) const override;
+    IR::MutablePtr<SymbolicBool> isValid() const;
+    IR::MutablePtr<SymbolicValue> clone() const override;
+    IR::MutablePtr<SymbolicValue> get(const IR::Node *node, cstring field) const override;
     void setAllUnknown() override;
     void assign(const SymbolicValue *other) override;
     void dbprint(std::ostream &out) const override;
@@ -471,7 +485,7 @@ class SymbolicHeaderUnion : public SymbolicStruct {
 };
 
 class SymbolicArray final : public SymbolicValue {
-    std::vector<SymbolicValue *> values;
+    std::vector<IR::MutablePtr<SymbolicValue>> values;
     friend class AnyElement;
     explicit SymbolicArray(const IR::Type_Array *type)
         : SymbolicValue(type),
@@ -480,10 +494,10 @@ class SymbolicArray final : public SymbolicValue {
 
  public:
     const size_t size;
-    const IR::Type_Header *elemType;
+    IR::Ptr<IR::Type_Header> elemType;
     SymbolicArray(const IR::Type_Array *stack, bool uninitialized,
                   const SymbolicValueFactory *factory);
-    SymbolicValue *get(const IR::Node *node, size_t index) const {
+    IR::MutablePtr<SymbolicValue> get(const IR::Node *node, size_t index) const {
         if (index >= values.size())
             return new SymbolicException(node, P4::StandardExceptions::StackOutOfBounds);
         return values.at(index);
@@ -494,10 +508,10 @@ class SymbolicArray final : public SymbolicValue {
         values[index] = value;
     }
     void dbprint(std::ostream &out) const override;
-    SymbolicValue *clone() const override;
-    SymbolicValue *next(const IR::Node *node);
-    SymbolicValue *last(const IR::Node *node);
-    SymbolicValue *lastIndex(const IR::Node *node);
+    IR::MutablePtr<SymbolicValue> clone() const override;
+    IR::MutablePtr<SymbolicValue> next(const IR::Node *node);
+    IR::MutablePtr<SymbolicValue> last(const IR::Node *node);
+    IR::MutablePtr<SymbolicValue> lastIndex(const IR::Node *node);
     bool isScalar() const override { return false; }
     void setAllUnknown() override;
     void assign(const SymbolicValue *other) override;
@@ -510,13 +524,13 @@ class SymbolicArray final : public SymbolicValue {
 
 // Represents any element from a stack
 class AnyElement final : public SymbolicHeader {
-    SymbolicArray *parent;
+    IR::MutablePtr<SymbolicArray> parent;
 
  public:
     explicit AnyElement(SymbolicArray *parent) : SymbolicHeader(parent->elemType), parent(parent) {
         valid = new SymbolicBool();
     }
-    SymbolicValue *clone() const override {
+    IR::MutablePtr<SymbolicValue> clone() const override {
         auto result = new AnyElement(parent);
         return result;
     }
@@ -526,20 +540,20 @@ class AnyElement final : public SymbolicHeader {
     void setValid(bool) override { parent->setAllUnknown(); }
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
-    SymbolicValue *collapse() const;
+    IR::MutablePtr<SymbolicValue> collapse() const;
     bool hasUninitializedParts() const override { BUG("Should not be called"); }
 
     DECLARE_TYPEINFO(AnyElement, SymbolicHeader);
 };
 
 class SymbolicTuple final : public SymbolicValue {
-    std::vector<SymbolicValue *> values;
+    std::vector<IR::MutablePtr<SymbolicValue>> values;
 
  public:
     explicit SymbolicTuple(const IR::Type_Tuple *type) : SymbolicValue(type) {}
     SymbolicTuple(const IR::Type_Tuple *type, bool uninitialized,
                   const SymbolicValueFactory *factory);
-    SymbolicValue *get(size_t index) const { return values.at(index); }
+    IR::MutablePtr<SymbolicValue> get(size_t index) const { return values.at(index); }
     void dbprint(std::ostream &out) const override {
         bool first = true;
         for (auto f : values) {
@@ -548,11 +562,11 @@ class SymbolicTuple final : public SymbolicValue {
             first = false;
         }
     }
-    SymbolicValue *clone() const override;
+    IR::MutablePtr<SymbolicValue> clone() const override;
     bool isScalar() const override { return false; }
     void setAllUnknown() override;
     void assign(const SymbolicValue *) override { BUG("%1%: tuples are read-only", this); }
-    void add(SymbolicValue *value) { values.push_back(value); }
+    void add(IR::MutablePtr<SymbolicValue> value) { values.push_back(value); }
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override;
@@ -565,7 +579,7 @@ class SymbolicExtern : public SymbolicValue {
  public:
     explicit SymbolicExtern(const IR::Type_Extern *type) : SymbolicValue(type) { CHECK_NULL(type); }
     void dbprint(std::ostream &out) const override { out << "instance of " << type; }
-    SymbolicValue *clone() const override {
+    IR::MutablePtr<SymbolicValue> clone() const override {
         return new SymbolicExtern(type->to<IR::Type_Extern>());
     }
     bool isScalar() const override { return false; }
@@ -596,7 +610,7 @@ class SymbolicPacketIn final : public SymbolicExtern {
         out << "packet_in; offset =" << minimumStreamOffset
             << (conservative ? " (conservative)" : "");
     }
-    SymbolicValue *clone() const override {
+    IR::MutablePtr<SymbolicValue> clone() const override {
         auto result = new SymbolicPacketIn(type->to<IR::Type_Extern>());
         result->minimumStreamOffset = minimumStreamOffset;
         result->conservative = conservative;

@@ -100,7 +100,7 @@ bool Taint::hasTaint(const IR::Expression *expr) {
     }
 
     if (const auto *structExpr = expr->to<IR::StructExpression>()) {
-        for (const auto *subExpr : structExpr->components) {
+        for (auto subExpr : structExpr->components) {
             if (hasTaint(subExpr->expression)) {
                 return true;
             }
@@ -108,7 +108,7 @@ bool Taint::hasTaint(const IR::Expression *expr) {
         return false;
     }
     if (const auto *listExpr = expr->to<IR::ListExpression>()) {
-        for (const auto *subExpr : listExpr->components) {
+        for (auto subExpr : listExpr->components) {
             if (hasTaint(subExpr)) {
                 return true;
             }
@@ -213,7 +213,7 @@ class TaintPropagator : public Transform {
         auto slLeftInt = slice->e1->checkedTo<IR::Constant>()->asInt();
         auto slRightInt = slice->e2->checkedTo<IR::Constant>()->asInt();
         auto width = 1 + slLeftInt - slRightInt;
-        const auto *sliceTb = IR::Type_Bits::get(width);
+        auto sliceTb = IR::Type_Bits::get(width);
         if (Taint::hasTaint(slice)) {
             return ToolsVariables::getTaintExpression(sliceTb);
         }
@@ -246,29 +246,29 @@ class MaskBuilder : public Transform {
 
     const IR::Node *preorder(IR::Literal *lit) override {
         // Fill out a literal with zeroes.
-        const auto *maxConst = IR::getMaxValueConstant(lit->type);
+        IR::Ptr<IR::Constant> maxConst = IR::getMaxValueConstant(lit->type);
         // If the literal would have been zero anyway, just return it.
         if (lit->equiv(*maxConst)) {
             return lit;
         }
-        return maxConst;
+        return guardReturn(maxConst);
     }
 
  public:
     MaskBuilder() { visitDagOnce = false; }
 };
 
-const IR::Literal *Taint::buildTaintMask(const Model *evaluatedModel,
-                                         const IR::Expression *programPacket) {
+IR::Ptr<IR::Literal> Taint::buildTaintMask(const Model *evaluatedModel,
+                                           const IR::Expression *programPacket) {
     // First propagate taint and simplify the packet.
-    const auto *taintedPacket = programPacket->apply(TaintPropagator());
+    auto taintedPacket = programPacket->apply(TaintPropagator());
     // Then create the mask based on the remaining expressions.
-    const auto *mask = taintedPacket->apply(MaskBuilder());
+    auto mask = taintedPacket->apply(MaskBuilder());
     // Produce the evaluated literal. The hex expression should only have 0 or f.
     return evaluatedModel->evaluate(mask, false);
 }
 
-const IR::Expression *Taint::propagateTaint(const IR::Expression *expr) {
+IR::Ptr<IR::Expression> Taint::propagateTaint(const IR::Expression *expr) {
     return expr->apply(TaintPropagator());
 }
 

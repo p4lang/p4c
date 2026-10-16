@@ -70,7 +70,7 @@ IR::P4Parser *GenericCoreSmithTarget::generateParserBlock() const {
     auto *typeParser = new IR::Type_Parser("p", parList);
 
     // add to the scope
-    for (const auto *param : parList->parameters) {
+    for (auto param : parList->parameters) {
         P4Scope::addToScope(param);
         // add to the name_2_type
         // only add values that are !read-only to the modifiable types
@@ -110,7 +110,7 @@ IR::P4Control *GenericCoreSmithTarget::generateIngressBlock() const {
     auto *typeCtrl = new IR::Type_Control("ingress", parList);
 
     // add to the scope
-    for (const auto *param : parList->parameters) {
+    for (auto param : parList->parameters) {
         P4Scope::addToScope(param);
         // add to the name_2_type
         // only add values that are !read-only to the modifiable types

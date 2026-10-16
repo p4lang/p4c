@@ -25,19 +25,19 @@ const IR::Node *DoConvertErrors::preorder(IR::Type_Error *type) {
     size_t width = policy->errorSize(count);
     BUG_CHECK(count <= (1ULL << width), "%1%: not enough bits to represent %2%", width, type);
     // using the same data structure as for enum elimination.
-    auto *r = new P4::EnumRepresentation(type->srcInfo, width);
-    const auto *canontype = typeMap->getTypeType(getOriginal(), true);
+    auto r = std::make_shared<P4::EnumRepresentation>(type->srcInfo, width);
+    const IR::Type *canontype = typeMap->getTypeType(getOriginal(), true);
     BUG_CHECK(canontype->is<IR::Type_Error>(), "canon type of error %s is non error %s?", type,
               canontype);
     repr.emplace(canontype->to<IR::Type_Error>()->name, r);
-    for (const auto *d : type->members) {
+    for (const IR::Declaration_ID *d : type->members) {
         r->add(d->name.name);
     }
     return type;
 }
 
 const IR::Node *DoConvertErrors::postorder(IR::Type_Name *type) {
-    const auto *canontype = typeMap->getTypeType(getOriginal(), true);
+    const IR::Type *canontype = typeMap->getTypeType(getOriginal(), true);
     if (!canontype->is<IR::Type_Error>()) {
         return type;
     }
@@ -46,7 +46,7 @@ const IR::Node *DoConvertErrors::postorder(IR::Type_Name *type) {
         return type;
     }
     auto errorType = canontype->to<IR::Type_Error>()->name;
-    auto *r = ::P4::get(repr, errorType);
+    auto r = ::P4::get(repr, errorType);
     if (r == nullptr) {
         return type;
     }
@@ -58,7 +58,7 @@ const IR::Node *DoConvertErrors::postorder(IR::Member *member) {
     if (!typeErr) {
         return member;
     }
-    auto *r = ::P4::get(repr, typeErr->name);
+    auto r = ::P4::get(repr, typeErr->name);
     CHECK_NULL(r);
     if (!member->expr->is<IR::TypeNameExpression>()) {
         // variable
@@ -75,7 +75,7 @@ IR::IndexedVector<IR::SerEnumMember> *ChooseErrorRepresentation::assignValues(
     IR::Type_Error *type, unsigned width) const {
     auto *members = new IR::IndexedVector<IR::SerEnumMember>;
     unsigned idx = 0;
-    for (const auto *d : type->members) {
+    for (const IR::Declaration_ID *d : type->members) {
         members->push_back(new IR::SerEnumMember(
             d->name.name, new IR::Constant(IR::Type_Bits::get(width), idx++)));
     }

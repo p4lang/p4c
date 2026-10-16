@@ -17,7 +17,7 @@
 namespace P4::P4Tools {
 
 /// Symbolic maps map a state variable to a IR::Expression.
-using SymbolicMapType = P4::flat_map<IR::StateVariable, const IR::Expression *>;
+using SymbolicMapType = P4::flat_map<IR::StateVariable, IR::Ptr<IR::Expression>>;
 
 /// Represents a solution found by the solver. A model is a concretized form of a symbolic
 /// environment. All the expressions in a Model must be of type IR::Literal.
@@ -49,7 +49,7 @@ class Model {
 
  public:
     // Maps an expression to its value in the model.
-    using ExpressionMap = std::map<const IR::Expression *, const IR::Literal *>;
+    using ExpressionMap = std::map<IR::Ptr<IR::Expression>, IR::Ptr<IR::Literal>>;
 
     /// A model is initialized with a symbolic map. Usually, these are derived from the solver.
     explicit Model(SymbolicMapping symbolicMap) : symbolicMap(std::move(symbolicMap)) {}
@@ -65,18 +65,18 @@ class Model {
     /// A BUG occurs if the given expression refers to a variable that is not bound by this model.
     /// If the input list @param resolvedExpressions is not null, we also collect the resolved value
     /// of this expression.
-    const IR::Literal *evaluate(const IR::Expression *expr, bool doComplete,
-                                ExpressionMap *resolvedExpressions = nullptr) const;
+    IR::Ptr<IR::Literal> evaluate(IR::Ptr<IR::Expression> expr, bool doComplete,
+                                  ExpressionMap *resolvedExpressions = nullptr) const;
 
     // Evaluates a P4 StructExpression in the context of this model. Recursively calls into
     // @evaluate and substitutes all members of this list with a Value type.
-    const IR::StructExpression *evaluateStructExpr(
+    IR::Ptr<IR::StructExpression> evaluateStructExpr(
         const IR::StructExpression *structExpr, bool doComplete,
         ExpressionMap *resolvedExpressions = nullptr) const;
 
     // Evaluates a P4 BaseListExpression in the context of this model. Recursively calls into
     // @evaluate and substitutes all members of this list with a Value type.
-    const IR::BaseListExpression *evaluateListExpr(
+    IR::Ptr<IR::BaseListExpression> evaluateListExpr(
         const IR::BaseListExpression *listExpr, bool doComplete,
         ExpressionMap *resolvedExpressions = nullptr) const;
 

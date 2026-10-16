@@ -143,14 +143,14 @@ TemporaryVariableInserter::InjectInitializations::findActions(
     if (path_ == nullptr) return action_list_;
 
     /* -- find the table declaration */
-    const auto *decl_(ref_map->getDeclaration(path_->path));
+    const IR::IDeclaration *decl_(ref_map->getDeclaration(path_->path));
     if (decl_ == nullptr) return action_list_;
     const auto *table_(decl_->to<IR::P4Table>());
     if (table_ == nullptr) return action_list_;
 
     /* -- search for the actions property */
     const IR::ActionList *actions_(nullptr);
-    for (const auto *property_ : table_->properties->properties) {
+    for (const IR::Property *property_ : table_->properties->properties) {
         if (property_->name.name == table_->properties->actionsPropertyName) {
             actions_ = property_->value->to<IR::ActionList>();
             break;
@@ -159,7 +159,7 @@ TemporaryVariableInserter::InjectInitializations::findActions(
     if (actions_ == nullptr) return action_list_;
 
     /* -- construct list of used actions */
-    for (const auto *element_ : actions_->actionList) {
+    for (const IR::ActionListElement *element_ : actions_->actionList) {
         const auto *mce_(element_->expression->to<IR::MethodCallExpression>());
         if (mce_ == nullptr) continue;
         const auto *pe_(mce_->method->to<IR::PathExpression>());
@@ -346,7 +346,7 @@ const IR::Node *ProcessFields::replaceByTemporaryVariable(IR::Expression *expr_)
      *    the initialization to be moved into a previous stage. */
 
     /* -- replace the expression by a temporary variable */
-    auto *expr_type_(type_map->getType(getOriginal(), true));
+    const IR::Type *expr_type_(type_map->getType(getOriginal(), true));
     auto *stmt_(findContext<IR::Statement>());
     auto *action_(findContext<IR::P4Action>());
     auto *tmp_var_(

@@ -60,7 +60,7 @@ class RenameMap {
 /// move declarations around.
 class UniqueNames : public PassManager {
  private:
-    RenameMap *renameMap;
+    std::shared_ptr<RenameMap> renameMap;
 
  public:
     UniqueNames();
@@ -116,17 +116,17 @@ class RenameSymbols : public Transform, public ResolutionContext {
     RenameMap *renameMap;
 
     /// Get new name of the current declaration or nullptr if the declaration is not to be renamed.
-    IR::ID *getName() const;
+    std::optional<IR::ID> getName() const;
     /// Get new name of the given declaration or nullptr if the declaration is not to be renamed.
     /// @param decl Declaration *in the original/non-transformed* P4 IR.
-    IR::ID *getName(const IR::IDeclaration *decl) const;
+    std::optional<IR::ID> getName(const IR::IDeclaration *decl) const;
 
     /// Rename any declaration where we want to add @name annotation with the original name.
     /// Has to be a template as there is no common base for declarations with annotations member.
     template <typename D>
     const IR::Node *renameDeclWithNameAnnotation(D *decl) {
         auto name = getName();
-        if (name != nullptr && *name != decl->name) {
+        if (name && *name != decl->name) {
             decl->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                      new IR::StringLiteral(decl->name));
             decl->name = *name;
@@ -176,7 +176,7 @@ class FindParameters : public Inspector {
 /// This must also rename named arguments
 class UniqueParameters : public PassManager {
  private:
-    RenameMap *renameMap;
+    std::shared_ptr<RenameMap> renameMap;
 
  public:
     explicit UniqueParameters(TypeMap *typeMap);

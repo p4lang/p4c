@@ -21,29 +21,29 @@ class ComplexValues final {
      * has a struct type.
      */
     struct Component : public IHasDbPrint {
-        virtual const IR::Expression *convertToExpression() = 0;
-        virtual Component *getComponent(cstring name) = 0;
+        virtual IR::Ptr<IR::Expression> convertToExpression() = 0;
+        virtual std::shared_ptr<Component> getComponent(cstring name) = 0;
         virtual void dbprint(std::ostream &out) const = 0;
     };
 
     struct FinalName : public Component {
         cstring newName;
         explicit FinalName(cstring name) : newName(name) {}
-        const IR::Expression *convertToExpression() override {
+        IR::Ptr<IR::Expression> convertToExpression() override {
             return new IR::PathExpression(IR::ID(newName));
         }
-        Component *getComponent(cstring) override { return nullptr; }
+        std::shared_ptr<Component> getComponent(cstring) override { return nullptr; }
         void dbprint(std::ostream &out) const override { out << newName << Log::endl; }
     };
 
     struct FieldsMap : public Component {
-        ordered_map<cstring, Component *> members;
-        const IR::Type *type;
+        ordered_map<cstring, std::shared_ptr<Component>> members;
+        IR::Ptr<IR::Type> type;
         explicit FieldsMap(const IR::Type *type) : type(type) {
             CHECK_NULL(type);
             BUG_CHECK(type->is<IR::Type_Struct>(), "%1%: expected a struct", type);
         }
-        const IR::Expression *convertToExpression() override {
+        IR::Ptr<IR::Expression> convertToExpression() override {
             IR::IndexedVector<IR::NamedExpression> vec;
             for (auto m : members) {
                 auto e = m.second->convertToExpression();
@@ -51,7 +51,9 @@ class ComplexValues final {
             }
             return new IR::StructExpression(type->getP4Type(), vec);
         }
-        Component *getComponent(cstring name) override { return ::P4::get(members, name); }
+        std::shared_ptr<Component> getComponent(cstring name) override {
+            return ::P4::get(members, name);
+        }
         void dbprint(std::ostream &out) const override {
             out << Log::indent;
             for (auto m : members) out << m.first << "=>" << m.second;
@@ -59,8 +61,8 @@ class ComplexValues final {
         }
     };
 
-    std::map<const IR::Declaration_Variable *, Component *> values;
-    std::map<const IR::Expression *, Component *> translation;
+    std::map<IR::Ptr<IR::Declaration_Variable>, std::shared_ptr<Component>> values;
+    std::map<IR::Ptr<IR::Expression>, std::shared_ptr<Component>> translation;
 
     TypeMap *typeMap;
     NameGenerator &nameGen;
@@ -74,16 +76,16 @@ class ComplexValues final {
     template <class T>
     void explode(std::string_view prefix, const IR::Type_Struct *type, FieldsMap *map,
                  IR::Vector<T> *result);
-    Component *getTranslation(const IR::IDeclaration *decl) const {
+    std::shared_ptr<Component> getTranslation(const IR::IDeclaration *decl) const {
         auto dv = decl->to<IR::Declaration_Variable>();
         if (dv == nullptr) return nullptr;
         return ::P4::get(values, dv);
     }
-    Component *getTranslation(const IR::Expression *expression) const {
+    std::shared_ptr<Component> getTranslation(const IR::Expression *expression) const {
         LOG2("Check translation " << dbp(expression));
         return ::P4::get(translation, expression);
     }
-    void setTranslation(const IR::Expression *expression, Component *comp) {
+    void setTranslation(const IR::Expression *expression, std::shared_ptr<Component> comp) {
         translation.emplace(expression, comp);
         LOG2("Translated " << dbp(expression) << " to " << comp);
     }

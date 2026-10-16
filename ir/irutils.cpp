@@ -84,14 +84,14 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
     }
     if (const auto *st = type->to<IR::Type_StructLike>()) {
         auto *vec = new IR::IndexedVector<IR::NamedExpression>();
-        for (const auto *field : st->fields) {
+        for (const IR::StructField *field : st->fields) {
             const auto *value = getDefaultValue(field->type, srcInfo);
             if (value == nullptr) {
                 return nullptr;
             }
             vec->push_back(new IR::NamedExpression(field->name, value));
         }
-        const auto *resultType = st->getP4Type();
+        IR::Ptr<IR::Type> resultType = st->getP4Type();
         return new IR::StructExpression(srcInfo, resultType, resultType, *vec);
     }
     if (const auto *tf = type->to<IR::Type_Fragment>()) {
@@ -99,7 +99,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
     }
     if (const auto *tt = type->to<IR::Type_BaseList>()) {
         auto *vec = new IR::Vector<IR::Expression>();
-        for (const auto *field : tt->components) {
+        for (const IR::Type *field : tt->components) {
             const auto *value = getDefaultValue(field, srcInfo);
             if (value == nullptr) {
                 return nullptr;
@@ -110,7 +110,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
     }
     if (const auto *ta = type->to<IR::Type_Array>()) {
         auto *vec = new IR::Vector<IR::Expression>();
-        const auto *elementType = ta->elementType;
+        const IR::Type *elementType = ta->elementType;
         for (size_t i = 0; i < ta->getSize(); i++) {
             const IR::Expression *value = getDefaultValue(elementType, srcInfo);
             if (value == nullptr) {
@@ -118,7 +118,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
             }
             vec->push_back(value);
         }
-        const auto *resultType = ta->getP4Type();
+        IR::Ptr<IR::Type> resultType = ta->getP4Type();
         return new IR::ArrayExpression(srcInfo, resultType, *vec, resultType);
     }
     if (valueRequired) {
@@ -138,8 +138,8 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
               structExpr->type, structExpr->node_type_name());
 
     // We use the underlying struct type, which will gives us the right field ordering.
-    for (const auto *typeField : structType->fields) {
-        const auto *listElem = structExpr->getField(typeField->name);
+    for (const IR::StructField *typeField : structType->fields) {
+        const IR::NamedExpression *listElem = structExpr->getField(typeField->name);
         if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
             auto subList = flattenStructExpression(subStructExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
@@ -155,7 +155,7 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
 
 std::vector<const Expression *> flattenListExpression(const BaseListExpression *listExpr) {
     std::vector<const Expression *> exprList;
-    for (const auto *listElem : listExpr->components) {
+    for (const IR::Expression *listElem : listExpr->components) {
         if (const auto *subListExpr = listElem->to<BaseListExpression>()) {
             auto subList = flattenListExpression(subListExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
@@ -235,7 +235,7 @@ const IR::Node *inlineBlockImpl(const Transform &t, Stmts &&stmts) {
         // the child of a SwitchCase *must* be a BlockStatement
         // it could also be a declaration, and it that case, we need to wrap it in a block anyway
         if (auto *stmt = (*stmts.begin())->template to<IR::Statement>()) {
-            return stmt;
+            return t.guardReturn(stmt);
         }
     }
     if (t.getParent<IR::BlockStatement>()) {

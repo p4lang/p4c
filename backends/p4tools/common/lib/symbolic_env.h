@@ -34,7 +34,7 @@ class SymbolicEnv {
 
     /// Substitutes state variables in @expr for their symbolic value in this environment.
     /// Variables that are unbound by this environment are left untouched.
-    const IR::Expression *subst(const IR::Expression *expr) const;
+    IR::Ptr<IR::Expression> subst(const IR::Expression *expr) const;
 
     /// @returns The immutable map that is internal to this symbolic environment.
     [[nodiscard]] const SymbolicMapType &getInternalMap() const;

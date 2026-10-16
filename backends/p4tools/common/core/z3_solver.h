@@ -30,7 +30,7 @@ namespace P4::P4Tools {
 /// A stack of maps, which map Z3-internal expression IDs of declared Z3 variables to their
 /// corresponding P4 state variable. The maps are pushed and pop according to the solver push() and
 /// pop() operations.
-using Z3DeclaredVariablesMap = std::vector<ordered_map<unsigned, const IR::SymbolicVariable *>>;
+using Z3DeclaredVariablesMap = std::vector<ordered_map<unsigned, IR::Ptr<IR::SymbolicVariable>>>;
 
 /// A Z3-based implementation of AbstractSolver. Encapsulates a z3::solver and a z3::context.
 class Z3Solver : public AbstractSolver {
@@ -50,7 +50,7 @@ class Z3Solver : public AbstractSolver {
 
     void timeout(unsigned tm) override;
 
-    std::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) override;
+    std::optional<bool> checkSat(const std::vector<IR::Ptr<Constraint>> &asserts) override;
 
     /// Z3Solver specific checkSat function. Calls check on the input z3::expr_vector.
     /// Only relies on the incrementality mode of the Z3 solver.
@@ -73,7 +73,7 @@ class Z3Solver : public AbstractSolver {
     [[nodiscard]] const z3::context &getZ3Ctx() const;
 
     /// @returns the list of active assertions on this solver.
-    [[nodiscard]] safe_vector<const Constraint *> getAssertions() const;
+    [[nodiscard]] safe_vector<IR::Ptr<Constraint>> getAssertions() const;
 
     /// Resets the internal state: pops all assertions from previous solver
     /// invocation, removes variable declarations.
@@ -135,7 +135,7 @@ class Z3Solver : public AbstractSolver {
     Z3DeclaredVariablesMap declaredVarsById;
 
     /// The sequence of P4 assertions that have been made to the solver.
-    safe_vector<const Constraint *> p4Assertions;
+    safe_vector<IR::Ptr<Constraint>> p4Assertions;
 
     /// Indicates whether the incremental Z3 solver is being used. When this is false, this class
     /// manages push and pop operations explicitly by restarting Z3 as needed.

@@ -47,6 +47,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
 #define BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
 
+#include <memory>
+
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
@@ -82,7 +84,8 @@ class CheckExternValidity : public Inspector {
  * \typedef ActionExterns
  * \ingroup CheckDesignPattern
  */
-typedef std::map<const IR::P4Action *, std::vector<const P4::ExternMethod *>> ActionExterns;
+using ActionExterns =
+    std::map<const IR::P4Action *, std::vector<std::unique_ptr<const P4::MethodInstance>>>;
 /**
  * \ingroup CheckDesignPattern
  */

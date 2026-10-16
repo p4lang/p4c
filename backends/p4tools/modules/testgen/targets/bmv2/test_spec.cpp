@@ -41,8 +41,8 @@ const IR::Expression *IndexExpression::getValue() const { return value; }
 cstring IndexExpression::getObjectName() const { return "IndexExpression"_cs; }
 
 const IndexExpression *IndexExpression::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedIndex = model.evaluate(index, doComplete);
-    const auto *evaluatedValue = model.evaluate(value, doComplete);
+    auto evaluatedIndex = model.evaluate(index, doComplete);
+    auto evaluatedValue = model.evaluate(value, doComplete);
     return new IndexExpression(evaluatedIndex, evaluatedValue);
 }
 
@@ -99,10 +99,10 @@ cstring Bmv2V1ModelRegisterValue::getObjectName() const { return "Bmv2V1ModelReg
 
 const Bmv2V1ModelRegisterValue *Bmv2V1ModelRegisterValue::evaluate(const Model &model,
                                                                    bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(getInitialValue(), doComplete);
+    auto evaluatedValue = model.evaluate(getInitialValue(), doComplete);
     auto *evaluatedRegisterValue = new Bmv2V1ModelRegisterValue(evaluatedValue);
     for (const auto &cond : indexConditions) {
-        const auto *evaluatedCond = cond.evaluate(model, doComplete);
+        IR::Ptr<IndexExpression> evaluatedCond = cond.evaluate(model, doComplete);
         evaluatedRegisterValue->writeToIndex(evaluatedCond->getEvaluatedIndex(),
                                              evaluatedCond->getEvaluatedValue());
     }
@@ -120,10 +120,10 @@ cstring Bmv2V1ModelMeterValue::getObjectName() const { return "Bmv2V1ModelMeterV
 
 const Bmv2V1ModelMeterValue *Bmv2V1ModelMeterValue::evaluate(const Model &model,
                                                              bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(getInitialValue(), doComplete);
+    auto evaluatedValue = model.evaluate(getInitialValue(), doComplete);
     auto *evaluatedMeterValue = new Bmv2V1ModelMeterValue(evaluatedValue, isDirect);
     for (const auto &cond : indexConditions) {
-        const auto *evaluatedCond = cond.evaluate(model, doComplete);
+        IR::Ptr<IndexExpression> evaluatedCond = cond.evaluate(model, doComplete);
         evaluatedMeterValue->writeToIndex(evaluatedCond->getEvaluatedIndex(),
                                           evaluatedCond->getEvaluatedValue());
     }
@@ -162,7 +162,8 @@ const Bmv2V1ModelActionProfile *Bmv2V1ModelActionProfile::evaluate(const Model &
         std::vector<ActionArg> evaluatedArgs;
         evaluatedArgs.reserve(actionArgs.size());
         for (const auto &actionArg : actionArgs) {
-            evaluatedArgs.emplace_back(*actionArg.evaluate(model, doComplete));
+            IR::Ptr<ActionArg> evaluatedArg = actionArg.evaluate(model, doComplete);
+            evaluatedArgs.emplace_back(*evaluatedArg);
         }
         profile->addToActionMap(actionTuple.first, evaluatedArgs);
     }
@@ -203,7 +204,7 @@ Bmv2V1ModelCloneInfo::Bmv2V1ModelCloneInfo(const IR::Expression *sessionId,
                                            std::optional<int> preserveIndex)
     : sessionId(sessionId),
       cloneType(cloneType),
-      clonedState(clonedState),
+      clonedState(&clonedState),
       preserveIndex(preserveIndex) {}
 
 cstring Bmv2V1ModelCloneInfo::getObjectName() const { return "Bmv2V1ModelCloneInfo"_cs; }
@@ -212,7 +213,7 @@ BMv2Constants::CloneType Bmv2V1ModelCloneInfo::getCloneType() const { return clo
 
 const IR::Expression *Bmv2V1ModelCloneInfo::getSessionId() const { return sessionId; }
 
-const ExecutionState &Bmv2V1ModelCloneInfo::getClonedState() const { return clonedState; }
+const ExecutionState &Bmv2V1ModelCloneInfo::getClonedState() const { return *clonedState; }
 
 std::optional<int> Bmv2V1ModelCloneInfo::getPreserveIndex() const { return preserveIndex; }
 
@@ -274,7 +275,7 @@ const IR::Constant *Optional::getEvaluatedValue() const {
 }
 
 const Optional *Optional::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedValue = model.evaluate(value, doComplete);
+    auto evaluatedValue = model.evaluate(value, doComplete);
     return new Optional(getKey(), evaluatedValue, addMatch);
 }
 
@@ -304,8 +305,8 @@ const IR::Constant *Range::getEvaluatedHigh() const {
 }
 
 const Range *Range::evaluate(const Model &model, bool doComplete) const {
-    const auto *evaluatedLow = model.evaluate(low, doComplete);
-    const auto *evaluatedHigh = model.evaluate(high, doComplete);
+    auto evaluatedLow = model.evaluate(low, doComplete);
+    auto evaluatedHigh = model.evaluate(high, doComplete);
     return new Range(getKey(), evaluatedLow, evaluatedHigh);
 }
 
@@ -322,7 +323,7 @@ const MetadataCollection *MetadataCollection::evaluate(const Model & /*model*/,
     P4C_UNIMPLEMENTED("%1% has no implementation for \"evaluate\".", getObjectName());
 }
 
-const std::map<cstring, const IR::Literal *> &MetadataCollection::getMetadataFields() const {
+const std::map<cstring, IR::Ptr<IR::Literal>> &MetadataCollection::getMetadataFields() const {
     return metadataFields;
 }
 

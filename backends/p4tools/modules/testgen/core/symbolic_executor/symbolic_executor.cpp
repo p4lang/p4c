@@ -106,7 +106,7 @@ SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &pr
 
 bool SymbolicExecutor::updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes) {
     auto hasUpdated = false;
-    for (const auto *newNode : newNodes) {
+    for (const auto &newNode : newNodes) {
         hasUpdated |= visitedNodes.insert(newNode).second;
     }
     return hasUpdated;

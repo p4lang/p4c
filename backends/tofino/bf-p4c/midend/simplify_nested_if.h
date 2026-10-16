@@ -135,7 +135,7 @@ class UniqueAndValidDest : public SimplifyComplexConditionPolicy {
         }
 
         auto *param = BFN::getContainingParameter(*path.linearPath, refMap);
-        auto *paramType = typeMap->getType(param);
+        const IR::Type *paramType = typeMap->getType(param);
         if (!BFN::isIntrinsicMetadataType(paramType)) {
             error("Destination %1% must be intrinsic metadata ", dest);
             return false;
