@@ -129,7 +129,8 @@ const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
     auto varType = resolveType(var->type);
 
     // In some cases, we may reference a complex expression. Convert it to a struct expression.
-    if (varType->is<IR::Type_StructLike>() || varType->to<IR::Type_Array>()) {
+    if (varType->is<IR::Type_StructLike>() || varType->is<IR::Type_Array>() ||
+        varType->is<IR::Type_BaseList>()) {
         return convertToComplexExpression(var);
     }
 
