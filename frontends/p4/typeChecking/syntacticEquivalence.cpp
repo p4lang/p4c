@@ -89,6 +89,14 @@ bool SameExpression::sameExpression(const IR::Expression *left, const IR::Expres
                 return false;
         }
         return true;
+    } else if (left->is<IR::Invalid>()) {
+        return true;
+    } else if (auto lh = left->to<IR::InvalidHeader>()) {
+        auto rh = right->to<IR::InvalidHeader>();
+        return sameType(lh->headerType, rh->headerType);
+    } else if (auto lh = left->to<IR::InvalidHeaderUnion>()) {
+        auto rh = right->to<IR::InvalidHeaderUnion>();
+        return sameType(lh->headerUnionType, rh->headerUnionType);
     } else {
         BUG("%1%: Unexpected expression", left);
     }
