@@ -1,0 +1,26 @@
+issue5883-invalid-array.p4(2): [--Wwarn=unused] warning: control 'C' is unused
+control C()() {
+        ^
+issue5883-invalid-array.p4(3): [--Werror=overlimit] error: Illegal array size: -491219345
+  H[-491219345] stack;
+     ^^^^^^^^^
+issue5883-invalid-array.p4(5): [--Werror=type-error] error: 'stack = {}'
+    stack = {};
+          ^
+  ---- Actual error:
+issue5883-invalid-array.p4(3): Cannot unify header stack 'header H[-491219345]' with negative size -491219345
+    H[-491219345] stack;
+    ^^^^^^^^^^^^^
+issue5883-invalid-array.p4(3)
+    H[-491219345] stack;
+       ^^^^^^^^^
+  ---- Originating from:
+issue5883-invalid-array.p4(5): Source expression '{}' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header H[-491219345]'
+      stack = {};
+              ^^
+issue5883-invalid-array.p4(5)
+      stack = {};
+              ^^
+issue5883-invalid-array.p4(3)
+    H[-491219345] stack;
+    ^^^^^^^^^^^^^
