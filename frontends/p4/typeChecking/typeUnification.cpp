@@ -233,7 +233,8 @@ bool TypeUnification::unifyBlocks(const BinaryConstraint *constraint) {
 bool TypeUnification::containsDots(const IR::Type_StructLike *type) {
     if (type->fields.empty()) return false;
     size_t lastIndex = type->fields.size() - 1;
-    return type->fields.at(lastIndex)->type->is<IR::Type_Any>();
+    const auto *lastField = type->fields.at(lastIndex);
+    return lastField->name == "..."_cs && lastField->type->is<IR::Type_Any>();
 }
 
 bool TypeUnification::containsDots(const IR::Type_BaseList *type) {

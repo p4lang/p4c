@@ -1,0 +1,20 @@
+issue5881.p4(8): [--Werror=type-error] error: 's'
+    S s = { b = ... };
+    ^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+issue5881.p4(8): Number of fields 1 in initializer different than number of fields in structure 0: unknown struct to struct S
+      S s = { b = ... };
+            ^^^^^^^^^^^
+issue5881.p4(1)
+  struct S { }
+         ^
+  ---- Originating from:
+issue5881.p4(8): Source expression '{ b = ... }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct S'
+      S s = { b = ... };
+            ^^^^^^^^^^^
+issue5881.p4(8)
+      S s = { b = ... };
+            ^^^^^^^^^^^
+issue5881.p4(1)
+  struct S { }
+         ^
