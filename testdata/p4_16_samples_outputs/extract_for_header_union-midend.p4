@@ -23,6 +23,7 @@ struct headers {
 parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract<addr_ipv4_t>(hdr.addr_src1_ipv4);
+        hdr.addr_src1_ipv6.setInvalid();
         hdr.addr_src1_ipv4.addr = hdr.addr_src2_ipv4.addr;
         transition reject;
     }

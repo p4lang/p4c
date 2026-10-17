@@ -23,8 +23,10 @@ apply {
 	extract h.h1
 	jmpeq P_GETH1 h.h1.a 0x0
 	extract h.u_h2
+	invalidate h.u_h1
 	jmp P_ACCEPT
 	P_GETH1 :	extract h.u_h1
+	invalidate h.u_h2
 	P_ACCEPT :	emit h.h1
 	emit h.u_h1
 	emit h.u_h2
