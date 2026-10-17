@@ -28,6 +28,8 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
         pkt.extract<Header1>(hdr.u1_h3);
+        hdr.u1_h1.setInvalid();
+        hdr.u1_h2.setInvalid();
         hdr.u1_h3.setValid();
         hdr.u1_h3.data = 32w1;
         hdr.u1_h1.setInvalid();

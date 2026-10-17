@@ -53,8 +53,10 @@ apply {
 	jmpeq PARSERIMPL_PARSEO2 h.base.t 0x1
 	jmp PARSERIMPL_ACCEPT
 	PARSERIMPL_PARSEO2 :	extract h.u_short
+	invalidate h.u_byte
 	jmp PARSERIMPL_ACCEPT
 	PARSERIMPL_PARSEO1 :	extract h.u_byte
+	invalidate h.u_short
 	PARSERIMPL_ACCEPT :	mov m.ingress_debug_hdr_base_t h.base.t
 	mov m.ingress_debug_hdr_u_short_isValid 1
 	jmpv LABEL_END h.u_short

@@ -128,17 +128,21 @@ class DoFlattenHeaderUnionStack : public DoFlattenHeaderUnion {
  *   b) if(u.isValid())               | if (tmp == 1)
  * 3) When setValid method is called on a header element, it is translated to setValid for the
  *    given element and setInvalid for rest of the elements
- * 4) Equality/inequality comparisons on unions are unrolled into element-wise comparisons by
+ * 4) Extracting into a header element is followed by setInvalid for rest of the elements
+ * 5) Equality/inequality comparisons on unions are unrolled into element-wise comparisons by
  *    earlier passes and hence no-action required here.
  */
 class HandleValidityHeaderUnion : public Transform {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+    bool flattenStacks;
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
 
+    bool isFlattened(const IR::Expression *u) const;
+
  public:
-    HandleValidityHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
+    HandleValidityHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, bool flattenStacks)
+        : refMap(refMap), typeMap(typeMap), flattenStacks(flattenStacks) {
         setName("HandleValidityHeaderUnion");
     }
     const IR::Node *postorder(IR::AssignmentStatement *assn) override;
@@ -217,7 +221,7 @@ class FlattenHeaderUnion : public PassManager {
             passes.push_back(new P4::TypeInference(typeMap, false));
             passes.push_back(new P4::TypeChecking(refMap, typeMap));
         }
-        passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap));
+        passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap, loopsUnroll));
         // Stack flattening is only applicable if parser loops are unrolled and
         // header union stack elements are accessed using [] notation. This pass does not handle
         // .next .last etc accessors for stack elements.

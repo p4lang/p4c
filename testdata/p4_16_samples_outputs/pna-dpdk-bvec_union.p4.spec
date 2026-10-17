@@ -35,8 +35,10 @@ apply {
 	extract h.h1
 	jmpeq PARSERIMPL_GETH1 h.h1._a0 0x0
 	extract h.u_h2
+	invalidate h.u_h1
 	jmp PARSERIMPL_ACCEPT
 	PARSERIMPL_GETH1 :	extract h.u_h1
+	invalidate h.u_h2
 	PARSERIMPL_ACCEPT :	jmpnv LABEL_END h.u_h2
 	invalidate h.u_h2
 	LABEL_END :	emit h.h1
