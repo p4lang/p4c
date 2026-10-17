@@ -202,10 +202,9 @@ set (BMV2_PTF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary2-bmv2.p4"
 )
 
-# -p to use psa switch model
-# -a to pass flags to compiler
-set (testExtraFlagsPSA "${testExtraFlags} -p -a='--target bmv2 --arch psa'")
-set (testExtraFlagsPNA "${testExtraFlags} --use_pna -a='--target bmv2 --arch pna'")
+# --target and --arch pick the compiler and switch model, and are passed to the compiler
+set (testExtraFlagsPSA "${testExtraFlags} --target bmv2 --arch psa")
+set (testExtraFlagsPNA "${testExtraFlags} --target bmv2 --arch pna")
 
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
