@@ -348,6 +348,9 @@ class BMV2Table(object):
 
 
 class BMv2StfLexer(STFLexer):
+    # Separator between port and lag lists, matching simple_switch_CLI syntax.
+    t_PIPE = r"\|"
+
     def __init__(self):
         super().__init__()
         tokens = [
@@ -359,6 +362,7 @@ class BMv2StfLexer(STFLexer):
             "MC_NODE_CREATE",
             "MC_NODE_UPDATE",
             "MC_NODE_ASSOCIATE",
+            "MC_SET_LAG_MEMBERSHIP",
             "COUNTER_READ",
             "COUNTER_WRITE",
             "REGISTER_READ",
@@ -372,6 +376,8 @@ class BMv2StfLexer(STFLexer):
         for keyword in tokens:
             self.keywords_map[keyword.lower()] = keyword
         self.tokens.extend(tokens)
+        # PIPE is a symbol, not a keyword.
+        self.tokens.append("PIPE")
 
 
 # PARSER GRAMMAR --------------------------------------------------------------
@@ -395,8 +401,13 @@ class BMv2StfLexer(STFLexer):
 #           | MIRRORING_GET number
 #           | MC_MGRP_CREATE number
 #           | MC_NODE_CREATE number number_list
+#           | MC_NODE_CREATE number PIPE number_list
+#           | MC_NODE_CREATE number number_list PIPE number_list
 #           | MC_NODE_UPDATE number number_list
+#           | MC_NODE_UPDATE number PIPE number_list
+#           | MC_NODE_UPDATE number number_list PIPE number_list
 #           | MC_NODE_ASSOCIATE number number
+#           | MC_SET_LAG_MEMBERSHIP number number_list
 #           | COUNTER_READ qualified_name number
 #           | COUNTER_WRITE qualified_name number number number
 #           | REGISTER_READ qualified_name number
@@ -448,8 +459,28 @@ class Bmv2StfParser(STFParser):
         "direct_cmd : MC_NODE_CREATE number number_list"
         p[0] = (p[1].lower(), p[2], p[3])
 
+    def p_direct_cmd_mc_node_create_lag_only(self, p):
+        "direct_cmd : MC_NODE_CREATE number PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4])
+
+    def p_direct_cmd_mc_node_create_ports_and_lag(self, p):
+        "direct_cmd : MC_NODE_CREATE number number_list PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4], p[5])
+
     def p_direct_cmd_mc_node_update(self, p):
         "direct_cmd : MC_NODE_UPDATE number number_list"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_mc_node_update_lag_only(self, p):
+        "direct_cmd : MC_NODE_UPDATE number PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4])
+
+    def p_direct_cmd_mc_node_update_ports_and_lag(self, p):
+        "direct_cmd : MC_NODE_UPDATE number number_list PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4], p[5])
+
+    def p_direct_cmd_mc_set_lag_membership(self, p):
+        "direct_cmd : MC_SET_LAG_MEMBERSHIP number number_list"
         p[0] = (p[1].lower(), p[2], p[3])
 
     def p_direct_cmd_mc_node_associate(self, p):
@@ -556,7 +587,9 @@ class RunBMV2(object):
             "mirroring_get",
             "mc_mgrp_create",
             "mc_node_create",
+            "mc_node_update",
             "mc_node_associate",
+            "mc_set_lag_membership",
             "counter_read",
             "counter_write",
             "register_read",
