@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium & Devansh Singh
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# dst_addr = 0x000000015600, whose bits [16:9] equal 0xAB (171):
+#   87552 = 0x015600, and (87552 >> 9) & 0xff == 0xab.
+# h.a is overwritten by h.eth_hdr.dst_addr[16:9], everything else passes
+# through unchanged (dst_addr itself is never modified by the program).
+packet 0 00 00 00 01 56 00 00 00 00 00 00 00 00 00 00
+expect 0 00 00 00 01 56 00 00 00 00 00 00 00 00 00 ab
