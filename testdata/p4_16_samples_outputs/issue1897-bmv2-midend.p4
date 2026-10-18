@@ -41,10 +41,12 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state ProtAddrParser_ipv4 {
         packet.extract<addr_ipv4_t>(addr_0_ipv4_0);
+        addr_0_ipv6_0.setInvalid();
         transition start_0;
     }
     state ProtAddrParser_ipv6 {
         packet.extract<addr_ipv6_t>(addr_0_ipv6_0);
+        addr_0_ipv4_0.setInvalid();
         transition start_0;
     }
     state start_0 {
@@ -90,10 +92,12 @@ parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state ProtAddrParser_ipv4_0 {
         packet.extract<addr_ipv4_t>(addr_0_ipv4_0);
+        addr_0_ipv6_0.setInvalid();
         transition start_1;
     }
     state ProtAddrParser_ipv6_0 {
         packet.extract<addr_ipv6_t>(addr_0_ipv6_0);
+        addr_0_ipv4_0.setInvalid();
         transition start_1;
     }
     state start_1 {

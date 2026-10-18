@@ -29,6 +29,8 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u1_h2.setInvalid();
         hdr.u1_h3.setInvalid();
         pkt.extract<Header1>(hdr.u1_h3);
+        hdr.u1_h1.setInvalid();
+        hdr.u1_h2.setInvalid();
         hdr.u1_h3.setValid();
         hdr.u1_h3.data = 32w1;
         hdr.u1_h1.setInvalid();

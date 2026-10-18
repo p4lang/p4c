@@ -32,11 +32,17 @@ struct B {
 parser ParserImpl(packet_in pkt, out A hdr, inout B meta, inout standard_metadata_t sm) {
     state start {
         pkt.extract<H1>(hdr.u_x);
+        hdr.u_y.setInvalid();
         pkt.extract<H1>(hdr.hus0_x);
+        hdr.hus0_y.setInvalid();
         pkt.extract<H2>(hdr.hus1_y);
+        hdr.hus1_x.setInvalid();
         pkt.extract<H1>(meta.u_x_0);
+        meta.u_y_0.setInvalid();
         pkt.extract<H1>(meta.hus0_0_x);
+        meta.hus0_0_y.setInvalid();
         pkt.extract<H2>(meta.hus1_0_y);
+        meta.hus1_0_x.setInvalid();
         transition accept;
     }
 }
