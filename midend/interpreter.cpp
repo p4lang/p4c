@@ -607,9 +607,10 @@ bool AnyElement::equals(const SymbolicValue *) const {
     return true;
 }
 
-SymbolicValue *AnyElement::collapse() const {
-    auto result = parent->get(nullptr, 0)->clone();
-    for (size_t i = 1; i < parent->values.size(); i++) (void)result->merge(parent->get(nullptr, i));
+SymbolicValue *SymbolicArray::collapse() const {
+    if (values.empty()) return SymbolicVoid::get();
+    auto result = values.at(0)->clone();
+    for (size_t i = 1; i < values.size(); i++) (void)result->merge(values.at(i));
     return result;
 }
 
@@ -1040,6 +1041,7 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex *expression) {
     }
     auto rv = r->to<ScalarValue>();
     auto lv = l->to<SymbolicArray>();
+    CHECK_NULL(lv);
 
     if (rv->isUninitialized() || rv->isUnknown()) {
         if (rv->isUninitialized()) {
@@ -1047,21 +1049,28 @@ void ExpressionEvaluator::postorder(const IR::ArrayIndex *expression) {
             set(expression, result);
             return;
         }
+        if (auto arrayType = lv->type->to<IR::Type_Array>()) {
+            if (arrayType->elementType->is<IR::Type_HeaderUnion>()) {
+                auto result = new SymbolicStaticError(
+                    expression, "Non-constant index into a header union stack is not supported");
+                set(expression, result);
+                return;
+            }
+        }
+        if (!evaluatingLeftValue) {
+            set(expression, lv->collapse());
+            return;
+        }
         if (lv->elemType == nullptr) {
-            // AnyElement can't model header union stack elements (null elemType)
-            auto result = new SymbolicStaticError(
-                expression, "Non-constant index into a header union stack is not supported");
+            lv->setAllUnknown();
+            auto result = new SymbolicStaticError(expression->right, "Unknown array index");
             set(expression, result);
             return;
         }
         auto v0 = new AnyElement(lv);
-        if (!evaluatingLeftValue)
-            set(expression, v0->collapse());
-        else
-            set(expression, v0);
+        set(expression, v0);
         return;
     }
-    CHECK_NULL(lv);
     auto ix = r->to<SymbolicInteger>();
     CHECK_NULL(ix);
     auto result = lv->get(expression, ix->constant->asInt());
