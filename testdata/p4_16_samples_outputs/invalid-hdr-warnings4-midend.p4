@@ -53,29 +53,12 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         hd_11.setValid();
     }
     @name("IngressI.invalidateHeader") action invalidateHeader() {
-        hd_12.setInvalid();
     }
     @name("IngressI.invalidateStack") action invalidateStack() {
-        hd_0.setInvalid();
-        hd_1.setInvalid();
     }
     @name("IngressI.invalidateStack") action invalidateStack_1() {
-        hd_8.setInvalid();
-        hd_9.setInvalid();
     }
     @hidden action invalidhdrwarnings4l45() {
-        h_0_h1[0].setInvalid();
-        h_0_h1[1].setInvalid();
-        h_0_h2[0].setInvalid();
-        h_0_h2[1].setInvalid();
-        h_copy_0_h1[0].setInvalid();
-        h_copy_0_h1[1].setInvalid();
-        h_copy_0_h2[0].setInvalid();
-        h_copy_0_h2[1].setInvalid();
-        h_copy2_0_h1[0].setInvalid();
-        h_copy2_0_h1[1].setInvalid();
-        h_copy2_0_h2[0].setInvalid();
-        h_copy2_0_h2[1].setInvalid();
     }
     @hidden action invalidhdrwarnings4l108() {
         h_0_h1[1].setValid();

@@ -82,12 +82,6 @@ control c(out bit<1> x) {
     X z_0_xu;
     GH_bit32 z_0_h3u;
     @hidden action genericstruct96() {
-        gh_0.setInvalid();
-        s_0[0].setInvalid();
-        s_0[1].setInvalid();
-        s_0[2].setInvalid();
-        z_0_xu.setInvalid();
-        z_0_h3u.setInvalid();
         x = 1w0;
     }
     @hidden table tbl_genericstruct96 {

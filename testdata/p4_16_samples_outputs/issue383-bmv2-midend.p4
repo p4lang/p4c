@@ -89,10 +89,6 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         default_action = NoAction_1();
     }
     @hidden action issue383bmv2l65() {
-        s_0_col_bvh.setInvalid();
-        s_0_bvh0.setInvalid();
-        s_0_bvh1.setInvalid();
-        bh_0.setInvalid();
     }
     @hidden action issue383bmv2l95() {
         local_metadata._col_bvh8._row_alt0_valid0 = 1w0;

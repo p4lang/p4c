@@ -46,22 +46,6 @@ control ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
     @name("ingress.au1") hu1_t[2] au1_0;
     @name("ingress.au1b") hu1_t[2] au1b_0;
     @hidden action pnadpdkwrongwarning56() {
-        hu1_0_h1.setInvalid();
-        hu1_0_h2.setInvalid();
-        hu1b_0_h1.setInvalid();
-        hu1b_0_h2.setInvalid();
-        a1_0[0].setInvalid();
-        a1_0[1].setInvalid();
-        a1b_0[0].setInvalid();
-        a1b_0[1].setInvalid();
-        au1_0[0].h1.setInvalid();
-        au1_0[0].h2.setInvalid();
-        au1_0[1].h1.setInvalid();
-        au1_0[1].h2.setInvalid();
-        au1b_0[0].h1.setInvalid();
-        au1b_0[0].h2.setInvalid();
-        au1b_0[1].h1.setInvalid();
-        au1b_0[1].h2.setInvalid();
     }
     @hidden table tbl_pnadpdkwrongwarning56 {
         actions = {

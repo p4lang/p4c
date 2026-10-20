@@ -66,13 +66,6 @@ control C(out bit<32> x) {
     @hidden action defaultinitializer61() {
         ih.setInvalid();
         ih_0.setInvalid();
-        stack_0[0].setInvalid();
-        stack_0[1].setInvalid();
-        hustack_0[0].h.setInvalid();
-        hustack_0[0].i.setInvalid();
-        hustack_0[1].h.setInvalid();
-        hustack_0[1].i.setInvalid();
-        sa_0_h.setInvalid();
         x = 32w0;
         f<tuple_0>((tuple_0){f0 = 8s0,f1 = true,f2 = error.NoError,f3 = myEnum1.e1,f4 = 8w0,f5 = ih,f6 = (S1){val = 8w0,val1 = myEnum1.e1,errorNoOne = error.NoError,h = ih_0,z = 1w0,b = false,i = 8s0}});
     }

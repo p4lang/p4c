@@ -60,16 +60,11 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @hidden action invalidhdrwarnings3bmv2l35() {
         h1_0.setValid();
-        h2_0.setInvalid();
     }
     @hidden action invalidhdrwarnings3bmv2l36() {
         h1_0.setValid();
-        h2_0.setInvalid();
     }
     @hidden action invalidhdrwarnings3bmv2l24() {
-        h1_0.setInvalid();
-        h2_0.setInvalid();
-        h1_0.setInvalid();
         h2_0.setValid();
         h2_0.data = 32w1;
     }
@@ -78,8 +73,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         h2_0.setValid();
     }
     @hidden action invalidhdrwarnings3bmv2l45() {
-        h1_0.setInvalid();
-        h2_0.setInvalid();
     }
     @hidden action invalidhdrwarnings3bmv2l40() {
         hdr.h1.data = h2_0.data;
