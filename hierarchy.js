@@ -3582,6 +3582,7 @@ var hierarchy =
         [ "P4::EBPF::ConvertToEbpfPSA", "class_p4_1_1_e_b_p_f_1_1_convert_to_ebpf_p_s_a.html", null ],
         [ "P4::EBPF::LowerExpressions", "class_p4_1_1_e_b_p_f_1_1_lower_expressions.html", null ],
         [ "P4::ElimCallExprInIfCond", "group___simplify_if_statement.html#class_p4_1_1_elim_call_expr_in_if_cond", null ],
+        [ "P4::ElimUnreachableStmts", "class_p4_1_1_elim_unreachable_stmts.html", null ],
         [ "P4::EliminateSubparserCalls", "class_p4_1_1_eliminate_subparser_calls.html", null ],
         [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
         [ "P4::FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],

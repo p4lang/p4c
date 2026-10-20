@@ -170,6 +170,7 @@ var namespace_p4 =
     [ "EliminateSwitch", "class_p4_1_1_eliminate_switch.html", null ],
     [ "EliminateTuples", "class_p4_1_1_eliminate_tuples.html", null ],
     [ "EliminateTypedef", "class_p4_1_1_eliminate_typedef.html", null ],
+    [ "ElimUnreachableStmts", "class_p4_1_1_elim_unreachable_stmts.html", null ],
     [ "EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
     [ "EnumInstance", "class_p4_1_1_enum_instance.html", null ],
     [ "EnumOn32Bits", "class_p4_1_1_enum_on32_bits.html", null ],
