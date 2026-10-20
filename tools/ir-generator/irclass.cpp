@@ -511,7 +511,7 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     //     F2 f2;
     //     T(PF1 pf1, PF2 pf2, F1 f1, F2 f2) :
     //         P(pf1, pf2), f1(f1), f2(f2)
-    //     { validate(); }
+    //     { T::validate(); }
     // }
     int optargs = 0;
     std::stringstream body;
@@ -539,7 +539,10 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
         body << '\n'
              << LineDirective(user->getSourceInfo()) << user->body << '\n'
              << LineDirective() << indent;
-    if (kind != NodeKind::Nested) body << " validate(); ";
+    // Construction validates only the class currently being initialized.
+    if (kind != NodeKind::Nested) {
+        body << " " << name << "::validate(); ";
+    }
     body << "}";
     auto ctor = new IrMethod(name, body.str());
     ctor->clss = this;
