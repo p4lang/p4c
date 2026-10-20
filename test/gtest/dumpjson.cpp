@@ -120,12 +120,9 @@ TEST(JSON, IntegralRoundTrip) {
     // Integers wider than int must survive a JSON round trip exactly.
     const std::vector<unsigned long long> values = {
         0ULL, 1ULL, 2147483647ULL, 2147483648ULL, 8589934591ULL, 18446744073709551615ULL};
-    for (auto value : values) {
-        std::stringstream ss;
-        JSONGenerator(ss).emit(value);
-        JSONLoader loader(ss);
-        unsigned long long result = 0;
-        loader >> result;
-        EXPECT_EQ(value, result) << "value: " << value;
-    }
+    std::stringstream ss;
+    JSONGenerator(ss).emit(values);
+    std::vector<unsigned long long> result;
+    JSONLoader(ss) >> result;
+    EXPECT_EQ(values, result);
 }

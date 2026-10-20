@@ -131,9 +131,7 @@ class JSONLoader {
             return nullptr;
         }
         track_decode();
-        // Initialize to an invalid sentinel to avoid maybe-uninitialized warnings;
-        // load() leaves `id` untouched when the field is missing (returns false).
-        int id = -1;
+        int id = -1;  // load() leaves id untouched if Node_ID is absent.
         auto success = load("Node_ID", id) || error("missing field Node_ID");
         if (!success) return nullptr;
         if (id >= 0) {
