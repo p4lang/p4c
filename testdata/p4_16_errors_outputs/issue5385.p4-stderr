@@ -1,0 +1,6 @@
+issue5385.p4(11): [--Werror=type-error] error: index: parameters with type int must be directionless
+    void count(in I index);
+                    ^^^^^
+issue5385.p4(15)
+    MyCounter<int>(1024) counter;
+              ^^^

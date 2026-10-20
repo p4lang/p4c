@@ -486,6 +486,24 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
             args->push_back(canon);
         }
         auto specialized = specialize(gt, args, getChildContext());
+        // Parameters of type int must be directionless. Substituting an explicit int type
+        // argument can produce such a parameter in an extern method, e.g., 'in I index' in
+        // MyCounter<int>. Type variables bound to unsized literals by inference are not
+        // checked here; they are reported as width inference errors instead.
+        bool intArg = std::any_of(args->begin(), args->end(),
+                                  [](const IR::Type *a) { return a->is<IR::Type_InfInt>(); });
+        const auto *ext = specialized ? specialized->to<IR::Type_Extern>() : nullptr;
+        if (intArg && ext != nullptr) {
+            for (const auto *m : ext->methods) {
+                for (const auto *p : m->type->parameters->parameters) {
+                    if (p->direction != IR::Direction::None && p->type->is<IR::Type_InfInt>()) {
+                        typeError("%1%: parameters with type %2% must be directionless", p,
+                                  p->type);
+                        return nullptr;
+                    }
+                }
+            }
+        }
 
         auto result =
             new IR::Type_SpecializedCanonical(type->srcInfo, baseCanon, args, specialized);
