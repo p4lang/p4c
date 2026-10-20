@@ -1,0 +1,12 @@
+reused-counter-bmv2.p4(43): [--Wwarn=unused] warning: Unused action parameter a
+    action my_action(bit<9> a) { sm.egress_spec = a; }
+                            ^
+reused-counter-bmv2.p4(41): [--Werror=invalid] error: ingress.c: Direct counters cannot be attached to multiple tables ingress.t1 and ingress.t2
+    direct_counter(CounterType.packets) c;
+                                        ^
+reused-counter-bmv2.p4(44)
+    table t1 {
+          ^^
+reused-counter-bmv2.p4(49)
+    table t2 {
+          ^^

@@ -76,13 +76,13 @@ if (ASAN_ENABLED)
 endif()
 
 # json_diff
-set (JSONDIFF_SOURCES json_diff.cpp json.cpp fdstream.cpp)
+set (JSONDIFF_SOURCES json_diff.cpp json.cpp)
 
 # bfdumpbin
-set (BFDUMPBIN_SOURCES bfdumpbin.cpp fdstream.cpp json.cpp bson.cpp)
+set (BFDUMPBIN_SOURCES bfdumpbin.cpp json.cpp bson.cpp)
 
 # bfdis
-set (BFDIS_SOURCES bfdis.cpp disasm.cpp fdstream.cpp)
+set (BFDIS_SOURCES bfdis.cpp disasm.cpp)
 
 # reflow
 set (REFLOW_SOURCES reflow.cpp)
@@ -98,11 +98,13 @@ set (MKSIZES_SOURCES mksizes.cpp)
 
 # json_diff
 add_executable (json_diff ${JSONDIFF_SOURCES})
+target_link_libraries(json_diff PRIVATE p4ctoolkit)
 # Disable errors for warnings. FIXME: Get rid of this.
 target_compile_options(json_diff PUBLIC "-Wno-error")
 
 # bfdumpbin
 add_executable (bfdumpbin ${BFDUMPBIN_SOURCES})
+target_link_libraries(bfdumpbin PRIVATE p4ctoolkit)
 # Disable errors for warnings. FIXME: Get rid of this.
 target_compile_options(bfdumpbin PUBLIC "-Wno-error")
 
@@ -272,6 +274,7 @@ if (ENABLE_GTESTS)
   add_library (bfas_lib ${BFAS_SOURCES})
   target_compile_definitions(bfas_lib PRIVATE BUILDING_FOR_GTEST)  # removes main()
   target_link_libraries (bfas_lib PRIVATE ${BFASM_LIBS} ${BFASM_LIB_DEPS})
+  add_dependencies(bfas_lib bfasm_yaml)
 
   set(BFAS_GTEST_SOURCES
     gtest/gtestasm.cpp
@@ -296,6 +299,6 @@ if (ENABLE_GTESTS)
   target_compile_options(gtestasm PUBLIC "-Wno-error")
 
   # Add to CTests - but this is in the BFASM project viz build/bf-asm, not build/p4c
-  add_test (NAME gtestasm COMMAND gtestasm WORKING_DIRECTORY ${P4C_BINARY_DIR})
-  set_tests_properties (gtestasm PROPERTIES LABELS "gtest")
+  add_test (NAME tofino-gtestasm COMMAND gtestasm WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  set_tests_properties (tofino-gtestasm PROPERTIES LABELS "gtest")
 endif ()

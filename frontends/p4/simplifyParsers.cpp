@@ -24,9 +24,11 @@ namespace {
 class RemoveUnreachableStates : public Transform {
     ParserCallGraph *transitions;
     std::set<const IR::ParserState *> reachable;
+    bool warnUnreachableStates;
 
  public:
-    explicit RemoveUnreachableStates(ParserCallGraph *transitions) : transitions(transitions) {
+    explicit RemoveUnreachableStates(ParserCallGraph *transitions, bool warnUnreachableStates)
+        : transitions(transitions), warnUnreachableStates(warnUnreachableStates) {
         CHECK_NULL(transitions);
         setName("RemoveUnreachableStates");
     }
@@ -66,8 +68,9 @@ class RemoveUnreachableStates : public Transform {
         auto orig = getOriginal<IR::ParserState>();
         if (reachable.find(orig) == reachable.end()) {
             if (state->name == IR::ParserState::accept) {
-                warn(ErrorType::WARN_UNREACHABLE, "%1% state in %2% is unreachable", state,
-                     findContext<IR::P4Parser>());
+                if (warnUnreachableStates)
+                    warn(ErrorType::WARN_UNREACHABLE, "%1% state in %2% is unreachable", state,
+                         findContext<IR::P4Parser>());
                 return state;
             } else {
                 LOG1("Removing unreachable state " << dbp(state));
@@ -176,9 +179,9 @@ class SimplifyParser : public PassManager {
     ParserCallGraph transitions;
 
  public:
-    SimplifyParser() : transitions("transitions") {
+    explicit SimplifyParser(bool warnUnreachableStates) : transitions("transitions") {
         passes.push_back(new ComputeParserCG(&transitions));
-        passes.push_back(new RemoveUnreachableStates(&transitions));
+        passes.push_back(new RemoveUnreachableStates(&transitions, warnUnreachableStates));
         passes.push_back(new CollapseChains(&transitions));
         setName("SimplifyParser");
     }
@@ -187,7 +190,7 @@ class SimplifyParser : public PassManager {
 }  // namespace
 
 const IR::Node *SimplifyParsers::preorder(IR::P4Parser *parser) {
-    SimplifyParser simpl;
+    SimplifyParser simpl(warnUnreachableStates);
     simpl.setCalledBy(this);
     return parser->apply(simpl, getContext());
 }

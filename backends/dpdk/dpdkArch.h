@@ -401,8 +401,7 @@ class LogicalExpressionUnroll : public Inspector {
     IR::Expression *root;
     static bool is_logical(const IR::Operation_Binary *bin) {
         if (bin->is<IR::LAnd>() || bin->is<IR::LOr>() || bin->is<IR::Leq>() || bin->is<IR::Equ>() ||
-            bin->is<IR::Neq>() || bin->is<IR::Grt>() || bin->is<IR::Lss>() || bin->is<IR::Geq>() ||
-            bin->is<IR::Leq>())
+            bin->is<IR::Neq>() || bin->is<IR::Grt>() || bin->is<IR::Lss>() || bin->is<IR::Geq>())
             return true;
         else
             return false;
@@ -713,7 +712,8 @@ class BreakLogicalExpressionParenthesis : public Transform {
             auto sub = new IR::LOr(lor2->right, lor->right);
             return new IR::LOr(lor2->left, sub);
         } else if (!lor->left->is<IR::LAnd>() && !lor->left->is<IR::Equ>() &&
-                   !lor->left->is<IR::Neq>() && !lor->left->is<IR::Lss>() &&
+                   !lor->left->is<IR::Neq>() && !lor->left->is<IR::Leq>() &&
+                   !lor->left->is<IR::Geq>() && !lor->left->is<IR::Lss>() &&
                    !lor->left->is<IR::Grt>() && !lor->left->is<IR::MethodCallExpression>() &&
                    !lor->left->is<IR::PathExpression>() && !lor->left->is<IR::Member>()) {
             BUG("Logical Expression Unroll pass failed");

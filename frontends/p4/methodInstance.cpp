@@ -26,10 +26,9 @@ MethodInstance *MethodInstance::resolve(const IR::MethodCallExpression *mce,
     if (typeMap && !mce->typeArguments->empty()) {
         auto t = TypeInference::specialize(originalType, mce->typeArguments, ctxt);
         CHECK_NULL(t);
-        actualType = t->to<IR::Type_MethodBase>();
+        actualType = t->checkedTo<IR::Type_MethodBase>();
         ReadOnlyTypeInference tc(typeMap);
         (void)actualType->apply(tc, ctxt);  // may need to learn new type components
-        CHECK_NULL(actualType);
     }
     // mt can be Type_Method or Type_Action
     if (mce->method->is<IR::Member>()) {

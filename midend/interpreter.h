@@ -318,9 +318,7 @@ class SymbolicInteger final : public ScalarValue {
     SymbolicInteger(ScalarValue::ValueState state, const IR::Type_Bits *type)
         : ScalarValue(state, type), constant(nullptr) {}
     explicit SymbolicInteger(const IR::Constant *constant)
-        : ScalarValue(ScalarValue::ValueState::Constant, constant->type), constant(constant) {
-        CHECK_NULL(constant);
-    }
+        : ScalarValue(ScalarValue::ValueState::Constant, constant->type), constant(constant) {}
     SymbolicInteger(const SymbolicInteger &other) = default;
     void dbprint(std::ostream &out) const override {
         ScalarValue::dbprint(out);
@@ -347,9 +345,7 @@ class SymbolicString final : public ScalarValue {
     SymbolicString(ScalarValue::ValueState state, const IR::Type_String *type)
         : ScalarValue(state, type), string(nullptr) {}
     explicit SymbolicString(const IR::StringLiteral *string)
-        : ScalarValue(ScalarValue::ValueState::Constant, string->type), string(string) {
-        CHECK_NULL(string);
-    }
+        : ScalarValue(ScalarValue::ValueState::Constant, string->type), string(string) {}
     SymbolicString(const SymbolicString &other) = default;
     void dbprint(std::ostream &out) const override {
         ScalarValue::dbprint(out);
@@ -508,6 +504,7 @@ class SymbolicArray final : public SymbolicValue {
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override;
+    SymbolicValue *collapse() const;
 
     DECLARE_TYPEINFO(SymbolicArray, SymbolicValue);
 };
@@ -518,7 +515,6 @@ class AnyElement final : public SymbolicHeader {
 
  public:
     explicit AnyElement(SymbolicArray *parent) : SymbolicHeader(parent->elemType), parent(parent) {
-        CHECK_NULL(parent);
         valid = new SymbolicBool();
     }
     SymbolicValue *clone() const override {
@@ -531,7 +527,11 @@ class AnyElement final : public SymbolicHeader {
     void setValid(bool) override { parent->setAllUnknown(); }
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
-    SymbolicValue *collapse() const;
+    SymbolicValue *get(const IR::Node *node, cstring) const override {
+        parent->setAllUnknown();
+        return new SymbolicStaticError(node, "Unknown array index");
+    }
+    SymbolicValue *collapse() const { return parent->collapse(); }
     bool hasUninitializedParts() const override { BUG("Should not be called"); }
 
     DECLARE_TYPEINFO(AnyElement, SymbolicHeader);

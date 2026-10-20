@@ -1,6 +1,5 @@
 #include <core.p4>
 
-
 struct TArg1 {
     bit<9> field1;
     bool   drop;

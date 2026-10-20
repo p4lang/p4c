@@ -42,10 +42,16 @@ HOMEBREW_PREFIX=$(brew --prefix)
 # Fetch the latest formulae
 brew update
 
+# FIXME: As of 2026-Oct-11, brew update removes python@3.14 and
+# installs python@3.15, which gives errors when trying to install the
+# pynng package.  Install python@3.14 and use it later below in
+# creating a Python venv so package install succeeds.
+brew install python@3.14
+
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake jsoncpp libtool
-    openssl coreutils bison grep ninja virtualenv uv
+    openssl coreutils bison grep ninja uv
     libevent nanomsg thrift xxhash
     ${BOOST_LIB}
 )
@@ -69,7 +75,11 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
 # Set up uv for Python dependency management.
-uv sync
+# FIXME: See earlier FIXME for why we force the use of python@3.14
+# here.
+uv venv --seed --python /opt/homebrew/opt/python@3.14/libexec/bin/python3 ~/.venv
+source ~/.venv/bin/activate
+uv sync --python /opt/homebrew/opt/python@3.14/libexec/bin/python3
 
 # Install BMv2 from source via the shared CMake-based helper.
 THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )

@@ -33,10 +33,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, in pna
     }
     state parseO1 {
         packet.extract<O1>(hdr.u_byte);
+        hdr.u_short.setInvalid();
         transition accept;
     }
     state parseO2 {
         packet.extract<O2>(hdr.u_short);
+        hdr.u_byte.setInvalid();
         transition accept;
     }
 }

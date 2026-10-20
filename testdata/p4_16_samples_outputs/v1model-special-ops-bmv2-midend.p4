@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
@@ -78,6 +79,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta_0.checksum_error = standard_metadata.checksum_error;
         smeta_0.parser_error = standard_metadata.parser_error;
         smeta_0.priority = standard_metadata.priority;
+        smeta_0.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_0);
         standard_metadata.ingress_port = smeta_0.ingress_port;
         standard_metadata.egress_spec = smeta_0.egress_spec;
@@ -95,6 +97,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_0.checksum_error;
         standard_metadata.parser_error = smeta_0.parser_error;
         standard_metadata.priority = smeta_0.priority;
+        standard_metadata.lag_hash = smeta_0.lag_hash;
     }
     @name(".my_drop") action my_drop_3() {
         smeta_3.ingress_port = standard_metadata.ingress_port;
@@ -113,6 +116,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta_3.checksum_error = standard_metadata.checksum_error;
         smeta_3.parser_error = standard_metadata.parser_error;
         smeta_3.priority = standard_metadata.priority;
+        smeta_3.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_3);
         standard_metadata.ingress_port = smeta_3.ingress_port;
         standard_metadata.egress_spec = smeta_3.egress_spec;
@@ -130,6 +134,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_3.checksum_error;
         standard_metadata.parser_error = smeta_3.parser_error;
         standard_metadata.priority = smeta_3.priority;
+        standard_metadata.lag_hash = smeta_3.lag_hash;
     }
     @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_2) {
         meta._fwd_l2ptr0 = l2ptr_2;
@@ -174,31 +179,31 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         default_action = my_drop_3();
     }
-    @hidden action v1modelspecialopsbmv2l283() {
+    @hidden action v1modelspecialopsbmv2l282() {
         hdr.ipv4.srcAddr = 32w184320258;
         meta._fwd_l2ptr0 = 32w0xe50b;
     }
-    @hidden action v1modelspecialopsbmv2l286() {
+    @hidden action v1modelspecialopsbmv2l285() {
         hdr.ipv4.srcAddr = 32w180835939;
         meta._fwd_l2ptr0 = 32w0xec1c;
     }
-    @hidden table tbl_v1modelspecialopsbmv2l283 {
+    @hidden table tbl_v1modelspecialopsbmv2l282 {
         actions = {
-            v1modelspecialopsbmv2l283();
+            v1modelspecialopsbmv2l282();
         }
-        const default_action = v1modelspecialopsbmv2l283();
+        const default_action = v1modelspecialopsbmv2l282();
     }
-    @hidden table tbl_v1modelspecialopsbmv2l286 {
+    @hidden table tbl_v1modelspecialopsbmv2l285 {
         actions = {
-            v1modelspecialopsbmv2l286();
+            v1modelspecialopsbmv2l285();
         }
-        const default_action = v1modelspecialopsbmv2l286();
+        const default_action = v1modelspecialopsbmv2l285();
     }
     apply {
         if (standard_metadata.instance_type == 32w6) {
-            tbl_v1modelspecialopsbmv2l283.apply();
+            tbl_v1modelspecialopsbmv2l282.apply();
         } else if (standard_metadata.instance_type == 32w4) {
-            tbl_v1modelspecialopsbmv2l286.apply();
+            tbl_v1modelspecialopsbmv2l285.apply();
         } else {
             ipv4_da_lpm_0.apply();
         }
@@ -229,6 +234,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         smeta_4.checksum_error = standard_metadata.checksum_error;
         smeta_4.parser_error = standard_metadata.parser_error;
         smeta_4.priority = standard_metadata.priority;
+        smeta_4.lag_hash = standard_metadata.lag_hash;
         mark_to_drop(smeta_4);
         standard_metadata.ingress_port = smeta_4.ingress_port;
         standard_metadata.egress_spec = smeta_4.egress_spec;
@@ -246,6 +252,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         standard_metadata.checksum_error = smeta_4.checksum_error;
         standard_metadata.parser_error = smeta_4.parser_error;
         standard_metadata.priority = smeta_4.priority;
+        standard_metadata.lag_hash = smeta_4.lag_hash;
     }
     @name("egress.set_out_bd") action set_out_bd(@name("bd") bit<24> bd_2) {
         meta._fwd_out_bd1 = bd_2;

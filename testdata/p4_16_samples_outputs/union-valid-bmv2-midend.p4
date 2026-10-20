@@ -23,6 +23,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     state start {
         b.extract<Hdr1>(h.h1);
         b.extract<Hdr1>(h.u_h1);
+        h.u_h2.setInvalid();
         transition accept;
     }
 }

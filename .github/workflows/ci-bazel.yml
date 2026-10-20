@@ -45,10 +45,10 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-direct
+          key: bazel-v2-${{ runner.os }}-direct-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-
-            ${{ runner.os }}-bazel-shared-
+            bazel-v2-${{ runner.os }}-direct-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-
+            bazel-v2-${{ runner.os }}-direct-main-
 
       - name: Save start time
         run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
@@ -66,10 +66,11 @@ jobs:
 
       - name: Save bazel cache
         uses: actions/cache/save@v6
-        if: always() && (github.ref_name == 'main' || fromJSON(env.duration) > 180)
+        # Keep expensive PR rebuilds reusable, but never save merge-queue caches.
+        if: success() && (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && fromJSON(env.duration) > 180))
         with:
           path: ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-direct-${{ github.run_id }}
+          key: bazel-v2-${{ runner.os }}-direct-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}
 
   build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
     needs: format_bazel_files
@@ -83,12 +84,10 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-indirect
+          key: bazel-v2-${{ runner.os }}-indirect-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-indirect
-            ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-direct
-            ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-
-            ${{ runner.os }}-bazel-shared-
+            bazel-v2-${{ runner.os }}-indirect-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-
+            bazel-v2-${{ runner.os }}-indirect-main-
 
       - name: Save start time
         run: echo "START_TIME=$(date +%s)" >> "$GITHUB_ENV"
@@ -108,7 +107,8 @@ jobs:
 
       - name: Save bazel cache
         uses: actions/cache/save@v6
-        if: always() && (github.ref_name == 'main' || fromJSON(env.duration) > 180)
+        # Keep expensive PR rebuilds reusable, but never save merge-queue caches.
+        if: success() && (github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && fromJSON(env.duration) > 180))
         with:
           path: ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-shared-${{ hashFiles('**/*.bazel*', '**/*.bzl') }}-indirect-${{ github.run_id }}
+          key: bazel-v2-${{ runner.os }}-indirect-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}-${{ github.run_id }}-${{ github.run_attempt }}

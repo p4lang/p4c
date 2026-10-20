@@ -46,7 +46,7 @@ class BackendDriver:
     def __str__(self):
         return self._backend
 
-    def add_command(self, cmd_name, cmd):
+    def add_command(self, cmd_name: str, cmd: str) -> None:
         """Add a command
 
         If the command was previously set, it is overwritten

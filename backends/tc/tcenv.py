@@ -23,6 +23,7 @@ import sys
 import time
 from pathlib import Path
 from typing import Any, List, Optional
+from urllib.parse import unquote
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -133,19 +134,29 @@ class Virtme:
             testutils.kill_proc_group(self.vm_proc)
 
     def _get_version(self, url):
-        pattern = r"(\d+\.\d+\.0p\d+tc-v\d+-rc\d+)"
+        candidates = [
+            # Legacy linux-p4tc kernel release naming.
+            (r"(\d+\.\d+\.0p\d+tc-v\d+-rc\d+\+?)", True),
+            # Newer release labels can be plain semantic versions.
+            (r"[Vv]ersion\s+(\d+\.\d+\.\d+(?:\.\d+)?\+?)", False),
+            # Fallback for asset names: linux-image-<version>_<arch>.deb
+            (r"linux-image-([^/_]+?)(?:_[^/]+)?(?:\.deb)?$", False),
+        ]
+        source = unquote(url.strip())
 
-        match = re.search(pattern, url)
-
-        if match:
+        for pattern, force_plus in candidates:
+            match = re.search(pattern, source)
+            if not match:
+                continue
             version = match.group(1)
+            if force_plus and not version.endswith("+"):
+                version += "+"
             if self.verbose:
                 print(f"Extracted version: {version}")
-        else:
-            testutils.log.error("Version string not found")
-            return None
+            return version
 
-        return version + "+"
+        testutils.log.error("Version string not found in '%s'", source)
+        return None
 
     def extract_version(self):
         cmd = f'curl -s {self.release_url} | jq .assets[2].browser_download_url | tr -d \\"'

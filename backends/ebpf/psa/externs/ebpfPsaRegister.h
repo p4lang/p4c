@@ -26,6 +26,8 @@ class EBPFRegisterPSA : public EBPFTableBase {
     EBPFType *valueType;
 
     bool shouldUseArrayMap();
+    void emitAssignment(CodeBuilder *builder, EBPFType *type, cstring name,
+                        const IR::Expression *expression, ControlBodyTranslatorPSA *translator);
 
  public:
     EBPFRegisterPSA(const EBPFProgram *program, cstring instanceName,
@@ -40,6 +42,8 @@ class EBPFRegisterPSA : public EBPFTableBase {
     void emitRegisterRead(CodeBuilder *builder, const P4::ExternMethod *method,
                           ControlBodyTranslatorPSA *translator,
                           const IR::Expression *leftExpression);
+    void emitRegisterReadExpression(CodeBuilder *builder, const P4::ExternMethod *method,
+                                    ControlBodyTranslatorPSA *translator);
     void emitRegisterWrite(CodeBuilder *builder, const P4::ExternMethod *method,
                            ControlBodyTranslatorPSA *translator);
 };
