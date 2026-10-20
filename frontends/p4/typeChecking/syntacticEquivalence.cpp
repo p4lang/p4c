@@ -90,6 +90,7 @@ bool SameExpression::sameExpression(const IR::Expression *left, const IR::Expres
         }
         return true;
     } else if (left->is<IR::Invalid>()) {
+        // Both sides passed type checking; a bare {#} has no type or operands to compare.
         return true;
     } else if (auto lh = left->to<IR::InvalidHeader>()) {
         auto rh = right->to<IR::InvalidHeader>();
