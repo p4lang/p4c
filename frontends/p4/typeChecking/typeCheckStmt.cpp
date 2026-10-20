@@ -233,6 +233,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SelectCase *sc) {
     return sc;
 }
 
+const IR::Node *TypeInferenceBase::postorder(const IR::ParserState *state) {
+    // A direct transition ("transition name;") is a PathExpression that must name a parser state.
+    // Select expressions check their cases separately and are always typed as Type_State.
+    if (state->selectExpression == nullptr) return state;
+    auto type = getType(state->selectExpression);
+    if (type != nullptr && type != IR::Type_State::get())
+        typeError("%1%: transition target must be a parser state", state->selectExpression);
+    return state;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::KeyElement *elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr) return elem;
