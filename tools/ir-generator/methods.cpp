@@ -220,9 +220,17 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       {},
       CONST + IN_IMPL + EXTEND + OVERRIDE,
       [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+          // Only generate a validator if this class has checks of its own.
           bool needed = false;
           std::stringstream buf;
           buf << "{" << LineDirective(true);
+          // Check inherited fields too. Interfaces have no Node base to validate.
+          if (cl->kind != NodeKind::Interface) {
+              if (auto parent = cl->getParent())
+                  buf << std::endl
+                      << cl->indent << cl->indent << parent->qualified_name(cl->containedIn)
+                      << "::validate();";
+          }
           for (auto f : *cl->getFields()) {
               if (f->type) {
                   if (f->type->resolve(cl->containedIn) == nullptr)
