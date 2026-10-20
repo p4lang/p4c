@@ -35,7 +35,7 @@ trap 'rm -rf "$work_dir"' EXIT
 src_dir="$work_dir/source dir"
 inc_dir="$work_dir/include dir"
 out_dir="$work_dir/output dir"
-mkdir -p "$src_dir" "$inc_dir"
+mkdir -p "$src_dir" "$inc_dir" "$out_dir"
 
 printf '#define QUOTED_HEADER_MARKER quoted_header_was_found\n' > "$inc_dir/quoted definitions.p4"
 printf '#include "quoted definitions.p4"\nQUOTED_HEADER_MARKER\n' > "$src_dir/prog.p4"
