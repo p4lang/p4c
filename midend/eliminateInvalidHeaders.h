@@ -25,7 +25,11 @@ class DoEliminateInvalidHeaders final : public Transform {
     std::vector<const IR::Declaration_Variable *> variables;
 
  public:
-    DoEliminateInvalidHeaders() { setName("DoEliminateInvalidHeaders"); }
+    DoEliminateInvalidHeaders() {
+        setName("DoEliminateInvalidHeaders");
+        // Shared {#} nodes (e.g. in duplicated actions) need one new declaration per scope.
+        visitDagOnce = false;
+    }
 
     Visitor::profile_t init_apply(const IR::Node *node) override {
         auto rv = Transform::init_apply(node);
