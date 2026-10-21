@@ -62,7 +62,7 @@ if (ENABLE_P4TC_STF_TESTS)
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/ipip_decap" "testdata/p4tc_samples_stf/ipip.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/ipip_decap.stf" "")
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/varbit_pop" "testdata/p4tc_samples_stf/varbit_pop.p4" "-e InternetChecksum -tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/varbit_pop.stf" "")
   p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/varbit_reflect" "testdata/p4tc_samples_stf/varbit_reflect.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/varbit_reflect.stf" "")
-  foreach(comparison_test mac_comparisons array_comparisons)
+  foreach(comparison_test mac_comparisons array_comparisons signed24_comparisons signed_scalar_comparisons)
     p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE
       "testdata/p4tc_samples_stf/${comparison_test}"
       "testdata/p4tc_samples_stf/${comparison_test}.p4"

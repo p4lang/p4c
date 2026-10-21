@@ -11,8 +11,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/TestTemplate.cmake)
 # TEST PROGRAMS
 #############################################################################
 set(PNA_SEARCH_PATTERNS "include.*pna.p4" "main")
-# The BMv2 flavor of PNA has a different package, this target only handles the DPDK one.
-set(PNA_EXCLUDE_PATTERNS "include.*bmv2/pna.p4")
+# The BMv2 and TC flavors of PNA have a different package, this target only handles the DPDK one.
+set(PNA_EXCLUDE_PATTERNS "include.*bmv2/pna.p4" "include.*tc/pna.p4")
 set(
   P4TESTS_FOR_PNA "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4"
 )

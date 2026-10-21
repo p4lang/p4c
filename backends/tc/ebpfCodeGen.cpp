@@ -3631,6 +3631,24 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Shr *e) {
     return (false);
 }
 
+// Left-justifies a signed operand narrower than its C type, so that the P4 sign
+// bit becomes the C sign bit. The shift is done unsigned to stay defined for
+// negative constants, and the signed cast follows it so that integer promotion
+// cannot keep bits above the C width.
+static void emitSignedCmpOperand(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
+                                 const IR::Expression *operand, unsigned width) {
+    unsigned cw = width <= 8 ? 8 : width <= 16 ? 16 : width <= 32 ? 32 : 64;
+    if (width == cw) {
+        bld->appendFormat("((s%u)(", cw);
+        cbt->visitHostOrder(operand);
+        bld->append("))");
+    } else {
+        bld->appendFormat("((s%u)((u%u)(", cw, cw);
+        cbt->visitHostOrder(operand);
+        bld->appendFormat(")<<%u))", cw - width);
+    }
+}
+
 static void gen_cmp(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
                     const IR::Operation_Binary *e, const char *small, const char *large) {
     auto lt = e->left->type->to<IR::Type_Bits>();
@@ -3646,77 +3664,29 @@ static void gen_cmp(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
     auto w = lt->width_bits();
     assert(w == e->right->type->to<IR::Type_Bits>()->width_bits());
     assert(lt->isSigned == e->right->type->to<IR::Type_Bits>()->isSigned);
-    if (w <= 64) {
-        switch (small[0]) {
-            case '=':
-            case '!':
-                cbt->visitHostOrder(e->left);
-                bld->appendFormat("%s", small);
-                cbt->visitHostOrder(e->right);
-                break;
-            case '<':
-            case '>':
-                if (lt->isSigned) {
-                    bool exact = false;
-                    int cw = 0;
-
-                    if (w < 8) {
-                        cw = 8;
-                        exact = false;
-                    } else if (w == 8) {
-                        cw = 8;
-                        exact = true;
-                    } else if (w < 16) {
-                        cw = 16;
-                        exact = false;
-                    } else if (w == 16) {
-                        cw = 16;
-                        exact = true;
-                    } else if (w < 32) {
-                        cw = 32;
-                        exact = false;
-                    } else if (w == 32) {
-                        cw = 32;
-                        exact = true;
-                    } else if (w < 64) {
-                        cw = 64;
-                        exact = false;
-                    } else if (w == 64) {
-                        cw = 64;
-                        exact = true;
-                    } else
-                        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                                    "Impossible width %u in gen_cmp", w);
-
-                    bld->appendFormat("((i%d)(", cw);
-                    cbt->visitHostOrder(e->left);
-                    if (exact)
-                        bld->append("))");
-                    else
-                        bld->appendFormat(")<<%u)", cw - w);
-                    bld->appendFormat("%s", small);
-                    bld->appendFormat("((i%d)(", cw);
-                    cbt->visitHostOrder(e->right);
-                    if (exact)
-                        bld->append("))");
-                    else
-                        bld->appendFormat(")<<%u)", cw - w);
-                } else {
-                    cbt->visitHostOrder(e->left);
-                    bld->appendFormat("%s", small);
-                    cbt->visitHostOrder(e->right);
-                }
-                break;
-            default:
-                assert(!"Invalid call to gen_cmp");
-                break;
-        }
-    } else {
+    if (w > 64) {
         bld->appendFormat("cmp_%s_%u_%s(", lt->isSigned ? "s" : "u", w, large);
         cbt->visit(e->left);
         bld->append(',');
         cbt->visit(e->right);
         bld->append(')');
+        return;
+    }
+    bool isEquality = small[0] == '=' || small[0] == '!';
+    bool isByteWidth = w == 8 || w == 16 || w == 32 || w == 64;
+    if (lt->isSigned && (!isEquality || !isByteWidth)) {
+        emitSignedCmpOperand(cbt, bld, e->left, w);
+        bld->appendFormat("%s", small);
+        emitSignedCmpOperand(cbt, bld, e->right, w);
+    } else if (isEquality && cbt->isNetworkOrder(e->left) && cbt->isNetworkOrder(e->right)) {
+        // Equal network-order values have equal bytes, so no conversion is needed.
+        cbt->getBitAlignment(e->left);
+        bld->appendFormat("%s", small);
+        cbt->getBitAlignment(e->right);
+    } else {
+        cbt->visitHostOrder(e->left);
+        bld->appendFormat("%s", small);
+        cbt->visitHostOrder(e->right);
     }
 }
 
@@ -3764,10 +3734,13 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AddSat *e) { return (sarithCom
 
 bool ControlBodyTranslatorPNA::preorder(const IR::SubSat *e) { return (sarithCommon(e, "subsat")); }
 
+bool ControlBodyTranslatorPNA::isNetworkOrder(const IR::Expression *e) {
+    return dynamic_cast<const EBPF::P4TCTarget *>(builder->target)
+               ->getByteOrder(typeMap, findContext<IR::P4Action>(), e) == "NETWORK";
+}
+
 void ControlBodyTranslatorPNA::visitHostOrder(const IR::Expression *e) {
-    auto bo = dynamic_cast<const EBPF::P4TCTarget *>(builder->target)
-                  ->getByteOrder(typeMap, findContext<IR::P4Action>(), e);
-    if (bo == "NETWORK") {
+    if (isNetworkOrder(e)) {
         emitAndConvertByteOrder(e, "HOST"_cs);
     } else {
         getBitAlignment(e);
