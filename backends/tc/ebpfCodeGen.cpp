@@ -3650,9 +3650,9 @@ static void gen_cmp(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
         switch (small[0]) {
             case '=':
             case '!':
-                cbt->visit(e->left);
+                cbt->visitHostOrder(e->left);
                 bld->appendFormat("%s", small);
-                cbt->visit(e->right);
+                cbt->visitHostOrder(e->right);
                 break;
             case '<':
             case '>':
@@ -3689,22 +3689,22 @@ static void gen_cmp(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
                                     "Impossible width %u in gen_cmp", w);
 
                     bld->appendFormat("((i%d)(", cw);
-                    cbt->visit(e->left);
+                    cbt->visitHostOrder(e->left);
                     if (exact)
                         bld->append("))");
                     else
                         bld->appendFormat(")<<%u)", cw - w);
                     bld->appendFormat("%s", small);
                     bld->appendFormat("((i%d)(", cw);
-                    cbt->visit(e->right);
+                    cbt->visitHostOrder(e->right);
                     if (exact)
                         bld->append("))");
                     else
                         bld->appendFormat(")<<%u)", cw - w);
                 } else {
-                    cbt->visit(e->left);
+                    cbt->visitHostOrder(e->left);
                     bld->appendFormat("%s", small);
-                    cbt->visit(e->right);
+                    cbt->visitHostOrder(e->right);
                 }
                 break;
             default:
