@@ -473,10 +473,12 @@ IR::ForStatement *DoLocalCopyPropagation::preorder(IR::ForStatement *s) {
     s->apply(LoopPrepass(*this), getContext());
     ControlFlowVisitor::SaveGlobal outer(*this, "-BREAK-"_cs, "-CONTINUE-"_cs);
     visit(s->condition, "condition");
+    auto &after_cond = flow_clone();
     visit(s->body, "body");
     flow_merge_global_from("-CONTINUE-"_cs);
     visit(s->updates, "updates");
     flow_merge_global_from("-BREAK-"_cs);
+    flow_merge(after_cond);
     prune();
     return s;
 }

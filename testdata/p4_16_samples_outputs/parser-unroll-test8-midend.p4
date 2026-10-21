@@ -28,6 +28,7 @@ struct Meta {
 parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         pkt.extract<h_index1>(hdr.h0_i1);
+        hdr.h0_i2.setInvalid();
         pkt.extract<h_index>(hdr.i);
         hdr.i.index = hdr.h0_i1.index;
         transition accept;

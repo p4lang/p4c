@@ -1,0 +1,11 @@
+# No VLAN tag, nothing goes on the stack.
+packet 0 000000000001 000000000002 0800 AABB
+expect 1 000000000001 000000000002 0800 AABB
+
+# One VLAN tag, extracted into vlan[0] and emitted unchanged.
+packet 0 000000000001 000000000002 8100 0001 0800 AABB
+expect 1 000000000001 000000000002 8100 0001 0800 AABB
+
+# Two VLAN tags fill the stack, pop_front(1) removes the outer one.
+packet 0 000000000001 000000000002 8100 0001 8100 0002 0800 AABB
+expect 1 000000000001 000000000002 8100 0002 0800 AABB

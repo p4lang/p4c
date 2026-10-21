@@ -23,7 +23,7 @@ def get_script_dir(follow_symlinks: bool = True) -> Path:
 
 # top-down find, good for deployment
 def find_bin(exe: str) -> Optional[Path]:
-    for pp in os.environ["PATH"].split(":"):
+    for pp in os.environ["PATH"].split(os.pathsep):
         pp_path = Path(pp)
         if not pp_path.is_dir():
             continue

@@ -334,7 +334,7 @@ function build_p4tc() {
 
   sudo apt-get install -y --no-install-recommends ${P4TC_DEPS}
 
-if [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
+if [[ "${DISTRIB_RELEASE}" != "24.04" && "${DISTRIB_RELEASE}" != "26.04" ]] ; then
   wget https://apt.llvm.org/llvm.sh
   sudo chmod +x llvm.sh
   sudo ./llvm.sh 15

@@ -5,6 +5,8 @@
 
 #include "flattenUnions.h"
 
+#include "frontends/p4/coreLibrary.h"
+
 namespace P4 {
 const IR::MethodCallStatement *HandleValidityHeaderUnion::processValidityForStr(
     const IR::Statement *s, const IR::Member *m, cstring headerElement, cstring setValid) {
@@ -142,6 +144,15 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::SwitchStatement *a) {
     return a;
 }
 
+// True if DoFlattenHeaderUnion splits this union into separate headers
+bool HandleValidityHeaderUnion::isFlattened(const IR::Expression *u) const {
+    if (u->is<IR::ArrayIndex>()) return flattenStacks;
+    if (auto mem = u->to<IR::Member>()) return mem->expr->type->is<IR::Type_Struct>();
+    if (auto path = u->to<IR::PathExpression>())
+        return refMap->getDeclaration(path->path, true)->is<IR::Declaration_Variable>();
+    return false;
+}
+
 // Assumes nested structs are flattened before this pass
 const IR::Node *HandleValidityHeaderUnion::postorder(IR::MethodCallStatement *mcs) {
     auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
@@ -149,6 +160,16 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::MethodCallStatement *mc
         if (a->name == "setValid") {  // hdr.u.h1.setValid() or u.h1.setValid
             if (auto m = a->appliedTo->to<IR::Member>()) {
                 if (auto huType = m->expr->type->to<IR::Type_HeaderUnion>())  // u.h1  or hdr.u.h1
+                    return setInvalidforRest(mcs, m, huType, m->member.name, false);
+            }
+        }
+    } else if (auto em = mi->to<P4::ExternMethod>()) {
+        auto &corelib = P4CoreLibrary::instance();
+        if (em->actualExternType->name == corelib.packetIn.name &&
+            em->method->name == corelib.packetIn.extract.name) {  // pkt.extract(hdr.u.h1)
+            if (auto m = mcs->methodCall->arguments->at(0)->expression->to<IR::Member>()) {
+                auto huType = m->expr->type->to<IR::Type_HeaderUnion>();
+                if (huType && isFlattened(m->expr))
                     return setInvalidforRest(mcs, m, huType, m->member.name, false);
             }
         }

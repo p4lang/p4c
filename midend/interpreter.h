@@ -504,6 +504,7 @@ class SymbolicArray final : public SymbolicValue {
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
     bool hasUninitializedParts() const override;
+    SymbolicValue *collapse() const;
 
     DECLARE_TYPEINFO(SymbolicArray, SymbolicValue);
 };
@@ -526,7 +527,11 @@ class AnyElement final : public SymbolicHeader {
     void setValid(bool) override { parent->setAllUnknown(); }
     bool merge(const SymbolicValue *other) override;
     bool equals(const SymbolicValue *other) const override;
-    SymbolicValue *collapse() const;
+    SymbolicValue *get(const IR::Node *node, cstring) const override {
+        parent->setAllUnknown();
+        return new SymbolicStaticError(node, "Unknown array index");
+    }
+    SymbolicValue *collapse() const { return parent->collapse(); }
     bool hasUninitializedParts() const override { BUG("Should not be called"); }
 
     DECLARE_TYPEINFO(AnyElement, SymbolicHeader);

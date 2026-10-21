@@ -26,6 +26,7 @@ import subprocess
 import sys
 import time
 from collections import OrderedDict
+from dataclasses import dataclass
 from glob import glob
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -50,6 +51,20 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGALRM, signal_handler)
 
 
+@dataclass(frozen=True)
+class Bmv2Target:
+    compiler: str
+    switch: str
+    switch_cli: str
+
+
+BMV2_TARGETS: Dict[Tuple[str, str], Bmv2Target] = {
+    ("bmv2", "v1model"): Bmv2Target("p4c-bm2-ss", "simple_switch", "simple_switch_CLI"),
+    ("bmv2", "psa"): Bmv2Target("p4c-bm2-psa", "psa_switch", "psa_switch_CLI"),
+    ("bmv2", "pna"): Bmv2Target("p4c-bm2-pna", "pna_nic", "pna_nic_CLI"),
+}
+
+
 class Options:
     # File that is being compiled.
     p4_file: Path = Path(".")
@@ -67,11 +82,16 @@ class Options:
     switch_options: List[str] = []
     switch_target_options: List[str] = []
     has_bmv2: bool = False  # Is the behavioral model installed?
-    use_psa: bool = False  # Use the psa switch behavioral model?
+    target: str = "bmv2"
+    arch: str = "v1model"
     run_debugger: str = ""
     # Log packets produced by the BMV2 model if path to log is supplied
     observation_log: Optional[Path] = None
     init_commands: List[str] = []
+
+    @property
+    def bmv2_target(self) -> Bmv2Target:
+        return BMV2_TARGETS[(self.target, self.arch)]
 
 
 def ByteToHex(byteStr):
@@ -348,6 +368,9 @@ class BMV2Table(object):
 
 
 class BMv2StfLexer(STFLexer):
+    # Separator between port and lag lists, matching simple_switch_CLI syntax.
+    t_PIPE = r"\|"
+
     def __init__(self):
         super().__init__()
         tokens = [
@@ -359,6 +382,7 @@ class BMv2StfLexer(STFLexer):
             "MC_NODE_CREATE",
             "MC_NODE_UPDATE",
             "MC_NODE_ASSOCIATE",
+            "MC_SET_LAG_MEMBERSHIP",
             "COUNTER_READ",
             "COUNTER_WRITE",
             "REGISTER_READ",
@@ -372,6 +396,8 @@ class BMv2StfLexer(STFLexer):
         for keyword in tokens:
             self.keywords_map[keyword.lower()] = keyword
         self.tokens.extend(tokens)
+        # PIPE is a symbol, not a keyword.
+        self.tokens.append("PIPE")
 
 
 # PARSER GRAMMAR --------------------------------------------------------------
@@ -395,8 +421,13 @@ class BMv2StfLexer(STFLexer):
 #           | MIRRORING_GET number
 #           | MC_MGRP_CREATE number
 #           | MC_NODE_CREATE number number_list
+#           | MC_NODE_CREATE number PIPE number_list
+#           | MC_NODE_CREATE number number_list PIPE number_list
 #           | MC_NODE_UPDATE number number_list
+#           | MC_NODE_UPDATE number PIPE number_list
+#           | MC_NODE_UPDATE number number_list PIPE number_list
 #           | MC_NODE_ASSOCIATE number number
+#           | MC_SET_LAG_MEMBERSHIP number number_list
 #           | COUNTER_READ qualified_name number
 #           | COUNTER_WRITE qualified_name number number number
 #           | REGISTER_READ qualified_name number
@@ -448,8 +479,28 @@ class Bmv2StfParser(STFParser):
         "direct_cmd : MC_NODE_CREATE number number_list"
         p[0] = (p[1].lower(), p[2], p[3])
 
+    def p_direct_cmd_mc_node_create_lag_only(self, p):
+        "direct_cmd : MC_NODE_CREATE number PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4])
+
+    def p_direct_cmd_mc_node_create_ports_and_lag(self, p):
+        "direct_cmd : MC_NODE_CREATE number number_list PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4], p[5])
+
     def p_direct_cmd_mc_node_update(self, p):
         "direct_cmd : MC_NODE_UPDATE number number_list"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_mc_node_update_lag_only(self, p):
+        "direct_cmd : MC_NODE_UPDATE number PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4])
+
+    def p_direct_cmd_mc_node_update_ports_and_lag(self, p):
+        "direct_cmd : MC_NODE_UPDATE number number_list PIPE number_list"
+        p[0] = (p[1].lower(), p[2], p[3], p[4], p[5])
+
+    def p_direct_cmd_mc_set_lag_membership(self, p):
+        "direct_cmd : MC_SET_LAG_MEMBERSHIP number number_list"
         p[0] = (p[1].lower(), p[2], p[3])
 
     def p_direct_cmd_mc_node_associate(self, p):
@@ -522,10 +573,9 @@ class RunBMV2(object):
             self.json = json.load(jf)
         for a in self.json["actions"]:
             self.actions.append(BMV2Action(a))
-        for t in self.json["pipelines"][0]["tables"]:
-            self.tables.append(BMV2Table(t))
-        for t in self.json["pipelines"][1]["tables"]:
-            self.tables.append(BMV2Table(t))
+        for pipeline in self.json["pipelines"]:
+            for t in pipeline["tables"]:
+                self.tables.append(BMV2Table(t))
 
     def filename(self, interface: str, direction: str) -> Path:
         return self.folder.joinpath(f"{self.pcapPrefix}{interface}_{direction}.pcap")
@@ -556,7 +606,9 @@ class RunBMV2(object):
             "mirroring_get",
             "mc_mgrp_create",
             "mc_node_create",
+            "mc_node_update",
             "mc_node_associate",
+            "mc_set_lag_membership",
             "counter_read",
             "counter_write",
             "register_read",
@@ -726,12 +778,8 @@ class RunBMV2(object):
         testutils.log.info("Running model")
         wait = 0  # Time to wait before model starts running
 
-        if self.options.use_psa:
-            switch = "psa_switch"
-            switch_cli = "psa_switch_CLI"
-        else:
-            switch = "simple_switch"
-            switch_cli = "simple_switch_CLI"
+        switch = self.options.bmv2_target.switch
+        switch_cli = self.options.bmv2_target.switch_cli
 
         concurrent = ConcurrentInteger(os.getcwd(), 1000)
         rand = concurrent.generate()

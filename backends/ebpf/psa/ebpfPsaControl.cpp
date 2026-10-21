@@ -41,7 +41,20 @@ bool ControlBodyTranslatorPSA::preorder(const IR::AssignmentStatement *a) {
         }
     }
 
-    return CodeGenInspector::preorder(a);
+    emittingExpression = true;
+    auto result = CodeGenInspector::preorder(a);
+    emittingExpression = false;
+    return result;
+}
+
+bool ControlBodyTranslatorPSA::preorder(const IR::MethodCallExpression *expression) {
+    auto wasEmittingExpression = emittingExpression;
+    // Propagate expression context so nested Register.read() calls do not emit
+    // standalone statements into the surrounding C expression.
+    emittingExpression = true;
+    auto result = ControlBodyTranslator::preorder(expression);
+    emittingExpression = wasEmittingExpression;
+    return result;
 }
 
 void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
@@ -67,6 +80,12 @@ void ControlBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
         return;
     } else if (declType->name.name == "Register") {
         auto reg = control->to<EBPFControlPSA>()->getRegister(name);
+        if (method->method->type->name == "read" && emittingExpression) {
+            // Emit a value-producing expression for nested reads; the normal
+            // path emits statements for reads assigned to a standalone lvalue.
+            reg->emitRegisterReadExpression(builder, method, this);
+            return;
+        }
         if (method->method->type->name == "write") {
             reg->emitRegisterWrite(builder, method, this);
         } else if (method->method->type->name == "read") {

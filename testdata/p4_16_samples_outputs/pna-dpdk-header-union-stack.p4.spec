@@ -29,6 +29,8 @@ apply {
 	invalidate h.u0_h2
 	invalidate h.u0_h3
 	extract h.u0_h3
+	invalidate h.u0_h1
+	invalidate h.u0_h2
 	validate h.u0_h3
 	mov h.u0_h3.data 0x1
 	invalidate h.u0_h1

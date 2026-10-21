@@ -28,10 +28,12 @@ parser p(packet_in b, out Headers h, inout Meta m, in pna_main_parser_input_meta
     }
     state getH1 {
         b.extract<Hdr1>(h.u_h1);
+        h.u_h2.setInvalid();
         transition accept;
     }
     state getH2 {
         b.extract<Hdr2>(h.u_h2);
+        h.u_h1.setInvalid();
         transition accept;
     }
 }

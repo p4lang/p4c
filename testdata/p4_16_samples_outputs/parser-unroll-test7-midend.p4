@@ -28,7 +28,9 @@ struct metadata {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
         packet.extract<O1>(hdr.u0_byte);
+        hdr.u0_short.setInvalid();
         packet.extract<O2>(hdr.u1_short);
+        hdr.u1_byte.setInvalid();
         transition accept;
     }
 }

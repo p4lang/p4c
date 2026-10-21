@@ -915,7 +915,7 @@ const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
             }
         }
     }
-    return new IR::Constant(e->srcInfo, left->type, value, cl->base);
+    return new IR::Constant(e->srcInfo, left->type, value, cl->base, true);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {

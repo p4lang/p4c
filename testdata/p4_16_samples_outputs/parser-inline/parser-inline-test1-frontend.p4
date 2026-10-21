@@ -63,7 +63,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition p0_0;
     }
     state p0_0 {
-        transition p2;
+        hdr.h4 = phdr_0.h1;
+        transition accept;
     }
     state p1 {
         hdr.h1.setInvalid();
@@ -71,10 +72,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.h3.setInvalid();
         hdr.h4.setInvalid();
         transition Subparser_start;
-    }
-    state p2 {
-        hdr.h4 = phdr_0.h1;
-        transition accept;
     }
 }
 
