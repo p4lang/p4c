@@ -3634,7 +3634,14 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Shr *e) {
 static void gen_cmp(ControlBodyTranslatorPNA *cbt, EBPF::CodeBuilder *bld,
                     const IR::Operation_Binary *e, const char *small, const char *large) {
     auto lt = e->left->type->to<IR::Type_Bits>();
-    assert(lt);
+    if (lt == nullptr) {
+        bld->append("(");
+        cbt->visit(e->left);
+        bld->appendFormat(") %s (", small);
+        cbt->visit(e->right);
+        bld->append(")");
+        return;
+    }
     assert(e->right->type->to<IR::Type_Bits>());
     auto w = lt->width_bits();
     assert(w == e->right->type->to<IR::Type_Bits>()->width_bits());
