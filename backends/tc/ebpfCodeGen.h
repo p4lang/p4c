@@ -438,6 +438,7 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     bool preorder(const IR::SubSat *) override;
     bool preorder(const IR::Constant *) override;
     bool bigXSmallMul(const IR::Expression *, const IR::Constant *);
+    bool isNetworkOrder(const IR::Expression *);
     void visitHostOrder(const IR::Expression *);
 };
 

@@ -1,0 +1,6 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "signed_scalar_comparisons",
+  "externs" : [],
+  "tables" : []
+}
