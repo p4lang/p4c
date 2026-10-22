@@ -5,7 +5,7 @@
 
 """Keep the latest main caches and remove old or excess PR caches.
 
-Only manage keys starting with ccache-v2- or bazel-v2-.
+Only manage keys starting with ccache-v2-, bazel-v2-, or cpm-v1-.
 GitHub can still remove caches itself when the repository runs out of space.
 """
 
@@ -20,7 +20,12 @@ PR_REF = re.compile(r"refs/pull/(\d+)/merge$")
 
 
 def cache_prefix(key: str) -> str | None:
-    """Remove the run ID and attempt from keys written by our cache actions."""
+    """Remove the changing suffix from keys written by our cache actions."""
+    if key.startswith("cpm-v1-"):
+        prefix, _, digest = key.rpartition("-")
+        if prefix.endswith("-main") and re.fullmatch(r"[0-9a-f]{64}", digest):
+            return prefix
+        return None
     if not key.startswith(("ccache-v2-", "bazel-v2-")):
         return None
     prefix, run_id, attempt = key.rsplit("-", 2)
