@@ -6,9 +6,7 @@ macro(obtain_z3)
   option(USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)
 
   if(USE_PREINSTALLED_Z3)
-    # TEMPORARY: exercise Ubuntu 20.04's Z3 in CI before deciding whether to
-    # lower the supported minimum. Drop this change with the validation commit.
-    set(Z3_MIN_VERSION "4.8.7")
+    set(Z3_MIN_VERSION "4.8.14")
     find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
 
     if(ENABLE_GC)
