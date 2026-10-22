@@ -34,7 +34,7 @@ void compile(EbpfOptions &options) {
         ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "This compiler only handles P4-16");
         return;
     }
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
 
     if (options.loadIRFromJson) {
         std::filebuf fb;

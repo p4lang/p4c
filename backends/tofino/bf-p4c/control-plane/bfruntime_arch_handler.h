@@ -1574,7 +1574,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         } else {
             auto parserName = "ingress_parser"_cs;
             forAllPipeBlocks(evaluatedProgram, [&](cstring, const IR::PackageBlock *pkg) {
-                auto *block = pkg->findParameterValue(parserName);
+                const IR::CompileTimeValue *block = pkg->findParameterValue(parserName);
                 if (!block) return;
                 if (!block->is<IR::ParserBlock>()) return;
                 auto parserBlock = block->to<IR::ParserBlock>();
@@ -1730,7 +1730,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         // phase0 table in bf-rt.json (e.g. ig_intr_md.ingress_port). TNA
         // translation will extract this value during midend and set the key
         // name in phase0 table in context.json to be consistent.
-        auto *params = parser->getApplyParameters();
+        const IR::ParameterList *params = parser->getApplyParameters();
         for (auto p : *params) {
             if (p->type->toString() == "ingress_intrinsic_metadata_t") {
                 BUG_CHECK(ingressIntrinsicMdParamName.count(parserBlock) == 0 ||
@@ -2023,7 +2023,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
             }
             void postorder(const IR::P4Table *table) override {
                 // Find the M/A table with attached direct register that uses a register parameter
-                auto *registers = table->properties->getProperty("registers"_cs);
+                const IR::Property *registers = table->properties->getProperty("registers"_cs);
                 if (registers == nullptr) return;
                 auto *registers_value = registers->value->to<IR::ExpressionValue>();
                 CHECK_NULL(registers_value);
@@ -2205,7 +2205,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         if (function->method->name != BFN::ExternPortMetadataUnpackString) return std::nullopt;
 
         if (auto *call = function->expr->to<IR::MethodCallExpression>()) {
-            auto *typeArg = call->typeArguments->at(0);
+            const IR::Type *typeArg = call->typeArguments->at(0);
             auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(refMap, typeMap,
                                                                             typeArg, p4RtTypeInfo);
             return PortMetadata{typeSpec};

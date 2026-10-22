@@ -9,13 +9,12 @@ bool FindTypesInLogMsgInvocationToReplace::hasStructInParameter(
     if (auto *path = methodCallStatement->methodCall->method->to<IR::PathExpression>()) {
         if (methodCallStatement->methodCall->arguments->size() == 2 &&
             path->path->name.name == "log_msg") {
-            auto *param1 = methodCallStatement->methodCall->arguments->at(0)->expression;
-            auto *param2 = methodCallStatement->methodCall->arguments->at(1)->expression;
-            if (!param1->is<IR::StringLiteral>() || !param2->is<IR::StructExpression>()) {
+            const IR::MethodCallExpression *mc = methodCallStatement->methodCall;
+            const IR::Expression *param1 = mc->arguments->at(0)->expression;
+            const IR::Expression *param2 = mc->arguments->at(1)->expression;
+            if (!param1->is<IR::StringLiteral>() || !param2->is<IR::StructExpression>())
                 return false;
-            }
-            auto *type =
-                typeMap->getTypeType(methodCallStatement->methodCall->typeArguments->at(0), true);
+            const IR::Type *type = typeMap->getTypeType(mc->typeArguments->at(0), true);
             if (auto *typeStruct = type->to<IR::Type_StructLike>()) {
                 for (auto field : typeStruct->fields) {
                     if (field->type->is<IR::Type_StructLike>()) {
@@ -34,9 +33,9 @@ const IR::MethodCallStatement *FindTypesInLogMsgInvocationToReplace::prepareLogM
         return newMethod;
     }
     // Create new statement
-    auto *param1 = methodCallStatement->methodCall->arguments->at(0)->expression;
+    const IR::Expression *param1 = methodCallStatement->methodCall->arguments->at(0)->expression;
     std::string strParam1 = param1->to<IR::StringLiteral>()->value.c_str();
-    auto *argType =
+    const IR::Type *argType =
         typeMap->getTypeType(methodCallStatement->methodCall->typeArguments->at(0), true);
     auto *structType = argType->checkedTo<IR::Type_StructLike>();
     index = 0;
@@ -54,7 +53,7 @@ const IR::MethodCallStatement *FindTypesInLogMsgInvocationToReplace::prepareLogM
     newArgument->expression = newString;
     newArguments->at(0) = newArgument;
     newArgument = newMethodCall->arguments->at(1)->clone();
-    auto *oldType = newArgument->expression->to<IR::StructExpression>()->structType;
+    const IR::Type *oldType = newArgument->expression->to<IR::StructExpression>()->structType;
     auto newStructExpression = new IR::StructExpression(
         oldType->srcInfo, structType, structType->getP4Type()->template to<IR::Type_Name>(),
         exprVector.first);
@@ -92,7 +91,7 @@ TypeLogMsgParams FindTypesInLogMsgInvocationToReplace::unfoldStruct(const IR::Ex
                                                                     std::string strParam,
                                                                     std::string curName) {
     TypeLogMsgParams result;
-    auto *exprType = typeMap->getType(expr, true);
+    const IR::Type *exprType = typeMap->getType(expr, true);
     if (!expr->is<IR::StructExpression>()) {
         if (auto structType = exprType->to<IR::Type_StructLike>()) {
             result.second += "(";

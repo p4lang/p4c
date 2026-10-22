@@ -32,19 +32,19 @@ Objects that have a type in the map:
 class TypeMap final : public ProgramMap {
     // We want to have the same canonical type for two
     // different tuples, lists, stacks, or p4lists with the same signature.
-    std::vector<const IR::Type *> canonicalTuples;
-    std::vector<const IR::Type *> canonicalStacks;
-    std::vector<const IR::Type *> canonicalP4lists;
-    std::vector<const IR::Type *> canonicalLists;
+    std::vector<IR::Ptr<IR::Type>> canonicalTuples;
+    std::vector<IR::Ptr<IR::Type>> canonicalStacks;
+    std::vector<IR::Ptr<IR::Type>> canonicalP4lists;
+    std::vector<IR::Ptr<IR::Type>> canonicalLists;
 
     // Map each node to its canonical type
-    absl::flat_hash_map<const IR::Node *, const IR::Type *, Util::Hash> typeMap;
+    absl::flat_hash_map<IR::Ptr<IR::Node>, IR::Ptr<IR::Type>, Util::Hash> typeMap;
     // All left-values in the program.
-    absl::flat_hash_set<const IR::Expression *, Util::Hash> leftValues;
+    absl::flat_hash_set<IR::Ptr<IR::Expression>, Util::Hash> leftValues;
     // All compile-time constants.  A compile-time constant
     // is not necessarily a constant - it could be a directionless
     // parameter as well.
-    absl::flat_hash_set<const IR::Expression *, Util::Hash> constants;
+    absl::flat_hash_set<IR::Ptr<IR::Expression>, Util::Hash> constants;
     // For each type variable in the program the actual
     // type that is substituted for it.
     TypeVariableSubstitution allTypeVariables;
@@ -59,22 +59,30 @@ class TypeMap final : public ProgramMap {
     /// equivalent, if false only that the have the same fields.
     bool strictStruct;
     void setStrictStruct(bool value) { strictStruct = value; }
-    bool contains(const IR::Node *element) { return typeMap.count(element) != 0; }
-    void setType(const IR::Node *element, const IR::Type *type);
-    const IR::Type *getType(const IR::Node *element, bool notNull = false) const;
+    bool contains(const IR::Node *element) {
+#if !HAVE_LIBGC
+        BUG_CHECK(element->check_referenced(), "checking unreferenced node in typeMap");
+#endif
+        return typeMap.count(element) != 0;
+    }
+    void setType(IR::Ptr<IR::Node> element, const IR::Type *type);
+    IR::Ptr<IR::Type> getType(const IR::Node *element, bool notNull = false) const;
     // unwraps a TypeType into its contents
-    const IR::Type *getTypeType(const IR::Node *element, bool notNull) const;
+    IR::Ptr<IR::Type> getTypeType(const IR::Node *element, bool notNull) const;
     void dbprint(std::ostream &out) const override;
     void clear();
     bool isLeftValue(const IR::Expression *expression) const {
+#if !HAVE_LIBGC
+        BUG_CHECK(expression->check_referenced(), "checking unreferenced node in typeMap");
+#endif
         return leftValues.count(expression) > 0;
     }
     bool isCompileTimeConstant(const IR::Expression *expression) const;
     size_t size() const { return typeMap.size(); }
 
-    void setLeftValue(const IR::Expression *expression);
+    void setLeftValue(IR::Ptr<IR::Expression> expression);
     void cloneExpressionProperties(const IR::Expression *to, const IR::Expression *from);
-    void setCompileTimeConstant(const IR::Expression *expression);
+    void setCompileTimeConstant(IR::Ptr<IR::Expression> expression);
     void addSubstitutions(const TypeVariableSubstitution *tvs);
     const IR::Type *getSubstitution(const IR::ITypeVar *var) {
         return allTypeVariables.lookup(var);

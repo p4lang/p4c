@@ -29,9 +29,9 @@ namespace P4::V1 {
 
 V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(std::istream &in,
-                                                        std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::V1Program> V1ParserDriver::parse(std::istream &in,
+                                                          std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     LOG1("Parsing P4-14 program " << sourceFile);
 
     // Create and configure the parser and lexer.
@@ -51,8 +51,8 @@ V1ParserDriver::V1ParserDriver() : global(new IR::V1Program) {}
     return driver.global;
 }
 
-/* static */ const IR::V1Program *V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
-                                                        unsigned sourceLine /* = 1 */) {
+/* static */ IR::Ptr<IR::V1Program> V1ParserDriver::parse(FILE *in, std::string_view sourceFile,
+                                                          unsigned sourceLine /* = 1 */) {
     std::stringstream stream;
     char buffer[512];
     while (fgets(buffer, sizeof(buffer), in)) stream << buffer;

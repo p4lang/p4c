@@ -112,7 +112,8 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
     } else {
         auto func = new IR::PathExpression(IR::ID(primitive->srcInfo, primitive->name));
         auto args = new IR::Vector<IR::Argument>;
-        for (auto *op : primitive->operands) args->push_back(new IR::Argument(op->srcInfo, op));
+        for (const IR::Expression *op : primitive->operands)
+            args->push_back(new IR::Argument(op->srcInfo, op));
         auto result = new IR::MethodCallExpression(primitive->srcInfo, func, args);
         return result;
     }
@@ -319,7 +320,7 @@ const IR::Node *StatementConverter::preorder(IR::Apply *apply) {
             std::map<const IR::Vector<IR::Expression> *, int> converted;
             for (auto a : apply->actions) {
                 StatementConverter conv(structure, renameMap);
-                const IR::Statement *stat = nullptr;
+                IR::Ptr<IR::Statement> stat = nullptr;
                 auto insert_at = cases.end();
                 if (converted.count(a.second)) {
                     insert_at = cases.begin() + converted.at(a.second);
@@ -370,7 +371,7 @@ const IR::Node *StatementConverter::preorder(IR::If *cond) {
 
     auto pred = apply_visitor(cond->pred)->to<IR::Expression>();
     BUG_CHECK(pred != nullptr, "Expected to get an expression when converting %1%", cond->pred);
-    const IR::Statement *t, *f;
+    IR::Ptr<IR::Statement> t, f;
     if (cond->ifTrue == nullptr)
         t = new IR::EmptyStatement(cond->srcInfo);
     else
@@ -386,20 +387,28 @@ const IR::Node *StatementConverter::preorder(IR::If *cond) {
     return result;
 }
 
-const IR::Statement *StatementConverter::convert(const IR::Vector<IR::Expression> *toConvert) {
-    auto stats = new IR::IndexedVector<IR::StatOrDecl>();
-    for (auto e : *toConvert) {
-        auto s = convert(e);
-        stats->push_back(s);
+IR::Ptr<IR::Statement> StatementConverter::convert(const IR::Node *node) {
+    if (auto *toConvert = node->to<IR::Vector<IR::Expression>>()) {
+        auto stats = new IR::IndexedVector<IR::StatOrDecl>();
+        for (auto e : *toConvert) {
+            auto s = convert(e);
+            stats->push_back(s);
+        }
+        auto result = new IR::BlockStatement(toConvert->srcInfo, *stats);
+        return result;
+    } else {
+        auto conv = node->apply(*this);
+        auto result = conv->to<IR::Statement>();
+        BUG_CHECK(result != nullptr, "Conversion of %1% did not produce a statement", node);
+        return result;
     }
-    auto result = new IR::BlockStatement(toConvert->srcInfo, *stats);
-    return result;
 }
 
 const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     if (vbtype->size == 0) {
         if (auto type = findContext<IR::Type_StructLike>()) {
-            if (const auto *max = type->getAnnotation(IR::Annotation::maxLengthAnnotation)) {
+            if (const IR::Annotation *max =
+                    type->getAnnotation(IR::Annotation::maxLengthAnnotation)) {
                 const auto &expr = max->getExpr();
                 if (expr.size() != 1 || !expr[0]->is<IR::Constant>())
                     error(ErrorType::ERR_UNSUPPORTED, "%s: max_length must be a constant", max);
@@ -449,7 +458,7 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     // given a struct with length and max_length, the
     // varbit field size is max_length * 8 - struct_size
     if (field->type->is<IR::Type_Varbits>()) {
-        if (const auto *len = type->getAnnotation(IR::Annotation::lengthAnnotation)) {
+        if (const IR::Annotation *len = type->getAnnotation(IR::Annotation::lengthAnnotation)) {
             const auto &expr = len->getExpr();
             if (expr.size() == 1) {
                 auto lenexpr = expr[0];
@@ -535,15 +544,15 @@ class FixupExtern : public Modifier {
 };
 }  // namespace
 
-const IR::Type_Extern *ExternConverter::convertExternType(ProgramStructure *structure,
-                                                          const IR::Type_Extern *ext,
-                                                          cstring name) {
+IR::Ptr<IR::Type_Extern> ExternConverter::convertExternType(ProgramStructure *structure,
+                                                            const IR::Type_Extern *ext,
+                                                            cstring name) {
     if (!ext->attributes.empty())
         warning(ErrorType::WARN_UNSUPPORTED, "%s: P4_14 extern type not fully supported", ext);
     return ext->apply(FixupExtern(structure, name))->to<IR::Type_Extern>();
 }
 
-const IR::Declaration_Instance *ExternConverter::convertExternInstance(
+IR::Ptr<IR::Declaration_Instance> ExternConverter::convertExternInstance(
     ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
     IR::IndexedVector<IR::Declaration> *) {
     auto *rv = ext->clone();
@@ -558,9 +567,9 @@ const IR::Declaration_Instance *ExternConverter::convertExternInstance(
     return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
 }
 
-const IR::Statement *ExternConverter::convertExternCall(ProgramStructure *structure,
-                                                        const IR::Declaration_Instance *ext,
-                                                        const IR::Primitive *prim) {
+IR::Ptr<IR::Statement> ExternConverter::convertExternCall(ProgramStructure *structure,
+                                                          const IR::Declaration_Instance *ext,
+                                                          const IR::Primitive *prim) {
     ExpressionConverter conv(structure);
     auto extref = new IR::PathExpression(prim->srcInfo,
                                          new IR::Path(prim->srcInfo, structure->externs.get(ext)));
@@ -609,18 +618,18 @@ PrimitiveConverter::~PrimitiveConverter() {
     vec.erase(std::find(vec.begin(), vec.end(), this));
 }
 
-const IR::Statement *PrimitiveConverter::cvtPrimitive(ProgramStructure *structure,
-                                                      const IR::Primitive *primitive) {
+IR::Ptr<IR::Statement> PrimitiveConverter::cvtPrimitive(ProgramStructure *structure,
+                                                        const IR::Primitive *primitive) {
     if (all_converters->count(primitive->name))
         for (auto cvt : all_converters->at(primitive->name))
-            if (auto *rv = cvt->convert(structure, primitive)) return rv;
+            if (auto rv = cvt->convert(structure, primitive)) return rv;
     return nullptr;
 }
 
-safe_vector<const IR::Expression *> PrimitiveConverter::convertArgs(ProgramStructure *structure,
-                                                                    const IR::Primitive *prim) {
+safe_vector<IR::Ptr<IR::Expression>> PrimitiveConverter::convertArgs(ProgramStructure *structure,
+                                                                     const IR::Primitive *prim) {
     ExpressionConverter conv(structure);
-    safe_vector<const IR::Expression *> rv;
+    safe_vector<IR::Ptr<IR::Expression>> rv;
     for (auto arg : prim->operands) rv.push_back(conv.convert(arg));
     return rv;
 }

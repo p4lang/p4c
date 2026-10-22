@@ -83,7 +83,7 @@ void IR::Type_Specialized::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
     out << Brief << baseType << "<";
     const char *sep = "";
-    for (auto *arg : *arguments) {
+    for (auto arg : *arguments) {
         out << sep << arg;
         sep = ", ";
     }
