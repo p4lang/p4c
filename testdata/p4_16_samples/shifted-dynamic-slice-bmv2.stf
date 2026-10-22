@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# The eight-bit shift produces 0xB0. All slices below are in bounds.
+# Offset zero selects only zero-filled bits.
+packet 0 AB 00 FF
+expect 0 AB 00 00
+
+# Offsets below four select both zero-filled bits and data.
+packet 0 AB 01 FF
+expect 0 AB 01 08
+packet 0 AB 02 FF
+expect 0 AB 02 0C
+packet 0 AB 03 FF
+expect 0 AB 03 06
+
+# Offset four selects only data from the original value.
+packet 0 AB 04 FF
+expect 0 AB 04 0B
