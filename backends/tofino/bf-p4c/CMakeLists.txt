@@ -538,7 +538,8 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
   add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
+target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} p4runtime::cpp ir)
+target_include_directories(tofinobackend PRIVATE "${P4C_BINARY_DIR}/control-plane")
 target_include_directories(
   tofinobackend
   # We also export Z3's includes with the common library.
@@ -846,7 +847,8 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
   add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 endif()
-target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefetch)
+target_link_libraries(bfn_p4runtime PUBLIC p4runtime::cpp PRIVATE absl::prefetch)
+target_include_directories(bfn_p4runtime PUBLIC "${P4C_BINARY_DIR}/control-plane")
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
 
@@ -1058,5 +1060,4 @@ if (ENABLE_GTESTS)
   # set_tests_properties(test_p4c_driver PROPERTIES LABELS lint)
 
 endif(ENABLE_GTESTS)
-
 

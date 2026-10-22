@@ -20,14 +20,14 @@ add_library(dpdk_runtime OBJECT ${DPDK_P4RUNTIME_INFO_PROTO})
 target_include_directories(dpdk_runtime PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(dpdk_runtime PRIVATE controlplane)
 # Ideally we use DEPENDENCIES, but it only works in later versions (3.28).
-add_dependencies(dpdk_runtime mkP4configdir dpdk_runtime_dir)
+add_dependencies(dpdk_runtime dpdk_runtime_dir)
 protobuf_generate(
   TARGET dpdk_runtime
   LANGUAGE cpp
   IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${DPDK_P4RUNTIME_DIR} ${Protobuf_INCLUDE_DIRS}
   PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/p4/config
   OUT_VAR DPDK_P4RUNTIME_INFO_CPP_GEN_SRCS
-  DEPENDENCIES ${DPDK_P4RUNTIME_INFO_PROTO} mkP4configdir dpdk_runtime_dir
+  DEPENDENCIES ${DPDK_P4RUNTIME_INFO_PROTO} dpdk_runtime_dir
 )
 protobuf_generate(
   TARGET dpdk_runtime
@@ -35,8 +35,7 @@ protobuf_generate(
   IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${DPDK_P4RUNTIME_DIR} ${Protobuf_INCLUDE_DIRS}
   PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/p4/config
   OUT_VAR DPDK_P4RUNTIME_INFO_PY_GEN_SRCS
-  DEPENDENCIES ${DPDK_P4RUNTIME_INFO_PROTO}
-  mkP4configdir dpdk_runtime_dir
+  DEPENDENCIES ${DPDK_P4RUNTIME_INFO_PROTO} dpdk_runtime_dir
 )
 
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
