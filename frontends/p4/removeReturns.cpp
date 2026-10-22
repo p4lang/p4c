@@ -14,8 +14,14 @@ bool MoveToElseAfterBranch::preorder(IR::BlockStatement *block) {
     for (auto it = block->components.begin(); it != block->components.end();) {
         if (movedToIfBranch)
             it = block->components.erase(it);
-        else
-            visit(*it++);
+        else {
+            auto statement = *it;
+            visit(statement);
+            if (statement == *it)
+                ++it;
+            else
+                it = block->components.replace(it, statement);
+        }
     }
     movedToIfBranch = false;
     return false;
