@@ -206,6 +206,7 @@ class TCAction {
 class TCEntry {
     cstring action;
     ordered_map<cstring,cstring> keys;
+    ordered_map<cstring,cstring> actionParams;
     cstring getActionName() const {
         return action;
     }
@@ -351,7 +352,7 @@ class TCTable {
         if (matchType == TC::EXACT_TYPE) {
             absl::StrAppend(&tcTable, " nummasks ", TC::DEFAULT_KEY_MASK_EXACT);
         } else {
-            absl::StrAppend(&tcTable, " nummasks ", TC::DEFAULT_KEY_MASK);
+            absl::StrAppend(&tcTable, " nummasks ", numMask);
         }
 
         if (isTableAddOnMiss && timerProfiles > defaultTimerProfiles) {
@@ -414,8 +415,10 @@ class TCTable {
                                 "/", controlName, "/", tableName,
                                 " entry", entry,
                                 " permissions 0x1024",
-                                " action ", pipelineName,
-                                "/", controlName, "/", entry->getActionName());
+                                " action ", entry->getActionName());
+                for (auto param : entry->actionParams) {
+                    absl::StrAppend(&tcTable, " param ", param.first, " ", param.second);
+                }
             }
         }
         return tcTable;
