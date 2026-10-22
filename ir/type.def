@@ -749,8 +749,10 @@ class Type_Specialized : Type {
     : Type_Specialized(si, bt, new Vector<Type>(std::move(args))) {}
 }
 
-/** Canonical representation of a Type_Specialized;
-   only used by the type-checker, never in the IR tree. */
+/** The type checker's version of a Type_Specialized, for example Register<bit<32>>.
+   After type checking, Expression::type and the TypeMap can contain this type.
+   To use this type in the program, for example as the type of a declaration,
+   convert it to a Type_Specialized with getP4Type(). */
 class Type_SpecializedCanonical : Type {
     Type         baseType;     /// canonical baseType; always IMayBeGenericType
     Vector<Type> arguments;    /// canonical type arguments

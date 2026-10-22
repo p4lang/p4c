@@ -198,6 +198,13 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
+  # P4Testgen reaches this error only if it skips the generic extern argument.
+  "Unknown or unimplemented extern method: observe"
+  generic-extern-instance-argument.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
   issue3225.p4
 )
