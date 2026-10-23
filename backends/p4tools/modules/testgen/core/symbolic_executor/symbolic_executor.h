@@ -17,6 +17,7 @@
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 
@@ -64,14 +65,15 @@ class SymbolicExecutor {
     /// Update the set of visited nodes. Returns true if there was an update.
     [[nodiscard]] bool updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes);
 
-    /// Records a path the executor has skipped because the target does not model something.
-    /// @p message describes the feature.
-    void recordSkippedPath(cstring message);
-
     /// @returns the number of paths the executor skipped, one entry per message.
     [[nodiscard]] const ordered_map<cstring, size_t> &getSkippedPaths() const;
 
  protected:
+    /// Handles a path that reached a construct the target does not model.
+    /// Must be called from within the catch block of @p e.
+    /// In strict mode, rethrows the active exception.
+    void handleUnimplemented(const TestgenUnimplemented &e);
+
     /// Target-specific information about the P4 program.
     const ProgramInfo &programInfo;
 
