@@ -514,7 +514,7 @@ bool P4Formatter::preorder(const IR::Declaration_Variable *v) {
 
 bool P4Formatter::preorder(const IR::Type_Error *d) {
     bool first = true;
-    for (auto a : *d->getDeclarations()) {
+    for (auto a : d->getDeclarations()) {
         if (!ifSystemFile(a->getNode()).empty())
             // only print if not from a system file
             continue;
