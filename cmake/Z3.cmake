@@ -15,18 +15,17 @@ macro(obtain_z3)
       cmake_push_check_state(RESET)
       check_cxx_source_compiles("
         #include <cstdlib>
-        #ifndef __GLIBC__
-        #error Not using glibc
+        #if !defined(__GLIBC__) && !defined(__APPLE__) && !defined(__FreeBSD__)
+        #error No GC allocation-size query override
         #endif
         int main() { return 0; }
-      " Z3_USES_GLIBC)
+      " Z3_HAS_GC_SIZE_QUERY)
       cmake_pop_check_state()
       # Z3 4.12 and newer query allocation sizes. With GC enabled, these
       # queries must use the GC allocator rather than the system allocator.
-      # lib/gc.cpp handles this on glibc. Other platforms still need the
-      # bundled Z3 patch, which disables these queries.
-      if(NOT Z3_USES_GLIBC AND Z3_VERSION_STRING VERSION_GREATER_EQUAL "4.12")
-        message(FATAL_ERROR "System Z3 ${Z3_VERSION_STRING} is not supported with GC on this platform. Use bundled Z3 or disable ENABLE_GC.")
+      # lib/gc.cpp handles this on glibc, macOS, and FreeBSD.
+      if(NOT Z3_HAS_GC_SIZE_QUERY AND Z3_VERSION_STRING VERSION_GREATER_EQUAL "4.12")
+        message(FATAL_ERROR "System Z3 ${Z3_VERSION_STRING} is not supported with GC on this platform. Disable ENABLE_GC.")
       endif()
     endif()
     # Set variables for later consumption.
