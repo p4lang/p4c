@@ -1,4 +1,5 @@
 #include <core.p4>
+
 #include <pna.p4>
 
 header ethernet_t {
@@ -54,13 +55,12 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.addr") bit<32> addr_0;
+    @name("MainControlImpl.tmp") bit<32> tmp;
     @name("MainControlImpl.forward") action forward(@name("addr") bit<32> addr) {
         user_meta.meta = addr;
     }
     @name("MainControlImpl.forward") action forward_1() {
-        addr_0 = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
-        user_meta.meta = addr_0;
+        user_meta.meta = tmp;
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
         drop_packet();
@@ -75,6 +75,15 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         const default_action = default_route_drop();
     }
+    @hidden action pnaexampleSelectByDirection2l114() {
+        tmp = SelectByDirection<bit<32>>(istd.direction, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr);
+    }
+    @hidden table tbl_pnaexampleSelectByDirection2l114 {
+        actions = {
+            pnaexampleSelectByDirection2l114();
+        }
+        const default_action = pnaexampleSelectByDirection2l114();
+    }
     @hidden table tbl_forward {
         actions = {
             forward_1();
@@ -83,6 +92,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     }
     apply {
         if (hdr.ipv4.isValid()) {
+            tbl_pnaexampleSelectByDirection2l114.apply();
             tbl_forward.apply();
             if (user_meta.meta == hdr.ipv4.dstAddr) {
                 ipv4_da_lpm_0.apply();

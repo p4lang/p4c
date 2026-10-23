@@ -395,6 +395,11 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     IR::IndexedVector<IR::StatOrDecl> copyBack;
     auto args = new IR::Vector<IR::Argument>();
     auto mi = MethodInstance::resolve(orig, this, typeMap);
+    // Skip directionless parameters unless an action call binds them to an argument.
+    auto shouldSkipArgument = [mi](const IR::Parameter *parameter, const IR::Argument *argument) {
+        return parameter->direction == IR::Direction::None &&
+               (!mi->is<ActionCall>() || argument == nullptr);
+    };
 
     // If a parameter is in this set then we use a temporary to
     // copy the corresponding argument.  We could always use
@@ -412,8 +417,8 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     mce->apply(gwe, getContext());
 
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
-        if (p->direction == IR::Direction::None) continue;
         auto arg = mi->substitution.lookup(p);
+        if (shouldSkipArgument(p, arg)) continue;
         if (gwe.written.find(GetWrittenExpressions::everything) != gwe.written.end()) {
             // just copy everything.
             LOG3("Detected table application, using temporaries for all parameters " << arg);
@@ -458,8 +463,9 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
 
     // For each argument check to see if it aliases any expression in the written set.
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
-        if (useTemporary.find(p) != useTemporary.end()) continue;
         auto arg = mi->substitution.lookup(p);
+        if (shouldSkipArgument(p, arg)) continue;
+        if (useTemporary.find(p) != useTemporary.end()) continue;
         if (typeMap->isCompileTimeConstant(arg->expression)) continue;
         for (auto e : modifies) {
             // Here we use just raw equality: equivalent but not equal expressions
@@ -481,7 +487,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     CloneExpressions cloner;  // a cheap version of deep copy
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
-        if (p->direction == IR::Direction::None) {
+        if (shouldSkipArgument(p, arg)) {
             args->push_back(arg);
             continue;
         }
@@ -524,7 +530,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         } else {
             argValue = argex;
         }
-        if (p->direction != IR::Direction::In && useTemp) {
+        if (p->direction != IR::Direction::In && p->direction != IR::Direction::None && useTemp) {
             auto assign =
                 new IR::AssignmentStatement(expressionSrcInfo, cloner.clone<IR::Expression>(argex),
                                             cloner.clone<IR::Expression>(argValue));
