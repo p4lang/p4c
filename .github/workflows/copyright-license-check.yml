@@ -18,17 +18,17 @@ jobs:
           # Ensures we have the full history for diff
           fetch-depth: 0
 
+      - name: Install uv and reuse
+        run: |
+          ./tools/install-uv.sh
+          uv pip install reuse
+
       - name: Get changed files
         id: changes
         run: |
           git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
           echo "changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
-
-      - name: Install uv and reuse
-        run: |
-          ./tools/install-uv.sh
-          uv pip install reuse
 
       - name: Check copyright and license annotations in changed files
         run: |
