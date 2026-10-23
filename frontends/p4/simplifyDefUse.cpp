@@ -1295,7 +1295,7 @@ class FindUninitialized : public Inspector {
             auto am = mi->to<ApplyMethod>();
             isControlOrParserApply = !am->isTableApply();
         }
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction != IR::Direction::Out) {
                 visit(expr);
@@ -1359,7 +1359,7 @@ class FindUninitialized : public Inspector {
             fu.setCalledBy(this);
             for (auto c : callee) (void)c->getNode()->apply(fu);
         }
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 bool save = lhs;

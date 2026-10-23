@@ -20,6 +20,7 @@
 #define BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
 
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -278,8 +279,8 @@ struct ActionSelector {
 
 /// The information about a digest instance which is needed to serialize it.
 struct Digest {
-    const cstring name;                          // The fully qualified external name of the digest
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    const cstring name;  // The fully qualified external name of the digest
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this digest
                                         // declaration.
 };
@@ -288,7 +289,7 @@ struct Digest {
 struct DynHash {
     const cstring name;  // The fully qualified external name of the dynhash
     // The format of the fields used for hash calculation.
-    const p4configv1::P4DataTypeSpec *typeSpec;
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this dynhash
                                         // declaration.
     struct hashField {
@@ -302,8 +303,8 @@ struct DynHash {
 /// The information about a value set instance which is needed to serialize it.
 struct ValueSet {
     const cstring name;
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the stored data
-    const int64_t size;                          // Number of entries in the value set
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the stored data
+    const int64_t size;                 // Number of entries in the value set
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this value set
                                         // declaration.
 
@@ -332,7 +333,7 @@ struct ValueSet {
 /// The information about a register instance which is needed to serialize it.
 struct Register {
     const cstring name;  // The fully qualified external name of the register table
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     int64_t size;
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this register
                                         // declaration.
@@ -394,7 +395,7 @@ struct Register {
 /// The information about a register parameter instance which is needed to serialize it.
 struct RegisterParam {
     const cstring name;  // The fully qualified external name of the register parameter
-    const p4configv1::P4DataTypeSpec *typeSpec;  // The format of the packed data.
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // The format of the packed data.
     int64_t initial_value;
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this register
                                         // declaration.
@@ -507,7 +508,7 @@ struct Wred {
 };
 
 struct PortMetadata {
-    const p4configv1::P4DataTypeSpec *typeSpec;  // format of port metadata
+    std::shared_ptr<const p4configv1::P4DataTypeSpec> typeSpec;  // format of port metadata
     static const cstring name() { return "$PORT_METADATA"_cs; }
 };
 

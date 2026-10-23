@@ -233,6 +233,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SelectCase *sc) {
     return sc;
 }
 
+const IR::Node *TypeInferenceBase::postorder(const IR::ParserState *state) {
+    // A direct transition ("transition name;") is a PathExpression that must name a parser state.
+    // Select expressions check their cases separately and are always typed as Type_State.
+    if (state->selectExpression == nullptr) return state;
+    auto type = getType(state->selectExpression);
+    if (type != nullptr && type != IR::Type_State::get())
+        typeError("%1%: transition target must be a parser state", state->selectExpression);
+    return state;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::KeyElement *elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr) return elem;
@@ -321,7 +331,7 @@ const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
     auto listInstance =
         MethodInstance::resolve(actionListCall, this, typeMap, getChildContext(), true);
 
-    for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
+    for (auto param : listInstance->substitution.getParametersInArgumentOrder()) {
         auto aa = listInstance->substitution.lookup(param);
         auto da = callInstance->substitution.lookup(param);
         if (da == nullptr) {
@@ -335,7 +345,7 @@ const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
         }
     }
 
-    for (auto param : *callInstance->substitution.getParametersInOrder()) {
+    for (auto param : callInstance->substitution.getParametersInOrder()) {
         auto da = callInstance->substitution.lookup(param);
         if (da == nullptr) {
             typeError("%1%: parameter should be assigned in call %2%", param, call);

@@ -339,8 +339,8 @@ class IrClass : public IrElement {
     void resolve() override;
     cstring toString() const override { return name; }
     std::string fullName() const;
-    Util::Enumerator<IrField *> *getFields() const;
-    Util::Enumerator<IrMethod *> *getUserMethods() const;
+    Util::EnumeratorPtr<IrField *> getFields() const;
+    Util::EnumeratorPtr<IrMethod *> getUserMethods() const;
     cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
     // name with scope qual if needed in the context
 };
@@ -362,7 +362,7 @@ class IrEnumType : public IrElement {
 
 class IrDefinitions {
     std::vector<IrElement *> elements;
-    Util::Enumerator<IrClass *> *getClasses() const;
+    Util::EnumeratorPtr<IrClass *> getClasses() const;
 
  public:
     explicit IrDefinitions(std::vector<IrElement *> classes) : elements(classes) {}
@@ -374,7 +374,7 @@ class IrDefinitions {
         IrClass::nodemapClass()->resolve();
         IrClass::ideclaration()->resolve();
         IrClass::indexedVectorClass()->resolve();
-        for (auto cls : *getClasses()) cls->resolve();
+        for (auto cls : getClasses()) cls->resolve();
         toposort();
     }
     void generate(std::ostream &t, std::ostream &out, std::ostream &impl) const;

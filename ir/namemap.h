@@ -142,11 +142,11 @@ class NameMap : public Node {
     void toJSON(JSONGenerator &json) const override;
     static Node *fromJSON(JSONLoader &json);
 
-    Util::Enumerator<const T *> *valueEnumerator() const {
+    Util::EnumeratorPtr<const T *> valueEnumerator() const {
         return Util::enumerate(Values(symbols));
     }
     template <typename S>
-    Util::Enumerator<const S *> *only() const {
+    Util::EnumeratorPtr<const S *> only() const {
         return valueEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
     }

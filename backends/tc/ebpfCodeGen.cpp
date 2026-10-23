@@ -1558,7 +1558,7 @@ void EBPFTablePNA::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4A
         builder->append("struct __attribute__((__packed__)) ");
     builder->blockStart();
 
-    for (auto p : *action->parameters->getEnumerator()) {
+    for (auto p : action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = EBPF::EBPFTypeFactory::instance->create(p->type);
         type->declare(builder, p->externalName(), false);
