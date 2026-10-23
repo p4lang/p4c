@@ -4365,7 +4365,8 @@ var hierarchy =
             [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat02", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat02.html", null ],
             [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat03", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat03.html", null ],
             [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat04", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat04.html", null ],
-            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat05", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat05.html", null ]
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat05", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat05.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat06", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat06.html", null ]
           ] ],
           [ "P4::P4Tools::Test::Z3SolverTest", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_solver_test.html", null ],
           [ "P4::P4Tools::Test::Z3SolverTests", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_solver_tests.html", [

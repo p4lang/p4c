@@ -1,23 +1,23 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="Node000000" title=" " alt="" coords="5,133,151,173"/>
 <area shape="rect" id="Node000001" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="199,77,389,102"/>
-<area shape="poly" id="edge2677_Node000000_Node000001" title=" " alt="" coords="149,126,198,111,239,100,240,105,199,116,150,131"/>
+<area shape="poly" id="edge2678_Node000000_Node000001" title=" " alt="" coords="149,126,198,111,239,100,240,105,199,116,150,131"/>
 <area shape="rect" id="Node000004" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="209,126,379,181"/>
-<area shape="poly" id="edge2680_Node000000_Node000004" title=" " alt="" coords="164,151,209,151,209,156,164,156"/>
+<area shape="poly" id="edge2681_Node000000_Node000004" title=" " alt="" coords="164,151,209,151,209,156,164,156"/>
 <area shape="rect" id="Node000006" href="$class_p4_1_1_util_1_1_enumerator.html" title="Type&#45;erased Enumerator interface." alt="" coords="199,247,389,273"/>
-<area shape="poly" id="edge2682_Node000000_Node000006" title=" " alt="" coords="133,177,268,245,266,249,130,182"/>
+<area shape="poly" id="edge2683_Node000000_Node000006" title=" " alt="" coords="133,177,268,245,266,249,130,182"/>
 <area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_as_enumerator.html" title="Casts each element, preserving ownership when S is a smart pointer." alt="" coords="471,5,640,45"/>
-<area shape="poly" id="edge2678_Node000001_Node000002" title=" " alt="" coords="360,71,472,43,473,48,361,76"/>
+<area shape="poly" id="edge2679_Node000001_Node000002" title=" " alt="" coords="360,71,472,43,473,48,361,76"/>
 <area shape="rect" id="Node000003" href="$class_p4_1_1_util_1_1_map_enumerator.html" title="Transforms all elements from type T to type S." alt="" coords="465,69,646,109"/>
-<area shape="poly" id="edge2679_Node000001_Node000003" title=" " alt="" coords="403,87,464,87,464,92,403,92"/>
+<area shape="poly" id="edge2680_Node000001_Node000003" title=" " alt="" coords="403,87,464,87,464,92,403,92"/>
 <area shape="rect" id="Node000005" href="$class_p4_1_1_util_1_1_iterator_enumerator.html" title="A generic iterator returning elements of type T." alt="" coords="455,133,656,173"/>
-<area shape="poly" id="edge2681_Node000004_Node000005" title=" " alt="" coords="393,151,454,151,454,156,393,156"/>
+<area shape="poly" id="edge2682_Node000004_Node000005" title=" " alt="" coords="393,151,454,151,454,156,393,156"/>
 <area shape="rect" id="Node000007" href="$class_p4_1_1_util_1_1_concat_enumerator.html" title="Concatenation." alt="" coords="437,198,673,223"/>
-<area shape="poly" id="edge2683_Node000006_Node000007" title=" " alt="" coords="375,242,487,221,488,226,376,247"/>
+<area shape="poly" id="edge2684_Node000006_Node000007" title=" " alt="" coords="375,242,487,221,488,226,376,247"/>
 <area shape="rect" id="Node000008" href="$class_p4_1_1_util_1_1_empty_enumerator.html" title="Always empty iterator (equivalent to end())" alt="" coords="439,247,672,273"/>
-<area shape="poly" id="edge2684_Node000006_Node000008" title=" " alt="" coords="403,257,438,257,438,263,403,263"/>
+<area shape="poly" id="edge2685_Node000006_Node000008" title=" " alt="" coords="403,257,438,257,438,263,403,263"/>
 <area shape="rect" id="Node000009" href="$class_p4_1_1_util_1_1_filter_enumerator.html" title=" " alt="" coords="462,297,649,337"/>
-<area shape="poly" id="edge2685_Node000006_Node000009" title=" " alt="" coords="366,273,464,295,463,300,365,278"/>
+<area shape="poly" id="edge2686_Node000006_Node000009" title=" " alt="" coords="366,273,464,295,463,300,365,278"/>
 <area shape="rect" id="Node000010" href="$class_p4_1_1_util_1_1_single_enumerator.html" title=" " alt="" coords="440,362,671,387"/>
-<area shape="poly" id="edge2686_Node000006_Node000010" title=" " alt="" coords="324,279,375,314,438,347,478,359,476,364,436,352,372,318,320,283"/>
+<area shape="poly" id="edge2687_Node000006_Node000010" title=" " alt="" coords="324,279,375,314,438,347,478,359,476,364,436,352,372,318,320,283"/>
 </map>

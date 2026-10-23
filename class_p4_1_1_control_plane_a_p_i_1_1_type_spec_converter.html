@@ -145,8 +145,8 @@ Inheritance diagram for P4::ControlPlaneAPI::TypeSpecConverter:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a988bec5306f75566d0cc97eb2632b586" id="r_a988bec5306f75566d0cc97eb2632b586"><td class="memItemLeft" align="right" valign="top">static const ::p4::config::v1::P4DataTypeSpec *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a988bec5306f75566d0cc97eb2632b586">convert</a> (const <a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, const IR::Type *type, ::p4::config::v1::P4TypeInfo *typeInfo)</td></tr>
-<tr class="separator:a988bec5306f75566d0cc97eb2632b586"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6cd6c3c9e131c4f663e1e0b6cdc1cd8" id="r_ae6cd6c3c9e131c4f663e1e0b6cdc1cd8"><td class="memItemLeft" align="right" valign="top">static std::shared_ptr&lt; const ::p4::config::v1::P4DataTypeSpec &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae6cd6c3c9e131c4f663e1e0b6cdc1cd8">convert</a> (const <a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap, const IR::Type *type, ::p4::config::v1::P4TypeInfo *typeInfo)</td></tr>
+<tr class="separator:ae6cd6c3c9e131c4f663e1e0b6cdc1cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
 <tr class="memitem:acc1e5976fdbd48c1d087e5b037325978 inherit pub_static_methods_class_p4_1_1_visitor" id="r_acc1e5976fdbd48c1d087e5b037325978"><td class="memItemLeft" align="right" valign="top">
 static <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>demangle</b> (const char *)</td></tr>
@@ -385,8 +385,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Generates the appropriate p4.P4DataTypeSpec for a given IR::Type node. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a988bec5306f75566d0cc97eb2632b586" name="a988bec5306f75566d0cc97eb2632b586"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a988bec5306f75566d0cc97eb2632b586">&#9670;&#160;</a></span>convert()</h2>
+<a id="ae6cd6c3c9e131c4f663e1e0b6cdc1cd8" name="ae6cd6c3c9e131c4f663e1e0b6cdc1cd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6cd6c3c9e131c4f663e1e0b6cdc1cd8">&#9670;&#160;</a></span>convert()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -395,7 +395,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const P4DataTypeSpec * P4::ControlPlaneAPI::TypeSpecConverter::convert </td>
+          <td class="memname">std::shared_ptr&lt; const P4DataTypeSpec &gt; P4::ControlPlaneAPI::TypeSpecConverter::convert </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *</td>          <td class="paramname"><span class="paramname"><em>refMap</em></span>, </td>
         </tr>

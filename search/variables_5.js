@@ -14,7 +14,7 @@ var searchData=
   ['enabletablecache_11',['enableTableCache',['../class_p4_1_1_ebpf_options.html#ad356541141c207a516cd184d9a664c56',1,'P4::EbpfOptions']]],
   ['endpoint_12',['endpoint',['../class_p4_1_1_b_m_v2_1_1_c_f_g_1_1_edge.html#a6fd107a421cd4457c6b7929da40ed9af',1,'P4::BMV2::CFG::Edge']]],
   ['enforceassumptions_13',['enforceAssumptions',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a87a6765af8a714a3d866d754a26e1c92',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
-  ['entries_14',['entries',['../struct_p4_1_1_p4_runtime_a_p_i.html#a96c3017c977cd32fb237116db5690869',1,'P4::P4RuntimeAPI']]],
+  ['entries_14',['entries',['../struct_p4_1_1_p4_runtime_a_p_i.html#a452cc25320caaf24d52435205dcc73e8',1,'P4::P4RuntimeAPI']]],
   ['env_15',['env',['../class_p4_1_1_p4_tools_1_1_abstract_execution_state.html#a53a46f0cfaf2472b52fb0bb0976ba6f6',1,'P4::P4Tools::AbstractExecutionState']]],
   ['errorcodesmap_16',['errorCodesMap',['../class_p4_1_1_program_structure.html#a6d2ae70bf6a002aad26b8aba05905c92',1,'P4::ProgramStructure']]],
   ['errors_17',['errors',['../struct_b_f_n_1_1_program_structure.html#accf340921b6714229841afda30b3e8d0',1,'BFN::ProgramStructure']]],

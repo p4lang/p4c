@@ -1,5 +1,6 @@
 var NAVTREEINDEX36 =
 {
+"struct_i_x_bar_random.html":[13,0,397],
 "struct_infer_write_mode.html":[13,0,367],
 "struct_infer_write_mode.html#a454f014c1d6bbff655dc73d58c358cfe":[13,0,367,1],
 "struct_infer_write_mode.html#a82e0d39f00bdfcac0581c395051fb5a1":[13,0,367,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX36 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html":[13,0,12,3,1,26],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html#aca6d71bc254a18a81e0ced526a9610f2":[12,0,14,1,1,26,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html#aca6d71bc254a18a81e0ced526a9610f2":[13,0,12,3,1,26,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html":[12,0,14,1,1,27],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html":[13,0,12,3,1,27]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html":[12,0,14,1,1,27]
 };
