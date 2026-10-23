@@ -232,46 +232,28 @@ control c(inout bit<32> x) {
         if (u_0_h1.isValid()) {
             u1_6_h1.setValid();
             u1_6_h1 = u_0_h1;
-            u1_6_h2.setInvalid();
-        } else {
-            u1_6_h1.setInvalid();
         }
         if (u_0_h2.isValid()) {
             u1_6_h2.setValid();
             u1_6_h2 = u_0_h2;
-            u1_6_h1.setInvalid();
-        } else {
-            u1_6_h2.setInvalid();
         }
         hs1_6[0] = hs_0[0];
         hs1_6[1] = hs_0[1];
         if (us_0[0].h1.isValid()) {
             us1_6[0].h1.setValid();
             us1_6[0].h1 = us_0[0].h1;
-            us1_6[0].h2.setInvalid();
-        } else {
-            us1_6[0].h1.setInvalid();
         }
         if (us_0[0].h2.isValid()) {
             us1_6[0].h2.setValid();
             us1_6[0].h2 = us_0[0].h2;
-            us1_6[0].h1.setInvalid();
-        } else {
-            us1_6[0].h2.setInvalid();
         }
         if (us_0[1].h1.isValid()) {
             us1_6[1].h1.setValid();
             us1_6[1].h1 = us_0[1].h1;
-            us1_6[1].h2.setInvalid();
-        } else {
-            us1_6[1].h1.setInvalid();
         }
         if (us_0[1].h2.isValid()) {
             us1_6[1].h2.setValid();
             us1_6[1].h2 = us_0[1].h2;
-            us1_6[1].h1.setInvalid();
-        } else {
-            us1_6[1].h2.setInvalid();
         }
         x = u1_6_h1.a ^ u1_6_h2.a ^ hs1_6[0].a ^ hs1_6[1].a ^ us1_6[0].h1.a ^ us1_6[0].h2.a ^ us1_6[1].h1.a ^ us1_6[1].h2.a;
     }
