@@ -215,6 +215,8 @@ const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>get
 <tr class="separator:a74adee5a2ac967ecc41e3aa30d1c32c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d17d0c42623218c9bcbbfb6cb4147ff" id="r_a4d17d0c42623218c9bcbbfb6cb4147ff"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d17d0c42623218c9bcbbfb6cb4147ff">getDefaultValue</a> (const Type *type, const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">Util::SourceInfo</a> &amp;srcInfo={}, bool valueRequired=false)</td></tr>
 <tr class="separator:a4d17d0c42623218c9bcbbfb6cb4147ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab682375355338205940a0c5d5bb2d12" id="r_aab682375355338205940a0c5d5bb2d12"><td class="memItemLeft" align="right" valign="top">const Type_Extern *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aab682375355338205940a0c5d5bb2d12">getExternType</a> (const Type *type)</td></tr>
+<tr class="separator:aab682375355338205940a0c5d5bb2d12"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fd26aec929b5889cbe7e1ee4aa93d35" id="r_a1fd26aec929b5889cbe7e1ee4aa93d35"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1fd26aec929b5889cbe7e1ee4aa93d35">getIntFromLiteral</a> (const Literal *l)</td></tr>
 <tr class="separator:a1fd26aec929b5889cbe7e1ee4aa93d35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50db24fa30117fb0132f0f1c80851a1a" id="r_a50db24fa30117fb0132f0f1c80851a1a"><td class="memItemLeft" align="right" valign="top">big_int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a50db24fa30117fb0132f0f1c80851a1a">getMaxBvVal</a> (const Type *t)</td></tr>
@@ -391,6 +393,24 @@ template&lt;class T&gt; </td></tr>
       </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>the "default" value for a given type. The resulting expression will have the specified srcInfo position. The current mapping as defined in the P4 specification is: Type_Bits 0 Type_Boolean false Type_InfInt 0 Type_Enum first member Type_SerEnum first member Type_Error NoError Type_String "" Type_Header InvalidHeader Type_HeaderUnion InvalidHeaderUnion Type_StructLike StructExpression (fields filled with getDefaultValue) Type_Fragment recurses into getDefaultValue Type_BaseList ListExpression (fields filled with getDefaultValue) Type_Array ArrayExpression (fields filled with getDefaultValue) Definition: <a href="https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values">https://p4.org/p4-spec/docs/P4-16-working-spec.html#sec-default-values</a> </dd></dl>
+
+</div>
+</div>
+<a id="aab682375355338205940a0c5d5bb2d12" name="aab682375355338205940a0c5d5bb2d12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab682375355338205940a0c5d5bb2d12">&#9670;&#160;</a></span>getExternType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const Type_Extern * P4::IR::getExternType </td>
+          <td>(</td>
+          <td class="paramtype">const Type *</td>          <td class="paramname"><span class="paramname"><em>type</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the extern that <code class="param">type</code> describes, or nullptr if <code class="param">type</code> does not describe an extern. After type checking, an instance of a generic extern has the type Type_SpecializedCanonical. For this type, the result is the extern with the type arguments of the instance. </dd></dl>
 
 </div>
 </div>

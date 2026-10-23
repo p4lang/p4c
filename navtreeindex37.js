@@ -1,5 +1,6 @@
 var NAVTREEINDEX37 =
 {
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html#a1f034a5d35783b5e49d90cf37f1f5254":[12,0,14,1,1,27,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html#a1f034a5d35783b5e49d90cf37f1f5254":[13,0,12,3,1,27,0],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register.html":[12,0,14,1,1,28],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register.html":[13,0,12,3,1,28],
@@ -248,6 +249,5 @@ var NAVTREEINDEX37 =
 "struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html":[13,0,12,18,2,0,27],
 "struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html#a00fda8aa7d7c1433b8a15d6205052408":[12,0,14,9,1,0,27,0],
 "struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_ir_test.html#a00fda8aa7d7c1433b8a15d6205052408":[13,0,12,18,2,0,27,0],
-"struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_test.html":[12,0,14,9,1,0,28],
-"struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_test.html":[13,0,12,18,2,0,28]
+"struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_protobuf_test.html":[12,0,14,9,1,0,28]
 };

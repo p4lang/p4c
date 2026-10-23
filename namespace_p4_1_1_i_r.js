@@ -22,6 +22,7 @@ var namespace_p4_1_1_i_r =
     [ "getBigIntFromLiteral", "namespace_p4_1_1_i_r.html#acaa73b2ae9e69f36400517159e75c36e", null ],
     [ "getBitTypeToFit", "namespace_p4_1_1_i_r.html#a7cc00c575e059ebe6b62a37b3f3cd3e5", null ],
     [ "getDefaultValue", "namespace_p4_1_1_i_r.html#a4d17d0c42623218c9bcbbfb6cb4147ff", null ],
+    [ "getExternType", "namespace_p4_1_1_i_r.html#aab682375355338205940a0c5d5bb2d12", null ],
     [ "getIntFromLiteral", "namespace_p4_1_1_i_r.html#a1fd26aec929b5889cbe7e1ee4aa93d35", null ],
     [ "getMaxBvVal", "namespace_p4_1_1_i_r.html#a50db24fa30117fb0132f0f1c80851a1a", null ],
     [ "getMaxBvVal", "namespace_p4_1_1_i_r.html#ac7f932b8f1653613c56081d5efe8ef5f", null ],
