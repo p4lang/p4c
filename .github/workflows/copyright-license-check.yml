@@ -15,7 +15,7 @@ jobs:
       - name: Checkout the code
         uses: actions/checkout@v7
         with:
-	  # Ensures we have the full history for diff
+          # Ensures we have the full history for diff
           fetch-depth: 0
 
       - name: Get changed files
@@ -28,9 +28,9 @@ jobs:
       - name: Install uv and reuse
         run: |
           ./tools/install-uv.sh
-	  uv pip install reuse
+          uv pip install reuse
 
       - name: Check copyright and license annotations in changed files
         run: |
-	  echo "Changed files: ${{ steps.changes.outputs.changed }}"
-	  uvx reuse lint-file ${{ steps.changes.outputs.changed }}
+          echo "Changed files: ${{ steps.changes.outputs.changed }}"
+          uvx reuse lint-file ${{ steps.changes.outputs.changed }}
