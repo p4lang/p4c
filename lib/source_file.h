@@ -13,6 +13,7 @@
 #define LIB_SOURCE_FILE_H_
 
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string_view>
 #include <vector>
@@ -147,7 +148,7 @@ class SourceInfo final {
         if (!rhs.isValid()) return *this;
         SourcePosition s = start.min(rhs.start);
         SourcePosition e = end.max(rhs.end);
-        return SourceInfo(sources, s, e);
+        return SourceInfo(sources.get(), s, e);
     }
     SourceInfo &operator+=(const SourceInfo &rhs) {
         if (!isValid()) {
@@ -206,7 +207,10 @@ class SourceInfo final {
     friend std::ostream &operator<<(std::ostream &os, const SourceInfo &info);
 
  private:
-    const InputSources *sources = nullptr;
+    friend class InputSources;
+    friend class Comment;
+    SourceInfo retainSources() const;
+    std::shared_ptr<const InputSources> sources;
     SourcePosition start = SourcePosition();
     SourcePosition end = SourcePosition();
 };
@@ -264,7 +268,7 @@ class Comment final : IHasDbPrint, IHasSourceInfo {
     }
 
     /// Retrieve the source position associated with this comment.
-    [[nodiscard]] SourceInfo getSourceInfo() const override { return srcInfo; }
+    [[nodiscard]] SourceInfo getSourceInfo() const override { return srcInfo.retainSources(); }
 };
 
 /**
@@ -275,9 +279,9 @@ class Comment final : IHasDbPrint, IHasSourceInfo {
   The mutable part of the API is tailored for interaction with the lexer.
   After the lexer is done this object can be "sealed" and never changes again.
 
-  This class implements a singleton pattern: there is a single instance of this class.
+  Source locations retain this object for as long as diagnostics need its text.
 */
-class InputSources final {
+class InputSources final : public std::enable_shared_from_this<InputSources> {
 #ifdef P4C_GTEST_ENABLED
     FRIEND_TEST(UtilSourceFile, InputSources);
 #endif
@@ -332,6 +336,7 @@ class InputSources final {
     /// Each line also stores the end-of-line character(s)
     std::vector<std::string> contents;
     /// The commends found in the file.
+    std::vector<std::unique_ptr<Comment>> ownedComments;
     std::vector<Comment *> comments;
 };
 

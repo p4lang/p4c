@@ -22,12 +22,13 @@ class EnumInstance : public InstanceBase {
 
  public:
     const IR::ID name;
-    const IR::Type *type;
+    IR::Ptr<IR::Type> type;
     const P4::TypeMap *typeMap;
 
     /// Returns nullptr if the expression is not a compile-time constant
     /// referring to an enum
-    static EnumInstance *resolve(const IR::Expression *expression, const P4::TypeMap *typeMap);
+    static std::unique_ptr<EnumInstance> resolve(const IR::Expression *expression,
+                                                 const P4::TypeMap *typeMap);
     bool equals(const EnumInstance *other) const {
         return typeMap->equivalent(type, other->type) && name.name == other->name.name;
     }
@@ -48,7 +49,7 @@ class SimpleEnumInstance : public EnumInstance {
 /// X.A from enum bit<5> X { A = 3, B = 2 }
 class SerEnumInstance : public EnumInstance {
  public:
-    const IR::Expression *value;
+    IR::Ptr<IR::Expression> value;
     SerEnumInstance(const IR::Type_SerEnum *type, const IR::ID name, const IR::Expression *value,
                     const P4::TypeMap *typeMap)
         : EnumInstance(name, type, typeMap), value(value) {}

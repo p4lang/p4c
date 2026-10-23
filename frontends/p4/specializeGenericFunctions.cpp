@@ -32,7 +32,7 @@ bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) 
     if (!insert) insert = findContext<IR::Declaration_Instance>();
     if (!insert) insert = findContext<IR::P4Action>();
     CHECK_NULL(insert);
-    MethodInstance *mi = MethodInstance::resolve(mce, this, specMap->typeMap);
+    auto mi = MethodInstance::resolve(mce, this, specMap->typeMap);
     if (auto func = mi->to<FunctionCall>()) {
         LOG3("Will specialize " << mce);
         specMap->add(mce, func->function, insert, &nameGen);
@@ -57,7 +57,7 @@ const IR::Node *SpecializeFunctions::postorder(IR::Function *function) {
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
             tsv.setCalledBy(this);
             LOG3("Substitution " << ts);
-            auto specialized = function->apply(tsv)->to<IR::Function>();
+            IR::Ptr<IR::Function> specialized = function->apply(tsv)->to<IR::Function>();
             auto renamed =
                 new IR::Function(specialized->srcInfo, it.second->name, specialized->annotations,
                                  specialized->type, specialized->body);

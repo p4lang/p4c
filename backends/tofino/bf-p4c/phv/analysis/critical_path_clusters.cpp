@@ -24,7 +24,7 @@ Visitor::profile_t CalcCriticalPathClusters::init_apply(const IR::Node *root) {
     return rv;
 }
 
-const IR::Node *CalcCriticalPathClusters::apply_visitor(const IR::Node *node, const char *) {
+IR::Ptr<IR::Node> CalcCriticalPathClusters::apply_visitor(const IR::Node *node, const char *) {
     critical_fields_i = parser_critical_path.calc_all_critical_fields();
     return node;
 }

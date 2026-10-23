@@ -32,10 +32,10 @@ class FinalState {
     std::reference_wrapper<const ExecutionState> state;
 
     /// The final model which has been augmented with environment completions.
-    std::reference_wrapper<const Model> finalModel;
+    Model finalModel;
 
     /// The final program trace.
-    std::vector<std::reference_wrapper<const TraceEvent>> trace;
+    std::vector<IR::Ptr<TraceEvent>> trace;
 
     /// If the calculated payload size (the size of the symbolic packet size variable minus the size
     /// of the input packet) is not negative, create a randomly sized payload and add the variable
@@ -62,7 +62,7 @@ class FinalState {
     /// variables in this final state may have been added in post, e.g., the payload size. If the
     /// concolic variables do not recompute these variables, the model will simply copy these
     /// variables over manually to the newly generated model.
-    [[nodiscard]] std::optional<std::reference_wrapper<const FinalState>> computeConcolicState(
+    [[nodiscard]] std::optional<FinalState> computeConcolicState(
         const ConcolicVariableMap &resolvedConcolicVariables) const;
 
     /// @returns the model after it was augmented by completions from the symbolic environment.
@@ -75,7 +75,7 @@ class FinalState {
     [[nodiscard]] const ExecutionState *getExecutionState() const;
 
     /// @returns the computed traces of this final state.
-    [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> *getTraces() const;
+    [[nodiscard]] const std::vector<IR::Ptr<TraceEvent>> *getTraces() const;
 
     /// @returns the list of visited nodes of this state.
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;

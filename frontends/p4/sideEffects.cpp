@@ -15,8 +15,8 @@
 
 namespace P4 {
 
-IR::ID DoSimplifyExpressions::createTemporary(Util::SourceInfo srcInfo, const IR::Type *type) {
-    type = type->getP4Type();
+IR::ID DoSimplifyExpressions::createTemporary(Util::SourceInfo srcInfo, const IR::Type *type_) {
+    auto type = type_->getP4Type();
     BUG_CHECK(type && !type->is<IR::Type_Dontcare>(), "Can't create don't-care temps");
     auto tmp = IR::ID(srcInfo, nameGen.newName("tmp"), nullptr);
     auto decl = new IR::Declaration_Variable(srcInfo, tmp, type);
@@ -393,7 +393,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     }
 
     IR::IndexedVector<IR::StatOrDecl> copyBack;
-    auto args = new IR::Vector<IR::Argument>();
+    IR::MutablePtr<IR::Vector<IR::Argument>> args = new IR::Vector<IR::Argument>();
     auto mi = MethodInstance::resolve(orig, this, typeMap);
 
     // If a parameter is in this set then we use a temporary to
@@ -546,7 +546,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         tbl_apply = tbl != nullptr || tbl1 != nullptr || tbl2 != nullptr;
     }
     // Simplified method call, with arguments substituted
-    if (!IR::equiv(mce->arguments, args)) mce->arguments = args;
+    if (!mce->arguments->equiv(*args)) mce->arguments = args;
     typeMap->setType(mce, type);
     const IR::Expression *rv = mce;
     // See whether we assign the result of the call to a temporary

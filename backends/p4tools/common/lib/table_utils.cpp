@@ -12,7 +12,7 @@ using namespace P4::literals;
 
 void checkTableImmutability(const IR::P4Table &table, TableProperties &properties) {
     bool isConstant = false;
-    const auto *entriesAnnotation = table.properties->getProperty("entries");
+    auto entriesAnnotation = table.properties->getProperty("entries");
     if (entriesAnnotation != nullptr) {
         isConstant = entriesAnnotation->isConstant;
     }
@@ -20,19 +20,19 @@ void checkTableImmutability(const IR::P4Table &table, TableProperties &propertie
     // This also implies that it cannot be modified.
     properties.tableIsImmutable =
         isConstant || table.hasAnnotation(IR::Annotation::hiddenAnnotation);
-    const auto *defaultAction = table.properties->getProperty("default_action");
+    auto defaultAction = table.properties->getProperty("default_action");
     CHECK_NULL(defaultAction);
     properties.defaultIsImmutable = defaultAction->isConstant;
 }
 
 std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Table &table) {
     std::vector<const IR::ActionListElement *> tableActionList;
-    const auto *actionList = table.getActionList();
+    auto actionList = table.getActionList();
     if (actionList == nullptr) {
         return tableActionList;
     }
     for (size_t idx = 0; idx < actionList->size(); idx++) {
-        const auto *action = actionList->actionList.at(idx);
+        auto action = actionList->actionList.at(idx);
         if (action->hasAnnotation(IR::Annotation::defaultOnlyAnnotation)) {
             continue;
         }
@@ -47,8 +47,8 @@ bool compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn, size_t
     BUG_CHECK(
         lpmIndex < leftIn->keys->components.size() && lpmIndex < rightIn->keys->components.size(),
         "LPM index out of range.");
-    const auto *left = leftIn->keys->components.at(lpmIndex);
-    const auto *right = rightIn->keys->components.at(lpmIndex);
+    auto left = leftIn->keys->components.at(lpmIndex);
+    auto right = rightIn->keys->components.at(lpmIndex);
 
     // The expressions are equivalent, so no need to compare.
     if (left->equiv(*right)) {
@@ -86,7 +86,7 @@ bool compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn, size_t
 }
 
 const IR::PathExpression *getDefaultActionName(const IR::P4Table &table) {
-    const auto *defaultAction = table.getDefaultAction();
+    auto defaultAction = table.getDefaultAction();
     const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
     return tableAction->method->checkedTo<IR::PathExpression>();
 }
@@ -102,17 +102,17 @@ const IR::Expression *computeEntryMatch(const IR::P4Table &table, const IR::Entr
               "The entry key list and key match list must be equal in size.");
     const IR::Expression *entryMatchCondition = IR::BoolLiteral::get(true);
     for (size_t idx = 0; idx < numKeys; ++idx) {
-        const auto *keyElement = key.keyElements.at(idx);
-        const auto *keyExpr = keyElement->expression;
+        auto keyElement = key.keyElements.at(idx);
+        auto keyExpr = keyElement->expression;
         BUG_CHECK(keyExpr != nullptr, "Entry %1% in table %2% is null", entry, table);
-        const auto *entryKey = entry.keys->components.at(idx);
+        auto entryKey = entry.keys->components.at(idx);
         // DefaultExpressions always match, so do not even consider them in the equation.
         if (entryKey->is<IR::DefaultExpression>()) {
             continue;
         }
         if (const auto *rangeExpr = entryKey->to<IR::Range>()) {
-            const auto *minKey = rangeExpr->left;
-            const auto *maxKey = rangeExpr->right;
+            auto minKey = rangeExpr->left;
+            auto maxKey = rangeExpr->right;
             entryMatchCondition = new IR::LAnd(
                 entryMatchCondition,
                 new IR::LAnd(new IR::Leq(minKey, keyExpr), new IR::Leq(keyExpr, maxKey)));

@@ -135,7 +135,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
         new IR::ParameterList(
             {new IR::Parameter("blockRef", IR::Direction::In, IR::Type_Unknown::get())})));
     cmds.emplace_back(copyOutCall);
-    auto *dropStmt =
+    IR::Ptr<IR::MethodCallStatement> dropStmt =
         new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
 
     // Update some metadata variables for egress processing after we are done with Ingress
@@ -186,16 +186,16 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*standard_metadata"),
-                                                 "ingress_port"));
+IR::StateVariable Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*standard_metadata"),
+                                            "ingress_port"));
 }
 
-const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
-                                                 new IR::PathExpression("*standard_metadata"),
-                                                 "egress_spec"));
+IR::StateVariable Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
+    return IR::StateVariable(new IR::Member(IR::Type_Bits::get(BMv2Constants::PORT_BIT_WIDTH),
+                                            new IR::PathExpression("*standard_metadata"),
+                                            "egress_spec"));
 }
 
 const IR::Expression *Bmv2V1ModelProgramInfo::dropIsActive() const {
@@ -215,9 +215,9 @@ const IR::PathExpression *Bmv2V1ModelProgramInfo::getBlockParam(cstring blockLab
     const auto *typeDecl = programmableBlocks->at(blockLabel);
     const auto *applyBlock = typeDecl->to<IR::IApply>();
     CHECK_NULL(applyBlock);
-    const auto *params = applyBlock->getApplyParameters();
-    const auto *param = params->getParameter(paramIndex);
-    const auto *paramType = param->type;
+    auto params = applyBlock->getApplyParameters();
+    auto param = params->getParameter(paramIndex);
+    auto paramType = param->type;
     // For convenience, resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
         paramType = resolveProgramType(&getP4Program(), tn);
@@ -245,7 +245,7 @@ const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *
     auto parserApplyParams = parser->getApplyParameters()->parameters;
     cstring structLabel = nullptr;
     if (parserApplyParams.size() > paramIndex) {
-        const auto *paramString = parser->getApplyParameters()->parameters.at(paramIndex);
+        auto paramString = parser->getApplyParameters()->parameters.at(paramIndex);
         structLabel = paramString->name;
     } else {
         structLabel = ARCH_SPEC.getParamName("Parser"_cs, paramIndex);

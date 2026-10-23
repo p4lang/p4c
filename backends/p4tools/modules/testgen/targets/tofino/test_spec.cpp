@@ -232,7 +232,8 @@ const TofinoActionProfile *TofinoActionProfile::evaluate(const Model &model,
         std::vector<ActionArg> evaluatedArgs;
         evaluatedArgs.reserve(actionArgs.size());
         for (const auto &actionArg : actionArgs) {
-            evaluatedArgs.emplace_back(*actionArg.evaluate(model, doComplete));
+            IR::Ptr<ActionArg> evaluatedArg = actionArg.evaluate(model, doComplete);
+            evaluatedArgs.emplace_back(*evaluatedArg);
         }
         profile->addToActionMap(actionTuple.first, evaluatedArgs);
     }

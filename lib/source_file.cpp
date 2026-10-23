@@ -38,7 +38,12 @@ cstring SourcePosition::toString() const {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, SourcePosition end)
-    : sources(sources), start(start), end(end) {
+    : sources(sources ? sources->weak_from_this().lock() : nullptr), start(start), end(end) {
+    // Stack-allocated sources are borrowed, as before. Parsed sources are shared
+    // between the parser, IR source locations, and clients such as the formatter.
+    if (!this->sources)
+        this->sources =
+            std::shared_ptr<const InputSources>(std::shared_ptr<const InputSources>{}, sources);
     BUG_CHECK(sources != nullptr, "Invalid InputSources in SourceInfo");
     if (!start.isValid() || !end.isValid()) {
         BUG("Invalid source position in SourceInfo %1%-%2% for %3%", start.toString(),
@@ -50,6 +55,14 @@ SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, Source
 
 SourceInfo::SourceInfo(const InputSources *sources, SourcePosition point)
     : SourceInfo(sources, point, point) {}
+
+SourceInfo SourceInfo::retainSources() const {
+    auto result = *this;
+    if (sources) {
+        if (auto owner = sources->weak_from_this().lock()) result.sources = std::move(owner);
+    }
+    return result;
+}
 
 SourceInfo::SourceInfo(cstring filename, int line, int column, cstring srcBrief) {
     this->filename = filename;
@@ -78,7 +91,13 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
     if (!singleLine)
         // Drop the "*/"
         body = body.exceptLast(2);
-    comments.push_back(new Comment(srcInfo, singleLine, body));
+    // Comments belong to these sources. Their internal locations borrow the
+    // owner to avoid a cycle; getSourceInfo() retains it when a location escapes.
+    if (srcInfo.sources.get() == this)
+        srcInfo.sources =
+            std::shared_ptr<const InputSources>(std::shared_ptr<const InputSources>{}, this);
+    ownedComments.push_back(std::make_unique<Comment>(srcInfo, singleLine, body));
+    comments.push_back(ownedComments.back().get());
 }
 
 const std::vector<Comment *> &InputSources::getAllComments() const { return comments; }

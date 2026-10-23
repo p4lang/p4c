@@ -6,6 +6,7 @@
 #include <chrono>
 #endif
 #include <cstdlib>
+#include <memory>
 
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
@@ -23,7 +24,7 @@ using P4TestContext = P4CContextWithOptions<CompilerOptions>;
 
 class P4CParserUnroll : public P4CTest {};
 
-const IR::P4Parser *getParser(const IR::P4Program *program) {
+IR::Ptr<IR::P4Parser> getParser(const IR::P4Program *program) {
     // FIXME: This certainly should be improved, it should be possible to check
     // and cast at the same time
     return program->getDeclarations()
@@ -33,8 +34,8 @@ const IR::P4Parser *getParser(const IR::P4Program *program) {
 }
 
 /// Rewrites parser
-std::pair<const IR::P4Parser *, const IR::P4Parser *> rewriteParser(const IR::P4Program *program,
-                                                                    CompilerOptions &options) {
+std::pair<IR::Ptr<IR::P4Parser>, IR::Ptr<IR::P4Parser>> rewriteParser(
+    IR::Ptr<IR::P4Program> program, CompilerOptions &options) {
     P4::FrontEnd frontend;
     program = frontend.run(options, program);
     CHECK_NULL(program);
@@ -49,7 +50,7 @@ std::pair<const IR::P4Parser *, const IR::P4Parser *> rewriteParser(const IR::P4
     auto t1 = high_resolution_clock::now();
 #endif
     MidEnd midEnd(options);
-    const IR::P4Program *res = program;
+    IR::Ptr<IR::P4Program> res = program;
     midEnd.process(res);
 #ifdef PARSER_UNROLL_TIME_CHECKING
     auto t2 = high_resolution_clock::now();
@@ -60,7 +61,7 @@ std::pair<const IR::P4Parser *, const IR::P4Parser *> rewriteParser(const IR::P4
 }
 
 /// Loads example from a file
-const IR::P4Program *load_model(const char *curFile, CompilerOptions &options) {
+IR::Ptr<IR::P4Program> load_model(const char *curFile, CompilerOptions &options) {
     std::string includeDir = std::string(buildPath) + std::string("p4include");
     auto originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
@@ -76,13 +77,13 @@ const IR::P4Program *load_model(const char *curFile, CompilerOptions &options) {
     return program;
 }
 
-std::pair<const IR::P4Parser *, const IR::P4Parser *> loadExample(
+std::pair<IR::Ptr<IR::P4Parser>, IR::Ptr<IR::P4Parser>> loadExample(
     const char *file,
     CompilerOptions::FrontendVersion langVersion = CompilerOptions::FrontendVersion::P4_16) {
-    AutoCompileContext autoP4TestContext(new P4TestContext);
+    AutoCompileContext autoP4TestContext(std::make_unique<P4TestContext>());
     auto &options = P4TestContext::get().options();
     options.langVersion = langVersion;
-    const IR::P4Program *program = load_model(file, options);
+    IR::Ptr<IR::P4Program> program = load_model(file, options);
     if (!program) return std::make_pair(nullptr, nullptr);
     return rewriteParser(program, options);
 }
@@ -159,17 +160,17 @@ TEST_F(P4CParserUnroll, ErrorOperandPropagation) {
     // An error on either side must propagate; it must not be replaced by the other side's value.
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    P4::ValueMap valueMap;
-    auto *type = IR::Type_Bits::get(8);
+    auto valueMap = std::make_shared<P4::ValueMap>();
+    auto type = IR::Type_Bits::get(8);
     auto *decl = new IR::Declaration_Variable(IR::ID("e"), type);
     auto *errPath = new IR::PathExpression(new IR::Path("e"));
     refMap.setDeclaration(errPath->path, decl);
     typeMap.setType(errPath, type);
     SymbolicValue *err = new SymbolicStaticError(errPath, "Reading field from invalid header");
-    valueMap.set(decl, err);
+    valueMap->set(decl, err);
     auto *one = new IR::Constant(IR::Type_Bits::get(8), 1);
 
-    ExpressionEvaluator ev(&refMap, &typeMap, &valueMap);
+    ExpressionEvaluator ev(&refMap, &typeMap, valueMap);
     EXPECT_EQ(err, ev.evaluate(new IR::Add(type, one, errPath), false));
     EXPECT_EQ(err, ev.evaluate(new IR::Add(type, errPath, one), false));
     EXPECT_EQ(err,

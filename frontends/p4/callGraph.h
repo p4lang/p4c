@@ -33,12 +33,12 @@ class CallGraph {
  protected:
     cstring name;
     // Use an ordered map to make this deterministic
-    ordered_map<T, std::vector<T> *> out_edges;  // map caller to list of callees
-    ordered_map<T, std::vector<T> *> in_edges;
+    ordered_map<T, std::shared_ptr<std::vector<T>>> out_edges;  // map caller to list of callees
+    ordered_map<T, std::shared_ptr<std::vector<T>>> in_edges;
 
  public:
     ordered_set<T> nodes;  // all nodes; do not modify this directly
-    using const_iterator = typename ordered_map<T, std::vector<T> *>::const_iterator;
+    using const_iterator = typename ordered_map<T, std::shared_ptr<std::vector<T>>>::const_iterator;
 
     explicit CallGraph(std::string_view name) : name(name) {}
 
@@ -52,10 +52,14 @@ class CallGraph {
     [[nodiscard]] size_t size() const { return nodes.size(); }
 
     /// Return the number of outgoing edges
-    [[nodiscard]] const ordered_map<T, std::vector<T> *> &getOutEdges() const { return out_edges; }
+    [[nodiscard]] const ordered_map<T, std::shared_ptr<std::vector<T>>> &getOutEdges() const {
+        return out_edges;
+    }
 
     /// Return the number of incoming edges
-    [[nodiscard]] const ordered_map<T, std::vector<T> *> &getInEdges() const { return in_edges; }
+    [[nodiscard]] const ordered_map<T, std::shared_ptr<std::vector<T>>> &getInEdges() const {
+        return in_edges;
+    }
 
     /// Return the set of nodes.
     [[nodiscard]] const ordered_set<T> &getNodes() const { return nodes; }
@@ -66,8 +70,8 @@ class CallGraph {
     void add(T caller) {
         if (nodes.find(caller) != nodes.end()) return;
         LOG1(name << ": " << cgMakeString(caller));
-        out_edges[caller] = new std::vector<T>();
-        in_edges[caller] = new std::vector<T>();
+        out_edges[caller] = std::make_shared<std::vector<T>>();
+        in_edges[caller] = std::make_shared<std::vector<T>>();
         nodes.emplace(caller);
     }
     void calls(T caller, T callee) {
@@ -119,8 +123,8 @@ class CallGraph {
     // Iterators over the out_edges
     const_iterator begin() const { return out_edges.cbegin(); }
     const_iterator end() const { return out_edges.cend(); }
-    std::vector<T> *getCallees(T caller) { return out_edges[caller]; }
-    std::vector<T> *getCallers(T callee) { return in_edges[callee]; }
+    std::vector<T> *getCallees(T caller) { return out_edges[caller].get(); }
+    std::vector<T> *getCallers(T callee) { return in_edges[callee].get(); }
     // Callees are appended to 'toAppend'
     void getCallees(T caller, std::set<T> &toAppend) {
         if (isCaller(caller)) toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());

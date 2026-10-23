@@ -14,7 +14,7 @@ namespace P4 {
 
 /// Applies expression optimizations to the input node.
 /// Currently, performs constant folding and strength reduction.
-inline const IR::Expression *optimizeExpression(const IR::Expression *node) {
+inline IR::Ptr<IR::Expression> optimizeExpression(IR::Ptr<IR::Expression> node) {
     P4::StrengthReductionPolicy strengthReductionPolicy;
     P4::ConstantFoldingPolicy constantFoldingPolicy;
     P4::DoStrengthReduction strengthReduction(nullptr, &strengthReductionPolicy);

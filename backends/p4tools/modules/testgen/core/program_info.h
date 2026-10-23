@@ -41,7 +41,7 @@ class ProgramInfo : public ICastable {
     std::vector<Continuation::Command> pipelineSequence;
 
     /// The constraints imposed by the target.
-    std::optional<const IR::Expression *> targetConstraints = std::nullopt;
+    std::optional<IR::Ptr<IR::Expression>> targetConstraints = std::nullopt;
 
     /// Maps the programmable blocks in the P4 program to their canonical counterpart.
     ordered_map<cstring, cstring> blockMap;
@@ -69,13 +69,13 @@ class ProgramInfo : public ICastable {
 
     /// @returns the constraints of this target.
     /// These constraints can influence the execution of the interpreter
-    [[nodiscard]] std::optional<const IR::Expression *> getTargetConstraints() const;
+    [[nodiscard]] std::optional<IR::Ptr<IR::Expression>> getTargetConstraints() const;
 
     /// @returns the metadata member corresponding to the ingress port
-    [[nodiscard]] virtual const IR::StateVariable &getTargetInputPortVar() const = 0;
+    [[nodiscard]] virtual IR::StateVariable getTargetInputPortVar() const = 0;
 
     /// @returns the metadata member corresponding to the final output port
-    [[nodiscard]] virtual const IR::StateVariable &getTargetOutputPortVar() const = 0;
+    [[nodiscard]] virtual IR::StateVariable getTargetOutputPortVar() const = 0;
 
     /// @returns an expression that checks whether the packet is to be dropped.
     /// The computation is target specific.

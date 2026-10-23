@@ -224,7 +224,7 @@ struct FindBridgeMetadataAssignment : public Transform {
             LOG4("Won't remove ingress deparser assignment to local object: " << assignment);
             return assignment;
         }
-        auto *paramType = typeMap->getType(param);
+        auto paramType = typeMap->getType(param);
         BUG_CHECK(paramType, "No type for param: %1%", param);
         LOG4("param type " << paramType);
         if (!BFN::isCompilerGeneratedType(paramType)) {
@@ -235,7 +235,7 @@ struct FindBridgeMetadataAssignment : public Transform {
 
         if (path.components.size() < 2) return assignment;
         auto *nextToLastComponent = path.components[path.components.size() - 2];
-        auto *nextToLastComponentType = typeMap->getType(nextToLastComponent);
+        auto nextToLastComponentType = typeMap->getType(nextToLastComponent);
         BUG_CHECK(nextToLastComponentType, "No type for path component: %1%", nextToLastComponent);
 
         auto *bridgeHeader = structure->bridge.structType;

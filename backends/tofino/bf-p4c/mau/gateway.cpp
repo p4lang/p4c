@@ -380,7 +380,7 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::LNot *e) {
 const IR::Expression *CanonGatewayExpr::postorder(IR::BAnd *e) {
     if (e->left->is<IR::Constant>()) {
         BUG_CHECK(!e->right->is<IR::Constant>(), "constant folding failed");
-        auto *t = e->left;
+        const IR::Expression *t = e->left;
         e->left = e->right;
         e->right = t;
     }
@@ -396,7 +396,7 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::BAnd *e) {
 const IR::Expression *CanonGatewayExpr::postorder(IR::BOr *e) {
     if (e->left->is<IR::Constant>()) {
         BUG_CHECK(!e->right->is<IR::Constant>(), "constant folding failed");
-        auto *t = e->left;
+        const IR::Expression *t = e->left;
         e->left = e->right;
         e->right = t;
     }
@@ -444,12 +444,12 @@ static bool contradictory(const IR::Expression *a_, const IR::Expression *b_) {
 
 /* simplify a canonical row by removing duplicate conjuncts and making the entire row
  * false if it contains contradictory conjuncts */
-static const IR::Expression *simplifyRow(const IR::Expression *e) {
-    std::vector<const IR::Expression *> terms;
+static IR::Ptr<IR::Expression> simplifyRow(IR::Ptr<IR::Expression> e) {
+    std::vector<IR::Ptr<IR::Expression>> terms;
     bool delta = false;
-    auto *rest = e;
+    IR::Ptr<IR::Expression> rest = e;
     auto *conj = rest->to<IR::LAnd>();
-    while (auto *t = conj ? conj->right : rest) {
+    while (auto t = conj ? conj->right : rest) {
         bool remove = false;
         for (auto p : terms) {
             if (t->equiv(*p))
@@ -480,8 +480,8 @@ static const IR::Expression *simplifyRow(const IR::Expression *e) {
 }
 
 /* break apart the terms of a conjunction into a set of conjuncts */
-static std::set<const IR::Expression *> rowConjuncts(const IR::Expression *e) {
-    std::set<const IR::Expression *> rv;
+static std::set<IR::Ptr<IR::Expression>> rowConjuncts(const IR::Expression *e) {
+    std::set<IR::Ptr<IR::Expression>> rv;
     while (auto *conj = e->to<IR::LAnd>()) {
         rv.insert(conj->right);
         e = conj->left;
@@ -493,7 +493,7 @@ static std::set<const IR::Expression *> rowConjuncts(const IR::Expression *e) {
 /* remove a conjunct from a set of conjuncts if present.  FIXME This would be much more
  * efficient if the IR generator supported autogen hash and/or operator< for IR nodes
  * to allow efficient set tracking */
-static void removeConjunct(std::set<const IR::Expression *> &s, const IR::Expression *e) {
+static void removeConjunct(std::set<IR::Ptr<IR::Expression>> &s, const IR::Expression *e) {
     for (auto it = s.begin(); it != s.end();) {
         if (e->equiv(**it))
             it = s.erase(it);
@@ -506,7 +506,7 @@ static void removeConjunct(std::set<const IR::Expression *> &s, const IR::Expres
  * does it can be safely reomved as it will never match (the previous row will also
  * match, and at a higher priority, dominating it).   We need a copy of the 'prev'
  * set here so we can modify to see if all elements are present */
-static bool rowDominates(std::set<const IR::Expression *> prev, const IR::Expression *e) {
+static bool rowDominates(std::set<IR::Ptr<IR::Expression>> prev, const IR::Expression *e) {
     while (auto *conj = e->to<IR::LAnd>()) {
         removeConjunct(prev, conj->right);
         if (prev.empty()) return true;
@@ -525,7 +525,7 @@ void CanonGatewayExpr::removeUnusedRows(IR::MAU::Table *tbl, bool isCanon) {
     // While doing that, track the next tags that we remove and keep.
     bool erase_rest = false;
     std::set<cstring> removed, present;  // next tags in the table from the gateway
-    std::vector<std::set<const IR::Expression *>> prevRowTerms;
+    std::vector<std::set<IR::Ptr<IR::Expression>>> prevRowTerms;
     for (auto row = rows.begin(); row != rows.end();) {
         if (erase_rest) {
             removed.insert(row->second);
@@ -611,7 +611,7 @@ void CanonGatewayExpr::splitGatewayRows(safe_vector<GWRow_t> &rows) {
     /* split logical-OR operations across rows */
     for (auto it = rows.begin(); it != rows.end(); ++it) {
         LOG3("    " << it->first << " -> " << it->second);
-        while (auto *e = dynamic_cast<const IR::LOr *>(it->first)) {
+        while (auto *e = it->first ? it->first->to<IR::LOr>() : nullptr) {
             auto act = it->second;
             it->first = e->left;
             it = rows.emplace(++it, e->right, act);

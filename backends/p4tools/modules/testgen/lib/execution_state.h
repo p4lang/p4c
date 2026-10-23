@@ -41,6 +41,8 @@ class ExecutionState : public AbstractExecutionState {
     friend class Test::SmallStepTest;
 
  public:
+    using CoverageCache = std::map<IR::Ptr<IR::Node>, P4::Coverage::CoverageSet>;
+
     class StackFrame {
      public:
         using ExceptionHandlers = std::map<Continuation::Exception, Continuation>;
@@ -48,13 +50,14 @@ class ExecutionState : public AbstractExecutionState {
      private:
         Continuation normalContinuation;
         ExceptionHandlers exceptionHandlers;
-        const NamespaceContext *namespaces = nullptr;
+        std::shared_ptr<const NamespaceContext> namespaces = nullptr;
 
      public:
-        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces);
+        StackFrame(Continuation normalContinuation,
+                   std::shared_ptr<const NamespaceContext> namespaces);
 
         StackFrame(Continuation normalContinuation, ExceptionHandlers exceptionHandlers,
-                   const NamespaceContext *namespaces);
+                   std::shared_ptr<const NamespaceContext> namespaces);
 
         StackFrame(const StackFrame &) = default;
         StackFrame(StackFrame &&) noexcept = default;
@@ -69,7 +72,7 @@ class ExecutionState : public AbstractExecutionState {
         [[nodiscard]] const ExceptionHandlers &getExceptionHandlers() const;
 
         /// @returns the namespaces contained within this stack frame.
-        [[nodiscard]] const NamespaceContext *getNameSpaces() const;
+        [[nodiscard]] std::shared_ptr<const NamespaceContext> getNameSpaces() const;
     };
 
     /// No move semantics because of constant members. We always need to clone a state.
@@ -79,10 +82,13 @@ class ExecutionState : public AbstractExecutionState {
 
  private:
     /// The program trace for the current program point (i.e., how we got to the current state).
-    std::vector<std::reference_wrapper<const TraceEvent>> trace;
+    std::vector<IR::Ptr<TraceEvent>> trace;
 
     /// Set of visited nodes. Used for code coverage.
     P4::Coverage::CoverageSet visitedNodes;
+
+    /// Shared by branches of this execution, released when the execution ends.
+    std::shared_ptr<CoverageCache> coverageCache = std::make_shared<CoverageCache>();
 
     /// The remaining body of the current function being executed.
     ///
@@ -96,7 +102,7 @@ class ExecutionState : public AbstractExecutionState {
     /// becomes the top of the stack.
     ///
     // Invariant: if the @body is empty, then so is this, and this state is terminal.
-    std::stack<std::reference_wrapper<const StackFrame>> stack;
+    std::stack<std::shared_ptr<const StackFrame>> stack;
 
     /// State properties are bools, integers, or strings that can be set and propagated across
     /// execution state. They are used to influence execution along a particular continuation path.
@@ -126,7 +132,7 @@ class ExecutionState : public AbstractExecutionState {
 
     /// List of path constraints - expressions that must all evaluate to true to reach this
     /// execution state.
-    std::vector<const IR::Expression *> pathConstraint;
+    std::vector<IR::Ptr<IR::Expression>> pathConstraint;
 
     /// List of branch decisions leading into this state.
     std::vector<uint64_t> selectedBranches;
@@ -152,7 +158,7 @@ class ExecutionState : public AbstractExecutionState {
     [[nodiscard]] bool isTerminal() const;
 
     /// @returns list of paths constraints.
-    [[nodiscard]] const std::vector<const IR::Expression *> &getPathConstraint() const;
+    [[nodiscard]] const std::vector<IR::Ptr<IR::Expression>> &getPathConstraint() const;
 
     /// @returns list of branch decisions leading into this state.
     [[nodiscard]] const std::vector<uint64_t> &getSelectedBranches() const;
@@ -178,18 +184,21 @@ class ExecutionState : public AbstractExecutionState {
     /// @returns list of all nodes visited before reaching this state.
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;
 
+    /// Coverage lookahead is shared by branches, but belongs to this execution.
+    [[nodiscard]] CoverageCache &getCoverageCache() const { return *coverageCache; }
+
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.
     void set(const IR::StateVariable &var, const IR::Expression *value) override;
 
     /// @returns the current event trace.
-    [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> &getTrace() const;
+    [[nodiscard]] const std::vector<IR::Ptr<TraceEvent>> &getTrace() const;
 
     /// @returns the current body.
     [[nodiscard]] const Continuation::Body &getBody() const;
 
     /// @returns the current stack.
-    [[nodiscard]] const std::stack<std::reference_wrapper<const StackFrame>> &getStack() const;
+    [[nodiscard]] const std::stack<std::shared_ptr<const StackFrame>> &getStack() const;
 
     /// Set the property with @arg propertyName to @arg property.
     void setProperty(cstring propertyName, Continuation::PropertyValue property);
@@ -295,7 +304,7 @@ class ExecutionState : public AbstractExecutionState {
      *  Continuation-stack operations
      * ========================================================================================= */
     /// Pushes a new frame onto the continuation stack.
-    void pushContinuation(const StackFrame &frame);
+    void pushContinuation(StackFrame frame);
 
     /// Pushes the current body and namespace context as a new frame on the continuation stack. The
     /// new frame will have a parameterless continuation, and will use the given set of exception
@@ -315,7 +324,7 @@ class ExecutionState : public AbstractExecutionState {
     ///
     /// Expressions in the metalanguage include P4 non-expressions. Because of this, the argument
     /// (if provided) does not necessarily need to be an instance of IR::Expression.
-    void popContinuation(std::optional<const IR::Node *> argument_opt = std::nullopt);
+    void popContinuation(std::optional<IR::Ptr<IR::Node>> argument_opt = std::nullopt);
 
     /// Invokes first handler for e found on the stack
     void handleException(Continuation::Exception e);
@@ -356,13 +365,13 @@ class ExecutionState : public AbstractExecutionState {
     /// will produce variables constants that are appended to the input packet. This means we
     /// generate packet content as needed. The returned slice is optional in case one just needs to
     /// advance.
-    const IR::Expression *slicePacketBuffer(int amount);
+    IR::Ptr<IR::Expression> slicePacketBuffer(int amount);
 
     /// Peeks ahead into the packet buffer. Works similarly to slicePacketBuffer but does NOT
     /// advance the parser cursor or removes content from the packet buffer. However, because
     /// functions such as lookahead may still produce a parser error, this function can also enlarge
     /// the minimum input packet required.
-    [[nodiscard]] const IR::Expression *peekPacketBuffer(int amount);
+    [[nodiscard]] IR::Ptr<IR::Expression> peekPacketBuffer(int amount);
 
     /// Append data to the packet buffer.
     void appendToPacketBuffer(const IR::Expression *expr);
@@ -412,7 +421,16 @@ class ExecutionState : public AbstractExecutionState {
     ExecutionState &operator=(const ExecutionState &) = default;
 };
 
-using ExecutionStateReference = std::reference_wrapper<ExecutionState>;
+/// Keeps a state alive while it is being explored or retained as a pending branch.
+/// The reference interface also supports stack-allocated states in unit tests.
+class ExecutionStateReference {
+    IR::MutablePtr<ExecutionState> state;
+
+ public:
+    ExecutionStateReference(ExecutionState &state) : state(&state) {}  // NOLINT(runtime/explicit)
+    ExecutionState &get() const { return *state; }
+    operator ExecutionState &() const { return *state; }
+};
 
 }  // namespace P4::P4Tools::P4Testgen
 

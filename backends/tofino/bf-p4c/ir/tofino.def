@@ -317,7 +317,7 @@ class TempVar : BFN::Reference {
     // this bit directly to use deparser_zero optimization.
     bool        deparsed_zero;
     cstring     name;
-    static int  uid;
+    static int  uid = 0;
 #noconstructor
     TempVar(Type t, bool p = false, cstring n = cstring()) : BFN::Reference(t), POV(p), name(n) {
         deparsed_zero = false;
@@ -339,7 +339,7 @@ class TempVar : BFN::Reference {
  */
 class Padding : BFN::Reference {
     cstring     name;
-    static int  uid;
+    static int  uid = 0;
 #noconstructor
     Padding(Type t, cstring n = cstring()) :
         BFN::Reference(t), name(n) {
