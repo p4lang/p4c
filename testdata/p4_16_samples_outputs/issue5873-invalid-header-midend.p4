@@ -34,18 +34,18 @@ control C(inout S s, in bit<8> k, out bool v) {
         }
         default_action = a_1();
     }
-    @hidden action issue5873invalidheader25() {
+    @hidden action issue5873invalidheader31() {
         v = s.h.isValid();
     }
-    @hidden table tbl_issue5873invalidheader25 {
+    @hidden table tbl_issue5873invalidheader31 {
         actions = {
-            issue5873invalidheader25();
+            issue5873invalidheader31();
         }
-        const default_action = issue5873invalidheader25();
+        const default_action = issue5873invalidheader31();
     }
     apply {
         t1_0.apply();
-        tbl_issue5873invalidheader25.apply();
+        tbl_issue5873invalidheader31.apply();
         t2_0.apply();
     }
 }
