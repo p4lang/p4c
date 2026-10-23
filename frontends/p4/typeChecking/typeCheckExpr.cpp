@@ -2403,7 +2403,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::SelectExpression *express
     if (!validateSelectTypes(selectType, expression)) return expression;
 
     if (tuple->components.empty()) {
-        for (const auto *sc : expression->selectCases) {
+        for (const auto &sc : expression->selectCases) {
             if (!sc->keyset->is<IR::DefaultExpression>()) {
                 typeError(
                     "%1%: key set expression must be default or _ when select expression list is "
