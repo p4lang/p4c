@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "ir/ir.h"
 #include "ir/json_loader.h"
@@ -113,4 +114,15 @@ TEST(JSON, variant) {
     for (size_t i = 0; i < data.size() && i < copy.size(); ++i) {
         EXPECT_EQ(data[i], copy[i]);
     }
+}
+
+TEST(JSON, IntegralRoundTrip) {
+    // Integers wider than int must survive a JSON round trip exactly.
+    const std::vector<unsigned long long> values = {
+        0ULL, 1ULL, 2147483647ULL, 2147483648ULL, 8589934591ULL, 18446744073709551615ULL};
+    std::stringstream ss;
+    JSONGenerator(ss).emit(values);
+    std::vector<unsigned long long> result;
+    JSONLoader(ss) >> result;
+    EXPECT_EQ(values, result);
 }
