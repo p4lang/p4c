@@ -97,3 +97,10 @@ add_dependencies(gtestp4c copy_gtest_deps)
 # Tests
 add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
 set_tests_properties (gtestp4c PROPERTIES LABELS "gtest")
+
+if (ENABLE_SANITIZERS AND NOT ENABLE_GC)
+  add_test(NAME gtestp4c-ownership-leaks
+    COMMAND gtestp4c --gtest_filter=IRSharedPtr.*:UtilEnumerator.*:DiagnosticOptions.*
+    WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  set_tests_properties(gtestp4c-ownership-leaks PROPERTIES LABELS "memory-leak")
+endif()

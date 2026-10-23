@@ -16,14 +16,12 @@ Allows the loading and testing of eBPF programs."""
 
 import logging
 import os
-import re
 import socket
 import subprocess
 import sys
 import time
 from pathlib import Path
 from typing import Any, List, Optional
-from urllib.parse import unquote
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -124,7 +122,6 @@ class Virtme:
         self.spawn_script = spawn_script
         self.host_ip = "10.10.11.7"
         self.tmpdir_basename = tmpdir_basename
-        self.release_url = 'https://api.github.com/repos/p4tc-dev/linux-p4tc-pub/releases/latest'
         self.port_mapping = (self.ns.port0, self.ns.port1)
         self.verbose = verbose
         self.user = "ci"
@@ -133,41 +130,20 @@ class Virtme:
         if self.vm_proc:
             testutils.kill_proc_group(self.vm_proc)
 
-    def _get_version(self, url):
-        candidates = [
-            # Legacy linux-p4tc kernel release naming.
-            (r"(\d+\.\d+\.0p\d+tc-v\d+-rc\d+\+?)", True),
-            # Newer release labels can be plain semantic versions.
-            (r"[Vv]ersion\s+(\d+\.\d+\.\d+(?:\.\d+)?\+?)", False),
-            # Fallback for asset names: linux-image-<version>_<arch>.deb
-            (r"linux-image-([^/_]+?)(?:_[^/]+)?(?:\.deb)?$", False),
-        ]
-        source = unquote(url.strip())
-
-        for pattern, force_plus in candidates:
-            match = re.search(pattern, source)
-            if not match:
-                continue
-            version = match.group(1)
-            if force_plus and not version.endswith("+"):
-                version += "+"
-            if self.verbose:
-                print(f"Extracted version: {version}")
-            return version
-
-        testutils.log.error("Version string not found in '%s'", source)
-        return None
-
     def extract_version(self):
-        cmd = f'curl -s {self.release_url} | jq .assets[2].browser_download_url | tr -d \\"'
-        result = testutils.exec_process(cmd, shell=True)
-        if result.returncode != testutils.SUCCESS:
-            testutils.log.error("Failed to download deb package")
+        # Boot the kernel downloaded by the setup fixture. Querying the latest
+        # release for every test can hit API rate limits or select a newer image
+        # than the one installed locally.
+        boot_dir = Path(self.extract_dir) / "boot"
+        images = sorted(boot_dir.glob("vmlinuz-*"))
+        if len(images) != 1:
+            testutils.log.error("Expected one extracted kernel in %s, found %s", boot_dir, images)
             return None
-
-        image_url = result.output
-
-        return self._get_version(image_url)
+        version = images[0].name.removeprefix("vmlinuz-")
+        if not (boot_dir / f"config-{version}").is_file():
+            testutils.log.error("Missing configuration for extracted kernel %s", version)
+            return None
+        return version
 
     def wait_for_ssh(self):
         while True:

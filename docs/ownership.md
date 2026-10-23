@@ -71,6 +71,23 @@ paths. Valgrind additionally detects invalid accesses that a leak-only check
 can miss. Compare generated tests with a GC-enabled baseline using the same
 seed, ignoring generated timestamps.
 
+The no-GC sanitizer build defines a `memory-leak` CTest label for ownership unit
+tests and representative compiler/JSON/P4Runtime regressions. CI runs this suite
+with leak detection enabled and no suppressions, then runs the remaining tests
+with address and undefined-behavior checks. To reproduce the leak checks:
+
+```sh
+cmake -B build-asan -DDISABLE_GC=ON -DENABLE_SANITIZERS=ON -DENABLE_GTESTS=ON
+ASAN_OPTIONS=detect_leaks=0 cmake --build build-asan
+ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
+UBSAN_OPTIONS=print_stacktrace=1:halt_on_error=1 LSAN_OPTIONS=exitcode=23 \
+ctest --test-dir build-asan -L memory-leak --no-tests=error --output-on-failure
+```
+
+Leak detection is disabled during the build because the IR generator still
+retains allocations. The labeled tests must release their allocations; passing
+them does not establish leak freedom for every backend or compiler input.
+
 The [Testgen memory benchmark](../backends/p4tools/modules/testgen/benchmarks/README.md)
 measures peak RSS at increasing test counts. A memory ceiling catches large
 growth regressions, but passing it does not establish that allocations are

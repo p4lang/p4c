@@ -1,0 +1,6 @@
+constructor-call-lifetime.p4(21): [--Wwarn=unused] warning: 'box' is unused
+    Box<bit<8>>(Token(8w2)) box;
+                            ^^^
+constructor-call-lifetime.p4(22): [--Wwarn=unused] warning: 'wide' is unused
+    Box<bit<16>>(Token(16w3)) wide;
+                              ^^^^

@@ -46,7 +46,8 @@ namespace P4 {
 class MoveConstructors : public Transform {
     struct ConstructorMap {
         // Maps a constructor to the temporary used to hold its value.
-        ordered_map<const IR::ConstructorCallExpression *, cstring> tmpName;
+        // Retain rewritten constructors until their declarations are emitted.
+        ordered_map<IR::Ptr<IR::ConstructorCallExpression>, cstring> tmpName;
 
         void clear() { tmpName.clear(); }
         void add(const IR::ConstructorCallExpression *expression, cstring name) {
