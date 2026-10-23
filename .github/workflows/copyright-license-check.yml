@@ -35,5 +35,9 @@ jobs:
       - name: Check copyright and license annotations in changed files
         shell: bash
         run: |
-          echo "Changed files: ${{ steps.changes.outputs.changed }}"
-          ec=0; uvx reuse lint-file ${{ steps.changes.outputs.changed }} || ec=$?; if [ $ec -ne 0 ]; then echo "::error::New or modified files in this PR, listed above, failed copyright or license checks.  See https://github.com/p4lang/.github/blob/main/copyright-and-license-issues/README-choosing-copyright-holder-and-license-for-new-files.md"; fi; exit $ec
+          ec=0
+          uvx reuse lint-file ${{ steps.changes.outputs.changed }} || ec=$?
+          if [ $ec -ne 0 ]; then
+            echo "::error::New or modified files in this PR, listed above, failed copyright or license checks.  See https://github.com/p4lang/.github/blob/main/copyright-and-license-issues/README-choosing-copyright-holder-and-license-for-new-files.md"
+          fi
+          exit $ec
