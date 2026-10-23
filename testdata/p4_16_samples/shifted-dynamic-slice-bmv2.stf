@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# The eight-bit shift produces 0xB0.
+# Reference: (bit<8>) (bit<4>) ((bit<8>) (0xAB << 4) >> offset).
+# Offset zero selects only zero-filled bits.
+packet 0 AB 00 FF
+expect 0 AB 00 00
+
+# Offsets below four select both zero-filled bits and data.
+packet 0 AB 01 FF
+expect 0 AB 01 08
+packet 0 AB 02 FF
+expect 0 AB 02 0C
+packet 0 AB 03 FF
+expect 0 AB 03 06
+
+# Offset four selects only data from the original value.
+packet 0 AB 04 FF
+expect 0 AB 04 0B
+
+# Slices crossing the upper boundary are zero-extended.
+packet 0 AB 05 FF
+expect 0 AB 05 05
+packet 0 AB 06 FF
+expect 0 AB 06 02
+packet 0 AB 07 FF
+expect 0 AB 07 01
+
+# A slice starting at the value's width is entirely zero.
+packet 0 AB 08 FF
+expect 0 AB 08 00
