@@ -28,8 +28,9 @@ jobs:
         id: changes
         run: |
           git fetch origin ${{ github.base_ref }}
-          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          echo "changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "test<<EOF" >> $GITHUB_OUTPUT
+          echo "$(git diff --name-only origin/${{ github.base_ref }}...HEAD)" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Check copyright and license annotations in changed files
         run: |
