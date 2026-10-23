@@ -233,6 +233,7 @@ sudo dpkg -i /path/to/package.deb
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
      - `-DP4C_USE_PREINSTALLED_ABSEIL=ON|OFF`. Try to find a system version of Abseil instead of a fetched one. Default is OFF.
+     - `-DP4C_USE_PREINSTALLED_MULTIPRECISION=ON|OFF`. Use installed Multiprecision headers and their matching Boost dependencies instead of fetching standalone Multiprecision. Default is OFF.
      - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version. Default is OFF.
      - `-DENABLE_ABSEIL_STATIC=ON|OFF`. Enable the use of static abseil libraries. Default is ON. Only has an effect when `P4C_USE_PREINSTALLED_ABSEIL` is enabled.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
@@ -283,7 +284,7 @@ platforms are untested; you can try to use them, but YMMV.
 
 - Google Protocol Buffers v3.25.3 or higher for control plane API generation
 
-- C++ boost library
+- Boost.Multiprecision library for arbitrary precision arithmetic
 
 - Python 3 and uv for scripting and running tests
 
@@ -301,8 +302,7 @@ Most dependencies can be installed using `apt-get install`:
 
 ```bash
 sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
-libfl-dev libboost-dev libboost-iostreams-dev \
-libboost-graph-dev llvm pkg-config python3 python3-pip \
+libfl-dev libboost-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
 ```
@@ -358,7 +358,7 @@ P4C requires a CMake version of at least 3.16.3 or higher. On older systems, a n
 
 ```bash
 sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
-libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
+libfl-devel gmp-devel boost-devel llvm pkg-config \
 python3 python3-pip tcpdump uv
 
 uv sync
