@@ -23,8 +23,8 @@ function(p4c_obtain_p4runtime)
     FetchContent_Declare(
       p4runtime
       # P4Runtime 1.6.0 with CMake packaging: p4lang/p4runtime#642.
-      URL https://github.com/p4lang/p4runtime/archive/96142bc78013c5d99a64f7bf8325bdf8448dc6c8.tar.gz
-      URL_HASH SHA256=f3c49c3e2dd64234317f2b3f5f55a508f22e958c06db4f82562ddfae343b81cf
+      URL https://github.com/p4lang/p4runtime/archive/0bea6a3be25d6f852615a8d6b55fd68dfd624350.tar.gz
+      URL_HASH SHA256=e64fac0ce4abf47aa0e2ed9920473edbba67aa1c79767f198f8606a8beea986e
       DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
     FetchContent_MakeAvailable(p4runtime)
