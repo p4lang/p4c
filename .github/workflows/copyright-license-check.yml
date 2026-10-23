@@ -1,0 +1,36 @@
+name: Copyright and license annotation check
+
+# Note: Until we add these annotations to all files in the p4c repo,
+# do the checks only on new or modified files in a pull request, both
+# when it is created, and when it is updated.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v5
+        with:
+	  # Ensures we have the full history for diff
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changes
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "changed=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+      - name: Install uv and reuse
+        run: |
+          ./tools/install-uv.sh
+	  uv pip install reuse
+
+      - name: Check copyright and license annotations in changed files
+        run: |
+	  echo "Changed files: ${{ steps.changes.outputs.changed }}"
+	  uvx reuse lint-file ${{ steps.changes.outputs.changed }}
