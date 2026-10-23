@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Pantherun Technologies
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 struct S { }
 struct R {}
 struct T { R r; bit<8> b; }
