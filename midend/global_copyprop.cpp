@@ -60,7 +60,7 @@ void compareValuesInMaps(std::map<cstring, const IR::Expression *> *oldValues,
 // Removes values if they are used as Out/InOut parameter
 void checkParametersForMap(const MethodInstance *mi,
                            std::map<cstring, const IR::Expression *> *vars) {
-    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
         if (param->hasOut()) {
             auto arg = mi->substitution.lookup(param);
             if (auto name = GlobalCopyProp::lValueName(arg->expression))
@@ -279,7 +279,7 @@ IR::MethodCallExpression *DoGlobalCopyPropagation::preorder(IR::MethodCallExpres
     visit(mc->method);
     visit(mc->typeArguments);
     auto *args = new IR::Vector<IR::Argument>();
-    for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto param : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(param);
         if (!param->hasOut()) visit(arg);
         args->push_back(arg);

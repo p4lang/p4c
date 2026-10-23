@@ -366,7 +366,7 @@ class GetWrittenExpressions : public Inspector, public ResolutionContext {
                 return;
             }
         }
-        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        for (auto p : mi->substitution.getParametersInArgumentOrder()) {
             if (!p->hasOut()) continue;
             // The only modified expressions much be left-values
             // that are substituted to out or inout parameters.
@@ -411,13 +411,13 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     gwe.setCalledBy(this);
     mce->apply(gwe, getContext());
 
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction == IR::Direction::None) continue;
         auto arg = mi->substitution.lookup(p);
         if (gwe.written.find(GetWrittenExpressions::everything) != gwe.written.end()) {
             // just copy everything.
             LOG3("Detected table application, using temporaries for all parameters " << arg);
-            for (auto p : *mi->substitution.getParametersInArgumentOrder()) useTemporary.emplace(p);
+            for (auto p : mi->substitution.getParametersInArgumentOrder()) useTemporary.emplace(p);
             break;
         }
         modifies.insert(gwe.written.begin(), gwe.written.end());
@@ -457,7 +457,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     }
 
     // For each argument check to see if it aliases any expression in the written set.
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         if (useTemporary.find(p) != useTemporary.end()) continue;
         auto arg = mi->substitution.lookup(p);
         if (typeMap->isCompileTimeConstant(arg->expression)) continue;
@@ -479,7 +479,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     visit(mce->method);
 
     CloneExpressions cloner;  // a cheap version of deep copy
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         if (p->direction == IR::Direction::None) {
             args->push_back(arg);

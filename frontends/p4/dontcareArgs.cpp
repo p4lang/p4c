@@ -21,7 +21,7 @@ const IR::Node *DontcareArgs::postorder(IR::MethodCallExpression *expression) {
     auto vec = new IR::Vector<IR::Argument>();
 
     auto mi = MethodInstance::resolve(expression, this, typeMap);
-    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+    for (auto p : mi->substitution.getParametersInArgumentOrder()) {
         auto a = mi->substitution.lookup(p);
         if (a->expression->is<IR::DefaultExpression>()) {
             cstring name = nameGen.newName("arg");
