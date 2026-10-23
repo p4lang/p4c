@@ -388,6 +388,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Base *type) {
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Newtype *type) {
     (void)setTypeType(type);
     auto argType = getTypeType(type->type);
+    if (argType == nullptr) return type;
     if (!argType->is<IR::Type_Bits>() && !argType->is<IR::Type_Boolean>() &&
         !argType->is<IR::Type_Newtype>())
         typeError("%1%: `type' can only be applied to base types", type);
