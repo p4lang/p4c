@@ -1,4 +1,4 @@
-name: Copyright and license annotation check
+name: "copyright-license-check"
 
 # Note: Until we add these annotations to all files in the p4c repo,
 # do the checks only on new or modified files in a pull request, both
@@ -6,14 +6,14 @@ name: Copyright and license annotation check
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [main]
 
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
 	  # Ensures we have the full history for diff
           fetch-depth: 0
