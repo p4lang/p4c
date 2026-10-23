@@ -152,8 +152,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5eba81b395ec7e90ba7e8a147173c9c7" id="r_a5eba81b395ec7e90ba7e8a147173c9c7"><td class="memItemLeft" align="right" valign="top"><a id="a5eba81b395ec7e90ba7e8a147173c9c7" name="a5eba81b395ec7e90ba7e8a147173c9c7"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_p4_1_1_abstract_solver.html">AbstractSolver</a>)</td></tr>
 <tr class="separator:a5eba81b395ec7e90ba7e8a147173c9c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a57193596eb10a9ad2105319ff664308a" id="r_a57193596eb10a9ad2105319ff664308a"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a57193596eb10a9ad2105319ff664308a">getSymbolicMapping</a> () const =0</td></tr>
-<tr class="separator:a57193596eb10a9ad2105319ff664308a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6354913ed8893c8f8691cb364b94e90d" id="r_a6354913ed8893c8f8691cb364b94e90d"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6354913ed8893c8f8691cb364b94e90d">getSymbolicMapping</a> () const =0</td></tr>
+<tr class="separator:a6354913ed8893c8f8691cb364b94e90d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6a41436231b00695e3d9d9694f990c05" id="r_a6a41436231b00695e3d9d9694f990c05"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6a41436231b00695e3d9d9694f990c05">isInIncrementalMode</a> () const =0</td></tr>
 <tr class="separator:a6a41436231b00695e3d9d9694f990c05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1e4fde4920184258255c34db3592d9a" id="r_ac1e4fde4920184258255c34db3592d9a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac1e4fde4920184258255c34db3592d9a">seed</a> (unsigned seed)=0</td></tr>
@@ -273,8 +273,8 @@ std::nullopt if the solver times out, or is otherwise unable to provide an answe
 
 </div>
 </div>
-<a id="a57193596eb10a9ad2105319ff664308a" name="a57193596eb10a9ad2105319ff664308a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a57193596eb10a9ad2105319ff664308a">&#9670;&#160;</a></span>getSymbolicMapping()</h2>
+<a id="a6354913ed8893c8f8691cb364b94e90d" name="a6354913ed8893c8f8691cb364b94e90d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6354913ed8893c8f8691cb364b94e90d">&#9670;&#160;</a></span>getSymbolicMapping()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -283,7 +283,7 @@ std::nullopt if the solver times out, or is otherwise unable to provide an answe
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual const <a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a> &amp; P4::AbstractSolver::getSymbolicMapping </td>
+          <td class="memname">virtual <a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a> P4::AbstractSolver::getSymbolicMapping </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>
@@ -298,7 +298,7 @@ std::nullopt if the solver times out, or is otherwise unable to provide an answe
 <p>Obtains the first solution found by the solver in the last call to @checkSat.</p>
 <p>A BUG occurs if the solver has no available solution. This can happen if the last call to @checkSat returned anything other than true, if there was no such previous call, or if the state in the solver has changed since the last such call (e.g., more assertions have been made). </p>
 
-<p>Implemented in <a class="el" href="class_p4_1_1_p4_tools_1_1_z3_solver.html#ad13760b9e68471e68229fde93089c4a2">P4::P4Tools::Z3Solver</a>.</p>
+<p>Implemented in <a class="el" href="class_p4_1_1_p4_tools_1_1_z3_solver.html#af13edbd8fbb32eb42e3c6e7302116992">P4::P4Tools::Z3Solver</a>.</p>
 
 </div>
 </div>

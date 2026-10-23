@@ -1,5 +1,7 @@
 <map id="P4::Util::EmptyEnumerator&lt; T &gt;" name="P4::Util::EmptyEnumerator&lt; T &gt;">
-<area shape="rect" id="Node000001" title="Always empty iterator (equivalent to end())" alt="" coords="5,79,239,104"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_enumerator.html" title="Type&#45;erased Enumerator interface." alt="" coords="27,5,217,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,44,125,79,119,79,119,44"/>
+<area shape="rect" id="Node000001" title="Always empty iterator (equivalent to end())" alt="" coords="5,181,239,207"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_enumerator.html" title="Type&#45;erased Enumerator interface." alt="" coords="27,108,217,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,147,125,181,119,181,119,147"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="31,5,213,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="125,74,125,108,119,108,119,74"/>
 </map>

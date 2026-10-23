@@ -1,5 +1,7 @@
 <map id="P4::Util::MapEnumerator&lt; T, S, Mapper &gt;" name="P4::Util::MapEnumerator&lt; T, S, Mapper &gt;">
-<area shape="rect" id="Node000001" title="Transforms all elements from type T to type S." alt="" coords="10,79,191,119"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="5,5,196,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,44,103,79,98,79,98,44"/>
+<area shape="rect" id="Node000001" title="Transforms all elements from type T to type S." alt="" coords="10,181,191,221"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="5,108,196,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,147,103,181,98,181,98,147"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="9,5,192,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,74,103,108,98,108,98,74"/>
 </map>

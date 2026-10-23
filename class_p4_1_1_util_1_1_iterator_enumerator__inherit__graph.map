@@ -1,5 +1,7 @@
 <map id="P4::Util::IteratorEnumerator&lt; Iter &gt;" name="P4::Util::IteratorEnumerator&lt; Iter &gt;">
-<area shape="rect" id="Node000001" title="A generic iterator returning elements of type T." alt="" coords="5,108,207,148"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="21,5,191,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,74,109,108,103,108,103,74"/>
+<area shape="rect" id="Node000001" title="A generic iterator returning elements of type T." alt="" coords="455,20,656,60"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="237,13,407,67"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="421,37,454,37,454,43,421,43"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,5,189,75"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="203,37,237,37,237,43,203,43"/>
 </map>

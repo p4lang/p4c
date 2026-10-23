@@ -2317,19 +2317,6 @@ var hierarchy =
     ] ],
     [ "P4::Util::Detail::TupleHasher< index, Types >", "struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher.html", null ],
     [ "P4::Util::Detail::TupleHasher< 0, Types... >", "struct_p4_1_1_util_1_1_detail_1_1_tuple_hasher_3_010_00_01_types_8_8_8_01_4.html", null ],
-    [ "P4::Util::Enumerator< T >", "class_p4_1_1_util_1_1_enumerator.html", [
-      [ "P4::Util::ConcatEnumerator< T >", "class_p4_1_1_util_1_1_concat_enumerator.html", null ],
-      [ "P4::Util::EmptyEnumerator< T >", "class_p4_1_1_util_1_1_empty_enumerator.html", null ],
-      [ "P4::Util::FilterEnumerator< T, Filter >", "class_p4_1_1_util_1_1_filter_enumerator.html", null ],
-      [ "P4::Util::SingleEnumerator< T >", "class_p4_1_1_util_1_1_single_enumerator.html", null ]
-    ] ],
-    [ "P4::Util::Enumerator< S >", "class_p4_1_1_util_1_1_enumerator.html", [
-      [ "P4::Util::AsEnumerator< T, S >", "class_p4_1_1_util_1_1_as_enumerator.html", null ],
-      [ "P4::Util::MapEnumerator< T, S, Mapper >", "class_p4_1_1_util_1_1_map_enumerator.html", null ]
-    ] ],
-    [ "P4::Util::Enumerator< std::iterator_traits< Iter >::value_type >", "class_p4_1_1_util_1_1_enumerator.html", [
-      [ "P4::Util::IteratorEnumerator< Iter >", "class_p4_1_1_util_1_1_iterator_enumerator.html", null ]
-    ] ],
     [ "P4::Util::EnumeratorHandle< T >", "class_p4_1_1_util_1_1_enumerator_handle.html", null ],
     [ "P4::Util::Hash", "struct_p4_1_1_util_1_1_hash.html", null ],
     [ "P4::Util::Hasher< Key, Enable >", "struct_p4_1_1_util_1_1_hasher.html", null ],
@@ -4005,6 +3992,21 @@ var hierarchy =
     ] ],
     [ "std::enable_if", null, [
       [ "P4::RTTI::enable_if_has_rtti< T, R >", "struct_p4_1_1_r_t_t_i_1_1enable__if__has__rtti.html", null ]
+    ] ],
+    [ "std::enable_shared_from_this", null, [
+      [ "P4::Util::Enumerator< S >", "class_p4_1_1_util_1_1_enumerator.html", [
+        [ "P4::Util::AsEnumerator< T, S >", "class_p4_1_1_util_1_1_as_enumerator.html", null ],
+        [ "P4::Util::MapEnumerator< T, S, Mapper >", "class_p4_1_1_util_1_1_map_enumerator.html", null ]
+      ] ],
+      [ "P4::Util::Enumerator< std::iterator_traits< Iter >::value_type >", "class_p4_1_1_util_1_1_enumerator.html", [
+        [ "P4::Util::IteratorEnumerator< Iter >", "class_p4_1_1_util_1_1_iterator_enumerator.html", null ]
+      ] ],
+      [ "P4::Util::Enumerator< T >", "class_p4_1_1_util_1_1_enumerator.html", [
+        [ "P4::Util::ConcatEnumerator< T >", "class_p4_1_1_util_1_1_concat_enumerator.html", null ],
+        [ "P4::Util::EmptyEnumerator< T >", "class_p4_1_1_util_1_1_empty_enumerator.html", null ],
+        [ "P4::Util::FilterEnumerator< T, Filter >", "class_p4_1_1_util_1_1_filter_enumerator.html", null ],
+        [ "P4::Util::SingleEnumerator< T >", "class_p4_1_1_util_1_1_single_enumerator.html", null ]
+      ] ]
     ] ],
     [ "std::exception", null, [
       [ "P4::Util::P4CExceptionBase", "class_p4_1_1_util_1_1_p4_c_exception_base.html", [
