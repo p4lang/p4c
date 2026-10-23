@@ -53,7 +53,11 @@ jobs:
 
       - name: Run compiler tests without GC
         if: matrix.disable_gc == 'ON'
-        run: uv run ctest -R "^(p4/|err/|p14_to_16/|gtestp4c)" --output-on-failure
+        # The preceding root-run tests create CTest logs owned by root.
+        # Restore ownership so the remaining checks run as the runner user.
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" Testing
+          uv run ctest -R "^(p4/|err/|p14_to_16/|gtestp4c)" --output-on-failure
         working-directory: ./build
 
       - name: Measure Testgen memory without GC
