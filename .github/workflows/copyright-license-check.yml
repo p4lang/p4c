@@ -21,6 +21,7 @@ jobs:
       - name: Install uv and reuse
         run: |
           ./tools/install-uv.sh
+          uv venv
           uv pip install reuse
 
       - name: Get changed files
