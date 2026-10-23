@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2024 Intel Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 const bit<4> a = 0b0101;
 const int b = (int)a; // 5
 const bit<7> c = (bit<7>)b; // 5

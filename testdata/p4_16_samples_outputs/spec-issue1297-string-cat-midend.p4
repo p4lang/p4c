@@ -1,5 +1,6 @@
 #include <core.p4>
 
+
 extern void log(string msg);
 control c() {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
@@ -22,18 +23,18 @@ control c() {
         }
         default_action = NoAction_1();
     }
-    @hidden action specissue1297stringcat39() {
+    @hidden action specissue1297stringcat45() {
         log("simple msg");
         log("concat msg multiple lines");
     }
-    @hidden table tbl_specissue1297stringcat39 {
+    @hidden table tbl_specissue1297stringcat45 {
         actions = {
-            specissue1297stringcat39();
+            specissue1297stringcat45();
         }
-        const default_action = specissue1297stringcat39();
+        const default_action = specissue1297stringcat45();
     }
     apply {
-        tbl_specissue1297stringcat39.apply();
+        tbl_specissue1297stringcat45.apply();
         a_0.apply();
     }
 }

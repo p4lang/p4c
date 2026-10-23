@@ -1,4 +1,4 @@
-type-in-expr-lex0.p4(8):syntax error, unexpected >, expecting (
+type-in-expr-lex0.p4(14):syntax error, unexpected >, expecting (
     ctrl<H> val = ctrl(H >
                          ^
 [--Werror=overlimit] error: 1 errors encountered, aborting compilation
