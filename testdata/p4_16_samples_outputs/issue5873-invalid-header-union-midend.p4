@@ -65,7 +65,7 @@ control C(inout S s, in bit<8> k, out bool v) {
         }
         default_action = a_1();
     }
-    @hidden action issue5873invalidheaderunion29() {
+    @hidden action issue5873invalidheaderunion35() {
         bit<32> tmp;
         tmp = 32w0;
         if (s.hu_h1.isValid()) {
@@ -76,15 +76,15 @@ control C(inout S s, in bit<8> k, out bool v) {
         }
         v = tmp == 32w1;
     }
-    @hidden table tbl_issue5873invalidheaderunion29 {
+    @hidden table tbl_issue5873invalidheaderunion35 {
         actions = {
-            issue5873invalidheaderunion29();
+            issue5873invalidheaderunion35();
         }
-        const default_action = issue5873invalidheaderunion29();
+        const default_action = issue5873invalidheaderunion35();
     }
     apply {
         t1_0.apply();
-        tbl_issue5873invalidheaderunion29.apply();
+        tbl_issue5873invalidheaderunion35.apply();
         t2_0.apply();
     }
 }
