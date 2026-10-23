@@ -60,7 +60,7 @@ make
 * [z3](https://github.com/Z3Prover/z3) SMT solver to compute path constraints.
     * System installations require Z3 4.8.14 or newer (`-DUSE_PREINSTALLED_Z3=ON`).
     * With garbage collection enabled, system Z3 4.12 or newer requires glibc.
-      On other platforms, use the bundled Z3 or disable garbage collection.
+      On other platforms, disable garbage collection.
 
 These dependencies are automatically installed via CMakelist's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module.
 
