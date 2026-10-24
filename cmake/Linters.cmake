@@ -29,35 +29,6 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/tc/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "test/frameworks")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/tofino/third_party")
 
-#################### CPPLINT
-add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
-
-# Retrieve the global cpplint property.
-get_property(CPPLINT_FILES GLOBAL PROPERTY CPPLINT-files)
-
-if(DEFINED CPPLINT_FILES)
-  # Write the list to a file. We need to do this as too many files will reach
-  # the shell argument limit.
-  set(CPPLINT_TXT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
-  file(WRITE ${CPPLINT_TXT_FILE} "${CPPLINT_FILES}")
-  list(SORT CPPLINT_FILES)
-  set(CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
-  set(CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
-  # Pipe the file into cpplint.
-  add_custom_target(
-    cpplint
-    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS}
-    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint"
-  )
-  add_custom_target(
-    cpplint-quiet
-    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS} --quiet
-    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint quietly"
-  )
-endif()
-
 #################### CLANG-FORMAT
 add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
@@ -91,43 +62,66 @@ endif()
 
 #################### CLANG-TIDY
 
-# TODO: Add files here once clang-tidy is fast enough.
-# file(
-#   GLOB_RECURSE P4C_CLANG_TIDY_LINT_LIST  FOLLOW_SYMLINKS
-# )
-# add_clang_tidy_files(${P4C_SOURCE_DIR} "${P4C_CLANG_TIDY_LINT_LIST}")
+add_clang_tidy_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
 
-find_program(CLANG_TIDY_CMD clang-tidy)
+if(NOT FORMATTING_ONLY AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
+  # Prepare generated inputs without building/linking the compiler or backends.
+  # Sources also include generated lexer fragments and protobuf headers.
+  set(CLANG_TIDY_GENERATED)
+  get_all_targets(CLANG_TIDY_TARGETS ${P4C_SOURCE_DIR})
+  foreach(target IN LISTS CLANG_TIDY_TARGETS)
+    get_target_property(source_dir ${target} SOURCE_DIR)
+    if(NOT source_dir MATCHES "^${P4C_SOURCE_DIR}/" OR source_dir MATCHES "/_deps/")
+      continue()
+    endif()
+    get_target_property(sources ${target} SOURCES)
+    foreach(source IN LISTS sources)
+      if(source MATCHES "\\$<")
+        continue()
+      endif()
+      get_source_file_property(generated ${source} DIRECTORY ${source_dir} GENERATED)
+      if(generated)
+        list(APPEND CLANG_TIDY_GENERATED ${source})
+        get_source_file_property(extra_deps ${source} DIRECTORY ${source_dir} OBJECT_DEPENDS)
+        if(extra_deps)
+          list(APPEND CLANG_TIDY_GENERATED ${extra_deps})
+        endif()
+      endif()
+    endforeach()
+  endforeach()
+  list(REMOVE_DUPLICATES CLANG_TIDY_GENERATED)
+  add_custom_target(clang-tidy-prepare DEPENDS genIR ${CLANG_TIDY_GENERATED})
+  # These headers/fragments are consumed through includes, not SOURCES.
+  foreach(target IN ITEMS p4headers_h bfasm_yaml bfn_p4runtime-gen)
+    if(TARGET ${target})
+      add_dependencies(clang-tidy-prepare ${target})
+    endif()
+  endforeach()
 
-if(CLANG_TIDY_CMD)
-  # Retrieve the global clang-tidy property.
-  get_property(CLANG_TIDY_FILES GLOBAL PROPERTY CLANG_TIDY-files)
-
-  if (DEFINED CLANG_TIDY_FILES AND NOT CMAKE_EXPORT_COMPILE_COMMANDS)
-    message(WARNING "CMAKE_EXPORT_COMPILE_COMMANDS is not set ON, clang-tidy remains disabled.")
-  endif()
-  if(DEFINED CLANG_TIDY_FILES AND CMAKE_EXPORT_COMPILE_COMMANDS)
-
-    # Write the list to a file.
-    # We need to do this as too many files will reach the shell argument limit.
-    set(CLANG_TIDY_TXT_FILE ${P4C_BINARY_DIR}/clang_tidy_files.txt)
+  find_program(CLANG_TIDY_CMD NAMES clang-tidy clang-tidy-22)
+  if(CLANG_TIDY_CMD AND CMAKE_EXPORT_COMPILE_COMMANDS AND
+     NOT CMAKE_UNITY_BUILD AND NOT ENABLE_UNIFIED_COMPILATION)
+    get_property(CLANG_TIDY_FILES GLOBAL PROPERTY CLANG_TIDY-files)
     list(SORT CLANG_TIDY_FILES)
+    set(CLANG_TIDY_TXT_FILE ${P4C_BINARY_DIR}/clang_tidy_files.txt)
     file(WRITE ${CLANG_TIDY_TXT_FILE} "${CLANG_TIDY_FILES}")
-    add_custom_target(
-      clang-tidy
-      COMMAND xargs -a ${CLANG_TIDY_TXT_FILE} -r -d '\;' ${CLANG_TIDY_CMD} -p ${CMAKE_BINARY_DIR}
+    set(CLANG_TIDY_ARGS --build-dir ${P4C_BINARY_DIR} --clang-tidy ${CLANG_TIDY_CMD}
+        --file-list ${CLANG_TIDY_TXT_FILE})
+    add_custom_target(clang-tidy
+      COMMAND ${PYTHON_EXECUTABLE} ${P4C_SOURCE_DIR}/tools/run-clang-tidy.py ${CLANG_TIDY_ARGS}
+      DEPENDS clang-tidy-prepare
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Applying clang-tidy analysis."
-    )
-    add_custom_target(
-      clang-tidy-apply-fix-its
-      COMMAND xargs -a ${CLANG_TIDY_TXT_FILE} -r -d '\;' ${CLANG_TIDY_CMD} -p ${CMAKE_BINARY_DIR} --fix
+      COMMENT "Analyzing C++ translation units in parallel."
+      VERBATIM)
+    add_custom_target(clang-tidy-apply-fix-its
+      COMMAND ${PYTHON_EXECUTABLE} ${P4C_SOURCE_DIR}/tools/run-clang-tidy.py ${CLANG_TIDY_ARGS} -j 1 --fix
+      DEPENDS clang-tidy-prepare
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Applying clang-tidy fix-its."
-    )
+      COMMENT "Applying clang-tidy fixes serially to protect shared headers."
+      VERBATIM)
+  else()
+    message(STATUS "clang-tidy needs clang-tidy, CMAKE_EXPORT_COMPILE_COMMANDS=ON and a non-unity build.")
   endif()
-else()
-  message(WARNING "clang-tidy executable not found. Disabling clang-tidy checks. clang-tidy can be installed with \"pip3 install --user --upgrade clang-tidy\" or your distribution's package manager.")
 endif()
 
 
@@ -142,7 +136,6 @@ file(
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime/contrib")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/tofino/third_party")
-list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "tools/cpplint.py")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/tc/runtime")
 
 add_black_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")

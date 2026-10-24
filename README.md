@@ -505,7 +505,7 @@ Occasionally formatting commits are applied to P4C. These pollute the git histor
 
 The P4C code base is subject to a series of linter checks which are checked by CI. To avoid failing these checks and wasting unnecessary CI cycles and resources, you can install [git commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) by running
 ```./tools/install_git_hooks.sh```
-These commit hooks will run on every commit and check the files you are planning to commit with cpplint and clang-format.
+These commit hooks check staged C++ formatting with clang-format. Clang-tidy analysis runs in CI and can also be run locally as described in [tools/README.md](tools/README.md#clang-tidy).
 
 ## Docker
 
@@ -572,10 +572,10 @@ Again, `MY_IR_SRCS` is a list of file names with absolute path.
 
 #### Source files
 
-Sources (.cpp and .h) should be added to the cpplint and clang-format target using the following rule:
+Extension sources (.cpp and .h) should be added to the clang-tidy and clang-format targets using the following rules:
 
 ```
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
+add_clang_tidy_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 ```
 
@@ -586,17 +586,17 @@ add_black_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 
 The P4C CMakeLists.txt will use that name to figure the full path of the files to lint.
 
-clang-format, black, and isort need to be installed before the linter can be used. They can be installed with the following command:
+The pinned lint and formatting tools can be installed with:
 ```
-uv pip install "clang-format==18.1.8" "black==24.3.0" "isort==5.13.2"
+uv sync
 ```
 clang-format can be checked using `cmake --build build --target clang-format`. Complaints can be fixed by running `cmake --build build --target clang-format-fix-errors`. black and isort can be checked using `cmake --build build --target black` or `cmake --build build --target isort` respectively. Complaints can be fixed by running `cmake --build build --target black-fix-errors` or `cmake --build build --target isort-fix-errors`.
 
-cpplint, clang-format, and black/isort run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
+clang-tidy, clang-format, and black/isort run in P4C's continuous integration process. Clang-tidy enforces findings on changed lines and requires a non-unity compilation database; see [the analysis instructions](tools/README.md#clang-tidy). Install the fast formatting hook with:
 ```
 ./tools/install_git_hooks.sh
 ```
-clang-format, cpplint, and black/isort checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
+The hook checks staged C++ formatting without requiring a configured build. Python formatting and semantic C++ analysis run in CI. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
 
 #### Target
 

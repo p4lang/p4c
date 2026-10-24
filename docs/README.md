@@ -339,7 +339,7 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
 
 * Coding style is guided by the [following rules](CodingStandardPhilosophy.md).
 
-* We generally follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). This is partially enforced by `cpplint` and `clang-format` and their respective configuration files. We have customized Google's `cpplint.py` tool for our purposes.  The tool can be invoked with `make cpplint`. To be able to run `clang-format` on Ubuntu 20.04, install it with `pip3 install --user clang-format`. Do not use the Debian package. Both tools run in a git hook and as part of CI.
+* We generally follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). Formatting is enforced by `clang-format`; semantic checks use `clang-tidy` and `.clang-tidy`. Install the pinned tools with `uv sync`. The commit hook checks staged formatting, and CI runs both tools. See [the clang-tidy instructions](../tools/README.md#clang-tidy) for local analysis and coverage details.
 
 * Commenting Style is guided by the [following rules](#cc-documentation-comments-style-guide).
   

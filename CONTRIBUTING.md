@@ -40,8 +40,8 @@ We welcome and appreciate new contributions. Check out [git usage](docs/README.m
 * Code has to be reviewed before it is merged.
 * Make sure all tests pass when you send a pull request.
 * Participate in the code review process and address any feedback or comments.
-* Make sure `cmake --build . --target clang-format cpplint black isort
-` produces no errors.
+* Make sure `cmake --build build --target clang-format black isort` produces no errors.
+* Run [clang-tidy on your changes](tools/README.md#clang-tidy) using a non-unity analysis build.
 
 ### Finding a Task
 - Check out the issues that have specifically been [marked as being friendly to new contributors](https://github.com/p4lang/p4c/issues?q=is%3Aopen+is%3Aissue+label%3Agood-first-issue)

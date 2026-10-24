@@ -42,11 +42,12 @@ Two-level map of the repository (major folders only):
 
 
 Optional tools:
-- `cmake --build build --target clang-format cpplint black isort`: format/lint checks (`*-fix-errors` to fix).
+- `cmake --build build --target clang-format black isort`: formatting checks (`*-fix-errors` to fix).
+- `cmake --build build-tidy --target clang-tidy`: C++ analysis (non-unity build with compilation commands; see `tools/README.md`).
 
 ## Coding Style & Naming Conventions
 - Follow the P4 coding standard philosophy and `.clang-tidy`.
-- C++ uses `clang-format` and `cpplint`; Python uses `black` and `isort`.
+- C++ uses `clang-format` and `clang-tidy`; Python uses `black` and `isort`.
 - Prefer IR node casts via `node->to<Node>()`; use `node->checkedTo<Node>()` when `nullptr` is not acceptable. Avoid `dynamic_cast`.
 - Main C++ dependency is Abseil; do not introduce new Boost dependencies.
 

@@ -95,11 +95,6 @@ function(add_files dir filelist label)
   set_property(GLOBAL PROPERTY ${label}-files "${${label}_FILES}")
 endfunction(add_files)
 
-# Add files with the appropriate path to the list of cpplint-linted files.
-function(add_cpplint_files dir filelist)
-  add_files(${dir} "${filelist}" CPPLINT)
-endfunction(add_cpplint_files)
-
 # Add files with the appropriate path to the list of clang-format-linted files.
 function(add_clang_format_files dir filelist)
   add_files(${dir} "${filelist}" CLANG_FORMAT)
@@ -109,6 +104,12 @@ endfunction(add_clang_format_files)
 function(add_clang_tidy_files dir filelist)
   add_files(${dir} "${filelist}" CLANG_TIDY)
 endfunction(add_clang_tidy_files)
+
+# Compatibility for out-of-tree extensions. No cpplint executable or target is
+# retained: legacy registrations now contribute to clang-tidy's source list.
+function(add_cpplint_files dir filelist)
+  add_clang_tidy_files(${dir} "${filelist}")
+endfunction(add_cpplint_files)
 
 # Add files with the appropriate path to the list of black-linted files.
 function(add_black_files dir filelist)

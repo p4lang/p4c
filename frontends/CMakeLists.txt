@@ -142,6 +142,8 @@ set (FRONTEND_GEN_SOURCES ${FRONTEND_GEN_SOURCES} ${v1PARSER_GEN_SRCS})
 endif ()
 
 
+add_custom_target(frontend-parser-inputs DEPENDS ${FRONTEND_GEN_SOURCES})
+add_dependencies(frontend-parser-inputs mkp4dirs)
 add_library (frontend-parser-gen OBJECT ${FRONTEND_GEN_SOURCES})
 target_link_libraries (frontend-parser-gen
   # Make sure to also expose the compile flags associated with the ir library.
@@ -149,7 +151,7 @@ target_link_libraries (frontend-parser-gen
   # These libraries are exposed by a header.
   PUBLIC p4ctoolkit
 )
-add_dependencies (frontend-parser-gen mkp4dirs ir-generated)
+add_dependencies (frontend-parser-gen frontend-parser-inputs ir-generated)
 
 
 
@@ -160,7 +162,7 @@ set (FRONTEND_SOURCES
   )
 
 if (SUPPORT_P4_14)
-  add_dependencies (frontend-parser-gen mkv1dirs)
+  add_dependencies (frontend-parser-inputs mkv1dirs)
 
   set (V1_FRONTEND_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/parsers/parserDriver_v1.cpp

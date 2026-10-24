@@ -3,39 +3,32 @@
 # SPDX-License-Identifier: Apache-2.0
 
 ---
-Checks:
-'clang-diagnostic-*,
-clang-analyzer-*,
-modernize-*,
-performance-*,
-readability-*,
-bugprone-*,
-cppcoreguidelines-*,
-boost-*,
-hicpp-*,
-misc-*,
-llvm-*,
-google-*,
--modernize-use-trailing-return-type,
--misc-confusable-identifiers,
--readability-identifier-length,
--cppcoreguidelines-owning-memory,
--bugprone-easily-swappable-parameters,
--llvm-header-guard,
--misc-no-recursion'
+# Keep CI focused on correctness and ownership. Formatting belongs to clang-format;
+# broad modernization/style families substantially increase repeated IR-header work.
+# Analyzer checks must be explicit: LLVM 22 removed them from the default set.
+Checks: >-
+  -*,
+  clang-diagnostic-*,
+  clang-analyzer-core.*,
+  clang-analyzer-cplusplus.*,
+  clang-analyzer-unix.Malloc*,
+  clang-analyzer-unix.MismatchedDeallocator,
+  clang-analyzer-unix.cstring.*,
+  cppcoreguidelines-owning-memory,
+  bugprone-use-after-move,
+  bugprone-dangling-handle,
+  bugprone-unused-raii,
+  bugprone-unchecked-optional-access,
+  bugprone-incorrect-enable-shared-from-this,
+  bugprone-return-const-ref-from-parameter,
+  bugprone-suspicious-realloc-usage,
+  bugprone-inaccurate-erase,
+  bugprone-sizeof-expression,
+  bugprone-sizeof-container,
+  bugprone-stringview-nullptr,
+  misc-uniqueptr-reset-release
 FormatStyle: file
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 UseColor: true
-CheckOptions:
-  - { key: misc-const-correctness.AnalyzeValues,              value: false }
-  - { key: readability-identifier-naming.NamespaceCase,       value: CamelCase }
-  - { key: readability-identifier-naming.ClassCase,           value: CamelCase  }
-  - { key: readability-identifier-naming.StructCase,          value: CamelCase  }
-  - { key: readability-identifier-naming.FunctionCase,        value: camelBack }
-  - { key: readability-identifier-naming.VariableCase,        value: camelBack }
-  - { key: readability-identifier-naming.GlobalConstantCase,  value: UPPER_CASE }
-  - { key: readability-identifier-naming.StaticConstantCase,  value: UPPER_CASE }
-  - { key: readability-identifier-naming.StaticVariableCase,  value: UPPER_CASE }
-  - { key: cppcoreguidelines-avoid-do-while.IgnoreMacros,     value: true }
 ...

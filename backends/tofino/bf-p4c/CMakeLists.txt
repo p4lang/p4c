@@ -838,9 +838,14 @@ add_custom_command(
           --cpp_out ${P4C_BINARY_DIR}/control-plane
           --python_out ${P4C_BINARY_DIR}/control-plane
           ${BFN_P4RUNTIME_INFO_PROTO}
-  DEPENDS ${BFN_P4RUNTIME_INFO_PROTO}
+  DEPENDS ${BFN_P4RUNTIME_INFO_PROTO} ${Protobuf_PROTOC_EXECUTABLE}
   COMMENT "Generating protobuf files for p4info."
   )
+# Own the generation rule separately from its consumers so analysis can prepare
+# headers without first compiling the frontend and control-plane libraries.
+add_custom_target(bfn_p4runtime-gen
+  DEPENDS ${BFN_P4RUNTIME_INFO_GEN_SRCS} ${BFN_P4RUNTIME_INFO_GEN_HDRS})
+add_dependencies(bfn_p4runtime-gen barefootdir)
 if(BUILD_STATIC_BFP4C_LIBS)
   add_library(bfn_p4runtime STATIC ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 else()
@@ -848,7 +853,7 @@ else()
 endif()
 target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefetch)
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
-add_dependencies(bfn_p4runtime barefootdir controlplane)
+add_dependencies(bfn_p4runtime bfn_p4runtime-gen controlplane)
 
 # # ############## Testing
 
@@ -1058,5 +1063,3 @@ if (ENABLE_GTESTS)
   # set_tests_properties(test_p4c_driver PROPERTIES LABELS lint)
 
 endif(ENABLE_GTESTS)
-
-

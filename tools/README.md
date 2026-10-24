@@ -47,17 +47,70 @@ make clang-format-fix-errors
 ```
 in the build directory.
 
-## cpplint
-cpplint contains additional semantic checks that are enforced. These are configured in `CPPLINT.cfg`
-
-To check whether the code confirms to the correct cpplint standard you can run
-```
-make cpplint
-```
-in the build directory.
-
 ## clang-tidy
-This repository also contains configurations for clang-tidy, which are listed in `.clang-tidy` file. These recommendations are not enforced yet.
+
+C++ semantic analysis uses the pinned clang-tidy 22.1.0 and `.clang-tidy`.
+LLVM 22 avoids analyzing system-header code by default. The runner analyzes
+translation units in parallel, using each file's actual compilation command.
+
+Prepare a **non-unity** build with CMake 3.18 or newer (enable the backends you
+intend to analyze):
+
+```sh
+uv run cmake -S . -B build-tidy -G Ninja \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  -DCMAKE_UNITY_BUILD=OFF -DENABLE_UNIFIED_COMPILATION=OFF
+uv run cmake --build build-tidy --target clang-tidy-prepare -j4
+uv run python tools/run-clang-tidy.py --build-dir build-tidy --base origin/main -j4
+```
+
+The preparation target builds generators and their inputs, not the compiler or
+backend executables. Run it again after changing IR definitions, parser grammars,
+or protobuf inputs. Analysis fails if a changed source lacks a compilation
+command: enable its backend instead of silently dropping coverage.
+
+### CI and existing findings
+
+CI analyzes whole affected translation units and enforces diagnostics on **new
+or modified lines**, including changed headers. Existing diagnostics outside
+those lines are filtered so adoption does not require a repository-wide cleanup.
+This is a location-based filter, not a semantic baseline: a change can cause a
+diagnostic at an unchanged line, which requires a full audit to detect.
+
+Source-only changes select those translation units. Header, IR-definition,
+protobuf and parser changes conservatively select every translation unit in each configured
+profile. Generated parser/IR translation units are included to cover diagnostics
+originating in grammars and `.def` files. Tofino's profile includes its Testgen
+target as well as the backend. The portable and Tofino profiles each
+prepare inputs once, then share generated files and dependency headers with
+eight disjoint shards. Each shard uses two workers and a 30-minute job budget.
+Every translation unit has a
+180-second limit; timeouts and compiler errors fail rather than pass as clean
+analysis. Preparation also has a 30-minute limit; the end-to-end time includes
+both stages, so cold-cache or unusually broad changes can still exceed the
+30-minute target. Timing profiles and diagnostics are uploaded.
+
+No C++ changes means no analysis is necessary. A `.clang-tidy`-only change does
+not retroactively enforce all existing findings; validate such changes with a
+full audit before proposing them.
+
+### Full audits and local commits
+
+```sh
+# Report all findings in the configured source set, without changed-line filtering.
+uv run cmake --build build-tidy --target clang-tidy
+# Analyze staged changes; partial staging of C++ files is rejected.
+uv run python tools/run-clang-tidy.py --build-dir build-tidy --staged
+# Measure individual check costs and save per-file results.
+uv run python tools/run-clang-tidy.py --build-dir build-tidy --profile --report tidy.json
+```
+
+Full audits report existing warnings; parsing errors and timeouts still fail.
+`clang-tidy-apply-fix-its` applies fixes serially to avoid concurrent edits of
+shared headers. The commit hook checks only formatting so commits do not require
+a configured build. The old `add_cpplint_files` CMake helper is a compatibility
+alias for extension source registration; the cpplint executable, configuration,
+and build targets have been removed.
 
 ## check-git-submodules
 A helper script that checks that each of the submodules in the repository remains on the branch that it is tracking. The intention is to avoid accidentally switching to a non-stable or outdated branch for a particular dependency.

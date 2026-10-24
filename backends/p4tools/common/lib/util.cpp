@@ -5,7 +5,7 @@
 #include "backends/p4tools/common/lib/util.h"
 
 #include <bit>
-#include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
+#include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <iomanip>
