@@ -37,6 +37,10 @@ jobs:
       - name: Check copyright and license annotations in changed files
         shell: bash
         run: |
+          echo "Contents of $HOME/out-debug.txt:"
+          echo "----------------------------------------"
+          cat $HOME/out-debug.txt
+          echo "----------------------------------------"
           ec=0
           uvx reuse lint-file ${{ steps.changes.outputs.changed }} || ec=$?
           if [ $ec -ne 0 ]; then
