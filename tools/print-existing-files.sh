@@ -11,8 +11,9 @@ for j in $*
 do
     if [ -e "$j" ]
     then
+	1>&2 echo "File exists: $j"
         echo "$j"
     else
-        echo "$j"
+	1>&2 echo "NO file: $j"
     fi
 done
