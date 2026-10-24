@@ -33,10 +33,6 @@ jobs:
         run: |
           git fetch origin ${{ github.base_ref }}
           echo "changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | xargs ./tools/print-existing-files.sh | paste -s -d ' ' -)" >> $GITHUB_OUTPUT
-          echo "Contents of $HOME/out-debug.txt:"
-          echo "----------------------------------------"
-          cat $HOME/out-debug.txt
-          echo "----------------------------------------"
 
       - name: Check copyright and license annotations in changed files
         shell: bash
