@@ -100,7 +100,8 @@ Every translation unit has a 900-second limit to accommodate the generated IR
 implementation; timeouts and compiler errors fail rather than pass as clean
 analysis. Preparation also has a 30-minute limit; the end-to-end time includes
 both stages, so cold-cache or unusually broad changes can still exceed the
-30-minute target. Timing profiles and diagnostics are uploaded.
+30-minute target. Per-file timings and diagnostics are uploaded. Per-check
+profiling is opt-in with `--profile` to avoid its overhead in routine CI.
 
 No C++ changes means no analysis is necessary. A `.clang-tidy`-only change does
 not retroactively enforce all existing findings; validate such changes with a

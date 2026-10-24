@@ -209,7 +209,7 @@ jobs:
           uv run python tools/run-clang-tidy.py \
             --build-dir build-tidy --base "$BASE_SHA" \
             --shard "$SHARD" --shards 8 -j 4 --timeout 900 \
-            --profile --report build-tidy/clang-tidy-report.json "${scope[@]}"
+            --report build-tidy/clang-tidy-report.json "${scope[@]}"
 
       - name: Upload analysis timings and diagnostics
         if: always() && steps.scope.outputs.needed == 'true'
