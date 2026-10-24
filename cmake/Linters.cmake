@@ -92,7 +92,7 @@ if(NOT FORMATTING_ONLY AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.18)
   list(REMOVE_DUPLICATES CLANG_TIDY_GENERATED)
   add_custom_target(clang-tidy-prepare DEPENDS genIR ${CLANG_TIDY_GENERATED})
   # These headers/fragments are consumed through includes, not SOURCES.
-  foreach(target IN ITEMS p4headers_h bfasm_yaml bfn_p4runtime-gen)
+  foreach(target IN ITEMS p4headers_h bfasm_yaml bfn_p4runtime-gen genLogging)
     if(TARGET ${target})
       add_dependencies(clang-tidy-prepare ${target})
     endif()

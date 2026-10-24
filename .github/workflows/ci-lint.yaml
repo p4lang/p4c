@@ -102,6 +102,12 @@ jobs:
         run: |
           if [ "$PROFILE" = tofino ]; then
             options=(-DENABLE_TOFINO=ON -DENABLE_TEST_TOOLS=ON)
+            # Ubuntu's RapidJSON 1.1.0 headers contain an invalid assignment to
+            # a const member, rejected by Clang 22. Use fixed, pinned headers.
+            mkdir -p build-tidy/_deps/rapidjson-src
+            curl -fsSL https://github.com/Tencent/rapidjson/archive/24b5e7a8b27f42fa16b96fc70aade9106cf7102f.tar.gz | \
+              tar -xz --strip-components=1 -C build-tidy/_deps/rapidjson-src
+            options+=("-DCMAKE_CXX_FLAGS=-isystem $PWD/build-tidy/_deps/rapidjson-src/include")
           else
             options=(-DENABLE_TOFINO=OFF -DENABLE_TEST_TOOLS=ON)
           fi
@@ -115,7 +121,9 @@ jobs:
 
       - name: Generate analysis inputs
         if: steps.scope.outputs.needed == 'true'
-        run: uv run cmake --build build-tidy --target clang-tidy-prepare -j 4
+        run: >-
+          uv run --with pyyaml==6.0.3 --with jsl==0.2.4 --with jsonschema==4.23.0
+          cmake --build build-tidy --target clang-tidy-prepare -j 4
 
       - name: Save generator compilation cache
         if: steps.scope.outputs.needed == 'true'
@@ -200,7 +208,7 @@ jobs:
           uv run clang-tidy --version
           uv run python tools/run-clang-tidy.py \
             --build-dir build-tidy --base "$BASE_SHA" \
-            --shard "$SHARD" --shards 8 -j 2 --timeout 180 \
+            --shard "$SHARD" --shards 8 -j 4 --timeout 900 \
             --profile --report build-tidy/clang-tidy-report.json "${scope[@]}"
 
       - name: Upload analysis timings and diagnostics

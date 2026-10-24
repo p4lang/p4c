@@ -68,6 +68,18 @@ The preparation target builds generators and their inputs, not the compiler or
 backend executables. Run it again after changing IR definitions, parser grammars,
 or protobuf inputs. Analysis fails if a changed source lacks a compilation
 command: enable its backend instead of silently dropping coverage.
+For Tofino, install `rapidjson-dev` (including its pkg-config metadata) and prepare
+with the schema generators' Python dependencies:
+
+```sh
+uv run --with pyyaml==6.0.3 --with jsl==0.2.4 --with jsonschema==4.23.0 \
+  cmake --build build-tidy --target clang-tidy-prepare -j4
+```
+
+Clang 22 rejects an invalid const-member assignment in Ubuntu 24.04's RapidJSON
+headers. CI uses fixed headers pinned to RapidJSON commit
+`24b5e7a8b27f42fa16b96fc70aade9106cf7102f`, adding their include directory via
+`-DCMAKE_CXX_FLAGS="-isystem /absolute/path/to/rapidjson/include"` at configuration.
 
 ### CI and existing findings
 
@@ -83,9 +95,9 @@ profile. Generated parser/IR translation units are included to cover diagnostics
 originating in grammars and `.def` files. Tofino's profile includes its Testgen
 target as well as the backend. The portable and Tofino profiles each
 prepare inputs once, then share generated files and dependency headers with
-eight disjoint shards. Each shard uses two workers and a 30-minute job budget.
-Every translation unit has a
-180-second limit; timeouts and compiler errors fail rather than pass as clean
+eight disjoint shards. Each shard uses four workers and a 30-minute job budget.
+Every translation unit has a 900-second limit to accommodate the generated IR
+implementation; timeouts and compiler errors fail rather than pass as clean
 analysis. Preparation also has a 30-minute limit; the end-to-end time includes
 both stages, so cold-cache or unusually broad changes can still exceed the
 30-minute target. Timing profiles and diagnostics are uploaded.
