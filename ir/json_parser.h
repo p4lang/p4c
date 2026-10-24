@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef IR_JSON_PARSER_H_
 #define IR_JSON_PARSER_H_
 
@@ -35,7 +40,7 @@ class JsonData : public ICastable {
         error(const std::string_view what, std::streamoff l)
             : runtime_error(std::string(what)), loc(l) {}
         error(const std::string_view what, const JsonData *d)
-            : runtime_error(std::string(what)), data(d) {}
+            : runtime_error(std::string(what)), data(d), loc(data->start) {}
     };
 
     class LocationInfo {
