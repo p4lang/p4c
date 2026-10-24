@@ -165,7 +165,13 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::ArrayExpression *expression) override {
-        rw.emplace(expression, new SetOfLocations());
+        const SetOfLocations *result = new SetOfLocations();
+        for (auto e : expression->components) {
+            auto s = ::P4::get(rw, e);
+            CHECK_NULL(s);
+            result = result->join(s);
+        }
+        rw.emplace(expression, result);
     }
 
     void postorder(const IR::TypeNameExpression *expression) override {
