@@ -1,9 +1,5 @@
 #! /bin/bash
 
-# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
-#
-# SPDX-License-Identifier: Apache-2.0
-
 # Among all of the command line arguments, print only those which name
 # files that exist.
 
