@@ -341,21 +341,21 @@ struct AllocateParserState : public ParserTransform {
         };
 
         template <typename T>
-        static bool out_of_buffer(const T *p) {
+        static bool out_of_buffer(T p) {
             OutOfBuffer oob;
             p->apply(oob);
             return oob.lo;
         }
 
         template <typename T>
-        static bool straddles_buffer(const T *p) {
+        static bool straddles_buffer(T p) {
             OutOfBuffer oob;
             p->apply(oob);
             return !oob.lo && oob.hi;
         }
 
         template <typename T>
-        static bool within_buffer(const T *p) {
+        static bool within_buffer(T p) {
             OutOfBuffer oob;
             p->apply(oob);
             return !oob.hi;
@@ -1094,7 +1094,7 @@ struct AllocateParserState : public ParserTransform {
                     // However in this case the subtract of b in the first state does not actually
                     // happen since it is not really extracted there
                     if (auto add = s->to<IR::BFN::ChecksumAdd>()) {
-                        const auto *src = add->source;
+                        auto src = add->source;
                         CHECK_NULL(src);
                         if (src->range.lo >= compute_max_shift_in_bits()) {
                             spilled_statements.push_back(s);
@@ -1102,7 +1102,7 @@ struct AllocateParserState : public ParserTransform {
                             LOG3("spill checksum add (pos > shift_amt)");
                         }
                     } else if (auto sub = s->to<IR::BFN::ChecksumSubtract>()) {
-                        const auto *src = sub->source;
+                        auto src = sub->source;
                         CHECK_NULL(src);
                         if (src->range.lo >= compute_max_shift_in_bits()) {
                             spilled_statements.push_back(s);
@@ -1189,7 +1189,7 @@ struct AllocateParserState : public ParserTransform {
             bool select_changed_shift = false;
             do {
                 select_changed_shift = false;
-                for (auto *select : state->selects) {
+                for (auto select : state->selects) {
                     if (auto *source = select->source->to<IR::BFN::SavedRVal>()) {
                         if (auto *rval = source->source->to<IR::BFN::InputBufferRVal>()) {
                             if (rval->range.lo < shift &&

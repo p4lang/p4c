@@ -91,9 +91,9 @@ class Z3SolverSatTests : public P4TestgenBmv2Test {
         }
 
         // Extract the binary operation from the P4Program
-        const auto *decl = test->getProgram().getDeclsByName("mau"_cs)->single();
+        auto decl = test->getProgram().getDeclsByName("mau"_cs)->single();
         const auto *control = decl->to<IR::P4Control>();
-        for (const auto *st : control->body->components) {
+        for (auto st : control->body->components) {
             if (const auto *as = st->to<IR::IfStatement>()) {
                 expression = as->condition;
                 if (const auto *op = as->ifTrue->to<IR::AssignmentStatement>()) {
@@ -102,8 +102,8 @@ class Z3SolverSatTests : public P4TestgenBmv2Test {
             }
         }
     }
-    const IR::Expression *expression = nullptr;
-    const IR::AssignmentStatement *variableValue = nullptr;
+    IR::Ptr<IR::Expression> expression = nullptr;
+    IR::Ptr<IR::AssignmentStatement> variableValue = nullptr;
     std::string condition;
     std::string equation;
 };
@@ -120,7 +120,7 @@ class SaturationTransform : public Transform {
     const IR::Node *postorder(IR::SubSat *sub) override { return SaturationElim::eliminate(sub); }
 };
 
-void test(const IR::Expression *expression, const IR::AssignmentStatement *variableValue) {
+void test(IR::Ptr<IR::Expression> expression, IR::Ptr<IR::AssignmentStatement> variableValue) {
     // checking initial data
     ASSERT_TRUE(expression);
     ASSERT_TRUE(variableValue);
@@ -145,7 +145,7 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
 
     ASSERT_EQ(symbolMap.count(variableValue->left->checkedTo<IR::SymbolicVariable>()), 1U);
 
-    const auto *value = symbolMap.at(variableValue->left->checkedTo<IR::SymbolicVariable>());
+    auto value = symbolMap.at(variableValue->left->checkedTo<IR::SymbolicVariable>());
 
     ASSERT_TRUE(variableValue->right->is<IR::Constant>());
     ASSERT_TRUE(value->is<IR::Constant>());
@@ -257,19 +257,19 @@ TEST_F(Z3SolverSubSat06, SubSat06) { test(expression, variableValue); }
 
 TEST(SubSatExhaustive, AllSignedFourBitOperands) {
     constexpr int kOperandWidth = 4;
-    const auto *bitType = IR::Type_Bits::get(kOperandWidth, true);
+    const auto bitType = IR::Type_Bits::get(kOperandWidth, true);
     const big_int minValue = IR::getMinBvVal(bitType);
     const big_int maxValue = IR::getMaxBvVal(bitType);
     Z3Solver solver;
 
     for (big_int left = minValue; left <= maxValue; ++left) {
         for (big_int right = minValue; right <= maxValue; ++right) {
-            const auto *operation = new IR::SubSat(bitType, IR::Constant::get(bitType, left),
-                                                   IR::Constant::get(bitType, right));
-            const auto *result = SaturationElim::eliminate(operation);
+            IR::Ptr<IR::SubSat> operation = new IR::SubSat(
+                bitType, IR::Constant::get(bitType, left), IR::Constant::get(bitType, right));
+            IR::Ptr<IR::Mux> result = SaturationElim::eliminate(operation);
             const big_int difference = left - right;
             const big_int expectedValue = std::max(minValue, std::min(maxValue, difference));
-            const auto *expected = IR::Constant::get(bitType, expectedValue);
+            const auto expected = IR::Constant::get(bitType, expectedValue);
             ASSERT_EQ(solver.checkSat({new IR::Equ(result, expected)}), true)
                 << "left=" << left << ", right=" << right;
         }

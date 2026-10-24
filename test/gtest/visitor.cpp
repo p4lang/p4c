@@ -24,7 +24,7 @@ struct MultiVisitInspector : public Inspector, virtual public P4::ResolutionCont
     void loop_revisit(const IR::ParserState *) override {}
 
     void visit_def(const IR::PathExpression *pe) {
-        auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+        auto d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
         if (auto *ps = d->to<IR::ParserState>()) {
             visit(ps, "transition");
@@ -54,7 +54,7 @@ struct MultiVisitModifier : public Modifier,
     void loop_revisit(const IR::ParserState *) override {}
 
     void visit_def(const IR::PathExpression *pe) {
-        auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+        auto d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
         if (auto *ps = d->to<IR::ParserState>()) {
             visit(ps, "transition");
@@ -130,7 +130,7 @@ std::string getMultiVisitLoopSource() {
 // This test fails when Visitor::Tracker::try_start does _not_ reset done on a previously-visited
 // node
 TEST_F(P4CVisitor, MultiVisitInspectorLoop) {
-    auto *program = P4::parseP4String(getMultiVisitLoopSource());
+    auto program = P4::parseP4String(getMultiVisitLoopSource());
     ASSERT_TRUE(program != nullptr);
 
     program = program->apply(MultiVisitInspector());
@@ -140,11 +140,112 @@ TEST_F(P4CVisitor, MultiVisitInspectorLoop) {
 // This test fails when Visitor::ChangeTracker::try_start does _not_ reset visit_in_progress on a
 // previously-visited node
 TEST_F(P4CVisitor, MultiVisitModifierLoop) {
-    auto *program = P4::parseP4String(getMultiVisitLoopSource());
+    auto program = P4::parseP4String(getMultiVisitLoopSource());
     ASSERT_TRUE(program != nullptr);
 
     program = program->apply(MultiVisitModifier());
     ASSERT_TRUE(program != nullptr);
 }
+
+#if !HAVE_LIBGC
+namespace {
+class TrackedVisitorConstant final : public IR::Constant {
+    int &live;
+
+ public:
+    TrackedVisitorConstant(int &live, int value) : IR::Constant(value), live(live) { ++live; }
+    TrackedVisitorConstant(const TrackedVisitorConstant &other)
+        : IR::Constant(other), live(other.live) {
+        ++live;
+    }
+    ~TrackedVisitorConstant() override { --live; }
+    TrackedVisitorConstant *clone() const override { return new TrackedVisitorConstant(*this); }
+};
+
+class ReplaceTrackedConstant : public Transform {
+    int &live;
+
+ public:
+    explicit ReplaceTrackedConstant(int &live) : live(live) {}
+    const IR::Node *preorder(IR::Constant *constant) override {
+        return constant->value == 0 ? new TrackedVisitorConstant(live, 1) : constant;
+    }
+};
+}  // namespace
+
+TEST_F(P4CVisitor, PreorderReplacementReleasesExtraClone) {
+    int live = 0;
+    {
+        IR::Ptr<IR::Constant> original = new TrackedVisitorConstant(live, 0);
+        ReplaceTrackedConstant transform(live);
+        auto result = original->apply(transform);
+        EXPECT_EQ(result->checkedTo<IR::Constant>()->value, 1);
+        EXPECT_EQ(original->value, 0);
+        EXPECT_EQ(live, 2);
+    }
+    EXPECT_EQ(live, 0);
+}
+
+TEST_F(P4CVisitor, ControlFlowClonesReleaseSharedAnalysisState) {
+    struct TrackedFlow : Inspector, ControlFlowVisitor {
+        int &live;
+        explicit TrackedFlow(int &live) : live(live) { ++live; }
+        TrackedFlow(const TrackedFlow &other)
+            : Visitor(other), Inspector(other), ControlFlowVisitor(other), live(other.live) {
+            ++live;
+        }
+        ~TrackedFlow() override { --live; }
+        TrackedFlow *clone() const override { return new TrackedFlow(*this); }
+        void flow_merge(Visitor &) override {}
+        void flow_copy(ControlFlowVisitor &) override {}
+    };
+    int live = 0;
+    {
+        TrackedFlow flow(live);
+        flow.flow_merge_global_to("saved"_cs);
+        EXPECT_EQ(live, 2);
+        {
+            ControlFlowVisitor::SaveGlobal save(flow, "saved"_cs);
+            flow.flow_merge_global_to("saved"_cs);
+            EXPECT_EQ(live, 3);
+        }
+        EXPECT_EQ(live, 2);
+        flow.clear_globals();
+        EXPECT_EQ(live, 1);
+        IR::Ptr<IR::IfStatement> branch = new IR::IfStatement(
+            new IR::BoolLiteral(true), new IR::EmptyStatement(), new IR::EmptyStatement());
+        branch->apply(flow);
+        EXPECT_EQ(live, 1);
+        flow.flow_merge_global_to("retained-until-destruction"_cs);
+    }
+    EXPECT_EQ(live, 0);
+}
+
+TEST_F(P4CVisitor, PassManagersShareOwnedPassesAndBorrowStackPasses) {
+    struct TrackedPass : Inspector {
+        int &live;
+        explicit TrackedPass(int &live) : live(live) {
+            ++live;
+            setName("TrackedPass");
+        }
+        ~TrackedPass() override { --live; }
+    };
+    int live = 0;
+    {
+        TrackedPass stackPass(live);
+        {
+            PassManager first({new TrackedPass(live), &stackPass});
+            {
+                PassManager second(first);
+                first.removePasses({"TrackedPass"_cs});
+                EXPECT_EQ(live, 2);
+            }
+            EXPECT_EQ(live, 1);
+        }
+        EXPECT_EQ(live, 1);
+    }
+    EXPECT_EQ(live, 0);
+}
+#endif
 
 }  // namespace P4::Test

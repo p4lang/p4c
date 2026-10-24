@@ -35,9 +35,9 @@ class AssertsParser : public Transform {
     /// an IR::Expression. Internally calls all other necessary functions, for example
     /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
     /// constraint
-    static std::vector<const IR::Expression *> genIRStructs(cstring tableName,
-                                                            cstring restrictionString,
-                                                            const IdenitifierTypeMap &typeMap);
+    static std::vector<IR::Ptr<IR::Expression>> genIRStructs(cstring tableName,
+                                                             cstring restrictionString,
+                                                             const IdenitifierTypeMap &typeMap);
     const IR::Node *postorder(IR::P4Action *actionContext) override;
     const IR::Node *postorder(IR::P4Table *tableContext) override;
 };

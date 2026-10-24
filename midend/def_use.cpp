@@ -33,7 +33,11 @@ int ComputeDefUse::uid_ctr = 0;
 const hvec_set<const ComputeDefUse::loc_t *> ComputeDefUse::empty;
 
 ComputeDefUse::ComputeDefUse()
-    : ResolutionContext(true), cached_locs(*new std::unordered_set<loc_t>), defuse(*new defuse_t) {
+    : ResolutionContext(true),
+      cachedLocsOwner(std::make_shared<std::unordered_set<loc_t>>()),
+      cached_locs(*cachedLocsOwner),
+      defuseOwner(std::make_shared<defuse_t>()),
+      defuse(*defuseOwner) {
     joinFlows = true;
     visitDagOnce = false;
 }
@@ -181,7 +185,7 @@ class ComputeDefUse::SetupJoinPoints : public ControlFlowVisitor::SetupJoinPoint
     void revisit(const IR::Node *) override {}
     bool preorder(const IR::PathExpression *pe) override {
         if (pe->type->is<IR::Type_State>()) {
-            auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+            const IR::IDeclaration *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
             BUG_CHECK(d, "failed to resolve %s", pe);
             auto ps = d->to<IR::ParserState>();
             BUG_CHECK(ps, "%s is not a parser state", d);
@@ -314,14 +318,14 @@ bool ComputeDefUse::preorder(const IR::P4Control *c) {
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse" << uid << "(P4Control " << c->name << ")" << indent);
     bool is_type_declaration = !c->getTypeParameters()->empty();
-    for (auto *p : c->getApplyParameters()->parameters)
+    for (const IR::Parameter *p : c->getApplyParameters()->parameters)
         if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut) {
             def_info[p].defs.insert(getLoc(p));
             // Assume that all components of input parameters are live: we don't currently
             // propagate liveness innformation across parser/control block boundaries.
             if (!is_type_declaration) {
                 if (auto *tn = p->type->to<IR::Type_Name>()) {
-                    auto *d = resolveUnique(tn->path->name, P4::ResolutionType::Any);
+                    auto d = resolveUnique(tn->path->name, P4::ResolutionType::Any);
                     if (auto *type = d->to<IR::Type>()) {
                         set_live_from_type(def_info[p], type);
                     }
@@ -330,7 +334,7 @@ bool ComputeDefUse::preorder(const IR::P4Control *c) {
         }
     state = NORMAL;
     visit(c->body, "body");  // just visit the body; tables/actions will be visited when applied
-    for (auto *p : c->getApplyParameters()->parameters)
+    for (const IR::Parameter *p : c->getApplyParameters()->parameters)
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut)
             add_uses(getLoc(p), def_info[p]);
     def_info.clear();
@@ -353,7 +357,7 @@ bool ComputeDefUse::preorder(const IR::P4Table *tbl) {
 
 bool ComputeDefUse::preorder(const IR::P4Action *act) {
     if (state == SKIPPING) return false;
-    for (auto *p : *act->parameters) def_info[p].defs.insert(getLoc(p));
+    for (const IR::Parameter *p : *act->parameters) def_info[p].defs.insert(getLoc(p));
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse" << uid << "(P4Action " << act->name << ")" << indent);
     visit(act->body, "body");
@@ -365,7 +369,7 @@ bool ComputeDefUse::preorder(const IR::Function *fn) {
     LOG5("ComputeDefUse" << uid << "(Function " << fn->name << ")" << indent);
     auto oldstate = state;
     if (state == SKIPPING) state = NORMAL;
-    for (auto *p : *fn->type->parameters) def_info[p].defs.insert(getLoc(p));
+    for (const IR::Parameter *p : *fn->type->parameters) def_info[p].defs.insert(getLoc(p));
     visit(fn->body, "body");
     state = oldstate;
     return false;
@@ -375,7 +379,7 @@ bool ComputeDefUse::preorder(const IR::P4Parser *p) {
     BUG_CHECK(state == SKIPPING, "Nested %s not supported in ComputeDefUse", p);
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse" << uid << "(P4Parser " << p->name << ")" << indent);
-    for (auto *a : p->getApplyParameters()->parameters)
+    for (const IR::Parameter *a : p->getApplyParameters()->parameters)
         if (a->direction == IR::Direction::In || a->direction == IR::Direction::InOut)
             def_info[a].defs.insert(getLoc(a));
     state = NORMAL;
@@ -384,7 +388,7 @@ bool ComputeDefUse::preorder(const IR::P4Parser *p) {
     } else {
         BUG("No start state in %s", p);
     }
-    for (auto *a : p->getApplyParameters()->parameters)
+    for (const IR::Parameter *a : p->getApplyParameters()->parameters)
         if (a->direction == IR::Direction::Out || a->direction == IR::Direction::InOut)
             add_uses(getLoc(a), def_info[a]);
     def_info.clear();
@@ -552,7 +556,7 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
             // Before updating write information for a particular field,
             // propagate struct liveness to all of the fields
             if (di.live[fi]) {
-                for (auto *sf : str->fields) {
+                for (const IR::StructField *sf : str->fields) {
                     if (!di.fields.count(sf->name)) {
                         set_live_from_type(di.fields[sf->name], sf->type);
                         di.fields[sf->name].defs = di.defs;
@@ -642,7 +646,7 @@ bool ComputeDefUse::preorder(const IR::PathExpression *pe) {
     LOG6("ComputeDefUse" << uid << "(PathExpression " << *pe << '<' << pe->id << '>'
                          << LogAbbrev(pe->srcInfo) << ")" << indent);
     if (pe->type->is<IR::Type_State>()) {
-        auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+        const IR::IDeclaration *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
         BUG_CHECK(d, "failed to resolve %s", pe);
         auto ps = d->to<IR::ParserState>();
         BUG_CHECK(ps, "%s is not a parser state", d);
@@ -650,7 +654,7 @@ bool ComputeDefUse::preorder(const IR::PathExpression *pe) {
         return false;
     }
     if (state == SKIPPING) return false;
-    auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
+    const IR::IDeclaration *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
     BUG_CHECK(d, "failed to resolve %s", pe);
     if (isRead() && state != WRITE_ONLY) do_read(def_info[d], pe, getContext());
     if (isWrite() && state != READ_ONLY) do_write(def_info[d], pe, getContext());
@@ -661,7 +665,7 @@ void ComputeDefUse::loop_revisit(const IR::PathExpression *pe) {
 }
 
 bool ComputeDefUse::preorder(const IR::MethodCallExpression *mc) {
-    auto *mi = P4::MethodInstance::resolve(mc, this);
+    auto mi = P4::MethodInstance::resolve(mc, this);
     if (state == WRITE_ONLY) {
         BUG_CHECK(!isWrite(), "Method call in out or inout arg should have failed typechecking");
         return false;

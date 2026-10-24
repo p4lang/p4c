@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include "backends/bmv2/common/JsonObjects.h"
@@ -31,7 +32,7 @@ using namespace P4;
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoPsaSwitchContext(new BMV2::PsaSwitchContext);
+    AutoCompileContext autoPsaSwitchContext(std::make_unique<BMV2::PsaSwitchContext>());
     auto &options = BMV2::PsaSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = cstring(BMV2_PSA_VERSION_STRING);
@@ -46,8 +47,8 @@ int main(int argc, char *const argv[]) {
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
 
-    const IR::P4Program *program = nullptr;
-    const IR::ToplevelBlock *toplevel = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
+    IR::Ptr<IR::ToplevelBlock> toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
@@ -100,11 +101,12 @@ int main(int argc, char *const argv[]) {
     }
     if (::P4::errorCount() > 0) return 1;
 
-    auto backend =
-        new BMV2::PsaSwitchBackend(options, &midEnd.refMap, &midEnd.typeMap, &midEnd.enumMap);
+    auto backend = std::make_unique<BMV2::PsaSwitchBackend>(options, &midEnd.refMap,
+                                                            &midEnd.typeMap, &midEnd.enumMap);
 
     // Necessary because BMV2Context is expected at the top of stack in further processing
-    AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::PsaSwitchContext::get()));
+    AutoCompileContext autoContext(
+        std::make_unique<BMV2::BMV2Context>(BMV2::PsaSwitchContext::get()));
     try {
         backend->convert(toplevel);
     } catch (const std::exception &bug) {

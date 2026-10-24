@@ -92,7 +92,7 @@ class VariableSubstitution : public Transform {
         : var(var), expr(expr) {}
 };
 
-Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt) const {
+Continuation::Body Continuation::apply(std::optional<IR::Ptr<IR::Node>> value_opt) const {
     BUG_CHECK(!(value_opt && !parameterOpt),
               "Supplied a value to a continuation with no parameters.");
     BUG_CHECK(!(!value_opt && parameterOpt),
@@ -104,7 +104,7 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
         return body;
     }
 
-    const auto *paramType = (*parameterOpt)->type;
+    auto paramType = (*parameterOpt)->type;
     const IR::Type *argType = nullptr;
     if (const auto *valueExpr = (*value_opt)->to<IR::Expression>()) {
         argType = valueExpr->type;
@@ -168,10 +168,10 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
     return result;
 }
 
-const Continuation::Parameter *Continuation::genParameter(const IR::Type *type, cstring name,
-                                                          const NamespaceContext *ctx) {
+Continuation::Parameter Continuation::genParameter(const IR::Type *type, cstring name,
+                                                   std::shared_ptr<const NamespaceContext> ctx) {
     auto varName = ctx->genName(name, '*');
-    return new Parameter(new IR::PathExpression(type, new IR::Path(varName)));
+    return Parameter(new IR::PathExpression(type, new IR::Path(varName)));
 }
 
 }  // namespace P4::P4Tools::P4Testgen

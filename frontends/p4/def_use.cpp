@@ -17,7 +17,7 @@ using namespace literals;
 
 // internal name for header valid bit; used only locally
 const cstring StorageFactory::validFieldName = "$valid"_cs;
-const LocationSet *LocationSet::empty = new LocationSet();
+std::shared_ptr<const LocationSet> LocationSet::empty = std::make_shared<LocationSet>();
 ProgramPoint ProgramPoint::beforeStart;
 
 #ifdef DEBUG_LOCATION_IDS
@@ -53,7 +53,7 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
         // Tuple and List
         auto *result = construct<TupleLocation>(type, name);
         size_t index = 0;
-        for (const auto *t : bl->components) {
+        for (const IR::Type *t : bl->components) {
             cstring fieldName = absl::StrCat(name, "[", index, "]");
             auto *sl = create(t, fieldName);
             result->createElement(index, sl);
@@ -163,17 +163,18 @@ LocationSet StorageLocation::getLastIndexField() const {
     return result;
 }
 
-const LocationSet *LocationSet::join(const LocationSet *other) const {
+std::shared_ptr<const LocationSet> LocationSet::join(
+    std::shared_ptr<const LocationSet> other) const {
     CHECK_NULL(other);
-    if (this == LocationSet::empty) return other;
-    if (other == LocationSet::empty) return this;
-    auto result = new LocationSet(locations);
+    if (this == LocationSet::empty.get()) return other;
+    if (other == LocationSet::empty) return shared_from_this();
+    auto result = std::make_shared<LocationSet>(locations);
     for (auto e : other->locations) result->add(e);
     return result;
 }
 
-const LocationSet *LocationSet::getArrayLastIndex() const {
-    auto *result = new LocationSet();
+std::shared_ptr<const LocationSet> LocationSet::getArrayLastIndex() const {
+    auto result = std::make_shared<LocationSet>();
     for (const auto *l : locations) {
         if (const auto *array = l->to<ArrayLocation>()) {
             result->add(array->getLastIndexField());
@@ -182,24 +183,24 @@ const LocationSet *LocationSet::getArrayLastIndex() const {
     return result;
 }
 
-const LocationSet *LocationSet::getField(cstring field) const {
-    auto *result = new LocationSet();
+std::shared_ptr<const LocationSet> LocationSet::getField(cstring field) const {
+    auto result = std::make_shared<LocationSet>();
     for (const auto *l : locations) {
         if (const auto *strct = l->to<StructLocation>()) {
             if (field == StorageFactory::validFieldName && strct->isHeaderUnion()) {
                 // special handling for union.isValid()
                 for (const auto *f : strct->fields()) {
-                    f->to<StructLocation>()->addField(field, result);
+                    f->to<StructLocation>()->addField(field, result.get());
                 }
             } else {
-                strct->addField(field, result);
+                strct->addField(field, result.get());
             }
         } else if (const auto *array = l->to<ArrayLocation>()) {
             for (const auto *f : *array) {
                 if (field == IR::Type_Array::next || field == IR::Type_Array::last) {
                     result->add(f);
                 } else {
-                    f->to<StructLocation>()->addField(field, result);
+                    f->to<StructLocation>()->addField(field, result.get());
                 }
             }
         }
@@ -207,21 +208,21 @@ const LocationSet *LocationSet::getField(cstring field) const {
     return result;
 }
 
-const LocationSet *LocationSet::getValidField() const {
+std::shared_ptr<const LocationSet> LocationSet::getValidField() const {
     return getField(StorageFactory::validFieldName);
 }
 
-const LocationSet *LocationSet::getIndex(unsigned index) const {
-    auto result = new LocationSet();
+std::shared_ptr<const LocationSet> LocationSet::getIndex(unsigned index) const {
+    auto result = std::make_shared<LocationSet>();
     for (auto l : locations) {
         auto array = l->to<IndexedLocation>();
-        array->addElement(index, result);
+        array->addElement(index, result.get());
     }
     return result;
 }
 
-const LocationSet *LocationSet::allElements() const {
-    auto result = new LocationSet();
+std::shared_ptr<const LocationSet> LocationSet::allElements() const {
+    auto result = std::make_shared<LocationSet>();
     for (auto l : locations) {
         auto array = l->to<ArrayLocation>();
         for (auto e : *array) result->add(e);
@@ -229,8 +230,8 @@ const LocationSet *LocationSet::allElements() const {
     return result;
 }
 
-const LocationSet *LocationSet::canonicalize() const {
-    LocationSet *result = new LocationSet();
+std::shared_ptr<const LocationSet> LocationSet::canonicalize() const {
+    auto result = std::make_shared<LocationSet>();
     for (auto e : locations) result->addCanonical(e);
     return result;
 }
@@ -247,7 +248,7 @@ void LocationSet::addCanonical(const StorageLocation *location) {
     }
 }
 
-bool LocationSet::overlaps(const LocationSet *other) const {
+bool LocationSet::overlaps(std::shared_ptr<const LocationSet> other) const {
     for (auto s : locations) {
         if (other->locations.find(s) != other->locations.end()) return true;
     }
@@ -281,26 +282,28 @@ bool ProgramPoint::operator==(const ProgramPoint &other) const {
 
 std::size_t ProgramPoint::hash() const { return Util::hash_range(stack.begin(), stack.end()); }
 
-void ProgramPoints::add(const ProgramPoints *from) {
+void ProgramPoints::add(std::shared_ptr<const ProgramPoints> from) {
     points.insert(from->points.begin(), from->points.end());
 }
 
 // Take the union of the current object with another.  A new ProgramPoints
 // will be allocated if necessary, but in the case where one of the two
 // ProgramPoints is a subset of the other, the latter will itself be returned.
-const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
-    if (with == this) {
+std::shared_ptr<const ProgramPoints> ProgramPoints::merge(
+    std::shared_ptr<const ProgramPoints> with) const {
+    if (with.get() == this) {
         // Notice the case where the two are identical and exit early to avoid
         // the iteration.
-        return this;
+        return shared_from_this();
     } else {
         // Iterate over the (weakly) smaller of the two.
-        ProgramPoints *result = nullptr;
-        const ProgramPoints *larger = this, *smaller = with;
+        std::shared_ptr<ProgramPoints> result = nullptr;
+        auto larger = shared_from_this(), smaller = with;
         if (size() < with->size()) std::swap(larger, smaller);
         for (auto pp : smaller->points) {
             if (!larger->points.count(pp)) {
-                if (!result) result = new ProgramPoints(larger->points);
+                if (!result)
+                    result = std::shared_ptr<ProgramPoints>(new ProgramPoints(larger->points));
                 result->points.insert(pp);
             }
         }
@@ -315,8 +318,9 @@ bool ProgramPoints::operator==(const ProgramPoints &other) const {
     return true;
 }
 
-Definitions *Definitions::joinDefinitions(const Definitions *other) const {
-    auto result = new Definitions();
+std::shared_ptr<Definitions> Definitions::joinDefinitions(
+    std::shared_ptr<const Definitions> other) const {
+    auto result = std::make_shared<Definitions>();
     for (auto d : other->definitions) {
         auto loc = d.first;
         auto defs = d.second;
@@ -339,12 +343,14 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
     return result;
 }
 
-void Definitions::setDefinition(const StorageLocation *location, const ProgramPoints *point) {
+void Definitions::setDefinition(const StorageLocation *location,
+                                std::shared_ptr<const ProgramPoints> point) {
     LocationSet locset(location);
     setDefinition(locset, point);
 }
 
-void Definitions::setDefinition(const LocationSet &locations, const ProgramPoints *point) {
+void Definitions::setDefinition(const LocationSet &locations,
+                                std::shared_ptr<const ProgramPoints> point) {
     for (const auto *sl : locations.canonical()) definitions[sl->to<BaseLocation>()] = point;
 }
 
@@ -357,18 +363,19 @@ void Definitions::removeLocation(const StorageLocation *location) {
     }
 }
 
-const ProgramPoints *Definitions::getPoints(const LocationSet &locations) const {
-    ProgramPoints *result = new ProgramPoints();
+std::shared_ptr<const ProgramPoints> Definitions::getPoints(const LocationSet &locations) const {
+    std::shared_ptr<ProgramPoints> result = std::make_shared<ProgramPoints>();
     for (const auto *sl : locations.canonical()) {
-        const auto *points = getPoints(sl->to<BaseLocation>());
+        auto points = getPoints(sl->to<BaseLocation>());
         result->add(points);
     }
     return result;
 }
 
-Definitions *Definitions::writes(ProgramPoint point, const LocationSet &locations) const {
-    auto result = new Definitions(*this);
-    auto points = new ProgramPoints(point);
+std::shared_ptr<Definitions> Definitions::writes(ProgramPoint point,
+                                                 const LocationSet &locations) const {
+    auto result = std::make_shared<Definitions>(*this);
+    auto points = std::make_shared<ProgramPoints>(point);
     for (auto l : locations.canonical()) result->setDefinition(l->to<BaseLocation>(), points);
     return result;
 }
@@ -393,12 +400,12 @@ int ComputeWriteSet::nest_count = 0;
 void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
                                  const IR::IndexedVector<IR::Declaration> *locals,
                                  ProgramPoint entryPoint, bool clear) {
-    Definitions *defs = nullptr;
+    std::shared_ptr<Definitions> defs = nullptr;
     if (!clear) defs = currentDefinitions;
-    if (defs == nullptr) defs = new Definitions();
+    if (defs == nullptr) defs = std::make_shared<Definitions>();
 
-    auto startPoints = new ProgramPoints(entryPoint);
-    auto uninit = new ProgramPoints(ProgramPoint::beforeStart);
+    auto startPoints = std::make_shared<ProgramPoints>(entryPoint);
+    auto uninit = std::make_shared<ProgramPoints>(ProgramPoint::beforeStart);
 
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
@@ -459,7 +466,7 @@ void ComputeWriteSet::exitScope(const IR::ParameterList *parameters,
     }
 }
 
-Definitions *ComputeWriteSet::getDefinitionsAfter(const IR::ParserState *state) {
+std::shared_ptr<Definitions> ComputeWriteSet::getDefinitionsAfter(const IR::ParserState *state) {
     ProgramPoint last;
     if (state->components.size() == 0)
         last = ProgramPoint(state);
@@ -478,7 +485,8 @@ ProgramPoint ComputeWriteSet::getProgramPoint(const IR::Node *node) const {
 }
 
 // set the currentDefinitions after executing node
-bool ComputeWriteSet::setDefinitions(Definitions *defs, const IR::Node *node, bool overwrite) {
+bool ComputeWriteSet::setDefinitions(std::shared_ptr<Definitions> defs, const IR::Node *node,
+                                     bool overwrite) {
     CHECK_NULL(defs);
     currentDefinitions = defs;
     auto point = getProgramPoint(node);
@@ -560,7 +568,8 @@ bool ComputeWriteSet::preorder(const IR::PathExpression *expression) {
     }
     auto decl = refMap->getDeclaration(expression->path, true);
     auto storage = allDefinitions->getStorage(decl);
-    const LocationSet *result = storage ? new LocationSet(storage) : LocationSet::empty;
+    std::shared_ptr<const LocationSet> result =
+        storage ? std::make_shared<LocationSet>(storage) : LocationSet::empty;
     expressionWrites(expression, result);
     return false;
 }
@@ -646,7 +655,7 @@ bool ComputeWriteSet::preorder(const IR::SelectExpression *expression) {
     visit(&expression->selectCases);
     auto l = getWrites(expression->select);
     const loc_t *selectCasesLoc = getLoc(&expression->selectCases, getChildContext());
-    for (auto *c : expression->selectCases) {
+    for (const IR::SelectCase *c : expression->selectCases) {
         const loc_t *selectCaseLoc = getLoc(c, selectCasesLoc);
         auto s = getWrites(c->keyset, selectCaseLoc);
         l = l->join(s);
@@ -857,8 +866,8 @@ bool ComputeWriteSet::preorder(const IR::P4Control *control) {
     LOG3("CWS Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
     enterScope(control->getApplyParameters(), &control->controlLocals, startPoint);
-    exitDefinitions = new Definitions();
-    returnedDefinitions = new Definitions();
+    exitDefinitions = std::make_shared<Definitions>();
+    returnedDefinitions = std::make_shared<Definitions>();
     visitVirtualMethods(control->controlLocals);
     visit(control->body);
     auto returned = currentDefinitions->joinDefinitions(returnedDefinitions);
@@ -889,10 +898,10 @@ bool ComputeWriteSet::preorder(const IR::ForStatement *statement) {
 
     auto saveBreak = breakDefinitions;
     auto saveContinue = continueDefinitions;
-    breakDefinitions = new Definitions();
-    continueDefinitions = new Definitions();
-    Definitions *startDefs = nullptr;
-    Definitions *exitDefs = nullptr;
+    breakDefinitions = std::make_shared<Definitions>();
+    continueDefinitions = std::make_shared<Definitions>();
+    std::shared_ptr<Definitions> startDefs = nullptr;
+    std::shared_ptr<Definitions> exitDefs = nullptr;
 
     do {
         startDefs = currentDefinitions;
@@ -920,10 +929,10 @@ bool ComputeWriteSet::preorder(const IR::ForInStatement *statement) {
 
     auto saveBreak = breakDefinitions;
     auto saveContinue = continueDefinitions;
-    breakDefinitions = new Definitions();
-    continueDefinitions = new Definitions();
-    Definitions *startDefs = nullptr;
-    Definitions *exitDefs = currentDefinitions;  // in case collection is empty;
+    breakDefinitions = std::make_shared<Definitions>();
+    continueDefinitions = std::make_shared<Definitions>();
+    std::shared_ptr<Definitions> startDefs = nullptr;
+    std::shared_ptr<Definitions> exitDefs = currentDefinitions;  // in case collection is empty;
 
     do {
         startDefs = currentDefinitions;
@@ -972,7 +981,7 @@ bool ComputeWriteSet::preorder(const IR::ContinueStatement *) {
     return handleJump("Continue", continueDefinitions);
 }
 
-bool ComputeWriteSet::handleJump(const char *tok, Definitions *&defs) {
+bool ComputeWriteSet::handleJump(const char *tok, std::shared_ptr<Definitions> &defs) {
     defs = defs->joinDefinitions(currentDefinitions);
     if (LOGGING(5))
         LOG5(tok << " definitions " << defs);
@@ -994,7 +1003,7 @@ bool ComputeWriteSet::preorder(const IR::BaseAssignmentStatement *statement) {
     visit(statement->left);
     lhs = false;
     visit(statement->right);
-    const LocationSet *locs;
+    std::shared_ptr<const LocationSet> locs;
     auto l = getWrites(statement->left);
     auto r = getWrites(statement->right);
     locs = l->join(r);
@@ -1010,7 +1019,7 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement *statement) {
     auto defs = currentDefinitions->writes(getProgramPoint(statement->expression), *locs);
     (void)setDefinitions(defs, statement->expression, false);
     auto save = currentDefinitions;
-    auto result = new Definitions();
+    auto result = std::make_shared<Definitions>();
     bool seenDefault = false;
     for (auto s : statement->cases) {
         currentDefinitions = save;
@@ -1036,7 +1045,7 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement *statement) {
 bool ComputeWriteSet::preorder(const IR::P4Action *action) {
     LOG3("CWS Visiting " << dbp(action));
     auto saveReturned = returnedDefinitions;
-    returnedDefinitions = new Definitions();
+    returnedDefinitions = std::make_shared<Definitions>();
 
     IR::IndexedVector<IR::Declaration> decls;
     // We assume that there are no declarations in inner scopes
@@ -1091,7 +1100,7 @@ bool ComputeWriteSet::preorder(const IR::Function *function) {
     auto saveReturned = returnedDefinitions;
     enterScope(function->type->parameters, &locals, point, false);
 
-    returnedDefinitions = new Definitions();
+    returnedDefinitions = std::make_shared<Definitions>();
     visit(function->body);
     currentDefinitions = currentDefinitions->joinDefinitions(returnedDefinitions);
     if (LOGGING(5))
@@ -1112,7 +1121,7 @@ bool ComputeWriteSet::preorder(const IR::P4Table *table) {
     enterScope(nullptr, nullptr, pt, false);
 
     // non-deterministic call of one of the actions in the table
-    auto after = new Definitions();
+    auto after = std::make_shared<Definitions>();
     auto beforeTable = currentDefinitions;
     auto actions = table->getActionList();
     for (auto ale : actions->actionList) {

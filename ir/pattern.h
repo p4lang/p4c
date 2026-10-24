@@ -21,8 +21,10 @@ namespace P4 {
 class Pattern {
     class Base {
      public:
+        virtual ~Base() = default;
         virtual bool match(const IR::Node *) = 0;
-    } *pattern;
+    };
+    std::shared_ptr<Base> pattern;
     Pattern(Base *p) : pattern(p) {}  // NOLINT(runtime/explicit)
 
     template <class T>
@@ -47,18 +49,18 @@ class Pattern {
     };
     template <class T>
     class Unary : public Base {
-        Base *expr;
+        std::shared_ptr<Base> expr;
 
      public:
         bool match(const IR::Node *n) override {
             if (auto b = n->to<T>()) return expr->match(b->expr);
             return false;
         }
-        Unary(Base *e) : expr(e) {}  // NOLINT(runtime/explicit)
+        Unary(std::shared_ptr<Base> e) : expr(std::move(e)) {}  // NOLINT(runtime/explicit)
     };
     template <class T>
     class Binary : public Base {
-        Base *left, *right;
+        std::shared_ptr<Base> left, right;
         bool commutative;
 
      public:
@@ -69,19 +71,23 @@ class Pattern {
             }
             return false;
         }
-        Binary(Base *l, Base *r, bool commute = false) : left(l), right(r), commutative(commute) {}
+        Binary(std::shared_ptr<Base> l, std::shared_ptr<Base> r, bool commute = false)
+            : left(std::move(l)), right(std::move(r)), commutative(commute) {}
     };
 
  public:
     template <class T>
     class Match : public Base {
-        const T *m;
+        IR::Ptr<T> m;
 
      public:
         bool match(const IR::Node *n) override { return (m = n->to<T>()); }
         Match() : m(nullptr) {}
         const T *operator->() const { return m; }
+        operator IR::Ptr<T>() const { return m; }  // NOLINT(runtime/explicit)
+#if !HAVE_LIBGC
         operator const T *() const { return m; }  // NOLINT(runtime/explicit)
+#endif
         Pattern operator*(const Pattern &a) { return Pattern(*this) * a; }
         Pattern operator/(const Pattern &a) { return Pattern(*this) / a; }
         Pattern operator%(const Pattern &a) { return Pattern(*this) % a; }
@@ -111,7 +117,7 @@ class Pattern {
     template <class T = IR::AssignmentStatement>
     class Assign : public Base {
         static_assert(std::is_base_of_v<IR::BaseAssignmentStatement, T>);
-        Base *left, *right;
+        std::shared_ptr<Base> left, right;
 
      public:
         bool match(const IR::Node *n) override {
@@ -120,18 +126,19 @@ class Pattern {
             }
             return false;
         }
-        Assign(Base *l, Base *r) : left(l), right(r) {}
+        Assign(Base *l, Base *r)
+            : left(std::shared_ptr<Base>{}, l), right(std::shared_ptr<Base>{}, r) {}
         Assign(const Pattern &l, const Pattern &r) : left(l.pattern), right(r.pattern) {}
-        Assign(Base *l, int val) : left(l), right(new Const(val)) {}
-        Assign(Base *l, big_int val) : left(l), right(new Const(val)) {}
+        Assign(Base *l, int val) : left(std::shared_ptr<Base>{}, l), right(new Const(val)) {}
+        Assign(Base *l, big_int val) : left(std::shared_ptr<Base>{}, l), right(new Const(val)) {}
     };
 
     template <class T>
     Pattern(const T *&m) : pattern(new MatchExt<T>(m)) {}  // NOLINT(runtime/explicit)
     template <class T>
-    Pattern(Match<T> &m) : pattern(&m) {}                   // NOLINT(runtime/explicit)
-    explicit Pattern(big_int v) : pattern(new Const(v)) {}  // NOLINT(runtime/explicit)
-    explicit Pattern(int v) : pattern(new Const(v)) {}      // NOLINT(runtime/explicit)
+    Pattern(Match<T> &m) : pattern(std::shared_ptr<Base>{}, &m) {}  // NOLINT(runtime/explicit)
+    explicit Pattern(big_int v) : pattern(new Const(v)) {}          // NOLINT(runtime/explicit)
+    explicit Pattern(int v) : pattern(new Const(v)) {}              // NOLINT(runtime/explicit)
     Pattern operator-() const { return Pattern(new Unary<IR::Neg>(pattern)); }
     Pattern operator~() const { return Pattern(new Unary<IR::Cmpl>(pattern)); }
     Pattern operator!() const { return Pattern(new Unary<IR::LNot>(pattern)); }

@@ -29,13 +29,13 @@ using namespace literals;
 /// a path can be x.a, or just x.  An array index is represented as a
 /// number (encoded as a string) or as "*", denoting an unknown index.
 struct LocationPath : public IHasDbPrint {
-    const IR::IDeclaration *root;
+    IR::Ptr<IR::IDeclaration> root;
     std::vector<cstring> path;
 
     explicit LocationPath(const IR::IDeclaration *root) : root(root) { CHECK_NULL(root); }
 
-    const LocationPath *append(cstring suffix) const {
-        auto result = new LocationPath(root);
+    std::shared_ptr<const LocationPath> append(cstring suffix) const {
+        auto result = std::make_shared<LocationPath>(root);
         result->path = path;
         result->path.push_back(suffix);
         return result;
@@ -64,33 +64,34 @@ struct LocationPath : public IHasDbPrint {
 /// objects.
 class SetOfLocations : public IHasDbPrint {
  public:
-    std::set<const LocationPath *> paths;
+    std::set<std::shared_ptr<const LocationPath>> paths;
 
     SetOfLocations() = default;
-    explicit SetOfLocations(const LocationPath *path) { add(path); }
+    explicit SetOfLocations(std::shared_ptr<const LocationPath> path) { add(path); }
     explicit SetOfLocations(const SetOfLocations *set) : paths(set->paths) {}
 
-    void add(const LocationPath *path) { paths.emplace(path); }
-    bool overlaps(const SetOfLocations *other) const {
+    void add(std::shared_ptr<const LocationPath> path) { paths.emplace(path); }
+    bool overlaps(const std::shared_ptr<const SetOfLocations> &other) const {
         // Normally one of these sets has only one element, because
         // one of the two is a left-value, so this should be fast.
         for (auto s : paths) {
             for (auto so : other->paths) {
-                if (s->isPrefix(so)) return true;
+                if (s->isPrefix(so.get())) return true;
             }
         }
         return false;
     }
 
-    const SetOfLocations *join(const SetOfLocations *other) const {
-        auto result = new SetOfLocations(this);
+    std::shared_ptr<const SetOfLocations> join(
+        const std::shared_ptr<const SetOfLocations> &other) const {
+        auto result = std::make_shared<SetOfLocations>(this);
         for (auto p : other->paths) result->add(p);
         return result;
     }
 
     /// Append suffix to each location in the set
-    const SetOfLocations *append(cstring suffix) const {
-        auto result = new SetOfLocations();
+    std::shared_ptr<const SetOfLocations> append(cstring suffix) const {
+        auto result = std::make_shared<SetOfLocations>();
         for (auto p : paths) {
             auto append = p->append(suffix);
             result->add(append);
@@ -105,7 +106,7 @@ class SetOfLocations : public IHasDbPrint {
 
 /// Computes the SetOfLocations read and written by an expression.
 class ReadsWrites : public Inspector, public ResolutionContext {
-    std::map<const IR::Expression *, const SetOfLocations *> rw;
+    std::map<IR::Ptr<IR::Expression>, std::shared_ptr<const SetOfLocations>> rw;
 
  public:
     ReadsWrites() { setName("ReadsWrites"); }
@@ -120,8 +121,8 @@ class ReadsWrites : public Inspector, public ResolutionContext {
 
     void postorder(const IR::PathExpression *expression) override {
         auto decl = getDeclaration(expression->path);
-        auto path = new LocationPath(decl);
-        auto locs = new SetOfLocations(path);
+        auto path = std::make_shared<LocationPath>(decl);
+        auto locs = std::make_shared<SetOfLocations>(path);
         rw.emplace(expression, locs);
     }
 
@@ -141,7 +142,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     void postorder(const IR::ArrayIndex *expression) override {
         auto e = ::P4::get(rw, expression->left);
         CHECK_NULL(e);
-        const SetOfLocations *result;
+        std::shared_ptr<const SetOfLocations> result;
         if (expression->right->is<IR::Constant>()) {
             int index = expression->right->to<IR::Constant>()->asInt();
             result = e->append(Util::toString(index));
@@ -153,23 +154,23 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::Literal *expression) override {
-        rw.emplace(expression, new SetOfLocations());
+        rw.emplace(expression, std::make_shared<SetOfLocations>());
     }
 
     void postorder(const IR::InvalidHeader *expression) override {
-        rw.emplace(expression, new SetOfLocations());
+        rw.emplace(expression, std::make_shared<SetOfLocations>());
     }
 
     void postorder(const IR::InvalidHeaderUnion *expression) override {
-        rw.emplace(expression, new SetOfLocations());
+        rw.emplace(expression, std::make_shared<SetOfLocations>());
     }
 
     void postorder(const IR::ArrayExpression *expression) override {
-        rw.emplace(expression, new SetOfLocations());
+        rw.emplace(expression, std::make_shared<SetOfLocations>());
     }
 
     void postorder(const IR::TypeNameExpression *expression) override {
-        rw.emplace(expression, new SetOfLocations());
+        rw.emplace(expression, std::make_shared<SetOfLocations>());
     }
 
     void postorder(const IR::Operation_Ternary *expression) override {
@@ -199,7 +200,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::ConstructorCallExpression *expression) override {
-        const SetOfLocations *result = new SetOfLocations();
+        std::shared_ptr<const SetOfLocations> result = std::make_shared<SetOfLocations>();
         for (auto e : *expression->arguments) {
             auto s = ::P4::get(rw, e->expression);
             CHECK_NULL(s);
@@ -209,7 +210,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::StructExpression *expression) override {
-        const SetOfLocations *result = new SetOfLocations();
+        std::shared_ptr<const SetOfLocations> result = std::make_shared<SetOfLocations>();
         for (auto e : expression->components) {
             auto s = ::P4::get(rw, e->expression);
             CHECK_NULL(s);
@@ -219,7 +220,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::ListExpression *expression) override {
-        const SetOfLocations *result = new SetOfLocations();
+        std::shared_ptr<const SetOfLocations> result = std::make_shared<SetOfLocations>();
         for (auto e : expression->components) {
             auto s = ::P4::get(rw, e);
             CHECK_NULL(s);
@@ -229,10 +230,11 @@ class ReadsWrites : public Inspector, public ResolutionContext {
     }
 
     void postorder(const IR::DefaultExpression *expression) override {
-        rw.emplace(expression, new SetOfLocations());
+        rw.emplace(expression, std::make_shared<SetOfLocations>());
     }
 
-    const SetOfLocations *get(const IR::Expression *expression, const Visitor::Context *ctxt) {
+    std::shared_ptr<const SetOfLocations> get(const IR::Expression *expression,
+                                              const Visitor::Context *ctxt) {
         expression->apply(*this, ctxt);
         auto result = ::P4::get(rw, expression);
         CHECK_NULL(result);

@@ -40,13 +40,13 @@ class TypeMap;
  * expression which constructs an anonymous instance.
  */
 struct ExternInstance final {
-    const std::optional<cstring> name;          // The instance's name, if any.
-    const IR::Expression *expression;           // The original expression passed to resolve().
-    const IR::Type_Extern *type;                // The type of the instance.
-    const IR::Vector<IR::Type> *typeArguments;  // The instance's type arguments;
-    const IR::Vector<IR::Argument> *arguments;  // The instance's constructor arguments.
-    ParameterSubstitution substitution;         // Mapping from parameter names to arguments
-    const IR::IAnnotated *annotations;          // If non-null, the instance's annotations.
+    const std::optional<cstring> name;            // The instance's name, if any.
+    IR::Ptr<IR::Expression> expression;           // The original expression passed to resolve().
+    IR::Ptr<IR::Type_Extern> type;                // The type of the instance.
+    IR::Ptr<IR::Vector<IR::Type>> typeArguments;  // The instance's type arguments;
+    IR::Ptr<IR::Vector<IR::Argument>> arguments;  // The instance's constructor arguments.
+    ParameterSubstitution substitution;           // Mapping from parameter names to arguments
+    IR::Ptr<IR::IAnnotated> annotations;          // If non-null, the instance's annotations.
 
     /**
      * @return the extern instance that @expr resolves to, if any, or

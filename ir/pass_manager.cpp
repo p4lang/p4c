@@ -26,11 +26,15 @@ namespace P4 {
 void PassManager::removePasses(const std::vector<cstring> &exclude) {
     for (auto it : exclude) {
         bool excluded = false;
-        for (std::vector<Visitor *>::iterator it1 = passes.begin(); it1 != passes.end(); ++it1) {
+        for (auto it1 = passes.begin(); it1 != passes.end();) {
             if ((*it1) != nullptr && it == (*it1)->name()) {
+#if HAVE_LIBGC
                 delete (*it1);
-                passes.erase(it1--);
+#endif
+                it1 = passes.erase(it1);
                 excluded = true;
+            } else {
+                ++it1;
             }
         }
         if (!excluded) {
@@ -48,8 +52,9 @@ void PassManager::listPasses(std::ostream &out, cstring sep) const {
     }
 }
 
-const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
-    safe_vector<std::pair<safe_vector<Visitor *>::iterator, const IR::Node *>> backup;
+IR::Ptr<IR::Node> PassManager::apply_visitor(const IR::Node *program_, const char *) {
+    IR::Ptr<IR::Node> program = program_;
+    safe_vector<std::pair<decltype(passes)::iterator, IR::Ptr<IR::Node>>> backup;
     static indent_t log_indent(-1);
     struct indent_nesting {
         indent_t &indent;
@@ -69,7 +74,8 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
         }
         try {
             try {
-                LOG1(log_indent << name() << " invoking " << v->name());
+                LOG1(log_indent << name() << " invoking " << v->name() << " on "
+                                << program->node_type_name() << '[' << program->id << ']');
                 program = program->apply(**it, getChildContext());
                 if (LOGGING(3)) {
                     size_t maxmem, mem = gc_mem_inuse(&maxmem);  // triggers gc
@@ -90,7 +96,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                     continue;
                 }
                 it = backup.back().first;
-                auto b = dynamic_cast<Backtrack *>(*it);
+                auto b = dynamic_cast<Backtrack *>(static_cast<Visitor *>(*it));
                 program = backup.back().second;
                 if (b->backtrack(trig)) break;
                 LOG1(log_indent << "pass " << b->name() << " can't handle it");
@@ -119,7 +125,7 @@ bool PassManager::backtrack(trigger &trig) {
 
 bool PassManager::never_backtracks() {
     if (never_backtracks_cache >= 0) return never_backtracks_cache;
-    for (auto v : passes) {
+    for (Visitor *v : passes) {
         if (auto b = dynamic_cast<Backtrack *>(v)) {
             if (!b->never_backtracks()) {
                 never_backtracks_cache = 0;
@@ -135,7 +141,8 @@ void PassManager::runDebugHooks(const char *visitorName, const IR::Node *program
     for (auto h : debugHooks) h(name(), seqNo, visitorName, program);
 }
 
-const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char *name) {
+IR::Ptr<IR::Node> PassRepeated::apply_visitor(const IR::Node *program_, const char *name) {
+    IR::Ptr<IR::Node> program = program_;
     bool done = false;
     unsigned iterations = 0;
     unsigned initial_error_count = ::P4::errorCount();
@@ -152,7 +159,8 @@ const IR::Node *PassRepeated::apply_visitor(const IR::Node *program, const char 
     return program;
 }
 
-const IR::Node *PassRepeatUntil::apply_visitor(const IR::Node *program, const char *name) {
+IR::Ptr<IR::Node> PassRepeatUntil::apply_visitor(const IR::Node *program_, const char *name) {
+    IR::Ptr<IR::Node> program = program_;
     do {
         running = true;
         program = PassManager::apply_visitor(program, name);
@@ -160,10 +168,10 @@ const IR::Node *PassRepeatUntil::apply_visitor(const IR::Node *program, const ch
     return program;
 }
 
-const IR::Node *PassIf::apply_visitor(const IR::Node *program, const char *name) {
+IR::Ptr<IR::Node> PassIf::apply_visitor(const IR::Node *program, const char *name) {
     if (cond()) {
         running = true;
-        program = PassManager::apply_visitor(program, name);
+        return PassManager::apply_visitor(program, name);
     }
     return program;
 }

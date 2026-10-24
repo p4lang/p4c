@@ -124,13 +124,13 @@ void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) 
     const auto *traces = testSpec->getTraces();
     if (traces != nullptr) {
         for (const auto &trace : *traces) {
-            if (const auto *successfulExtract = trace.get().to<TraceEvents::ExtractSuccess>()) {
+            if (const auto *successfulExtract = trace->to<TraceEvents::ExtractSuccess>()) {
                 inja::json j;
                 j["label"] = successfulExtract->getExtractedHeader()->toString();
                 j["offset"] = successfulExtract->getOffset();
                 dataJson["offsets"].push_back(j);
             }
-            if (const auto *parserState = trace.get().to<TraceEvents::ParserState>()) {
+            if (const auto *parserState = trace->to<TraceEvents::ParserState>()) {
                 dataJson["parser_states"].push_back(parserState->getParserState()->getName().name);
             }
             std::stringstream ss;

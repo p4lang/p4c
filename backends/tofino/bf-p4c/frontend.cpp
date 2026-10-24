@@ -89,7 +89,7 @@ class ConverterAllowingRecirculate : public P4V1::Converter {
         bool found = false;
         for (unsigned i = 0; i < passes.size(); i++) {
             // Replace FindRecirculated with our version
-            if (dynamic_cast<P4V1::FindRecirculated *>(passes[i])) {
+            if (dynamic_cast<P4V1::FindRecirculated *>(static_cast<Visitor *>(passes[i]))) {
                 found = true;
                 LOG3("Replacing FindRecirculated (" << i << ") with AllowingPort version.");
                 passes[i] = new FindRecirculatedAllowingPort(structure);
@@ -99,14 +99,14 @@ class ConverterAllowingRecirculate : public P4V1::Converter {
     }
 };
 
-const IR::P4Program *run_frontend() {
+IR::Ptr<IR::P4Program> run_frontend() {
     // Initialize the Barefoot-specific error types, in case they aren't already initialized.
     BFN::ErrorType::getErrorTypes();
 
     auto &options = BackendOptions();
     auto hook = options.getDebugHook();
 
-    const IR::P4Program *program = nullptr;
+    IR::Ptr<IR::P4Program> program = nullptr;
     if (options.arch == "tna" && options.langVersion == CompilerOptions::FrontendVersion::P4_14) {
         program = P4::parseP4File<P4V1::TnaConverter>(options);
     } else {

@@ -32,7 +32,7 @@ const ProgramInfo *TestgenTarget::produceProgramInfoImpl(
 
     // Resolve the program's main declaration instance and delegate to the version of
     // produceProgramInfoImpl that takes the main declaration.
-    const auto *mainIDecl = program.getDeclsByName(IR::P4Program::main)->single();
+    auto mainIDecl = program.getDeclsByName(IR::P4Program::main)->single();
     BUG_CHECK(mainIDecl, "Program's main declaration not found: %1%", program.main);
 
     const auto *mainNode = mainIDecl->getNode();
@@ -66,7 +66,7 @@ CmdStepper *TestgenTarget::getCmdStepper(ExecutionState &state, AbstractSolver &
 }
 
 CompilerResultOrError TestgenTarget::runCompilerImpl(const CompilerOptions &options,
-                                                     const IR::P4Program *program) const {
+                                                     IR::Ptr<IR::P4Program> program) const {
     program = runFrontend(options, program);
     if (program == nullptr) {
         return std::nullopt;
@@ -89,8 +89,8 @@ CompilerResultOrError TestgenTarget::runCompilerImpl(const CompilerOptions &opti
     auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
     program->apply(coverage);
 
-    return {
-        *new TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg)};
+    return std::make_shared<TestgenCompilerResult>(CompilerResult(*program),
+                                                   coverage.getCoverableNodes(), dcg);
 }
 
 ICompileContext *TestgenTarget::makeContext() const {

@@ -31,7 +31,7 @@ bool isSigned(const IR::Type *);
 
 // probably belongs in ir/ir.h or ir/node.h...
 template <class T>
-inline T *clone_update(const T *&ptr) {
+inline T *clone_update(IR::Ptr<T> &ptr) {
     T *rv = ptr->clone();
     ptr = rv;
     return rv;
@@ -53,7 +53,7 @@ class CatchBacktrack : public Backtrack {
         }
     }
     // pass does nothing
-    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return n; }
+    IR::Ptr<IR::Node> apply_visitor(const IR::Node *n, const char * = 0) override { return n; }
 
  public:
     explicit CatchBacktrack(std::function<void(BT *)> f) : fn(f) {}

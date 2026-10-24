@@ -38,21 +38,21 @@
 namespace P4::P4Tools::P4Testgen {
 
 /// Replace argument of given index in a method call with given value.
-const IR::MethodCallExpression *replaceCallArg(const IR::MethodCallExpression *call, size_t argIdx,
-                                               const IR::Expression *replacement) {
+IR::Ptr<IR::MethodCallExpression> replaceCallArg(const IR::MethodCallExpression *call,
+                                                 size_t argIdx, const IR::Expression *replacement) {
     return IR::Traversal::apply(call, &IR::MethodCallExpression::arguments,
                                 IR::Traversal::Index(argIdx), &IR::Argument::expression,
                                 IR::Traversal::Assign(replacement));
 }
 
-std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::setFields(
+std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> ExprStepper::setFields(
     ExecutionState &nextState, const std::vector<IR::StateVariable> &flatFields,
     int varBitFieldSize) {
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
+    std::vector<std::pair<IR::StateVariable, IR::Ptr<IR::Expression>>> fields;
     // Make a copy of the StateVariable so it can be modified in the varbit case (and it is just a
     // pointer wrapper anyway).
     for (IR::StateVariable fieldRef : flatFields) {
-        const auto *fieldType = fieldRef->type;
+        auto fieldType = fieldRef->type;
         // If the header had a varbit, the header needs to be updated.
         // We assign @param varbitFeldSize to the varbit field.
         if (const auto *varbit = fieldType->to<IR::Extracted_Varbits>()) {
@@ -72,7 +72,7 @@ std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::s
             continue;
         }
         // Slice from the buffer and append to the packet, if necessary.
-        const auto *pktVar = nextState.slicePacketBuffer(fieldWidth);
+        auto pktVar = nextState.slicePacketBuffer(fieldWidth);
         // We need to cast the generated variable to the appropriate type.
         if (fieldType->is<IR::Extracted_Varbits>()) {
             pktVar = new IR::Cast(fieldType, pktVar);
@@ -86,7 +86,7 @@ std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::s
                 pktVar = new IR::Cast(fieldType, pktVar);
             }
         } else if (fieldRef->type->is<IR::Type_Boolean>()) {
-            const auto *boolType = IR::Type_Boolean::get();
+            auto boolType = IR::Type_Boolean::get();
             pktVar = new IR::Cast(boolType, pktVar);
         }
         // Update the field and add the field to the return list.
@@ -127,7 +127,7 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     // Compute the accept case.
     int advanceVal = 0;
     const auto *advanceCond = new IR::LAnd(cond, restrictions);
-    const auto *advanceConst = evaluateExpression(advanceExpr, advanceCond);
+    auto advanceConst = evaluateExpression(advanceExpr, advanceCond);
     // If we can not satisfy the advance, set the condition to nullptr.
     if (advanceConst == nullptr) {
         advanceCond = nullptr;
@@ -141,7 +141,7 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     // Compute the reject case.
     int notAdvanceVal = 0;
     const auto *notAdvanceCond = new IR::LAnd(new IR::LNot(cond), restrictions);
-    const auto *notAdvanceConst = evaluateExpression(advanceExpr, notAdvanceCond);
+    auto notAdvanceConst = evaluateExpression(advanceExpr, notAdvanceCond);
     // If we can not satisfy the reject, set the condition to nullptr.
     if (notAdvanceConst == nullptr) {
         notAdvanceCond = nullptr;
@@ -165,7 +165,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
     {"*.prepend_to_prog_header"_cs,
      {"hdr"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *prependVar = externInfo.externArguments.at(0)->expression;
+         auto prependVar = externInfo.externArguments.at(0)->expression;
          auto &nextState = stepper.state.clone();
          const auto *prependType = stepper.state.resolveType(prependVar->type);
 
@@ -196,7 +196,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
     {"*.append_to_prog_header"_cs,
      {"hdr"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *appendVar = externInfo.externArguments.at(0)->expression;
+         auto appendVar = externInfo.externArguments.at(0)->expression;
 
          auto &nextState = stepper.state.clone();
          const auto *appendType = stepper.state.resolveType(appendVar->type);
@@ -245,8 +245,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
      {},
      [](const ExternInfo & /*externInfo*/, ExprStepper &stepper) {
          auto &nextState = stepper.state.clone();
-         const auto *drop =
-             stepper.state.getSymbolicEnv().subst(stepper.programInfo.dropIsActive());
+         auto drop = stepper.state.getSymbolicEnv().subst(stepper.programInfo.dropIsActive());
          // If the drop variable is tainted, we also mark the port tainted.
          if (Taint::hasTaint(drop)) {
              nextState.set(stepper.programInfo.getTargetOutputPortVar(),
@@ -270,21 +269,22 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          const auto *blockRef =
              externInfo.externArguments.at(0)->expression->checkedTo<IR::StringLiteral>();
-         const auto *block = stepper.state.findDecl(new IR::Path(blockRef->value));
+         const IR::Path path(blockRef->value);
+         const auto *block = stepper.state.findDecl(&path);
          auto blockName = block->getName().name;
          auto &nextState = stepper.state.clone();
          auto canonicalName = stepper.programInfo.getCanonicalBlockName(blockName);
          const auto &archSpec = stepper.programInfo.getArchSpec();
          const auto *blockApply = block->to<IR::IApply>();
          CHECK_NULL(blockApply);
-         const auto *blockParams = blockApply->getApplyParameters();
+         auto blockParams = blockApply->getApplyParameters();
 
          // Copy-in.
          // Get the current level and disable it for these operations to avoid overtainting.
          auto currentTaint = stepper.state.getProperty<bool>("inUndefinedState"_cs);
          nextState.setProperty("inUndefinedState"_cs, false);
          for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
-             const auto *internalParam = blockParams->getParameter(paramIdx);
+             auto internalParam = blockParams->getParameter(paramIdx);
              auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
              nextState.copyIn(TestgenTarget::get(), internalParam, externalParamName);
          }
@@ -304,21 +304,22 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::INTERNAL_EXTERN_M
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          const auto *blockRef =
              externInfo.externArguments.at(0)->expression->checkedTo<IR::StringLiteral>();
-         const auto *block = stepper.state.findDecl(new IR::Path(blockRef->value));
+         const IR::Path path(blockRef->value);
+         const auto *block = stepper.state.findDecl(&path);
          const auto &archSpec = stepper.programInfo.getArchSpec();
          auto blockName = block->getName().name;
          auto &nextState = stepper.state.clone();
          auto canonicalName = stepper.programInfo.getCanonicalBlockName(blockName);
          const auto *blockApply = block->to<IR::IApply>();
          CHECK_NULL(blockApply);
-         const auto *blockParams = blockApply->getApplyParameters();
+         auto blockParams = blockApply->getApplyParameters();
 
          // Copy-in.
          // Get the current level and disable it for these operations to avoid overtainting.
          auto currentTaint = stepper.state.getProperty<bool>("inUndefinedState"_cs);
          nextState.setProperty("inUndefinedState"_cs, false);
          for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
-             const auto *internalParam = blockParams->getParameter(paramIdx);
+             auto internalParam = blockParams->getParameter(paramIdx);
              auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
              nextState.copyOut(internalParam, externalParamName);
          }
@@ -355,9 +356,9 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
     {"packet_in.lookahead"_cs,
      {},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *typeArgs = externInfo.originalCall.typeArguments;
+         auto typeArgs = externInfo.originalCall.typeArguments;
          BUG_CHECK(typeArgs->size() == 1, "Lookahead should have exactly one type argument.");
-         const auto *lookaheadType = externInfo.originalCall.typeArguments->at(0);
+         auto lookaheadType = externInfo.originalCall.typeArguments->at(0);
          if (!lookaheadType->is<IR::Type_Base>()) {
              TESTGEN_UNIMPLEMENTED(
                  "Lookahead type %1% not supported. Expected a base type. Got %2%", lookaheadType,
@@ -376,7 +377,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              condInfo.advanceCond->dbprint(condStream);
              auto &nextState = stepper.state.clone();
              // Peek into the buffer, we do NOT slice from it.
-             const auto *lookaheadVar = nextState.peekPacketBuffer(lookaheadSize);
+             auto lookaheadVar = nextState.peekPacketBuffer(lookaheadSize);
              nextState.add(*new TraceEvents::Expression(lookaheadVar, "Lookahead result"_cs));
              // Record the condition we are passing at this at this point.
              nextState.add(*new TraceEvents::Generic(condStream.str()));
@@ -400,12 +401,12 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
     {"packet_in.advance"_cs,
      {"sizeInBits"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *advanceExpr = externInfo.externArguments.at(0)->expression;
+         auto advanceExpr = externInfo.externArguments.at(0)->expression;
 
          if (!SymbolicEnv::isSymbolicValue(advanceExpr)) {
              stepToSubexpr(advanceExpr, stepper.result, stepper.state,
                            [&externInfo](const Continuation::Parameter *v) {
-                               const auto *clonedCall =
+                               auto clonedCall =
                                    replaceCallArg(&externInfo.originalCall, 0, v->param);
                                return Continuation::Return(clonedCall);
                            });
@@ -493,7 +494,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              ToolsVariables::convertReference(externInfo.externArguments.at(0)->expression);
 
          // Get the extractedType
-         const auto *typeArgs = externInfo.originalCall.typeArguments;
+         auto typeArgs = externInfo.originalCall.typeArguments;
          BUG_CHECK(typeArgs->size() == 1, "Must have exactly 1 type argument for extract. %1%",
                    externInfo.originalCall);
 
@@ -546,11 +547,11 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
          // This argument is the structure being written by the extract.
          const auto &extractOutput =
              ToolsVariables::convertReference(externInfo.externArguments.at(0)->expression);
-         const auto *varbitExtractExpr = externInfo.externArguments.at(1)->expression;
+         auto varbitExtractExpr = externInfo.externArguments.at(1)->expression;
          if (!SymbolicEnv::isSymbolicValue(varbitExtractExpr)) {
              stepToSubexpr(varbitExtractExpr, stepper.result, stepper.state,
                            [&externInfo](const Continuation::Parameter *v) {
-                               const auto *clonedCall =
+                               auto clonedCall =
                                    replaceCallArg(&externInfo.originalCall, 1, v->param);
                                return Continuation::Return(clonedCall);
                            });
@@ -558,7 +559,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
          }
 
          // Get the extractedType
-         const auto *typeArgs = externInfo.originalCall.typeArguments;
+         auto typeArgs = externInfo.originalCall.typeArguments;
          BUG_CHECK(typeArgs->size() == 1, "Must have exactly 1 type argument for extract. %1%",
                    externInfo.originalCall);
 
@@ -568,7 +569,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
 
          // Try to find the varbit inside the header we are extracting.
          const IR::Extracted_Varbits *varbit = nullptr;
-         for (const auto *fieldRef : extractedType->fields) {
+         for (auto fieldRef : extractedType->fields) {
              if (const auto *varbitTmp = fieldRef->type->to<IR::Extracted_Varbits>()) {
                  varbit = varbitTmp;
                  break;
@@ -690,7 +691,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
          const auto *emitHeader =
              externInfo.externArguments.at(0)->expression->checkedTo<IR::HeaderExpression>();
-         const auto *validVar = emitHeader->validity;
+         auto validVar = emitHeader->validity;
 
          // Check whether the validity bit of the header is tainted. If it is, the entire
          // emit is tainted. There is not much we can do here, so throw an error.
@@ -709,7 +710,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              // Append to the emit buffer.
              auto flatFields = IR::flattenStructExpression(emitHeader);
              for (const auto *fieldExpr : flatFields) {
-                 const auto *fieldType = fieldExpr->type;
+                 auto fieldType = fieldExpr->type;
                  BUG_CHECK(!fieldType->is<IR::Type_StructLike>(),
                            "Unexpected emit field %1% of type %2%", fieldExpr, fieldType);
                  if (const auto *varbits = fieldType->to<IR::Extracted_Varbits>()) {
@@ -767,7 +768,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
     {"*method.verify"_cs,
      {"bool"_cs, "error"_cs},
      [](const ExternInfo &externInfo, ExprStepper &stepper) {
-         const auto *cond = externInfo.externArguments.at(0)->expression;
+         auto cond = externInfo.externArguments.at(0)->expression;
          const auto *error =
              externInfo.externArguments.at(1)->expression->checkedTo<IR::Constant>();
          if (!SymbolicEnv::isSymbolicValue(cond)) {
@@ -775,7 +776,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              stepToSubexpr(cond, stepper.result, stepper.state,
                            [&externInfo](const Continuation::Parameter *v) {
                                auto *clonedCall = externInfo.originalCall.clone();
-                               const auto *error = clonedCall->arguments->at(1);
+                               auto error = clonedCall->arguments->at(1);
                                auto *arguments = new IR::Vector<IR::Argument>();
                                arguments->push_back(new IR::Argument(v->param));
                                arguments->push_back(error);
@@ -825,7 +826,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              stepper.result->emplace_back(nextState);
              return;
          }
-         const auto *cond = externInfo.externArguments.at(0)->expression;
+         auto cond = externInfo.externArguments.at(0)->expression;
 
          // If assumption mode is active, add the condition to the required path conditions.
          if (!SymbolicEnv::isSymbolicValue(cond)) {
@@ -871,7 +872,7 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
              stepper.result->emplace_back(nextState);
              return;
          }
-         const auto *cond = externInfo.externArguments.at(0)->expression;
+         auto cond = externInfo.externArguments.at(0)->expression;
 
          // If assumption mode is active, add the condition to the required path conditions.
          if (!SymbolicEnv::isSymbolicValue(cond)) {

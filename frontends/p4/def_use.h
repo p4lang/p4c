@@ -240,7 +240,7 @@ class StorageFactory {
 
 /// A set of locations that may be read or written by a computation.
 /// In general this is a conservative approximation of the actual location set.
-class LocationSet : public IHasDbPrint {
+class LocationSet : public IHasDbPrint, public std::enable_shared_from_this<LocationSet> {
     using LocationsStorage = ordered_set<const StorageLocation *>;
     LocationsStorage locations;
 
@@ -308,22 +308,22 @@ class LocationSet : public IHasDbPrint {
         CHECK_NULL(location);
         locations.emplace(location);
     }
-    static const LocationSet *empty;
+    static std::shared_ptr<const LocationSet> empty;
 
-    const LocationSet *getField(cstring field) const;
-    const LocationSet *getValidField() const;
-    const LocationSet *getIndex(unsigned index) const;
-    const LocationSet *allElements() const;
-    const LocationSet *getArrayLastIndex() const;
+    std::shared_ptr<const LocationSet> getField(cstring field) const;
+    std::shared_ptr<const LocationSet> getValidField() const;
+    std::shared_ptr<const LocationSet> getIndex(unsigned index) const;
+    std::shared_ptr<const LocationSet> allElements() const;
+    std::shared_ptr<const LocationSet> getArrayLastIndex() const;
 
     void add(const StorageLocation *location) {
         CHECK_NULL(location);
         locations.emplace(location);
     }
-    const LocationSet *join(const LocationSet *other) const;
+    std::shared_ptr<const LocationSet> join(std::shared_ptr<const LocationSet> other) const;
     /// @returns this location set expressed only in terms of BaseLocation;
     /// e.g., a StructLocation is expanded in all its fields.
-    const LocationSet *canonicalize() const;
+    std::shared_ptr<const LocationSet> canonicalize() const;
     void addCanonical(const StorageLocation *location);
     auto begin() const { return locations.cbegin(); }
     auto end() const { return locations.cend(); }
@@ -339,7 +339,7 @@ class LocationSet : public IHasDbPrint {
         }
     }
     // only defined for canonical representations
-    bool overlaps(const LocationSet *other) const;
+    bool overlaps(std::shared_ptr<const LocationSet> other) const;
     bool operator==(const LocationSet &other) const;
     bool isEmpty() const { return locations.empty(); }
 };
@@ -463,7 +463,7 @@ struct Hasher<P4::loc_t> {
 }  // namespace P4::Util
 
 namespace P4 {
-class ProgramPoints : public IHasDbPrint {
+class ProgramPoints : public IHasDbPrint, public std::enable_shared_from_this<ProgramPoints> {
     typedef absl::flat_hash_set<ProgramPoint, Util::Hash> Points;
     Points points;
     explicit ProgramPoints(const Points &points) : points(points) {}
@@ -471,8 +471,8 @@ class ProgramPoints : public IHasDbPrint {
  public:
     ProgramPoints() = default;
     explicit ProgramPoints(ProgramPoint point) { points.emplace(point); }
-    void add(const ProgramPoints *from);
-    const ProgramPoints *merge(const ProgramPoints *with) const;
+    void add(std::shared_ptr<const ProgramPoints> from);
+    std::shared_ptr<const ProgramPoints> merge(std::shared_ptr<const ProgramPoints> with) const;
     bool operator==(const ProgramPoints &other) const;
     void dbprint(std::ostream &out) const override {
         out << "{";
@@ -491,7 +491,7 @@ class ProgramPoints : public IHasDbPrint {
 class Definitions : public IHasDbPrint {
     /// Set of program points that have written last to each location
     /// (conservative approximation).
-    hvec_map<const BaseLocation *, const ProgramPoints *> definitions;
+    hvec_map<const BaseLocation *, std::shared_ptr<const ProgramPoints>> definitions;
     /// If true the current program point is actually unreachable.
     bool unreachable = false;
 
@@ -499,30 +499,27 @@ class Definitions : public IHasDbPrint {
     Definitions() = default;
     Definitions(const Definitions &other)
         : definitions(other.definitions), unreachable(other.unreachable) {}
-    Definitions *joinDefinitions(const Definitions *other) const;
+    std::shared_ptr<Definitions> joinDefinitions(std::shared_ptr<const Definitions> other) const;
     /// Point writes the specified LocationSet.
-    Definitions *writes(ProgramPoint point, const LocationSet &locations) const;
-    void setDefintion(const BaseLocation *loc, const ProgramPoints *point) {
+    std::shared_ptr<Definitions> writes(ProgramPoint point, const LocationSet &locations) const;
+    void setDefintion(const BaseLocation *loc, std::shared_ptr<const ProgramPoints> point) {
         CHECK_NULL(loc);
         CHECK_NULL(point);
         definitions[loc] = point;
     }
-    void setDefinition(const StorageLocation *loc, const ProgramPoints *point);
-    void setDefinition(const LocationSet &loc, const ProgramPoints *point);
-    Definitions *setUnreachable() {
-        unreachable = true;
-        return this;
-    }
+    void setDefinition(const StorageLocation *loc, std::shared_ptr<const ProgramPoints> point);
+    void setDefinition(const LocationSet &loc, std::shared_ptr<const ProgramPoints> point);
+    void setUnreachable() { unreachable = true; }
     bool isUnreachable() const { return unreachable; }
     bool hasLocation(const BaseLocation *location) const {
         return definitions.find(location) != definitions.end();
     }
-    const ProgramPoints *getPoints(const BaseLocation *location) const {
+    std::shared_ptr<const ProgramPoints> getPoints(const BaseLocation *location) const {
         auto r = ::P4::get(definitions, location);
         BUG_CHECK(r != nullptr, "no definitions found for %1%", location);
         return r;
     }
-    const ProgramPoints *getPoints(const LocationSet &locations) const;
+    std::shared_ptr<const ProgramPoints> getPoints(const LocationSet &locations) const;
     bool operator==(const Definitions &other) const;
     void dbprint(std::ostream &out) const override {
         if (unreachable) {
@@ -536,7 +533,9 @@ class Definitions : public IHasDbPrint {
             first = false;
         }
     }
-    Definitions *cloneDefinitions() const { return new Definitions(*this); }
+    std::shared_ptr<Definitions> cloneDefinitions() const {
+        return std::make_shared<Definitions>(*this);
+    }
     void removeLocation(const StorageLocation *loc);
     bool empty() const { return definitions.empty(); }
     size_t size() const { return definitions.size(); }
@@ -547,17 +546,17 @@ class AllDefinitions : public IHasDbPrint {
     /// However, for ProgramPoints representing P4Control, P4Action,
     /// P4Table, P4Function -- the definitions are BEFORE the
     /// ProgramPoint.
-    hvec_map<ProgramPoint, Definitions *> atPoint;
+    hvec_map<ProgramPoint, std::shared_ptr<Definitions>> atPoint;
     StorageMap storageMap;
 
  public:
     AllDefinitions(ReferenceMap *refMap, TypeMap *typeMap) : storageMap(refMap, typeMap) {}
 
-    Definitions *getDefinitions(ProgramPoint point, bool emptyIfNotFound = false) {
+    std::shared_ptr<Definitions> getDefinitions(ProgramPoint point, bool emptyIfNotFound = false) {
         auto it = atPoint.find(point);
         if (it == atPoint.end()) {
             if (emptyIfNotFound) {
-                auto defs = new Definitions();
+                auto defs = std::make_shared<Definitions>();
                 setDefinitionsAt(point, defs, false);
                 return defs;
             }
@@ -565,7 +564,7 @@ class AllDefinitions : public IHasDbPrint {
         }
         return it->second;
     }
-    void setDefinitionsAt(ProgramPoint point, Definitions *defs, bool overwrite) {
+    void setDefinitionsAt(ProgramPoint point, std::shared_ptr<Definitions> defs, bool overwrite) {
         if (!overwrite) {
             auto it = atPoint.find(point);
             if (it != atPoint.end()) {
@@ -612,7 +611,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
           allDefinitions(allDefinitions),
           currentDefinitions(nullptr),
           returnedDefinitions(nullptr),
-          exitDefinitions(new Definitions()),
+          exitDefinitions(std::make_shared<Definitions>()),
           lhs(false),
           virtualMethod(false),
           cached_locs(new CachedLocs) {
@@ -652,7 +651,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     bool preorder(const IR::ReturnStatement *statement) override;
     bool preorder(const IR::ExitStatement *statement) override;
     bool preorder(const IR::BreakStatement *statement) override;
-    bool handleJump(const char *tok, Definitions *&defs);
+    bool handleJump(const char *tok, std::shared_ptr<Definitions> &defs);
     bool preorder(const IR::ContinueStatement *statement) override;
     bool preorder(const IR::IfStatement *statement) override;
     bool preorder(const IR::ForStatement *statement) override;
@@ -662,7 +661,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     bool preorder(const IR::EmptyStatement *statement) override;
     bool preorder(const IR::MethodCallStatement *statement) override;
 
-    const LocationSet *writtenLocations(const IR::Expression *expression) {
+    std::shared_ptr<const LocationSet> writtenLocations(const IR::Expression *expression) {
         expression->apply(*this);
         return getWrites(expression);
     }
@@ -670,17 +669,18 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
  protected:
     ReferenceMap *refMap;
     TypeMap *typeMap;
-    AllDefinitions *allDefinitions;              /// Result computed by this pass.
-    Definitions *currentDefinitions;             /// Before statement currently processed.
-    Definitions *returnedDefinitions;            /// Definitions after return statements.
-    Definitions *exitDefinitions;                /// Definitions after exit statements.
-    Definitions *breakDefinitions = nullptr;     /// Definitions at break statements.
-    Definitions *continueDefinitions = nullptr;  /// Definitions at continue statements.
+    AllDefinitions *allDefinitions;                    /// Result computed by this pass.
+    std::shared_ptr<Definitions> currentDefinitions;   /// Before statement currently processed.
+    std::shared_ptr<Definitions> returnedDefinitions;  /// Definitions after return statements.
+    std::shared_ptr<Definitions> exitDefinitions;      /// Definitions after exit statements.
+    std::shared_ptr<Definitions> breakDefinitions = nullptr;  /// Definitions at break statements.
+    std::shared_ptr<Definitions> continueDefinitions =
+        nullptr;  /// Definitions at continue statements.
     ProgramPoint callingContext;
     /// if true we are processing an expression on the lhs of an assignment
     bool lhs;
     /// For each program location the location set it writes
-    hvec_map<loc_t, const LocationSet *> writes;
+    hvec_map<loc_t, std::shared_ptr<const LocationSet>> writes;
     bool virtualMethod;  /// True if we are analyzing a virtual method
     AllocTrace memuse;
     alloc_trace_cb_t nested_trace;
@@ -688,7 +688,8 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
 
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
-    ComputeWriteSet(const ComputeWriteSet *source, ProgramPoint context, Definitions *definitions,
+    ComputeWriteSet(const ComputeWriteSet *source, ProgramPoint context,
+                    std::shared_ptr<Definitions> definitions,
                     std::shared_ptr<CachedLocs> cached_locs)
         : refMap(source->refMap),
           typeMap(source->typeMap),
@@ -714,11 +715,12 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
                     bool clear = true);
     void exitScope(const IR::ParameterList *parameters,
                    const IR::IndexedVector<IR::Declaration> *locals, ProgramPoint endPoint);
-    Definitions *getDefinitionsAfter(const IR::ParserState *state);
-    bool setDefinitions(Definitions *defs, const IR::Node *who = nullptr, bool overwrite = false);
+    std::shared_ptr<Definitions> getDefinitionsAfter(const IR::ParserState *state);
+    bool setDefinitions(std::shared_ptr<Definitions> defs, const IR::Node *who = nullptr,
+                        bool overwrite = false);
     ProgramPoint getProgramPoint(const IR::Node *node = nullptr) const;
     // Get writes of a node that is a direct child of the currently being visited node.
-    const LocationSet *getWrites(const IR::Expression *expression) {
+    std::shared_ptr<const LocationSet> getWrites(const IR::Expression *expression) {
         const loc_t &exprLoc = *getLoc(expression, getChildContext());
         auto result = ::P4::get(writes, exprLoc);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
@@ -726,14 +728,16 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
     // Get writes of a node that is not a direct child of the currently being visited node.
     // In this case, parentLoc is the loc of expression's direct parent node.
-    const LocationSet *getWrites(const IR::Expression *expression, const loc_t *parentLoc) {
+    std::shared_ptr<const LocationSet> getWrites(const IR::Expression *expression,
+                                                 const loc_t *parentLoc) {
         const loc_t &exprLoc = *getLoc(expression, parentLoc);
         auto result = ::P4::get(writes, exprLoc);
         BUG_CHECK(result != nullptr, "No location set known for %1%", expression);
         return result;
     }
     // Register writes of expression, which is expected to be the currently visited node.
-    void expressionWrites(const IR::Expression *expression, const LocationSet *loc) {
+    void expressionWrites(const IR::Expression *expression,
+                          std::shared_ptr<const LocationSet> loc) {
         CHECK_NULL(expression);
         CHECK_NULL(loc);
         LOG3(expression << dbp(expression) << " writes " << loc);

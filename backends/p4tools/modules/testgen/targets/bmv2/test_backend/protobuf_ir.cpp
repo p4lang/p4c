@@ -30,13 +30,13 @@ ProtobufIr::ProtobufIr(const TestBackendConfiguration &testBackendConfiguration,
 
 std::optional<std::string> ProtobufIr::checkForP4RuntimeTranslationAnnotation(
     const IR::IAnnotated *node) {
-    const auto *p4RuntimeTranslationAnnotation = node->getAnnotation("p4runtime_translation"_cs);
+    auto p4RuntimeTranslationAnnotation = node->getAnnotation("p4runtime_translation"_cs);
     if (p4RuntimeTranslationAnnotation == nullptr) {
         return std::nullopt;
     }
     auto annotationVector = p4RuntimeTranslationAnnotation->getExpr();
     BUG_CHECK(annotationVector.size() == 2, "Expected size of %1% to be 2. ", annotationVector);
-    const auto *targetValue = annotationVector.at(1);
+    auto targetValue = annotationVector.at(1);
     if (targetValue->is<IR::StringLiteral>()) {
         return "str";
     }
@@ -49,7 +49,7 @@ std::optional<std::string> ProtobufIr::checkForP4RuntimeTranslationAnnotation(
 
 std::map<cstring, cstring> ProtobufIr::getP4RuntimeTranslationMappings(const IR::IAnnotated *node) {
     std::map<cstring, cstring> p4RuntimeTranslationMappings;
-    const auto *p4RuntimeTranslationMappingAnnotation =
+    auto p4RuntimeTranslationMappingAnnotation =
         node->getAnnotation("p4runtime_translation_mappings"_cs);
     if (p4RuntimeTranslationMappingAnnotation == nullptr) {
         return p4RuntimeTranslationMappings;
@@ -59,7 +59,7 @@ std::map<cstring, cstring> ProtobufIr::getP4RuntimeTranslationMappings(const IR:
     auto annotationExpr = p4RuntimeTranslationMappingAnnotation->getExpr();
     BUG_CHECK(annotationExpr.size() == 1, "Expected size of %1% to be 1. ", annotationExpr);
     const auto *exprList = annotationExpr.at(0)->checkedTo<IR::ListExpression>();
-    for (const auto *expr : exprList->components) {
+    for (auto expr : exprList->components) {
         const auto *exprTuple = expr->checkedTo<IR::ListExpression>();
         const auto &components = exprTuple->components;
         auto left = components.at(0)->checkedTo<IR::StringLiteral>()->value;
@@ -76,7 +76,7 @@ std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
         return p4RuntimeTranslationFormat.value();
     }
 
-    const auto *formatAnnotation = node->getAnnotation("format"_cs);
+    auto formatAnnotation = node->getAnnotation("format"_cs);
     if (formatAnnotation == nullptr) {
         return "hex_str";
     }

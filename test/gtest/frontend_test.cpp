@@ -20,8 +20,8 @@ namespace P4::Test {
 struct P4CFrontend : P4CTest {
     void addPasses(std::initializer_list<PassManager::VisitorRef> passes) { pm.addPasses(passes); }
 
-    const IR::Node *parseAndProcess(std::string program) {
-        const auto *pgm = P4::parseP4String(program);
+    IR::Ptr<IR::Node> parseAndProcess(std::string program) {
+        auto pgm = P4::parseP4String(program);
         EXPECT_TRUE(pgm);
         EXPECT_EQ(::P4::errorCount(), 0);
         if (!pgm) {
@@ -50,7 +50,7 @@ TEST_F(P4CFrontend, ParseStdioAcrossBufferBoundaries) {
     std::rewind(input.get());
     ASSERT_EQ(std::fgetc(input.get()), 'x');
 
-    const auto *program = P4ParserDriver::parse(input.get(), "stdio.p4");
+    const auto program = P4ParserDriver::parse(input.get(), "stdio.p4");
     ASSERT_NE(program, nullptr);
     ASSERT_EQ(program->objects.size(), 1U);
     const auto *constant = program->objects.at(0)->to<IR::Declaration_Constant>();
@@ -67,7 +67,7 @@ TEST_F(P4CFrontend, ParseStdioAcrossBufferBoundaries) {
 TEST_F(P4CFrontend, ParseEmptyStdio) {
     std::unique_ptr<FILE, int (*)(FILE *)> input(std::tmpfile(), &std::fclose);
     ASSERT_NE(input, nullptr);
-    const auto *program = P4ParserDriver::parse(input.get(), "empty.p4");
+    const auto program = P4ParserDriver::parse(input.get(), "empty.p4");
     ASSERT_NE(program, nullptr);
     EXPECT_TRUE(program->objects.empty());
     EXPECT_EQ(errorCount(), 0U);
@@ -82,7 +82,7 @@ TEST_F(P4CFrontendEnumValidation, Bit) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -98,7 +98,7 @@ TEST_F(P4CFrontendEnumValidation, BitNeg) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -114,7 +114,7 @@ TEST_F(P4CFrontendEnumValidation, IntPos) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -130,7 +130,7 @@ TEST_F(P4CFrontendEnumValidation, IntNeg) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -150,7 +150,7 @@ TEST_F(P4CFrontendEnumValidation, TypeDef) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 2);
@@ -166,7 +166,7 @@ TEST_F(P4CFrontendEnumValidation, ExplicitCast) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 0);
@@ -179,7 +179,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidUnderlyingUnsized) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -195,7 +195,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidType) {
         }
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 1);
@@ -215,7 +215,7 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
             apply{}
         }
     )");
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 0);
 
@@ -223,7 +223,7 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
     // is correctly maintained by MoveInitializers.
     const auto *p4prog = prog->to<IR::P4Program>();
     ASSERT_TRUE(p4prog);
-    for (const auto *node : p4prog->objects) {
+    for (const IR::Node *node : p4prog->objects) {
         if (const auto *control = node->to<IR::P4Control>()) {
             ASSERT_TRUE(control->body->srcInfo.isValid());
         }
@@ -266,7 +266,7 @@ TEST_F(P4CFrontendDefaultAction, InvalidHeaderActionArgs) {
         top(C()) main;
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 0);
@@ -298,7 +298,7 @@ TEST_F(P4CFrontendDefaultAction, MismatchedInvalidHeaderActionArgs) {
         top(C()) main;
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     EXPECT_GT(::P4::errorCount(), 0);

@@ -7,8 +7,8 @@
 
 namespace P4::TC {
 
-IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
-                               std::ostream *outStream) {
+IR::MutablePtr<IR::ToplevelBlock> MidEnd::run(TCOptions &options, const IR::P4Program *program,
+                                              std::ostream *outStream) {
     if (program == nullptr && options.listMidendPasses == 0) return nullptr;
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 

@@ -46,7 +46,7 @@ void Bmv2V1ModelTestgenTarget::make() {
 }
 
 CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
-    const CompilerOptions &options, const IR::P4Program *program) const {
+    const CompilerOptions &options, IR::Ptr<IR::P4Program> program) const {
     program = runFrontend(options, program);
     if (program == nullptr) {
         return std::nullopt;
@@ -104,9 +104,9 @@ CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
         return std::nullopt;
     }
 
-    return {*new BMv2V1ModelCompilerResult{
+    return std::make_shared<BMv2V1ModelCompilerResult>(
         TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg),
-        p4runtimeApi, directExternMapper.getDirectExternMap(), p4ConstraintsRestrictions}};
+        p4runtimeApi, directExternMapper.getDirectExternMap(), p4ConstraintsRestrictions);
 }
 
 MidEnd Bmv2V1ModelTestgenTarget::mkMidEnd(const CompilerOptions &options) const {

@@ -50,9 +50,9 @@ TofinoTestBackend::TofinoTestBackend(const TofinoSharedProgramInfo &programInfo,
         exit(EXIT_FAILURE);
     }
     if (testBackendString == "PTF") {
-        testWriter = new PTF(testBackendConfiguration);
+        testWriter = std::make_unique<PTF>(testBackendConfiguration);
     } else if (testBackendString == "STF") {
-        testWriter = new STF(testBackendConfiguration);
+        testWriter = std::make_unique<STF>(testBackendConfiguration);
     } else {
         std::stringstream supportedBackendString;
         bool isFirst = true;
@@ -84,7 +84,7 @@ bool TofinoTestBackend::printTestInfo(const ExecutionState *executionState,
 TestBackEnd::TestInfo TofinoTestBackend::produceTestInfo(
     const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
+    const std::vector<IR::Ptr<TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     if (outputPortExpr->is<IR::UninitializedTaintExpression>()) {

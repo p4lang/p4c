@@ -67,6 +67,20 @@ TEST(UtilSourceFile, InputSources) {
     EXPECT_EQ(5u, original.sourceLine);
 }
 
+TEST(UtilSourceFile, CommentsRetainSourcesWithoutOwnershipCycles) {
+    auto sources = std::make_shared<InputSources>();
+    std::weak_ptr<InputSources> lifetime = sources;
+    sources->appendText("// comment\n");
+    sources->addComment(SourceInfo(sources.get(), SourcePosition(1, 0), SourcePosition(1, 10)),
+                        true, " comment"_cs);
+    auto location = sources->getAllComments().front()->getSourceInfo();
+    sources.reset();
+    EXPECT_FALSE(lifetime.expired());
+    EXPECT_EQ(location.toSourceFragment(false), "// comment\n\n");
+    location = SourceInfo();
+    EXPECT_TRUE(lifetime.expired());
+}
+
 TEST(UtilSourceFile, SourceInfo) {
     Util::InputSources sources;
 
