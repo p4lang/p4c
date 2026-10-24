@@ -5,6 +5,8 @@
 name: "p4c-lint"
 
 on:
+  # Manual runs audit every configured translation unit with the full policy.
+  workflow_dispatch:
   push:
     branches: [main]
   pull_request:
@@ -14,7 +16,7 @@ on:
 
 # Cancel any preceding run on the pull request.
 concurrency:
-  group: p4c-lint-${{ github.event.pull_request.number || github.ref }}
+  group: p4c-lint-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
@@ -77,7 +79,11 @@ jobs:
           else
             scope=(--exclude-prefix backends/tofino/ --exclude-prefix backends/p4tools/modules/testgen/targets/tofino/)
           fi
-          needed=$(python3 tools/run-clang-tidy.py --base "$BASE_SHA" --check-changes "${scope[@]}")
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            needed=true
+          else
+            needed=$(python3 tools/run-clang-tidy.py --base "$BASE_SHA" --check-changes "${scope[@]}")
+          fi
           echo "needed=$needed" >> "$GITHUB_OUTPUT"
 
       - name: Install analysis prerequisites
@@ -152,7 +158,8 @@ jobs:
     name: clang-tidy (${{ matrix.profile }}, ${{ matrix.shard }})
     needs: prepare-clang-tidy
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    # Let a manual benchmark finish even when it exceeds the PR runtime budget.
+    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 120 || 30 }}
     strategy:
       fail-fast: false
       matrix:
@@ -176,7 +183,11 @@ jobs:
           else
             scope=(--exclude-prefix backends/tofino/ --exclude-prefix backends/p4tools/modules/testgen/targets/tofino/)
           fi
-          needed=$(python3 tools/run-clang-tidy.py --base "$BASE_SHA" --check-changes --shard "$SHARD" --shards 8 "${scope[@]}")
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            needed=true
+          else
+            needed=$(python3 tools/run-clang-tidy.py --base "$BASE_SHA" --check-changes --shard "$SHARD" --shards 8 "${scope[@]}")
+          fi
           echo "needed=$needed" >> "$GITHUB_OUTPUT"
 
       - name: Install analysis tools and system headers
@@ -196,7 +207,7 @@ jobs:
         if: steps.scope.outputs.needed == 'true'
         run: tar -xzf clang-tidy-inputs.tar.gz
 
-      - name: Analyze changed C++ code
+      - name: Analyze C++ code
         if: steps.scope.outputs.needed == 'true'
         shell: bash
         run: |
@@ -205,10 +216,14 @@ jobs:
           else
             scope=(--exclude-prefix backends/tofino/ --exclude-prefix backends/p4tools/modules/testgen/targets/tofino/)
           fi
+          mode=(--base "$BASE_SHA" --timeout 900)
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+            mode=(--timeout 3600)
+          fi
           uv run clang-tidy --version
           uv run python tools/run-clang-tidy.py \
-            --build-dir build-tidy --base "$BASE_SHA" \
-            --shard "$SHARD" --shards 8 -j 4 --timeout 900 \
+            --build-dir build-tidy "${mode[@]}" \
+            --shard "$SHARD" --shards 8 -j 4 \
             --report build-tidy/clang-tidy-report.json "${scope[@]}"
 
       - name: Upload analysis timings and diagnostics

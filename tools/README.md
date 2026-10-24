@@ -107,6 +107,11 @@ No C++ changes means no analysis is necessary. A `.clang-tidy`-only change does
 not retroactively enforce all existing findings; validate such changes with a
 full audit before proposing them.
 
+Manually dispatching the `p4c-lint` workflow audits every configured translation
+unit with the same check policy and shard layout. Manual runs have a two-hour
+job limit and one-hour per-file limit so benchmarks can finish and measure any
+overrun of the normal PR budget.
+
 ### Full audits and local commits
 
 ```sh
