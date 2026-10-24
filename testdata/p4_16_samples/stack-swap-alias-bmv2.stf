@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 The P4 Language Consortium
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Reversing a stack must retain both original header values.
 packet 0 1234
 expect 0 3412
