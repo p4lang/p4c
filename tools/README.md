@@ -112,6 +112,12 @@ unit with the same check policy and shard layout. Manual runs have a two-hour
 job limit and one-hour per-file limit so benchmarks can finish and measure any
 overrun of the normal PR budget.
 
+The initial [full CI audit](https://github.com/p4lang/p4c/actions/runs/40137227093)
+completed 970 translation units in **48m49s**, with no analysis failures.
+Preparation took up to 10m45s and analysis jobs up to 37m57s. Generated IR alone
+took 36m06s. Consequently, broad runs currently exceed the ordinary PR timeout
+budgets; the 30-minute full-run target has not been met.
+
 ### Full audits and local commits
 
 ```sh
