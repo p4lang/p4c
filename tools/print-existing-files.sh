@@ -7,8 +7,10 @@
 # Among all of the command line arguments, print only those which name
 # files that exist.
 
-for j in $*; do
-    if [ -e "$j" ]; then
+for j in $*
+do
+    if [ -e "$j" ]
+    then
         echo "$j"
     else
         echo "$j"
