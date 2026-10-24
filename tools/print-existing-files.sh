@@ -8,6 +8,7 @@
 # files that exist.
 
 echo "Create the file ..." > $HOME/out-debug.txt
+echo "Cmd line args: $*" >> $HOME/out-debug.txt
 for j in $*
 do
     if [ -e "$j" ]
