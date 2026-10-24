@@ -257,19 +257,19 @@ TEST_F(Z3SolverSubSat06, SubSat06) { test(expression, variableValue); }
 
 TEST(SubSatExhaustive, AllSignedFourBitOperands) {
     constexpr int kOperandWidth = 4;
-    const auto *bitType = IR::Type_Bits::get(kOperandWidth, true);
+    const auto bitType = IR::Type_Bits::get(kOperandWidth, true);
     const big_int minValue = IR::getMinBvVal(bitType);
     const big_int maxValue = IR::getMaxBvVal(bitType);
     Z3Solver solver;
 
     for (big_int left = minValue; left <= maxValue; ++left) {
         for (big_int right = minValue; right <= maxValue; ++right) {
-            const auto *operation = new IR::SubSat(bitType, IR::Constant::get(bitType, left),
-                                                   IR::Constant::get(bitType, right));
-            const auto *result = SaturationElim::eliminate(operation);
+            IR::Ptr<IR::SubSat> operation = new IR::SubSat(
+                bitType, IR::Constant::get(bitType, left), IR::Constant::get(bitType, right));
+            IR::Ptr<IR::Mux> result = SaturationElim::eliminate(operation);
             const big_int difference = left - right;
             const big_int expectedValue = std::max(minValue, std::min(maxValue, difference));
-            const auto *expected = IR::Constant::get(bitType, expectedValue);
+            const auto expected = IR::Constant::get(bitType, expectedValue);
             ASSERT_EQ(solver.checkSat({new IR::Equ(result, expected)}), true)
                 << "left=" << left << ", right=" << right;
         }

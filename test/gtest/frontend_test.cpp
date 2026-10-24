@@ -266,7 +266,7 @@ TEST_F(P4CFrontendDefaultAction, InvalidHeaderActionArgs) {
         top(C()) main;
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::P4::errorCount(), 0);
@@ -298,7 +298,7 @@ TEST_F(P4CFrontendDefaultAction, MismatchedInvalidHeaderActionArgs) {
         top(C()) main;
     )");
     RedirectStderr errors;
-    const auto *prog = parseAndProcess(program);
+    auto prog = parseAndProcess(program);
     errors.dumpAndReset();
     ASSERT_TRUE(prog);
     EXPECT_GT(::P4::errorCount(), 0);
