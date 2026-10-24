@@ -32,7 +32,7 @@ jobs:
         id: changes
         run: |
           git fetch origin ${{ github.base_ref }}
-          echo "changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | paste -s -d ' ' -)" >> $GITHUB_OUTPUT
+          echo "changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | ./tools/print-existing-files.sh | paste -s -d ' ' -)" >> $GITHUB_OUTPUT
 
       - name: Check copyright and license annotations in changed files
         shell: bash
