@@ -7,6 +7,7 @@
 # Among all of the command line arguments, print only those which name
 # files that exist.
 
+echo "Create the file ..." > $HOME/out-debug.txt
 for j in $*
 do
     if [ -e "$j" ]
