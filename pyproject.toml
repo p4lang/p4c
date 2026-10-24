@@ -20,14 +20,14 @@ dependencies = [
     "grpcio<=1.75.1,>=1.67.0; python_version > '3.6'",
     "grpcio==1.48.2 ; python_version <= '3.6'",
     "thrift==0.24.0",
-    "protobuf==3.20.2 ; python_version > '3.6'",
+    "protobuf==4.21.6 ; python_version > '3.6'",
     "protobuf==3.19.2 ; python_version <= '3.6'",
     "clang-format==18.1.8",
     "black==26.10.1 ; python_version >= '3.10'",
     "black==24.3.0 ; python_version < '3.10'",
     "isort==5.13.2 ; python_version > '3.6'",
     "isort==5.10.1 ; python_version <= '3.6'",
-    "p4runtime",
+    "p4runtime==1.6.0",
     "ptf",
 ]
 
@@ -40,11 +40,8 @@ extend-ignore = "E203"
 package = false
 
 [tool.uv.sources]
-# FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Python.
-# NOTE: This intentionally lags the P4Runtime version in the top-level CMakeLists.txt (v1.6.0).
-# The P4Runtime v1.6.0 Python package requires protobuf>=4.21.6, but p4c still pins protobuf 3.20.2.
-p4runtime = { git = "https://github.com/p4lang/p4runtime.git", rev = "ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5", subdirectory = "py" }
-ptf = { git = "https://github.com/p4lang/ptf.git", rev = "947da5af3dfbc52fdb0a27d14d49e74ad81dfc7c"}
+# This commit SHA corresponds to ptf version 0.12.3
+ptf = { git = "https://github.com/p4lang/ptf.git", rev = "95a05315668b4e002166186f387fd2a15549f42f"}
 
 [build-system]
 requires = ["hatchling"]
