@@ -136,6 +136,13 @@ fi
 export UV_PROJECT_ENVIRONMENT="${VIRTUAL_ENV}"
 uv sync
 uv tool update-shell
+protoc --version || echo "No protoc in path"
+# This causes slower Python parsing of protobuf messages, but enables
+# larger differences between the version of protoc used to compile
+# P4Runtime API ".proto" files into the Python versions installed in
+# the Python venv, and some other different version that might be used
+# during ptf tests.
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 
 if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
 then
