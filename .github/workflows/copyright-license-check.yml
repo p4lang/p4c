@@ -28,18 +28,8 @@ jobs:
           uv venv
           uv pip install reuse
 
-      - name: Get changed files
+      - name: Get changed files and check copyright and license annotations
         id: changes
         run: |
           git fetch origin ${{ github.base_ref }}
-          echo "changed=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | xargs ./tools/print-existing-files.sh | paste -s -d ' ' -)" >> $GITHUB_OUTPUT
-
-      - name: Check copyright and license annotations in changed files
-        shell: bash
-        run: |
-          ec=0
-          uvx reuse lint-file ${{ steps.changes.outputs.changed }} || ec=$?
-          if [ $ec -ne 0 ]; then
-            echo "::error::New or modified files in this PR, listed above, failed copyright or license checks.  See https://github.com/p4lang/.github/blob/main/copyright-and-license-issues/README-choosing-copyright-holder-and-license-for-new-files.md"
-          fi
-          exit $ec
+          ./tools/reuse-lint-only-changed-files.sh ${{ github.base_ref }}
