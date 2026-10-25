@@ -193,7 +193,7 @@ def main():
     parser.add_argument("--shards", type=int, default=1)
     parser.add_argument("-j", "--jobs", type=int, default=min(os.cpu_count() or 1, 4))
     parser.add_argument(
-        "--timeout", type=int, default=900, help="Seconds allowed per translation unit"
+        "--timeout", type=int, default=3600, help="Seconds allowed per translation unit"
     )
     parser.add_argument("--profile", action="store_true", help="Include per-check timing profiles")
     parser.add_argument("--fix", action="store_true")

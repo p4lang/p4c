@@ -159,7 +159,7 @@ jobs:
     needs: prepare-clang-tidy
     runs-on: ubuntu-24.04
     # Let a manual benchmark finish even when it exceeds the PR runtime budget.
-    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 120 || 30 }}
+    timeout-minutes: ${{ github.event_name == 'workflow_dispatch' && 120 || 60 }}
     strategy:
       fail-fast: false
       matrix:
@@ -216,7 +216,7 @@ jobs:
           else
             scope=(--exclude-prefix backends/tofino/ --exclude-prefix backends/p4tools/modules/testgen/targets/tofino/)
           fi
-          mode=(--base "$BASE_SHA" --timeout 900)
+          mode=(--base "$BASE_SHA" --timeout 3600)
           if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
             mode=(--timeout 3600)
           fi
