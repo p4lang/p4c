@@ -1,5 +1,6 @@
 /*
  * Copyright 2018 VMware, Inc.
+ * SPDX-FileCopyrightText: 2018 VMware, Inc.
  * SPDX-License-Identifier: GPL-2.0-only or BSD-2-Clause
  * 
  * See this article for details on the dual license used for this
